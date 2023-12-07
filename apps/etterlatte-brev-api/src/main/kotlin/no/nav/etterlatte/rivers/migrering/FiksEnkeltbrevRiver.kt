@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -13,6 +14,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class FiksEnkeltbrevRiver(
@@ -24,7 +27,7 @@ internal class FiksEnkeltbrevRiver(
 
     init {
         initialiserRiver(rapidsConnection, Migreringshendelser.FIKS_ENKELTBREV) {
-            validate { it.requireKey(BREV_ID_KEY) }
+            validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SUM) }
         }
     }
@@ -33,18 +36,24 @@ internal class FiksEnkeltbrevRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val brevId = packet[BREV_ID_KEY].asLong()
-        val brev = service.hentBrev(id = brevId)
+        val behandlingId = packet.behandlingId
+        logger.info("Fikser vedtaksbrev for behandling $behandlingId")
 
-        logger.info("Fikser vedtaksbrev for brev $brevId")
-        val behandlingId = brev.behandlingId!!
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         val sum = packet[SUM].asInt()
-        val migreringBrevRequest = MigreringBrevRequest(brutto = sum)
+        val migreringBrevRequest = MigreringBrevRequest(brutto = sum, yrkesskade = false, utlandstilknytningType = null)
         runBlocking {
-            service.genererPdf(brevId, brukerTokenInfo, migreringBrevRequest)
+            val sakId = vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo).sak.id
+            val vedtaksbrev: Brev =
+                service.opprettVedtaksbrev(
+                    sakId,
+                    behandlingId,
+                    brukerTokenInfo,
+                    migreringBrevRequest,
+                )
+            service.genererPdf(vedtaksbrev.id, brukerTokenInfo, migreringBrevRequest)
             service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)
-            logger.info("Har oppretta vedtaksbrev for brev $brevId")
+            logger.info("Har oppretta vedtaksbrev for behandling $behandlingId")
 
             packet.eventName = VedtakKafkaHendelseType.ATTESTERT.toString()
             val vedtak = vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo)

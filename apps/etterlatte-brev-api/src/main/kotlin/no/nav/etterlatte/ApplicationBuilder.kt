@@ -55,7 +55,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
-import no.nav.etterlatte.rivers.migrering.BREV_ID_KEY
 import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.migrering.SUM
@@ -65,6 +64,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
+import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.getRapidEnv
 import java.util.UUID
 import kotlin.concurrent.thread
@@ -213,11 +213,11 @@ class ApplicationBuilder {
         thread {
             Thread.sleep(60_000)
             listOf(
-                Pair(6071L, 3213),
-                Pair(6300L, 3954),
+                Pair("", 3213),
+                Pair("", 3954),
             ).forEach {
                 rapidsConnection.publish(
-                    message = lagMelding(brevId = it),
+                    message = lagMelding(behandlingId = it),
                     key = UUID.randomUUID().toString(),
                 )
                 Thread.sleep(3000)
@@ -225,13 +225,13 @@ class ApplicationBuilder {
         }
     }
 
-    private fun lagMelding(brevId: Pair<Long, Int>) =
+    private fun lagMelding(behandlingId: Pair<String, Int>) =
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
-                BREV_ID_KEY to brevId.first,
+                BEHANDLING_ID_KEY to behandlingId.first,
                 FIKS_BREV_MIGRERING to true,
-                SUM to brevId.second,
+                SUM to behandlingId.second,
             ),
         ).toJson()
 

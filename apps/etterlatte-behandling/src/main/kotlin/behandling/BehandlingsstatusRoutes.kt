@@ -13,6 +13,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunAttestant
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
@@ -153,8 +154,9 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
 
     route("/behandlinger") {
         post("/settTilbakeTilTrygdetidOppdatert") {
+            val saker = call.receive<Saker>()
             val tilbakestilteBehandlinger =
-                behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
+                behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker)
             call.respond(tilbakestilteBehandlinger)
         }
     }

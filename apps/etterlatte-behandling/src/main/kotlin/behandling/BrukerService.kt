@@ -46,6 +46,13 @@ class BrukerServiceImpl(
 ) : BrukerService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    override suspend fun enheterForIdent(ident: String) = client.hentSaksbehandlerEnhet(ident)
+
+    override suspend fun harTilgangTilEnhet(
+        ident: String,
+        enhetId: String,
+    ) = enheterForIdent(ident).any { enhet -> enhet.id == enhetId }
+
     override suspend fun finnNavkontorForPerson(
         fnr: String,
         saktype: SakType,
@@ -63,13 +70,6 @@ class BrukerServiceImpl(
             }
         }
     }
-
-    override suspend fun enheterForIdent(ident: String) = client.hentSaksbehandlerEnhet(ident)
-
-    override suspend fun harTilgangTilEnhet(
-        ident: String,
-        enhetId: String,
-    ) = enheterForIdent(ident).any { enhet -> enhet.id == enhetId }
 
     override fun finnEnhetForPersonOgTema(
         fnr: String,

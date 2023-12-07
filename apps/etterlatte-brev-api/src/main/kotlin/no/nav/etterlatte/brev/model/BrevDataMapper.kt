@@ -395,6 +395,7 @@ class BrevDataMapper(
                         etterbetaling.await(),
                         trygdetidHentet,
                         grunnbeloepHentet,
+                        generellBrevData.utlandstilknytning?.type,
                         innholdMedVedlegg,
                     )
                 }

@@ -30,6 +30,7 @@ data class GenerellBrevData(
 
 data class Trygdetid(
     val aarTrygdetid: Int,
+    val prorataBroek: IntBroek?,
     val maanederTrygdetid: Int,
     val perioder: List<Trygdetidsperiode>,
     val overstyrt: Boolean,

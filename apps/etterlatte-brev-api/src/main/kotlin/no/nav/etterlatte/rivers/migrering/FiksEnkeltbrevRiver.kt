@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -41,7 +42,8 @@ internal class FiksEnkeltbrevRiver(
 
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         val sum = packet[SUM].asInt()
-        val migreringBrevRequest = MigreringBrevRequest(brutto = sum, yrkesskade = false, utlandstilknytningType = null)
+        val migreringBrevRequest =
+            MigreringBrevRequest(brutto = sum, yrkesskade = false, utlandstilknytningType = UtlandstilknytningType.BOSATT_UTLAND)
         runBlocking {
             val sakId = vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo).sak.id
             val vedtaksbrev: Brev =

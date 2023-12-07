@@ -259,9 +259,25 @@ fun hentRelevantVerge(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): Vergem
     }
 }
 
+fun flereVergerMedOekonomiskInteresse(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): Boolean {
+    val verger =
+        vergeListe?.filter {
+            it.vergeEllerFullmektig.omfang in alleVergeOmfangMedOekonomiskeInteresser
+        } ?: emptyList()
+    return verger.size > 1
+}
+
+fun finnesVergeMedUkjentOmfang(vergeListe: List<VergemaalEllerFremtidsfullmakt>?) =
+    vergeListe.orEmpty().any {
+        it.vergeEllerFullmektig.omfang !in alleKjenteVergeOmfang
+    }
+
 private val alleVergeOmfangMedOekonomiskeInteresser =
     listOf(
         "utlendingssakerPersonligeOgOekonomiskeInteresser",
         "personligeOgOekonomiskeInteresser",
         "oekonomiskeInteresser",
     )
+
+private val alleKjenteVergeOmfang =
+    alleVergeOmfangMedOekonomiskeInteresser + listOf("personligeInteresser")

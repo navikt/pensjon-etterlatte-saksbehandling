@@ -3,6 +3,8 @@ package no.nav.etterlatte.migrering.verifisering
 import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.finnesVergeMedUkjentOmfang
+import no.nav.etterlatte.libs.common.person.flereVergerMedOekonomiskInteresse
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
@@ -70,9 +72,11 @@ internal class Verifiserer(
                 if (it.first == PersonRolle.BARN) {
                     person.getOrNull()?.let { pdlPerson ->
                         pdlPerson.vergemaalEllerFremtidsfullmakt?.let { vergemaal ->
-                            if (vergemaal.isNotEmpty()) {
-                                logger.warn("Barn har vergemaal eller fremtidsfullmakt, kan ikke migrere")
-                                return listOf(BarnetHarVerge)
+                            if (flereVergerMedOekonomiskInteresse(vergemaal.map { it.verdi }) ||
+                                finnesVergeMedUkjentOmfang(vergemaal.map { it.verdi })
+                            ) {
+                                logger.warn("Barn har komplisert vergemaal eller fremtidsfullmakt, kan ikke migrere")
+                                return listOf(BarnetHarKomplisertVergemaal)
                             }
                         }
                     }
@@ -96,6 +100,11 @@ data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikat
 object BarnetHarVerge : Verifiseringsfeil() {
     override val message: String
         get() = "Barn har vergemaal eller fremtidsfullmakt, kan ikke migrere"
+}
+
+object BarnetHarKomplisertVergemaal : Verifiseringsfeil() {
+    override val message: String
+        get() = "Barn har spesialtilfelle av vergemaal eller fremtidsfullmakt som vi ikke støtter, kan ikke migrere"
 }
 
 object StrengtFortrolig : Verifiseringsfeil() {

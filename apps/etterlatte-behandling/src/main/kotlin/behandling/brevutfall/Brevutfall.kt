@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.brevoppsett
+package no.nav.etterlatte.behandling.brevutfall
 
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -8,7 +8,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-data class Brevoppsett(
+data class Brevutfall(
     val behandlingId: UUID,
     val etterbetaling: Etterbetaling?,
     val aldersgruppe: Aldersgruppe?,
@@ -21,10 +21,10 @@ data class Etterbetaling(
 ) {
     init {
         if (fom > tom) {
-            throw BrevoppsettException.EtterbetalingFomErEtterTom(fom, tom)
+            throw BrevutfallException.EtterbetalingFomErEtterTom(fom, tom)
         }
         if (tom > YearMonth.now()) {
-            throw BrevoppsettException.EtterbetalingTomErFramITid(tom)
+            throw BrevutfallException.EtterbetalingTomErFramITid(tom)
         }
     }
 
@@ -34,7 +34,7 @@ data class Etterbetaling(
             datoTom: LocalDate?,
         ): Etterbetaling {
             if (datoFom == null || datoTom == null) {
-                throw BrevoppsettException.EtterbetalingManglerDato()
+                throw BrevutfallException.EtterbetalingManglerDato()
             }
             return Etterbetaling(YearMonth.from(datoFom), YearMonth.from(datoTom))
         }
@@ -46,7 +46,7 @@ enum class Aldersgruppe {
     UNDER_18,
 }
 
-sealed class BrevoppsettException {
+sealed class BrevutfallException {
     class EtterbetalingManglerDato : UgyldigForespoerselException(
         code = "MANGLER_FRA_ELLER_TIL_DATO",
         detail = "Etterbetaling må ha en fra-dato og en til-dato",

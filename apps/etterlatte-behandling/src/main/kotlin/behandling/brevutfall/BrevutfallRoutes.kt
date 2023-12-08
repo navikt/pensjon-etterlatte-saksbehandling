@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.brevoppsett
+package no.nav.etterlatte.behandling.brevutfall
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -8,7 +8,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
-import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
@@ -20,46 +19,44 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import java.time.LocalDate
 import java.util.UUID
 
-internal fun Route.brevoppsettRoutes(service: BrevoppsettService) {
+internal fun Route.metadataRoutes(service: BrevutfallService) {
     val logger = application.log
 
-    route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/brevoppsett") {
-        post {
-            medBody<BrevoppsettDto> { dto ->
-                val brevoppsett =
-                    inTransaction {
-                        logger.info("Lagrer brevoppsett for behandling $behandlingId")
-                        service.lagreBrevoppsett(dto.toBrevoppsett(behandlingId, brukerTokenInfo))
-                    }
-                call.respond(HttpStatusCode.Created, brevoppsett.toDto())
+    route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
+        route("/brevutfall") {
+            post {
+                medBody<BrevutfallDto> { dto ->
+                    val brevutfall =
+                        inTransaction {
+                            logger.info("Lagrer brevutfall for behandling $behandlingId")
+                            service.lagreBrevutfall(dto.toBrevutfall(behandlingId, brukerTokenInfo))
+                        }
+                    call.respond(brevutfall.toDto())
+                }
+            }
+
+            get {
+                when (val brevutfall = inTransaction { service.hentBrevutfall(behandlingId) }) {
+                    null -> call.respond(HttpStatusCode.NoContent)
+                    else -> call.respond(brevutfall.toDto())
+                }
             }
         }
 
-        put {
-            medBody<BrevoppsettDto> { dto ->
-                val brevoppsett =
-                    inTransaction {
-                        logger.info("Oppdaterer brevoppsett for behandling $behandlingId")
-                        service.lagreBrevoppsett(dto.toBrevoppsett(behandlingId, brukerTokenInfo))
-                    }
-                call.respond(brevoppsett.toDto())
-            }
-        }
-
-        get {
-            when (val brevoppsett = inTransaction { service.hentBrevoppsett(behandlingId) }) {
+        get("/etterbetaling") {
+            when (val etterbetaling = inTransaction { service.hentEtterbetaling(behandlingId) }) {
                 null -> call.respond(HttpStatusCode.NoContent)
-                else -> call.respond(brevoppsett.toDto())
+                else -> call.respond(etterbetaling.toDto())
             }
         }
     }
 }
 
-private fun BrevoppsettDto.toBrevoppsett(
+private fun BrevutfallDto.toBrevutfall(
     behandlingId: UUID,
     bruker: BrukerTokenInfo,
-): Brevoppsett =
-    Brevoppsett(
+): Brevutfall =
+    Brevutfall(
         behandlingId = behandlingId,
         etterbetaling =
             if (etterbetaling?.datoFom != null && etterbetaling.datoTom != null) {
@@ -71,20 +68,20 @@ private fun BrevoppsettDto.toBrevoppsett(
         kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
     )
 
-private fun Brevoppsett.toDto() =
-    BrevoppsettDto(
-        etterbetaling =
-            etterbetaling?.let {
-                EtterbetalingDto(
-                    datoFom = etterbetaling.fom.atDay(1),
-                    datoTom = etterbetaling.tom.atEndOfMonth(),
-                )
-            },
+private fun Brevutfall.toDto() =
+    BrevutfallDto(
+        etterbetaling = etterbetaling?.toDto(),
         aldersgruppe = aldersgruppe,
         kilde = kilde,
     )
 
-data class BrevoppsettDto(
+private fun Etterbetaling.toDto() =
+    EtterbetalingDto(
+        datoFom = fom.atDay(1),
+        datoTom = tom.atEndOfMonth(),
+    )
+
+data class BrevutfallDto(
     val etterbetaling: EtterbetalingDto?,
     val aldersgruppe: Aldersgruppe?,
     val kilde: Grunnlagsopplysning.Kilde?,

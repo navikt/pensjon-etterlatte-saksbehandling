@@ -1,7 +1,7 @@
-create table brevoppsett
+create table brevutfall
 (
     behandling_id     UUID PRIMARY KEY
-        CONSTRAINT brevoppsett_behandling_fk_id REFERENCES behandling (id),
+        CONSTRAINT brevutfall_behandling_fk_id REFERENCES behandling (id),
     oppdatert         TIMESTAMP,
     etterbetaling_fom DATE,
     etterbetaling_tom DATE,

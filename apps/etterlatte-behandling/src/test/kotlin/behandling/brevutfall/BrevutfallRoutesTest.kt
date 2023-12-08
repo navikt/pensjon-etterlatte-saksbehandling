@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.brevoppsett
+package no.nav.etterlatte.behandling.brevutfall
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -7,7 +7,6 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
-import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -39,9 +38,9 @@ import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BrevoppsettRoutesTest {
+internal class BrevutfallRoutesTest {
     private val applicationContext: ApplicationContext = mockk(relaxed = true)
-    private var brevoppsettDao: BrevoppsettDao = mockk()
+    private var brevutfallDao: BrevutfallDao = mockk()
     private var behandlingService: BehandlingService = mockk()
 
     private val server: MockOAuth2Server = MockOAuth2Server()
@@ -53,13 +52,13 @@ internal class BrevoppsettRoutesTest {
         val httpServer = server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
 
-        brevoppsettDao = mockk()
+        brevutfallDao = mockk()
         every { applicationContext.tilgangService } returns
             mockk {
                 every { harTilgangTilBehandling(any(), any()) } returns true
                 every { harTilgangTilSak(any(), any()) } returns true
             }
-        every { applicationContext.brevoppsettService } returns BrevoppsettService(brevoppsettDao, behandlingService)
+        every { applicationContext.brevutfallService } returns BrevutfallService(brevutfallDao, behandlingService)
     }
 
     @AfterAll
@@ -68,12 +67,12 @@ internal class BrevoppsettRoutesTest {
     }
 
     @Test
-    fun `skal opprette brevoppsett`() {
+    fun `skal lagre brevutfall`() {
         val behandlingId = UUID.randomUUID()
-        val opprettDto = brevoppsettDto()
+        val opprettDto = brevutfallDto()
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
-        every { brevoppsettDao.lagre(any()) } returns brevoppsett(behandlingId)
+        every { brevutfallDao.lagre(any()) } returns brevutfall(behandlingId)
 
         testApplication {
             environment { config = hoconApplicationConfig }
@@ -82,28 +81,28 @@ internal class BrevoppsettRoutesTest {
             val client = createClient()
 
             val response =
-                client.post("/api/behandling/${UUID.randomUUID()}/brevoppsett") {
+                client.post("/api/behandling/${UUID.randomUUID()}/brevutfall") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
-                    setBody(brevoppsettDto())
+                    setBody(brevutfallDto())
                 }
 
-            val opprettetBrevoppsett: BrevoppsettDto = response.body()
-            response.status shouldBe HttpStatusCode.Created
+            val opprettetBrevutfall: BrevutfallDto = response.body()
+            response.status shouldBe HttpStatusCode.OK
 
-            opprettetBrevoppsett.aldersgruppe shouldBe opprettDto.aldersgruppe
-            opprettetBrevoppsett.etterbetaling shouldBe opprettDto.etterbetaling
-            opprettetBrevoppsett.kilde shouldNotBe null
+            opprettetBrevutfall.aldersgruppe shouldBe opprettDto.aldersgruppe
+            opprettetBrevutfall.etterbetaling shouldBe opprettDto.etterbetaling
+            opprettetBrevutfall.kilde shouldNotBe null
         }
     }
 
     @Test
-    fun `skal oppdatere brevoppsett`() {
+    fun `skal hente brevutfall`() {
         val behandlingId = UUID.randomUUID()
-        val oppdaterDto = brevoppsettDto()
+        val opprettDto = brevutfallDto()
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
-        every { brevoppsettDao.lagre(any()) } returns brevoppsett(behandlingId)
+        every { brevutfallDao.hent(any()) } returns brevutfall(behandlingId)
 
         testApplication {
             environment { config = hoconApplicationConfig }
@@ -112,44 +111,14 @@ internal class BrevoppsettRoutesTest {
             val client = createClient()
 
             val response =
-                client.put("/api/behandling/${UUID.randomUUID()}/brevoppsett") {
-                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                    setBody(brevoppsettDto())
-                }
-
-            val opprettetBrevoppsett: BrevoppsettDto = response.body()
-            response.status shouldBe HttpStatusCode.OK
-
-            opprettetBrevoppsett.aldersgruppe shouldBe oppdaterDto.aldersgruppe
-            opprettetBrevoppsett.etterbetaling shouldBe oppdaterDto.etterbetaling
-            opprettetBrevoppsett.kilde shouldNotBe null
-        }
-    }
-
-    @Test
-    fun `skal hente brevoppsett`() {
-        val behandlingId = UUID.randomUUID()
-        val opprettDto = brevoppsettDto()
-
-        every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
-        every { brevoppsettDao.hent(any()) } returns brevoppsett(behandlingId)
-
-        testApplication {
-            environment { config = hoconApplicationConfig }
-            application { module(applicationContext) }
-
-            val client = createClient()
-
-            val response =
-                client.get("/api/behandling/${UUID.randomUUID()}/brevoppsett") {
+                client.get("/api/behandling/${UUID.randomUUID()}/brevutfall") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            val hentetBrevoppsett: BrevoppsettDto = response.body()
+            val hentetBrevutfall: BrevutfallDto = response.body()
             response.status shouldBe HttpStatusCode.OK
 
-            hentetBrevoppsett.aldersgruppe shouldBe opprettDto.aldersgruppe
+            hentetBrevutfall.aldersgruppe shouldBe opprettDto.aldersgruppe
         }
     }
 
@@ -165,16 +134,16 @@ internal class BrevoppsettRoutesTest {
                 Virkningstidspunkt.create(YearMonth.of(2023, 1), "ident", "begrunnelse")
         }
 
-    private fun brevoppsett(behandlingId: UUID) =
-        Brevoppsett(
+    private fun brevutfall(behandlingId: UUID) =
+        Brevutfall(
             behandlingId = behandlingId,
             etterbetaling = Etterbetaling(YearMonth.of(2023, 1), YearMonth.of(2023, 2)),
             aldersgruppe = Aldersgruppe.UNDER_18,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
 
-    private fun brevoppsettDto() =
-        BrevoppsettDto(
+    private fun brevutfallDto() =
+        BrevutfallDto(
             etterbetaling =
                 EtterbetalingDto(
                     datoFom = LocalDate.of(2023, 1, 1),

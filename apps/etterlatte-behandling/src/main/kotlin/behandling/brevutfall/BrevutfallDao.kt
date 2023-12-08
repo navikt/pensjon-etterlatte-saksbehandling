@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.brevoppsett
+package no.nav.etterlatte.behandling.brevutfall
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -12,11 +12,11 @@ import java.sql.ResultSet
 import java.time.YearMonth
 import java.util.UUID
 
-class BrevoppsettDao(private val connection: () -> Connection) {
-    fun lagre(brevoppsett: Brevoppsett): Brevoppsett {
+class BrevutfallDao(private val connection: () -> Connection) {
+    fun lagre(brevutfall: Brevutfall): Brevutfall {
         return connection().prepareStatement(
             """
-            INSERT INTO brevoppsett(
+            INSERT INTO brevutfall(
                 behandling_id, oppdatert, etterbetaling_fom, etterbetaling_tom, aldersgruppe, kilde
             )
             VALUES (?, ?, ?, ?, ?, ?)
@@ -30,33 +30,33 @@ class BrevoppsettDao(private val connection: () -> Connection) {
             """.trimIndent(),
         )
             .apply {
-                setObject(1, brevoppsett.behandlingId)
+                setObject(1, brevutfall.behandlingId)
                 setTidspunkt(2, Tidspunkt.now())
-                setDate(3, brevoppsett.etterbetaling?.fom?.atDay(1).let { java.sql.Date.valueOf(it) })
-                setDate(4, brevoppsett.etterbetaling?.tom?.atEndOfMonth().let { java.sql.Date.valueOf(it) })
-                setString(5, brevoppsett.aldersgruppe?.name)
-                setString(6, brevoppsett.kilde.toJson())
+                setDate(3, brevutfall.etterbetaling?.fom?.atDay(1).let { java.sql.Date.valueOf(it) })
+                setDate(4, brevutfall.etterbetaling?.tom?.atEndOfMonth().let { java.sql.Date.valueOf(it) })
+                setString(5, brevutfall.aldersgruppe?.name)
+                setString(6, brevutfall.kilde.toJson())
             }
             .run { executeUpdate() }
             .also { require(it == 1) }
-            .let { hent(brevoppsett.behandlingId) ?: throw InternfeilException("Feilet under lagring av brevoppsett") }
+            .let { hent(brevutfall.behandlingId) ?: throw InternfeilException("Feilet under lagring av brevutfall") }
     }
 
-    fun hent(behandlingId: UUID): Brevoppsett? {
+    fun hent(behandlingId: UUID): Brevutfall? {
         return connection()
             .prepareStatement(
                 """
                     SELECT behandling_id, etterbetaling_fom, etterbetaling_tom, aldersgruppe, kilde 
-                    FROM brevoppsett 
+                    FROM brevutfall 
                     WHERE behandling_id = ?::UUID
                     """,
             )
             .apply { setObject(1, behandlingId) }
-            .run { executeQuery().singleOrNull { toBrevoppsett() } }
+            .run { executeQuery().singleOrNull { toBrevutfall() } }
     }
 
-    private fun ResultSet.toBrevoppsett() =
-        Brevoppsett(
+    private fun ResultSet.toBrevutfall() =
+        Brevutfall(
             behandlingId = getString("behandling_id").toUUID(),
             etterbetaling =
                 getDate("etterbetaling_fom")?.let {

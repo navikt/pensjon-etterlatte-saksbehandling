@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.brevoppsett
+package no.nav.etterlatte.behandling.brevutfall
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -29,11 +29,11 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BrevoppsettDaoTest {
+internal class BrevutfallDaoTest {
     private lateinit var dataSource: DataSource
     private lateinit var behandlingDao: BehandlingDao
     private lateinit var sakDao: SakDao
-    private lateinit var dao: BrevoppsettDao
+    private lateinit var dao: BrevutfallDao
 
     private lateinit var behandlingId: UUID
 
@@ -61,12 +61,12 @@ internal class BrevoppsettDaoTest {
                 RevurderingDao { dataSource.connection },
             ) { dataSource.connection }
 
-        dao = BrevoppsettDao { dataSource.connection }
+        dao = BrevutfallDao { dataSource.connection }
     }
 
     @BeforeEach
     fun reset() {
-        dataSource.connection.prepareStatement("""TRUNCATE TABLE brevoppsett""").executeUpdate()
+        dataSource.connection.prepareStatement("""TRUNCATE TABLE brevutfall""").executeUpdate()
 
         val sak = opprettSakForTest()
         opprettBehandlingForTest(sak).let {
@@ -81,55 +81,55 @@ internal class BrevoppsettDaoTest {
     }
 
     @Test
-    fun `skal lagre brevoppsett`() {
-        val brevoppsett = brevoppsett(behandlingId)
+    fun `skal lagre brevutfall`() {
+        val brevutfall = brevutfall(behandlingId)
 
-        val lagretBrevoppsett = dao.lagre(brevoppsett)
+        val lagretBrevutfall = dao.lagre(brevutfall)
 
-        lagretBrevoppsett shouldNotBe null
-        lagretBrevoppsett.etterbetaling?.fom shouldBe brevoppsett.etterbetaling?.fom
-        lagretBrevoppsett.etterbetaling?.tom shouldBe brevoppsett.etterbetaling?.tom
-        lagretBrevoppsett.aldersgruppe shouldBe brevoppsett.aldersgruppe
-        lagretBrevoppsett.kilde shouldBe brevoppsett.kilde
+        lagretBrevutfall shouldNotBe null
+        lagretBrevutfall.etterbetaling?.fom shouldBe brevutfall.etterbetaling?.fom
+        lagretBrevutfall.etterbetaling?.tom shouldBe brevutfall.etterbetaling?.tom
+        lagretBrevutfall.aldersgruppe shouldBe brevutfall.aldersgruppe
+        lagretBrevutfall.kilde shouldBe brevutfall.kilde
     }
 
     @Test
-    fun `skal hente brevoppsett`() {
-        val brevoppsett = brevoppsett(behandlingId)
+    fun `skal hente brevutfall`() {
+        val brevutfall = brevutfall(behandlingId)
 
-        dao.lagre(brevoppsett)
-        val lagretBrevoppsett = dao.hent(brevoppsett.behandlingId)
+        dao.lagre(brevutfall)
+        val lagretBrevutfall = dao.hent(brevutfall.behandlingId)
 
-        lagretBrevoppsett shouldNotBe null
+        lagretBrevutfall shouldNotBe null
     }
 
     @Test
-    fun `skal oppdatere brevoppsett`() {
-        val brevoppsett = brevoppsett(behandlingId)
+    fun `skal oppdatere brevutfall`() {
+        val brevutfall = brevutfall(behandlingId)
 
-        val lagretBrevoppsett = dao.lagre(brevoppsett)
+        val lagretBrevutfall = dao.lagre(brevutfall)
 
-        val oppdatertBrevoppsett =
-            lagretBrevoppsett.copy(
+        val oppdatertBrevutfall =
+            lagretBrevutfall.copy(
                 etterbetaling =
                     Etterbetaling(
-                        fom = brevoppsett.etterbetaling!!.fom.minusYears(1),
-                        tom = brevoppsett.etterbetaling!!.tom.minusYears(1),
+                        fom = brevutfall.etterbetaling!!.fom.minusYears(1),
+                        tom = brevutfall.etterbetaling!!.tom.minusYears(1),
                     ),
                 aldersgruppe = Aldersgruppe.OVER_18,
             )
 
-        val lagretOppdatertBrevoppsett = dao.lagre(oppdatertBrevoppsett)
+        val lagretOppdatertBrevutfall = dao.lagre(oppdatertBrevutfall)
 
-        lagretOppdatertBrevoppsett shouldNotBe null
-        lagretOppdatertBrevoppsett.etterbetaling?.fom shouldBe brevoppsett.etterbetaling?.fom?.minusYears(1)
-        lagretOppdatertBrevoppsett.etterbetaling?.tom shouldBe brevoppsett.etterbetaling?.tom?.minusYears(1)
-        lagretOppdatertBrevoppsett.aldersgruppe shouldBe Aldersgruppe.OVER_18
-        lagretOppdatertBrevoppsett.kilde shouldNotBe null
+        lagretOppdatertBrevutfall shouldNotBe null
+        lagretOppdatertBrevutfall.etterbetaling?.fom shouldBe brevutfall.etterbetaling?.fom?.minusYears(1)
+        lagretOppdatertBrevutfall.etterbetaling?.tom shouldBe brevutfall.etterbetaling?.tom?.minusYears(1)
+        lagretOppdatertBrevutfall.aldersgruppe shouldBe Aldersgruppe.OVER_18
+        lagretOppdatertBrevutfall.kilde shouldNotBe null
     }
 
-    private fun brevoppsett(behandlingId: UUID) =
-        Brevoppsett(
+    private fun brevutfall(behandlingId: UUID) =
+        Brevutfall(
             behandlingId = behandlingId,
             etterbetaling =
                 Etterbetaling(

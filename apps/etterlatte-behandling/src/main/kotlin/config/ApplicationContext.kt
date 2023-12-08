@@ -17,8 +17,8 @@ import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
-import no.nav.etterlatte.behandling.brevoppsett.BrevoppsettDao
-import no.nav.etterlatte.behandling.brevoppsett.BrevoppsettService
+import no.nav.etterlatte.behandling.brevutfall.BrevutfallDao
+import no.nav.etterlatte.behandling.brevutfall.BrevutfallService
 import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingDao
 import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
@@ -205,7 +205,7 @@ internal class ApplicationContext(
     val klageDao = KlageDaoImpl { databaseContext().activeTx() }
     val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
     val etterbetalingDao = EtterbetalingDao { databaseContext().activeTx() }
-    val brevoppsettDao = BrevoppsettDao { databaseContext().activeTx() }
+    val brevutfallDao = BrevutfallDao { databaseContext().activeTx() }
     val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
 
     // Klient
@@ -241,7 +241,7 @@ internal class ApplicationContext(
             grunnlagService = grunnlagsService,
         )
     val etterbetalingService = EtterbetalingService(etterbetalingDao, behandlingService)
-    val brevoppsettService = BrevoppsettService(brevoppsettDao, behandlingService)
+    val brevutfallService = BrevutfallService(brevutfallDao, behandlingService)
     val generellBehandlingService =
         GenerellBehandlingService(
             generellbehandlingDao,

@@ -144,6 +144,7 @@ internal class BrevutfallRoutesTest {
 
     private fun brevutfallDto() =
         BrevutfallDto(
+            behandlingId = UUID.randomUUID(),
             etterbetaling =
                 EtterbetalingDto(
                     datoFom = LocalDate.of(2023, 1, 1),

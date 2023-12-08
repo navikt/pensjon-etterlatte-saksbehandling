@@ -24,6 +24,7 @@ import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
@@ -95,7 +96,9 @@ class BeregnBarnepensjonService(
 
         val nyttRegelverkAktivert = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
         val erMigrering = behandling.kilde == Vedtaksloesning.PESYS
-        val brukNyttRegelverk = nyttRegelverkAktivert || erMigrering
+        val erOmregning = behandling.revurderingsaarsak?.name == Revurderingaarsak.REGULERING.name
+        // Midlertidig åpne opp nytt regelverk for migrering og omregning: EY-3232
+        val brukNyttRegelverk = nyttRegelverkAktivert || erMigrering || erOmregning
 
         val barnepensjonGrunnlag =
             opprettBeregningsgrunnlag(

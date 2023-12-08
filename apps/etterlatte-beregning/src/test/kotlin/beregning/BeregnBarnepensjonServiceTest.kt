@@ -698,6 +698,7 @@ internal class BeregnBarnepensjonServiceTest {
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
             every { kilde } returns vedtaksloesning
+            every { revurderingsaarsak } returns null
         }
 
     private fun mockTrygdetid(behandlingId_: UUID): TrygdetidDto =

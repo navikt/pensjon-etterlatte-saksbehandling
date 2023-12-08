@@ -99,23 +99,24 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
             }
         when (adresse) {
             is VergeSamhandlerFormat -> {
-                sikkerLogg.warn(
-                    "Adresseoppslag: $foedselsnummer - $seEtterVerge: Landkode: ${adresse.landkode}, land: ${adresse.land}," +
+                sikkerLogg.debug(
+                    "Adresseoppslag: VergeSamhandlerFormat - $foedselsnummer - $seEtterVerge: " +
+                        "Landkode: ${adresse.landkode}, land: ${adresse.land}," +
                         " postnummer: ${adresse.postnr}, poststed: ${adresse.poststed}, linje1: ${adresse.linje1}",
                 )
             }
             is VergePersonFormat -> {
-                sikkerLogg.warn(
-                    "Adresseoppslag: $foedselsnummer - $seEtterVerge: Landkode: ${adresse.adresse.landkode}," +
-                        " land: ${adresse.adresse.land}," +
+                sikkerLogg.debug(
+                    "Adresseoppslag: VergePersonFormat - $foedselsnummer - $seEtterVerge: " +
+                        "Landkode: ${adresse.adresse.landkode}, land: ${adresse.adresse.land}," +
                         " postnummer: ${adresse.adresse.postnummer}, poststed: ${adresse.adresse.poststed}," +
                         " linje1: ${adresse.adresse.adresselinje1}",
                 )
             }
             is RegoppslagFormat -> {
-                sikkerLogg.warn(
-                    "Adresseoppslag: $foedselsnummer - $seEtterVerge: Landkode: ${adresse.adresse.landkode}," +
-                        " land: ${adresse.adresse.land}," +
+                sikkerLogg.debug(
+                    "Adresseoppslag: RegoppslagFormat - $foedselsnummer - $seEtterVerge: " +
+                        "Landkode: ${adresse.adresse.landkode}, land: ${adresse.adresse.land}," +
                         " postnummer: ${adresse.adresse.postnummer}, poststed: ${adresse.adresse.poststed}," +
                         " linje1: ${adresse.adresse.adresselinje1}",
                 )

@@ -6,14 +6,13 @@ import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.rapidsandrivers.OmregningEvents
 import no.nav.etterlatte.rivers.BrevEventTypes
 import no.nav.etterlatte.token.Systembruker
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.OMREGNING_BRUTTO
-import rapidsandrivers.OMREGNING_NYE_REGLER
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import java.util.UUID
 
@@ -27,8 +26,8 @@ internal class OpprettVedtaksbrevForOmregningNyRegelRiver(
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.FATTET.toString()) {
             validate { it.requireKey("vedtak.behandlingId") }
             validate { it.requireKey("vedtak.sak.id") }
-            validate { it.requireKey(OMREGNING_NYE_REGLER) }
-            validate { it.requireKey(OMREGNING_BRUTTO) }
+            validate { it.requireKey(OmregningEvents.OMREGNING_NYE_REGLER) }
+            validate { it.requireKey(OmregningEvents.OMREGNING_BRUTTO) }
             validate { it.rejectValue(PDF_GENERERT, true) }
         }
     }
@@ -44,7 +43,7 @@ internal class OpprettVedtaksbrevForOmregningNyRegelRiver(
         runBlocking {
             val migreringBrevRequest =
                 MigreringBrevRequest( // TODO Må sjekke at det ikke er saker med yrkesskade
-                    brutto = packet[OMREGNING_BRUTTO].asInt(),
+                    brutto = packet[OmregningEvents.OMREGNING_BRUTTO].asInt(),
                     utlandstilknytningType = UtlandstilknytningType.NASJONAL,
                     yrkesskade = false,
                     erOmregningGjenny = true,

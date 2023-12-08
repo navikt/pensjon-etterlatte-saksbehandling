@@ -126,7 +126,7 @@ class BrevDataMapper(
         erOmregningNyRegel: Boolean = false,
     ): BrevkodePar {
         if (generellBrevData.systemkilde == Vedtaksloesning.PESYS || erOmregningNyRegel) {
-            assert(listOf(VedtakType.INNVILGELSE, VedtakType.INNVILGELSE).contains(generellBrevData.forenkletVedtak.type))
+            assert(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(generellBrevData.forenkletVedtak.type))
             return BrevkodePar(BARNEPENSJON_VEDTAK_OMREGNING, BARNEPENSJON_VEDTAK_OMREGNING_FERDIG)
         }
 

@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -45,6 +46,12 @@ import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
+
+class KunneIkkeLukkeOppgaveForhendelse(message: String) :
+    UgyldigForespoerselException(
+        code = "FEIL_MED_OPPGAVE_UNDER_LUKKING",
+        detail = message,
+    )
 
 class GrunnlagsendringshendelseService(
     private val oppgaveService: OppgaveService,
@@ -88,6 +95,10 @@ class GrunnlagsendringshendelseService(
         inTransaction {
             grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)
             try {
+                val oppgaveForReferanse = oppgaveService.hentEnkeltOppgaveForReferanse(hendelse.id.toString())
+                if (oppgaveForReferanse.manglerSaksbehandler()) {
+                    oppgaveService.tildelSaksbehandler(oppgaveForReferanse.id, saksbehandler.ident)
+                }
                 oppgaveService.ferdigStillOppgaveUnderBehandling(
                     hendelse.id.toString(),
                     saksbehandler = saksbehandler,
@@ -97,7 +108,7 @@ class GrunnlagsendringshendelseService(
                     "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil",
                     e,
                 )
-                throw e
+                throw KunneIkkeLukkeOppgaveForhendelse(e.message ?: "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil")
             }
         }
     }

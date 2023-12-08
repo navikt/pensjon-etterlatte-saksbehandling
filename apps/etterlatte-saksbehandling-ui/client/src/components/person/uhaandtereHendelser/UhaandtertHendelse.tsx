@@ -94,7 +94,7 @@ const UhaandtertHendelse = (props: {
             >
               <Modal.Body>
                 <Heading spacing level="2" size="medium" id="modal-heading">
-                  Avslutt uten revurdering
+                  Lukk hendelse
                 </Heading>
                 {hendelse.type === GrunnlagsendringsType.INSTITUSJONSOPPHOLD ? (
                   <>

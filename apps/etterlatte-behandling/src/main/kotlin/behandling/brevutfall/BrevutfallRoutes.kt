@@ -70,6 +70,7 @@ private fun BrevutfallDto.toBrevutfall(
 
 private fun Brevutfall.toDto() =
     BrevutfallDto(
+        behandlingId = behandlingId,
         etterbetaling = etterbetaling?.toDto(),
         aldersgruppe = aldersgruppe,
         kilde = kilde,
@@ -82,6 +83,7 @@ private fun Etterbetaling.toDto() =
     )
 
 data class BrevutfallDto(
+    val behandlingId: UUID?,
     val etterbetaling: EtterbetalingDto?,
     val aldersgruppe: Aldersgruppe?,
     val kilde: Grunnlagsopplysning.Kilde?,

@@ -32,8 +32,8 @@ class BrevutfallDao(private val connection: () -> Connection) {
             .apply {
                 setObject(1, brevutfall.behandlingId)
                 setTidspunkt(2, Tidspunkt.now())
-                setDate(3, brevutfall.etterbetaling?.fom?.atDay(1).let { java.sql.Date.valueOf(it) })
-                setDate(4, brevutfall.etterbetaling?.tom?.atEndOfMonth().let { java.sql.Date.valueOf(it) })
+                setDate(3, brevutfall.etterbetaling?.fom?.atDay(1)?.let { java.sql.Date.valueOf(it) })
+                setDate(4, brevutfall.etterbetaling?.tom?.atEndOfMonth()?.let { java.sql.Date.valueOf(it) })
                 setString(5, brevutfall.aldersgruppe?.name)
                 setString(6, brevutfall.kilde.toJson())
             }

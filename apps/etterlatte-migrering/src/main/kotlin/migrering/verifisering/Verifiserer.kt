@@ -1,5 +1,6 @@
 package no.nav.etterlatte.migrering.verifisering
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -9,6 +10,7 @@ import no.nav.etterlatte.libs.common.person.flereVergerMedOekonomiskInteresse
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
+import no.nav.etterlatte.migrering.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -21,6 +23,7 @@ internal class Verifiserer(
     private val gjenlevendeForelderPatcher: GjenlevendeForelderPatcher,
     private val utenlandstilknytningsjekker: Utenlandstilknytningsjekker,
     private val personHenter: PersonHenter,
+    private val grunnlagKlient: GrunnlagKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogger = sikkerlogger()
@@ -36,6 +39,7 @@ internal class Verifiserer(
                 feil.add(StrengtFortrolig)
             }
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
+            feil.addAll(sjekkAtSoekerHarRelevantVerge(it))
         }
 
         if (feil.isNotEmpty()) {
@@ -111,6 +115,20 @@ internal class Verifiserer(
             .map { it.exceptionOrNull() }
             .filterIsInstance<Verifiseringsfeil>()
     }
+
+    private fun sjekkAtSoekerHarRelevantVerge(request: MigreringRequest): List<Verifiseringsfeil> {
+        val person = personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()!!
+        if (person.vergemaalEllerFremtidsfullmakt?.isNotEmpty() == true) {
+            val vergesAdresse =
+                runBlocking { grunnlagKlient.hentVergesAdresse(request.soeker.value) }
+                    ?: return listOf(BarnetHarVergeMenIkkeVergesAdresse)
+
+            if (vergesAdresse.adresseTypeIKilde !in listOf("VERGE_SAMHANDLER_POSTADRESSE", "VERGE_PERSON_POSTADRESSE")) {
+                return listOf(BarnetHarVergeMenIkkeIPesys)
+            }
+        }
+        return emptyList()
+    }
 }
 
 sealed class Verifiseringsfeil : Exception()
@@ -120,9 +138,14 @@ data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikat
         get() = toString()
 }
 
-object BarnetHarVerge : Verifiseringsfeil() {
+object BarnetHarVergeMenIkkeVergesAdresse : Verifiseringsfeil() {
     override val message: String
-        get() = "Barn har vergemaal eller fremtidsfullmakt, kan ikke migrere"
+        get() = "Barn har vergemål i PDL men vi finner verken søkers eller verges adresse vha Persondata-tjenesten, kan ikke migrere"
+}
+
+object BarnetHarVergeMenIkkeIPesys : Verifiseringsfeil() {
+    override val message: String
+        get() = "Barn har vergemål i PDL men vi finner ikke verges adresse via pensjon-fullmakt, kan ikke migrere"
 }
 
 object BarnetHarKomplisertVergemaal : Verifiseringsfeil() {

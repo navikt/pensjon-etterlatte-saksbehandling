@@ -63,6 +63,7 @@ internal class ApplicationContext {
             gjenlevendeForelderPatcher = gjenlevendeForelderPatcher,
             utenlandstilknytningsjekker = utenlandstilknytningsjekker,
             personHenter = personHenter,
+            grunnlagKlient = grunnlagKlient,
         )
 
     val krrKlient =

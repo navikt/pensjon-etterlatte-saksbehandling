@@ -8,10 +8,13 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
 class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleService) {
-    fun fra(generellBrevData: GenerellBrevData): BrevProsessType {
+    fun fra(
+        generellBrevData: GenerellBrevData,
+        erOmregningNyRegel: Boolean = false,
+    ): BrevProsessType {
         return when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> omsBrev(generellBrevData)
-            SakType.BARNEPENSJON -> bpBrev(generellBrevData)
+            SakType.BARNEPENSJON -> bpBrev(generellBrevData, erOmregningNyRegel)
         }
     }
 
@@ -39,8 +42,11 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
         }
     }
 
-    private fun bpBrev(generellBrevData: GenerellBrevData): BrevProsessType {
-        if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+    private fun bpBrev(
+        generellBrevData: GenerellBrevData,
+        erOmregningNyRegel: Boolean = false,
+    ): BrevProsessType {
+        if (generellBrevData.systemkilde == Vedtaksloesning.PESYS || erOmregningNyRegel) {
             return BrevProsessType.REDIGERBAR
         }
         return when (generellBrevData.forenkletVedtak.type) {

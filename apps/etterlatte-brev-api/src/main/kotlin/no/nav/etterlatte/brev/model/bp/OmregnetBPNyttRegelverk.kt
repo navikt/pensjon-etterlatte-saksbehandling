@@ -37,7 +37,10 @@ data class OmregnetBPNyttRegelverk(
                     erYrkesskade = false,
                 )
 
-            if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+            if (
+                generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
+                migreringRequest?.erOmregningGjenny ?: false
+            ) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
                 val (pesysUtenlandstilknytning, yrkesskade) =
                     when (migreringRequest) {
@@ -49,6 +52,7 @@ data class OmregnetBPNyttRegelverk(
                             val yrkesskade = false // Må redigere brev manuelt hvis yrkesskade
                             Pair(utlandstilknytning.type, yrkesskade)
                         }
+
                         else -> Pair(migreringRequest.utlandstilknytningType, migreringRequest.yrkesskade)
                     }
 

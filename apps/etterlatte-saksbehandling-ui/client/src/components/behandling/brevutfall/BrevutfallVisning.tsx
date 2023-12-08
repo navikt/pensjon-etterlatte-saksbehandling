@@ -4,6 +4,7 @@ import { Aldersgruppe, Brevutfall } from '~components/behandling/brevutfall/Brev
 import { format, parseISO } from 'date-fns'
 import nb from 'date-fns/locale/nb'
 import { SakType } from '~shared/types/sak'
+import { PencilIcon } from '@navikt/aksel-icons'
 
 function aldersgruppeToString(aldersgruppe: Aldersgruppe) {
   switch (aldersgruppe) {
@@ -54,7 +55,12 @@ export const BrevutfallVisning = (props: {
       )}
       {redigerbar && (
         <HStack>
-          <Button size="small" onClick={() => setVisSkjema(true)}>
+          <Button
+            variant="secondary"
+            icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+            size="small"
+            onClick={() => setVisSkjema(true)}
+          >
             Rediger
           </Button>
         </HStack>

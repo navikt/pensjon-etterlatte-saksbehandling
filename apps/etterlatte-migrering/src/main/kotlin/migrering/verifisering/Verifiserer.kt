@@ -1,6 +1,5 @@
 package no.nav.etterlatte.migrering.verifisering
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -8,7 +7,6 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
-import no.nav.etterlatte.migrering.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -22,7 +20,6 @@ internal class Verifiserer(
     private val gjenlevendeForelderPatcher: GjenlevendeForelderPatcher,
     private val utenlandstilknytningsjekker: Utenlandstilknytningsjekker,
     private val personHenter: PersonHenter,
-    private val grunnlagKlient: GrunnlagKlient,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -103,14 +100,8 @@ internal class Verifiserer(
             }
         }
 
-        if (person.vergemaalEllerFremtidsfullmakt?.isNotEmpty() == true) {
-            val vergesAdresse =
-                runBlocking { grunnlagKlient.hentVergesAdresse(request.soeker.value) }
-                    ?: return listOf(BarnetHarVergeMenIkkeVergesAdresse)
-
-            if (vergesAdresse.adresseTypeIKilde !in listOf("VERGE_SAMHANDLER_POSTADRESSE", "VERGE_PERSON_POSTADRESSE")) {
-                return listOf(BarnetHarVergeMenIkkeIPesys)
-            }
+        if ((person.vergemaalEllerFremtidsfullmakt?.size ?: 0) > 1) {
+            return listOf(BarnetHarFlereVerger)
         }
         return emptyList()
     }
@@ -123,14 +114,9 @@ data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikat
         get() = toString()
 }
 
-object BarnetHarVergeMenIkkeVergesAdresse : Verifiseringsfeil() {
+object BarnetHarFlereVerger : Verifiseringsfeil() {
     override val message: String
-        get() = "Barn har vergemål i PDL men vi finner verken søkers eller verges adresse vha Persondata-tjenesten, kan ikke migrere"
-}
-
-object BarnetHarVergeMenIkkeIPesys : Verifiseringsfeil() {
-    override val message: String
-        get() = "Barn har vergemål i PDL men vi finner ikke verges adresse via pensjon-fullmakt, kan ikke migrere"
+        get() = "Barnet har flere verger"
 }
 
 object BarnetHarVergemaal : Verifiseringsfeil() {

@@ -1,7 +1,7 @@
 import { BodyShort, Button, HStack, Label, VStack } from '@navikt/ds-react'
 import React from 'react'
 import { Aldersgruppe, Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import nb from 'date-fns/locale/nb'
 
 function aldersgruppeToString(aldersgruppe: Aldersgruppe) {
@@ -13,8 +13,8 @@ function aldersgruppeToString(aldersgruppe: Aldersgruppe) {
   }
 }
 
-function formaterDatoSomMaaned(dato: Date) {
-  return format(dato, 'MMMM yyyy', { locale: nb })
+function formaterDatoSomMaaned(dato: string) {
+  return format(parseISO(dato), 'MMMM yyyy', { locale: nb })
 }
 
 export const BrevutfallVisning = (props: {
@@ -35,18 +35,18 @@ export const BrevutfallVisning = (props: {
           <HStack gap="8">
             <VStack gap="2">
               <Label>Fra og med</Label>
-              <BodyShort>{formaterDatoSomMaaned(brevutfall.etterbetaling.fom!!)}</BodyShort>
+              <BodyShort>{formaterDatoSomMaaned(brevutfall.etterbetaling.datoFom!!)}</BodyShort>
             </VStack>
             <VStack gap="2">
               <Label>Til og med</Label>
-              <BodyShort>{formaterDatoSomMaaned(brevutfall.etterbetaling.fom!!)}</BodyShort>
+              <BodyShort>{formaterDatoSomMaaned(brevutfall.etterbetaling.datoTom!!)}</BodyShort>
             </VStack>
           </HStack>
         )}
       </VStack>
       <VStack gap="2">
         <Label>Gjelder brevet under eller over 18 år?</Label>
-        <BodyShort>{brevutfall.aldersgruppe ? aldersgruppeToString(brevutfall.aldersgruppe) : ''}</BodyShort>
+        <BodyShort>{brevutfall.aldersgruppe ? aldersgruppeToString(brevutfall.aldersgruppe) : 'Ikke satt'}</BodyShort>
       </VStack>
       {redigerbar && (
         <HStack>

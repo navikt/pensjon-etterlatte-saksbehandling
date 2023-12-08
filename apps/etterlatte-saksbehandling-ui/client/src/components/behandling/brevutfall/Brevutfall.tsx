@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { Alert, BodyLong, Heading, VStack } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentBrevutfall } from '~shared/api/behandling'
+import { hentBrevutfallApi } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { BrevutfallSkjema } from '~components/behandling/brevutfall/BrevutfallSkjema'
@@ -18,29 +18,35 @@ export interface Brevutfall {
 export enum Aldersgruppe {
   OVER_18 = 'OVER_18',
   UNDER_18 = 'UNDER_18',
+  IKKE_VALGT = 'IKKE_VALGT',
 }
 
 export interface Etterbetaling {
-  fom?: Date | null
-  tom?: Date | null
+  datoFom?: string | null
+  datoTom?: string | null
 }
 
 export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
   const behandling = props.behandling
   const redigerbar = behandlingErRedigerbar(behandling.status)
   const [brevutfall, setBrevutfall] = useState<Brevutfall>({})
-  const [hentBrevutfallResultat, hentBrevutfallRequest] = useApiCall(hentBrevutfall)
+  const [hentBrevutfallResultat, hentBrevutfallRequest] = useApiCall(hentBrevutfallApi)
   const [visSkjema, setVisSkjema] = useState(redigerbar)
 
-  useEffect(() => {
+  const hentBrevutfall = () => {
     hentBrevutfallRequest(behandling.id, (brevutfall: Brevutfall | null) => {
       if (brevutfall) {
         setBrevutfall(brevutfall)
         setVisSkjema(false)
       } else {
-        setVisSkjema(true)
+        setBrevutfall({})
+        if (redigerbar) setVisSkjema(true)
       }
     })
+  }
+
+  useEffect(() => {
+    hentBrevutfall()
   }, [])
 
   return (
@@ -60,6 +66,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
               brevutfall={brevutfall}
               setBrevutfall={setBrevutfall}
               setVisSkjema={setVisSkjema}
+              onAvbryt={hentBrevutfall}
             />
           ) : (
             <BrevutfallVisning redigerbar={redigerbar} brevutfall={brevutfall} setVisSkjema={setVisSkjema} />

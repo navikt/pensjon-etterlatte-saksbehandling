@@ -9,15 +9,26 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Aldersgruppe, Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
 
+enum HarEtterbetaling {
+  JA = 'JA',
+  NEI = 'NEI',
+  IKKE_VALGT = 'IKKE_VALGT',
+}
+
 export const BrevutfallSkjema = (props: {
   behandling: IDetaljertBehandling
   brevutfall: Brevutfall
   setBrevutfall: (brevutfall: Brevutfall) => void
   setVisSkjema: (visSkjema: boolean) => void
+  onAvbryt: () => void
 }) => {
-  const { behandling, brevutfall, setBrevutfall, setVisSkjema } = props
-  const [harEtterbetaling, setHarEtterbetaling] = useState<boolean | undefined>(
-    brevutfall.etterbetaling ? true : undefined
+  const { behandling, brevutfall, setBrevutfall, setVisSkjema, onAvbryt } = props
+  const [harEtterbetaling, setHarEtterbetaling] = useState<HarEtterbetaling>(
+    brevutfall.etterbetaling === undefined
+      ? HarEtterbetaling.IKKE_VALGT
+      : brevutfall.etterbetaling
+      ? HarEtterbetaling.JA
+      : HarEtterbetaling.NEI
   )
   const [lagreBrevutfallResultat, lagreBrevutfallRequest, lagreBrevutfallReset] = useApiCall(lagreBrevutfall)
   const [valideringsfeil, setValideringsfeil] = useState<Array<string>>([])
@@ -40,9 +51,9 @@ export const BrevutfallSkjema = (props: {
 
   const valider = () => {
     const feilmeldinger = []
-    if (brevutfall.etterbetaling || harEtterbetaling) {
-      const fom = brevutfall.etterbetaling?.fom
-      const tom = brevutfall.etterbetaling?.tom
+    if (brevutfall.etterbetaling || harEtterbetaling === HarEtterbetaling.JA) {
+      const fom = brevutfall.etterbetaling?.datoFom
+      const tom = brevutfall.etterbetaling?.datoTom
       if (!fom || !tom) {
         feilmeldinger.push('Både fra- og til-måned for etterbetaling må fylles ut.')
         return feilmeldinger
@@ -60,7 +71,7 @@ export const BrevutfallSkjema = (props: {
         feilmeldinger.push('Fra-måned kan ikke være før virkningstidspunkt.')
       }
 
-      if (til > new Date()) {
+      if (til.getMonth() > new Date().getMonth()) {
         feilmeldinger.push('Til-måned kan ikke være i framtida.')
       }
     }
@@ -92,31 +103,41 @@ export const BrevutfallSkjema = (props: {
           className="radioGroup"
           value={harEtterbetaling}
           onChange={(event) => {
-            const svar = event as boolean
+            const svar = event as HarEtterbetaling
             setHarEtterbetaling(svar)
-            if (!svar) {
+            if (svar === HarEtterbetaling.NEI) {
               setBrevutfall({ ...brevutfall, etterbetaling: undefined })
             }
           }}
         >
-          <Radio size="small" value={true}>
+          <Radio size="small" value={HarEtterbetaling.JA}>
             Ja
           </Radio>
-          <Radio size="small" value={false}>
+          <Radio size="small" value={HarEtterbetaling.NEI}>
             Nei
           </Radio>
         </RadioGroup>
 
-        {harEtterbetaling && (
+        {harEtterbetaling == HarEtterbetaling.JA && (
           <HStack gap="4">
             <MaanedVelger
-              value={brevutfall.etterbetaling?.fom ? new Date(brevutfall.etterbetaling?.fom) : undefined}
-              onChange={(e) => setBrevutfall({ ...brevutfall, etterbetaling: { ...brevutfall.etterbetaling, fom: e } })}
+              value={brevutfall.etterbetaling?.datoFom ? new Date(brevutfall.etterbetaling?.datoFom) : undefined}
+              onChange={(e) =>
+                setBrevutfall({
+                  ...brevutfall,
+                  etterbetaling: { ...brevutfall.etterbetaling, datoFom: e ? e.toISOString() : undefined },
+                })
+              }
               label="Fra og med"
             />
             <MaanedVelger
-              value={brevutfall.etterbetaling?.tom ? new Date(brevutfall.etterbetaling?.tom) : undefined}
-              onChange={(e) => setBrevutfall({ ...brevutfall, etterbetaling: { ...brevutfall.etterbetaling, tom: e } })}
+              value={brevutfall.etterbetaling?.datoTom ? new Date(brevutfall.etterbetaling?.datoTom) : undefined}
+              onChange={(e) =>
+                setBrevutfall({
+                  ...brevutfall,
+                  etterbetaling: { ...brevutfall.etterbetaling, datoTom: e ? e.toISOString() : undefined },
+                })
+              }
               label="Til og med"
             />
           </HStack>
@@ -137,7 +158,7 @@ export const BrevutfallSkjema = (props: {
               </HelpTextWrapper>
             }
             className="radioGroup"
-            value={brevutfall.aldersgruppe}
+            value={brevutfall.aldersgruppe === undefined ? Aldersgruppe.IKKE_VALGT : brevutfall.aldersgruppe}
             onChange={(e) => setBrevutfall({ ...brevutfall, aldersgruppe: e })}
           >
             <Radio size="small" value={Aldersgruppe.UNDER_18}>
@@ -154,7 +175,14 @@ export const BrevutfallSkjema = (props: {
         <Button size="small" type="submit" loading={isPending(lagreBrevutfallResultat)} onClick={submitBrevutfall}>
           Lagre valg
         </Button>
-        <Button variant="secondary" size="small" onClick={() => setVisSkjema(false)}>
+        <Button
+          variant="secondary"
+          size="small"
+          onClick={() => {
+            onAvbryt()
+            setVisSkjema(false)
+          }}
+        >
           Avbryt
         </Button>
       </HStack>

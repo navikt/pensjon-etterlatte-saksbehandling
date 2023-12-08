@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -162,7 +163,7 @@ class BehandlingServiceImpl(
 //        runBlocking {
 //            behandlingKlient.get("$url/saker").body()
 //        }
-        Saker(emptyList())
+        Saker(listOf(Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 1, "IKKE_RELEVANT")))
 
     override fun avbryt(behandlingId: UUID) =
         runBlocking {

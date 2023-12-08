@@ -29,7 +29,7 @@ internal class OpprettVedtakforespoerselRiver(
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             // TODO EY-3232 - Fjerne
-            validate { it.requireKey(OmregningEvents.OMREGNING_NYE_REGLER) }
+            validate { it.interestedIn(OmregningEvents.OMREGNING_NYE_REGLER) }
             validate { it.interestedIn(OmregningEvents.OMREGNING_NYE_REGLER_KJORING) }
         }
     }

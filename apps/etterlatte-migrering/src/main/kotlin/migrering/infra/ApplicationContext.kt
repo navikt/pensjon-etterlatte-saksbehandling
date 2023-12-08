@@ -64,6 +64,7 @@ internal class ApplicationContext {
             utenlandstilknytningsjekker = utenlandstilknytningsjekker,
             personHenter = personHenter,
             grunnlagKlient = grunnlagKlient,
+            featureToggleService = featureToggleService,
         )
 
     val krrKlient =

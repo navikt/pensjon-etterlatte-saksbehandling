@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { lagreBrevutfall } from '~shared/api/behandling'
+import { lagreBrevutfallApi } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Aldersgruppe, Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
@@ -30,7 +30,7 @@ export const BrevutfallSkjema = (props: {
       ? HarEtterbetaling.JA
       : HarEtterbetaling.NEI
   )
-  const [lagreBrevutfallResultat, lagreBrevutfallRequest, lagreBrevutfallReset] = useApiCall(lagreBrevutfall)
+  const [lagreBrevutfallResultat, lagreBrevutfallRequest, lagreBrevutfallReset] = useApiCall(lagreBrevutfallApi)
   const [valideringsfeil, setValideringsfeil] = useState<Array<string>>([])
 
   const submitBrevutfall = () => {
@@ -83,8 +83,6 @@ export const BrevutfallSkjema = (props: {
     }
     return feilmeldinger
   }
-
-  const harValideringsfeil = () => valideringsfeil?.length > 0
 
   return (
     <VStack gap="8">
@@ -187,7 +185,7 @@ export const BrevutfallSkjema = (props: {
         </Button>
       </HStack>
 
-      {harValideringsfeil() && (
+      {valideringsfeil?.length > 0 && (
         <ErrorSummary heading="Feil ved lagring av brevutfall">
           {valideringsfeil.map((feilmelding, index) => (
             <ErrorSummary.Item key={`${index}`} href="#brevutfall">

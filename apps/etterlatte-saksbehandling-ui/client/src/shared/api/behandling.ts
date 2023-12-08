@@ -144,7 +144,7 @@ export const oppdaterGrunnlag = async (args: { behandlingId: string }): Promise<
   return apiClient.post(`/behandling/${args.behandlingId}/oppdater-grunnlag`, {})
 }
 
-export const lagreBrevutfall = async (args: {
+export const lagreBrevutfallApi = async (args: {
   behandlingId: string
   brevutfall: Brevutfall
 }): Promise<ApiResponse<Brevutfall>> => {

@@ -47,7 +47,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
 
   useEffect(() => {
     hentBrevutfall()
-  }, [])
+  }, [behandling.id])
 
   return (
     <BrevutfallContent id="brevutfall">

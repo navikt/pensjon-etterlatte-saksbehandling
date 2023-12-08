@@ -205,6 +205,7 @@ data class BrevMottaker(
     val navn: String?,
     val foedselsnummer: MottakerFoedselsnummer?,
     val adresse: MottakerAdresse,
+    val adresseTypeIKilde: String? = null,
 )
 
 /**

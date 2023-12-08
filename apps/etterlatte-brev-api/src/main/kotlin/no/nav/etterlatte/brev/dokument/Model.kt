@@ -1,9 +1,9 @@
 package no.nav.etterlatte.brev.dokument
 
 import io.ktor.http.HttpStatusCode
-import no.nav.etterlatte.brev.journalpost.Bruker
-import no.nav.etterlatte.brev.journalpost.BrukerIdType
-import no.nav.etterlatte.brev.journalpost.JournalpostSak
+import no.nav.etterlatte.brev.dokarkiv.Bruker
+import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
+import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 
 data class HentDokumentoversiktBrukerResult(
     val journalposter: List<Journalpost> = emptyList(),

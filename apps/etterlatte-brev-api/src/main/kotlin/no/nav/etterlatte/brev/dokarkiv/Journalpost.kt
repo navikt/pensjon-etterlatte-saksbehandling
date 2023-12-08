@@ -1,18 +1,56 @@
-package no.nav.etterlatte.brev.journalpost
+package no.nav.etterlatte.brev.dokarkiv
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.token.Fagsaksystem
+import java.time.LocalDateTime
 
-data class JournalpostRequest(
-    val tittel: String,
-    val journalpostType: JournalPostType,
-    val tema: String,
-    val kanal: String?,
-    val journalfoerendeEnhet: String?,
+/**
+ * Requestobjekt for å opprette ny Journalpost
+ **/
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+data class OpprettJournalpostRequest(
     val avsenderMottaker: AvsenderMottaker,
+    val behandlingstema: String? = null,
     val bruker: Bruker,
-    val sak: JournalpostSak,
-    val eksternReferanseId: String,
+    val datoDokument: LocalDateTime? = null,
+    val datoMottatt: LocalDateTime? = null,
     val dokumenter: List<JournalpostDokument>,
+    val eksternReferanseId: String,
+    val journalfoerendeEnhet: String,
+    val journalposttype: JournalPostType,
+    val kanal: String,
+    val sak: JournalpostSak,
+    val tema: String,
+    val tilleggsopplysninger: Map<String, String> = emptyMap(),
+    val tittel: String,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class OpprettJournalpostResponse(
+    val journalpostId: String,
+    val journalpostferdigstilt: Boolean,
+    val dokumenter: List<DokumentInfo> = emptyList(),
+)
+
+/**
+ * Requestobjekt for å oppdatere eksisterende Journalpost
+ **/
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+data class OppdaterJournalpostRequest(
+    val avsenderMottaker: AvsenderMottaker,
+    val behandlingstema: String,
+    val bruker: Bruker,
+    val datoDokument: LocalDateTime?,
+    val dokumenter: List<JournalpostDokument>,
+    val sak: JournalpostSak,
+    val tema: String,
+    val tilleggsopplysninger: Map<String, String>,
+    val tittel: String,
+)
+
+data class OppdaterJournalpostResponse(
+    val journalpostId: String,
 )
 
 data class AvsenderMottaker(
@@ -27,9 +65,13 @@ data class Bruker(
     val idType: String = "FNR",
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class DokumentInfo(
+    val dokumentInfoId: String,
+)
+
 data class JournalpostDokument(
     val tittel: String,
-    val dokumentKategori: DokumentKategori? = null, // depricated
     val brevkode: String = "XX.YY-ZZ",
     val dokumentvarianter: List<DokumentVariant>,
 )

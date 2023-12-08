@@ -20,7 +20,7 @@ import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_INNHOLD_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_MOTTAKER_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_PDF_QUERY
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
-import no.nav.etterlatte.brev.journalpost.JournalpostResponse
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -272,7 +272,7 @@ class BrevRepository(private val ds: DataSource) {
 
     fun settBrevJournalfoert(
         brevId: BrevID,
-        journalpostResponse: JournalpostResponse,
+        journalpostResponse: OpprettJournalpostResponse,
     ): Boolean =
         ds.transaction { tx ->
             tx.run(

@@ -11,19 +11,15 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import no.nav.etterlatte.brev.journalpost.Bruker
-import no.nav.etterlatte.brev.journalpost.JournalpostRequest
-import no.nav.etterlatte.brev.journalpost.JournalpostResponse
-import no.nav.etterlatte.brev.journalpost.JournalpostSak
 import org.slf4j.LoggerFactory
 
 class DokarkivKlient(private val client: HttpClient, private val url: String) {
     private val logger = LoggerFactory.getLogger(DokarkivKlient::class.java)
 
     internal suspend fun opprettJournalpost(
-        request: JournalpostRequest,
+        request: OpprettJournalpostRequest,
         ferdigstill: Boolean,
-    ): JournalpostResponse =
+    ): OpprettJournalpostResponse =
         try {
             client.post("$url?forsoekFerdigstill=$ferdigstill") {
                 accept(ContentType.Application.Json)
@@ -47,6 +43,15 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
         client.patch("$url/$journalpostId/ferdigstill") {
             contentType(ContentType.Application.Json)
             setBody(FerdigstillJournalpostRequest(journalfoerendeEnhet))
+        }.body()
+
+    internal suspend fun oppdaterJournalpost(
+        journalpostId: String,
+        request: OppdaterJournalpostRequest,
+    ): OppdaterJournalpostResponse =
+        client.put("$url/$journalpostId") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
         }.body()
 
     internal suspend fun oppdaterFagsak(

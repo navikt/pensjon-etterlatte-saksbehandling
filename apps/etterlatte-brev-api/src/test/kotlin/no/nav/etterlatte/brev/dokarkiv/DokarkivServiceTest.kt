@@ -11,14 +11,7 @@ import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.journalpost.AvsenderMottaker
-import no.nav.etterlatte.brev.journalpost.Bruker
-import no.nav.etterlatte.brev.journalpost.JournalPostType
-import no.nav.etterlatte.brev.journalpost.JournalpostKoder.Companion.BREV_KODE
-import no.nav.etterlatte.brev.journalpost.JournalpostRequest
-import no.nav.etterlatte.brev.journalpost.JournalpostResponse
-import no.nav.etterlatte.brev.journalpost.JournalpostSak
-import no.nav.etterlatte.brev.journalpost.Sakstype
+import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder.Companion.BREV_KODE
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
@@ -81,7 +74,7 @@ internal class DokarkivServiceTest {
                         Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
                     ),
             )
-        val forventetResponse = JournalpostResponse("12345", journalpostferdigstilt = true)
+        val forventetResponse = OpprettJournalpostResponse("12345", journalpostferdigstilt = true)
 
         coEvery { mockKlient.opprettJournalpost(any(), any()) } returns forventetResponse
         every { mockDb.hentBrevInnhold(any()) } returns forventetInnhold
@@ -101,7 +94,7 @@ internal class DokarkivServiceTest {
         val response = runBlocking { service.journalfoer(brevId, vedtak) }
         response shouldBe forventetResponse
 
-        val requestSlot = slot<JournalpostRequest>()
+        val requestSlot = slot<OpprettJournalpostRequest>()
         coVerify { mockKlient.opprettJournalpost(capture(requestSlot), true) }
         verify {
             mockDb.hentBrevInnhold(brevId)
@@ -111,7 +104,7 @@ internal class DokarkivServiceTest {
 
         with(requestSlot.captured) {
             tittel shouldBe forventetInnhold.tittel
-            journalpostType shouldBe JournalPostType.UTGAAENDE
+            journalposttype shouldBe JournalPostType.UTGAAENDE
             tema shouldBe vedtak.sak.sakType.tema
             kanal shouldBe "S"
             journalfoerendeEnhet shouldBe vedtak.ansvarligEnhet

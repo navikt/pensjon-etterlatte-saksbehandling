@@ -19,10 +19,10 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
-import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataMapper
@@ -163,7 +163,7 @@ internal class BrevServiceTest {
         fun `Journalfoering fungerer som forventet`() {
             val brev = opprettBrev(Status.FERDIGSTILT, BrevProsessType.MANUELL)
             val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, "1234")
-            val journalpostResponse = JournalpostResponse("444", journalpostferdigstilt = true)
+            val journalpostResponse = OpprettJournalpostResponse("444", journalpostferdigstilt = true)
 
             coEvery { sakService.hentSak(any(), any()) } returns sak
             coEvery { dokarkivService.journalfoer(any<Brev>(), any()) } returns journalpostResponse

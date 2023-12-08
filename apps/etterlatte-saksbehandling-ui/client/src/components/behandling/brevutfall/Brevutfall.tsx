@@ -7,8 +7,8 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { BrevutfallSkjema } from '~components/behandling/brevutfall/BrevutfallSkjema'
 import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallVisning'
-import { isFailure, isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
+import { MapApiResult } from '~shared/components/MapApiResult'
 
 export interface Brevutfall {
   etterbetaling?: Etterbetaling | null
@@ -30,7 +30,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
   const behandling = props.behandling
   const redigerbar = behandlingErRedigerbar(behandling.status)
   const [brevutfall, setBrevutfall] = useState<Brevutfall>({})
-  const [hentBrevutfallResultat, hentBrevutfallRequest] = useApiCall(hentBrevutfallApi)
+  const [hentBrevutfallResult, hentBrevutfallRequest] = useApiCall(hentBrevutfallApi)
   const [visSkjema, setVisSkjema] = useState(redigerbar)
 
   const hentBrevutfall = () => {
@@ -58,28 +58,31 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
         Her velger du hvilket utfall som gjelder slik at det blir riktig informasjon i brevet.
       </BodyLong>
 
-      {isSuccess(hentBrevutfallResultat) && (
-        <VStack gap="8">
-          {visSkjema ? (
-            <BrevutfallSkjema
-              behandling={behandling}
-              brevutfall={brevutfall}
-              setBrevutfall={setBrevutfall}
-              setVisSkjema={setVisSkjema}
-              onAvbryt={hentBrevutfall}
-            />
-          ) : (
-            <BrevutfallVisning
-              redigerbar={redigerbar}
-              brevutfall={brevutfall}
-              sakType={behandling.sakType}
-              setVisSkjema={setVisSkjema}
-            />
-          )}
-        </VStack>
-      )}
-      {isPendingOrInitial(hentBrevutfallResultat) && <Spinner visible={true} label="Henter brevutfall" />}
-      {isFailure(hentBrevutfallResultat) && <Alert variant="error">{hentBrevutfallResultat.error.detail}</Alert>}
+      <MapApiResult
+        result={hentBrevutfallResult}
+        mapInitialOrPending={<Spinner visible={true} label="Henter brevutfall .." />}
+        mapError={(apiError) => <Alert variant="error">{apiError.detail}</Alert>}
+        mapSuccess={() => (
+          <VStack gap="8">
+            {visSkjema ? (
+              <BrevutfallSkjema
+                behandling={behandling}
+                brevutfall={brevutfall}
+                setBrevutfall={setBrevutfall}
+                setVisSkjema={setVisSkjema}
+                onAvbryt={hentBrevutfall}
+              />
+            ) : (
+              <BrevutfallVisning
+                redigerbar={redigerbar}
+                brevutfall={brevutfall}
+                sakType={behandling.sakType}
+                setVisSkjema={setVisSkjema}
+              />
+            )}
+          </VStack>
+        )}
+      />
     </BrevutfallContent>
   )
 }

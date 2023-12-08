@@ -13,6 +13,8 @@ import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.Month
 
 internal class Verifiserer(
     private val repository: PesysRepository,
@@ -72,6 +74,14 @@ internal class Verifiserer(
                 val person = personHenter.hentPerson(it.first, it.second)
 
                 if (it.first == PersonRolle.BARN) {
+                    val foedselsdato: LocalDate? = person.getOrNull()?.foedselsdato?.verdi
+                    if (foedselsdato != null) {
+                        if (foedselsdato.isAfter(LocalDate.of(2005, Month.NOVEMBER, 30))) {
+                            logger.warn("Søker er over 18 år")
+                            return listOf(SoekerErOver18)
+                        }
+                    }
+
                     person.getOrNull()?.let { pdlPerson ->
                         pdlPerson.vergemaalEllerFremtidsfullmakt?.let { vergemaal ->
                             val flereVergerMedOekonomiskInteresse =
@@ -128,4 +138,9 @@ object StrengtFortrolig : Verifiseringsfeil() {
 data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
     override val message: String?
         get() = kilde.message
+}
+
+object SoekerErOver18 : Verifiseringsfeil() {
+    override val message: String
+        get() = "Skal ikke per nå migrere søker der søker er over 18"
 }

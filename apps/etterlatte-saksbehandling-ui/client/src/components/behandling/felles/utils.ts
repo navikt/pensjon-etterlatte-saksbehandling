@@ -93,7 +93,8 @@ export const behandlingSkalSendeBrev = (
       return false
     case IBehandlingsType.REVURDERING:
       return !(
-        revurderingsaarsak === Revurderingaarsak.REGULERING || revurderingsaarsak === Revurderingaarsak.DOEDSFALL
+        //revurderingsaarsak === Revurderingaarsak.REGULERING || TODO EY-3232 Fjern utkommentering
+        (revurderingsaarsak === Revurderingaarsak.DOEDSFALL)
       )
   }
 }

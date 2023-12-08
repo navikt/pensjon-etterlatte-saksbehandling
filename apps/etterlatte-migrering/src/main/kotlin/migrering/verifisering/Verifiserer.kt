@@ -92,7 +92,9 @@ internal class Verifiserer(
     }
 
     private fun sjekkAtSoekerHarRelevantVerge(request: MigreringRequest): List<Verifiseringsfeil> {
-        val person = personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()!!
+        val person =
+            personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()
+                ?: return listOf(FinsIkkeIPDL(PersonRolle.BARN, request.soeker))
         if (person.vergemaalEllerFremtidsfullmakt?.isNotEmpty() == true) {
             val vergesAdresse =
                 runBlocking { grunnlagKlient.hentVergesAdresse(request.soeker.value) }

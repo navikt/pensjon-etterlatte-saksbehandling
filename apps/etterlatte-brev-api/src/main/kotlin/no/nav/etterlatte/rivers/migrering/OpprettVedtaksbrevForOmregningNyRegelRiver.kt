@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import java.util.UUID
 
+// TODO EY-3232 - Fjerne
 internal class OpprettVedtaksbrevForOmregningNyRegelRiver(
     rapidsConnection: RapidsConnection,
     private val service: VedtaksbrevService,

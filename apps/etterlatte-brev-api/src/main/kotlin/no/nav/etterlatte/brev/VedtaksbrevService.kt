@@ -76,7 +76,7 @@ class VedtaksbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
+        automatiskMigreringRequest: MigreringBrevRequest? = null, // TODO EY-3232 - Fjerne
     ): Brev {
         require(hentVedtaksbrev(behandlingId) == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -380,6 +380,7 @@ class VedtaksbrevService(
     }
 }
 
+// TODO EY-3232 - Fjerne
 data class MigreringBrevRequest(
     val brutto: Int,
     val yrkesskade: Boolean,

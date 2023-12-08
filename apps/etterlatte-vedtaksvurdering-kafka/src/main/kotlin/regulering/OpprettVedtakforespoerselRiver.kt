@@ -28,6 +28,7 @@ internal class OpprettVedtakforespoerselRiver(
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
+            // TODO EY-3232 - Fjerne
             validate { it.interestedIn(OmregningEvents.OMREGNING_NYE_REGLER) }
             validate { it.interestedIn(OmregningEvents.OMREGNING_NYE_REGLER_KJORING) }
         }
@@ -42,6 +43,7 @@ internal class OpprettVedtakforespoerselRiver(
         val behandlingId = packet.behandlingId
 
         withFeilhaandtering(packet, context, OPPRETT_VEDTAK) {
+            // TODO EY-3232 - Fjerne
             val kjoringVariant = packet[OmregningEvents.OMREGNING_NYE_REGLER_KJORING].asText()
             val respons =
                 if (kjoringVariant == MigreringKjoringVariant.MED_PAUSE.name) {

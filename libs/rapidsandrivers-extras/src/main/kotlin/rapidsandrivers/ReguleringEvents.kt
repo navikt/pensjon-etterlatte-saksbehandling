@@ -15,6 +15,7 @@ object ReguleringEvents {
     const val OPPRETT_VEDTAK = "${PREFIX}OPPRETT_VEDTAK"
 }
 
+// TODO EY-3232 - Fjerne
 object OmregningEvents {
     const val OMREGNING_NYE_REGLER = "OMREGNING_NYE_REGLER"
     const val OMREGNING_BRUTTO = "OMREGNING_BRUTTO"

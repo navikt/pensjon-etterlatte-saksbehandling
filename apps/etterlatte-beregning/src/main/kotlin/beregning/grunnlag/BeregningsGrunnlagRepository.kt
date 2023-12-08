@@ -257,11 +257,11 @@ private fun Row.asBeregningsGrunnlagBP(): BeregningsGrunnlag {
         behandlingId = this.uuid("behandlings_id"),
         soeskenMedIBeregning = objectMapper.readValue(this.string("soesken_med_i_beregning_perioder")),
         institusjonsoppholdBeregningsgrunnlag =
-            this.string("institusjonsopphold").let {
+            this.stringOrNull("institusjonsopphold")?.let {
                 objectMapper.readValue(
                     it,
                 )
-            },
+            } ?: emptyList(),
         beregningsMetode =
             this.string("beregningsmetode").let {
                 objectMapper.readValue(

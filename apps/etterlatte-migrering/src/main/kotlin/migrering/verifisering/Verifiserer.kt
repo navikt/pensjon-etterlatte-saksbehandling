@@ -74,12 +74,12 @@ internal class Verifiserer(
                 val person = personHenter.hentPerson(it.first, it.second)
 
                 if (it.first == PersonRolle.BARN) {
-                    val foedselsdato: LocalDate? = person.getOrNull()?.foedselsdato?.verdi
-                    if (foedselsdato != null) {
-                        if (foedselsdato.isAfter(LocalDate.of(2005, Month.NOVEMBER, 30))) {
-                            logger.warn("Søker er over 18 år")
-                            return listOf(SoekerErOver18)
-                        }
+                    val foedselsdato: LocalDate =
+                        person.getOrNull()?.foedselsdato?.verdi
+                            ?: request.soeker.getBirthDate()
+                    if (foedselsdato.isAfter(LocalDate.of(2005, Month.NOVEMBER, 30))) {
+                        logger.warn("Søker er over 18 år")
+                        return listOf(SoekerErOver18)
                     }
 
                     person.getOrNull()?.let { pdlPerson ->

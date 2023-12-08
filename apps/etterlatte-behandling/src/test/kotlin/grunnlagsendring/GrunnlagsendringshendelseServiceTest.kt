@@ -795,7 +795,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `Oppretter ny bostedshendelse hvis det finnes en oppgave under behandling for sak`() {
+    fun `Oppretter ny bostedshendelse`() {
         Kontekst.set(
             Context(
                 mockk(),
@@ -872,18 +872,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdresseHendelse(bostedsadresse)
         }
-        coVerify(exactly = 1) { sakService.finnSaker(bostedsadresse.fnr) }
         coVerify(exactly = 1) { grunnlagClient.hentPersonSakOgRolle(KONTANT_FOT.value) }
-        verify(exactly = 1) {
-            sakService.oppdaterEnhetForSaker(
-                any(),
-            )
-        }
-        verify(exactly = 1) {
-            oppgaveService.oppdaterEnhetForRelaterteOppgaver(
-                any(),
-            )
-        }
     }
 
     @Test

@@ -77,7 +77,7 @@ internal class Verifiserer(
                     val foedselsdato: LocalDate =
                         person.getOrNull()?.foedselsdato?.verdi
                             ?: request.soeker.getBirthDate()
-                    if (foedselsdato.isAfter(LocalDate.of(2005, Month.NOVEMBER, 30))) {
+                    if (foedselsdato.isBefore(LocalDate.of(2005, Month.NOVEMBER, 30))) {
                         logger.warn("Søker er over 18 år")
                         return listOf(SoekerErOver18)
                     }

@@ -53,8 +53,6 @@ Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gj
 
 ### API Gateway (beta, men vil etterhvert bli gjeldende for eksterne)
 
-**_NB! Prod er ikke klar ennå_**
-
 | Miljø | Ingress                                  | Path               |
 |:------|:-----------------------------------------|--------------------|
 | dev   | https://etterlatte-gw.ekstern.dev.nav.no | /samordning/vedtak |

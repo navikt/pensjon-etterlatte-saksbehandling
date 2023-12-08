@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
@@ -37,7 +38,9 @@ data class OmregnetBPNyttRegelverk(
                     grunnbeloep = Kroner(foersteBeregningsperiode.grunnbeloep.value),
                     erBosattUtlandet = false,
                     erYrkesskade = false,
-                    erForeldreloes = generellBrevData.personerISak.avdoede.size > 1,
+                    erForeldreloes =
+                        generellBrevData.personerISak.avdoede.size > 1 &&
+                            generellBrevData.personerISak.verge !is ForelderVerge,
                 )
             if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0

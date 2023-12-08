@@ -15,11 +15,15 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
+import no.nav.etterlatte.grunnlag.adresse.RegoppslagFormat
+import no.nav.etterlatte.grunnlag.adresse.VergePersonFormat
+import no.nav.etterlatte.grunnlag.adresse.VergeSamhandlerFormat
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: String) {
@@ -74,24 +78,50 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
         foedselsnummer: String,
         seEtterVerge: Boolean,
     ): PersondataAdresse {
-        return runBlocking {
-            retry(times = 3) {
-                val jsonResponse: String =
-                    httpClient.get("$apiUrl/api/adresse/kontaktadresse") {
-                        parameter("checkForVerge", seEtterVerge)
-                        header("pid", foedselsnummer)
-                        accept(Json)
-                        contentType(Json)
-                        setBody("")
-                    }.body<String>()
-                objectMapper.readValue<PersondataAdresse>(jsonResponse)
-            }.let {
-                when (it) {
-                    is RetryResult.Success -> it.content
-                    is RetryResult.Failure -> throw it.samlaExceptions()
+        val adresse =
+            runBlocking {
+                retry(times = 3) {
+                    val jsonResponse: String =
+                        httpClient.get("$apiUrl/api/adresse/kontaktadresse") {
+                            parameter("checkForVerge", seEtterVerge)
+                            header("pid", foedselsnummer)
+                            accept(Json)
+                            contentType(Json)
+                            setBody("")
+                        }.body<String>()
+                    objectMapper.readValue<PersondataAdresse>(jsonResponse)
+                }.let {
+                    when (it) {
+                        is RetryResult.Success -> it.content
+                        is RetryResult.Failure -> throw it.samlaExceptions()
+                    }
                 }
             }
+        when (adresse) {
+            is VergeSamhandlerFormat -> {
+                sikkerLogg.warn(
+                    "Adresseoppslag: $foedselsnummer - $seEtterVerge: Landkode: ${adresse.landkode}, land: ${adresse.land}," +
+                        " postnummer: ${adresse.postnr}, poststed: ${adresse.poststed}, linje1: ${adresse.linje1}",
+                )
+            }
+            is VergePersonFormat -> {
+                sikkerLogg.warn(
+                    "Adresseoppslag: $foedselsnummer - $seEtterVerge: Landkode: ${adresse.adresse.landkode}," +
+                        " land: ${adresse.adresse.land}," +
+                        " postnummer: ${adresse.adresse.postnummer}, poststed: ${adresse.adresse.poststed}," +
+                        " linje1: ${adresse.adresse.adresselinje1}",
+                )
+            }
+            is RegoppslagFormat -> {
+                sikkerLogg.warn(
+                    "Adresseoppslag: $foedselsnummer - $seEtterVerge: Landkode: ${adresse.adresse.landkode}," +
+                        " land: ${adresse.adresse.land}," +
+                        " postnummer: ${adresse.adresse.postnummer}, poststed: ${adresse.adresse.poststed}," +
+                        " linje1: ${adresse.adresse.adresselinje1}",
+                )
+            }
         }
+        return adresse
     }
 
     private fun erVergesAdresse(adresse: PersondataAdresse) =

@@ -288,6 +288,17 @@ class OppgaveService(
         return oppgaveDao.hentOppgaverForReferanse(referanse)
     }
 
+    fun hentEnkeltOppgaveForReferanse(referanse: String): OppgaveIntern {
+        val hentOppgaverForReferanse = hentOppgaverForReferanse(referanse)
+        try {
+            return hentOppgaverForReferanse.single()
+        } catch (e: NoSuchElementException) {
+            throw BadRequestException("Finner ingen oppgaver for referanse: $referanse")
+        } catch (e: IllegalArgumentException) {
+            throw BadRequestException("Det finnes mer enn en oppgave for referanse: $referanse")
+        }
+    }
+
     fun avbrytOppgaveUnderBehandling(
         behandlingEllerHendelseId: String,
         saksbehandler: BrukerTokenInfo,

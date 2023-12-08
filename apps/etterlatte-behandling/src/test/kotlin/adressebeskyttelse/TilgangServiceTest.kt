@@ -3,7 +3,7 @@ package no.nav.etterlatte.adressebeskyttelse
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.EnhetService
+import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
@@ -48,7 +48,7 @@ internal class TilgangServiceTest {
     private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
     private val fortroligDev = "ea930b6b-9397-44d9-b9e6-f4cf527a632a"
     private val egenAnsattDev = "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d"
-    private val enhetService = mockk<EnhetService>()
+    private val brukerService = mockk<BrukerService>()
     private val skjermingKlient = mockk<SkjermingKlient>()
 
     @BeforeAll
@@ -67,7 +67,7 @@ internal class TilgangServiceTest {
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         sakRepo = SakDao { dataSource.connection }
 
-        sakService = SakServiceImpl(sakRepo, skjermingKlient, enhetService)
+        sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService)
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao {

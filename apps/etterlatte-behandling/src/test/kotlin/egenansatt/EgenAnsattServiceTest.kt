@@ -9,7 +9,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.behandling.EnhetServiceImpl
+import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
@@ -81,16 +81,16 @@ internal class EgenAnsattServiceTest {
         sakRepo = SakDao { connection }
         oppgaveRepo = OppgaveDaoImpl { connection }
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo) { connection }
-        val enhetService = EnhetServiceImpl(mockk(), pdlKlient, norg2Klient)
+        val brukerService = BrukerServiceImpl(pdlKlient, norg2Klient)
         sakService =
             spyk(
-                SakServiceImpl(sakRepo, skjermingKlient, enhetService),
+                SakServiceImpl(sakRepo, skjermingKlient, brukerService),
             )
         oppgaveService =
             spyk(
                 OppgaveService(oppgaveRepoMedSporing, sakRepo),
             )
-        egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, enhetService)
+        egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, brukerService)
 
         user = mockk<SaksbehandlerMedEnheterOgRoller>()
 

@@ -23,7 +23,7 @@ import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 
-class EnhetServiceTest {
+class BrukerServiceTest {
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
     private val saksbehandlerEnheter =
@@ -49,10 +49,10 @@ class EnhetServiceTest {
 
     @Test
     fun `hent enheter skal returnere en liste av enheter`() {
-        val service = EnhetServiceImpl(klient(), pdlKlient, norg2Klient)
+        val service = klient()
 
         runBlocking {
-            val resultat = service.enheterForIdent(testNavIdent)
+            val resultat = service.hentEnhetForSaksbehandler(testNavIdent)
 
             resultat.size shouldBeExactly 3
 
@@ -60,12 +60,17 @@ class EnhetServiceTest {
         }
     }
 
+    fun harTilgangTilEnhet(
+        enheter: List<SaksbehandlerEnhet>,
+        enhetId: String,
+    ) = enheter.any { enhet -> enhet.id == enhetId }
+
     @Test
     fun `enhet tilgang skal returnere true naar det er tilgang`() {
-        val service = EnhetServiceImpl(klient(), pdlKlient, norg2Klient)
+        val service = klient()
 
         runBlocking {
-            val resultat = service.harTilgangTilEnhet(testNavIdent, "id1")
+            val resultat = harTilgangTilEnhet(service.hentEnhetForSaksbehandler(testNavIdent), "id1")
 
             resultat shouldBe true
         }
@@ -73,10 +78,10 @@ class EnhetServiceTest {
 
     @Test
     fun `enhet tilgang skal returnere false naar det ikke er tilgang`() {
-        val service = EnhetServiceImpl(klient(), pdlKlient, norg2Klient)
+        val service = klient()
 
         runBlocking {
-            val resultat = service.harTilgangTilEnhet(testNavIdent, "id4")
+            val resultat = harTilgangTilEnhet(service.hentEnhetForSaksbehandler(testNavIdent), "id4")
 
             resultat shouldBe false
         }

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.egenansatt
 
-import no.nav.etterlatte.behandling.EnhetService
+import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.person.maskerFnr
@@ -15,7 +15,7 @@ class EgenAnsattService(
     private val sakService: SakService,
     private val oppgaveService: OppgaveService,
     val sikkerLogg: Logger,
-    private val enhetService: EnhetService,
+    private val brukerService: BrukerService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -40,7 +40,7 @@ class EgenAnsattService(
                     if (skjermetHendelse.skjermet) {
                         Enheter.EGNE_ANSATTE.enhetNr
                     } else {
-                        enhetService.finnEnhetForPersonOgTema(
+                        brukerService.finnEnhetForPersonOgTema(
                             skjermetHendelse.fnr,
                             it.sakType.tema,
                             it.sakType,

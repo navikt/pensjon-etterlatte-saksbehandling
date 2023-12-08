@@ -15,6 +15,7 @@ import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
+import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
@@ -625,17 +626,21 @@ class Norg2KlientTest : Norg2Klient {
     ): List<ArbeidsFordelingEnhet> {
         return listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))
     }
+
+    override suspend fun hentNavkontorForOmraade(omraade: String): Navkontor {
+        return Navkontor("1202 NAV BERGEN SØR", "4808")
+    }
 }
 
 class NavAnsattKlientTest : NavAnsattKlient {
-    override suspend fun hentSaksbehandlerEnhet(ident: String): List<SaksbehandlerEnhet> {
+    override suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
         return listOf(
             SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
             SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
         )
     }
 
-    override suspend fun hentSaksbehandlerTema(ident: String): List<SaksbehandlerTema> {
+    override suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema> {
         return listOf(SaksbehandlerTema(SakType.BARNEPENSJON.name), SaksbehandlerTema(SakType.OMSTILLINGSSTOENAD.name))
     }
 }

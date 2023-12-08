@@ -34,19 +34,20 @@ data class OpprettJournalpostResponse(
 )
 
 /**
- * Requestobjekt for å oppdatere eksisterende Journalpost
+ * Requestobjekt for å oppdatere eksisterende Journalpost.
+ * Setter [JsonInclude.Include.NON_EMPTY] siden Dokakiv ignorerer verdier som mangler eller er null.
  **/
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 data class OppdaterJournalpostRequest(
-    val avsenderMottaker: AvsenderMottaker,
-    val behandlingstema: String,
-    val bruker: Bruker,
+    val avsenderMottaker: AvsenderMottaker?,
+    val behandlingstema: String?,
+    val bruker: Bruker?,
     val datoDokument: LocalDateTime?,
-    val dokumenter: List<JournalpostDokument>,
-    val sak: JournalpostSak,
-    val tema: String,
-    val tilleggsopplysninger: Map<String, String>,
-    val tittel: String,
+    val dokumenter: List<JournalpostDokument>?,
+    val sak: JournalpostSak?,
+    val tema: String?,
+    val tilleggsopplysninger: Map<String, String>?,
+    val tittel: String?,
 )
 
 data class OppdaterJournalpostResponse(

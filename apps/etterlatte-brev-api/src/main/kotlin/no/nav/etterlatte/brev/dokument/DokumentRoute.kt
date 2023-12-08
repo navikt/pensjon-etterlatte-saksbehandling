@@ -11,6 +11,7 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
+import no.nav.etterlatte.brev.dokarkiv.OppdaterJournalpostRequest
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.withFoedselsnummer
@@ -34,38 +35,52 @@ fun Route.dokumentRoute(
             }
         }
 
-        post("{journalpostId}/ferdigstill") {
-            val sak = call.receive<Sak>()
-            val journalpostId =
-                requireNotNull(call.parameters["journalpostId"]) {
-                    "JournalpostID er påkrevd for å kunne ferdigstille journalposten"
-                }
+        route("{journalpostId}") {
+            get {
+                val journalpostId = call.parameters["journalpostId"]!!
+                val result = safService.hentJournalpost(journalpostId, brukerTokenInfo)
 
-            dokarkivService.ferdigstill(journalpostId, sak)
-            call.respond(HttpStatusCode.OK)
-        }
+                call.respond(result.journalpost ?: HttpStatusCode.NotFound)
+            }
 
-        put("{journalpostId}/tema/{nyttTema}") {
-            val journalpostId = call.parameters["journalpostId"]!!
-            val nyttTema = call.parameters["nyttTema"]!!
+            put {
+                val journalpostId = call.parameters["journalpostId"]!!
+                val forsoekFerdistill = call.request.queryParameters["forsoekFerdigstill"]?.toBoolean() ?: false
+                val journalfoerendeEnhet = call.request.queryParameters["journalfoerendeEnhet"]
 
-            dokarkivService.endreTema(journalpostId, nyttTema)
-            call.respond(HttpStatusCode.OK)
-        }
+                val request = call.receive<OppdaterJournalpostRequest>()
 
-        get("{journalpostId}") {
-            val journalpostId = call.parameters["journalpostId"]!!
-            val result = safService.hentJournalpost(journalpostId, brukerTokenInfo)
+                val response = dokarkivService.oppdater(journalpostId, forsoekFerdistill, journalfoerendeEnhet, request)
 
-            call.respond(result.journalpost ?: HttpStatusCode.NotFound)
-        }
+                call.respond(response)
+            }
 
-        get("{journalpostId}/{dokumentInfoId}") {
-            val journalpostId = call.parameters["journalpostId"]!!
-            val dokumentInfoId = call.parameters["dokumentInfoId"]!!
-            val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, brukerTokenInfo.accessToken())
+            post("/ferdigstill") {
+                val sak = call.receive<Sak>()
+                val journalpostId =
+                    requireNotNull(call.parameters["journalpostId"]) {
+                        "JournalpostID er påkrevd for å kunne ferdigstille journalposten"
+                    }
 
-            call.respond(innhold)
+                dokarkivService.ferdigstill(journalpostId, sak)
+                call.respond(HttpStatusCode.OK)
+            }
+
+            put("/tema/{nyttTema}") {
+                val journalpostId = call.parameters["journalpostId"]!!
+                val nyttTema = call.parameters["nyttTema"]!!
+
+                dokarkivService.endreTema(journalpostId, nyttTema)
+                call.respond(HttpStatusCode.OK)
+            }
+
+            get("/{dokumentInfoId}") {
+                val journalpostId = call.parameters["journalpostId"]!!
+                val dokumentInfoId = call.parameters["dokumentInfoId"]!!
+                val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, brukerTokenInfo.accessToken())
+
+                call.respond(innhold)
+            }
         }
     }
 }

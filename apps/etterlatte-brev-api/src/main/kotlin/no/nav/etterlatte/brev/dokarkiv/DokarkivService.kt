@@ -21,6 +21,13 @@ interface DokarkivService {
         sak: Sak,
     ): OpprettJournalpostResponse
 
+    suspend fun oppdater(
+        journalpostId: String,
+        forsoekFerdistill: Boolean,
+        journalfoerendeEnhet: String?,
+        request: OppdaterJournalpostRequest,
+    ): OppdaterJournalpostResponse
+
     suspend fun ferdigstill(
         journalpostId: String,
         sak: Sak,
@@ -67,6 +74,27 @@ class DokarkivServiceImpl(
                     "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
                 )
             }
+    }
+
+    override suspend fun oppdater(
+        journalpostId: String,
+        forsoekFerdistill: Boolean,
+        journalfoerendeEnhet: String?,
+        request: OppdaterJournalpostRequest,
+    ): OppdaterJournalpostResponse {
+        val response = client.oppdaterJournalpost(journalpostId, request)
+
+        logger.info("Journalpost med id=$journalpostId oppdatert OK!")
+
+        if (forsoekFerdistill) {
+            if (journalfoerendeEnhet.isNullOrBlank()) {
+                logger.error("Kan ikke ferdigstille journalpost=$journalpostId når enhet mangler")
+            } else {
+                client.ferdigstillJournalpost(journalpostId, journalfoerendeEnhet)
+            }
+        }
+
+        return response
     }
 
     override suspend fun ferdigstill(

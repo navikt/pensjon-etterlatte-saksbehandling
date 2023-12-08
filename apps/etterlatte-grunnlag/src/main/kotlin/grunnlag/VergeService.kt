@@ -4,6 +4,7 @@ import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
@@ -11,6 +12,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.hentRelevantVerge
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -19,8 +21,15 @@ class VergeService(
 ) {
     private val logger = LoggerFactory.getLogger(VergeService::class.java)
 
-    fun hentGrunnlagsopplysningVergesAdresse(pdlPerson: Person): Grunnlagsopplysning<BrevMottaker>? =
-        hentRelevantVerge(pdlPerson.vergemaalEllerFremtidsfullmakt)?.let { verge ->
+    val sikkerLogg: Logger = sikkerlogger()
+
+    fun hentGrunnlagsopplysningVergesAdresse(pdlPerson: Person): Grunnlagsopplysning<BrevMottaker>? {
+        val vergeListe = pdlPerson.vergemaalEllerFremtidsfullmakt
+        if ((vergeListe?.size ?: 0) > 1) {
+            sikkerLogg.warn("Flere verger for fødselsnummer " + pdlPerson.foedselsnummer.value)
+        }
+        val pdlVerge = hentRelevantVerge(vergeListe)
+        return pdlVerge?.let { verge ->
             val vergesAdresse = hentVergesAdresse(pdlPerson.foedselsnummer.value, verge)
             if (vergesAdresse == null) {
                 logger.error(
@@ -30,6 +39,7 @@ class VergeService(
             }
             vergesAdresse
         }
+    }
 
     private fun hentVergesAdresse(
         soekerFnr: String,

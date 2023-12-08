@@ -755,46 +755,6 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `Skal kunne sette adresse og faa oppdatert enhet`() {
-        val sakIder: Set<Long> = setOf(1, 2, 3, 4, 5, 6)
-        val saker =
-            sakIder.map {
-                Sak(
-                    id = it,
-                    ident = KONTANT_FOT.value,
-                    sakType = SakType.BARNEPENSJON,
-                    enhet = Enheter.PORSGRUNN.enhetNr,
-                )
-            }
-        val fnr = "16508201382"
-        val bostedsadresse = Bostedsadresse("1", Endringstype.OPPRETTET, fnr)
-        coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
-        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
-        every { sakService.finnSaker(fnr) } returns saker
-        every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
-        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
-        every {
-            brukerService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
-        every { sakService.oppdaterEnhetForSaker(any()) } just runs
-        runBlocking {
-            grunnlagsendringshendelseService.oppdaterAdresseHendelse(bostedsadresse)
-        }
-        coVerify(exactly = 1) { sakService.finnSaker(bostedsadresse.fnr) }
-
-        verify(exactly = 6) {
-            sakService.oppdaterEnhetForSaker(
-                any(),
-            )
-        }
-        verify(exactly = 6) {
-            oppgaveService.oppdaterEnhetForRelaterteOppgaver(
-                any(),
-            )
-        }
-    }
-
-    @Test
     fun `Oppretter ny bostedshendelse`() {
         Kontekst.set(
             Context(

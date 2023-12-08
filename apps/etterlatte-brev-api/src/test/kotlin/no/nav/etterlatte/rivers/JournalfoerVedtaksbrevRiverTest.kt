@@ -9,7 +9,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
-import no.nav.etterlatte.brev.journalpost.JournalpostResponse
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Status
@@ -64,7 +64,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 Tidspunkt.now(),
                 mottaker = mockk(),
             )
-        val response = JournalpostResponse("1234", null, null, true, emptyList())
+        val response = OpprettJournalpostResponse("1234", true, emptyList())
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
         every { vedtaksbrevService.journalfoerVedtaksbrev(any(), any()) } returns response

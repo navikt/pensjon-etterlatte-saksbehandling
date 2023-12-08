@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonService
-import no.nav.etterlatte.brev.journalpost.JournalpostResponse
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -47,9 +47,8 @@ internal class OpprettJournalfoerOgDistribuer {
             mockk<VedtaksbrevService>().also {
                 coEvery { it.hentVedtaksbrev(any()) } returns brev
                 coEvery { it.journalfoerVedtaksbrev(any(), any()) } returns
-                    JournalpostResponse(
+                    OpprettJournalpostResponse(
                         journalpostId = "123",
-                        journalpoststatus = Status.JOURNALFOERT.toString(),
                         journalpostferdigstilt = true,
                     )
                 coEvery { it.hentBrev(any()) } returns brev
@@ -91,9 +90,8 @@ internal class OpprettJournalfoerOgDistribuer {
             mockk<VedtaksbrevService>().also {
                 coEvery { it.hentVedtaksbrev(any()) } returns brev
                 coEvery { it.journalfoerVedtaksbrev(any(), any()) } returns
-                    JournalpostResponse(
+                    OpprettJournalpostResponse(
                         journalpostId = "123",
-                        journalpoststatus = Status.JOURNALFOERT.toString(),
                         journalpostferdigstilt = true,
                     )
                 coEvery { it.hentBrev(any()) } returns brev

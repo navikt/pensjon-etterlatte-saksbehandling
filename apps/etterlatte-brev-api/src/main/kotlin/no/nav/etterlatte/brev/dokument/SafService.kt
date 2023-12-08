@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.dokument
 
-import no.nav.etterlatte.brev.journalpost.BrukerIdType
+import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.token.BrukerTokenInfo
 
 interface SafService {

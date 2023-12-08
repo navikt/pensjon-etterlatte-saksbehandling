@@ -28,9 +28,9 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerPdfResponse
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
-import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataFeatureToggle
@@ -705,7 +705,7 @@ internal class VedtaksbrevServiceTest {
         fun `Vedtaksbrev journalfoeres som forventet`() {
             val forventetBrev = opprettBrev(Status.FERDIGSTILT, mockk())
 
-            val forventetResponse = JournalpostResponse("1", "OK", "melding", true)
+            val forventetResponse = OpprettJournalpostResponse("1", true)
             coEvery { dokarkivService.journalfoer(any<BrevID>(), any()) } returns forventetResponse
 
             val vedtak = opprettVedtak()

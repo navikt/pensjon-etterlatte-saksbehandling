@@ -5,8 +5,6 @@ import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.person.finnesVergeMedUkjentOmfang
-import no.nav.etterlatte.libs.common.person.flereVergerMedOekonomiskInteresse
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
@@ -85,30 +83,7 @@ internal class Verifiserer(
                         logger.warn("Søker er over 18 år")
                         return listOf(SoekerErOver18)
                     }
-
-                    person.getOrNull()?.let { pdlPerson ->
-                        pdlPerson.vergemaalEllerFremtidsfullmakt?.let { vergemaal ->
-                            val flereVergerMedOekonomiskInteresse =
-                                flereVergerMedOekonomiskInteresse(vergemaal.map { it.verdi })
-                            val finnesVergeMedUkjentOmfang = finnesVergeMedUkjentOmfang(vergemaal.map { it.verdi })
-                            if (flereVergerMedOekonomiskInteresse || finnesVergeMedUkjentOmfang) {
-                                logger.warn("Barn har komplisert vergemaal eller fremtidsfullmakt, kan ikke migrere")
-                                sikkerlogger.warn(
-                                    "Flere verger med økonomisk interesse? $flereVergerMedOekonomiskInteresse. " +
-                                        "Finnes verge med ukjent omfang? $finnesVergeMedUkjentOmfang. " +
-                                        "Vergemål: ${vergemaal.map { i -> i.verdi }.joinToString(";")}}, ${
-                                            vergemaal.map { i -> i.verdi }.map { i ->
-                                                "Embete: ${i.embete}, type: ${i.type}, verge eller fullmektig?: " +
-                                                    "${i.vergeEllerFullmektig.toJson()}"
-                                            }.joinToString(";")
-                                        }. ",
-                                )
-                                return listOf(BarnetHarKomplisertVergemaal)
-                            }
-                        }
-                    }
                 }
-
                 person
             }
             .filter { it.isFailure }

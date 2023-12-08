@@ -89,6 +89,11 @@ class GrunnlagsendringshendelseService(
         inTransaction {
             grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)
             try {
+                val hentOppgaverForReferanse = oppgaveService.hentOppgaverForReferanse(hendelse.id.toString())
+                val oppgaveForReferanse = hentOppgaverForReferanse.single()
+                if (oppgaveForReferanse.manglerSaksbehandler()) {
+                    oppgaveService.tildelSaksbehandler(oppgaveForReferanse.id, saksbehandler.ident)
+                }
                 oppgaveService.ferdigStillOppgaveUnderBehandling(
                     hendelse.id.toString(),
                     saksbehandler = saksbehandler,

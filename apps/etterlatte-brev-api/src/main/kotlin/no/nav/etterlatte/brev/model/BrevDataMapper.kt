@@ -114,15 +114,19 @@ class BrevDataMapper(
     fun brevKode(
         generellBrevData: GenerellBrevData,
         brevProsessType: BrevProsessType,
+        erOmregningNyRegel: Boolean = false,
     ) = when (brevProsessType) {
-        BrevProsessType.AUTOMATISK -> brevKodeAutomatisk(generellBrevData)
-        BrevProsessType.REDIGERBAR -> brevKodeAutomatisk(generellBrevData)
+        BrevProsessType.AUTOMATISK -> brevKodeAutomatisk(generellBrevData, erOmregningNyRegel)
+        BrevProsessType.REDIGERBAR -> brevKodeAutomatisk(generellBrevData, erOmregningNyRegel)
         BrevProsessType.MANUELL -> BrevkodePar(OMS_OPPHOER_MANUELL)
     }
 
-    private fun brevKodeAutomatisk(generellBrevData: GenerellBrevData): BrevkodePar {
-        if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
-            assert(generellBrevData.forenkletVedtak.type == VedtakType.INNVILGELSE)
+    private fun brevKodeAutomatisk(
+        generellBrevData: GenerellBrevData,
+        erOmregningNyRegel: Boolean = false,
+    ): BrevkodePar {
+        if (generellBrevData.systemkilde == Vedtaksloesning.PESYS || erOmregningNyRegel) {
+            assert(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(generellBrevData.forenkletVedtak.type))
             return BrevkodePar(BARNEPENSJON_VEDTAK_OMREGNING, BARNEPENSJON_VEDTAK_OMREGNING_FERDIG)
         }
 
@@ -209,7 +213,10 @@ class BrevDataMapper(
     }
 
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
-        when (redigerbarTekstRequest.generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+        when (
+            redigerbarTekstRequest.generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
+                redigerbarTekstRequest.migrering?.erOmregningGjenny ?: false
+        ) {
             false ->
                 brevData(
                     redigerbarTekstRequest.generellBrevData,
@@ -395,6 +402,7 @@ class BrevDataMapper(
                         etterbetaling.await(),
                         trygdetidHentet,
                         grunnbeloepHentet,
+                        generellBrevData.utlandstilknytning?.type,
                         innholdMedVedlegg,
                     )
                 }

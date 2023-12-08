@@ -11,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
+import no.nav.etterlatte.libs.common.person.BrevMottaker
 
 class GrunnlagKlient(
     config: Config,
@@ -27,6 +28,19 @@ class GrunnlagKlient(
             }
         if (post.status == HttpStatusCode.NotFound) {
             return VurdertBostedsland.finsIkkeIPDL
+        }
+        return post.body()
+    }
+
+    suspend fun hentVergesAdresse(fnr: String): BrevMottaker? {
+        val post =
+            grunnlagHttpClient.post("$url/grunnlag/person/vergeadresse") {
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
+            }
+        if (post.status == HttpStatusCode.NotFound) {
+            return null
         }
         return post.body()
     }

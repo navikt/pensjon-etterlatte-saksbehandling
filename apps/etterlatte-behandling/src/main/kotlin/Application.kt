@@ -176,7 +176,7 @@ private fun Route.attachContekst(
                     decideUser(
                         call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
                         context.saksbehandlerGroupIdsByKey,
-                        context.enhetService,
+                        context.navAnsattKlient,
                         brukerTokenInfo,
                     ),
                 databasecontxt = DatabaseContext(ds),

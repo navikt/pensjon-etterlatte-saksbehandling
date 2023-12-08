@@ -59,6 +59,7 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_FLERE_KEY
 import rapidsandrivers.SAK_ID_KEY
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -104,6 +105,7 @@ internal class MigreringRiverIntegrationTest {
                                 } returns
                                     mockk<PersonDTO>().also {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
+                                        every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
                                     }
                             }
                         val personHenter = PersonHenter(pdlKlient, featureToggleService)
@@ -122,6 +124,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
                                     personHenter,
+                                    featureToggleService,
                                 ),
                             krrKlient =
                                 mockk<KrrKlient>().also {
@@ -195,6 +198,7 @@ internal class MigreringRiverIntegrationTest {
                                 } returns
                                     mockk<PersonDTO>().also {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
+                                        every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
                                     }
                             }
                         val personHenter = PersonHenter(pdlKlient, featureToggleService)
@@ -211,6 +215,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
                                     personHenter,
+                                    featureToggleService,
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -296,6 +301,7 @@ internal class MigreringRiverIntegrationTest {
                                 } returns
                                     mockk<PersonDTO>().also {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
+                                        every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
                                     }
                             }
                         val personHenter = PersonHenter(pdlKlient, featureToggleService)
@@ -312,6 +318,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
                                     personHenter,
+                                    featureToggleService,
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -427,6 +434,7 @@ internal class MigreringRiverIntegrationTest {
                                     GjenlevendeForelderPatcher(pdlKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                     personHenter,
+                                    featureToggleService,
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -476,6 +484,7 @@ internal class MigreringRiverIntegrationTest {
                                     mockk<PersonDTO>().also {
                                         val listOf = komplisertVergemaal()
                                         every { it.vergemaalEllerFremtidsfullmakt } returns listOf
+                                        every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
                                     }
                             }
                         val personHenter = PersonHenter(pdlKlient, featureToggleService)
@@ -492,6 +501,7 @@ internal class MigreringRiverIntegrationTest {
                                     GjenlevendeForelderPatcher(pdlKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                     personHenter,
+                                    featureToggleService,
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )

@@ -4,7 +4,9 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
@@ -23,7 +25,7 @@ internal class TrygdetidServiceTest {
     private val trygdetidKlient = mockk<TrygdetidKlient>()
 
     @Test
-    fun `henter trygdetid`() {
+    fun `henter trygdetid nasjonal beregning`() {
         val service = TrygdetidService(trygdetidKlient)
         val behandlingId = UUID.randomUUID()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetidDto(behandlingId))
@@ -34,12 +36,39 @@ internal class TrygdetidServiceTest {
                     listOf(
                         mockk {
                             every { trygdetidForIdent } returns AVDOED_FOEDSELSNUMMER.value
-                            every { trygdetid } returns 23
+                            every { samletNorskTrygdetid } returns 23
+                            every { beregningsMetode } returns BeregningsMetode.NASJONAL
                         },
                     )
             }
         val trygdetid = runBlocking { service.finnTrygdetidsgrunnlag(behandlingId, beregning, mockk()) }
         Assertions.assertEquals(23, trygdetid!!.aarTrygdetid)
+        Assertions.assertEquals(0, trygdetid.maanederTrygdetid)
+        Assertions.assertEquals(BeregnetTrygdetidGrunnlagDto(dager = 0, maaneder = 10, aar = 2), trygdetid.perioder[0].opptjeningsperiode)
+    }
+
+    @Test
+    fun `henter ut prorata riktig`() {
+        val service = TrygdetidService(trygdetidKlient)
+        val behandlingId = UUID.randomUUID()
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetidDto(behandlingId))
+
+        val beregning =
+            mockk<BeregningDTO> {
+                every { beregningsperioder } returns
+                    listOf(
+                        mockk {
+                            every { trygdetidForIdent } returns AVDOED_FOEDSELSNUMMER.value
+                            every { samletTeoretiskTrygdetid } returns 40
+                            every { broek } returns IntBroek(13, 37)
+                            every { beregningsMetode } returns BeregningsMetode.PRORATA
+                        },
+                    )
+            }
+        val trygdetid = runBlocking { service.finnTrygdetidsgrunnlag(behandlingId, beregning, mockk()) }
+        Assertions.assertEquals(40, trygdetid!!.aarTrygdetid)
+        Assertions.assertEquals(13, trygdetid.prorataBroek?.teller)
+        Assertions.assertEquals(37, trygdetid.prorataBroek?.nevner)
         Assertions.assertEquals(0, trygdetid.maanederTrygdetid)
         Assertions.assertEquals(BeregnetTrygdetidGrunnlagDto(dager = 0, maaneder = 10, aar = 2), trygdetid.perioder[0].opptjeningsperiode)
     }

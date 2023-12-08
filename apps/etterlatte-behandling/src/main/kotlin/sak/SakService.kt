@@ -3,10 +3,12 @@ package no.nav.etterlatte.sak
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
-import no.nav.etterlatte.behandling.EnhetService
+import no.nav.etterlatte.behandling.BrukerService
+import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -52,12 +54,16 @@ interface SakService {
         sakId: Long,
         flyktning: Flyktning,
     )
+
+    fun hentEnkeltSakForPerson(fnr: String): Sak
+
+    suspend fun finnNavkontorForPerson(fnr: String): Navkontor
 }
 
 class SakServiceImpl(
     private val dao: SakDao,
     private val skjermingKlient: SkjermingKlient,
-    private val enhetService: EnhetService,
+    private val brukerService: BrukerService,
 ) : SakService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -66,6 +72,17 @@ class SakServiceImpl(
         flyktning: Flyktning,
     ) {
         dao.oppdaterFlyktning(sakId, flyktning)
+    }
+
+    override fun hentEnkeltSakForPerson(fnr: String): Sak {
+        return this.finnSaker(
+            fnr,
+        ).firstOrNull() ?: throw PersonManglerSak("Personen har ikke sak")
+    }
+
+    override suspend fun finnNavkontorForPerson(fnr: String): Navkontor {
+        val sak = inTransaction { hentEnkeltSakForPerson(fnr) }
+        return brukerService.finnNavkontorForPerson(fnr, sak.sakType)
     }
 
     override fun hentSaker(): List<Sak> {
@@ -119,7 +136,7 @@ class SakServiceImpl(
         type: SakType,
         enhet: String?,
     ): String {
-        val enhetFraNorg = enhetService.finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
+        val enhetFraNorg = brukerService.finnEnhetForPersonOgTema(fnr, type.tema, type).enhetNr
         if (enhet != null && enhet != enhetFraNorg) {
             logger.info("Finner/oppretter sak med enhet $enhet, selv om geografisk tilknytning tilsier $enhetFraNorg")
         }

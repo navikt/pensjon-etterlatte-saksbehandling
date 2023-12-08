@@ -42,7 +42,10 @@ data class OmregnetBPNyttRegelverk(
                         generellBrevData.personerISak.avdoede.size > 1 &&
                             generellBrevData.personerISak.verge !is ForelderVerge,
                 )
-            if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+            if (
+                generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
+                migreringRequest?.erOmregningGjenny ?: false
+            ) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
                 val (pesysUtenlandstilknytning, yrkesskade) =
                     when (migreringRequest) {

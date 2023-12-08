@@ -1,27 +1,28 @@
 package no.nav.etterlatte.migrering.verifisering
 
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.samleExceptions
-import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.person.finnesVergeMedUkjentOmfang
-import no.nav.etterlatte.libs.common.person.flereVergerMedOekonomiskInteresse
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
+import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.Month
 
 internal class Verifiserer(
     private val repository: PesysRepository,
     private val gjenlevendeForelderPatcher: GjenlevendeForelderPatcher,
     private val utenlandstilknytningsjekker: Utenlandstilknytningsjekker,
     private val personHenter: PersonHenter,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private val sikkerlogger = sikkerlogger()
 
     fun verifiserRequest(request: MigreringRequest): MigreringRequest {
         val patchedRequest = gjenlevendeForelderPatcher.patchGjenlevendeHvisIkkeOppgitt(request)
@@ -34,6 +35,7 @@ internal class Verifiserer(
                 feil.add(StrengtFortrolig)
             }
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
+            feil.addAll(sjekkAtSoekerHarRelevantVerge(it))
         }
 
         if (feil.isNotEmpty()) {
@@ -72,34 +74,36 @@ internal class Verifiserer(
                 val person = personHenter.hentPerson(it.first, it.second)
 
                 if (it.first == PersonRolle.BARN) {
-                    person.getOrNull()?.let { pdlPerson ->
-                        pdlPerson.vergemaalEllerFremtidsfullmakt?.let { vergemaal ->
-                            val flereVergerMedOekonomiskInteresse =
-                                flereVergerMedOekonomiskInteresse(vergemaal.map { it.verdi })
-                            val finnesVergeMedUkjentOmfang = finnesVergeMedUkjentOmfang(vergemaal.map { it.verdi })
-                            if (flereVergerMedOekonomiskInteresse || finnesVergeMedUkjentOmfang) {
-                                logger.warn("Barn har komplisert vergemaal eller fremtidsfullmakt, kan ikke migrere")
-                                sikkerlogger.warn(
-                                    "Flere verger med økonomisk interesse? $flereVergerMedOekonomiskInteresse. " +
-                                        "Finnes verge med ukjent omfang? $finnesVergeMedUkjentOmfang. " +
-                                        "Vergemål: ${vergemaal.map { i -> i.verdi }.joinToString(";")}}, ${
-                                            vergemaal.map { i -> i.verdi }.map { i ->
-                                                "Embete: ${i.embete}, type: ${i.type}, verge eller fullmektig?: " +
-                                                    "${i.vergeEllerFullmektig.toJson()}"
-                                            }.joinToString(";")
-                                        }. ",
-                                )
-                                return listOf(BarnetHarKomplisertVergemaal)
-                            }
-                        }
+                    val foedselsdato: LocalDate =
+                        person.getOrNull()?.foedselsdato?.verdi
+                            ?: request.soeker.getBirthDate()
+                    if (foedselsdato.isBefore(LocalDate.of(2006, Month.JANUARY, 1))) {
+                        logger.warn("Søker er over 18 år")
+                        return listOf(SoekerErOver18)
                     }
                 }
-
                 person
             }
             .filter { it.isFailure }
             .map { it.exceptionOrNull() }
             .filterIsInstance<Verifiseringsfeil>()
+    }
+
+    private fun sjekkAtSoekerHarRelevantVerge(request: MigreringRequest): List<Verifiseringsfeil> {
+        val person =
+            personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()
+                ?: return listOf(FinsIkkeIPDL(PersonRolle.BARN, request.soeker))
+
+        if (!featureToggleService.isEnabled(MigreringFeatureToggle.MigrerNaarSoekerHarVerge, false)) {
+            if (person.vergemaalEllerFremtidsfullmakt?.isNotEmpty() == true) {
+                return listOf(BarnetHarVergemaal)
+            }
+        }
+
+        if ((person.vergemaalEllerFremtidsfullmakt?.size ?: 0) > 1) {
+            return listOf(BarnetHarFlereVerger)
+        }
+        return emptyList()
     }
 }
 
@@ -110,14 +114,14 @@ data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikat
         get() = toString()
 }
 
-object BarnetHarVerge : Verifiseringsfeil() {
+object BarnetHarFlereVerger : Verifiseringsfeil() {
     override val message: String
-        get() = "Barn har vergemaal eller fremtidsfullmakt, kan ikke migrere"
+        get() = "Barnet har flere verger"
 }
 
-object BarnetHarKomplisertVergemaal : Verifiseringsfeil() {
+object BarnetHarVergemaal : Verifiseringsfeil() {
     override val message: String
-        get() = "Barn har spesialtilfelle av vergemaal eller fremtidsfullmakt som vi ikke støtter, kan ikke migrere"
+        get() = "Barn har vergemål eller framtidsfullmakt, støtte for det er deaktivert"
 }
 
 object StrengtFortrolig : Verifiseringsfeil() {
@@ -128,4 +132,9 @@ object StrengtFortrolig : Verifiseringsfeil() {
 data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
     override val message: String?
         get() = kilde.message
+}
+
+object SoekerErOver18 : Verifiseringsfeil() {
+    override val message: String
+        get() = "Skal ikke per nå migrere søker der søker er over 18"
 }

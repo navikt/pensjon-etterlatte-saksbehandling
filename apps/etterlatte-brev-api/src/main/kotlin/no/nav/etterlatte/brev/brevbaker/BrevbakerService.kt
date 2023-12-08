@@ -33,7 +33,11 @@ class BrevbakerService(
     suspend fun hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest: RedigerbarTekstRequest): Slate {
         val request =
             BrevbakerRequest.fra(
-                brevDataMapper.brevKode(redigerbarTekstRequest.generellBrevData, BrevProsessType.REDIGERBAR).redigering,
+                brevDataMapper.brevKode(
+                    redigerbarTekstRequest.generellBrevData,
+                    BrevProsessType.REDIGERBAR,
+                    erOmregningNyRegel = redigerbarTekstRequest.migrering?.erOmregningGjenny ?: false,
+                ).redigering,
                 brevDataMapper.brevData(redigerbarTekstRequest),
                 redigerbarTekstRequest.generellBrevData,
                 adresseService.hentAvsender(redigerbarTekstRequest.generellBrevData.forenkletVedtak),

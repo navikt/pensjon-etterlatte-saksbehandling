@@ -18,9 +18,10 @@ import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
-import no.nav.etterlatte.behandling.EnhetServiceImpl
+import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
+import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
@@ -46,7 +47,8 @@ internal class SakServiceTest {
     private val sakDao = mockk<SakDao>()
     private val pdlKlient = mockk<PdlKlient>()
     private val norg2Klient = mockk<Norg2Klient>()
-    private val enhetService = EnhetServiceImpl(mockk(), pdlKlient, norg2Klient)
+    private val brukerService = BrukerServiceImpl(pdlKlient, norg2Klient)
+    private val navansattKlient = mockk<NavAnsattKlient>()
     private val skjermingKlient = mockk<SkjermingKlient>()
 
     @BeforeEach
@@ -83,7 +85,7 @@ internal class SakServiceTest {
             Context(
                 SaksbehandlerMedEnheterOgRoller(
                     tokenValidationContext,
-                    enhetService,
+                    navansattKlient,
                     SaksbehandlerMedRoller(
                         Saksbehandler("", "Z123456", claims),
                         groups,
@@ -139,7 +141,7 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer hvis vi har en saksbehandler`() {
         saksbehandlerKontekst()
 
-        coEvery { enhetService.enheterForIdent(any()) } returns
+        coEvery { navansattKlient.hentEnhetForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
@@ -155,7 +157,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, skjermingKlient, enhetService)
+            SakServiceImpl(sakDao, skjermingKlient, brukerService)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
@@ -168,7 +170,7 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer hvis vi har en saksbehandler uten riktig enhet`() {
         saksbehandlerKontekst()
 
-        coEvery { enhetService.enheterForIdent(any()) } returns
+        coEvery { navansattKlient.hentEnhetForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
@@ -184,7 +186,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, skjermingKlient, enhetService)
+            SakServiceImpl(sakDao, skjermingKlient, brukerService)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
@@ -197,7 +199,7 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer ikke hvis vi har en system bruker`() {
         systemBrukerKontekst()
 
-        coEvery { enhetService.enheterForIdent(any()) } returns
+        coEvery { navansattKlient.hentEnhetForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
@@ -213,7 +215,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, skjermingKlient, enhetService)
+            SakServiceImpl(sakDao, skjermingKlient, brukerService)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
@@ -230,7 +232,7 @@ internal class SakServiceTest {
         } throws responseException
 
         val service: SakService =
-            SakServiceImpl(sakDao, skjermingKlient, enhetService)
+            SakServiceImpl(sakDao, skjermingKlient, brukerService)
 
         val thrown =
             assertThrows<ResponseException> {
@@ -257,7 +259,7 @@ internal class SakServiceTest {
         every { norg2Klient.hentEnheterForOmraade(SakType.BARNEPENSJON.tema, "0301") } returns emptyList()
 
         val service: SakService =
-            SakServiceImpl(sakDao, skjermingKlient, enhetService)
+            SakServiceImpl(sakDao, skjermingKlient, brukerService)
 
         val thrown =
             assertThrows<IngenEnhetFunnetException> {
@@ -295,7 +297,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, skjermingKlient, enhetService)
+            SakServiceImpl(sakDao, skjermingKlient, brukerService)
 
         val sak = service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
 
@@ -341,7 +343,7 @@ internal class SakServiceTest {
         every { sakDao.oppdaterAdresseBeskyttelse(any(), any()) } returns 1
 
         val service: SakService =
-            SakServiceImpl(sakDao, skjermingKlient, enhetService)
+            SakServiceImpl(sakDao, skjermingKlient, brukerService)
 
         val sak =
             service.finnEllerOpprettSak(
@@ -377,7 +379,7 @@ internal class SakServiceTest {
     fun `filtrerer for saksbehandler med nasjonal tilgang`() {
         saksbehandlerKontekst(nasjonalTilgang = true)
 
-        coEvery { enhetService.enheterForIdent(any()) } returns
+        coEvery { navansattKlient.hentEnhetForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
@@ -393,7 +395,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, skjermingKlient, enhetService)
+            SakServiceImpl(sakDao, skjermingKlient, brukerService)
 
         val saker = service.finnSaker(KONTANT_FOT.value)
 
@@ -427,7 +429,7 @@ internal class SakServiceTest {
             )
 
         val service: SakService =
-            SakServiceImpl(sakDao, skjermingKlient, enhetService)
+            SakServiceImpl(sakDao, skjermingKlient, brukerService)
         val sak = service.finnEllerOpprettSak(KONTANT_FOT.value, SakType.BARNEPENSJON)
 
         sak shouldBe

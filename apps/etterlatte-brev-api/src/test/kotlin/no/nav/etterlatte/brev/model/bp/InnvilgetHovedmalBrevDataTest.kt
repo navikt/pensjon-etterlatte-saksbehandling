@@ -51,6 +51,7 @@ internal class InnvilgetHovedmalBrevDataTest {
                         maanederTrygdetid = 0,
                         perioder = listOf(),
                         overstyrt = false,
+                        prorataBroek = null,
                     ),
                 grunnbeloep =
                     Grunnbeloep(
@@ -60,6 +61,7 @@ internal class InnvilgetHovedmalBrevDataTest {
                         omregningsfaktor = null,
                     ),
                 innhold = lagInnholdMedVedlegg(),
+                utlandstilknytning = null,
             )
 
         Assertions.assertEquals(

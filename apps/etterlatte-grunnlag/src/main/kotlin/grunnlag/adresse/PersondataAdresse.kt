@@ -57,6 +57,7 @@ data class VergeSamhandlerFormat(
                     landkode = utledLandkode(landkode, land),
                     land = utledLand(landkode, land),
                 ),
+            adresseTypeIKilde = "VERGE_SAMHANDLER_POSTADRESSE",
         )
     }
 }
@@ -83,6 +84,7 @@ data class VergePersonFormat(
                     landkode = adresse.landkode,
                     land = adresse.land,
                 ),
+            adresseTypeIKilde = "VERGE_PERSON_POSTADRESSE",
         )
     }
 }
@@ -109,6 +111,7 @@ data class RegoppslagFormat(
                     landkode = adresse.landkode,
                     land = adresse.land,
                 ),
+            adresseTypeIKilde = "REGOPPSLAG_ADRESSE",
         )
     }
 }

@@ -47,7 +47,7 @@ internal class NavAnsattKlientTest {
         val navAnsattKlient: NavAnsattKlient = NavAnsattKlientImpl(klient, "")
 
         runBlocking {
-            val resultat = navAnsattKlient.hentSaksbehandlerEnhet(testNavIdent)
+            val resultat = navAnsattKlient.hentEnhetForSaksbehandler(testNavIdent)
 
             resultat.size shouldBeExactly 3
 
@@ -125,7 +125,7 @@ internal class NavAnsattKlientTest {
         val navAnsattKlient: NavAnsattKlient = NavAnsattKlientImpl(klient, "")
 
         runBlocking {
-            val resultat = navAnsattKlient.hentSaksbehandlerTema(testNavIdent)
+            val resultat = navAnsattKlient.hentTemaForSaksbehandler(testNavIdent)
 
             resultat.size shouldBeExactly 2
 

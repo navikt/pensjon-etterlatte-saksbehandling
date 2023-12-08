@@ -15,7 +15,10 @@ class MigreringBrevDataService(private val brevdataFacade: BrevdataFacade) {
         migrering: MigreringBrevRequest?,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevData {
-        if (generellBrevData.systemkilde != Vedtaksloesning.PESYS) {
+        if (
+            generellBrevData.systemkilde != Vedtaksloesning.PESYS &&
+            !(migrering?.erOmregningGjenny ?: false)
+        ) {
             throw InternfeilException("Kan ikke opprette et migreringsbrev fra pesys hvis kilde ikke er pesys")
         }
         return coroutineScope {

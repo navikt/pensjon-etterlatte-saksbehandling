@@ -27,6 +27,7 @@ import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -209,5 +210,6 @@ class ReguleringTest {
         every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
         every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         every { kilde } returns vedtaksloesning
+        every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
     }
 }

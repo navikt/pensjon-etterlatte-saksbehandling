@@ -169,14 +169,18 @@ internal fun Route.sakWebRoutes(
         }
 
         route("/personer/") {
+            post("/navkontor") {
+                withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val navkontor = sakService.finnNavkontorForPerson(fnr.value)
+                    call.respond(navkontor)
+                }
+            }
+
             post("/behandlingerforsak") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val behandlinger =
                         inTransaction {
-                            val sak =
-                                sakService.finnSaker(
-                                    fnr.value,
-                                ).firstOrNull() ?: throw PersonManglerSak("Personen har ikke sak")
+                            val sak = sakService.hentEnkeltSakForPerson(fnr.value)
                             val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(sak.id)
                             val sakMedUtlandstilknytning = SakMedUtlandstilknytning.fra(sak, utlandstilknytning)
 

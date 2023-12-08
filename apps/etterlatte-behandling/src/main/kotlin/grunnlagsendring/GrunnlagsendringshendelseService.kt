@@ -2,7 +2,7 @@ package no.nav.etterlatte.grunnlagsendring
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.EnhetService
+import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -27,7 +27,6 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
@@ -54,7 +53,7 @@ class GrunnlagsendringshendelseService(
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val sakService: SakService,
-    private val enhetService: EnhetService,
+    private val brukerService: BrukerService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -108,7 +107,7 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettBostedhendelse(bostedsadresse: Bostedsadresse): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED)
+        return inTransaction { opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED) }
     }
 
     fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
@@ -189,27 +188,8 @@ class GrunnlagsendringshendelseService(
     }
 
     fun oppdaterAdresseHendelse(bostedsadresse: Bostedsadresse) {
-        inTransaction {
-            val finnSaker = sakService.finnSaker(bostedsadresse.fnr)
-            val sakerMedNyEnhet =
-                finnSaker.map {
-                    SakMedEnhet(
-                        it.id,
-                        enhetService.finnEnhetForPersonOgTema(bostedsadresse.fnr, it.sakType.tema, it.sakType).enhetNr,
-                    )
-                }
-            sakerMedNyEnhet.forEach { sakMedEnhet ->
-                val oppgaverUnderBehandling =
-                    oppgaveService.hentOppgaverForSak(sakMedEnhet.id).filter { it.status == Status.UNDER_BEHANDLING }
-                if (oppgaverUnderBehandling.isNotEmpty()) {
-                    logger.info("Oppretter manuell oppgave for Bosted fordi det er åpne behandlinger")
-                    opprettBostedhendelse(bostedsadresse)
-                } else {
-                    sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
-                    oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
-                }
-            }
-        }
+        logger.info("Oppretter manuell oppgave for Bosted")
+        opprettBostedhendelse(bostedsadresse)
     }
 
     private fun oppdaterEnheterForsaker(
@@ -234,11 +214,11 @@ class GrunnlagsendringshendelseService(
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG.enhetNr
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
             AdressebeskyttelseGradering.FORTROLIG -> {
-                enhetService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
+                brukerService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }
 
             AdressebeskyttelseGradering.UGRADERT -> {
-                enhetService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
+                brukerService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }
         }
     }

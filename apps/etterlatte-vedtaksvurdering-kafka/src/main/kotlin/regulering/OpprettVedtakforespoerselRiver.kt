@@ -8,8 +8,10 @@ import no.nav.etterlatte.vedtaksvurdering.RapidUtsender
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
+import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
@@ -53,7 +55,9 @@ internal class OpprettVedtakforespoerselRiver(
                 }
 
             // TODO EY-3232 - Fjerne
-            packet[OmregningEvents.OMREGNING_BRUTTO] = respons.vedtak.utbetalingsperioder.last().beloep!!.toInt()
+            val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
+            val forrigeVedtak = vedtak.hentVedtak(behandlingViOmregnerFra)
+            packet[OmregningEvents.OMREGNING_BRUTTO] = forrigeVedtak.utbetalingsperioder.last().beloep!!.toInt()
 
             logger.info("Opprettet vedtak ${respons.vedtak.vedtakId} for sak: $sakId og behandling: $behandlingId")
             RapidUtsender.sendUt(respons, packet, context)

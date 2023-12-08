@@ -69,7 +69,12 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
               onAvbryt={hentBrevutfall}
             />
           ) : (
-            <BrevutfallVisning redigerbar={redigerbar} brevutfall={brevutfall} setVisSkjema={setVisSkjema} />
+            <BrevutfallVisning
+              redigerbar={redigerbar}
+              brevutfall={brevutfall}
+              sakType={behandling.sakType}
+              setVisSkjema={setVisSkjema}
+            />
           )}
         </VStack>
       )}

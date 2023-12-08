@@ -33,6 +33,7 @@ internal class OpprettVedtakforespoerselRiver(
             // TODO EY-3232 - Fjerne
             validate { it.interestedIn(OmregningEvents.OMREGNING_NYE_REGLER) }
             validate { it.interestedIn(OmregningEvents.OMREGNING_NYE_REGLER_KJORING) }
+            validate { it.interestedIn(BEHANDLING_VI_OMREGNER_FRA_KEY) }
         }
     }
 

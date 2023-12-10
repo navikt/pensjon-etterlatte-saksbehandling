@@ -14,7 +14,7 @@ import java.time.LocalDate
 class InntektAvkortingTest {
     @Test
     fun `avkortingsfaktor er 45 prosent`() {
-        val faktor = avkortingFaktor.anvend(inntektAvkortingGrunnlag(), RegelPeriode(LocalDate.now()))
+        val faktor = avkortingFaktor.anvend(inntektAvkortingGrunnlag(), RegelPeriode(LocalDate.of(2024, 1, 1)))
         faktor.verdi shouldBe Beregningstall(0.45)
     }
 
@@ -28,7 +28,7 @@ class InntektAvkortingTest {
                     inntektUtland = 100000,
                     relevanteMaaneder = 10,
                 ),
-                RegelPeriode(LocalDate.now()),
+                RegelPeriode(LocalDate.of(2024, 1, 1)),
             )
         inntekt.verdi.toInteger() shouldBe 45000
     }
@@ -38,9 +38,9 @@ class InntektAvkortingTest {
         val overstegetInntekt =
             overstegetInntektPerMaaned.anvend(
                 inntektAvkortingGrunnlag(inntekt = 120000),
-                RegelPeriode(LocalDate.of(2023, 1, 1)),
+                RegelPeriode(LocalDate.of(2024, 1, 1)),
             )
-        overstegetInntekt.verdi.toInteger() shouldBe 5355
+        overstegetInntekt.verdi.toInteger() shouldBe 5057
     }
 
     @Test
@@ -48,7 +48,7 @@ class InntektAvkortingTest {
         val overstegetInntekt =
             overstegetInntektPerMaaned.anvend(
                 inntektAvkortingGrunnlag(inntekt = 25000),
-                RegelPeriode(LocalDate.of(2023, 1, 1)),
+                RegelPeriode(LocalDate.of(2024, 1, 1)),
             )
         overstegetInntekt.verdi.toInteger() shouldBe 0
     }
@@ -58,8 +58,8 @@ class InntektAvkortingTest {
         val avkortingsbeloep =
             kroneavrundetInntektAvkorting.anvend(
                 inntektAvkortingGrunnlag(inntekt = 500000, fratrekkInnAar = 0, relevanteMaaneder = 12),
-                RegelPeriode(LocalDate.of(2023, 1, 1)),
+                RegelPeriode(LocalDate.of(2024, 1, 1)),
             )
-        avkortingsbeloep.verdi shouldBe 16660
+        avkortingsbeloep.verdi shouldBe 16526
     }
 }

@@ -497,14 +497,14 @@ internal class BeregnBarnepensjonServiceTest {
                     behandling,
                     Systembruker("migrering", "migrering"),
                 )
-            Assertions.assertEquals(2, beregning.beregningsperioder.size)
+            beregning.beregningsperioder.size shouldBeGreaterThanOrEqual 3
             with(beregning.beregningsperioder[0]) {
                 datoFOM shouldBe YearMonth.of(2023, Month.DECEMBER)
                 datoTOM shouldBe YearMonth.of(2023, Month.DECEMBER)
             }
             with(beregning.beregningsperioder[1]) {
                 datoFOM shouldBe YearMonth.of(2024, Month.JANUARY)
-                datoTOM shouldBe null
+                datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
             }
         }
     }
@@ -543,7 +543,7 @@ internal class BeregnBarnepensjonServiceTest {
             }
             with(beregning.beregningsperioder[2]) {
                 datoFOM shouldBe YearMonth.of(2024, 1)
-                datoTOM shouldBe null
+                datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_TO_DOEDE_FORELDRE
             }
         }

@@ -39,7 +39,7 @@ data class OmstillingstoenadGrunnlag(
 
 val beregnOmstillingstoenadRegel =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Reduserer ytelsen mot opptjening i folketrygden",
         regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-REDUSER-MOT-TRYGDETID"),
     ) benytter omstillingstoenadSatsRegel og trygdetidsFaktor med { sats, trygdetidsfaktor ->
@@ -48,7 +48,7 @@ val beregnOmstillingstoenadRegel =
 
 val OmstillingstoenadSatsMedInstitusjonsopphold =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Sikrer at ytelsen ikke blir større med institusjonsoppholdberegning",
         regelReferanse = RegelReferanse(id = "OMS-BEREGNING-GUNSTIGHET-INSTITUSJON"),
     ) benytter omstillingstoenadSatsRegel og institusjonsoppholdSatsRegelOMS med { standardSats, institusjonsoppholdSats ->
@@ -57,7 +57,7 @@ val OmstillingstoenadSatsMedInstitusjonsopphold =
 
 val omstillingstoenadSats =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Bruker institusjonsoppholdberegning hvis bruker er i institusjon",
         regelReferanse = RegelReferanse("OMS-BEREGNING-KANSKJEANVENDINSTITUSJON"),
     ) benytter omstillingstoenadSatsRegel og OmstillingstoenadSatsMedInstitusjonsopphold og erBrukerIInstitusjonOMS med {
@@ -70,7 +70,7 @@ val omstillingstoenadSats =
 
 val kroneavrundetOmstillingstoenadRegel =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Gjør en kroneavrunding av beregningen",
         regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING"),
     ) benytter beregnOmstillingstoenadRegel med { beregnetOmstillingstoenad ->
@@ -79,7 +79,7 @@ val kroneavrundetOmstillingstoenadRegel =
 
 val beregnOmstillingstoenadRegelMedInstitusjon =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Bruker institusjonsoppholdberegning hvis bruker er i institusjon",
         regelReferanse = RegelReferanse(id = "OMS-BEREGNING-2024-REDUSER-MOT-TRYGDETID"),
     ) benytter omstillingstoenadSats og trygdetidsFaktor med { sats, trygdetidsfaktor ->
@@ -88,7 +88,7 @@ val beregnOmstillingstoenadRegelMedInstitusjon =
 
 val kroneavrundetOmstillingstoenadRegelMedInstitusjon =
     RegelMeta(
-        gjelderFra = OMS_GYLDIG_FROM_TEST,
+        gjelderFra = OMS_GYLDIG_FRA,
         beskrivelse = "Gjør en kroneavrunding av omstillingstønad inkludert institusjonsopphold",
         regelReferanse = RegelReferanse(id = "REGEL-KRONEAVRUNDING-INSTITUSJON"),
     ) benytter beregnOmstillingstoenadRegelMedInstitusjon med { beregnetOmstillingstoenad ->

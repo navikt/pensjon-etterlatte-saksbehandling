@@ -81,10 +81,10 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 grunnlagMetadata shouldBe grunnlag.metadata
                 beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_23
+                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                    datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
+                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     soeskenFlokk shouldBe null
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                     regelResultat shouldNotBe null
@@ -120,10 +120,10 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 grunnlagMetadata shouldBe grunnlag.metadata
                 beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_23_PRORATA
+                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_24_PRORATA
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                    datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
+                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     soeskenFlokk shouldBe null
                     this.trygdetid shouldBe PRORATA_TRYGDETID_30_AAR / 2
                     regelResultat shouldNotBe null
@@ -159,10 +159,10 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 grunnlagMetadata shouldBe grunnlag.metadata
                 beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_23
+                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                    datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
+                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     soeskenFlokk shouldBe null
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                     regelResultat shouldNotBe null
@@ -203,10 +203,10 @@ internal class BeregnOmstillingsstoenadServiceTest {
                 grunnlagMetadata shouldBe grunnlag.metadata
                 beregningsperioder.size shouldBeGreaterThanOrEqual 2
                 with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_23
+                    utbetaltBeloep shouldBe OMS_BELOEP_JAN_24
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe YearMonth.of(2023, Month.APRIL)
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                    datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
+                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     this.trygdetid shouldBe TRYGDETID_40_AAR
                 }
             }
@@ -246,7 +246,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     utbetaltBeloep shouldBe 0
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe null
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     this.trygdetid shouldBe 0
                 }
             }
@@ -282,7 +282,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
                     utbetaltBeloep shouldBe 0
                     datoFOM shouldBe behandling.virkningstidspunkt?.dato
                     datoTOM shouldBe null
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
+                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
                     soeskenFlokk shouldBe null
                     this.trygdetid shouldBe 0
                 }
@@ -335,7 +335,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
     private fun mockBehandling(
         type: BehandlingType,
-        virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_23,
+        virk: YearMonth = VIRKNINGSTIDSPUNKT_JAN_24,
     ): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
@@ -369,13 +369,13 @@ internal class BeregnOmstillingsstoenadServiceTest {
         }
 
     companion object {
-        val VIRKNINGSTIDSPUNKT_JAN_23: YearMonth = YearMonth.of(2023, 1)
+        val VIRKNINGSTIDSPUNKT_JAN_24: YearMonth = YearMonth.of(2024, 1)
         const val TRYGDETID_40_AAR: Int = 40
         const val PRORATA_TRYGDETID_30_AAR: Int = 30
         val PRORATA_BROEK: IntBroek = IntBroek(1, 2)
-        const val GRUNNBELOEP_JAN_23: Int = 9290
-        const val OMS_BELOEP_JAN_23: Int = 20902
-        const val OMS_BELOEP_JAN_23_PRORATA: Int = 7838
+        const val GRUNNBELOEP_JAN_24: Int = 9885
+        const val OMS_BELOEP_JAN_24: Int = 22241
+        const val OMS_BELOEP_JAN_24_PRORATA: Int = 8340
     }
 
     private fun omstillingstoenadBeregningsGrunnlag(

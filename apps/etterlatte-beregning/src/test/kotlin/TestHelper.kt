@@ -165,7 +165,7 @@ fun aarsoppgjoer(
 
 fun ytelseFoerAvkorting(
     beregning: Int = 100,
-    periode: Periode = Periode(fom = YearMonth.of(2023, 1), tom = null),
+    periode: Periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
     beregningsreferanse: UUID = UUID.randomUUID(),
 ) = YtelseFoerAvkorting(
     beregning = beregning,
@@ -283,7 +283,7 @@ fun behandling(
     sak: Long = 123,
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
+    virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
     status: BehandlingStatus = BehandlingStatus.BEREGNET,
 ) = DetaljertBehandling(
     id = id,

@@ -9,7 +9,7 @@ import java.time.YearMonth
 internal class GrunnbeloepRepositoryTest {
     @Test
     fun `skal hente alle historiske grunnbeloep`() {
-        GrunnbeloepRepository.historiskeGrunnbeloep shouldHaveSize 70
+        GrunnbeloepRepository.historiskeGrunnbeloep shouldHaveSize 71
     }
 
     @Test

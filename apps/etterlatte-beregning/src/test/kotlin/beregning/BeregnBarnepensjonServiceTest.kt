@@ -589,7 +589,7 @@ internal class BeregnBarnepensjonServiceTest {
 
             with(beregning.beregningsperioder[0]) {
                 datoFOM shouldBe YearMonth.of(2024, 1)
-                datoTOM shouldBe null
+                datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe GRUNNBELOEP_MAI_23
             }
         }

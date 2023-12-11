@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.BrevMottaker
-import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.hentRelevantVerge
@@ -65,10 +64,7 @@ class VergeService(
         relevantVerge: VergemaalEllerFremtidsfullmakt,
     ): BrevMottaker {
         val pdlVergeFoedselsnummer = relevantVerge.vergeEllerFullmektig.motpartsPersonident!!.value
-        return vergesAdresseInfo.tilFrittstaendeBrevMottaker()
-            .copy(
-                foedselsnummer = MottakerFoedselsnummer(pdlVergeFoedselsnummer),
-            )
+        return vergesAdresseInfo.tilFrittstaendeBrevMottaker(pdlVergeFoedselsnummer)
     }
 
     private fun BrevMottaker.tilGrunnlagsopplysning(registersReferanse: String?): Grunnlagsopplysning<BrevMottaker> =

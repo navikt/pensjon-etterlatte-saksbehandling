@@ -24,7 +24,7 @@ sealed class PersondataAdresse(
 ) {
     /**
      * Med frittstående menes at adressen skal kunne brukes til å adressere bare denne personen, uten c/o. */
-    abstract fun tilFrittstaendeBrevMottaker(): BrevMottaker
+    abstract fun tilFrittstaendeBrevMottaker(foedselsnummer: String): BrevMottaker
 }
 
 data class VergeSamhandlerFormat(
@@ -41,11 +41,11 @@ data class VergeSamhandlerFormat(
 ) : PersondataAdresse("VERGE_SAMHANDLER_POSTADRESSE", adresselinjer, adresseString) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun tilFrittstaendeBrevMottaker(): BrevMottaker {
+    override fun tilFrittstaendeBrevMottaker(foedselsnummer: String): BrevMottaker {
         logger.debug("Tolker ${this::class.simpleName}, med landkode: ${landkode.quoted}, land: ${land.quoted}")
         return BrevMottaker(
             navn = navn ?: "Ukjent",
-            foedselsnummer = null,
+            foedselsnummer = null, // Brevmottaker skal hverken ha fnr eller orgnummer
             adresse =
                 MottakerAdresse(
                     adresseType = adressetypeFromLand(landkode, land),
@@ -69,10 +69,10 @@ data class VergePersonFormat(
     val vergePid: String,
     val navn: String?,
 ) : PersondataAdresse("VERGE_PERSON_POSTADRESSE", adresselinjer, adresseString) {
-    override fun tilFrittstaendeBrevMottaker(): BrevMottaker {
+    override fun tilFrittstaendeBrevMottaker(foedselsnummer: String): BrevMottaker {
         return BrevMottaker(
             navn = navn ?: "Ukjent",
-            foedselsnummer = MottakerFoedselsnummer(vergePid),
+            foedselsnummer = MottakerFoedselsnummer(foedselsnummer),
             adresse =
                 MottakerAdresse(
                     adresseType = adressetypeFromLand(adresse.landkode, adresse.land),
@@ -96,10 +96,10 @@ data class RegoppslagFormat(
     val navn: String?,
 ) :
     PersondataAdresse("REGOPPSLAG_ADRESSE", adresselinjer, adresseString) {
-    override fun tilFrittstaendeBrevMottaker(): BrevMottaker {
+    override fun tilFrittstaendeBrevMottaker(foedselsnummer: String): BrevMottaker {
         return BrevMottaker(
             navn = navn ?: "Ukjent",
-            foedselsnummer = null,
+            foedselsnummer = MottakerFoedselsnummer(foedselsnummer),
             adresse =
                 MottakerAdresse(
                     adresseType = adressetypeFromLand(adresse.landkode, adresse.land),

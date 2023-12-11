@@ -137,7 +137,7 @@ class DokarkivServiceImpl(
         return OpprettJournalpostRequest(
             tittel = innhold.tittel,
             journalposttype = JournalPostType.UTGAAENDE,
-            avsenderMottaker = AvsenderMottaker(mottakerIdent(brev)),
+            avsenderMottaker = brev.avsenderMottaker(),
             bruker = Bruker(vedtak.sak.ident),
             eksternReferanseId = "${vedtak.behandlingId}.$brevId",
             sak = JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString()),
@@ -158,7 +158,7 @@ class DokarkivServiceImpl(
         return OpprettJournalpostRequest(
             tittel = innhold.tittel,
             journalposttype = JournalPostType.UTGAAENDE,
-            avsenderMottaker = AvsenderMottaker(mottakerIdent(brev)),
+            avsenderMottaker = brev.avsenderMottaker(),
             bruker = Bruker(brev.soekerFnr),
             eksternReferanseId = "${brev.sakId}.${brev.id}",
             sak = JournalpostSak(Sakstype.FAGSAK, brev.sakId.toString()),
@@ -176,8 +176,23 @@ class DokarkivServiceImpl(
             dokumentvarianter = listOf(DokumentVariant.ArkivPDF(Base64.getEncoder().encodeToString(bytes))),
         )
 
-    private fun mottakerIdent(brev: Brev) =
-        requireNotNull(brev.mottaker.foedselsnummer?.value ?: brev.mottaker.orgnummer) {
-            "Mottaker mangler både fnr. og orgnr. i brev med id=${brev.id}"
-        }
+    private fun Brev.avsenderMottaker(): AvsenderMottaker {
+        return AvsenderMottaker(
+            id = this.mottaker.foedselsnummer?.value ?: this.mottaker.orgnummer,
+            idType =
+                if (this.mottaker.foedselsnummer != null) {
+                    "FNR"
+                } else if (this.mottaker.orgnummer != null) {
+                    "ORGNR"
+                } else {
+                    null
+                },
+            navn =
+                if (this.mottaker.foedselsnummer?.value != null || this.mottaker.orgnummer != null) {
+                    null
+                } else {
+                    this.mottaker.navn
+                },
+        )
+    }
 }

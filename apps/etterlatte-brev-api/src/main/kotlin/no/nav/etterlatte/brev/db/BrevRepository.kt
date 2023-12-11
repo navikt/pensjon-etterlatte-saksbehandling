@@ -126,8 +126,8 @@ class BrevRepository(private val ds: DataSource) {
                 OPPDATER_MOTTAKER_QUERY,
                 mapOf(
                     "brev_id" to id,
-                    "foedselsnummer" to mottaker.foedselsnummer?.value,
-                    "orgnummer" to mottaker.orgnummer,
+                    "foedselsnummer" to mottaker.foedselsnummer?.value?.let { it.ifBlank { null } },
+                    "orgnummer" to mottaker.orgnummer?.let { it.ifBlank { null } },
                     "navn" to mottaker.navn,
                     "adressetype" to mottaker.adresse.adresseType,
                     "adresselinje1" to mottaker.adresse.adresselinje1,

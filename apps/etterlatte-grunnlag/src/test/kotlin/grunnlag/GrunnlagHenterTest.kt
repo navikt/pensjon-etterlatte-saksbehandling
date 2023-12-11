@@ -83,7 +83,7 @@ class GrunnlagHenterTest {
         } returns grunnlagTestData.hentPersonGalleri()
 
         val persondataAdresseVerge = mockk<PersondataAdresse>()
-        every { persondataAdresseVerge.tilFrittstaendeBrevMottaker() } returns sampleVergeAdresse()
+        every { persondataAdresseVerge.tilFrittstaendeBrevMottaker(any()) } returns sampleVergeAdresse()
         every {
             vergeService.hentGrunnlagsopplysningVergesAdresse(grunnlagTestData.soeker)
         } returns grunnlagsopplysningVergesAdresse()

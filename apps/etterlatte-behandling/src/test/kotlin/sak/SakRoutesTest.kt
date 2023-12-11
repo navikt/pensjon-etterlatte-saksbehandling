@@ -86,6 +86,24 @@ internal class SakRoutesTest {
     }
 
     @Test
+    fun `Returnerer bad request hvis sak ikke finnes ved endring av enhet`() {
+        coEvery {
+            sakService.oppdaterEnhetForSaker(any())
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
+        } just runs
+        every { sakService.finnSak(any()) } returns null
+        withTestApplication { client ->
+            val response =
+                client.post("/api/sak/1/endre_enhet") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(EnhetRequest(enhet = "4808"))
+                }
+            assertEquals(400, response.status.value)
+        }
+    }
+
+    @Test
     fun `siste iverksatte route returnerer 200 ok og behandling`() {
         val sakId = 1
         coEvery { behandlingService.hentSisteIverksatte(1) } returns mockk(relaxed = true)

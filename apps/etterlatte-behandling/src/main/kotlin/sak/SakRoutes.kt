@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
@@ -120,6 +121,12 @@ class SakIkkeFunnetException(message: String) :
         detail = message,
     )
 
+class SakBleBorteException(message: String) :
+    IkkeTillattException(
+        code = "SAKEN_FORSVANT",
+        detail = message,
+    )
+
 internal fun Route.sakWebRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
@@ -167,7 +174,7 @@ internal fun Route.sakWebRoutes(
                         )
                         val oppdatertSak =
                             inTransaction { sakService.finnSak(sakId) }
-                                ?: throw SakIkkeFunnetException("Saken ble borte etter å endre enheten på den sakid: $sakId. Kritisk! ")
+                                ?: throw SakBleBorteException("Saken ble borte etter å endre enheten på den sakid: $sakId. Kritisk! ")
 
                         call.respond(oppdatertSak)
                     } catch (e: TilstandException.UgyldigTilstand) {

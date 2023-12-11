@@ -7,6 +7,7 @@ import io.ktor.server.application.RouteScopedPlugin
 import io.ktor.server.application.call
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.hooks.ResponseSent
+import io.ktor.server.auth.principal
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.request.uri
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.ktor.PluginConfiguration
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
+import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 import org.slf4j.MDC
 
 internal val LOGGER = KtorSimpleLogger("no.nav.etterlatte.samordning.requestLogger")
@@ -49,10 +51,15 @@ val userIdMdcPlugin: RouteScopedPlugin<PluginConfiguration> =
         on(UserIdMdcHook) { call ->
             val user =
                 if (call.request.uri.contains("pensjon")) {
-                    when (val bruker = call.brukerTokenInfo) {
-                        is Systembruker -> bruker.jwtTokenClaims?.getStringClaim("azp_name") ?: bruker.sub
-                        is Saksbehandler -> "Saksbehandler"
-                        else -> "Ukjent"
+                    val principal = call.principal<TokenValidationContextPrincipal>()
+                    if (principal?.context?.issuers?.contains("tokenx") == true) {
+                        "Selvbetjening"
+                    } else {
+                        when (val bruker = call.brukerTokenInfo) {
+                            is Systembruker -> bruker.jwtTokenClaims?.getStringClaim("azp_name") ?: bruker.sub
+                            is Saksbehandler -> "Saksbehandler"
+                            else -> "Ukjent"
+                        }
                     }
                 } else {
                     call.orgNummer

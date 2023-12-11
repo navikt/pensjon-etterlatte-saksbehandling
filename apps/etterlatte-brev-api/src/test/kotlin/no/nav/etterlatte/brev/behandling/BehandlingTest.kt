@@ -32,7 +32,7 @@ internal class BehandlingTest {
     fun `MapSoeker mapper til Soeker`() {
         val grunnlag = opprettGrunnlag()
 
-        assertEquals(Soeker("Unormal", "Frisk", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)), grunnlag.mapSoeker())
+        assertEquals(Soeker("Unormal", "Frisk", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), false), grunnlag.mapSoeker())
     }
 
     @Test
@@ -51,7 +51,7 @@ internal class BehandlingTest {
             )
 
         assertEquals(
-            Soeker("Unormal-Kar", "Frisk-Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+            Soeker("Unormal-Kar", "Frisk-Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), false),
             grunnlag.mapSoeker(),
         )
         assertEquals(listOf(Avdoed("Riv-Jern Kul-Kar Badeball-Sommer", LocalDate.of(2022, 8, 17))), grunnlag.mapAvdoede())
@@ -66,7 +66,7 @@ internal class BehandlingTest {
             )
 
         assertEquals(
-            Soeker("Unormal Kar", "Frisk Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+            Soeker("Unormal Kar", "Frisk Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), false),
             grunnlag.mapSoeker(),
         )
         assertEquals(listOf(Avdoed("Riv Jern Kul Kar Badeball-Sommer", LocalDate.of(2022, 8, 17))), grunnlag.mapAvdoede())
@@ -81,7 +81,7 @@ internal class BehandlingTest {
             )
 
         assertEquals(
-            Soeker("Unormal-Kar Kis", "Frisk-Is Tak", "Herresykkel Bom", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value)),
+            Soeker("Unormal-Kar Kis", "Frisk-Is Tak", "Herresykkel Bom", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), false),
             grunnlag.mapSoeker(),
         )
         assertEquals(
@@ -169,6 +169,10 @@ internal class BehandlingTest {
                             opprettOpplysning(
                                 SOEKER_FOEDSELSNUMMER.toJsonNode(),
                             ),
+                        Opplysningstype.FOEDSELSDATO to
+                            opprettOpplysning(
+                                LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
+                            ),
                     ),
                 familie =
                     listOf(
@@ -183,6 +187,41 @@ internal class BehandlingTest {
 
         val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())
         assertEquals(gjenlevendeNavn.toString(), vergeBarnepensjon!!.navn())
+
+        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID())
+        assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
+    }
+
+    @Test
+    fun `Ingen verge og over 18 år gir ingen verge barnepensjon eller oms`() {
+        val gjenlevendeNavn = Navn("Elegang", "Mellomstor", "Barnevogn")
+
+        val grunnlag =
+            Grunnlag(
+                soeker =
+                    mapOf(
+                        Opplysningstype.FOEDSELSNUMMER to
+                            opprettOpplysning(
+                                SOEKER_FOEDSELSNUMMER.toJsonNode(),
+                            ),
+                        Opplysningstype.FOEDSELSDATO to
+                            opprettOpplysning(
+                                LocalDate.now().minusYears(19).toJsonNode(), // 19 år gammel
+                            ),
+                    ),
+                familie =
+                    listOf(
+                        mapOf(
+                            Opplysningstype.PERSONROLLE to opprettOpplysning(PersonRolle.GJENLEVENDE.toJsonNode()),
+                            Opplysningstype.NAVN to opprettOpplysning(gjenlevendeNavn.toJsonNode()),
+                        ),
+                    ),
+                sak = emptyMap(),
+                metadata = mockk(),
+            )
+
+        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())
+        assertNull(vergeBarnepensjon, "Verge skal ikke settes for barnepensjon hvis barnet er over 18 år")
 
         val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID())
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")

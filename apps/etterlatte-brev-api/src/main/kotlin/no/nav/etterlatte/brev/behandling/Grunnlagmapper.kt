@@ -29,7 +29,7 @@ fun Grunnlag.mapSoeker(): Soeker =
         val dato18Aar = hentFoedselsdato()?.verdi?.plusYears(18)
         val erUnder18 =
             dato18Aar?.let {
-                LocalDate.now() > it
+                LocalDate.now() < it
             }
 
         Soeker(
@@ -95,7 +95,7 @@ fun Grunnlag.mapVerge(
                     "Barnet har ikke fødselsdato i grunnlag. Dette skal ikke skje, vi " +
                         "klarer ikke å avgjøre hvor gammelt barnet er"
                 }.verdi.plusYears(18)
-            if (dato18Aar >= LocalDate.now()) {
+            if (dato18Aar <= LocalDate.now()) {
                 null
             } else {
                 hentPotensiellGjenlevende()

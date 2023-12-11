@@ -1,4 +1,4 @@
-name: .deploy-main-prod.yaml
+name: .deploy-jobb-main-prod.yaml
 
 on:
   workflow_call:

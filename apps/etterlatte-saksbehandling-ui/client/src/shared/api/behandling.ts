@@ -148,9 +148,9 @@ export const lagreBrevutfallApi = async (args: {
   behandlingId: string
   brevutfall: Brevutfall
 }): Promise<ApiResponse<Brevutfall>> => {
-  return apiClient.post(`/behandling/${args.behandlingId}/brevutfall`, { ...args.brevutfall })
+  return apiClient.post(`/behandling/${args.behandlingId}/info/brevutfall`, { ...args.brevutfall })
 }
 
 export const hentBrevutfallApi = async (behandlingId: string): Promise<ApiResponse<Brevutfall | null>> => {
-  return apiClient.get(`/behandling/${behandlingId}/brevutfall`)
+  return apiClient.get(`/behandling/${behandlingId}/info/brevutfall`)
 }

@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { Alert, BodyLong, Heading, VStack } from '@navikt/ds-react'
+import { Alert, BodyLong, Heading } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevutfallApi } from '~shared/api/behandling'
@@ -62,26 +62,24 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
         result={hentBrevutfallResult}
         mapInitialOrPending={<Spinner visible={true} label="Henter brevutfall .." />}
         mapError={(apiError) => <Alert variant="error">{apiError.detail}</Alert>}
-        mapSuccess={() => (
-          <VStack gap="8">
-            {visSkjema ? (
-              <BrevutfallSkjema
-                behandling={behandling}
-                brevutfall={brevutfall}
-                setBrevutfall={setBrevutfall}
-                setVisSkjema={setVisSkjema}
-                onAvbryt={hentBrevutfall}
-              />
-            ) : (
-              <BrevutfallVisning
-                redigerbar={redigerbar}
-                brevutfall={brevutfall}
-                sakType={behandling.sakType}
-                setVisSkjema={setVisSkjema}
-              />
-            )}
-          </VStack>
-        )}
+        mapSuccess={() =>
+          visSkjema ? (
+            <BrevutfallSkjema
+              behandling={behandling}
+              brevutfall={brevutfall}
+              setBrevutfall={setBrevutfall}
+              setVisSkjema={setVisSkjema}
+              onAvbryt={hentBrevutfall}
+            />
+          ) : (
+            <BrevutfallVisning
+              redigerbar={redigerbar}
+              brevutfall={brevutfall}
+              sakType={behandling.sakType}
+              setVisSkjema={setVisSkjema}
+            />
+          )
+        }
       />
     </BrevutfallContent>
   )

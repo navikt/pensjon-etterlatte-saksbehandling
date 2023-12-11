@@ -11,6 +11,7 @@ import io.ktor.http.contentType
 import io.ktor.server.config.HoconApplicationConfig
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
@@ -18,6 +19,8 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.EnhetRequest
@@ -70,7 +73,7 @@ internal class SakRoutesTest {
             sakService.oppdaterEnhetForSaker(any())
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
         } just runs
-
+        every { sakService.finnSak(any()) } returns Sak(ident = "12345", sakType = SakType.BARNEPENSJON, id = 123455, enhet = "birger")
         withTestApplication { client ->
             val response =
                 client.post("/api/sak/1/endre_enhet") {
@@ -79,6 +82,24 @@ internal class SakRoutesTest {
                     setBody(EnhetRequest(enhet = "4808"))
                 }
             assertEquals(200, response.status.value)
+        }
+    }
+
+    @Test
+    fun `Returnerer bad request hvis sak ikke finnes ved endring av enhet`() {
+        coEvery {
+            sakService.oppdaterEnhetForSaker(any())
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
+        } just runs
+        every { sakService.finnSak(any()) } returns null
+        withTestApplication { client ->
+            val response =
+                client.post("/api/sak/1/endre_enhet") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(EnhetRequest(enhet = "4808"))
+                }
+            assertEquals(400, response.status.value)
         }
     }
 

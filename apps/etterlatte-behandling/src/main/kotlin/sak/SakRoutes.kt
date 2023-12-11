@@ -142,17 +142,31 @@ internal fun Route.sakWebRoutes(
                 hentNavidentFraToken { navIdent ->
                     val enhetrequest = call.receive<EnhetRequest>()
                     try {
+                        requireNotNull(sakService.finnSak(sakId)) {
+                            logger.info("Fant ingen sak å endre enhet på")
+                            call.respond(HttpStatusCode.BadRequest, "Fant ingen sak å endre enhet på")
+                        }
+
                         val sakMedEnhet =
                             GrunnlagsendringshendelseService.SakMedEnhet(
                                 enhet = enhetrequest.enhet,
                                 id = sakId,
                             )
+
                         inTransaction {
                             sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                         }
-                        logger.info("Endret enhet på sak: $sakId  og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}")
-                        call.respond(sakMedEnhet)
+
+                        logger.info(
+                            "Saksbehandler $navIdent endret enhet på sak: $sakId og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}",
+                        )
+                        val oppdatertSak =
+                            requireNotNull(sakService.finnSak(sakId)) {
+                                logger.info("Fant ikke sak etter enhetsendring")
+                                call.respond(HttpStatusCode.BadRequest, "Fant ikke sak etter enhetsendring")
+                            }
+                        call.respond(oppdatertSak)
                     } catch (e: TilstandException.UgyldigTilstand) {
                         call.respond(HttpStatusCode.BadRequest, "Kan ikke endre enhet på sak og oppgaver")
                     }

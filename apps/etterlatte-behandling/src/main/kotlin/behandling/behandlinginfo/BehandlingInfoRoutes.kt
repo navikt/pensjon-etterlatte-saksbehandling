@@ -11,9 +11,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingNy
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.medBody
@@ -28,25 +25,53 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/info") {
         route("/brevutfall") {
             post {
-                medBody<BrevutfallDto> { dto ->
-                    val brevutfall =
+                medBody<BrevutfallOgEtterbetalingDto> { dto ->
+                    val brevutfallOgEtterbetaling =
                         inTransaction {
-                            logger.info("Lagrer brevutfall for behandling $behandlingId")
-                            service.lagreBrevutfall(dto.toBrevutfall(behandlingId, brukerTokenInfo))
+                            logger.info("Lagrer brevutfall og etterbetaling for behandling $behandlingId")
+                            val brevutfallLagret =
+                                service.lagreBrevutfall(behandlingId, dto.toBrevutfall(behandlingId, brukerTokenInfo))
+                            val etterbetalingLagret =
+                                service.lagreEtterbetaling(
+                                    behandlingId,
+                                    dto.toEtterbetaling(behandlingId, brukerTokenInfo),
+                                )
+
+                            BrevutfallOgEtterbetalingDto(
+                                behandlingId,
+                                etterbetalingLagret?.toDto(),
+                                brevutfallLagret.toDto(),
+                            )
                         }
-                    call.respond(brevutfall.toDto())
+                    call.respond(brevutfallOgEtterbetaling)
                 }
             }
 
             get {
-                when (val brevutfall = inTransaction { service.hentBrevutfall(behandlingId) }) {
+                logger.info("Henter brevutfall og etterbetaling for behandling $behandlingId")
+                val brevutfallOgEtterbetaling =
+                    inTransaction {
+                        val brevutfall = service.hentBrevutfall(behandlingId)
+                        val etterbetaling = service.hentEtterbetaling(behandlingId)
+                        if (brevutfall != null) {
+                            BrevutfallOgEtterbetalingDto(
+                                behandlingId,
+                                etterbetaling?.toDto(),
+                                brevutfall.toDto(),
+                            )
+                        } else {
+                            null
+                        }
+                    }
+                when (brevutfallOgEtterbetaling) {
                     null -> call.respond(HttpStatusCode.NoContent)
-                    else -> call.respond(brevutfall.toDto())
+                    else -> call.respond(brevutfallOgEtterbetaling)
                 }
             }
         }
 
         get("/etterbetaling") {
+            logger.info("Henter etterbetaling for behandling $behandlingId")
             when (val etterbetaling = inTransaction { service.hentEtterbetaling(behandlingId) }) {
                 null -> call.respond(HttpStatusCode.NoContent)
                 else -> call.respond(etterbetaling.toDto())
@@ -55,44 +80,61 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
     }
 }
 
-private fun BrevutfallDto.toBrevutfall(
+private fun BrevutfallOgEtterbetalingDto.toBrevutfall(
     behandlingId: UUID,
     bruker: BrukerTokenInfo,
 ): Brevutfall =
     Brevutfall(
         behandlingId = behandlingId,
-        etterbetalingNy =
-            if (etterbetaling?.datoFom != null && etterbetaling.datoTom != null) {
-                EtterbetalingNy.fra(etterbetaling.datoFom, etterbetaling.datoTom)
-            } else {
-                null
-            },
-        aldersgruppe = aldersgruppe,
+        aldersgruppe = brevutfall?.aldersgruppe,
         kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
     )
+
+private fun BrevutfallOgEtterbetalingDto.toEtterbetaling(
+    behandlingId: UUID,
+    bruker: BrukerTokenInfo,
+): EtterbetalingNy? =
+    if (etterbetaling?.datoFom != null && etterbetaling.datoTom != null) {
+        EtterbetalingNy.fra(
+            behandlingId = behandlingId,
+            datoFom = etterbetaling.datoFom,
+            datoTom = etterbetaling.datoTom,
+            kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
+        )
+    } else {
+        null
+    }
 
 private fun Brevutfall.toDto() =
     BrevutfallDto(
         behandlingId = behandlingId,
-        etterbetaling = etterbetalingNy?.toDto(),
         aldersgruppe = aldersgruppe,
         kilde = kilde,
     )
 
 private fun EtterbetalingNy.toDto() =
     EtterbetalingDto(
+        behandlingId = behandlingId,
         datoFom = fom.atDay(1),
         datoTom = tom.atEndOfMonth(),
+        kilde = kilde,
     )
+
+data class BrevutfallOgEtterbetalingDto(
+    val behandlingId: UUID?,
+    val etterbetaling: EtterbetalingDto?,
+    val brevutfall: BrevutfallDto?,
+)
 
 data class BrevutfallDto(
     val behandlingId: UUID?,
-    val etterbetaling: EtterbetalingDto?,
     val aldersgruppe: Aldersgruppe?,
     val kilde: Grunnlagsopplysning.Kilde?,
 )
 
 data class EtterbetalingDto(
+    val behandlingId: UUID?,
     val datoFom: LocalDate?,
     val datoTom: LocalDate?,
+    val kilde: Grunnlagsopplysning.Kilde?,
 )

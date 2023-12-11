@@ -7,11 +7,8 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingNy
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -90,8 +87,6 @@ internal class BehandlingInfoDaoTest {
         val lagretBrevutfall = dao.lagreBrevutfall(brevutfall)
 
         lagretBrevutfall shouldNotBe null
-        lagretBrevutfall.etterbetalingNy?.fom shouldBe brevutfall.etterbetalingNy?.fom
-        lagretBrevutfall.etterbetalingNy?.tom shouldBe brevutfall.etterbetalingNy?.tom
         lagretBrevutfall.aldersgruppe shouldBe brevutfall.aldersgruppe
         lagretBrevutfall.kilde shouldBe brevutfall.kilde
     }
@@ -114,42 +109,63 @@ internal class BehandlingInfoDaoTest {
 
         val oppdatertBrevutfall =
             lagretBrevutfall.copy(
-                etterbetalingNy =
-                    EtterbetalingNy(
-                        fom = brevutfall.etterbetalingNy!!.fom.minusYears(1),
-                        tom = brevutfall.etterbetalingNy!!.tom.minusYears(1),
-                    ),
                 aldersgruppe = Aldersgruppe.OVER_18,
             )
 
         val lagretOppdatertBrevutfall = dao.lagreBrevutfall(oppdatertBrevutfall)
 
         lagretOppdatertBrevutfall shouldNotBe null
-        lagretOppdatertBrevutfall.etterbetalingNy?.fom shouldBe brevutfall.etterbetalingNy?.fom?.minusYears(1)
-        lagretOppdatertBrevutfall.etterbetalingNy?.tom shouldBe brevutfall.etterbetalingNy?.tom?.minusYears(1)
         lagretOppdatertBrevutfall.aldersgruppe shouldBe Aldersgruppe.OVER_18
         lagretOppdatertBrevutfall.kilde shouldNotBe null
     }
 
     @Test
+    fun `skal lagre etterbetaling`() {
+        val etterbetaling = etterbetaling(behandlingId)
+
+        val lagretEtterbetaling = dao.lagreEtterbetaling(etterbetaling)
+
+        lagretEtterbetaling shouldNotBe null
+        lagretEtterbetaling.fom shouldBe etterbetaling.fom
+        lagretEtterbetaling.tom shouldBe etterbetaling.tom
+        lagretEtterbetaling.kilde shouldBe etterbetaling.kilde
+    }
+
+    @Test
     fun `skal hente etterbetaling`() {
-        val brevutfall = brevutfall(behandlingId)
+        val etterbetaling = etterbetaling(behandlingId)
 
-        dao.lagreBrevutfall(brevutfall)
-        val etterbetaling = dao.hentEtterbetaling(brevutfall.behandlingId)
+        dao.lagreEtterbetaling(etterbetaling)
+        val etterbetalingHentet = dao.hentEtterbetaling(etterbetaling.behandlingId)
 
-        etterbetaling shouldNotBe null
+        etterbetalingHentet shouldNotBe null
+    }
+
+    @Test
+    fun `skal slette etterbetaling`() {
+        val etterbetaling = etterbetaling(behandlingId)
+
+        val lagretEtterbetaling = dao.lagreEtterbetaling(etterbetaling)
+
+        lagretEtterbetaling shouldNotBe null
+
+        dao.slettEtterbetaling(etterbetaling.behandlingId)
+
+        dao.hentEtterbetaling(etterbetaling.behandlingId) shouldBe null
     }
 
     private fun brevutfall(behandlingId: UUID) =
         Brevutfall(
             behandlingId = behandlingId,
-            etterbetalingNy =
-                EtterbetalingNy(
-                    fom = YearMonth.of(2023, 11),
-                    tom = YearMonth.of(2023, 12),
-                ),
             aldersgruppe = Aldersgruppe.UNDER_18,
+            kilde = Grunnlagsopplysning.Saksbehandler("Z1234567", Tidspunkt.now()),
+        )
+
+    private fun etterbetaling(behandlingId: UUID) =
+        EtterbetalingNy(
+            behandlingId = behandlingId,
+            fom = YearMonth.of(2023, 11),
+            tom = YearMonth.of(2023, 12),
             kilde = Grunnlagsopplysning.Saksbehandler("Z1234567", Tidspunkt.now()),
         )
 

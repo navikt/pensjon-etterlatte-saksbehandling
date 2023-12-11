@@ -2,14 +2,10 @@ package no.nav.etterlatte.behandling.behandlinginfo
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
-import no.nav.etterlatte.libs.common.behandling.BrevutfallException
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingException
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingNy
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Test
@@ -21,37 +17,53 @@ import java.util.UUID.randomUUID
 internal class BehandlingInfoServiceTest {
     private val behandlingInfoDao: BehandlingInfoDao = mockk()
     private val behandlingService: BehandlingService = mockk()
-    private val behandlingInfoService: BehandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService)
+    private val behandlingInfoService: BehandlingInfoService =
+        BehandlingInfoService(behandlingInfoDao, behandlingService)
 
     @Test
     fun `skal feile ved opprettelse av brevutfall hvis behandling ikke kan endres`() {
         val behandlingId = randomUUID()
 
-        every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId, BehandlingStatus.FATTET_VEDTAK)
+        every { behandlingService.hentBehandling(any()) } returns
+            behandling(
+                behandlingId,
+                BehandlingStatus.FATTET_VEDTAK,
+            )
 
         assertThrows<BrevutfallException.BehandlingKanIkkeEndres> {
-            behandlingInfoService.lagreBrevutfall(brevutfall(behandlingId))
+            behandlingInfoService.lagreBrevutfall(behandlingId, brevutfall(behandlingId))
         }
     }
 
     @Test
-    fun `skal feile ved opprettelse av brevutfall hvis etterbetaling fra-dato er foer virkningstidspunkt`() {
+    fun `skal feile ved opprettelse av etterbetaling hvis etterbetaling fra-dato er foer virkningstidspunkt`() {
+        val behandlingId = randomUUID()
+        val etterbetaling =
+            etterbetaling(
+                behandlingId = behandlingId,
+                fom = YearMonth.of(2022, 12),
+                tom = YearMonth.of(2023, 1),
+            )
+
+        every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
+        every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling
+
+        assertThrows<EtterbetalingException.EtterbetalingFraDatoErFoerVirk> {
+            behandlingInfoService.lagreEtterbetaling(behandlingId, etterbetaling)
+        }
+    }
+
+    @Test
+    fun `skal slette etterbetaling hvis den er null og det allerede finnes en etterbetaling`() {
         val behandlingId = randomUUID()
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
+        every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling(behandlingId)
+        every { behandlingInfoDao.slettEtterbetaling(any()) } returns 1
 
-        assertThrows<EtterbetalingException.EtterbetalingFraDatoErFoerVirk> {
-            behandlingInfoService.lagreBrevutfall(
-                brevutfall(
-                    behandlingId,
-                    etterbetalingNy =
-                        EtterbetalingNy(
-                            fom = YearMonth.of(2022, 1),
-                            tom = YearMonth.of(2023, 3),
-                        ),
-                ),
-            )
-        }
+        behandlingInfoService.lagreEtterbetaling(behandlingId, null)
+
+        verify { behandlingInfoDao.slettEtterbetaling(behandlingId) }
     }
 
     private fun behandling(
@@ -65,17 +77,21 @@ internal class BehandlingInfoServiceTest {
                 Virkningstidspunkt.create(YearMonth.of(2023, 1), "ident", "begrunnelse")
         }
 
-    private fun brevutfall(
+    private fun brevutfall(behandlingId: UUID) =
+        Brevutfall(
+            behandlingId = behandlingId,
+            aldersgruppe = Aldersgruppe.UNDER_18,
+            kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
+        )
+
+    private fun etterbetaling(
         behandlingId: UUID,
-        etterbetalingNy: EtterbetalingNy =
-            EtterbetalingNy(
-                fom = YearMonth.of(2023, 1),
-                tom = YearMonth.of(2023, 2),
-            ),
-    ) = Brevutfall(
+        fom: YearMonth = YearMonth.of(2023, 1),
+        tom: YearMonth = YearMonth.of(2023, 2),
+    ) = EtterbetalingNy(
         behandlingId = behandlingId,
-        etterbetalingNy = etterbetalingNy,
-        aldersgruppe = Aldersgruppe.UNDER_18,
+        fom = fom,
+        tom = tom,
         kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
     )
 }

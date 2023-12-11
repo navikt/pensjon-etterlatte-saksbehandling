@@ -8,6 +8,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -20,10 +21,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.config.ApplicationContext
-import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingNy
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -70,12 +68,13 @@ internal class BehandlingInfoRoutesTest {
     }
 
     @Test
-    fun `skal lagre brevutfall`() {
+    fun `skal lagre brevutfall og etterbetaling`() {
         val behandlingId = UUID.randomUUID()
-        val opprettDto = brevutfallDto()
+        val dto = brevutfallOgEtterbetalingDto(behandlingId)
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
         every { behandlingInfoDao.lagreBrevutfall(any()) } returns brevutfall(behandlingId)
+        every { behandlingInfoDao.lagreEtterbetaling(any()) } returns etterbetaling(behandlingId)
 
         testApplication {
             environment { config = hoconApplicationConfig }
@@ -87,25 +86,29 @@ internal class BehandlingInfoRoutesTest {
                 client.post("/api/behandling/${UUID.randomUUID()}/info/brevutfall") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
-                    setBody(brevutfallDto())
+                    setBody(dto)
                 }
 
-            val opprettetBrevutfall: BrevutfallDto = response.body()
+            val opprettetBrevutfallOgEtterbetaling: BrevutfallOgEtterbetalingDto = response.body()
             response.status shouldBe HttpStatusCode.OK
 
-            opprettetBrevutfall.aldersgruppe shouldBe opprettDto.aldersgruppe
-            opprettetBrevutfall.etterbetaling shouldBe opprettDto.etterbetaling
-            opprettetBrevutfall.kilde shouldNotBe null
+            opprettetBrevutfallOgEtterbetaling.brevutfall?.aldersgruppe shouldBe dto.brevutfall?.aldersgruppe
+            opprettetBrevutfallOgEtterbetaling.brevutfall?.kilde shouldNotBe null
+
+            opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoFom shouldBe dto.etterbetaling?.datoFom
+            opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoTom shouldBe dto.etterbetaling?.datoTom
+            opprettetBrevutfallOgEtterbetaling.etterbetaling?.kilde shouldNotBe null
         }
     }
 
     @Test
     fun `skal hente brevutfall`() {
         val behandlingId = UUID.randomUUID()
-        val opprettDto = brevutfallDto()
+        val dto = brevutfallOgEtterbetalingDto(behandlingId)
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
         every { behandlingInfoDao.hentBrevutfall(any()) } returns brevutfall(behandlingId)
+        every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling(behandlingId)
 
         testApplication {
             environment { config = hoconApplicationConfig }
@@ -118,20 +121,21 @@ internal class BehandlingInfoRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            val hentetBrevutfall: BrevutfallDto = response.body()
+            val hentetBrevutfall: BrevutfallOgEtterbetalingDto = response.body()
+            println(response.bodyAsText())
             response.status shouldBe HttpStatusCode.OK
 
-            hentetBrevutfall.aldersgruppe shouldBe opprettDto.aldersgruppe
+            hentetBrevutfall.brevutfall?.aldersgruppe shouldBe dto.brevutfall?.aldersgruppe
         }
     }
 
     @Test
     fun `skal hente etterbetaling`() {
         val behandlingId = UUID.randomUUID()
-        val opprettDto = brevutfallDto()
+        val dto = brevutfallOgEtterbetalingDto(behandlingId)
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
-        every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling()
+        every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling(behandlingId)
 
         testApplication {
             environment { config = hoconApplicationConfig }
@@ -147,8 +151,8 @@ internal class BehandlingInfoRoutesTest {
             val etterbetaling: EtterbetalingDto = response.body()
             response.status shouldBe HttpStatusCode.OK
 
-            etterbetaling.datoFom shouldBe opprettDto.etterbetaling?.datoFom
-            etterbetaling.datoTom shouldBe opprettDto.etterbetaling?.datoTom
+            etterbetaling.datoFom shouldBe dto.etterbetaling?.datoFom
+            etterbetaling.datoTom shouldBe dto.etterbetaling?.datoTom
         }
     }
 
@@ -167,23 +171,29 @@ internal class BehandlingInfoRoutesTest {
     private fun brevutfall(behandlingId: UUID) =
         Brevutfall(
             behandlingId = behandlingId,
-            etterbetalingNy = EtterbetalingNy(YearMonth.of(2023, 1), YearMonth.of(2023, 2)),
             aldersgruppe = Aldersgruppe.UNDER_18,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
 
-    private fun etterbetaling() = EtterbetalingNy(YearMonth.of(2023, 1), YearMonth.of(2023, 2))
+    private fun etterbetaling(behandlingId: UUID) =
+        EtterbetalingNy(
+            behandlingId = behandlingId,
+            fom = YearMonth.of(2023, 1),
+            tom = YearMonth.of(2023, 2),
+            kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
+        )
 
-    private fun brevutfallDto() =
-        BrevutfallDto(
+    private fun brevutfallOgEtterbetalingDto(behandlingId: UUID = UUID.randomUUID()) =
+        BrevutfallOgEtterbetalingDto(
             behandlingId = UUID.randomUUID(),
+            brevutfall = BrevutfallDto(behandlingId, Aldersgruppe.UNDER_18, null),
             etterbetaling =
                 EtterbetalingDto(
+                    behandlingId = behandlingId,
                     datoFom = LocalDate.of(2023, 1, 1),
                     datoTom = LocalDate.of(2023, 2, 28),
+                    null,
                 ),
-            aldersgruppe = Aldersgruppe.UNDER_18,
-            kilde = null,
         )
 
     private fun ApplicationTestBuilder.createClient() =

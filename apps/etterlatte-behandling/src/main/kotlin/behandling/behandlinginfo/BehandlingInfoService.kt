@@ -2,10 +2,6 @@ package no.nav.etterlatte.behandling.behandlinginfo
 
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
-import no.nav.etterlatte.libs.common.behandling.BrevutfallException
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingException
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingNy
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import java.util.UUID
@@ -14,13 +10,15 @@ class BehandlingInfoService(
     private val behandlingInfoDao: BehandlingInfoDao,
     private val behandlingService: BehandlingService,
 ) {
-    fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall {
+    fun lagreBrevutfall(
+        behandlingId: UUID,
+        brevutfall: Brevutfall,
+    ): Brevutfall {
         val behandling =
-            behandlingService.hentBehandling(brevutfall.behandlingId)
+            behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
 
         sjekkBehandlingKanEndres(behandling)
-        sjekkEtterbetalingFoerVirkningstidspunkt(behandling, brevutfall)
         sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
 
         return behandlingInfoDao.lagreBrevutfall(brevutfall)
@@ -28,6 +26,27 @@ class BehandlingInfoService(
 
     fun hentBrevutfall(behandlingId: UUID): Brevutfall? {
         return behandlingInfoDao.hentBrevutfall(behandlingId)
+    }
+
+    fun lagreEtterbetaling(
+        behandlingId: UUID,
+        etterbetaling: EtterbetalingNy?,
+    ): EtterbetalingNy? {
+        val behandling =
+            behandlingService.hentBehandling(behandlingId)
+                ?: throw GenerellIkkeFunnetException()
+
+        sjekkBehandlingKanEndres(behandling)
+
+        if (etterbetaling == null) {
+            hentEtterbetaling(behandlingId)?.let {
+                behandlingInfoDao.slettEtterbetaling(behandlingId)
+            }
+            return null
+        }
+
+        sjekkEtterbetalingFoerVirkningstidspunkt(behandling, etterbetaling)
+        return behandlingInfoDao.lagreEtterbetaling(etterbetaling)
     }
 
     fun hentEtterbetaling(behandlingId: UUID): EtterbetalingNy? {
@@ -40,14 +59,14 @@ class BehandlingInfoService(
 
     private fun sjekkEtterbetalingFoerVirkningstidspunkt(
         behandling: Behandling,
-        brevutfall: Brevutfall,
+        etterbetaling: EtterbetalingNy,
     ) {
         val virkningstidspunkt =
             behandling.virkningstidspunkt?.dato
                 ?: throw BrevutfallException.VirkningstidspunktIkkeSatt(behandling.id)
 
-        if (brevutfall.etterbetalingNy != null && brevutfall.etterbetalingNy!!.fom < virkningstidspunkt) {
-            throw EtterbetalingException.EtterbetalingFraDatoErFoerVirk(brevutfall.etterbetalingNy!!.fom, virkningstidspunkt)
+        if (etterbetaling.fom < virkningstidspunkt) {
+            throw EtterbetalingException.EtterbetalingFraDatoErFoerVirk(etterbetaling.fom, virkningstidspunkt)
         }
     }
 

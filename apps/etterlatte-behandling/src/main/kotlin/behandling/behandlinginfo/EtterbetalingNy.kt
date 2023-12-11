@@ -1,12 +1,16 @@
-package no.nav.etterlatte.libs.common.behandling
+package no.nav.etterlatte.behandling.behandlinginfo
 
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 
 data class EtterbetalingNy(
+    val behandlingId: UUID,
     val fom: YearMonth,
     val tom: YearMonth,
+    val kilde: Grunnlagsopplysning.Saksbehandler,
 ) {
     init {
         if (fom > tom) {
@@ -19,13 +23,15 @@ data class EtterbetalingNy(
 
     companion object {
         fun fra(
+            behandlingId: UUID,
             datoFom: LocalDate?,
             datoTom: LocalDate?,
+            kilde: Grunnlagsopplysning.Saksbehandler,
         ): EtterbetalingNy {
             if (datoFom == null || datoTom == null) {
                 throw EtterbetalingException.EtterbetalingManglerDato()
             }
-            return EtterbetalingNy(YearMonth.from(datoFom), YearMonth.from(datoTom))
+            return EtterbetalingNy(behandlingId, YearMonth.from(datoFom), YearMonth.from(datoTom), kilde)
         }
     }
 }

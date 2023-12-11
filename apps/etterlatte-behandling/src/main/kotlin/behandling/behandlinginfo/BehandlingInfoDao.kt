@@ -1,44 +1,30 @@
 package no.nav.etterlatte.behandling.behandlinginfo
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
-import no.nav.etterlatte.libs.common.behandling.Brevutfall
-import no.nav.etterlatte.libs.common.behandling.EtterbetalingNy
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
-import no.nav.helse.rapids_rivers.toUUID
 import java.sql.Connection
 import java.sql.ResultSet
-import java.time.YearMonth
 import java.util.UUID
 
 class BehandlingInfoDao(private val connection: () -> Connection) {
     fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall {
         return connection().prepareStatement(
             """
-            INSERT INTO behandling_info(
-                behandling_id, oppdatert, etterbetaling_fom, etterbetaling_tom, aldersgruppe, kilde
-            )
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO behandling_info(behandling_id, oppdatert, brevutfall)
+            VALUES (?, ?, ?)
             ON CONFLICT (behandling_id) DO 
-            UPDATE SET 
-                oppdatert = excluded.oppdatert, 
-                etterbetaling_fom = excluded.etterbetaling_fom, 
-                etterbetaling_tom = excluded.etterbetaling_tom, 
-                aldersgruppe = excluded.aldersgruppe,
-                kilde = excluded.kilde
+            UPDATE SET oppdatert = excluded.oppdatert, brevutfall = excluded.brevutfall
             """.trimIndent(),
         )
             .apply {
                 setObject(1, brevutfall.behandlingId)
                 setTidspunkt(2, Tidspunkt.now())
-                setDate(3, brevutfall.etterbetalingNy?.fom?.atDay(1)?.let { java.sql.Date.valueOf(it) })
-                setDate(4, brevutfall.etterbetalingNy?.tom?.atEndOfMonth()?.let { java.sql.Date.valueOf(it) })
-                setString(5, brevutfall.aldersgruppe?.name)
-                setString(6, brevutfall.kilde.toJson())
+                setJsonb(3, brevutfall)
             }
             .run { executeUpdate() }
             .also { require(it == 1) }
@@ -49,7 +35,7 @@ class BehandlingInfoDao(private val connection: () -> Connection) {
         return connection()
             .prepareStatement(
                 """
-                    SELECT behandling_id, etterbetaling_fom, etterbetaling_tom, aldersgruppe, kilde 
+                    SELECT behandling_id, brevutfall 
                     FROM behandling_info 
                     WHERE behandling_id = ?::UUID
                     """,
@@ -58,36 +44,58 @@ class BehandlingInfoDao(private val connection: () -> Connection) {
             .run { executeQuery().singleOrNull { toBrevutfall() } }
     }
 
+    fun lagreEtterbetaling(etterbetaling: EtterbetalingNy): EtterbetalingNy {
+        return connection().prepareStatement(
+            """
+            INSERT INTO behandling_info(behandling_id, oppdatert, etterbetaling)
+            VALUES (?, ?, ?)
+            ON CONFLICT (behandling_id) DO 
+            UPDATE SET oppdatert = excluded.oppdatert, etterbetaling = excluded.etterbetaling
+            """.trimIndent(),
+        )
+            .apply {
+                setObject(1, etterbetaling.behandlingId)
+                setTidspunkt(2, Tidspunkt.now())
+                setJsonb(3, etterbetaling)
+            }
+            .run { executeUpdate() }
+            .also { require(it == 1) }
+            .let {
+                hentEtterbetaling(etterbetaling.behandlingId)
+                    ?: throw InternfeilException("Feilet under lagring av etterbetaling")
+            }
+    }
+
+    fun slettEtterbetaling(behandlingId: UUID): Int {
+        return connection().prepareStatement(
+            """
+            UPDATE behandling_info SET oppdatert = ?, etterbetaling = ?
+            WHERE behandling_id = ?
+            """.trimIndent(),
+        )
+            .apply {
+                setTidspunkt(1, Tidspunkt.now())
+                setJsonb(2, null)
+                setObject(3, behandlingId)
+            }
+            .run { executeUpdate() }
+            .also { require(it == 1) }
+    }
+
     fun hentEtterbetaling(behandlingId: UUID): EtterbetalingNy? {
         return connection()
             .prepareStatement(
                 """
-                    SELECT behandling_id, etterbetaling_fom, etterbetaling_tom 
+                    SELECT behandling_id, etterbetaling 
                     FROM behandling_info 
-                    WHERE behandling_id = ?::UUID AND etterbetaling_fom IS NOT Null AND etterbetaling_tom IS NOT NULL
+                    WHERE behandling_id = ?::UUID AND etterbetaling IS NOT NULL
                     """,
             )
             .apply { setObject(1, behandlingId) }
             .run { executeQuery().singleOrNull { toEtterbetaling() } }
     }
 
-    private fun ResultSet.toBrevutfall() =
-        Brevutfall(
-            behandlingId = getString("behandling_id").toUUID(),
-            etterbetalingNy =
-                getDate("etterbetaling_fom")?.let {
-                    EtterbetalingNy(
-                        fom = getDate("etterbetaling_fom").toLocalDate().let { YearMonth.from(it) },
-                        tom = getDate("etterbetaling_tom").toLocalDate().let { YearMonth.from(it) },
-                    )
-                },
-            aldersgruppe = getString("aldersgruppe")?.let { Aldersgruppe.valueOf(it) },
-            kilde = getString("kilde").let { objectMapper.readValue(it) },
-        )
+    private fun ResultSet.toBrevutfall(): Brevutfall = this.getString("brevutfall").let { objectMapper.readValue(it) }
 
-    private fun ResultSet.toEtterbetaling() =
-        EtterbetalingNy(
-            fom = getDate("etterbetaling_fom").toLocalDate().let { YearMonth.from(it) },
-            tom = getDate("etterbetaling_tom").toLocalDate().let { YearMonth.from(it) },
-        )
+    private fun ResultSet.toEtterbetaling(): EtterbetalingNy = this.getString("etterbetaling").let { objectMapper.readValue(it) }
 }

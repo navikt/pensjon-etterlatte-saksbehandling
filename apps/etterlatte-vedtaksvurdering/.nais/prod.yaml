@@ -87,7 +87,6 @@ spec:
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-behandling
         - application: etterlatte-samordning-vedtak
           permissions:

@@ -73,7 +73,6 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-beregning
         - application: etterlatte-vedtaksvurdering

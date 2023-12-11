@@ -127,7 +127,6 @@ spec:
       rules:
         - application: etterlatte-klage
         - application: etterlatte-brev-api
-        - application: etterlatte-vilkaar
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
         - application: etterlatte-vedtaksvurdering

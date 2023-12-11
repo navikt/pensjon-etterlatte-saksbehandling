@@ -134,7 +134,6 @@ spec:
     outbound:
       rules:
         - application: etterlatte-brev-api
-        - application: etterlatte-vilkaar
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
         - application: skjermede-personer-pip

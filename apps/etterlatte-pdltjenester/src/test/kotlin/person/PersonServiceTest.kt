@@ -53,7 +53,7 @@ internal class PersonServiceTest {
     private val pdlKlient = mockk<PdlKlient>()
     private val ppsKlient = mockk<ParallelleSannheterKlient>()
     private val featureToggleService = mockk<FeatureToggleService>()
-    private val personService = PersonService(pdlKlient, ppsKlient, featureToggleService)
+    private val personService = PersonService(pdlKlient, ppsKlient)
 
     private val aktorIdMedNpid = "1234567890123"
     private val aktorIdMedFolkeregisterIdent = AVDOED_FOEDSELSNUMMER.value

@@ -12,7 +12,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.producer
@@ -48,7 +47,7 @@ object OpprettSoeknadFeature : TestDataFeature {
                                     gjenlevendeFnr = it["fnrGjenlevende"]!!,
                                     avdoedFnr = it["fnrAvdoed"]!!,
                                     barnFnr = it["fnrBarn"]!!,
-                                ).toJson(),
+                                ),
                                 mapOf("NavIdent" to (navIdentFraToken()!!.toByteArray())),
                             )
                         }

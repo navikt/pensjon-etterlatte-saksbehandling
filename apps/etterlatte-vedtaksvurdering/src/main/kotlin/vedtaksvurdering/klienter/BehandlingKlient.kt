@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -228,11 +229,13 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
         )
         val resource = Resource(clientId = clientId, url = "$resourceUrl/fattvedtak")
         val response =
-            downstreamResourceClient.post(
-                resource = resource,
-                brukerTokenInfo = brukerTokenInfo,
-                postBody = vedtakEndringDTO,
-            )
+            retryOgPakkUt {
+                downstreamResourceClient.post(
+                    resource = resource,
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = vedtakEndringDTO,
+                )
+            }
         return when (response) {
             is Ok -> true
             is Err -> {

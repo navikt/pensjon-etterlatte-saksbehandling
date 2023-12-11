@@ -93,6 +93,5 @@ spec:
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-brev-api
         - application: etterlatte-vedtaksvurdering
-        - application: etterlatte-behandling
         - application: etterlatte-statistikk
         - application: etterlatte-beregning-kafka

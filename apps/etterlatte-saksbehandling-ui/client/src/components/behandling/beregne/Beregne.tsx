@@ -30,6 +30,7 @@ import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -45,6 +46,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const erOpphoer = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
+  const visBrevutfall = useFeatureEnabledMedDefault('pensjon-etterlatte.brevutfall-og-etterbetaling', false)
 
   useEffect(() => {
     if (!erOpphoer) {
@@ -113,7 +115,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                   </InfoAlert>
                 )}
 
-                <Brevutfall behandling={behandling} />
+                {visBrevutfall && <Brevutfall behandling={behandling} />}
               </BeregningWrapper>
             )
           )}
@@ -159,4 +161,5 @@ const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
 
 const BeregningWrapper = styled.div`
   padding: 0 4em;
+  margin-bottom: 4em;
 `

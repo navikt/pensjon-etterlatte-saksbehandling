@@ -54,7 +54,7 @@ internal class BehandlingInfoDaoTest {
                 jdbcUrl = postgreSQLContainer.jdbcUrl,
                 username = postgreSQLContainer.username,
                 password = postgreSQLContainer.password,
-                maxPoolSize = 20,
+                maxPoolSize = 30,
             ).apply { migrate() }
 
         sakDao = SakDao { dataSource.connection }
@@ -87,7 +87,7 @@ internal class BehandlingInfoDaoTest {
     fun `skal lagre brevutfall`() {
         val brevutfall = brevutfall(behandlingId)
 
-        val lagretBrevutfall = dao.lagre(brevutfall)
+        val lagretBrevutfall = dao.lagreBrevutfall(brevutfall)
 
         lagretBrevutfall shouldNotBe null
         lagretBrevutfall.etterbetalingNy?.fom shouldBe brevutfall.etterbetalingNy?.fom
@@ -100,8 +100,8 @@ internal class BehandlingInfoDaoTest {
     fun `skal hente brevutfall`() {
         val brevutfall = brevutfall(behandlingId)
 
-        dao.lagre(brevutfall)
-        val lagretBrevutfall = dao.hent(brevutfall.behandlingId)
+        dao.lagreBrevutfall(brevutfall)
+        val lagretBrevutfall = dao.hentBrevutfall(brevutfall.behandlingId)
 
         lagretBrevutfall shouldNotBe null
     }
@@ -110,7 +110,7 @@ internal class BehandlingInfoDaoTest {
     fun `skal oppdatere brevutfall`() {
         val brevutfall = brevutfall(behandlingId)
 
-        val lagretBrevutfall = dao.lagre(brevutfall)
+        val lagretBrevutfall = dao.lagreBrevutfall(brevutfall)
 
         val oppdatertBrevutfall =
             lagretBrevutfall.copy(
@@ -122,13 +122,23 @@ internal class BehandlingInfoDaoTest {
                 aldersgruppe = Aldersgruppe.OVER_18,
             )
 
-        val lagretOppdatertBrevutfall = dao.lagre(oppdatertBrevutfall)
+        val lagretOppdatertBrevutfall = dao.lagreBrevutfall(oppdatertBrevutfall)
 
         lagretOppdatertBrevutfall shouldNotBe null
         lagretOppdatertBrevutfall.etterbetalingNy?.fom shouldBe brevutfall.etterbetalingNy?.fom?.minusYears(1)
         lagretOppdatertBrevutfall.etterbetalingNy?.tom shouldBe brevutfall.etterbetalingNy?.tom?.minusYears(1)
         lagretOppdatertBrevutfall.aldersgruppe shouldBe Aldersgruppe.OVER_18
         lagretOppdatertBrevutfall.kilde shouldNotBe null
+    }
+
+    @Test
+    fun `skal hente etterbetaling`() {
+        val brevutfall = brevutfall(behandlingId)
+
+        dao.lagreBrevutfall(brevutfall)
+        val etterbetaling = dao.hentEtterbetaling(brevutfall.behandlingId)
+
+        etterbetaling shouldNotBe null
     }
 
     private fun brevutfall(behandlingId: UUID) =

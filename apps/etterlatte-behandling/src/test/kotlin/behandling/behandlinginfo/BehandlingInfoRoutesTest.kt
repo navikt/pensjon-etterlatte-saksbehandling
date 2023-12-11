@@ -75,7 +75,7 @@ internal class BehandlingInfoRoutesTest {
         val opprettDto = brevutfallDto()
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
-        every { behandlingInfoDao.lagre(any()) } returns brevutfall(behandlingId)
+        every { behandlingInfoDao.lagreBrevutfall(any()) } returns brevutfall(behandlingId)
 
         testApplication {
             environment { config = hoconApplicationConfig }
@@ -105,7 +105,7 @@ internal class BehandlingInfoRoutesTest {
         val opprettDto = brevutfallDto()
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
-        every { behandlingInfoDao.hent(any()) } returns brevutfall(behandlingId)
+        every { behandlingInfoDao.hentBrevutfall(any()) } returns brevutfall(behandlingId)
 
         testApplication {
             environment { config = hoconApplicationConfig }
@@ -122,6 +122,33 @@ internal class BehandlingInfoRoutesTest {
             response.status shouldBe HttpStatusCode.OK
 
             hentetBrevutfall.aldersgruppe shouldBe opprettDto.aldersgruppe
+        }
+    }
+
+    @Test
+    fun `skal hente etterbetaling`() {
+        val behandlingId = UUID.randomUUID()
+        val opprettDto = brevutfallDto()
+
+        every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
+        every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling()
+
+        testApplication {
+            environment { config = hoconApplicationConfig }
+            application { module(applicationContext) }
+
+            val client = createClient()
+
+            val response =
+                client.get("/api/behandling/${UUID.randomUUID()}/info/etterbetaling") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            val etterbetaling: EtterbetalingDto = response.body()
+            response.status shouldBe HttpStatusCode.OK
+
+            etterbetaling.datoFom shouldBe opprettDto.etterbetaling?.datoFom
+            etterbetaling.datoTom shouldBe opprettDto.etterbetaling?.datoTom
         }
     }
 
@@ -144,6 +171,8 @@ internal class BehandlingInfoRoutesTest {
             aldersgruppe = Aldersgruppe.UNDER_18,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
+
+    private fun etterbetaling() = EtterbetalingNy(YearMonth.of(2023, 1), YearMonth.of(2023, 2))
 
     private fun brevutfallDto() =
         BrevutfallDto(

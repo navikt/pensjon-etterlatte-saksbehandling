@@ -16,7 +16,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 class BehandlingInfoDao(private val connection: () -> Connection) {
-    fun lagre(brevutfall: Brevutfall): Brevutfall {
+    fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall {
         return connection().prepareStatement(
             """
             INSERT INTO behandling_info(
@@ -42,10 +42,10 @@ class BehandlingInfoDao(private val connection: () -> Connection) {
             }
             .run { executeUpdate() }
             .also { require(it == 1) }
-            .let { hent(brevutfall.behandlingId) ?: throw InternfeilException("Feilet under lagring av brevutfall") }
+            .let { hentBrevutfall(brevutfall.behandlingId) ?: throw InternfeilException("Feilet under lagring av brevutfall") }
     }
 
-    fun hent(behandlingId: UUID): Brevutfall? {
+    fun hentBrevutfall(behandlingId: UUID): Brevutfall? {
         return connection()
             .prepareStatement(
                 """
@@ -56,6 +56,19 @@ class BehandlingInfoDao(private val connection: () -> Connection) {
             )
             .apply { setObject(1, behandlingId) }
             .run { executeQuery().singleOrNull { toBrevutfall() } }
+    }
+
+    fun hentEtterbetaling(behandlingId: UUID): EtterbetalingNy? {
+        return connection()
+            .prepareStatement(
+                """
+                    SELECT behandling_id, etterbetaling_fom, etterbetaling_tom 
+                    FROM behandling_info 
+                    WHERE behandling_id = ?::UUID AND etterbetaling_fom IS NOT Null AND etterbetaling_tom IS NOT NULL
+                    """,
+            )
+            .apply { setObject(1, behandlingId) }
+            .run { executeQuery().singleOrNull { toEtterbetaling() } }
     }
 
     private fun ResultSet.toBrevutfall() =
@@ -70,5 +83,11 @@ class BehandlingInfoDao(private val connection: () -> Connection) {
                 },
             aldersgruppe = getString("aldersgruppe")?.let { Aldersgruppe.valueOf(it) },
             kilde = getString("kilde").let { objectMapper.readValue(it) },
+        )
+
+    private fun ResultSet.toEtterbetaling() =
+        EtterbetalingNy(
+            fom = getDate("etterbetaling_fom").toLocalDate().let { YearMonth.from(it) },
+            tom = getDate("etterbetaling_tom").toLocalDate().let { YearMonth.from(it) },
         )
 }

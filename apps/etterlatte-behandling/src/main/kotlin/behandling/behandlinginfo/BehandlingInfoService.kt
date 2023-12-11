@@ -23,15 +23,15 @@ class BehandlingInfoService(
         sjekkEtterbetalingFoerVirkningstidspunkt(behandling, brevutfall)
         sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
 
-        return behandlingInfoDao.lagre(brevutfall)
+        return behandlingInfoDao.lagreBrevutfall(brevutfall)
     }
 
     fun hentBrevutfall(behandlingId: UUID): Brevutfall? {
-        return behandlingInfoDao.hent(behandlingId)
+        return behandlingInfoDao.hentBrevutfall(behandlingId)
     }
 
     fun hentEtterbetaling(behandlingId: UUID): EtterbetalingNy? {
-        return behandlingInfoDao.hent(behandlingId)?.etterbetalingNy
+        return behandlingInfoDao.hentEtterbetaling(behandlingId)
     }
 
     private fun sjekkBehandlingKanEndres(behandling: Behandling) {

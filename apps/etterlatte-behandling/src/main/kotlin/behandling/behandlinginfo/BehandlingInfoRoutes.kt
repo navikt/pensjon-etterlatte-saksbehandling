@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.brevutfall
+package no.nav.etterlatte.behandling.behandlinginfo
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -11,6 +11,9 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingNy
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.medBody
@@ -19,10 +22,10 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import java.time.LocalDate
 import java.util.UUID
 
-internal fun Route.metadataRoutes(service: BrevutfallService) {
+internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
     val logger = application.log
 
-    route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
+    route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/info") {
         route("/brevutfall") {
             post {
                 medBody<BrevutfallDto> { dto ->
@@ -58,9 +61,9 @@ private fun BrevutfallDto.toBrevutfall(
 ): Brevutfall =
     Brevutfall(
         behandlingId = behandlingId,
-        etterbetaling =
+        etterbetalingNy =
             if (etterbetaling?.datoFom != null && etterbetaling.datoTom != null) {
-                Etterbetaling.fra(etterbetaling.datoFom, etterbetaling.datoTom)
+                EtterbetalingNy.fra(etterbetaling.datoFom, etterbetaling.datoTom)
             } else {
                 null
             },
@@ -71,12 +74,12 @@ private fun BrevutfallDto.toBrevutfall(
 private fun Brevutfall.toDto() =
     BrevutfallDto(
         behandlingId = behandlingId,
-        etterbetaling = etterbetaling?.toDto(),
+        etterbetaling = etterbetalingNy?.toDto(),
         aldersgruppe = aldersgruppe,
         kilde = kilde,
     )
 
-private fun Etterbetaling.toDto() =
+private fun EtterbetalingNy.toDto() =
     EtterbetalingDto(
         datoFom = fom.atDay(1),
         datoTom = tom.atEndOfMonth(),

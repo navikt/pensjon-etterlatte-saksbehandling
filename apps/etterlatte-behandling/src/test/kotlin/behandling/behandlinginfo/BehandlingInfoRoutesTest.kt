@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.brevutfall
+package no.nav.etterlatte.behandling.behandlinginfo
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -20,7 +20,10 @@ import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingNy
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -38,9 +41,9 @@ import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BrevutfallRoutesTest {
+internal class BehandlingInfoRoutesTest {
     private val applicationContext: ApplicationContext = mockk(relaxed = true)
-    private var brevutfallDao: BrevutfallDao = mockk()
+    private var behandlingInfoDao: BehandlingInfoDao = mockk()
     private var behandlingService: BehandlingService = mockk()
 
     private val server: MockOAuth2Server = MockOAuth2Server()
@@ -52,13 +55,13 @@ internal class BrevutfallRoutesTest {
         val httpServer = server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
 
-        brevutfallDao = mockk()
+        behandlingInfoDao = mockk()
         every { applicationContext.tilgangService } returns
             mockk {
                 every { harTilgangTilBehandling(any(), any()) } returns true
                 every { harTilgangTilSak(any(), any()) } returns true
             }
-        every { applicationContext.brevutfallService } returns BrevutfallService(brevutfallDao, behandlingService)
+        every { applicationContext.behandlingInfoService } returns BehandlingInfoService(behandlingInfoDao, behandlingService)
     }
 
     @AfterAll
@@ -72,7 +75,7 @@ internal class BrevutfallRoutesTest {
         val opprettDto = brevutfallDto()
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
-        every { brevutfallDao.lagre(any()) } returns brevutfall(behandlingId)
+        every { behandlingInfoDao.lagre(any()) } returns brevutfall(behandlingId)
 
         testApplication {
             environment { config = hoconApplicationConfig }
@@ -81,7 +84,7 @@ internal class BrevutfallRoutesTest {
             val client = createClient()
 
             val response =
-                client.post("/api/behandling/${UUID.randomUUID()}/brevutfall") {
+                client.post("/api/behandling/${UUID.randomUUID()}/info/brevutfall") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                     setBody(brevutfallDto())
@@ -102,7 +105,7 @@ internal class BrevutfallRoutesTest {
         val opprettDto = brevutfallDto()
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
-        every { brevutfallDao.hent(any()) } returns brevutfall(behandlingId)
+        every { behandlingInfoDao.hent(any()) } returns brevutfall(behandlingId)
 
         testApplication {
             environment { config = hoconApplicationConfig }
@@ -111,7 +114,7 @@ internal class BrevutfallRoutesTest {
             val client = createClient()
 
             val response =
-                client.get("/api/behandling/${UUID.randomUUID()}/brevutfall") {
+                client.get("/api/behandling/${UUID.randomUUID()}/info/brevutfall") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
@@ -137,7 +140,7 @@ internal class BrevutfallRoutesTest {
     private fun brevutfall(behandlingId: UUID) =
         Brevutfall(
             behandlingId = behandlingId,
-            etterbetaling = Etterbetaling(YearMonth.of(2023, 1), YearMonth.of(2023, 2)),
+            etterbetalingNy = EtterbetalingNy(YearMonth.of(2023, 1), YearMonth.of(2023, 2)),
             aldersgruppe = Aldersgruppe.UNDER_18,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )

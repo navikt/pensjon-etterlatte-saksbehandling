@@ -1,10 +1,15 @@
-package no.nav.etterlatte.behandling.brevutfall
+package no.nav.etterlatte.behandling.behandlinginfo
 
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.BrevutfallException
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingException
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingNy
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import org.junit.jupiter.api.Test
@@ -13,10 +18,10 @@ import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
 
-internal class BrevutfallServiceTest {
-    private val brevutfallDao: BrevutfallDao = mockk()
+internal class BehandlingInfoServiceTest {
+    private val behandlingInfoDao: BehandlingInfoDao = mockk()
     private val behandlingService: BehandlingService = mockk()
-    private val brevutfallService: BrevutfallService = BrevutfallService(brevutfallDao, behandlingService)
+    private val behandlingInfoService: BehandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService)
 
     @Test
     fun `skal feile ved opprettelse av brevutfall hvis behandling ikke kan endres`() {
@@ -25,7 +30,7 @@ internal class BrevutfallServiceTest {
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId, BehandlingStatus.FATTET_VEDTAK)
 
         assertThrows<BrevutfallException.BehandlingKanIkkeEndres> {
-            brevutfallService.lagreBrevutfall(brevutfall(behandlingId))
+            behandlingInfoService.lagreBrevutfall(brevutfall(behandlingId))
         }
     }
 
@@ -35,12 +40,12 @@ internal class BrevutfallServiceTest {
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
 
-        assertThrows<BrevutfallException.EtterbetalingFraDatoErFoerVirk> {
-            brevutfallService.lagreBrevutfall(
+        assertThrows<EtterbetalingException.EtterbetalingFraDatoErFoerVirk> {
+            behandlingInfoService.lagreBrevutfall(
                 brevutfall(
                     behandlingId,
-                    etterbetaling =
-                        Etterbetaling(
+                    etterbetalingNy =
+                        EtterbetalingNy(
                             fom = YearMonth.of(2022, 1),
                             tom = YearMonth.of(2023, 3),
                         ),
@@ -62,14 +67,14 @@ internal class BrevutfallServiceTest {
 
     private fun brevutfall(
         behandlingId: UUID,
-        etterbetaling: Etterbetaling =
-            Etterbetaling(
+        etterbetalingNy: EtterbetalingNy =
+            EtterbetalingNy(
                 fom = YearMonth.of(2023, 1),
                 tom = YearMonth.of(2023, 2),
             ),
     ) = Brevutfall(
         behandlingId = behandlingId,
-        etterbetaling = etterbetaling,
+        etterbetalingNy = etterbetalingNy,
         aldersgruppe = Aldersgruppe.UNDER_18,
         kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
     )

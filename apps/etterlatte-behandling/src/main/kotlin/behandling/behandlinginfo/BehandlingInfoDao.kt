@@ -1,6 +1,9 @@
-package no.nav.etterlatte.behandling.brevutfall
+package no.nav.etterlatte.behandling.behandlinginfo
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingNy
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -12,11 +15,11 @@ import java.sql.ResultSet
 import java.time.YearMonth
 import java.util.UUID
 
-class BrevutfallDao(private val connection: () -> Connection) {
+class BehandlingInfoDao(private val connection: () -> Connection) {
     fun lagre(brevutfall: Brevutfall): Brevutfall {
         return connection().prepareStatement(
             """
-            INSERT INTO brevutfall(
+            INSERT INTO behandling_info(
                 behandling_id, oppdatert, etterbetaling_fom, etterbetaling_tom, aldersgruppe, kilde
             )
             VALUES (?, ?, ?, ?, ?, ?)
@@ -32,8 +35,8 @@ class BrevutfallDao(private val connection: () -> Connection) {
             .apply {
                 setObject(1, brevutfall.behandlingId)
                 setTidspunkt(2, Tidspunkt.now())
-                setDate(3, brevutfall.etterbetaling?.fom?.atDay(1)?.let { java.sql.Date.valueOf(it) })
-                setDate(4, brevutfall.etterbetaling?.tom?.atEndOfMonth()?.let { java.sql.Date.valueOf(it) })
+                setDate(3, brevutfall.etterbetalingNy?.fom?.atDay(1)?.let { java.sql.Date.valueOf(it) })
+                setDate(4, brevutfall.etterbetalingNy?.tom?.atEndOfMonth()?.let { java.sql.Date.valueOf(it) })
                 setString(5, brevutfall.aldersgruppe?.name)
                 setString(6, brevutfall.kilde.toJson())
             }
@@ -47,7 +50,7 @@ class BrevutfallDao(private val connection: () -> Connection) {
             .prepareStatement(
                 """
                     SELECT behandling_id, etterbetaling_fom, etterbetaling_tom, aldersgruppe, kilde 
-                    FROM brevutfall 
+                    FROM behandling_info 
                     WHERE behandling_id = ?::UUID
                     """,
             )
@@ -58,9 +61,9 @@ class BrevutfallDao(private val connection: () -> Connection) {
     private fun ResultSet.toBrevutfall() =
         Brevutfall(
             behandlingId = getString("behandling_id").toUUID(),
-            etterbetaling =
+            etterbetalingNy =
                 getDate("etterbetaling_fom")?.let {
-                    Etterbetaling(
+                    EtterbetalingNy(
                         fom = getDate("etterbetaling_fom").toLocalDate().let { YearMonth.from(it) },
                         tom = getDate("etterbetaling_tom").toLocalDate().let { YearMonth.from(it) },
                     )

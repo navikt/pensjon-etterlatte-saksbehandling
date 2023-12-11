@@ -20,7 +20,7 @@ import java.time.Month
 import java.time.YearMonth
 import java.util.stream.Stream
 
-class EtterbetalingServiceTest {
+class EtterbetalingNyServiceTest {
     private val behandlingService: BehandlingService = mockk()
     private val etterbetalingDao: EtterbetalingDao = mockk()
 

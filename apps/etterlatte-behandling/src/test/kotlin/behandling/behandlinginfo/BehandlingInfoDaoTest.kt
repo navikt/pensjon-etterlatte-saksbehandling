@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.brevutfall
+package no.nav.etterlatte.behandling.behandlinginfo
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -7,8 +7,11 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingNy
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -29,11 +32,11 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BrevutfallDaoTest {
+internal class BehandlingInfoDaoTest {
     private lateinit var dataSource: DataSource
     private lateinit var behandlingDao: BehandlingDao
     private lateinit var sakDao: SakDao
-    private lateinit var dao: BrevutfallDao
+    private lateinit var dao: BehandlingInfoDao
 
     private lateinit var behandlingId: UUID
 
@@ -61,12 +64,12 @@ internal class BrevutfallDaoTest {
                 RevurderingDao { dataSource.connection },
             ) { dataSource.connection }
 
-        dao = BrevutfallDao { dataSource.connection }
+        dao = BehandlingInfoDao { dataSource.connection }
     }
 
     @BeforeEach
     fun reset() {
-        dataSource.connection.prepareStatement("""TRUNCATE TABLE brevutfall""").executeUpdate()
+        dataSource.connection.prepareStatement("""TRUNCATE TABLE behandling_info""").executeUpdate()
 
         val sak = opprettSakForTest()
         opprettBehandlingForTest(sak).let {
@@ -87,8 +90,8 @@ internal class BrevutfallDaoTest {
         val lagretBrevutfall = dao.lagre(brevutfall)
 
         lagretBrevutfall shouldNotBe null
-        lagretBrevutfall.etterbetaling?.fom shouldBe brevutfall.etterbetaling?.fom
-        lagretBrevutfall.etterbetaling?.tom shouldBe brevutfall.etterbetaling?.tom
+        lagretBrevutfall.etterbetalingNy?.fom shouldBe brevutfall.etterbetalingNy?.fom
+        lagretBrevutfall.etterbetalingNy?.tom shouldBe brevutfall.etterbetalingNy?.tom
         lagretBrevutfall.aldersgruppe shouldBe brevutfall.aldersgruppe
         lagretBrevutfall.kilde shouldBe brevutfall.kilde
     }
@@ -111,10 +114,10 @@ internal class BrevutfallDaoTest {
 
         val oppdatertBrevutfall =
             lagretBrevutfall.copy(
-                etterbetaling =
-                    Etterbetaling(
-                        fom = brevutfall.etterbetaling!!.fom.minusYears(1),
-                        tom = brevutfall.etterbetaling!!.tom.minusYears(1),
+                etterbetalingNy =
+                    EtterbetalingNy(
+                        fom = brevutfall.etterbetalingNy!!.fom.minusYears(1),
+                        tom = brevutfall.etterbetalingNy!!.tom.minusYears(1),
                     ),
                 aldersgruppe = Aldersgruppe.OVER_18,
             )
@@ -122,8 +125,8 @@ internal class BrevutfallDaoTest {
         val lagretOppdatertBrevutfall = dao.lagre(oppdatertBrevutfall)
 
         lagretOppdatertBrevutfall shouldNotBe null
-        lagretOppdatertBrevutfall.etterbetaling?.fom shouldBe brevutfall.etterbetaling?.fom?.minusYears(1)
-        lagretOppdatertBrevutfall.etterbetaling?.tom shouldBe brevutfall.etterbetaling?.tom?.minusYears(1)
+        lagretOppdatertBrevutfall.etterbetalingNy?.fom shouldBe brevutfall.etterbetalingNy?.fom?.minusYears(1)
+        lagretOppdatertBrevutfall.etterbetalingNy?.tom shouldBe brevutfall.etterbetalingNy?.tom?.minusYears(1)
         lagretOppdatertBrevutfall.aldersgruppe shouldBe Aldersgruppe.OVER_18
         lagretOppdatertBrevutfall.kilde shouldNotBe null
     }
@@ -131,8 +134,8 @@ internal class BrevutfallDaoTest {
     private fun brevutfall(behandlingId: UUID) =
         Brevutfall(
             behandlingId = behandlingId,
-            etterbetaling =
-                Etterbetaling(
+            etterbetalingNy =
+                EtterbetalingNy(
                     fom = YearMonth.of(2023, 11),
                     tom = YearMonth.of(2023, 12),
                 ),

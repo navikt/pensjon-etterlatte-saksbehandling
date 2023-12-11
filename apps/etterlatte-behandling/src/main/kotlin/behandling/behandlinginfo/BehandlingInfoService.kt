@@ -1,13 +1,17 @@
-package no.nav.etterlatte.behandling.brevutfall
+package no.nav.etterlatte.behandling.behandlinginfo
 
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.BrevutfallException
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingException
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingNy
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import java.util.UUID
 
-class BrevutfallService(
-    private val brevutfallDao: BrevutfallDao,
+class BehandlingInfoService(
+    private val behandlingInfoDao: BehandlingInfoDao,
     private val behandlingService: BehandlingService,
 ) {
     fun lagreBrevutfall(brevutfall: Brevutfall): Brevutfall {
@@ -19,19 +23,19 @@ class BrevutfallService(
         sjekkEtterbetalingFoerVirkningstidspunkt(behandling, brevutfall)
         sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
 
-        return brevutfallDao.lagre(brevutfall)
+        return behandlingInfoDao.lagre(brevutfall)
     }
 
     fun hentBrevutfall(behandlingId: UUID): Brevutfall? {
-        return brevutfallDao.hent(behandlingId)
+        return behandlingInfoDao.hent(behandlingId)
     }
 
-    fun hentEtterbetaling(behandlingId: UUID): Etterbetaling? {
-        return brevutfallDao.hent(behandlingId)?.etterbetaling
+    fun hentEtterbetaling(behandlingId: UUID): EtterbetalingNy? {
+        return behandlingInfoDao.hent(behandlingId)?.etterbetalingNy
     }
 
     private fun sjekkBehandlingKanEndres(behandling: Behandling) {
-        if (!behandling.status.kanEndres()) throw BrevutfallException.BehandlingKanIkkeEndres(behandling)
+        if (!behandling.status.kanEndres()) throw BrevutfallException.BehandlingKanIkkeEndres(behandling.id, behandling.status)
     }
 
     private fun sjekkEtterbetalingFoerVirkningstidspunkt(
@@ -40,10 +44,10 @@ class BrevutfallService(
     ) {
         val virkningstidspunkt =
             behandling.virkningstidspunkt?.dato
-                ?: throw BrevutfallException.VirkningstidspunktIkkeSatt(behandling)
+                ?: throw BrevutfallException.VirkningstidspunktIkkeSatt(behandling.id)
 
-        if (brevutfall.etterbetaling != null && brevutfall.etterbetaling.fom < virkningstidspunkt) {
-            throw BrevutfallException.EtterbetalingFraDatoErFoerVirk(brevutfall.etterbetaling.fom, virkningstidspunkt)
+        if (brevutfall.etterbetalingNy != null && brevutfall.etterbetalingNy!!.fom < virkningstidspunkt) {
+            throw EtterbetalingException.EtterbetalingFraDatoErFoerVirk(brevutfall.etterbetalingNy!!.fom, virkningstidspunkt)
         }
     }
 

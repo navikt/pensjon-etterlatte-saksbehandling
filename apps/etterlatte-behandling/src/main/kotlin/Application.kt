@@ -16,9 +16,9 @@ import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingVedtakRoute
+import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
-import no.nav.etterlatte.behandling.brevutfall.metadataRoutes
 import no.nav.etterlatte.behandling.etterbetaling.etterbetalingRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
 import no.nav.etterlatte.behandling.klage.klageRoutes
@@ -128,7 +128,7 @@ internal fun Application.module(context: ApplicationContext) {
                 behandlingService = behandlingService,
             )
             etterbetalingRoutes(etterbetalingService)
-            metadataRoutes(brevutfallService)
+            behandlingInfoRoutes(behandlingInfoService)
             oppgaveRoutes(
                 service = oppgaveService,
                 gosysOppgaveService = gosysOppgaveService,

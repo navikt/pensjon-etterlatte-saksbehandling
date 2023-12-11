@@ -51,22 +51,22 @@ internal class BehandlingInfoDaoTest {
                 jdbcUrl = postgreSQLContainer.jdbcUrl,
                 username = postgreSQLContainer.username,
                 password = postgreSQLContainer.password,
-                maxPoolSize = 30,
             ).apply { migrate() }
 
-        sakDao = SakDao { dataSource.connection }
+        val connection = dataSource.connection
+        sakDao = SakDao { connection }
         behandlingDao =
             BehandlingDao(
-                KommerBarnetTilGodeDao { dataSource.connection },
-                RevurderingDao { dataSource.connection },
-            ) { dataSource.connection }
+                KommerBarnetTilGodeDao { connection },
+                RevurderingDao { connection },
+            ) { connection }
 
-        dao = BehandlingInfoDao { dataSource.connection }
+        dao = BehandlingInfoDao { connection }
     }
 
     @BeforeEach
     fun reset() {
-        dataSource.connection.prepareStatement("""TRUNCATE TABLE behandling_info""").executeUpdate()
+        dataSource.connection.use { it.prepareStatement("""TRUNCATE TABLE behandling_info""").executeUpdate() }
 
         val sak = opprettSakForTest()
         opprettBehandlingForTest(sak).let {

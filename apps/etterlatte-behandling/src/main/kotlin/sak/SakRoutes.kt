@@ -166,10 +166,9 @@ internal fun Route.sakWebRoutes(
                             "Saksbehandler $navIdent endret enhet på sak: $sakId og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}",
                         )
                         val oppdatertSak =
-                            requireNotNull(inTransaction { sakService.finnSak(sakId) }) {
-                                logger.info("Fant ikke sak etter enhetsendring")
-                                call.respond(HttpStatusCode.BadRequest, "Fant ikke sak etter enhetsendring")
-                            }
+                            inTransaction { sakService.finnSak(sakId) }
+                                ?: throw SakIkkeFunnetException("Saken ble borte etter å endre enheten på den sakid: $sakId. Kritisk! ")
+
                         call.respond(oppdatertSak)
                     } catch (e: TilstandException.UgyldigTilstand) {
                         call.respond(HttpStatusCode.BadRequest, "Kan ikke endre enhet på sak og oppgaver")

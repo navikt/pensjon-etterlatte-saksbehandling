@@ -17,19 +17,21 @@ import java.time.temporal.ChronoUnit
 class Folkeregisteridentifikator private constructor(
     @JsonValue val value: String,
 ) {
-    init {
-        require(FolkeregisteridentifikatorValidator.isValid(value))
-    }
-
     companion object {
         @JvmStatic
         @JsonCreator
-        fun of(fnr: String?): Folkeregisteridentifikator =
-            try {
-                Folkeregisteridentifikator(fnr!!.replace(Regex("[^0-9]"), ""))
-            } catch (e: Exception) {
-                throw InvalidFoedselsnummerException(fnr, e)
+        fun of(fnr: String?): Folkeregisteridentifikator {
+            if (fnr.isNullOrEmpty()) {
+                throw InvalidFoedselsnummerException("Fnr er tomt")
+            } else {
+                val fnrMedGyldigeTall = fnr.replace(Regex("[^0-9]"), "")
+                if (FolkeregisteridentifikatorValidator.isValid(fnrMedGyldigeTall)) {
+                    return Folkeregisteridentifikator(fnrMedGyldigeTall)
+                } else {
+                    throw InvalidFoedselsnummerException("Fødselsnummeret er ugyldig")
+                }
             }
+        }
 
         fun isValid(fnr: String?): Boolean = FolkeregisteridentifikatorValidator.isValid(fnr!!.replace(Regex("[^0-9]"), ""))
     }
@@ -137,7 +139,7 @@ internal fun firesifretAarstallFraTosifret(
     }
 }
 
-class InvalidFoedselsnummerException(value: String?, cause: Throwable) : UgyldigForespoerselException(
+class InvalidFoedselsnummerException(value: String?, cause: Throwable? = null) : UgyldigForespoerselException(
     code = "UGYLDIG_FNR",
     detail = "Ugyldig fødselsnummer $value",
     cause = cause,

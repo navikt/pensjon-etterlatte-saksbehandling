@@ -165,11 +165,9 @@ class BehandlingServiceImpl(
 //        }
         Saker(
             listOf(
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON,	96, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON,	117, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON,	122, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON,	206, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON,	208, "IKKE_RELEVANT"),
+                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON,	42, "IKKE_RELEVANT"),
+                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON,	121, "IKKE_RELEVANT"),
+                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON,	190, "IKKE_RELEVANT"),
             ),
         )
 

@@ -114,6 +114,12 @@ class PersonManglerSak(message: String) :
         detail = message,
     )
 
+class SakIkkeFunnetException(message: String) :
+    UgyldigForespoerselException(
+        code = "FANT_INGEN_SAK",
+        detail = message,
+    )
+
 internal fun Route.sakWebRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
@@ -142,10 +148,8 @@ internal fun Route.sakWebRoutes(
                 hentNavidentFraToken { navIdent ->
                     val enhetrequest = call.receive<EnhetRequest>()
                     try {
-                        requireNotNull(inTransaction { sakService.finnSak(sakId) }) {
-                            logger.info("Fant ingen sak å endre enhet på")
-                            call.respond(HttpStatusCode.BadRequest, "Fant ingen sak å endre enhet på")
-                        }
+                        inTransaction { sakService.finnSak(sakId) }
+                            ?: throw SakIkkeFunnetException("Fant ingen sak å endre enhet på sakid: $sakId")
 
                         val sakMedEnhet =
                             GrunnlagsendringshendelseService.SakMedEnhet(

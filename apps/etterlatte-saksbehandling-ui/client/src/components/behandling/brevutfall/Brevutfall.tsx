@@ -10,8 +10,12 @@ import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallV
 import Spinner from '~shared/Spinner'
 import { MapApiResult } from '~shared/components/MapApiResult'
 
-export interface Brevutfall {
+export interface BrevutfallOgEtterbetaling {
   etterbetaling?: Etterbetaling | null
+  brevutfall: Brevutfall
+}
+
+export interface Brevutfall {
   aldersgruppe?: Aldersgruppe | null
 }
 
@@ -26,20 +30,28 @@ export interface Etterbetaling {
   datoTom?: string | null
 }
 
+const initialBrevutfallOgEtterbetaling = {
+  brevutfall: {
+    aldersgruppe: Aldersgruppe.IKKE_VALGT,
+  },
+}
+
 export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
   const behandling = props.behandling
   const redigerbar = behandlingErRedigerbar(behandling.status)
-  const [brevutfall, setBrevutfall] = useState<Brevutfall>({})
+  const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
+    initialBrevutfallOgEtterbetaling
+  )
   const [hentBrevutfallResult, hentBrevutfallRequest] = useApiCall(hentBrevutfallApi)
   const [visSkjema, setVisSkjema] = useState(redigerbar)
 
   const hentBrevutfall = () => {
-    hentBrevutfallRequest(behandling.id, (brevutfall: Brevutfall | null) => {
+    hentBrevutfallRequest(behandling.id, (brevutfall: BrevutfallOgEtterbetaling | null) => {
       if (brevutfall) {
-        setBrevutfall(brevutfall)
+        setBrevutfallOgEtterbetaling(brevutfall)
         setVisSkjema(false)
       } else {
-        setBrevutfall({})
+        setBrevutfallOgEtterbetaling(initialBrevutfallOgEtterbetaling)
         if (redigerbar) setVisSkjema(true)
       }
     })
@@ -66,15 +78,15 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
           visSkjema ? (
             <BrevutfallSkjema
               behandling={behandling}
-              brevutfall={brevutfall}
-              setBrevutfall={setBrevutfall}
+              brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
+              setBrevutfallOgEtterbetaling={setBrevutfallOgEtterbetaling}
               setVisSkjema={setVisSkjema}
               onAvbryt={hentBrevutfall}
             />
           ) : (
             <BrevutfallVisning
               redigerbar={redigerbar}
-              brevutfall={brevutfall}
+              brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
               sakType={behandling.sakType}
               setVisSkjema={setVisSkjema}
             />

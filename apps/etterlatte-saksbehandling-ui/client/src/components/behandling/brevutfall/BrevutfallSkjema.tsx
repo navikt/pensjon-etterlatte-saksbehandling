@@ -7,7 +7,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBrevutfallApi } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
-import { Aldersgruppe, Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
+import { Aldersgruppe, BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 
 enum HarEtterbetaling {
   JA = 'JA',
@@ -17,16 +17,16 @@ enum HarEtterbetaling {
 
 export const BrevutfallSkjema = (props: {
   behandling: IDetaljertBehandling
-  brevutfall: Brevutfall
-  setBrevutfall: (brevutfall: Brevutfall) => void
+  brevutfallOgEtterbetaling: BrevutfallOgEtterbetaling
+  setBrevutfallOgEtterbetaling: (brevutfall: BrevutfallOgEtterbetaling) => void
   setVisSkjema: (visSkjema: boolean) => void
   onAvbryt: () => void
 }) => {
-  const { behandling, brevutfall, setBrevutfall, setVisSkjema, onAvbryt } = props
+  const { behandling, brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling, setVisSkjema, onAvbryt } = props
   const [harEtterbetaling, setHarEtterbetaling] = useState<HarEtterbetaling>(
-    brevutfall.etterbetaling === undefined
+    brevutfallOgEtterbetaling.etterbetaling === undefined
       ? HarEtterbetaling.IKKE_VALGT
-      : brevutfall.etterbetaling
+      : brevutfallOgEtterbetaling.etterbetaling
       ? HarEtterbetaling.JA
       : HarEtterbetaling.NEI
   )
@@ -43,17 +43,20 @@ export const BrevutfallSkjema = (props: {
       return
     }
 
-    lagreBrevutfallRequest({ behandlingId: behandling.id, brevutfall: brevutfall }, (brevutfall: Brevutfall) => {
-      setBrevutfall(brevutfall)
-      setVisSkjema(false)
-    })
+    lagreBrevutfallRequest(
+      { behandlingId: behandling.id, brevutfall: brevutfallOgEtterbetaling },
+      (brevutfall: BrevutfallOgEtterbetaling) => {
+        setBrevutfallOgEtterbetaling(brevutfall)
+        setVisSkjema(false)
+      }
+    )
   }
 
   const valider = () => {
     const feilmeldinger = []
-    if (brevutfall.etterbetaling || harEtterbetaling === HarEtterbetaling.JA) {
-      const fom = brevutfall.etterbetaling?.datoFom
-      const tom = brevutfall.etterbetaling?.datoTom
+    if (brevutfallOgEtterbetaling.etterbetaling || harEtterbetaling === HarEtterbetaling.JA) {
+      const fom = brevutfallOgEtterbetaling.etterbetaling?.datoFom
+      const tom = brevutfallOgEtterbetaling.etterbetaling?.datoTom
       if (!fom || !tom) {
         feilmeldinger.push('Både fra- og til-måned for etterbetaling må fylles ut.')
         return feilmeldinger
@@ -78,7 +81,7 @@ export const BrevutfallSkjema = (props: {
     if (harEtterbetaling === undefined) {
       feilmeldinger.push('Det må angis om det er etterbetaling eller ikke i saken.')
     }
-    if (behandling.sakType == SakType.BARNEPENSJON && !brevutfall.aldersgruppe) {
+    if (behandling.sakType == SakType.BARNEPENSJON && !brevutfallOgEtterbetaling.brevutfall?.aldersgruppe) {
       feilmeldinger.push('Over eller under 18 år må angis i barnepensjonssaker.')
     }
     return feilmeldinger
@@ -104,7 +107,7 @@ export const BrevutfallSkjema = (props: {
             const svar = event as HarEtterbetaling
             setHarEtterbetaling(svar)
             if (svar === HarEtterbetaling.NEI) {
-              setBrevutfall({ ...brevutfall, etterbetaling: undefined })
+              setBrevutfallOgEtterbetaling({ ...brevutfallOgEtterbetaling, etterbetaling: undefined })
             }
           }}
         >
@@ -119,21 +122,35 @@ export const BrevutfallSkjema = (props: {
         {harEtterbetaling == HarEtterbetaling.JA && (
           <HStack gap="4">
             <MaanedVelger
-              value={brevutfall.etterbetaling?.datoFom ? new Date(brevutfall.etterbetaling?.datoFom) : undefined}
+              value={
+                brevutfallOgEtterbetaling.etterbetaling?.datoFom
+                  ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
+                  : undefined
+              }
               onChange={(e) =>
-                setBrevutfall({
-                  ...brevutfall,
-                  etterbetaling: { ...brevutfall.etterbetaling, datoFom: e ? e.toISOString() : undefined },
+                setBrevutfallOgEtterbetaling({
+                  ...brevutfallOgEtterbetaling,
+                  etterbetaling: {
+                    ...brevutfallOgEtterbetaling.etterbetaling,
+                    datoFom: e ? e.toISOString() : undefined,
+                  },
                 })
               }
               label="Fra og med"
             />
             <MaanedVelger
-              value={brevutfall.etterbetaling?.datoTom ? new Date(brevutfall.etterbetaling?.datoTom) : undefined}
+              value={
+                brevutfallOgEtterbetaling.etterbetaling?.datoTom
+                  ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoTom)
+                  : undefined
+              }
               onChange={(e) =>
-                setBrevutfall({
-                  ...brevutfall,
-                  etterbetaling: { ...brevutfall.etterbetaling, datoTom: e ? e.toISOString() : undefined },
+                setBrevutfallOgEtterbetaling({
+                  ...brevutfallOgEtterbetaling,
+                  etterbetaling: {
+                    ...brevutfallOgEtterbetaling.etterbetaling,
+                    datoTom: e ? e.toISOString() : undefined,
+                  },
                 })
               }
               label="Til og med"
@@ -156,8 +173,17 @@ export const BrevutfallSkjema = (props: {
               </HelpTextWrapper>
             }
             className="radioGroup"
-            value={brevutfall.aldersgruppe === undefined ? Aldersgruppe.IKKE_VALGT : brevutfall.aldersgruppe}
-            onChange={(e) => setBrevutfall({ ...brevutfall, aldersgruppe: e })}
+            value={
+              brevutfallOgEtterbetaling.brevutfall.aldersgruppe === undefined
+                ? Aldersgruppe.IKKE_VALGT
+                : brevutfallOgEtterbetaling.brevutfall.aldersgruppe
+            }
+            onChange={(e) =>
+              setBrevutfallOgEtterbetaling({
+                ...brevutfallOgEtterbetaling,
+                brevutfall: { ...brevutfallOgEtterbetaling.brevutfall, aldersgruppe: e },
+              })
+            }
           >
             <Radio size="small" value={Aldersgruppe.UNDER_18}>
               Under 18 år

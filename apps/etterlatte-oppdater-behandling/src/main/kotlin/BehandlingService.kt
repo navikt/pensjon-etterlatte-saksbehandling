@@ -165,27 +165,6 @@ class BehandlingServiceImpl(
 //        }
         Saker(
             listOf(
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 2, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 3, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 4, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 5, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 6, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 7, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 11, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 12, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 13, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 14, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 15, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 16, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 17, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 18, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 19, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 20, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 21, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 23, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 26, "IKKE_RELEVANT"),
-                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 27, "IKKE_RELEVANT"),
-                /*
                 Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 28, "IKKE_RELEVANT"),
                 Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 31, "IKKE_RELEVANT"),
                 Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 32, "IKKE_RELEVANT"),
@@ -370,7 +349,6 @@ class BehandlingServiceImpl(
                 Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 8904, "IKKE_RELEVANT"),
                 Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 8908, "IKKE_RELEVANT"),
                 Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 8909, "IKKE_RELEVANT"),
-                 */
             ),
         )
 

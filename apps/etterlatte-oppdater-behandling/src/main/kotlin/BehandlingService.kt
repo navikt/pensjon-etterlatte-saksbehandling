@@ -163,7 +163,13 @@ class BehandlingServiceImpl(
 //        runBlocking {
 //            behandlingKlient.get("$url/saker").body()
 //        }
-        Saker(listOf(Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 1, "IKKE_RELEVANT")))
+        Saker(
+            listOf(
+//            Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 1, "IKKE_RELEVANT"),
+//            Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 150, "IKKE_RELEVANT"),
+                Sak("IKKE_RELEVANT", SakType.BARNEPENSJON, 6040, "IKKE_RELEVANT"),
+            ),
+        )
 
     override fun avbryt(behandlingId: UUID) =
         runBlocking {

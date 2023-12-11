@@ -50,11 +50,18 @@ const Virkningstidspunkt = (props: {
   const avdoedDoedsdato = avdoede?.opplysning?.doedsdato
   const tittel = 'Hva er virkningstidspunkt for behandlingen?'
 
+  function finnMinimumvirkningstidspunkt() {
+    if (erBosattUtland) {
+      return subYears(new Date(), 20)
+    }
+    if (behandling.soeknadMottattDato) {
+      return new Date(behandling.soeknadMottattDato)
+    }
+    return new Date(0)
+  }
+
   const { monthpickerProps, inputProps } = useMonthpicker({
-    fromDate: hentMinimumsVirkningstidspunkt(
-      avdoedDoedsdato,
-      erBosattUtland ? subYears(new Date(), 20) : new Date(behandling.soeknadMottattDato)
-    ),
+    fromDate: hentMinimumsVirkningstidspunkt(avdoedDoedsdato, finnMinimumvirkningstidspunkt()),
     toDate: addMonths(new Date(), 1),
     onMonthChange: (date: Date) => setVirkningstidspunkt(date),
     inputFormat: 'dd.MM.yyyy',

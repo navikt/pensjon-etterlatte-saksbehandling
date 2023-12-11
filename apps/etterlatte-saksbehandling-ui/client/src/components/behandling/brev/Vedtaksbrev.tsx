@@ -138,7 +138,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 Vedtaksbrev
               </Heading>
             </HeadingWrapper>
-            <Soeknadsdato mottattDato={soeknadMottattDato} />
+            {soeknadMottattDato && <Soeknadsdato mottattDato={soeknadMottattDato} />}
 
             <br />
             {(vedtaksbrev?.prosessType === BrevProsessType.MANUELL ||

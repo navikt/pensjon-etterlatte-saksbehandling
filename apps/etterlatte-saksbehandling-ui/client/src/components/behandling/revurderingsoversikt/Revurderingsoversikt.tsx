@@ -111,7 +111,7 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         )}
         <div>
           <strong>Revurdering opprettet: </strong>
-          {format(new Date(behandling.soeknadMottattDato), 'dd.MM.yyyy')}
+          {format(new Date(behandling.soeknadMottattDato!!), 'dd.MM.yyyy')}
         </div>
       </ContentHeader>
       <InnholdPadding>

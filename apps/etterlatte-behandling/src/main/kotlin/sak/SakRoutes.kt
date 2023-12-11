@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
@@ -114,6 +115,18 @@ class PersonManglerSak(message: String) :
         detail = message,
     )
 
+class SakIkkeFunnetException(message: String) :
+    UgyldigForespoerselException(
+        code = "FANT_INGEN_SAK",
+        detail = message,
+    )
+
+class SakBleBorteException(message: String) :
+    IkkeTillattException(
+        code = "SAKEN_FORSVANT",
+        detail = message,
+    )
+
 internal fun Route.sakWebRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
@@ -142,10 +155,8 @@ internal fun Route.sakWebRoutes(
                 hentNavidentFraToken { navIdent ->
                     val enhetrequest = call.receive<EnhetRequest>()
                     try {
-                        requireNotNull(inTransaction { sakService.finnSak(sakId) }) {
-                            logger.info("Fant ingen sak å endre enhet på")
-                            call.respond(HttpStatusCode.BadRequest, "Fant ingen sak å endre enhet på")
-                        }
+                        inTransaction { sakService.finnSak(sakId) }
+                            ?: throw SakIkkeFunnetException("Fant ingen sak å endre enhet på sakid: $sakId")
 
                         val sakMedEnhet =
                             GrunnlagsendringshendelseService.SakMedEnhet(
@@ -162,10 +173,9 @@ internal fun Route.sakWebRoutes(
                             "Saksbehandler $navIdent endret enhet på sak: $sakId og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}",
                         )
                         val oppdatertSak =
-                            requireNotNull(inTransaction { sakService.finnSak(sakId) }) {
-                                logger.info("Fant ikke sak etter enhetsendring")
-                                call.respond(HttpStatusCode.BadRequest, "Fant ikke sak etter enhetsendring")
-                            }
+                            inTransaction { sakService.finnSak(sakId) }
+                                ?: throw SakBleBorteException("Saken ble borte etter å endre enheten på den sakid: $sakId. Kritisk! ")
+
                         call.respond(oppdatertSak)
                     } catch (e: TilstandException.UgyldigTilstand) {
                         call.respond(HttpStatusCode.BadRequest, "Kan ikke endre enhet på sak og oppgaver")

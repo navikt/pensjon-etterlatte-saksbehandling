@@ -21,6 +21,7 @@ data class OmregnetBPNyttRegelverk(
     val erBosattUtlandet: Boolean,
     val erYrkesskade: Boolean,
     val erForeldreloes: Boolean,
+    val erUnder18Aar: Boolean,
 ) : BrevData() {
     companion object {
         fun fra(
@@ -29,6 +30,10 @@ data class OmregnetBPNyttRegelverk(
             migreringRequest: MigreringBrevRequest?,
         ): OmregnetBPNyttRegelverk {
             val foersteBeregningsperiode = utbetalingsinfo.beregningsperioder.first()
+            val erUnder18Aar =
+                requireNotNull(generellBrevData.personerISak.soeker.under18) {
+                    "Klarte ikke å bestemme om alder på søker er under eller over 18 år. Kan dermed ikke velge riktig brev"
+                }
             val defaultBrevdataOmregning =
                 OmregnetBPNyttRegelverk(
                     utbetaltFoerReform = Kroner(0),
@@ -41,6 +46,7 @@ data class OmregnetBPNyttRegelverk(
                     erForeldreloes =
                         generellBrevData.personerISak.avdoede.size > 1 &&
                             generellBrevData.personerISak.verge !is ForelderVerge,
+                    erUnder18Aar = erUnder18Aar,
                 )
             if (
                 generellBrevData.systemkilde == Vedtaksloesning.PESYS ||

@@ -142,7 +142,7 @@ internal fun Route.sakWebRoutes(
                 hentNavidentFraToken { navIdent ->
                     val enhetrequest = call.receive<EnhetRequest>()
                     try {
-                        requireNotNull(sakService.finnSak(sakId)) {
+                        requireNotNull(inTransaction { sakService.finnSak(sakId) }) {
                             logger.info("Fant ingen sak å endre enhet på")
                             call.respond(HttpStatusCode.BadRequest, "Fant ingen sak å endre enhet på")
                         }
@@ -162,7 +162,7 @@ internal fun Route.sakWebRoutes(
                             "Saksbehandler $navIdent endret enhet på sak: $sakId og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}",
                         )
                         val oppdatertSak =
-                            requireNotNull(sakService.finnSak(sakId)) {
+                            requireNotNull(inTransaction { sakService.finnSak(sakId) }) {
                                 logger.info("Fant ikke sak etter enhetsendring")
                                 call.respond(HttpStatusCode.BadRequest, "Fant ikke sak etter enhetsendring")
                             }

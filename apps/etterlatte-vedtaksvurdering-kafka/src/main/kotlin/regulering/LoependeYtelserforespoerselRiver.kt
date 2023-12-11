@@ -58,7 +58,7 @@ internal class LoependeYtelserforespoerselRiver(
         respons.takeIf { it.erLoepende }?.let {
             packet.eventName = OMREGNINGSHENDELSE
             packet[OmregningEvents.OMREGNING_NYE_REGLER] = OmregningEvents.OMREGNING_NYE_REGLER
-            packet[OmregningEvents.OMREGNING_NYE_REGLER_KJORING] = MigreringKjoringVariant.MED_PAUSE
+            packet[OmregningEvents.OMREGNING_NYE_REGLER_KJORING] = MigreringKjoringVariant.FULL_KJORING
             packet[HENDELSE_DATA_KEY] =
                 Omregningshendelse(
                     sakId = sakId,

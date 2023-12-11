@@ -1,4 +1,4 @@
-name: .deploy-main-prod.yaml
+name: .deploy-jobb-main-prod.yaml
 
 on:
   workflow_call:
@@ -22,5 +22,5 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: jobs/etterlatte-${{ inputs.applikasjon }}/deploy/prod.yml
+          RESOURCE: jobs/${{ inputs.applikasjon }}/deploy/prod.yml
           VAR: image=${{ env.image }}

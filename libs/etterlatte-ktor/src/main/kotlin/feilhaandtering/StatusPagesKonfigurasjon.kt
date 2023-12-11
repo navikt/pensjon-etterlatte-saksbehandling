@@ -134,8 +134,9 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
                     "Feilen fikk status ${internfeil.status} til frontend.",
             )
         }
+
         // Logger ikke meta, siden det kan inneholde identiferende informasjon
-        this.info("En forespørselsfeil oppstod i et endepunkt", internfeil.cause ?: internfeil.noMeta())
+        this.info("En forespørselsfeil oppstod i et endepunkt, detaljer: ${internfeil.detail}", internfeil.cause ?: internfeil.noMeta())
     }
 
     private suspend fun ApplicationCall.respond(feil: ForespoerselException) {

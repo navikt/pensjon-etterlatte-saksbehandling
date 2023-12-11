@@ -22,7 +22,7 @@ class Folkeregisteridentifikator private constructor(
         @JsonCreator
         fun of(fnr: String?): Folkeregisteridentifikator {
             if (fnr.isNullOrEmpty()) {
-                throw InvalidFoedselsnummerException("Fnr er tomt")
+                throw InvalidFoedselsnummerException("Fødselsnummer er tomt")
             } else {
                 val fnrMedGyldigeTall = fnr.replace(Regex("[^0-9]"), "")
                 if (FolkeregisteridentifikatorValidator.isValid(fnrMedGyldigeTall)) {
@@ -139,8 +139,7 @@ internal fun firesifretAarstallFraTosifret(
     }
 }
 
-class InvalidFoedselsnummerException(value: String?, cause: Throwable? = null) : UgyldigForespoerselException(
+class InvalidFoedselsnummerException(details: String) : UgyldigForespoerselException(
     code = "UGYLDIG_FNR",
-    detail = "Ugyldig fødselsnummer $value",
-    cause = cause,
+    detail = details,
 )

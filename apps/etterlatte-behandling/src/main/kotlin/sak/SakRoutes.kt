@@ -159,7 +159,9 @@ internal fun Route.sakWebRoutes(
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                         }
 
-                        logger.info("Endret enhet på sak: $sakId  og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}")
+                        logger.info(
+                            "Saksbehandler $navIdent endret enhet på sak: $sakId og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}",
+                        )
                         call.respond(isak)
                     } catch (e: TilstandException.UgyldigTilstand) {
                         call.respond(HttpStatusCode.BadRequest, "Kan ikke endre enhet på sak og oppgaver")

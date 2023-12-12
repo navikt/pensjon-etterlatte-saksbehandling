@@ -140,6 +140,7 @@ data class VergeEllerFullmektig(
     val navn: String?,
     val tjenesteomraade: String?,
     val omfangetErInnenPersonligOmraade: Boolean?,
+    val omfang: String?,
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")

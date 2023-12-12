@@ -1,43 +1,60 @@
-import { ISak } from '~shared/types/sak'
-
 export interface Journalpost {
   journalpostId: string
   tittel: string
   tema: string
   journalposttype: string
   journalstatus: string
-  dokumenter: Dokument[]
-  avsenderMottaker: {
-    id?: string
-    navn?: string
-  }
+  dokumenter: DokumentInfo[]
+  bruker: Bruker
+  avsenderMottaker: AvsenderMottaker
   kanal: string
-  sak?: {
-    sakstype?: string
-    fagsakId?: string
-    fagsaksystem?: string
-  }
+  sak?: JournalpostSak
   datoOpprettet: string
 }
 
-interface Dokument {
+export interface OppdaterJournalpostRequest {
+  journalpostId: string
+  tittel?: string
+  tema?: string
+  dokumenter?: DokumentInfo[]
+  bruker?: Bruker
+  avsenderMottaker?: AvsenderMottaker
+  sak?: JournalpostSak
+}
+
+export interface DokumentInfo {
   dokumentInfoId: string
   tittel: string
-  dokumentvarianter: {
-    saksbehandlerHarTilgang: boolean
-  }[]
+  dokumentvarianter: DokumentVariant[]
 }
 
-export enum JournalpostVariant {
-  NY_SOEKNAD = 'NY_SOEKNAD',
-  NYTT_VEDLEGG = 'NYTT_VEDLEGG',
-  FEIL_TEMA = 'FEIL_TEMA',
+export interface DokumentVariant {
+  filtype?: string
+  fysiskDokument?: string
+  variantformat?: string
 }
 
-export interface OppdaterJournalpostTemaRequest {
-  nyttTema?: string
+export interface Bruker {
+  id?: string
+  type?: BrukerIdType
 }
 
-export interface FerdigstillJournalpostRequest {
-  sak?: ISak
+export enum BrukerIdType {
+  ORGNR = 'ORGNR',
+  AKTOERID = 'AKTOERID',
+  FNR = 'FNR',
+}
+
+export interface AvsenderMottaker {
+  id?: string
+  idType?: string
+  navn?: string
+  land?: string
+}
+
+export interface JournalpostSak {
+  sakstype?: string
+  fagsakId?: string
+  fagsaksystem?: string
+  tema?: string
 }

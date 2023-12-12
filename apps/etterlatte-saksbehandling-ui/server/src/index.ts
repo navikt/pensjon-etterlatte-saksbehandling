@@ -12,6 +12,7 @@ import prometheus from './monitoring/prometheus'
 import { sanitize } from './utils/sanitize'
 import { unleash } from './utils/unleash'
 import { innloggetBrukerRouter } from './routers/innloggetBrukerRouter'
+import { norg2Router } from './routers/norg2Router'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -81,6 +82,7 @@ if (isDev) {
 
   app.use(authenticateUser) // Alle ruter etter denne er authenticated
   app.use('/api/innlogget', innloggetBrukerRouter)
+  app.use('/api/norg2', norg2Router)
 
   app.use(
     '/api/vilkaarsvurdering',

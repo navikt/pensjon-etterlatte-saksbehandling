@@ -90,7 +90,8 @@ class DokarkivServiceImpl(
             if (journalfoerendeEnhet.isNullOrBlank()) {
                 logger.error("Kan ikke ferdigstille journalpost=$journalpostId når enhet mangler")
             } else {
-                client.ferdigstillJournalpost(journalpostId, journalfoerendeEnhet)
+                val ferdigstilt = client.ferdigstillJournalpost(journalpostId, journalfoerendeEnhet)
+                logger.info("journalpostId=$journalpostId, ferdigstillrespons='$ferdigstilt'")
             }
         }
 

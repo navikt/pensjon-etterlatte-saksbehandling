@@ -12,13 +12,19 @@ import { FlexRow } from '~shared/styled'
 import { gyldigBehandlingRequest } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 
 export default function OppsummeringOppgavebehandling() {
-  const { journalpost, nyBehandlingRequest, oppgave, sak } = useJournalfoeringOppgave()
+  const { journalpost, nyBehandlingRequest, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
 
   const navigate = useNavigate()
 
   const tilbake = () => navigate('../', { relative: 'path' })
 
-  if (!journalpost || !nyBehandlingRequest || !oppgave || !sak || !gyldigBehandlingRequest(nyBehandlingRequest)) {
+  if (
+    !journalpost ||
+    !nyBehandlingRequest ||
+    !oppgave ||
+    !sakMedBehandlinger ||
+    !gyldigBehandlingRequest(nyBehandlingRequest)
+  ) {
     return null
   }
 
@@ -71,12 +77,7 @@ export default function OppsummeringOppgavebehandling() {
             Tilbake
           </Button>
 
-          <FullfoerOppgaveModal
-            oppgave={oppgave}
-            behandlingBehov={nyBehandlingRequest}
-            journalpost={journalpost}
-            sak={sak}
-          />
+          <FullfoerOppgaveModal oppgave={oppgave} behandlingBehov={nyBehandlingRequest} />
         </FlexRow>
         <FlexRow justify="center">
           <AvbrytBehandleJournalfoeringOppgave />

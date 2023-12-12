@@ -43,7 +43,5 @@ spec:
     - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
-      rules:
-        - application: etterlatte-behandling
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

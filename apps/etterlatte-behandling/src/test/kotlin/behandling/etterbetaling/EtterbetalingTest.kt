@@ -35,7 +35,7 @@ import java.time.LocalTime
 import java.time.Month
 import java.util.UUID
 
-class EtterbetalingNyTest : BehandlingIntegrationTest() {
+class EtterbetalingTest : BehandlingIntegrationTest() {
     @BeforeEach
     fun start() = startServer()
 

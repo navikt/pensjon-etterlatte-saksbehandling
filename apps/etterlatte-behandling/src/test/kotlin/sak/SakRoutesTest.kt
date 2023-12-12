@@ -95,7 +95,7 @@ internal class SakRoutesTest {
                     sakId = 1,
                     kilde = null,
                     type = OppgaveType.ATTESTERING,
-                    saksbehandler = null,
+                    saksbehandler = "Bjarne",
                     referanse = "hmm",
                     merknad = null,
                     opprettet = Tidspunkt.now(),
@@ -128,7 +128,7 @@ internal class SakRoutesTest {
                 }
             assertEquals(200, response.status.value)
             verify(exactly = 1) { oppgaveService.hentOppgaverForSak(any()) }
-            verify(exactly = 2) { oppgaveService.fjernSaksbehandler(any()) }
+            verify(exactly = 1) { oppgaveService.fjernSaksbehandler(any()) }
         }
     }
 

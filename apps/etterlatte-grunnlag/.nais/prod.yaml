@@ -100,7 +100,6 @@ spec:
         - application: etterlatte-migrering
         - application: etterlatte-trygdetid
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-saksbehandling-ui-lokal
     outbound:
       rules:
         - application: etterlatte-behandling

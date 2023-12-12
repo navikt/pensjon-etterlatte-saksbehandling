@@ -81,9 +81,8 @@ spec:
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
         - application: etterlatte-brev-api
         - application: etterlatte-vedtaksvurdering
-        - application: etterlatte-behandling
         - application: etterlatte-statistikk
         - application: etterlatte-beregning-kafka

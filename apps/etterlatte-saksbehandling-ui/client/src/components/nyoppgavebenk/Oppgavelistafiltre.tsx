@@ -100,7 +100,6 @@ const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   KLAGE: 'Klage',
   TILBAKEKREVING: 'Tilbakekreving',
   OMGJOERING: 'Omgjøring',
-  MANUELL_JOURNALFOERING: 'Manuell journalføring',
   JOURNALFOERING: 'Journalføring',
 } as const
 

@@ -76,7 +76,8 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
 
             client.post("/oppgaver/sak/${sak.id}/opprett") {
                 val dto =
-                    NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.MANUELL_JOURNALFOERING, "abc")
+                    NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.JOURNALFOERING, "Mottatt journalpost", "12345")
+
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(dto)
@@ -84,7 +85,8 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
                 val lestOppgave: OppgaveIntern = it.body()
                 assertEquals(fnr, lestOppgave.fnr)
-                assertEquals(OppgaveType.MANUELL_JOURNALFOERING, lestOppgave.type)
+                assertEquals("12345", lestOppgave.referanse)
+                assertEquals(OppgaveType.JOURNALFOERING, lestOppgave.type)
             }
 
             client.get("/api/oppgaver/sak/${sak.id}/oppgaver") {

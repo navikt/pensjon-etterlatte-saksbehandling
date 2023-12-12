@@ -119,7 +119,6 @@ enum class OppgaveType {
     KLAGE,
     TILBAKEKREVING,
     OMGJOERING,
-    MANUELL_JOURNALFOERING, // TODO: Fjerne
     JOURNALFOERING,
 }
 

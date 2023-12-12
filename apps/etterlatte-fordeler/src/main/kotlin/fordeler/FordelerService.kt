@@ -39,8 +39,6 @@ sealed class FordelerResultat {
     class UgyldigHendelse(val message: String) : FordelerResultat()
 
     class IkkeGyldigForBehandling(val ikkeOppfylteKriterier: List<FordelerKriterie>) : FordelerResultat()
-
-    class TrengerManuellJournalfoering(val melding: String) : FordelerResultat()
 }
 
 class FordelerService(
@@ -200,10 +198,6 @@ class FordelerService(
         return runBlocking {
             behandlingKlient.hentSak(fnr, barnepensjon, gradering)
         }
-    }
-
-    fun opprettOppgave(sakId: Long) {
-        return runBlocking { behandlingKlient.opprettOppgave(sakId) }
     }
 }
 

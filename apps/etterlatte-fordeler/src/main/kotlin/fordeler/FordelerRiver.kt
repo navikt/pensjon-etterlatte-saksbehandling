@@ -86,23 +86,6 @@ internal class FordelerRiver(
                         ?.let { context.publish(it) }
                 }
 
-                is FordelerResultat.TrengerManuellJournalfoering -> {
-                    logger.warn("Trenger manuell journalføring: ${resultat.melding}")
-                    hentSakId(packet, AdressebeskyttelseGradering.UGRADERT)?.let { sakIdForSoeknad ->
-                        fordelerService.opprettOppgave(sakIdForSoeknad)
-                        context.publish(
-                            packet
-                                .leggPaaSakId(sakIdForSoeknad)
-                                .leggPaaFordeltStatus(true)
-                                .leggPaaTrengerManuellJournalfoering(true).toJson(),
-                        )
-                    }
-
-                    fordelerMetricLogger.logMetricFordelt()
-                    lagStatistikkMelding(packet, resultat, SakType.BARNEPENSJON)
-                        ?.let { context.publish(it) }
-                }
-
                 is FordelerResultat.UgyldigHendelse -> {
                     logger.warn("Avbrutt fordeling: ${resultat.message}")
                 }
@@ -153,7 +136,6 @@ internal class FordelerRiver(
         val (resultat, ikkeOppfylteKriterier) =
             when (fordelerResultat) {
                 is FordelerResultat.GyldigForBehandling -> true to null
-                is FordelerResultat.TrengerManuellJournalfoering -> true to null
                 is FordelerResultat.IkkeGyldigForBehandling ->
                     // Sjekker eksplisitt opp mot ikkeOppfylteKriterier for om det er gyldig for behandling,
                     // siden det er logikk for å begrense hvor mange saker vi tar inn i pilot
@@ -180,12 +162,6 @@ internal class FordelerRiver(
 
     private fun JsonMessage.leggPaaFordeltStatus(fordelt: Boolean): JsonMessage {
         this[FordelerFordelt.soeknadFordeltKey] = fordelt
-        correlationId = getCorrelationId()
-        return this
-    }
-
-    private fun JsonMessage.leggPaaTrengerManuellJournalfoering(value: Boolean): JsonMessage {
-        this[FordelerFordelt.soeknadTrengerManuellJournalfoering] = value
         correlationId = getCorrelationId()
         return this
     }

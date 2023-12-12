@@ -81,7 +81,7 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         tx: TransactionalSession? = null,
     ) = tx.session<Pesyssak?> {
         hent(
-            "SELECT status from pesyssak WHERE id = :id",
+            "SELECT sak from pesyssak WHERE id = :id",
             mapOf("id" to id),
         ) { row ->
             row.string("sak").let { objectMapper.readValue(it) }

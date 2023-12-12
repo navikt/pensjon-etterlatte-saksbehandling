@@ -51,11 +51,10 @@ spec:
     path: /metrics
   resources:
     limits:
-      cpu: 500m
       memory: 512Mi
     requests:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 100m
+      memory: 192Mi
   env:
     - name: BREV_API_URL
       value: http://etterlatte-brev-api

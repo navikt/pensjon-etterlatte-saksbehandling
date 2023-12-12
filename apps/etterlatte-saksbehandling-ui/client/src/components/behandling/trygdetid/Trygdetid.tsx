@@ -146,10 +146,7 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
       </LovtekstMedLenke>
       {trygdetid && landListe && (
         <>
-          <Grunnlagopplysninger opplysninger={trygdetid.opplysninger} />
-          {trygdetid.opplysningerDifferanse?.differanse && (
-            <Grunnlagopplysninger opplysninger={trygdetid.opplysningerDifferanse.oppdaterteGrunnlagsopplysninger} />
-          )}
+          <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} />
 
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}

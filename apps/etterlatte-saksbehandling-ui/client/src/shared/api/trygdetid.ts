@@ -32,6 +32,9 @@ export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
 export const oppdaterStatus = async (behandlingId: string): Promise<ApiResponse<StatusOppdatert>> =>
   apiClient.post(`/trygdetid/${behandlingId}/oppdater-status`, {})
 
+export const oppdaterOpplysningsgrunnlag = async (behandlingId: string): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.post(`/trygdetid_v2/${behandlingId}/oppdater-opplysningsgrunnlag`, {})
+
 export interface StatusOppdatert {
   statusOppdatert: boolean
 }

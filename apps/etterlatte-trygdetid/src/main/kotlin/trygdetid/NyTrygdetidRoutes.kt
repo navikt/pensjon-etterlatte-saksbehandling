@@ -63,6 +63,15 @@ fun Route.trygdetidV2(
             }
         }
 
+        post("oppdater-opplysningsgrunnlag") {
+            withBehandlingId(behandlingKlient) {
+                logger.info("Oppretter trygdetid(er) for behandling $behandlingId")
+                val trygdetider =
+                    trygdetidService.oppdaterTrygdetiderForBehandlingMedNyttGrunnlag(behandlingId, brukerTokenInfo)
+                call.respond(trygdetider.map { it.toDto() })
+            }
+        }
+
         post("overstyr") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Oppdater trygdetid (overstyring) for behandling $behandlingId")

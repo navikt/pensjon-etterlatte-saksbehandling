@@ -240,6 +240,11 @@ interface NyTrygdetidService {
         ident: String,
         beregnetTrygdetid: DetaljertBeregnetTrygdetidResultat,
     ): Trygdetid
+
+    suspend fun oppdaterTrygdetiderForBehandlingMedNyttGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Trygdetid>
 }
 
 class TrygdetidServiceImpl(
@@ -270,6 +275,7 @@ class TrygdetidServiceImpl(
     ): List<Trygdetid> {
         return trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
             .map { trygdetid -> sjekkYrkesskadeForEndring(behandlingId, brukerTokenInfo, trygdetid) }
+            .map { trygdetid -> trygdetid.copy(opplysningerDifferanse = finnOpplysningerDifferanse(trygdetid, brukerTokenInfo)) }
     }
 
     override suspend fun hentTrygdetidIBehandlingMedId(
@@ -718,6 +724,37 @@ class TrygdetidServiceImpl(
         return trygdetidRepository.oppdaterTrygdetid(oppdatertTrygdetid, true)
     }
 
+    override suspend fun oppdaterTrygdetiderForBehandlingMedNyttGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): List<Trygdetid> {
+        val trygdetidList = trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
+        if (trygdetidList.isEmpty()) {
+            throw IngenTrygdetidFunnetForAvdoede()
+        }
+        val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+        logger.info("Oppretter manuell overstyrt trygdetid for behandling $behandlingId")
+
+        val avdoede = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede()
+        trygdetidList
+            .map { trygdetid -> medOppdaterteOpplysningerOmAvdoede(trygdetid, avdoede, behandlingId) }
+            .forEach { trygdetid -> oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo) }
+
+        return hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+    }
+
+    private fun medOppdaterteOpplysningerOmAvdoede(
+        trygdetid: Trygdetid,
+        avdoede: List<Grunnlagsdata<JsonNode>>,
+        behandlingId: UUID,
+    ) = trygdetid.copy(
+        opplysninger =
+            hentOpplysninger(
+                avdoede.first { it.hentFoedselsnummer()?.verdi?.value == trygdetid.ident },
+                behandlingId,
+            ),
+    )
+
     override suspend fun sjekkGyldighetOgOppdaterBehandlingStatus(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -790,10 +827,10 @@ class TrygdetidServiceImpl(
         val nyFylt16 = nyeOpplysninger.first { it.type == TrygdetidOpplysningType.FYLT_16 }
         val nyFyller66 = nyeOpplysninger.first { it.type == TrygdetidOpplysningType.FYLLER_66 }
 
-        val eksisterendeFoedselsdato = trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FOEDSELSDATO }
-        val eksisterendeDoedsdato = trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.DOEDSDATO }
-        val eksisterendeFylt16 = trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FYLT_16 }
-        val eksisterendeFyller66 = trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FYLLER_66 }
+        val eksisterendeFoedselsdato = trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FOEDSELSDATO }
+        val eksisterendeDoedsdato = trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.DOEDSDATO }
+        val eksisterendeFylt16 = trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FYLT_16 }
+        val eksisterendeFyller66 = trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FYLLER_66 }
         val diff =
             toLocalDate(nyFoedselsdato) != toLocalDate(eksisterendeFoedselsdato) ||
                 toLocalDate(nyDoedsdato) != toLocalDate(eksisterendeDoedsdato) ||
@@ -806,8 +843,8 @@ class TrygdetidServiceImpl(
         )
     }
 
-    private fun toLocalDate(opplysningsgrunnlag: Opplysningsgrunnlag): LocalDate =
-        objectMapper.readValue(opplysningsgrunnlag.opplysning.toString())
+    private fun toLocalDate(opplysningsgrunnlag: Opplysningsgrunnlag?): LocalDate? =
+        opplysningsgrunnlag?.let { objectMapper.readValue(opplysningsgrunnlag.opplysning.toString()) }
 
     override suspend fun overstyrNorskPoengaaarForTrygdetid(
         trygdetidId: UUID,
@@ -832,7 +869,11 @@ class TrygdetidServiceImpl(
         trygdetid: Trygdetid,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
-        val datoer = hentDatoerForBehandlingOgAvdoed(behandlingId, trygdetid.ident, brukerTokenInfo)
+        val datoer =
+            DatoerForBehandling(
+                toLocalDate(trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FOEDSELSDATO })!!,
+                toLocalDate(trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.DOEDSDATO })!!,
+            )
 
         val nyBeregnetTrygdetid =
             beregnTrygdetidService.beregnTrygdetid(

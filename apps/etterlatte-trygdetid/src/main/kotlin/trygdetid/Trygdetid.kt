@@ -186,7 +186,7 @@ fun List<Opplysningsgrunnlag>.toDto(): GrunnlagOpplysningerDto =
         avdoedFyllerSeksti = this.finnOpplysning(TrygdetidOpplysningType.FYLLER_66),
     )
 
-private fun List<Opplysningsgrunnlag>.finnOpplysning(type: TrygdetidOpplysningType): OpplysningsgrunnlagDto? =
+fun List<Opplysningsgrunnlag>.finnOpplysning(type: TrygdetidOpplysningType): OpplysningsgrunnlagDto? =
     this.find { opplysning -> opplysning.type == type }?.toDto()
 
 private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto =

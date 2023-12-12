@@ -53,8 +53,13 @@ export interface AvsenderMottaker {
 }
 
 export interface JournalpostSak {
-  sakstype?: string
+  sakstype?: Sakstype
   fagsakId?: string
   fagsaksystem?: string
   tema?: string
+}
+
+export enum Sakstype {
+  FAGSAK = 'FAGSAK',
+  GENERELL_SAK = 'GENERELL_SAK',
 }

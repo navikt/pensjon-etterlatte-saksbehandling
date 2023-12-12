@@ -1,6 +1,8 @@
 package no.nav.etterlatte.migrering
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.TransactionalSession
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
@@ -71,6 +73,18 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
             mapOf("id" to id),
         ) {
             Migreringsstatus.valueOf(it.string("status"))
+        }
+    }
+
+    fun hentSak(
+        id: Long,
+        tx: TransactionalSession? = null,
+    ) = tx.session<Pesyssak?> {
+        hent(
+            "SELECT status from pesyssak WHERE id = :id",
+            mapOf("id" to id),
+        ) { row ->
+            row.string("sak").let { objectMapper.readValue(it) }
         }
     }
 

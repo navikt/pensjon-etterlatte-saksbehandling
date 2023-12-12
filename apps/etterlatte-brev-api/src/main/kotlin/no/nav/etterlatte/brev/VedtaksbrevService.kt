@@ -85,22 +85,16 @@ class VedtaksbrevService(
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo) }
 
-        val mottakerFnr =
-            with(generellBrevData.personerISak) {
-                when (verge) {
-                    is Vergemaal ->
-                        verge.mottaker.foedselsnummer!!.value
-                    else ->
-                        innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
-                }
-            }
         val mottaker =
             with(generellBrevData.personerISak) {
                 when (verge) {
                     is Vergemaal ->
                         verge.toMottaker()
-                    else ->
+                    else -> {
+                        val mottakerFnr =
+                            innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
                         adresseService.hentMottakerAdresse(mottakerFnr)
+                    }
                 }
             }
 

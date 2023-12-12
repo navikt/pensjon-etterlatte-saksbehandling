@@ -106,7 +106,6 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-pdl-proxy
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-grunnlag
         - application: etterlatte-beregning

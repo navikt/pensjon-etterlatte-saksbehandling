@@ -1,4 +1,4 @@
-import { Journalpost } from '~shared/types/Journalpost'
+import { Journalpost, OppdaterJournalpostRequest } from '~shared/types/Journalpost'
 import { apiClient, ApiResponse } from './apiClient'
 import { ISak } from '~shared/types/sak'
 
@@ -12,6 +12,18 @@ export const endreTemaJournalpost = async (args: {
   journalpostId: string
   nyttTema: string
 }): Promise<ApiResponse<any>> => apiClient.put(`/dokumenter/${args.journalpostId}/tema/${args.nyttTema}`, {})
+
+export const oppdaterJournalpost = async (args: {
+  journalpost: OppdaterJournalpostRequest
+  forsoekFerdigstill?: boolean
+  journalfoerendeEnhet?: string
+}): Promise<ApiResponse<any>> => {
+  const queryParams = `journalfoerendeEnhet=${args.journalfoerendeEnhet}&forsoekFerdigstill=${args.forsoekFerdigstill}`
+
+  return apiClient.put(`/dokumenter/${args.journalpost.journalpostId}?${queryParams}`, {
+    ...args.journalpost,
+  })
+}
 
 export const hentJournalpost = async (journalpostId: string): Promise<ApiResponse<Journalpost>> =>
   apiClient.get(`/dokumenter/${journalpostId}`)

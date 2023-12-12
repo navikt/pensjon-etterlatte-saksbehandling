@@ -7,26 +7,20 @@ import { opprettBehandling } from '~shared/api/behandling'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { useNavigate } from 'react-router-dom'
 import { FlexRow } from '~shared/styled'
-import { ferdigstillJournalpost } from '~shared/api/dokument'
-import { Journalpost } from '~shared/types/Journalpost'
-import { ISak } from '~shared/types/sak'
 
 import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 
 interface ModalProps {
   oppgave: OppgaveDTO
   behandlingBehov: NyBehandlingRequest
-  journalpost: Journalpost
-  sak: ISak
 }
 
-export default function FullfoerOppgaveModal({ oppgave, behandlingBehov, journalpost, sak }: ModalProps) {
+export default function FullfoerOppgaveModal({ oppgave, behandlingBehov }: ModalProps) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
 
   const [opprettBehandlingStatus, opprettNyBehandling] = useApiCall(opprettBehandling)
   const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
-  const [ferdigstillJournalpostStatus, apiFerdigstillJournalpost] = useApiCall(ferdigstillJournalpost)
 
   const ferdigstill = () => {
     opprettNyBehandling(
@@ -35,12 +29,10 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov, journal
         mottattDato: behandlingBehov!!.mottattDato!!.replace('Z', ''),
       },
       () => {
-        apiFerdigstillJournalpost({ journalpostId: journalpost.journalpostId, sak }, () => {
-          apiFerdigstillOppgave(oppgave.id, () => {
-            setTimeout(() => {
-              navigate('/')
-            }, 5000)
-          })
+        apiFerdigstillOppgave(oppgave.id, () => {
+          setTimeout(() => {
+            navigate('/')
+          }, 5000)
         })
       }
     )
@@ -66,9 +58,7 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov, journal
             ferdigstilles.
           </BodyLong>
 
-          {isSuccess(opprettBehandlingStatus) &&
-          isSuccess(ferdigstillOppgaveStatus) &&
-          isSuccess(ferdigstillJournalpostStatus) ? (
+          {isSuccess(opprettBehandlingStatus) && isSuccess(ferdigstillOppgaveStatus) ? (
             <Alert variant="success">
               Behandling opprettet for bruker med fødselsnummer {oppgave.fnr}. Du blir straks sendt til oppgavebenken.
             </Alert>
@@ -77,22 +67,14 @@ export default function FullfoerOppgaveModal({ oppgave, behandlingBehov, journal
               <Button
                 variant="secondary"
                 onClick={() => setOpen(false)}
-                disabled={
-                  isPending(opprettBehandlingStatus) ||
-                  isPending(ferdigstillOppgaveStatus) ||
-                  isPending(ferdigstillJournalpostStatus)
-                }
+                disabled={isPending(opprettBehandlingStatus) || isPending(ferdigstillOppgaveStatus)}
               >
                 Avbryt
               </Button>
               <Button
                 variant="primary"
                 onClick={ferdigstill}
-                loading={
-                  isPending(opprettBehandlingStatus) ||
-                  isPending(ferdigstillOppgaveStatus) ||
-                  isPending(ferdigstillJournalpostStatus)
-                }
+                loading={isPending(opprettBehandlingStatus) || isPending(ferdigstillOppgaveStatus)}
               >
                 Ferdigstill
               </Button>

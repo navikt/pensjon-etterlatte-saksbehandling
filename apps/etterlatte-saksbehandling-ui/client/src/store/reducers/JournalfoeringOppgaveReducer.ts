@@ -1,32 +1,28 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
-import {
-  FerdigstillJournalpostRequest,
-  Journalpost,
-  JournalpostVariant,
-  OppdaterJournalpostTemaRequest,
-} from '~shared/types/Journalpost'
-import { ISak } from '~shared/types/sak'
+import { Journalpost } from '~shared/types/Journalpost'
+import { SakMedBehandlinger } from '~components/person/typer'
 
 export const settBruker = createAction<string>('behandling/bruker/sett')
 export const settOppgave = createAction<OppgaveDTO>('behandling/oppgave/sett')
-export const settSak = createAction<ISak>('behandling/sak/sett')
+export const settSak = createAction<SakMedBehandlinger>('behandling/sak/sett')
 export const settJournalpost = createAction<Journalpost>('behandling/journalpost/sett')
-export const settJournalpostVariant = createAction<JournalpostVariant>('oppgave/journalpostvariant/sett')
-export const settNyttTema = createAction<OppdaterJournalpostTemaRequest>('oppgave/endretemarequest/sett')
-export const settFerdigstillRequest = createAction<FerdigstillJournalpostRequest>('oppgave/ferdigstillrequest/sett')
+export const settOppgaveHandling = createAction<OppgaveHandling>('oppgave/oppgavehandling/sett')
 export const settNyBehandlingRequest = createAction<NyBehandlingRequest>('behandling/behandlingbehov/sett')
 
 export interface IJournalfoeringOppgaveReducer {
   bruker?: string
   oppgave?: OppgaveDTO
-  sak?: ISak
+  sakMedBehandlinger?: SakMedBehandlinger
   journalpost?: Journalpost
-  journalpostVariant?: JournalpostVariant
-  endreTemaRequest?: OppdaterJournalpostTemaRequest
-  ferdigstillRequest?: FerdigstillJournalpostRequest
+  oppgaveHandling?: OppgaveHandling
   nyBehandlingRequest?: NyBehandlingRequest
+}
+
+export enum OppgaveHandling {
+  NY_BEHANDLING = 'NY_BEHANDLING',
+  FERDIGSTILL_OPPGAVE = 'FERDIGSTILL_OPPGAVE',
 }
 
 const initialState: IJournalfoeringOppgaveReducer = {}
@@ -40,19 +36,13 @@ export const journalfoeringOppgaveReducer = createReducer(initialState, (builder
       state.oppgave = action.payload
     })
     .addCase(settSak, (state, action) => {
-      state.sak = action.payload
+      state.sakMedBehandlinger = action.payload
     })
     .addCase(settJournalpost, (state, action) => {
       state.journalpost = action.payload
     })
-    .addCase(settJournalpostVariant, (state, action) => {
-      state.journalpostVariant = action.payload
-    })
-    .addCase(settNyttTema, (state, action) => {
-      state.endreTemaRequest = action.payload
-    })
-    .addCase(settFerdigstillRequest, (state, action) => {
-      state.ferdigstillRequest = action.payload
+    .addCase(settOppgaveHandling, (state, action) => {
+      state.oppgaveHandling = action.payload
     })
     .addCase(settNyBehandlingRequest, (state, action) => {
       state.nyBehandlingRequest = action.payload

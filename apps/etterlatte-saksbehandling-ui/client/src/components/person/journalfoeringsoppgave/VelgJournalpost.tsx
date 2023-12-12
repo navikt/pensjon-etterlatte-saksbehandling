@@ -2,7 +2,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentDokumenter, hentDokumentPDF, hentJournalpost } from '~shared/api/dokument'
 import React, { useEffect, useState } from 'react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
-import { Button, Detail, Heading, Link, Panel, Table } from '@navikt/ds-react'
+import { Button, Detail, Heading, Table } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { formaterStringDato } from '~utils/formattering'
 import { useAppDispatch } from '~store/Store'
@@ -13,14 +13,12 @@ import DokumentModal from '../dokumenter/dokumentModal'
 import { Journalpost } from '~shared/types/Journalpost'
 import { FlexRow } from '~shared/styled'
 import { ApiErrorAlert } from '~ErrorBoundary'
-import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
 import { isPending, isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export default function VelgJournalpost({ journalpostId }: { journalpostId: string | null }) {
-  const { bruker, journalpost } = useJournalfoeringOppgave()
+  const { journalpost, oppgave } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
   const [journalposter, apiHentJournalposter] = useApiCall(hentDokumenter)
@@ -33,20 +31,20 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
   }
 
   useEffect(() => {
-    if (fnrHarGyldigFormat(bruker) && !journalpost) {
+    if (fnrHarGyldigFormat(oppgave?.fnr) && !journalpost) {
       if (journalpostId) {
         apiHentJournalpost(journalpostId, (journalpost) => {
           velgJournalpost(journalpost)
         })
       } else {
-        apiHentJournalposter(bruker!!, (journalposter) => {
+        apiHentJournalposter(oppgave!!.fnr, (journalposter) => {
           if (journalposter.length === 1) {
             velgJournalpost(journalposter[0])
           }
         })
       }
     }
-  }, [bruker])
+  }, [oppgave?.fnr])
 
   useEffect(() => {
     if (journalpost && !fileURL) {
@@ -82,41 +80,9 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
 
       {journalpost ? (
         <>
-          <Panel>
-            <Heading size="medium" spacing>
-              Journalpost ({journalpost.journalpostId})<Detail>{journalpost.tittel}</Detail>
-            </Heading>
-            <InfoWrapper>
-              <Info
-                label="Avsender/mottaker"
-                tekst={
-                  <>
-                    {journalpost.avsenderMottaker?.navn} (
-                    {journalpost.avsenderMottaker?.id?.length === 11 ? (
-                      <Link href={`/person/${journalpost.avsenderMottaker?.id}`}>
-                        {journalpost.avsenderMottaker?.id}
-                      </Link>
-                    ) : (
-                      journalpost.avsenderMottaker?.id
-                    )}
-                    )
-                  </>
-                }
-              />
-              <Info
-                label="Sak"
-                tekst={
-                  journalpost.sak
-                    ? `${journalpost.sak.fagsaksystem}: ${journalpost.sak.fagsakId || '-'}`
-                    : 'Ikke tilknyttet sak'
-                }
-              />
-              <Info label="Status" tekst={journalpost.journalstatus} />
-              <Info label="Kanal" tekst={journalpost.kanal} />
-            </InfoWrapper>
-          </Panel>
-
-          <br />
+          <Heading size="medium" spacing>
+            Journalpost ({journalpost.journalpostId})<Detail>{journalpost.tittel}</Detail>
+          </Heading>
 
           {mapApiResult(
             dokument,
@@ -124,7 +90,7 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
             () => (
               <ApiErrorAlert>Feil ved henting av PDF</ApiErrorAlert>
             ),
-            () => (!!fileURL ? <PdfViewer src={`${fileURL}#toolbar=0`} /> : <></>)
+            () => (!!fileURL ? <PdfViewer src={fileURL} /> : <></>)
           )}
         </>
       ) : (

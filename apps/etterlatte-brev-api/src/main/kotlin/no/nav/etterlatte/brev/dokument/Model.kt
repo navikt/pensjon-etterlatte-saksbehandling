@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.dokument
 
 import io.ktor.http.HttpStatusCode
-import no.nav.etterlatte.brev.dokarkiv.Bruker
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 
@@ -112,11 +111,13 @@ data class Dokumentvarianter(
 
 data class Bruker(
     val id: String,
-    val type: String = "FNR",
+    val type: BrukerIdType,
 )
 
 data class AvsenderMottaker(
     val id: String?,
+    val type: String?,
     val navn: String?,
+    val land: String?,
     val erLikBruker: Boolean?,
 )

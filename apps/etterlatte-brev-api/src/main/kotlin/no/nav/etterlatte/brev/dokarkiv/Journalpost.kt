@@ -31,24 +31,12 @@ data class OpprettJournalpostResponse(
     val journalpostId: String,
     val journalpostferdigstilt: Boolean,
     val dokumenter: List<DokumentInfo> = emptyList(),
-)
-
-/**
- * Requestobjekt for å oppdatere eksisterende Journalpost.
- * Setter [JsonInclude.Include.NON_EMPTY] siden Dokakiv ignorerer verdier som mangler eller er null.
- **/
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
-data class OppdaterJournalpostRequest(
-    val avsenderMottaker: AvsenderMottaker?,
-    val behandlingstema: String?,
-    val bruker: Bruker?,
-    val datoDokument: LocalDateTime?,
-    val dokumenter: List<JournalpostDokument>?,
-    val sak: JournalpostSak?,
-    val tema: String?,
-    val tilleggsopplysninger: Map<String, String>?,
-    val tittel: String?,
-)
+) {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class DokumentInfo(
+        val dokumentInfoId: String,
+    )
+}
 
 data class OppdaterJournalpostResponse(
     val journalpostId: String,
@@ -63,12 +51,7 @@ data class AvsenderMottaker(
 
 data class Bruker(
     val id: String,
-    val idType: String = "FNR",
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class DokumentInfo(
-    val dokumentInfoId: String,
+    val idType: BrukerIdType = BrukerIdType.FNR,
 )
 
 data class JournalpostDokument(

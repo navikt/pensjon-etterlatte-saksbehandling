@@ -62,7 +62,6 @@ class ApplicationBuilder {
                 azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
                 azureAppScope = config.getString("samordnevedtak.azure.scope"),
             ),
-            featureToggleService,
         )
     private val vedtaksvurderingService =
         VedtaksvurderingService(repository = VedtaksvurderingRepository.using(dataSource))

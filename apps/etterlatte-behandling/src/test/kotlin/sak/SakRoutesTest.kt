@@ -15,12 +15,17 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.verify
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.EnhetRequest
@@ -37,6 +42,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SakRoutesTest {
@@ -73,7 +79,46 @@ internal class SakRoutesTest {
             sakService.oppdaterEnhetForSaker(any())
             oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
         } just runs
-        every { sakService.finnSak(any()) } returns Sak(ident = "12345", sakType = SakType.BARNEPENSJON, id = 123455, enhet = "birger")
+        every { sakService.finnSak(any()) } returns
+            Sak(
+                ident = "12345",
+                sakType = SakType.BARNEPENSJON,
+                id = 123455,
+                enhet = "birger",
+            )
+        every { oppgaveService.hentOppgaverForSak(any()) } returns
+            listOf(
+                OppgaveIntern(
+                    id = UUID.randomUUID(),
+                    status = Status.NY,
+                    enhet = "4808",
+                    sakId = 1,
+                    kilde = null,
+                    type = OppgaveType.ATTESTERING,
+                    saksbehandler = "Bjarne",
+                    referanse = "hmm",
+                    merknad = null,
+                    opprettet = Tidspunkt.now(),
+                    sakType = SakType.BARNEPENSJON,
+                    fnr = "123",
+                    frist = null,
+                ),
+                OppgaveIntern(
+                    id = UUID.randomUUID(),
+                    status = Status.NY,
+                    enhet = "4808",
+                    sakId = 1,
+                    kilde = null,
+                    type = OppgaveType.KLAGE,
+                    saksbehandler = null,
+                    referanse = "hmm",
+                    merknad = null,
+                    opprettet = Tidspunkt.now(),
+                    sakType = SakType.BARNEPENSJON,
+                    fnr = "123",
+                    frist = null,
+                ),
+            )
         withTestApplication { client ->
             val response =
                 client.post("/api/sak/1/endre_enhet") {
@@ -82,6 +127,31 @@ internal class SakRoutesTest {
                     setBody(EnhetRequest(enhet = "4808"))
                 }
             assertEquals(200, response.status.value)
+            verify(exactly = 1) { oppgaveService.hentOppgaverForSak(any()) }
+            verify(exactly = 1) { oppgaveService.fjernSaksbehandler(any()) }
+        }
+    }
+
+    @Test
+    fun `Returnerer badrequest ved endring av enhet med ugyldig enhet`() {
+        coEvery {
+            sakService.oppdaterEnhetForSaker(any())
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
+        } just runs
+        every { sakService.finnSak(any()) } returns null
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
+
+        withTestApplication { client ->
+            val response =
+                client.post("/api/sak/1/endre_enhet") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(EnhetRequest(enhet = "4805"))
+                }
+            assertEquals(400, response.status.value)
+            verify(exactly = 0) { sakService.finnSak(any()) }
+            verify(exactly = 0) { oppgaveService.hentOppgaverForSak(any()) }
+            verify(exactly = 0) { oppgaveService.fjernSaksbehandler(any()) }
         }
     }
 

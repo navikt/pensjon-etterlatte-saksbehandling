@@ -20,3 +20,7 @@ export const hentSak = async (sakId: number): Promise<ApiResponse<ISak>> => {
 
 export const hentSakForPerson = async (args: { fnr: string; type: SakType }): Promise<ApiResponse<ISak>> =>
   apiClient.post(`/personer/sak/${args.type}`, { foedselsnummer: args.fnr })
+
+export const byttEnhetPaaSak = async (args: { sakId: number; enhet: String }): Promise<ApiResponse<void>> => {
+  return apiClient.post(`sak/${args.sakId}/endre_enhet`, { enhet: args.enhet })
+}

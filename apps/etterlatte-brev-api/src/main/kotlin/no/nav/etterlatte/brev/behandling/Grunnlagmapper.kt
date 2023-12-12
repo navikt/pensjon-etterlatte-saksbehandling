@@ -41,11 +41,21 @@ fun Grunnlag.mapSoeker(): Soeker =
         )
     }
 
-fun Grunnlag.mapAvdoede(): List<Avdoed> =
-    with(this.familie) {
-        val avdoede = hentAvdoede()
+fun Grunnlag.mapAvdoede(): List<Avdoed> {
+    val avdoedeIPersongalleri =
+        this.sak.hentKonstantOpplysning<Persongalleri>(Opplysningstype.PERSONGALLERI_V1)
+            ?.verdi?.avdoed
 
-        return avdoede
+    val harLagtInnFlereAvdoede = avdoedeIPersongalleri?.size == 2
+
+    return with(this.familie) {
+        var avdoede = hentAvdoede()
+        if (avdoede.size == 1 && harLagtInnFlereAvdoede) {
+            // Dette er en hack for å kunne sende riktig omregningsbrev for foreldreløse med ukjent forelder.
+            avdoede = avdoede + avdoede
+        }
+
+        return@with avdoede
             .filter { it.hentDoedsdato() != null }
             .map { avdoed ->
                 Avdoed(
@@ -54,6 +64,7 @@ fun Grunnlag.mapAvdoede(): List<Avdoed> =
                 )
             }
     }
+}
 
 fun Grunnlag.mapInnsender(): Innsender? =
     with(this.sak) {

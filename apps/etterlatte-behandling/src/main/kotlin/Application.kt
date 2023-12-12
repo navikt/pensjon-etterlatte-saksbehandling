@@ -19,7 +19,6 @@ import no.nav.etterlatte.behandling.behandlingVedtakRoute
 import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
-import no.nav.etterlatte.behandling.etterbetaling.etterbetalingRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
 import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
@@ -127,7 +126,6 @@ internal fun Application.module(context: ApplicationContext) {
                 oppgaveService = oppgaveService,
                 behandlingService = behandlingService,
             )
-            etterbetalingRoutes(etterbetalingService)
             behandlingInfoRoutes(behandlingInfoService)
             oppgaveRoutes(
                 service = oppgaveService,

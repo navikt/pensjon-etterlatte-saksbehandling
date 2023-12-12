@@ -1,7 +1,6 @@
 import {
   IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
-  IEtterbetaling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
   IUtlandstilknytning,
@@ -142,19 +141,6 @@ export const hentSak = async (sakId: string): Promise<ApiResponse<ISak>> => {
 
 export const hentFoersteVirk = async (args: { sakId: number }) =>
   apiClient.get<FoersteVirk>(`/sak/${args.sakId}/behandlinger/foerstevirk`)
-
-export const lagreEtterbetaling = async (args: {
-  behandlingId: string
-  etterbetaling: IEtterbetaling
-}): Promise<ApiResponse<void>> => {
-  return apiClient.put(`/behandling/${args.behandlingId}/etterbetaling `, {
-    fraDato: args.etterbetaling.fra,
-    tilDato: args.etterbetaling.til,
-  })
-}
-export const slettEtterbetaling = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
-  return apiClient.delete(`/behandling/${args.behandlingId}/etterbetaling`)
-}
 
 export const oppdaterGrunnlag = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/oppdater-grunnlag`, {})

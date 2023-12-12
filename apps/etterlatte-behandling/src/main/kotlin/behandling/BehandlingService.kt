@@ -7,7 +7,6 @@ import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
-import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingDao
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
@@ -129,7 +128,6 @@ internal class BehandlingServiceImpl(
     private val behandlingRequestLogger: BehandlingRequestLogger,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
-    private val etterbetalingDao: EtterbetalingDao,
     private val grunnlagService: GrunnlagService,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -348,7 +346,6 @@ internal class BehandlingServiceImpl(
             revurderingsaarsak = behandling.revurderingsaarsak(),
             revurderinginfo = behandling.revurderingInfo(),
             begrunnelse = behandling.begrunnelse(),
-            etterbetaling = inTransaction { etterbetalingDao.hentEtterbetaling(behandlingId) },
         )
     }
 

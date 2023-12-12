@@ -450,7 +450,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
     ): Boolean {
         logger.info("Henter eventuell etterbetaling for behandlingId=$behandlingId")
 
-        val resource = Resource(clientId = clientId, url = "$resourceUrl/api/behandling/$behandlingId/etterbetaling")
+        val resource = Resource(clientId = clientId, url = "$resourceUrl/api/behandling/$behandlingId/info/etterbetaling")
         val response = downstreamResourceClient.get(resource = resource, brukerTokenInfo = brukerTokenInfo)
 
         return response.mapBoth(

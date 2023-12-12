@@ -144,7 +144,7 @@ internal class BehandlingInfoRoutesTest {
             val client = createClient()
 
             val response =
-                client.get("/api/behandling/${UUID.randomUUID()}/info/etterbetaling-ny") {
+                client.get("/api/behandling/${UUID.randomUUID()}/info/etterbetaling") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
@@ -176,7 +176,7 @@ internal class BehandlingInfoRoutesTest {
         )
 
     private fun etterbetaling(behandlingId: UUID) =
-        EtterbetalingNy(
+        Etterbetaling(
             behandlingId = behandlingId,
             fom = YearMonth.of(2023, 1),
             tom = YearMonth.of(2023, 2),

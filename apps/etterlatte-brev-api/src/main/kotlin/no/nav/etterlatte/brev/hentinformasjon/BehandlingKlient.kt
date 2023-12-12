@@ -88,7 +88,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
                 resource =
                     Resource(
                         clientId = clientId,
-                        url = "$resourceUrl/api/behandling/$behandlingId/etterbetaling",
+                        url = "$resourceUrl/api/behandling/$behandlingId/info/etterbetaling",
                     ),
                 brukerTokenInfo = brukerTokenInfo,
             ).mapBoth(

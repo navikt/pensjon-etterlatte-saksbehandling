@@ -19,8 +19,6 @@ import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
 import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
-import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingDao
-import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -204,7 +202,6 @@ internal class ApplicationContext(
     val metrikkerDao = OppgaveMetrikkerDao(dataSource)
     val klageDao = KlageDaoImpl { databaseContext().activeTx() }
     val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
-    val etterbetalingDao = EtterbetalingDao { databaseContext().activeTx() }
     val behandlingInfoDao = BehandlingInfoDao { databaseContext().activeTx() }
     val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
 
@@ -237,10 +234,8 @@ internal class ApplicationContext(
             behandlingRequestLogger = behandlingRequestLogger,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
-            etterbetalingDao = etterbetalingDao,
             grunnlagService = grunnlagsService,
         )
-    val etterbetalingService = EtterbetalingService(etterbetalingDao, behandlingService)
     val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService)
     val generellBehandlingService =
         GenerellBehandlingService(

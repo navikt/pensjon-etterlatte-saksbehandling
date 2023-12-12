@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
@@ -121,12 +120,6 @@ class SakIkkeFunnetException(message: String) :
         detail = message,
     )
 
-class SakBleBorteException(message: String) :
-    IkkeTillattException(
-        code = "SAKEN_FORSVANT",
-        detail = message,
-    )
-
 internal fun Route.sakWebRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
@@ -167,16 +160,15 @@ internal fun Route.sakWebRoutes(
                         inTransaction {
                             sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
+                            for (oppgaveIntern in oppgaveService.hentOppgaverForSak(sakId)) {
+                                oppgaveService.fjernSaksbehandler(oppgaveIntern.id)
+                            }
                         }
 
                         logger.info(
                             "Saksbehandler $navIdent endret enhet på sak: $sakId og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}",
                         )
-                        val oppdatertSak =
-                            inTransaction { sakService.finnSak(sakId) }
-                                ?: throw SakBleBorteException("Saken ble borte etter å endre enheten på den sakid: $sakId. Kritisk! ")
-
-                        call.respond(oppdatertSak)
+                        call.respond(HttpStatusCode.OK)
                     } catch (e: TilstandException.UgyldigTilstand) {
                         call.respond(HttpStatusCode.BadRequest, "Kan ikke endre enhet på sak og oppgaver")
                     }

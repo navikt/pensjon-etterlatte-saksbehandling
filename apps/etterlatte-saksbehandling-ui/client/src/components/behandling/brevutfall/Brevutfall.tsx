@@ -9,6 +9,7 @@ import { BrevutfallSkjema } from '~components/behandling/brevutfall/BrevutfallSk
 import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallVisning'
 import Spinner from '~shared/Spinner'
 import { MapApiResult } from '~shared/components/MapApiResult'
+import { SakType } from '~shared/types/sak'
 
 export interface BrevutfallOgEtterbetaling {
   etterbetaling?: Etterbetaling | null
@@ -30,17 +31,26 @@ export interface Etterbetaling {
   datoTom?: string | null
 }
 
-const initialBrevutfallOgEtterbetaling = {
-  brevutfall: {
-    aldersgruppe: Aldersgruppe.IKKE_VALGT,
-  },
+const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {
+  switch (saktype) {
+    case SakType.BARNEPENSJON:
+      return {
+        brevutfall: {
+          aldersgruppe: Aldersgruppe.IKKE_VALGT,
+        },
+      }
+    case SakType.OMSTILLINGSSTOENAD:
+      return {
+        brevutfall: {},
+      }
+  }
 }
 
 export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
   const behandling = props.behandling
   const redigerbar = behandlingErRedigerbar(behandling.status)
   const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
-    initialBrevutfallOgEtterbetaling
+    initialBrevutfallOgEtterbetaling(behandling.sakType)
   )
   const [hentBrevutfallResult, hentBrevutfallRequest] = useApiCall(hentBrevutfallApi)
   const [visSkjema, setVisSkjema] = useState(redigerbar)
@@ -51,7 +61,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
         setBrevutfallOgEtterbetaling(brevutfall)
         setVisSkjema(false)
       } else {
-        setBrevutfallOgEtterbetaling(initialBrevutfallOgEtterbetaling)
+        setBrevutfallOgEtterbetaling(initialBrevutfallOgEtterbetaling(behandling.sakType))
         if (redigerbar) setVisSkjema(true)
       }
     })

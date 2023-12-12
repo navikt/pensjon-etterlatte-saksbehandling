@@ -55,7 +55,6 @@ class PersonMapperTest {
                 personRolle = PersonRolle.BARN,
                 hentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl),
                 saktype = SakType.BARNEPENSJON,
-                aksepterPersonerUtenIdent = true,
             )
         Assertions.assertNull(person.statsborgerskap)
         Assertions.assertEquals(2, person.pdlStatsborgerskap?.size)
@@ -104,7 +103,6 @@ class PersonMapperTest {
                 personRolle = PersonRolle.BARN,
                 hentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl),
                 saktype = SakType.BARNEPENSJON,
-                aksepterPersonerUtenIdent = true,
             )
         Assertions.assertEquals("Norge", person.statsborgerskap)
         Assertions.assertNull(person.pdlStatsborgerskap)
@@ -132,7 +130,6 @@ class PersonMapperTest {
                 personRolle = PersonRolle.BARN,
                 hentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl),
                 saktype = SakType.BARNEPENSJON,
-                aksepterPersonerUtenIdent = true,
             )
         Assertions.assertNull(person.pdlStatsborgerskap)
         Assertions.assertNull(person.statsborgerskap)

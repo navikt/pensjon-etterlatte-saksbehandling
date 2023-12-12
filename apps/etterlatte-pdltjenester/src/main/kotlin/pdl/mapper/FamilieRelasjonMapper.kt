@@ -4,7 +4,6 @@ import no.nav.etterlatte.libs.common.behandling.Navn
 import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.behandling.RelatertPerson
 import no.nav.etterlatte.libs.common.behandling.RelativPersonrolle
-import no.nav.etterlatte.libs.common.pdl.AkseptererIkkePersonerUtenIdentException
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -13,7 +12,6 @@ import no.nav.etterlatte.pdl.PdlForelderBarnRelasjon
 import no.nav.etterlatte.pdl.PdlForelderBarnRelasjonRolle
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlRelatertBiPerson
-import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 
 object FamilieRelasjonMapper {
@@ -22,7 +20,6 @@ object FamilieRelasjonMapper {
     fun mapFamilieRelasjon(
         hentPerson: PdlHentPerson,
         personRolle: PersonRolle,
-        aksepterPersonerUtenIdent: Boolean,
     ): FamilieRelasjon {
         // TODO tar kun med foreldreAnsvar med fnr nå
         // TODO finn ut om det er riktig å hente ut basert på sisteRegistrertDato
@@ -68,27 +65,11 @@ object FamilieRelasjonMapper {
 
         val personerUtenIdent = mapPersonerUtenIdenter(hentPerson, personRolle)
 
-        if (personerUtenIdent.isNullOrEmpty()) {
-            return FamilieRelasjon(ansvarligeForeldre, foreldre, barn)
-        }
-
-        if (!aksepterPersonerUtenIdent) {
-            logger.error(
-                "Feilet i mapping av familierelasjon på grunn av personer som mangler identer. " +
-                    "Se sikkerlogg for detaljer.",
-            )
-            sikkerLogg.error(
-                "Feilet i mapping av familierelasjon på grunn av personer som mangler identer. " +
-                    "Mappet følgende personer som mangler identer: $personerUtenIdent",
-            )
-            throw AkseptererIkkePersonerUtenIdentException()
-        }
-
         return FamilieRelasjon(
             ansvarligeForeldre = ansvarligeForeldre,
             foreldre = foreldre,
             barn = barn,
-            personerUtenIdent = personerUtenIdent,
+            personerUtenIdent = personerUtenIdent.takeUnless { it.isNullOrEmpty() },
         )
     }
 

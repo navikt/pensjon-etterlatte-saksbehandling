@@ -12,7 +12,6 @@ import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.feilhaandtering.ExceptionResponse
 import no.nav.etterlatte.libs.common.logging.samleExceptions
-import no.nav.etterlatte.libs.common.pdl.AkseptererIkkePersonerUtenIdentException
 import no.nav.etterlatte.libs.common.pdl.PdlFeilAarsak
 import no.nav.etterlatte.libs.common.pdl.PdlInternalServerError
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -51,7 +50,6 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
                         }
                     when (feilFraPdl) {
                         PdlFeilAarsak.FANT_IKKE_PERSON -> null
-                        PdlFeilAarsak.INGEN_IDENT_FAMILIERELASJON -> throw AkseptererIkkePersonerUtenIdentException()
                         PdlFeilAarsak.INTERNAL_SERVER_ERROR -> throw PdlInternalServerError()
                     }
                 }

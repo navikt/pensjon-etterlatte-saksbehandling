@@ -1,6 +1,5 @@
 package no.nav.etterlatte.pdl.mapper
 
-import no.nav.etterlatte.libs.common.pdl.AkseptererIkkePersonerUtenIdentException
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.mockResponse
 import no.nav.etterlatte.pdl.PdlHentPerson
@@ -16,30 +15,11 @@ class FamilierelasjonMapperTest {
     private val hentPerson: PdlHentPerson = personResponse.data?.hentPerson!!
 
     @Test
-    fun `mapFamilierelasjon kaster feil hvis vi mangler ident på relasjon og ikke aksepeterer det`() {
-        Assertions.assertThrows(AkseptererIkkePersonerUtenIdentException::class.java) {
-            FamilieRelasjonMapper.mapFamilieRelasjon(
-                hentPerson = hentPersonRelasjonUtenIdent,
-                personRolle = PersonRolle.BARN,
-                aksepterPersonerUtenIdent = false,
-            )
-        }
-    }
-
-    @Test
     fun `mapFamilierelasjon kaster ikke feil hvis vi ikke mangler ident på relasjon`() {
         Assertions.assertDoesNotThrow {
             FamilieRelasjonMapper.mapFamilieRelasjon(
                 hentPerson = hentPerson,
                 personRolle = PersonRolle.BARN,
-                aksepterPersonerUtenIdent = false,
-            )
-        }
-        Assertions.assertDoesNotThrow {
-            FamilieRelasjonMapper.mapFamilieRelasjon(
-                hentPerson = hentPerson,
-                personRolle = PersonRolle.BARN,
-                aksepterPersonerUtenIdent = true,
             )
         }
     }
@@ -50,7 +30,6 @@ class FamilierelasjonMapperTest {
             FamilieRelasjonMapper.mapFamilieRelasjon(
                 hentPerson = hentPersonRelasjonUtenIdent,
                 personRolle = PersonRolle.BARN,
-                aksepterPersonerUtenIdent = true,
             )
         Assertions.assertNotNull(personer.personerUtenIdent)
         Assertions.assertEquals(2, personer.personerUtenIdent?.size)

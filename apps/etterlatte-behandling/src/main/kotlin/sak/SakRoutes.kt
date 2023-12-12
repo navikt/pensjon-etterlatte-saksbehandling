@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -148,7 +149,7 @@ internal fun Route.sakWebRoutes(
                 hentNavidentFraToken { navIdent ->
                     val enhetrequest = call.receive<EnhetRequest>()
                     try {
-                        if (enhetrequest.enhet !in gyldigeEnheter) {
+                        if (enhetrequest.enhet !in Enheter.values().map { it.enhetNr }) {
                             throw UgyldigForespoerselException(
                                 code = "ENHET IKKE GYLDIG",
                                 detail = "enhet ${enhetrequest.enhet} er ikke i listen over gyldige enheter",
@@ -279,15 +280,5 @@ data class UtlandstilknytningRequest(
 data class EnhetRequest(
     val enhet: String,
 )
-
-val gyldigeEnheter =
-    listOf(
-        "4815",
-        "4808",
-        "4862",
-        "0001",
-        "4883",
-        "2103",
-    )
 
 data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)

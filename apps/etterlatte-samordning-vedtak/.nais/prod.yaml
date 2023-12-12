@@ -94,7 +94,6 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: etterlatte-krakend
         - application: pensjon-pen
           namespace: pensjondeployer
           cluster: prod-fss

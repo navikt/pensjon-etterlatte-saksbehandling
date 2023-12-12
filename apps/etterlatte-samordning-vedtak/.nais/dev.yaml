@@ -96,7 +96,6 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: etterlatte-krakend
         - application: pensjon-pen-q0
           namespace: pensjon-q0
           cluster: dev-fss

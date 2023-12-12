@@ -70,7 +70,8 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
             }
         }
 
-        get("/etterbetaling") {
+        // TODO rename når den gamle er fjernet
+        get("/etterbetaling-ny") {
             logger.info("Henter etterbetaling for behandling $behandlingId")
             when (val etterbetaling = inTransaction { service.hentEtterbetaling(behandlingId) }) {
                 null -> call.respond(HttpStatusCode.NoContent)

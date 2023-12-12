@@ -124,6 +124,6 @@ spec:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:
       rules:
-        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling

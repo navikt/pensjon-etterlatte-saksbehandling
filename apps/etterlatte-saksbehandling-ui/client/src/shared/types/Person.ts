@@ -38,6 +38,8 @@ export interface IPdlPerson {
   oppholdsadresse?: IAdresse[]
   avdoedesBarn?: IPdlPerson[]
   utland?: Utland
+  statsborgerskap?: string
+  pdlStatsborgerskap?: Statsborgerskap[]
   familieRelasjon?: IFamilieRelasjon
   sivilstatus?: Sivilstatus
   sivilstand?: Sivilstand[]
@@ -53,6 +55,12 @@ export interface Utland {
     fraflyttingsland?: string
     dato?: string
   }[]
+}
+
+export interface Statsborgerskap {
+  land: string
+  gyldigFraOgMed?: string
+  gyldigTilOgMed?: string
 }
 
 export interface Sivilstand {

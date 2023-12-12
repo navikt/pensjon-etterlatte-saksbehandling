@@ -15,7 +15,9 @@ class SamordningHendelseHandler(
      * Skal kun dytte info videre for Omstillingsstønad-hendelser slik at R&R lytter kan faktisk håndtere det
      */
     fun handleSamordningHendelse(hendelse: SamordningVedtakHendelse) {
+        logger.info("Behandler samordning-hendelse [fagomrade='${hendelse.fagomrade}'")
         if (hendelse.fagomrade != FAGOMRADE_OMS) {
+            logger.info("Skipper hendelse")
             return
         }
 

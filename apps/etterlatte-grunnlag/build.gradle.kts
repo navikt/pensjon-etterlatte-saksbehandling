@@ -8,12 +8,12 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-database"))
-    implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-sporingslogg"))
     implementation(project(":libs:etterlatte-behandling-model"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-pdl-model"))
     implementation(project(":libs:etterlatte-migrering-model"))
+    implementation(libs.etterlatte.common)
 
     implementation(libs.ktor2.servercore)
     implementation(libs.ktor2.servercio)
@@ -36,6 +36,7 @@ dependencies {
 
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.ktor2.clientcontentnegotiation)
     testImplementation(libs.ktor2.servertests)
     testImplementation(project(":libs:testdata"))
     testImplementation(libs.test.kotest.assertionscore)

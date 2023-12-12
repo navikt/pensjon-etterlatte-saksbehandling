@@ -14,7 +14,6 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -50,17 +49,16 @@ internal class GyldighetsproevingServiceImplTest {
     private val behandlingDaoMock = mockk<BehandlingDao>()
     private val hendelseDaoMock = mockk<HendelseDao>()
     private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>()
-    private val featureToggleService = mockk<FeatureToggleService>()
     private val naaTid = Tidspunkt.now()
     private val behandlingsService =
         GyldighetsproevingServiceImpl(
             behandlingDaoMock,
-            featureToggleService,
             naaTid.fixedNorskTid(),
         )
 
     @BeforeEach
     fun before() {
+        every { user.name() } returns "User"
         Kontekst.set(
             Context(
                 user,
@@ -87,8 +85,6 @@ internal class GyldighetsproevingServiceImplTest {
     fun hentFoerstegangsbehandling() {
         val id = UUID.randomUUID()
 
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
         every {
             behandlingDaoMock.hentBehandling(id)
         } returns
@@ -112,10 +108,15 @@ internal class GyldighetsproevingServiceImplTest {
                         Grunnlagsopplysning.Saksbehandler.create("ident"),
                         "begrunnelse",
                     ),
+                utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,
             )
+
+        every {
+            user.enheter()
+        } returns listOf(Enheter.defaultEnhet.enhetNr)
 
         behandlingsService.hentFoerstegangsbehandling(id)
 
@@ -136,6 +137,7 @@ internal class GyldighetsproevingServiceImplTest {
                 status = BehandlingStatus.OPPRETTET,
                 kommerBarnetTilgode = null,
                 virkningstidspunkt = null,
+                utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 soeknadMottattDato = now,
                 gyldighetsproeving = null,
@@ -146,7 +148,9 @@ internal class GyldighetsproevingServiceImplTest {
 
         every { behandlingDaoMock.lagreGyldighetsproving(any()) } just Runs
 
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
+        every {
+            user.enheter()
+        } returns listOf(Enheter.defaultEnhet.enhetNr)
 
         val forventetResultat =
             GyldighetsResultat(
@@ -182,45 +186,6 @@ internal class GyldighetsproevingServiceImplTest {
     }
 
     @Test
-    fun hentFoerstegangsbehandlingMedEnhetMensFeatureErSkruddAv() {
-        val id = UUID.randomUUID()
-
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns false
-
-        every {
-            behandlingDaoMock.hentBehandling(id)
-        } returns
-            Foerstegangsbehandling(
-                id = id,
-                sak =
-                    Sak(
-                        ident = "Ola Olsen",
-                        sakType = SakType.BARNEPENSJON,
-                        id = 1,
-                        enhet = Enheter.PORSGRUNN.enhetNr,
-                    ),
-                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-                status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-                gyldighetsproeving = null,
-                virkningstidspunkt =
-                    Virkningstidspunkt(
-                        YearMonth.of(2022, 1),
-                        Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        "begrunnelse",
-                    ),
-                boddEllerArbeidetUtlandet = null,
-                kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
-            )
-
-        behandlingsService.hentFoerstegangsbehandling(id)
-
-        verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
-    }
-
-    @Test
     fun hentFoerstegangsbehandlingMedEnhetOgSaksbehandlerHarEnhet() {
         every {
             user.enheter()
@@ -228,8 +193,6 @@ internal class GyldighetsproevingServiceImplTest {
 
         val id = UUID.randomUUID()
 
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
         every {
             behandlingDaoMock.hentBehandling(id)
         } returns
@@ -253,6 +216,7 @@ internal class GyldighetsproevingServiceImplTest {
                         Grunnlagsopplysning.Saksbehandler.create("ident"),
                         "begrunnelse",
                     ),
+                utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,
@@ -271,8 +235,6 @@ internal class GyldighetsproevingServiceImplTest {
 
         val id = UUID.randomUUID()
 
-        every { featureToggleService.isEnabled(BehandlingServiceFeatureToggle.FiltrerMedEnhetId, false) } returns true
-
         every {
             behandlingDaoMock.hentBehandling(id)
         } returns
@@ -296,6 +258,7 @@ internal class GyldighetsproevingServiceImplTest {
                         Grunnlagsopplysning.Saksbehandler.create("ident"),
                         "begrunnelse",
                     ),
+                utlandstilknytning = null,
                 boddEllerArbeidetUtlandet = null,
                 kommerBarnetTilgode = null,
                 kilde = Vedtaksloesning.GJENNY,

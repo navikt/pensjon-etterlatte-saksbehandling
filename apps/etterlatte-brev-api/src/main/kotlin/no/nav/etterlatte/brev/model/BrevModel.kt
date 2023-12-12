@@ -46,9 +46,6 @@ data class Mottaker(
     val adresse: Adresse,
 ) {
     init {
-        require(foedselsnummer != null || orgnummer != null) {
-            "Fødselsnummer eller orgnummer må være spesifisert"
-        }
         require(navn.isNotBlank()) {
             "Navn på mottaker må være satt"
         }

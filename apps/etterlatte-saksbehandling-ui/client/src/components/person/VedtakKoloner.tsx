@@ -24,13 +24,15 @@ export const VedtakKolonner = (props: { behandlingId: string }) => {
     <>
       {mapApiResult(
         vedtak,
-        <Table.DataCell>
+        <Table.DataCell colSpan={2}>
           <Spinner visible label="" margin="0" />
         </Table.DataCell>,
         (apierror) => (
-          <ExclamationmarkTriangleFillIcon
-            title={apierror.detail || 'Feil oppsto ved henting av sammendrag for behandling'}
-          />
+          <Table.DataCell colSpan={2}>
+            <ExclamationmarkTriangleFillIcon
+              title={apierror.detail || 'Feil oppsto ved henting av sammendrag for behandling'}
+            />
+          </Table.DataCell>
         ),
         (vedtak) => (
           <>

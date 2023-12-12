@@ -18,11 +18,9 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
-import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.common.Enheter
@@ -38,6 +36,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -132,7 +131,7 @@ fun opprettBehandling(
     soeknadMottattDato: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     virkningstidspunkt: Virkningstidspunkt? = null,
     revurderingAarsak: Revurderingaarsak? = null,
-    opphoerAarsaker: List<ManueltOpphoerAarsak>? = null,
+    opphoerAarsaker: List<String>? = null,
     fritekstAarsak: String? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
@@ -159,6 +158,7 @@ fun foerstegangsbehandling(
     persongalleri: Persongalleri = persongalleri(),
     gyldighetsproeving: GyldighetsResultat? = null,
     virkningstidspunkt: Virkningstidspunkt? = null,
+    utlandstilknytning: Utlandstilknytning? = null,
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     kommerBarnetTilgode: KommerBarnetTilgode? = null,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
@@ -178,6 +178,7 @@ fun foerstegangsbehandling(
     soeknadMottattDato = soeknadMottattDato,
     gyldighetsproeving = gyldighetsproeving,
     virkningstidspunkt = virkningstidspunkt,
+    utlandstilknytning = utlandstilknytning,
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     kommerBarnetTilgode = kommerBarnetTilgode,
     kilde = kilde,
@@ -193,6 +194,7 @@ fun revurdering(
     revurderingAarsak: Revurderingaarsak,
     kommerBarnetTilgode: KommerBarnetTilgode = kommerBarnetTilgode(id),
     virkningstidspunkt: Virkningstidspunkt? = null,
+    utlandstilknytning: Utlandstilknytning? = null,
     boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
     prosesstype: Prosesstype = Prosesstype.MANUELL,
     kilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
@@ -213,43 +215,13 @@ fun revurdering(
     status = status,
     kommerBarnetTilgode = kommerBarnetTilgode,
     virkningstidspunkt = virkningstidspunkt,
+    utlandstilknytning = utlandstilknytning,
     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
     revurderingsaarsak = revurderingAarsak,
     prosesstype = prosesstype,
     kilde = kilde,
     revurderingInfo = revurderingInfo,
     begrunnelse = begrunnelse,
-)
-
-fun manueltOpphoer(
-    sakId: Long = 1,
-    behandlingId: UUID = UUID.randomUUID(),
-    persongalleri: Persongalleri = persongalleri(),
-    opphoerAarsaker: List<ManueltOpphoerAarsak> =
-        listOf(
-            ManueltOpphoerAarsak.SOESKEN_DOED,
-            ManueltOpphoerAarsak.GJENLEVENDE_FORELDER_DOED,
-        ),
-    fritekstAarsak: String? = "Umulig å revurdere i nytt saksbehandlingssystem",
-    virkningstidspunkt: Virkningstidspunkt? = null,
-    boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet? = null,
-    enhet: String = Enheter.defaultEnhet.enhetNr,
-) = ManueltOpphoer(
-    id = behandlingId,
-    sak =
-        Sak(
-            ident = persongalleri.soeker,
-            sakType = SakType.BARNEPENSJON,
-            id = sakId,
-            enhet = enhet,
-        ),
-    behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-    sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-    status = BehandlingStatus.OPPRETTET,
-    opphoerAarsaker = opphoerAarsaker,
-    fritekstAarsak = fritekstAarsak,
-    virkningstidspunkt = virkningstidspunkt,
-    boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
 )
 
 fun persongalleri(

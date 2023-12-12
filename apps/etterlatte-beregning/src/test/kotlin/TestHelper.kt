@@ -46,7 +46,6 @@ import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.Saksbehandler
 import java.math.RoundingMode
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -166,7 +165,7 @@ fun aarsoppgjoer(
 
 fun ytelseFoerAvkorting(
     beregning: Int = 100,
-    periode: Periode = Periode(fom = YearMonth.of(2023, 1), tom = null),
+    periode: Periode = Periode(fom = YearMonth.of(2024, 1), tom = null),
     beregningsreferanse: UUID = UUID.randomUUID(),
 ) = YtelseFoerAvkorting(
     beregning = beregning,
@@ -284,27 +283,21 @@ fun behandling(
     sak: Long = 123,
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1)),
+    virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
     status: BehandlingStatus = BehandlingStatus.BEREGNET,
 ) = DetaljertBehandling(
     id = id,
     sak = sak,
     sakType = sakType,
-    behandlingOpprettet = LocalDateTime.now(),
-    soeknadMottattDato = null,
-    innsender = null,
     soeker = "12312312321",
-    gjenlevende = listOf(),
-    avdoed = listOf(),
-    soesken = listOf(),
     status = status,
     behandlingType = behandlingType,
     virkningstidspunkt = virkningstidspunkt,
     revurderingsaarsak = null,
     prosesstype = Prosesstype.MANUELL,
     boddEllerArbeidetUtlandet = null,
+    utlandstilknytning = null,
     revurderingInfo = null,
-    enhet = "1111",
     kilde = Vedtaksloesning.GJENNY,
 )
 

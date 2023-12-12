@@ -8,6 +8,7 @@ import { DatoFormat, formaterFnr } from '~utils/formattering'
 import { IconSize } from '~shared/types/Icon'
 import { GrunnlagKilde } from '~shared/types/grunnlag'
 import { Utlandsopphold } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/UtvandringInnvandring'
+import { StatsborgerskapVisning } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/StatsborgerskapVisning'
 
 const PersonBorder = styled.div`
   padding: 1.2em 1em 1em 0em;
@@ -64,7 +65,10 @@ export const Person = ({ person, kilde, avdoed = false, mottaker = false, gjenle
           <PersonInfoAdresse adresser={person.bostedsadresse} visHistorikk={false} adresseDoedstidspunkt={avdoed} />
         </div>
         {person.utland && <Utlandsopphold utland={person.utland} />}
-
+        <StatsborgerskapVisning
+          statsborgerskap={person.statsborgerskap}
+          pdlStatsborgerskap={person.pdlStatsborgerskap}
+        />
         <Detail>
           <Label size="small" as="p">
             Kilde

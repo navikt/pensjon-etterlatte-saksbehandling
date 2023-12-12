@@ -13,8 +13,6 @@ dependencies {
     implementation(project(":libs:etterlatte-beregning-model"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-sporingslogg"))
-    implementation(project(":libs:ktor2client-onbehalfof"))
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
 
     implementation(libs.ktor2.servercore)
     implementation(libs.ktor2.servercio)

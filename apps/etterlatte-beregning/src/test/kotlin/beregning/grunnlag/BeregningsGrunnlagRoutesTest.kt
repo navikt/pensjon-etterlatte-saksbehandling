@@ -48,7 +48,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID.randomUUID
@@ -84,21 +83,15 @@ internal class BeregningsGrunnlagRoutesTest {
                 id = randomUUID(),
                 sak = 123,
                 sakType = SakType.BARNEPENSJON,
-                behandlingOpprettet = LocalDateTime.now(),
-                soeknadMottattDato = null,
-                innsender = null,
                 soeker = "diam",
-                gjenlevende = listOf(),
-                avdoed = listOf(),
-                soesken = listOf(),
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 virkningstidspunkt = null,
                 revurderingsaarsak = null,
                 prosesstype = Prosesstype.MANUELL,
                 boddEllerArbeidetUtlandet = null,
+                utlandstilknytning = null,
                 revurderingInfo = null,
-                enhet = "1111",
                 kilde = Vedtaksloesning.GJENNY,
             )
 
@@ -139,21 +132,15 @@ internal class BeregningsGrunnlagRoutesTest {
                 id = randomUUID(),
                 sak = sakId,
                 sakType = SakType.BARNEPENSJON,
-                behandlingOpprettet = LocalDateTime.now(),
-                soeknadMottattDato = null,
-                innsender = null,
                 soeker = "",
-                gjenlevende = listOf(),
-                avdoed = listOf(),
-                soesken = listOf(),
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
                 behandlingType = BehandlingType.REVURDERING,
                 virkningstidspunkt = virkRevurdering,
                 revurderingsaarsak = null,
                 prosesstype = Prosesstype.MANUELL,
                 boddEllerArbeidetUtlandet = null,
+                utlandstilknytning = null,
                 revurderingInfo = null,
-                enhet = "1111",
                 kilde = Vedtaksloesning.GJENNY,
             )
         coEvery {
@@ -284,13 +271,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 id = randomUUID(),
                 sak = 123,
                 sakType = SakType.BARNEPENSJON,
-                behandlingOpprettet = LocalDateTime.now(),
-                soeknadMottattDato = null,
-                innsender = null,
                 soeker = "diam",
-                gjenlevende = listOf(),
-                avdoed = listOf(),
-                soesken = listOf(),
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 virkningstidspunkt =
@@ -306,8 +287,8 @@ internal class BeregningsGrunnlagRoutesTest {
                 revurderingsaarsak = null,
                 prosesstype = Prosesstype.MANUELL,
                 boddEllerArbeidetUtlandet = null,
+                utlandstilknytning = null,
                 revurderingInfo = null,
-                enhet = "1111",
                 kilde = Vedtaksloesning.GJENNY,
             )
 
@@ -350,13 +331,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 id = randomUUID(),
                 sak = 123,
                 sakType = SakType.BARNEPENSJON,
-                behandlingOpprettet = LocalDateTime.now(),
-                soeknadMottattDato = null,
-                innsender = null,
                 soeker = "diam",
-                gjenlevende = listOf(),
-                avdoed = listOf(),
-                soesken = listOf(),
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 virkningstidspunkt =
@@ -372,8 +347,8 @@ internal class BeregningsGrunnlagRoutesTest {
                 revurderingsaarsak = null,
                 prosesstype = Prosesstype.MANUELL,
                 boddEllerArbeidetUtlandet = null,
+                utlandstilknytning = null,
                 revurderingInfo = null,
-                enhet = "1111",
                 kilde = Vedtaksloesning.GJENNY,
             )
 
@@ -620,21 +595,15 @@ internal class BeregningsGrunnlagRoutesTest {
                 id = randomUUID(),
                 sak = 222,
                 sakType = SakType.BARNEPENSJON,
-                behandlingOpprettet = LocalDateTime.now(),
-                soeknadMottattDato = null,
-                innsender = null,
                 soeker = "diam",
-                gjenlevende = listOf(),
-                avdoed = listOf(),
-                soesken = listOf(),
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 virkningstidspunkt = null,
                 revurderingsaarsak = null,
                 prosesstype = Prosesstype.MANUELL,
                 boddEllerArbeidetUtlandet = null,
+                utlandstilknytning = null,
                 revurderingInfo = null,
-                enhet = "1111",
                 kilde = Vedtaksloesning.GJENNY,
             )
 

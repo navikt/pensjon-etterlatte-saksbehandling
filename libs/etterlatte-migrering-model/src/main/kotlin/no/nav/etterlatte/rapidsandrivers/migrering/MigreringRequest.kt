@@ -4,7 +4,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
@@ -27,7 +27,7 @@ data class MigreringRequest(
     val trygdetid: Trygdetid,
     val flyktningStatus: Boolean = false,
     val spraak: Spraak,
-    val utenlandstilknytningType: UtenlandstilknytningType? = null,
+    val utlandstilknytningType: UtlandstilknytningType? = null,
 ) {
     fun opprettPersongalleri() =
         Persongalleri(
@@ -49,6 +49,12 @@ data class MigreringRequest(
 
     fun harMindreEnn40AarsTrygdetid(): Boolean {
         return beregning.anvendtTrygdetid < 40
+    }
+
+    fun anvendtFlyktningerfordel(): Boolean {
+        return flyktningStatus &&
+            foersteVirkningstidspunkt < YearMonth.of(2021, 1) &&
+            beregning.anvendtTrygdetid == 40
     }
 }
 

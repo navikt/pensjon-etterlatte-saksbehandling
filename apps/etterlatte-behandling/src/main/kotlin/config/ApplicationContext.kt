@@ -10,11 +10,13 @@ import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
-import no.nav.etterlatte.behandling.EnhetServiceImpl
+import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
+import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
+import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoService
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.etterbetaling.EtterbetalingDao
@@ -39,7 +41,6 @@ import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.behandling.manueltopphoer.RealManueltOpphoerService
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
@@ -204,6 +205,7 @@ internal class ApplicationContext(
     val klageDao = KlageDaoImpl { databaseContext().activeTx() }
     val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
     val etterbetalingDao = EtterbetalingDao { databaseContext().activeTx() }
+    val behandlingInfoDao = BehandlingInfoDao { databaseContext().activeTx() }
     val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
 
     // Klient
@@ -221,26 +223,25 @@ internal class ApplicationContext(
     val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)
 
     // Service
-    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao, featureToggleService)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao)
 
-    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient, featureToggleService)
+    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient)
     val grunnlagsService = GrunnlagService(grunnlagKlient)
     val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,
             behandlingHendelser = behandlingsHendelser,
-            hendelseDao = hendelseDao,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
+            hendelseDao = hendelseDao,
             grunnlagKlient = grunnlagKlientObo,
             behandlingRequestLogger = behandlingRequestLogger,
-            featureToggleService = featureToggleService,
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
             etterbetalingDao = etterbetalingDao,
             grunnlagService = grunnlagsService,
-            sakDao = sakDao,
         )
     val etterbetalingService = EtterbetalingService(etterbetalingDao, behandlingService)
+    val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService)
     val generellBehandlingService =
         GenerellBehandlingService(
             generellbehandlingDao,
@@ -270,17 +271,6 @@ internal class ApplicationContext(
     val gyldighetsproevingService =
         GyldighetsproevingServiceImpl(
             behandlingDao = behandlingDao,
-            featureToggleService = featureToggleService,
-        )
-
-    val manueltOpphoerService =
-        RealManueltOpphoerService(
-            oppgaveService = oppgaveService,
-            behandlingDao = behandlingDao,
-            behandlingHendelser = behandlingsHendelser,
-            hendelseDao = hendelseDao,
-            grunnlagService = grunnlagsService,
-            featureToggleService = featureToggleService,
         )
 
     val omregningService =
@@ -291,15 +281,13 @@ internal class ApplicationContext(
         )
 
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
+    val enhetService = BrukerServiceImpl(pdlKlient, norg2Klient)
     val sakService =
         SakServiceImpl(
             sakDao,
-            pdlKlient,
-            norg2Klient,
-            featureToggleService,
             skjermingKlient,
+            enhetService,
         )
-    val enhetService = EnhetServiceImpl(navAnsattKlient)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             oppgaveService = oppgaveService,
@@ -308,6 +296,7 @@ internal class ApplicationContext(
             pdlKlient = pdlKlient,
             grunnlagKlient = grunnlagKlient,
             sakService = sakService,
+            brukerService = enhetService,
         )
 
     val behandlingsStatusService =
@@ -329,7 +318,6 @@ internal class ApplicationContext(
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
             behandlingHendelser = behandlingsHendelser,
-            featureToggleService = featureToggleService,
             migreringKlient = migreringKlient,
         )
 

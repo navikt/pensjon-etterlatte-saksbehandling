@@ -2,6 +2,10 @@ package no.nav.etterlatte.grunnlag.adresse
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import no.nav.etterlatte.libs.common.person.BrevMottaker
+import no.nav.etterlatte.libs.common.person.MottakerAdresse
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import org.slf4j.LoggerFactory
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
@@ -20,7 +24,7 @@ sealed class PersondataAdresse(
 ) {
     /**
      * Med frittstående menes at adressen skal kunne brukes til å adressere bare denne personen, uten c/o. */
-    abstract fun tilFrittstaendeBrevMottaker(): BrevMottaker
+    abstract fun tilFrittstaendeBrevMottaker(foedselsnummer: String): BrevMottaker
 }
 
 data class VergeSamhandlerFormat(
@@ -32,24 +36,28 @@ data class VergeSamhandlerFormat(
     val postnr: String?,
     val poststed: String?,
     val navn: String?,
-    val landkode: String,
-    val land: String,
+    val landkode: String?,
+    val land: String?,
 ) : PersondataAdresse("VERGE_SAMHANDLER_POSTADRESSE", adresselinjer, adresseString) {
-    override fun tilFrittstaendeBrevMottaker(): BrevMottaker {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
+    override fun tilFrittstaendeBrevMottaker(foedselsnummer: String): BrevMottaker {
+        logger.debug("Tolker ${this::class.simpleName}, med landkode: ${landkode.quoted}, land: ${land.quoted}")
         return BrevMottaker(
             navn = navn ?: "Ukjent",
-            foedselsnummer = null,
+            foedselsnummer = null, // Brevmottaker skal hverken ha fnr eller orgnummer
             adresse =
-                Adresse(
+                MottakerAdresse(
                     adresseType = adressetypeFromLand(landkode, land),
                     adresselinje1 = linje1,
                     adresselinje2 = linje2,
                     adresselinje3 = linje3,
                     postnummer = postnr,
                     poststed = poststed,
-                    landkode = landkode,
-                    land = land,
+                    landkode = utledLandkode(landkode, land),
+                    land = utledLand(landkode, land),
                 ),
+            adresseTypeIKilde = "VERGE_SAMHANDLER_POSTADRESSE",
         )
     }
 }
@@ -61,12 +69,12 @@ data class VergePersonFormat(
     val vergePid: String,
     val navn: String?,
 ) : PersondataAdresse("VERGE_PERSON_POSTADRESSE", adresselinjer, adresseString) {
-    override fun tilFrittstaendeBrevMottaker(): BrevMottaker {
+    override fun tilFrittstaendeBrevMottaker(foedselsnummer: String): BrevMottaker {
         return BrevMottaker(
             navn = navn ?: "Ukjent",
-            foedselsnummer = Foedselsnummer(vergePid),
+            foedselsnummer = MottakerFoedselsnummer(foedselsnummer),
             adresse =
-                Adresse(
+                MottakerAdresse(
                     adresseType = adressetypeFromLand(adresse.landkode, adresse.land),
                     adresselinje1 = adresse.adresselinje1,
                     adresselinje2 = adresse.adresselinje2,
@@ -76,6 +84,7 @@ data class VergePersonFormat(
                     landkode = adresse.landkode,
                     land = adresse.land,
                 ),
+            adresseTypeIKilde = "VERGE_PERSON_POSTADRESSE",
         )
     }
 }
@@ -87,12 +96,12 @@ data class RegoppslagFormat(
     val navn: String?,
 ) :
     PersondataAdresse("REGOPPSLAG_ADRESSE", adresselinjer, adresseString) {
-    override fun tilFrittstaendeBrevMottaker(): BrevMottaker {
+    override fun tilFrittstaendeBrevMottaker(foedselsnummer: String): BrevMottaker {
         return BrevMottaker(
             navn = navn ?: "Ukjent",
-            foedselsnummer = null,
+            foedselsnummer = MottakerFoedselsnummer(foedselsnummer),
             adresse =
-                Adresse(
+                MottakerAdresse(
                     adresseType = adressetypeFromLand(adresse.landkode, adresse.land),
                     adresselinje1 = adresse.adresselinje1,
                     adresselinje2 = adresse.adresselinje2,
@@ -102,6 +111,7 @@ data class RegoppslagFormat(
                     landkode = adresse.landkode,
                     land = adresse.land,
                 ),
+            adresseTypeIKilde = "REGOPPSLAG_ADRESSE",
         )
     }
 }
@@ -110,11 +120,35 @@ private fun adressetypeFromLand(
     landkode: String?,
     land: String?,
 ): String {
-    if (listOf("no", "nor").contains(landkode?.lowercase())) {
-        return "NORSKPOSTADRESSE"
-    }
-    if (listOf("norge", "norway").contains(land?.lowercase())) {
+    if (landkodeRegnesSomNorsk(landkode) && landRegnesSomNorsk(land)) {
         return "NORSKPOSTADRESSE"
     }
     return "UTENLANDSKPOSTADRESSE"
 }
+
+private fun utledLand(
+    landkode: String?,
+    land: String?,
+): String {
+    if (landkodeRegnesSomNorsk(landkode) && landRegnesSomNorsk(land)) {
+        return "NORGE"
+    }
+    return land ?: "UKJENT"
+}
+
+private fun utledLandkode(
+    landkode: String?,
+    land: String?,
+): String {
+    if (landkodeRegnesSomNorsk(landkode) && landRegnesSomNorsk(land)) {
+        return "NO"
+    }
+    return requireNotNull(landkode) { "Landkode kunne ikke settes " }
+}
+
+private fun landkodeRegnesSomNorsk(landkode: String?) = landkode.isNullOrBlank() || listOf("no", "nor").contains(landkode.lowercase())
+
+private fun landRegnesSomNorsk(land: String?) = land.isNullOrBlank() || listOf("norge", "norway").contains(land.lowercase())
+
+private val String?.quoted: String?
+    get() = this?.let { "\"$this\"" }

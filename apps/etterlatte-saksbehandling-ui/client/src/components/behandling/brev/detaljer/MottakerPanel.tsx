@@ -54,12 +54,14 @@ export default function MottakerPanel({
           label="Adresse"
           tekst={
             <>
-              {[adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3].map((linje) => (
-                <>
-                  {linje}
-                  <br />
-                </>
-              ))}
+              {[adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3]
+                .filter((linje) => linje != null)
+                .map((linje) => (
+                  <>
+                    {linje}
+                    <br />
+                  </>
+                ))}
               <br />
               {adresse?.postnummer} {adresse?.poststed}
               <br />

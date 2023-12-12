@@ -11,9 +11,9 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
-import no.nav.etterlatte.brev.journalpost.JournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevData
@@ -36,7 +36,7 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -76,7 +76,7 @@ class VedtaksbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
+        automatiskMigreringRequest: MigreringBrevRequest? = null, // TODO EY-3232 - Fjerne
     ): Brev {
         require(hentVedtaksbrev(behandlingId) == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -85,26 +85,24 @@ class VedtaksbrevService(
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo) }
 
-        val mottakerFnr =
-            with(generellBrevData.personerISak) {
-                when (verge) {
-                    is Vergemaal ->
-                        verge.mottaker.foedselsnummer!!.value
-                    else ->
-                        innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
-                }
-            }
         val mottaker =
             with(generellBrevData.personerISak) {
                 when (verge) {
                     is Vergemaal ->
                         verge.toMottaker()
-                    else ->
+                    else -> {
+                        val mottakerFnr =
+                            innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
                         adresseService.hentMottakerAdresse(mottakerFnr)
+                    }
                 }
             }
 
-        val prosessType = brevProsessTypeFactory.fra(generellBrevData)
+        val prosessType =
+            brevProsessTypeFactory.fra(
+                generellBrevData,
+                erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
+            )
 
         val nyttBrev =
             OpprettNyttBrev(
@@ -145,10 +143,18 @@ class VedtaksbrevService(
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, brukerTokenInfo) }
         val avsender = adresseService.hentAvsender(generellBrevData.forenkletVedtak)
 
-        val brevkodePar = brevDataMapper.brevKode(generellBrevData, brev.prosessType)
+        val brevkodePar =
+            brevDataMapper.brevKode(
+                generellBrevData,
+                brev.prosessType,
+                erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
+            )
 
         val brevData =
-            when (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+            when (
+                generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
+                    automatiskMigreringRequest?.erOmregningGjenny ?: false
+            ) {
                 false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
                 true ->
                     OmregnetBPNyttRegelverkFerdig(
@@ -346,7 +352,7 @@ class VedtaksbrevService(
     fun journalfoerVedtaksbrev(
         vedtaksbrev: Brev,
         vedtak: VedtakTilJournalfoering,
-    ): JournalpostResponse {
+    ): OpprettJournalpostResponse {
         if (vedtaksbrev.status != Status.FERDIGSTILT) {
             throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
         }
@@ -368,7 +374,13 @@ class VedtaksbrevService(
     }
 }
 
-data class MigreringBrevRequest(val brutto: Int, val yrkesskade: Boolean, val utenlandstilknytningType: UtenlandstilknytningType?)
+// TODO EY-3232 - Fjerne
+data class MigreringBrevRequest(
+    val brutto: Int,
+    val yrkesskade: Boolean,
+    val utlandstilknytningType: UtlandstilknytningType?,
+    val erOmregningGjenny: Boolean = false,
+)
 
 fun Vergemaal.toMottaker(): Mottaker {
     return Mottaker(

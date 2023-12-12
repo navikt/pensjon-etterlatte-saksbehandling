@@ -9,10 +9,9 @@ import no.nav.etterlatte.libs.common.behandling.Etterbetaling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
-import no.nav.etterlatte.libs.common.person.Person
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -26,12 +25,11 @@ data class DetaljertBehandlingDto(
     val gyldighetsprøving: GyldighetsResultat?,
     val soeknadMottattDato: LocalDateTime?,
     val virkningstidspunkt: Virkningstidspunkt?,
-    val utenlandstilknytning: Utenlandstilknytning?,
+    val utlandstilknytning: Utlandstilknytning?,
     val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
     val status: BehandlingStatus,
     val hendelser: List<LagretHendelse>?,
     val behandlingType: BehandlingType,
-    val søker: Person?,
     val kommerBarnetTilgode: KommerBarnetTilgode?,
     val revurderingsaarsak: Revurderingaarsak?,
     val revurderinginfo: RevurderingInfoMedBegrunnelse?,

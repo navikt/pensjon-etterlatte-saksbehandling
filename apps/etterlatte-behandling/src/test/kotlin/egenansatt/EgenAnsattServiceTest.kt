@@ -8,6 +8,8 @@ import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
+import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
@@ -56,6 +58,7 @@ internal class EgenAnsattServiceTest {
     private lateinit var sakService: SakService
     private lateinit var oppgaveService: OppgaveService
     private lateinit var egenAnsattService: EgenAnsattService
+    private lateinit var user: SaksbehandlerMedEnheterOgRoller
 
     @BeforeAll
     fun beforeAll() {
@@ -78,15 +81,20 @@ internal class EgenAnsattServiceTest {
         sakRepo = SakDao { connection }
         oppgaveRepo = OppgaveDaoImpl { connection }
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo) { connection }
+        val brukerService = BrukerServiceImpl(pdlKlient, norg2Klient)
         sakService =
             spyk(
-                SakServiceImpl(sakRepo, pdlKlient, norg2Klient, featureToggleService, skjermingKlient),
+                SakServiceImpl(sakRepo, skjermingKlient, brukerService),
             )
         oppgaveService =
             spyk(
-                OppgaveService(oppgaveRepoMedSporing, sakRepo, featureToggleService),
+                OppgaveService(oppgaveRepoMedSporing, sakRepo),
             )
-        egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg)
+        egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, brukerService)
+
+        user = mockk<SaksbehandlerMedEnheterOgRoller>()
+
+        every { user.name() } returns "User"
 
         coEvery { skjermingKlient.personErSkjermet(any()) } returns false
         every { pdlKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")
@@ -101,7 +109,7 @@ internal class EgenAnsattServiceTest {
     fun before() {
         Kontekst.set(
             Context(
-                mockk(),
+                user,
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
@@ -122,10 +130,12 @@ internal class EgenAnsattServiceTest {
 
     @Test
     fun sjekkAtSettingAvSkjermingFungererEtterOpprettelseAvSak() {
+        every { user.enheter() } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
+
         val fnr = AVDOED_FOEDSELSNUMMER.value
-        sakService.finnEllerOpprettSak(fnr, SakType.BARNEPENSJON, enhet = Enheter.EGNE_ANSATTE.enhetNr)
+        sakService.finnEllerOpprettSak(fnr, SakType.BARNEPENSJON, overstyrendeEnhet = Enheter.EGNE_ANSATTE.enhetNr)
         val fnr2 = AVDOED2_FOEDSELSNUMMER.value
-        sakService.finnEllerOpprettSak(fnr2, SakType.BARNEPENSJON, enhet = Enheter.EGNE_ANSATTE.enhetNr)
+        sakService.finnEllerOpprettSak(fnr2, SakType.BARNEPENSJON, overstyrendeEnhet = Enheter.EGNE_ANSATTE.enhetNr)
 
         assertNotNull(sakService.finnSak(fnr, SakType.BARNEPENSJON))
         assertNotNull(sakService.finnSak(fnr2, SakType.BARNEPENSJON))

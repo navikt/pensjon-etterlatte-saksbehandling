@@ -457,6 +457,7 @@ internal class BeregnBarnepensjonServiceTest {
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         featureToggleService.settBryter(BrukNyttRegelverkIBeregning, false)
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
 
         runBlocking {
             val beregning =
@@ -488,6 +489,7 @@ internal class BeregnBarnepensjonServiceTest {
         } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         featureToggleService.settBryter(BrukNyttRegelverkIBeregning, false)
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
 
         runBlocking {
             val beregning =
@@ -495,14 +497,14 @@ internal class BeregnBarnepensjonServiceTest {
                     behandling,
                     Systembruker("migrering", "migrering"),
                 )
-            Assertions.assertEquals(2, beregning.beregningsperioder.size)
+            beregning.beregningsperioder.size shouldBeGreaterThanOrEqual 3
             with(beregning.beregningsperioder[0]) {
                 datoFOM shouldBe YearMonth.of(2023, Month.DECEMBER)
                 datoTOM shouldBe YearMonth.of(2023, Month.DECEMBER)
             }
             with(beregning.beregningsperioder[1]) {
                 datoFOM shouldBe YearMonth.of(2024, Month.JANUARY)
-                datoTOM shouldBe null
+                datoTOM shouldBe YearMonth.of(2024, Month.APRIL)
             }
         }
     }
@@ -525,6 +527,7 @@ internal class BeregnBarnepensjonServiceTest {
             )
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
         featureToggleService.settBryter(BrukNyttRegelverkIBeregning, true)
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
 
         runBlocking {
             val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
@@ -540,7 +543,7 @@ internal class BeregnBarnepensjonServiceTest {
             }
             with(beregning.beregningsperioder[2]) {
                 datoFOM shouldBe YearMonth.of(2024, 1)
-                datoTOM shouldBe null
+                datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_TO_DOEDE_FORELDRE
             }
         }
@@ -586,7 +589,7 @@ internal class BeregnBarnepensjonServiceTest {
 
             with(beregning.beregningsperioder[0]) {
                 datoFOM shouldBe YearMonth.of(2024, 1)
-                datoTOM shouldBe null
+                datoTOM shouldBe YearMonth.of(2024, 4)
                 utbetaltBeloep shouldBe GRUNNBELOEP_MAI_23
             }
         }
@@ -695,6 +698,7 @@ internal class BeregnBarnepensjonServiceTest {
             every { behandlingType } returns type
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
             every { kilde } returns vedtaksloesning
+            every { revurderingsaarsak } returns null
         }
 
     private fun mockTrygdetid(behandlingId_: UUID): TrygdetidDto =

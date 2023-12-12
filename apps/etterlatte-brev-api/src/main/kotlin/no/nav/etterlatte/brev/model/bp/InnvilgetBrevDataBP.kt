@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -51,6 +52,8 @@ data class InnvilgetHovedmalBrevData(
     val beregningsinfo: BeregningsinfoBP,
     val etterbetaling: EtterbetalingBrev? = null,
     val innhold: List<Slate.Element>,
+    val brukerUnder18Aar: Boolean,
+    val bosattUtland: Boolean,
 ) : BrevData() {
     companion object {
         fun fra(
@@ -59,6 +62,7 @@ data class InnvilgetHovedmalBrevData(
             etterbetalingDTO: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             grunnbeloep: Grunnbeloep,
+            utlandstilknytning: UtlandstilknytningType?,
             innhold: InnholdMedVedlegg,
         ): InnvilgetHovedmalBrevData =
             InnvilgetHovedmalBrevData(
@@ -66,6 +70,8 @@ data class InnvilgetHovedmalBrevData(
                 avkortingsinfo = avkortingsinfo,
                 beregningsinfo = BeregningsinfoBP.fra(utbetalingsinfo, trygdetid, grunnbeloep, innhold),
                 etterbetaling = EtterbetalingBrev.fra(etterbetalingDTO, utbetalingsinfo.beregningsperioder),
+                brukerUnder18Aar = true, // TODO map opp mot valg gjort av saksbehandler i løsningen
+                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 innhold = innhold.innhold(),
             )
     }

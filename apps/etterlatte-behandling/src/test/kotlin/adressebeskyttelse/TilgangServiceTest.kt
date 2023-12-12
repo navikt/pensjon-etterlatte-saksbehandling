@@ -3,13 +3,11 @@ package no.nav.etterlatte.adressebeskyttelse
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.klienter.Norg2Klient
+import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -50,9 +48,7 @@ internal class TilgangServiceTest {
     private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
     private val fortroligDev = "ea930b6b-9397-44d9-b9e6-f4cf527a632a"
     private val egenAnsattDev = "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d"
-    private val pdlKlient = mockk<PdlKlient>()
-    private val norg2Klient = mockk<Norg2Klient>()
-    private val featureToggleService = mockk<FeatureToggleService>()
+    private val brukerService = mockk<BrukerService>()
     private val skjermingKlient = mockk<SkjermingKlient>()
 
     @BeforeAll
@@ -71,7 +67,7 @@ internal class TilgangServiceTest {
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         sakRepo = SakDao { dataSource.connection }
 
-        sakService = SakServiceImpl(sakRepo, pdlKlient, norg2Klient, featureToggleService, skjermingKlient)
+        sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService)
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao {

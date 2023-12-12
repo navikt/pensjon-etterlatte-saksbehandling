@@ -27,15 +27,17 @@ async function sourceMapMapper(numbers: IStackLineNoColumnNo): Promise<NullableM
 
 const GYLDIG_FNR = (input: string | undefined) => /^\d{11}$/.test(input ?? '')
 
-function findAndSanitizeUrl(url?: string): string {
+function sanitizeUrlPossibleFnr(url?: string): string {
   if (url) {
     const splittedUrl = url.split('/')
-    splittedUrl.map((urlpart) => {
-      if (GYLDIG_FNR(urlpart)) {
-        return urlpart.substring(0, 5).concat('******')
-      }
-      return urlpart
-    })
+    return splittedUrl
+      .map((urlpart) => {
+        if (GYLDIG_FNR(urlpart)) {
+          return urlpart.substring(0, 5).concat('******')
+        }
+        return urlpart
+      })
+      .join('/')
   }
   return ''
 }
@@ -55,7 +57,7 @@ loggerRouter.post('/', express.json(), (req, res) => {
   } else if (body.type && body.type === 'info') {
     frontendLogger.info('Frontendlogging: ', JSON.stringify(body))
   } else {
-    const maybeUrl = findAndSanitizeUrl(body.jsonContent.url)
+    const maybeUrl = sanitizeUrlPossibleFnr(body.jsonContent.url)
     const errorObject = {
       request_uri: maybeUrl,
       user_device: JSON.stringify(body.jsonContent.userDeviceInfo),

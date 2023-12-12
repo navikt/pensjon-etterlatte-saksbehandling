@@ -16,6 +16,7 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -78,6 +79,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
     private val sakService = mockk<SakService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
+    private val brukerService = mockk<BrukerService>()
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "hendelseid",
@@ -95,6 +97,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             pdlService,
             grunnlagClient,
             sakService,
+            brukerService,
         )
 
     @BeforeEach
@@ -752,47 +755,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
-    fun `Skal kunne sette adresse og faa oppdatert enhet`() {
-        val sakIder: Set<Long> = setOf(1, 2, 3, 4, 5, 6)
-        val saker =
-            sakIder.map {
-                Sak(
-                    id = it,
-                    ident = KONTANT_FOT.value,
-                    sakType = SakType.BARNEPENSJON,
-                    enhet = Enheter.PORSGRUNN.enhetNr,
-                )
-            }
-        val fnr = "16508201382"
-        val bostedsadresse = Bostedsadresse("1", Endringstype.OPPRETTET, fnr)
-        coEvery { grunnlagClient.hentAlleSakIder(any()) } returns sakIder
-        every { sakService.oppdaterAdressebeskyttelse(any(), any()) } returns 1
-        every { sakService.finnSaker(fnr) } returns saker
-        every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
-        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
-        every {
-            sakService.finnEnhetForPersonOgTema(any(), any(), any())
-        } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
-        every { sakService.oppdaterEnhetForSaker(any()) } just runs
-        runBlocking {
-            grunnlagsendringshendelseService.oppdaterAdresseHendelse(bostedsadresse)
-        }
-        coVerify(exactly = 1) { sakService.finnSaker(bostedsadresse.fnr) }
-
-        verify(exactly = 6) {
-            sakService.oppdaterEnhetForSaker(
-                any(),
-            )
-        }
-        verify(exactly = 6) {
-            oppgaveService.oppdaterEnhetForRelaterteOppgaver(
-                any(),
-            )
-        }
-    }
-
-    @Test
-    fun `Oppretter ny bostedshendelse hvis det finnes en oppgave under behandling for sak`() {
+    fun `Oppretter ny bostedshendelse`() {
         Kontekst.set(
             Context(
                 mockk(),
@@ -854,7 +817,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 ),
             )
         every {
-            sakService.finnEnhetForPersonOgTema(any(), any(), any())
+            brukerService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         every { grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any()) } returns emptyList()
@@ -869,18 +832,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         runBlocking {
             grunnlagsendringshendelseService.oppdaterAdresseHendelse(bostedsadresse)
         }
-        coVerify(exactly = 1) { sakService.finnSaker(bostedsadresse.fnr) }
         coVerify(exactly = 1) { grunnlagClient.hentPersonSakOgRolle(KONTANT_FOT.value) }
-        verify(exactly = 1) {
-            sakService.oppdaterEnhetForSaker(
-                any(),
-            )
-        }
-        verify(exactly = 1) {
-            oppgaveService.oppdaterEnhetForRelaterteOppgaver(
-                any(),
-            )
-        }
     }
 
     @Test
@@ -904,7 +856,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { sakService.finnSaker(fnr) } returns saker
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
-            sakService.finnEnhetForPersonOgTema(any(), any(), any())
+            brukerService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         runBlocking {
@@ -947,7 +899,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { sakService.finnSaker(fnr) } returns saker
         every { oppgaveService.oppdaterEnhetForRelaterteOppgaver(any()) } returns Unit
         every {
-            sakService.finnEnhetForPersonOgTema(any(), any(), any())
+            brukerService.finnEnhetForPersonOgTema(any(), any(), any())
         } returns ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr)
         every { sakService.oppdaterEnhetForSaker(any()) } just runs
         runBlocking {

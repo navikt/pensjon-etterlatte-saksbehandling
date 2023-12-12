@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentNavn
@@ -19,17 +20,24 @@ import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.hentRelevantVerge
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import java.time.LocalDate
 import java.util.UUID
 
 fun Grunnlag.mapSoeker(): Soeker =
     with(this.soeker) {
         val navn = hentNavn()!!.verdi
+        val dato18Aar = hentFoedselsdato()?.verdi?.plusYears(18)
+        val erUnder18 =
+            dato18Aar?.let {
+                LocalDate.now() < it
+            }
 
         Soeker(
             fornavn = navn.fornavn.storForbokstav(),
             mellomnavn = navn.mellomnavn?.storForbokstav(),
             etternavn = navn.etternavn.storForbokstav(),
             fnr = Foedselsnummer(hentFoedselsnummer()!!.verdi.value),
+            under18 = erUnder18,
         )
     }
 
@@ -37,12 +45,14 @@ fun Grunnlag.mapAvdoede(): List<Avdoed> =
     with(this.familie) {
         val avdoede = hentAvdoede()
 
-        return avdoede.map { avdoed ->
-            Avdoed(
-                navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
-                doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
-            )
-        }
+        return avdoede
+            .filter { it.hentDoedsdato() != null }
+            .map { avdoed ->
+                Avdoed(
+                    navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
+                    doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
+                )
+            }
     }
 
 fun Grunnlag.mapInnsender(): Innsender? =
@@ -78,7 +88,22 @@ fun Grunnlag.mapVerge(
             return hentVergemaal(relevantVerge, behandlingId)
         }
         if (sakType == SakType.BARNEPENSJON) {
-            ForelderVerge(hentGjenlevende().hentNavn()!!.verdi.fulltNavn())
+            // Er barnet over 18? Denne mappingen må heller komme fra valg saksbehandler gjør men her vi automatisk
+            // i forbindelse med migrering. Før nye vedtak på nytt regelverk skal dette bort
+            val dato18Aar =
+                requireNotNull(this.soeker.hentFoedselsdato()) {
+                    "Barnet har ikke fødselsdato i grunnlag. Dette skal ikke skje, vi " +
+                        "klarer ikke å avgjøre hvor gammelt barnet er"
+                }.verdi.plusYears(18)
+            if (dato18Aar <= LocalDate.now()) {
+                null
+            } else {
+                hentPotensiellGjenlevende()
+                    ?.hentNavn()
+                    ?.verdi
+                    ?.fulltNavn()
+                    ?.let { ForelderVerge(it) }
+            }
         } else {
             null
         }

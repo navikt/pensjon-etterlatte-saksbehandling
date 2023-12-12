@@ -21,7 +21,6 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
-      - libs/ktor2client-auth-clientcredentials/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -33,7 +32,6 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
-      - libs/ktor2client-auth-clientcredentials/**
       - gradle/libs.versions.toml
 
 jobs:

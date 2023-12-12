@@ -16,7 +16,7 @@ export interface IDetaljertBehandling {
   kommerBarnetTilgode: IKommerBarnetTilgode | null
   soeknadMottattDato: string
   virkningstidspunkt: Virkningstidspunkt | null
-  utenlandstilknytning: IUtenlandstilknytning | null
+  utlandstilknytning: IUtlandstilknytning | null
   boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null
   status: IBehandlingStatus
   hendelser: IHendelse[]
@@ -57,14 +57,14 @@ export enum IBehandlingStatus {
   AVBRUTT = 'AVBRUTT',
 }
 
-export enum UtenlandstilknytningType {
+export enum UtlandstilknytningType {
   NASJONAL = 'NASJONAL',
   UTLANDSTILSNITT = 'UTLANDSTILSNITT',
   BOSATT_UTLAND = 'BOSATT_UTLAND',
 }
 
-export interface IUtenlandstilknytning {
-  type: UtenlandstilknytningType
+export interface IUtlandstilknytning {
+  type: UtlandstilknytningType
   kilde: KildeSaksbehandler
   begrunnelse: string
 }

@@ -12,9 +12,9 @@ import io.mockk.verify
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingHendelseType
-import no.nav.etterlatte.behandling.BehandlingServiceFeatureToggle
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
@@ -45,7 +45,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.persongalleri
-import no.nav.etterlatte.sak.SakServiceFeatureToggle
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.AfterAll
@@ -66,8 +65,13 @@ import java.util.UUID
 class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     @BeforeAll
     fun start() {
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+
+        every { user.name() } returns "User"
+        every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
+
         startServer()
-        Kontekst.set(Context(mockk(), DatabaseContext(applicationContext.dataSource)))
+        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource)))
     }
 
     @AfterEach
@@ -115,13 +119,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 any(),
             )
         } returns true
-
-        every {
-            featureToggleService.isEnabled(
-                BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
-                false,
-            )
-        } returns false
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
 
@@ -192,13 +189,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 any(),
             )
         } returns true
-
-        every {
-            featureToggleService.isEnabled(
-                BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
-                false,
-            )
-        } returns false
 
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
 
@@ -317,13 +307,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             )
         } returns false
 
-        every {
-            featureToggleService.isEnabled(
-                BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
-                false,
-            )
-        } returns false
-
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
 
         assertNotNull(behandling)
@@ -372,20 +355,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
 
         every {
             featureToggleService.isEnabled(
-                SakServiceFeatureToggle.FiltrerMedEnhetId,
-                false,
-            )
-        } returns false
-
-        every {
-            featureToggleService.isEnabled(
-                BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
-                false,
-            )
-        } returns false
-
-        every {
-            featureToggleService.isEnabled(
                 RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
                 any(),
             )
@@ -415,7 +384,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 behandlingDao = applicationContext.behandlingDao,
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = hendelser,
-                featureToggleService = featureToggleService,
                 migreringKlient = mockk(),
             )
 
@@ -539,13 +507,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             )
         } returns true
 
-        every {
-            featureToggleService.isEnabled(
-                BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
-                false,
-            )
-        } returns false
-
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
 
         assertNotNull(behandling)
@@ -632,13 +593,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             )
         } returns true
 
-        every {
-            featureToggleService.isEnabled(
-                BehandlingServiceFeatureToggle.FiltrerMedEnhetId,
-                false,
-            )
-        } returns false
-
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr)
 
         assertNotNull(behandling)
@@ -703,7 +657,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 behandlingDao = applicationContext.behandlingDao,
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = applicationContext.behandlingsHendelser,
-                featureToggleService = applicationContext.featureToggleService,
                 migreringKlient = mockk(),
             )
         val (sak, behandling) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
@@ -831,7 +784,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 behandlingDao = applicationContext.behandlingDao,
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = applicationContext.behandlingsHendelser,
-                featureToggleService = applicationContext.featureToggleService,
                 migreringKlient = mockk(),
             )
 
@@ -877,7 +829,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 behandlingDao = applicationContext.behandlingDao,
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = applicationContext.behandlingsHendelser,
-                featureToggleService = applicationContext.featureToggleService,
                 migreringKlient = mockk(),
             )
 
@@ -921,7 +872,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 behandlingDao = applicationContext.behandlingDao,
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = applicationContext.behandlingsHendelser,
-                featureToggleService = applicationContext.featureToggleService,
                 migreringKlient = mockk(),
             )
 
@@ -967,7 +917,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 behandlingDao = applicationContext.behandlingDao,
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = applicationContext.behandlingsHendelser,
-                featureToggleService = applicationContext.featureToggleService,
                 migreringKlient = mockk(),
             )
 
@@ -1015,7 +964,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 behandlingDao = applicationContext.behandlingDao,
                 hendelseDao = applicationContext.hendelseDao,
                 behandlingHendelser = applicationContext.behandlingsHendelser,
-                featureToggleService = applicationContext.featureToggleService,
                 migreringKlient = mockk(),
             )
 

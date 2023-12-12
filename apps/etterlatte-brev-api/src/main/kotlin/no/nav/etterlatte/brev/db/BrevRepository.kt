@@ -20,7 +20,7 @@ import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_INNHOLD_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_MOTTAKER_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_PDF_QUERY
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
-import no.nav.etterlatte.brev.journalpost.JournalpostResponse
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -126,8 +126,8 @@ class BrevRepository(private val ds: DataSource) {
                 OPPDATER_MOTTAKER_QUERY,
                 mapOf(
                     "brev_id" to id,
-                    "foedselsnummer" to mottaker.foedselsnummer?.value,
-                    "orgnummer" to mottaker.orgnummer,
+                    "foedselsnummer" to mottaker.foedselsnummer?.value?.let { it.ifBlank { null } },
+                    "orgnummer" to mottaker.orgnummer?.let { it.ifBlank { null } },
                     "navn" to mottaker.navn,
                     "adressetype" to mottaker.adresse.adresseType,
                     "adresselinje1" to mottaker.adresse.adresselinje1,
@@ -272,7 +272,7 @@ class BrevRepository(private val ds: DataSource) {
 
     fun settBrevJournalfoert(
         brevId: BrevID,
-        journalpostResponse: JournalpostResponse,
+        journalpostResponse: OpprettJournalpostResponse,
     ): Boolean =
         ds.transaction { tx ->
             tx.run(

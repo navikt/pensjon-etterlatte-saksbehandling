@@ -21,7 +21,6 @@ import { BarnepensjonSammendrag } from '~components/behandling/beregne/Barnepens
 import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/OmstillingsstoenadSammendrag'
 import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { SakType } from '~shared/types/sak'
-import Etterbetaling from '~components/behandling/beregningsgrunnlag/Etterbetaling'
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
@@ -30,6 +29,8 @@ import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -45,6 +46,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const erOpphoer = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
+  const visBrevutfall = useFeatureEnabledMedDefault('pensjon-etterlatte.brevutfall-og-etterbetaling', false)
 
   useEffect(() => {
     if (!erOpphoer) {
@@ -113,14 +115,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                   </InfoAlert>
                 )}
 
-                <EtterbetalingWrapper>
-                  <Etterbetaling
-                    behandlingId={behandling.id}
-                    lagraEtterbetaling={behandling.etterbetaling}
-                    redigerbar={redigerbar}
-                    virkningstidspunkt={virkningstidspunkt}
-                  />
-                </EtterbetalingWrapper>
+                {visBrevutfall && <Brevutfall behandling={behandling} />}
               </BeregningWrapper>
             )
           )}
@@ -159,16 +154,6 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   )
 }
 
-const EtterbetalingWrapper = styled.div`
-  margin-top: 3rem;
-  margin-bottom: 3rem;
-  max-width: 500px;
-
-  .text {
-    margin: 1em 0 5em 0;
-  }
-`
-
 const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
   margin-top: 2rem;
   margin-bottom: 2rem;
@@ -176,4 +161,5 @@ const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
 
 const BeregningWrapper = styled.div`
   padding: 0 4em;
+  margin-bottom: 4em;
 `

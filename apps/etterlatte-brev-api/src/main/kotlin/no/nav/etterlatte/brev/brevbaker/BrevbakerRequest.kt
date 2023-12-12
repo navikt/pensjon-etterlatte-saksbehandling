@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.pensjon.brevbaker.api.model.Felles
@@ -27,13 +28,28 @@ data class BrevbakerRequest(
                         sakId = generellBrevData.sak.id,
                         soeker = generellBrevData.personerISak.soeker,
                         avsender = avsender,
-                        vergeNavn = generellBrevData.personerISak.verge?.navn(),
+                        vergeNavn =
+                            if (erMigrering(brevKode)) {
+                                generellBrevData.personerISak.soeker.formaterNavn() + " ved verge"
+                            } else {
+                                generellBrevData.personerISak.verge?.navn()
+                            },
                     ),
                 language = LanguageCode.spraakToLanguageCode(generellBrevData.spraak),
             )
         }
+
+        private fun erMigrering(brevKode: EtterlatteBrevKode): Boolean =
+            brevKode in
+                listOf(
+                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
+                    EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,
+                    EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
+                )
     }
 }
+
+fun Soeker.formaterNavn() = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ")
 
 enum class LanguageCode {
     BOKMAL,

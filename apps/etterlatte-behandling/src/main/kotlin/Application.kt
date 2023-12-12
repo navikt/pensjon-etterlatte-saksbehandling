@@ -16,6 +16,7 @@ import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingVedtakRoute
+import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
 import no.nav.etterlatte.behandling.etterbetaling.etterbetalingRoutes
@@ -106,7 +107,6 @@ internal fun Application.module(context: ApplicationContext) {
             behandlingRoutes(
                 behandlingService = behandlingService,
                 gyldighetsproevingService = gyldighetsproevingService,
-                manueltOpphoerService = manueltOpphoerService,
                 kommerBarnetTilGodeService = kommerBarnetTilGodeService,
                 aktivitetspliktService = aktivtetspliktService,
                 behandlingFactory = behandlingFactory,
@@ -116,7 +116,6 @@ internal fun Application.module(context: ApplicationContext) {
             generellbehandlingRoutes(
                 generellBehandlingService = generellBehandlingService,
                 sakService = sakService,
-                featureToggleService = featureToggleService,
             )
             revurderingRoutes(revurderingService = revurderingService)
             omregningRoutes(omregningService = omregningService)
@@ -129,13 +128,14 @@ internal fun Application.module(context: ApplicationContext) {
                 behandlingService = behandlingService,
             )
             etterbetalingRoutes(etterbetalingService)
+            behandlingInfoRoutes(behandlingInfoService)
             oppgaveRoutes(
                 service = oppgaveService,
                 gosysOppgaveService = gosysOppgaveService,
             )
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
             egenAnsattRoute(
-                egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg),
+                egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, enhetService),
                 requestLogger = behandlingRequestLogger,
             )
             institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))
@@ -178,7 +178,7 @@ private fun Route.attachContekst(
                     decideUser(
                         call.principal() ?: throw Exception("Ingen bruker funnet i jwt token"),
                         context.saksbehandlerGroupIdsByKey,
-                        context.enhetService,
+                        context.navAnsattKlient,
                         brukerTokenInfo,
                     ),
                 databasecontxt = DatabaseContext(ds),

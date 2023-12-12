@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -31,6 +32,7 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
+import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregningsperiode
 
 class BrevdataFacade(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
@@ -123,7 +125,7 @@ class BrevdataFacade(
                             spraak = grunnlag.mapSpraak(),
                             revurderingsaarsak = vedtakInnhold.behandling.revurderingsaarsak,
                             systemkilde = systemkilde,
-                            // utenlandstilkytning = behandling.utenlandstilkytning // TODO Venter på EY-3191
+                            utlandstilknytning = behandling?.utlandstilknytning,
                         )
                     }
 
@@ -182,16 +184,7 @@ class BrevdataFacade(
 
         val beregningsperioder =
             beregning.beregningsperioder.map {
-                val (benyttetTrygdetid, prorataBroek) =
-                    when (it.beregningsMetode) {
-                        BeregningsMetode.NASJONAL -> it.samletNorskTrygdetid!! to null
-                        BeregningsMetode.PRORATA -> it.samletTeoretiskTrygdetid!! to it.broek!!
-                        BeregningsMetode.BEST -> throw IllegalArgumentException(
-                            "Kan ikke ha brukt beregningsmetode 'BEST' i en faktisk beregning, " +
-                                "siden best velger mellom nasjonal eller prorata når det beregnes.",
-                        )
-                        null -> it.trygdetid to null
-                    }
+                val (benyttetTrygdetid, prorataBroek) = hentBenyttetTrygdetidOgProratabroek(it)
 
                 Beregningsperiode(
                     datoFOM = it.datoFOM.atDay(1),
@@ -260,5 +253,18 @@ class BrevdataFacade(
         val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)!!
 
         return trygdetidService.finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
+    }
+}
+
+fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> {
+    return when (beregningsperiode.beregningsMetode) {
+        BeregningsMetode.NASJONAL -> beregningsperiode.samletNorskTrygdetid!! to null
+        BeregningsMetode.PRORATA -> beregningsperiode.samletTeoretiskTrygdetid!! to beregningsperiode.broek!!
+        BeregningsMetode.BEST -> throw IllegalArgumentException(
+            "Kan ikke ha brukt beregningsmetode 'BEST' i en faktisk beregning, " +
+                "siden best velger mellom nasjonal eller prorata når det beregnes.",
+        )
+
+        null -> beregningsperiode.trygdetid to null
     }
 }

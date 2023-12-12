@@ -54,9 +54,7 @@ fun Route.samordningVedtakRoute(
                     ?: call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
                     ?: throw ManglerFomDatoException()
 
-            val fnr =
-                call.request.headers["fnr"]
-                    ?: throw ManglerFoedselsnummerException()
+            val fnr = call.fnr
 
             val tpnummer =
                 call.request.headers["tpnr"]
@@ -83,6 +81,11 @@ fun Route.samordningVedtakRoute(
     route("api/pensjon/vedtak") {
         install(AuthorizationPlugin) {
             roles = setOf("les-oms-vedtak", config.getString("roller.pensjon-saksbehandler"))
+            issuers = setOf("azure")
+        }
+        install(SelvbetjeningAuthorizationPlugin) {
+            validator = { call, borger -> borger.value == call.fnr }
+            issuer = "tokenx"
         }
 
         get {
@@ -91,9 +94,7 @@ fun Route.samordningVedtakRoute(
                     ?: call.parameters["virkFom"]?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
                     ?: throw ManglerFomDatoException()
 
-            val fnr =
-                call.request.headers["fnr"]
-                    ?: throw ManglerFoedselsnummerException()
+            val fnr = call.fnr
 
             val samordningVedtakDtos =
                 try {
@@ -124,4 +125,10 @@ inline val ApplicationCall.orgNummer: String
                 ?.get("consumer") as Map<*, *>?
                 ?: throw IllegalArgumentException("Kan ikke hente ut organisasjonsnummer")
         return (claims["ID"] as String).split(":")[1]
+    }
+
+inline val ApplicationCall.fnr: String
+    get() {
+        return this.request.headers["fnr"]
+            ?: throw ManglerFoedselsnummerException()
     }

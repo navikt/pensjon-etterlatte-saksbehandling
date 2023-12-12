@@ -11,10 +11,13 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
+import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
@@ -31,6 +34,7 @@ import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.migrering.start.MigreringRiver
 import no.nav.etterlatte.migrering.verifisering.GjenlevendeForelderPatcher
 import no.nav.etterlatte.migrering.verifisering.PDLKlient
+import no.nav.etterlatte.migrering.verifisering.PersonHenter
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -55,6 +59,7 @@ import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.SAK_ID_FLERE_KEY
 import rapidsandrivers.SAK_ID_KEY
+import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -100,8 +105,10 @@ internal class MigreringRiverIntegrationTest {
                                 } returns
                                     mockk<PersonDTO>().also {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
+                                        every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
                                     }
                             }
+                        val personHenter = PersonHenter(pdlKlient, featureToggleService)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient =
@@ -111,13 +118,13 @@ internal class MigreringRiverIntegrationTest {
                             featureToggleService = featureToggleService,
                             verifiserer =
                                 Verifiserer(
-                                    pdlKlient,
                                     repository,
-                                    featureToggleService,
-                                    GjenlevendeForelderPatcher(pdlKlient),
+                                    GjenlevendeForelderPatcher(pdlKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also {
-                                        every { it.finnUtenlandstilknytning(any()) } returns UtenlandstilknytningType.NASJONAL
+                                        every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
+                                    personHenter,
+                                    featureToggleService,
                                 ),
                             krrKlient =
                                 mockk<KrrKlient>().also {
@@ -191,8 +198,10 @@ internal class MigreringRiverIntegrationTest {
                                 } returns
                                     mockk<PersonDTO>().also {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
+                                        every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
                                     }
                             }
+                        val personHenter = PersonHenter(pdlKlient, featureToggleService)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient = penKlient,
@@ -200,13 +209,13 @@ internal class MigreringRiverIntegrationTest {
                             featureToggleService = featureToggleService,
                             verifiserer =
                                 Verifiserer(
-                                    pdlKlient,
                                     repository,
-                                    featureToggleService,
-                                    GjenlevendeForelderPatcher(pdlKlient),
+                                    GjenlevendeForelderPatcher(pdlKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also {
-                                        every { it.finnUtenlandstilknytning(any()) } returns UtenlandstilknytningType.NASJONAL
+                                        every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
+                                    personHenter,
+                                    featureToggleService,
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -292,8 +301,10 @@ internal class MigreringRiverIntegrationTest {
                                 } returns
                                     mockk<PersonDTO>().also {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
+                                        every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
                                     }
                             }
+                        val personHenter = PersonHenter(pdlKlient, featureToggleService)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient = penKlient,
@@ -301,13 +312,13 @@ internal class MigreringRiverIntegrationTest {
                             featureToggleService = featureToggleService,
                             verifiserer =
                                 Verifiserer(
-                                    pdlKlient,
                                     repository,
-                                    featureToggleService,
-                                    GjenlevendeForelderPatcher(pdlKlient),
+                                    GjenlevendeForelderPatcher(pdlKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also {
-                                        every { it.finnUtenlandstilknytning(any()) } returns UtenlandstilknytningType.NASJONAL
+                                        every { it.finnUtenlandstilknytning(any()) } returns UtlandstilknytningType.NASJONAL
                                     },
+                                    personHenter,
+                                    featureToggleService,
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -409,6 +420,7 @@ internal class MigreringRiverIntegrationTest {
                                     )
                                 } throws IllegalStateException("")
                             }
+                        val personHenter = PersonHenter(pdlKlient, featureToggleService)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient =
@@ -418,11 +430,11 @@ internal class MigreringRiverIntegrationTest {
                             featureToggleService = featureToggleService,
                             verifiserer =
                                 Verifiserer(
-                                    pdlKlient,
                                     repository,
-                                    featureToggleService,
-                                    GjenlevendeForelderPatcher(pdlKlient),
+                                    GjenlevendeForelderPatcher(pdlKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
+                                    personHenter,
+                                    featureToggleService,
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -445,7 +457,7 @@ internal class MigreringRiverIntegrationTest {
     }
 
     @Test
-    fun `Feiler med barn som har vergemaal i PDL`() {
+    fun `Feiler med barn som har komplisert vergemaal i PDL`() {
         testApplication {
             val pesysid = 22974139L
             val repository = PesysRepository(datasource)
@@ -470,9 +482,12 @@ internal class MigreringRiverIntegrationTest {
                                     )
                                 } returns
                                     mockk<PersonDTO>().also {
-                                        every { it.vergemaalEllerFremtidsfullmakt } returns listOf(mockk())
+                                        val listOf = komplisertVergemaal()
+                                        every { it.vergemaalEllerFremtidsfullmakt } returns listOf
+                                        every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
                                     }
                             }
+                        val personHenter = PersonHenter(pdlKlient, featureToggleService)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient =
@@ -482,11 +497,11 @@ internal class MigreringRiverIntegrationTest {
                             featureToggleService = featureToggleService,
                             verifiserer =
                                 Verifiserer(
-                                    pdlKlient,
                                     repository,
-                                    featureToggleService,
-                                    GjenlevendeForelderPatcher(pdlKlient),
+                                    GjenlevendeForelderPatcher(pdlKlient, personHenter),
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
+                                    personHenter,
+                                    featureToggleService,
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -554,3 +569,42 @@ internal fun PesysRepository.hentSaker(tx: TransactionalSession? = null): List<P
             objectMapper.readValue(it.string("sak"), Pesyssak::class.java)
         }
     }
+
+private fun komplisertVergemaal(): List<OpplysningDTO<VergemaalEllerFremtidsfullmakt>> {
+    val vergemaalEllerFremtidsfullmakt1 =
+        mockk<VergemaalEllerFremtidsfullmakt> {
+            every {
+                vergeEllerFullmektig
+            } returns
+                mockk<VergeEllerFullmektig> {
+                    every { motpartsPersonident } returns null
+                    every { navn } returns null
+                    every { embete } returns ""
+                    every { type } returns ""
+                    every { omfangetErInnenPersonligOmraade } returns false
+                    every { tjenesteomraade } returns "personligeOgOekonomiskeInteresser"
+                }
+        }
+    val vergemaalEllerFremtidsfullmakt2 =
+        mockk<VergemaalEllerFremtidsfullmakt> {
+            every {
+                vergeEllerFullmektig
+            } returns
+                mockk<VergeEllerFullmektig> {
+                    every { motpartsPersonident } returns null
+                    every { embete } returns ""
+                    every { type } returns ""
+                    every { navn } returns null
+                    every { omfangetErInnenPersonligOmraade } returns false
+                    every { tjenesteomraade } returns "oekonomiskeInteresser"
+                }
+        }
+
+    return listOf(
+        opplysningDTO(vergemaalEllerFremtidsfullmakt1),
+        opplysningDTO(vergemaalEllerFremtidsfullmakt2),
+    )
+}
+
+private fun opplysningDTO(vergemaalEllerFremtidsfullmakt1: VergemaalEllerFremtidsfullmakt) =
+    mockk<OpplysningDTO<VergemaalEllerFremtidsfullmakt>> { every { verdi } returns vergemaalEllerFremtidsfullmakt1 }

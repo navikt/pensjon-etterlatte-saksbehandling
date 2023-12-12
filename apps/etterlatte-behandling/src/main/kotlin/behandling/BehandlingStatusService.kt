@@ -6,7 +6,6 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
-import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingToggle
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -15,6 +14,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
 import no.nav.etterlatte.libs.common.sak.SakIDListe
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -97,7 +97,7 @@ interface BehandlingStatusService {
         vedtakHendelse: VedtakHendelse,
     )
 
-    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe
+    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): SakIDListe
 }
 
 class BehandlingStatusServiceImpl(
@@ -256,33 +256,29 @@ class BehandlingStatusServiceImpl(
     }
 
     private fun haandterUtland(behandling: Behandling) {
-        if (featureToggleService.isEnabled(GenerellBehandlingToggle.KanBrukeGenerellBehandlingToggle, false)) {
-            if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
-                if (behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true) {
-                    generellBehandlingService.opprettBehandling(
-                        GenerellBehandling.opprettUtland(
-                            behandling.sak.id,
-                            behandling.id,
-                        ),
-                        null,
-                    )
-                } else {
-                    logger.info("behandling ${behandling.id} har ikke satt skalSendeKravpakke=true")
-                }
+        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            if (behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true) {
+                generellBehandlingService.opprettBehandling(
+                    GenerellBehandling.opprettUtland(
+                        behandling.sak.id,
+                        behandling.id,
+                    ),
+                    null,
+                )
             } else {
-                logger.info("Behandlingtype: ${behandling.type} får ikke utlandsoppgave")
+                logger.info("behandling ${behandling.id} har ikke satt skalSendeKravpakke=true")
             }
         } else {
-            logger.info("Håndterer ikke utland for behandling ${behandling.id}")
+            logger.info("Behandlingtype: ${behandling.type} får ikke utlandsoppgave")
         }
     }
 
-    override fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning() =
+    override fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker) =
         inTransaction {
-            behandlingDao.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning()
+            behandlingDao.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker)
         }
 
-    fun registrerVedtakHendelse(
+    private fun registrerVedtakHendelse(
         behandlingId: UUID,
         vedtakHendelse: VedtakHendelse,
         hendelseType: HendelseType,

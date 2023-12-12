@@ -5,8 +5,6 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -59,17 +57,6 @@ internal class SakDaoTest {
         val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
         Assertions.assertEquals(Enheter.PORSGRUNN.enhetNr, opprettSak.enhet)
-    }
-
-    @Test
-    fun `kan lagre utenlandstilknytning`() {
-        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
-        sakRepo.oppdaterUtenlandstilknytning(
-            opprettSak.id,
-            Utenlandstilknytning(UtenlandstilknytningType.BOSATT_UTLAND, Grunnlagsopplysning.Saksbehandler.create("ident"), "begrunnelse"),
-        )
-        val sakUtenlandstilknytning = sakRepo.hentUtenlandstilknytningForSak(opprettSak.id)
-        Assertions.assertEquals(UtenlandstilknytningType.BOSATT_UTLAND, sakUtenlandstilknytning?.utenlandstilknytning?.type)
     }
 
     @Test

@@ -77,7 +77,7 @@ spec:
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
         - application: etterlatte-behandling
         - application: etterlatte-samordning-vedtak
           permissions:

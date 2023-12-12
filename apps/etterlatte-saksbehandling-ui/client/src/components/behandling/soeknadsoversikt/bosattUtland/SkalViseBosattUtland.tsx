@@ -1,4 +1,4 @@
-import { IDetaljertBehandling, UtenlandstilknytningType } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { BosattUtland } from '~components/behandling/soeknadsoversikt/bosattUtland/BosattUtland'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBosattutland } from '~shared/api/bosattutland'
@@ -12,7 +12,7 @@ export const SkalViseBosattUtland = (props: { behandling: IDetaljertBehandling; 
   const { behandling, redigerbar } = props
   return (
     <>
-      {behandling.utenlandstilknytning?.type === UtenlandstilknytningType.BOSATT_UTLAND && (
+      {behandling.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND && (
         <HentBosattutland behandlingId={behandling.id} redigerbar={redigerbar} />
       )}
     </>

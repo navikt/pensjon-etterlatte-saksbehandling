@@ -7,14 +7,14 @@ on:
       - main
     paths:
       - apps/etterlatte-testdata/**
-      - libs/ktor2client-onbehalfof/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
       - apps/etterlatte-testdata/**
-      - libs/ktor2client-onbehalfof/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
 
 jobs:

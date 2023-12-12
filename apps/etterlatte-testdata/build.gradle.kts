@@ -7,7 +7,6 @@ dependencies {
 
     implementation(project(":libs:etterlatte-kafka"))
     implementation(project(":libs:saksbehandling-common"))
-    implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-ktor"))
 
     implementation(libs.ktor2.servercore)
@@ -25,6 +24,8 @@ dependencies {
     implementation(libs.bundles.jackson)
     implementation(libs.jackson.core)
     implementation(libs.jackson.databind)
+
+    implementation(libs.etterlatte.common)
 
     implementation(libs.navfelles.tokenclientcore)
     implementation(libs.navfelles.tokenvalidationktor2)

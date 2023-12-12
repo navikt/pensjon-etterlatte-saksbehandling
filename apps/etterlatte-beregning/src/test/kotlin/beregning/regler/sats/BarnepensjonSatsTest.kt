@@ -28,7 +28,7 @@ import java.time.YearMonth
 internal class BarnepensjonSatsTest {
     @Test
     fun `historiskeGrunnbeloep skal hente alle historiske grunnbeloep`() {
-        historiskeGrunnbeloep.size shouldBeExactly 70
+        historiskeGrunnbeloep.size shouldBeExactly 71
     }
 
     @Test

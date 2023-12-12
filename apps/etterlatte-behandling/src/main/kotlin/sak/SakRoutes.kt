@@ -1,11 +1,9 @@
 package no.nav.etterlatte.sak
 
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -24,9 +22,9 @@ import no.nav.etterlatte.libs.common.behandling.ForenkletBehandling
 import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
-import no.nav.etterlatte.libs.common.behandling.Utenlandstilknytning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
@@ -34,7 +32,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
@@ -112,6 +109,24 @@ internal fun Route.sakSystemRoutes(
     }
 }
 
+class PersonManglerSak(message: String) :
+    UgyldigForespoerselException(
+        code = "PERSON_MANGLER_SAK",
+        detail = message,
+    )
+
+class SakIkkeFunnetException(message: String) :
+    UgyldigForespoerselException(
+        code = "FANT_INGEN_SAK",
+        detail = message,
+    )
+
+class SakBleBorteException(message: String) :
+    IkkeTillattException(
+        code = "SAKEN_FORSVANT",
+        detail = message,
+    )
+
 internal fun Route.sakWebRoutes(
     tilgangService: TilgangService,
     sakService: SakService,
@@ -138,49 +153,32 @@ internal fun Route.sakWebRoutes(
 
             post("/endre_enhet") {
                 hentNavidentFraToken { navIdent ->
-                    val enhet = call.receive<String>()
+                    val enhetrequest = call.receive<EnhetRequest>()
                     try {
+                        inTransaction { sakService.finnSak(sakId) }
+                            ?: throw SakIkkeFunnetException("Fant ingen sak å endre enhet på sakid: $sakId")
+
                         val sakMedEnhet =
                             GrunnlagsendringshendelseService.SakMedEnhet(
-                                enhet = enhet,
+                                enhet = enhetrequest.enhet,
                                 id = sakId,
                             )
+
                         inTransaction {
                             sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                         }
-                        logger.info("Endret enhet på sak: $sakId  og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}")
-                        call.respond(sakMedEnhet)
+
+                        logger.info(
+                            "Saksbehandler $navIdent endret enhet på sak: $sakId og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}",
+                        )
+                        val oppdatertSak =
+                            inTransaction { sakService.finnSak(sakId) }
+                                ?: throw SakBleBorteException("Saken ble borte etter å endre enheten på den sakid: $sakId. Kritisk! ")
+
+                        call.respond(oppdatertSak)
                     } catch (e: TilstandException.UgyldigTilstand) {
                         call.respond(HttpStatusCode.BadRequest, "Kan ikke endre enhet på sak og oppgaver")
-                    }
-                }
-            }
-
-            post("/utenlandstilknytning") {
-                hentNavidentFraToken { navIdent ->
-                    logger.debug("Prøver å fastsette utenlandstilknytning")
-                    val body = call.receive<UtenlandstilknytningRequest>()
-
-                    try {
-                        val utenlandstilknytning =
-                            Utenlandstilknytning(
-                                type = body.utenlandstilknytningType,
-                                kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                                begrunnelse = body.begrunnelse,
-                            )
-
-                        inTransaction {
-                            sakService.oppdaterUtenlandstilknytning(sakId, utenlandstilknytning)
-                        }
-
-                        call.respondText(
-                            contentType = ContentType.Application.Json,
-                            status = HttpStatusCode.OK,
-                            text = utenlandstilknytning.toJson(),
-                        )
-                    } catch (e: TilstandException.UgyldigTilstand) {
-                        call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                     }
                 }
             }
@@ -195,28 +193,32 @@ internal fun Route.sakWebRoutes(
         }
 
         route("/personer/") {
+            post("/navkontor") {
+                withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val navkontor = sakService.finnNavkontorForPerson(fnr.value)
+                    call.respond(navkontor)
+                }
+            }
+
             post("/behandlingerforsak") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
                     val behandlinger =
                         inTransaction {
-                            val sakUtenlandstilknytning = sakService.hentSakMedUtenlandstilknytning(fnr.value)
+                            val sak = sakService.hentEnkeltSakForPerson(fnr.value)
+                            val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(sak.id)
+                            val sakMedUtlandstilknytning = SakMedUtlandstilknytning.fra(sak, utlandstilknytning)
+
                             requestLogger.loggRequest(
                                 brukerTokenInfo,
-                                Folkeregisteridentifikator.of(sakUtenlandstilknytning.ident),
+                                Folkeregisteridentifikator.of(sak.ident),
                                 "behandlinger",
                             )
-                            behandlingService.hentBehandlingerForSak(sakUtenlandstilknytning.id)
+
+                            behandlingService.hentBehandlingerForSak(sakMedUtlandstilknytning.id)
                                 .map { it.toBehandlingSammendrag() }
-                                .let { BehandlingListe(sakUtenlandstilknytning, it) }
+                                .let { BehandlingListe(sakMedUtlandstilknytning, it) }
                         }
                     call.respond(behandlinger)
-                }
-            }
-
-            post("/utenlandstilknytning") {
-                withFoedselsnummerInternal(tilgangService) { fnr ->
-                    val sakUtenlandstilknytning = inTransaction { sakService.hentSakMedUtenlandstilknytning(fnr.value) }
-                    call.respond(sakUtenlandstilknytning)
                 }
             }
 
@@ -270,9 +272,13 @@ internal fun Route.sakWebRoutes(
     }
 }
 
-data class UtenlandstilknytningRequest(
-    val utenlandstilknytningType: UtenlandstilknytningType,
+data class UtlandstilknytningRequest(
+    val utlandstilknytningType: UtlandstilknytningType,
     val begrunnelse: String,
+)
+
+data class EnhetRequest(
+    val enhet: String,
 )
 
 data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)

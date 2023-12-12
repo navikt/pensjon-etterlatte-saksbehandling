@@ -16,7 +16,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.isSuccess
-import no.nav.etterlatte.brev.journalpost.BrukerIdType
+import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson

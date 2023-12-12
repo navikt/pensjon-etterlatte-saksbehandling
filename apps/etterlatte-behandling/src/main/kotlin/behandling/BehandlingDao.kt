@@ -19,10 +19,12 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
+import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
@@ -30,6 +32,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.database.toListPassesRsToBlock
@@ -102,17 +105,20 @@ class BehandlingDao(
             mapSak(this),
         ) { i: UUID -> kommerBarnetTilGodeDao.hentKommerBarnetTilGode(i) }
 
-    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(): SakIDListe {
+    fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): SakIDListe {
         with(connection()) {
             val stmt =
                 prepareStatement(
                     """
                     UPDATE behandling
-                    SET status = '${BehandlingStatus.VILKAARSVURDERT}'
-                    WHERE status <> ALL (?) RETURNING id, sak_id
+                    SET status = '${BehandlingStatus.TRYGDETID_OPPDATERT}'
+                    WHERE status <> ALL (?)
+                        AND sak_id = ANY (?)
+                    RETURNING id, sak_id
                     """.trimIndent(),
                 )
             stmt.setArray(1, createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()))
+            stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
 
             return SakIDListe(stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) })
         }
@@ -129,6 +135,9 @@ class BehandlingDao(
             gyldighetsproeving = rs.getString("gyldighetssproving")?.let { objectMapper.readValue(it) },
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
+            utlandstilknytning =
+                rs.getString("utlandstilknytning")
+                    ?.let { objectMapper.readValue(it) },
             boddEllerArbeidetUtlandet =
                 rs.getString("bodd_eller_arbeidet_utlandet")
                     ?.let { objectMapper.readValue(it) },
@@ -152,6 +161,9 @@ class BehandlingDao(
             sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
             status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
             virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
+            utlandstilknytning =
+                rs.getString("utlandstilknytning")
+                    ?.let { objectMapper.readValue(it) },
             boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")?.let { objectMapper.readValue(it) },
             opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
             fritekstAarsak = rs.getString("fritekst_aarsak"),
@@ -171,9 +183,9 @@ class BehandlingDao(
             connection().prepareStatement(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                soeknad_mottatt_dato, virkningstidspunkt, revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, 
-                prosesstype, kilde, begrunnelse)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
+                revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, begrunnelse)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
             )
         with(behandling) {
@@ -185,12 +197,14 @@ class BehandlingDao(
             stmt.setString(6, type.name)
             stmt.setTidspunkt(7, soeknadMottattDato?.toTidspunkt())
             stmt.setString(8, virkningstidspunkt?.toJson())
-            stmt.setString(9, revurderingsAarsak?.name)
-            stmt.setString(10, opphoerAarsaker?.toJson())
-            stmt.setString(11, fritekstAarsak)
-            stmt.setString(12, prosesstype.toString())
-            stmt.setString(13, kilde.toString())
-            stmt.setString(14, begrunnelse)
+            stmt.setJsonb(9, utlandstilknytning)
+            stmt.setString(10, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
+            stmt.setString(11, revurderingsAarsak?.name)
+            stmt.setString(12, opphoerAarsaker?.toJson())
+            stmt.setString(13, fritekstAarsak)
+            stmt.setString(14, prosesstype.toString())
+            stmt.setString(15, kilde.toString())
+            stmt.setString(16, begrunnelse)
         }
         require(stmt.executeUpdate() == 1)
     }
@@ -236,6 +250,17 @@ class BehandlingDao(
         stmt.setString(1, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
         stmt.setObject(2, behandlingId)
         require(stmt.executeUpdate() == 1)
+    }
+
+    fun lagreUtlandstilknytning(
+        behandlingId: UUID,
+        utlandstilknytning: Utlandstilknytning,
+    ) {
+        val statement =
+            connection().prepareStatement("UPDATE behandling set utlandstilknytning = ? where id = ?")
+        statement.setJsonb(1, utlandstilknytning)
+        statement.setObject(2, behandlingId)
+        require(statement.executeUpdate() == 1)
     }
 
     private fun ResultSet.behandlingsListe(): List<Behandling> = toList { tilBehandling(getString("behandlingstype")) }.filterNotNull()

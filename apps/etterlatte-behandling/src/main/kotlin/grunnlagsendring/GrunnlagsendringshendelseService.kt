@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlagsendring
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -23,10 +24,10 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
@@ -46,6 +47,12 @@ import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
+class KunneIkkeLukkeOppgaveForhendelse(message: String) :
+    UgyldigForespoerselException(
+        code = "FEIL_MED_OPPGAVE_UNDER_LUKKING",
+        detail = message,
+    )
+
 class GrunnlagsendringshendelseService(
     private val oppgaveService: OppgaveService,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
@@ -53,6 +60,7 @@ class GrunnlagsendringshendelseService(
     private val pdlKlient: PdlKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val sakService: SakService,
+    private val brukerService: BrukerService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -87,6 +95,10 @@ class GrunnlagsendringshendelseService(
         inTransaction {
             grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)
             try {
+                val oppgaveForReferanse = oppgaveService.hentEnkeltOppgaveForReferanse(hendelse.id.toString())
+                if (oppgaveForReferanse.manglerSaksbehandler()) {
+                    oppgaveService.tildelSaksbehandler(oppgaveForReferanse.id, saksbehandler.ident)
+                }
                 oppgaveService.ferdigStillOppgaveUnderBehandling(
                     hendelse.id.toString(),
                     saksbehandler = saksbehandler,
@@ -96,7 +108,7 @@ class GrunnlagsendringshendelseService(
                     "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil",
                     e,
                 )
-                throw e
+                throw KunneIkkeLukkeOppgaveForhendelse(e.message ?: "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil")
             }
         }
     }
@@ -106,7 +118,7 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettBostedhendelse(bostedsadresse: Bostedsadresse): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED)
+        return inTransaction { opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED) }
     }
 
     fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
@@ -187,27 +199,8 @@ class GrunnlagsendringshendelseService(
     }
 
     fun oppdaterAdresseHendelse(bostedsadresse: Bostedsadresse) {
-        inTransaction {
-            val finnSaker = sakService.finnSaker(bostedsadresse.fnr)
-            val sakerMedNyEnhet =
-                finnSaker.map {
-                    SakMedEnhet(
-                        it.id,
-                        sakService.finnEnhetForPersonOgTema(bostedsadresse.fnr, it.sakType.tema, it.sakType).enhetNr,
-                    )
-                }
-            sakerMedNyEnhet.forEach { sakMedEnhet ->
-                val oppgaverUnderBehandling =
-                    oppgaveService.hentOppgaverForSak(sakMedEnhet.id).filter { it.status == Status.UNDER_BEHANDLING }
-                if (oppgaverUnderBehandling.isNotEmpty()) {
-                    logger.info("Oppretter manuell oppgave for Bosted fordi det er åpne behandlinger")
-                    opprettBostedhendelse(bostedsadresse)
-                } else {
-                    sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
-                    oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
-                }
-            }
-        }
+        logger.info("Oppretter manuell oppgave for Bosted")
+        opprettBostedhendelse(bostedsadresse)
     }
 
     private fun oppdaterEnheterForsaker(
@@ -232,11 +225,11 @@ class GrunnlagsendringshendelseService(
             AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND -> Enheter.STRENGT_FORTROLIG.enhetNr
             AdressebeskyttelseGradering.STRENGT_FORTROLIG -> Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
             AdressebeskyttelseGradering.FORTROLIG -> {
-                sakService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
+                brukerService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }
 
             AdressebeskyttelseGradering.UGRADERT -> {
-                sakService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
+                brukerService.finnEnhetForPersonOgTema(fnr, sakType.tema, sakType).enhetNr
             }
         }
     }

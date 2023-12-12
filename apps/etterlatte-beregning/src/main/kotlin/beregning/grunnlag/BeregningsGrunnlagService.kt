@@ -5,6 +5,7 @@ import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Companion.automatiskSaksbehandler
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
@@ -154,7 +155,7 @@ class BeregningsGrunnlagService(
             beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(
                 forrigeIverksatteBehandlingId,
             )
-        val revurderingVirk = revurdering.virkningstidspunkt!!.dato.atDay(1)
+        val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
 
         val soeskenjusteringErLiktFoerVirk =
             erGrunnlagLiktFoerEnDato(
@@ -179,7 +180,7 @@ class BeregningsGrunnlagService(
     ): Boolean {
         val forrigeGrunnlag =
             beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(forrigeIverksatteBehandlingId)
-        val revurderingVirk = revurdering.virkningstidspunkt!!.dato.atDay(1)
+        val revurderingVirk = revurdering.virkningstidspunkt().dato.atDay(1)
 
         return erGrunnlagLiktFoerEnDato(
             omstillingstoenadBeregningsGrunnlag.institusjonsopphold ?: emptyList(),

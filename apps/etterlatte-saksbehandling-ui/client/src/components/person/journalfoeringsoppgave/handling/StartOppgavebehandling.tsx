@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Heading, Link, Panel, Radio, RadioGroup, Tag } from '@navikt/ds-react'
+import { Alert, Button, Heading, Link, Panel, Radio, RadioGroup, Tag } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { useNavigate } from 'react-router-dom'
@@ -10,23 +10,20 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { FlexRow } from '~shared/styled'
 
 import { FristWrapper } from '~components/nyoppgavebenk/FristWrapper'
-import { JournalpostVariant } from '~shared/types/Journalpost'
-import { settJournalpostVariant } from '~store/reducers/JournalfoeringOppgaveReducer'
+import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { FormWrapper } from '../BehandleJournalfoeringOppgave'
 
-export default function StartOppgavebehandling() {
-  const { oppgave, journalpost, journalpostVariant } = useJournalfoeringOppgave()
+export default function StartOppgavebehandling({ antallBehandlinger }: { antallBehandlinger: number }) {
+  const { oppgave, journalpost, oppgaveHandling } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
   const neste = () => {
-    switch (journalpostVariant) {
-      case JournalpostVariant.NY_SOEKNAD:
+    switch (oppgaveHandling) {
+      case OppgaveHandling.NY_BEHANDLING:
         return navigate('nybehandling', { relative: 'path' })
-      case JournalpostVariant.NYTT_VEDLEGG:
+      case OppgaveHandling.FERDIGSTILL_OPPGAVE:
         return navigate('ferdigstill', { relative: 'path' })
-      case JournalpostVariant.FEIL_TEMA:
-        return navigate('endretema', { relative: 'path' })
     }
   }
 
@@ -34,11 +31,11 @@ export default function StartOppgavebehandling() {
 
   return (
     <FormWrapper column>
-      <Heading size="large">Behandle journalpost</Heading>
+      <Heading size="medium">Behandle journalføringsoppgave</Heading>
 
       <Panel border>
-        <Heading size="medium" spacing>
-          Oppgave
+        <Heading size="small" spacing>
+          Oppgavedetaljer
         </Heading>
 
         <InfoWrapper>
@@ -71,23 +68,37 @@ export default function StartOppgavebehandling() {
         </InfoWrapper>
       </Panel>
 
+      <br />
+      {antallBehandlinger > 0 ? (
+        <Alert variant="info">Bruker har allerede {antallBehandlinger} behandling(er) i Gjenny</Alert>
+      ) : (
+        <Alert variant="info">Bruker har ingen behandlinger i Gjenny</Alert>
+      )}
+      <br />
+
       <RadioGroup
-        legend="Hva gjelder journalposten?"
+        legend="Velg handling"
         size="small"
         onChange={(value) => {
-          dispatch(settJournalpostVariant(value as JournalpostVariant))
+          dispatch(settOppgaveHandling(value as OppgaveHandling))
         }}
-        value={journalpostVariant || ''}
+        value={oppgaveHandling || ''}
         disabled={!journalpost}
       >
-        <Radio value={JournalpostVariant.NY_SOEKNAD}>Ny søknad (behandling)</Radio>
-        <Radio value={JournalpostVariant.NYTT_VEDLEGG}>Nytt vedlegg (tileggsinformasjon)</Radio>
-        <Radio value={JournalpostVariant.FEIL_TEMA}>Feil tema</Radio>
+        <Radio value={OppgaveHandling.NY_BEHANDLING} description="Oppretter en ny behandling">
+          Opprett behandling
+        </Radio>
+        <Radio
+          value={OppgaveHandling.FERDIGSTILL_OPPGAVE}
+          description="Dersom oppgaven ikke er aktuell/relevant kan du ferdigstille den"
+        >
+          Ferdigstill oppgaven
+        </Radio>
       </RadioGroup>
 
       <div>
         <FlexRow justify="center" $spacing>
-          <Button variant="primary" onClick={neste} disabled={!journalpostVariant || !journalpost}>
+          <Button variant="primary" onClick={neste} disabled={!oppgaveHandling || !journalpost}>
             Neste
           </Button>
         </FlexRow>

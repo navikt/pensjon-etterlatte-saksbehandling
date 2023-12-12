@@ -8,8 +8,6 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.User
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -34,7 +32,6 @@ class BrukerManglerAttestantRolleException(msg: String) : Exception(msg)
 class OppgaveService(
     private val oppgaveDao: OppgaveDaoMedEndringssporing,
     private val sakDao: SakDao,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
@@ -49,7 +46,7 @@ class OppgaveService(
         }.filterForEnheter(Kontekst.get().AppUser)
     }
 
-    private fun List<OppgaveIntern>.filterForEnheter(bruker: User) = this.filterOppgaverForEnheter(featureToggleService, bruker)
+    private fun List<OppgaveIntern>.filterForEnheter(bruker: User) = this.filterOppgaverForEnheter(bruker)
 
     private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) =
         roller.flatMap {
@@ -291,6 +288,17 @@ class OppgaveService(
         return oppgaveDao.hentOppgaverForReferanse(referanse)
     }
 
+    fun hentEnkeltOppgaveForReferanse(referanse: String): OppgaveIntern {
+        val hentOppgaverForReferanse = hentOppgaverForReferanse(referanse)
+        try {
+            return hentOppgaverForReferanse.single()
+        } catch (e: NoSuchElementException) {
+            throw BadRequestException("Finner ingen oppgaver for referanse: $referanse")
+        } catch (e: IllegalArgumentException) {
+            throw BadRequestException("Det finnes mer enn en oppgave for referanse: $referanse")
+        }
+    }
+
     fun avbrytOppgaveUnderBehandling(
         behandlingEllerHendelseId: String,
         saksbehandler: BrukerTokenInfo,
@@ -437,23 +445,12 @@ class OppgaveService(
 
 class FantIkkeSakException(msg: String) : Exception(msg)
 
-fun List<OppgaveIntern>.filterOppgaverForEnheter(
-    featureToggleService: FeatureToggleService,
-    user: User,
-) = this.filterForEnheter(
-    featureToggleService,
-    OppgaveServiceFeatureToggle.EnhetFilterOppgaver,
-    user,
-) { item, enheter ->
-    enheter.contains(item.enhet)
-}
-
-enum class OppgaveServiceFeatureToggle(private val key: String) : FeatureToggle {
-    EnhetFilterOppgaver("pensjon-etterlatte.filter-oppgaver-enhet"),
-    ;
-
-    override fun key() = key
-}
+fun List<OppgaveIntern>.filterOppgaverForEnheter(user: User) =
+    this.filterForEnheter(
+        user,
+    ) { item, enheter ->
+        enheter.contains(item.enhet)
+    }
 
 enum class Rolle {
     SAKSBEHANDLER,

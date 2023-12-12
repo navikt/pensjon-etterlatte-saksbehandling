@@ -46,7 +46,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -311,21 +310,15 @@ internal class BrevdataFacadeImplTest {
             id = UUID.randomUUID(),
             sak = 1L,
             sakType = SakType.BARNEPENSJON,
-            behandlingOpprettet = LocalDateTime.now(),
-            soeknadMottattDato = LocalDateTime.now(),
-            innsender = null,
             soeker = "123",
-            gjenlevende = listOf(),
-            avdoed = listOf(),
-            soesken = listOf(),
             status = BehandlingStatus.OPPRETTET,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
             boddEllerArbeidetUtlandet = null,
+            utlandstilknytning = null,
             revurderingsaarsak = null,
             prosesstype = Prosesstype.MANUELL,
             revurderingInfo = null,
-            enhet = "1111",
             kilde = Vedtaksloesning.GJENNY,
         )
 

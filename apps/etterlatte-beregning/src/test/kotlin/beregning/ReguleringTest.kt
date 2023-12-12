@@ -27,6 +27,7 @@ import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -36,7 +37,9 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregn
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -70,6 +73,23 @@ class ReguleringTest {
             )
     }
 
+    private fun mockTrygdetid(behandlingId_: UUID): TrygdetidDto =
+        mockk<TrygdetidDto>().apply {
+            every { id } returns UUID.randomUUID()
+            every { behandlingId } returns behandlingId_
+            every { ident } returns AVDOED_FOEDSELSNUMMER.value
+            every { beregnetTrygdetid } returns
+                mockk {
+                    every { resultat } returns
+                        mockk {
+                            every { samletTrygdetidNorge } returns BeregnBarnepensjonServiceTest.TRYGDETID_40_AAR
+                            every { samletTrygdetidTeoretisk } returns BeregnBarnepensjonServiceTest.PRORATA_TRYGDETID_30_AAR
+                            every { prorataBroek } returns BeregnBarnepensjonServiceTest.PRORATA_BROEK
+                        }
+                    every { tidspunkt } returns Tidspunkt.now()
+                }
+        }
+
     @Test
     fun `skal regulere barnepensjon foerstegangsbehandling - ingen soesken`() {
         val virk = BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23.minusYears(1)
@@ -90,8 +110,7 @@ class ReguleringTest {
                 emptyList(),
                 BeregnBarnepensjonServiceTest.VIRKNINGSTIDSPUNKT_JAN_23.minusYears(1),
             )
-
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
+        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
 
         runBlocking {
             val beregning22 = beregnBarnepensjonService.beregn(behandling, bruker)
@@ -191,5 +210,6 @@ class ReguleringTest {
         every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
         every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         every { kilde } returns vedtaksloesning
+        every { revurderingsaarsak } returns Revurderingaarsak.REGULERING
     }
 }

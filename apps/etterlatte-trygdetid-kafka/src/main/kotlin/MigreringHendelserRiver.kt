@@ -56,6 +56,9 @@ internal class MigreringHendelserRiver(
             if (request.dodAvYrkesskade) {
                 logger.info("Avdød hadde yrkesskade i Pesys, oppretter yrkesskadegrunnlag for behandling $behandlingId")
                 trygdetidService.opprettGrunnlagVedYrkesskade(behandlingId)
+            } else if (request.anvendtFlyktningerfordel()) {
+                logger.info("Avdød hadde flyktningerfordel i Pesys, overstyrer med samme trygdetid $behandlingId")
+                overstyrBeregnetTrygdetid(request, behandlingId)
             } else if (request.trygdetid.perioder.isNotEmpty()) {
                 logger.info("Mottok trygdetidsperioder for behandling $behandlingId")
                 leggTilPerioder(request, behandlingId)

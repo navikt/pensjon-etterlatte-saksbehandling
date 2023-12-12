@@ -1,22 +1,28 @@
 import { Behandlingsliste } from './Behandlingsliste'
 import styled from 'styled-components'
-import { ManueltOpphoerModal } from './ManueltOpphoerModal'
 import { FlexRow, GridContainer } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
-import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
-import { SakType } from '~shared/types/sak'
+import { Alert, BodyShort, Heading, HStack, Tag } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterSakstype } from '~utils/formattering'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE, OpprettKlage } from '~components/person/OpprettKlage'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { KlageListe } from '~components/person/KlageListe'
 import { tagColors } from '~shared/Tags'
 import { SakMedBehandlinger } from '~components/person/typer'
-
 import { mapApiResult, Result } from '~shared/api/apiUtils'
+import { useEffect } from 'react'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentNavkontorForPerson } from '~shared/api/sak'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
-export const SakOversikt = ({ sakStatus }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
+export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
+  const [hentNavkontorStatus, hentNavkontor] = useApiCall(hentNavkontorForPerson)
+
+  useEffect(() => {
+    hentNavkontor(fnr)
+  }, [fnr])
 
   return (
     <GridContainer>
@@ -30,30 +36,34 @@ export const SakOversikt = ({ sakStatus }: { sakStatus: Result<SakMedBehandlinge
           <>
             <MainContent>
               <Heading size="medium" spacing>
-                Saknummer {sakOgBehandlinger.sak.id}{' '}
-                <Tag variant="success" size="medium">
-                  {formaterSakstype(sakOgBehandlinger.sak.sakType)}
-                </Tag>
-                {sakOgBehandlinger.sak.utenlandstilknytning ? (
-                  <Tag variant={tagColors[sakOgBehandlinger.sak.utenlandstilknytning.type]} size="small">
-                    {formaterEnumTilLesbarString(sakOgBehandlinger.sak.utenlandstilknytning.type)}
+                <HStack gap="2">
+                  Saknummer {sakOgBehandlinger.sak.id}{' '}
+                  <Tag variant="success" size="medium">
+                    {formaterSakstype(sakOgBehandlinger.sak.sakType)}
                   </Tag>
-                ) : (
-                  <BodyShort>Du må velge en tilknytning for saken</BodyShort>
-                )}
+                  {sakOgBehandlinger.sak.utlandstilknytning && (
+                    <Tag variant={tagColors[sakOgBehandlinger.sak.utlandstilknytning.type]} size="medium">
+                      {formaterEnumTilLesbarString(sakOgBehandlinger.sak.utlandstilknytning.type)}
+                    </Tag>
+                  )}
+                </HStack>
+
                 <FlexRow justify="right">
                   <OpprettKlage sakId={sakOgBehandlinger.sak.id} />
-                  {sakOgBehandlinger.sak.sakType === SakType.BARNEPENSJON && (
-                    <ManueltOpphoerModal
-                      sakId={sakOgBehandlinger.sak.id}
-                      behandlingliste={sakOgBehandlinger.behandlinger}
-                    />
-                  )}
                 </FlexRow>
               </Heading>
 
               <BodyShort spacing>Denne saken tilhører enhet {sakOgBehandlinger.sak.enhet}.</BodyShort>
-
+              {mapApiResult(
+                hentNavkontorStatus,
+                <Spinner visible label="Laster navkontor ..." />,
+                () => (
+                  <ApiErrorAlert>Kunne ikke hente navkontor</ApiErrorAlert>
+                ),
+                (navkontor) => (
+                  <BodyShort spacing>Navkontor er: {navkontor.navn}</BodyShort>
+                )
+              )}
               <hr />
               <Behandlingsliste behandlinger={sakOgBehandlinger.behandlinger} sakId={sakOgBehandlinger.sak.id} />
 

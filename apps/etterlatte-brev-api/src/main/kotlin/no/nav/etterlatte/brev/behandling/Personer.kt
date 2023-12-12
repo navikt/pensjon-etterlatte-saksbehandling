@@ -13,6 +13,12 @@ data class PersonerISak(
 
 data class Innsender(val fnr: Foedselsnummer)
 
-data class Soeker(val fornavn: String, val mellomnavn: String? = null, val etternavn: String, val fnr: Foedselsnummer)
+data class Soeker(
+    val fornavn: String,
+    val mellomnavn: String? = null,
+    val etternavn: String,
+    val fnr: Foedselsnummer,
+    val under18: Boolean? = null,
+)
 
 data class Avdoed(val navn: String, val doedsdato: LocalDate)

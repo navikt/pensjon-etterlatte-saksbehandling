@@ -13,9 +13,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import mockPerson
-import no.nav.etterlatte.grunnlag.adresse.Adresse
-import no.nav.etterlatte.grunnlag.adresse.BrevMottaker
-import no.nav.etterlatte.grunnlag.adresse.Foedselsnummer
 import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -25,7 +22,10 @@ import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
+import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.MottakerAdresse
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -83,7 +83,7 @@ class GrunnlagHenterTest {
         } returns grunnlagTestData.hentPersonGalleri()
 
         val persondataAdresseVerge = mockk<PersondataAdresse>()
-        every { persondataAdresseVerge.tilFrittstaendeBrevMottaker() } returns sampleVergeAdresse()
+        every { persondataAdresseVerge.tilFrittstaendeBrevMottaker(any()) } returns sampleVergeAdresse()
         every {
             vergeService.hentGrunnlagsopplysningVergesAdresse(grunnlagTestData.soeker)
         } returns grunnlagsopplysningVergesAdresse()
@@ -148,9 +148,9 @@ class GrunnlagHenterTest {
     private fun sampleVergeAdresse() =
         BrevMottaker(
             navn = "Tore",
-            foedselsnummer = Foedselsnummer(vergesFnr),
+            foedselsnummer = MottakerFoedselsnummer(vergesFnr),
             adresse =
-                Adresse(
+                MottakerAdresse(
                     adresseType = "NORSKPOSTADRESSE",
                     adresselinje1 = "Vergestien 2",
                     land = "Norge",

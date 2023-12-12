@@ -21,9 +21,9 @@ private enum class InfoType(val urlSuffix: String) {
 }
 
 interface NavAnsattKlient {
-    suspend fun hentSaksbehandlerEnhet(ident: String): List<SaksbehandlerEnhet>
+    suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet>
 
-    suspend fun hentSaksbehandlerTema(ident: String): List<SaksbehandlerTema>
+    suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema>
 }
 
 class NavAnsattKlientImpl(
@@ -41,14 +41,14 @@ class NavAnsattKlientImpl(
             .expireAfterWrite(Duration.ofMinutes(15))
             .build<String, List<SaksbehandlerTema>>()
 
-    override suspend fun hentSaksbehandlerEnhet(ident: String): List<SaksbehandlerEnhet> =
+    override suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet> =
         hentSaksbehandler(
             ident,
             InfoType.ENHET,
             enhetCache,
         )
 
-    override suspend fun hentSaksbehandlerTema(ident: String): List<SaksbehandlerTema> =
+    override suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema> =
         hentSaksbehandler(
             ident,
             InfoType.TEMA,

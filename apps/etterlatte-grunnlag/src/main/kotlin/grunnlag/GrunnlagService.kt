@@ -2,7 +2,6 @@ package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.grunnlag.adresse.BrevMottaker
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -27,6 +26,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.P
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKER_PDL_V1
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -155,22 +155,31 @@ class RealGrunnlagService(
         val grunnlag =
             opplysningDao.hentGrunnlagAvTypeForBehandling(
                 behandlingId,
+                PERSONGALLERI_V1,
                 INNSENDER_PDL_V1,
                 SOEKER_PDL_V1,
                 AVDOED_PDL_V1,
                 GJENLEVENDE_FORELDER_PDL_V1,
             )
 
-        // Finn siste grunnlag blant relevante typer for unike personer,
+        val persongalleri =
+            grunnlag
+                .filter { it.opplysning.opplysningType == PERSONGALLERI_V1 }
+                .maxBy { it.hendelseNummer }
+                .let { deserialize<Persongalleri>(it.opplysning.opplysning.toJson()) }
+
+        // Finn siste grunnlag blant relevante typer for unike personer, som eksisterer i persongalleriet fra søknaden,
         // slik at hver person kun havner i en av kategoriene
         val sisteGrunnlagPerFnr =
-            grunnlag.filter {
-                setOf(
-                    SOEKER_PDL_V1,
-                    AVDOED_PDL_V1,
-                    GJENLEVENDE_FORELDER_PDL_V1,
-                ).contains(it.opplysning.opplysningType)
-            }
+            grunnlag
+                .filter {
+                    setOf(
+                        SOEKER_PDL_V1,
+                        AVDOED_PDL_V1,
+                        GJENLEVENDE_FORELDER_PDL_V1,
+                    ).contains(it.opplysning.opplysningType)
+                }
+                .filter { persongalleri.inkluderer(it.opplysning) }
                 .groupBy { it.opplysning.fnr }
                 .map {
                     it.value.maxBy { opplysning -> opplysning.hendelseNummer }
@@ -196,6 +205,13 @@ class RealGrunnlagService(
             gjenlevende = gjenlevende.mapNotNull { it?.opplysning?.asPersonopplysning() },
         )
     }
+
+    private fun Persongalleri.inkluderer(it: Grunnlagsopplysning<JsonNode>) =
+        when (it.opplysningType) {
+            AVDOED_PDL_V1 -> it.fnr?.let { fnr -> avdoed.contains(fnr.value) } ?: false
+            GJENLEVENDE_FORELDER_PDL_V1 -> it.fnr?.let { fnr -> gjenlevende.contains(fnr.value) } ?: false
+            else -> true
+        }
 
     override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {
         return opplysningDao.finnAllePersongalleriHvorPersonFinnes(fnr)

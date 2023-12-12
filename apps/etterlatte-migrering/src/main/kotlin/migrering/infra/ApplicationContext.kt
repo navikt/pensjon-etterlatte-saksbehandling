@@ -14,6 +14,7 @@ import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.start.StartMigreringRepository
 import no.nav.etterlatte.migrering.verifisering.GjenlevendeForelderPatcher
 import no.nav.etterlatte.migrering.verifisering.PDLKlient
+import no.nav.etterlatte.migrering.verifisering.PersonHenter
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 
 internal class ApplicationContext {
@@ -42,7 +43,8 @@ internal class ApplicationContext {
                 azureAppScope = config.getString("pdl.azure.scope"),
             ),
         )
-    val gjenlevendeForelderPatcher = GjenlevendeForelderPatcher(pdlKlient = pdlKlient)
+    val personHenter = PersonHenter(pdlKlient, featureToggleService)
+    val gjenlevendeForelderPatcher = GjenlevendeForelderPatcher(pdlKlient = pdlKlient, personHenter)
     val grunnlagKlient =
         GrunnlagKlient(
             config,
@@ -53,15 +55,15 @@ internal class ApplicationContext {
                 azureAppScope = config.getString("grunnlag.azure.scope"),
             ),
         )
-    val utenlandstilknytningsjekker = Utenlandstilknytningsjekker(grunnlagKlient)
 
+    val utenlandstilknytningsjekker = Utenlandstilknytningsjekker(grunnlagKlient)
     val verifiserer =
         Verifiserer(
-            pdlKlient = pdlKlient,
             repository = pesysRepository,
-            featureToggleService = featureToggleService,
             gjenlevendeForelderPatcher = gjenlevendeForelderPatcher,
             utenlandstilknytningsjekker = utenlandstilknytningsjekker,
+            personHenter = personHenter,
+            featureToggleService = featureToggleService,
         )
 
     val krrKlient =

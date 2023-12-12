@@ -7,7 +7,9 @@ import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.person.ForelderVerge
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
 data class OmregnetBPNyttRegelverk(
@@ -18,6 +20,8 @@ data class OmregnetBPNyttRegelverk(
     val grunnbeloep: Kroner,
     val erBosattUtlandet: Boolean,
     val erYrkesskade: Boolean,
+    val erForeldreloes: Boolean,
+    val erUnder18Aar: Boolean,
 ) : BrevData() {
     companion object {
         fun fra(
@@ -26,6 +30,10 @@ data class OmregnetBPNyttRegelverk(
             migreringRequest: MigreringBrevRequest?,
         ): OmregnetBPNyttRegelverk {
             val foersteBeregningsperiode = utbetalingsinfo.beregningsperioder.first()
+            val erUnder18Aar =
+                requireNotNull(generellBrevData.personerISak.soeker.under18) {
+                    "Klarte ikke å bestemme om alder på søker er under eller over 18 år. Kan dermed ikke velge riktig brev"
+                }
             val defaultBrevdataOmregning =
                 OmregnetBPNyttRegelverk(
                     utbetaltFoerReform = Kroner(0),
@@ -35,29 +43,41 @@ data class OmregnetBPNyttRegelverk(
                     grunnbeloep = Kroner(foersteBeregningsperiode.grunnbeloep.value),
                     erBosattUtlandet = false,
                     erYrkesskade = false,
+                    erForeldreloes =
+                        generellBrevData.personerISak.avdoede.size > 1 &&
+                            generellBrevData.personerISak.verge !is ForelderVerge,
+                    erUnder18Aar = erUnder18Aar,
                 )
-
-            if (generellBrevData.systemkilde == Vedtaksloesning.PESYS) {
+            if (
+                generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
+                migreringRequest?.erOmregningGjenny ?: false
+            ) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
                 val (pesysUtenlandstilknytning, yrkesskade) =
                     when (migreringRequest) {
                         null -> {
-                            val utenlandstilkytning = false
-                            /*
-                            TODO Venter på EY-3191
-                                requireNotNull(generellBrevData.utenlandstilkytning  {
-                                    "Kan ikke velge mellom bosatt utland eller bosatt norge i brev hvis migreringrequesten mangler grunnlag"
+                            val utlandstilknytning =
+                                requireNotNull(generellBrevData.utlandstilknytning) {
+                                    "Mangler utlandstilknytning for behandling=${generellBrevData.behandlingId}"
                                 }
-                             */
-                            val yrkesskade = false // TODO
-                            Pair(utenlandstilkytning, yrkesskade)
+                            val yrkesskade = false // Må redigere brev manuelt hvis yrkesskade
+                            Pair(utlandstilknytning.type, yrkesskade)
                         }
-                        else -> Pair(migreringRequest.utenlandstilknytningType, migreringRequest.yrkesskade)
+
+                        else -> Pair(migreringRequest.utlandstilknytningType, migreringRequest.yrkesskade)
                     }
 
+                if (generellBrevData.forenkletVedtak.saksbehandlerIdent == Fagsaksystem.EY.navn &&
+                    defaultBrevdataOmregning.erForeldreloes
+                ) {
+                    throw IllegalStateException(
+                        "Vi har en automatisk migrering som setter foreldreløs. " +
+                            "Dette skal ikke skje, siden dette brevet må redigeres av saksbehandler",
+                    )
+                }
                 return defaultBrevdataOmregning.copy(
                     utbetaltFoerReform = Kroner(pesysUtbetaltFoerReform),
-                    erBosattUtlandet = pesysUtenlandstilknytning == UtenlandstilknytningType.BOSATT_UTLAND,
+                    erBosattUtlandet = pesysUtenlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                     erYrkesskade = yrkesskade,
                 )
             }

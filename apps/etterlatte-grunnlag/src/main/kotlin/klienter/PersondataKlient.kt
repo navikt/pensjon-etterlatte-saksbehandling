@@ -25,18 +25,9 @@ import org.slf4j.LoggerFactory
 class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: String) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    /**
-     * Fra Pensjondata dokumentasjon: Hvis checkForVerge er true gjøres det først et oppslag mot pensjon-fullmakt
-     * for å se om bruker har verge.
-     * Hvis< det foreligger en verge som er samhandler vil det slås opp i TSS for å hente vergens adresse som
-     * returneres. Hvis det foreligger en verge som er privatperson slås det opp i PDL og denne personens adresse
-     * returneres i stedet. Hvis det ikke identifiseres noen verge gås det videre til neste steg.
-
-     * @see <a href="https://pensjon-dokumentasjon.intern.dev.nav.no/pensjon-persondata/main/index.html#_adresse_api">
-     * Pensjondata dokumentasjon</a>. */
     fun hentVergeadresseGittVergehaversFnr(vergehaverFnr: String): PersondataAdresse? {
         try {
-            val kontaktadresse = hentKontaktadresse(vergehaverFnr, true)
+            val kontaktadresse = hentKontaktadresse(vergehaverFnr, seEtterVerge = true)
 
             return if (erVergesAdresse(kontaktadresse)) {
                 kontaktadresse
@@ -70,15 +61,24 @@ class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: S
         }
     }
 
+    /**
+     * Fra Pensjondata dokumentasjon: Hvis checkForVerge er true gjøres det først et oppslag mot pensjon-fullmakt
+     * for å se om bruker har verge.
+     * Hvis det foreligger en verge som er samhandler vil det slås opp i TSS for å hente vergens adresse som
+     * returneres. Hvis det foreligger en verge som er privatperson slås det opp i PDL og denne personens adresse
+     * returneres i stedet. Hvis det ikke identifiseres noen verge gås det videre til neste steg.
+
+     * @see <a href="https://pensjon-dokumentasjon.intern.dev.nav.no/pensjon-persondata/main/index.html#_adresse_api">
+     * Pensjondata dokumentasjon</a>. */
     private fun hentKontaktadresse(
         foedselsnummer: String,
-        checkForVerge: Boolean,
+        seEtterVerge: Boolean,
     ): PersondataAdresse {
         return runBlocking {
             retry(times = 3) {
                 val jsonResponse: String =
                     httpClient.get("$apiUrl/api/adresse/kontaktadresse") {
-                        parameter("checkForVerge", checkForVerge)
+                        parameter("checkForVerge", seEtterVerge)
                         header("pid", foedselsnummer)
                         accept(Json)
                         contentType(Json)

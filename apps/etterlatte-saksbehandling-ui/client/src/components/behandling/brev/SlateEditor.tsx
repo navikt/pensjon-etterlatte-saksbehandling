@@ -98,6 +98,10 @@ const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   if (leaf.placeholder) {
     children = <strong style={{ background: 'orange' }}>{children}</strong>
   }
+  // @ts-expect-error leaf er eigentleg eit objekt
+  if (leaf['type'] === 'list-item') {
+    return <li {...attributes}>{children}</li>
+  }
 
   return <span {...attributes}>{children}</span>
 }

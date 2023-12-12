@@ -127,7 +127,6 @@ spec:
       rules:
         - application: etterlatte-klage
         - application: etterlatte-brev-api
-        - application: etterlatte-vilkaar
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
         - application: etterlatte-vedtaksvurdering
@@ -147,7 +146,7 @@ spec:
         - application: etterlatte-egne-ansatte-lytter
         - application: etterlatte-beregning
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
         - application: etterlatte-gyldig-soeknad
         - application: etterlatte-oppdater-behandling
         - application: etterlatte-hendelser-joark

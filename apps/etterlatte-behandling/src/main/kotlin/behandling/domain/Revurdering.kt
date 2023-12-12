@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.sak.Sak
 import java.time.LocalDateTime
@@ -43,6 +44,7 @@ sealed class Revurdering(
             status: BehandlingStatus,
             kommerBarnetTilgode: KommerBarnetTilgode?,
             virkningstidspunkt: Virkningstidspunkt?,
+            utlandstilknytning: Utlandstilknytning?,
             boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?,
             revurderingsaarsak: Revurderingaarsak,
             prosesstype: Prosesstype,
@@ -59,6 +61,7 @@ sealed class Revurdering(
                     status = status,
                     kommerBarnetTilgode = kommerBarnetTilgode,
                     virkningstidspunkt = virkningstidspunkt,
+                    utlandstilknytning = utlandstilknytning,
                     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
                     revurderingsaarsak = revurderingsaarsak,
                     revurderingInfo = revurderingInfo,
@@ -75,6 +78,7 @@ sealed class Revurdering(
                     status = status,
                     kommerBarnetTilgode = kommerBarnetTilgode,
                     virkningstidspunkt = virkningstidspunkt,
+                    utlandstilknytning = utlandstilknytning,
                     boddEllerArbeidetUtlandet = boddEllerArbeidetUtlandet,
                     revurderingsaarsak = revurderingsaarsak,
                     revurderingInfo = revurderingInfo,

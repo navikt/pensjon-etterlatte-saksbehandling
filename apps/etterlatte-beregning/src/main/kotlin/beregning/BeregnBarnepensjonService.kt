@@ -3,6 +3,7 @@ package no.nav.etterlatte.beregning
 import beregning.regler.finnAnvendtGrunnbeloep
 import beregning.regler.finnAnvendtTrygdetid
 import com.fasterxml.jackson.databind.JsonNode
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
@@ -23,13 +24,13 @@ import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
-import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
@@ -45,7 +46,6 @@ import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
-import no.nav.etterlatte.regler.Beregningstall
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -76,8 +76,7 @@ class BeregnBarnepensjonService(
     ): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
         val behandlingType = behandling.behandlingType
-        val virkningstidspunkt =
-            requireNotNull(behandling.virkningstidspunkt?.dato) { "Behandling ${behandling.id} mangler virkningstidspunkt" }
+        val virkningstidspunkt = behandling.virkningstidspunkt().dato
 
         val beregningsGrunnlag =
             requireNotNull(
@@ -97,7 +96,9 @@ class BeregnBarnepensjonService(
 
         val nyttRegelverkAktivert = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
         val erMigrering = behandling.kilde == Vedtaksloesning.PESYS
-        val brukNyttRegelverk = nyttRegelverkAktivert || erMigrering
+        val erOmregning = behandling.revurderingsaarsak?.name == Revurderingaarsak.REGULERING.name
+        // Midlertidig åpne opp nytt regelverk for migrering og omregning: EY-3232
+        val brukNyttRegelverk = nyttRegelverkAktivert || erMigrering || erOmregning
 
         val barnepensjonGrunnlag =
             opprettBeregningsgrunnlag(
@@ -311,19 +312,10 @@ class BeregnBarnepensjonService(
                         beskrivelse = "Trygdetid avdød forelder",
                     ),
                 )
-            } ?: KonstantGrunnlag(
-                FaktumNode(
-                    verdi =
-                        SamletTrygdetidMedBeregningsMetode(
-                            beregningsMetode = BeregningsMetode.NASJONAL,
-                            samletTrygdetidNorge = Beregningstall(FASTSATT_TRYGDETID_I_PILOT),
-                            samletTrygdetidTeoretisk = null,
-                            prorataBroek = null,
-                            ident = null,
-                        ),
-                    kilde = Grunnlagsopplysning.RegelKilde("MVP hardkodet trygdetid", Tidspunkt.now(), "1"),
-                    beskrivelse = "Trygdetid avdød forelder",
-                ),
+            } ?: throw ForespoerselException(
+                HttpStatusCode.BadRequest.value,
+                code = "MÅ_FASTSETTE_TRYGDETID",
+                detail = "Mangler trygdetid, gå tilbake til trygdetidsiden for å opprette dette",
             ),
         institusjonsopphold =
             PeriodisertBeregningGrunnlag.lagPotensieltTomtGrunnlagMedDefaultUtenforPerioder(
@@ -336,7 +328,7 @@ class BeregnBarnepensjonService(
                 },
             ) { _, _, _ -> FaktumNode(null, beregningsGrunnlag.kilde, "Institusjonsopphold") },
         avdoedeForeldre =
-            when (trygdetid?.ident) {
+            when (trygdetid.ident) {
                 UKJENT_AVDOED ->
                     KonstantGrunnlag(
                         FaktumNode(
@@ -345,25 +337,32 @@ class BeregnBarnepensjonService(
                             beskrivelse = "Avdød er ukjent. Trygdetid er satt manuelt.",
                         ),
                     )
-                else ->
-                    PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-                        grunnlag.hentAvdoede().toPeriodisertAvdoedeGrunnlag().mapVerdier { fnrListe ->
+                else -> {
+                    if (grunnlag.hentAvdoede().any { it.hentDoedsdato() == null }) {
+                        KonstantGrunnlag(
                             FaktumNode(
-                                verdi = fnrListe,
+                                verdi = emptyList(),
                                 kilde = beregningsGrunnlag.kilde,
-                                beskrivelse = "Hvilke foreldre er døde",
-                            )
-                        },
-                        fom,
-                        tom,
-                    )
+                                beskrivelse = "Avdød mangler dødsdato. Trygdetid skal være satt manuelt eller overstyrt.",
+                            ),
+                        )
+                    } else {
+                        PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                            grunnlag.hentAvdoede().toPeriodisertAvdoedeGrunnlag().mapVerdier { fnrListe ->
+                                FaktumNode(
+                                    verdi = fnrListe,
+                                    kilde = beregningsGrunnlag.kilde,
+                                    beskrivelse = "Hvilke foreldre er døde",
+                                )
+                            },
+                            fom,
+                            tom,
+                        )
+                    }
+                }
             },
         brukNyttRegelverk = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false),
     )
-
-    companion object {
-        private const val FASTSATT_TRYGDETID_I_PILOT = 40
-    }
 
     private fun List<Grunnlagsdata<JsonNode>>.toPeriodisertAvdoedeGrunnlag(): List<GrunnlagMedPeriode<List<Folkeregisteridentifikator>>> {
         val doede = mutableListOf<Folkeregisteridentifikator>()

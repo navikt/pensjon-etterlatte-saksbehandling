@@ -8,7 +8,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
-import no.nav.etterlatte.brev.journalpost.JournalpostResponse
+import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
@@ -214,7 +214,7 @@ internal class BrevRepositoryIntegrationTest {
 
         val brev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
 
-        assertTrue(db.settBrevJournalfoert(brev.id, JournalpostResponse(journalpostId, journalpostferdigstilt = true)))
+        assertTrue(db.settBrevJournalfoert(brev.id, OpprettJournalpostResponse(journalpostId, journalpostferdigstilt = true)))
     }
 
     @Test
@@ -237,7 +237,7 @@ internal class BrevRepositoryIntegrationTest {
         db.lagrePdfOgFerdigstillBrev(opprettetBrev.id, Pdf(PDF_BYTES))
         db.hentBrev(opprettetBrev.id).status shouldBe Status.FERDIGSTILT
 
-        db.settBrevJournalfoert(opprettetBrev.id, JournalpostResponse("id", journalpostferdigstilt = true))
+        db.settBrevJournalfoert(opprettetBrev.id, OpprettJournalpostResponse("id", journalpostferdigstilt = true))
         db.hentBrev(opprettetBrev.id).status shouldBe Status.JOURNALFOERT
 
         db.settBrevDistribuert(opprettetBrev.id, DistribuerJournalpostResponse("id"))
@@ -261,7 +261,7 @@ internal class BrevRepositoryIntegrationTest {
         val opprettetBrev = db.opprettBrev(ulagretBrev(behandlingId = UUID.randomUUID()))
         db.lagrePdfOgFerdigstillBrev(opprettetBrev.id, Pdf(PDF_BYTES))
 
-        val journalpostResponse = JournalpostResponse("id", journalpostferdigstilt = true)
+        val journalpostResponse = OpprettJournalpostResponse("id", journalpostferdigstilt = true)
         db.settBrevJournalfoert(opprettetBrev.id, journalpostResponse)
 
         db.hentBrev(opprettetBrev.id).status shouldBe Status.JOURNALFOERT

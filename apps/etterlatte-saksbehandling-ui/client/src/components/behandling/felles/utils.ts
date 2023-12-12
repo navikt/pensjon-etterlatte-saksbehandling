@@ -77,6 +77,11 @@ export const harIngenUavbrutteManuelleOpphoer = (behandlingliste: IBehandlingsam
 export const kunIverksatteBehandlinger = (behandlingliste: IBehandlingsammendrag[]): IBehandlingsammendrag[] =>
   behandlingliste.filter((behandling) => behandling.status === IBehandlingStatus.IVERKSATT)
 
+export const behandlingErIverksattEllerSamordnet = (behandlingStatus: IBehandlingStatus): boolean =>
+  behandlingStatus === IBehandlingStatus.IVERKSATT ||
+  behandlingStatus === IBehandlingStatus.SAMORDNET ||
+  behandlingStatus === IBehandlingStatus.TIL_SAMORDNING
+
 export const behandlingSkalSendeBrev = (
   behandlingType: IBehandlingsType,
   revurderingsaarsak: Revurderingaarsak | null
@@ -88,7 +93,8 @@ export const behandlingSkalSendeBrev = (
       return false
     case IBehandlingsType.REVURDERING:
       return !(
-        revurderingsaarsak === Revurderingaarsak.REGULERING || revurderingsaarsak === Revurderingaarsak.DOEDSFALL
+        //revurderingsaarsak === Revurderingaarsak.REGULERING || TODO EY-3232 Fjern utkommentering
+        (revurderingsaarsak === Revurderingaarsak.DOEDSFALL)
       )
   }
 }

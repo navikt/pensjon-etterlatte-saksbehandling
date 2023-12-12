@@ -5,14 +5,31 @@ import { loggError, loggInfo } from '~store/reducers/BehandlingReducer'
 
 const browser: any = Bowser.getParser(window.navigator.userAgent)
 
+const GYLDIG_FNR = (input: string | undefined) => /^\d{11}$/.test(input ?? '')
+
+function sanitizeUrlPossibleFnr(url?: string): string {
+  if (url) {
+    const splittedUrl = url.split('/')
+    return splittedUrl
+      .map((urlpart) => {
+        if (GYLDIG_FNR(urlpart)) {
+          return urlpart.substring(0, 5).concat('******')
+        }
+        return urlpart
+      })
+      .join('/')
+  }
+  return ''
+}
+
 const defaultContext = {
-  url: window.location.href,
+  url: sanitizeUrlPossibleFnr(window.location.href),
   userAgent: window.navigator.userAgent,
   userDeviceInfo: browser.parsedResult,
   appName: 'etterlatte-saksbehandling-ui-client',
 }
 
-const loggFunc = (data: any) => apiClient.post('/logg', data)
+const loggFunc = (data: any) => apiClient.post('/logg', data, true, true)
 
 export interface IStackLineNoColumnNo {
   readonly lineno: number

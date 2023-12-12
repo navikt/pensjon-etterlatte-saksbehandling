@@ -73,6 +73,7 @@ export const BarnepensjonSammendrag = ({ beregning }: Props) => {
                 <>
                   {soeker && (
                     <Barnepensjonberegningssammendrag
+                      overstyring={beregning.overstyrBeregning}
                       beregningsperiode={beregningsperiode}
                       soeker={soeker}
                       soesken={soesken}

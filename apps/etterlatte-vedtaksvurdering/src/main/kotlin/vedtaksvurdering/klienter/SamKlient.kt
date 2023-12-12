@@ -2,7 +2,6 @@ package no.nav.etterlatte.vedtaksvurdering.klienter
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.typesafe.config.Config
-import io.getunleash.UnleashContext
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
@@ -11,8 +10,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -37,7 +34,6 @@ interface SamKlient {
 class SamKlientImpl(
     config: Config,
     private val httpClient: HttpClient,
-    private val featureToggleService: FeatureToggleService,
 ) : SamKlient {
     private val logger = LoggerFactory.getLogger(SamKlient::class.java)
 
@@ -48,18 +44,6 @@ class SamKlientImpl(
         etterbetaling: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
-        if (!featureToggleService.isEnabled(
-                toggleId = SamordneVedtakFeatureToggle.SamordneVedtakMedSamToggle,
-                defaultValue = false,
-                context =
-                    UnleashContext.builder()
-                        .userId(brukerTokenInfo.ident())
-                        .build(),
-            )
-        ) {
-            return false
-        }
-
         try {
             val response =
                 httpClient.post("$resourceUrl/api/vedtak/samordne") {
@@ -120,10 +104,3 @@ class SamordneVedtakBehandlingUgyldigForespoerselException(override val message:
 
 class SamordneVedtakGenerellException(override val message: String, override val cause: Throwable) :
     Exception(message, cause)
-
-enum class SamordneVedtakFeatureToggle(private val key: String) : FeatureToggle {
-    SamordneVedtakMedSamToggle("pensjon-etterlatte.samordne-vedtak-med-sam"),
-    ;
-
-    override fun key() = key
-}

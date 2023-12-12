@@ -4,7 +4,6 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-behandling-model"))
@@ -18,6 +17,7 @@ dependencies {
     implementation(libs.ktor2.clientauth)
     implementation(libs.ktor2.clientjackson)
     implementation(libs.ktor2.clientcontentnegotiation)
+    implementation(libs.ktor2.jackson)
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.kotlinx.coroutinescore)

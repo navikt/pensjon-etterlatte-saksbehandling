@@ -1,4 +1,4 @@
-import { IUtenlandstilknytning } from '~shared/types/IDetaljertBehandling'
+import { IUtlandstilknytning } from '~shared/types/IDetaljertBehandling'
 
 export interface ISak {
   id: number
@@ -7,12 +7,12 @@ export interface ISak {
   enhet: string
 }
 
-export interface ISakMedUtenlandstilknytning {
+export interface ISakMedUtlandstilknytning {
   id: number
   ident: string
   sakType: SakType
   enhet: string
-  utenlandstilknytning?: IUtenlandstilknytning
+  utlandstilknytning?: IUtlandstilknytning
 }
 
 export enum SakType {

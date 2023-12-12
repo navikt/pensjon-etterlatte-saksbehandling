@@ -2,8 +2,6 @@ package no.nav.etterlatte.migrering.verifisering
 
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.samleExceptions
-import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
@@ -14,15 +12,16 @@ import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.Month
 
 internal class Verifiserer(
-    private val pdlKlient: PDLKlient,
     private val repository: PesysRepository,
-    private val featureToggleService: FeatureToggleService,
     private val gjenlevendeForelderPatcher: GjenlevendeForelderPatcher,
     private val utenlandstilknytningsjekker: Utenlandstilknytningsjekker,
+    private val personHenter: PersonHenter,
+    private val featureToggleService: FeatureToggleService,
 ) {
-    private val sikkerlogg = sikkerlogger()
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun verifiserRequest(request: MigreringRequest): MigreringRequest {
@@ -32,25 +31,18 @@ internal class Verifiserer(
             feil.add(PDLException(feilen).also { it.addSuppressed(feilen) })
         }
         patchedRequest.onSuccess {
-            if (request.gjenlevendeForelder == null) {
-                feil.add(GjenlevendeForelderMangler)
-            }
             if (request.enhet.nr == "2103") {
                 feil.add(StrengtFortrolig)
             }
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
-        }
-
-        val utenlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request)
-        if (utenlandstilknytningType == null) {
-            feil.add(ManglerUtenlandstilknytningtype)
+            feil.addAll(sjekkAtSoekerHarRelevantVerge(it))
         }
 
         if (feil.isNotEmpty()) {
             haandterFeil(request, feil)
         }
         return patchedRequest.getOrThrow().copy(
-            utenlandstilknytningType = utenlandstilknytningType,
+            utlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request),
         )
     }
 
@@ -79,19 +71,17 @@ internal class Verifiserer(
 
         return personer
             .map {
-                val person = hentPerson(it.first, it.second)
+                val person = personHenter.hentPerson(it.first, it.second)
 
                 if (it.first == PersonRolle.BARN) {
-                    person.getOrNull()?.let { pdlPerson ->
-                        pdlPerson.vergemaalEllerFremtidsfullmakt?.let { vergemaal ->
-                            if (vergemaal.isNotEmpty()) {
-                                logger.warn("Barn har vergemaal eller fremtidsfullmakt, kan ikke migrere")
-                                return listOf(BarnetHarVerge)
-                            }
-                        }
+                    val foedselsdato: LocalDate =
+                        person.getOrNull()?.foedselsdato?.verdi
+                            ?: request.soeker.getBirthDate()
+                    if (foedselsdato.isBefore(LocalDate.of(2006, Month.JANUARY, 1))) {
+                        logger.warn("Søker er over 18 år")
+                        return listOf(SoekerErOver18)
                     }
                 }
-
                 person
             }
             .filter { it.isFailure }
@@ -99,21 +89,22 @@ internal class Verifiserer(
             .filterIsInstance<Verifiseringsfeil>()
     }
 
-    private fun hentPerson(
-        rolle: PersonRolle,
-        folkeregisteridentifikator: Folkeregisteridentifikator,
-    ): Result<PersonDTO?> =
-        try {
-            Result.success(pdlKlient.hentPerson(rolle, folkeregisteridentifikator))
-        } catch (e: Exception) {
-            sikkerlogg.warn("Fant ikke person $folkeregisteridentifikator med rolle $rolle i PDL", e)
-            if (featureToggleService.isEnabled(MigreringFeatureToggle.VerifiserFoerMigrering, true)) {
-                Result.failure(FinsIkkeIPDL(rolle, folkeregisteridentifikator))
-            } else {
-                logger.warn("Har skrudd av at vi feiler migreringa hvis verifisering feiler. Fortsetter.")
-                Result.success(null)
+    private fun sjekkAtSoekerHarRelevantVerge(request: MigreringRequest): List<Verifiseringsfeil> {
+        val person =
+            personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()
+                ?: return listOf(FinsIkkeIPDL(PersonRolle.BARN, request.soeker))
+
+        if (!featureToggleService.isEnabled(MigreringFeatureToggle.MigrerNaarSoekerHarVerge, false)) {
+            if (person.vergemaalEllerFremtidsfullmakt?.isNotEmpty() == true) {
+                return listOf(BarnetHarVergemaal)
             }
         }
+
+        if ((person.vergemaalEllerFremtidsfullmakt?.size ?: 0) > 1) {
+            return listOf(BarnetHarFlereVerger)
+        }
+        return emptyList()
+    }
 }
 
 sealed class Verifiseringsfeil : Exception()
@@ -123,14 +114,14 @@ data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikat
         get() = toString()
 }
 
-object GjenlevendeForelderMangler : Verifiseringsfeil() {
+object BarnetHarFlereVerger : Verifiseringsfeil() {
     override val message: String
-        get() = "Gjenlevende forelder er null i det vi får fra Pesys"
+        get() = "Barnet har flere verger"
 }
 
-object BarnetHarVerge : Verifiseringsfeil() {
+object BarnetHarVergemaal : Verifiseringsfeil() {
     override val message: String
-        get() = "Barn har vergemaal eller fremtidsfullmakt, kan ikke migrere"
+        get() = "Barn har vergemål eller framtidsfullmakt, støtte for det er deaktivert"
 }
 
 object StrengtFortrolig : Verifiseringsfeil() {
@@ -143,7 +134,7 @@ data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
         get() = kilde.message
 }
 
-object ManglerUtenlandstilknytningtype : Verifiseringsfeil() {
+object SoekerErOver18 : Verifiseringsfeil() {
     override val message: String
-        get() = "Vi klarte ikke å hente ut utenlandstilknytningstype automatisk, det trenger vi for brevet"
+        get() = "Skal ikke per nå migrere søker der søker er over 18"
 }

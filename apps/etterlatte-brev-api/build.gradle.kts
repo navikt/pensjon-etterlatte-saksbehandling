@@ -12,8 +12,6 @@ dependencies {
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-trygdetid-model"))
-    implementation(project(":libs:ktor2client-onbehalfof"))
-    implementation(project(":libs:ktor2client-auth-clientcredentials"))
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-tilbakekreving-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
@@ -47,6 +45,7 @@ dependencies {
 
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.ktor2.clientmock)
+    testImplementation(libs.ktor2.okhttp)
     testImplementation(libs.ktor2.servertests)
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.navfelles.mockoauth2server)

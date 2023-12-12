@@ -4,8 +4,10 @@ import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.rapidsandrivers.OmregningEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.FINN_LOEPENDE_YTELSER
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.OMREGNINGSHENDELSE
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -55,6 +57,8 @@ internal class LoependeYtelserforespoerselRiver(
         val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
         respons.takeIf { it.erLoepende }?.let {
             packet.eventName = OMREGNINGSHENDELSE
+            packet[OmregningEvents.OMREGNING_NYE_REGLER] = OmregningEvents.OMREGNING_NYE_REGLER
+            packet[OmregningEvents.OMREGNING_NYE_REGLER_KJORING] = MigreringKjoringVariant.FULL_KJORING
             packet[HENDELSE_DATA_KEY] =
                 Omregningshendelse(
                     sakId = sakId,

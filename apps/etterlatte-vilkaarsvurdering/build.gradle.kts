@@ -10,7 +10,6 @@ repositories {
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
-    implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-behandling-model"))
     implementation(project(":libs:etterlatte-database"))

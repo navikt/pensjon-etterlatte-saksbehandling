@@ -138,7 +138,7 @@ data class VergemaalEllerFremtidsfullmakt(
 data class VergeEllerFullmektig(
     val motpartsPersonident: Folkeregisteridentifikator?,
     val navn: String?,
-    val omfang: String?,
+    val tjenesteomraade: String?,
     val omfangetErInnenPersonligOmraade: Boolean?,
 )
 
@@ -203,9 +203,23 @@ data class ForelderVerge(val navn: String) : Verge {
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class BrevMottaker(
     val navn: String?,
-    val foedselsnummer: Foedselsnummer?,
+    val foedselsnummer: MottakerFoedselsnummer?,
     val adresse: MottakerAdresse,
+    val adresseTypeIKilde: String? = null,
 )
+
+/**
+ * Denne pakker inn fødselsnummer i {value: "<fnr>"}, fordi det skal matche responsen fra brev-api...
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class MottakerFoedselsnummer(val value: String) {
+    /**
+     * Skal ALLTID returnere anonymisert fødselsnummer.
+     *
+     * Bruk [value] ved behov for komplett fødselsnummer.
+     */
+    override fun toString(): String = this.value.replaceRange(6 until 11, "*****")
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class MottakerAdresse(
@@ -241,10 +255,25 @@ enum class AdressebeskyttelseGradering {
 fun List<AdressebeskyttelseGradering?>.hentPrioritertGradering() = this.filterNotNull().minOrNull() ?: AdressebeskyttelseGradering.UGRADERT
 
 fun hentRelevantVerge(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): VergemaalEllerFremtidsfullmakt? {
-    return vergeListe?.firstOrNull {
-        it.vergeEllerFullmektig.omfang in alleVergeOmfangMedOekonomiskeInteresser
-    }
+    val oekonomisk =
+        vergeListe?.firstOrNull {
+            it.vergeEllerFullmektig.tjenesteomraade in alleVergeOmfangMedOekonomiskeInteresser
+        }
+    return oekonomisk ?: vergeListe?.firstOrNull()
 }
+
+fun flereVergerMedOekonomiskInteresse(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): Boolean {
+    val verger =
+        vergeListe?.filter {
+            it.vergeEllerFullmektig.tjenesteomraade in alleVergeOmfangMedOekonomiskeInteresser
+        } ?: emptyList()
+    return verger.size > 1
+}
+
+fun finnesVergeMedUkjentOmfang(vergeListe: List<VergemaalEllerFremtidsfullmakt>?) =
+    vergeListe.orEmpty().any {
+        it.vergeEllerFullmektig.tjenesteomraade !in alleKjenteVergeOmfang
+    }
 
 private val alleVergeOmfangMedOekonomiskeInteresser =
     listOf(
@@ -252,3 +281,6 @@ private val alleVergeOmfangMedOekonomiskeInteresser =
         "personligeOgOekonomiskeInteresser",
         "oekonomiskeInteresser",
     )
+
+private val alleKjenteVergeOmfang =
+    alleVergeOmfangMedOekonomiskeInteresser + listOf("personligeInteresser")

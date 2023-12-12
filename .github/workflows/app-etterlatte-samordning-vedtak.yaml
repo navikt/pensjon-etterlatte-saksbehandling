@@ -15,24 +15,24 @@ on:
     branches:
       - main
     paths:
-      - apps/etterlatte-samordning-vedtak/**
+      - apps/etterlatte-samordning-vedtak/src/**
+      - apps/etterlatte-samordning-vedtak/*.kts
+      - apps/etterlatte-samordning-vedtak/.nais/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**
-      - libs/ktor2client-auth-clientcredentials/**
-      - libs/ktor2client-onbehalfof/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
       - main
     paths:
-      - apps/etterlatte-samordning-vedtak/**
+      - apps/etterlatte-samordning-vedtak/src/**
+      - apps/etterlatte-samordning-vedtak/*.kts
+      - apps/etterlatte-samordning-vedtak/.nais/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**
-      - libs/ktor2client-auth-clientcredentials/**
-      - libs/ktor2client-onbehalfof/**
       - gradle/libs.versions.toml
 
 jobs:

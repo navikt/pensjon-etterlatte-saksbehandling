@@ -17,7 +17,6 @@ on:
     paths:
       - apps/etterlatte-statistikk/**
       - libs/saksbehandling-common/**
-      - libs/ktor2client-auth-clientcredentials/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**
@@ -30,7 +29,6 @@ on:
     paths:
       - apps/etterlatte-statistikk/**
       - libs/saksbehandling-common/**
-      - libs/ktor2client-auth-clientcredentials/**
       - libs/etterlatte-behandling-model/**
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-database/**

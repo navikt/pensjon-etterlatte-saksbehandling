@@ -6,7 +6,6 @@ import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/Beh
 import { useEffect, useState } from 'react'
 import { lagreBeregningsGrunnlag, opprettEllerEndreBeregning } from '~shared/api/beregning'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
-import { Opphoersgrunn, OVERSETTELSER_OPPHOERSGRUNNER } from '~components/person/ManueltOpphoerModal'
 import { hentManueltOpphoerDetaljer } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -25,7 +24,7 @@ import { mapApiResult } from '~shared/api/apiUtils'
 export interface ManueltOpphoerDetaljer {
   id: string
   virkningstidspunkt?: Virkningstidspunkt
-  opphoerAarsaker: Opphoersgrunn[]
+  opphoerAarsaker: string[]
   fritekstAarsak?: string
   andreBehandlinger: IBehandlingsammendrag[]
 }
@@ -118,7 +117,7 @@ export const ManueltOpphoerOversikt = (props: { behandling: IBehandlingReducer }
                 </Heading>
                 <OppsummeringListe>
                   {manueltOpphoerDetaljer.opphoerAarsaker.map((opphoersgrunn) => (
-                    <li key={opphoersgrunn}>{OVERSETTELSER_OPPHOERSGRUNNER[opphoersgrunn]}</li>
+                    <li key={opphoersgrunn}>{opphoersgrunn}</li>
                   ))}
                   {manueltOpphoerDetaljer.fritekstAarsak?.length ? (
                     <li>Annet: {manueltOpphoerDetaljer.fritekstAarsak}</li>

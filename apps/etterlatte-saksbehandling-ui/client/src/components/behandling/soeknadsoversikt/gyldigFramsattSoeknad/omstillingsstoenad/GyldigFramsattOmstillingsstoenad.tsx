@@ -12,6 +12,7 @@ import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/u
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { StatusIconProps } from '~shared/icons/statusIcon'
 import { Personopplysning } from '~shared/types/grunnlag'
+import { Verger } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/Verger'
 
 export const GyldigFramsattOmstillingsstoenad = ({
   behandling,
@@ -51,6 +52,7 @@ export const GyldigFramsattOmstillingsstoenad = ({
           <InfoWrapper>
             <Info tekst={navn} undertekst={undertekst} label="Innsender" />
           </InfoWrapper>
+          <Verger behandlingId={behandling.id} sakId={behandling.sakId} />
         </InfobokserWrapper>
       </div>
       <VurderingsContainerWrapper>

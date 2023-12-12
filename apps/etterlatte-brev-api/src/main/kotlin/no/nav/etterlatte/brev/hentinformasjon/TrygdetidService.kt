@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.hentinformasjon
 
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
+import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
@@ -32,7 +33,7 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
         // lagt opp til annet enn en eventuell redigering av fritekst i trygdetidsvedlegget.
         // det vil uansett bli riktig for alle saker der vi kun benytter en trygdetid, som er overveiende flesteparten
         val foersteBeregningsperiode = beregning.beregningsperioder.minBy { it.datoFOM }
-        val anvendtTrygdetid = foersteBeregningsperiode.trygdetid
+        val (anvendtTrygdetid, prorataBroek) = hentBenyttetTrygdetidOgProratabroek(foersteBeregningsperiode)
 
         val trygdetidgrunnlagForAnvendtTrygdetid =
             trygdetiderIBehandling.find { it.ident == foersteBeregningsperiode.trygdetidForIdent }
@@ -49,6 +50,7 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
             // vi har kommet frem til trygdetiden
             return Trygdetid(
                 aarTrygdetid = anvendtTrygdetid,
+                prorataBroek = prorataBroek,
                 maanederTrygdetid = 0,
                 perioder = listOf(),
                 overstyrt = true,
@@ -56,11 +58,16 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
         }
 
         val trygdetidsperioder =
-            finnTrygdetidsperioderForTabell(trygdetidgrunnlagForAnvendtTrygdetid.trygdetidGrunnlag, anvendtTrygdetid)
+            finnTrygdetidsperioderForTabell(
+                trygdetidgrunnlagForAnvendtTrygdetid.trygdetidGrunnlag,
+                anvendtTrygdetid,
+                prorataBroek,
+            )
 
         return Trygdetid(
             aarTrygdetid = anvendtTrygdetid,
             maanederTrygdetid = 0,
+            prorataBroek = prorataBroek,
             perioder = trygdetidsperioder,
             overstyrt = false,
         )
@@ -69,12 +76,14 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
     private fun finnTrygdetidsperioderForTabell(
         trygdetidsgrunnlag: List<TrygdetidGrunnlagDto>,
         anvendtTrygdetid: Int,
+        prorataBroek: IntBroek?,
     ): List<Trygdetidsperiode> {
         val harKunNorskeTrygdetidsperioder = trygdetidsgrunnlag.all { !it.prorata || it.bosted == "NOR" }
 
         // Vi skal kun vise tabell hvis den har relevante perioder for bruker, dvs. vi har med avtaleland utenfor Norge
-        // eller vi har anvendt trygdetid < 40. Hvis ikke (kun norske og anvendt trygdetid = 40) er det unødvendig
-        if (harKunNorskeTrygdetidsperioder && anvendtTrygdetid == 40) {
+        // eller vi har anvendt trygdetid < 40 og eller prorataberegning.
+        // Hvis ikke (kun norske og anvendt trygdetid = 40 uten prorata) er det unødvendig
+        if (harKunNorskeTrygdetidsperioder && anvendtTrygdetid == 40 && prorataBroek == null) {
             return emptyList()
         }
 

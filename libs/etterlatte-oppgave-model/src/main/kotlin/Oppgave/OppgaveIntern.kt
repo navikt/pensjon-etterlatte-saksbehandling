@@ -32,6 +32,10 @@ data class OppgaveIntern(
     override val fnr: String? = null,
     override val frist: Tidspunkt?,
 ) : Oppgave() {
+    fun manglerSaksbehandler(): Boolean {
+        return saksbehandler == null
+    }
+
     fun erAvsluttet(): Boolean {
         return Status.erAvsluttet(this.status)
     }

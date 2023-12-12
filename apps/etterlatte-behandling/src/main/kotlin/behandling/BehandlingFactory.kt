@@ -9,7 +9,6 @@ import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -44,7 +43,6 @@ class BehandlingFactory(
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
-    private val featureToggleService: FeatureToggleService,
     private val migreringKlient: MigreringKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -187,7 +185,6 @@ class BehandlingFactory(
     private fun Behandling?.sjekkEnhet() =
         this?.let { behandling ->
             listOf(behandling).filterBehandlingerForEnheter(
-                featureToggleService,
                 Kontekst.get().AppUser,
             ).firstOrNull()
         }

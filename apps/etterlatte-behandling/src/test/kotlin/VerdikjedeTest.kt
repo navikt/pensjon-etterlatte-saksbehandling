@@ -18,13 +18,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.FastsettVirkningstidspunktResponse
-import no.nav.etterlatte.behandling.ManueltOpphoerResponse
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klage.VurdereFormkravDto
 import no.nav.etterlatte.behandling.klage.VurdertUtfallDto
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerAarsak
-import no.nav.etterlatte.behandling.manueltopphoer.ManueltOpphoerRequest
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -45,7 +42,7 @@ import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.UtenlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
@@ -67,7 +64,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.sak.UtenlandstilknytningRequest
+import no.nav.etterlatte.sak.UtlandstilknytningRequest
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -207,13 +204,13 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
                 val behandling: DetaljertBehandling = it.body()
                 assertNotNull(behandling.id)
-                assertEquals("innsender", behandling.innsender)
+                assertEquals("soeker", behandling.soeker)
             }
 
-            client.post("/api/sak/${sak.id}/utenlandstilknytning") {
+            client.post("/api/behandling/$behandlingId/utlandstilknytning") {
                 addAuthToken(tokenSaksbehandler)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(UtenlandstilknytningRequest(UtenlandstilknytningType.NASJONAL, "begrunnelse"))
+                setBody(UtlandstilknytningRequest(UtlandstilknytningType.NASJONAL, "begrunnelse"))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -552,25 +549,6 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
-            client.post("/api/behandlinger/${sak.id}/manueltopphoer") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(
-                    ManueltOpphoerRequest(
-                        sakId = sak.id,
-                        opphoerAarsaker =
-                            listOf(
-                                ManueltOpphoerAarsak.SOESKEN_DOED,
-                                ManueltOpphoerAarsak.UTFLYTTING_FRA_NORGE,
-                            ),
-                        fritekstAarsak = "kunne ikke behandles manuelt",
-                    ),
-                )
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-                it.body<ManueltOpphoerResponse>()
-            }
-
             client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -596,7 +574,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
         kotlin.runCatching { sleep(3000) }
         assertNotNull(behandlingOpprettet)
         val rapid = applicationContext.rapid as TestProdusent
-        assertEquals(4, rapid.publiserteMeldinger.size)
+        assertEquals(3, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue(),
@@ -608,10 +586,6 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
         assertEquals(
             "BEHANDLING:AVBRUTT",
             objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue(),
-        )
-        assertEquals(
-            "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue(),
         )
         applicationContext.dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }

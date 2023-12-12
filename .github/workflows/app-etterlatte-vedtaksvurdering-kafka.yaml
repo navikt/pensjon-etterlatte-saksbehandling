@@ -23,7 +23,6 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
-      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
       - gradle/libs.versions.toml
   pull_request:
@@ -38,7 +37,6 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-utbetaling-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
-      - libs/ktor2client-auth-clientcredentials/**
       - libs/testdata/**
       - gradle/libs.versions.toml
 

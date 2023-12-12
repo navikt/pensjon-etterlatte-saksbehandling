@@ -15,7 +15,6 @@ dependencies {
     implementation(project(":libs:etterlatte-vilkaarsvurdering-model"))
     implementation(project(":libs:etterlatte-database"))
     implementation(project(":libs:etterlatte-trygdetid-model"))
-    implementation(project(":libs:ktor2client-onbehalfof"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     implementation(libs.ktor2.servercio)
@@ -27,4 +26,6 @@ dependencies {
     testImplementation(libs.test.kotest.assertionscore)
 
     testImplementation(project(":libs:testdata"))
+    testImplementation(libs.ktor2.jackson)
+    testImplementation(libs.ktor2.clientcontentnegotiation)
 }

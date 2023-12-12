@@ -30,7 +30,7 @@ spec:
     limits:
       memory: 256Mi
     requests:
-      cpu: 25m
+      cpu: 10m
       memory: 192Mi
   replicas:
     min: 1
@@ -78,6 +78,8 @@ spec:
         extra:
           - "NAVident"
           - "azp_name"
+  tokenx:
+    enabled: true
   env:
     - name: MASKINPORTEN_WELL_KNOWN_URL
       value: https://test.maskinporten.no/.well-known/oauth-authorization-server
@@ -119,6 +121,12 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: pensjon-selvbetjening-soknad-alder-backend
+          namespace: pensjonselvbetjening
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
         - application: ida
           namespace: traktor
           cluster: prod-fss
@@ -131,6 +139,9 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: tokenx-token-generator
+          namespace: aura
+          cluster: dev-gcp
     outbound:
       rules:
         - application: etterlatte-vedtaksvurdering

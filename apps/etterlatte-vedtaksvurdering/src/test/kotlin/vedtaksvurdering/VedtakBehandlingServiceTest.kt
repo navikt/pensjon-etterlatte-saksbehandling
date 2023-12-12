@@ -32,6 +32,9 @@ import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -55,6 +58,7 @@ import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlient
+import no.nav.etterlatte.vedtaksvurdering.klienter.TrygdetidKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -84,6 +88,7 @@ internal class VedtakBehandlingServiceTest {
     private val vilkaarsvurderingKlientMock = mockk<VilkaarsvurderingKlient>()
     private val behandlingKlientMock = mockk<BehandlingKlient>()
     private val samKlientMock = mockk<SamKlient>()
+    private val trygdetidKlientMock = mockk<TrygdetidKlient>()
 
     private lateinit var service: VedtakBehandlingService
 
@@ -91,6 +96,7 @@ internal class VedtakBehandlingServiceTest {
     fun beforeAll() {
         postgreSQLContainer.start()
 
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
         dataSource =
             DataSourceBuilder.createDataSource(
                 jdbcUrl = postgreSQLContainer.jdbcUrl,
@@ -106,6 +112,7 @@ internal class VedtakBehandlingServiceTest {
                 vilkaarsvurderingKlient = vilkaarsvurderingKlientMock,
                 behandlingKlient = behandlingKlientMock,
                 samKlient = samKlientMock,
+                trygdetidKlient = trygdetidKlientMock,
             )
     }
 
@@ -142,6 +149,7 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         val vedtak = runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }
 
@@ -171,6 +179,7 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         val vedtak =
             runBlocking {
@@ -229,6 +238,8 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, type = VedtakType.INNVILGELSE))
             repository.fattVedtak(
@@ -273,6 +284,8 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
+
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, type = VedtakType.OPPHOER))
             repository.fattVedtak(
@@ -315,6 +328,7 @@ internal class VedtakBehandlingServiceTest {
                 1L,
                 ENHET_1,
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         val oppdatertVedtak =
             runBlocking {
@@ -358,6 +372,7 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         val fattetVedtak =
             runBlocking {
@@ -518,6 +533,7 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         val attestertVedtak =
             runBlocking {
@@ -568,6 +584,7 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {
             repository.opprettVedtak(
@@ -628,6 +645,7 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         val attestering =
             runBlocking {
@@ -667,6 +685,7 @@ internal class VedtakBehandlingServiceTest {
                 behandlingId,
             )
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns mockk(relaxed = true)
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
@@ -719,6 +738,7 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
@@ -760,6 +780,7 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         val iverksattVedtak =
             runBlocking {
@@ -807,15 +828,15 @@ internal class VedtakBehandlingServiceTest {
             )
 
         coEvery { behandlingKlientMock.iverksett(any(), any(), any()) } throws RuntimeException("Behandling feilet")
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
-        val attestertVedtak =
-            runBlocking {
-                repository.opprettVedtak(
-                    opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId),
-                )
-                service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
-                service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
-            }
+        runBlocking {
+            repository.opprettVedtak(
+                opprettVedtak(virkningstidspunkt = virkningstidspunkt, behandlingId = behandlingId),
+            )
+            service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
+            service.attesterVedtak(behandlingId, KOMMENTAR, attestant)
+        }
 
         assertThrows<RuntimeException> {
             runBlocking {
@@ -870,6 +891,7 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
@@ -882,6 +904,7 @@ internal class VedtakBehandlingServiceTest {
             }
         }
     }
+    // TODO sjekk flere caser rundt opprett
 
     @Test
     fun `skal sette vedtak til underkjent`() {
@@ -910,6 +933,7 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(virkningstidspunkt, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         val underkjentVedtak =
             runBlocking {
@@ -919,6 +943,7 @@ internal class VedtakBehandlingServiceTest {
                 service.fattVedtak(behandlingId, gjeldendeSaksbehandler)
                 service.underkjennVedtak(behandlingId, attestant, underkjennVedtakBegrunnelse())
             }
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         underkjentVedtak shouldNotBe null
         underkjentVedtak.vedtak.status shouldBe VedtakStatus.RETURNERT
@@ -946,6 +971,7 @@ internal class VedtakBehandlingServiceTest {
                 behandlingId,
             )
         coEvery { beregningKlientMock.hentBeregningOgAvkorting(any(), any(), any()) } returns mockk(relaxed = true)
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
@@ -1000,6 +1026,7 @@ internal class VedtakBehandlingServiceTest {
                 beregning = mockBeregning(VIRKNINGSTIDSPUNKT_JAN_2023, behandlingId),
                 avkorting = mockAvkorting(),
             )
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId))
@@ -1049,6 +1076,8 @@ internal class VedtakBehandlingServiceTest {
                 1L,
                 ENHET_1,
             )
+
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
             val innhold = innhold as VedtakBehandlingInnhold
@@ -1113,6 +1142,7 @@ internal class VedtakBehandlingServiceTest {
         coEvery { behandlingKlientMock.harEtterbetaling(behandlingId, attestant) } returns false
         coEvery { samKlientMock.samordneVedtak(any(), false, attestant) } returns false
         coEvery { behandlingKlientMock.samordnet(any(), any(), any()) } returns true
+        coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         runBlocking {
             repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
@@ -1221,5 +1251,15 @@ internal class VedtakBehandlingServiceTest {
         val VIRKNINGSTIDSPUNKT_JAN_2023: YearMonth = YearMonth.of(2023, Month.JANUARY)
         val VIRKNINGSTIDSPUNKT_JAN_2024: YearMonth = YearMonth.of(2024, Month.JANUARY)
         const val KOMMENTAR = "Sendt oppgave til NØP"
+    }
+
+    private fun trygdetidDtoUtenDiff(): TrygdetidDto {
+        val oppdaterteGrunnlagsopplysninger = mockk<GrunnlagOpplysningerDto>()
+        val trygdetidDto =
+            mockk<TrygdetidDto> {
+                every { opplysningerDifferanse } returns
+                    OpplysningerDifferanse(false, oppdaterteGrunnlagsopplysninger)
+            }
+        return trygdetidDto
     }
 }

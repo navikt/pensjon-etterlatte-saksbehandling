@@ -3,8 +3,6 @@ package no.nav.etterlatte.vedtaksvurdering.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -24,6 +22,7 @@ import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlientImpl
+import no.nav.etterlatte.vedtaksvurdering.klienter.TrygdetidKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.samordningsvedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.tilbakekrevingvedtakRoute
@@ -51,7 +50,6 @@ class ApplicationBuilder {
             password = properties.dbPassword,
         )
 
-    private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val samKlient =
         SamKlientImpl(
@@ -63,6 +61,7 @@ class ApplicationBuilder {
                 azureAppScope = config.getString("samordnevedtak.azure.scope"),
             ),
         )
+    private val trygdetidKlient = TrygdetidKlient(config, httpClient())
     private val vedtaksvurderingService =
         VedtaksvurderingService(repository = VedtaksvurderingRepository.using(dataSource))
     private val vedtakBehandlingService =
@@ -72,6 +71,7 @@ class ApplicationBuilder {
             vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
             behandlingKlient = behandlingKlient,
             samKlient = samKlient,
+            trygdetidKlient = trygdetidKlient,
         )
     private val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)
     private val vedtakTilbakekrevingService =
@@ -118,10 +118,3 @@ class ApplicationBuilder {
         rapidsConnection.publish(message = melding, key = key.toString())
     }
 }
-
-private fun featureToggleProperties(config: Config) =
-    FeatureToggleProperties(
-        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-        host = config.getString("funksjonsbrytere.unleash.host"),
-        apiKey = config.getString("funksjonsbrytere.unleash.token"),
-    )

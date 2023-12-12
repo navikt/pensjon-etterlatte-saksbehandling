@@ -138,6 +138,7 @@ export interface ITrygdetid {
   trygdetidGrunnlag: ITrygdetidGrunnlag[]
   opplysninger: IGrunnlagOpplysninger
   overstyrtNorskPoengaar: number | undefined
+  opplysningerDifferanse: IOpplysningerDifferanse | undefined
 }
 
 export interface ITrygdetidOverstyring {
@@ -243,4 +244,9 @@ export interface ILand {
     term: string
     tekst: string
   }
+}
+
+export interface IOpplysningerDifferanse {
+  differanse: Boolean
+  oppdaterteGrunnlagsopplysninger: IGrunnlagOpplysninger
 }

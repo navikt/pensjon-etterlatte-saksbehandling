@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 
 data class VedtakData(
@@ -11,6 +12,7 @@ data class VedtakData(
     val vilkaarsvurderingDto: VilkaarsvurderingDto? = null,
     val beregningOgAvkorting: BeregningOgAvkorting? = null,
     val sak: Sak,
+    val trygdetid: TrygdetidDto?,
 )
 
 data class BeregningOgAvkorting(

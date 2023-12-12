@@ -15,11 +15,9 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -296,6 +294,7 @@ class TrygdetidServiceImpl(
             }
 
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+            println("behandling = ${behandling.behandlingType}, id= ${behandling.id}")
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
                     logger.info("Oppretter trygdetid for behandling $behandlingId")
@@ -526,7 +525,7 @@ class TrygdetidServiceImpl(
 
         // TODO EY-3232 Skal fjernes
         if (forrigeTrygdetid.isEmpty()) {
-            val avdoed = grunnlagKlient.hentGrunnlag(behandling.sak, behandling.id, brukerTokenInfo).hentAvdoede().firstOrNull()
+            val avdoed = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede().firstOrNull()
             val trygdetid =
                 Trygdetid(
                     sakId = behandling.sak,
@@ -882,22 +881,3 @@ class TrygdetidManglerBeregning : UgyldigForespoerselException(
     code = "TRYGDETID_MANGLER_BEREGNING",
     detail = "Oppgitt trygdetid er ikke gyldig fordi det mangler en beregning",
 )
-
-private fun <T> tilGrunnlagsopplysningFraPdl(
-    value: T,
-    opplysningstype: Opplysningstype,
-): Opplysning.Konstant<T> {
-    return Opplysning.Konstant.create(
-        Grunnlagsopplysning(
-            id = UUID.randomUUID(),
-            kilde =
-                Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null),
-            opplysningType = opplysningstype,
-            meta = objectMapper.createObjectNode(),
-            opplysning = value,
-            attestering = null,
-            fnr = null,
-            periode = null,
-        ),
-    )
-}

@@ -86,6 +86,10 @@ spec:
       value: https://sam.prod-fss-pub.nais.io
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://prod-fss.pensjonsamhandling.sam/.default
+    - name: ETTERLATTE_TRYGDETID_URL
+      value: http://etterlatte-trygdetid
+    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-trygdetid
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

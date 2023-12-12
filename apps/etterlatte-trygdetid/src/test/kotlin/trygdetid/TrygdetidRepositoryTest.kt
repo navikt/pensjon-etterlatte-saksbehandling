@@ -51,6 +51,10 @@ internal class TrygdetidRepositoryTest {
         cleanDatabase()
     }
 
+    private val pdlKilde: Grunnlagsopplysning.Pdl = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
+
+    private val regelKilde: Grunnlagsopplysning.RegelKilde = Grunnlagsopplysning.RegelKilde("regel", Tidspunkt.now(), "1")
+
     @Test
     fun `skal opprette trygdetid med opplysninger`() {
         val behandling = behandlingMock()
@@ -60,15 +64,7 @@ internal class TrygdetidRepositoryTest {
         val seksten = LocalDate.of(2016, 1, 1)
         val seksti = LocalDate.of(2066, 1, 1)
 
-        val pdl = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
-        val regel = Grunnlagsopplysning.RegelKilde("regel", Tidspunkt.now(), "1")
-        val opplysninger =
-            listOf(
-                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, pdl, foedselsdato),
-                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, pdl, doedsdato),
-                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLT_16, regel, seksten),
-                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLLER_66, regel, seksti),
-            )
+        val opplysninger = opplysningsgrunnlag(foedselsdato, doedsdato, seksten, seksti)
 
         val opprettetTrygdetid = trygdetid(behandling.id, behandling.sak, opplysninger = opplysninger)
 
@@ -81,23 +77,39 @@ internal class TrygdetidRepositoryTest {
         with(trygdetid.opplysninger[0]) {
             type shouldBe TrygdetidOpplysningType.FOEDSELSDATO
             opplysning shouldBe foedselsdato.toJsonNode()
-            kilde shouldBe pdl
+            kilde shouldBe pdlKilde
         }
         with(trygdetid.opplysninger[1]) {
             type shouldBe TrygdetidOpplysningType.DOEDSDATO
             opplysning shouldBe doedsdato.toJsonNode()
-            kilde shouldBe pdl
+            kilde shouldBe pdlKilde
         }
         with(trygdetid.opplysninger[2]) {
             type shouldBe TrygdetidOpplysningType.FYLT_16
             opplysning shouldBe seksten.toJsonNode()
-            kilde shouldBe regel
+            kilde shouldBe regelKilde
         }
         with(trygdetid.opplysninger[3]) {
             type shouldBe TrygdetidOpplysningType.FYLLER_66
             opplysning shouldBe seksti.toJsonNode()
-            kilde shouldBe regel
+            kilde shouldBe regelKilde
         }
+    }
+
+    private fun opplysningsgrunnlag(
+        foedselsdato: LocalDate,
+        doedsdato: LocalDate,
+        seksten: LocalDate,
+        seksti: LocalDate,
+    ): List<Opplysningsgrunnlag> {
+        val opplysninger =
+            listOf(
+                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, pdlKilde, foedselsdato),
+                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, pdlKilde, doedsdato),
+                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLT_16, regelKilde, seksten),
+                Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLLER_66, regelKilde, seksti),
+            )
+        return opplysninger
     }
 
     @Test

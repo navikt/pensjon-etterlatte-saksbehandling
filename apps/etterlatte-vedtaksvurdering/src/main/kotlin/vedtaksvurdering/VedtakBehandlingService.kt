@@ -32,6 +32,7 @@ import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.val
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlient
+import no.nav.etterlatte.vedtaksvurdering.klienter.TrygdetidKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlient
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -44,6 +45,7 @@ class VedtakBehandlingService(
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val behandlingKlient: BehandlingKlient,
     private val samKlient: SamKlient,
+    private val trygdetidKlient: TrygdetidKlient,
 ) {
     private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
 
@@ -66,8 +68,9 @@ class VedtakBehandlingService(
             verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         }
 
-        val (behandling, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
-        validerVersjon(vilkaarsvurdering, beregningOgAvkorting)
+        val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetid) =
+            hentDataForVedtak(behandlingId, brukerTokenInfo)
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetid)
 
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
@@ -92,8 +95,8 @@ class VedtakBehandlingService(
         verifiserGyldigBehandlingStatus(behandlingKlient.kanFatteVedtak(behandlingId, brukerTokenInfo), vedtak)
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
-        val (_, vilkaarsvurdering, beregningOgAvkorting) = hentDataForVedtak(behandlingId, brukerTokenInfo)
-        validerVersjon(vilkaarsvurdering, beregningOgAvkorting)
+        val (_, vilkaarsvurdering, beregningOgAvkorting, _, trygdetid) = hentDataForVedtak(behandlingId, brukerTokenInfo)
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetid)
 
         val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
@@ -553,13 +556,15 @@ class VedtakBehandlingService(
         return coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             val sak = behandlingKlient.hentSak(behandling.sak, brukerTokenInfo)
+            val trygdetid = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+
             when (behandling.behandlingType) {
-                BehandlingType.MANUELT_OPPHOER -> VedtakData(behandling, null, null, sak)
+                BehandlingType.MANUELT_OPPHOER -> VedtakData(behandling, null, null, sak, trygdetid)
 
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                     val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
                     when (vilkaarsvurdering?.resultat?.utfall) {
-                        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakData(behandling, vilkaarsvurdering, null, sak)
+                        VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakData(behandling, vilkaarsvurdering, null, sak, trygdetid)
                         VilkaarsvurderingUtfall.OPPFYLT -> {
                             val beregningOgAvkorting =
                                 beregningKlient.hentBeregningOgAvkorting(
@@ -567,7 +572,7 @@ class VedtakBehandlingService(
                                     brukerTokenInfo,
                                     sak.sakType,
                                 )
-                            VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak)
+                            VedtakData(behandling, vilkaarsvurdering, beregningOgAvkorting, sak, trygdetid)
                         }
 
                         null -> throw Exception("Mangler resultat av vilkårsvurdering for behandling $behandlingId")

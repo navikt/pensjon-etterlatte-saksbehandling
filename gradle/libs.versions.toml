@@ -74,7 +74,7 @@ etterlatte-common = { module = "no.nav.etterlatte:common", version = "2023.12.01
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.9" }
-logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.11" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.14" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "7.4" }
 
 metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.5" }

@@ -137,9 +137,9 @@ spec:
         - application: etterlatte-pdltjenester
         - application: etterlatte-grunnlag
         - application: skjermede-personer-pip
+          namespace: nom
         - application: etterlatte-migrering
         - application: etterlatte-vedtaksvurdering
-          namespace: nom
       external:
         - host: skjermede-personer-pip.intern.nav.no
         - host: unleash.nais.io

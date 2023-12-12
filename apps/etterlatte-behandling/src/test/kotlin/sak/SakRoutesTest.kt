@@ -133,6 +133,29 @@ internal class SakRoutesTest {
     }
 
     @Test
+    fun `Returnerer badrequest ved endring av enhet med ugyldig enhet`() {
+        coEvery {
+            sakService.oppdaterEnhetForSaker(any())
+            oppgaveService.oppdaterEnhetForRelaterteOppgaver(any())
+        } just runs
+        every { sakService.finnSak(any()) } returns null
+        every { oppgaveService.hentOppgaverForSak(any()) } returns emptyList()
+
+        withTestApplication { client ->
+            val response =
+                client.post("/api/sak/1/endre_enhet") {
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    contentType(ContentType.Application.Json)
+                    setBody(EnhetRequest(enhet = "4805"))
+                }
+            assertEquals(400, response.status.value)
+            verify(exactly = 0) { sakService.finnSak(any()) }
+            verify(exactly = 0) { oppgaveService.hentOppgaverForSak(any()) }
+            verify(exactly = 0) { oppgaveService.fjernSaksbehandler(any()) }
+        }
+    }
+
+    @Test
     fun `Returnerer bad request hvis sak ikke finnes ved endring av enhet`() {
         coEvery {
             sakService.oppdaterEnhetForSaker(any())

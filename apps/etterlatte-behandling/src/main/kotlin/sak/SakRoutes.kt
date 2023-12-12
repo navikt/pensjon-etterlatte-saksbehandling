@@ -148,6 +148,13 @@ internal fun Route.sakWebRoutes(
                 hentNavidentFraToken { navIdent ->
                     val enhetrequest = call.receive<EnhetRequest>()
                     try {
+                        if (enhetrequest.enhet !in gyldigeEnheter) {
+                            throw UgyldigForespoerselException(
+                                code = "ENHET IKKE GYLDIG",
+                                detail = "enhet ${enhetrequest.enhet} er ikke i listen over gyldige enheter",
+                            )
+                        }
+
                         inTransaction { sakService.finnSak(sakId) }
                             ?: throw SakIkkeFunnetException("Fant ingen sak å endre enhet på sakid: $sakId")
 
@@ -272,5 +279,15 @@ data class UtlandstilknytningRequest(
 data class EnhetRequest(
     val enhet: String,
 )
+
+val gyldigeEnheter =
+    listOf(
+        "4815",
+        "4808",
+        "4862",
+        "0001",
+        "4883",
+        "2103",
+    )
 
 data class FoersteVirkDto(val foersteIverksatteVirkISak: LocalDate, val sakId: Long)

@@ -76,7 +76,7 @@ export default function BehandleJournalfoeringOppgave() {
                     <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
                   </Route>
 
-                  <Route path="avslutt" element={<FerdigstillOppgave />} />
+                  <Route path="ferdigstill" element={<FerdigstillOppgave />} />
                 </Routes>
               )
             ) : (

@@ -54,7 +54,6 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
                   {statusbeskrivelse}
                 </option>
               ))}
-              <option>Velg Enhet</option>
             </Select>
             <ButtonGroup>
               <Button variant="secondary" onClick={closeAndReset}>

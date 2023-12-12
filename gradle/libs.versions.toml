@@ -33,7 +33,7 @@ jakartabind-impl = { module = "org.glassfish.jaxb:jaxb-runtime", version = "4.0.
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.5.1" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.11.2" }
 kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.3.1" }
-kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.3" }
+kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.4" }
 el-api = { module = "javax.el:javax.el-api", version = "3.0.0"}
 el-impl = { module = "org.glassfish:jakarta.el", version = "3.0.4" }
 
@@ -74,10 +74,10 @@ etterlatte-common = { module = "no.nav.etterlatte:common", version = "2023.12.01
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.9" }
-logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.11" }
+logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.14" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "7.4" }
 
-metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.11.5" }
+metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.12.1" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 
@@ -85,7 +85,7 @@ messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.
 
 mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.4.0" }
 
-navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2023041310341681374880.67ced5ad4dda" }
+navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2023120410321701682379.55cc1a24d803" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version = "1.78ffd1e" }
 navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon", version = "1.78ffd1e" }
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version = "1.78ffd1e" }
@@ -101,9 +101,9 @@ test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", vers
 test-mockk = { module = "io.mockk:mockk", version = "1.13.8" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
-test-wiremock = { module = "com.github.tomakehurst:wiremock-jre8", version = "3.0.1" }
+test-wiremock = { module = "org.wiremock:wiremock", version = "3.3.1" }
 
-unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.0.0" }
+unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.2.0" }
 
 [bundles]
 jackson = ["jackson-datatypejsr310", "jackson-datatypejdk8", "jackson-modulekotlin"]

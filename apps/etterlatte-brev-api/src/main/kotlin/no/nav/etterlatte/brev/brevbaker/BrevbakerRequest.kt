@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.pensjon.brevbaker.api.model.Felles
 
 data class BrevbakerRequest(
@@ -20,6 +21,11 @@ data class BrevbakerRequest(
             generellBrevData: GenerellBrevData,
             avsender: Avsender,
         ): BrevbakerRequest {
+            // Hvis under18 er true eller ukjent (null) sier vi at vi skal ha forelderverge i barnepensjonssaker
+            val skalHaForelderVerge =
+                generellBrevData.sak.sakType == SakType.BARNEPENSJON && generellBrevData.personerISak.soeker.under18 != false
+            val harVerge = generellBrevData.personerISak.verge != null || skalHaForelderVerge
+
             return BrevbakerRequest(
                 kode = brevKode,
                 letterData = letterData,
@@ -29,7 +35,7 @@ data class BrevbakerRequest(
                         soeker = generellBrevData.personerISak.soeker,
                         avsender = avsender,
                         vergeNavn =
-                            if (erMigrering(brevKode)) {
+                            if (erMigrering(brevKode) && harVerge) {
                                 generellBrevData.personerISak.soeker.formaterNavn() + " ved verge"
                             } else {
                                 generellBrevData.personerISak.verge?.navn()

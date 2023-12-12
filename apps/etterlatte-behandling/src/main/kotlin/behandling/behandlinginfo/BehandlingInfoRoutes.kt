@@ -11,6 +11,9 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.medBody
@@ -25,7 +28,7 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/info") {
         route("/brevutfall") {
             post {
-                medBody<BrevutfallOgEtterbetalingDto> { dto ->
+                medBody<OpprettBrevutfallOgEtterbetalingDto> { dto ->
                     val brevutfallOgEtterbetaling =
                         inTransaction {
                             logger.info("Lagrer brevutfall og etterbetaling for behandling $behandlingId")
@@ -40,7 +43,7 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
                             BrevutfallOgEtterbetalingDto(
                                 behandlingId,
                                 etterbetalingLagret?.toDto(),
-                                brevutfallLagret.toDto(),
+                                brevutfallLagret?.toDto(),
                             )
                         }
                     call.respond(brevutfallOgEtterbetaling)
@@ -80,7 +83,7 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
     }
 }
 
-private fun BrevutfallOgEtterbetalingDto.toBrevutfall(
+private fun OpprettBrevutfallOgEtterbetalingDto.toBrevutfall(
     behandlingId: UUID,
     bruker: BrukerTokenInfo,
 ): Brevutfall =
@@ -90,7 +93,7 @@ private fun BrevutfallOgEtterbetalingDto.toBrevutfall(
         kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
     )
 
-private fun BrevutfallOgEtterbetalingDto.toEtterbetaling(
+private fun OpprettBrevutfallOgEtterbetalingDto.toEtterbetaling(
     behandlingId: UUID,
     bruker: BrukerTokenInfo,
 ): Etterbetaling? =
@@ -105,14 +108,14 @@ private fun BrevutfallOgEtterbetalingDto.toEtterbetaling(
         null
     }
 
-private fun Brevutfall.toDto() =
+fun Brevutfall.toDto() =
     BrevutfallDto(
         behandlingId = behandlingId,
         aldersgruppe = aldersgruppe,
         kilde = kilde,
     )
 
-private fun Etterbetaling.toDto() =
+fun Etterbetaling.toDto() =
     EtterbetalingDto(
         behandlingId = behandlingId,
         datoFom = fom.atDay(1),
@@ -120,21 +123,22 @@ private fun Etterbetaling.toDto() =
         kilde = kilde,
     )
 
+data class OpprettBrevutfallOgEtterbetalingDto(
+    val etterbetaling: OpprettEtterbetalingDto?,
+    val brevutfall: OpprettBrevutfallDto?,
+)
+
 data class BrevutfallOgEtterbetalingDto(
     val behandlingId: UUID?,
     val etterbetaling: EtterbetalingDto?,
     val brevutfall: BrevutfallDto?,
 )
 
-data class BrevutfallDto(
-    val behandlingId: UUID?,
+data class OpprettBrevutfallDto(
     val aldersgruppe: Aldersgruppe?,
-    val kilde: Grunnlagsopplysning.Kilde?,
 )
 
-data class EtterbetalingDto(
-    val behandlingId: UUID?,
+data class OpprettEtterbetalingDto(
     val datoFom: LocalDate?,
     val datoTom: LocalDate?,
-    val kilde: Grunnlagsopplysning.Kilde?,
 )

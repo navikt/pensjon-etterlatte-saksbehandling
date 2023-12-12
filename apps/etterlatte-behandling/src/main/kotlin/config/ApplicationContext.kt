@@ -235,6 +235,7 @@ internal class ApplicationContext(
             kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
+            behandlingInfoDao = behandlingInfoDao,
         )
     val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService)
     val generellBehandlingService =

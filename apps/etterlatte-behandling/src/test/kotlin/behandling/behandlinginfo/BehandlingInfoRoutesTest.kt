@@ -21,7 +21,9 @@ import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -70,7 +72,7 @@ internal class BehandlingInfoRoutesTest {
     @Test
     fun `skal lagre brevutfall og etterbetaling`() {
         val behandlingId = UUID.randomUUID()
-        val dto = brevutfallOgEtterbetalingDto(behandlingId)
+        val dto = brevutfallOgEtterbetalingDto()
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
         every { behandlingInfoDao.lagreBrevutfall(any()) } returns brevutfall(behandlingId)
@@ -104,7 +106,7 @@ internal class BehandlingInfoRoutesTest {
     @Test
     fun `skal hente brevutfall`() {
         val behandlingId = UUID.randomUUID()
-        val dto = brevutfallOgEtterbetalingDto(behandlingId)
+        val dto = brevutfallOgEtterbetalingDto()
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
         every { behandlingInfoDao.hentBrevutfall(any()) } returns brevutfall(behandlingId)
@@ -132,7 +134,7 @@ internal class BehandlingInfoRoutesTest {
     @Test
     fun `skal hente etterbetaling`() {
         val behandlingId = UUID.randomUUID()
-        val dto = brevutfallOgEtterbetalingDto(behandlingId)
+        val dto = brevutfallOgEtterbetalingDto()
 
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
         every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling(behandlingId)
@@ -183,16 +185,13 @@ internal class BehandlingInfoRoutesTest {
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
 
-    private fun brevutfallOgEtterbetalingDto(behandlingId: UUID = UUID.randomUUID()) =
-        BrevutfallOgEtterbetalingDto(
-            behandlingId = UUID.randomUUID(),
-            brevutfall = BrevutfallDto(behandlingId, Aldersgruppe.UNDER_18, null),
+    private fun brevutfallOgEtterbetalingDto() =
+        OpprettBrevutfallOgEtterbetalingDto(
+            brevutfall = OpprettBrevutfallDto(Aldersgruppe.UNDER_18),
             etterbetaling =
-                EtterbetalingDto(
-                    behandlingId = behandlingId,
+                OpprettEtterbetalingDto(
                     datoFom = LocalDate.of(2023, 1, 1),
                     datoTom = LocalDate.of(2023, 2, 28),
-                    null,
                 ),
         )
 

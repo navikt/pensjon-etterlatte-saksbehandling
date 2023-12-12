@@ -4,6 +4,8 @@ import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
+import no.nav.etterlatte.behandling.behandlinginfo.BehandlingInfoDao
+import no.nav.etterlatte.behandling.behandlinginfo.toDto
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
@@ -19,7 +21,9 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -129,6 +133,7 @@ internal class BehandlingServiceImpl(
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagService,
+    private val behandlingInfoDao: BehandlingInfoDao,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -306,13 +311,15 @@ internal class BehandlingServiceImpl(
         val behandling: Behandling,
         val kommerBarnetTilgode: KommerBarnetTilgode?,
         val hendelserIBehandling: List<LagretHendelse>,
+        val etterbetaling: EtterbetalingDto?,
+        val brevutfall: BrevutfallDto?,
     )
 
     override suspend fun hentDetaljertBehandlingMedTilbehoer(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandlingDto {
-        val (behandling, kommerBarnetTilgode, hendelserIBehandling) =
+        val (behandling, kommerBarnetTilgode, hendelserIBehandling, etterbetaling, brevutfall) =
             inTransaction {
                 val behandling =
                     hentBehandling(behandlingId)
@@ -322,7 +329,10 @@ internal class BehandlingServiceImpl(
                 val kommerBarnetTilgode =
                     kommerBarnetTilGodeDao.hentKommerBarnetTilGode(behandlingId)
                         .takeIf { behandling.sak.sakType == SakType.BARNEPENSJON }
-                BehandlingMedData(behandling, kommerBarnetTilgode, hendelserIBehandling)
+                val etterbetaling = behandlingInfoDao.hentEtterbetaling(behandlingId)?.toDto()
+                val brevutfall = behandlingInfoDao.hentBrevutfall(behandlingId)?.toDto()
+
+                BehandlingMedData(behandling, kommerBarnetTilgode, hendelserIBehandling, etterbetaling, brevutfall)
             }
 
         val sakId = behandling.sak.id
@@ -346,6 +356,8 @@ internal class BehandlingServiceImpl(
             revurderingsaarsak = behandling.revurderingsaarsak(),
             revurderinginfo = behandling.revurderingInfo(),
             begrunnelse = behandling.begrunnelse(),
+            etterbetaling = etterbetaling,
+            brevutfall = brevutfall,
         )
     }
 

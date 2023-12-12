@@ -13,15 +13,23 @@ class BehandlingInfoService(
     fun lagreBrevutfall(
         behandlingId: UUID,
         brevutfall: Brevutfall,
-    ): Brevutfall {
+    ): Brevutfall? {
         val behandling =
             behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
 
         sjekkBehandlingKanEndres(behandling)
-        sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
 
-        return behandlingInfoDao.lagreBrevutfall(brevutfall)
+        return when (behandling.sak.sakType) {
+            SakType.BARNEPENSJON -> {
+                sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
+                behandlingInfoDao.lagreBrevutfall(brevutfall)
+            }
+
+            SakType.OMSTILLINGSSTOENAD -> {
+                null
+            }
+        }
     }
 
     fun hentBrevutfall(behandlingId: UUID): Brevutfall? {

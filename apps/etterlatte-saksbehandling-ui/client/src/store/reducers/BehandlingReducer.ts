@@ -10,7 +10,6 @@ import {
   IBehandlingStatus,
   IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
-  IEtterbetaling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
   IUtlandstilknytning,
@@ -34,7 +33,6 @@ export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidet
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
 export const oppdaterUtlandstilknytning = createAction<IUtlandstilknytning>('behandling/utlandstilknytning')
-export const oppdaterEtterbetaling = createAction<IEtterbetaling | null>('behandling/etterbetaling')
 export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagPostDto>('behandling/beregningsgrunnlag')
 export const oppdaterBeregingsGrunnlagOMS = createAction<BeregningsGrunnlagOMSPostDto>(
   'behandling/beregningsgrunnlagOMS'
@@ -82,9 +80,6 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterBoddEllerArbeidetUtlandet, (state, action) => {
     state.behandling!!.boddEllerArbeidetUtlandet = action.payload
-  })
-  builder.addCase(oppdaterEtterbetaling, (state, action) => {
-    state.behandling!!.etterbetaling = action.payload
   })
   builder.addCase(oppdaterBeregning, (state, action) => {
     state.behandling!!.beregning = action.payload

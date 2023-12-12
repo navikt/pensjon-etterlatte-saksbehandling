@@ -42,8 +42,8 @@ internal class InnvilgetHovedmalBrevDataTest {
                 avkortingsinfo = null,
                 etterbetalingDTO =
                     EtterbetalingDTO(
-                        fraDato = LocalDate.of(2022, Month.JANUARY, 1),
-                        tilDato = LocalDate.of(2022, Month.MARCH, 30),
+                        datoFom = LocalDate.of(2022, Month.JANUARY, 1),
+                        datoTom = LocalDate.of(2022, Month.MARCH, 30),
                     ),
                 trygdetid =
                     Trygdetid(

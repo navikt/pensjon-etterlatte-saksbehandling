@@ -41,7 +41,7 @@ class BehandlingInfoDao(private val connection: () -> Connection) {
             .run { executeQuery().singleOrNull { toBrevutfall() } }
     }
 
-    fun lagreEtterbetaling(etterbetaling: EtterbetalingNy): EtterbetalingNy {
+    fun lagreEtterbetaling(etterbetaling: Etterbetaling): Etterbetaling {
         return connection().prepareStatement(
             """
             INSERT INTO behandling_info(behandling_id, etterbetaling)
@@ -77,7 +77,7 @@ class BehandlingInfoDao(private val connection: () -> Connection) {
             .also { require(it == 1) }
     }
 
-    fun hentEtterbetaling(behandlingId: UUID): EtterbetalingNy? {
+    fun hentEtterbetaling(behandlingId: UUID): Etterbetaling? {
         return connection()
             .prepareStatement(
                 """
@@ -92,5 +92,5 @@ class BehandlingInfoDao(private val connection: () -> Connection) {
 
     private fun ResultSet.toBrevutfall(): Brevutfall = this.getString("brevutfall").let { objectMapper.readValue(it) }
 
-    private fun ResultSet.toEtterbetaling(): EtterbetalingNy = this.getString("etterbetaling").let { objectMapper.readValue(it) }
+    private fun ResultSet.toEtterbetaling(): Etterbetaling = this.getString("etterbetaling").let { objectMapper.readValue(it) }
 }

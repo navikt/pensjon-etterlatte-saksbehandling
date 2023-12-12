@@ -155,8 +155,8 @@ enum class BrevProsessType {
 }
 
 data class EtterbetalingDTO(
-    val fraDato: LocalDate,
-    val tilDato: LocalDate,
+    val datoFom: LocalDate,
+    val datoTom: LocalDate,
 )
 
 data class Beregningsinfo(
@@ -186,9 +186,9 @@ data class EtterbetalingBrev(
             null
         } else {
             EtterbetalingBrev(
-                fraDato = dto.fraDato,
-                tilDato = dto.tilDato,
-                etterbetalingsperioder = perioder.filter { YearMonth.from(it.datoFOM) <= YearMonth.from(dto.tilDato) },
+                fraDato = dto.datoFom,
+                tilDato = dto.datoTom,
+                etterbetalingsperioder = perioder.filter { YearMonth.from(it.datoFOM) <= YearMonth.from(dto.datoTom) },
             )
         }
     }

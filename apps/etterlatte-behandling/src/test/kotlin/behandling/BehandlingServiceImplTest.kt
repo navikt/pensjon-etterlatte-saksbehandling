@@ -99,7 +99,6 @@ class BehandlingServiceImplTest {
                 behandlingRequestLogger = mockk(),
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
-                etterbetalingDao = mockk(),
                 grunnlagService = mockk(),
             )
 
@@ -614,7 +613,6 @@ class BehandlingServiceImplTest {
                 behandlingRequestLogger = mockk(),
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
-                etterbetalingDao = mockk(),
                 grunnlagService = mockk(),
             )
 
@@ -659,7 +657,6 @@ class BehandlingServiceImplTest {
                 behandlingRequestLogger = mockk(),
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
-                etterbetalingDao = mockk(),
                 grunnlagService = mockk(),
             )
 
@@ -702,7 +699,6 @@ class BehandlingServiceImplTest {
                 mockk(),
                 kommerBarnetTilGodeDao = mockk(),
                 oppgaveService = mockk(),
-                etterbetalingDao = mockk(),
                 grunnlagService = mockk(),
             )
 
@@ -773,7 +769,6 @@ class BehandlingServiceImplTest {
             behandlingRequestLogger = mockk(),
             kommerBarnetTilGodeDao = mockk(),
             oppgaveService = oppgaveService,
-            etterbetalingDao = mockk(),
             grunnlagService = mockk(),
         )
 

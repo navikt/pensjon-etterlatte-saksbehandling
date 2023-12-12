@@ -30,8 +30,8 @@ class BehandlingInfoService(
 
     fun lagreEtterbetaling(
         behandlingId: UUID,
-        etterbetaling: EtterbetalingNy?,
-    ): EtterbetalingNy? {
+        etterbetaling: Etterbetaling?,
+    ): Etterbetaling? {
         val behandling =
             behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
@@ -49,7 +49,7 @@ class BehandlingInfoService(
         return behandlingInfoDao.lagreEtterbetaling(etterbetaling)
     }
 
-    fun hentEtterbetaling(behandlingId: UUID): EtterbetalingNy? {
+    fun hentEtterbetaling(behandlingId: UUID): Etterbetaling? {
         return behandlingInfoDao.hentEtterbetaling(behandlingId)
     }
 
@@ -59,7 +59,7 @@ class BehandlingInfoService(
 
     private fun sjekkEtterbetalingFoerVirkningstidspunkt(
         behandling: Behandling,
-        etterbetaling: EtterbetalingNy,
+        etterbetaling: Etterbetaling,
     ) {
         val virkningstidspunkt =
             behandling.virkningstidspunkt?.dato

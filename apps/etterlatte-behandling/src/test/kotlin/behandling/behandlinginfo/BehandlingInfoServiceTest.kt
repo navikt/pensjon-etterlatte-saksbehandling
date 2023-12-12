@@ -88,7 +88,7 @@ internal class BehandlingInfoServiceTest {
         behandlingId: UUID,
         fom: YearMonth = YearMonth.of(2023, 1),
         tom: YearMonth = YearMonth.of(2023, 2),
-    ) = EtterbetalingNy(
+    ) = Etterbetaling(
         behandlingId = behandlingId,
         fom = fom,
         tom = tom,

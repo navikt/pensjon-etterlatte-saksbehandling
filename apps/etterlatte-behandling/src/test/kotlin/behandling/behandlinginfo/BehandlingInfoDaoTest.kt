@@ -162,7 +162,7 @@ internal class BehandlingInfoDaoTest {
         )
 
     private fun etterbetaling(behandlingId: UUID) =
-        EtterbetalingNy(
+        Etterbetaling(
             behandlingId = behandlingId,
             fom = YearMonth.of(2023, 11),
             tom = YearMonth.of(2023, 12),

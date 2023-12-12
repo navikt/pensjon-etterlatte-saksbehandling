@@ -6,7 +6,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-data class EtterbetalingNy(
+data class Etterbetaling(
     val behandlingId: UUID,
     val fom: YearMonth,
     val tom: YearMonth,
@@ -27,11 +27,11 @@ data class EtterbetalingNy(
             datoFom: LocalDate?,
             datoTom: LocalDate?,
             kilde: Grunnlagsopplysning.Saksbehandler,
-        ): EtterbetalingNy {
+        ): Etterbetaling {
             if (datoFom == null || datoTom == null) {
                 throw EtterbetalingException.EtterbetalingManglerDato()
             }
-            return EtterbetalingNy(behandlingId, YearMonth.from(datoFom), YearMonth.from(datoTom), kilde)
+            return Etterbetaling(behandlingId, YearMonth.from(datoFom), YearMonth.from(datoTom), kilde)
         }
     }
 }

@@ -70,8 +70,7 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
             }
         }
 
-        // TODO rename når den gamle er fjernet
-        get("/etterbetaling-ny") {
+        get("/etterbetaling") {
             logger.info("Henter etterbetaling for behandling $behandlingId")
             when (val etterbetaling = inTransaction { service.hentEtterbetaling(behandlingId) }) {
                 null -> call.respond(HttpStatusCode.NoContent)
@@ -94,9 +93,9 @@ private fun BrevutfallOgEtterbetalingDto.toBrevutfall(
 private fun BrevutfallOgEtterbetalingDto.toEtterbetaling(
     behandlingId: UUID,
     bruker: BrukerTokenInfo,
-): EtterbetalingNy? =
+): Etterbetaling? =
     if (etterbetaling?.datoFom != null && etterbetaling.datoTom != null) {
-        EtterbetalingNy.fra(
+        Etterbetaling.fra(
             behandlingId = behandlingId,
             datoFom = etterbetaling.datoFom,
             datoTom = etterbetaling.datoTom,
@@ -113,7 +112,7 @@ private fun Brevutfall.toDto() =
         kilde = kilde,
     )
 
-private fun EtterbetalingNy.toDto() =
+private fun Etterbetaling.toDto() =
     EtterbetalingDto(
         behandlingId = behandlingId,
         datoFom = fom.atDay(1),

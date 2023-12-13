@@ -1,6 +1,8 @@
 package no.nav.etterlatte.migrering
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.TransactionalSession
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
@@ -153,14 +155,14 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
     }
 
     fun hentSakerMedVerge(tx: TransactionalSession? = null) =
-        tx.session<List<Pesyssak>> {
+        tx.session {
             hentListe(
                 """SELECT DISTINCT sak from pesyssak p
                 INNER JOIN feilkjoering f on p.id = f.pesys_id
                 AND p.status = in ('${Migreringsstatus.VERIFISERING_FEILA.name}', '${Migreringsstatus.HENTA.name}')
                 """.trimMargin(),
-            ) { row ->
-                row.string("sak").let { objectMapper.readValue(it) }
+            ) {
+                objectMapper.readValue<Pesyssak>(it.string("sak"))
             }
         }
 }

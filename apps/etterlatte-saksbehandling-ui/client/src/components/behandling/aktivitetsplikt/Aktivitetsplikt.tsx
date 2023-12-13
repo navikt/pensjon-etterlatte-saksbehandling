@@ -130,6 +130,7 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
           gått 9-10 måneder etter dødsfall. Om den etterlatte har andre ytelser eller annen grunn til videre oppfølging
           bør man vurdere andre frister.
         </BodyLong>
+        <BodyShort spacing>Huk av i sjekklista når oppfølgingsoppgave er opprettet.</BodyShort>
         <SpacingWrapper>
           <Button
             variant="primary"

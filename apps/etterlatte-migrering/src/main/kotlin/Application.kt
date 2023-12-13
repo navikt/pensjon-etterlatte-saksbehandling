@@ -15,6 +15,7 @@ import no.nav.etterlatte.migrering.PauseMigreringRiver
 import no.nav.etterlatte.migrering.start.MigrerSpesifikkSakRiver
 import no.nav.etterlatte.migrering.start.MigreringRiver
 import no.nav.etterlatte.migrering.start.StartMigrering
+import no.nav.etterlatte.migrering.verge.SjekkVergemaalJobb
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.getRapidEnv
 
@@ -55,6 +56,7 @@ internal class Server(private val context: ApplicationContext) {
                     LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)
                     FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)
                     StartMigrering(startMigreringRepository, rapidsConnection, featureToggleService)
+                    SjekkVergemaalJobb(pdlKlient, pesysRepository).also { it.sjekkMuligeProblemsaker() }
                 }.start()
         }
 }

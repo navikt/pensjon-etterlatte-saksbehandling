@@ -40,6 +40,7 @@ import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -59,6 +60,7 @@ import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForOmregningNyRegelRiver
 import no.nav.etterlatte.rivers.migrering.SUM
+import no.nav.etterlatte.rivers.migrering.UTLANDSTILKNYTNINGTYPE
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -225,18 +227,24 @@ class ApplicationBuilder {
         }
     }
 
-    private fun lagMelding(behandlingId: Pair<String, Int>) =
+    private fun lagMelding(behandlingId: Triple<String, Int, UtlandstilknytningType>) =
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
                 BEHANDLING_ID_KEY to behandlingId.first,
                 FIKS_BREV_MIGRERING to true,
                 SUM to behandlingId.second,
+                UTLANDSTILKNYTNINGTYPE to behandlingId.third.name,
             ),
         ).toJson()
 
     private val behandlingerAaLageBrevFor =
-        listOf<Pair<String, Int>>()
+        listOf<Triple<String, Int, UtlandstilknytningType>>(
+            Triple("91507535-dc73-4949-8cef-24ec093620f5", 1492, UtlandstilknytningType.BOSATT_UTLAND),
+            Triple("6f326d99-b46e-45ac-b8b3-a596c058be53", 3954, UtlandstilknytningType.NASJONAL),
+            Triple("5c95dcc2-daf2-49df-899e-efacac9c7b01", 3954, UtlandstilknytningType.NASJONAL),
+            Triple("8edec82c-e3ae-4db9-aa5f-f7763932b3db", 3954, UtlandstilknytningType.NASJONAL),
+        )
 
     private fun featureToggleProperties(config: Config) =
         FeatureToggleProperties(

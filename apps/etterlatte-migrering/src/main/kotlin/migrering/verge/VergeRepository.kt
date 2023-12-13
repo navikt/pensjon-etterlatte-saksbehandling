@@ -39,7 +39,7 @@ internal class VergeRepository(private val dataSource: DataSource) : Transaction
             )
             """.trimIndent(),
             mapOf(
-                "id" to UUID.randomUUID().toString(),
+                "id" to UUID.randomUUID(),
                 "pesys_id" to pesysId.id,
                 "sak" to sak,
                 "pensjon_fullmakt" to pensjonFullmakt,

@@ -54,6 +54,7 @@ internal val defaultSjekklisteItemsOMS =
         "Ikke søkt om, men kan ha rett på stønad til barnetilsyn - informert søker",
         "Mulighet for, og ikke søkt om (utvidet) barnetrygd. Oppgave til barnetrygd sendt",
         "Gjenlevende har gradert uføretrygd. Oppgave til NAY sendt.",
+        "Opprettet oppgave i Gosys for videre oppfølging av aktivitetsplikt",
         "Ikke registrert/feil kontonummer i saken - opprettet oppgave til NØP",
         "Refusjonskrav (annen NAV-ytelse) i etterbetaling av OMS - opprettet oppgave til NØP",
         "Samordning - løst opp pga ingen refusjon, se eget notat",

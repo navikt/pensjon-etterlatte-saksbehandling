@@ -159,7 +159,7 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
             hentListe(
                 """SELECT DISTINCT sak from pesyssak p
                 INNER JOIN feilkjoering f on p.id = f.pesys_id
-                AND p.status = in ('${Migreringsstatus.VERIFISERING_FEILA.name}', '${Migreringsstatus.HENTA.name}')
+                AND p.status in ('${Migreringsstatus.VERIFISERING_FEILA.name}', '${Migreringsstatus.HENTA.name}')
                 """.trimMargin(),
             ) {
                 objectMapper.readValue<Pesyssak>(it.string("sak"))

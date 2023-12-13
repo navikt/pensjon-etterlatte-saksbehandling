@@ -19,6 +19,9 @@ spec:
     path: /metrics
   secureLogs:
     enabled: true
+  requests:
+    cpu: 50m
+    memory: 320Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 4

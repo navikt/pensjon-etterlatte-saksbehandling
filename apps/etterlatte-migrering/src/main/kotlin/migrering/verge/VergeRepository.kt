@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
+import java.util.UUID
 import javax.sql.DataSource
 
 internal class VergeRepository(private val dataSource: DataSource) : Transactions<VergeRepository> {
@@ -23,12 +24,14 @@ internal class VergeRepository(private val dataSource: DataSource) : Transaction
         opprett(
             """
             INSERT INTO vergeadresse(
+            id,
             pesys_id,
             sak,
             pensjon_fullmakt,
             pdl
             )
             VALUES (
+            :id,
             :pesys_id,
             :sak::jsonb,
             :pensjon_fullmakt::jsonb,
@@ -36,6 +39,7 @@ internal class VergeRepository(private val dataSource: DataSource) : Transaction
             )
             """.trimIndent(),
             mapOf(
+                "id" to UUID.randomUUID().toString(),
                 "pesys_id" to pesysId.id,
                 "sak" to sak,
                 "pensjon_fullmakt" to pensjonFullmakt,

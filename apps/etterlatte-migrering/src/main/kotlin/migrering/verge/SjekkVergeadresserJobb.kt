@@ -22,7 +22,9 @@ internal class SjekkVergeadresserJobb(
     fun sjekkMuligeProblemsaker() {
         thread {
             Thread.sleep(60_000)
+            logger.info("Sjekker mulige problemsaker")
             val saker = muligeProblemsaker()
+            logger.info("Sjekker ${saker.size} saker")
             saker.forEach {
                 runBlocking {
                     sjekkVergemaal(it)
@@ -38,13 +40,13 @@ internal class SjekkVergeadresserJobb(
                 sjekkPDL(sak)
             } catch (e: Exception) {
                 logger.error("Feil i adressesjekken mot PDL", e)
-                "{}"
+                "".toJson()
             }
         vergeRepository.lagreVergeadresse(
-            pensjonFullmakt = vergesAdressePensjonFullmakt?.toJson() ?: "{}",
+            pensjonFullmakt = vergesAdressePensjonFullmakt?.toJson() ?: "".toJson(),
             sak = sak.toJson(),
             pesysId = PesysId(sak.id),
-            pdl = pdl,
+            pdl = pdl.toJson(),
         )
     }
 
@@ -56,10 +58,10 @@ internal class SjekkVergeadresserJobb(
             repository.lagreFeilkjoering(
                 request = sak.toJson(),
                 feilendeSteg = "EkstraVergesjekkAdresse",
-                feil = "Personen har ikke akkurat éitt vergemål i PDL, men ${vergemaalFraPDL.size}",
+                feil = "Personen har ikke akkurat éitt vergemål i PDL, men ${vergemaalFraPDL.size}".toJson(),
                 pesysId = PesysId(sak.id),
             )
-            return "{}"
+            return "".toJson()
         }
 
         val vergeFraPDL = vergemaalFraPDL.first().verdi.vergeEllerFullmektig.motpartsPersonident
@@ -67,10 +69,10 @@ internal class SjekkVergeadresserJobb(
             repository.lagreFeilkjoering(
                 request = sak.toJson(),
                 feilendeSteg = "EkstraVergesjekkAdresse",
-                feil = "Vergen fins ikke i PDL. Rart scenario",
+                feil = "Vergen fins ikke i PDL. Rart scenario".toJson(),
                 pesysId = PesysId(sak.id),
             )
-            return "{}"
+            return "".toJson()
         }
 
         val svarFraPDL = pdlKlient.hentPerson(PersonRolle.TILKNYTTET_BARN, vergeFraPDL)

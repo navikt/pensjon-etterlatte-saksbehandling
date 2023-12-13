@@ -7,6 +7,7 @@ import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { SakType } from '~shared/types/sak'
 import { RevurderingMedBegrunnelse } from '~shared/types/RevurderingInfo'
 import { Spraak } from '~shared/types/Brev'
+import { BrevutfallDto, EtterbetalingDto } from '~components/behandling/brevutfall/Brevutfall'
 
 export interface IDetaljertBehandling {
   id: string
@@ -24,6 +25,8 @@ export interface IDetaljertBehandling {
   revurderingsaarsak: Revurderingaarsak | null
   revurderinginfo: RevurderingMedBegrunnelse | null
   begrunnelse: string | null
+  etterbetaling: EtterbetalingDto | null
+  brevutfall: BrevutfallDto | null
 }
 
 export interface NyBehandlingRequest {

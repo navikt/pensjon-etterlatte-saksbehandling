@@ -10,13 +10,15 @@ import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallV
 import Spinner from '~shared/Spinner'
 import { MapApiResult } from '~shared/components/MapApiResult'
 import { SakType } from '~shared/types/sak'
+import { useAppDispatch } from '~store/Store'
+import { oppdaterBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 
-export interface BrevutfallOgEtterbetaling {
-  etterbetaling?: Etterbetaling | null
-  brevutfall: Brevutfall
+export interface BrevutfallOgEtterbetalingDto {
+  etterbetaling?: EtterbetalingDto | null
+  brevutfall: BrevutfallDto
 }
 
-export interface Brevutfall {
+export interface BrevutfallDto {
   aldersgruppe?: Aldersgruppe | null
 }
 
@@ -26,7 +28,7 @@ export enum Aldersgruppe {
   IKKE_VALGT = 'IKKE_VALGT',
 }
 
-export interface Etterbetaling {
+export interface EtterbetalingDto {
   datoFom?: string | null
   datoTom?: string | null
 }
@@ -48,16 +50,18 @@ const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {
 
 export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
   const behandling = props.behandling
+  const dispatch = useAppDispatch()
   const redigerbar = behandlingErRedigerbar(behandling.status)
-  const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
+  const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetalingDto>(
     initialBrevutfallOgEtterbetaling(behandling.sakType)
   )
   const [hentBrevutfallResult, hentBrevutfallRequest] = useApiCall(hentBrevutfallApi)
   const [visSkjema, setVisSkjema] = useState(redigerbar)
 
   const hentBrevutfall = () => {
-    hentBrevutfallRequest(behandling.id, (brevutfall: BrevutfallOgEtterbetaling | null) => {
+    hentBrevutfallRequest(behandling.id, (brevutfall: BrevutfallOgEtterbetalingDto | null) => {
       if (brevutfall) {
+        dispatch(oppdaterBrevutfallOgEtterbetaling(brevutfall))
         setBrevutfallOgEtterbetaling(brevutfall)
         setVisSkjema(false)
       } else {

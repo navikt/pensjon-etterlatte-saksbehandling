@@ -10,7 +10,7 @@ data class Etterbetaling(
     val behandlingId: UUID,
     val fom: YearMonth,
     val tom: YearMonth,
-    val kilde: Grunnlagsopplysning.Saksbehandler,
+    val kilde: Grunnlagsopplysning.Kilde,
 ) {
     init {
         if (fom > tom) {

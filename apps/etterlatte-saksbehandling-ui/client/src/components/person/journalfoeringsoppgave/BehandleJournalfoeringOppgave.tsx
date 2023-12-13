@@ -63,7 +63,11 @@ export default function BehandleJournalfoeringOppgave() {
           <Container>
             {!!journalpost && !!sakMedBehandlinger ? (
               kanEndreJournalpost(journalpost) ? (
-                <OppdaterJournalpost initialJournalpost={journalpost} sak={sakMedBehandlinger.sak} />
+                <OppdaterJournalpost
+                  initialJournalpost={journalpost}
+                  sak={sakMedBehandlinger.sak}
+                  oppgaveId={oppgaveId!!}
+                />
               ) : (
                 <Routes>
                   <Route

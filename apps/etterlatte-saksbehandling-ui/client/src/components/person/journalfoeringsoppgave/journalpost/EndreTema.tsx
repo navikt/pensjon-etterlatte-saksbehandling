@@ -7,6 +7,7 @@ import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import { Alert, UNSAFE_Combobox } from '@navikt/ds-react'
+import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 
 export const EndreTema = ({
   journalpost,
@@ -51,11 +52,18 @@ export const EndreTema = ({
           }}
         />
 
-        {!!valgtKode && valgtKode !== gammelKode && (
-          <Alert variant="info">
-            Nytt tema blir <strong>{valgtKode.term}</strong> (temakode <strong>{valgtKode.navn}</strong>)
-          </Alert>
-        )}
+        {!!valgtKode &&
+          valgtKode !== gammelKode &&
+          (temaTilhoererGjenny(journalpost) ? (
+            <Alert variant="info">
+              Nytt tema blir <strong>{valgtKode.term}</strong> (temakode <strong>{valgtKode.navn}</strong>)
+            </Alert>
+          ) : (
+            <Alert variant="warning">
+              OBS! Du har valgt tema <strong>{valgtKode.term}</strong> (temakode <strong>{valgtKode.navn}</strong>).
+              Dette temaet kan ikke behandles i Gjenny og oppgaven vil derfor bli avsluttet ved lagring av utkast.
+            </Alert>
+          ))}
       </FormWrapper>
     )
   )

@@ -4,6 +4,7 @@ import kotliquery.TransactionalSession
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hent
+import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
@@ -150,6 +151,18 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
             Pesyskopling(pesysId, it.uuid(Pesyskoplingtabell.BEHANDLING_ID))
         }
     }
+
+    fun hentSakerMedVerge(tx: TransactionalSession? = null) =
+        tx.session<List<Pesyssak>> {
+            hentListe(
+                """SELECT DISTINCT sak from pesyssak p
+                INNER JOIN feilkjoering f on p.id = f.pesys_id
+                AND p.status = in ('${Migreringsstatus.VERIFISERING_FEILA.name}', '${Migreringsstatus.HENTA.name}')
+                """.trimMargin(),
+            ) { row ->
+                row.string("sak").let { objectMapper.readValue(it) }
+            }
+        }
 }
 
 private object Pesyskoplingtabell {

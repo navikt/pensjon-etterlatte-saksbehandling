@@ -50,6 +50,9 @@ spec:
           - NAVident
   kafka:
     pool: nav-dev
+  requests:
+    cpu: 50m
+    memory: 320Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 2

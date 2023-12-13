@@ -12,10 +12,10 @@ import { behandlingErRedigerbar } from '../felles/utils'
 import { useFieldArray, useForm } from 'react-hook-form'
 import {
   FEIL_I_PERIODE,
-  PeriodisertBeregningsgrunnlag,
   feilIKomplettePerioderOverIntervall,
   mapListeFraDto,
   mapListeTilDto,
+  PeriodisertBeregningsgrunnlag,
 } from './PeriodisertBeregningsgrunnlag'
 import OverstyrBeregningTableWrapper from './OverstyrBeregningTableWrapper'
 import { useEffect, useState } from 'react'
@@ -44,6 +44,21 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+
+const stripWhitespace = (s: string): string => s.replace(/\s+/g, '')
+
+function fjernWhitespaceFraUtbetaltBeloep(
+  data: OverstyrBeregingsperiodeGrunnlagData
+): OverstyrBeregingsperiodeGrunnlagData {
+  return data.map(({ fom, tom, data }) => ({
+    fom,
+    tom,
+    data: {
+      ...data,
+      utbetaltBeloep: stripWhitespace(data.utbetaltBeloep),
+    },
+  }))
+}
 
 const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; overstyrBeregning: OverstyrBeregning }) => {
   const { behandling, overstyrBeregning } = props
@@ -93,14 +108,15 @@ const OverstyrBeregningGrunnlag = (props: { behandling: IBehandlingReducer; over
     return grunnlag.every((value) => feilIOverstyrBeregningperiode(value).length === 0)
   }
 
-  const validerOgLagre = (overstyrBeregningForm: OverstyrBeregingsperiodeGrunnlagData) => {
-    if (validerOverstyrBeregning(overstyrBeregningForm) && feil.length === 0) {
+  const validerOgLagre = (overstyrtBeregningForm: OverstyrBeregingsperiodeGrunnlagData) => {
+    const fiksetBeloep = fjernWhitespaceFraUtbetaltBeloep(overstyrtBeregningForm)
+    if (validerOverstyrBeregning(fiksetBeloep) && feil.length === 0) {
       setVisFeil(false)
       saveOverstyrBeregningGrunnlag(
         {
           behandlingId: behandling.id,
           grunnlag: {
-            perioder: mapListeTilDto(overstyrBeregningForm),
+            perioder: mapListeTilDto(fiksetBeloep),
           },
         },
         (result) => {

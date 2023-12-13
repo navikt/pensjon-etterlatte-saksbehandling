@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
@@ -169,7 +170,13 @@ internal fun Route.sakWebRoutes(
                             sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                             for (oppgaveIntern in oppgaveService.hentOppgaverForSak(sakId)) {
-                                if (oppgaveIntern.saksbehandler != null) oppgaveService.fjernSaksbehandler(oppgaveIntern.id)
+                                if (oppgaveIntern.saksbehandler != null &&
+                                    oppgaveIntern.status == Status.UNDER_BEHANDLING
+                                ) {
+                                    oppgaveService.fjernSaksbehandler(
+                                        oppgaveIntern.id,
+                                    )
+                                }
                             }
                         }
 

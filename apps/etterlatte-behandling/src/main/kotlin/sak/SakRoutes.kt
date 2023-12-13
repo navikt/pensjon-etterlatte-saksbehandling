@@ -190,6 +190,11 @@ internal fun Route.sakWebRoutes(
                 }
             }
 
+            get("flyktning") {
+                val flyktning = inTransaction { sakService.finnFlyktningForSak(sakId) }
+                call.respond(flyktning ?: HttpStatusCode.NoContent)
+            }
+
             get("/behandlinger/foerstevirk") {
                 logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
                 when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {

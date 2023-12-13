@@ -36,6 +36,8 @@ interface SakService {
 
     fun finnSak(id: Long): Sak?
 
+    fun finnFlyktningForSak(id: Long): Flyktning?
+
     fun markerSakerMedSkjerming(
         sakIder: List<Long>,
         skjermet: Boolean,
@@ -184,6 +186,8 @@ class SakServiceImpl(
     override fun finnSak(id: Long): Sak? {
         return dao.hentSak(id).sjekkEnhet()
     }
+
+    override fun finnFlyktningForSak(id: Long): Flyktning? = dao.hentSak(id).sjekkEnhet()?.let { dao.finnFlyktningForSak(id) }
 
     private fun List<Sak>.filterForEnheter() =
         this.filterSakerForEnheter(

@@ -1,5 +1,7 @@
 package no.nav.etterlatte.sak
 
+import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -86,6 +88,16 @@ class SakDao(private val connection: () -> Connection) {
         val statement = connection().prepareStatement("SELECT id, sakType, fnr, enhet from sak where id = ?")
         statement.setLong(1, id)
         return statement.executeQuery().singleOrNull { this.toSak() }
+    }
+
+    fun finnFlyktningForSak(id: Long): Flyktning? {
+        return with(connection()) {
+            val statement = prepareStatement("SELECT flyktning from sak where id = ?")
+            statement.setLong(1, id)
+            statement.executeQuery().singleOrNull {
+                objectMapper.readValue<Flyktning>(this.getString("flyktning"))
+            }
+        }
     }
 
     fun opprettSak(

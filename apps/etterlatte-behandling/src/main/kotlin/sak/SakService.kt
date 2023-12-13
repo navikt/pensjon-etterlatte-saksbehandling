@@ -187,7 +187,7 @@ class SakServiceImpl(
         return dao.hentSak(id).sjekkEnhet()
     }
 
-    override fun finnFlyktningForSak(id: Long): Flyktning? = dao.finnFlyktningForSak(id)
+    override fun finnFlyktningForSak(id: Long): Flyktning? = dao.hentSak(id).sjekkEnhet()?.let { dao.finnFlyktningForSak(id) }
 
     private fun List<Sak>.filterForEnheter() =
         this.filterSakerForEnheter(

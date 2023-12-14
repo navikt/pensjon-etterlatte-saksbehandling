@@ -29,16 +29,19 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class BrukerManglerAttestantRolleException(msg: String) : UgyldigForespoerselException(
-    code = "MANGLER_OPPGAVE_UNDER_BEHANDLING",
+    code = "BRUKER_ER_IKKE_ATTESTANT",
     detail = msg,
 )
 
 class ManglerOppgaveUnderBehandling(msg: String) : UgyldigForespoerselException(
-    code = "FOR_MANGE_OPPGAVER_UNDER_BEHANDLING",
+    code = "MANGLER_OPPGAVE_UNDER_BEHANDLING",
     detail = msg,
 )
 
-class ForMangeOppgaverUnderBehandling(msg: String) : Exception(msg)
+class ForMangeOppgaverUnderBehandling(msg: String) : UgyldigForespoerselException(
+    code = "FOR_MANGE_OPPGAVER_UNDER_BEHANDLING",
+    detail = msg,
+)
 
 class OppgaveService(
     private val oppgaveDao: OppgaveDaoMedEndringssporing,

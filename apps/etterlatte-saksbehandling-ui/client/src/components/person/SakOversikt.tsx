@@ -4,26 +4,32 @@ import { FlexRow, GridContainer } from '~shared/styled'
 import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 import { Alert, BodyShort, Heading, HelpText, HStack, Tag } from '@navikt/ds-react'
-import { formaterEnumTilLesbarString, formaterSakstype } from '~utils/formattering'
+import { formaterEnumTilLesbarString, formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE, OpprettKlage } from '~components/person/OpprettKlage'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { KlageListe } from '~components/person/KlageListe'
 import { tagColors } from '~shared/Tags'
 import { SakMedBehandlinger } from '~components/person/typer'
-import { mapApiResult, Result } from '~shared/api/apiUtils'
+import { isSuccess, mapApiResult, Result } from '~shared/api/apiUtils'
 import { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { EndreEnhet } from '~components/person/EndreEnhet'
 import { hentNavkontorForPerson } from '~shared/api/sak'
+import { hentFlyktningStatusForSak } from '~shared/api/sak'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
   const [hentNavkontorStatus, hentNavkontor] = useApiCall(hentNavkontorForPerson)
+  const [hentFlyktningStatus, hentFlyktning] = useApiCall(hentFlyktningStatusForSak)
 
   useEffect(() => {
     hentNavkontor(fnr)
-  }, [fnr])
+    if (isSuccess(sakStatus)) {
+      hentFlyktning(sakStatus.data.sak.id)
+    }
+  }, [fnr, sakStatus])
 
   return (
     <GridContainer>
@@ -53,6 +59,22 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
                   <OpprettKlage sakId={sakOgBehandlinger.sak.id} />
                 </FlexRow>
               </Heading>
+              {isSuccess(hentFlyktningStatus) && hentFlyktningStatus.data.erFlyktning && (
+                <>
+                  <FlexRow>
+                    <Alert variant="info">
+                      Saken er markert med flyktning i Pesys og første virkningstidspunkt var{' '}
+                      {formaterStringDato(hentFlyktningStatus.data.virkningstidspunkt)}
+                    </Alert>
+                  </FlexRow>
+                  <hr />
+                </>
+              )}
+              {isFailureHandler({
+                apiResult: hentFlyktningStatus,
+                errorMessage: 'Klarte ikke hente informasjon om flyktningstatus',
+              })}
+
               {mapApiResult(
                 hentNavkontorStatus,
                 <Spinner visible label="Laster navkontor ..." />,

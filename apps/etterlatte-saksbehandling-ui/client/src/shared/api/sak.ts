@@ -6,6 +6,11 @@ export interface Navkontor {
   navn: string
 }
 
+export interface Flyktning {
+  erFlyktning: boolean
+  virkningstidspunkt: string
+}
+
 export const hentNavkontorForPerson = async (fnr: string): Promise<ApiResponse<Navkontor>> => {
   return apiClient.post(`/personer/navkontor`, { foedselsnummer: fnr })
 }
@@ -16,6 +21,10 @@ export const hentSakMedBehandlnger = async (fnr: string): Promise<ApiResponse<Sa
 
 export const hentSak = async (sakId: number): Promise<ApiResponse<ISak>> => {
   return apiClient.get(`sak/${sakId}`)
+}
+
+export const hentFlyktningStatusForSak = async (sakId: number): Promise<ApiResponse<Flyktning>> => {
+  return apiClient.get(`sak/${sakId}/flyktning`)
 }
 
 export const hentSakForPerson = async (args: { fnr: string; type: SakType }): Promise<ApiResponse<ISak>> =>

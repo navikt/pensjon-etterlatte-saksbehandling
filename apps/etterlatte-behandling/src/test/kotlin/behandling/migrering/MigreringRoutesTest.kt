@@ -14,6 +14,7 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
@@ -93,6 +94,7 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
                 }.body<DetaljertBehandling>()
 
             Assertions.assertEquals(YearMonth.of(2024, 1), behandling.virkningstidspunkt!!.dato)
+            Assertions.assertEquals(Prosesstype.AUTOMATISK, behandling.prosesstype)
 
             client.get("/saker/${behandling.sak}") {
                 addAuthToken(tokenSaksbehandler)

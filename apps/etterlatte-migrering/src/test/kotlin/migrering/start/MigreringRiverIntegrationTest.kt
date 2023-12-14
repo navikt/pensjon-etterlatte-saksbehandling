@@ -125,6 +125,7 @@ internal class MigreringRiverIntegrationTest {
                                     },
                                     personHenter,
                                     featureToggleService,
+                                    grunnlagKlient = mockk(),
                                 ),
                             krrKlient =
                                 mockk<KrrKlient>().also {
@@ -216,6 +217,7 @@ internal class MigreringRiverIntegrationTest {
                                     },
                                     personHenter,
                                     featureToggleService,
+                                    grunnlagKlient = mockk(),
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -319,6 +321,7 @@ internal class MigreringRiverIntegrationTest {
                                     },
                                     personHenter,
                                     featureToggleService,
+                                    grunnlagKlient = mockk(),
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -435,6 +438,7 @@ internal class MigreringRiverIntegrationTest {
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                     personHenter,
                                     featureToggleService,
+                                    grunnlagKlient = mockk(),
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -502,6 +506,7 @@ internal class MigreringRiverIntegrationTest {
                                     mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
                                     personHenter,
                                     featureToggleService,
+                                    grunnlagKlient = mockk(),
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )

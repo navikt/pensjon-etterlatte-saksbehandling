@@ -112,21 +112,20 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   }
 
   const kanSendeTilAttestering = (): boolean => {
-    const kanSende =
-      behandling?.behandlingType !== IBehandlingsType.FØRSTEGANGSBEHANDLING ||
-      (behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-        sjekkliste !== null &&
-        sjekkliste.bekreftet)
-
-    if (!kanSende) {
-      const fant = valideringsfeil.find((e) => e === Valideringsfeilkoder.MAA_HUKES_AV)
-      if (!fant) {
-        dispatch(addValideringsfeil(Valideringsfeilkoder.MAA_HUKES_AV))
+    const erForestegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+    if (erForestegangsbehandling) {
+      const sjekklisteErBekreftet = sjekkliste !== null && sjekkliste.bekreftet
+      if (!sjekklisteErBekreftet) {
+        const fant = valideringsfeil.find((e) => e === Valideringsfeilkoder.MAA_HUKES_AV)
+        if (!fant) {
+          dispatch(addValideringsfeil(Valideringsfeilkoder.MAA_HUKES_AV))
+        }
+        dispatch(visSjekkliste())
       }
-      dispatch(visSjekkliste())
+      return sjekklisteErBekreftet
+    } else {
+      return true
     }
-
-    return kanSende
   }
 
   return (

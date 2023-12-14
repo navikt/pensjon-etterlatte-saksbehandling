@@ -12,6 +12,7 @@ import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.start.StartMigreringRepository
+import no.nav.etterlatte.migrering.verge.VergeRepository
 import no.nav.etterlatte.migrering.verifisering.GjenlevendeForelderPatcher
 import no.nav.etterlatte.migrering.verifisering.PDLKlient
 import no.nav.etterlatte.migrering.verifisering.PersonHenter
@@ -32,6 +33,7 @@ internal class ApplicationContext {
     val featureToggleService: FeatureToggleService =
         FeatureToggleService.initialiser(featureToggleProperties(ConfigFactory.load()))
     val pesysRepository = PesysRepository(dataSource)
+    val vergeRepository = VergeRepository(dataSource)
 
     val pdlKlient =
         PDLKlient(

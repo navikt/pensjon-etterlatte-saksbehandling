@@ -80,7 +80,7 @@ export default function AnnullerBehandling() {
           <BodyLong>
             {erFoerstegangsbehandling
               ? 'Behandlingen blir annullert og kan ikke tas videre i Gjenny. Du vil bli sendt til saksoversikten til bruker der behandlingen får status avbrutt.'
-              : 'Behandlingen blir avsluttet og kan opprettes på nytt.'}
+              : 'Denne behandlingen blir annullert og kan eventuelt opprettes på nytt.'}
           </BodyLong>
         </Modal.Body>
 

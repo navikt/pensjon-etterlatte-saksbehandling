@@ -84,6 +84,7 @@ enum class Revurderingaarsak(
     YRKESSKADE(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
+    OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, KunIDev, OpphoerUtenBrev),
     ;
 
     fun kanBrukesIMiljo(): Boolean =

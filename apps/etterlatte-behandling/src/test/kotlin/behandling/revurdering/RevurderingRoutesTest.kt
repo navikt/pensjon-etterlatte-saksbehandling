@@ -15,6 +15,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.revurdering.OpprettRevurderingRequest
+import no.nav.etterlatte.behandling.revurdering.RevurderingRoutesFeatureToggle
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -46,7 +47,9 @@ internal class RevurderingRoutesTest {
                 every { harTilgangTilSak(any(), any()) } returns true
             }
 
-        every { applicationContext.featureToggleService.isEnabled(any(), any()) } returns true
+        every {
+            applicationContext.featureToggleService.isEnabled(RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev, any())
+        } returns false
     }
 
     @AfterAll
@@ -167,7 +170,9 @@ internal class RevurderingRoutesTest {
 
     @Test
     fun `returnerer ikke revurderingsaarsak opphoer uten brev dersom feature toggle er av`() {
-        every { applicationContext.featureToggleService.isEnabled(any(), any()) } returns false
+        every {
+            applicationContext.featureToggleService.isEnabled(RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev, any())
+        } returns false
 
         testApplication {
             environment { config = hoconApplicationConfig }

@@ -14,7 +14,7 @@ export const SjekklisteValideringErrorSummary = () => {
     if (harValideringsfeil) {
       dispatch(visSjekkliste())
     }
-  }, [sjekklisteValideringsfeil.length])
+  }, [harValideringsfeil])
 
   return (
     <>

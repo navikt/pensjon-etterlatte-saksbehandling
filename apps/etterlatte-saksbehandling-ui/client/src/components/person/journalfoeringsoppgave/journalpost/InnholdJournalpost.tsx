@@ -53,10 +53,10 @@ export const InnholdJournalpost = ({ journalpost }: { journalpost: Journalpost }
         <Heading size="small">Sak</Heading>
 
         <InfoWrapper>
-          <Info label="SakID" tekst={journalpost.sak!!.fagsakId} />
-          <Info label="Sakstype" tekst={journalpost.sak!!.sakstype} />
-          <Info label="Fagsystem" tekst={journalpost.sak!!.fagsaksystem} />
-          <Info label="Tema" tekst={journalpost.sak!!.tema} />
+          <Info label="SakID" tekst={journalpost.sak?.fagsakId || '-'} />
+          <Info label="Sakstype" tekst={journalpost.sak?.sakstype || '-'} />
+          <Info label="Fagsystem" tekst={journalpost.sak?.fagsaksystem || '-'} />
+          <Info label="Tema" tekst={journalpost.sak?.tema || '-'} />
         </InfoWrapper>
       </FormWrapper>
     </>

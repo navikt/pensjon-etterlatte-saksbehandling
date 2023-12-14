@@ -66,16 +66,14 @@ export const EndreSak = ({
               <Table.DataCell>{fagsak?.fagsaksystem || '-'}</Table.DataCell>
               <Table.DataCell>{fagsak?.tema || '-'}</Table.DataCell>
               <Table.DataCell>
-                {!!fagsak && (
-                  <Button
-                    variant="tertiary-neutral"
-                    size="small"
-                    icon={<XMarkIcon />}
-                    title="Fjern kobling til saken"
-                    style={{ float: 'right' }}
-                    onClick={() => kobleTilSak(undefined)}
-                  />
-                )}
+                <Button
+                  variant="tertiary-neutral"
+                  size="small"
+                  icon={<XMarkIcon />}
+                  title="Fjern kobling til saken"
+                  style={{ float: 'right' }}
+                  onClick={() => kobleTilSak(undefined)}
+                />
               </Table.DataCell>
             </Table.Row>
           )}

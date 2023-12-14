@@ -59,14 +59,14 @@ export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: 
         <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
           <Modal.Body>
             <Heading size="medium" id="modal-heading" spacing>
-              Endre tema og ferdigstill oppgave
+              Endre tema og ferdigstille oppgave?
             </Heading>
 
             <br />
 
             <Alert variant="info">
-              Du endrer nå til tema {journalpost.tema} som ikke kan behandles i Gjenny. Oppgaven vil derfor bli
-              ferdigstilt og journalposten må behandles ferdig av enheten(e) som eier tema {journalpost.tema}.
+              Du endrer nå til tema {journalpost.tema}, som ikke kan behandles i Gjenny. Oppgaven vil bli ferdigstilt i
+              Gjenny og overføres til enheten som eier tema {journalpost.tema}.
             </Alert>
             <br />
 

@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -109,13 +110,11 @@ class BehandlingFactory(
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
+        prosessType: Prosesstype = Prosesstype.MANUELL,
     ): BehandlingOgOppgave? {
         logger.info("Starter behandling i sak $sakId")
 
-        val sak =
-            sakService.finnSak(sakId).let {
-                requireNotNull(it) { "Fant ingen sak med id=$sakId!" }
-            }
+        val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
         val harBehandlingerForSak =
             behandlingDao.alleBehandlingerISak(sak.id)
 
@@ -140,7 +139,8 @@ class BehandlingFactory(
                     BehandlingStatus.underBehandling().find { it == behandling.status } != null
                 }
             val behandling =
-                opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, mottattDato, kilde) ?: return null
+                opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, mottattDato, kilde, prosessType)
+                    ?: return null
             grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
             val oppgave =
                 oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
@@ -160,6 +160,7 @@ class BehandlingFactory(
         sak: Sak,
         mottattDato: String?,
         kilde: Vedtaksloesning,
+        prosessType: Prosesstype,
     ): Behandling? {
         harBehandlingUnderbehandling.forEach {
             behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
@@ -172,6 +173,7 @@ class BehandlingFactory(
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
             kilde = kilde,
+            prosesstype = prosessType,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
             hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())

@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -137,10 +138,11 @@ class MigreringService(
         request: MigreringRequest,
         sak: Sak,
     ) = behandlingFactory.opprettBehandling(
-        sak.id,
-        request.opprettPersongalleri(),
-        null,
-        Vedtaksloesning.PESYS,
+        sakId = sak.id,
+        persongalleri = request.opprettPersongalleri(),
+        mottattDato = null,
+        kilde = Vedtaksloesning.PESYS,
+        prosessType = Prosesstype.AUTOMATISK,
     )
 
     private fun finnEllerOpprettSak(request: MigreringRequest) =

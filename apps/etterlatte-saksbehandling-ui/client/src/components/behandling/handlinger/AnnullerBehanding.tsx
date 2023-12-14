@@ -57,7 +57,7 @@ export default function AnnullerBehandling() {
         <ExpansionCard.Content>
           <BodyLong>
             {erFoerstegangsbehandling
-              ? 'Hvis denne behandlingen ikke kan behandles i Gjenny må sak og behandling annulleres.'
+              ? 'Hvis denne behandlingen ikke skal tas videre i Gjenny må du annullere den. Behandlingen får da status avbrutt.'
               : 'Hvis denne behandlingen er uaktuell, kan du annullere den her.'}
           </BodyLong>
           <br />

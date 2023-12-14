@@ -168,7 +168,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
           </Tabs.Panel>
           <Tabs.Panel value={BehandlingFane.SJEKKLISTE}>
             <>
-              {soeker?.foedselsnummer && <Sjekkliste behandling={behandling} />}
+              <Sjekkliste behandling={behandling} />
               {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
               {erFoerstegangsbehandling &&
                 !erFerdigBehandlet(behandling.status) &&

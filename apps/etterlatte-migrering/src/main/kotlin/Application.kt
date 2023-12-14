@@ -61,7 +61,7 @@ internal class Server(private val context: ApplicationContext) {
                         pesysRepository,
                         vergeRepository,
                         grunnlagKlient,
-                    ).also { it.sjekkMuligeProblemsaker() }
+                    )
                 }.start()
         }
 }

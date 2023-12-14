@@ -1,7 +1,6 @@
 package no.nav.etterlatte.samordning
 
 import no.nav.etterlatte.kafka.Kafkakonsument
-import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
@@ -18,13 +17,10 @@ class SamordningHendelseKonsument(
         topic = topic,
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
-    private val sikkerLogg = sikkerlogger()
-
     override fun stream() {
         stream { meldinger ->
             meldinger
                 .forEach {
-                    sikkerLogg.info(it.toString())
                     logger.info("Behandler melding [key=${it.key()}]")
 
                     withLogContext {

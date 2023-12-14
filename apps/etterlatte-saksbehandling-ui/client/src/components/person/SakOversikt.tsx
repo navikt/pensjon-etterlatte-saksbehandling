@@ -16,13 +16,13 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { EndreEnhet } from '~components/person/EndreEnhet'
 import { hentNavkontorForPerson } from '~shared/api/sak'
-import { hentFlyktningForSak } from '~shared/api/sak'
+import { hentFlyktningStatusForSak } from '~shared/api/sak'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
   const [hentNavkontorStatus, hentNavkontor] = useApiCall(hentNavkontorForPerson)
-  const [hentFlyktningStatus, hentFlyktning] = useApiCall(hentFlyktningForSak)
+  const [hentFlyktningStatus, hentFlyktning] = useApiCall(hentFlyktningStatusForSak)
 
   useEffect(() => {
     hentNavkontor(fnr)
@@ -61,10 +61,12 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
               </Heading>
               {isSuccess(hentFlyktningStatus) && hentFlyktningStatus.data.erFlyktning && (
                 <>
-                  <Alert variant="info">
-                    Saken er markert med flyktning i Pesys og første virkningstidspunkt var{' '}
-                    {formaterStringDato(hentFlyktningStatus.data.virkningstidspunkt)}
-                  </Alert>
+                  <FlexRow>
+                    <Alert variant="info">
+                      Saken er markert med flyktning i Pesys og første virkningstidspunkt var{' '}
+                      {formaterStringDato(hentFlyktningStatus.data.virkningstidspunkt)}
+                    </Alert>
+                  </FlexRow>
                   <hr />
                 </>
               )}

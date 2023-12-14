@@ -23,7 +23,7 @@ export const hentSak = async (sakId: number): Promise<ApiResponse<ISak>> => {
   return apiClient.get(`sak/${sakId}`)
 }
 
-export const hentFlyktningForSak = async (sakId: number): Promise<ApiResponse<Flyktning>> => {
+export const hentFlyktningStatusForSak = async (sakId: number): Promise<ApiResponse<Flyktning>> => {
   return apiClient.get(`sak/${sakId}/flyktning`)
 }
 

@@ -1,13 +1,11 @@
 import { useState } from 'react'
-import { Alert, Button, ExpansionCard, Heading, Modal } from '@navikt/ds-react'
+import { BodyLong, Button, ExpansionCard, Heading, Modal } from '@navikt/ds-react'
 import { avbrytBehandling } from '~shared/api/behandling'
 import { useNavigate } from 'react-router'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
-import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { formaterBehandlingstype } from '~utils/formattering'
 import { ExclamationmarkTriangleFillIcon, XMarkIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
@@ -24,11 +22,9 @@ export default function AnnullerBehandling() {
   const behandling = useBehandling()
   const soeker = usePersonopplysninger()?.soeker?.opplysning
   const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
-  const erFoerstegangsbehandlingOgOmstillingsstoenad =
-    behandling?.sakType == SakType.OMSTILLINGSSTOENAD && erFoerstegangsbehandling
 
   const behandles = behandlingErRedigerbar(behandling?.status ?? IBehandlingStatus.IVERKSATT)
-  if (!behandles || erFoerstegangsbehandlingOgOmstillingsstoenad) {
+  if (!behandles) {
     return null
   }
 
@@ -52,22 +48,22 @@ export default function AnnullerBehandling() {
             </div>
             <div>
               <Heading size="xsmall" id="card-heading">
-                Annuller {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
+                Annuller behandling
               </Heading>
             </div>
           </div>
         </ExpansionCard.Header>
 
         <ExpansionCard.Content>
-          <Alert variant="warning">
+          <BodyLong>
             {erFoerstegangsbehandling
-              ? 'Hvis denne behandlingen ikke kan behandles i Gjenny må sak og behandling annulleres.'
+              ? 'Hvis denne behandlingen ikke skal tas videre i Gjenny må du annullere den. Behandlingen får da status avbrutt.'
               : 'Hvis denne behandlingen er uaktuell, kan du annullere den her.'}
-          </Alert>
+          </BodyLong>
           <br />
           <div className="flex">
-            <Button variant="danger" onClick={() => setIsOpen(true)} icon={<XMarkIcon />}>
-              Annuller {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
+            <Button size="small" variant="danger" onClick={() => setIsOpen(true)} icon={<XMarkIcon />}>
+              Annuller behandling
             </Button>
           </div>
         </ExpansionCard.Content>
@@ -81,20 +77,20 @@ export default function AnnullerBehandling() {
         </Modal.Header>
 
         <Modal.Body>
-          <Alert variant="warning">
+          <BodyLong>
             {erFoerstegangsbehandling
-              ? 'Saken blir annullert og kan ikke behandles videre i Gjenny. Saken må manuelt opprettes på nytt i Pesys.'
-              : 'Behandlingen blir avsluttet og kan opprettes på nytt.'}
-          </Alert>
+              ? 'Behandlingen blir annullert og kan ikke tas videre i Gjenny. Du vil bli sendt til saksoversikten til bruker der behandlingen får status avbrutt.'
+              : 'Denne behandlingen blir annullert og kan eventuelt opprettes på nytt.'}
+          </BodyLong>
         </Modal.Body>
 
         <Modal.Footer>
           <FlexRow justify="center">
             <Button variant="secondary" onClick={() => setIsOpen(false)} loading={isPending(status)}>
-              Nei, fortsett {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
+              Nei, fortsett behandling
             </Button>
             <Button variant="danger" onClick={avbryt} loading={isPending(status)}>
-              Ja, avbryt {formaterBehandlingstype(behandling!!.behandlingType).toLowerCase()}
+              Ja, annuller behandling
             </Button>
           </FlexRow>
           {isFailureHandler({ apiResult: status, errorMessage: 'Det oppsto en feil ved avbryting av behandlingen.' })}

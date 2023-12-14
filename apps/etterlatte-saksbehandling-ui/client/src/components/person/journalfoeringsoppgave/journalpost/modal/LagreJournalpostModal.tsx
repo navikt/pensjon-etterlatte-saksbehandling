@@ -1,0 +1,111 @@
+import React, { useState } from 'react'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { Alert, Button, Heading, Modal } from '@navikt/ds-react'
+import { Journalpost } from '~shared/types/Journalpost'
+import { oppdaterJournalpost } from '~shared/api/dokument'
+import { FlexRow } from '~shared/styled'
+import { ApiErrorAlert } from '~ErrorBoundary'
+
+import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
+import { ferdigstillOppgave } from '~shared/api/oppgaver'
+import { useNavigate } from 'react-router-dom'
+import { Toast } from '~shared/alerts/Toast'
+
+interface ModalProps {
+  journalpost: Journalpost
+  oppgaveId: string
+}
+
+export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: ModalProps) {
+  const navigate = useNavigate()
+
+  const [open, setOpen] = useState(false)
+
+  const [oppdaterStatus, apiOppdaterJournalpost] = useApiCall(oppdaterJournalpost)
+  const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
+
+  const oppdater = () => {
+    apiOppdaterJournalpost({ journalpost })
+  }
+
+  const oppdaterOgAvsluttOppgave = () => {
+    apiOppdaterJournalpost({ journalpost }, () => {
+      apiFerdigstillOppgave(oppgaveId, () => {
+        setTimeout(() => {
+          navigate(`/`)
+        }, 5000)
+      })
+    })
+  }
+
+  if (temaTilhoererGjenny(journalpost)) {
+    return (
+      <>
+        <Button variant="secondary" onClick={oppdater} loading={isPending(oppdaterStatus)}>
+          Lagre utkast
+        </Button>
+
+        {isSuccess(oppdaterStatus) && <Toast melding="Journalpost oppdatert!" />}
+      </>
+    )
+  } else
+    return (
+      <>
+        <Button variant="secondary" onClick={() => setOpen(true)}>
+          Lagre utkast
+        </Button>
+
+        <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
+          <Modal.Body>
+            <Heading size="medium" id="modal-heading" spacing>
+              Endre tema og ferdigstill oppgave
+            </Heading>
+
+            <br />
+
+            <Alert variant="info">
+              Du endrer nå til tema {journalpost.tema} som ikke kan behandles i Gjenny. Oppgaven vil derfor bli
+              ferdigstilt og journalposten må behandles ferdig av enheten(e) som eier tema {journalpost.tema}.
+            </Alert>
+            <br />
+
+            {isSuccess(oppdaterStatus) && isSuccess(ferdigstillOppgaveStatus) ? (
+              <Alert variant="success">
+                Tema er endret til {journalpost.tema} og oppgaven ferdigstilt! Du blir straks sendt tilbake til
+                oppgavebenken.
+              </Alert>
+            ) : (
+              <FlexRow justify="center">
+                <Button
+                  variant="secondary"
+                  onClick={() => setOpen(false)}
+                  disabled={isPending(oppdaterStatus) || isPending(ferdigstillOppgaveStatus)}
+                >
+                  Nei, avbryt
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={oppdaterOgAvsluttOppgave}
+                  loading={isPending(oppdaterStatus) || isPending(ferdigstillOppgaveStatus)}
+                >
+                  Ja, fortsett
+                </Button>
+              </FlexRow>
+            )}
+
+            {isFailure(oppdaterStatus) && (
+              <Modal.Footer>
+                <ApiErrorAlert>Det oppsto en feil ved oppdatering av journalposten</ApiErrorAlert>
+              </Modal.Footer>
+            )}
+            {isFailure(ferdigstillOppgaveStatus) && (
+              <Modal.Footer>
+                <ApiErrorAlert>Det oppsto en feil ved ferdigstilling av oppgaven</ApiErrorAlert>
+              </Modal.Footer>
+            )}
+          </Modal.Body>
+        </Modal>
+      </>
+    )
+}

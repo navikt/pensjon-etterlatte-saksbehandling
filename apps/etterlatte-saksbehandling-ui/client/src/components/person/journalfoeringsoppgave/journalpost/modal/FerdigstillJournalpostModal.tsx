@@ -8,7 +8,10 @@ import { ISak } from '~shared/types/sak'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
-import { kanFerdigstilleJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/validering'
+import {
+  kanFerdigstilleJournalpost,
+  temaTilhoererGjenny,
+} from '~components/person/journalfoeringsoppgave/journalpost/validering'
 
 interface ModalProps {
   journalpost: Journalpost
@@ -29,7 +32,11 @@ export default function FerdigstillJournalpostModal({ journalpost, sak }: ModalP
 
   return (
     <>
-      <Button variant="primary" onClick={() => setOpen(true)} disabled={!sak?.id || !sak?.sakType}>
+      <Button
+        variant="primary"
+        onClick={() => setOpen(true)}
+        disabled={!sak?.id || !sak?.sakType || !temaTilhoererGjenny(journalpost)}
+      >
         Ferdigstill
       </Button>
 

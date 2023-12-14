@@ -1,4 +1,4 @@
-import { Alert, Button, Heading } from '@navikt/ds-react'
+import { Alert, Heading } from '@navikt/ds-react'
 import { Border, InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { FlexRow } from '~shared/styled'
@@ -14,19 +14,17 @@ import { EndreBruker } from '~components/person/journalfoeringsoppgave/journalpo
 import { EndreAvsenderMottaker } from '~components/person/journalfoeringsoppgave/journalpost/EndreAvsenderMottaker'
 import { EndreSak } from '~components/person/journalfoeringsoppgave/journalpost/EndreSak'
 import { EndreDokumenter } from '~components/person/journalfoeringsoppgave/journalpost/EndreDokumenter'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { oppdaterJournalpost } from '~shared/api/dokument'
-import { isPending } from '@reduxjs/toolkit'
-import FerdigstillJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/FerdigstillJournalpostModal'
+import FerdigstillJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/FerdigstillJournalpostModal'
+import LagreJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/LagreJournalpostModal'
 
-export const OppdaterJournalpost = ({ initialJournalpost, sak }: { initialJournalpost: Journalpost; sak: ISak }) => {
+interface Props {
+  initialJournalpost: Journalpost
+  sak: ISak
+  oppgaveId: string
+}
+
+export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Props) => {
   const [journalpost, setJournalpost] = useState<Journalpost>({ ...initialJournalpost })
-
-  const [oppdaterStatus, apiOppdaterJournalpost] = useApiCall(oppdaterJournalpost)
-
-  const oppdater = () => {
-    apiOppdaterJournalpost({ journalpost })
-  }
 
   return (
     <>
@@ -80,9 +78,8 @@ export const OppdaterJournalpost = ({ initialJournalpost, sak }: { initialJourna
 
         <div>
           <FlexRow justify="center" $spacing>
-            <Button variant="secondary" onClick={oppdater} loading={isPending(oppdaterStatus)}>
-              Lagre utkast
-            </Button>
+            <LagreJournalpostModal journalpost={journalpost} oppgaveId={oppgaveId} />
+
             <FerdigstillJournalpostModal journalpost={journalpost} sak={sak} />
           </FlexRow>
           <FlexRow justify="center">

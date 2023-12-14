@@ -1,14 +1,24 @@
 import { ErrorSummary } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
-import React from 'react'
+import React, { useEffect } from 'react'
+import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
+import { useAppDispatch } from '~store/Store'
 
 export const SjekklisteValideringErrorSummary = () => {
   const sjekklisteValideringsfeil = useSjekklisteValideringsfeil()
+  const dispatch = useAppDispatch()
+  const harValideringsfeil = sjekklisteValideringsfeil.length > 0
+
+  useEffect(() => {
+    if (harValideringsfeil) {
+      dispatch(visSjekkliste())
+    }
+  }, [harValideringsfeil])
 
   return (
     <>
-      {sjekklisteValideringsfeil.length > 0 && (
+      {harValideringsfeil && (
         <FeilOppsummering heading="For å gå videre må du rette opp følgende:">
           {sjekklisteValideringsfeil.map((item, index) => (
             <ErrorSummary.Item key={index}>{item}</ErrorSummary.Item>

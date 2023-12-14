@@ -61,7 +61,8 @@ export const EndreTema = ({
           ) : (
             <Alert variant="warning">
               OBS! Du har valgt tema <strong>{valgtKode.term}</strong> (temakode <strong>{valgtKode.navn}</strong>).
-              Dette temaet kan ikke behandles i Gjenny og oppgaven vil derfor bli avsluttet ved lagring av utkast.
+              Dette temaet kan ikke behandles i Gjenny. Ved å trykke på «Lagre utkast» vil journalposten blir flyttet
+              til enheten som eier tema, og oppgaven i Gjenny blir avsluttet.
             </Alert>
           ))}
       </FormWrapper>

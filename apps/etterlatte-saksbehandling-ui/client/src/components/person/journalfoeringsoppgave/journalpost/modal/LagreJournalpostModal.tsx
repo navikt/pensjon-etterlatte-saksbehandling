@@ -25,8 +25,6 @@ export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: 
   const [oppdaterStatus, apiOppdaterJournalpost] = useApiCall(oppdaterJournalpost)
   const [ferdigstillOppgaveStatus, apiFerdigstillOppgave] = useApiCall(ferdigstillOppgave)
 
-  const harGjennyTema = temaTilhoererGjenny(journalpost)
-
   const oppdater = () => {
     apiOppdaterJournalpost({ journalpost })
   }
@@ -41,7 +39,7 @@ export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: 
     })
   }
 
-  if (harGjennyTema) {
+  if (temaTilhoererGjenny(journalpost)) {
     return (
       <>
         <Button variant="secondary" onClick={oppdater} loading={isPending(oppdaterStatus)}>

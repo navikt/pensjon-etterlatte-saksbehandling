@@ -9,6 +9,7 @@ import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/ap
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 export const SendTilAttesteringModal = ({
   behandlingId,
@@ -29,6 +30,8 @@ export const SendTilAttesteringModal = ({
     hentOppgaveForBehandlingUnderBehandlingIkkeattestert
   )
 
+  const soeker = usePersonopplysninger()?.soeker?.opplysning
+
   useEffect(() => {
     requesthentOppgaveForBehandling({ referanse: behandlingId, sakId: sakId }, (saksbehandler, statusCode) => {
       if (statusCode === 200) {
@@ -40,7 +43,11 @@ export const SendTilAttesteringModal = ({
   const fattVedtakWrapper = () => {
     fattVedtak(behandlingId, () => {
       setIsOpen(false)
-      navigate('/')
+      if (soeker?.foedselsnummer) {
+        navigate(`/person/${soeker}`)
+      } else {
+        navigate('/')
+      }
     })
   }
 

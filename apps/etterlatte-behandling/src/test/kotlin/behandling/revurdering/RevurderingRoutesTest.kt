@@ -15,6 +15,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.revurdering.OpprettRevurderingRequest
+import no.nav.etterlatte.behandling.revurdering.RevurderingRoutesFeatureToggle
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
@@ -45,6 +47,13 @@ internal class RevurderingRoutesTest {
                 every { harTilgangTilBehandling(any(), any()) } returns true
                 every { harTilgangTilSak(any(), any()) } returns true
             }
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        every {
+            applicationContext.featureToggleService.isEnabled(RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev, any())
+        } returns true
     }
 
     @AfterAll
@@ -156,6 +165,41 @@ internal class RevurderingRoutesTest {
             assertTrue(
                 revurderingAarsak.containsAll(
                     Revurderingaarsak.values()
+                        .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
+                        .filter { it.name !== Revurderingaarsak.NY_SOEKNAD.toString() },
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `returnerer ikke revurderingsaarsak opphoer uten brev dersom feature toggle er av`() {
+        every {
+            applicationContext.featureToggleService.isEnabled(RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev, any())
+        } returns false
+
+        testApplication {
+            environment { config = hoconApplicationConfig }
+            application { module(applicationContext) }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+                    }
+                }
+
+            val response =
+                client.get("api/stoettederevurderinger/${SakType.OMSTILLINGSSTOENAD.name}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            val revurderingAarsak: List<Revurderingaarsak> = response.body()
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(
+                revurderingAarsak.containsAll(
+                    Revurderingaarsak.values()
+                        .filterNot { it == Revurderingaarsak.OPPHOER_UTEN_BREV }
                         .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
                         .filter { it.name !== Revurderingaarsak.NY_SOEKNAD.toString() },
                 ),

@@ -94,7 +94,10 @@ export const behandlingSkalSendeBrev = (
     case IBehandlingsType.REVURDERING:
       return !(
         //revurderingsaarsak === Revurderingaarsak.REGULERING || TODO EY-3232 Fjern utkommentering
-        (revurderingsaarsak === Revurderingaarsak.DOEDSFALL)
+        (
+          revurderingsaarsak === Revurderingaarsak.DOEDSFALL ||
+          revurderingsaarsak === Revurderingaarsak.OPPHOER_UTEN_BREV
+        )
       )
   }
 }

@@ -107,25 +107,17 @@ internal class Verifiserer(
         if (!featureToggleService.isEnabled(MigreringFeatureToggle.MigrerNaarSoekerHarVerge, false)) {
             return listOf(BarnetHarVergemaal)
         } else {
-            try {
-                return person.vergemaalEllerFremtidsfullmakt!!
-                    .map { it.verdi }
-                    .map { it.vergeEllerFullmektig }
-                    .map { it.motpartsPersonident }
-                    .map { it!!.value }
-                    .mapNotNull {
-                        runBlocking {
-                            val vergesAdresse = grunnlagKlient.hentVergesAdresse(it)
-                            return@runBlocking if (vergesAdresse == null) {
-                                VergeManglerAdresseFraPDL
-                            } else {
-                                null
-                            }
-                        }
+            return try {
+                runBlocking {
+                    if (grunnlagKlient.hentVergesAdresse(request.soeker.value) == null) {
+                        listOf(VergeManglerAdresseFraPDL)
+                    } else {
+                        listOf()
                     }
+                }
             } catch (e: Exception) {
                 logger.error("Feil under henting av verges adresse", e)
-                return listOf(FeilUnderHentingAvVergesAdresse)
+                listOf(FeilUnderHentingAvVergesAdresse)
             }
         }
     }

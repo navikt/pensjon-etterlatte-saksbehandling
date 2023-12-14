@@ -56,6 +56,7 @@ export interface Beregningsperiode {
   broek: IProrataBroek | undefined
 }
 
+// TODO: Burde speile backend DTO-en
 export interface OverstyrBeregningsperiode {
   utbetaltBeloep: string
   trygdetid: string

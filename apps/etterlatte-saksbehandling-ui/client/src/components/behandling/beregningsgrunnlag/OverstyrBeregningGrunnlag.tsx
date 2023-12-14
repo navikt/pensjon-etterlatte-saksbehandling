@@ -45,7 +45,10 @@ import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
-const stripWhitespace = (s: string): string => s.replace(/\s+/g, '')
+const stripWhitespace = (s: string | number): string => {
+  if (typeof s === 'string') return s.replace(/\s+/g, '')
+  else return s.toString().replace(/\s+/g, '')
+}
 
 function fjernWhitespaceFraUtbetaltBeloep(
   data: OverstyrBeregingsperiodeGrunnlagData

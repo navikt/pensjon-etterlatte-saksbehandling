@@ -297,5 +297,3 @@ fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTidspunkt(kolonne).toLoc
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-class BehandlingNotFoundException(override val message: String) : RuntimeException(message)

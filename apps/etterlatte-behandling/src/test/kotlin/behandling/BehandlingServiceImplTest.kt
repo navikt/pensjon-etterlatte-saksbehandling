@@ -158,15 +158,15 @@ class BehandlingServiceImplTest {
             )
 
         val saksbehandler = Saksbehandler("", "saksbehandler", null)
-        assertThrows<IllegalStateException> {
+        assertThrows<BehandlingKanIkkeAvbrytesException> {
             behandlingService.avbrytBehandling(avbruttBehandling.id, saksbehandler)
         }
 
-        assertThrows<IllegalStateException> {
+        assertThrows<BehandlingKanIkkeAvbrytesException> {
             behandlingService.avbrytBehandling(iverksattBehandling.id, saksbehandler)
         }
 
-        assertThrows<IllegalStateException> {
+        assertThrows<BehandlingKanIkkeAvbrytesException> {
             behandlingService.avbrytBehandling(attestertBehandling.id, saksbehandler)
         }
         assertDoesNotThrow {

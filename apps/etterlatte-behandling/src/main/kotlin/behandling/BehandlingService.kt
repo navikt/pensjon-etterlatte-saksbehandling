@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -49,6 +50,17 @@ class KravdatoMaaFinnesHvisBosattutland(message: String) :
 
 class VirkningstidspunktMaaHaUtenlandstilknytning(message: String) :
     UgyldigForespoerselException(code = "VIRK_MÅ_HA UTENLANDSTILKNYTNING", detail = message)
+
+class BehandlingNotFoundException(behandlingId: UUID) :
+    IkkeFunnetException(
+        code = "FANT_IKKE_BEHANDLING",
+        detail = "Kunne ikke finne ønsket behandling, id: $behandlingId",
+    )
+
+class BehandlingKanIkkeAvbrytesException(behandlingStatus: BehandlingStatus) : UgyldigForespoerselException(
+    code = "BEHANDLING_KAN_IKKE_AVBRYTES",
+    detail = "Behandlingen kan ikke avbrytes, status: $behandlingStatus",
+)
 
 interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
@@ -159,9 +171,9 @@ internal class BehandlingServiceImpl(
     ) {
         val behandling =
             hentBehandlingForId(behandlingId)
-                ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId som skulle avbrytes")
+                ?: throw BehandlingNotFoundException(behandlingId)
         if (!behandling.status.kanAvbrytes()) {
-            throw IllegalStateException("Kan ikke avbryte en behandling med status ${behandling.status}")
+            throw BehandlingKanIkkeAvbrytesException(behandling.status)
         }
 
         behandlingDao.avbrytBehandling(behandlingId).also {
@@ -458,7 +470,7 @@ internal class BehandlingServiceImpl(
 
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)
-            ?: throw BehandlingNotFoundException("Fant ikke behandling med id=$behandlingId")
+            ?: throw BehandlingNotFoundException(behandlingId)
 }
 
 fun <T : Behandling> List<T>.filterBehandlingerForEnheter(user: User) =

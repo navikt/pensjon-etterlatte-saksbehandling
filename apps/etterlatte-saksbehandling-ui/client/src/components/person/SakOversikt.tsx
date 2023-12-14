@@ -59,7 +59,7 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
                   <OpprettKlage sakId={sakOgBehandlinger.sak.id} />
                 </FlexRow>
               </Heading>
-              {isSuccess(hentFlyktningStatus) && hentFlyktningStatus.data.erFlyktning && (
+              {isSuccess(hentFlyktningStatus) && hentFlyktningStatus.data?.erFlyktning && (
                 <>
                   <FlexRow>
                     <Alert variant="info">

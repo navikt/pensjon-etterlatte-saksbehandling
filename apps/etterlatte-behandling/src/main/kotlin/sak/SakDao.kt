@@ -95,7 +95,7 @@ class SakDao(private val connection: () -> Connection) {
             val statement = prepareStatement("SELECT flyktning from sak where id = ?")
             statement.setLong(1, id)
             statement.executeQuery().singleOrNull {
-                objectMapper.readValue<Flyktning>(this.getString("flyktning"))
+                this.getString("flyktning")?.let { objectMapper.readValue(it) }
             }
         }
     }

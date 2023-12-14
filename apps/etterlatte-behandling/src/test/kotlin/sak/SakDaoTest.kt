@@ -68,6 +68,13 @@ internal class SakDaoTest {
     }
 
     @Test
+    fun `Returnerer null dersom flyktning ikke finnes`() {
+        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+        Assertions.assertEquals(sakRepo.finnFlyktningForSak(opprettSak.id), null)
+    }
+
+    @Test
     fun `Skal kunne oppdatere enhet`() {
         val fnr = "fnr"
         val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)

@@ -26,6 +26,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
@@ -46,10 +47,13 @@ internal class RevurderingRoutesTest {
                 every { harTilgangTilBehandling(any(), any()) } returns true
                 every { harTilgangTilSak(any(), any()) } returns true
             }
+    }
 
+    @BeforeEach
+    fun beforeEach() {
         every {
             applicationContext.featureToggleService.isEnabled(RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev, any())
-        } returns false
+        } returns true
     }
 
     @AfterAll
@@ -191,7 +195,6 @@ internal class RevurderingRoutesTest {
                 }
 
             val revurderingAarsak: List<Revurderingaarsak> = response.body()
-            println(revurderingAarsak)
             assertEquals(HttpStatusCode.OK, response.status)
             assertTrue(
                 revurderingAarsak.containsAll(

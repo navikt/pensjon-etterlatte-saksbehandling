@@ -285,6 +285,7 @@ class TrygdetidServiceImpl(
     ): Trygdetid? {
         return trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId)
             ?.let { trygdetid -> sjekkYrkesskadeForEndring(behandlingId, brukerTokenInfo, trygdetid) }
+            ?.let { trygdetid -> trygdetid.copy(opplysningerDifferanse = finnOpplysningerDifferanse(trygdetid, brukerTokenInfo)) }
     }
 
     override suspend fun opprettTrygdetiderForBehandling(
@@ -736,11 +737,9 @@ class TrygdetidServiceImpl(
         logger.info("Oppretter manuell overstyrt trygdetid for behandling $behandlingId")
 
         val avdoede = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede()
-        trygdetidList
+        return trygdetidList
             .map { trygdetid -> medOppdaterteOpplysningerOmAvdoede(trygdetid, avdoede, behandlingId) }
-            .forEach { trygdetid -> oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo) }
-
-        return hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+            .map { trygdetid -> oppdaterBeregnetTrygdetid(behandlingId, trygdetid, brukerTokenInfo) }
     }
 
     private fun medOppdaterteOpplysningerOmAvdoede(

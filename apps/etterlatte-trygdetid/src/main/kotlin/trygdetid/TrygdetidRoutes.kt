@@ -57,8 +57,8 @@ fun Route.trygdetid(
         post {
             withBehandlingId(behandlingKlient) {
                 logger.info("Oppretter trygdetid for behandling $behandlingId")
-                val trygdetid = trygdetidService.opprettTrygdetid(behandlingId, brukerTokenInfo)
-                call.respond(trygdetid.toDto())
+                trygdetidService.opprettTrygdetid(behandlingId, brukerTokenInfo)
+                call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
             }
         }
 
@@ -67,14 +67,13 @@ fun Route.trygdetid(
                 logger.info("Oppdater trygdetid (overstyring) for behandling $behandlingId")
                 val trygdetidOverstyringDto = call.receive<TrygdetidOverstyringDto>()
 
-                val trygdetid =
-                    trygdetidService.overstyrNorskPoengaar(
-                        trygdetidOverstyringDto.id,
-                        behandlingId,
-                        trygdetidOverstyringDto.overstyrtNorskPoengaar,
-                        brukerTokenInfo,
-                    )
-                call.respond(trygdetid.toDto())
+                trygdetidService.overstyrNorskPoengaar(
+                    trygdetidOverstyringDto.id,
+                    behandlingId,
+                    trygdetidOverstyringDto.overstyrtNorskPoengaar,
+                    brukerTokenInfo,
+                )
+                call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
             }
         }
 
@@ -88,7 +87,8 @@ fun Route.trygdetid(
                         behandlingId,
                         brukerTokenInfo,
                         trygdetidgrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo),
-                    ).let { trygdetid -> call.respond(trygdetid.toDto()) }
+                    )
+                    call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
                 } catch (overlappendePeriodeException: OverlappendePeriodeException) {
                     logger.info("Klarte ikke legge til ny trygdetidsperiode for $behandlingId pga overlapp.")
                     call.respond(HttpStatusCode.Conflict)
@@ -102,7 +102,8 @@ fun Route.trygdetid(
                 trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
                     behandlingId,
                     brukerTokenInfo,
-                ).let { trygdetid -> call.respond(trygdetid.toDto()) }
+                )
+                call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
             }
         }
 
@@ -137,7 +138,8 @@ fun Route.trygdetid(
 
                     val beregnetTrygdetid = call.receive<DetaljertBeregnetTrygdetidResultat>()
 
-                    call.respond(trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid).toDto())
+                    trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
+                    call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
                 }
             }
 
@@ -157,7 +159,7 @@ fun Route.trygdetid(
                     val dto = trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid).toDto()
                     behandlingKlient.settBehandlingStatusTrygdetidOppdatert(dto.behandlingId, brukerTokenInfo)
 
-                    call.respond(dto)
+                    call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
                 }
             }
 
@@ -168,13 +170,12 @@ fun Route.trygdetid(
                     val trygdetid = trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)
 
                     if (trygdetid != null) {
-                        call.respond(
-                            trygdetidService.reberegnUtenFremtidigTrygdetid(
-                                behandlingId,
-                                trygdetid.id,
-                                brukerTokenInfo,
-                            ).toDto(),
-                        )
+                        trygdetidService.reberegnUtenFremtidigTrygdetid(
+                            behandlingId,
+                            trygdetid.id,
+                            brukerTokenInfo,
+                        ).toDto()
+                        call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
                     } else {
                         call.respond(HttpStatusCode.NoContent)
                     }

@@ -7,6 +7,8 @@ import no.nav.etterlatte.libs.common.person.MottakerAdresse
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import org.slf4j.LoggerFactory
 
+const val REGOPPSLAG_ADRESSE = "REGOPPSLAG_ADRESSE"
+
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.EXISTING_PROPERTY,
@@ -15,7 +17,7 @@ import org.slf4j.LoggerFactory
 @JsonSubTypes(
     JsonSubTypes.Type(value = VergeSamhandlerFormat::class, name = "VERGE_SAMHANDLER_POSTADRESSE"),
     JsonSubTypes.Type(value = VergePersonFormat::class, name = "VERGE_PERSON_POSTADRESSE"),
-    JsonSubTypes.Type(value = RegoppslagFormat::class, name = "REGOPPSLAG_ADRESSE"),
+    JsonSubTypes.Type(value = RegoppslagFormat::class, name = REGOPPSLAG_ADRESSE),
 )
 sealed class PersondataAdresse(
     val type: String,
@@ -96,8 +98,8 @@ data class RegoppslagFormat(
     val navn: String?,
 ) :
     PersondataAdresse("REGOPPSLAG_ADRESSE", adresselinjer, adresseString) {
-    override fun tilFrittstaendeBrevMottaker(foedselsnummer: String): BrevMottaker {
-        return BrevMottaker(
+    override fun tilFrittstaendeBrevMottaker(foedselsnummer: String): BrevMottaker =
+        BrevMottaker(
             navn = navn ?: "Ukjent",
             foedselsnummer = MottakerFoedselsnummer(foedselsnummer),
             adresse =
@@ -113,38 +115,37 @@ data class RegoppslagFormat(
                 ),
             adresseTypeIKilde = "REGOPPSLAG_ADRESSE",
         )
-    }
 }
 
 private fun adressetypeFromLand(
     landkode: String?,
     land: String?,
-): String {
+): String =
     if (landkodeRegnesSomNorsk(landkode) && landRegnesSomNorsk(land)) {
-        return "NORSKPOSTADRESSE"
+        "NORSKPOSTADRESSE"
+    } else {
+        "UTENLANDSKPOSTADRESSE"
     }
-    return "UTENLANDSKPOSTADRESSE"
-}
 
 private fun utledLand(
     landkode: String?,
     land: String?,
-): String {
+): String =
     if (landkodeRegnesSomNorsk(landkode) && landRegnesSomNorsk(land)) {
-        return "NORGE"
+        "NORGE"
+    } else {
+        land ?: "UKJENT"
     }
-    return land ?: "UKJENT"
-}
 
 private fun utledLandkode(
     landkode: String?,
     land: String?,
-): String {
+): String =
     if (landkodeRegnesSomNorsk(landkode) && landRegnesSomNorsk(land)) {
-        return "NO"
+        "NO"
+    } else {
+        requireNotNull(landkode) { "Landkode kunne ikke settes " }
     }
-    return requireNotNull(landkode) { "Landkode kunne ikke settes " }
-}
 
 private fun landkodeRegnesSomNorsk(landkode: String?) = landkode.isNullOrBlank() || listOf("no", "nor").contains(landkode.lowercase())
 

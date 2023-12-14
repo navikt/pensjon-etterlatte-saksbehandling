@@ -54,9 +54,10 @@ spec:
           - id: e750ceb5-b70b-4d94-b4fa-9d22467b786b # 0000-GA-Egne_ansatte
         extra:
           - NAVident
-  requests:
-    cpu: 50m
-    memory: 320Mi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 320Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 4

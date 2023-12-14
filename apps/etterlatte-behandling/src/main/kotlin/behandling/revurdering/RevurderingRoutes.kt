@@ -23,7 +23,7 @@ import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
 
-enum class BehandlingStatusServiceFeatureToggle(private val key: String) : FeatureToggle {
+enum class RevurderingRoutesFeatureToggle(private val key: String) : FeatureToggle {
     VisRevurderingsaarsakOpphoerUtenBrev("pensjon-etterlatte.vis-opphoer-uten-brev"),
     ;
 
@@ -103,7 +103,7 @@ internal fun Route.revurderingRoutes(
                     .filter {
                         if (it == Revurderingaarsak.OPPHOER_UTEN_BREV) {
                             featureToggleService.isEnabled(
-                                BehandlingStatusServiceFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev,
+                                RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev,
                                 false,
                             )
                         } else {

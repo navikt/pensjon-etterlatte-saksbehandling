@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
@@ -46,7 +47,14 @@ internal class FiksEnkeltbrevRiver(
         val migreringBrevRequest =
             MigreringBrevRequest(brutto = sum, yrkesskade = false, utlandstilknytningType = utlandstilknytningType)
         runBlocking {
-            val vedtaksbrev = service.hentVedtaksbrev(behandlingId)!!
+            val sakId = vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo).sak.id
+            val vedtaksbrev: Brev =
+                service.opprettVedtaksbrev(
+                    sakId,
+                    behandlingId,
+                    brukerTokenInfo,
+                    migreringBrevRequest,
+                )
             service.genererPdf(vedtaksbrev.id, brukerTokenInfo, migreringBrevRequest)
             service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)
             logger.info("Har oppretta vedtaksbrev for behandling $behandlingId")

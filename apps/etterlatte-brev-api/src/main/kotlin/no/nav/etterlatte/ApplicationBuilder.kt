@@ -240,10 +240,7 @@ class ApplicationBuilder {
 
     private val behandlingerAaLageBrevFor =
         listOf<Triple<String, Int, UtlandstilknytningType>>(
-            Triple("91507535-dc73-4949-8cef-24ec093620f5", 1492, UtlandstilknytningType.BOSATT_UTLAND),
-            Triple("6f326d99-b46e-45ac-b8b3-a596c058be53", 3954, UtlandstilknytningType.NASJONAL),
-            Triple("5c95dcc2-daf2-49df-899e-efacac9c7b01", 3954, UtlandstilknytningType.NASJONAL),
-            Triple("8edec82c-e3ae-4db9-aa5f-f7763932b3db", 3954, UtlandstilknytningType.NASJONAL),
+            Triple("68c4b1a7-c332-4305-9d90-85a2144abf9d", 2471, UtlandstilknytningType.UTLANDSTILSNITT),
         )
 
     private fun featureToggleProperties(config: Config) =

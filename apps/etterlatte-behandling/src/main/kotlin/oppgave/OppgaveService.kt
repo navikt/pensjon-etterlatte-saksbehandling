@@ -9,6 +9,7 @@ import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.User
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
@@ -27,7 +28,17 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class BrukerManglerAttestantRolleException(msg: String) : Exception(msg)
+class BrukerManglerAttestantRolleException(msg: String) : UgyldigForespoerselException(
+    code = "MANGLER_OPPGAVE_UNDER_BEHANDLING",
+    detail = msg,
+)
+
+class ManglerOppgaveUnderBehandling(msg: String) : UgyldigForespoerselException(
+    code = "FOR_MANGE_OPPGAVER_UNDER_BEHANDLING",
+    detail = msg,
+)
+
+class ForMangeOppgaverUnderBehandling(msg: String) : Exception(msg)
 
 class OppgaveService(
     private val oppgaveDao: OppgaveDaoMedEndringssporing,
@@ -313,16 +324,14 @@ class OppgaveService(
                 "Oppgaven vi akkurat avbrøt kunne ikke hentes ut"
             }
         } catch (e: NoSuchElementException) {
-            throw BadRequestException(
+            throw ManglerOppgaveUnderBehandling(
                 "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
                     " $behandlingEllerHendelseId}",
-                e,
             )
         } catch (e: IllegalArgumentException) {
-            throw BadRequestException(
+            throw ForMangeOppgaverUnderBehandling(
                 "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
                     " $behandlingEllerHendelseId",
-                e,
             )
         }
     }

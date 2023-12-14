@@ -45,6 +45,8 @@ internal class RevurderingRoutesTest {
                 every { harTilgangTilBehandling(any(), any()) } returns true
                 every { harTilgangTilSak(any(), any()) } returns true
             }
+
+        every { applicationContext.featureToggleService.isEnabled(any(), any()) } returns true
     }
 
     @AfterAll
@@ -156,6 +158,40 @@ internal class RevurderingRoutesTest {
             assertTrue(
                 revurderingAarsak.containsAll(
                     Revurderingaarsak.values()
+                        .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
+                        .filter { it.name !== Revurderingaarsak.NY_SOEKNAD.toString() },
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `returnerer ikke revurderingsaarsak opphoer uten brev dersom feature toggle er av`() {
+        every { applicationContext.featureToggleService.isEnabled(any(), any()) } returns false
+
+        testApplication {
+            environment { config = hoconApplicationConfig }
+            application { module(applicationContext) }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        register(ContentType.Application.Json, JacksonConverter(no.nav.etterlatte.libs.common.objectMapper))
+                    }
+                }
+
+            val response =
+                client.get("api/stoettederevurderinger/${SakType.OMSTILLINGSSTOENAD.name}") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                }
+
+            val revurderingAarsak: List<Revurderingaarsak> = response.body()
+            println(revurderingAarsak)
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(
+                revurderingAarsak.containsAll(
+                    Revurderingaarsak.values()
+                        .filterNot { it == Revurderingaarsak.OPPHOER_UTEN_BREV }
                         .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
                         .filter { it.name !== Revurderingaarsak.NY_SOEKNAD.toString() },
                 ),

@@ -9,6 +9,8 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
@@ -21,7 +23,17 @@ import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
 
-internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
+enum class BehandlingStatusServiceFeatureToggle(private val key: String) : FeatureToggle {
+    VisRevurderingsaarsakOpphoerUtenBrev("pensjon-etterlatte.vis-opphoer-uten-brev"),
+    ;
+
+    override fun key() = key
+}
+
+internal fun Route.revurderingRoutes(
+    revurderingService: RevurderingService,
+    featureToggleService: FeatureToggleService,
+) {
     val logger = application.log
 
     route("/api/revurdering") {
@@ -85,7 +97,20 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                 call.parameters["saktype"]?.let { SakType.valueOf(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
-            val stoettedeRevurderinger = Revurderingaarsak.values().filter { it.erStoettaRevurdering(sakType) }
+            val stoettedeRevurderinger =
+                Revurderingaarsak.values()
+                    .filter { it.erStoettaRevurdering(sakType) }
+                    .filter {
+                        if (it == Revurderingaarsak.OPPHOER_UTEN_BREV) {
+                            featureToggleService.isEnabled(
+                                BehandlingStatusServiceFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev,
+                                false,
+                            )
+                        } else {
+                            true
+                        }
+                    }
+
             call.respond(stoettedeRevurderinger)
         }
     }

@@ -16,7 +16,7 @@ import {
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { RevurderingInfo } from '~shared/types/RevurderingInfo'
-import { BrevutfallOgEtterbetalingDto } from '~components/behandling/brevutfall/Brevutfall'
+import { IBrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 
 export const setBehandling = createAction<IDetaljertBehandling>('behandling/set')
 export const resetBehandling = createAction('behandling/reset')
@@ -41,7 +41,7 @@ export const oppdaterBeregingsGrunnlagOMS = createAction<BeregningsGrunnlagOMSPo
 export const oppdaterOverstyrBeregningsGrunnlag =
   createAction<OverstyrBeregningGrunnlagPostDTO>('behandling/overstyrBeregning')
 export const oppdaterRevurderingInfo = createAction<RevurderingInfo>('behandling/revurderinginfo')
-export const oppdaterBrevutfallOgEtterbetaling = createAction<BrevutfallOgEtterbetalingDto>('behandling/brevutfall')
+export const oppdaterBrevutfallOgEtterbetaling = createAction<IBrevutfallOgEtterbetaling>('behandling/brevutfall')
 export const resetBeregning = createAction('behandling/beregning/reset')
 export const loggError = createAction<any>('loggError')
 export const loggInfo = createAction<any>('loggInfo')
@@ -106,9 +106,6 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterRevurderingInfo, (state, action) => {
     state.behandling!!.revurderinginfo!!.revurderingInfo = action.payload
-  })
-  builder.addCase(oppdaterEtterbetaling, (state, action) => {
-    state.behandling!!.etterbetaling = action.payload
   })
   builder.addCase(oppdaterBrevutfallOgEtterbetaling, (state, action) => {
     state.behandling!!.brevutfall = action.payload.brevutfall

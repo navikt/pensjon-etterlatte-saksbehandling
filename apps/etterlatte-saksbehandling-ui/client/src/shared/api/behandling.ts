@@ -15,7 +15,7 @@ import { FoersteVirk, ISak } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
-import { BrevutfallOgEtterbetalingDto } from '~components/behandling/brevutfall/Brevutfall'
+import { IBrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
@@ -148,13 +148,13 @@ export const oppdaterGrunnlag = async (args: { behandlingId: string }): Promise<
 
 export const lagreBrevutfallApi = async (args: {
   behandlingId: string
-  brevutfall: BrevutfallOgEtterbetalingDto
-}): Promise<ApiResponse<BrevutfallOgEtterbetalingDto>> => {
+  brevutfall: IBrevutfallOgEtterbetaling
+}): Promise<ApiResponse<IBrevutfallOgEtterbetaling>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/info/brevutfall`, { ...args.brevutfall })
 }
 
 export const hentBrevutfallApi = async (
   behandlingId: string
-): Promise<ApiResponse<BrevutfallOgEtterbetalingDto | null>> => {
+): Promise<ApiResponse<IBrevutfallOgEtterbetaling | null>> => {
   return apiClient.get(`/behandling/${behandlingId}/info/brevutfall`)
 }

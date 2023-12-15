@@ -7,7 +7,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBrevutfallApi } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
-import { Aldersgruppe, BrevutfallOgEtterbetalingDto } from '~components/behandling/brevutfall/Brevutfall'
+import { Aldersgruppe, IBrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 import { oppdaterBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 
@@ -19,8 +19,8 @@ enum HarEtterbetaling {
 
 export const BrevutfallSkjema = (props: {
   behandling: IDetaljertBehandling
-  brevutfallOgEtterbetaling: BrevutfallOgEtterbetalingDto
-  setBrevutfallOgEtterbetaling: (brevutfall: BrevutfallOgEtterbetalingDto) => void
+  brevutfallOgEtterbetaling: IBrevutfallOgEtterbetaling
+  setBrevutfallOgEtterbetaling: (brevutfall: IBrevutfallOgEtterbetaling) => void
   setVisSkjema: (visSkjema: boolean) => void
   onAvbryt: () => void
 }) => {
@@ -48,7 +48,7 @@ export const BrevutfallSkjema = (props: {
 
     lagreBrevutfallRequest(
       { behandlingId: behandling.id, brevutfall: brevutfallOgEtterbetaling },
-      (brevutfall: BrevutfallOgEtterbetalingDto) => {
+      (brevutfall: IBrevutfallOgEtterbetaling) => {
         setBrevutfallOgEtterbetaling(brevutfall)
         setVisSkjema(false)
         dispatch(oppdaterBrevutfallOgEtterbetaling(brevutfall))

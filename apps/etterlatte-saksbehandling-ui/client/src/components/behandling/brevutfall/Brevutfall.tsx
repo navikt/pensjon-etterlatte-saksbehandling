@@ -13,12 +13,12 @@ import { SakType } from '~shared/types/sak'
 import { useAppDispatch } from '~store/Store'
 import { oppdaterBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 
-export interface BrevutfallOgEtterbetalingDto {
-  etterbetaling?: EtterbetalingDto | null
-  brevutfall: BrevutfallDto
+export interface IBrevutfallOgEtterbetaling {
+  etterbetaling?: IEtterbetaling | null
+  brevutfall: IBrevutfall
 }
 
-export interface BrevutfallDto {
+export interface IBrevutfall {
   aldersgruppe?: Aldersgruppe | null
 }
 
@@ -28,7 +28,7 @@ export enum Aldersgruppe {
   IKKE_VALGT = 'IKKE_VALGT',
 }
 
-export interface EtterbetalingDto {
+export interface IEtterbetaling {
   datoFom?: string | null
   datoTom?: string | null
 }
@@ -52,14 +52,14 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
   const behandling = props.behandling
   const dispatch = useAppDispatch()
   const redigerbar = behandlingErRedigerbar(behandling.status)
-  const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetalingDto>(
+  const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<IBrevutfallOgEtterbetaling>(
     initialBrevutfallOgEtterbetaling(behandling.sakType)
   )
   const [hentBrevutfallResult, hentBrevutfallRequest] = useApiCall(hentBrevutfallApi)
   const [visSkjema, setVisSkjema] = useState(redigerbar)
 
   const hentBrevutfall = () => {
-    hentBrevutfallRequest(behandling.id, (brevutfall: BrevutfallOgEtterbetalingDto | null) => {
+    hentBrevutfallRequest(behandling.id, (brevutfall: IBrevutfallOgEtterbetaling | null) => {
       if (brevutfall) {
         dispatch(oppdaterBrevutfallOgEtterbetaling(brevutfall))
         setBrevutfallOgEtterbetaling(brevutfall)

@@ -1,6 +1,6 @@
 import { BodyShort, Button, HStack, Label, VStack } from '@navikt/ds-react'
 import React from 'react'
-import { Aldersgruppe, BrevutfallOgEtterbetalingDto } from '~components/behandling/brevutfall/Brevutfall'
+import { Aldersgruppe, IBrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 import { format, parseISO } from 'date-fns'
 import nb from 'date-fns/locale/nb'
 import { SakType } from '~shared/types/sak'
@@ -23,7 +23,7 @@ function formaterDatoSomMaaned(dato: string) {
 
 export const BrevutfallVisning = (props: {
   redigerbar: boolean
-  brevutfallOgEtterbetaling: BrevutfallOgEtterbetalingDto
+  brevutfallOgEtterbetaling: IBrevutfallOgEtterbetaling
   sakType: SakType
   setVisSkjema: (visSkjema: boolean) => void
 }) => {

@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.behandlinginfo
 
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import java.util.UUID

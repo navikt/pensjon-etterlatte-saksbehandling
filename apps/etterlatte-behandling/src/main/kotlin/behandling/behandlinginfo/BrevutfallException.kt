@@ -3,19 +3,7 @@ package no.nav.etterlatte.behandling.behandlinginfo
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import java.util.UUID
-
-data class Brevutfall(
-    val behandlingId: UUID,
-    val aldersgruppe: Aldersgruppe?,
-    val kilde: Grunnlagsopplysning.Kilde,
-)
-
-enum class Aldersgruppe {
-    OVER_18,
-    UNDER_18,
-}
 
 sealed class BrevutfallException {
     class BehandlingKanIkkeEndres(behandlingId: UUID, status: BehandlingStatus) : IkkeTillattException(

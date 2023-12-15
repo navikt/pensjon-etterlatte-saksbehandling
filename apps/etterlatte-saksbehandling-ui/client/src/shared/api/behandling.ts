@@ -153,8 +153,8 @@ export const lagreBrevutfallApi = async (args: {
   return apiClient.post(`/behandling/${args.behandlingId}/info/brevutfall`, { ...args.brevutfall })
 }
 
-export const hentBrevutfallApi = async (
+export const hentBrevutfallOgEtterbetalingApi = async (
   behandlingId: string
 ): Promise<ApiResponse<BrevutfallOgEtterbetaling | null>> => {
-  return apiClient.get(`/behandling/${behandlingId}/info/brevutfall`)
+  return apiClient.get(`/behandling/${behandlingId}/info/brevutfallogetterbetaling`)
 }

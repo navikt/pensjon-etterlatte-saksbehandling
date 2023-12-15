@@ -1,5 +1,6 @@
 package no.nav.etterlatte.migrering.verifisering
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -7,6 +8,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
+import no.nav.etterlatte.migrering.grunnlag.GrunnlagKlient
 import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -21,6 +23,7 @@ internal class Verifiserer(
     private val utenlandstilknytningsjekker: Utenlandstilknytningsjekker,
     private val personHenter: PersonHenter,
     private val featureToggleService: FeatureToggleService,
+    private val grunnlagKlient: GrunnlagKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -94,16 +97,29 @@ internal class Verifiserer(
             personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()
                 ?: return listOf(FinsIkkeIPDL(PersonRolle.BARN, request.soeker))
 
-        if (!featureToggleService.isEnabled(MigreringFeatureToggle.MigrerNaarSoekerHarVerge, false)) {
-            if (person.vergemaalEllerFremtidsfullmakt?.isNotEmpty() == true) {
-                return listOf(BarnetHarVergemaal)
-            }
-        }
-
         if ((person.vergemaalEllerFremtidsfullmakt?.size ?: 0) > 1) {
             return listOf(BarnetHarFlereVerger)
         }
-        return emptyList()
+        if (person.vergemaalEllerFremtidsfullmakt.isNullOrEmpty()) {
+            return emptyList()
+        }
+
+        if (!featureToggleService.isEnabled(MigreringFeatureToggle.MigrerNaarSoekerHarVerge, false)) {
+            return listOf(BarnetHarVergemaal)
+        } else {
+            return try {
+                runBlocking {
+                    if (grunnlagKlient.hentVergesAdresse(request.soeker.value) == null) {
+                        listOf(VergeManglerAdresseFraPDL)
+                    } else {
+                        emptyList()
+                    }
+                }
+            } catch (e: Exception) {
+                logger.error("Feil under henting av verges adresse", e)
+                listOf(FeilUnderHentingAvVergesAdresse)
+            }
+        }
     }
 }
 
@@ -137,4 +153,14 @@ data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
 object SoekerErOver18 : Verifiseringsfeil() {
     override val message: String
         get() = "Skal ikke per nå migrere søker der søker er over 18"
+}
+
+object VergeManglerAdresseFraPDL : Verifiseringsfeil() {
+    override val message: String
+        get() = "Verge mangler adresse i PDL"
+}
+
+object FeilUnderHentingAvVergesAdresse : Verifiseringsfeil() {
+    override val message: String
+        get() = "Noe feil skjedde under henting av verges adresse, se detaljer i logg"
 }

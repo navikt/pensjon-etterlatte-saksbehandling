@@ -16,4 +16,5 @@ data class NyBehandlingRequest(
     val kilde: Vedtaksloesning?,
     val pesysId: Long?,
     val enhet: String?,
+    val foreldreloes: Boolean = false,
 )

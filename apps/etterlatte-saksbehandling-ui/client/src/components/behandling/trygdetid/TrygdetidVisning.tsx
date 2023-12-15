@@ -12,8 +12,7 @@ import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import React, { useEffect, useState } from 'react'
-import YrkesskadeTrygdetidBP from '~components/behandling/trygdetid/YrkesskadeTrygdetidBP'
-import YrkesskadeTrygdetidOMS from '~components/behandling/trygdetid/YrkesskadeTrygdetidOMS'
+import YrkesskadeTrygdetid from '~components/behandling/trygdetid/YrkesskadeTrygdetid'
 import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
 import { oppdaterStatus } from '~shared/api/trygdetid'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
@@ -73,8 +72,24 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
       {isSuccess(vilkaarsvurdering) &&
         (yrkesskadeTrygdetid ? (
           {
-            [SakType.BARNEPENSJON]: <YrkesskadeTrygdetidBP status={behandling.status} />,
-            [SakType.OMSTILLINGSSTOENAD]: <YrkesskadeTrygdetidOMS status={behandling.status} />,
+            [SakType.BARNEPENSJON]: (
+              <YrkesskadeTrygdetid
+                status={behandling.status}
+                hjemmel={{
+                  tittel: '§ 18-11.Barnepensjon etter dødsfall som skyldes yrkesskade',
+                  lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-11',
+                }}
+              />
+            ),
+            [SakType.OMSTILLINGSSTOENAD]: (
+              <YrkesskadeTrygdetid
+                status={behandling.status}
+                hjemmel={{
+                  tittel: '§ 17-12.Pensjon etter dødsfall som skyldes yrkesskade',
+                  lenke: 'https://lovdata.no/lov/1997-02-28-19/§17-12',
+                }}
+              />
+            ),
           }[behandling.sakType]
         ) : (
           <Trygdetid

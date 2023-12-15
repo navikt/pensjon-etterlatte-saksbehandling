@@ -12,17 +12,34 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { behandlingErIverksattEllerSamordnet } from '~components/behandling/felles/utils'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 
-const YrkesskadeTrygdetid = ({ status }: { status: IBehandlingStatus }) => {
+const YrkesskadeTrygdetid = ({
+  status,
+  hjemmel,
+}: {
+  status: IBehandlingStatus
+  hjemmel: {
+    tittel: string
+    lenke: string
+  }
+}) => {
   const { behandlingId } = useParams()
   const [hentTrygdetidRequest, fetchTrygdetid] = useApiCall(hentTrygdetid)
   const [opprettTrygdetidRequest, requestOpprettTrygdetid] = useApiCall(opprettTrygdetid)
   const [opprettYrkesskadeTrygdetidGrunnlag, requestOpprettYrkesskadeTrygdetidGrunnlag] = useApiCall(
     lagreYrkesskadeTrygdetidGrunnlag
   )
+
   const [harPilotTrygdetid, setHarPilotTrygdetid] = useState<boolean>(false)
+
+  const statusForRedigerTrygdetid =
+    status === IBehandlingStatus.OPPRETTET ||
+    status === IBehandlingStatus.RETURNERT ||
+    status === IBehandlingStatus.VILKAARSVURDERT ||
+    status === IBehandlingStatus.TRYGDETID_OPPDATERT
 
   useEffect(() => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
+
     fetchTrygdetid(behandlingId, (trygdetid: ITrygdetid) => {
       if (trygdetid === null) {
         if (behandlingErIverksattEllerSamordnet(status)) {
@@ -36,7 +53,9 @@ const YrkesskadeTrygdetid = ({ status }: { status: IBehandlingStatus }) => {
         // Må skrives om når vi gjør om til å støtte utenlands og poeng i inn/ut år (relatert til prorata)
         // Pt sjekker vi regelResultat string i backend (Trygdetid.kt) for å gjøre en "er dette yrkesskade"
         // I mellomtid så vil den bare erstatte en fast 40 år med en ny fast 40 år på samme grunnlag
-        requestOpprettYrkesskadeTrygdetidGrunnlag({ behandlingId })
+        if (statusForRedigerTrygdetid) {
+          requestOpprettYrkesskadeTrygdetidGrunnlag({ behandlingId })
+        }
       }
     })
   }, [])
@@ -54,16 +73,7 @@ const YrkesskadeTrygdetid = ({ status }: { status: IBehandlingStatus }) => {
 
   return (
     <TrygdetidWrapper>
-      <LovtekstMedLenke
-        tittel="Trygdetid"
-        hjemler={[
-          {
-            tittel: '§ 17-12.Pensjon etter dødsfall som skyldes yrkesskade',
-            lenke: 'https://lovdata.no/lov/1997-02-28-19/§17-12',
-          },
-        ]}
-        status={null}
-      >
+      <LovtekstMedLenke tittel="Trygdetid" hjemler={[hjemmel]} status={null}>
         <TrygdetidInfo>
           <BodyShort>Dødsfall som skyldes en skade eller sykdom som går inn under kapittel 13</BodyShort>
           <BodyShort>

@@ -97,7 +97,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
                 failure = { throwableErrorMessage -> throw throwableErrorMessage },
             )
         } catch (e: Exception) {
-            throw BehandlingKlientException("Henting av etterbetaling feilet", e)
+            throw BehandlingKlientException("Henting av brevutfall feilet", e)
         }
     }
 

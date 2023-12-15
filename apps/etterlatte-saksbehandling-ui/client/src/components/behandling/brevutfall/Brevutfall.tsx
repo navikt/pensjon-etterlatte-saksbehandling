@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { Alert, BodyLong, Heading } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentBrevutfallApi } from '~shared/api/behandling'
+import { hentBrevutfallOgEtterbetalingApi } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { BrevutfallSkjema } from '~components/behandling/brevutfall/BrevutfallSkjema'
@@ -52,7 +52,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
   const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
     initialBrevutfallOgEtterbetaling(behandling.sakType)
   )
-  const [hentBrevutfallResult, hentBrevutfallRequest] = useApiCall(hentBrevutfallApi)
+  const [hentBrevutfallResult, hentBrevutfallRequest] = useApiCall(hentBrevutfallOgEtterbetalingApi)
   const [visSkjema, setVisSkjema] = useState(redigerbar)
 
   const hentBrevutfall = () => {

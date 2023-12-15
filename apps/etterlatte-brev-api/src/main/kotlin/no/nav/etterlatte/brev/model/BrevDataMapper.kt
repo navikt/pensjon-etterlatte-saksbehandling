@@ -46,6 +46,7 @@ import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -70,6 +71,8 @@ private class BrevDatafetcher(
     private val type: VedtakType,
     private val sak: Sak,
 ) {
+    suspend fun hentBrevutfall() = brevdataFacade.hentBrevutfall(behandlingId, brukerTokenInfo)
+
     suspend fun hentUtbetaling() =
         brevdataFacade.finnUtbetalingsinfo(
             behandlingId,
@@ -371,7 +374,10 @@ class BrevDataMapper(
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
                     val grunnbeloep = async { fetcher.hentGrunnbeloep() }
-                    val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
+                    val trygdetidHentet =
+                        requireNotNull(
+                            trygdetid.await(),
+                        ) { "${kode.ferdigstilling} Har ikke trygdetid, det er påbudt for ${BARNEPENSJON_INNVILGELSE_NY.name}" }
                     val grunnbeloepHentet =
                         requireNotNull(grunnbeloep.await()) { "${kode.ferdigstilling} Må ha grunnbeløp" }
                     EndringHovedmalBrevData.fra(
@@ -393,9 +399,18 @@ class BrevDataMapper(
                     val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
                     val grunnbeloep = async { fetcher.hentGrunnbeloep() }
-                    val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
+                    val brevutfall = async { fetcher.hentBrevutfall() }
+                    val trygdetidHentet =
+                        requireNotNull(
+                            trygdetid.await(),
+                        ) { "${kode.ferdigstilling} Har ikke trygdetid, det er påbudt for ${BARNEPENSJON_INNVILGELSE_NY.name}" }
                     val grunnbeloepHentet =
                         requireNotNull(grunnbeloep.await()) { "${kode.ferdigstilling} Må ha grunnbeløp" }
+
+                    val brevutfallHentet =
+                        requireNotNull(brevutfall.await()) {
+                            "${kode.ferdigstilling} Må ha brevutfall for å avgjøre over eller under 18 år"
+                        }
                     InnvilgetHovedmalBrevData.fra(
                         utbetaling.await(),
                         avkortingsinfo.await(),
@@ -404,6 +419,7 @@ class BrevDataMapper(
                         grunnbeloepHentet,
                         generellBrevData.utlandstilknytning?.type,
                         innholdMedVedlegg,
+                        brevutfallHentet.aldersgruppe == Aldersgruppe.UNDER_18,
                     )
                 }
             }

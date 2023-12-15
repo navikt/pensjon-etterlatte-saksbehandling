@@ -62,6 +62,7 @@ internal class InnvilgetHovedmalBrevDataTest {
                     ),
                 innhold = lagInnholdMedVedlegg(),
                 utlandstilknytning = null,
+                brukerUnder18Aar = true,
             )
 
         Assertions.assertEquals(

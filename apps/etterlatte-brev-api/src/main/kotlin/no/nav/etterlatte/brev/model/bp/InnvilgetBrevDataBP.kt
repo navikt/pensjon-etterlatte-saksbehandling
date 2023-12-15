@@ -64,13 +64,14 @@ data class InnvilgetHovedmalBrevData(
             grunnbeloep: Grunnbeloep,
             utlandstilknytning: UtlandstilknytningType?,
             innhold: InnholdMedVedlegg,
+            brukerUnder18Aar: Boolean,
         ): InnvilgetHovedmalBrevData =
             InnvilgetHovedmalBrevData(
                 utbetalingsinfo = Utbetalingsinfo.kopier(utbetalingsinfo, etterbetalingDTO),
                 avkortingsinfo = avkortingsinfo,
                 beregningsinfo = BeregningsinfoBP.fra(utbetalingsinfo, trygdetid, grunnbeloep, innhold),
                 etterbetaling = EtterbetalingBrev.fra(etterbetalingDTO, utbetalingsinfo.beregningsperioder),
-                brukerUnder18Aar = true, // TODO map opp mot valg gjort av saksbehandler i løsningen
+                brukerUnder18Aar = brukerUnder18Aar,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 innhold = innhold.innhold(),
             )

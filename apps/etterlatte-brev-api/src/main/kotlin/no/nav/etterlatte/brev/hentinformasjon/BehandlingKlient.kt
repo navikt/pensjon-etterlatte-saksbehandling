@@ -6,6 +6,7 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
@@ -76,6 +77,27 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
                     )
                 }
             }
+        }
+    }
+
+    internal suspend fun hentBrevutfall(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevutfallDto? {
+        try {
+            return downstreamResourceClient.get(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/api/behandling/$behandlingId/info/brevutfall",
+                    ),
+                brukerTokenInfo = brukerTokenInfo,
+            ).mapBoth(
+                success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
+                failure = { throwableErrorMessage -> throw throwableErrorMessage },
+            )
+        } catch (e: Exception) {
+            throw BehandlingKlientException("Henting av brevutfall feilet", e)
         }
     }
 

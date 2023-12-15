@@ -21,6 +21,7 @@ import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.objectMapper
@@ -42,6 +43,13 @@ class BrevdataFacade(
     private val sakService: SakService,
     private val trygdetidService: TrygdetidService,
 ) {
+    suspend fun hentBrevutfall(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevutfallDto? {
+        return behandlingKlient.hentBrevutfall(behandlingId, brukerTokenInfo)
+    }
+
     suspend fun hentEtterbetaling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

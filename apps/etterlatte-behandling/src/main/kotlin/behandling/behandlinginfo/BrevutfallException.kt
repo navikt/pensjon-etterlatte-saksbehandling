@@ -16,7 +16,7 @@ sealed class BrevutfallException {
         detail = "Behandling $behandlingId har ikke satt virkningstidspunkt.",
     )
 
-    class AldergruppeIkkeSatt() : IkkeTillattException(
+    class AldergruppeIkkeSatt : IkkeTillattException(
         code = "ALDERGRUPPE_IKKE_SATT",
         detail = "Aldersgruppe må være satt for behandling av barnepensjon.",
     )

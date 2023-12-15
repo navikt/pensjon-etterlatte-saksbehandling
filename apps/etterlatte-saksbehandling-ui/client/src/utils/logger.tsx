@@ -26,7 +26,6 @@ const defaultContext = {
   url: sanitizeUrlPossibleFnr(window.location.href),
   userAgent: window.navigator.userAgent,
   userDeviceInfo: browser.parsedResult,
-  appName: 'etterlatte-saksbehandling-ui-client',
 }
 
 const loggFunc = (data: any) => apiClient.post('/logg', data, true, true)
@@ -55,7 +54,7 @@ export const logger = {
         console.error('Unable to log error message: ', data, ' err: ', err)
       })
   },
-  generalInfo: (info: string) => {
+  generalInfo: (info: object) => {
     const data = { type: 'info', data: info, jsonContent: { ...defaultContext } }
     loggFunc(data)
       .then(() => store.dispatch(loggInfo(data)))
@@ -63,7 +62,7 @@ export const logger = {
         console.error('Unable to log info message: ', data, ' err: ', err)
       })
   },
-  generalError: (info: string) => {
+  generalError: (info: object) => {
     const data = { type: 'error', data: info, jsonContent: { ...defaultContext } }
     loggFunc(data)
       .then(() => store.dispatch(loggError(data)))

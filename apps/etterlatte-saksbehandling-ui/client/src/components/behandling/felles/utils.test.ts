@@ -207,6 +207,8 @@ const opprettBehandling = (
     revurderinginfo: null,
     begrunnelse: null,
     utlandstilknytning: null,
+    etterbetaling: null,
+    brevutfall: null,
   }
 }
 

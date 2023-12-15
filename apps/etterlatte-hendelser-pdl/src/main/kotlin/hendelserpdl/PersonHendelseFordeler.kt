@@ -233,7 +233,10 @@ class PersonHendelseFordeler(
         opplysningstype: LeesahOpplysningstype,
         hendelse: PdlHendelse,
     ) {
-        logger.info("Publiserer at en person med fnr=${hendelse.fnr.maskerFnr()} har mottatt hendelse $opplysningstype")
+        logger.info(
+            "Publiserer at en person med fnr=${hendelse.fnr.maskerFnr()} har mottatt hendelse " +
+                "med id=${hendelse.hendelseId} og type=$opplysningstype",
+        )
 
         kafkaProduser.publiser(
             noekkel = UUID.randomUUID().toString(),
@@ -252,7 +255,7 @@ class PersonHendelseFordeler(
     private fun Personhendelse.endringstype() = Endringstype.valueOf(this.endringstype.name)
 
     private fun loggIgnorererNpid(hendelseId: String) =
-        logger.info("Ignorerer en hendelse med id=$hendelseId om en person som kun har NPID som identifikator")
+        logger.warn("Ignorerer en hendelse med id=$hendelseId om en person som kun har NPID som identifikator")
 
     private fun loggFeilVedHaandteringAvHendelse(
         hendelseId: String,

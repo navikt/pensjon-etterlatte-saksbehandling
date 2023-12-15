@@ -1,4 +1,16 @@
-import { BodyShort, Button, ErrorMessage, Heading, Label, ReadMore, Table, Textarea, TextField } from '@navikt/ds-react'
+import {
+  BodyShort,
+  Button,
+  ErrorMessage,
+  Heading,
+  HStack,
+  Label,
+  ReadMore,
+  Table,
+  Textarea,
+  TextField,
+  VStack,
+} from '@navikt/ds-react'
 import styled from 'styled-components'
 import React, { FormEvent, useState } from 'react'
 import { IAvkorting, IAvkortingGrunnlag } from '~shared/types/IAvkorting'
@@ -185,66 +197,68 @@ export const AvkortingInntekt = (props: {
             {formToggle && (
               <>
                 <FormWrapper>
-                  <TextField
-                    label="Forventet årsinntekt Norge"
-                    size="medium"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={inntektGrunnlagForm.aarsinntekt}
-                    onChange={(e) =>
-                      setInntektGrunnlagForm({
-                        ...inntektGrunnlagForm,
-                        aarsinntekt: e.target.value === '' ? undefined : Number(e.target.value),
-                      })
-                    }
-                  />
-                  <TextField
-                    label="Fratrekk inn-år"
-                    size="medium"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={inntektGrunnlagForm.fratrekkInnAar}
-                    onChange={(e) =>
-                      setInntektGrunnlagForm({
-                        ...inntektGrunnlagForm,
-                        fratrekkInnAar: Number(e.target.value),
-                      })
-                    }
-                  />
-                  <TextField
-                    label="Forventet årsinntekt utland"
-                    size="medium"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={inntektGrunnlagForm.inntektUtland}
-                    onChange={(e) =>
-                      setInntektGrunnlagForm({
-                        ...inntektGrunnlagForm,
-                        inntektUtland: Number(e.target.value),
-                      })
-                    }
-                  />
-                  <TextField
-                    label="Fratrekk inn-år"
-                    size="medium"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={inntektGrunnlagForm.fratrekkInnAarUtland}
-                    onChange={(e) =>
-                      setInntektGrunnlagForm({
-                        ...inntektGrunnlagForm,
-                        fratrekkInnAarUtland: Number(e.target.value),
-                      })
-                    }
-                  />
-                  <DatoSection>
-                    <Label>F.o.m dato</Label>
-                    <Info label="" tekst={formaterStringDato(inntektGrunnlagForm.fom!)} />
-                  </DatoSection>
+                  <HStack gap="4">
+                    <TextField
+                      label="Forventet årsinntekt Norge"
+                      size="medium"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={inntektGrunnlagForm.aarsinntekt}
+                      onChange={(e) =>
+                        setInntektGrunnlagForm({
+                          ...inntektGrunnlagForm,
+                          aarsinntekt: e.target.value === '' ? undefined : Number(e.target.value),
+                        })
+                      }
+                    />
+                    <TextField
+                      label="Fratrekk inn-år"
+                      size="medium"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={inntektGrunnlagForm.fratrekkInnAar}
+                      onChange={(e) =>
+                        setInntektGrunnlagForm({
+                          ...inntektGrunnlagForm,
+                          fratrekkInnAar: Number(e.target.value),
+                        })
+                      }
+                    />
+                    <TextField
+                      label="Forventet årsinntekt utland"
+                      size="medium"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={inntektGrunnlagForm.inntektUtland}
+                      onChange={(e) =>
+                        setInntektGrunnlagForm({
+                          ...inntektGrunnlagForm,
+                          inntektUtland: Number(e.target.value),
+                        })
+                      }
+                    />
+                    <TextField
+                      label="Fratrekk inn-år"
+                      size="medium"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={inntektGrunnlagForm.fratrekkInnAarUtland}
+                      onChange={(e) =>
+                        setInntektGrunnlagForm({
+                          ...inntektGrunnlagForm,
+                          fratrekkInnAarUtland: Number(e.target.value),
+                        })
+                      }
+                    />
+                    <VStack gap="4">
+                      <Label>Fra og med dato</Label>
+                      <BodyShort>{formaterStringDato(inntektGrunnlagForm.fom!)}</BodyShort>
+                    </VStack>
+                  </HStack>
                 </FormWrapper>
                 <TextAreaWrapper>
                   <Textarea
@@ -350,7 +364,7 @@ const TextAreaWrapper = styled.div`
     margin-top: 1em;
     border-width: 1px;
     border-radius: 4px 4px 0 4px;
-    width: 46em;
+    width: 47em;
     height: 98px;
     text-indent: 4px;
     resize: none;
@@ -359,10 +373,6 @@ const TextAreaWrapper = styled.div`
 
 const SpesifikasjonLabel = styled.div``
 
-const DatoSection = styled.section`
-  display: grid;
-  gap: 0.5em;
-`
 const Rows = styled.div`
   flex-direction: column;
 `

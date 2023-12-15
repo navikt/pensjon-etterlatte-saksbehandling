@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -34,6 +35,7 @@ class VedtakhendelserRiver(
             validate { it.demandAny(EVENT_NAME_KEY, vedtakshendelser) }
             validate { it.requireKey("vedtak") }
             validate { it.interestedIn(TEKNISK_TID_KEY) }
+            validate { it.rejectKey(FIKS_BREV_MIGRERING) }
         }
     }
 

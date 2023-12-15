@@ -24,7 +24,7 @@ class VergeService(private val persondataKlient: PersondataKlient) {
         val pdlVerge = finnVerge(pdlPerson) ?: return null
         val vergesAdresse = hentVergesAdresse(pdlVerge)
         if (vergesAdresse == null) {
-            logger.error("Fant ikke verges adresse ved oppretting av grunnlag, for fnr ${pdlPerson.foedselsnummer}")
+            logger.warn("Fant ikke verges adresse ved oppretting av grunnlag, for fnr ${pdlPerson.foedselsnummer}")
         }
         return vergesAdresse
     }

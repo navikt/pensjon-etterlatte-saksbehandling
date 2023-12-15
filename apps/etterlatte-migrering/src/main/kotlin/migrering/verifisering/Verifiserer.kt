@@ -101,7 +101,7 @@ internal class Verifiserer(
             return listOf(BarnetHarFlereVerger)
         }
         if (person.vergemaalEllerFremtidsfullmakt.isNullOrEmpty()) {
-            return listOf()
+            return emptyList()
         }
 
         if (!featureToggleService.isEnabled(MigreringFeatureToggle.MigrerNaarSoekerHarVerge, false)) {
@@ -112,7 +112,7 @@ internal class Verifiserer(
                     if (grunnlagKlient.hentVergesAdresse(request.soeker.value) == null) {
                         listOf(VergeManglerAdresseFraPDL)
                     } else {
-                        listOf()
+                        emptyList()
                     }
                 }
             } catch (e: Exception) {

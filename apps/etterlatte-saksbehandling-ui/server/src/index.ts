@@ -9,10 +9,9 @@ import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
 import { loggerRouter } from './routers/loggerRouter'
 import prometheus from './monitoring/prometheus'
-import { sanitize } from './utils/sanitize'
-import { unleash } from './utils/unleash'
 import { innloggetBrukerRouter } from './routers/innloggetBrukerRouter'
 import { norg2Router } from './routers/norg2Router'
+import { unleashRouter } from './routers/unleashRouter'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -24,11 +23,11 @@ app.set('trust proxy', 1)
 app.use('/', express.static(clientPath))
 app.use(requestLogger(isDev))
 
-app.use(['/health/isAlive', '/health/isReady'], (req: Request, res: Response) => {
+app.use(['/health/isAlive', '/health/isReady'], (_: Request, res: Response) => {
   res.send('OK')
 })
 
-app.get('/metrics', async (req: Request, res: Response) => {
+app.get('/metrics', async (_: Request, res: Response) => {
   res.set('Content-Type', prometheus.register.contentType)
   res.end(await prometheus.register.metrics())
 })
@@ -39,46 +38,7 @@ if (isDev) {
 } else {
   app.use('/api/logg', loggerRouter)
 
-  app.post('/api/feature', express.json(), (req: Request, res: Response) => {
-    const toggles: string[] = req.body.features
-
-    const PAA = 'PAA'
-    const AV = 'AV'
-    const UDEFINERT = 'UDEFINERT'
-    const HENTING_FEILA = 'HENTING_FEILA'
-
-    const isEnabled = (toggle: string): String => {
-      if (!unleash) {
-        return UDEFINERT
-      }
-      try {
-        if (unleash.isEnabled(toggle, undefined)) {
-          return PAA
-        } else {
-          return AV
-        }
-      } catch (e) {
-        logger.error({
-          message: `Fikk feilmelding fra Unleash for toggle ${sanitize(toggle)}, bruker defaultverdi false`,
-          error: JSON.stringify(e),
-        })
-        return HENTING_FEILA
-      }
-    }
-
-    res.json(
-      toggles.map((toggle) => {
-        const enabled = isEnabled(toggle)
-
-        logger.info(`${sanitize(toggle)} enabled: ${enabled}`)
-
-        return {
-          toggle: toggle,
-          enabled: enabled,
-        }
-      })
-    )
-  })
+  app.use('/api/feature', unleashRouter)
 
   app.use(authenticateUser) // Alle ruter etter denne er authenticated
   app.use('/api/innlogget', innloggetBrukerRouter)

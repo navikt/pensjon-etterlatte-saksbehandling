@@ -9,6 +9,8 @@ import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -55,6 +57,25 @@ class BehandlingFactory(
         val soeker = request.persongalleri.soeker
 
         val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType) }
+
+        if (
+            sak.enhet != request.enhet &&
+            sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr &&
+            sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
+        ) {
+            request.enhet?.let {
+                inTransaction {
+                    sakService.oppdaterEnhetForSaker(
+                        listOf(
+                            GrunnlagsendringshendelseService.SakMedEnhet(
+                                enhet = it,
+                                id = sak.id,
+                            ),
+                        ),
+                    )
+                }
+            }
+        }
 
         val persongalleri =
             when (request.kilde) {

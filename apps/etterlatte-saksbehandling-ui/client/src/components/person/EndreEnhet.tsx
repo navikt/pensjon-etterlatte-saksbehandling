@@ -74,7 +74,7 @@ const OpprettRevurderingWrapper = styled.div`
   margin-top: 0;
 `
 
-const ENHETER = {
+export const ENHETER = {
   VELGENHET: 'Velg Enhet',
   E4815: 'Ålesund - 4815',
   E4808: 'Porsgrunn - 4808',
@@ -85,9 +85,9 @@ const ENHETER = {
   E2103: 'Vikafossen - 2103',
 }
 
-type EnhetFilterKeys = keyof typeof ENHETER
+export type EnhetFilterKeys = keyof typeof ENHETER
 
-function filtrerEnhet(enhetsFilter: EnhetFilterKeys): String {
+export function filtrerEnhet(enhetsFilter: EnhetFilterKeys): String {
   return enhetsFilter.substring(1)
 }
 

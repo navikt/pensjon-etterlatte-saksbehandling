@@ -33,6 +33,7 @@ export interface NyBehandlingRequest {
   spraak?: Spraak
   kilde?: string
   pesysId?: number
+  enhet?: String
 }
 
 export enum IBehandlingsType {

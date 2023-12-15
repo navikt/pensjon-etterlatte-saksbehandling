@@ -17,6 +17,7 @@ import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
 import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~components/person/EndreEnhet'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
@@ -33,6 +34,8 @@ export default function ManuellBehandling() {
 
   const [pesysId, setPesysId] = useState<number | undefined>(undefined)
 
+  const [enhetsFilter, setEnhetsfilter] = useState<EnhetFilterKeys>('VELGENHET')
+
   const ferdigstill = () => {
     opprettNyBehandling(
       {
@@ -41,6 +44,7 @@ export default function ManuellBehandling() {
         mottattDato: nyBehandlingRequest!!.mottattDato!!.replace('Z', ''),
         kilde: erMigrering ? 'PESYS' : undefined,
         pesysId: pesysId,
+        enhet: enhetsFilter === 'VELGENHET' ? undefined : filtrerEnhet(enhetsFilter),
       },
       (nyBehandlingRespons) => {
         if (overstyrBeregning) {
@@ -86,6 +90,18 @@ export default function ManuellBehandling() {
           onChange={(e) => setPesysId(Number(e.target.value))}
         />
       </InputRow>
+
+      <Select
+        label="Overstyre enhet (valgfritt)"
+        value={enhetsFilter}
+        onChange={(e) => setEnhetsfilter(e.target.value as EnhetFilterKeys)}
+      >
+        {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
+          <option key={status} value={status}>
+            {statusbeskrivelse}
+          </option>
+        ))}
+      </Select>
 
       <Checkbox checked={overstyrBeregning} onChange={() => setOverstyrBeregning(!overstyrBeregning)}>
         Skal bruke manuell beregning

@@ -622,6 +622,7 @@ class BehandlingFactoryTest {
                         "nb",
                         Vedtaksloesning.GJENNY,
                         null,
+                        null,
                     ),
                 )
             }

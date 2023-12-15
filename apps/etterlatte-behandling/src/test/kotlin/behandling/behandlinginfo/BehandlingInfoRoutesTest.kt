@@ -122,7 +122,7 @@ internal class BehandlingInfoRoutesTest {
             val client = createClient()
 
             val response =
-                client.get("/api/behandling/${UUID.randomUUID()}/info/brevutfall") {
+                client.get("/api/behandling/${UUID.randomUUID()}/info/brevutfallogetterbetaling") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 

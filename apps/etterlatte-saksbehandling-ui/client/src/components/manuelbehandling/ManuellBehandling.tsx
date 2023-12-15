@@ -47,7 +47,7 @@ export default function ManuellBehandling() {
         kilde: erMigrering ? 'PESYS' : undefined,
         pesysId: pesysId,
         enhet: enhetsFilter === 'VELGENHET' ? undefined : filtrerEnhet(enhetsFilter),
-        erForeldreloes = erForeldreloes,
+        foreldreloes: erForeldreloes,
       },
       (nyBehandlingRespons) => {
         if (overstyrBeregning) {

@@ -34,7 +34,7 @@ export interface NyBehandlingRequest {
   kilde?: string
   pesysId?: number
   enhet?: String
-  erForeldreloes?: boolean
+  foreldreloes?: boolean
 }
 
 export enum IBehandlingsType {

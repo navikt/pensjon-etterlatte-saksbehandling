@@ -84,6 +84,10 @@ internal class Verifiserer(
                         logger.warn("Søker er over 18 år og det er ikke yrkesskade")
                         return listOf(SoekerErOver18)
                     }
+
+                    if (person.getOrNull()?.doedsdato != null) {
+                        return listOf(SoekerErDoed)
+                    }
                 }
                 person
             }
@@ -163,4 +167,9 @@ object VergeManglerAdresseFraPDL : Verifiseringsfeil() {
 object FeilUnderHentingAvVergesAdresse : Verifiseringsfeil() {
     override val message: String
         get() = "Noe feil skjedde under henting av verges adresse, se detaljer i logg"
+}
+
+object SoekerErDoed : Verifiseringsfeil() {
+    override val message: String
+        get() = "Søker er død"
 }

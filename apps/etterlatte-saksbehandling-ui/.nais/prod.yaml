@@ -8,7 +8,7 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 spec:
-  image: {{ image }}
+  image: "{{image}}"
   port: 8080
   replicas:
     max: 4
@@ -89,7 +89,7 @@ spec:
     - name: RINA_URL
       value: http://rina-ss1.adeo.no
     - name: APP_VERSION
-      value: {{ image }}
+      value: "{{ image }}"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:

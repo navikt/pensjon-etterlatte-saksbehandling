@@ -24,7 +24,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
-import no.nav.etterlatte.libs.common.grunnlag.hentErForeldreloes
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -92,7 +91,6 @@ class BrevdataFacade(
                     soeker = grunnlag.mapSoeker(),
                     avdoede = grunnlag.mapAvdoede(),
                     verge = grunnlag.mapVerge(sak.sakType, behandlingId),
-                    foreldreloes = grunnlag.sak.hentErForeldreloes()?.verdi ?: false,
                 )
             val vedtak = vedtakDeferred.await()
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()

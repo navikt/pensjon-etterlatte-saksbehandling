@@ -9,7 +9,6 @@ data class PersonerISak(
     val soeker: Soeker,
     val avdoede: List<Avdoed>,
     val verge: Verge?,
-    val foreldreloes: Boolean = false,
 )
 
 data class Innsender(val fnr: Foedselsnummer)
@@ -20,6 +19,7 @@ data class Soeker(
     val etternavn: String,
     val fnr: Foedselsnummer,
     val under18: Boolean? = null,
+    val foreldreloes: Boolean = false,
 )
 
 data class Avdoed(val navn: String, val doedsdato: LocalDate)

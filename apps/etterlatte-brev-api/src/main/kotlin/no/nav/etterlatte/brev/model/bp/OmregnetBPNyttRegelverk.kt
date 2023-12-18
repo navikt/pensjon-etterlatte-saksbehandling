@@ -44,7 +44,7 @@ data class OmregnetBPNyttRegelverk(
                     erBosattUtlandet = false,
                     erYrkesskade = false,
                     erForeldreloes =
-                        generellBrevData.personerISak.foreldreloes ||
+                        generellBrevData.personerISak.soeker.foreldreloes ||
                             (
                                 generellBrevData.personerISak.avdoede.size > 1 &&
                                     generellBrevData.personerISak.verge !is ForelderVerge

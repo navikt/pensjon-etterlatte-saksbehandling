@@ -7,7 +7,7 @@ import { JaNei } from '~shared/types/ISvar'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { IHendelse, IHendelseType } from '~shared/types/IHendelse'
 
-export function behandlingErUtfylt(behandling: IDetaljertBehandling): boolean {
+export function soeknadsoversiktErFerdigUtfylt(behandling: IDetaljertBehandling): boolean {
   const gyldigUtfylt = !!(
     behandling.gyldighetsprøving &&
     behandling.virkningstidspunkt &&

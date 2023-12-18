@@ -4,12 +4,12 @@ import { Beregne } from './beregne/Beregne'
 import { Vilkaarsvurdering } from './vilkaarsvurdering/Vilkaarsvurdering'
 import { Soeknadsoversikt } from './soeknadsoversikt/Soeknadoversikt'
 import Beregningsgrunnlag from './beregningsgrunnlag/Beregningsgrunnlag'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Vedtaksbrev } from './brev/Vedtaksbrev'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { Revurderingsoversikt } from '~components/behandling/revurderingsoversikt/Revurderingsoversikt'
-import { behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
+import { behandlingSkalSendeBrev, soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivitetsplikt'
 import { SakType } from '~shared/types/sak'
@@ -31,7 +31,7 @@ type behandlingRouteTypes =
 export interface BehandlingRouteTypes {
   path: string
   description: string
-  kreverBehandlingsstatus?: IBehandlingStatus
+  kreverBehandlingsstatus?: (behandling: IBehandlingReducer) => IBehandlingStatus
   sakstype?: SakType
 }
 
@@ -65,38 +65,39 @@ const routeTypes = {
   vilkaarsvurdering: {
     path: 'vilkaarsvurdering',
     description: 'Vilkårsvurdering',
-    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    kreverBehandlingsstatus: (behandling: IDetaljertBehandling) =>
+      soeknadsoversiktErFerdigUtfylt(behandling) ? IBehandlingStatus.OPPRETTET : IBehandlingStatus.VILKAARSVURDERT,
   },
   aktivitetsplikt: {
     path: 'aktivitetsplikt',
     description: 'Oppfølging av aktivitet',
-    kreverBehandlingsstatus: IBehandlingStatus.VILKAARSVURDERT,
+    kreverBehandlingsstatus: () => IBehandlingStatus.VILKAARSVURDERT,
     sakstype: SakType.OMSTILLINGSSTOENAD,
   },
   trygdetid: {
     path: 'trygdetid',
     description: 'Trygdetid',
-    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
+    kreverBehandlingsstatus: () => IBehandlingStatus.TRYGDETID_OPPDATERT,
   },
   beregningsgrunnlag: {
     path: 'beregningsgrunnlag',
     description: 'Beregningsgrunnlag',
-    kreverBehandlingsstatus: IBehandlingStatus.TRYGDETID_OPPDATERT,
+    kreverBehandlingsstatus: () => IBehandlingStatus.TRYGDETID_OPPDATERT,
   },
   beregning: {
     path: 'beregne',
     description: 'Beregning',
-    kreverBehandlingsstatus: IBehandlingStatus.BEREGNET,
+    kreverBehandlingsstatus: () => IBehandlingStatus.BEREGNET,
   },
   brevBp: {
     path: 'brev',
     description: 'Vedtaksbrev',
-    kreverBehandlingsstatus: IBehandlingStatus.BEREGNET,
+    kreverBehandlingsstatus: () => IBehandlingStatus.BEREGNET,
   },
   brevOms: {
     path: 'brev',
     description: 'Vedtaksbrev',
-    kreverBehandlingsstatus: IBehandlingStatus.AVKORTET,
+    kreverBehandlingsstatus: () => IBehandlingStatus.AVKORTET,
   },
 }
 

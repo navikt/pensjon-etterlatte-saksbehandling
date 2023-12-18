@@ -1,1 +1,1 @@
-alter table saker_til_migrering add column lopendeJanuar2024 boolean not null default false;
+alter table saker_til_migrering add column lopendeJanuar2024 boolean not null default true;

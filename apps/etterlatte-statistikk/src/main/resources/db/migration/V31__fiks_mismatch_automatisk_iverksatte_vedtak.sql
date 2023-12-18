@@ -1,7 +1,16 @@
+create temporary view saker_med_offset_teknisk_tid as
+(
+select b_iverksatt.behandling_id, b_iverksatt.teknisk_tid
+from sak b_iverksatt
+         left join sak b_attestert on b_iverksatt.behandling_id = b_attestert.behandling_id
+where b_iverksatt.behandling_status = 'IVERKSATT'
+  and b_attestert.behandling_status = 'ATTESTERT'
+  and b_iverksatt.teknisk_tid < b_attestert.teknisk_tid
+    );
+
 update sak s
 set teknisk_tid = s.teknisk_tid + interval '1 hour'
-where s.behandling_status = 'IVERKSATT'
+from saker_med_offset_teknisk_tid saker_med_feil
+where s.behandling_id = saker_med_feil.behandling_id
   and s.saksbehandler = 'EY'
-  and s.teknisk_tid < (select s2.teknisk_tid
-                       from sak s2
-                       where s2.behandling_status = 'ATTESTERT' and s.behandling_id = s2.behandling_id);
+  and s.behandling_status = 'IVERKSATT';

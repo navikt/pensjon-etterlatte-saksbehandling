@@ -12,4 +12,5 @@ update sak s
 set teknisk_tid = s.teknisk_tid + interval '1 hour'
 from saker_med_offset_teknisk_tid saker_med_feil
 where s.behandling_id = saker_med_feil.behandling_id
+  and s.saksbehandler = 'EY'
   and s.behandling_status = 'IVERKSATT';

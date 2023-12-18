@@ -19,6 +19,7 @@ data class Soeker(
     val etternavn: String,
     val fnr: Foedselsnummer,
     val under18: Boolean? = null,
+    val foreldreloes: Boolean = false,
 )
 
 data class Avdoed(val navn: String, val doedsdato: LocalDate)

@@ -105,7 +105,7 @@ class BehandlingFactory(
         val kilde = Grunnlagsopplysning.Privatperson(soeker, mottattDato.toTidspunkt())
 
         val opplysninger =
-            listOf(
+            mutableListOf(
                 lagOpplysning(Opplysningstype.SPRAAK, kilde, request.spraak.toJsonNode()),
                 lagOpplysning(
                     Opplysningstype.SOEKNAD_MOTTATT_DATO,
@@ -113,6 +113,9 @@ class BehandlingFactory(
                     SoeknadMottattDato(mottattDato).toJsonNode(),
                 ),
             )
+        if (request.kilde == Vedtaksloesning.PESYS) {
+            opplysninger.add(lagOpplysning(Opplysningstype.FORELDRELOES, kilde, request.foreldreloes.toJsonNode()))
+        }
 
         grunnlagService.leggTilNyeOpplysninger(behandling.id, NyeSaksopplysninger(sak.id, opplysninger))
 

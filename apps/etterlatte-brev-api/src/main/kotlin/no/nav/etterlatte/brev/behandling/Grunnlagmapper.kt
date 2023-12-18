@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
+import no.nav.etterlatte.libs.common.grunnlag.hentErForeldreloes
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
@@ -38,6 +39,7 @@ fun Grunnlag.mapSoeker(): Soeker =
             etternavn = navn.etternavn.storForbokstav(),
             fnr = Foedselsnummer(hentFoedselsnummer()!!.verdi.value),
             under18 = erUnder18,
+            foreldreloes = sak.hentErForeldreloes()?.verdi ?: false,
         )
     }
 

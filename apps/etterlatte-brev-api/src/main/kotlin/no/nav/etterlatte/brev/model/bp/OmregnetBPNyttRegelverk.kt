@@ -44,8 +44,11 @@ data class OmregnetBPNyttRegelverk(
                     erBosattUtlandet = false,
                     erYrkesskade = false,
                     erForeldreloes =
-                        generellBrevData.personerISak.avdoede.size > 1 &&
-                            generellBrevData.personerISak.verge !is ForelderVerge,
+                        generellBrevData.personerISak.soeker.foreldreloes ||
+                            (
+                                generellBrevData.personerISak.avdoede.size > 1 &&
+                                    generellBrevData.personerISak.verge !is ForelderVerge
+                            ),
                     erUnder18Aar = erUnder18Aar,
                 )
             if (

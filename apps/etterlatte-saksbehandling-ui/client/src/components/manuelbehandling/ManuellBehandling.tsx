@@ -36,6 +36,8 @@ export default function ManuellBehandling() {
 
   const [enhetsFilter, setEnhetsfilter] = useState<EnhetFilterKeys>('VELGENHET')
 
+  const [erForeldreloes, setErForeldreloes] = useState<boolean>(false)
+
   const ferdigstill = () => {
     opprettNyBehandling(
       {
@@ -45,6 +47,7 @@ export default function ManuellBehandling() {
         kilde: erMigrering ? 'PESYS' : undefined,
         pesysId: pesysId,
         enhet: enhetsFilter === 'VELGENHET' ? undefined : filtrerEnhet(enhetsFilter),
+        foreldreloes: erForeldreloes,
       },
       (nyBehandlingRespons) => {
         if (overstyrBeregning) {
@@ -138,6 +141,9 @@ export default function ManuellBehandling() {
         }
       />
 
+      <Checkbox checked={erForeldreloes} onChange={() => setErForeldreloes(!erForeldreloes)}>
+        Er foreldreløs
+      </Checkbox>
       <PersongalleriBarnepensjon erManuellMigrering={true} />
 
       <Knapp>

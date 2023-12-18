@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.F
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSAAR
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSDATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FOEDSELSNUMMER
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.FORELDRELOES
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.KONTAKTADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.NAVN
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.OPPHOLDSADRESSE
@@ -94,6 +95,8 @@ fun Grunnlagsdata<JsonNode>.hentUtenlandsopphold() = this.hentKonstantOpplysning
 fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() = this.hentKonstantOpplysning<Utenlandsadresse>(UTENLANDSADRESSE)
 
 fun Grunnlagsdata<JsonNode>.hentVergeadresse() = this.hentKonstantOpplysning<BrevMottaker>(VERGES_ADRESSE)
+
+fun Grunnlagsdata<JsonNode>.hentErForeldreloes() = this.hentKonstantOpplysning<Boolean>(FORELDRELOES)
 
 // TODO:
 //  Dette er duplikat av mottatt dato i behandling.

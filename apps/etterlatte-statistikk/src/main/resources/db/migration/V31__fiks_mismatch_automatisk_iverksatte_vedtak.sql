@@ -1,11 +1,11 @@
 create temporary view saker_med_offset_teknisk_tid as
 (
-select s_iverksatt.behandling_id, s_iverksatt.teknisk_tid
-from sak s_iverksatt
-         left join sak b_attestert on s_iverksatt.behandling_id = b_attestert.behandling_id
-where s_iverksatt.behandling_status = 'IVERKSATT'
+select b_iverksatt.behandling_id, b_iverksatt.teknisk_tid
+from sak b_iverksatt
+         left join sak b_attestert on b_iverksatt.behandling_id = b_attestert.behandling_id
+where b_iverksatt.behandling_status = 'IVERKSATT'
   and b_attestert.behandling_status = 'ATTESTERT'
-  and s_iverksatt.teknisk_tid < b_attestert.teknisk_tid
+  and b_iverksatt.teknisk_tid < b_attestert.teknisk_tid
     );
 
 update sak s

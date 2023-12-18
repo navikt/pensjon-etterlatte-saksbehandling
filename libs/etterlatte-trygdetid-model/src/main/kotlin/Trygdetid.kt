@@ -15,7 +15,7 @@ data class TrygdetidDto(
     val trygdetidGrunnlag: List<TrygdetidGrunnlagDto>,
     val opplysninger: GrunnlagOpplysningerDto,
     val overstyrtNorskPoengaar: Int?,
-    val opplysningerDifferanse: OpplysningerDifferanse? = null,
+    val opplysningerDifferanse: OpplysningerDifferanse,
 )
 
 const val UKJENT_AVDOED = "UKJENT_AVDOED"

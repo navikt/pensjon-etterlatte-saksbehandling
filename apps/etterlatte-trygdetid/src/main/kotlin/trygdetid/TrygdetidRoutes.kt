@@ -45,8 +45,7 @@ fun Route.trygdetid(
                 val trygdetid = trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)
                 if (trygdetid != null) {
                     call.respond(
-                        trygdetid.toDto()
-                            .copy(opplysningerDifferanse = trygdetidService.finnOpplysningerDifferanse(trygdetid, brukerTokenInfo)),
+                        trygdetid.toDto(),
                     )
                 } else {
                     call.respond(HttpStatusCode.NoContent)
@@ -111,13 +110,14 @@ fun Route.trygdetid(
             withBehandlingId(behandlingKlient) {
                 withParam("trygdetidGrunnlagId") { trygdetidGrunnlagId ->
                     logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingId")
-                    val trygdetid =
-                        trygdetidService.slettTrygdetidGrunnlag(
-                            behandlingId,
-                            trygdetidGrunnlagId,
-                            brukerTokenInfo,
-                        )
-                    call.respond(trygdetid.toDto())
+                    trygdetidService.slettTrygdetidGrunnlag(
+                        behandlingId,
+                        trygdetidGrunnlagId,
+                        brukerTokenInfo,
+                    )
+                    call.respond(
+                        trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto(),
+                    )
                 }
             }
         }
@@ -202,7 +202,7 @@ fun Trygdetid.toDto(): TrygdetidDto =
         opplysninger = this.opplysninger.toDto(),
         overstyrtNorskPoengaar = this.overstyrtNorskPoengaar,
         ident = this.ident,
-        opplysningerDifferanse = this.opplysningerDifferanse,
+        opplysningerDifferanse = requireNotNull(opplysningerDifferanse),
     )
 
 private fun DetaljertBeregnetTrygdetid.toDto(): DetaljertBeregnetTrygdetidDto =

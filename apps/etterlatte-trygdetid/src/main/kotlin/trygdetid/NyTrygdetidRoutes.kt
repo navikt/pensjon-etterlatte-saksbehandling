@@ -70,7 +70,7 @@ fun Route.trygdetidV2(
             withBehandlingId(behandlingKlient) {
                 logger.info("Oppretter trygdetid(er) for behandling $behandlingId")
 
-                trygdetidService.oppdaterTrygdetiderForBehandlingMedNyttGrunnlag(behandlingId, brukerTokenInfo)
+                trygdetidService.oppdaterOpplysningsgrunnlagForTrygdetider(behandlingId, brukerTokenInfo)
                 call.respond(
                     trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
                         .map { it.toDto() },
@@ -124,7 +124,8 @@ fun Route.trygdetidV2(
                     trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
                         behandlingId,
                         brukerTokenInfo,
-                    ).let { trygdetid -> call.respond(trygdetid.toDto()) }
+                    )
+                    call.respond(trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo).first())
                 }
             }
 

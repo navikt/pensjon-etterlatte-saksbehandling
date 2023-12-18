@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource
 import no.nav.etterlatte.libs.common.requireEnvValue
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
+import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
 object DataSourceBuilder {
@@ -46,16 +47,21 @@ object DataSourceBuilder {
 }
 
 fun DataSource.migrate(gcp: Boolean = true): MigrateResult =
-    Flyway.configure()
-        .dataSource(this)
-        .apply {
-            // Kjør GCP-spesifikke migrasjoner kun hvis vi er i GCP
-            if (gcp) {
-                locations("db/migration", "db/gcp")
+    try {
+        Flyway.configure()
+            .dataSource(this)
+            .apply {
+                // Kjør GCP-spesifikke migrasjoner kun hvis vi er i GCP
+                if (gcp) {
+                    locations("db/migration", "db/gcp")
+                }
             }
-        }
-        .load()
-        .migrate()
+            .load()
+            .migrate()
+    } catch (e: Exception) {
+        LoggerFactory.getLogger(this::class.java).error("Fikk feil under Flyway-migrering", e)
+        throw e
+    }
 
 fun jdbcUrl(
     host: String,

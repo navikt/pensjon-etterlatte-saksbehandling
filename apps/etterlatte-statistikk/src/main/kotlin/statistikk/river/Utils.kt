@@ -8,7 +8,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 private val defaultLog = LoggerFactory.getLogger("parseTekniskTid")
@@ -28,7 +28,7 @@ internal fun parseTekniskTid(
             return LocalDateTime.parse(pakkeTid)
         } catch (e: Exception) {
             try {
-                return LocalDateTime.ofInstant(ZonedDateTime.parse(pakkeTid).toInstant(), ZoneId.of("UTC"))
+                return LocalDateTime.ofInstant(ZonedDateTime.parse(pakkeTid).toInstant(), ZoneOffset.UTC)
             } catch (e2: Exception) {
                 e2.addSuppressed(e)
                 logger.warn("Kunne ikke parse teknisk tid på hendelse $eventName, på grunn av feil", e2)

@@ -54,7 +54,7 @@ class StartMigrering(
             mapOf(
                 EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
                 SAK_ID_KEY to sakTilMigrering.sakId,
-                LOPENDE_JANUAR_2024_KEY to true,
+                LOPENDE_JANUAR_2024_KEY to sakTilMigrering.lopendeJanuar2024,
                 MIGRERING_KJORING_VARIANT to sakTilMigrering.kjoringVariant,
             ),
         ).toJson()
@@ -70,12 +70,14 @@ class StartMigreringRepository(private val dataSource: DataSource) : Transaction
         tx.session {
             hentListe(
                 queryString =
-                    "SELECT ${Databasetabell.SAKID}, ${Databasetabell.KJOERING} FROM ${Databasetabell.TABELLNAVN} " +
+                    "SELECT ${Databasetabell.SAKID}, ${Databasetabell.KJOERING}, ${Databasetabell.LOPENDE} " +
+                        "FROM ${Databasetabell.TABELLNAVN} " +
                         "WHERE ${Databasetabell.HAANDTERT} = FALSE",
             ) {
                 SakTilMigrering(
                     sakId = it.long(Databasetabell.SAKID),
                     kjoringVariant = MigreringKjoringVariant.valueOf(it.string(Databasetabell.KJOERING)),
+                    lopendeJanuar2024 = it.boolean(Databasetabell.LOPENDE),
                 )
             }
         }
@@ -101,7 +103,8 @@ class StartMigreringRepository(private val dataSource: DataSource) : Transaction
         const val HAANDTERT = "haandtert"
         const val SAKID = "sakId"
         const val KJOERING = "kjoering"
+        const val LOPENDE = "lopendeJanuar2024"
     }
 }
 
-data class SakTilMigrering(val sakId: Long, val kjoringVariant: MigreringKjoringVariant)
+data class SakTilMigrering(val sakId: Long, val kjoringVariant: MigreringKjoringVariant, val lopendeJanuar2024: Boolean)

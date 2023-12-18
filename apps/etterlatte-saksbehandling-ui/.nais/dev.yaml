@@ -99,6 +99,7 @@ spec:
         - host: login.microsoftonline.com
         - host: graph.microsoft.com
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: norg2.dev-fss-pub.nais.io
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-vilkaarsvurdering

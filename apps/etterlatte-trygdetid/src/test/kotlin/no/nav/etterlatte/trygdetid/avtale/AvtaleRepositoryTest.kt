@@ -1,4 +1,4 @@
-package no.nav.etterlatte.trygdetid
+package no.nav.etterlatte.trygdetid.avtale
 
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.trygdetid.avtale.AvtaleRepository
+import no.nav.etterlatte.trygdetid.trygdeavtale
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import trygdetid.trygdeavtale
 import java.util.UUID.randomUUID
 import javax.sql.DataSource
 

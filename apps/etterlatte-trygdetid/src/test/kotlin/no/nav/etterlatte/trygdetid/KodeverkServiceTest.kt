@@ -1,4 +1,4 @@
-package trygdetid
+package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.coEvery
@@ -6,8 +6,6 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.trygdetid.KodeverkService
-import no.nav.etterlatte.trygdetid.LandNormalisert
 import no.nav.etterlatte.trygdetid.klienter.Beskrivelse
 import no.nav.etterlatte.trygdetid.klienter.Betydning
 import no.nav.etterlatte.trygdetid.klienter.KodeverkKlient

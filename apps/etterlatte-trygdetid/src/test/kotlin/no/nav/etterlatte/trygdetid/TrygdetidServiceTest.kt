@@ -1,4 +1,4 @@
-package trygdetid
+package no.nav.etterlatte.trygdetid
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.collections.shouldNotContain
@@ -38,22 +38,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.eldreAvdoedTestopplysningerMap
-import no.nav.etterlatte.trygdetid.BeregnetTrygdetidGrunnlag
-import no.nav.etterlatte.trygdetid.DetaljertBeregnetTrygdetid
-import no.nav.etterlatte.trygdetid.IngenTrygdetidFunnetForAvdoede
-import no.nav.etterlatte.trygdetid.LandNormalisert
-import no.nav.etterlatte.trygdetid.ManglerForrigeTrygdetidMaaReguleresManuelt
-import no.nav.etterlatte.trygdetid.Trygdetid
-import no.nav.etterlatte.trygdetid.TrygdetidAlleredeOpprettetException
-import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
-import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
-import no.nav.etterlatte.trygdetid.TrygdetidManglerBeregning
-import no.nav.etterlatte.trygdetid.TrygdetidOpplysningType
-import no.nav.etterlatte.trygdetid.TrygdetidPeriode
-import no.nav.etterlatte.trygdetid.TrygdetidRepository
-import no.nav.etterlatte.trygdetid.TrygdetidService
-import no.nav.etterlatte.trygdetid.TrygdetidServiceImpl
-import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.klienter.GrunnlagKlient
 import no.nav.etterlatte.trygdetid.klienter.VilkaarsvuderingKlient

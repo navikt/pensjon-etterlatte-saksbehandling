@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import trygdetid.trygdetid
 import java.security.SecureRandom
 import java.time.LocalDate
 import java.util.UUID

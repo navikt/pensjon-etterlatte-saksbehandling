@@ -10,11 +10,11 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
+import no.nav.etterlatte.trygdetid.trygdeavtale
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import trygdetid.trygdeavtale
 import java.time.LocalDate
 import java.time.Month
 import java.util.UUID.randomUUID

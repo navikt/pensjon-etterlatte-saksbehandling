@@ -19,10 +19,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import trygdetid.beregnetTrygdetid
-import trygdetid.beregnetTrygdetidGrunnlag
-import trygdetid.trygdetid
-import trygdetid.trygdetidGrunnlag
 import java.time.LocalDate
 import java.util.UUID.randomUUID
 import javax.sql.DataSource

@@ -1,8 +1,6 @@
-package trygdetid
+package no.nav.etterlatte.trygdetid
 
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.trygdetid.OverlappendePeriodeException
-import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate

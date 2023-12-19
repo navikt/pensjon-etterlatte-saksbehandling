@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.trygdetid.avtale.TrygdetidAvtaleKriteria
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
+import no.nav.etterlatte.trygdetid.trygdeavtale
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -37,7 +38,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import trygdetid.trygdeavtale
 import java.time.LocalDate
 import java.time.Month
 import java.util.UUID.randomUUID

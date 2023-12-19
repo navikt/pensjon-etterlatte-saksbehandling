@@ -1,4 +1,4 @@
-package trygdetid
+package no.nav.etterlatte.trygdetid
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -14,15 +14,6 @@ import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResulta
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.trygdetid.BeregnetTrygdetidGrunnlag
-import no.nav.etterlatte.trygdetid.DetaljertBeregnetTrygdetid
-import no.nav.etterlatte.trygdetid.LandNormalisert
-import no.nav.etterlatte.trygdetid.Opplysningsgrunnlag
-import no.nav.etterlatte.trygdetid.Trygdetid
-import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
-import no.nav.etterlatte.trygdetid.TrygdetidOpplysningType
-import no.nav.etterlatte.trygdetid.TrygdetidPeriode
-import no.nav.etterlatte.trygdetid.TrygdetidType
 import java.time.LocalDate
 import java.time.Period
 import java.util.UUID

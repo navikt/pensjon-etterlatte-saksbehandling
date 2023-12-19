@@ -34,6 +34,10 @@ on:
       - libs/rapidsandrivers-extras/**
       - gradle/libs.versions.toml
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   test:
     if: github.event_name == 'pull_request'
@@ -44,9 +48,6 @@ jobs:
     if: github.event_name != 'pull_request'
     uses: ./.github/workflows/.build.yaml
     secrets: inherit
-    permissions:
-      contents: 'read'
-      id-token: 'write'
 
   deploy:
     if: github.event_name != 'pull_request'
@@ -55,6 +56,3 @@ jobs:
     with:
       image: ${{ needs.build.outputs.image }}
     secrets: inherit
-    permissions:
-      contents: read
-      id-token: write

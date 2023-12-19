@@ -49,7 +49,14 @@ class BrukerServiceImpl(
 
             else -> {
                 val geografiskTilknytning = tilknytning.geografiskTilknytning() ?: throw GeografiskTilknytningMangler()
-                norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)
+                if (tilknytning.harBareLandTilknytning()) {
+                    if (tilknytning.land?.equals("NO") != null) {
+                        Navkontor(navn = "UKjent kontor, men har Norge satt", enhetNr = "ukjent enhetsnummer")
+                    }
+                    Navkontor(navn = "Nav utland - Ålesund", enhetNr = Enheter.AALESUND_UTLAND.enhetNr)
+                } else {
+                    norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)
+                }
             }
         }
     }

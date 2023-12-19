@@ -183,6 +183,8 @@ data class GeografiskTilknytning(
             land != null -> land
             else -> null
         }
+
+    fun harBareLandTilknytning() = bydel == null && kommune == null && land != null
 }
 
 interface Verge {

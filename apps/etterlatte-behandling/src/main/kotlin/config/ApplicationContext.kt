@@ -67,6 +67,8 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
+import no.nav.etterlatte.metrics.BehandlingMetrics
+import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
 import no.nav.etterlatte.metrics.MetrikkerJob
 import no.nav.etterlatte.metrics.OppgaveMetrics
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
@@ -200,7 +202,8 @@ internal class ApplicationContext(
     val sakDao = SakDao { databaseContext().activeTx() }
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
-    val metrikkerDao = OppgaveMetrikkerDao(dataSource)
+    val oppgaveMetrikkerDato = OppgaveMetrikkerDao(dataSource)
+    val behandlingMetrikkerDao = BehandlingMetrikkerDao(dataSource)
     val klageDao = KlageDaoImpl { databaseContext().activeTx() }
     val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
     val behandlingInfoDao = BehandlingInfoDao { databaseContext().activeTx() }
@@ -358,10 +361,17 @@ internal class ApplicationContext(
             minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong(),
         )
 
-    val metrikkUthenter = OppgaveMetrics(metrikkerDao)
-    val metrikkerJob: MetrikkerJob by lazy {
+    val oppgaveMetrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
-            metrikkUthenter,
+            OppgaveMetrics(oppgaveMetrikkerDato),
+            leaderElectionKlient,
+            Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(5, ChronoUnit.MINUTES),
+        )
+    }
+    val behandlingMetrikkerJob: MetrikkerJob by lazy {
+        MetrikkerJob(
+            BehandlingMetrics(behandlingMetrikkerDao),
             leaderElectionKlient,
             Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(5, ChronoUnit.MINUTES),

@@ -17,7 +17,7 @@ class OppgaveMetrics(private val metrikkerDao: OppgaveMetrikkerDao) : MetrikkUth
     }
 
     override fun run() {
-        logger.info("Samler metrikker for etterlatte-behandling")
+        logger.info("Samler metrikker med ${this::class.simpleName}")
         with(metrikkerDao.hentOppgaveAntall()) {
             antallOppgaver.set(totalt.toDouble())
             antallOppgaverAktive.set(aktive.toDouble())

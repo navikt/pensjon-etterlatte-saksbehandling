@@ -138,7 +138,8 @@ internal fun Application.module(context: ApplicationContext) {
             institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))
             tilgangRoutes(tilgangService)
 
-            context.metrikkerJob.schedule().also { addShutdownHook(it) }
+            context.oppgaveMetrikkerJob.schedule().also { addShutdownHook(it) }
+            context.behandlingMetrikkerJob.schedule().also { addShutdownHook(it) }
 
             install(adressebeskyttelsePlugin) {
                 saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey

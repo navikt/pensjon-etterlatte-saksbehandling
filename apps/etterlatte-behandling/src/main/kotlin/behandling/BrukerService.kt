@@ -50,7 +50,7 @@ class BrukerServiceImpl(
             else -> {
                 val geografiskTilknytning = tilknytning.geografiskTilknytning() ?: throw GeografiskTilknytningMangler()
                 if (tilknytning.harBareLandTilknytning()) {
-                    if (tilknytning.land?.equals("NO") != null) {
+                    if (tilknytning.land!! == "NO") {
                         Navkontor(navn = "UKjent kontor, men har Norge satt", enhetNr = "ukjent enhetsnummer")
                     }
                     Navkontor(navn = "Nav utland - Ålesund", enhetNr = Enheter.AALESUND_UTLAND.enhetNr)

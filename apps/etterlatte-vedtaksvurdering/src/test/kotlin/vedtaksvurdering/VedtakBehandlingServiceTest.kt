@@ -190,8 +190,6 @@ internal class VedtakBehandlingServiceTest {
         vedtak.status shouldBe VedtakStatus.OPPRETTET
     }
 
-    // TODO sjekk flere caser rundt opprett
-
     @Test
     fun `skal ikke kunne oppdatere allerede fattet vedtak`() {
         val behandlingId = randomUUID()
@@ -904,7 +902,6 @@ internal class VedtakBehandlingServiceTest {
             }
         }
     }
-    // TODO sjekk flere caser rundt opprett
 
     @Test
     fun `skal sette vedtak til underkjent`() {

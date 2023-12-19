@@ -307,7 +307,7 @@ class TrygdetidServiceImpl(
             }
 
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-            println("behandling = ${behandling.behandlingType}, id= ${behandling.id}")
+
             when (behandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> {
                     logger.info("Oppretter trygdetid for behandling $behandlingId")
@@ -811,7 +811,6 @@ class TrygdetidServiceImpl(
         val nyAvdoedGrunnlag =
             grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).hentAvdoede()
                 .first { it.hentFoedselsnummer()?.verdi?.value == trygdetid.ident }
-        // If no match System.exit(0) :)
 
         val nyeOpplysninger = hentOpplysninger(nyAvdoedGrunnlag, trygdetid.behandlingId)
         val nyFoedselsdato = nyeOpplysninger.first { it.type == TrygdetidOpplysningType.FOEDSELSDATO }

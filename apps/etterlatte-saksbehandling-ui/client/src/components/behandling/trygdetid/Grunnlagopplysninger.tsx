@@ -29,6 +29,7 @@ export const Grunnlagopplysninger = ({
 
   return (
     <>
+      {!trygdetid.opplysningerDifferanse?.differanse && <OpplysningerTabell opplysninger={trygdetid.opplysninger} />}
       {trygdetid.opplysningerDifferanse?.differanse && (
         <>
           <Alert variant="info">
@@ -38,12 +39,9 @@ export const Grunnlagopplysninger = ({
           <Heading size="small" level="4">
             Eksisterende grunnlag
           </Heading>
-        </>
-      )}
-      <OpplysningerTabell opplysninger={trygdetid.opplysninger} />
 
-      {trygdetid.opplysningerDifferanse?.differanse && (
-        <>
+          <OpplysningerTabell opplysninger={trygdetid.opplysninger} />
+
           <Heading size="small" level="4">
             Nytt grunnlag
           </Heading>

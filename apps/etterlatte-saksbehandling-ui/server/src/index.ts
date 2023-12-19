@@ -3,7 +3,6 @@ import path from 'path'
 import { ApiConfig, appConf, ClientConfig } from './config/config'
 import { authenticateUser } from './middleware/auth'
 import { logger } from './monitoring/logger'
-import { requestLogger } from './middleware/logging'
 import { tokenMiddleware } from './middleware/getOboToken'
 import { proxy } from './middleware/proxy'
 import { loggerRouter } from './routers/loggerRouter'
@@ -11,16 +10,16 @@ import prometheus from './monitoring/prometheus'
 import { innloggetBrukerRouter } from './routers/innloggetBrukerRouter'
 import { norg2Router } from './routers/norg2Router'
 import { unleashRouter } from './routers/unleashRouter'
+import { requestLoggerMiddleware } from './middleware/logging'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
 const clientPath = path.resolve(__dirname, '..', 'client')
-const isDev = process.env.NODE_ENV !== 'production'
 
 const app = express()
 app.set('trust proxy', 1)
 app.use('/', express.static(clientPath))
-app.use(requestLogger(isDev))
+app.use(requestLoggerMiddleware)
 
 app.use(['/health/isAlive', '/health/isReady'], (_: Request, res: Response) => {
   res.send('OK')

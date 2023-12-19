@@ -1,4 +1,4 @@
-export function sanitize(value: String | undefined | null) {
+export function sanitize(value?: string) {
   if (value === undefined) {
     return undefined
   }

@@ -1,19 +1,13 @@
 import { NextFunction, Request, Response } from 'express'
 import { logger } from '../monitoring/logger'
+import { sanitizeUrl } from '../utils/sanitize'
 
-const requestLoggerIncludeHeaders = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.url.includes('health')) {
-    logger.info('Request', { ...req.headers, url: req.url })
+const kanLoggeRequest = (input: string | undefined) => !/(health|metrics)/.test(input ?? '')
+
+export const requestLoggerMiddleware = (req: Request, _: Response, next: NextFunction) => {
+  if (kanLoggeRequest(req.url)) {
+    logger.info(`${req.method} ${sanitizeUrl(req.url)}`)
   }
+
   next()
 }
-
-const requestLoggerExcludeHeaders = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.url.includes('health')) {
-    logger.info('Request', { url: req.url })
-  }
-  next()
-}
-
-export const requestLogger = (includeHeaders: boolean) =>
-  includeHeaders ? requestLoggerIncludeHeaders : requestLoggerExcludeHeaders

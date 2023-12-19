@@ -35,6 +35,10 @@ on:
       - libs/etterlatte-vedtaksvurdering-model/**
       - gradle/libs.versions.toml
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   test:
     if: github.event_name == 'pull_request'
@@ -45,9 +49,6 @@ jobs:
     if: github.event_name != 'pull_request'
     uses: ./.github/workflows/.build.yaml
     secrets: inherit
-    permissions:
-      contents: 'read'
-      id-token: 'write'
 
   deploy:
     if: github.event_name != 'pull_request'
@@ -56,17 +57,11 @@ jobs:
     with:
       image: ${{ needs.build.outputs.image }}
     secrets: inherit
-    permissions:
-      contents: read
-      id-token: write
 
   deploy-gateway-config-dev-gcp:
     name: Deploy API gateway config dev
     needs: deploy
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     timeout-minutes: 1
     steps:
       - name: Checkout
@@ -83,9 +78,6 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
     needs: deploy-gateway-config-dev-gcp
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     timeout-minutes: 1
     steps:
       - name: Checkout

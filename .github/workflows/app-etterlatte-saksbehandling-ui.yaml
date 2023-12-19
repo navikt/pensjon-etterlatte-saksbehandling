@@ -25,6 +25,10 @@ on:
     paths:
       - apps/etterlatte-saksbehandling-ui/**
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   test:
     if: github.event_name == 'pull_request'
@@ -51,9 +55,6 @@ jobs:
     if: github.event_name != 'pull_request'
     name: Build, test and publish
     runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-      id-token: 'write'
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
     steps:
@@ -90,9 +91,6 @@ jobs:
     if: github.event_name != 'pull_request'
     name: Deploy to dev-gcp
     needs: build-and-publish
-    permissions:
-      contents: read
-      id-token: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -108,9 +106,6 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
     needs: [build-and-publish,deploy-to-dev-gcp]
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2

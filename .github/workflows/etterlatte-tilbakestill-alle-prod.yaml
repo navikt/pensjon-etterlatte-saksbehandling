@@ -28,3 +28,6 @@ jobs:
     uses: ./.github/workflows/.deploy-main-prod.yaml
     with:
       applikasjon: ${{ matrix.applikasjon }}
+    permissions:
+      contents: read
+      id-token: write

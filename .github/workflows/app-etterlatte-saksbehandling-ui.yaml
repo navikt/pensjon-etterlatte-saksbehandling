@@ -90,12 +90,14 @@ jobs:
     if: github.event_name != 'pull_request'
     name: Deploy to dev-gcp
     needs: build-and-publish
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: apps/${{ env.APP_NAME }}/.nais/dev.yaml
           VAR: image=${{ needs.build-and-publish.outputs.image }}
@@ -106,11 +108,13 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.deploy-prod == 'true' }}
     needs: [build-and-publish,deploy-to-dev-gcp]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: apps/${{ env.APP_NAME }}/.nais/prod.yaml
           VAR: image=${{ needs.build-and-publish.outputs.image }}

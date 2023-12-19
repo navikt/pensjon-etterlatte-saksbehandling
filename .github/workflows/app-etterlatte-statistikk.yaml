@@ -57,3 +57,6 @@ jobs:
     with:
       image: ${{ needs.build.outputs.image }}
     secrets: inherit
+    permissions:
+      contents: read
+      id-token: write

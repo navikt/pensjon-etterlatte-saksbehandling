@@ -80,23 +80,21 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
 
       const error: JsonError = await response.json()
       if (response.status >= 500) {
-        const errorobj = {
-          msg: 'Fikk feil i kall mot backend',
-          errorInfo: JSON.stringify({ url: url, method: method, error: error }),
-        }
         if (shouldLogError) {
-          logger.generalError(JSON.stringify(errorobj))
+          logger.generalError({
+            msg: 'Fikk feil i kall mot backend',
+            errorInfo: { url, method, error },
+          })
         }
         console.error(error, response)
         return { ...error, ok: false }
       } else {
         // logger 3xx og 4xx som info
-        const errorobj = {
-          msg: `Fikk status=${response.status} i kall mot backend`,
-          errorInfo: JSON.stringify({ url: url, method: method, error: error }),
-        }
         if (shouldLogError) {
-          logger.generalInfo(JSON.stringify(errorobj))
+          logger.generalInfo({
+            msg: `Fikk status=${response.status} i kall mot backend`,
+            errorInfo: { url, method, error },
+          })
         }
         console.log(error, response)
         return { ...error, ok: false }
@@ -104,9 +102,8 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
     }
   } catch (e) {
     console.error('Rejection i fetch / utlesing av data', e)
-    const errorobj = { msg: 'Fikk Rejection i kall mot backend', errorInfo: { url: url, method: method } }
     if (shouldLogError) {
-      logger.generalError(JSON.stringify(errorobj))
+      logger.generalError({ msg: 'Fikk Rejection i kall mot backend', errorInfo: { url, method } })
     }
     return {
       ok: false,

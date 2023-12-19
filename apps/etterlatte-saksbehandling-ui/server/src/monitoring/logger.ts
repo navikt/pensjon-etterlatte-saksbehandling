@@ -13,7 +13,7 @@ const dev = combine(colorize(), simple())
 export const logger = winston.createLogger({
   level: 'info',
   format: process.env.NAIS_CLUSTER_NAME ? production : dev,
-  defaultMeta: { service: 'etterlatte-saksbehandling-ui' },
+  defaultMeta: { service: 'etterlatte-saksbehandling-ui-server' },
   transports: [consoleTransport, prometheusTransport],
 })
 

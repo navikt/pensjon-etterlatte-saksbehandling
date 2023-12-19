@@ -1,8 +1,9 @@
 import express from 'express'
-import { frontendLogger } from '../monitoring/logger'
+import { frontendLogger, logger } from '../monitoring/logger'
 import sourceMap, { NullableMappedPosition } from 'source-map'
 import * as fs from 'fs'
 import { parseJwt } from '../utils/parsejwt'
+import { sanitizeUrl } from '../utils/sanitize'
 
 export const loggerRouter = express.Router()
 
@@ -13,33 +14,17 @@ export interface IStackLineNoColumnNo {
   error: any
 }
 
-function stackInfoIsInvalid(numbers: IStackLineNoColumnNo): boolean {
-  return numbers.lineno < 1 || numbers.columnno < 0
+function isStackInfoValid(numbers: IStackLineNoColumnNo): boolean {
+  return numbers.lineno > 0 && numbers.columnno >= 0
 }
 
 const sourcemapLocation = '/app/client/assets'
+
 async function sourceMapMapper(numbers: IStackLineNoColumnNo): Promise<NullableMappedPosition> {
   const sourcemapFile = fs.readdirSync(sourcemapLocation).find((file) => file.includes('.map')) ?? ''
   const rawSourceMap = fs.readFileSync(`${sourcemapLocation}/${sourcemapFile}`).toString()
   const smc = await new sourceMap.SourceMapConsumer(rawSourceMap)
   return Promise.resolve(smc.originalPositionFor({ line: numbers.lineno, column: numbers.columnno }))
-}
-
-const GYLDIG_FNR = (input: string | undefined) => /^\d{11}$/.test(input ?? '')
-
-function sanitizeUrlPossibleFnr(url?: string): string {
-  if (url) {
-    const splittedUrl = url.split('/')
-    return splittedUrl
-      .map((urlpart) => {
-        if (GYLDIG_FNR(urlpart)) {
-          return urlpart.substring(0, 5).concat('******')
-        }
-        return urlpart
-      })
-      .join('/')
-  }
-  return ''
 }
 
 function getNAVident(authorizationHeader: string | undefined): string | undefined {
@@ -50,55 +35,111 @@ function getNAVident(authorizationHeader: string | undefined): string | undefine
 }
 
 loggerRouter.post('/', express.json(), (req, res) => {
-  const body = req.body
+  const logEvent = req.body as LogEvent
+  const user = getNAVident(req.headers.authorization)
+  const errorData = logEvent.data
 
-  if (!process.env.NAIS_CLUSTER_NAME) {
-    frontendLogger.info(`Nais cluster unavailable: ${JSON.stringify(body)}`)
-  } else if (body.type && body.type === 'info') {
-    frontendLogger.info('Frontendlogging: ', JSON.stringify(body))
+  if (logEvent.type && logEvent.type === 'info') {
+    frontendLogger.info('Frontendlogging: ', JSON.stringify(logEvent))
   } else {
-    const maybeUrl = sanitizeUrlPossibleFnr(body.jsonContent.url)
-    const errorObject = {
-      request_uri: maybeUrl,
-      user_device: JSON.stringify(body.jsonContent.userDeviceInfo),
-      user_agent: body.jsonContent.userAgent,
-      user: getNAVident(req.headers.authorization),
-    }
-    if (body.stackInfo) {
-      if (stackInfoIsInvalid(body.stackInfo)) {
-        frontendLogger.error({
-          ...errorObject,
-          message: 'Cannot parse stackInfo',
-          stack_trace: JSON.stringify(body),
-        })
-      } else {
-        sourceMapMapper(body.stackInfo)
-          .then((position) => {
-            const message = body.stackInfo.message
-            const error = JSON.stringify(body.stackInfo.error)
-            const component = `'${position.source}' (line: ${position.line}, col: ${position.column})`
+    if (logEvent.stackInfo && isStackInfoValid(logEvent.stackInfo)) {
+      sourceMapMapper(logEvent.stackInfo!!)
+        .then((position) => {
+          const message = logEvent.stackInfo?.message
+          const stackInfoError = JSON.stringify(logEvent.stackInfo?.error)
+          const component = `'${position.source}' (line: ${position.line}, col: ${position.column})`
 
-            frontendLogger.error({
-              ...errorObject,
-              message: message || 'Request error on: ',
-              stack_trace: `Error occurred in ${component}:\n${message}\n${error}`,
-            })
+          frontendLogger.error({
+            message: message || 'Feil ved request',
+            stack_trace: `Error occurred in ${component}:\n${message}\n${stackInfoError}`,
+            ...mapCommonFields(user, logEvent.jsonContent, errorData),
           })
-          .catch((err) => {
-            frontendLogger.error({
-              ...errorObject,
-              message: `Got error on request`,
-              stack_trace: JSON.stringify({ ...err, ...body }),
-            })
+        })
+        .catch((err) => {
+          logger.error(err)
+
+          frontendLogger.error({
+            message: logEvent.stackInfo?.message || errorData?.msg || 'Ukjent feil oppsto (sourceMapMapper)',
+            stack_trace: !!errorData?.errorInfo ? JSON.stringify(errorData?.errorInfo) : JSON.stringify(logEvent),
+            ...mapCommonFields(user, logEvent.jsonContent, errorData),
           })
-      }
+        })
     } else {
       frontendLogger.error({
-        ...errorObject,
-        message: `General error from frontend. ${body.data.msg ?? ''}`,
-        stack_trace: JSON.stringify(body),
+        message: errorData?.msg || 'Ukjent feil oppsto',
+        stack_trace: !!errorData?.errorInfo ? JSON.stringify(errorData?.errorInfo) : JSON.stringify(logEvent),
+        ...mapCommonFields(user, logEvent.jsonContent, errorData),
       })
     }
   }
-  res.sendStatus(200)
+  return res.sendStatus(200)
 })
+
+const mapCommonFields = (user?: string, jsonContent?: JsonContent, errorData?: ErrorData) => {
+  return {
+    user,
+    request_uri: sanitizeUrl(jsonContent?.url),
+    outbound_uri: errorData?.errorInfo?.url,
+    method: errorData?.errorInfo?.method,
+    user_device: stringifyUserDevice(jsonContent?.userDeviceInfo),
+    user_agent: jsonContent?.userAgent,
+  }
+}
+
+const stringifyUserDevice = (device?: UserDeviceInfo): string | undefined => {
+  if (!device) return undefined
+  else {
+    try {
+      const browser = `${device.browser.name} ${device.browser.version}`
+      const os = `${device.os.name} ${device.os.version} (${device.os.versionName})`
+
+      return `${browser} - ${os}`
+    } catch (e) {
+      logger.error(`Kunne ikke formatere userDeviceInfo til lesbar string: \n${device}`)
+      return undefined
+    }
+  }
+}
+
+interface LogEvent {
+  type: string
+  data?: ErrorData
+  stackInfo?: IStackLineNoColumnNo
+  jsonContent?: JsonContent
+}
+
+interface ErrorData {
+  msg: string
+  errorInfo?: ErrorInfo
+}
+
+interface ErrorInfo {
+  url: string
+  method: string
+  error?: JsonError
+}
+
+interface JsonError {
+  status: number
+  detail: string
+  code?: string
+  meta?: Record<string, unknown>
+}
+
+interface JsonContent {
+  url: string
+  userAgent: string
+  userDeviceInfo?: UserDeviceInfo
+}
+
+interface UserDeviceInfo {
+  browser: {
+    name: string
+    version: string
+  }
+  os: {
+    name: string
+    version: string
+    versionName: string
+  }
+}

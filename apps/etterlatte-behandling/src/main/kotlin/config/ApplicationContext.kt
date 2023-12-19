@@ -70,7 +70,6 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.metrics.BehandlingMetrics
 import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
 import no.nav.etterlatte.metrics.MetrikkerJob
-import no.nav.etterlatte.metrics.OppgaveMetrics
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
@@ -363,15 +362,7 @@ internal class ApplicationContext(
 
     val oppgaveMetrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
-            OppgaveMetrics(oppgaveMetrikkerDato),
-            leaderElectionKlient,
-            Duration.of(10, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(5, ChronoUnit.MINUTES),
-        )
-    }
-    val behandlingMetrikkerJob: MetrikkerJob by lazy {
-        MetrikkerJob(
-            BehandlingMetrics(behandlingMetrikkerDao),
+            BehandlingMetrics(oppgaveMetrikkerDato, behandlingMetrikkerDao),
             leaderElectionKlient,
             Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(5, ChronoUnit.MINUTES),

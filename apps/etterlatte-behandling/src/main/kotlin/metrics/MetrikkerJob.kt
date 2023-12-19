@@ -17,7 +17,7 @@ class MetrikkerJob(
     private val jobbNavn = this::class.simpleName
 
     fun schedule(): Timer {
-        logger.info("$jobbNavn er satt til å kjøre med periode $periode")
+        logger.info("$jobbNavn er satt til å kjøre med uthenter=${uthenter::class.simpleName} og periode $periode")
 
         return fixedRateCancellableTimer(
             name = jobbNavn,

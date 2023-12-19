@@ -139,7 +139,6 @@ internal fun Application.module(context: ApplicationContext) {
             tilgangRoutes(tilgangService)
 
             context.oppgaveMetrikkerJob.schedule().also { addShutdownHook(it) }
-            context.behandlingMetrikkerJob.schedule().also { addShutdownHook(it) }
 
             install(adressebeskyttelsePlugin) {
                 saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey

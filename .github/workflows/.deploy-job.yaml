@@ -15,9 +15,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: jobs/${{ github.workflow }}/deploy/dev.yml
           VAR: image=${{ inputs.image }}
@@ -34,10 +33,9 @@ jobs:
         id: check_files
         with:
           files: "jobs/${{ github.workflow }}/deploy/prod.yml"
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         if: steps.check_files.outputs.files_exists == 'true'
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: jobs/${{ github.workflow }}/deploy/prod.yml
           VAR: image=${{ inputs.image }}

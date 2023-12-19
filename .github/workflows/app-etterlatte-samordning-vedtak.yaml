@@ -66,9 +66,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Deploy krakend ApiEndpoints
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: apps/etterlatte-samordning-vedtak/.nais/apiendpoints.yaml
           PRINT_PAYLOAD: true
@@ -83,9 +82,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Deploy krakend ApiEndpoints
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: apps/${{ github.workflow }}/.nais/apiendpoints.yaml
           PRINT_PAYLOAD: true

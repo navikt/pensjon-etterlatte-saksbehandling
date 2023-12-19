@@ -1,23 +1,27 @@
 package no.nav.etterlatte.metrics
 
-import io.micrometer.core.instrument.Gauge
-import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.binder.MeterBinder
+import io.prometheus.client.Gauge
+import org.slf4j.LoggerFactory
 
-class OppgaveMetrics(private val metrikkerDao: OppgaveMetrikkerDao) : MeterBinder {
-    override fun bindTo(registry: MeterRegistry) {
-        val oppgaveAntall = metrikkerDao.hentOppgaveAntall()
+class OppgaveMetrics(private val metrikkerDao: OppgaveMetrikkerDao) : MetrikkUthenter() {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
-        Gauge.builder("antall_oppgaver", -1) { oppgaveAntall.totalt.toDouble() }
-            .description("Antall oppgaver")
-            .register(registry)
+    val antallOppgaver by lazy {
+        Gauge.build("antall_oppgaver", "Antall oppgaver").register()
+    }
+    val antallOppgaverAktive by lazy {
+        Gauge.build("antall_aktive_oppgaver", "Antall aktive oppgaver").register()
+    }
+    val antallOppgaverAvslutta by lazy {
+        Gauge.build("antall_avslutta_oppgaver", "Antall avslutta oppgaver").register()
+    }
 
-        Gauge.builder("antall_aktive_oppgaver", -1) { oppgaveAntall.aktive.toDouble() }
-            .description("Antall aktive oppgaver")
-            .register(registry)
-
-        Gauge.builder("antall_avslutta_oppgaver", -1) { oppgaveAntall.avsluttet.toDouble() }
-            .description("Antall avslutta oppgaver")
-            .register(registry)
+    override fun run() {
+        logger.info("Samler metrikker for etterlatte-behandling")
+        with(metrikkerDao.hentOppgaveAntall()) {
+            antallOppgaver.set(totalt.toDouble())
+            antallOppgaverAktive.set(aktive.toDouble())
+            antallOppgaverAvslutta.set(avsluttet.toDouble())
+        }
     }
 }

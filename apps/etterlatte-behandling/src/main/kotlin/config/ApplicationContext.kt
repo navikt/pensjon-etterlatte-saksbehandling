@@ -67,6 +67,7 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
+import no.nav.etterlatte.metrics.MetrikkerJob
 import no.nav.etterlatte.metrics.OppgaveMetrics
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
@@ -216,9 +217,6 @@ internal class ApplicationContext(
         TilbakekrevingKlientImpl(tilbakekrevingHttpClient, resourceUrl = env.getValue("ETTERLATTE_TILBAKEKREVING_URL"))
     val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue("ETTERLATTE_MIGRERING_URL"))
 
-    // Metrikker
-    val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)
-
     // Service
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao)
 
@@ -359,4 +357,14 @@ internal class ApplicationContext(
             periode = Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES),
             minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong(),
         )
+
+    val metrikkUthenter = OppgaveMetrics(metrikkerDao)
+    val metrikkerJob: MetrikkerJob by lazy {
+        MetrikkerJob(
+            metrikkUthenter,
+            leaderElectionKlient,
+            Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(5, ChronoUnit.MINUTES),
+        )
+    }
 }

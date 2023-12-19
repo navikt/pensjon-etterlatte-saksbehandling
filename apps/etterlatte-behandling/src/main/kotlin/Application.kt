@@ -84,7 +84,6 @@ internal fun Application.module(context: ApplicationContext) {
         restModule(
             sikkerLogg,
             withMetrics = true,
-            additionalMetrics = listOf(oppgaveMetrikker),
         ) {
             attachContekst(dataSource, context)
             sakSystemRoutes(
@@ -138,6 +137,8 @@ internal fun Application.module(context: ApplicationContext) {
             )
             institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))
             tilgangRoutes(tilgangService)
+
+            context.metrikkerJob.schedule().also { addShutdownHook(it) }
 
             install(adressebeskyttelsePlugin) {
                 saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey

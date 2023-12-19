@@ -78,7 +78,6 @@ abstract class BehandlingIntegrationTest {
         featureToggleService: FeatureToggleService = DummyFeatureToggleService(),
     ) {
         server.start()
-
         val httpServer = server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
         postgreSQLContainer.start()

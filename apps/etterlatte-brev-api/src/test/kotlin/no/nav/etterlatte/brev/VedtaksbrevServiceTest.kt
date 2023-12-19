@@ -48,6 +48,10 @@ import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.BrevMottaker
+import no.nav.etterlatte.libs.common.person.MottakerAdresse
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
+import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -248,6 +252,47 @@ internal class VedtaksbrevServiceTest {
             brev.soekerFnr shouldBe behandling.personerISak.soeker.fnr.value
             brev.mottaker shouldBe mottaker
             brev.prosessType shouldBe forventetProsessType
+        }
+
+        @Test
+        fun `Vedtaksbrev finnes ikke - skal opprettes nytt med verge`() {
+            val sakId = Random.nextLong()
+            val behandling =
+                generellBrevdataMedVerge(
+                    SakType.BARNEPENSJON,
+                    VedtakType.INNVILGELSE,
+                    VedtakStatus.FATTET_VEDTAK,
+                )
+
+            every { db.hentBrevForBehandling(behandling.behandlingId) } returns null
+            coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
+
+            runBlocking {
+                vedtaksbrevService.opprettVedtaksbrev(
+                    sakId,
+                    BEHANDLING_ID,
+                    ATTESTANT,
+                )
+            }
+
+            val brevSlot = slot<OpprettNyttBrev>()
+
+            coVerify {
+                db.hentBrevForBehandling(BEHANDLING_ID)
+                brevdataFacade.hentGenerellBrevData(sakId, BEHANDLING_ID, any())
+            }
+
+            verify {
+                db.opprettBrev(capture(brevSlot))
+                brevbaker wasNot Called
+                dokarkivService wasNot Called
+            }
+
+            val brev = brevSlot.captured
+            brev.sakId shouldBe sakId
+            brev.behandlingId shouldBe behandling.behandlingId
+            brev.soekerFnr shouldBe behandling.personerISak.soeker.fnr.value
+            brev.mottaker shouldBe expectedVergeMottaker()
         }
 
         @ParameterizedTest
@@ -820,6 +865,58 @@ internal class VedtaksbrevServiceTest {
             spraak = Spraak.NB,
             systemkilde = systemkilde,
             revurderingsaarsak = revurderingsaarsak,
+        )
+    }
+
+    private fun generellBrevdataMedVerge(
+        sakType: SakType,
+        vedtakType: VedtakType,
+        vedtakStatus: VedtakStatus = VedtakStatus.OPPRETTET,
+        systemkilde: Vedtaksloesning = Vedtaksloesning.GJENNY,
+        revurderingsaarsak: Revurderingaarsak? = null,
+    ): GenerellBrevData {
+        val brevdata =
+            opprettGenerellBrevdata(sakType, vedtakType, vedtakStatus, systemkilde, revurderingsaarsak)
+        return brevdata
+            .copy(
+                personerISak =
+                    brevdata.personerISak.copy(verge = vergemaal()),
+            )
+    }
+
+    private fun vergemaal() =
+        Vergemaal(
+            BrevMottaker(
+                "Vera Vergesen",
+                MottakerFoedselsnummer("0101197212345"),
+                MottakerAdresse(
+                    adresseType = "NORSKPOSTADRESSE",
+                    adresselinje1 = "c/o ADVOKAT VERA",
+                    adresselinje2 = "POSTBOKS 1064",
+                    adresselinje3 = "1510 MOSS",
+                    postnummer = "1510",
+                    poststed = "MOSS",
+                    landkode = "NO",
+                    land = "NORGE",
+                ),
+            ),
+        )
+
+    private fun expectedVergeMottaker(): Mottaker {
+        return Mottaker(
+            "Vera Vergesen",
+            Foedselsnummer("0101197212345"),
+            null,
+            Adresse(
+                adresseType = "NORSKPOSTADRESSE",
+                adresselinje1 = "c/o ADVOKAT VERA",
+                adresselinje2 = "POSTBOKS 1064",
+                adresselinje3 = "1510 MOSS",
+                postnummer = "1510",
+                poststed = "MOSS",
+                landkode = "NO",
+                land = "NORGE",
+            ),
         )
     }
 

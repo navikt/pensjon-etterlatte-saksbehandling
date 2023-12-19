@@ -21,6 +21,9 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
+  resources:
+    requests:
+      cpu: 25m
   replicas:
     cpuThresholdPercentage: 90
     max: 1

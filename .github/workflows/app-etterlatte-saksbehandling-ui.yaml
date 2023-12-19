@@ -25,6 +25,10 @@ on:
     paths:
       - apps/etterlatte-saksbehandling-ui/**
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   test:
     if: github.event_name == 'pull_request'
@@ -51,9 +55,6 @@ jobs:
     if: github.event_name != 'pull_request'
     name: Build, test and publish
     runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-      id-token: 'write'
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
     steps:
@@ -93,9 +94,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: apps/${{ env.APP_NAME }}/.nais/dev.yaml
           VAR: image=${{ needs.build-and-publish.outputs.image }}
@@ -108,9 +108,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: nais/deploy/actions/deploy@v1
+      - uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: apps/${{ env.APP_NAME }}/.nais/prod.yaml
           VAR: image=${{ needs.build-and-publish.outputs.image }}

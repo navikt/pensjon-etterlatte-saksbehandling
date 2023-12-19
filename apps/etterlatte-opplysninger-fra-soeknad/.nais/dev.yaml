@@ -19,6 +19,9 @@ spec:
     path: /metrics
   kafka:
     pool: nav-dev
+  resources:
+    requests:
+      cpu: 25m
   replicas:
     cpuThresholdPercentage: 90
     max: 1

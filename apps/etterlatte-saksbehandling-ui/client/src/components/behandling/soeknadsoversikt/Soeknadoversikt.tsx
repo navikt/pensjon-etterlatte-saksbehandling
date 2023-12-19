@@ -5,7 +5,7 @@ import { Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Soeknadsdato } from './Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { behandlingErRedigerbar, behandlingErUtfylt } from '../felles/utils'
+import { behandlingErRedigerbar, soeknadsoversiktErFerdigUtfylt } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
@@ -121,7 +121,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       <Familieforhold behandling={behandling} personopplysninger={personopplysninger} />
       {redigerbar ? (
         <BehandlingHandlingKnapper>
-          {behandlingErUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}
+          {soeknadsoversiktErFerdigUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />

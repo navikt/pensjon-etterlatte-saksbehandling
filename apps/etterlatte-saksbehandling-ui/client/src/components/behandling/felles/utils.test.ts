@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { behandlingErUtfylt, behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
+import { soeknadsoversiktErFerdigUtfylt, behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import {
   IBehandlingStatus,
   IBehandlingsType,
@@ -25,7 +25,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeTruthy()
   })
@@ -39,7 +39,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -53,7 +53,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -67,7 +67,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -81,7 +81,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       undefined
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -97,7 +97,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeTruthy()
   })
@@ -111,7 +111,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -125,7 +125,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
       undefined
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -139,7 +139,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -153,7 +153,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })

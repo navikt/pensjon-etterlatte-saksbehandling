@@ -79,7 +79,7 @@ internal class SakServiceTest {
 
         every { tokenValidationContext.getJwtToken(any()) } returns token
 
-        val groups = AzureGroup.values().associateWith { it.name }
+        val groups = AzureGroup.entries.associateWith { it.name }
 
         Kontekst.set(
             Context(

@@ -183,7 +183,7 @@ internal class ApplicationContext(
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
-    val saksbehandlerGroupIdsByKey = AzureGroup.values().associateWith { env.requireEnvValue(it.envKey) }
+    val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
     val sporingslogg = Sporingslogg()
     val behandlingRequestLogger = BehandlingRequestLogger(sporingslogg)
     val dataSource = DataSourceBuilder.createDataSource(env.props)

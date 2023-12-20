@@ -8,7 +8,7 @@ class KabalOversendelseTest {
     @Test
     fun `kan mappe alle KabalHjemmel til Hjemmel i klagekodeverk`() {
         Assertions.assertDoesNotThrow {
-            KabalHjemmel.values().forEach {
+            KabalHjemmel.entries.forEach {
                 it.tilHjemmel()
             }
         }

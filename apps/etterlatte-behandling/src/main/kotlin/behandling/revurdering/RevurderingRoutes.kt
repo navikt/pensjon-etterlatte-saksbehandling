@@ -98,7 +98,7 @@ internal fun Route.revurderingRoutes(
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
             val stoettedeRevurderinger =
-                Revurderingaarsak.values()
+                Revurderingaarsak.entries
                     .filter { it.erStoettaRevurdering(sakType) }
                     .filter {
                         if (it == Revurderingaarsak.OPPHOER_UTEN_BREV) {

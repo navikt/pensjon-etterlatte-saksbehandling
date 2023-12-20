@@ -16,7 +16,7 @@ enum class Enheter(val enhetNr: String, val navn: String, val inkludertForNasjon
     companion object {
         val defaultEnhet = PORSGRUNN
 
-        fun nasjonalTilgangEnheter() = Enheter.values().filter { it.inkludertForNasjonalTilgang }.map { it.enhetNr }
+        fun nasjonalTilgangEnheter() = entries.filter { it.inkludertForNasjonalTilgang }.map { it.enhetNr }
     }
 }
 

@@ -67,7 +67,7 @@ internal class BehandlingDaoReguleringTest {
         postgreSQLContainer.stop()
     }
 
-    private fun hentMigrerbareStatuses() = BehandlingStatus.values().toList() - BehandlingStatus.skalIkkeOmregnesVedGRegulering().toSet()
+    private fun hentMigrerbareStatuses() = BehandlingStatus.entries - BehandlingStatus.skalIkkeOmregnesVedGRegulering().toSet()
 
     @ParameterizedTest(
         name = "behandling med status {0} skal endres til aa vaere VILKAARSVURDERT",

@@ -132,7 +132,7 @@ internal class RevurderingRoutesTest {
             val revurderingAarsak: List<Revurderingaarsak> = response.body()
             assertEquals(HttpStatusCode.OK, response.status)
             val revurderingsaarsakerForBarnepensjon =
-                Revurderingaarsak.values().filter { it.erStoettaRevurdering(SakType.BARNEPENSJON) }
+                Revurderingaarsak.entries.filter { it.erStoettaRevurdering(SakType.BARNEPENSJON) }
             assertEquals(revurderingsaarsakerForBarnepensjon.size, revurderingAarsak.size)
             assertTrue(
                 revurderingAarsak.containsAll<Any>(
@@ -164,7 +164,7 @@ internal class RevurderingRoutesTest {
             assertEquals(HttpStatusCode.OK, response.status)
             assertTrue(
                 revurderingAarsak.containsAll(
-                    Revurderingaarsak.values()
+                    Revurderingaarsak.entries
                         .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
                         .filter { it.name !== Revurderingaarsak.NY_SOEKNAD.toString() },
                 ),
@@ -198,7 +198,7 @@ internal class RevurderingRoutesTest {
             assertEquals(HttpStatusCode.OK, response.status)
             assertTrue(
                 revurderingAarsak.containsAll(
-                    Revurderingaarsak.values()
+                    Revurderingaarsak.entries
                         .filterNot { it == Revurderingaarsak.OPPHOER_UTEN_BREV }
                         .filter { it.gyldigForSakType(SakType.OMSTILLINGSSTOENAD) }
                         .filter { it.name !== Revurderingaarsak.NY_SOEKNAD.toString() },

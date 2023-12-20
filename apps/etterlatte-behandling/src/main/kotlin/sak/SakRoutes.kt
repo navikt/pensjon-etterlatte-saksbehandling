@@ -150,7 +150,7 @@ internal fun Route.sakWebRoutes(
                 hentNavidentFraToken { navIdent ->
                     val enhetrequest = call.receive<EnhetRequest>()
                     try {
-                        if (enhetrequest.enhet !in Enheter.values().map { it.enhetNr }) {
+                        if (enhetrequest.enhet !in Enheter.entries.map { it.enhetNr }) {
                             throw UgyldigForespoerselException(
                                 code = "ENHET IKKE GYLDIG",
                                 detail = "enhet ${enhetrequest.enhet} er ikke i listen over gyldige enheter",

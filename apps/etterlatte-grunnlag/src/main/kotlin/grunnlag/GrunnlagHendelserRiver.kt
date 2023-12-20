@@ -76,6 +76,6 @@ class GrunnlagHendelserRiver(
     }
 
     companion object {
-        private val OPPLYSNING_TYPER = Opplysningstype.values().map { it.name }
+        private val OPPLYSNING_TYPER = Opplysningstype.entries.map { it.name }
     }
 }

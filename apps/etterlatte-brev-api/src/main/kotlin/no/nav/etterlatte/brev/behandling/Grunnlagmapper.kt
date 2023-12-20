@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentErForeldreloes
+import no.nav.etterlatte.libs.common.grunnlag.hentFamilierelasjon
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
@@ -89,7 +90,14 @@ fun Grunnlag.mapVerge(
         if (relevantVerge != null) {
             return hentVergemaal(relevantVerge, behandlingId)
         }
+        val soekersAnsvarligeForeldre = this.soeker.hentFamilierelasjon()?.verdi?.ansvarligeForeldre ?: emptyList()
+        val gjenlevende = hentPotensiellGjenlevende()
+        val gjenlevendeIdent = gjenlevende?.hentFoedselsnummer()?.verdi
+        val gjenlevendeHarForeldreansvar = soekersAnsvarligeForeldre.contains(gjenlevendeIdent)
+
         if (sakType == SakType.BARNEPENSJON) {
+            // TODO: se på flyten her for innvilgelse kontra migrering, da begge vil leve parallellt en stund
+
             // Er barnet over 18? Denne mappingen må heller komme fra valg saksbehandler gjør men her vi automatisk
             // i forbindelse med migrering. Før nye vedtak på nytt regelverk skal dette bort
             val dato18Aar =
@@ -99,12 +107,14 @@ fun Grunnlag.mapVerge(
                 }.verdi.plusYears(18)
             if (dato18Aar <= LocalDate.now()) {
                 null
-            } else {
-                hentPotensiellGjenlevende()
+            } else if (gjenlevendeHarForeldreansvar) {
+                gjenlevende
                     ?.hentNavn()
                     ?.verdi
                     ?.fulltNavn()
                     ?.let { ForelderVerge(it) }
+            } else {
+                null // Vi har ikke navnet på den som har foreldreansvar (kanskje innsender?)
             }
         } else {
             null

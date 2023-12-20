@@ -1,12 +1,13 @@
 package no.nav.etterlatte.metrics
 
 import io.prometheus.client.Gauge
+import no.nav.etterlatte.jobs.MetrikkUthenter
 import org.slf4j.LoggerFactory
 
 class BehandlingMetrics(
     private val metrikkerDao: OppgaveMetrikkerDao,
     private val behandlingerMetrikkerDao: BehandlingMetrikkerDao,
-) : MetrikkUthenter() {
+) : MetrikkUthenter {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     val antallOppgaver by lazy {

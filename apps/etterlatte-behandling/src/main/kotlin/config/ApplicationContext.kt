@@ -57,6 +57,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
+import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
@@ -69,7 +70,6 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.metrics.BehandlingMetrics
 import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
-import no.nav.etterlatte.metrics.MetrikkerJob
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl

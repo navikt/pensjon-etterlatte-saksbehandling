@@ -1,11 +1,13 @@
-package no.nav.etterlatte.metrics
+package no.nav.etterlatte.jobs
 
-import no.nav.etterlatte.jobs.LoggerInfo
-import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
+
+interface MetrikkUthenter {
+    fun run()
+}
 
 class MetrikkerJob(
     private val uthenter: MetrikkUthenter,
@@ -29,11 +31,5 @@ class MetrikkerJob(
                 uthenter.run()
             }
         }
-    }
-}
-
-sealed class MetrikkUthenter {
-    open fun run() {
-        throw NotImplementedError("Metode må overrides og implementeres")
     }
 }

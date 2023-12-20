@@ -100,8 +100,8 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
           ))}
 
           <HMargin>
-            {soeker!.foedselsnummer ? (
-              <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker!.foedselsnummer}`} target="_blank">
+            {soeker?.foedselsnummer ? (
+              <Link href={`${configContext['gosysUrl']}/personoversikt/fnr=${soeker.foedselsnummer}`} target="_blank">
                 Personoversikt i Gosys
               </Link>
             ) : (

@@ -108,7 +108,7 @@ internal class BrevdataFacadeImplTest {
         Assertions.assertEquals("Død Mellom Far", generellBrevData.personerISak.avdoede.first().navn)
         Assertions.assertEquals(VedtakType.INNVILGELSE, generellBrevData.forenkletVedtak.type)
         Assertions.assertEquals(123L, generellBrevData.forenkletVedtak.id)
-        Assertions.assertEquals(ENHET, generellBrevData.forenkletVedtak.ansvarligEnhet)
+        Assertions.assertEquals(ENHET, generellBrevData.forenkletVedtak.sakenhet)
         Assertions.assertEquals(SAKSBEHANDLER_IDENT, generellBrevData.forenkletVedtak.saksbehandlerIdent)
         Assertions.assertEquals(ATTESTANT_IDENT, generellBrevData.forenkletVedtak.attestantIdent)
 
@@ -145,8 +145,8 @@ internal class BrevdataFacadeImplTest {
         }
         with(generellBrevData.forenkletVedtak) {
             type shouldBe VedtakType.TILBAKEKREVING
+            sakenhet shouldBe ENHET
             id shouldBe 123L
-            ansvarligEnhet shouldBe ENHET
             saksbehandlerIdent shouldBe SAKSBEHANDLER_IDENT
             attestantIdent shouldBe ATTESTANT_IDENT
             this.tilbakekreving shouldBe tilbakekreving

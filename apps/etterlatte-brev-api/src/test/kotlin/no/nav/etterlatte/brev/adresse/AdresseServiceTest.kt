@@ -67,7 +67,7 @@ internal class AdresseServiceTest {
         faktiskAvsender.attestant shouldBe "att estant"
 
         coVerify(exactly = 1) {
-            norg2Mock.hentEnhet(vedtak.ansvarligEnhet)
+            norg2Mock.hentEnhet(vedtak.sakenhet)
             navansattMock.hentSaksbehandlerInfo(vedtak.saksbehandlerIdent)
             navansattMock.hentSaksbehandlerInfo(vedtak.attestantIdent!!)
         }

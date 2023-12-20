@@ -42,7 +42,7 @@ class AdresseService(
 
             val saksbehandlerEnhet =
                 async {
-                    hentEnhet(vedtak.ansvarligEnhet)
+                    hentEnhet(vedtak.sakenhet)
                 }
 
             val attestantNavn =

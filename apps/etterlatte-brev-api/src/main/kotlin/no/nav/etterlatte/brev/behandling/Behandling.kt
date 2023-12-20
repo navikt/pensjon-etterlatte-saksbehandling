@@ -47,7 +47,7 @@ data class ForenkletVedtak(
     val id: Long,
     val status: VedtakStatus,
     val type: VedtakType,
-    val ansvarligEnhet: String,
+    val sakenhet: String,
     val saksbehandlerIdent: String,
     val attestantIdent: String?,
     val vedtaksdato: LocalDate?,

@@ -94,7 +94,6 @@ class BrevdataFacade(
                 )
             val vedtak = vedtakDeferred.await()
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
-            val ansvarligEnhet = vedtak.vedtakFattet?.ansvarligEnhet ?: sak.enhet
             val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
             val attestantIdent =
                 vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
@@ -123,7 +122,7 @@ class BrevdataFacade(
                                     vedtak.id,
                                     vedtak.status,
                                     vedtak.type,
-                                    ansvarligEnhet,
+                                    sak.enhet,
                                     saksbehandlerIdent,
                                     attestantIdent,
                                     vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
@@ -147,7 +146,7 @@ class BrevdataFacade(
                                 vedtak.id,
                                 vedtak.status,
                                 vedtak.type,
-                                ansvarligEnhet,
+                                sak.enhet,
                                 saksbehandlerIdent,
                                 attestantIdent,
                                 vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),

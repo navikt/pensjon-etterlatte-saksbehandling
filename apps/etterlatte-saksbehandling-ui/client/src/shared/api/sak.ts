@@ -27,8 +27,18 @@ export const hentFlyktningStatusForSak = async (sakId: number): Promise<ApiRespo
   return apiClient.get(`sak/${sakId}/flyktning`)
 }
 
-export const hentSakForPerson = async (args: { fnr: string; type: SakType }): Promise<ApiResponse<ISak>> =>
-  apiClient.post(`/personer/sak/${args.type}`, { foedselsnummer: args.fnr })
+export const hentSakForPerson = async (args: {
+  fnr: string
+  type: SakType
+  opprettHvisIkkeFinnes?: boolean
+}): Promise<ApiResponse<ISak>> => {
+  if (args.opprettHvisIkkeFinnes) {
+    // TODO: Fjerne når søknad gjenlevendepensjon ikke lenger må behandles
+    return apiClient.post(`/personer/sak/${args.type}?opprettHvisIkkeFinnes=true`, { foedselsnummer: args.fnr })
+  } else {
+    return apiClient.post(`/personer/sak/${args.type}`, { foedselsnummer: args.fnr })
+  }
+}
 
 export const byttEnhetPaaSak = async (args: { sakId: number; enhet: String }): Promise<ApiResponse<void>> => {
   return apiClient.post(`sak/${args.sakId}/endre_enhet`, { enhet: args.enhet })

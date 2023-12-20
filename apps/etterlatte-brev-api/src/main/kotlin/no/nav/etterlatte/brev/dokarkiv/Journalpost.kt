@@ -7,6 +7,11 @@ import java.time.LocalDateTime
 
 /**
  * Requestobjekt for å opprette ny Journalpost
+ *
+ * Tema:
+ *  https://confluence.adeo.no/display/BOA/Tema
+ * Kanal:
+ *  https://confluence.adeo.no/display/BOA/Utsendingskanal
  **/
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 data class OpprettJournalpostRequest(
@@ -40,6 +45,19 @@ data class OpprettJournalpostResponse(
 
 data class OppdaterJournalpostResponse(
     val journalpostId: String,
+)
+
+data class KnyttTilAnnenSakRequest(
+    val bruker: Bruker,
+    val fagsakId: String,
+    val fagsaksystem: String,
+    val journalfoerendeEnhet: String,
+    val tema: String,
+    val sakstype: Sakstype,
+)
+
+data class KnyttTilAnnenSakResponse(
+    val nyJournalpostId: String,
 )
 
 data class AvsenderMottaker(

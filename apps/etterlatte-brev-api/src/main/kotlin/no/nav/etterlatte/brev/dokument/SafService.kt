@@ -6,6 +6,7 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 interface SafService {
     suspend fun hentDokumenter(
         fnr: String,
+        visTemaPen: Boolean,
         idType: BrukerIdType,
         brukerTokenInfo: BrukerTokenInfo,
     ): HentDokumentoversiktBrukerResult

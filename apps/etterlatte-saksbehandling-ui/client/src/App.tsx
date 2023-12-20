@@ -26,6 +26,7 @@ import BehandleJournalfoeringOppgave from '~components/person/journalfoeringsopp
 
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { FlyttJournalpost } from '~components/person/flyttjournalpost/FlyttJournalpost'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
@@ -54,6 +55,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<ToggleMinOppgaveliste />} />
                   <Route path="/oppgavebenken" element={<ToggleMinOppgaveliste />} />
+                  <Route path="/flyttjournalpost" element={<FlyttJournalpost />} />
                   <Route path="/person/:fnr" element={<Person />} />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
                   <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />

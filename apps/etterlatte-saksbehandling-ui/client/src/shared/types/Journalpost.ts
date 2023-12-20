@@ -22,6 +22,22 @@ export interface OppdaterJournalpostRequest {
   sak?: JournalpostSak
 }
 
+export interface KnyttTilAnnenSakRequest {
+  bruker: {
+    id: string
+    idType: string
+  }
+  fagsakId: string
+  fagsaksystem: string
+  journalfoerendeEnhet: string
+  sakstype: string
+  tema: string
+}
+
+export interface KnyttTilAnnenSakResponse {
+  nyJournalpostId: string
+}
+
 export interface DokumentInfo {
   dokumentInfoId: string
   tittel: string

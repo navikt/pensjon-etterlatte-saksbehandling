@@ -71,7 +71,7 @@ export const FlexRow = styled.div<{
 }>`
   display: flex;
   justify-content: ${(props) => props.justify ?? 'left'};
-  align-items: ${(props) => props.justify ?? 'normal'};
+  align-items: ${(props) => props.align ?? 'normal'};
   gap: 1rem;
   ${(props) =>
     props.$spacing &&

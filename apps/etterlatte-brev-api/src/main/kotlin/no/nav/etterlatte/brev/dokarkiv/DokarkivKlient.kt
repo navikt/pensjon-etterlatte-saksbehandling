@@ -71,6 +71,25 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
             contentType(ContentType.Application.Json)
             setBody(OppdaterJournalpostTemaRequest(nyttTema))
         }.body()
+
+    internal suspend fun feilregistrerSakstilknytning(journalpostId: String): String =
+        client.patch("$url/$journalpostId/feilregistrer/feilregistrerSakstilknytning") {
+            contentType(ContentType.Application.Json)
+        }.body()
+
+    internal suspend fun opphevFeilregistrertSakstilknytning(journalpostId: String): String =
+        client.patch("$url/$journalpostId/feilregistrer/opphevFeilregistrertSakstilknytning") {
+            contentType(ContentType.Application.Json)
+        }.body()
+
+    internal suspend fun knyttTilAnnenSak(
+        journalpostId: String,
+        request: KnyttTilAnnenSakRequest,
+    ): KnyttTilAnnenSakResponse =
+        client.put("$url/$journalpostId/knyttTilAnnenSak") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
 }
 
 data class OppdaterJournalpostTemaRequest(val tema: String)

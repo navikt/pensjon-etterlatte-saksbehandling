@@ -67,6 +67,25 @@ internal fun Route.oppgaveRoutes(
                 }
             }
 
+            post("/opprett") {
+                kunSaksbehandler {
+                    val nyOppgaveDto = call.receive<NyOppgaveDto>()
+
+                    val nyOppgave =
+                        inTransaction {
+                            service.opprettNyOppgaveMedSakOgReferanse(
+                                nyOppgaveDto.referanse ?: "",
+                                sakId,
+                                nyOppgaveDto.oppgaveKilde,
+                                nyOppgaveDto.oppgaveType,
+                                nyOppgaveDto.merknad,
+                            )
+                        }
+
+                    call.respond(nyOppgave)
+                }
+            }
+
             get("/ferdigstiltogattestert/{referanse}") {
                 kunSaksbehandler {
                     val saksbehandler =

@@ -10,6 +10,7 @@ import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import org.slf4j.LoggerFactory
 
 interface BrukerService {
@@ -60,6 +61,8 @@ class BrukerServiceImpl(
             }
         }
     }
+
+    private fun GeografiskTilknytning.harBareLandTilknytning() = bydel == null && kommune == null && land != null
 
     override fun finnEnhetForPersonOgTema(
         fnr: String,

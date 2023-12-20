@@ -201,7 +201,7 @@ internal class ApplicationContext(
     val sakDao = SakDao { databaseContext().activeTx() }
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
-    val oppgaveMetrikkerDato = OppgaveMetrikkerDao(dataSource)
+    val oppgaveMetrikkerDao = OppgaveMetrikkerDao(dataSource)
     val behandlingMetrikkerDao = BehandlingMetrikkerDao(dataSource)
     val klageDao = KlageDaoImpl { databaseContext().activeTx() }
     val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
@@ -360,9 +360,9 @@ internal class ApplicationContext(
             minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong(),
         )
 
-    val oppgaveMetrikkerJob: MetrikkerJob by lazy {
+    val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
-            BehandlingMetrics(oppgaveMetrikkerDato, behandlingMetrikkerDao),
+            BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao),
             leaderElectionKlient,
             Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(5, ChronoUnit.MINUTES),

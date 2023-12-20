@@ -278,7 +278,7 @@ enum class LandNormalisert(val isoCode: String, val beskrivelse: String) {
         private val mapAvLandkodeOgBeskrivelse = HashMap<String, String>()
 
         init {
-            LandNormalisert.values().forEach {
+            entries.forEach {
                 mapAvLandkodeOgBeskrivelse[it.isoCode] = it.beskrivelse
             }
         }

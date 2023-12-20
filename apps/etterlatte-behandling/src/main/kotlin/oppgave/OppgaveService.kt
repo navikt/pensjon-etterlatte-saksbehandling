@@ -65,9 +65,9 @@ class OppgaveService(
     private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) =
         roller.flatMap {
             when (it) {
-                Rolle.SAKSBEHANDLER -> OppgaveType.values().toList() - OppgaveType.ATTESTERING
+                Rolle.SAKSBEHANDLER -> OppgaveType.entries - OppgaveType.ATTESTERING
                 Rolle.ATTESTANT -> listOf(OppgaveType.ATTESTERING)
-                Rolle.STRENGT_FORTROLIG -> OppgaveType.values().toList()
+                Rolle.STRENGT_FORTROLIG -> OppgaveType.entries
             }.distinct()
         }
 

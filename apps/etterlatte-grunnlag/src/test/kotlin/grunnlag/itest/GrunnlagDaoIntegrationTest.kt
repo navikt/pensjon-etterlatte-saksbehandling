@@ -157,7 +157,7 @@ internal class GrunnlagDaoIntegrationTest {
     fun `Hente nyeste grunnlag av type`() {
         val sakId = Random.nextLong()
         val behandlingId = UUID.randomUUID()
-        val type = Opplysningstype.SOEKER_PDL_V1
+        val type = SOEKER_PDL_V1
 
         lagGrunnlagsopplysning(type, verdi = opprettMockPerson(SOEKER_FOEDSELSNUMMER).toJsonNode())
             .also { opplysningRepo.leggOpplysningTilGrunnlag(sakId, it) }
@@ -203,9 +203,9 @@ internal class GrunnlagDaoIntegrationTest {
         lagGrunnlagsopplysning(AVDOED_PDL_V1).also { opplysningRepo.leggOpplysningTilGrunnlag(33, it) }
         lagGrunnlagsopplysning(AVDOED_PDL_V1, uuid = uuid).also { opplysningRepo.leggOpplysningTilGrunnlag(33, it) }
 
-        assertEquals(uuid, opplysningRepo.finnNyesteGrunnlagForSak(33, Opplysningstype.AVDOED_PDL_V1)?.opplysning?.id)
+        assertEquals(uuid, opplysningRepo.finnNyesteGrunnlagForSak(33, AVDOED_PDL_V1)?.opplysning?.id)
         // Skal håndtere at opplysning ikke finnes
-        assertEquals(null, opplysningRepo.finnNyesteGrunnlagForSak(0L, Opplysningstype.AVDOED_PDL_V1))
+        assertEquals(null, opplysningRepo.finnNyesteGrunnlagForSak(0L, AVDOED_PDL_V1))
     }
 
     @Test
@@ -223,12 +223,12 @@ internal class GrunnlagDaoIntegrationTest {
 
         assertEquals(
             behandlingId,
-            opplysningRepo.finnNyesteGrunnlagForBehandling(behandlingId, Opplysningstype.AVDOED_PDL_V1)?.opplysning?.id,
+            opplysningRepo.finnNyesteGrunnlagForBehandling(behandlingId, AVDOED_PDL_V1)?.opplysning?.id,
         )
         // Skal håndtere at opplysning ikke finnes
         assertEquals(
             null,
-            opplysningRepo.finnNyesteGrunnlagForBehandling(UUID.randomUUID(), Opplysningstype.AVDOED_PDL_V1),
+            opplysningRepo.finnNyesteGrunnlagForBehandling(UUID.randomUUID(), AVDOED_PDL_V1),
         )
     }
 
@@ -436,7 +436,7 @@ internal class GrunnlagDaoIntegrationTest {
         repeat(10) {
             val annenBehandlingId = UUID.randomUUID()
             val tempHendelsenummer =
-                Opplysningstype.values().maxOf { opplysningstype ->
+                Opplysningstype.entries.toTypedArray().maxOf { opplysningstype ->
                     opplysningRepo.leggOpplysningTilGrunnlag(sakId, lagGrunnlagsopplysning(opplysningstype))
                 }
             opplysningRepo.oppdaterVersjonForBehandling(annenBehandlingId, sakId, tempHendelsenummer)

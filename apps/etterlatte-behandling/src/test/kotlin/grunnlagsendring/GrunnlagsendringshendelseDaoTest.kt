@@ -305,7 +305,7 @@ internal class GrunnlagsendringshendelseDaoTest {
         val alleHendelser =
             grunnlagsendringshendelsesRepo.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakid,
-                GrunnlagsendringStatus.values().toList(),
+                GrunnlagsendringStatus.entries,
             )
         assertEquals(alleHendelser.size, 4)
         assertEquals(

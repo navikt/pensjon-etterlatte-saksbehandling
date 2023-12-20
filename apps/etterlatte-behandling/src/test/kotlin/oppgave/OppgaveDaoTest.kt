@@ -68,7 +68,7 @@ internal class OppgaveDaoTest {
         oppgaveDao.opprettOppgave(lagNyOppgave(sakAalesund))
         oppgaveDao.opprettOppgave(lagNyOppgave(sakAalesund))
 
-        val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.values().toList())
+        val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.entries)
         assertEquals(3, hentOppgaver.size)
     }
 
@@ -78,7 +78,7 @@ internal class OppgaveDaoTest {
         val oppgaveNy = lagNyOppgave(sakAalesund, OppgaveKilde.BEHANDLING, OppgaveType.ATTESTERING)
         oppgaveDao.opprettOppgave(oppgaveNy)
 
-        val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.values().toList())
+        val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.entries)
         assertEquals(1, hentOppgaver.size)
         assertEquals(OppgaveType.ATTESTERING, hentOppgaver[0].type)
     }
@@ -107,7 +107,7 @@ internal class OppgaveDaoTest {
         val oppgaveUtenbeskyttelse = lagNyOppgave(sakutenbeskyttelse)
         oppgaveDao.opprettOppgave(oppgaveUtenbeskyttelse)
 
-        val hentetOppgave = oppgaveDao.hentOppgaver(OppgaveType.values().toList())
+        val hentetOppgave = oppgaveDao.hentOppgaver(OppgaveType.entries)
         assertEquals(1, hentetOppgave.size)
     }
 
@@ -120,7 +120,7 @@ internal class OppgaveDaoTest {
 
         val hentetOppgave =
             oppgaveDao
-                .finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(OppgaveType.values().toList())
+                .finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(OppgaveType.entries)
         assertEquals(1, hentetOppgave.size)
     }
 

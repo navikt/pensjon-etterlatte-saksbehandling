@@ -11,11 +11,14 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -159,7 +162,7 @@ internal class BehandlingTest {
     }
 
     @Test
-    fun `Ingen verge i grunnlag`() {
+    fun `Ingen verge i grunnlag gjenlevende har foreldreansvar`() {
         val gjenlevendeNavn = Navn("Elegang", "Mellomstor", "Barnevogn")
 
         val grunnlag =
@@ -174,12 +177,22 @@ internal class BehandlingTest {
                             opprettOpplysning(
                                 LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
                             ),
+                        Opplysningstype.FAMILIERELASJON to
+                            opprettOpplysning(
+                                FamilieRelasjon(
+                                    ansvarligeForeldre = listOf(GJENLEVENDE_FOEDSELSNUMMER),
+                                    foreldre = listOf(),
+                                    barn = listOf(),
+                                    personerUtenIdent = listOf(),
+                                ).toJsonNode(),
+                            ),
                     ),
                 familie =
                     listOf(
                         mapOf(
                             Opplysningstype.PERSONROLLE to opprettOpplysning(PersonRolle.GJENLEVENDE.toJsonNode()),
                             Opplysningstype.NAVN to opprettOpplysning(gjenlevendeNavn.toJsonNode()),
+                            Opplysningstype.FOEDSELSNUMMER to opprettOpplysning(GJENLEVENDE_FOEDSELSNUMMER.toJsonNode()),
                         ),
                     ),
                 sak = emptyMap(),
@@ -188,6 +201,51 @@ internal class BehandlingTest {
 
         val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())
         assertEquals(gjenlevendeNavn.toString(), vergeBarnepensjon!!.navn())
+
+        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID())
+        assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
+    }
+
+    @Test
+    fun `Ingen verge i grunnlag gjenlevende har ikke foreldreansvar`() {
+        val gjenlevendeNavn = Navn("Elegang", "Mellomstor", "Barnevogn")
+
+        val grunnlag =
+            Grunnlag(
+                soeker =
+                    mapOf(
+                        Opplysningstype.FOEDSELSNUMMER to
+                            opprettOpplysning(
+                                SOEKER_FOEDSELSNUMMER.toJsonNode(),
+                            ),
+                        Opplysningstype.FOEDSELSDATO to
+                            opprettOpplysning(
+                                LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
+                            ),
+                        Opplysningstype.FAMILIERELASJON to
+                            opprettOpplysning(
+                                FamilieRelasjon(
+                                    ansvarligeForeldre = listOf(AVDOED2_FOEDSELSNUMMER),
+                                    foreldre = listOf(),
+                                    barn = listOf(),
+                                    personerUtenIdent = listOf(),
+                                ).toJsonNode(),
+                            ),
+                    ),
+                familie =
+                    listOf(
+                        mapOf(
+                            Opplysningstype.PERSONROLLE to opprettOpplysning(PersonRolle.GJENLEVENDE.toJsonNode()),
+                            Opplysningstype.NAVN to opprettOpplysning(gjenlevendeNavn.toJsonNode()),
+                            Opplysningstype.FOEDSELSNUMMER to opprettOpplysning(GJENLEVENDE_FOEDSELSNUMMER.toJsonNode()),
+                        ),
+                    ),
+                sak = emptyMap(),
+                metadata = mockk(),
+            )
+
+        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())
+        assertNull(vergeBarnepensjon)
 
         val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID())
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")

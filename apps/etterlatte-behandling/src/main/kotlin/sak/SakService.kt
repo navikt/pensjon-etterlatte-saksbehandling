@@ -83,7 +83,10 @@ class SakServiceImpl(
     }
 
     override suspend fun finnNavkontorForPerson(fnr: String): Navkontor {
-        val sak = inTransaction { hentEnkeltSakForPerson(fnr) }
+        val sak =
+            inTransaction {
+                hentEnkeltSakForPerson(fnr)
+            }
         return brukerService.finnNavkontorForPerson(fnr, sak.sakType)
     }
 

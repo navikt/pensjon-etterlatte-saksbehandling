@@ -10,6 +10,7 @@ import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import org.slf4j.LoggerFactory
 
 interface BrukerService {
@@ -49,10 +50,19 @@ class BrukerServiceImpl(
 
             else -> {
                 val geografiskTilknytning = tilknytning.geografiskTilknytning() ?: throw GeografiskTilknytningMangler()
-                norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)
+                if (tilknytning.harBareLandTilknytning()) {
+                    if (tilknytning.land!! == "NO") {
+                        Navkontor(navn = "UKjent kontor, men har Norge som landkode", enhetNr = "ukjent enhetsnummer")
+                    }
+                    Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
+                } else {
+                    norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)
+                }
             }
         }
     }
+
+    private fun GeografiskTilknytning.harBareLandTilknytning() = bydel == null && kommune == null && land != null
 
     override fun finnEnhetForPersonOgTema(
         fnr: String,

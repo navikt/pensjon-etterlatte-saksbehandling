@@ -3,6 +3,8 @@ package no.nav.etterlatte.vedtaksvurdering.config
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -50,6 +52,7 @@ class ApplicationBuilder {
             password = properties.dbPassword,
         )
 
+    private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val samKlient =
         SamKlientImpl(
@@ -72,6 +75,7 @@ class ApplicationBuilder {
             behandlingKlient = behandlingKlient,
             samKlient = samKlient,
             trygdetidKlient = trygdetidKlient,
+            featureToggleService = featureToggleService,
         )
     private val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)
     private val vedtakTilbakekrevingService =
@@ -117,4 +121,11 @@ class ApplicationBuilder {
     ) {
         rapidsConnection.publish(message = melding, key = key.toString())
     }
+
+    private fun featureToggleProperties(config: Config) =
+        FeatureToggleProperties(
+            applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+            host = config.getString("funksjonsbrytere.unleash.host"),
+            apiKey = config.getString("funksjonsbrytere.unleash.token"),
+        )
 }

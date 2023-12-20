@@ -2,6 +2,7 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -16,6 +17,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.REVURDERING_AARSAK
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -28,6 +30,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.vedtaksvurdering.config.VedtaksvurderingFeatureToggle
 import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
@@ -46,6 +49,7 @@ class VedtakBehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val samKlient: SamKlient,
     private val trygdetidKlient: TrygdetidKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
 
@@ -67,10 +71,9 @@ class VedtakBehandlingService(
         if (vedtak != null) {
             verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         }
-
         val (behandling, vilkaarsvurdering, beregningOgAvkorting, _, trygdetid) =
             hentDataForVedtak(behandlingId, brukerTokenInfo)
-        validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetid)
+        validerGrunnlagsversjon(vilkaarsvurdering, beregningOgAvkorting, trygdetid)
 
         val vedtakType = vedtakType(behandling.behandlingType, vilkaarsvurdering)
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
@@ -96,7 +99,7 @@ class VedtakBehandlingService(
         verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
         val (_, vilkaarsvurdering, beregningOgAvkorting, _, trygdetid) = hentDataForVedtak(behandlingId, brukerTokenInfo)
-        validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetid)
+        validerGrunnlagsversjon(vilkaarsvurdering, beregningOgAvkorting, trygdetid)
 
         val sak = behandlingKlient.hentSak(vedtak.sakId, brukerTokenInfo)
 
@@ -142,6 +145,16 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
             ),
         )
+    }
+
+    private fun validerGrunnlagsversjon(
+        vilkaarsvurdering: VilkaarsvurderingDto?,
+        beregningOgAvkorting: BeregningOgAvkorting?,
+        trygdetid: TrygdetidDto?,
+    ) {
+        if (featureToggleService.isEnabled(VedtaksvurderingFeatureToggle.ValiderGrunnlagsversjon, false)) {
+            validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetid)
+        }
     }
 
     suspend fun attesterVedtak(

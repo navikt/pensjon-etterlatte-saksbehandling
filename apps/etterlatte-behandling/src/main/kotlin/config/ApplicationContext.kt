@@ -57,6 +57,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
+import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
@@ -67,7 +68,8 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
-import no.nav.etterlatte.metrics.OppgaveMetrics
+import no.nav.etterlatte.metrics.BehandlingMetrics
+import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
@@ -199,7 +201,8 @@ internal class ApplicationContext(
     val sakDao = SakDao { databaseContext().activeTx() }
     val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
-    val metrikkerDao = OppgaveMetrikkerDao(dataSource)
+    val oppgaveMetrikkerDao = OppgaveMetrikkerDao(dataSource)
+    val behandlingMetrikkerDao = BehandlingMetrikkerDao(dataSource)
     val klageDao = KlageDaoImpl { databaseContext().activeTx() }
     val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
     val behandlingInfoDao = BehandlingInfoDao { databaseContext().activeTx() }
@@ -215,9 +218,6 @@ internal class ApplicationContext(
     val tilbakekrevingKlient =
         TilbakekrevingKlientImpl(tilbakekrevingHttpClient, resourceUrl = env.getValue("ETTERLATTE_TILBAKEKREVING_URL"))
     val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue("ETTERLATTE_MIGRERING_URL"))
-
-    // Metrikker
-    val oppgaveMetrikker = OppgaveMetrics(metrikkerDao)
 
     // Service
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao)
@@ -359,4 +359,13 @@ internal class ApplicationContext(
             periode = Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES),
             minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong(),
         )
+
+    val metrikkerJob: MetrikkerJob by lazy {
+        MetrikkerJob(
+            BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao),
+            leaderElectionKlient,
+            Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(5, ChronoUnit.MINUTES),
+        )
+    }
 }

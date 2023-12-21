@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.hentinformasjon
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -59,6 +60,7 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
         val trygdetidsperioder =
             finnTrygdetidsperioderForTabell(
                 trygdetidgrunnlagForAnvendtTrygdetid.trygdetidGrunnlag,
+                foersteBeregningsperiode.beregningsMetode,
             )
 
         return Trygdetid(
@@ -70,17 +72,32 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
         )
     }
 
-    private fun finnTrygdetidsperioderForTabell(trygdetidsgrunnlag: List<TrygdetidGrunnlagDto>): List<Trygdetidsperiode> {
-        return trygdetidsgrunnlag
-            // Vi skal kun ha med de som er avtaleland, dvs. er med i prorata og de som er nasjonal
-            .filter { it.prorata || it.bosted == "NOR" }
-            .map { grunnlag ->
-                Trygdetidsperiode(
-                    datoFOM = grunnlag.periodeFra,
-                    datoTOM = grunnlag.periodeTil,
-                    land = grunnlag.bosted,
-                    opptjeningsperiode = grunnlag.beregnet,
-                )
+    private fun finnTrygdetidsperioderForTabell(
+        trygdetidsgrunnlag: List<TrygdetidGrunnlagDto>,
+        beregningsMetode: BeregningsMetode?,
+    ): List<Trygdetidsperiode> {
+        return when (beregningsMetode) {
+            BeregningsMetode.NASJONAL -> {
+                // Kun ta med nasjonale perioder
+                trygdetidsgrunnlag
+                    .filter { it.bosted == "NOR" }
+                    .map(::toTrygdetidsperiode)
             }
+            BeregningsMetode.PRORATA -> {
+                // Kun ta med de som er avtaleland
+                trygdetidsgrunnlag
+                    .filter { it.prorata }
+                    .map(::toTrygdetidsperiode)
+            }
+            else -> throw IllegalArgumentException("$beregningsMetode er ikke en gyldig beregningsmetode")
+        }
     }
+
+    private fun toTrygdetidsperiode(grunnlag: TrygdetidGrunnlagDto) =
+        Trygdetidsperiode(
+            datoFOM = grunnlag.periodeFra,
+            datoTOM = grunnlag.periodeTil,
+            land = grunnlag.bosted,
+            opptjeningsperiode = grunnlag.beregnet,
+        )
 }

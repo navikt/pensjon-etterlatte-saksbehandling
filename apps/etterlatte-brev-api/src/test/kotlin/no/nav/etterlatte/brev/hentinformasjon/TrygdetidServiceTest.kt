@@ -97,7 +97,7 @@ internal class TrygdetidServiceTest {
                     TrygdetidGrunnlagDto(
                         id = UUID.randomUUID(),
                         type = "",
-                        bosted = "Danmark",
+                        bosted = "NOR",
                         periodeFra = LocalDate.of(2020, Month.MARCH, 5),
                         periodeTil = LocalDate.of(2023, Month.JANUARY, 1),
                         kilde = null,

@@ -16,12 +16,15 @@ class AdresseService(
     private val regoppslagKlient: RegoppslagKlient,
 ) {
     suspend fun hentMottakerAdresse(ident: String): Mottaker {
-        val regoppslagResponse = regoppslagKlient.hentMottakerAdresse(ident)
+        val regoppslag = regoppslagKlient.hentMottakerAdresse(ident)
 
-        return Mottaker.fra(
-            Folkeregisteridentifikator.of(ident),
-            regoppslagResponse,
-        )
+        val fnr = Folkeregisteridentifikator.of(ident)
+
+        return if (regoppslag == null) {
+            Mottaker.tom(fnr)
+        } else {
+            Mottaker.fra(fnr, regoppslag)
+        }
     }
 
     suspend fun hentAvsender(

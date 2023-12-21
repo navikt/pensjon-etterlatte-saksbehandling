@@ -70,6 +70,18 @@ data class Mottaker(
                     land = regoppslag.adresse.land,
                 ),
         )
+
+        fun tom(fnr: Folkeregisteridentifikator) =
+            Mottaker(
+                navn = "",
+                foedselsnummer = Foedselsnummer(fnr.value),
+                adresse =
+                    Adresse(
+                        adresseType = "",
+                        landkode = "",
+                        land = "",
+                    ),
+            )
     }
 }
 

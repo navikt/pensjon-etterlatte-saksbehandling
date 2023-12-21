@@ -1,5 +1,5 @@
 import { IBrev } from '~shared/types/Brev'
-import { Alert, BodyShort, Heading, Label, Panel } from '@navikt/ds-react'
+import { Alert, Heading, Panel } from '@navikt/ds-react'
 import RedigerMottakerModal from '~components/person/brev/RedigerMottakerModal'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -8,6 +8,8 @@ import { getData, isSuccessOrNotFound } from '~shared/api/brev'
 import { VergeFeilhaandtering } from '~components/person/VergeFeilhaandtering'
 
 import { isSuccess } from '~shared/api/apiUtils'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
+import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 
 export default function NyttBrevMottaker({ brev }: { brev: IBrev }) {
   const [brevState, setBrevState] = useState(brev)
@@ -44,28 +46,84 @@ export default function NyttBrevMottaker({ brev }: { brev: IBrev }) {
               vergeadresse={getData(vergeadresse)}
             />
           </Heading>
-          <>
-            <BodyShort spacing size="small">
-              <Label>Navn</Label>
-              <br />
-              {mottaker?.navn}
-            </BodyShort>
 
-            <BodyShort size="small">
-              <Label>Adresse</Label>
-              <br />
-              {[adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3].map((linje) => (
+          <InfoWrapper>
+            <Info
+              wide
+              label="Navn"
+              tekst={
+                /[a-zA-Z\s]/.test(mottaker.navn) ? (
+                  mottaker.navn
+                ) : (
+                  <Alert variant="error" size="small" inline>
+                    Navn mangler
+                  </Alert>
+                )
+              }
+            />
+            {mottaker.foedselsnummer && <Info label="Fødselsnummer" tekst={mottaker.foedselsnummer.value} wide />}
+            {mottaker.orgnummer && <Info label="Org.nr." tekst={mottaker.orgnummer} wide />}
+
+            <Info
+              wide
+              label="Adresse"
+              tekst={
                 <>
-                  {linje}
-                  <br />
+                  {!adresse?.adresselinje1 && !adresse?.adresselinje2 && !adresse?.adresselinje3 ? (
+                    <Alert variant="warning" size="small" inline>
+                      Adresselinjer mangler
+                    </Alert>
+                  ) : (
+                    [adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3]
+                      .filter((linje) => !!linje)
+                      .map((linje) => (
+                        <>
+                          {linje}
+                          <br />
+                        </>
+                      ))
+                  )}
                 </>
-              ))}
-              <br />
-              {adresse?.postnummer} {adresse?.poststed}
-              <br />
-              {adresse?.land} ({adresse?.landkode})
-            </BodyShort>
-          </>
+              }
+            />
+
+            <Info
+              wide
+              label="Postnummer-/sted"
+              tekst={
+                !adresse?.postnummer && !adresse?.poststed ? (
+                  <Alert variant="warning" size="small" inline>
+                    Postnummer og -sted mangler
+                  </Alert>
+                ) : (
+                  <>
+                    {adresse?.postnummer} {adresse?.poststed}
+                  </>
+                )
+              }
+            />
+
+            <Info
+              wide
+              label="Land"
+              tekst={
+                <>
+                  {adresse?.land || (
+                    <Alert variant="error" size="small" inline>
+                      Land mangler
+                    </Alert>
+                  )}
+                  {!!adresse?.landkode ? (
+                    `(${adresse.landkode})`
+                  ) : (
+                    <Alert variant="error" size="small" inline>
+                      Landkode mangler
+                    </Alert>
+                  )}
+                </>
+              }
+            />
+          </InfoWrapper>
         </Panel>
       )}
       {VergeFeilhaandtering(vergeadresse)}

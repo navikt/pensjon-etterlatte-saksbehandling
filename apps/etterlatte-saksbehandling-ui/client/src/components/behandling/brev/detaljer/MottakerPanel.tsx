@@ -45,7 +45,19 @@ export default function MottakerPanel({
       <br />
 
       <InfoWrapper>
-        <Info label="Navn" tekst={mottaker.navn || '-'} wide />
+        <Info
+          wide
+          label="Navn"
+          tekst={
+            /[a-zA-Z\s]/.test(mottaker.navn) ? (
+              mottaker.navn
+            ) : (
+              <Alert variant="error" size="small" inline>
+                Navn mangler
+              </Alert>
+            )
+          }
+        />
         {mottaker.foedselsnummer && <Info label="Fødselsnummer" tekst={mottaker.foedselsnummer.value} wide />}
         {mottaker.orgnummer && <Info label="Org.nr." tekst={mottaker.orgnummer} wide />}
 
@@ -54,18 +66,57 @@ export default function MottakerPanel({
           label="Adresse"
           tekst={
             <>
-              {[adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3]
-                .filter((linje) => linje != null)
-                .map((linje) => (
-                  <>
-                    {linje}
-                    <br />
-                  </>
-                ))}
-              <br />
-              {adresse?.postnummer} {adresse?.poststed}
-              <br />
-              {adresse?.land} ({adresse?.landkode})
+              {!adresse?.adresselinje1 && !adresse?.adresselinje2 && !adresse?.adresselinje3 ? (
+                <Alert variant="warning" size="small" inline>
+                  Adresselinjer mangler
+                </Alert>
+              ) : (
+                [adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3]
+                  .filter((linje) => !!linje)
+                  .map((linje) => (
+                    <>
+                      {linje}
+                      <br />
+                    </>
+                  ))
+              )}
+            </>
+          }
+        />
+
+        <Info
+          wide
+          label="Postnummer-/sted"
+          tekst={
+            !adresse?.postnummer && !adresse?.poststed ? (
+              <Alert variant="warning" size="small" inline>
+                Postnummer og -sted mangler
+              </Alert>
+            ) : (
+              <>
+                {adresse?.postnummer} {adresse?.poststed}
+              </>
+            )
+          }
+        />
+
+        <Info
+          wide
+          label="Land"
+          tekst={
+            <>
+              {adresse?.land || (
+                <Alert variant="error" size="small" inline>
+                  Land mangler
+                </Alert>
+              )}
+              {!!adresse?.landkode ? (
+                `(${adresse.landkode})`
+              ) : (
+                <Alert variant="error" size="small" inline>
+                  Landkode mangler
+                </Alert>
+              )}
             </>
           }
         />

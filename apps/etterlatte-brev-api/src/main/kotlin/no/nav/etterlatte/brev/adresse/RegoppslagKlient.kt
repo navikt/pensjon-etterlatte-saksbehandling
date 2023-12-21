@@ -6,7 +6,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
-import io.ktor.http.isSuccess
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -22,7 +22,7 @@ class RegoppslagKlient(
             .expireAfterWrite(Duration.ofMinutes(15))
             .build<String, RegoppslagResponseDTO>()
 
-    suspend fun hentMottakerAdresse(ident: String): RegoppslagResponseDTO =
+    suspend fun hentMottakerAdresse(ident: String): RegoppslagResponseDTO? =
         try {
             val regoppslagCache = cache.getIfPresent(ident)
 
@@ -32,17 +32,18 @@ class RegoppslagKlient(
             } else {
                 logger.info("Ingen cachet mottakeradresse funnet. Henter fra regoppslag")
 
-                val response = client.get("$url/regoppslag/$ident")
-
-                if (response.status.isSuccess()) {
-                    response.body<RegoppslagResponseDTO>()
-                        .also {
-                            sikkerLogg.info("Respons fra regoppslag: $it")
-                            cache.put(ident, it)
-                        }
-                } else {
-                    throw ResponseException(response, "Ukjent feil fra navansatt api")
-                }
+                client.get("$url/regoppslag/$ident")
+                    .body<RegoppslagResponseDTO>()
+                    .also {
+                        sikkerLogg.info("Respons fra regoppslag: $it")
+                        cache.put(ident, it)
+                    }
+            }
+        } catch (re: ResponseException) {
+            if (re.response.status == HttpStatusCode.NotFound) {
+                null
+            } else {
+                throw re
             }
         } catch (exception: Exception) {
             throw AdresseException("Feil i kall mot Regoppslag", exception)

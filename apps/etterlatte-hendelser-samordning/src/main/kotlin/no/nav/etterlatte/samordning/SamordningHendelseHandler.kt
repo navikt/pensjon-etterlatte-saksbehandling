@@ -15,15 +15,13 @@ class SamordningHendelseHandler(
      * Skal kun dytte info videre for Omstillingsstønad-hendelser slik at R&R lytter kan faktisk håndtere det
      */
     fun handleSamordningHendelse(hendelse: SamordningVedtakHendelse) {
-        logger.info("Behandler samordning-hendelse [fagomrade='${hendelse.fagomrade}'")
+        logger.info("Behandler {}", hendelse)
         if (hendelse.fagomrade != FAGOMRADE_OMS) {
             logger.info("Skipper hendelse")
             return
         }
 
         if (hendelse.artTypeKode == SAKSTYPE_OMS) {
-            logger.info("Behandler samordning-hendelse [vedtakId=${hendelse.vedtakId}")
-
             hendelse.vedtakId?.let {
                 kafkaProduser.publiser(
                     noekkel = UUID.randomUUID().toString(),
@@ -37,10 +35,6 @@ class SamordningHendelseHandler(
                         ),
                 )
             }
-        } else {
-            logger.warn(
-                "Mottatt hendelse med fagområde EYO, men ikke ytelse OMS [vedtakId=${hendelse.vedtakId}",
-            )
         }
     }
 }

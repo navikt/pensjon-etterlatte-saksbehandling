@@ -145,7 +145,7 @@ fun Route.vedtaksvurderingRoute(
                 logger.info("Vedtak er til samordning for behandling $behandlingId")
                 val vedtak = vedtakBehandlingService.tilSamordningVedtak(behandlingId, brukerTokenInfo)
                 rapidService.sendToRapid(vedtak)
-                call.respond(HttpStatusCode.OK, vedtak.vedtak)
+                call.respond(HttpStatusCode.OK, vedtak.rapidInfo1.vedtak)
             }
         }
 
@@ -154,7 +154,7 @@ fun Route.vedtaksvurderingRoute(
                 logger.info("Vedtak ferdig samordning for behandling $behandlingId")
                 val vedtak = vedtakBehandlingService.samordnetVedtak(behandlingId, brukerTokenInfo)
                 rapidService.sendToRapid(vedtak)
-                call.respond(HttpStatusCode.OK, vedtak.vedtak)
+                call.respond(HttpStatusCode.OK, vedtak.rapidInfo1.vedtak)
             }
         }
 
@@ -219,7 +219,7 @@ fun Route.vedtaksvurderingRoute(
 
                 val samordnetVedtak = vedtakBehandlingService.samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)
                 rapidService.sendToRapid(samordnetVedtak)
-                call.respond(HttpStatusCode.OK, samordnetVedtak.vedtak)
+                call.respond(HttpStatusCode.OK, samordnetVedtak.rapidInfo1.vedtak)
             }
         }
     }

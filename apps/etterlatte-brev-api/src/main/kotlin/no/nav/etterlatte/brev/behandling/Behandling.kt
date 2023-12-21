@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
@@ -105,6 +106,8 @@ data class Beregningsperiode(
     val trygdetid: Int,
     val prorataBroek: IntBroek?,
     val institusjon: Boolean,
+    val beregningsMetodeAnvendt: BeregningsMetode,
+    val beregningsMetodeFraGrunnlag: BeregningsMetode,
 )
 
 fun List<Beregningsperiode>.hentUtbetaltBeloep(): Int {

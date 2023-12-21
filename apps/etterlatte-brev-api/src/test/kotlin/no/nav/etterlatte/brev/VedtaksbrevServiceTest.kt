@@ -48,6 +48,7 @@ import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -134,7 +135,9 @@ internal class VedtaksbrevServiceTest {
                         Kroner(5000),
                         40,
                         prorataBroek = null,
-                        false,
+                        institusjon = false,
+                        beregningsMetodeAnvendt = BeregningsMetode.NASJONAL,
+                        beregningsMetodeFraGrunnlag = BeregningsMetode.BEST,
                     ),
                 ),
             )
@@ -273,7 +276,7 @@ internal class VedtaksbrevServiceTest {
             every { db.hentBrevForBehandling(behandling.behandlingId) } returns null
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
-            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any()) } returns mockk()
+            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any()) } returns utbetalingsinfo
             coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
 
             runBlocking {

@@ -20,6 +20,8 @@ data class InnvilgetBrevDataEnkel(
     val avdoed: Avdoed,
     val vedtaksdato: LocalDate,
     val erEtterbetaling: Boolean,
+    val harFlereUtbetalingsperioder: Boolean,
+    val sisteUtbetalingsperiodeDatoFom: LocalDate,
 ) : BrevData() {
     companion object {
         fun fra(
@@ -31,6 +33,8 @@ data class InnvilgetBrevDataEnkel(
             avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
             vedtaksdato = finnVedtaksmaaned(generellBrevData, etterbetaling).atDay(1),
             erEtterbetaling = etterbetaling != null,
+            harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
+            sisteUtbetalingsperiodeDatoFom = utbetalingsinfo.beregningsperioder.maxBy { it.datoFOM }.datoFOM,
         )
 
         private fun finnVedtaksmaaned(
@@ -54,8 +58,11 @@ data class InnvilgetHovedmalBrevData(
     val innhold: List<Slate.Element>,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
+    val kunNyttRegelverk: Boolean,
 ) : BrevData() {
     companion object {
+        val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
+
         fun fra(
             utbetalingsinfo: Utbetalingsinfo,
             avkortingsinfo: Avkortingsinfo?,
@@ -73,6 +80,10 @@ data class InnvilgetHovedmalBrevData(
                 etterbetaling = EtterbetalingBrev.fra(etterbetalingDTO, utbetalingsinfo.beregningsperioder),
                 brukerUnder18Aar = brukerUnder18Aar,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                kunNyttRegelverk =
+                    utbetalingsinfo.beregningsperioder.all {
+                        it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
+                    },
                 innhold = innhold.innhold(),
             )
     }

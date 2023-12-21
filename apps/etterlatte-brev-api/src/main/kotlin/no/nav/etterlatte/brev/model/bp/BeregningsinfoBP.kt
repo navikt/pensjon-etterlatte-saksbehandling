@@ -8,6 +8,8 @@ import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
 data class BeregningsinfoBP(
@@ -18,6 +20,10 @@ data class BeregningsinfoBP(
     val aarTrygdetid: Int,
     val maanederTrygdetid: Int,
     val trygdetidsperioder: List<Trygdetidsperiode>,
+    val prorataBroek: IntBroek?,
+    val beregningsMetodeAnvendt: BeregningsMetode,
+    val beregningsMetodeFraGrunnlag: BeregningsMetode,
+    val harTrygdetidsperioderAvtaleland: Boolean,
 ) {
     companion object {
         fun fra(
@@ -33,6 +39,10 @@ data class BeregningsinfoBP(
             aarTrygdetid = trygdetid.aarTrygdetid,
             maanederTrygdetid = trygdetid.maanederTrygdetid,
             trygdetidsperioder = trygdetid.perioder,
+            prorataBroek = trygdetid.prorataBroek,
+            beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
+            beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
+            harTrygdetidsperioderAvtaleland = trygdetid.perioder.any { it.land != "NOR" },
         )
     }
 }

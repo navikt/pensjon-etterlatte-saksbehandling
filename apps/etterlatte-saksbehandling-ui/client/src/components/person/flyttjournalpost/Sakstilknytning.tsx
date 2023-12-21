@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, Heading, List, Modal, Panel, Select } from '@navikt/ds-react'
+import { Alert, Button, Heading, Modal, Panel, Select } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { isPending, isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -10,17 +10,14 @@ import React, { useEffect, useState } from 'react'
 import { Journalpost, KnyttTilAnnenSakResponse } from '~shared/types/Journalpost'
 import { temaFraSakstype } from '~components/person/journalfoeringsoppgave/journalpost/EndreSak'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import {
-  feilregistrerSakstilknytning,
-  knyttTilAnnenSak,
-  opphevFeilregistrertSakstilknytning,
-} from '~shared/api/dokument'
+import { knyttTilAnnenSak } from '~shared/api/dokument'
 import { hentSakForPerson, hentSakMedBehandlnger } from '~shared/api/sak'
 import { fnrErGyldig } from '~utils/fnr'
 import { SakType } from '~shared/types/sak'
 import { formaterSakstype } from '~utils/formattering'
 import { opprettOppgave } from '~shared/api/oppgaver'
 import { useNavigate } from 'react-router-dom'
+import { FeilregistrerJournalpost } from '~components/person/flyttjournalpost/FeilregistrerJournalpost'
 
 interface Props {
   bruker: string
@@ -38,10 +35,6 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
   const [nyOppgaveStatus, apiOpprettNyOppgave] = useApiCall(opprettOppgave)
 
   const [knyttTilAnnenSakStatus, apiKnyttTilAnnenSak] = useApiCall(knyttTilAnnenSak)
-  const [feilSakstilknytningStatus, apiFeilregistrerSakstilknytning] = useApiCall(feilregistrerSakstilknytning)
-  const [opphevFeilregisrteringStatus, apiOpphevFeilregistrertSakstilknytning] = useApiCall(
-    opphevFeilregistrertSakstilknytning
-  )
 
   useEffect(() => {
     if (!fnrErGyldig(bruker)) return
@@ -49,36 +42,17 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
     apiHentSakMedBehandlinger(bruker)
   }, [])
 
-  useEffect(() => {
-    if (isSuccess(hentEllerOpprettSakStatus)) {
-      apiHentSakMedBehandlinger(bruker)
-    }
-  }, [hentEllerOpprettSakStatus])
-
-  const opphevFeilregistrering = () => {
-    if (!valgtJournalpost) return
-
-    apiOpphevFeilregistrertSakstilknytning(valgtJournalpost.journalpostId, () => {
-      oppdaterJournalposter()
-    })
-  }
-
-  const feilregistrer = () => {
-    if (!valgtJournalpost) return
-
-    apiFeilregistrerSakstilknytning(valgtJournalpost.journalpostId, () => {
-      oppdaterJournalposter()
-    })
-  }
-
   const opprettSak = () => {
     if (!sakType) return
 
-    apiHentEllerOpprettSak({
-      fnr: bruker,
-      type: sakType,
-      opprettHvisIkkeFinnes: true,
-    })
+    apiHentEllerOpprettSak(
+      {
+        fnr: bruker,
+        type: sakType,
+        opprettHvisIkkeFinnes: true,
+      },
+      () => apiHentSakMedBehandlinger(bruker)
+    )
   }
 
   const opprettNyOppgave = (sakId: number, journalpostId: string) => {
@@ -162,52 +136,7 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
       <Heading size="small">Valgt journalpost</Heading>
 
       {valgtJournalpost.sak?.fagsaksystem !== 'EY' && (
-        <Panel>
-          <BodyShort spacing>
-            Du har valgt journalpost med ID {valgtJournalpost.journalpostId}.
-            <br />
-            Med dokument(er):
-          </BodyShort>
-          <List>
-            {valgtJournalpost.dokumenter.map((dok) => (
-              <List.Item key={dok.dokumentInfoId}>{dok.tittel}</List.Item>
-            ))}
-          </List>
-
-          {valgtJournalpost?.journalstatus === 'FEILREGISTRERT' ? (
-            <Alert variant="info">
-              Journalposten er markert som feilregistrert
-              <br />
-              (sakid {valgtJournalpost.sak?.fagsakId ? `er ${valgtJournalpost.sak?.fagsakId}` : 'mangler'} og tilhører
-              fagsystem {valgtJournalpost.sak?.fagsaksystem})
-            </Alert>
-          ) : (
-            <Alert variant="warning">
-              Journalposten tilhører ikke Gjenny (EY)!
-              <br />
-              Sakid {valgtJournalpost.sak?.fagsakId ? `er ${valgtJournalpost.sak?.fagsakId}` : 'mangler'} og tilhører
-              fagsystem {valgtJournalpost.sak?.fagsaksystem}
-            </Alert>
-          )}
-
-          <br />
-
-          <FlexRow justify="right">
-            {valgtJournalpost?.journalstatus === 'FEILREGISTRERT' ? (
-              <Button
-                variant="secondary"
-                onClick={opphevFeilregistrering}
-                loading={isPending(opphevFeilregisrteringStatus)}
-              >
-                Opphev feilregistrering
-              </Button>
-            ) : (
-              <Button variant="danger" onClick={feilregistrer} loading={isPending(feilSakstilknytningStatus)}>
-                Feilregistrer sakstilknytning
-              </Button>
-            )}
-          </FlexRow>
-        </Panel>
+        <FeilregistrerJournalpost valgtJournalpost={valgtJournalpost} oppdaterJournalposter={oppdaterJournalposter} />
       )}
 
       <hr />
@@ -273,7 +202,7 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
               <Button
                 onClick={knyttJournalpostTilGjennySak}
                 loading={isPending(knyttTilAnnenSakStatus) || isPending(nyOppgaveStatus)}
-                disabled={isSuccess(nyOppgaveStatus)}
+                disabled={valgtJournalpost.journalstatus !== 'FEILREGISTRERT' || isSuccess(nyOppgaveStatus)}
               >
                 Knytt til sak {sak.sak.id}
               </Button>

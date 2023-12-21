@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.hentinformasjon
 
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
-import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
@@ -60,8 +59,6 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
         val trygdetidsperioder =
             finnTrygdetidsperioderForTabell(
                 trygdetidgrunnlagForAnvendtTrygdetid.trygdetidGrunnlag,
-                anvendtTrygdetid,
-                prorataBroek,
             )
 
         return Trygdetid(
@@ -73,22 +70,10 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
         )
     }
 
-    private fun finnTrygdetidsperioderForTabell(
-        trygdetidsgrunnlag: List<TrygdetidGrunnlagDto>,
-        anvendtTrygdetid: Int,
-        prorataBroek: IntBroek?,
-    ): List<Trygdetidsperiode> {
-        val harKunNorskeTrygdetidsperioder = trygdetidsgrunnlag.all { !it.prorata || it.bosted == "NOR" }
-
-        // Vi skal kun vise tabell hvis den har relevante perioder for bruker, dvs. vi har med avtaleland utenfor Norge
-        // eller vi har anvendt trygdetid < 40 og eller prorataberegning.
-        // Hvis ikke (kun norske og anvendt trygdetid = 40 uten prorata) er det unødvendig
-        if (harKunNorskeTrygdetidsperioder && anvendtTrygdetid == 40 && prorataBroek == null) {
-            return emptyList()
-        }
-
+    private fun finnTrygdetidsperioderForTabell(trygdetidsgrunnlag: List<TrygdetidGrunnlagDto>): List<Trygdetidsperiode> {
         return trygdetidsgrunnlag
-            .filter { it.prorata } // Vi skal kun ha med de som er avtaleland, dvs. er med i prorata
+            // Vi skal kun ha med de som er avtaleland, dvs. er med i prorata og de som er nasjonal
+            .filter { it.prorata || it.bosted == "NOR" }
             .map { grunnlag ->
                 Trygdetidsperiode(
                     datoFOM = grunnlag.periodeFra,

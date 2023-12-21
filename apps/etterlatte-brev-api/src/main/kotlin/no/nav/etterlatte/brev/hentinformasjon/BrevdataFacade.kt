@@ -203,6 +203,8 @@ class BrevdataFacade(
                     trygdetid = benyttetTrygdetid,
                     prorataBroek = prorataBroek,
                     institusjon = it.institusjonsopphold != null,
+                    beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
+                    beregningsMetodeFraGrunnlag = requireNotNull(it.beregningsMetode), // TODO denne må hentes fra beregningsgrunnlag
                 )
             }
 

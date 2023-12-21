@@ -1,13 +1,27 @@
 package no.nav.etterlatte.libs.common.beregning
 
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
+import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.IntBroek
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.regler.Beregningstall
+import java.util.UUID
 
 // TODO kunne man like gjerne brukt sakType?
 enum class Beregningstype {
     BP,
     OMS,
 }
+
+data class BeregningsGrunnlag(
+    val behandlingId: UUID,
+    val kilde: Grunnlagsopplysning.Saksbehandler,
+    val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>>,
+    val institusjonsoppholdBeregningsgrunnlag: List<GrunnlagMedPeriode<InstitusjonsoppholdBeregningsgrunnlag>> =
+        emptyList(),
+    val beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
+)
 
 enum class BeregningsMetode {
     BEST,

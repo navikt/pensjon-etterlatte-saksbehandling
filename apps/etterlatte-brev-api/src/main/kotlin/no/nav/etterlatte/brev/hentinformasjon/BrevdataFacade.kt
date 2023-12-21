@@ -188,6 +188,7 @@ class BrevdataFacade(
         brukerTokenInfo: BrukerTokenInfo,
     ): Utbetalingsinfo? {
         val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo) ?: return null
+        val beregningsGrunnlag = beregningKlient.hentBeregningsGrunnlag(behandlingId, brukerTokenInfo) ?: return null
 
         val beregningsperioder =
             beregning.beregningsperioder.map {
@@ -203,7 +204,7 @@ class BrevdataFacade(
                     prorataBroek = prorataBroek,
                     institusjon = it.institusjonsopphold != null,
                     beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
-                    beregningsMetodeFraGrunnlag = requireNotNull(it.beregningsMetode), // TODO denne må hentes fra beregningsgrunnlag
+                    beregningsMetodeFraGrunnlag = requireNotNull(beregningsGrunnlag.beregningsMetode.beregningsMetode),
                 )
             }
 

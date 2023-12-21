@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -7,6 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentErForeldreloes
 import no.nav.etterlatte.libs.common.grunnlag.hentFamilierelasjon
@@ -24,8 +26,11 @@ import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.hentRelevantVerge
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
+
+private val logger = LoggerFactory.getLogger(Grunnlag::class.java)
 
 fun Grunnlag.mapSoeker(brevutfallDto: BrevutfallDto?): Soeker =
     with(this.soeker) {
@@ -101,18 +106,37 @@ fun Grunnlag.mapVerge(
     }
 
 private fun Grunnlag.hentForelderVerge(): ForelderVerge? {
-    val soekersAnsvarligeForeldre = this.soeker.hentFamilierelasjon()?.verdi?.ansvarligeForeldre ?: emptyList()
     val gjenlevende = hentPotensiellGjenlevende()
-    val gjenlevendeIdent = gjenlevende?.hentFoedselsnummer()?.verdi
-    val gjenlevendeHarForeldreansvar = soekersAnsvarligeForeldre.contains(gjenlevendeIdent)
-    return if (gjenlevendeHarForeldreansvar) {
-        gjenlevende
-            ?.hentNavn()
-            ?.verdi
-            ?.fulltNavn()
-            ?.let { ForelderVerge(it) }
+    return if (gjenlevende != null && erAnsvarligForelder(gjenlevende)) {
+        return forelderVerge(gjenlevende)
     } else {
-        null // Vi har ikke navnet på den som har foreldreansvar
+        null
+    }
+}
+
+private fun Grunnlag.erAnsvarligForelder(gjenlevende: Grunnlagsdata<JsonNode>): Boolean {
+    val soekersAnsvarligeForeldre = this.soeker.hentFamilierelasjon()?.verdi?.ansvarligeForeldre ?: emptyList()
+
+    return soekersAnsvarligeForeldre.contains(gjenlevende.hentFoedselsnummer()?.verdi)
+}
+
+private fun forelderVerge(gjenlevende: Grunnlagsdata<JsonNode>): ForelderVerge? {
+    val navn =
+        gjenlevende.hentNavn()?.verdi?.fulltNavn().also {
+            if (it == null) {
+                logger.error("Vi har ikke navnet på den som har foreldreansvar")
+            }
+        }
+    val foedselsnummer =
+        gjenlevende.hentFoedselsnummer()?.verdi.also {
+            if (it == null) {
+                logger.error("Vi har ikke fødselsnummer på den som har foreldreansvar")
+            }
+        }
+    return if (navn != null && foedselsnummer != null) {
+        ForelderVerge(foedselsnummer, navn)
+    } else {
+        null
     }
 }
 

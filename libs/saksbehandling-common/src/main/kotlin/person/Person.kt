@@ -195,7 +195,7 @@ data class Vergemaal(val mottaker: BrevMottaker) : Verge {
     }
 }
 
-data class ForelderVerge(val navn: String) : Verge {
+data class ForelderVerge(val foedselsnummer: Folkeregisteridentifikator, val navn: String) : Verge {
     override fun navn(): String {
         return navn
     }

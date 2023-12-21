@@ -166,19 +166,22 @@ class BrevdataFacade(
         sakId: Long,
         virkningstidspunkt: YearMonth,
         brukerTokenInfo: BrukerTokenInfo,
+        sakType: SakType,
     ): Utbetalingsinfo? =
         finnUtbetalingsinfoNullable(
             behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
             virkningstidspunkt,
             brukerTokenInfo,
+            sakType,
         )
 
     suspend fun finnUtbetalingsinfo(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
         brukerTokenInfo: BrukerTokenInfo,
+        sakType: SakType,
     ): Utbetalingsinfo =
-        requireNotNull(finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo)) {
+        requireNotNull(finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo, sakType)) {
             "Utbetalingsinfo er nødvendig, men mangler"
         }
 
@@ -186,8 +189,10 @@ class BrevdataFacade(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
         brukerTokenInfo: BrukerTokenInfo,
+        sakType: SakType,
     ): Utbetalingsinfo? {
         val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo) ?: return null
+        val beregningsGrunnlag = beregningKlient.hentBeregningsGrunnlag(behandlingId, sakType, brukerTokenInfo) ?: return null
 
         val beregningsperioder =
             beregning.beregningsperioder.map {
@@ -203,7 +208,7 @@ class BrevdataFacade(
                     prorataBroek = prorataBroek,
                     institusjon = it.institusjonsopphold != null,
                     beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
-                    beregningsMetodeFraGrunnlag = requireNotNull(it.beregningsMetode), // TODO denne må hentes fra beregningsgrunnlag
+                    beregningsMetodeFraGrunnlag = beregningsGrunnlag.beregningsMetode.beregningsMetode,
                 )
             }
 

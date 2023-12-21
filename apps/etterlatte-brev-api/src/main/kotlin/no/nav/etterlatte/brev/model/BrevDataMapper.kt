@@ -78,6 +78,7 @@ private class BrevDatafetcher(
             behandlingId,
             vedtakVirkningstidspunkt,
             brukerTokenInfo,
+            sak.sakType,
         )
 
     suspend fun hentForrigeUtbetaling() =
@@ -85,6 +86,7 @@ private class BrevDatafetcher(
             sak.id,
             vedtakVirkningstidspunkt,
             brukerTokenInfo,
+            sak.sakType,
         )
 
     suspend fun hentGrunnbeloep() = brevdataFacade.hentGrunnbeloep(brukerTokenInfo)

@@ -67,7 +67,7 @@ internal class DokumentRouteTest {
 
     @Test
     fun `Endepunkt for uthenting av alle dokumenter tilknyttet brukeren`() {
-        coEvery { journalpostService.hentDokumenter(any(), any(), any()) } returns HentDokumentoversiktBrukerResult()
+        coEvery { journalpostService.hentDokumenter(any(), any(), any(), any()) } returns HentDokumentoversiktBrukerResult()
         coEvery { tilgangssjekker.harTilgangTilPerson(any(), any()) } returns true
 
         val token = accessToken
@@ -102,7 +102,7 @@ internal class DokumentRouteTest {
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
-        coVerify(exactly = 1) { journalpostService.hentDokumenter(fnr, BrukerIdType.FNR, any()) }
+        coVerify(exactly = 1) { journalpostService.hentDokumenter(fnr, false, BrukerIdType.FNR, any()) }
     }
 
     @Test

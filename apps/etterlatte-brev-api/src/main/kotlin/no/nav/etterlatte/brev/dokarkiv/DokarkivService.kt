@@ -37,6 +37,15 @@ interface DokarkivService {
         journalpostId: String,
         nyttTema: String,
     )
+
+    suspend fun feilregistrerSakstilknytning(journalpostId: String)
+
+    suspend fun opphevFeilregistrertSakstilknytning(journalpostId: String)
+
+    suspend fun knyttTilAnnenSak(
+        journalpostId: String,
+        request: KnyttTilAnnenSakRequest,
+    ): KnyttTilAnnenSakResponse
 }
 
 class DokarkivServiceImpl(
@@ -127,6 +136,23 @@ class DokarkivServiceImpl(
         client.endreTema(journalpostId, nyttTema)
     }
 
+    override suspend fun feilregistrerSakstilknytning(journalpostId: String) {
+        client.feilregistrerSakstilknytning(journalpostId)
+    }
+
+    override suspend fun opphevFeilregistrertSakstilknytning(journalpostId: String) {
+        client.opphevFeilregistrertSakstilknytning(journalpostId)
+    }
+
+    override suspend fun knyttTilAnnenSak(
+        journalpostId: String,
+        request: KnyttTilAnnenSakRequest,
+    ): KnyttTilAnnenSakResponse {
+        return client.knyttTilAnnenSak(journalpostId, request).also {
+            logger.info("Journalpost knyttet til annen sak (nyJournalpostId=${it.nyJournalpostId})\n$request")
+        }
+    }
+
     private fun mapTilJournalpostRequest(
         brevId: BrevID,
         vedtak: VedtakTilJournalfoering,
@@ -143,8 +169,8 @@ class DokarkivServiceImpl(
             eksternReferanseId = "${vedtak.behandlingId}.$brevId",
             sak = JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString()),
             dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
-            tema = vedtak.sak.sakType.tema, // https://confluence.adeo.no/display/BOA/Tema
-            kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
+            tema = vedtak.sak.sakType.tema,
+            kanal = "S",
             journalfoerendeEnhet = vedtak.ansvarligEnhet,
         )
     }
@@ -164,8 +190,8 @@ class DokarkivServiceImpl(
             eksternReferanseId = "${brev.sakId}.${brev.id}",
             sak = JournalpostSak(Sakstype.FAGSAK, brev.sakId.toString()),
             dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
-            tema = sak.sakType.tema, // https://confluence.adeo.no/display/BOA/Tema
-            kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
+            tema = sak.sakType.tema,
+            kanal = "S",
             journalfoerendeEnhet = sak.enhet,
         )
     }

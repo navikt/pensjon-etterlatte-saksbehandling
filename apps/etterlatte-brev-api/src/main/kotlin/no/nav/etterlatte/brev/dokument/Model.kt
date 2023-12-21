@@ -71,6 +71,7 @@ data class GraphqlRequest(
 
 data class DokumentOversiktBrukerVariables(
     val brukerId: BrukerId,
+    val tema: List<String>,
     val foerste: Int,
 ) : GraphqlVariables
 

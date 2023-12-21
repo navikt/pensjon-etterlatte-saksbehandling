@@ -22,6 +22,13 @@ export interface OppgaveDTO {
   versjon: string | null
 }
 
+export interface NyOppgaveDto {
+  oppgaveKilde?: OppgaveKilde
+  oppgaveType: Oppgavetype
+  merknad?: string
+  referanse?: string
+}
+
 export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'FERDIGSTILT' | 'FEILREGISTRERT' | 'AVBRUTT'
 export type OppgaveKilde = 'HENDELSE' | 'BEHANDLING' | 'EKSTERN' | 'GENERELL_BEHANDLING' | 'TILBAKEKREVING'
 export type Oppgavetype =
@@ -43,6 +50,11 @@ export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'U
 export const hentOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver')
 export const hentOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/${id}`)
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
+
+export const opprettOppgave = async (args: {
+  sakId: number
+  request: NyOppgaveDto
+}): Promise<ApiResponse<OppgaveDTO>> => apiClient.post(`/oppgaver/sak/${args.sakId}/opprett`, { ...args.request })
 
 export const ferdigstillOppgave = async (id: string): Promise<ApiResponse<any>> =>
   apiClient.put(`/oppgaver/${id}/ferdigstill`, {})

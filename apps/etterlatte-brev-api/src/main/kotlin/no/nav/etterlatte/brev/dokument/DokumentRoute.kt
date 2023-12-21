@@ -11,6 +11,7 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
+import no.nav.etterlatte.brev.dokarkiv.KnyttTilAnnenSakRequest
 import no.nav.etterlatte.brev.dokarkiv.OppdaterJournalpostRequest
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -25,7 +26,10 @@ fun Route.dokumentRoute(
     route("dokumenter") {
         post {
             withFoedselsnummer(tilgangssjekker) { foedselsnummer ->
-                val result = safService.hentDokumenter(foedselsnummer.value, BrukerIdType.FNR, brukerTokenInfo)
+                val visTemaPen = call.request.queryParameters["visTemaPen"]?.toBoolean() ?: false
+
+                val result =
+                    safService.hentDokumenter(foedselsnummer.value, visTemaPen, BrukerIdType.FNR, brukerTokenInfo)
 
                 if (result.error == null) {
                     call.respond(result.journalposter)
@@ -71,6 +75,27 @@ fun Route.dokumentRoute(
                 val nyttTema = call.parameters["nyttTema"]!!
 
                 dokarkivService.endreTema(journalpostId, nyttTema)
+                call.respond(HttpStatusCode.OK)
+            }
+
+            put("/knyttTilAnnenSak") {
+                val journalpostId = call.parameters["journalpostId"]!!
+                val request = call.receive<KnyttTilAnnenSakRequest>()
+
+                call.respond(dokarkivService.knyttTilAnnenSak(journalpostId, request))
+            }
+
+            put("/feilregistrerSakstilknytning") {
+                val journalpostId = call.parameters["journalpostId"]!!
+
+                dokarkivService.feilregistrerSakstilknytning(journalpostId)
+                call.respond(HttpStatusCode.OK)
+            }
+
+            put("/opphevFeilregistrertSakstilknytning") {
+                val journalpostId = call.parameters["journalpostId"]!!
+
+                dokarkivService.opphevFeilregistrertSakstilknytning(journalpostId)
                 call.respond(HttpStatusCode.OK)
             }
 

@@ -4,7 +4,7 @@ import { Button, Heading, Table } from '@navikt/ds-react'
 import React from 'react'
 import { TabsAddIcon, XMarkIcon } from '@navikt/aksel-icons'
 
-const temaFraSakstype = (sakstype: SakType): string => {
+export const temaFraSakstype = (sakstype: SakType): string => {
   switch (sakstype) {
     case SakType.BARNEPENSJON:
       return 'EYB'

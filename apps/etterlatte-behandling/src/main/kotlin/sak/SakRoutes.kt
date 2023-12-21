@@ -91,7 +91,8 @@ internal fun Route.sakSystemRoutes(
 
     post("personer/saker/{type}") {
         withFoedselsnummerAndGradering(tilgangService) { fnr, gradering ->
-            val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
+            val type: SakType =
+                enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
             val message = inTransaction { sakService.finnEllerOpprettSak(fnr = fnr.value, type, gradering = gradering) }
             requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/saker")
             call.respond(message)
@@ -100,7 +101,8 @@ internal fun Route.sakSystemRoutes(
 
     post("personer/getsak/{type}") {
         withFoedselsnummerInternal(tilgangService) { fnr ->
-            val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne sak" })
+            val type: SakType =
+                enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne sak" })
             val sak =
                 inTransaction { sakService.finnSak(fnr.value, type) }.also {
                     requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak")
@@ -143,7 +145,15 @@ internal fun Route.sakWebRoutes(
             }
 
             get("/grunnlagsendringshendelser") {
-                call.respond(inTransaction { GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sakId)) })
+                call.respond(
+                    inTransaction {
+                        GrunnlagsendringsListe(
+                            grunnlagsendringshendelseService.hentAlleHendelserForSak(
+                                sakId,
+                            ),
+                        )
+                    },
+                )
             }
 
             post("/endre_enhet") {
@@ -236,14 +246,21 @@ internal fun Route.sakWebRoutes(
 
             post("sak/{type}") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val opprettHvisIkkeFinnes = call.request.queryParameters["opprettHvisIkkeFinnes"].toBoolean()
+
                     val type: SakType =
                         requireNotNull(call.parameters["type"]) {
                             "Mangler påkrevd parameter {type} for å hente sak på bruker"
                         }.let { enumValueOf(it) }
 
                     val sak =
-                        inTransaction { sakService.finnSak(fnr.value, type) }
-                            .also { requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak/type") }
+                        inTransaction {
+                            if (opprettHvisIkkeFinnes) {
+                                sakService.finnEllerOpprettSak(fnr.value, type)
+                            } else {
+                                sakService.finnSak(fnr.value, type)
+                            }
+                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak/type") }
                     call.respond(sak ?: HttpStatusCode.NoContent)
                 }
             }

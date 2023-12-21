@@ -52,11 +52,15 @@ class SafClient(
             throw JournalpostException("Feil ved kall til hentdokument", ex)
         }
 
+    // TODO: Fjerne param [visTemaPen] når gjenlevendepensjon er borte
     override suspend fun hentDokumenter(
         fnr: String,
+        visTemaPen: Boolean,
         idType: BrukerIdType,
         brukerTokenInfo: BrukerTokenInfo,
     ): HentDokumentoversiktBrukerResult {
+        logger.info("VisTemaPen=$visTemaPen")
+
         val request =
             GraphqlRequest(
                 query = getQuery("/graphql/dokumentoversiktBruker.graphql"),
@@ -67,7 +71,9 @@ class SafClient(
                                 id = fnr,
                                 type = idType,
                             ),
-                        10, // TODO: Finn en grense eller fiks paginering
+                        tema = if (visTemaPen) listOf("EYO", "EYB", "PEN") else listOf("EYO", "EYB"),
+                        // TODO: Finn en grense eller fiks paginering
+                        foerste = 10,
                     ),
             )
 

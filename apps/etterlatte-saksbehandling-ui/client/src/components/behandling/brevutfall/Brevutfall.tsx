@@ -10,6 +10,7 @@ import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallV
 import Spinner from '~shared/Spinner'
 import { MapApiResult } from '~shared/components/MapApiResult'
 import { SakType } from '~shared/types/sak'
+import { useAppSelector } from '~store/Store'
 
 export interface BrevutfallOgEtterbetaling {
   etterbetaling?: Etterbetaling | null
@@ -48,7 +49,9 @@ const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {
 
 export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
   const behandling = props.behandling
-  const redigerbar = behandlingErRedigerbar(behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+
+  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
     initialBrevutfallOgEtterbetaling(behandling.sakType)
   )

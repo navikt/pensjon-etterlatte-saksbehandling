@@ -73,7 +73,7 @@ function mapFormkrav(krav: FilledFormDataFormkrav, vedtakIKlagen: Array<Vedtaket
   return { ...krav, vedtaketKlagenGjelder: null }
 }
 
-export function KlageFormkrav() {
+export function KlageFormkrav({ kanRedigere }: { kanRedigere: boolean }) {
   const klage = useKlage()
   const [lagreFormkravStatus, lagreFormkrav] = useApiCall(oppdaterFormkravIKlage)
   const dispatch = useAppDispatch()
@@ -99,6 +99,9 @@ export function KlageFormkrav() {
   const kjenteVedtak = mapSuccess(iverksatteVedtak, (vedtak) => vedtak) ?? []
 
   function sendInnFormkrav(krav: FormDataFormkrav) {
+    if (!kanRedigere) {
+      return
+    }
     if (!klage) {
       return
     }

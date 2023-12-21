@@ -24,7 +24,9 @@ const TabsWidth = styled(Tabs)`
 
 export const ToggleMinOppgaveliste = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-
+  if (!innloggetSaksbehandler.skriveTilgang) {
+    return null
+  }
   const [filter, setFilter] = useState<Filter>(initialFilter())
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
   const [oppgaver, hentOppgaverFetch] = useApiCall(hentOppgaver)

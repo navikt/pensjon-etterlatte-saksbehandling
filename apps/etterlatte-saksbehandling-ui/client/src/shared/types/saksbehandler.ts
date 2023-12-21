@@ -5,6 +5,8 @@ export interface ISaksbehandler {
   etternavn: string
   enheter: IEnhet[]
   kanAttestere: boolean
+  leseTilgang: boolean
+  skriveTilgang: boolean
 }
 
 interface IEnhet {

@@ -18,6 +18,7 @@ import { usePersonopplysninger, usePersonopplysningerOmsAvdoede } from '~compone
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useAppSelector } from '~store/Store'
 
 export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -26,7 +27,9 @@ export const Aktivitetsplikt = (props: { behandling: IDetaljertBehandling }) => 
   const soeker = usePersonopplysninger()?.soeker?.opplysning
   const avdoede = usePersonopplysningerOmsAvdoede()
   const avdoedesDoedsdato = avdoede?.opplysning?.doedsdato
-  const redigerbar = behandlingErRedigerbar(behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+
+  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const configContext = useContext(ConfigContext)
 
   const [beskrivelse, setBeskrivelse] = useState<string>('')

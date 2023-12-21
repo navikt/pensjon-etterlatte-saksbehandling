@@ -12,6 +12,7 @@ import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsover
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useAppSelector } from '~store/Store'
 
 export const RevurderingAnnen = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -20,7 +21,8 @@ export const RevurderingAnnen = (props: { behandling: IDetaljertBehandling }) =>
   const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [feilmelding, setFeilmelding] = useState<string | null>(null)
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
-  const redigerbar = behandlingErRedigerbar(behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
 
   const handlesubmit = (e: FormEvent) => {
     e.stopPropagation()

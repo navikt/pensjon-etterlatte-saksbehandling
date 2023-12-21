@@ -45,6 +45,7 @@ import { GenerellbehandlingSidemeny } from '~components/generellbehandling/Gener
 
 import { isPending, isPendingOrInitial, isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useAppSelector } from '~store/Store'
 
 const TextFieldBegrunnelse = styled(Textarea).attrs({ size: 'medium' })`
   max-width: 40rem;
@@ -79,6 +80,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
   const [putOppdaterGenerellBehandlingStatus, putOppdaterGenerellBehandling] = useApiCall(oppdaterGenerellBehandling)
   const [avdoedeStatus, avdoedeFetch] = useApiCall(getGrunnlagsAvOpplysningstype)
   const [avdoed, setAvdoed] = useState<Grunnlagsopplysning<IPdlPerson, KildePdl> | null>(null)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const [hentAlleLandRequest, fetchAlleLand] = useApiCall(hentAlleLand)
 
@@ -143,7 +145,8 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
     }
   }
 
-  const redigerbar = generellbehandlingErRedigerbar(utlandsBehandling.status)
+  const redigerbar = generellbehandlingErRedigerbar(utlandsBehandling.status) && innloggetSaksbehandler.skriveTilgang
+
   return (
     <GridContainer>
       <MainContent style={{ whiteSpace: 'pre-wrap' }}>

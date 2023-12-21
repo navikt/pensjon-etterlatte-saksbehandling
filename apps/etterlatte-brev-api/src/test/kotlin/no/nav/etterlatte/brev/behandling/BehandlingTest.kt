@@ -3,6 +3,8 @@ package no.nav.etterlatte.brev.behandling
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -11,7 +13,10 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.MottakerAdresse
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -25,7 +30,6 @@ import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -36,7 +40,10 @@ internal class BehandlingTest {
     fun `MapSoeker mapper til Soeker`() {
         val grunnlag = opprettGrunnlag()
 
-        assertEquals(Soeker("Unormal", "Frisk", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), false), grunnlag.mapSoeker())
+        assertEquals(
+            Soeker("Unormal", "Frisk", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), false),
+            grunnlag.mapSoeker(null),
+        )
     }
 
     @Test
@@ -56,9 +63,12 @@ internal class BehandlingTest {
 
         assertEquals(
             Soeker("Unormal-Kar", "Frisk-Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), false),
-            grunnlag.mapSoeker(),
+            grunnlag.mapSoeker(null),
         )
-        assertEquals(listOf(Avdoed("Riv-Jern Kul-Kar Badeball-Sommer", LocalDate.of(2022, 8, 17))), grunnlag.mapAvdoede())
+        assertEquals(
+            listOf(Avdoed("Riv-Jern Kul-Kar Badeball-Sommer", LocalDate.of(2022, 8, 17))),
+            grunnlag.mapAvdoede(),
+        )
     }
 
     @Test
@@ -71,9 +81,12 @@ internal class BehandlingTest {
 
         assertEquals(
             Soeker("Unormal Kar", "Frisk Is", "Herresykkel", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), false),
-            grunnlag.mapSoeker(),
+            grunnlag.mapSoeker(null),
         )
-        assertEquals(listOf(Avdoed("Riv Jern Kul Kar Badeball-Sommer", LocalDate.of(2022, 8, 17))), grunnlag.mapAvdoede())
+        assertEquals(
+            listOf(Avdoed("Riv Jern Kul Kar Badeball-Sommer", LocalDate.of(2022, 8, 17))),
+            grunnlag.mapAvdoede(),
+        )
     }
 
     @Test
@@ -85,8 +98,14 @@ internal class BehandlingTest {
             )
 
         assertEquals(
-            Soeker("Unormal-Kar Kis", "Frisk-Is Tak", "Herresykkel Bom", Foedselsnummer(SOEKER_FOEDSELSNUMMER.value), false),
-            grunnlag.mapSoeker(),
+            Soeker(
+                "Unormal-Kar Kis",
+                "Frisk-Is Tak",
+                "Herresykkel Bom",
+                Foedselsnummer(SOEKER_FOEDSELSNUMMER.value),
+                false,
+            ),
+            grunnlag.mapSoeker(null),
         )
         assertEquals(
             listOf(Avdoed("Riv-Jern Tre Kul-Kar Gulv Badeball-Sommer Vinter", LocalDate.of(2022, 8, 17))),
@@ -122,8 +141,7 @@ internal class BehandlingTest {
         assertEquals(3163, beregningsperioder.hentUtbetaltBeloep())
     }
 
-    @Test // TODO ...
-    @Disabled("Skrus av inntil håndtering av verge er avklart på tvers av appene i Gjenny")
+    @Test
     fun `Verge finnes i grunnlag`() {
         val soekerFnr = SOEKER_FOEDSELSNUMMER
         val forventetVergeNavn = "Test Vergenavn"
@@ -136,10 +154,10 @@ internal class BehandlingTest {
                             opprettOpplysning(
                                 soekerFnr.toJsonNode(),
                             ),
-                    ),
-                familie = emptyList(),
-                sak =
-                    mapOf(
+                        Opplysningstype.FOEDSELSDATO to
+                            opprettOpplysning(
+                                LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
+                            ),
                         Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT to
                             opprettOpplysning(
                                 listOf(
@@ -151,13 +169,25 @@ internal class BehandlingTest {
                                 ).toJsonNode(),
                             ),
                     ),
+                familie = emptyList(),
+                sak =
+                    mapOf(
+                        Opplysningstype.VERGES_ADRESSE to
+                            opprettOpplysning(
+                                BrevMottaker(
+                                    forventetVergeNavn,
+                                    MottakerFoedselsnummer(""),
+                                    MottakerAdresse("", "", "", "", "", "", "", ""), "",
+                                ).toJsonNode(),
+                            ),
+                    ),
                 metadata = mockk(),
             )
 
-        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())
+        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID(), null)
         assertEquals(forventetVergeNavn, vergeBarnepensjon!!.navn())
 
-        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID())
+        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID(), null)
         assertEquals(forventetVergeNavn, vergeOmstillingsstoenad!!.navn())
     }
 
@@ -199,10 +229,10 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())
+        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID(), null)
         assertEquals(gjenlevendeNavn.toString(), vergeBarnepensjon!!.navn())
 
-        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID())
+        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID(), null)
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 
@@ -244,10 +274,61 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())
+        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID(), null)
         assertNull(vergeBarnepensjon)
 
-        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID())
+        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID(), null)
+        assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
+    }
+
+    @Test
+    fun `Ingen verge i grunnlag gjenlevende har foreldreansvar soeker er over 18 ifølge brevutfall`() {
+        val gjenlevendeNavn = Navn("Elegang", "Mellomstor", "Barnevogn")
+
+        val grunnlag =
+            Grunnlag(
+                soeker =
+                    mapOf(
+                        Opplysningstype.FOEDSELSNUMMER to
+                            opprettOpplysning(
+                                SOEKER_FOEDSELSNUMMER.toJsonNode(),
+                            ),
+                        Opplysningstype.FOEDSELSDATO to
+                            opprettOpplysning(
+                                LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
+                            ),
+                        Opplysningstype.FAMILIERELASJON to
+                            opprettOpplysning(
+                                FamilieRelasjon(
+                                    ansvarligeForeldre = listOf(GJENLEVENDE_FOEDSELSNUMMER),
+                                    foreldre = listOf(),
+                                    barn = listOf(),
+                                    personerUtenIdent = listOf(),
+                                ).toJsonNode(),
+                            ),
+                    ),
+                familie =
+                    listOf(
+                        mapOf(
+                            Opplysningstype.PERSONROLLE to opprettOpplysning(PersonRolle.GJENLEVENDE.toJsonNode()),
+                            Opplysningstype.NAVN to opprettOpplysning(gjenlevendeNavn.toJsonNode()),
+                            Opplysningstype.FOEDSELSNUMMER to opprettOpplysning(GJENLEVENDE_FOEDSELSNUMMER.toJsonNode()),
+                        ),
+                    ),
+                sak = emptyMap(),
+                metadata = mockk(),
+            )
+
+        val brevutfallDto =
+            BrevutfallDto(
+                UUID.randomUUID(),
+                Aldersgruppe.OVER_18,
+                Grunnlagsopplysning.Saksbehandler("Casey", Tidspunkt.now()),
+            )
+        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID(), brevutfallDto)
+        assertNull(vergeBarnepensjon)
+
+        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID(), null)
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 
@@ -279,10 +360,10 @@ internal class BehandlingTest {
                 metadata = mockk(),
             )
 
-        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())
+        val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID(), null)
         assertNull(vergeBarnepensjon, "Verge skal ikke settes for barnepensjon hvis barnet er over 18 år")
 
-        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID())
+        val vergeOmstillingsstoenad = grunnlag.mapVerge(SakType.OMSTILLINGSSTOENAD, UUID.randomUUID(), null)
         assertNull(vergeOmstillingsstoenad, "Verge skal ikke settes for OMS når verge mangler i grunnlaget")
     }
 

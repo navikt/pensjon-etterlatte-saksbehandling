@@ -1,6 +1,8 @@
 package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
@@ -25,21 +27,16 @@ import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.time.LocalDate
 import java.util.UUID
 
-fun Grunnlag.mapSoeker(): Soeker =
+fun Grunnlag.mapSoeker(brevutfallDto: BrevutfallDto?): Soeker =
     with(this.soeker) {
         val navn = hentNavn()!!.verdi
-        val dato18Aar = hentFoedselsdato()?.verdi?.plusYears(18)
-        val erUnder18 =
-            dato18Aar?.let {
-                LocalDate.now() < it
-            }
 
         Soeker(
             fornavn = navn.fornavn.storForbokstav(),
             mellomnavn = navn.mellomnavn?.storForbokstav(),
             etternavn = navn.etternavn.storForbokstav(),
             fnr = Foedselsnummer(hentFoedselsnummer()!!.verdi.value),
-            under18 = erUnder18,
+            under18 = !erOver18(brevutfallDto),
             foreldreloes = sak.hentErForeldreloes()?.verdi ?: false,
         )
     }
@@ -84,42 +81,40 @@ fun Grunnlag.mapSpraak(): Spraak =
 fun Grunnlag.mapVerge(
     sakType: SakType,
     behandlingId: UUID,
+    brevutfallDto: BrevutfallDto?,
 ): Verge? =
     with(this) {
         val relevantVerge = hentRelevantVerge(soeker.hentVergemaalellerfremtidsfullmakt()?.verdi)
         if (relevantVerge != null) {
             return hentVergemaal(relevantVerge, behandlingId)
         }
-        val soekersAnsvarligeForeldre = this.soeker.hentFamilierelasjon()?.verdi?.ansvarligeForeldre ?: emptyList()
-        val gjenlevende = hentPotensiellGjenlevende()
-        val gjenlevendeIdent = gjenlevende?.hentFoedselsnummer()?.verdi
-        val gjenlevendeHarForeldreansvar = soekersAnsvarligeForeldre.contains(gjenlevendeIdent)
 
         if (sakType == SakType.BARNEPENSJON) {
-            // TODO: se på flyten her for innvilgelse kontra migrering, da begge vil leve parallellt en stund
-
-            // Er barnet over 18? Denne mappingen må heller komme fra valg saksbehandler gjør men her vi automatisk
-            // i forbindelse med migrering. Før nye vedtak på nytt regelverk skal dette bort
-            val dato18Aar =
-                requireNotNull(this.soeker.hentFoedselsdato()) {
-                    "Barnet har ikke fødselsdato i grunnlag. Dette skal ikke skje, vi " +
-                        "klarer ikke å avgjøre hvor gammelt barnet er"
-                }.verdi.plusYears(18)
-            if (dato18Aar <= LocalDate.now()) {
+            if (erOver18(brevutfallDto)) {
                 null
-            } else if (gjenlevendeHarForeldreansvar) {
-                gjenlevende
-                    ?.hentNavn()
-                    ?.verdi
-                    ?.fulltNavn()
-                    ?.let { ForelderVerge(it) }
             } else {
-                null // Vi har ikke navnet på den som har foreldreansvar (kanskje innsender?)
+                hentForelderVerge()
             }
         } else {
             null
         }
     }
+
+private fun Grunnlag.hentForelderVerge(): ForelderVerge? {
+    val soekersAnsvarligeForeldre = this.soeker.hentFamilierelasjon()?.verdi?.ansvarligeForeldre ?: emptyList()
+    val gjenlevende = hentPotensiellGjenlevende()
+    val gjenlevendeIdent = gjenlevende?.hentFoedselsnummer()?.verdi
+    val gjenlevendeHarForeldreansvar = soekersAnsvarligeForeldre.contains(gjenlevendeIdent)
+    return if (gjenlevendeHarForeldreansvar) {
+        gjenlevende
+            ?.hentNavn()
+            ?.verdi
+            ?.fulltNavn()
+            ?.let { ForelderVerge(it) }
+    } else {
+        null // Vi har ikke navnet på den som har foreldreansvar
+    }
+}
 
 private fun Grunnlag.hentVergemaal(
     pdlVerge: VergemaalEllerFremtidsfullmakt,
@@ -146,6 +141,20 @@ private fun String.storForbokstavEtter(delim: String) =
     this.split(delim).joinToString(delim) {
         it.replaceFirstChar { c -> c.uppercase() }
     }
+
+private fun Grunnlag.erOver18(brevutfallDto: BrevutfallDto?): Boolean {
+    // TODO er dette ok? Migrering vil ikke finne noe brevutfall og dermed må PDL-fødselsdato brukes
+    if (brevutfallDto?.aldersgruppe == Aldersgruppe.OVER_18) {
+        return true
+    }
+    // TODO henting fra PDL skal fjernes når migrering er unnagjort. Da kan vi alltid bruke brevutfall
+    val dato18Aar =
+        requireNotNull(this.soeker.hentFoedselsdato()) {
+            "Barnet har ikke fødselsdato i grunnlag. Dette skal ikke skje, vi " +
+                "klarer ikke å avgjøre hvor gammelt barnet er"
+        }.verdi.plusYears(18)
+    return LocalDate.now() >= dato18Aar
+}
 
 class VergeManglerNavnException(
     behandlingId: UUID,

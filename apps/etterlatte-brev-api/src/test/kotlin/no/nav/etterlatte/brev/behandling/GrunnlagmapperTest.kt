@@ -57,7 +57,7 @@ class GrunnlagmapperTest {
                     ),
             ).hentOpplysningsgrunnlag()
 
-        val verge = opplysningsgrunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID())!! as Vergemaal
+        val verge = opplysningsgrunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID(), null)!! as Vergemaal
 
         verge.navn() shouldBe "ADVOKAT VERA V VERGE"
         verge.mottaker.foedselsnummer shouldBe MottakerFoedselsnummer(vergesAdresseFnr)

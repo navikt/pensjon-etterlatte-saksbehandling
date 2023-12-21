@@ -72,6 +72,8 @@ class BrevdataFacade(
         return coroutineScope {
             val sakDeferred = async { sakService.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
+            val brevutfallDeferred = async { hentBrevutfall(behandlingId, brukerTokenInfo) }
+            // TODO takler denne 204 no content?
             val grunnlag =
                 when (vedtakDeferred.await().type) {
                     VedtakType.TILBAKEKREVING ->
@@ -85,12 +87,13 @@ class BrevdataFacade(
                     else -> async { grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo) }.await()
                 }
             val sak = sakDeferred.await()
+            val brevutfallDto = brevutfallDeferred.await()
             val personerISak =
                 PersonerISak(
                     innsender = grunnlag.mapInnsender(),
-                    soeker = grunnlag.mapSoeker(),
+                    soeker = grunnlag.mapSoeker(brevutfallDto),
                     avdoede = grunnlag.mapAvdoede(),
-                    verge = grunnlag.mapVerge(sak.sakType, behandlingId),
+                    verge = grunnlag.mapVerge(sak.sakType, behandlingId, brevutfallDto),
                 )
             val vedtak = vedtakDeferred.await()
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()

@@ -82,6 +82,14 @@ class GosysOppgaveServiceImplTest {
 
     @Test
     fun `skal hente oppgaver og deretter folkeregisterIdent for unike identer`() {
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.name() } returns "ident"
+
+        setNewKontekstWithMockUser(saksbehandler)
+
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
+
         coEvery { gosysOppgaveKlient.hentOppgaver(any(), brukerTokenInfo) } returns
             GosysOppgaver(
                 antallTreffTotalt = 3,
@@ -158,7 +166,8 @@ class GosysOppgaveServiceImplTest {
     @Test
     fun `skal kun returnere vikafossen enhetsnummer relaterte oppgaver for ad-rolle strengt fortrolige`() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.STRENGT_FORTROLIG)
-        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
+        every { saksbehandler.name() } returns "ident"
 
         setNewKontekstWithMockUser(saksbehandler)
 

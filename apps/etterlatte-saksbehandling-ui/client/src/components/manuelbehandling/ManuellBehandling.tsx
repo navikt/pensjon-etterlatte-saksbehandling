@@ -1,4 +1,4 @@
-import { Alert, Button, Checkbox, Select, TextField } from '@navikt/ds-react'
+import { Alert, Button, Checkbox, ErrorSummary, Select, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import { DatoVelger } from '~shared/DatoVelger'
@@ -18,6 +18,7 @@ import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~components/person/EndreEnhet'
+import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
@@ -38,18 +39,32 @@ export default function ManuellBehandling() {
 
   const [erForeldreloes, setErForeldreloes] = useState<boolean>(false)
 
+  const [error, setError] = useState<Set<string>>(new Set([]))
+  const validateNyBehandlingForm = (behandlingRequest: NyBehandlingRequest): boolean => {
+    const feilkoder: Set<string> = new Set([])
+
+    if (!behandlingRequest.spraak) {
+      feilkoder.add('Mangler spraåk')
+    }
+    if (behandlingRequest.persongalleri === undefined) {
+      feilkoder.add('Mangler persongalleri')
+    }
+    setError(feilkoder)
+    return feilkoder.size === 0
+  }
+
   const ferdigstill = () => {
-    opprettNyBehandling(
-      {
-        ...nyBehandlingRequest,
-        sakType: SakType.BARNEPENSJON,
-        mottattDato: nyBehandlingRequest!!.mottattDato!!.replace('Z', ''),
-        kilde: erMigrering ? 'PESYS' : undefined,
-        pesysId: pesysId,
-        enhet: enhetsFilter === 'VELGENHET' ? undefined : filtrerEnhet(enhetsFilter),
-        foreldreloes: erForeldreloes,
-      },
-      (nyBehandlingRespons) => {
+    const behandlingRequest = {
+      ...nyBehandlingRequest,
+      sakType: SakType.BARNEPENSJON,
+      mottattDato: nyBehandlingRequest!!.mottattDato!!.replace('Z', ''),
+      kilde: erMigrering ? 'PESYS' : undefined,
+      pesysId: pesysId,
+      enhet: enhetsFilter === 'VELGENHET' ? undefined : filtrerEnhet(enhetsFilter),
+      foreldreloes: erForeldreloes,
+    }
+    if (validateNyBehandlingForm(behandlingRequest)) {
+      opprettNyBehandling(behandlingRequest, (nyBehandlingRespons) => {
         if (overstyrBeregning) {
           opprettOverstyrtBeregningReq({
             behandlingId: nyBehandlingRespons,
@@ -60,12 +75,20 @@ export default function ManuellBehandling() {
           opprettOverstyrtTrygdetidReq({ behandlingId: nyBehandlingRespons })
         }
         setNyId(nyBehandlingRespons)
-      }
-    )
+      })
+    }
   }
 
   return (
     <FormWrapper>
+      {!!error.size ? (
+        <ErrorSummary>
+          {Array.from(error).map((feilmelding, i) => (
+            <ErrorSummary.Item key={i}>{feilmelding}</ErrorSummary.Item>
+          ))}
+        </ErrorSummary>
+      ) : null}
+
       <h1>Manuell behandling</h1>
 
       <Select
@@ -117,9 +140,10 @@ export default function ManuellBehandling() {
       <Select
         label="Hva skal språket/målform være?"
         value={nyBehandlingRequest?.spraak || ''}
-        onChange={(e) =>
+        onChange={(e) => {
+          setError(new Set([]))
           dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, spraak: e.target.value as Spraak }))
-        }
+        }}
       >
         <option>Velg ...</option>
         <option value="nb">Bokmål</option>
@@ -144,7 +168,7 @@ export default function ManuellBehandling() {
       <Checkbox checked={erForeldreloes} onChange={() => setErForeldreloes(!erForeldreloes)}>
         Er foreldreløs
       </Checkbox>
-      <PersongalleriBarnepensjon erManuellMigrering={true} />
+      <PersongalleriBarnepensjon erManuellMigrering={true} resetError={() => setError(new Set([]))} />
 
       <Knapp>
         <Button

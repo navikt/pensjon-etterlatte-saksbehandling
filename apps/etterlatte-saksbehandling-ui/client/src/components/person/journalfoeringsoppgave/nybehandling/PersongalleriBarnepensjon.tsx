@@ -9,13 +9,22 @@ import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveRe
 
 type PersonArray = keyof Omit<Persongalleri, 'soeker' | 'innsender'>
 
-export default function PersongalleriBarnepensjon({ erManuellMigrering = false }: { erManuellMigrering?: boolean }) {
+export default function PersongalleriBarnepensjon({
+  erManuellMigrering = false,
+  resetError,
+}: {
+  erManuellMigrering?: boolean
+  resetError?: () => void
+}) {
   const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
   const persongalleri = nyBehandlingRequest?.persongalleri
 
   const oppdaterPersongalleri = (persongalleri: Persongalleri) => {
+    if (resetError) {
+      resetError()
+    }
     dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, persongalleri }))
   }
 

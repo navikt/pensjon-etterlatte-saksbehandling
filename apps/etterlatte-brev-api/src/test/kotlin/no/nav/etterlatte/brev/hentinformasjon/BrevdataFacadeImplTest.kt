@@ -304,6 +304,10 @@ internal class BrevdataFacadeImplTest {
         1000,
         10000,
         10,
+        beregningsMetode = BeregningsMetode.NASJONAL,
+        samletNorskTrygdetid = 10,
+        samletTeoretiskTrygdetid = 20,
+        broek = null,
     )
 
     private fun lagBehandling() =
@@ -345,7 +349,7 @@ internal class BrevdataFacadeImplTest {
                 null,
                 false,
                 BeregningsMetode.NASJONAL,
-                BeregningsMetode.BEST,
+                BeregningsMetode.NASJONAL,
             )
     }
 }

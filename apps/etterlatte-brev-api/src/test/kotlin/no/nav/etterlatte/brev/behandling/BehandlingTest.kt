@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -261,6 +262,8 @@ internal class BehandlingTest {
         10000,
         null,
         false,
+        BeregningsMetode.NASJONAL,
+        BeregningsMetode.BEST,
     )
 
     private fun opprettGrunnlag(

@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -124,6 +125,8 @@ internal class InnvilgetHovedmalBrevDataTest {
         trygdetid = 10,
         prorataBroek = null,
         institusjon = false,
+        beregningsMetodeAnvendt = BeregningsMetode.NASJONAL,
+        beregningsMetodeFraGrunnlag = BeregningsMetode.BEST,
     )
 
     private fun lagInnholdMedVedlegg() =

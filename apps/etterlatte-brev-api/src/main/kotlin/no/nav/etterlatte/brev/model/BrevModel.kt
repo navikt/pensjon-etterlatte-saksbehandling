@@ -10,7 +10,6 @@ import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.multipdf.PDFMergerUtility
-import sun.jvm.hotspot.oops.CellTypeState.value
 import java.io.ByteArrayOutputStream
 import java.time.LocalDate
 import java.time.YearMonth

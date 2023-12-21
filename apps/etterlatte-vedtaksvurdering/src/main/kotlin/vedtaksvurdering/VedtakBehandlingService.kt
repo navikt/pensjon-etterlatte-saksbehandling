@@ -302,7 +302,7 @@ class VedtakBehandlingService(
         return VedtakOgRapid(tilSamordningVedtakLocal.toDto(), tilSamordning)
     }
 
-    suspend fun samordnetVedtak(
+    fun samordnetVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakTilSamordning: Vedtak? = null,

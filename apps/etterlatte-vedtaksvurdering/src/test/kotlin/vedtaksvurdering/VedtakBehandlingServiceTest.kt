@@ -1129,15 +1129,13 @@ internal class VedtakBehandlingServiceTest {
     fun `skal ikke sette vedtak til samordnet pga ugyldig vedtaksstatus for oppdatering`() {
         val behandlingId = randomUUID()
 
-        runBlocking {
-            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
+        repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
 
-            assertThrows<VedtakTilstandException> {
-                service.samordnetVedtak(behandlingId, attestant)
-            }
-
-            coVerify { behandlingKlientMock wasNot called }
+        assertThrows<VedtakTilstandException> {
+            service.samordnetVedtak(behandlingId, attestant)
         }
+
+        coVerify { behandlingKlientMock wasNot called }
     }
 
     private fun underkjennVedtakBegrunnelse() = UnderkjennVedtakDto("Vedtaket er ugyldig", "Annet")

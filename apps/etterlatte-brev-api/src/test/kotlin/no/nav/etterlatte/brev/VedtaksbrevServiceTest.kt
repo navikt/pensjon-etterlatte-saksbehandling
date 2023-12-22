@@ -276,7 +276,7 @@ internal class VedtaksbrevServiceTest {
             every { db.hentBrevForBehandling(behandling.behandlingId) } returns null
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
-            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any()) } returns utbetalingsinfo
+            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
             coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
 
             runBlocking {
@@ -350,7 +350,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
-            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any()) } returns utbetalingsinfo
+            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
             coEvery { brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns avkortingsinfo
 
             runBlocking {
@@ -363,7 +363,7 @@ internal class VedtaksbrevServiceTest {
 
             coVerify {
                 brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any())
-                brevdataFacade.finnUtbetalingsinfo(any(), any(), any())
+                brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any())
                 brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, SAKSBEHANDLER)
                 adresseService.hentAvsender(any())
                 brevbaker.genererPdf(any())
@@ -379,7 +379,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns generellBrevData
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
-            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any()) } returns utbetalingsinfo
+            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
             coEvery { brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns avkortingsinfo
 
             runBlocking {
@@ -392,7 +392,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                brevdataFacade.finnUtbetalingsinfo(any(), any(), any())
+                brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any())
                 brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, ATTESTANT)
                 brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any())
                 adresseService.hentAvsender(any())
@@ -414,7 +414,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
-            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any()) } returns utbetalingsinfo
+            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
             coEvery { brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns avkortingsinfo
 
             runBlocking {
@@ -426,7 +426,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                brevdataFacade.finnUtbetalingsinfo(any(), any(), any())
+                brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any())
                 brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any())
                 brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, ATTESTANT)
                 adresseService.hentAvsender(any())
@@ -538,7 +538,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
-            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any()) } returns utbetalingsinfo
+            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
             coEvery { brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns avkortingsinfo
 
             runBlocking {
@@ -550,7 +550,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                brevdataFacade.finnUtbetalingsinfo(any(), any(), any())
+                brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any())
                 brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any())
                 brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, SAKSBEHANDLER)
                 adresseService.hentAvsender(any())

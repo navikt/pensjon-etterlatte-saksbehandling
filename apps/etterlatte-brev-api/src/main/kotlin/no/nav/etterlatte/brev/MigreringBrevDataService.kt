@@ -28,7 +28,12 @@ class MigreringBrevDataService(private val brevdataFacade: BrevdataFacade) {
                 }
 
             val utbetalingsinfo =
-                brevdataFacade.finnUtbetalingsinfo(generellBrevData.behandlingId, virkningstidspunkt, brukerTokenInfo)
+                brevdataFacade.finnUtbetalingsinfo(
+                    generellBrevData.behandlingId,
+                    virkningstidspunkt,
+                    brukerTokenInfo,
+                    generellBrevData.sak.sakType,
+                )
             OmregnetBPNyttRegelverk.fra(generellBrevData, utbetalingsinfo, migrering)
         }
     }

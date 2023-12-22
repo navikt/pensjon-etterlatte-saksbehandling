@@ -7,6 +7,3 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 * */
 
 data class SoeskenMedIBeregning(val foedselsnummer: Folkeregisteridentifikator, val skalBrukes: Boolean)
-
-//  Wrapper class for å kunne serialisere/deseralisere ObjectNode
-data class Beregningsgrunnlag(val beregningsgrunnlag: List<SoeskenMedIBeregning>)

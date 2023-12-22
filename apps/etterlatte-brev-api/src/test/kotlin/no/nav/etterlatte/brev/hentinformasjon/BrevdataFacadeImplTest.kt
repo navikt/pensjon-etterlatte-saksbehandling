@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -91,6 +92,7 @@ internal class BrevdataFacadeImplTest {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
+        coEvery { beregningKlient.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
         coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns opprettTrygdetid()
 
         val generellBrevData =
@@ -171,11 +173,12 @@ internal class BrevdataFacadeImplTest {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
+        coEvery { beregningKlient.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
         coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns opprettTrygdetid()
 
         val utbetalingsinfo =
             runBlocking {
-                service.finnUtbetalingsinfo(BEHANDLING_ID, YearMonth.now(), BRUKERTokenInfo)
+                service.finnUtbetalingsinfo(BEHANDLING_ID, YearMonth.now(), BRUKERTokenInfo, SakType.BARNEPENSJON)
             }
 
         Assertions.assertEquals(Kroner(3063), utbetalingsinfo.beloep)
@@ -188,6 +191,7 @@ internal class BrevdataFacadeImplTest {
 
         coVerify(exactly = 1) {
             beregningKlient.hentBeregning(BEHANDLING_ID, any())
+            beregningKlient.hentBeregningsGrunnlag(BEHANDLING_ID, any(), any())
         }
     }
 
@@ -203,17 +207,21 @@ internal class BrevdataFacadeImplTest {
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
+        coEvery { beregningKlient.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
         coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns opprettTrygdetid()
 
         val utbetalingsinfo =
             runBlocking {
-                service.finnUtbetalingsinfo(BEHANDLING_ID, YearMonth.now(), BRUKERTokenInfo)
+                service.finnUtbetalingsinfo(BEHANDLING_ID, YearMonth.now(), BRUKERTokenInfo, SakType.BARNEPENSJON)
             }
 
         Assertions.assertEquals(2, utbetalingsinfo.antallBarn)
         Assertions.assertTrue(utbetalingsinfo.soeskenjustering)
 
-        coVerify(exactly = 1) { beregningKlient.hentBeregning(any(), any()) }
+        coVerify(exactly = 1) {
+            beregningKlient.hentBeregning(any(), any())
+            beregningKlient.hentBeregningsGrunnlag(any(), any(), any())
+        }
     }
 
     private fun opprettBeregning() =
@@ -225,6 +233,14 @@ internal class BrevdataFacadeImplTest {
                         beloep = 3063,
                     ),
                 )
+        }
+
+    private fun opprettBeregningsgrunnlag() =
+        mockk<BeregningsGrunnlagFellesDto> {
+            every { beregningsMetode } returns
+                mockk {
+                    every { beregningsMetode } returns BeregningsMetode.BEST
+                }
         }
 
     private fun opprettBeregningSoeskenjustering() =
@@ -349,7 +365,7 @@ internal class BrevdataFacadeImplTest {
                 null,
                 false,
                 BeregningsMetode.NASJONAL,
-                BeregningsMetode.NASJONAL,
+                BeregningsMetode.BEST,
             )
     }
 }

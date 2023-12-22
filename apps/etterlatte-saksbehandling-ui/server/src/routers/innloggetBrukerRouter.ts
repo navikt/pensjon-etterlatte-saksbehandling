@@ -31,25 +31,28 @@ const kanAttestere = (groups: string[]): boolean => {
   }
 }
 
-const NKSEnheter = ['4101', '4116', '4118'] //Les
-const stoettedeEnheter = ['2103', '4883', '0001', '4815', '4862', '4817', '4808'] //Skriv
-const devEnhet = ['2970']
+const NKSEnheterKunLes = ['4101', '4116', '4118'] //Les
+const skriveOgLesEnheter = ['2103', '4883', '0001', '4815', '4862', '4817', '4808'] //Skriv
+const devenhetZBruker = ['2970']
 
 const harSkrivetilgang = (enheter: IEnhet[]) => {
   if (!process.env.NAIS_CLUSTER_NAME || process.env.NAIS_CLUSTER_NAME === 'dev-gcp') {
-    return enheter.some((e) => stoettedeEnheter.includes(e.enhetId) || devEnhet.includes(e.enhetId))
+    return enheter.some((e) => skriveOgLesEnheter.includes(e.enhetId) || devenhetZBruker.includes(e.enhetId))
   }
-  return enheter.some((e) => stoettedeEnheter.includes(e.enhetId))
+  return enheter.some((e) => skriveOgLesEnheter.includes(e.enhetId))
 }
 
 const harLesetilgang = (enheter: IEnhet[]) => {
   if (!process.env.NAIS_CLUSTER_NAME || process.env.NAIS_CLUSTER_NAME === 'dev-gcp') {
     return enheter.some(
-      (e) => NKSEnheter.includes(e.enhetId) || stoettedeEnheter.includes(e.enhetId) || devEnhet.includes(e.enhetId)
+      (e) =>
+        NKSEnheterKunLes.includes(e.enhetId) ||
+        skriveOgLesEnheter.includes(e.enhetId) ||
+        devenhetZBruker.includes(e.enhetId)
     )
   }
 
-  return enheter.some((e) => NKSEnheter.includes(e.enhetId) || stoettedeEnheter.includes(e.enhetId))
+  return enheter.some((e) => NKSEnheterKunLes.includes(e.enhetId) || skriveOgLesEnheter.includes(e.enhetId))
 }
 
 const getSaksbehandler = async (req: Request): Promise<ISaksbehandler | null> => {

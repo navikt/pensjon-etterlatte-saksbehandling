@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.behandlinginfo
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
@@ -64,7 +65,28 @@ class BehandlingInfoService(
     }
 
     private fun sjekkBehandlingKanEndres(behandling: Behandling) {
-        if (!behandling.status.kanEndres()) throw BrevutfallException.BehandlingKanIkkeEndres(behandling.id, behandling.status)
+        val kanEndres =
+            when (behandling.sak.sakType) {
+                SakType.BARNEPENSJON ->
+                    behandling.status in
+                        listOf(
+                            BehandlingStatus.BEREGNET,
+                            BehandlingStatus.RETURNERT,
+                        )
+
+                SakType.OMSTILLINGSSTOENAD ->
+                    behandling.status in
+                        listOf(
+                            BehandlingStatus.AVKORTET,
+                            BehandlingStatus.RETURNERT,
+                        )
+            }
+        if (!kanEndres) {
+            throw BrevutfallException.BehandlingKanIkkeEndres(
+                behandling.id,
+                behandling.status,
+            )
+        }
     }
 
     private fun sjekkEtterbetalingFoerVirkningstidspunkt(
@@ -94,8 +116,8 @@ class BehandlingInfoService(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         when (behandling.sak.sakType) {
-            SakType.BARNEPENSJON -> behandlingsstatusService.settBeregnet(behandling.id, brukerTokenInfo)
-            SakType.OMSTILLINGSSTOENAD -> behandlingsstatusService.settAvkortet(behandling.id, brukerTokenInfo)
+            SakType.BARNEPENSJON -> behandlingsstatusService.settBeregnet(behandling.id, brukerTokenInfo, false)
+            SakType.OMSTILLINGSSTOENAD -> behandlingsstatusService.settAvkortet(behandling.id, brukerTokenInfo, false)
         }
     }
 }

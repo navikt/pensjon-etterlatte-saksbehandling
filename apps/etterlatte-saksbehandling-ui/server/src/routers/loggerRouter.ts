@@ -3,7 +3,7 @@ import { frontendLogger, logger } from '../monitoring/logger'
 import sourceMap, { NullableMappedPosition } from 'source-map'
 import * as fs from 'fs'
 import { parseJwt } from '../utils/parsejwt'
-import { sanitizeUrl } from '../utils/sanitize'
+import { sanitize, sanitizeUrl } from '../utils/sanitize'
 
 export const loggerRouter = express.Router()
 
@@ -60,14 +60,14 @@ loggerRouter.post('/', express.json(), (req, res) => {
 
           frontendLogger.error({
             message: logEvent.stackInfo?.message || errorData?.msg || 'Ukjent feil oppsto (sourceMapMapper)',
-            stack_trace: !!errorData?.errorInfo ? JSON.stringify(errorData?.errorInfo) : JSON.stringify(logEvent),
+            stack_trace: errorData?.errorInfo ? JSON.stringify(errorData?.errorInfo) : JSON.stringify(logEvent),
             ...mapCommonFields(user, logEvent.jsonContent, errorData),
           })
         })
     } else {
       frontendLogger.error({
         message: errorData?.msg || 'Ukjent feil oppsto',
-        stack_trace: !!errorData?.errorInfo ? JSON.stringify(errorData?.errorInfo) : JSON.stringify(logEvent),
+        stack_trace: errorData?.errorInfo ? JSON.stringify(errorData?.errorInfo) : JSON.stringify(logEvent),
         ...mapCommonFields(user, logEvent.jsonContent, errorData),
       })
     }
@@ -95,7 +95,7 @@ const stringifyUserDevice = (device?: UserDeviceInfo): string | undefined => {
 
       return `${browser} - ${os}`
     } catch (e) {
-      logger.error(`Kunne ikke formatere userDeviceInfo til lesbar string: \n${device}`)
+      logger.error(`Kunne ikke formatere userDeviceInfo til lesbar string: \n${sanitize(JSON.stringify(device))}`)
       return undefined
     }
   }

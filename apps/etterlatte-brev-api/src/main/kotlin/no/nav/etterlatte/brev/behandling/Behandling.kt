@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 import java.time.YearMonth
@@ -42,6 +43,7 @@ data class Trygdetidsperiode(
     val datoTOM: LocalDate?,
     val land: String,
     val opptjeningsperiode: BeregnetTrygdetidGrunnlagDto?,
+    val type: TrygdetidType,
 )
 
 data class ForenkletVedtak(

@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.trygdetid.TrygdetidType
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -99,5 +100,6 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
             datoTOM = grunnlag.periodeTil,
             land = grunnlag.bosted,
             opptjeningsperiode = grunnlag.beregnet,
+            type = TrygdetidType.valueOf(grunnlag.type),
         )
 }

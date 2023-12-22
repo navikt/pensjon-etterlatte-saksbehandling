@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.trygdetid.TrygdetidType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -96,7 +97,7 @@ internal class TrygdetidServiceTest {
                 listOf(
                     TrygdetidGrunnlagDto(
                         id = UUID.randomUUID(),
-                        type = "",
+                        type = TrygdetidType.FAKTISK.name,
                         bosted = "NOR",
                         periodeFra = LocalDate.of(2020, Month.MARCH, 5),
                         periodeTil = LocalDate.of(2023, Month.JANUARY, 1),

@@ -26,7 +26,7 @@ const val SKRIVETILGANG_CALL_PARAMETER = "skrivetilgang"
 inline val PipelineContext<*, ApplicationCall>.berOmSkrivetilgang: Boolean
     get() =
         call.parameters[SKRIVETILGANG_CALL_PARAMETER]?.let { it.toBoolean() } ?: throw NullPointerException(
-            "Skrivparameter er ikke i path params",
+            "Skrivetilgangparameter er ikke i path params",
         )
 
 internal fun Route.tilgangRoutes(tilgangService: TilgangService) {

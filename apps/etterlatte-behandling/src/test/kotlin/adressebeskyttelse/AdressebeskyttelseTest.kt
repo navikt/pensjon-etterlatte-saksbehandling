@@ -39,7 +39,9 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdressebeskyttelseTest : BehandlingIntegrationTest() {
     @BeforeAll
-    fun start() = startServer()
+    fun start() {
+        startServer()
+    }
 
     @AfterEach
     fun afterEach() {
@@ -260,7 +262,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
 
             val harTilgang: Boolean =
-                client.get("/$TILGANG_ROUTE_PATH/behandling/$behandlingId") {
+                client.get("/$TILGANG_ROUTE_PATH/behandling/$behandlingId/true") {
                     addAuthToken(tokenSaksbehandler)
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
@@ -282,7 +284,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
 
             val harIkkeTilgang: Boolean =
-                client.get("/$TILGANG_ROUTE_PATH/behandling/$behandlingId") {
+                client.get("/$TILGANG_ROUTE_PATH/behandling/$behandlingId/true") {
                     addAuthToken(tokenSaksbehandler)
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)

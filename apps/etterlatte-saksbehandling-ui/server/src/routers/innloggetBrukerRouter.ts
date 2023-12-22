@@ -19,6 +19,8 @@ export interface ISaksbehandler {
   etternavn: string
   enheter: IEnhet[]
   kanAttestere: boolean
+  leseTilgang: boolean
+  skriveTilgang: boolean
 }
 
 const kanAttestere = (groups: string[]): boolean => {
@@ -27,6 +29,30 @@ const kanAttestere = (groups: string[]): boolean => {
   } else {
     return groups.includes('11053fd7-e674-4552-9a88-f9fcedfa70b3') // 0000-GA-PENSJON_ATTESTERING (PROD)
   }
+}
+
+const NKSEnheterKunLes = ['4101', '4116', '4118'] //Les
+const skriveOgLesEnheter = ['2103', '4883', '0001', '4815', '4862', '4817', '4808'] //Skriv
+const devenhetZBruker = ['2970']
+
+const harSkrivetilgang = (enheter: IEnhet[]) => {
+  if (!process.env.NAIS_CLUSTER_NAME || process.env.NAIS_CLUSTER_NAME === 'dev-gcp') {
+    return enheter.some((e) => skriveOgLesEnheter.includes(e.enhetId) || devenhetZBruker.includes(e.enhetId))
+  }
+  return enheter.some((e) => skriveOgLesEnheter.includes(e.enhetId))
+}
+
+const harLesetilgang = (enheter: IEnhet[]) => {
+  if (!process.env.NAIS_CLUSTER_NAME || process.env.NAIS_CLUSTER_NAME === 'dev-gcp') {
+    return enheter.some(
+      (e) =>
+        NKSEnheterKunLes.includes(e.enhetId) ||
+        skriveOgLesEnheter.includes(e.enhetId) ||
+        devenhetZBruker.includes(e.enhetId)
+    )
+  }
+
+  return enheter.some((e) => NKSEnheterKunLes.includes(e.enhetId) || skriveOgLesEnheter.includes(e.enhetId))
 }
 
 const getSaksbehandler = async (req: Request): Promise<ISaksbehandler | null> => {
@@ -38,13 +64,16 @@ const getSaksbehandler = async (req: Request): Promise<ISaksbehandler | null> =>
   const bearerToken = auth.split(' ')[1]
   const parsedToken = parseJwt(bearerToken)
 
+  const enheter = await hentEnheter(req, bearerToken)
   return {
     ident: parsedToken.NAVident,
     navn: parsedToken.name,
     fornavn: parsedToken.name.split(', ')[1],
     etternavn: parsedToken.name.split(', ')[0],
-    enheter: await hentEnheter(req, bearerToken),
+    enheter: enheter,
     kanAttestere: kanAttestere(parsedToken.groups),
+    leseTilgang: harLesetilgang(enheter),
+    skriveTilgang: harSkrivetilgang(enheter),
   }
 }
 

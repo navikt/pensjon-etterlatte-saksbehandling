@@ -26,6 +26,7 @@ import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/Omstil
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useAppSelector } from '~store/Store'
 
 export const AvkortingInntekt = (props: {
   behandling: IBehandlingReducer
@@ -33,8 +34,9 @@ export const AvkortingInntekt = (props: {
   redigerbar: boolean
   setAvkorting: (avkorting: IAvkorting) => void
 }) => {
-  const behandling = props.behandling
-  const redigerbar = props.redigerbar
+  const { behandling } = props
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const redigerbar = props.redigerbar && innloggetSaksbehandler.skriveTilgang
   const avkortingGrunnlag = [...props.avkortingGrunnlag]
   avkortingGrunnlag?.sort((a, b) => new Date(b.fom!).getTime() - new Date(a.fom!).getTime())
 

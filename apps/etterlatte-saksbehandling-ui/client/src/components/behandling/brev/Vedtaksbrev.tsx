@@ -26,7 +26,7 @@ import { SjekklisteValideringErrorSummary } from '~components/behandling/sjekkli
 import { IHendelse } from '~shared/types/IHendelse'
 import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
 import { hentBehandling } from '~shared/api/behandling'
-import { useAppDispatch } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
 import { VergeFeilhaandtering } from '~components/person/VergeFeilhaandtering'
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
@@ -40,7 +40,9 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const { sakId, soeknadMottattDato } = props.behandling
-  const redigerbar = behandlingErRedigerbar(props.behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+
+  const redigerbar = behandlingErRedigerbar(props.behandling.status) && innloggetSaksbehandler.skriveTilgang
 
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)

@@ -13,6 +13,7 @@ import { Revurderingsbegrunnelse } from '~components/behandling/revurderingsover
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useAppSelector } from '~store/Store'
 
 function formaterNavn(navn: Navn) {
   return [navn.fornavn, navn.mellomnavn, navn.etternavn].join(' ')
@@ -26,7 +27,9 @@ export const AdoptertAv = (props: { behandling: IDetaljertBehandling }) => {
   const [feilmelding, setFeilmelding] = useState<string | undefined>(undefined)
   const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
-  const redigerbar = behandlingErRedigerbar(behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
+
   const handlesubmit = (e: FormEvent) => {
     e.stopPropagation()
     e.preventDefault()

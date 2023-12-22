@@ -1,7 +1,7 @@
 import { useKlage } from '~components/klage/useKlage'
 import { Navigate, Route, Routes, useMatch } from 'react-router-dom'
 import React, { useEffect } from 'react'
-import { useAppDispatch } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { addKlage, resetKlage } from '~store/reducers/KlageReducer'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
@@ -29,6 +29,8 @@ export function Klagebehandling() {
   const klageIdFraUrl = match?.params.klageId
   const viHarLastetRiktigKlage = klageIdFraUrl === klage?.id
 
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const kanRedigere = innloggetSaksbehandler.skriveTilgang
   useEffect(() => {
     if (!klageIdFraUrl) return
 
@@ -60,7 +62,7 @@ export function Klagebehandling() {
         <GridContainer>
           <MainContent>
             <Routes>
-              <Route path="formkrav" element={<KlageFormkrav />} />
+              <Route path="formkrav" element={<KlageFormkrav kanRedigere={kanRedigere} />} />
               <Route path="vurdering" element={<KlageVurdering />} />
               <Route path="brev" element={<KlageBrev />} />
               <Route path="oppsummering" element={<KlageOppsummering />} />

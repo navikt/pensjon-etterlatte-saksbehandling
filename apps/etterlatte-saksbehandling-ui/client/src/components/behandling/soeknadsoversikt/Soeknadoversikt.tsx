@@ -31,10 +31,12 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { formaterStringDato } from '~utils/formattering'
 import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { useAppSelector } from '~store/Store'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const redigerbar = behandlingErRedigerbar(behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const personopplysninger = usePersonopplysninger()
   const avdoede = personopplysninger?.avdoede?.find((po) => po)

@@ -20,6 +20,7 @@ import { getPersongalleriFraSoeknad } from '~shared/api/grunnlag'
 import { Familieforhold } from '~shared/types/Person'
 
 import { isSuccess } from '~shared/api/apiUtils'
+import { useAppSelector } from '~store/Store'
 
 export const GyldigFramsattBarnepensjon = ({
   behandling,
@@ -35,8 +36,8 @@ export const GyldigFramsattBarnepensjon = ({
   if (gyldigFramsatt == null) {
     return <div style={{ color: 'red' }}>Kunne ikke hente ut data om søknaden er gyldig framsatt</div>
   }
-
-  const redigerbar = behandlingErRedigerbar(behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const [personGalleriSoeknad, getPersonGalleriSoeknad] = useApiCall(getPersongalleriFraSoeknad)
   useEffect(() => {
     getPersonGalleriSoeknad({ sakId: behandling.sakId, behandlingId: behandling.id })

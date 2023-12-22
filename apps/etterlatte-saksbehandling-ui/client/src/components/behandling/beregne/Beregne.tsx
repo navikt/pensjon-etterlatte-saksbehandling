@@ -3,7 +3,7 @@ import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { behandlingErRedigerbar, behandlingSkalSendeBrev } from '../felles/utils'
 import { formaterStringDato } from '~utils/formattering'
 import { useVedtaksResultat } from '../useVedtaksResultat'
-import { useAppDispatch } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import React, { useEffect, useState } from 'react'
 import { hentBeregning } from '~shared/api/beregning'
@@ -42,7 +42,9 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined
-  const redigerbar = behandlingErRedigerbar(behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+
+  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const erOpphoer = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'

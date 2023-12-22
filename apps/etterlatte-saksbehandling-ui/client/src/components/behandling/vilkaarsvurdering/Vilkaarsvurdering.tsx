@@ -10,7 +10,7 @@ import {
   oppdaterBehandlingsstatus,
   updateVilkaarsvurdering,
 } from '~store/reducers/BehandlingReducer'
-import { useAppDispatch } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { Alert, BodyLong, Button, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
@@ -33,7 +33,8 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const vilkaarsvurdering = behandling.vilkårsprøving
-  const redigerbar = behandlingErRedigerbar(behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [slettVilkaarsvurderingStatus, slettGammelVilkaarsvurdering] = useApiCall(slettVilkaarsvurdering)
   const [opprettNyVilkaarsvurderingStatus, opprettNyVilkaarsvurdering] = useApiCall(opprettVilkaarsvurdering)

@@ -18,6 +18,7 @@ import { VergeFeilhaandtering } from '~components/person/VergeFeilhaandtering'
 
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useAppSelector } from '~store/Store'
 
 export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: TilbakekrevingBehandling }) {
   const kanAttesteres = [
@@ -29,7 +30,8 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
   const [hentBrevStatus, hentBrevRequest] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
-
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const redigerbar = innloggetSaksbehandler.skriveTilgang
   const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
 
   const hentBrev = () => {
@@ -79,14 +81,14 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
               <MottakerPanel
                 vedtaksbrev={vedtaksbrev}
                 oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
-                redigerbar={true}
+                redigerbar={redigerbar}
                 vergeadresse={getData(vergeadresse)}
               />
             )}
           </ContentHeader>
         </Sidebar>
 
-        {vedtaksbrev && <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={true} />}
+        {vedtaksbrev && <RedigerbartBrev brev={vedtaksbrev} kanRedigeres={redigerbar} />}
         {isFailureHandler({
           apiResult: hentBrevStatus,
           errorMessage: 'Feil ved henting av brev',

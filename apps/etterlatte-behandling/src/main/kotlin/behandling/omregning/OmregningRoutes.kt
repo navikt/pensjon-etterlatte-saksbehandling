@@ -15,15 +15,19 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
     route("/omregning") {
         post {
             val request = call.receive<Omregningshendelse>()
-            val (behandlingId, forrigeBehandlingId, sakType) =
+            val forrigeBehandling = inTransaction { omregningService.hentForrigeBehandling(request.sakId) }
+            val persongalleri = omregningService.hentPersongalleri(forrigeBehandling.id)
+            val (behandlingId, sakType) =
                 inTransaction {
                     omregningService.opprettOmregning(
                         sakId = request.sakId,
                         fraDato = request.fradato,
                         prosessType = request.prosesstype,
+                        forrigeBehandling = forrigeBehandling,
+                        persongalleri = persongalleri,
                     )
                 }
-            call.respond(OpprettOmregningResponse(behandlingId, forrigeBehandlingId, sakType))
+            call.respond(OpprettOmregningResponse(behandlingId, forrigeBehandling.id, sakType))
         }
     }
 }

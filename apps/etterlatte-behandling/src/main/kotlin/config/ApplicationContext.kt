@@ -63,6 +63,7 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.ReguleringFeatureToggle
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -186,7 +187,12 @@ internal class ApplicationContext(
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
     val sporingslogg = Sporingslogg()
     val behandlingRequestLogger = BehandlingRequestLogger(sporingslogg)
-    val dataSource = DataSourceBuilder.createDataSource(env.props)
+    val dataSource =
+        if (featureToggleService.isEnabled(ReguleringFeatureToggle.START_REGULERING, false)) {
+            DataSourceBuilder.createDataSource(env.props, transactionIsolation = "TRANSACTION_READ_COMMITTED")
+        } else {
+            DataSourceBuilder.createDataSource(env.props)
+        }
 
     // Dao
     val hendelseDao = HendelseDao { databaseContext().activeTx() }

@@ -14,6 +14,7 @@ object DataSourceBuilder {
     fun createDataSource(
         env: Map<String, String>,
         maxPoolSize: Int = MAX_POOL_SIZE,
+        transactionIsolation: String = "TRANSACTION_SERIALIZABLE",
     ): DataSource {
         val jdbcUrl =
             jdbcUrl(
@@ -23,7 +24,7 @@ object DataSourceBuilder {
             )
         val username = env.requireEnvValue("DB_USERNAME")
         val password = env.requireEnvValue("DB_PASSWORD")
-        return createDataSource(jdbcUrl, username, password, maxPoolSize)
+        return createDataSource(jdbcUrl, username, password, maxPoolSize, transactionIsolation)
     }
 
     fun createDataSource(
@@ -31,13 +32,14 @@ object DataSourceBuilder {
         username: String,
         password: String,
         maxPoolSize: Int = MAX_POOL_SIZE,
+        transactionIsolation: String = "TRANSACTION_SERIALIZABLE",
     ): DataSource {
         val hikariConfig =
             HikariConfig().also {
                 it.jdbcUrl = jdbcUrl
                 it.username = username
                 it.password = password
-                it.transactionIsolation = "TRANSACTION_SERIALIZABLE"
+                it.transactionIsolation = transactionIsolation
                 it.initializationFailTimeout = 6000
                 it.maximumPoolSize = maxPoolSize
                 it.validate()

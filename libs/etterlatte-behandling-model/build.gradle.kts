@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
+    implementation(project(":libs:etterlatte-funksjonsbrytere"))
 
     testImplementation(libs.test.jupiter.api)
     testRuntimeOnly(libs.test.jupiter.engine)

@@ -1,8 +1,8 @@
 package no.nav.etterlatte.regulering
 
 import no.nav.etterlatte.BehandlingService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.ReguleringFeatureToggle
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.FINN_LOEPENDE_YTELSER
@@ -58,11 +58,4 @@ internal class ReguleringsforespoerselRiver(
             context.publish(packet.toJson())
         }
     }
-}
-
-enum class ReguleringFeatureToggle(private val key: String) : FeatureToggle {
-    START_REGULERING("start-regulering"),
-    ;
-
-    override fun key() = key
 }

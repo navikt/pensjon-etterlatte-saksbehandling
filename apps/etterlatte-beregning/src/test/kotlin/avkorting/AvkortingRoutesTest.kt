@@ -54,7 +54,7 @@ class AvkortingRoutesTest {
     @BeforeAll
     fun beforeAll() {
         server.start()
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll

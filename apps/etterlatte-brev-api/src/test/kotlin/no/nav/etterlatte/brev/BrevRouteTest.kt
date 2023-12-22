@@ -77,7 +77,7 @@ internal class BrevRouteTest {
         val brevId = Random.nextLong()
 
         coEvery { brevService.hentBrev(any()) } returns opprettBrev(brevId)
-        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -101,7 +101,7 @@ internal class BrevRouteTest {
         val pdf = Pdf("Hello world".toByteArray())
 
         coEvery { brevService.genererPdf(any(), any()) } returns pdf
-        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -119,7 +119,7 @@ internal class BrevRouteTest {
 
         coVerify(exactly = 1) {
             brevService.genererPdf(brevId, any())
-            tilgangssjekker.harTilgangTilSak(any(), any())
+            tilgangssjekker.harTilgangTilSak(any(), any(), any())
         }
     }
 
@@ -128,7 +128,7 @@ internal class BrevRouteTest {
         val brevId = Random.nextLong()
 
         coEvery { brevService.hentBrevPayload(any()) } returns BrevPayload(Slate(), null)
-        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -145,7 +145,7 @@ internal class BrevRouteTest {
 
         coVerify(exactly = 1) {
             brevService.hentBrevPayload(brevId)
-            tilgangssjekker.harTilgangTilSak(any(), any())
+            tilgangssjekker.harTilgangTilSak(any(), any(), any())
         }
     }
 
@@ -154,7 +154,7 @@ internal class BrevRouteTest {
         val brevId = Random.nextLong()
         coEvery { brevService.lagreBrevPayload(any(), any()) } returns 1
         coEvery { brevService.lagreBrevPayloadVedlegg(any(), any()) } returns 1
-        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -172,13 +172,13 @@ internal class BrevRouteTest {
 
         coVerify(exactly = 1) {
             brevService.lagreBrevPayload(brevId, any())
-            tilgangssjekker.harTilgangTilSak(any(), any())
+            tilgangssjekker.harTilgangTilSak(any(), any(), any())
         }
     }
 
     @Test
     fun `Endepunkt som ikke finnes`() {
-        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()

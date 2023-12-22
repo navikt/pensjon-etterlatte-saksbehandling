@@ -97,7 +97,7 @@ internal class SakGrunnlagRoutesKtTest {
         val sakId = Random.nextLong()
 
         every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns null
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val response =
@@ -112,7 +112,7 @@ internal class SakGrunnlagRoutesKtTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlagForSak(any()) }
-        coVerify(exactly = 1) { behandlingKlient.harTilgangTilSak(any(), any()) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilSak(any(), any(), any()) }
     }
 
     @Test
@@ -121,7 +121,7 @@ internal class SakGrunnlagRoutesKtTest {
         val testData = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         every { grunnlagService.hentOpplysningsgrunnlagForSak(any()) } returns testData
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val response =
@@ -137,7 +137,7 @@ internal class SakGrunnlagRoutesKtTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlagForSak(sakId) }
-        coVerify(exactly = 1) { behandlingKlient.harTilgangTilSak(sakId, any()) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilSak(sakId, any(), any()) }
     }
 
     @Test
@@ -149,7 +149,7 @@ internal class SakGrunnlagRoutesKtTest {
             )
 
         every { grunnlagService.hentPersonerISak(any()) } returns testData
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val response =
@@ -165,7 +165,7 @@ internal class SakGrunnlagRoutesKtTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentPersonerISak(sakId) }
-        coVerify(exactly = 1) { behandlingKlient.harTilgangTilSak(sakId, any()) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilSak(sakId, any(), any()) }
     }
 
     private fun ApplicationTestBuilder.createHttpClient(): HttpClient {

@@ -71,7 +71,7 @@ internal class BeregningRoutesTest {
 
         applicationConfig =
             buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll
@@ -102,7 +102,7 @@ internal class BeregningRoutesTest {
         val beregning = beregning()
         val behandling = mockk<DetaljertBehandling>()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns 1L
@@ -129,7 +129,7 @@ internal class BeregningRoutesTest {
         val beregning = beregning()
 
         every { beregningRepository.hent(beregning.behandlingId) } returns beregning
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns false
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
             environment { config = applicationConfig }
@@ -151,7 +151,7 @@ internal class BeregningRoutesTest {
 
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns mockBehandling()
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         every { beregningRepository.hentOverstyrBeregning(1L) } returns null
         coEvery { beregnBarnepensjonService.beregn(any(), any()) } returns beregning
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
@@ -182,7 +182,7 @@ internal class BeregningRoutesTest {
     fun `skal hente overstyrBeregning`() {
         val behandling = mockk<DetaljertBehandling>()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns 1L
         every { beregningRepository.hentOverstyrBeregning(1L) } returns OverstyrBeregning(1L, "Test", Tidspunkt.now())
@@ -208,7 +208,7 @@ internal class BeregningRoutesTest {
     fun `skal ikke hente overstyrBeregning hvis den ikke finnes`() {
         val behandling = mockk<DetaljertBehandling>()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         every { behandling.sak } returns 1L
         every { beregningRepository.hentOverstyrBeregning(1L) } returns null

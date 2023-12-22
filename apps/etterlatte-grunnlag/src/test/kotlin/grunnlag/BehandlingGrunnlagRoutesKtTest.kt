@@ -129,7 +129,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         val behandlingId = UUID.randomUUID()
 
         every { grunnlagService.hentOpplysningsgrunnlag(any()) } returns null
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
             environment {
@@ -155,7 +155,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlag(any()) }
-        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any()) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) }
     }
 
     @Test
@@ -164,7 +164,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         val testData = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         every { grunnlagService.hentOpplysningsgrunnlag(any<UUID>()) } returns testData
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
             val response =
@@ -180,7 +180,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentOpplysningsgrunnlag(any()) }
-        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any()) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) }
     }
 
     @ParameterizedTest
@@ -198,7 +198,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
             )
 
         every { grunnlagService.hentGrunnlagAvType(any<UUID>(), any<Opplysningstype>()) } returns opplysning
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
             val response =
@@ -214,7 +214,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentGrunnlagAvType(behandlingId, type) }
-        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any()) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) }
     }
 
     @Test
@@ -231,7 +231,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
             )
 
         every { grunnlagService.hentHistoriskForeldreansvar(any<UUID>()) } returns opplysning
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
             val response =
@@ -249,7 +249,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentHistoriskForeldreansvar(behandlingId) }
-        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any()) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) }
     }
 
     @Test
@@ -266,7 +266,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
             )
 
         every { grunnlagService.lagreNyeSaksopplysninger(any(), any(), any()) } just Runs
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
             val actualResponse =
@@ -284,7 +284,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
         val opplysningerSlot = slot<List<Grunnlagsopplysning<JsonNode>>>()
 
         verify(exactly = 1) { grunnlagService.lagreNyeSaksopplysninger(sakId, behandlingId, capture(opplysningerSlot)) }
-        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(behandlingId, any()) }
+        coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(behandlingId, any(), any()) }
 
         val faktiskOpplysning = opplysningerSlot.captured.single()
 

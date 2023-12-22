@@ -31,6 +31,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
 
     override suspend fun harTilgangTilBehandling(
         behandlingId: UUID,
+        skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean {
         try {
@@ -41,7 +42,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilgang/behandling/$behandlingId",
+                            url = "$resourceUrl/tilgang/behandling/$behandlingId/$skrivetilgang",
                         ),
                     brukerTokenInfo = bruker,
                 )

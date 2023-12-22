@@ -178,7 +178,7 @@ internal class PersonRoutesTest {
     fun `Hent navn på person`() {
         val response = NavnOpplysningDTO(1, "Test", "Mellom", "Testesen", SOEKER_FOEDSELSNUMMER.value)
         every { grunnlagService.hentOpplysningstypeNavnFraFnr(any(), any()) } returns response
-        coEvery { behandlingKlient.harTilgangTilPerson(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilPerson(any(), any(), any()) } returns true
 
         testApplication {
             environment {
@@ -199,12 +199,12 @@ internal class PersonRoutesTest {
         }
 
         verify(exactly = 1) { grunnlagService.hentOpplysningstypeNavnFraFnr(SOEKER_FOEDSELSNUMMER, any()) }
-        coVerify { behandlingKlient.harTilgangTilPerson(SOEKER_FOEDSELSNUMMER, any()) }
+        coVerify { behandlingKlient.harTilgangTilPerson(SOEKER_FOEDSELSNUMMER, any(), any()) }
     }
 
     @Test
     fun `Hent navn på person - saksbehandler har ikke tilgang`() {
-        coEvery { behandlingKlient.harTilgangTilPerson(any(), any()) } returns false
+        coEvery { behandlingKlient.harTilgangTilPerson(any(), any(), any()) } returns false
 
         testApplication {
             environment {
@@ -223,7 +223,7 @@ internal class PersonRoutesTest {
             assertEquals(HttpStatusCode.NotFound, actualResponse.status)
         }
 
-        coVerify { behandlingKlient.harTilgangTilPerson(SOEKER_FOEDSELSNUMMER, any()) }
+        coVerify { behandlingKlient.harTilgangTilPerson(SOEKER_FOEDSELSNUMMER, any(), any()) }
     }
 
     private fun ApplicationTestBuilder.createHttpClient(): HttpClient {

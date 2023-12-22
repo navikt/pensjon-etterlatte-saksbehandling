@@ -25,7 +25,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
@@ -35,6 +34,7 @@ import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
@@ -157,7 +157,7 @@ internal fun Route.sakWebRoutes(
             }
 
             post("/endre_enhet") {
-                hentNavidentFraToken { navIdent ->
+                kunSaksbehandlerMedSkrivetilgang { navIdent ->
                     val enhetrequest = call.receive<EnhetRequest>()
                     try {
                         if (enhetrequest.enhet !in Enheter.entries.map { it.enhetNr }) {
@@ -191,7 +191,8 @@ internal fun Route.sakWebRoutes(
                         }
 
                         logger.info(
-                            "Saksbehandler $navIdent endret enhet på sak: $sakId og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}",
+                            "Saksbehandler ${navIdent.ident} endret enhet på sak: $sakId og " +
+                                "tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}",
                         )
                         call.respond(HttpStatusCode.OK)
                     } catch (e: TilstandException.UgyldigTilstand) {

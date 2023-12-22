@@ -30,6 +30,8 @@ import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveService
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 class ManglerReferanseException(msg: String) :
     UgyldigForespoerselException(
@@ -68,7 +70,7 @@ internal fun Route.oppgaveRoutes(
             }
 
             post("/opprett") {
-                kunSaksbehandler {
+                kunSaksbehandlerMedSkrivetilgang {
                     val nyOppgaveDto = call.receive<NyOppgaveDto>()
 
                     val nyOppgave =
@@ -125,24 +127,28 @@ internal fun Route.oppgaveRoutes(
             }
 
             put("ferdigstill") {
-                inTransaction {
-                    service.hentOgFerdigstillOppgaveById(oppgaveId, brukerTokenInfo)
+                kunSkrivetilgang {
+                    inTransaction {
+                        service.hentOgFerdigstillOppgaveById(oppgaveId, brukerTokenInfo)
+                    }
+                    call.respond(HttpStatusCode.OK)
                 }
-                call.respond(HttpStatusCode.OK)
             }
 
             post("tildel-saksbehandler") {
-                val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
-                inTransaction {
-                    service.tildelSaksbehandler(
-                        oppgaveId,
-                        saksbehandlerEndringDto.saksbehandler,
-                    )
+                kunSkrivetilgang {
+                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
+                    inTransaction {
+                        service.tildelSaksbehandler(
+                            oppgaveId,
+                            saksbehandlerEndringDto.saksbehandler,
+                        )
+                    }
+                    call.respond(HttpStatusCode.OK)
                 }
-                call.respond(HttpStatusCode.OK)
             }
             post("bytt-saksbehandler") {
-                kunSaksbehandler {
+                kunSaksbehandlerMedSkrivetilgang {
                     val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringDto>()
                     inTransaction {
                         service.byttSaksbehandler(oppgaveId, saksbehandlerEndringDto.saksbehandler)
@@ -152,14 +158,14 @@ internal fun Route.oppgaveRoutes(
             }
             route("saksbehandler", HttpMethod.Delete) {
                 handle {
-                    kunSaksbehandler {
+                    kunSaksbehandlerMedSkrivetilgang {
                         inTransaction { service.fjernSaksbehandler(oppgaveId) }
                         call.respond(HttpStatusCode.OK)
                     }
                 }
             }
             put("frist") {
-                kunSaksbehandler {
+                kunSaksbehandlerMedSkrivetilgang {
                     val redigerFrist = call.receive<RedigerFristRequest>()
                     inTransaction { service.redigerFrist(oppgaveId, redigerFrist.frist) }
                     call.respond(HttpStatusCode.OK)
@@ -184,25 +190,29 @@ internal fun Route.oppgaveRoutes(
                 }
 
                 post("tildel-saksbehandler") {
-                    val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
-                    gosysOppgaveService.tildelOppgaveTilSaksbehandler(
-                        gosysOppgaveId,
-                        saksbehandlerEndringDto.versjon,
-                        saksbehandlerEndringDto.saksbehandler,
-                        brukerTokenInfo,
-                    )
-                    call.respond(HttpStatusCode.OK)
+                    kunSaksbehandlerMedSkrivetilgang {
+                        val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
+                        gosysOppgaveService.tildelOppgaveTilSaksbehandler(
+                            gosysOppgaveId,
+                            saksbehandlerEndringDto.versjon,
+                            saksbehandlerEndringDto.saksbehandler,
+                            brukerTokenInfo,
+                        )
+                        call.respond(HttpStatusCode.OK)
+                    }
                 }
 
                 post("endre-frist") {
-                    val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
-                    gosysOppgaveService.endreFrist(
-                        gosysOppgaveId,
-                        redigerFristRequest.versjon,
-                        redigerFristRequest.frist,
-                        brukerTokenInfo,
-                    )
-                    call.respond(HttpStatusCode.OK)
+                    kunSaksbehandlerMedSkrivetilgang {
+                        val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
+                        gosysOppgaveService.endreFrist(
+                            gosysOppgaveId,
+                            redigerFristRequest.versjon,
+                            redigerFristRequest.frist,
+                            brukerTokenInfo,
+                        )
+                        call.respond(HttpStatusCode.OK)
+                    }
                 }
             }
         }

@@ -23,72 +23,91 @@ import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseService: GrunnlagsendringshendelseService) {
     val logger = application.log
 
     route("/grunnlagsendringshendelse") {
         post("/doedshendelse") {
-            val doedshendelse = call.receive<Doedshendelse>()
-            logger.info("Mottar en doedshendelse fra PDL")
-            grunnlagsendringshendelseService.opprettDoedshendelse(doedshendelse)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val doedshendelse = call.receive<Doedshendelse>()
+                logger.info("Mottar en doedshendelse fra PDL")
+                grunnlagsendringshendelseService.opprettDoedshendelse(doedshendelse)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/utflyttingshendelse") {
-            val utflyttingsHendelse = call.receive<UtflyttingsHendelse>()
-            logger.info("Mottar en utflyttingshendelse fra PDL")
-            grunnlagsendringshendelseService.opprettUtflyttingshendelse(utflyttingsHendelse)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val utflyttingsHendelse = call.receive<UtflyttingsHendelse>()
+                logger.info("Mottar en utflyttingshendelse fra PDL")
+                grunnlagsendringshendelseService.opprettUtflyttingshendelse(utflyttingsHendelse)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/forelderbarnrelasjonhendelse") {
-            val forelderBarnRelasjonHendelse = call.receive<ForelderBarnRelasjonHendelse>()
-            logger.info("Mottar en forelder-barn-relasjon-hendelse fra PDL")
-            grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val forelderBarnRelasjonHendelse = call.receive<ForelderBarnRelasjonHendelse>()
+                logger.info("Mottar en forelder-barn-relasjon-hendelse fra PDL")
+                grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/adressebeskyttelse") {
-            val adressebeskyttelse = call.receive<Adressebeskyttelse>()
-            logger.info("Mottar en adressebeskyttelse-hendelse fra PDL")
-            grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val adressebeskyttelse = call.receive<Adressebeskyttelse>()
+                logger.info("Mottar en adressebeskyttelse-hendelse fra PDL")
+                grunnlagsendringshendelseService.oppdaterAdressebeskyttelseHendelse(adressebeskyttelse)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/bostedsadresse") {
-            val bostedsadresse = call.receive<Bostedsadresse>()
-            logger.info("Mottar en adresse-hendelse fra PDL")
-            grunnlagsendringshendelseService.oppdaterAdresseHendelse(bostedsadresse)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val bostedsadresse = call.receive<Bostedsadresse>()
+                logger.info("Mottar en adresse-hendelse fra PDL")
+                grunnlagsendringshendelseService.oppdaterAdresseHendelse(bostedsadresse)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/vergemaalellerfremtidsfullmakt") {
-            val vergeMaalEllerFremtidsfullmakt = call.receive<VergeMaalEllerFremtidsfullmakt>()
-            logger.info("Mottar en vergeMaalEllerFremtidsfullmakt-hendelse fra PDL")
-            grunnlagsendringshendelseService.opprettVergemaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val vergeMaalEllerFremtidsfullmakt = call.receive<VergeMaalEllerFremtidsfullmakt>()
+                logger.info("Mottar en vergeMaalEllerFremtidsfullmakt-hendelse fra PDL")
+                grunnlagsendringshendelseService.opprettVergemaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/sivilstandhendelse") {
-            val sivilstandHendelse = call.receive<SivilstandHendelse>()
-            logger.info("Mottar en sivilstand-hendelse fra PDL")
-            grunnlagsendringshendelseService.opprettSivilstandHendelse(sivilstandHendelse)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val sivilstandHendelse = call.receive<SivilstandHendelse>()
+                logger.info("Mottar en sivilstand-hendelse fra PDL")
+                grunnlagsendringshendelseService.opprettSivilstandHendelse(sivilstandHendelse)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/institusjonsopphold") {
-            val oppholdsHendelse = call.receive<InstitusjonsoppholdHendelseBeriket>()
-            logger.info("Mottar en institusjons-hendelse fra inst2")
-            grunnlagsendringshendelseService.opprettInstitusjonsOppholdhendelse(oppholdsHendelse)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val oppholdsHendelse = call.receive<InstitusjonsoppholdHendelseBeriket>()
+                logger.info("Mottar en institusjons-hendelse fra inst2")
+                grunnlagsendringshendelseService.opprettInstitusjonsOppholdhendelse(oppholdsHendelse)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/reguleringfeilet") {
-            val hendelse = call.receive<ReguleringFeiletHendelse>()
-            logger.info("Motter hendelse om at regulering har feilet i sak ${hendelse.sakId}")
-            grunnlagsendringshendelseService.opprettEndretGrunnbeloepHendelse(hendelse.sakId)
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                val hendelse = call.receive<ReguleringFeiletHendelse>()
+                logger.info("Motter hendelse om at regulering har feilet i sak ${hendelse.sakId}")
+                grunnlagsendringshendelseService.opprettEndretGrunnbeloepHendelse(hendelse.sakId)
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         route("/{$SAKID_CALL_PARAMETER}") {

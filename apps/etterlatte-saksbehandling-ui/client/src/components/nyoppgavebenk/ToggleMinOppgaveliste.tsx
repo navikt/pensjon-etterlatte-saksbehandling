@@ -14,6 +14,7 @@ import { Container } from '~shared/styled'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { Tilgangsmelding } from '~components/nyoppgavebenk/Tilgangsmelding'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -25,7 +26,7 @@ const TabsWidth = styled(Tabs)`
 export const ToggleMinOppgaveliste = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveTilgang) {
-    return null
+    return <Tilgangsmelding />
   }
   const [filter, setFilter] = useState<Filter>(initialFilter())
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')

@@ -37,7 +37,6 @@ import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -92,8 +91,6 @@ class VedtaksbrevService(
                 when (verge) {
                     is Vergemaal ->
                         verge.toMottaker()
-                    is ForelderVerge ->
-                        adresseService.hentMottakerAdresse(verge.foedselsnummer.value)
                     else -> {
                         val mottakerFnr =
                             innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value

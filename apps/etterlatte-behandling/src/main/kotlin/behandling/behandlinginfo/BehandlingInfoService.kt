@@ -1,19 +1,23 @@
 package no.nav.etterlatte.behandling.behandlinginfo
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.UUID
 
 class BehandlingInfoService(
     private val behandlingInfoDao: BehandlingInfoDao,
     private val behandlingService: BehandlingService,
+    private val behandlingsstatusService: BehandlingStatusService,
 ) {
     fun lagreBrevutfall(
         behandlingId: UUID,
         brevutfall: Brevutfall,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Brevutfall {
         val behandling =
             behandlingService.hentBehandling(behandlingId)
@@ -22,7 +26,9 @@ class BehandlingInfoService(
         sjekkBehandlingKanEndres(behandling)
         sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
 
-        return behandlingInfoDao.lagreBrevutfall(brevutfall)
+        val utfall = behandlingInfoDao.lagreBrevutfall(brevutfall)
+        oppdaterBehandlingStatus(behandling, brukerTokenInfo)
+        return utfall
     }
 
     fun hentBrevutfall(behandlingId: UUID): Brevutfall? {
@@ -32,6 +38,7 @@ class BehandlingInfoService(
     fun lagreEtterbetaling(
         behandlingId: UUID,
         etterbetaling: Etterbetaling?,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Etterbetaling? {
         val behandling =
             behandlingService.hentBehandling(behandlingId)
@@ -47,7 +54,9 @@ class BehandlingInfoService(
         }
 
         sjekkEtterbetalingFoerVirkningstidspunkt(behandling, etterbetaling)
-        return behandlingInfoDao.lagreEtterbetaling(etterbetaling)
+        val etterbetaling = behandlingInfoDao.lagreEtterbetaling(etterbetaling)
+        oppdaterBehandlingStatus(behandling, brukerTokenInfo)
+        return etterbetaling
     }
 
     fun hentEtterbetaling(behandlingId: UUID): Etterbetaling? {
@@ -77,6 +86,16 @@ class BehandlingInfoService(
     ) {
         if (behandling.sak.sakType == SakType.BARNEPENSJON && brevutfall.aldersgruppe == null) {
             throw BrevutfallException.AldergruppeIkkeSatt()
+        }
+    }
+
+    private fun oppdaterBehandlingStatus(
+        behandling: Behandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        when (behandling.sak.sakType) {
+            SakType.BARNEPENSJON -> behandlingsstatusService.settBeregnet(behandling.id, brukerTokenInfo)
+            SakType.OMSTILLINGSSTOENAD -> behandlingsstatusService.settAvkortet(behandling.id, brukerTokenInfo)
         }
     }
 }

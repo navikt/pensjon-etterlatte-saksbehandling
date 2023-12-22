@@ -32,17 +32,12 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
                     val brevutfallOgEtterbetaling =
                         inTransaction {
                             logger.info("Lagrer brevutfall og etterbetaling for behandling $behandlingId")
-                            val brevutfallLagret =
-                                service.lagreBrevutfall(
+                            val (brevutfallLagret, etterbetalingLagret) =
+                                service.lagreBrevutfallOgEtterbetaling(
                                     behandlingId,
+                                    brukerTokenInfo,
                                     dto.toBrevutfall(behandlingId, brukerTokenInfo),
-                                    brukerTokenInfo,
-                                )
-                            val etterbetalingLagret =
-                                service.lagreEtterbetaling(
-                                    behandlingId,
                                     dto.toEtterbetaling(behandlingId, brukerTokenInfo),
-                                    brukerTokenInfo,
                                 )
 
                             BrevutfallOgEtterbetalingDto(

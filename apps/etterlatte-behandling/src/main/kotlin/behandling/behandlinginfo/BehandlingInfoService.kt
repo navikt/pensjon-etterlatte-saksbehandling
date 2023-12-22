@@ -15,21 +15,32 @@ class BehandlingInfoService(
     private val behandlingService: BehandlingService,
     private val behandlingsstatusService: BehandlingStatusService,
 ) {
-    fun lagreBrevutfall(
+    fun lagreBrevutfallOgEtterbetaling(
         behandlingId: UUID,
-        brevutfall: Brevutfall,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Brevutfall {
+        brevutfall: Brevutfall,
+        etterbetaling: Etterbetaling?,
+    ): Pair<Brevutfall, Etterbetaling?> {
         val behandling =
             behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
 
         sjekkBehandlingKanEndres(behandling)
-        sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
 
-        val utfall = behandlingInfoDao.lagreBrevutfall(brevutfall)
+        val lagretBrevutfall = lagreBrevutfall(behandling, brevutfall)
+        val lagretEtterbetaling = lagreEtterbetaling(behandling, etterbetaling)
+
         oppdaterBehandlingStatus(behandling, brukerTokenInfo)
-        return utfall
+
+        return Pair(lagretBrevutfall, lagretEtterbetaling)
+    }
+
+    fun lagreBrevutfall(
+        behandling: Behandling,
+        brevutfall: Brevutfall,
+    ): Brevutfall {
+        sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
+        return behandlingInfoDao.lagreBrevutfall(brevutfall)
     }
 
     fun hentBrevutfall(behandlingId: UUID): Brevutfall? {
@@ -37,27 +48,18 @@ class BehandlingInfoService(
     }
 
     fun lagreEtterbetaling(
-        behandlingId: UUID,
+        behandling: Behandling,
         etterbetaling: Etterbetaling?,
-        brukerTokenInfo: BrukerTokenInfo,
     ): Etterbetaling? {
-        val behandling =
-            behandlingService.hentBehandling(behandlingId)
-                ?: throw GenerellIkkeFunnetException()
-
-        sjekkBehandlingKanEndres(behandling)
-
         if (etterbetaling == null) {
-            hentEtterbetaling(behandlingId)?.let {
-                behandlingInfoDao.slettEtterbetaling(behandlingId)
+            hentEtterbetaling(behandling.id)?.let {
+                behandlingInfoDao.slettEtterbetaling(behandling.id)
             }
             return null
         }
 
         sjekkEtterbetalingFoerVirkningstidspunkt(behandling, etterbetaling)
-        val etterbetaling = behandlingInfoDao.lagreEtterbetaling(etterbetaling)
-        oppdaterBehandlingStatus(behandling, brukerTokenInfo)
-        return etterbetaling
+        return behandlingInfoDao.lagreEtterbetaling(etterbetaling)
     }
 
     fun hentEtterbetaling(behandlingId: UUID): Etterbetaling? {

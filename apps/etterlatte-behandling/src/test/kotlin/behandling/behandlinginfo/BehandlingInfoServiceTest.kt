@@ -31,25 +31,35 @@ internal class BehandlingInfoServiceTest {
     }
 
     @Test
-    fun `brevutfall skal oppdatere behandlingsstatus hvis endret`() {
+    fun `Skal oppdatere behandlingsstatus hvis endret barnepensjon`() {
         val behandlingId = randomUUID()
         val brevutfall = brevutfall(behandlingId)
+        val etterbetaling = etterbetaling(behandlingId = behandlingId)
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
         every { behandlingInfoDao.lagreBrevutfall(any()) } returns mockk()
+        every { behandlingInfoDao.lagreEtterbetaling(any()) } returns mockk()
         every { behandlingsstatusService.settBeregnet(any(), any(), any()) } returns Unit
 
-        behandlingInfoService.lagreBrevutfall(behandlingId, brevutfall, bruker)
+        behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+            behandlingId,
+            bruker,
+            brevutfall,
+            etterbetaling,
+        )
 
         verify {
             behandlingInfoDao.lagreBrevutfall(brevutfall)
+            behandlingInfoDao.lagreEtterbetaling(etterbetaling)
             behandlingsstatusService.settBeregnet(behandlingId, bruker, false)
         }
     }
 
     @Test
-    fun `Etterbetaling skal oppdatere behandlingsstatus hvis endret`() {
+    fun `Etterbetaling skal oppdatere behandlingsstatus hvis endret omstillingstoenad`() {
         val behandlingId = randomUUID()
         val brevutfall = brevutfall(behandlingId)
+        val etterbetaling = etterbetaling(behandlingId = behandlingId)
+
         every { behandlingService.hentBehandling(any()) } returns
             behandling(
                 behandlingId,
@@ -57,12 +67,14 @@ internal class BehandlingInfoServiceTest {
                 BehandlingStatus.AVKORTET,
             )
         every { behandlingInfoDao.lagreBrevutfall(any()) } returns mockk()
+        every { behandlingInfoDao.lagreEtterbetaling(any()) } returns mockk()
         every { behandlingsstatusService.settAvkortet(any(), any(), any()) } returns Unit
 
-        behandlingInfoService.lagreBrevutfall(behandlingId, brevutfall, bruker)
+        behandlingInfoService.lagreBrevutfallOgEtterbetaling(behandlingId, bruker, brevutfall, etterbetaling)
 
         verify {
             behandlingInfoDao.lagreBrevutfall(brevutfall)
+            behandlingInfoDao.lagreEtterbetaling(etterbetaling)
             behandlingsstatusService.settAvkortet(behandlingId, bruker, false)
         }
     }
@@ -78,7 +90,12 @@ internal class BehandlingInfoServiceTest {
             )
 
         assertThrows<BrevutfallException.BehandlingKanIkkeEndres> {
-            behandlingInfoService.lagreBrevutfall(behandlingId, brevutfall(behandlingId), bruker)
+            behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+                behandlingId,
+                bruker,
+                brevutfall(behandlingId),
+                etterbetaling = null,
+            )
         }
     }
 
@@ -92,11 +109,10 @@ internal class BehandlingInfoServiceTest {
                 tom = YearMonth.of(2023, 1),
             )
 
-        every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
         every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling
 
         assertThrows<EtterbetalingException.EtterbetalingFraDatoErFoerVirk> {
-            behandlingInfoService.lagreEtterbetaling(behandlingId, etterbetaling, bruker)
+            behandlingInfoService.lagreEtterbetaling(behandling(behandlingId), etterbetaling)
         }
     }
 
@@ -104,11 +120,10 @@ internal class BehandlingInfoServiceTest {
     fun `skal slette etterbetaling hvis den er null og det allerede finnes en etterbetaling`() {
         val behandlingId = randomUUID()
 
-        every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
         every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling(behandlingId)
         every { behandlingInfoDao.slettEtterbetaling(any()) } returns 1
 
-        behandlingInfoService.lagreEtterbetaling(behandlingId, null, bruker)
+        behandlingInfoService.lagreEtterbetaling(behandling(behandlingId), null)
 
         verify { behandlingInfoDao.slettEtterbetaling(behandlingId) }
     }

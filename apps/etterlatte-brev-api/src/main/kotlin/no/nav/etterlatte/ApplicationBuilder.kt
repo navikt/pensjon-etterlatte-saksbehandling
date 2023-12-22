@@ -165,6 +165,7 @@ class ApplicationBuilder {
             dokarkivService,
             distribusjonService,
             brevbakerService,
+            brevdataFacade,
         )
 
     private val vedtaksbrevService =

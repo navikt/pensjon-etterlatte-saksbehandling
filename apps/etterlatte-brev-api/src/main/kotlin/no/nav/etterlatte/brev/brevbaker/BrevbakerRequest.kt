@@ -37,8 +37,11 @@ data class BrevbakerRequest(
                         vergeNavn =
                             if (erMigrering(brevKode) && harVerge) {
                                 generellBrevData.personerISak.soeker.formaterNavn() + " ved verge"
-                            } else {
+                            } else if (harVerge) {
                                 generellBrevData.personerISak.verge?.navn()
+                                    ?: (generellBrevData.personerISak.soeker.formaterNavn() + " ved verge")
+                            } else {
+                                null
                             },
                     ),
                 language = LanguageCode.spraakToLanguageCode(generellBrevData.spraak),

@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
+import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.model.Brev
@@ -39,6 +40,7 @@ class BrevService(
     private val dokarkivService: DokarkivService,
     private val distribusjonService: DistribusjonService,
     private val brevbakerService: BrevbakerService,
+    private val brevDataFacade: BrevdataFacade,
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
 
@@ -137,8 +139,12 @@ class BrevService(
             return requireNotNull(db.hentPdf(brev.id))
         }
 
+        val brevutfall =
+            brev.behandlingId?.let {
+                brevDataFacade.hentBrevutfall(brev.behandlingId, bruker)
+            }
         val sak = sakService.hentSak(brev.sakId, bruker)
-        val soeker = soekerService.hentSoeker(brev.sakId, bruker)
+        val soeker = soekerService.hentSoeker(brev.sakId, bruker, brevutfall)
         val avsender = adresseService.hentAvsender(sak, bruker.ident())
 
         val (brevKode, brevData) = opprettBrevData(brev)

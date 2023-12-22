@@ -55,6 +55,7 @@ internal class BrevServiceTest {
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
     private val brevDataMapper = mockk<BrevDataMapper>()
+    private val brevDataFacade = mockk<BrevdataFacade>()
 
     private val brevService =
         BrevService(
@@ -65,6 +66,7 @@ internal class BrevServiceTest {
             dokarkivService,
             distribusjonService,
             BrevbakerService(brevbaker, adresseService, brevDataMapper),
+            brevDataFacade,
         )
 
     private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null)

@@ -89,6 +89,7 @@ internal class BrevdataFacadeImplTest {
         } throws BehandlingKlientException("har ikke tidligere behandling")
         coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns lagBehandling()
+        coEvery { behandlingKlient.hentBrevutfall(any(), any()) } returns hentBrevutfall()
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
         coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
@@ -124,13 +125,10 @@ internal class BrevdataFacadeImplTest {
     @Test
     fun `hentGenerellBrevData fungerer som forventet for tilbakekreving`() {
         val tilbakekreving = tilbakekreving()
-        coEvery {
-            sakService.hentSak(any(), any())
-        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
-        coEvery {
-            vedtaksvurderingKlient.hentVedtak(any(), any())
-        } returns opprettTilbakekrevingVedtak(vedtakInnhold = tilbakekreving)
+        coEvery { sakService.hentSak(any(), any()) } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
+        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettTilbakekrevingVedtak(tilbakekreving)
         coEvery { grunnlagKlient.hentGrunnlagForSak(SAK_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
+        coEvery { behandlingKlient.hentBrevutfall(BEHANDLING_ID, BRUKERTokenInfo) } returns hentBrevutfall()
 
         val generellBrevData =
             runBlocking {
@@ -344,6 +342,8 @@ internal class BrevdataFacadeImplTest {
         )
 
     private fun opprettTrygdetid() = null
+
+    private fun hentBrevutfall() = null
 
     private companion object {
         private val GRUNNLAGSOPPLYSNING_PDL = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, null)

@@ -72,6 +72,8 @@ class BrevdataFacade(
         return coroutineScope {
             val sakDeferred = async { sakService.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
+            val brevutfallDeferred = async { hentBrevutfall(behandlingId, brukerTokenInfo) }
+
             val grunnlag =
                 when (vedtakDeferred.await().type) {
                     VedtakType.TILBAKEKREVING ->
@@ -85,12 +87,13 @@ class BrevdataFacade(
                     else -> async { grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo) }.await()
                 }
             val sak = sakDeferred.await()
+            val brevutfallDto = brevutfallDeferred.await()
             val personerISak =
                 PersonerISak(
                     innsender = grunnlag.mapInnsender(),
-                    soeker = grunnlag.mapSoeker(),
+                    soeker = grunnlag.mapSoeker(brevutfallDto),
                     avdoede = grunnlag.mapAvdoede(),
-                    verge = grunnlag.mapVerge(sak.sakType, behandlingId),
+                    verge = grunnlag.mapVerge(sak.sakType, behandlingId, brevutfallDto),
                 )
             val vedtak = vedtakDeferred.await()
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
@@ -202,7 +205,8 @@ class BrevdataFacade(
                     datoFOM = it.datoFOM.atDay(1),
                     datoTOM = it.datoTOM?.atEndOfMonth(),
                     grunnbeloep = Kroner(it.grunnbelop),
-                    antallBarn = (it.soeskenFlokk?.size ?: 0) + 1, // Legger til 1 pga at beregning fjerner soeker
+                    antallBarn = (it.soeskenFlokk?.size ?: 0) + 1,
+                    // Legger til 1 pga at beregning fjerner soeker
                     utbetaltBeloep = Kroner(it.utbetaltBeloep),
                     trygdetid = benyttetTrygdetid,
                     prorataBroek = prorataBroek,

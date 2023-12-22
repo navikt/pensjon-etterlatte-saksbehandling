@@ -34,7 +34,7 @@ fun Route.beregningsGrunnlag(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/barnepensjon") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 val body = call.receive<BarnepensjonBeregningsGrunnlag>()
 
                 when {
@@ -50,7 +50,7 @@ fun Route.beregningsGrunnlag(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/omstillingstoenad") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 val body = call.receive<OmstillingstoenadBeregningsGrunnlag>()
 
                 when {
@@ -106,7 +106,7 @@ fun Route.beregningsGrunnlag(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/overstyr") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Henter overstyr grunnlag for behandling $behandlingId")
 
                 val body = call.receive<OverstyrBeregningGrunnlagDTO>()

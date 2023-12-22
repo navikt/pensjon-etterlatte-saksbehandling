@@ -20,7 +20,7 @@ fun Route.personRoute(
 ) {
     route("person") {
         post("saker") {
-            withFoedselsnummer(behandlingKlient) { fnr ->
+            withFoedselsnummer(behandlingKlient, skrivetilgang = true) { fnr ->
                 val saksliste = grunnlagService.hentAlleSakerForFnr(fnr)
                 call.respond(saksliste)
             }
@@ -28,7 +28,7 @@ fun Route.personRoute(
 
         post("roller") {
             kunSystembruker {
-                withFoedselsnummer(behandlingKlient) { fnr ->
+                withFoedselsnummer(behandlingKlient, skrivetilgang = true) { fnr ->
                     val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(fnr)
                     call.respond(personMedSakOgRoller)
                 }
@@ -38,7 +38,7 @@ fun Route.personRoute(
         post("navn") {
             hentNavidentFraToken { navIdent ->
                 try {
-                    withFoedselsnummer(behandlingKlient) { foedselsnummer ->
+                    withFoedselsnummer(behandlingKlient, skrivetilgang = true) { foedselsnummer ->
                         val opplysning =
                             grunnlagService.hentOpplysningstypeNavnFraFnr(
                                 foedselsnummer,

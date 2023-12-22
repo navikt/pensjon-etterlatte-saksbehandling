@@ -42,7 +42,7 @@ fun Route.vedtaksbrevRoute(
         }
 
         post("vedtak") {
-            withBehandlingId(tilgangssjekker) { behandlingId ->
+            withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                 val sakId = sakId
 
                 logger.info("Oppretter vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
@@ -72,7 +72,7 @@ fun Route.vedtaksbrevRoute(
         }
 
         post("vedtak/ferdigstill") {
-            withBehandlingId(tilgangssjekker) { behandlingId ->
+            withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                 logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
 
                 measureTimedValue {
@@ -85,7 +85,7 @@ fun Route.vedtaksbrevRoute(
         }
 
         put("payload/tilbakestill") {
-            withBehandlingId(tilgangssjekker) {
+            withBehandlingId(tilgangssjekker, skrivetilgang = true) {
                 val body = call.receive<ResetPayloadRequest>()
                 val brevId = body.brevId
                 val sakId = body.sakId

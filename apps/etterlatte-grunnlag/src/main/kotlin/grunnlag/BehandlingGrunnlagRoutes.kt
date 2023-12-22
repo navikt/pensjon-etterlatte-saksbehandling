@@ -57,7 +57,7 @@ fun Route.behandlingGrunnlagRoute(
         }
 
         post("nye-opplysninger") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 val opplysningsbehov = call.receive<NyeSaksopplysninger>()
                 grunnlagService.lagreNyeSaksopplysninger(
                     opplysningsbehov.sakId,
@@ -70,7 +70,7 @@ fun Route.behandlingGrunnlagRoute(
 
         post("opprett-grunnlag") {
             kunSystembruker {
-                withBehandlingId(behandlingKlient) { behandlingId ->
+                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                     val opplysningsbehov = call.receive<Opplysningsbehov>()
                     grunnlagService.opprettGrunnlag(behandlingId, opplysningsbehov)
                     call.respond(HttpStatusCode.OK)
@@ -80,7 +80,7 @@ fun Route.behandlingGrunnlagRoute(
 
         post("oppdater-grunnlag") {
             kunSystembruker {
-                withBehandlingId(behandlingKlient) { behandlingId ->
+                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                     val request = call.receive<OppdaterGrunnlagRequest>()
                     grunnlagService.oppdaterGrunnlag(behandlingId, request.sakId, request.sakType)
                     call.respond(HttpStatusCode.OK)

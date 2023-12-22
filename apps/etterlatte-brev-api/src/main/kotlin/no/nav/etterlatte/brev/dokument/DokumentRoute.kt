@@ -25,7 +25,7 @@ fun Route.dokumentRoute(
 ) {
     route("dokumenter") {
         post {
-            withFoedselsnummer(tilgangssjekker) { foedselsnummer ->
+            withFoedselsnummer(tilgangssjekker, skrivetilgang = true) { foedselsnummer ->
                 val visTemaPen = call.request.queryParameters["visTemaPen"]?.toBoolean() ?: false
 
                 val result =

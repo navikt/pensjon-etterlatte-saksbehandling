@@ -236,7 +236,6 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
         )
-    val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService)
     val generellBehandlingService =
         GenerellBehandlingService(
             generellbehandlingDao,
@@ -302,6 +301,8 @@ internal class ApplicationContext(
             featureToggleService,
             generellBehandlingService,
         )
+
+    val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService, behandlingsStatusService)
 
     val behandlingFactory =
         BehandlingFactory(

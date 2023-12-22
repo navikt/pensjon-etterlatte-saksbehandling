@@ -1,27 +1,45 @@
 package no.nav.etterlatte.behandling.behandlinginfo
 
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
+import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.UUID
 
 class BehandlingInfoService(
     private val behandlingInfoDao: BehandlingInfoDao,
     private val behandlingService: BehandlingService,
+    private val behandlingsstatusService: BehandlingStatusService,
 ) {
-    fun lagreBrevutfall(
+    fun lagreBrevutfallOgEtterbetaling(
         behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
         brevutfall: Brevutfall,
-    ): Brevutfall {
+        etterbetaling: Etterbetaling?,
+    ): Pair<Brevutfall, Etterbetaling?> {
         val behandling =
             behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
 
         sjekkBehandlingKanEndres(behandling)
-        sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
 
+        val lagretBrevutfall = lagreBrevutfall(behandling, brevutfall)
+        val lagretEtterbetaling = lagreEtterbetaling(behandling, etterbetaling)
+
+        oppdaterBehandlingStatus(behandling, brukerTokenInfo)
+
+        return Pair(lagretBrevutfall, lagretEtterbetaling)
+    }
+
+    fun lagreBrevutfall(
+        behandling: Behandling,
+        brevutfall: Brevutfall,
+    ): Brevutfall {
+        sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
         return behandlingInfoDao.lagreBrevutfall(brevutfall)
     }
 
@@ -30,18 +48,12 @@ class BehandlingInfoService(
     }
 
     fun lagreEtterbetaling(
-        behandlingId: UUID,
+        behandling: Behandling,
         etterbetaling: Etterbetaling?,
     ): Etterbetaling? {
-        val behandling =
-            behandlingService.hentBehandling(behandlingId)
-                ?: throw GenerellIkkeFunnetException()
-
-        sjekkBehandlingKanEndres(behandling)
-
         if (etterbetaling == null) {
-            hentEtterbetaling(behandlingId)?.let {
-                behandlingInfoDao.slettEtterbetaling(behandlingId)
+            hentEtterbetaling(behandling.id)?.let {
+                behandlingInfoDao.slettEtterbetaling(behandling.id)
             }
             return null
         }
@@ -55,7 +67,28 @@ class BehandlingInfoService(
     }
 
     private fun sjekkBehandlingKanEndres(behandling: Behandling) {
-        if (!behandling.status.kanEndres()) throw BrevutfallException.BehandlingKanIkkeEndres(behandling.id, behandling.status)
+        val kanEndres =
+            when (behandling.sak.sakType) {
+                SakType.BARNEPENSJON ->
+                    behandling.status in
+                        listOf(
+                            BehandlingStatus.BEREGNET,
+                            BehandlingStatus.RETURNERT,
+                        )
+
+                SakType.OMSTILLINGSSTOENAD ->
+                    behandling.status in
+                        listOf(
+                            BehandlingStatus.AVKORTET,
+                            BehandlingStatus.RETURNERT,
+                        )
+            }
+        if (!kanEndres) {
+            throw BrevutfallException.BehandlingKanIkkeEndres(
+                behandling.id,
+                behandling.status,
+            )
+        }
     }
 
     private fun sjekkEtterbetalingFoerVirkningstidspunkt(
@@ -77,6 +110,16 @@ class BehandlingInfoService(
     ) {
         if (behandling.sak.sakType == SakType.BARNEPENSJON && brevutfall.aldersgruppe == null) {
             throw BrevutfallException.AldergruppeIkkeSatt()
+        }
+    }
+
+    private fun oppdaterBehandlingStatus(
+        behandling: Behandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        when (behandling.sak.sakType) {
+            SakType.BARNEPENSJON -> behandlingsstatusService.settBeregnet(behandling.id, brukerTokenInfo, false)
+            SakType.OMSTILLINGSSTOENAD -> behandlingsstatusService.settAvkortet(behandling.id, brukerTokenInfo, false)
         }
     }
 }

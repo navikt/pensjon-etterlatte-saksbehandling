@@ -13,7 +13,7 @@ import {
   behandlingSkalSendeBrev,
   sisteBehandlingHendelse,
 } from '~components/behandling/felles/utils'
-import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
@@ -143,14 +143,10 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             <Soeknadsdato mottattDato={soeknadMottattDato} />
 
             <br />
-            {(vedtaksbrev?.prosessType === BrevProsessType.MANUELL ||
-              vedtaksbrev?.prosessType === BrevProsessType.REDIGERBAR) && (
-              <WarningAlert>
-                {redigerbar
-                  ? 'Kan ikke generere brev automatisk. Du må selv redigere innholdet.'
-                  : 'Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.'}
-              </WarningAlert>
+            {behandling?.status === IBehandlingStatus.FATTET_VEDTAK && (
+              <WarningAlert>Kontroller innholdet nøye før attestering!</WarningAlert>
             )}
+
             {visAdvarselBehandlingEndret && (
               <WarningAlert>
                 Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles

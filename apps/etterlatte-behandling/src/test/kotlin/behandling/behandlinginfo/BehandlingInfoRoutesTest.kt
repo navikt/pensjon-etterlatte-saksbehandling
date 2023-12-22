@@ -19,6 +19,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -48,6 +49,7 @@ internal class BehandlingInfoRoutesTest {
     private val applicationContext: ApplicationContext = mockk(relaxed = true)
     private var behandlingInfoDao: BehandlingInfoDao = mockk()
     private var behandlingService: BehandlingService = mockk()
+    private val behandlingsstatusService: BehandlingStatusService = mockk()
 
     private val server: MockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
@@ -64,7 +66,12 @@ internal class BehandlingInfoRoutesTest {
                 every { harTilgangTilBehandling(any(), any()) } returns true
                 every { harTilgangTilSak(any(), any()) } returns true
             }
-        every { applicationContext.behandlingInfoService } returns BehandlingInfoService(behandlingInfoDao, behandlingService)
+        every { applicationContext.behandlingInfoService } returns
+            BehandlingInfoService(
+                behandlingInfoDao,
+                behandlingService,
+                behandlingsstatusService,
+            )
     }
 
     @AfterAll
@@ -80,6 +87,7 @@ internal class BehandlingInfoRoutesTest {
         every { behandlingService.hentBehandling(any()) } returns behandling(behandlingId)
         every { behandlingInfoDao.lagreBrevutfall(any()) } returns brevutfall(behandlingId)
         every { behandlingInfoDao.lagreEtterbetaling(any()) } returns etterbetaling(behandlingId)
+        every { behandlingsstatusService.settBeregnet(any(), any(), any()) } returns Unit
 
         testApplication {
             environment { config = hoconApplicationConfig }

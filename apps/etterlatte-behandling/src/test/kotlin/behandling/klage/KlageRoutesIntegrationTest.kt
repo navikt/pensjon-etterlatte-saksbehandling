@@ -11,12 +11,12 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.testing.testApplication
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
+import no.nav.etterlatte.libs.common.ReguleringFeatureToggle
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -39,8 +39,9 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     fun start() =
         startServer(
             featureToggleService =
-                mockk {
-                    every { isEnabled(KlageFeatureToggle.KanBrukeKlageToggle, any()) } returns true
+                DummyFeatureToggleService().also {
+                    it.settBryter(KlageFeatureToggle.KanBrukeKlageToggle, true)
+                    it.settBryter(ReguleringFeatureToggle.START_REGULERING, false)
                 },
         )
 

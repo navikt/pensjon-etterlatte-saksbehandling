@@ -167,7 +167,6 @@ private fun String.storForbokstavEtter(delim: String) =
     }
 
 private fun Grunnlag.erOver18(brevutfallDto: BrevutfallDto?): Boolean {
-    // TODO er dette ok? Migrering vil ikke finne noe brevutfall og dermed må PDL-fødselsdato brukes
     if (brevutfallDto?.aldersgruppe == Aldersgruppe.OVER_18) {
         return true
     }

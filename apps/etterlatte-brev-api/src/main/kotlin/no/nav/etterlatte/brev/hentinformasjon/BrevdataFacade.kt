@@ -73,7 +73,7 @@ class BrevdataFacade(
             val sakDeferred = async { sakService.hentSak(sakId, brukerTokenInfo) }
             val vedtakDeferred = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
             val brevutfallDeferred = async { hentBrevutfall(behandlingId, brukerTokenInfo) }
-            // TODO takler denne 204 no content?
+
             val grunnlag =
                 when (vedtakDeferred.await().type) {
                     VedtakType.TILBAKEKREVING ->
@@ -205,7 +205,8 @@ class BrevdataFacade(
                     datoFOM = it.datoFOM.atDay(1),
                     datoTOM = it.datoTOM?.atEndOfMonth(),
                     grunnbeloep = Kroner(it.grunnbelop),
-                    antallBarn = (it.soeskenFlokk?.size ?: 0) + 1, // Legger til 1 pga at beregning fjerner soeker
+                    antallBarn = (it.soeskenFlokk?.size ?: 0) + 1,
+                    // Legger til 1 pga at beregning fjerner soeker
                     utbetaltBeloep = Kroner(it.utbetaltBeloep),
                     trygdetid = benyttetTrygdetid,
                     prorataBroek = prorataBroek,

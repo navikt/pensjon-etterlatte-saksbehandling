@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.UUID
 

@@ -49,9 +49,9 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
   const configContext = useContext(ConfigContext)
 
   const rutinerBP =
-    'https://navno.sharepoint.com/:w:/r/sites/Pilot-Doffen/Delte dokumenter/General/Rutiner for sjekklister i Gjenny/BP - Rutine sjekkliste førstegangsbehandling.docx?web=1'
+    'https://navno.sharepoint.com/:u:/r/sites/fag-og-ytelser-pensjon-gjenlevendepensjon/SitePages/Rutine-for-sjekkliste-p%C3%A5-f%C3%B8rstegangsbehandling-Barnepensjon.aspx?csf=1&web=1&e=CZOas4'
   const rutinerOMS =
-    'https://navno.sharepoint.com/:w:/r/sites/Pilot-Doffen/Delte dokumenter/General/Rutiner for sjekklister i Gjenny/OMS - Rutine sjekkliste førstegangsbehandling .docx?web=1'
+    'https://navno.sharepoint.com/:u:/r/sites/fag-og-ytelser-pensjon-gjenlevendepensjon/SitePages/Rutine-for-sjekkliste-p%C3%A5-f%C3%B8rstegangsbehandling-Omstillingsst%C3%B8nad.aspx?csf=1&web=1&e=wqh9pu'
 
   const dispatchUpdatedItem = (item: ISjekklisteItem) => {
     dispatch(updateSjekklisteItem(item))
@@ -83,7 +83,7 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
       {sjekkliste && (
         <>
           <BodyLong>
-            Gjennomgå alle punktene og marker de som krever handling.
+            Gjennomgå alle punktene og marker de som krever handling.{' '}
             <Link href={behandling.sakType == SakType.BARNEPENSJON ? rutinerBP : rutinerOMS} target="_blank">
               Her finner du rutine til punktene.
             </Link>

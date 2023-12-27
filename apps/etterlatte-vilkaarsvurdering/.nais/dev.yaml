@@ -46,8 +46,10 @@ spec:
           - NAVident
   resources:
     requests:
-      cpu: 100m
+      cpu: 25m
       memory: 256Mi
+    limits:
+      memory: 512Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 4

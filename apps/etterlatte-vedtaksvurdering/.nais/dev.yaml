@@ -45,6 +45,12 @@ spec:
           - NAVident
   kafka:
     pool: nav-dev
+  resources:
+    limits:
+      memory: 640Mi
+    requests:
+      cpu: 20m
+      memory: 320Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1

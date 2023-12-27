@@ -25,6 +25,10 @@ spec:
     path: /metrics
   secureLogs:
     enabled: true
+  resources:
+    requests:
+      cpu: 25m
+      memory: 320Mi
   replicas:
     min: 1
     max: 1

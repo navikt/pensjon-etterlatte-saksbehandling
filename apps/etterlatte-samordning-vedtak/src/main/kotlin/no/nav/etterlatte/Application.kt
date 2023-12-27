@@ -6,6 +6,8 @@ import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
+import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.ktor.restModule
@@ -38,6 +40,11 @@ class Server(applicationContext: ApplicationContext) {
                         restModule(
                             sikkerLogg,
                             withMetrics = true,
+                            additionalMetrics =
+                                listOf(
+                                    JvmGcMetrics(),
+                                    JvmThreadMetrics(),
+                                ),
                         ) {
                             samordningVedtakRoute(
                                 samordningVedtakService = applicationContext.samordningVedtakService,

@@ -25,7 +25,7 @@ spec:
     enabled: true
   resources:
     requests:
-      cpu: 15m
+      cpu: 10m
   replicas:
     cpuThresholdPercentage: 90
     max: 1

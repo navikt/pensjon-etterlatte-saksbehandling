@@ -30,7 +30,12 @@ export const OversiktGyldigFramsatt = ({
   return behandling.sakType === SakType.BARNEPENSJON ? (
     <GyldigFramsattBarnepensjon
       behandling={behandling}
-      familieforhold={{ avdoede: personopplysninger.avdoede, gjenlevende: personopplysninger.gjenlevende }}
+      familieforhold={{
+        avdoede: personopplysninger.avdoede,
+        gjenlevende: personopplysninger.gjenlevende,
+        soeker: personopplysninger.soeker,
+      }}
+      innsender={personopplysninger.innsender}
       gyldigFramsatt={behandling.gyldighetsprøving}
       gyldigFremsattTilStatusIcon={gyldigFremsattTilStatusIcon(behandling.gyldighetsprøving)}
     />

@@ -32,6 +32,7 @@ import { formaterStringDato } from '~utils/formattering'
 import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useAppSelector } from '~store/Store'
+import { ReactNode } from 'react'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
@@ -39,8 +40,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
   const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const personopplysninger = usePersonopplysninger()
-  const avdoede = personopplysninger?.avdoede?.find((po) => po)
-  const avdoedDoedsdato = avdoede?.opplysning?.doedsdato
+  const avdoede = personopplysninger?.avdoede || []
   const erBosattUtland = behandling.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND
 
   const hjemlerVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
@@ -63,6 +63,24 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
           ? OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
           : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
     }
+  }
+
+  function doedsdatoOgSoknadMottatt(): { info: ReactNode } {
+    const nodes = avdoede.map((avdod, index) => (
+      <Info
+        key={index}
+        label="Dødsdato"
+        tekst={avdod?.opplysning.doedsdato ? formaterStringDato(avdod?.opplysning.doedsdato) : 'Ikke registrert'}
+        undertekst={formaterGrunnlagKilde(avdod?.kilde)}
+      />
+    ))
+    if (!avdoede.find((it) => it.opplysning.doedsdato)) {
+      nodes.push(<Info label="Dødsdato" tekst="Ikke registrert" />)
+    }
+    if (behandling.soeknadMottattDato) {
+      nodes.push(<Info label="Søknad mottatt" tekst={formaterStringDato(behandling.soeknadMottattDato)} />)
+    }
+    return { info: nodes }
   }
 
   return (
@@ -99,20 +117,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
               hjemler={hjemlerVirkningstidspunkt(behandling.sakType, erBosattUtland)}
               beskrivelse={beskrivelseVirkningstidspunkt(behandling.sakType, erBosattUtland)}
             >
-              {{
-                info: (
-                  <>
-                    <Info
-                      label="Dødsdato"
-                      tekst={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : 'Ikke registrert!'}
-                      undertekst={formaterGrunnlagKilde(avdoede?.kilde)}
-                    />
-                    {behandling.soeknadMottattDato && (
-                      <Info label="Søknad mottatt" tekst={formaterStringDato(behandling.soeknadMottattDato)} />
-                    )}
-                  </>
-                ),
-              }}
+              {doedsdatoOgSoknadMottatt()}
             </Virkningstidspunkt>{' '}
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
           </>

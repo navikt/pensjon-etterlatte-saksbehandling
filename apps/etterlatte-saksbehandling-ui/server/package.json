@@ -7,7 +7,7 @@
     "http-proxy-middleware": "^2.0.6",
     "node-fetch": "^2.6.12",
     "node-cache": "^5.1.2",
-    "prom-client": "^15.0.0",
+    "prom-client": "^15.1.0",
     "source-map": "~0.7.4",
     "unleash-client": "^5.0.0",
     "winston": "^3.11.0",

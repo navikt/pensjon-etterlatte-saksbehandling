@@ -19,10 +19,11 @@ import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.hvisEnabled
 import no.nav.etterlatte.libs.common.klageId
-import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
     KanBrukeKlageToggle("pensjon-etterlatte.kan-bruke-klage"),
@@ -37,13 +38,15 @@ internal fun Route.klageRoutes(
 ) {
     route("/api/klage") {
         post("opprett/{$SAKID_CALL_PARAMETER}") {
-            hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                val sakId = sakId
-                val klage =
-                    inTransaction {
-                        klageService.opprettKlage(sakId)
-                    }
-                call.respond(klage)
+            kunSkrivetilgang {
+                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
+                    val sakId = sakId
+                    val klage =
+                        inTransaction {
+                            klageService.opprettKlage(sakId)
+                        }
+                    call.respond(klage)
+                }
             }
         }
 
@@ -63,7 +66,7 @@ internal fun Route.klageRoutes(
 
             put("formkrav") {
                 hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                    kunSaksbehandler { saksbehandler ->
+                    kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                         medBody<VurdereFormkravDto> { formkravDto ->
                             val oppdatertKlage =
                                 inTransaction {
@@ -77,7 +80,7 @@ internal fun Route.klageRoutes(
 
             put("utfall") {
                 hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                    kunSaksbehandler { saksbehandler ->
+                    kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                         medBody<VurdertUtfallDto> { utfall ->
                             val oppdatertKlage =
                                 inTransaction {
@@ -91,7 +94,7 @@ internal fun Route.klageRoutes(
 
             post("ferdigstill") {
                 hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                    kunSaksbehandler { saksbehandler ->
+                    kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                         val ferdigstiltKlage =
                             inTransaction {
                                 klageService.ferdigstillKlage(klageId, saksbehandler)

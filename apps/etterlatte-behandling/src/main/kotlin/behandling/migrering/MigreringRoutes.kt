@@ -14,30 +14,35 @@ import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 fun Route.migreringRoutes(migreringService: MigreringService) {
     route("/migrering") {
         post {
-            val behandling =
-                migreringService.migrer(call.receive()).let {
-                    when (it) {
-                        is RetryResult.Success -> it.content
-                        is RetryResult.Failure -> throw it.samlaExceptions()
+            kunSkrivetilgang {
+                val behandling =
+                    migreringService.migrer(call.receive()).let {
+                        when (it) {
+                            is RetryResult.Success -> it.content
+                            is RetryResult.Failure -> throw it.samlaExceptions()
+                        }
                     }
-                }
 
-            when (behandling) {
-                null -> call.respond(HttpStatusCode.NotFound)
-                else ->
-                    call.respond(
-                        HttpStatusCode.Companion.Created,
-                        BehandlingOgSak(behandling.id, behandling.sak.id),
-                    )
+                when (behandling) {
+                    null -> call.respond(HttpStatusCode.NotFound)
+                    else ->
+                        call.respond(
+                            HttpStatusCode.Companion.Created,
+                            BehandlingOgSak(behandling.id, behandling.sak.id),
+                        )
+                }
             }
         }
         put("/{$BEHANDLINGID_CALL_PARAMETER}/avbryt") {
-            inTransaction { migreringService.avbrytBehandling(behandlingId, brukerTokenInfo) }
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                inTransaction { migreringService.avbrytBehandling(behandlingId, brukerTokenInfo) }
+                call.respond(HttpStatusCode.OK)
+            }
         }
     }
 }

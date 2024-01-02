@@ -30,10 +30,11 @@ import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
-import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 internal fun Route.behandlingRoutes(
     behandlingService: BehandlingService,
@@ -45,7 +46,7 @@ internal fun Route.behandlingRoutes(
     val logger = application.log
 
     post("/api/behandling") {
-        kunSaksbehandler {
+        kunSaksbehandlerMedSkrivetilgang {
             val request = call.receive<NyBehandlingRequest>()
             val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request)
             call.respondText(behandling.id.toString())
@@ -60,147 +61,159 @@ internal fun Route.behandlingRoutes(
         }
 
         post("/gyldigfremsatt") {
-            hentNavidentFraToken { navIdent ->
-                val body = call.receive<JaNeiMedBegrunnelse>()
-                when (
-                    val lagretGyldighetsResultat =
-                        inTransaction {
-                            gyldighetsproevingService.lagreGyldighetsproeving(
-                                behandlingId,
-                                navIdent,
-                                body,
-                            )
-                        }
-                ) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
+            kunSkrivetilgang {
+                hentNavidentFraToken { navIdent ->
+                    val body = call.receive<JaNeiMedBegrunnelse>()
+                    when (
+                        val lagretGyldighetsResultat =
+                            inTransaction {
+                                gyldighetsproevingService.lagreGyldighetsproeving(
+                                    behandlingId,
+                                    navIdent,
+                                    body,
+                                )
+                            }
+                    ) {
+                        null -> call.respond(HttpStatusCode.NotFound)
+                        else -> call.respond(HttpStatusCode.OK, lagretGyldighetsResultat)
+                    }
                 }
             }
         }
 
         post("/kommerbarnettilgode") {
-            hentNavidentFraToken { navIdent ->
-                val body = call.receive<JaNeiMedBegrunnelse>()
-                val kommerBarnetTilgode =
-                    KommerBarnetTilgode(
-                        body.svar,
-                        body.begrunnelse,
-                        Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                        behandlingId,
-                    )
+            kunSkrivetilgang {
+                hentNavidentFraToken { navIdent ->
+                    val body = call.receive<JaNeiMedBegrunnelse>()
+                    val kommerBarnetTilgode =
+                        KommerBarnetTilgode(
+                            body.svar,
+                            body.begrunnelse,
+                            Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                            behandlingId,
+                        )
 
-                try {
-                    inTransaction { kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode) }
-                    call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
-                } catch (e: TilstandException.UgyldigTilstand) {
-                    call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
+                    try {
+                        inTransaction { kommerBarnetTilGodeService.lagreKommerBarnetTilgode(kommerBarnetTilgode) }
+                        call.respond(HttpStatusCode.OK, kommerBarnetTilgode)
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
+                    }
                 }
             }
         }
 
         post("/avbryt") {
-            inTransaction { behandlingService.avbrytBehandling(behandlingId, brukerTokenInfo) }
-            call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                inTransaction { behandlingService.avbrytBehandling(behandlingId, brukerTokenInfo) }
+                call.respond(HttpStatusCode.OK)
+            }
         }
 
         post("/virkningstidspunkt") {
-            hentNavidentFraToken { navIdent ->
-                logger.debug("Prøver å fastsette virkningstidspunkt")
-                val body = call.receive<VirkningstidspunktRequest>()
+            kunSkrivetilgang {
+                hentNavidentFraToken { navIdent ->
+                    logger.debug("Prøver å fastsette virkningstidspunkt")
+                    val body = call.receive<VirkningstidspunktRequest>()
 
-                val erGyldigVirkningstidspunkt =
-                    behandlingService.erGyldigVirkningstidspunkt(
-                        behandlingId,
-                        brukerTokenInfo,
-                        body,
-                    )
-                if (!erGyldigVirkningstidspunkt) {
-                    return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
-                }
+                    val erGyldigVirkningstidspunkt =
+                        behandlingService.erGyldigVirkningstidspunkt(
+                            behandlingId,
+                            brukerTokenInfo,
+                            body,
+                        )
+                    if (!erGyldigVirkningstidspunkt) {
+                        return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
+                    }
 
-                try {
-                    val virkningstidspunkt =
-                        inTransaction {
-                            behandlingService.oppdaterVirkningstidspunkt(
-                                behandlingId,
-                                body.dato,
-                                navIdent,
-                                body.begrunnelse!!,
-                                kravdato = body.kravdato,
-                            )
-                        }
+                    try {
+                        val virkningstidspunkt =
+                            inTransaction {
+                                behandlingService.oppdaterVirkningstidspunkt(
+                                    behandlingId,
+                                    body.dato,
+                                    navIdent,
+                                    body.begrunnelse!!,
+                                    kravdato = body.kravdato,
+                                )
+                            }
 
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson(),
-                    )
-                } catch (e: TilstandException.UgyldigTilstand) {
-                    call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+                        call.respondText(
+                            contentType = ContentType.Application.Json,
+                            status = HttpStatusCode.OK,
+                            text = FastsettVirkningstidspunktResponse.from(virkningstidspunkt).toJson(),
+                        )
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
+                    }
                 }
             }
         }
 
         post("/utlandstilknytning") {
-            hentNavidentFraToken { navIdent ->
-                logger.debug("Prøver å fastsette utlandstilknytning")
-                val body = call.receive<UtlandstilknytningRequest>()
+            kunSkrivetilgang {
+                hentNavidentFraToken { navIdent ->
+                    logger.debug("Prøver å fastsette utlandstilknytning")
+                    val body = call.receive<UtlandstilknytningRequest>()
 
-                try {
-                    val utlandstilknytning =
-                        Utlandstilknytning(
-                            type = body.utlandstilknytningType,
-                            kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                            begrunnelse = body.begrunnelse,
+                    try {
+                        val utlandstilknytning =
+                            Utlandstilknytning(
+                                type = body.utlandstilknytningType,
+                                kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                                begrunnelse = body.begrunnelse,
+                            )
+
+                        inTransaction {
+                            behandlingService.oppdaterUtlandstilknytning(behandlingId, utlandstilknytning)
+                        }
+
+                        call.respondText(
+                            contentType = ContentType.Application.Json,
+                            status = HttpStatusCode.OK,
+                            text = utlandstilknytning.toJson(),
                         )
-
-                    inTransaction {
-                        behandlingService.oppdaterUtlandstilknytning(behandlingId, utlandstilknytning)
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                     }
-
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = utlandstilknytning.toJson(),
-                    )
-                } catch (e: TilstandException.UgyldigTilstand) {
-                    call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
             }
         }
 
         post("/boddellerarbeidetutlandet") {
-            hentNavidentFraToken { navIdent ->
-                logger.debug("Prøver å fastsette boddEllerArbeidetUtlandet")
-                val body = call.receive<BoddEllerArbeidetUtlandetRequest>()
+            kunSkrivetilgang {
+                hentNavidentFraToken { navIdent ->
+                    logger.debug("Prøver å fastsette boddEllerArbeidetUtlandet")
+                    val body = call.receive<BoddEllerArbeidetUtlandetRequest>()
 
-                try {
-                    val boddEllerArbeidetUtlandet =
-                        BoddEllerArbeidetUtlandet(
-                            boddEllerArbeidetUtlandet = body.boddEllerArbeidetUtlandet,
-                            kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                            begrunnelse = body.begrunnelse,
-                            boddArbeidetIkkeEosEllerAvtaleland = body.boddArbeidetIkkeEosEllerAvtaleland,
-                            boddArbeidetEosNordiskKonvensjon = body.boddArbeidetEosNordiskKonvensjon,
-                            boddArbeidetAvtaleland = body.boddArbeidetAvtaleland,
-                            vurdereAvoededsTrygdeavtale = body.vurdereAvoededsTrygdeavtale,
-                            skalSendeKravpakke = body.skalSendeKravpakke,
-                        )
+                    try {
+                        val boddEllerArbeidetUtlandet =
+                            BoddEllerArbeidetUtlandet(
+                                boddEllerArbeidetUtlandet = body.boddEllerArbeidetUtlandet,
+                                kilde = Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                                begrunnelse = body.begrunnelse,
+                                boddArbeidetIkkeEosEllerAvtaleland = body.boddArbeidetIkkeEosEllerAvtaleland,
+                                boddArbeidetEosNordiskKonvensjon = body.boddArbeidetEosNordiskKonvensjon,
+                                boddArbeidetAvtaleland = body.boddArbeidetAvtaleland,
+                                vurdereAvoededsTrygdeavtale = body.vurdereAvoededsTrygdeavtale,
+                                skalSendeKravpakke = body.skalSendeKravpakke,
+                            )
 
-                    inTransaction {
-                        behandlingService.oppdaterBoddEllerArbeidetUtlandet(
-                            behandlingId,
-                            boddEllerArbeidetUtlandet,
+                        inTransaction {
+                            behandlingService.oppdaterBoddEllerArbeidetUtlandet(
+                                behandlingId,
+                                boddEllerArbeidetUtlandet,
+                            )
+                        }
+
+                        call.respondText(
+                            contentType = ContentType.Application.Json,
+                            status = HttpStatusCode.OK,
+                            text = boddEllerArbeidetUtlandet.toJson(),
                         )
+                    } catch (e: TilstandException.UgyldigTilstand) {
+                        call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                     }
-
-                    call.respondText(
-                        contentType = ContentType.Application.Json,
-                        status = HttpStatusCode.OK,
-                        text = boddEllerArbeidetUtlandet.toJson(),
-                    )
-                } catch (e: TilstandException.UgyldigTilstand) {
-                    call.respond(HttpStatusCode.BadRequest, "Kan ikke endre feltet")
                 }
             }
         }
@@ -212,29 +225,33 @@ internal fun Route.behandlingRoutes(
             }
 
             post {
-                hentNavidentFraToken { navIdent ->
-                    val oppfolging = call.receive<OpprettAktivitetspliktOppfolging>()
+                kunSkrivetilgang {
+                    hentNavidentFraToken { navIdent ->
+                        val oppfolging = call.receive<OpprettAktivitetspliktOppfolging>()
 
-                    try {
-                        val result =
-                            aktivitetspliktService.lagreAktivitetspliktOppfolging(
-                                behandlingId,
-                                oppfolging,
-                                navIdent,
-                            )
-                        call.respond(result)
-                    } catch (e: TilstandException.UgyldigTilstand) {
-                        call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
+                        try {
+                            val result =
+                                aktivitetspliktService.lagreAktivitetspliktOppfolging(
+                                    behandlingId,
+                                    oppfolging,
+                                    navIdent,
+                                )
+                            call.respond(result)
+                        } catch (e: TilstandException.UgyldigTilstand) {
+                            call.respond(HttpStatusCode.BadRequest, "Kunne ikke endre på feltet")
+                        }
                     }
                 }
             }
         }
 
         post("/oppdater-grunnlag") {
-            inTransaction {
-                behandlingService.oppdaterGrunnlagOgStatus(behandlingId)
+            kunSkrivetilgang {
+                inTransaction {
+                    behandlingService.oppdaterGrunnlagOgStatus(behandlingId)
+                }
+                call.respond(HttpStatusCode.OK)
             }
-            call.respond(HttpStatusCode.OK)
         }
     }
 
@@ -249,29 +266,33 @@ internal fun Route.behandlingRoutes(
             }
 
             post("/gyldigfremsatt") {
-                val body = call.receive<GyldighetsResultat>()
-                gyldighetsproevingService.lagreGyldighetsproeving(behandlingId, body)
-                call.respond(HttpStatusCode.OK)
+                kunSkrivetilgang {
+                    val body = call.receive<GyldighetsResultat>()
+                    gyldighetsproevingService.lagreGyldighetsproeving(behandlingId, body)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
 
         route("/opprettbehandling") {
             post {
-                val behandlingsBehov = call.receive<BehandlingsBehov>()
+                kunSkrivetilgang {
+                    val behandlingsBehov = call.receive<BehandlingsBehov>()
 
-                when (
-                    val behandling =
-                        inTransaction {
-                            behandlingFactory.opprettBehandling(
-                                behandlingsBehov.sakId,
-                                behandlingsBehov.persongalleri,
-                                behandlingsBehov.mottattDato,
-                                Vedtaksloesning.GJENNY,
-                            )
-                        }?.behandling
-                ) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respondText(behandling.id.toString())
+                    when (
+                        val behandling =
+                            inTransaction {
+                                behandlingFactory.opprettBehandling(
+                                    behandlingsBehov.sakId,
+                                    behandlingsBehov.persongalleri,
+                                    behandlingsBehov.mottattDato,
+                                    Vedtaksloesning.GJENNY,
+                                )
+                            }?.behandling
+                    ) {
+                        null -> call.respond(HttpStatusCode.NotFound)
+                        else -> call.respondText(behandling.id.toString())
+                    }
                 }
             }
         }

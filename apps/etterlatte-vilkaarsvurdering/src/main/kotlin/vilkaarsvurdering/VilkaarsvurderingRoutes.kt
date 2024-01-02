@@ -45,7 +45,7 @@ fun Route.vilkaarsvurdering(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/opprett") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 try {
                     val kopierVedRevurdering =
                         call.request.queryParameters["kopierVedRevurdering"]?.let { it.toBoolean() }
@@ -108,7 +108,7 @@ fun Route.vilkaarsvurdering(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 val vurdertVilkaarDto = call.receive<VurdertVilkaarDto>()
                 val vurdertVilkaar = vurdertVilkaarDto.toVurdertVilkaar(brukerTokenInfo.ident())
 
@@ -138,7 +138,7 @@ fun Route.vilkaarsvurdering(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 val statusOppdatert =
                     vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
@@ -146,7 +146,7 @@ fun Route.vilkaarsvurdering(
         }
 
         delete("/{$BEHANDLINGID_CALL_PARAMETER}/{vilkaarId}") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 withParam("vilkaarId") { vilkaarId ->
                     logger.info("Sletter vurdering på vilkår $vilkaarId for $behandlingId")
                     try {
@@ -171,7 +171,7 @@ fun Route.vilkaarsvurdering(
         }
 
         delete("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Sletter vilkårsvurdering for $behandlingId")
 
                 try {
@@ -189,7 +189,7 @@ fun Route.vilkaarsvurdering(
 
         route("/resultat") {
             post("/{$BEHANDLINGID_CALL_PARAMETER}") {
-                withBehandlingId(behandlingKlient) { behandlingId ->
+                withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                     val vurdertResultatDto = call.receive<VurdertVilkaarsvurderingResultatDto>()
                     val vurdertResultat =
                         vurdertResultatDto.toVilkaarsvurderingResultat(

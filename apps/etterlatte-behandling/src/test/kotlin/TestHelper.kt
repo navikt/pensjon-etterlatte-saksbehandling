@@ -96,11 +96,11 @@ fun withTestApplicationBuilder(
 
 private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
-fun Route.attachMockContext() {
+fun Route.attachMockContext(saksbehandlerMedEnheterOgRoller: SaksbehandlerMedEnheterOgRoller? = null) {
     intercept(ApplicationCallPipeline.Call) {
         val context1 =
             Context(
-                user,
+                saksbehandlerMedEnheterOgRoller ?: user,
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()

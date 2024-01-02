@@ -73,7 +73,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
     @BeforeEach
     fun beforeEach() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll
@@ -154,7 +154,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 vedtakService.attesterVedtak(behandlingId, any(), any(), Fagsaksystem.EY.navn)
             }
             coVerify(atLeast = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any())
+                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
             }
         }
     }
@@ -237,7 +237,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     vedtakService.attesterVedtak(behandlingId, any(), any(), Fagsaksystem.EY.navn)
                 }
                 coVerify(atLeast = 1) {
-                    behandlingKlient.harTilgangTilBehandling(any(), any())
+                    behandlingKlient.harTilgangTilBehandling(any(), any(), any())
                 }
             }
         }
@@ -295,7 +295,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     behandlingKlient.tildelSaksbehandler(any(), any())
                 }
                 coVerify(atLeast = 1) {
-                    behandlingKlient.harTilgangTilBehandling(any(), any())
+                    behandlingKlient.harTilgangTilBehandling(any(), any(), any())
                 }
             }
         }
@@ -351,7 +351,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     vedtakService.attesterVedtak(behandlingId, any(), any(), Fagsaksystem.EY.navn)
                 }
                 coVerify(atLeast = 1) {
-                    behandlingKlient.harTilgangTilBehandling(any(), any())
+                    behandlingKlient.harTilgangTilBehandling(any(), any(), any())
                 }
             }
         }

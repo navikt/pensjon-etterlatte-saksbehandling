@@ -12,18 +12,21 @@ import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 internal fun Route.institusjonsoppholdRoute(institusjonsoppholdService: InstitusjonsoppholdService) {
     route("/api/institusjonsoppholdbegrunnelse/{$SAKID_CALL_PARAMETER}") {
         post {
-            hentNavidentFraToken { navIdent ->
-                val institusjonsoppholdBegrunnelse = call.receive<InstitusjonsoppholdBegrunnelseWrapper>()
-                institusjonsoppholdService.leggInnInstitusjonsoppholdBegrunnelse(
-                    sakId,
-                    Grunnlagsopplysning.Saksbehandler.create(navIdent),
-                    institusjonsoppholdBegrunnelse.institusjonsopphold,
-                )
-                call.respond(HttpStatusCode.OK)
+            kunSkrivetilgang {
+                hentNavidentFraToken { navIdent ->
+                    val institusjonsoppholdBegrunnelse = call.receive<InstitusjonsoppholdBegrunnelseWrapper>()
+                    institusjonsoppholdService.leggInnInstitusjonsoppholdBegrunnelse(
+                        sakId,
+                        Grunnlagsopplysning.Saksbehandler.create(navIdent),
+                        institusjonsoppholdBegrunnelse.institusjonsopphold,
+                    )
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }

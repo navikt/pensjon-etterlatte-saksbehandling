@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.UUID
 
@@ -28,25 +29,27 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/info") {
         route("/brevutfall") {
             post {
-                medBody<BrevutfallOgEtterbetalingDto> { dto ->
-                    val brevutfallOgEtterbetaling =
-                        inTransaction {
-                            logger.info("Lagrer brevutfall og etterbetaling for behandling $behandlingId")
-                            val (brevutfallLagret, etterbetalingLagret) =
-                                service.lagreBrevutfallOgEtterbetaling(
-                                    behandlingId,
-                                    brukerTokenInfo,
-                                    dto.toBrevutfall(behandlingId, brukerTokenInfo),
-                                    dto.toEtterbetaling(behandlingId, brukerTokenInfo),
-                                )
+                kunSkrivetilgang {
+                    medBody<BrevutfallOgEtterbetalingDto> { dto ->
+                        val brevutfallOgEtterbetaling =
+                            inTransaction {
+                                logger.info("Lagrer brevutfall og etterbetaling for behandling $behandlingId")
+                                val (brevutfallLagret, etterbetalingLagret) =
+                                    service.lagreBrevutfallOgEtterbetaling(
+                                        behandlingId,
+                                        brukerTokenInfo,
+                                        dto.toBrevutfall(behandlingId, brukerTokenInfo),
+                                        dto.toEtterbetaling(behandlingId, brukerTokenInfo),
+                                    )
 
-                            BrevutfallOgEtterbetalingDto(
-                                behandlingId,
-                                etterbetalingLagret?.toDto(),
-                                brevutfallLagret.toDto(),
-                            )
-                        }
-                    call.respond(brevutfallOgEtterbetaling)
+                                BrevutfallOgEtterbetalingDto(
+                                    behandlingId,
+                                    etterbetalingLagret?.toDto(),
+                                    brevutfallLagret.toDto(),
+                                )
+                            }
+                        call.respond(brevutfallOgEtterbetaling)
+                    }
                 }
             }
 

@@ -14,6 +14,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.behandling.tilgang.SKRIVETILGANG_CALL_QUERYPARAMETER
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
@@ -39,7 +40,9 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdressebeskyttelseTest : BehandlingIntegrationTest() {
     @BeforeAll
-    fun start() = startServer()
+    fun start() {
+        startServer()
+    }
 
     @AfterEach
     fun afterEach() {
@@ -260,7 +263,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
 
             val harTilgang: Boolean =
-                client.get("/$TILGANG_ROUTE_PATH/behandling/$behandlingId") {
+                client.get("/$TILGANG_ROUTE_PATH/behandling/$behandlingId?$SKRIVETILGANG_CALL_QUERYPARAMETER=true") {
                     addAuthToken(tokenSaksbehandler)
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
@@ -282,7 +285,7 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
             }
 
             val harIkkeTilgang: Boolean =
-                client.get("/$TILGANG_ROUTE_PATH/behandling/$behandlingId") {
+                client.get("/$TILGANG_ROUTE_PATH/behandling/$behandlingId?$SKRIVETILGANG_CALL_QUERYPARAMETER=true") {
                     addAuthToken(tokenSaksbehandler)
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)

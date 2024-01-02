@@ -56,7 +56,7 @@ fun Route.trygdetidV2(
         }
 
         post {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Oppretter trygdetid(er) for behandling $behandlingId")
                 val trygdetid = trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo)
                 call.respond(trygdetid.map { it.toDto() })
@@ -64,7 +64,7 @@ fun Route.trygdetidV2(
         }
 
         post("overstyr") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Oppdater trygdetid (overstyring) for behandling $behandlingId")
                 val trygdetidOverstyringDto = call.receive<TrygdetidOverstyringDto>()
 
@@ -81,7 +81,7 @@ fun Route.trygdetidV2(
 
         route("{${TRYGDETIDID_CALL_PARAMETER}}") {
             post("grunnlag") {
-                withBehandlingId(behandlingKlient) {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     logger.info("Legger til trygdetidsgrunnlag for behandling $behandlingId")
                     val trygdetidgrunnlagDto = call.receive<TrygdetidGrunnlagDto>()
 
@@ -95,7 +95,7 @@ fun Route.trygdetidV2(
             }
 
             post("/grunnlag/yrkesskade") {
-                withBehandlingId(behandlingKlient) {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     logger.info("Legger til yrkesskade trygdetidsgrunnlag for behandling $behandlingId")
                     trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
                         behandlingId,
@@ -105,7 +105,7 @@ fun Route.trygdetidV2(
             }
 
             delete("/grunnlag/{trygdetidGrunnlagId}") {
-                withBehandlingId(behandlingKlient) {
+                withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     withParam("trygdetidGrunnlagId") { trygdetidGrunnlagId ->
                         logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingId")
                         val trygdetid =
@@ -122,7 +122,7 @@ fun Route.trygdetidV2(
         }
 
         post("/kopier/{forrigeBehandlingId}") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Oppretter kopi av forrige trygdetider for behandling $behandlingId")
                 val forrigeBehandlingId = call.uuid("forrigeBehandlingId")
                 trygdetidService.kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, brukerTokenInfo)
@@ -131,7 +131,7 @@ fun Route.trygdetidV2(
         }
 
         post("/migrering") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Migrering overstyrer trygdetid for behandling $behandlingId")
 
                 val overstyringDto = call.receive<MigreringOverstyringDto>()

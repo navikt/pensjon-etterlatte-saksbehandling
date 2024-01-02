@@ -36,7 +36,7 @@ internal class TrygdetidRoutesTest {
     @BeforeAll
     fun beforeAll() {
         server.start()
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll
@@ -59,7 +59,7 @@ internal class TrygdetidRoutesTest {
         }
 
         coVerify {
-            behandlingKlient.harTilgangTilBehandling(any(), any())
+            behandlingKlient.harTilgangTilBehandling(any(), any(), any())
             trygdetidService.hentTrygdetid(any(), any())
         }
     }
@@ -82,7 +82,7 @@ internal class TrygdetidRoutesTest {
         }
 
         coVerify {
-            behandlingKlient.harTilgangTilBehandling(any(), any())
+            behandlingKlient.harTilgangTilBehandling(any(), any(), any())
             trygdetidService.sjekkGyldighetOgOppdaterBehandlingStatus(any(), any())
         }
     }

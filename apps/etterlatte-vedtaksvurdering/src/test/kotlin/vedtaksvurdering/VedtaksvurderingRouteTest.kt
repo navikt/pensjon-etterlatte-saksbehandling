@@ -86,7 +86,7 @@ internal class VedtaksvurderingRouteTest {
 
     @BeforeEach
     fun beforeEach() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterAll
@@ -145,7 +145,7 @@ internal class VedtaksvurderingRouteTest {
         }
 
         coVerify(exactly = 1) {
-            behandlingKlient.harTilgangTilBehandling(any(), any())
+            behandlingKlient.harTilgangTilBehandling(any(), any(), any())
             vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
         }
     }
@@ -177,7 +177,7 @@ internal class VedtaksvurderingRouteTest {
         }
 
         coVerify(exactly = 1) {
-            behandlingKlient.harTilgangTilBehandling(any(), any())
+            behandlingKlient.harTilgangTilBehandling(any(), any(), any())
             vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
         }
     }
@@ -231,7 +231,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any())
+                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
                 vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
             }
         }
@@ -288,7 +288,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any())
+                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
                 vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
             }
         }
@@ -336,7 +336,7 @@ internal class VedtaksvurderingRouteTest {
         }
 
         coVerify(exactly = 1) {
-            behandlingKlient.harTilgangTilBehandling(any(), any())
+            behandlingKlient.harTilgangTilBehandling(any(), any(), any())
             vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
         }
     }
@@ -379,7 +379,7 @@ internal class VedtaksvurderingRouteTest {
             // vedtaksammendrag.datoAttestert shouldBe attestertVedtak.attestasjon?.tidspunkt?.toNorskTid()
 
             coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any())
+                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
                 vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>())
             }
         }
@@ -391,7 +391,7 @@ internal class VedtaksvurderingRouteTest {
         val loependeYtelse = LoependeYtelse(erLoepende = true, LocalDate.now())
 
         every { vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(any(), any()) } returns loependeYtelse
-        coEvery { behandlingKlient.harTilgangTilSak(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             environment { config = applicationConfig }
@@ -419,7 +419,7 @@ internal class VedtaksvurderingRouteTest {
             hentetLoependeYtelse.dato shouldBe loependeYtelse.dato
 
             coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilSak(any(), any())
+                behandlingKlient.harTilgangTilSak(any(), any(), any())
                 vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(any(), any())
             }
         }
@@ -474,7 +474,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any())
+                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
                 vedtakBehandlingService.opprettEllerOppdaterVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 })
             }
         }
@@ -534,7 +534,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any())
+                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
                 vedtakBehandlingService.fattVedtak(any(), match { it.ident() == SAKSBEHANDLER_1 }, any())
                 rapidService.sendToRapid(any())
             }
@@ -601,7 +601,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any())
+                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
                 vedtakBehandlingService.attesterVedtak(
                     any(),
                     match { it == attestertVedtakKommentar.kommentar },
@@ -669,7 +669,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any())
+                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
                 vedtakBehandlingService.underkjennVedtak(
                     any(),
                     match { it.ident() == SAKSBEHANDLER_1 },
@@ -709,7 +709,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(any(), any())
+                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
                 vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(any())
             }
         }

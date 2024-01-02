@@ -264,28 +264,28 @@ fun Route.tilbakekrevingvedtakRoute(
 
     route("/tilbakekreving/{$BEHANDLINGID_CALL_PARAMETER}") {
         post("/lagre-vedtak") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingVedtakDto>()
                 logger.info("Oppretter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
                 call.respond(service.opprettEllerOppdaterVedtak(dto))
             }
         }
         post("/fatt-vedtak") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
                 call.respond(service.fattVedtak(dto))
             }
         }
         post("/attester-vedtak") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
                 call.respond(service.attesterVedtak(dto))
             }
         }
         post("/underkjenn-vedtak") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Underkjenner vedtak for tilbakekreving=$behandlingId")
                 call.respond(service.underkjennVedtak(behandlingId))
             }

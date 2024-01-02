@@ -77,7 +77,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @Test
     fun `skal returnere 204 naar beregnings ikke finnes`() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
@@ -126,7 +126,7 @@ internal class BeregningsGrunnlagRoutesTest {
                     ),
                 begrunnelse = "",
             )
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(idRevurdering, any()) } returns
             DetaljertBehandling(
                 id = randomUUID(),
@@ -182,7 +182,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @Test
     fun `skal hente beregning`() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         val id = randomUUID()
 
@@ -213,7 +213,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @Test
     fun `skal returnere not found naar saksbehandler ikke har tilgang til behandling`() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns false
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
             environment { config = applicationConfig }
@@ -230,7 +230,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @Test
     fun `skal returnere not found naar saksbehandler ikke har tilgang til behandling ved opprettelse`() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns false
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
             environment { config = applicationConfig }
@@ -260,7 +260,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @Test
     fun `skal opprettere`() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { repository.lagre(any()) } returns true
@@ -320,7 +320,7 @@ internal class BeregningsGrunnlagRoutesTest {
 
     @Test
     fun `skal returnere conflict fra opprettelse `() {
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
         every { repository.lagre(any()) } returns false
@@ -383,7 +383,7 @@ internal class BeregningsGrunnlagRoutesTest {
         val forrige = randomUUID()
         val nye = randomUUID()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
             BeregningsGrunnlag(
@@ -414,7 +414,7 @@ internal class BeregningsGrunnlagRoutesTest {
         val forrige = randomUUID()
         val nye = randomUUID()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
             BeregningsGrunnlag(
@@ -445,7 +445,7 @@ internal class BeregningsGrunnlagRoutesTest {
         val forrige = randomUUID()
         val nye = randomUUID()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns null
         every { repository.lagre(any()) } returns true
@@ -468,7 +468,7 @@ internal class BeregningsGrunnlagRoutesTest {
         val forrige = randomUUID()
         val nye = randomUUID()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { repository.finnBarnepensjonGrunnlagForBehandling(forrige) } returns
             BeregningsGrunnlag(
@@ -505,7 +505,7 @@ internal class BeregningsGrunnlagRoutesTest {
     fun `skal hente overstyr beregning grunnlag`() {
         val behandlingId = randomUUID()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(behandlingId, any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(behandlingId, any(), any()) } returns true
 
         every { repository.finnOverstyrBeregningGrunnlagForBehandling(behandlingId) } returns
             listOf(
@@ -588,7 +588,7 @@ internal class BeregningsGrunnlagRoutesTest {
         val behandlingId = randomUUID()
         val slot = slot<List<OverstyrBeregningGrunnlagDao>>()
 
-        coEvery { behandlingKlient.harTilgangTilBehandling(behandlingId, any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(behandlingId, any(), any()) } returns true
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             DetaljertBehandling(

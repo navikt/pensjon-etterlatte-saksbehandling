@@ -97,7 +97,7 @@ internal class VilkaarsvurderingRoutesTest {
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any())
         } returns true
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns true
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { grunnlagKlient.hentGrunnlag(any(), any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
     }
 
@@ -184,7 +184,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `skal returnere not found dersom saksbehandler ikke har tilgang til behandlingen`() {
         val behandlingKlient = mockk<BehandlingKlient>()
         val nyBehandlingId = UUID.randomUUID()
-        coEvery { behandlingKlient.harTilgangTilBehandling(nyBehandlingId, any()) } returns false
+        coEvery { behandlingKlient.harTilgangTilBehandling(nyBehandlingId, any(), any()) } returns false
 
         testApplication {
             environment {
@@ -200,7 +200,7 @@ internal class VilkaarsvurderingRoutesTest {
 
             assertEquals(response.status, HttpStatusCode.NotFound)
             coVerify(exactly = 1) {
-                behandlingKlient.harTilgangTilBehandling(nyBehandlingId, any())
+                behandlingKlient.harTilgangTilBehandling(nyBehandlingId, any(), any())
             }
         }
     }
@@ -622,7 +622,7 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
@@ -649,7 +649,7 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns false
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
@@ -679,7 +679,7 @@ internal class VilkaarsvurderingRoutesTest {
         val behandlingKlient = mockk<BehandlingKlient>()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.settBehandlingStatusOpprettet(any(), any(), any()) } returns false
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(
@@ -711,7 +711,7 @@ internal class VilkaarsvurderingRoutesTest {
                 true,
                 false,
             )
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         val vilkaarsvurderingServiceImpl =
             VilkaarsvurderingService(

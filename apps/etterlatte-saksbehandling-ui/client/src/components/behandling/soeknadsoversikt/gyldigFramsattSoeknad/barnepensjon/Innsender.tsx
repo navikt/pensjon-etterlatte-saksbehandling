@@ -1,8 +1,7 @@
 import { InfoWrapper } from '../../styled'
 import { Info } from '../../Info'
 import { Personopplysning } from '~shared/types/grunnlag'
-import { Link } from '@navikt/ds-react'
-import { formaterFnr } from '~utils/formattering'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
 interface Props {
   gjenlevendeGrunnlag: Personopplysning | undefined
@@ -25,9 +24,7 @@ export const Innsender = ({ gjenlevendeGrunnlag, innsender, harKildePesys }: Pro
   const navn = innsender ? (
     <>
       {fulltNavn(innsender) + ' '}
-      <Link href={`/person/${innsender.opplysning.foedselsnummer}`} target="_blank" rel="noreferrer noopener">
-        ({formaterFnr(innsender.opplysning.foedselsnummer)})
-      </Link>
+      <KopierbarVerdi value={innsender.opplysning.foedselsnummer} />
     </>
   ) : (
     'Ukjent'

@@ -3,8 +3,7 @@ import { Info } from '../../Info'
 import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
 import { IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { KildePdl } from '~shared/types/kilde'
-import { formaterFnr } from '~utils/formattering'
-import { Link } from '@navikt/ds-react'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
 interface Props {
   persongalleriGrunnlag: Grunnlagsopplysning<Persongalleri, KildePdl>
@@ -41,9 +40,7 @@ export const Foreldreansvar = ({
       {levendeMedAnsvar.map((fnr) => (
         <>
           {gjenlevende?.foedselsnummer == fnr ? fulltNavn(gjenlevende) + ' ' : 'Ukjent '}
-          <Link href={`/person/${fnr}`} target="_blank" rel="noreferrer noopener">
-            ({formaterFnr(fnr)})
-          </Link>
+          <KopierbarVerdi value={fnr} />
         </>
       ))}
     </>

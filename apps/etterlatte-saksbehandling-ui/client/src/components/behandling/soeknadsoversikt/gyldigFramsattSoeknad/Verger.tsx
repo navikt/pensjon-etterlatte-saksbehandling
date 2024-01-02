@@ -10,7 +10,7 @@ import { formaterKildePdl } from '~components/behandling/soeknadsoversikt/utils'
 
 import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { formaterFnr } from '~utils/formattering'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
 interface Props {
   behandlingId: string
@@ -47,7 +47,7 @@ export const Verger = ({ sakId, behandlingId }: Props) => {
             label="Verge"
             tekst={
               <>
-                {formaterFnr(it.vergeEllerFullmektig.motpartsPersonident!)}
+                <KopierbarVerdi value={it.vergeEllerFullmektig.motpartsPersonident!} />
                 <br />
                 {it.vergeEllerFullmektig.omfang &&
                   (omfangMap.get(it.vergeEllerFullmektig.omfang) ?? it.vergeEllerFullmektig.omfang)}

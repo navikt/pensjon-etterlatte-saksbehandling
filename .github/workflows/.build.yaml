@@ -44,5 +44,7 @@ jobs:
           docker_context: apps/${{ github.workflow }}/
           image_suffix: ${{ github.workflow }}
           tag: ${{ env.GITHUB_REF_SLUG }}
+          cache_from: type=registry,ref=${{ github.workflow }}
+          cache_to: type=inline
       - name: Print docker tag
         run: echo 'Docker-tag er ${{ steps.docker-build-push.outputs.image }} ' >> $GITHUB_STEP_SUMMARY

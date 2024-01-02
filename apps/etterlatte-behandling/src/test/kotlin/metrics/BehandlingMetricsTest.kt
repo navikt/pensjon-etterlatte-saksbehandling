@@ -3,6 +3,7 @@ package metrics
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import io.prometheus.client.CollectorRegistry
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -39,6 +40,8 @@ internal class BehandlingMetricsTest {
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingMetrics: BehandlingMetrics
 
+    private val testreg = CollectorRegistry(true)
+
     @BeforeAll
     fun beforeAll() {
         postgreSQLContainer.start()
@@ -63,7 +66,7 @@ internal class BehandlingMetricsTest {
 
         behandlingMetrikkerDao = BehandlingMetrikkerDao(ds)
         oppgaveDao = OppgaveMetrikkerDao(ds)
-        behandlingMetrics = BehandlingMetrics(oppgaveDao, behandlingMetrikkerDao)
+        behandlingMetrics = BehandlingMetrics(oppgaveDao, behandlingMetrikkerDao, testreg)
 
         behandlingMetrics.run()
     }

@@ -7,7 +7,7 @@ import java.sql.ResultSet
 import javax.sql.DataSource
 
 class OppgaveMetrikkerDao(private val dataSource: DataSource) {
-    fun hentOppgaveAntall(): List<OppgaveAntall> {
+    fun hentOppgaveAntall(): List<OppgaveAntall> =
         dataSource.connection.use {
             val statement =
                 it.prepareStatement(
@@ -21,7 +21,6 @@ class OppgaveMetrikkerDao(private val dataSource: DataSource) {
                 asOppgaveAntall()
             }
         }
-    }
 
     private fun ResultSet.asOppgaveAntall(): OppgaveAntall {
         return OppgaveAntall(
@@ -31,6 +30,36 @@ class OppgaveMetrikkerDao(private val dataSource: DataSource) {
             saktype = SakType.valueOf(getString("saktype")),
         )
     }
+
+    fun hentDistinkteSaksbehandlere(): List<SaksbehandlerAntall> =
+        dataSource.connection.use {
+            val antallTotalt =
+                it.prepareStatement(
+                    """
+                    SELECT count(distinct saksbehandler)
+                    FROM oppgave
+                    """.trimIndent(),
+                ).executeQuery().toList {
+                    SaksbehandlerAntall(
+                        antall = getInt("count"),
+                        enhet = "Totalt",
+                    )
+                }
+            val antallPerEnhet =
+                it.prepareStatement(
+                    """
+                    SELECT count(distinct saksbehandler), enhet
+                    FROM oppgave
+                    group by enhet;
+                    """.trimIndent(),
+                ).executeQuery().toList {
+                    SaksbehandlerAntall(
+                        antall = getInt("count"),
+                        enhet = getString("enhet"),
+                    )
+                }
+            antallTotalt + antallPerEnhet
+        }
 }
 
 data class OppgaveAntall(
@@ -38,4 +67,9 @@ data class OppgaveAntall(
     val status: Status,
     val enhet: String,
     val saktype: SakType,
+)
+
+data class SaksbehandlerAntall(
+    val antall: Int,
+    val enhet: String,
 )

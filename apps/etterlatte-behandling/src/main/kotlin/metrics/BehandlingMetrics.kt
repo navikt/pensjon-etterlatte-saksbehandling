@@ -22,7 +22,8 @@ class BehandlingMetrics(
 
     val behandlinger by lazy {
         Gauge.build("etterlatte_behandlinger", "Antall behandlinger")
-            .labelNames("kilde", "status", "automatiskMigrering").register()
+            .labelNames("behandlingstype", "status", "revurdering_aarsak", "kilde", "automatiskMigrering")
+            .register()
     }
 
     override fun run() {
@@ -36,8 +37,10 @@ class BehandlingMetrics(
 
         behandlingerMetrikkerDao.hent().forEach {
             behandlinger.labels(
-                it.kilde.name,
+                it.behandlingstype.name,
                 it.status.name,
+                it.revurderingsaarsak?.name ?: "null",
+                it.kilde.name,
                 it.automatiskMigrering,
             ).set(it.antall.toDouble())
         }

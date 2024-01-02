@@ -22,7 +22,7 @@
     "@types/node-fetch": "^2.6.4",
     "@types/request": "^2.48.11",
     "@typescript-eslint/parser": "^6.16.0",
-    "chai": "^5.0.0",
+    "chai": "^4.3.10",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-jest": "^27.6.0",

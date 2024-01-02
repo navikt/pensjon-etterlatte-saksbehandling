@@ -4,6 +4,7 @@ import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 
 export interface Familieforhold {
+  soeker: Personopplysning | undefined
   avdoede: Personopplysning[]
   gjenlevende: Personopplysning[]
 }

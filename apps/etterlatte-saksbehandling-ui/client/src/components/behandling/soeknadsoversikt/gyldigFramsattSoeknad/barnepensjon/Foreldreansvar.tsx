@@ -1,16 +1,23 @@
 import { InfoWrapper } from '../../styled'
 import { Info } from '../../Info'
 import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
-import { Persongalleri } from '~shared/types/Person'
+import { IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { KildePdl } from '~shared/types/kilde'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
 interface Props {
   persongalleriGrunnlag: Grunnlagsopplysning<Persongalleri, KildePdl>
   gjenlevendeGrunnlag: Personopplysning | undefined
+  soekerGrunnlag: Personopplysning | undefined
   harKildePesys: Boolean
 }
 
-export const Foreldreansvar = ({ persongalleriGrunnlag, gjenlevendeGrunnlag, harKildePesys }: Props) => {
+export const Foreldreansvar = ({
+  persongalleriGrunnlag,
+  gjenlevendeGrunnlag,
+  soekerGrunnlag,
+  harKildePesys,
+}: Props) => {
   const label = 'Foreldreansvar'
   if (harKildePesys) {
     return (
@@ -22,24 +29,39 @@ export const Foreldreansvar = ({ persongalleriGrunnlag, gjenlevendeGrunnlag, har
 
   const persongalleri = persongalleriGrunnlag.opplysning
   const gjenlevende = gjenlevendeGrunnlag?.opplysning
-  const oppfylt = persongalleri.innsender == gjenlevende?.foedselsnummer
-  const navn = oppfylt ? [gjenlevende?.fornavn, gjenlevende?.mellomnavn, gjenlevende?.etternavn].join(' ') : 'Ukjent'
+  const ansvarligeForeldre = soekerGrunnlag?.opplysning?.familieRelasjon?.ansvarligeForeldre || []
+  const oppfylt = persongalleri.innsender != undefined && ansvarligeForeldre.includes(persongalleri.innsender)
   const tekst = settTekst(oppfylt)
 
-  function settTekst(oppfylt: Boolean): string {
+  const levendeMedAnsvar = ansvarligeForeldre.filter((it) => !persongalleri.avdoed?.includes(it))
+
+  const foreldreansvar = (
+    <>
+      {levendeMedAnsvar.map((fnr) => (
+        <>
+          {gjenlevende?.foedselsnummer == fnr ? fulltNavn(gjenlevende) + ' ' : 'Ukjent '}
+          <KopierbarVerdi value={fnr} />
+        </>
+      ))}
+    </>
+  )
+
+  function settTekst(oppfylt: boolean): string {
     switch (oppfylt) {
       case true:
         return ''
       case false:
         return 'Innsender har ikke foreldreansvar'
-      default:
-        return 'Mangler info'
     }
+  }
+
+  function fulltNavn(person: IPdlPerson | undefined) {
+    return person ? [person?.fornavn, person?.mellomnavn, person?.etternavn].join(' ') : 'Ukjent'
   }
 
   return (
     <InfoWrapper>
-      <Info tekst={navn ?? 'Ukjent'} undertekst={tekst} label={label} />
+      <Info tekst={foreldreansvar ?? 'Ukjent'} undertekst={tekst} label={label} />
     </InfoWrapper>
   )
 }

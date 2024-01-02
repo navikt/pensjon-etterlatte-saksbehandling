@@ -1,16 +1,15 @@
 import { InfoWrapper } from '../../styled'
 import { Info } from '../../Info'
-import { Persongalleri } from '~shared/types/Person'
-import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
-import { KildePdl } from '~shared/types/kilde'
+import { Personopplysning } from '~shared/types/grunnlag'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
 interface Props {
-  persongalleriGrunnlag: Grunnlagsopplysning<Persongalleri, KildePdl>
   gjenlevendeGrunnlag: Personopplysning | undefined
+  innsender: Personopplysning | undefined
   harKildePesys: Boolean
 }
 
-export const Innsender = ({ persongalleriGrunnlag, gjenlevendeGrunnlag, harKildePesys }: Props) => {
+export const Innsender = ({ gjenlevendeGrunnlag, innsender, harKildePesys }: Props) => {
   const label = 'Innsender'
   if (harKildePesys) {
     return (
@@ -20,24 +19,26 @@ export const Innsender = ({ persongalleriGrunnlag, gjenlevendeGrunnlag, harKilde
     )
   }
   const gjenlevende = gjenlevendeGrunnlag?.opplysning
-  const oppfylt = persongalleriGrunnlag.opplysning.innsender == gjenlevende?.foedselsnummer
-  const navn = oppfylt ? [gjenlevende?.fornavn, gjenlevende?.mellomnavn, gjenlevende?.etternavn].join(' ') : 'Ukjent'
-  const tekst = settTekst(oppfylt)
+  const innsenderErGjenlevende = innsender?.opplysning.foedselsnummer == gjenlevende?.foedselsnummer
+
+  const navn = innsender ? (
+    <>
+      {fulltNavn(innsender) + ' '}
+      <KopierbarVerdi value={innsender.opplysning.foedselsnummer} />
+    </>
+  ) : (
+    'Ukjent'
+  )
+
+  const tekst = innsenderErGjenlevende ? '(gjenlevende forelder)' : 'Ikke gjenlevende forelder'
 
   return (
     <InfoWrapper>
-      <Info tekst={navn ?? 'Ukjent'} undertekst={tekst} label={label} />
+      <Info tekst={navn} undertekst={tekst} label={label} />
     </InfoWrapper>
   )
 
-  function settTekst(vurdering: Boolean): string {
-    switch (vurdering) {
-      case true:
-        return '(gjenlevende forelder)'
-      case false:
-        return 'Ikke gjenlevende forelder'
-      default:
-        return 'Mangler info'
-    }
+  function fulltNavn(innsender: Personopplysning) {
+    return [innsender.opplysning.fornavn, innsender.opplysning.mellomnavn, innsender.opplysning.etternavn].join(' ')
   }
 }

@@ -33,6 +33,9 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
     route("/$TILGANG_ROUTE_PATH") {
         post("/person") {
             val fnr = call.receive<String>()
+            if (berOmSkrivetilgang && !Kontekst.get().AppUser.harSkrivetilgang()) {
+                call.respond(false)
+            }
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                     inTransaction {
@@ -42,13 +45,13 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
                         )
                     }
                 }
-            if (berOmSkrivetilgang) {
-                call.respond(harTilgang && Kontekst.get().AppUser.harSkrivetilgang())
-            }
             call.respond(harTilgang)
         }
 
         get("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
+            if (berOmSkrivetilgang && !Kontekst.get().AppUser.harSkrivetilgang()) {
+                call.respond(false)
+            }
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                     tilgangService.harTilgangTilBehandling(
@@ -56,13 +59,14 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
                         Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
                     )
                 }
-            if (berOmSkrivetilgang) {
-                call.respond(harTilgang && Kontekst.get().AppUser.harSkrivetilgang())
-            }
+
             call.respond(harTilgang)
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}") {
+            if (berOmSkrivetilgang && !Kontekst.get().AppUser.harSkrivetilgang()) {
+                call.respond(false)
+            }
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                     tilgangService.harTilgangTilSak(
@@ -70,9 +74,6 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
                         Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
                     )
                 }
-            if (berOmSkrivetilgang) {
-                call.respond(harTilgang && Kontekst.get().AppUser.harSkrivetilgang())
-            }
             call.respond(harTilgang)
         }
     }

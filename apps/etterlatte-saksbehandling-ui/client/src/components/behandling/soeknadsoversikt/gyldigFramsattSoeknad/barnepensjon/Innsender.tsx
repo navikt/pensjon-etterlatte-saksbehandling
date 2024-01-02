@@ -18,7 +18,7 @@ export const Innsender = ({ harKildePesys }: Props) => {
       </InfoWrapper>
     )
   }
-  const gjenlevende = personer?.gjenlevende.find((a) => a)?.opplysning
+  const gjenlevende = personer?.gjenlevende.find((person) => person)?.opplysning
   const innsender = personer?.innsender?.opplysning
   const soeker = personer?.soeker?.opplysning
 

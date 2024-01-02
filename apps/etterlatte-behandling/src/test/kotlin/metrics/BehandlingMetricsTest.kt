@@ -78,52 +78,57 @@ internal class BehandlingMetricsTest {
         val metrikker = behandlingMetrics.behandlinger.collect().first().samples
         metrikker.first().labelNames shouldContainExactly
             listOf(
-                "behandlingstype", "status", "revurdering_aarsak", "kilde", "automatiskMigrering",
+                "saktype", "behandlingstype", "status", "revurdering_aarsak", "kilde", "automatiskMigrering",
             )
     }
 
     @Test
     fun `Henter riktig antall totalt`() {
         val metrikker = behandlingMetrics.behandlinger.collect().first().samples
-        metrikker.size shouldBe 4
+        metrikker.size shouldBe 5
+    }
+
+    @Test
+    fun `Henter riktig antall for saktype`() {
+        val metrikker = behandlingMetrics.behandlinger.collect().first().samples
+        metrikker.filter { it.labelValues[0] == SakType.BARNEPENSJON.name }.size shouldBe 4
+        metrikker.filter { it.labelValues[0] == SakType.OMSTILLINGSSTOENAD.name }.size shouldBe 1
     }
 
     @Test
     fun `Henter riktig antall for behandlingstyper`() {
         val metrikker = behandlingMetrics.behandlinger.collect().first().samples
-        metrikker.filter { it.labelValues[0] == BehandlingType.FØRSTEGANGSBEHANDLING.name }.size shouldBe 3
-        metrikker.filter { it.labelValues[0] == BehandlingType.REVURDERING.name }.size shouldBe 1
+        metrikker.filter { it.labelValues[1] == BehandlingType.FØRSTEGANGSBEHANDLING.name }.size shouldBe 4
+        metrikker.filter { it.labelValues[1] == BehandlingType.REVURDERING.name }.size shouldBe 1
     }
 
     @Test
     fun `Henter riktig antall for status`() {
         val metrikker = behandlingMetrics.behandlinger.collect().first().samples
-        metrikker.filter { it.labelValues[1] == BehandlingStatus.IVERKSATT.name }.size shouldBe 2
-        metrikker.filter { it.labelValues[1] == BehandlingStatus.OPPRETTET.name }.size shouldBe 2
+        metrikker.filter { it.labelValues[2] == BehandlingStatus.IVERKSATT.name }.size shouldBe 2
+        metrikker.filter { it.labelValues[2] == BehandlingStatus.OPPRETTET.name }.size shouldBe 3
     }
 
     @Test
     fun `Henter riktig antall for revuderingsaarsak`() {
         val metrikker = behandlingMetrics.behandlinger.collect().first().samples
-        metrikker.filter { it.labelValues[2] == "null" }.size shouldBe 3 // Førstegangsbehandling
-        metrikker.filter { it.labelValues[2] == Revurderingaarsak.REGULERING.name }.size shouldBe 1
+        metrikker.filter { it.labelValues[3] == "null" }.size shouldBe 4 // Førstegangsbehandling
+        metrikker.filter { it.labelValues[3] == Revurderingaarsak.REGULERING.name }.size shouldBe 1
     }
 
     @Test
     fun `Henter riktig antall for kilde`() {
         val metrikker = behandlingMetrics.behandlinger.collect().first().samples
-        metrikker.filter { it.labelValues[3] == Vedtaksloesning.GJENNY.name }.size shouldBe 2
-        metrikker.filter { it.labelValues[3] == Vedtaksloesning.PESYS.name }.size shouldBe 2
+        metrikker.filter { it.labelValues[4] == Vedtaksloesning.GJENNY.name }.size shouldBe 3
+        metrikker.filter { it.labelValues[4] == Vedtaksloesning.PESYS.name }.size shouldBe 2
     }
 
     @Test
     fun `Henter riktig antall for automatiskMigrert`() {
         val metrikker = behandlingMetrics.behandlinger.collect().first().samples
-        metrikker.filter { it.labelValues[4] == "true" }.size shouldBe 1
-        metrikker.filter { it.labelValues[4] == "false" }.size shouldBe 3
+        metrikker.filter { it.labelValues[5] == "true" }.size shouldBe 1
+        metrikker.filter { it.labelValues[5] == "false" }.size shouldBe 4
     }
-
-    // TODO SakType...
 
     private fun opprettBehandlinger() {
         sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).let {
@@ -138,6 +143,15 @@ internal class BehandlingMetricsTest {
                 opprettBehandling(
                     type = BehandlingType.REVURDERING,
                     revurderingAarsak = Revurderingaarsak.REGULERING,
+                    sakId = it.id,
+                ),
+            )
+        }
+
+        sakRepo.opprettSak("321", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr).let {
+            behandlingRepo.opprettBehandling(
+                opprettBehandling(
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
                     sakId = it.id,
                 ),
             )

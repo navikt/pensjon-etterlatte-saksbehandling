@@ -3,6 +3,7 @@ package no.nav.etterlatte.trygdetid
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -119,7 +120,12 @@ data class TrygdetidPeriode(
     val til: LocalDate,
 ) {
     init {
-        require(fra.isBefore(til) || fra.isEqual(til)) { "Ugyldig periode, fra må være før eller lik til. Fra var $fra, til var $til" }
+        if (fra.isAfter(til)) {
+            throw UgyldigForespoerselException(
+                code = "TRYGDETID_UGYLDIG_PERIODE",
+                detail = "Ugyldig periode, fra må være før eller lik til. Fra var $fra, til var $til",
+            )
+        }
     }
 
     fun overlapperMed(other: TrygdetidPeriode): Boolean {

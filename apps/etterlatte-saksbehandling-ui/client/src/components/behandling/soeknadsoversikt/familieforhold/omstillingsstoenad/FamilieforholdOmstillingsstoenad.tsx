@@ -28,7 +28,7 @@ export const FamilieforholdOmstillingsstoenad = ({ behandling, personopplysninge
   const soeker = personopplysninger.soeker
   const gjenlevende = personopplysninger.gjenlevende
   const avdoede = personopplysninger.avdoede
-  const familieforhold: Familieforhold = { avdoede: avdoede, gjenlevende: gjenlevende }
+  const familieforhold: Familieforhold = { avdoede: avdoede, gjenlevende: gjenlevende, soeker: soeker }
 
   return (
     <>

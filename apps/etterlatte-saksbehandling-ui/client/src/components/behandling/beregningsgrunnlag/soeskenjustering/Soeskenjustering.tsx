@@ -135,7 +135,11 @@ const Soeskenjustering = (props: SoeskenjusteringProps) => {
               <SoeskenjusteringPeriode
                 key={item.id}
                 behandling={behandling}
-                familieforhold={{ avdoede: personopplysninger.avdoede, gjenlevende: personopplysninger.gjenlevende }}
+                familieforhold={{
+                  avdoede: personopplysninger.avdoede,
+                  gjenlevende: personopplysninger.gjenlevende,
+                  soeker: personopplysninger.soeker,
+                }}
                 control={control}
                 index={index}
                 remove={() => remove(index)}

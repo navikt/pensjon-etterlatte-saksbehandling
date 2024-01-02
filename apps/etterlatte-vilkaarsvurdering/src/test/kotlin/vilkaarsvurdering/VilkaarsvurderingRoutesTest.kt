@@ -143,12 +143,12 @@ internal class VilkaarsvurderingRoutesTest {
                 }
 
             val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
-            val vilkaar = vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_DOEDSFALL_FORELDER }
+            val vilkaar = vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_DOEDSFALL_FORELDER_2024 }
 
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(behandlingId, vilkaarsvurdering.behandlingId)
-            assertEquals(VilkaarType.BP_DOEDSFALL_FORELDER, vilkaar.hovedvilkaar.type)
-            assertEquals("§ 18-4", vilkaar.hovedvilkaar.lovreferanse.paragraf)
+            assertEquals(VilkaarType.BP_DOEDSFALL_FORELDER_2024, vilkaar.hovedvilkaar.type)
+            assertEquals("§ 18-1", vilkaar.hovedvilkaar.lovreferanse.paragraf)
             assertEquals("Dødsfall forelder", vilkaar.hovedvilkaar.tittel)
             assertEquals(
                 """
@@ -156,7 +156,7 @@ internal class VilkaarsvurderingRoutesTest {
                 """.trimIndent(),
                 vilkaar.hovedvilkaar.beskrivelse,
             )
-            assertEquals("https://lovdata.no/lov/1997-02-28-19/%C2%A718-4", vilkaar.hovedvilkaar.lovreferanse.lenke)
+            assertEquals("https://lovdata.no/lov/1997-02-28-19/%C2%A718-1", vilkaar.hovedvilkaar.lovreferanse.lenke)
             assertNull(vilkaar.vurdering)
         }
     }
@@ -241,10 +241,10 @@ internal class VilkaarsvurderingRoutesTest {
 
             val vurdertVilkaarDto =
                 VurdertVilkaarDto(
-                    vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_DOEDSFALL_FORELDER)?.id!!,
+                    vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_DOEDSFALL_FORELDER_2024)?.id!!,
                     hovedvilkaar =
                         VilkaarTypeOgUtfall(
-                            VilkaarType.BP_DOEDSFALL_FORELDER,
+                            VilkaarType.BP_DOEDSFALL_FORELDER_2024,
                             Utfall.OPPFYLT,
                         ),
                     unntaksvilkaar = null,
@@ -290,13 +290,13 @@ internal class VilkaarsvurderingRoutesTest {
                 VurdertVilkaarDto(
                     vilkaarId =
                         vilkaarsvurdering
-                            .hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP)?.id!!,
+                            .hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024)?.id!!,
                     hovedvilkaar =
                         VilkaarTypeOgUtfall(
-                            type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP,
+                            type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024,
                             resultat = Utfall.OPPFYLT,
                         ),
-                    kommentar = "Søker oppfyller hovedvilkåret ${VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP}",
+                    kommentar = "Søker oppfyller hovedvilkåret ${VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024}",
                 )
 
             client.post("/api/vilkaarsvurdering/$behandlingId") {
@@ -318,20 +318,20 @@ internal class VilkaarsvurderingRoutesTest {
                 VurdertVilkaarDto(
                     vilkaarId =
                         vilkaarsvurdering
-                            .hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP)?.id!!,
+                            .hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024)?.id!!,
                     hovedvilkaar =
                         VilkaarTypeOgUtfall(
-                            type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP,
+                            type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024,
                             resultat = Utfall.IKKE_OPPFYLT,
                         ),
                     unntaksvilkaar =
                         VilkaarTypeOgUtfall(
-                            type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR,
+                            type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR_2024,
                             resultat = Utfall.OPPFYLT,
                         ),
                     kommentar =
                         "Søker oppfyller unntaksvilkåret " +
-                            "${VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR}",
+                            "${VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR_2024}",
                 )
 
             client.post("/api/vilkaarsvurdering/$behandlingId") {
@@ -348,7 +348,7 @@ internal class VilkaarsvurderingRoutesTest {
             assertNotNull(vurdertVilkaarPaaUnntak.vurdering)
             assertNotNull(vurdertVilkaarPaaUnntak.unntaksvilkaar)
             vurdertVilkaarPaaUnntak.unntaksvilkaar.forEach {
-                if (it.type === VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR) {
+                if (it.type === VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_UNNTAK_AVDOED_IKKE_FYLT_26_AAR_2024) {
                     assertEquals(Utfall.OPPFYLT, it.resultat)
                 } else {
                     assertNull(it.resultat)
@@ -369,10 +369,10 @@ internal class VilkaarsvurderingRoutesTest {
 
             val vurdertVilkaarDto =
                 VurdertVilkaarDto(
-                    vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_DOEDSFALL_FORELDER)?.id!!,
+                    vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_DOEDSFALL_FORELDER_2024)?.id!!,
                     hovedvilkaar =
                         VilkaarTypeOgUtfall(
-                            type = VilkaarType.BP_DOEDSFALL_FORELDER,
+                            type = VilkaarType.BP_DOEDSFALL_FORELDER_2024,
                             resultat = Utfall.OPPFYLT,
                         ),
                     kommentar = "Søker oppfyller vilkåret",
@@ -479,10 +479,10 @@ internal class VilkaarsvurderingRoutesTest {
             }
             val vurdertVilkaarDto =
                 VurdertVilkaarDto(
-                    vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_DOEDSFALL_FORELDER)?.id!!,
+                    vilkaarId = vilkaarsvurdering.hentVilkaarMedHovedvilkaarType(VilkaarType.BP_DOEDSFALL_FORELDER_2024)?.id!!,
                     hovedvilkaar =
                         VilkaarTypeOgUtfall(
-                            VilkaarType.BP_DOEDSFALL_FORELDER,
+                            VilkaarType.BP_DOEDSFALL_FORELDER_2024,
                             Utfall.OPPFYLT,
                         ),
                     unntaksvilkaar = null,
@@ -732,13 +732,13 @@ internal class VilkaarsvurderingRoutesTest {
                 VurdertVilkaarDto(
                     vilkaarId =
                         vilkaarsvurdering
-                            .hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP)?.id!!,
+                            .hentVilkaarMedHovedvilkaarType(VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024)?.id!!,
                     hovedvilkaar =
                         VilkaarTypeOgUtfall(
-                            type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP,
+                            type = VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024,
                             resultat = Utfall.OPPFYLT,
                         ),
-                    kommentar = "Søker oppfyller hovedvilkåret ${VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP}",
+                    kommentar = "Søker oppfyller hovedvilkåret ${VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024}",
                 )
 
             val response =

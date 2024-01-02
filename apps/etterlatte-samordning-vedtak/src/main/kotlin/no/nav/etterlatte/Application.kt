@@ -26,7 +26,7 @@ fun main() {
 
 class Server(applicationContext: ApplicationContext) {
     init {
-        sikkerLogg.info("SikkerLogg: etterlatte-samordning-vedtak oppstart")
+        sikkerLogg.info("SikkerLogg: etterlatte-samordning-vedtak oppstart!")
     }
 
     private val engine =

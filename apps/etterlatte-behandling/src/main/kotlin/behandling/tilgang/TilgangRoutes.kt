@@ -22,10 +22,10 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
 
-const val SKRIVETILGANG_CALL_PARAMETER = "skrivetilgang"
+const val SKRIVETILGANG_CALL_QUERYPARAMETER = "skrivetilgang"
 inline val PipelineContext<*, ApplicationCall>.berOmSkrivetilgang: Boolean
     get() =
-        call.request.queryParameters[SKRIVETILGANG_CALL_PARAMETER]?.let { it.toBoolean() } ?: throw NullPointerException(
+        call.request.queryParameters[SKRIVETILGANG_CALL_QUERYPARAMETER]?.let { it.toBoolean() } ?: throw NullPointerException(
             "Skrivetilgangparameter er ikke i path params",
         )
 
@@ -48,7 +48,7 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
             call.respond(harTilgang)
         }
 
-        get("/behandling/{$BEHANDLINGID_CALL_PARAMETER}/{$SKRIVETILGANG_CALL_PARAMETER}") {
+        get("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                     tilgangService.harTilgangTilBehandling(

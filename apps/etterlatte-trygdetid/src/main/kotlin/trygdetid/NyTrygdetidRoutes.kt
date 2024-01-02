@@ -90,8 +90,11 @@ fun Route.trygdetidV2(
                     brukerTokenInfo,
                 )
                 call.respond(
-                    trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
-                        .map { it.toDto() },
+                    trygdetidService.hentTrygdetidIBehandlingMedId(
+                        behandlingId,
+                        trygdetidOverstyringDto.id,
+                        brukerTokenInfo,
+                    )!!.toDto(),
                 )
             }
         }
@@ -121,11 +124,18 @@ fun Route.trygdetidV2(
             post("/grunnlag/yrkesskade") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     logger.info("Legger til yrkesskade trygdetidsgrunnlag for behandling $behandlingId")
-                    trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
-                        behandlingId,
-                        brukerTokenInfo,
+                    val trygdetid =
+                        trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
+                            behandlingId,
+                            brukerTokenInfo,
+                        )
+                    call.respond(
+                        trygdetidService.hentTrygdetidIBehandlingMedId(
+                            behandlingId,
+                            trygdetid.id,
+                            brukerTokenInfo,
+                        )!!.toDto(),
                     )
-                    call.respond(trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo).first())
                 }
             }
 
@@ -173,7 +183,8 @@ fun Route.trygdetidV2(
                 )
                 call.respond(
                     trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
-                        .filter { trygdetid -> trygdetid.ident == overstyringDto.ident },
+                        .first { trygdetid -> trygdetid.ident == overstyringDto.ident }
+                        .toDto(),
                 )
             }
         }

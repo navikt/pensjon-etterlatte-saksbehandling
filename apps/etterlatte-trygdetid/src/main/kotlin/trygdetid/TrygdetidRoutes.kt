@@ -44,9 +44,7 @@ fun Route.trygdetid(
                 logger.info("Henter trygdetid for behandling $behandlingId")
                 val trygdetid = trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)
                 if (trygdetid != null) {
-                    call.respond(
-                        trygdetid.toDto(),
-                    )
+                    call.respond(trygdetid.toDto())
                 } else {
                     call.respond(HttpStatusCode.NoContent)
                 }

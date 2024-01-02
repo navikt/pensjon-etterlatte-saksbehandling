@@ -1,54 +1,41 @@
 package no.nav.etterlatte.metrics
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
-import java.util.UUID
 import javax.sql.DataSource
 
 class OppgaveMetrikkerDao(private val dataSource: DataSource) {
-    fun hentOppgaveAntall(): OppgaveAntall {
-        val alleOppgaver = hentAlleOppgaver()
-        val aktive = alleOppgaver.filter { !Status.erAvsluttet(it.status) }.size
-        val avsluttet = alleOppgaver.filter { Status.erAvsluttet(it.status) }.size
-        val totalt = aktive + avsluttet
-        return OppgaveAntall(
-            totalt = totalt,
-            aktive = aktive,
-            avsluttet = avsluttet,
-        )
-    }
-
-    private fun hentAlleOppgaver(): List<OppgaveMetrikker> {
+    fun hentOppgaveAntall(): List<OppgaveAntall> {
         dataSource.connection.use {
             val statement =
                 it.prepareStatement(
                     """
-                    SELECT id, status
+                    SELECT count(*), status, enhet, saktype
                     FROM oppgave
+                    group by status, enhet, saktype
                     """.trimIndent(),
                 )
             return statement.executeQuery().toList {
-                asOppgaveMetrikker()
+                asOppgaveAntall()
             }
         }
     }
 
-    private fun ResultSet.asOppgaveMetrikker(): OppgaveMetrikker {
-        return OppgaveMetrikker(
-            id = getObject("id") as UUID,
+    private fun ResultSet.asOppgaveAntall(): OppgaveAntall {
+        return OppgaveAntall(
+            antall = getInt("count"),
             status = Status.valueOf(getString("status")),
+            enhet = getString("enhet"),
+            saktype = SakType.valueOf(getString("saktype")),
         )
     }
 }
 
-data class OppgaveMetrikker(
-    val id: UUID,
-    val status: Status,
-)
-
 data class OppgaveAntall(
-    val totalt: Int,
-    val aktive: Int,
-    val avsluttet: Int,
+    val antall: Int,
+    val status: Status,
+    val enhet: String,
+    val saktype: SakType,
 )

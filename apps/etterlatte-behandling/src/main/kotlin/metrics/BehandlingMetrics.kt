@@ -10,14 +10,10 @@ class BehandlingMetrics(
 ) : MetrikkUthenter {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    val antallOppgaver by lazy {
-        Gauge.build("antall_oppgaver", "Antall oppgaver").register()
-    }
-    val antallOppgaverAktive by lazy {
-        Gauge.build("antall_aktive_oppgaver", "Antall aktive oppgaver").register()
-    }
-    val antallOppgaverAvslutta by lazy {
-        Gauge.build("antall_avslutta_oppgaver", "Antall avslutta oppgaver").register()
+    val oppgaver by lazy {
+        Gauge.build("etterlatte_oppgaver", "Antall oppgaver")
+            .labelNames("status", "enhet", "saktype")
+            .register()
     }
 
     val behandlinger by lazy {
@@ -29,10 +25,8 @@ class BehandlingMetrics(
     override fun run() {
         logger.info("Samler metrikker med ${this::class.simpleName}")
 
-        with(metrikkerDao.hentOppgaveAntall()) {
-            antallOppgaver.set(totalt.toDouble())
-            antallOppgaverAktive.set(aktive.toDouble())
-            antallOppgaverAvslutta.set(avsluttet.toDouble())
+        metrikkerDao.hentOppgaveAntall().forEach {
+            oppgaver.labels(it.status.name, it.enhet, it.saktype.name).set(it.antall.toDouble())
         }
 
         behandlingerMetrikkerDao.hent().forEach {

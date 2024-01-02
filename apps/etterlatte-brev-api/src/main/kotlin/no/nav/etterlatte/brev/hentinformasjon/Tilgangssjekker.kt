@@ -37,7 +37,7 @@ class Tilgangssjekker(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilgang/behandling/$behandlingId/$skrivetilgang",
+                            url = "$resourceUrl/tilgang/behandling/$behandlingId?skrivetilgang=$skrivetilgang",
                         ),
                     brukerTokenInfo = bruker,
                 )
@@ -61,7 +61,7 @@ class Tilgangssjekker(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilgang/person/$skrivetilgang",
+                            url = "$resourceUrl/tilgang/person?skrivetilgang=$skrivetilgang",
                         ),
                     brukerTokenInfo = bruker,
                     postBody = foedselsnummer.value,
@@ -86,7 +86,7 @@ class Tilgangssjekker(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilgang/sak/$sakId/$skrivetilgang",
+                            url = "$resourceUrl/tilgang/sak/$sakId?skrivetilgang=$skrivetilgang",
                         ),
                     brukerTokenInfo = bruker,
                 )

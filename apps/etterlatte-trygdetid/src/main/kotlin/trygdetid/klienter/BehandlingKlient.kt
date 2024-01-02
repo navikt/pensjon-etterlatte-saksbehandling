@@ -42,7 +42,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) : BehandlingTilga
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilgang/behandling/$behandlingId/$skrivetilgang",
+                            url = "$resourceUrl/tilgang/behandling/$behandlingId?skrivetilgang=$skrivetilgang",
                         ),
                     brukerTokenInfo = bruker,
                 )

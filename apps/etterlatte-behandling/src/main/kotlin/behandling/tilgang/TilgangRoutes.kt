@@ -25,7 +25,7 @@ import no.nav.etterlatte.token.Systembruker
 const val SKRIVETILGANG_CALL_PARAMETER = "skrivetilgang"
 inline val PipelineContext<*, ApplicationCall>.berOmSkrivetilgang: Boolean
     get() =
-        call.parameters[SKRIVETILGANG_CALL_PARAMETER]?.let { it.toBoolean() } ?: throw NullPointerException(
+        call.request.queryParameters[SKRIVETILGANG_CALL_PARAMETER]?.let { it.toBoolean() } ?: throw NullPointerException(
             "Skrivetilgangparameter er ikke i path params",
         )
 

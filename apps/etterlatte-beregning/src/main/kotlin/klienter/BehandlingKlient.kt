@@ -175,7 +175,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient) : BehandlingK
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilgang/behandling/$behandlingId/$skrivetilgang",
+                            url = "$resourceUrl/tilgang/behandling/$behandlingId?skrivetilgang=$skrivetilgang",
                         ),
                     brukerTokenInfo = bruker,
                 )

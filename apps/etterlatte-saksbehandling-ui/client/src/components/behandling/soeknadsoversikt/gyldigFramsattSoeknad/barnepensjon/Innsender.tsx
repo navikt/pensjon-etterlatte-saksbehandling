@@ -1,15 +1,15 @@
 import { InfoWrapper } from '../../styled'
 import { Info } from '../../Info'
-import { Personopplysning } from '~shared/types/grunnlag'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { formaterNavn, IPdlPerson } from '~shared/types/Person'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 interface Props {
-  gjenlevendeGrunnlag: Personopplysning | undefined
-  innsender: Personopplysning | undefined
   harKildePesys: Boolean
 }
 
-export const Innsender = ({ gjenlevendeGrunnlag, innsender, harKildePesys }: Props) => {
+export const Innsender = ({ harKildePesys }: Props) => {
+  const personer = usePersonopplysninger()
   const label = 'Innsender'
   if (harKildePesys) {
     return (
@@ -18,27 +18,37 @@ export const Innsender = ({ gjenlevendeGrunnlag, innsender, harKildePesys }: Pro
       </InfoWrapper>
     )
   }
-  const gjenlevende = gjenlevendeGrunnlag?.opplysning
-  const innsenderErGjenlevende = innsender?.opplysning.foedselsnummer == gjenlevende?.foedselsnummer
+  const gjenlevende = personer?.gjenlevende.find((person) => person)?.opplysning
+  const innsender = personer?.innsender?.opplysning
+  const soeker = personer?.soeker?.opplysning
 
   const navn = innsender ? (
     <>
-      {fulltNavn(innsender) + ' '}
-      <KopierbarVerdi value={innsender.opplysning.foedselsnummer} />
+      {formaterNavn(innsender) + ' '}
+      <KopierbarVerdi value={innsender.foedselsnummer} />
     </>
   ) : (
     'Ukjent'
   )
 
-  const tekst = innsenderErGjenlevende ? '(gjenlevende forelder)' : 'Ikke gjenlevende forelder'
+  const undertekst = beskrivelseInnsender(soeker, gjenlevende, innsender)
 
   return (
     <InfoWrapper>
-      <Info tekst={navn} undertekst={tekst} label={label} />
+      <Info tekst={navn} undertekst={undertekst} label={label} />
     </InfoWrapper>
   )
 
-  function fulltNavn(innsender: Personopplysning) {
-    return [innsender.opplysning.fornavn, innsender.opplysning.mellomnavn, innsender.opplysning.etternavn].join(' ')
+  function beskrivelseInnsender(soeker?: IPdlPerson, innsender?: IPdlPerson, gjenlevende?: IPdlPerson): string {
+    if (!innsender?.foedselsnummer) {
+      return 'Mangler info'
+    }
+    if (innsender.foedselsnummer === gjenlevende?.foedselsnummer) {
+      return '(gjenlevende forelder)'
+    }
+    if (innsender.foedselsnummer === soeker?.foedselsnummer) {
+      return '(søker)'
+    }
+    return 'Ikke gjenlevende forelder'
   }
 }

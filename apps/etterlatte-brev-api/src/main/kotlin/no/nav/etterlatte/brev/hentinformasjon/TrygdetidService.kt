@@ -39,7 +39,7 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
         val trygdetidgrunnlagForAnvendtTrygdetid =
             trygdetiderIBehandling.find { it.ident == foersteBeregningsperiode.trygdetidForIdent }
                 ?: trygdetiderIBehandling.first().also {
-                    logger.error(
+                    logger.warn(
                         "Fant ikke riktig trygdetid for identen som er brukt i beregning, benytter den" +
                             " første av den vi fant i brevet, med id=${it.id} for behandlingId=${it.behandlingId}." +
                             " Vi fant total ${trygdetiderIBehandling.size} trygdetider for behandlingen",

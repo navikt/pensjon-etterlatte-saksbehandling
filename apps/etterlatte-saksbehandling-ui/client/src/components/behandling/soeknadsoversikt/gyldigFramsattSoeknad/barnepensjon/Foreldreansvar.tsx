@@ -34,8 +34,6 @@ export const Foreldreansvar = ({
   const oppfylt = persongalleri.innsender != undefined && ansvarligeForeldre.includes(persongalleri.innsender)
   const tekst = settTekst(oppfylt)
 
-  console.log('inns ' + persongalleri.innsender)
-  console.log('ansv ' + ansvarligeForeldre)
   const levendeMedAnsvar = ansvarligeForeldre.filter((it) => !persongalleri.avdoed?.includes(it))
 
   const foreldreansvar = (

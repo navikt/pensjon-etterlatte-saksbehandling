@@ -35,7 +35,6 @@ export const OversiktGyldigFramsatt = ({
         gjenlevende: personopplysninger.gjenlevende,
         soeker: personopplysninger.soeker,
       }}
-      innsender={personopplysninger.innsender}
       gyldigFramsatt={behandling.gyldighetsprøving}
       gyldigFremsattTilStatusIcon={gyldigFremsattTilStatusIcon(behandling.gyldighetsprøving)}
     />

@@ -21,18 +21,15 @@ import { Familieforhold } from '~shared/types/Person'
 
 import { isSuccess } from '~shared/api/apiUtils'
 import { useAppSelector } from '~store/Store'
-import { Personopplysning } from '~shared/types/grunnlag'
 
 export const GyldigFramsattBarnepensjon = ({
   behandling,
   familieforhold,
-  innsender,
   gyldigFramsatt,
   gyldigFremsattTilStatusIcon,
 }: {
   behandling: IDetaljertBehandling
   familieforhold: Familieforhold
-  innsender: Personopplysning | undefined
   gyldigFramsatt: IGyldighetResultat | undefined
   gyldigFremsattTilStatusIcon: StatusIconProps
 }) => {
@@ -73,11 +70,7 @@ export const GyldigFramsattBarnepensjon = ({
               eller i det landet vedkommende sist var medlem.
             </Beskrivelse>
             <InfobokserWrapper>
-              <Innsender
-                harKildePesys={harKildePesys}
-                innsender={innsender}
-                gjenlevendeGrunnlag={familieforhold?.gjenlevende?.find((po) => po)}
-              />
+              <Innsender harKildePesys={harKildePesys} />
               <Foreldreansvar
                 harKildePesys={harKildePesys}
                 soekerGrunnlag={familieforhold?.soeker}

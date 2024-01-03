@@ -6,7 +6,7 @@ cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
 jackson-version = "2.15.3"
 jupiter-version = "5.10.1"
 kotlinx-version = "1.7.3"
-ktor2-version = "2.3.6"
+ktor2-version = "2.3.7"
 navfelles-token-version = "3.1.8"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.19.3"
@@ -70,7 +70,7 @@ ktor2-mustache = { module = "io.ktor:ktor-server-mustache", version.ref = "ktor2
 ktor2-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor2-version" }
 ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
 
-etterlatte-common = { module = "no.nav.etterlatte:common", version = "2023.12.01-19.28.04ed855ae6eb" }
+etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.01.02-10.19.0e33fefa10eb"}
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.9" }
@@ -81,9 +81,9 @@ metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-pr
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 
-messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.1.4" }
+messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.1.5" }
 
-mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.4.0" }
+mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.4.1" }
 
 navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2023120410321701682379.55cc1a24d803" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version = "1.78ffd1e" }
@@ -91,7 +91,7 @@ navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.na
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version = "1.78ffd1e" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }
-navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.0.1" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.0" }
 
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }

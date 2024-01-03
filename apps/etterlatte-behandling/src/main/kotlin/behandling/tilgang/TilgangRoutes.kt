@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.tilgang
 
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -7,6 +8,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
@@ -20,11 +22,20 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
 
+const val SKRIVETILGANG_CALL_QUERYPARAMETER = "skrivetilgang"
+inline val PipelineContext<*, ApplicationCall>.berOmSkrivetilgang: Boolean
+    get() =
+        call.request.queryParameters[SKRIVETILGANG_CALL_QUERYPARAMETER]?.let { it.toBoolean() } ?: throw NullPointerException(
+            "Skrivetilgangparameter er ikke i path params",
+        )
+
 internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
     route("/$TILGANG_ROUTE_PATH") {
         post("/person") {
             val fnr = call.receive<String>()
-
+            if (berOmSkrivetilgang && !Kontekst.get().AppUser.harSkrivetilgang()) {
+                call.respond(false)
+            }
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                     inTransaction {
@@ -38,6 +49,9 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
         }
 
         get("/behandling/{$BEHANDLINGID_CALL_PARAMETER}") {
+            if (berOmSkrivetilgang && !Kontekst.get().AppUser.harSkrivetilgang()) {
+                call.respond(false)
+            }
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                     tilgangService.harTilgangTilBehandling(
@@ -45,10 +59,14 @@ internal fun Route.tilgangRoutes(tilgangService: TilgangService) {
                         Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
                     )
                 }
+
             call.respond(harTilgang)
         }
 
         get("/sak/{$SAKID_CALL_PARAMETER}") {
+            if (berOmSkrivetilgang && !Kontekst.get().AppUser.harSkrivetilgang()) {
+                call.respond(false)
+            }
             val harTilgang =
                 harTilgangBrukertypeSjekk(brukerTokenInfo) { _ ->
                     tilgangService.harTilgangTilSak(

@@ -64,7 +64,7 @@ internal class AvtaleRoutesTest {
     @BeforeEach
     fun beforeEach() {
         clearAllMocks()
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
     @AfterEach
@@ -144,7 +144,7 @@ internal class AvtaleRoutesTest {
 
             avtale.avtaleKode shouldBe "TEST"
 
-            coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any()) }
+            coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) }
             verify(exactly = 1) { repository.hentAvtale(any()) }
         }
     }
@@ -187,7 +187,7 @@ internal class AvtaleRoutesTest {
             avtale.behandlingId shouldBe behandlingId
             avtale.kilde.ident shouldBe "Saksbehandler01"
 
-            coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any()) }
+            coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) }
             verify(exactly = 1) { repository.opprettAvtale(any()) }
         }
     }
@@ -231,7 +231,7 @@ internal class AvtaleRoutesTest {
             avtale.behandlingId shouldBe behandlingId
             avtale.kilde.ident shouldBe "Saksbehandler01"
 
-            coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any()) }
+            coVerify(exactly = 1) { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) }
             verify(exactly = 1) { repository.lagreAvtale(any()) }
         }
     }

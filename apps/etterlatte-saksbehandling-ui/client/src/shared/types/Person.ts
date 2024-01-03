@@ -4,6 +4,7 @@ import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 
 export interface Familieforhold {
+  soeker: Personopplysning | undefined
   avdoede: Personopplysning[]
   gjenlevende: Personopplysning[]
 }
@@ -101,8 +102,8 @@ export enum PersonRolle {
   GJENLEVENDE = 'GJENLEVENDE',
 }
 
-export function formaterNavn(person: IPdlPerson): string {
-  return [person.fornavn, person.mellomnavn, person.etternavn].join(' ')
+export function formaterNavn(person: PersonNavn): string {
+  return [person.fornavn, person.mellomnavn, person.etternavn].filter((navn) => !!navn).join(' ')
 }
 
 export interface Persongalleri {

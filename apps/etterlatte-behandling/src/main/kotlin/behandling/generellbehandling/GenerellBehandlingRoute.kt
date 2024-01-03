@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 
 internal fun Route.generellbehandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
@@ -27,7 +28,7 @@ internal fun Route.generellbehandlingRoutes(
     val logger = application.log
 
     post("/api/generellbehandling/{$SAKID_CALL_PARAMETER}") {
-        kunSaksbehandler { saksbehandler ->
+        kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
             val request = call.receive<OpprettGenerellBehandlingRequest>()
             val finnSak = inTransaction { sakService.finnSak(sakId) }
             if (finnSak == null) {
@@ -47,7 +48,7 @@ internal fun Route.generellbehandlingRoutes(
     }
 
     put("/api/generellbehandling/sendtilattestering/{$SAKID_CALL_PARAMETER}") {
-        kunSaksbehandler { saksbehandler ->
+        kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
             val request = call.receive<GenerellBehandling>()
             inTransaction {
                 generellBehandlingService.sendTilAttestering(request, saksbehandler)
@@ -60,7 +61,7 @@ internal fun Route.generellbehandlingRoutes(
     }
 
     post("/api/generellbehandling/attester/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
-        kunSaksbehandler { saksbehandler ->
+        kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
             inTransaction {
                 generellBehandlingService.attester(generellBehandlingId, saksbehandler)
             }
@@ -70,7 +71,7 @@ internal fun Route.generellbehandlingRoutes(
     }
 
     post("/api/generellbehandling/underkjenn/{$SAKID_CALL_PARAMETER}/{$GENERELLBEHANDLINGID_CALL_PARAMETER}") {
-        kunSaksbehandler { saksbehandler ->
+        kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
             val kommentar = call.receive<Kommentar>()
             inTransaction {
                 generellBehandlingService.underkjenn(generellBehandlingId, saksbehandler, kommentar)
@@ -81,7 +82,7 @@ internal fun Route.generellbehandlingRoutes(
     }
 
     put("/api/generellbehandling/oppdater/{$SAKID_CALL_PARAMETER}") {
-        kunSaksbehandler {
+        kunSaksbehandlerMedSkrivetilgang {
             val request = call.receive<GenerellBehandling>()
             inTransaction {
                 generellBehandlingService.lagreNyeOpplysninger(

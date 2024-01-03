@@ -15,6 +15,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingService
@@ -179,8 +180,10 @@ internal class BehandlingRoutesTest {
     }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+        every { user.harSkrivetilgang() } returns true
         withTestApplicationBuilder(block, hoconApplicationConfig) {
-            attachMockContext()
+            attachMockContext(user)
             behandlingRoutes(
                 behandlingService,
                 gyldighetsproevingService,

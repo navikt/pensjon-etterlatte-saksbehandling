@@ -48,7 +48,7 @@ fun Route.beregning(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/overstyrt") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Oppretter overstyrBeregning med behandlingId=$it")
 
                 val overstyrBeregning =
@@ -66,7 +66,7 @@ fun Route.beregning(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Oppretter beregning for behandlingId=$it")
                 val beregning = beregningService.opprettBeregning(it, brukerTokenInfo)
                 call.respond(beregning.toDTO())
@@ -74,7 +74,7 @@ fun Route.beregning(
         }
 
         post("/opprettForOpphoer/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient) {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 beregningService.opprettForOpphoer(it, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK)
             }

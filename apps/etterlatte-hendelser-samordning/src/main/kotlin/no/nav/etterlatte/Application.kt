@@ -8,6 +8,8 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
+import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.metricsModule
@@ -30,7 +32,13 @@ class Server(private val context: ApplicationContext) {
                         routing {
                             healthApi()
                         }
-                        metricsModule()
+                        metricsModule(
+                            additionalMetrics =
+                                listOf(
+                                    JvmGcMetrics(),
+                                    JvmThreadMetrics(),
+                                ),
+                        )
                     }
                     connector { port = context.httpPort }
                 },

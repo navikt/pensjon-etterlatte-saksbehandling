@@ -1,16 +1,15 @@
 import { InfoWrapper } from '../../styled'
 import { Info } from '../../Info'
-import { Persongalleri } from '~shared/types/Person'
-import { Grunnlagsopplysning, Personopplysning } from '~shared/types/grunnlag'
-import { KildePdl } from '~shared/types/kilde'
+import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
+import { formaterNavn, IPdlPerson } from '~shared/types/Person'
+import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 interface Props {
-  persongalleriGrunnlag: Grunnlagsopplysning<Persongalleri, KildePdl>
-  gjenlevendeGrunnlag: Personopplysning | undefined
   harKildePesys: Boolean
 }
 
-export const Innsender = ({ persongalleriGrunnlag, gjenlevendeGrunnlag, harKildePesys }: Props) => {
+export const Innsender = ({ harKildePesys }: Props) => {
+  const personer = usePersonopplysninger()
   const label = 'Innsender'
   if (harKildePesys) {
     return (
@@ -19,25 +18,37 @@ export const Innsender = ({ persongalleriGrunnlag, gjenlevendeGrunnlag, harKilde
       </InfoWrapper>
     )
   }
-  const gjenlevende = gjenlevendeGrunnlag?.opplysning
-  const oppfylt = persongalleriGrunnlag.opplysning.innsender == gjenlevende?.foedselsnummer
-  const navn = oppfylt ? [gjenlevende?.fornavn, gjenlevende?.mellomnavn, gjenlevende?.etternavn].join(' ') : 'Ukjent'
-  const tekst = settTekst(oppfylt)
+  const gjenlevende = personer?.gjenlevende.find((person) => person)?.opplysning
+  const innsender = personer?.innsender?.opplysning
+  const soeker = personer?.soeker?.opplysning
+
+  const navn = innsender ? (
+    <>
+      {formaterNavn(innsender) + ' '}
+      <KopierbarVerdi value={innsender.foedselsnummer} />
+    </>
+  ) : (
+    'Ukjent'
+  )
+
+  const undertekst = beskrivelseInnsender(soeker, gjenlevende, innsender)
 
   return (
     <InfoWrapper>
-      <Info tekst={navn ?? 'Ukjent'} undertekst={tekst} label={label} />
+      <Info tekst={navn} undertekst={undertekst} label={label} />
     </InfoWrapper>
   )
 
-  function settTekst(vurdering: Boolean): string {
-    switch (vurdering) {
-      case true:
-        return '(gjenlevende forelder)'
-      case false:
-        return 'Ikke gjenlevende forelder'
-      default:
-        return 'Mangler info'
+  function beskrivelseInnsender(soeker?: IPdlPerson, innsender?: IPdlPerson, gjenlevende?: IPdlPerson): string {
+    if (!innsender?.foedselsnummer) {
+      return 'Mangler info'
     }
+    if (innsender.foedselsnummer === gjenlevende?.foedselsnummer) {
+      return '(gjenlevende forelder)'
+    }
+    if (innsender.foedselsnummer === soeker?.foedselsnummer) {
+      return '(søker)'
+    }
+    return 'Ikke gjenlevende forelder'
   }
 }

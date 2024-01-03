@@ -57,7 +57,7 @@ class OppgaveService(
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
         } else {
             oppgaveDao.hentOppgaver(aktuelleOppgavetyperForRoller).sortedByDescending { it.opprettet }
-        }.filterForEnheter(Kontekst.get().AppUser)
+        }.filterForEnheter(Kontekst.get().appUserAsSaksbehandler())
     }
 
     private fun List<OppgaveIntern>.filterForEnheter(bruker: User) = this.filterOppgaverForEnheter(bruker)

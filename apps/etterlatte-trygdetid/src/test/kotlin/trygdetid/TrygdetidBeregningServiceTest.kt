@@ -2,6 +2,7 @@ package trygdetid
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.trygdetid.TrygdetidBeregningService
@@ -185,7 +186,7 @@ class TrygdetidBeregningServiceTest {
 
     @Test
     fun `skal ikke vaere mulig aa opprette negativ periode i trygdetidgrunnlag`() {
-        assertThrows<IllegalArgumentException> {
+        assertThrows<UgyldigForespoerselException> {
             trygdetidGrunnlag(
                 periode = TrygdetidPeriode(fra = LocalDate.of(2023, 1, 1), til = LocalDate.of(2022, 1, 1)),
             )

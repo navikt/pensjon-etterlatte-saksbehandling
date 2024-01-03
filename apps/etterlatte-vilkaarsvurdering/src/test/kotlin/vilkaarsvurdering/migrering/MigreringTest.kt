@@ -99,7 +99,7 @@ class MigreringTest {
             MigreringService(
                 vilkaarsvurderingRepository,
             )
-        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(behandlingId, any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, any()) } returns true

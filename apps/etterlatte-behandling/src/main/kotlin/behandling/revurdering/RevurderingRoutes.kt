@@ -19,9 +19,10 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
-import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 enum class RevurderingRoutesFeatureToggle(private val key: String) : FeatureToggle {
     VisRevurderingsaarsakOpphoerUtenBrev("pensjon-etterlatte.vis-opphoer-uten-brev"),
@@ -40,17 +41,19 @@ internal fun Route.revurderingRoutes(
         route("{$BEHANDLINGID_CALL_PARAMETER}") {
             route("revurderinginfo") {
                 post {
-                    hentNavidentFraToken { navIdent ->
-                        logger.info("Lagrer revurderinginfo på behandling $behandlingId")
-                        medBody<RevurderingInfoDto> {
-                            inTransaction {
-                                revurderingService.lagreRevurderingInfo(
-                                    behandlingId,
-                                    RevurderingInfoMedBegrunnelse(it.info, it.begrunnelse),
-                                    navIdent,
-                                )
+                    kunSkrivetilgang {
+                        hentNavidentFraToken { navIdent ->
+                            logger.info("Lagrer revurderinginfo på behandling $behandlingId")
+                            medBody<RevurderingInfoDto> {
+                                inTransaction {
+                                    revurderingService.lagreRevurderingInfo(
+                                        behandlingId,
+                                        RevurderingInfoMedBegrunnelse(it.info, it.begrunnelse),
+                                        navIdent,
+                                    )
+                                }
+                                call.respond(HttpStatusCode.NoContent)
                             }
-                            call.respond(HttpStatusCode.NoContent)
                         }
                     }
                 }
@@ -59,7 +62,7 @@ internal fun Route.revurderingRoutes(
 
         route("/{$SAKID_CALL_PARAMETER}") {
             post {
-                kunSaksbehandler { saksbehandler ->
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     logger.info("Oppretter ny revurdering på sak $sakId")
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
 

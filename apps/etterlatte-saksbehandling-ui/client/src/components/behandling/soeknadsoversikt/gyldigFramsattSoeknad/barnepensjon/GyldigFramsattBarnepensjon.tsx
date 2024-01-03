@@ -70,13 +70,10 @@ export const GyldigFramsattBarnepensjon = ({
               eller i det landet vedkommende sist var medlem.
             </Beskrivelse>
             <InfobokserWrapper>
-              <Innsender
-                harKildePesys={harKildePesys}
-                persongalleriGrunnlag={personGalleriSoeknad.data}
-                gjenlevendeGrunnlag={familieforhold?.gjenlevende?.find((po) => po)}
-              />
+              <Innsender harKildePesys={harKildePesys} />
               <Foreldreansvar
                 harKildePesys={harKildePesys}
+                soekerGrunnlag={familieforhold?.soeker}
                 persongalleriGrunnlag={personGalleriSoeknad.data}
                 gjenlevendeGrunnlag={familieforhold?.gjenlevende?.find((po) => po)}
               />

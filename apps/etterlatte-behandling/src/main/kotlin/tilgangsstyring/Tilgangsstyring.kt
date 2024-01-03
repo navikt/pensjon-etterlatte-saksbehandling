@@ -182,6 +182,28 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
     }
 }
 
+suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(onSuccess: () -> Unit) {
+    val harSkrivetilgang = Kontekst.get().AppUser.harSkrivetilgang()
+    when (harSkrivetilgang) {
+        true -> onSuccess()
+        false -> call.respond(HttpStatusCode.Forbidden)
+    }
+}
+
+suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrivetilgang(onSuccess: (Saksbehandler) -> Unit) {
+    when (val token = brukerTokenInfo) {
+        is Saksbehandler -> {
+            val harSkrivetilgang = Kontekst.get().appUserAsSaksbehandler().harSkrivetilgang()
+            when (harSkrivetilgang) {
+                true -> onSuccess(token)
+                false -> call.respond(HttpStatusCode.Forbidden)
+            }
+        }
+
+        else -> call.respond(HttpStatusCode.Forbidden)
+    }
+}
+
 suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: () -> Unit) {
     when (brukerTokenInfo) {
         is Saksbehandler -> {

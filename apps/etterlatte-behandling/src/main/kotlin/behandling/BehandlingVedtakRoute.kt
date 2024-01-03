@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
@@ -31,115 +32,123 @@ internal fun Route.behandlingVedtakRoute(
 
     route("/fattvedtak") {
         post {
-            val fattVedtak = call.receive<VedtakEndringDTO>()
-            val behandling =
-                inTransaction {
-                    behandlingService.hentBehandling(
-                        UUID.fromString(fattVedtak.sakIdOgReferanse.referanse),
-                    )
-                }
-            if (behandling == null) {
-                call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
-            } else {
-                inTransaction {
-                    val merknadBehandling =
-                        when (val bruker = brukerTokenInfo) {
-                            is Saksbehandler -> "Behandlet av ${bruker.ident}"
-                            is Systembruker -> "Behandlet av systemet"
-                        }
-
-                    behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
-                    try {
-                        oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                            fattetoppgaveReferanseOgSak = fattVedtak.sakIdOgReferanse,
-                            oppgaveType = OppgaveType.ATTESTERING,
-                            saksbehandler = brukerTokenInfo,
-                            merknad =
-                                listOfNotNull(
-                                    merknadBehandling,
-                                    fattVedtak.vedtakHendelse.kommentar,
-                                ).joinToString(separator = ": "),
+            kunSkrivetilgang {
+                val fattVedtak = call.receive<VedtakEndringDTO>()
+                val behandling =
+                    inTransaction {
+                        behandlingService.hentBehandling(
+                            UUID.fromString(fattVedtak.sakIdOgReferanse.referanse),
                         )
-                    } catch (e: Exception) {
-                        haandterFeilIOppgaveService(e)
                     }
+                if (behandling == null) {
+                    call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
+                } else {
+                    inTransaction {
+                        val merknadBehandling =
+                            when (val bruker = brukerTokenInfo) {
+                                is Saksbehandler -> "Behandlet av ${bruker.ident}"
+                                is Systembruker -> "Behandlet av systemet"
+                            }
+
+                        behandlingsstatusService.settFattetVedtak(behandling, fattVedtak.vedtakHendelse)
+                        try {
+                            oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                                fattetoppgaveReferanseOgSak = fattVedtak.sakIdOgReferanse,
+                                oppgaveType = OppgaveType.ATTESTERING,
+                                saksbehandler = brukerTokenInfo,
+                                merknad =
+                                    listOfNotNull(
+                                        merknadBehandling,
+                                        fattVedtak.vedtakHendelse.kommentar,
+                                    ).joinToString(separator = ": "),
+                            )
+                        } catch (e: Exception) {
+                            haandterFeilIOppgaveService(e)
+                        }
+                    }
+                    call.respond(HttpStatusCode.OK)
                 }
-                call.respond(HttpStatusCode.OK)
             }
         }
     }
     route("/underkjennvedtak") {
         post {
-            val underkjennVedtakOppgave = call.receive<VedtakEndringDTO>()
-            val behandling =
-                inTransaction {
-                    behandlingService.hentBehandling(
-                        UUID.fromString(underkjennVedtakOppgave.sakIdOgReferanse.referanse),
-                    )
-                }
-            if (behandling == null) {
-                call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
-            } else {
-                inTransaction {
-                    behandlingsstatusService.settReturnertVedtak(behandling, underkjennVedtakOppgave.vedtakHendelse)
-                    val merknadFraAttestant =
-                        underkjennVedtakOppgave.vedtakHendelse.let {
-                            listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
-                        }
-                    try {
-                        val sisteSaksbehandlerIkkeAttestering =
-                            oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(underkjennVedtakOppgave.sakIdOgReferanse.referanse)
-
-                        val ferdigstillOppgaveUnderbehandlingOgLagNyMedType =
-                            oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
-                                fattetoppgaveReferanseOgSak = underkjennVedtakOppgave.sakIdOgReferanse,
-                                oppgaveType = OppgaveType.UNDERKJENT,
-                                merknad = merknadFraAttestant,
-                                saksbehandler = brukerTokenInfo,
-                            )
-                        if (sisteSaksbehandlerIkkeAttestering != null) {
-                            oppgaveService.tildelSaksbehandler(
-                                ferdigstillOppgaveUnderbehandlingOgLagNyMedType.id,
-                                sisteSaksbehandlerIkkeAttestering,
-                            )
-                        } else {
-                            logger.warn(
-                                "Fant ikke siste saksbehandler for behandling:" +
-                                    " ${underkjennVedtakOppgave.sakIdOgReferanse.referanse}. ",
-                            )
-                        }
-                    } catch (e: Exception) {
-                        haandterFeilIOppgaveService(e)
+            kunSkrivetilgang {
+                val underkjennVedtakOppgave = call.receive<VedtakEndringDTO>()
+                val behandling =
+                    inTransaction {
+                        behandlingService.hentBehandling(
+                            UUID.fromString(underkjennVedtakOppgave.sakIdOgReferanse.referanse),
+                        )
                     }
+                if (behandling == null) {
+                    call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
+                } else {
+                    inTransaction {
+                        behandlingsstatusService.settReturnertVedtak(behandling, underkjennVedtakOppgave.vedtakHendelse)
+                        val merknadFraAttestant =
+                            underkjennVedtakOppgave.vedtakHendelse.let {
+                                listOfNotNull(it.valgtBegrunnelse, it.kommentar).joinToString(separator = ": ")
+                            }
+                        try {
+                            val sisteSaksbehandlerIkkeAttestering =
+                                oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(
+                                    underkjennVedtakOppgave.sakIdOgReferanse.referanse,
+                                )
+
+                            val ferdigstillOppgaveUnderbehandlingOgLagNyMedType =
+                                oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
+                                    fattetoppgaveReferanseOgSak = underkjennVedtakOppgave.sakIdOgReferanse,
+                                    oppgaveType = OppgaveType.UNDERKJENT,
+                                    merknad = merknadFraAttestant,
+                                    saksbehandler = brukerTokenInfo,
+                                )
+                            if (sisteSaksbehandlerIkkeAttestering != null) {
+                                oppgaveService.tildelSaksbehandler(
+                                    ferdigstillOppgaveUnderbehandlingOgLagNyMedType.id,
+                                    sisteSaksbehandlerIkkeAttestering,
+                                )
+                            } else {
+                                logger.warn(
+                                    "Fant ikke siste saksbehandler for behandling:" +
+                                        " ${underkjennVedtakOppgave.sakIdOgReferanse.referanse}. ",
+                                )
+                            }
+                        } catch (e: Exception) {
+                            haandterFeilIOppgaveService(e)
+                        }
+                    }
+                    call.respond(HttpStatusCode.OK)
                 }
-                call.respond(HttpStatusCode.OK)
             }
         }
     }
     route("/attestervedtak") {
         post {
-            val attesterVedtakOppgave = call.receive<VedtakEndringDTO>()
-            val behandling =
-                inTransaction {
-                    behandlingService.hentBehandling(
-                        UUID.fromString(attesterVedtakOppgave.sakIdOgReferanse.referanse),
-                    )
-                }
-            if (behandling == null) {
-                call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
-            } else {
-                inTransaction {
-                    behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
-                    try {
-                        oppgaveService.ferdigStillOppgaveUnderBehandling(
-                            referanse = attesterVedtakOppgave.sakIdOgReferanse.referanse,
-                            saksbehandler = brukerTokenInfo,
+            kunSkrivetilgang {
+                val attesterVedtakOppgave = call.receive<VedtakEndringDTO>()
+                val behandling =
+                    inTransaction {
+                        behandlingService.hentBehandling(
+                            UUID.fromString(attesterVedtakOppgave.sakIdOgReferanse.referanse),
                         )
-                    } catch (e: Exception) {
-                        haandterFeilIOppgaveService(e)
                     }
+                if (behandling == null) {
+                    call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
+                } else {
+                    inTransaction {
+                        behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
+                        try {
+                            oppgaveService.ferdigStillOppgaveUnderBehandling(
+                                referanse = attesterVedtakOppgave.sakIdOgReferanse.referanse,
+                                saksbehandler = brukerTokenInfo,
+                            )
+                        } catch (e: Exception) {
+                            haandterFeilIOppgaveService(e)
+                        }
+                    }
+                    call.respond(HttpStatusCode.OK)
                 }
-                call.respond(HttpStatusCode.OK)
             }
         }
     }

@@ -23,7 +23,7 @@ export const FamilieforholdBarnepensjon = ({ personopplysninger }: PropsFamilief
   const soeker = personopplysninger.soeker
   const alleGjenlevende = personopplysninger.gjenlevende
   const alleAvdoede = personopplysninger.avdoede
-  const familieforhold: Familieforhold = { avdoede: alleAvdoede, gjenlevende: alleGjenlevende }
+  const familieforhold: Familieforhold = { avdoede: alleAvdoede, gjenlevende: alleGjenlevende, soeker: soeker }
 
   return (
     <>

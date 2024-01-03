@@ -61,7 +61,7 @@ fun Route.brevRoute(
         }
 
         post("mottaker") {
-            withSakId(tilgangssjekker) {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
                 val body = call.receive<OppdaterMottakerRequest>()
 
                 val mottaker = service.oppdaterMottaker(brevId, body.mottaker)
@@ -71,7 +71,7 @@ fun Route.brevRoute(
         }
 
         post("tittel") {
-            withSakId(tilgangssjekker) {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
                 val request = call.receive<OppdaterTittelRequest>()
 
                 service.oppdaterTittel(brevId, request.tittel)
@@ -88,7 +88,7 @@ fun Route.brevRoute(
             }
 
             post {
-                withSakId(tilgangssjekker) {
+                withSakId(tilgangssjekker, skrivetilgang = true) {
                     val brevId = brevId
                     val body = call.receive<OppdaterPayloadRequest>()
 
@@ -100,7 +100,7 @@ fun Route.brevRoute(
         }
 
         post("ferdigstill") {
-            withSakId(tilgangssjekker) {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
                 service.ferdigstill(brevId, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.OK)
@@ -108,7 +108,7 @@ fun Route.brevRoute(
         }
 
         post("journalfoer") {
-            withSakId(tilgangssjekker) {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
                 val journalpostId = service.journalfoer(brevId, brukerTokenInfo)
 
                 call.respond(JournalpostIdDto(journalpostId))
@@ -116,7 +116,7 @@ fun Route.brevRoute(
         }
 
         post("distribuer") {
-            withSakId(tilgangssjekker) {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
                 val bestillingsId = service.distribuer(brevId)
 
                 call.respond(BestillingsIdDto(bestillingsId))
@@ -139,7 +139,7 @@ fun Route.brevRoute(
         }
 
         post {
-            withSakId(tilgangssjekker) { sakId ->
+            withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 logger.info("Oppretter nytt brev på sak=$sakId)")
 
                 measureTimedValue {

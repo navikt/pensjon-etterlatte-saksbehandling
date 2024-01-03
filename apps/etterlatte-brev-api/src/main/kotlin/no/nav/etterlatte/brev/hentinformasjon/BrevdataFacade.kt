@@ -195,7 +195,7 @@ class BrevdataFacade(
         sakType: SakType,
     ): Utbetalingsinfo? {
         val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo) ?: return null
-        val beregningsGrunnlag = beregningKlient.hentBeregningsGrunnlag(behandlingId, sakType, brukerTokenInfo) ?: return null
+        val beregningsGrunnlag = beregningKlient.hentBeregningsGrunnlag(behandlingId, sakType, brukerTokenInfo)
 
         val beregningsperioder =
             beregning.beregningsperioder.map {
@@ -212,7 +212,10 @@ class BrevdataFacade(
                     prorataBroek = prorataBroek,
                     institusjon = it.institusjonsopphold != null,
                     beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
-                    beregningsMetodeFraGrunnlag = beregningsGrunnlag.beregningsMetode.beregningsMetode,
+                    beregningsMetodeFraGrunnlag =
+                        beregningsGrunnlag?.beregningsMetode?.beregningsMetode
+                            ?: requireNotNull(it.beregningsMetode),
+                    // ved manuelt overstyrt beregning har vi ikke grunnlag
                 )
             }
 

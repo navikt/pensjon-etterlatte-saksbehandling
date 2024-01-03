@@ -9,25 +9,28 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.util.UUID
 
 fun Route.omregningRoutes(omregningService: OmregningService) {
     route("/omregning") {
         post {
-            val request = call.receive<Omregningshendelse>()
-            val forrigeBehandling = inTransaction { omregningService.hentForrigeBehandling(request.sakId) }
-            val persongalleri = omregningService.hentPersongalleri(forrigeBehandling.id)
-            val (behandlingId, sakType) =
-                inTransaction {
-                    omregningService.opprettOmregning(
-                        sakId = request.sakId,
-                        fraDato = request.fradato,
-                        prosessType = request.prosesstype,
-                        forrigeBehandling = forrigeBehandling,
-                        persongalleri = persongalleri,
-                    )
-                }
-            call.respond(OpprettOmregningResponse(behandlingId, forrigeBehandling.id, sakType))
+            kunSkrivetilgang {
+                val request = call.receive<Omregningshendelse>()
+                val forrigeBehandling = inTransaction { omregningService.hentForrigeBehandling(request.sakId) }
+                val persongalleri = omregningService.hentPersongalleri(forrigeBehandling.id)
+                val (behandlingId, sakType) =
+                    inTransaction {
+                        omregningService.opprettOmregning(
+                            sakId = request.sakId,
+                            fraDato = request.fradato,
+                            prosessType = request.prosesstype,
+                            forrigeBehandling = forrigeBehandling,
+                            persongalleri = persongalleri,
+                        )
+                    }
+                call.respond(OpprettOmregningResponse(behandlingId, forrigeBehandling.id, sakType))
+            }
         }
     }
 }

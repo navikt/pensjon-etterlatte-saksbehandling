@@ -64,12 +64,13 @@ inline val PipelineContext<*, ApplicationCall>.klageId: UUID
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
+    skrivetilgang: Boolean = false,
     onSuccess: (id: UUID) -> Unit,
 ) = withParam(BEHANDLINGID_CALL_PARAMETER) { behandlingId ->
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilBehandling =
-                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, brukerTokenInfo as Saksbehandler)
+                behandlingTilgangsSjekk.harTilgangTilBehandling(behandlingId, skrivetilgang, brukerTokenInfo as Saksbehandler)
             if (harTilgangTilBehandling) {
                 onSuccess(behandlingId)
             } else {
@@ -84,11 +85,12 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
     sakTilgangsSjekk: SakTilgangsSjekk,
+    skrivetilgang: Boolean = false,
     onSuccess: (id: Long) -> Unit,
 ) = call.parameters[SAKID_CALL_PARAMETER]!!.toLong().let { sakId ->
     when (brukerTokenInfo) {
         is Saksbehandler -> {
-            val harTilgangTilSak = sakTilgangsSjekk.harTilgangTilSak(sakId, brukerTokenInfo as Saksbehandler)
+            val harTilgangTilSak = sakTilgangsSjekk.harTilgangTilSak(sakId, skrivetilgang, brukerTokenInfo as Saksbehandler)
             if (harTilgangTilSak) {
                 onSuccess(sakId)
             } else {
@@ -103,6 +105,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
 
 suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
     personTilgangsSjekk: PersonTilgangsSjekk,
+    skrivetilgang: Boolean = false,
     onSuccess: (fnr: Folkeregisteridentifikator) -> Unit,
 ) {
     val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
@@ -113,6 +116,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
             val harTilgangTilPerson =
                 personTilgangsSjekk.harTilgangTilPerson(
                     foedselsnummer,
+                    skrivetilgang,
                     brukerTokenInfo as Saksbehandler,
                 )
             if (harTilgangTilPerson) {
@@ -212,6 +216,7 @@ data class FoedselsNummerMedGraderingDTO(
 interface BehandlingTilgangsSjekk {
     suspend fun harTilgangTilBehandling(
         behandlingId: UUID,
+        skrivetilgang: Boolean = false,
         bruker: Saksbehandler,
     ): Boolean
 }
@@ -219,6 +224,7 @@ interface BehandlingTilgangsSjekk {
 interface SakTilgangsSjekk {
     suspend fun harTilgangTilSak(
         sakId: Long,
+        skrivetilgang: Boolean = false,
         bruker: Saksbehandler,
     ): Boolean
 }
@@ -226,6 +232,7 @@ interface SakTilgangsSjekk {
 interface PersonTilgangsSjekk {
     suspend fun harTilgangTilPerson(
         foedselsnummer: Folkeregisteridentifikator,
+        skrivetilgang: Boolean = false,
         bruker: Saksbehandler,
     ): Boolean
 }

@@ -115,9 +115,9 @@ class RestModuleTest {
 
     @Test
     fun `skal kun svare ok dersom bruker har tilgang`() {
-        coEvery { behandlingTilgangsSjekkMock.harTilgangTilBehandling(any(), any()) } returns true
-        coEvery { sakTilgangsSjekkMock.harTilgangTilSak(any(), any()) } returns true
-        coEvery { personTilgangsSjekkMock.harTilgangTilPerson(any(), any()) } returns true
+        coEvery { behandlingTilgangsSjekkMock.harTilgangTilBehandling(any(), any(), any()) } returns true
+        coEvery { sakTilgangsSjekkMock.harTilgangTilSak(any(), any(), any()) } returns true
+        coEvery { personTilgangsSjekkMock.harTilgangTilPerson(any(), any(), any()) } returns true
 
         testApplication {
             environment {
@@ -137,9 +137,9 @@ class RestModuleTest {
                 setBody(FoedselsnummerDTO("27458328671").toJson())
             }.let { assertEquals(OK, it.status) }
 
-            coEvery { behandlingTilgangsSjekkMock.harTilgangTilBehandling(any(), any()) } returns false
-            coEvery { sakTilgangsSjekkMock.harTilgangTilSak(any(), any()) } returns false
-            coEvery { personTilgangsSjekkMock.harTilgangTilPerson(any(), any()) } returns false
+            coEvery { behandlingTilgangsSjekkMock.harTilgangTilBehandling(any(), any(), any()) } returns false
+            coEvery { sakTilgangsSjekkMock.harTilgangTilSak(any(), any(), any()) } returns false
+            coEvery { personTilgangsSjekkMock.harTilgangTilPerson(any(), any(), any()) } returns false
 
             client.get("/behandling/${UUID.randomUUID()}") {
                 header(HttpHeaders.Authorization, "Bearer $token")

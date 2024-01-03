@@ -44,9 +44,7 @@ class OmregningService(
                 kilde = Vedtaksloesning.GJENNY,
                 persongalleri = persongalleri,
             ),
-        ) {
-            throw Exception("Opprettelse av revurdering feilet for $sakId")
-        }
+        ) { "Opprettelse av revurdering feilet for $sakId" }
     }
 }
 

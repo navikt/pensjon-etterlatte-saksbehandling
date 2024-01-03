@@ -28,10 +28,10 @@ internal class DistribuerBrevRiver(
         context: MessageContext,
     ) {
         val bestillingsId =
-            brevdistribuerer.distribuerVedtaksbrev(
-                packet["brevId"].asLong(),
-                packet.distribusjonType(),
-                packet["journalpostId"].asText(),
+            brevdistribuerer.distribuer(
+                id = packet["brevId"].asLong(),
+                distribusjonsType = packet.distribusjonType(),
+                journalpostIdInn = packet["journalpostId"].asText(),
             )
         rapidsConnection.svarSuksess(packet, bestillingsId)
     }

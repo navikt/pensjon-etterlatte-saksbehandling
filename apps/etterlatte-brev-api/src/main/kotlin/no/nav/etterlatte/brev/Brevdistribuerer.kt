@@ -15,7 +15,13 @@ class Brevdistribuerer(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun distribuer(id: BrevID): String {
+    fun distribuer(
+        id: BrevID,
+        distribusjonsType: DistribusjonsType = DistribusjonsType.ANNET,
+        journalpostIdInn: String? = null,
+    ): BestillingsID {
+        logger.info("Starter distribuering av brev $id.")
+
         val brev = db.hentBrev(id)
 
         if (brev.status != Status.JOURNALFOERT) {
@@ -25,9 +31,10 @@ class Brevdistribuerer(
         }
 
         val journalpostId =
-            requireNotNull(db.hentJournalpostId(id)) {
-                "JournalpostID mangler på brev (id=${brev.id}, status=${brev.status})"
-            }
+            journalpostIdInn
+                ?: requireNotNull(db.hentJournalpostId(id)) {
+                    "JournalpostID mangler på brev (id=${brev.id}, status=${brev.status})"
+                }
 
         val mottaker =
             requireNotNull(brev.mottaker) {
@@ -37,34 +44,9 @@ class Brevdistribuerer(
         return distribusjonService.distribuerJournalpost(
             brevId = brev.id,
             journalpostId = journalpostId,
-            type = DistribusjonsType.ANNET,
+            type = distribusjonsType,
             tidspunkt = DistribusjonsTidspunktType.KJERNETID,
             adresse = mottaker.adresse,
-        )
-    }
-
-    fun distribuerVedtaksbrev(
-        brevId: Long,
-        distribusjonType: DistribusjonsType,
-        journalpostId: String,
-    ): BestillingsID {
-        logger.info("Starter distribuering av brev.")
-
-        val brev = db.hentBrev(brevId)
-
-        val mottaker =
-            requireNotNull(brev.mottaker) {
-                "Kan ikke distribuere brev når mottaker er 'null' i brev med id=${brev.id}"
-            }
-
-        val bestillingsId =
-            distribusjonService.distribuerJournalpost(
-                brevId = brev.id,
-                journalpostId = journalpostId,
-                type = distribusjonType,
-                tidspunkt = DistribusjonsTidspunktType.KJERNETID,
-                adresse = mottaker.adresse,
-            )
-        return bestillingsId
+        ).also { logger.info("Distribuerte brev $id") }
     }
 }

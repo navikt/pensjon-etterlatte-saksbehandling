@@ -57,32 +57,23 @@ class DokarkivServiceImpl(
     override suspend fun journalfoer(
         brevId: BrevID,
         vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostResponse {
-        logger.info("Oppretter journalpost for brev med id=$brevId")
-
-        val request = mapTilJournalpostRequest(brevId, vedtak)
-
-        return client.opprettJournalpost(request, true).also {
-            logger.info(
-                "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
-            )
-        }
-    }
+    ): OpprettJournalpostResponse = journalfoer(brevId) { mapTilJournalpostRequest(brevId, vedtak) }
 
     override suspend fun journalfoer(
         brev: Brev,
         sak: Sak,
+    ): OpprettJournalpostResponse = journalfoer(brev.id) { mapTilJournalpostRequest(brev, sak) }
+
+    private suspend fun journalfoer(
+        brevId: BrevID,
+        request: () -> OpprettJournalpostRequest,
     ): OpprettJournalpostResponse {
-        logger.info("Oppretter journalpost for brev med id=${brev.id}")
-
-        val request = mapTilJournalpostRequest(brev, sak)
-
-        return client.opprettJournalpost(request, true)
-            .also {
-                logger.info(
-                    "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
-                )
-            }
+        logger.info("Oppretter journalpost for brev med id=$brevId")
+        return client.opprettJournalpost(request(), true).also {
+            logger.info(
+                "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
+            )
+        }
     }
 
     override suspend fun oppdater(

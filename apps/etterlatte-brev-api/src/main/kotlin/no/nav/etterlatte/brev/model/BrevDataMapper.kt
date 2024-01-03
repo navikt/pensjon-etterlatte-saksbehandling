@@ -428,14 +428,12 @@ class BrevDataMapper(
             }
 
             BARNEPENSJON_AVSLAG -> {
-                coroutineScope {
-                    AvslagBrevData.fra(
-                        innhold = innholdMedVedlegg,
-                        // TODO må kunne sette brevutfall ved avslag. Det er pr nå ikke mulig da dette ligger i beregningssteget.
-                        brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
-                        utlandstilknytning = generellBrevData.utlandstilknytning?.type,
-                    )
-                }
+                AvslagBrevData.fra(
+                    innhold = innholdMedVedlegg,
+                    // TODO må kunne sette brevutfall ved avslag. Det er pr nå ikke mulig da dette ligger i beregningssteget.
+                    brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
+                    utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+                )
             }
 
             OMS_FOERSTEGANGSVEDTAK_INNVILGELSE -> {

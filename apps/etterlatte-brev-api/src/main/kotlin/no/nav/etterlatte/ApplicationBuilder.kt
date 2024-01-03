@@ -214,7 +214,7 @@ class ApplicationBuilder {
 
                 JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
-                DistribuerBrevRiver(this, vedtaksbrevService, distribusjonService)
+                DistribuerBrevRiver(this, distribusjonService)
             }
 
     private fun fiksEnkeltbrev() {

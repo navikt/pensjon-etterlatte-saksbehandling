@@ -24,7 +24,7 @@ internal class DistribuerBrevRiverTest {
     private val brevService = mockk<VedtaksbrevService>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>(relaxed = true)
 
-    private val inspector = TestRapid().apply { DistribuerBrevRiver(this, brevService, distribusjonService) }
+    private val inspector = TestRapid().apply { DistribuerBrevRiver(this, distribusjonService) }
 
     private val brevId = 100L
     private val journalpostId = "11111"

@@ -60,7 +60,7 @@ internal class OpprettJournalfoerOgDistribuer {
         val testRapid =
             TestRapid().apply {
                 JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
-                DistribuerBrevRiver(this, vedtaksbrevService, distribusjonService)
+                DistribuerBrevRiver(this, distribusjonService)
             }
 
         testRapid.sendTestMessage(
@@ -106,7 +106,7 @@ internal class OpprettJournalfoerOgDistribuer {
         val testRapid =
             TestRapid().apply {
                 JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
-                DistribuerBrevRiver(this, vedtaksbrevService, distribusjonService)
+                DistribuerBrevRiver(this, distribusjonService)
             }
 
         testRapid.sendTestMessage(

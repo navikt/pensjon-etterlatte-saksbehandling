@@ -357,4 +357,8 @@ data class RevurderingOgOppfoelging(
         sendMeldingForHendelse()
         return revurdering
     }
+
+    fun behandlingId() = revurdering.id
+
+    fun sakType() = revurdering.sak.sakType
 }

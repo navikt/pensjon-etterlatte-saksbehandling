@@ -27,10 +27,15 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
                             prosessType = request.prosesstype,
                             forrigeBehandling = forrigeBehandling,
                             persongalleri = persongalleri,
-                        ).oppdater()
+                        )
                     }
-                val behandlingId = revurderingOgOppfoelging.id
-                val sakType = revurderingOgOppfoelging.sak.sakType
+                revurderingOgOppfoelging.leggInnGrunnlag()
+                inTransaction {
+                    revurderingOgOppfoelging.opprettOgTildelOppgave()
+                }
+                revurderingOgOppfoelging.sendMeldingForHendelse()
+                val behandlingId = revurderingOgOppfoelging.behandlingId()
+                val sakType = revurderingOgOppfoelging.sakType()
                 call.respond(OpprettOmregningResponse(behandlingId, forrigeBehandling.id, sakType))
             }
         }

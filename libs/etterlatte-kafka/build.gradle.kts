@@ -22,6 +22,7 @@ dependencies {
     testImplementation(libs.test.kotest.assertionscore)
     implementation(libs.kafka.clients)
     testImplementation(libs.kafka.embeddedenv)
+    testImplementation(libs.kafka.avroserializer)
 }
 
 tasks {

@@ -1,5 +1,6 @@
+package no.nav.etterlatte.kafka
+
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
-import no.nav.etterlatte.kafka.Avrokonstanter
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 

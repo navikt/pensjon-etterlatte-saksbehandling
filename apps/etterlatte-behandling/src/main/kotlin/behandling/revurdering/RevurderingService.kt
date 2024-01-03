@@ -321,10 +321,10 @@ class RevurderingService(
                         BehandlingHendelseType.OPPRETTET,
                     )
                 },
-                oppfoelging = { revurdering ->
+                opprettOgTildelOppgave = {
                     val oppgave =
                         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                            referanse = revurdering.id.toString(),
+                            referanse = it.id.toString(),
                             sakId = sakId,
                             oppgaveKilde = OppgaveKilde.BEHANDLING,
                             oppgaveType = OppgaveType.REVURDERING,
@@ -348,12 +348,12 @@ class RevurderingService(
 data class RevurderingOgOppfoelging(
     val revurdering: Revurdering,
     val leggInnGrunnlag: () -> Unit,
-    private val oppfoelging: (Revurdering) -> Unit,
+    val opprettOgTildelOppgave: () -> Unit,
     val sendMeldingForHendelse: () -> Unit,
 ) {
     fun oppdater(): Revurdering {
         leggInnGrunnlag()
-        oppfoelging(revurdering)
+        opprettOgTildelOppgave()
         sendMeldingForHendelse()
         return revurdering
     }

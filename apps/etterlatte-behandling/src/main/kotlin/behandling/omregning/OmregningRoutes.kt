@@ -9,6 +9,7 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import java.util.UUID
 
@@ -29,11 +30,13 @@ fun Route.omregningRoutes(omregningService: OmregningService) {
                             persongalleri = persongalleri,
                         )
                     }
-                revurderingOgOppfoelging.leggInnGrunnlag()
-                inTransaction {
-                    revurderingOgOppfoelging.opprettOgTildelOppgave()
+                retryOgPakkUt { revurderingOgOppfoelging.leggInnGrunnlag() }
+                retryOgPakkUt {
+                    inTransaction {
+                        revurderingOgOppfoelging.opprettOgTildelOppgave()
+                    }
                 }
-                revurderingOgOppfoelging.sendMeldingForHendelse()
+                retryOgPakkUt { revurderingOgOppfoelging.sendMeldingForHendelse() }
                 val behandlingId = revurderingOgOppfoelging.behandlingId()
                 val sakType = revurderingOgOppfoelging.sakType()
                 call.respond(OpprettOmregningResponse(behandlingId, forrigeBehandling.id, sakType))

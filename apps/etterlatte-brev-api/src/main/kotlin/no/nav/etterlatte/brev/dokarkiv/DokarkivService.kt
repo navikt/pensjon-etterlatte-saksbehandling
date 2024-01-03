@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder.Companion.BREV_KODE
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
@@ -149,25 +150,20 @@ class DokarkivServiceImpl(
         vedtak: VedtakTilJournalfoering,
     ): OpprettJournalpostRequest {
         val brukerident = vedtak.sak.ident
-        val eksternReferansePrefiks = vedtak.behandlingId
+        val eksternReferansePrefiks: Any = vedtak.behandlingId
         val sakId = vedtak.sak.id
-        val sak = vedtak.sak
         val journalfoerendeEnhet = vedtak.ansvarligEnhet
         val brev = requireNotNull(db.hentBrev(brevId))
+        val sakType = vedtak.sak.sakType
 
-        val innhold = requireNotNull(db.hentBrevInnhold(brevId))
-        val pdf = requireNotNull(db.hentPdf(brevId))
-        return OpprettJournalpostRequest(
-            tittel = innhold.tittel,
-            journalposttype = JournalPostType.UTGAAENDE,
-            avsenderMottaker = brev.avsenderMottaker(),
-            bruker = Bruker(brukerident),
-            eksternReferanseId = "$eksternReferansePrefiks.$brevId",
-            sak = JournalpostSak(Sakstype.FAGSAK, sakId.toString()),
-            dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
-            tema = sak.sakType.tema,
-            kanal = "S",
-            journalfoerendeEnhet = journalfoerendeEnhet,
+        return mapTilJournalpostRequest(
+            brevId,
+            brev,
+            brukerident,
+            eksternReferansePrefiks,
+            sakId,
+            sakType,
+            journalfoerendeEnhet,
         )
     }
 
@@ -176,11 +172,32 @@ class DokarkivServiceImpl(
         sak: Sak,
     ): OpprettJournalpostRequest {
         val brukerident = brev.soekerFnr
-        val eksternReferansePrefiks = brev.sakId
+        val eksternReferansePrefiks: Any = brev.sakId
         val sakId = brev.sakId
         val journalfoerendeEnhet = sak.enhet
         val brevId = brev.id
+        val sakType = sak.sakType
 
+        return mapTilJournalpostRequest(
+            brevId,
+            brev,
+            brukerident,
+            eksternReferansePrefiks,
+            sakId,
+            sakType,
+            journalfoerendeEnhet,
+        )
+    }
+
+    private fun mapTilJournalpostRequest(
+        brevId: BrevID,
+        brev: Brev,
+        brukerident: String,
+        eksternReferansePrefiks: Any,
+        sakId: Long,
+        sakType: SakType,
+        journalfoerendeEnhet: String,
+    ): OpprettJournalpostRequest {
         val innhold = requireNotNull(db.hentBrevInnhold(brevId))
         val pdf = requireNotNull(db.hentPdf(brevId))
         return OpprettJournalpostRequest(
@@ -191,7 +208,7 @@ class DokarkivServiceImpl(
             eksternReferanseId = "$eksternReferansePrefiks.$brevId",
             sak = JournalpostSak(Sakstype.FAGSAK, sakId.toString()),
             dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
-            tema = sak.sakType.tema,
+            tema = sakType.tema,
             kanal = "S",
             journalfoerendeEnhet = journalfoerendeEnhet,
         )

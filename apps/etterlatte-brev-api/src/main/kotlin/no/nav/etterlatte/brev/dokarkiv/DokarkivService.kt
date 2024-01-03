@@ -148,46 +148,30 @@ class DokarkivServiceImpl(
     private fun mapTilJournalpostRequest(
         brevId: BrevID,
         vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostRequest {
-        val brukerident = vedtak.sak.ident
-        val eksternReferansePrefiks: Any = vedtak.behandlingId
-        val sakId = vedtak.sak.id
-        val journalfoerendeEnhet = vedtak.ansvarligEnhet
-        val brev = requireNotNull(db.hentBrev(brevId))
-        val sakType = vedtak.sak.sakType
-
-        return mapTilJournalpostRequest(
-            brevId,
-            brev,
-            brukerident,
-            eksternReferansePrefiks,
-            sakId,
-            sakType,
-            journalfoerendeEnhet,
+    ): OpprettJournalpostRequest =
+        mapTilJournalpostRequest(
+            brevId = brevId,
+            brev = requireNotNull(db.hentBrev(brevId)),
+            brukerident = vedtak.sak.ident,
+            eksternReferansePrefiks = vedtak.behandlingId,
+            sakId = vedtak.sak.id,
+            sakType = vedtak.sak.sakType,
+            journalfoerendeEnhet = vedtak.ansvarligEnhet,
         )
-    }
 
     private fun mapTilJournalpostRequest(
         brev: Brev,
         sak: Sak,
-    ): OpprettJournalpostRequest {
-        val brukerident = brev.soekerFnr
-        val eksternReferansePrefiks: Any = brev.sakId
-        val sakId = brev.sakId
-        val journalfoerendeEnhet = sak.enhet
-        val brevId = brev.id
-        val sakType = sak.sakType
-
-        return mapTilJournalpostRequest(
-            brevId,
-            brev,
-            brukerident,
-            eksternReferansePrefiks,
-            sakId,
-            sakType,
-            journalfoerendeEnhet,
+    ): OpprettJournalpostRequest =
+        mapTilJournalpostRequest(
+            brevId = brev.id,
+            brev = brev,
+            brukerident = brev.soekerFnr,
+            eksternReferansePrefiks = brev.sakId,
+            sakId = brev.sakId,
+            sakType = sak.sakType,
+            journalfoerendeEnhet = sak.enhet,
         )
-    }
 
     private fun mapTilJournalpostRequest(
         brevId: BrevID,

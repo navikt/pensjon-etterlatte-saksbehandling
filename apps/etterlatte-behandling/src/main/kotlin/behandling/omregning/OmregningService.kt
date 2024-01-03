@@ -41,7 +41,7 @@ class OmregningService(
                         virkningstidspunkt = fraDato,
                         kilde = Vedtaksloesning.GJENNY,
                         persongalleri = persongalleri,
-                    )
+                    )?.oppdater()
 
                 Prosesstype.MANUELL -> throw Exception("Støtter ikke prosesstype MANUELL")
             } ?: throw Exception("Opprettelse av revurdering feilet for $sakId")

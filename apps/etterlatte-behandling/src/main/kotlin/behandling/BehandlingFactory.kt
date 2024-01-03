@@ -156,7 +156,7 @@ class BehandlingFactory(
                 mottattDato = mottattDato,
                 kilde = kilde,
                 revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
-            )?.let { BehandlingOgOppgave(it, null) }
+            )?.oppdater()?.let { BehandlingOgOppgave(it, null) }
         } else {
             val harBehandlingUnderbehandling =
                 harBehandlingerForSak.filter { behandling ->

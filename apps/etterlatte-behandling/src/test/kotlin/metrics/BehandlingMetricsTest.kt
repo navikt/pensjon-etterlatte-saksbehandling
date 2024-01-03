@@ -1,4 +1,4 @@
-package metrics
+package no.nav.etterlatte.metrics
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
@@ -17,9 +17,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.metrics.BehandlingMetrics
-import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
-import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.AfterAll

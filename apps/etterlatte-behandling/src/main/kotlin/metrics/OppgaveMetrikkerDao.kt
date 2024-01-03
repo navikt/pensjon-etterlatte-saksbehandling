@@ -36,25 +36,25 @@ class OppgaveMetrikkerDao(private val dataSource: DataSource) {
             val antallTotalt =
                 it.prepareStatement(
                     """
-                    SELECT count(distinct saksbehandler)
+                    SELECT count(distinct saksbehandler) antall
                     FROM oppgave
                     """.trimIndent(),
                 ).executeQuery().toList {
                     SaksbehandlerAntall(
-                        antall = getInt("count"),
+                        antall = getInt("antall"),
                         enhet = "Totalt",
                     )
                 }
             val antallPerEnhet =
                 it.prepareStatement(
                     """
-                    SELECT count(distinct saksbehandler), enhet
+                    SELECT count(distinct saksbehandler) antall, enhet
                     FROM oppgave
                     group by enhet;
                     """.trimIndent(),
                 ).executeQuery().toList {
                     SaksbehandlerAntall(
-                        antall = getInt("count"),
+                        antall = getInt("antall"),
                         enhet = getString("enhet"),
                     )
                 }

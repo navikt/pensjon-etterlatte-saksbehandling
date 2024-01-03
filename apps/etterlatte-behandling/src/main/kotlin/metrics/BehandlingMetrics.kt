@@ -6,7 +6,7 @@ import no.nav.etterlatte.jobs.MetrikkUthenter
 import org.slf4j.LoggerFactory
 
 class BehandlingMetrics(
-    private val metrikkerDao: OppgaveMetrikkerDao,
+    private val oppgaveMetrikkerDao: OppgaveMetrikkerDao,
     private val behandlingerMetrikkerDao: BehandlingMetrikkerDao,
     private val registry: CollectorRegistry = CollectorRegistry.defaultRegistry,
 ) : MetrikkUthenter {
@@ -33,10 +33,10 @@ class BehandlingMetrics(
     override fun run() {
         logger.info("Samler metrikker med ${this::class.simpleName}")
 
-        metrikkerDao.hentOppgaveAntall().forEach {
+        oppgaveMetrikkerDao.hentOppgaveAntall().forEach {
             oppgaver.labels(it.status.name, it.enhet, it.saktype.name).set(it.antall.toDouble())
         }
-        metrikkerDao.hentDistinkteSaksbehandlere().forEach {
+        oppgaveMetrikkerDao.hentDistinkteSaksbehandlere().forEach {
             saksbehandler.labels(it.enhet).set(it.antall.toDouble())
         }
 

@@ -308,22 +308,38 @@ class RevurderingService(
 
             behandlingDao.hentBehandling(opprettBehandling.id)!! as Revurdering
         }.also { revurdering ->
-            grunnlagService.leggInnNyttGrunnlag(revurdering, persongalleri)
-
-            val oppgave =
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = revurdering.id.toString(),
-                    sakId = sakId,
-                    oppgaveKilde = OppgaveKilde.BEHANDLING,
-                    oppgaveType = OppgaveType.REVURDERING,
-                    merknad = begrunnelse,
-                )
-            oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
-            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                revurdering.toStatistikkBehandling(persongalleri),
-                BehandlingHendelseType.OPPRETTET,
+            leggInnGrunnlagOpprettOppgaveTildelSaksbehandlerSendMelding(
+                revurdering,
+                persongalleri,
+                sakId,
+                begrunnelse,
+                saksbehandlerIdent,
             )
         }
+
+    private fun leggInnGrunnlagOpprettOppgaveTildelSaksbehandlerSendMelding(
+        revurdering: Revurdering,
+        persongalleri: Persongalleri,
+        sakId: Long,
+        begrunnelse: String?,
+        saksbehandlerIdent: String,
+    ) {
+        grunnlagService.leggInnNyttGrunnlag(revurdering, persongalleri)
+
+        val oppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = revurdering.id.toString(),
+                sakId = sakId,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveType = OppgaveType.REVURDERING,
+                merknad = begrunnelse,
+            )
+        oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
+        behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+            revurdering.toStatistikkBehandling(persongalleri),
+            BehandlingHendelseType.OPPRETTET,
+        )
+    }
 
     private fun lagreRevurderingsaarsakFritekst(
         fritekstAarsak: String,

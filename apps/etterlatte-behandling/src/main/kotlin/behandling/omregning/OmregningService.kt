@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -16,7 +16,7 @@ import java.util.UUID
 class OmregningService(
     private val behandlingService: BehandlingService,
     private val grunnlagService: GrunnlagService,
-    private val revurderingService: RevurderingService,
+    private val revurderingService: AutomatiskRevurderingService,
 ) {
     fun hentForrigeBehandling(sakId: Long) =
         behandlingService.hentSisteIverksatte(sakId)

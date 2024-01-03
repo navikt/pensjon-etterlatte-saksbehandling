@@ -26,6 +26,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
@@ -85,17 +86,19 @@ class BehandlingFactoryTest {
         }
     private val revurderingDao = mockk<RevurderingDao>()
     private val revurderingService =
-        RevurderingService(
-            oppgaveService,
-            grunnlagService,
-            behandlingHendelserKafkaProducerMock,
-            featureToggleService,
-            behandlingDaoMock,
-            hendelseDaoMock,
-            grunnlagsendringshendelseDao,
-            kommerBarnetTilGodeService,
-            revurderingDao,
-            behandlingService,
+        AutomatiskRevurderingService(
+            RevurderingService(
+                oppgaveService,
+                grunnlagService,
+                behandlingHendelserKafkaProducerMock,
+                featureToggleService,
+                behandlingDaoMock,
+                hendelseDaoMock,
+                grunnlagsendringshendelseDao,
+                kommerBarnetTilGodeService,
+                revurderingDao,
+                behandlingService,
+            ),
         )
     private val behandlingFactory =
         BehandlingFactory(

@@ -8,7 +8,7 @@ import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
-import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -40,7 +40,7 @@ import java.time.LocalDateTime
 class BehandlingFactory(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagService,
-    private val revurderingService: RevurderingService,
+    private val revurderingService: AutomatiskRevurderingService,
     private val gyldighetsproevingService: GyldighetsproevingService,
     private val sakService: SakService,
     private val behandlingDao: BehandlingDao,

@@ -378,7 +378,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             BehandlingFactory(
                 oppgaveService = oppgaveService,
                 grunnlagService = grunnlagService,
-                revurderingService = revurderingService,
+                revurderingService = AutomatiskRevurderingService(revurderingService),
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
                 sakService = applicationContext.sakService,
                 behandlingDao = applicationContext.behandlingDao,
@@ -651,7 +651,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             BehandlingFactory(
                 oppgaveService = applicationContext.oppgaveService,
                 grunnlagService = applicationContext.grunnlagsService,
-                revurderingService = applicationContext.revurderingService,
+                revurderingService = applicationContext.automatiskRevurderingService,
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
                 sakService = applicationContext.sakService,
                 behandlingDao = applicationContext.behandlingDao,
@@ -778,7 +778,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             BehandlingFactory(
                 oppgaveService = applicationContext.oppgaveService,
                 grunnlagService = applicationContext.grunnlagsService,
-                revurderingService = applicationContext.revurderingService,
+                revurderingService = applicationContext.automatiskRevurderingService,
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
                 sakService = applicationContext.sakService,
                 behandlingDao = applicationContext.behandlingDao,
@@ -823,7 +823,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             BehandlingFactory(
                 oppgaveService = applicationContext.oppgaveService,
                 grunnlagService = applicationContext.grunnlagsService,
-                revurderingService = applicationContext.revurderingService,
+                revurderingService = applicationContext.automatiskRevurderingService,
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
                 sakService = applicationContext.sakService,
                 behandlingDao = applicationContext.behandlingDao,
@@ -866,7 +866,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             BehandlingFactory(
                 oppgaveService = applicationContext.oppgaveService,
                 grunnlagService = applicationContext.grunnlagsService,
-                revurderingService = applicationContext.revurderingService,
+                revurderingService = applicationContext.automatiskRevurderingService,
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
                 sakService = applicationContext.sakService,
                 behandlingDao = applicationContext.behandlingDao,
@@ -911,7 +911,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             BehandlingFactory(
                 oppgaveService = applicationContext.oppgaveService,
                 grunnlagService = applicationContext.grunnlagsService,
-                revurderingService = applicationContext.revurderingService,
+                revurderingService = applicationContext.automatiskRevurderingService,
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
                 sakService = applicationContext.sakService,
                 behandlingDao = applicationContext.behandlingDao,
@@ -958,7 +958,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             BehandlingFactory(
                 oppgaveService = applicationContext.oppgaveService,
                 grunnlagService = applicationContext.grunnlagsService,
-                revurderingService = applicationContext.revurderingService,
+                revurderingService = applicationContext.automatiskRevurderingService,
                 gyldighetsproevingService = applicationContext.gyldighetsproevingService,
                 sakService = applicationContext.sakService,
                 behandlingDao = applicationContext.behandlingDao,

@@ -41,6 +41,7 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.omregning.MigreringService
 import no.nav.etterlatte.behandling.omregning.OmregningService
+import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteDao
@@ -261,6 +262,7 @@ internal class ApplicationContext(
             revurderingDao = revurderingDao,
             behandlingService = behandlingService,
         )
+    val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
 
     val gyldighetsproevingService =
         GyldighetsproevingServiceImpl(
@@ -271,7 +273,7 @@ internal class ApplicationContext(
         OmregningService(
             behandlingService = behandlingService,
             grunnlagService = grunnlagsService,
-            revurderingService = revurderingService,
+            revurderingService = automatiskRevurderingService,
         )
 
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
@@ -308,7 +310,7 @@ internal class ApplicationContext(
         BehandlingFactory(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
-            revurderingService = revurderingService,
+            revurderingService = automatiskRevurderingService,
             gyldighetsproevingService = gyldighetsproevingService,
             sakService = sakService,
             behandlingDao = behandlingDao,

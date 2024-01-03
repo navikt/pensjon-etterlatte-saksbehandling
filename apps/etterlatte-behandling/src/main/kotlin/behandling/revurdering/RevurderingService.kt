@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling.revurdering
 
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
@@ -12,9 +11,9 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.domain.sjekkEnhet
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
-import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
@@ -30,7 +29,6 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -39,10 +37,8 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -181,8 +177,7 @@ class RevurderingService(
     ) {
         if (aarsak == Revurderingaarsak.SLUTTBEHANDLING_UTLAND) {
             val behandlingerForSak = behandlingService.hentBehandlingerForSak(sakId)
-            behandlingerForSak.find {
-                    behandling ->
+            behandlingerForSak.find { behandling ->
                 (behandling is Foerstegangsbehandling) && behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true
             }
                 ?: throw RevurderingSluttbehandlingUtlandMaaHaEnBehandlingMedSkalSendeKravpakke(
@@ -202,7 +197,11 @@ class RevurderingService(
         saksbehandler: Saksbehandler,
     ): Revurdering? =
         forrigeBehandling.sjekkEnhet()?.let {
-            return if (featureToggleService.isEnabled(RevurderingServiceFeatureToggle.OpprettManuellRevurdering, false)) {
+            return if (featureToggleService.isEnabled(
+                    RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
+                    false,
+                )
+            ) {
                 val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
 
                 opprettRevurdering(
@@ -219,56 +218,31 @@ class RevurderingService(
                     begrunnelse = begrunnelse,
                     fritekstAarsak = fritekstAarsak,
                     saksbehandlerIdent = saksbehandler.ident,
-                ).also { revurdering ->
-                    if (paaGrunnAvHendelse != null) {
-                        grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
-                            paaGrunnAvHendelse,
-                            revurdering.id,
-                        )
-                        try {
-                            oppgaveService.ferdigStillOppgaveUnderBehandling(
-                                paaGrunnAvHendelse.toString(),
-                                saksbehandler,
+                ).oppdater()
+                    .also { revurdering ->
+                        if (paaGrunnAvHendelse != null) {
+                            grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
+                                paaGrunnAvHendelse,
+                                revurdering.id,
                             )
-                        } catch (e: Exception) {
-                            logger.error(
-                                "Kunne ikke ferdigstille oppgaven til hendelsen på grunn av feil, " +
-                                    "men oppgave er ikke i bruk i miljø så feilen svelges.",
-                                e,
-                            )
+                            try {
+                                oppgaveService.ferdigStillOppgaveUnderBehandling(
+                                    paaGrunnAvHendelse.toString(),
+                                    saksbehandler,
+                                )
+                            } catch (e: Exception) {
+                                logger.error(
+                                    "Kunne ikke ferdigstille oppgaven til hendelsen på grunn av feil, " +
+                                        "men oppgave er ikke i bruk i miljø så feilen svelges.",
+                                    e,
+                                )
+                            }
                         }
                     }
-                }
             } else {
                 null
             }
         }
-
-    fun opprettAutomatiskRevurdering(
-        sakId: Long,
-        forrigeBehandling: Behandling,
-        revurderingAarsak: Revurderingaarsak,
-        virkningstidspunkt: LocalDate? = null,
-        kilde: Vedtaksloesning,
-        persongalleri: Persongalleri,
-        mottattDato: String? = null,
-        begrunnelse: String? = null,
-    ) = forrigeBehandling.sjekkEnhet()?.let {
-        opprettRevurdering(
-            sakId = sakId,
-            persongalleri = persongalleri,
-            forrigeBehandling = forrigeBehandling.id,
-            mottattDato = mottattDato,
-            prosessType = Prosesstype.AUTOMATISK,
-            kilde = kilde,
-            revurderingAarsak = revurderingAarsak,
-            virkningstidspunkt = virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
-            utlandstilknytning = forrigeBehandling.utlandstilknytning,
-            boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-            begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
-            saksbehandlerIdent = Fagsaksystem.EY.navn,
-        )
-    }
 
     private fun behandlingErAvTypenRevurderingOgKanEndres(behandlingId: UUID) {
         val behandling = hentBehandling(behandlingId)
@@ -290,7 +264,9 @@ class RevurderingService(
         revurderingDao.lagreRevurderingInfo(behandlingId, revurderingInfoMedBegrunnelse, kilde)
     }
 
-    private fun opprettRevurdering(
+    // Denne burde nok ha vore private eller noko, men for å ikkje få ei altfor stor omskriving
+    // gjer eg han til internal for no
+    internal fun opprettRevurdering(
         sakId: Long,
         persongalleri: Persongalleri,
         forrigeBehandling: UUID?,
@@ -304,7 +280,7 @@ class RevurderingService(
         begrunnelse: String?,
         fritekstAarsak: String? = null,
         saksbehandlerIdent: String,
-    ): Revurdering =
+    ): RevurderingOgOppfoelging =
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
             sakId = sakId,
@@ -335,21 +311,27 @@ class RevurderingService(
             logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
             behandlingDao.hentBehandling(opprettBehandling.id)!! as Revurdering
-        }.also { revurdering ->
-            grunnlagService.leggInnNyttGrunnlag(revurdering, persongalleri)
-
-            val oppgave =
-                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                    referanse = revurdering.id.toString(),
-                    sakId = sakId,
-                    oppgaveKilde = OppgaveKilde.BEHANDLING,
-                    oppgaveType = OppgaveType.REVURDERING,
-                    merknad = begrunnelse,
-                )
-            oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
-            behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                revurdering.toStatistikkBehandling(persongalleri),
-                BehandlingHendelseType.OPPRETTET,
+        }.let {
+            RevurderingOgOppfoelging(
+                it,
+                leggInnGrunnlag = { grunnlagService.leggInnNyttGrunnlag(it, persongalleri) },
+                sendMeldingForHendelse = {
+                    behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                        it.toStatistikkBehandling(persongalleri),
+                        BehandlingHendelseType.OPPRETTET,
+                    )
+                },
+                opprettOgTildelOppgave = {
+                    val oppgave =
+                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                            referanse = it.id.toString(),
+                            sakId = sakId,
+                            oppgaveKilde = OppgaveKilde.BEHANDLING,
+                            oppgaveType = OppgaveType.REVURDERING,
+                            merknad = begrunnelse,
+                        )
+                    oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
+                },
             )
         }
 
@@ -361,11 +343,22 @@ class RevurderingService(
         val revurderingInfo = RevurderingInfo.RevurderingAarsakAnnen(fritekstAarsak)
         lagreRevurderingInfo(behandlingId, RevurderingInfoMedBegrunnelse(revurderingInfo, null), saksbehandlerIdent)
     }
+}
 
-    private fun <T : Behandling> T?.sjekkEnhet() =
-        this?.let { behandling ->
-            listOf(behandling).filterBehandlingerForEnheter(
-                Kontekst.get().AppUser,
-            ).firstOrNull()
-        }
+data class RevurderingOgOppfoelging(
+    val revurdering: Revurdering,
+    val leggInnGrunnlag: () -> Unit,
+    val opprettOgTildelOppgave: () -> Unit,
+    val sendMeldingForHendelse: () -> Unit,
+) {
+    fun oppdater(): Revurdering {
+        leggInnGrunnlag()
+        opprettOgTildelOppgave()
+        sendMeldingForHendelse()
+        return revurdering
+    }
+
+    fun behandlingId() = revurdering.id
+
+    fun sakType() = revurdering.sak.sakType
 }

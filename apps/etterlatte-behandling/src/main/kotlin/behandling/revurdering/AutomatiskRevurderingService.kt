@@ -34,6 +34,6 @@ class AutomatiskRevurderingService(private val revurderingService: RevurderingSe
             boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
             begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
             saksbehandlerIdent = Fagsaksystem.EY.navn,
-        )
+        ).oppdater()
     }
 }

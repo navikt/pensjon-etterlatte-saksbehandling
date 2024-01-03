@@ -312,21 +312,27 @@ class RevurderingService(
 
             behandlingDao.hentBehandling(opprettBehandling.id)!! as Revurdering
         }.let {
-            RevurderingOgOppfoelging(it, { grunnlagService.leggInnNyttGrunnlag(it, persongalleri) }) { revurdering ->
-                val oppgave =
-                    oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                        referanse = revurdering.id.toString(),
-                        sakId = sakId,
-                        oppgaveKilde = OppgaveKilde.BEHANDLING,
-                        oppgaveType = OppgaveType.REVURDERING,
-                        merknad = begrunnelse,
+            RevurderingOgOppfoelging(
+                it,
+                leggInnGrunnlag = { grunnlagService.leggInnNyttGrunnlag(it, persongalleri) },
+                sendMeldingForHendelse = {
+                    behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
+                        it.toStatistikkBehandling(persongalleri),
+                        BehandlingHendelseType.OPPRETTET,
                     )
-                oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
-                behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
-                    revurdering.toStatistikkBehandling(persongalleri),
-                    BehandlingHendelseType.OPPRETTET,
-                )
-            }
+                },
+                oppfoelging = { revurdering ->
+                    val oppgave =
+                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                            referanse = revurdering.id.toString(),
+                            sakId = sakId,
+                            oppgaveKilde = OppgaveKilde.BEHANDLING,
+                            oppgaveType = OppgaveType.REVURDERING,
+                            merknad = begrunnelse,
+                        )
+                    oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
+                },
+            )
         }
 
     private fun lagreRevurderingsaarsakFritekst(
@@ -343,10 +349,12 @@ data class RevurderingOgOppfoelging(
     val revurdering: Revurdering,
     val leggInnGrunnlag: () -> Unit,
     private val oppfoelging: (Revurdering) -> Unit,
+    val sendMeldingForHendelse: () -> Unit,
 ) {
     fun oppdater(): Revurdering {
         leggInnGrunnlag()
         oppfoelging(revurdering)
+        sendMeldingForHendelse()
         return revurdering
     }
 }

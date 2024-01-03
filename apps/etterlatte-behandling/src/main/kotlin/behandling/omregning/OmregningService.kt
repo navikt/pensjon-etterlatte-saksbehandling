@@ -31,20 +31,18 @@ class OmregningService(
         forrigeBehandling: Behandling,
         persongalleri: Persongalleri,
     ): Pair<UUID, SakType> {
+        if (prosessType == Prosesstype.MANUELL) {
+            throw Exception("Støtter ikke prosesstype MANUELL")
+        }
         val behandling =
-            when (prosessType) {
-                Prosesstype.AUTOMATISK ->
-                    revurderingService.opprettAutomatiskRevurdering(
-                        sakId = sakId,
-                        forrigeBehandling = forrigeBehandling,
-                        revurderingAarsak = Revurderingaarsak.REGULERING,
-                        virkningstidspunkt = fraDato,
-                        kilde = Vedtaksloesning.GJENNY,
-                        persongalleri = persongalleri,
-                    )?.oppdater()
-
-                Prosesstype.MANUELL -> throw Exception("Støtter ikke prosesstype MANUELL")
-            } ?: throw Exception("Opprettelse av revurdering feilet for $sakId")
+            revurderingService.opprettAutomatiskRevurdering(
+                sakId = sakId,
+                forrigeBehandling = forrigeBehandling,
+                revurderingAarsak = Revurderingaarsak.REGULERING,
+                virkningstidspunkt = fraDato,
+                kilde = Vedtaksloesning.GJENNY,
+                persongalleri = persongalleri,
+            )?.oppdater() ?: throw Exception("Opprettelse av revurdering feilet for $sakId")
         return Pair(behandling.id, behandling.sak.sakType)
     }
 }

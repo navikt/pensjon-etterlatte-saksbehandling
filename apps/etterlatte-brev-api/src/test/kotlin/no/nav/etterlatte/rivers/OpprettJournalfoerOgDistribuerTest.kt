@@ -5,7 +5,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.etterlatte.brev.VedtaksbrevService
-import no.nav.etterlatte.brev.distribusjon.DistribusjonService
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
@@ -54,8 +54,8 @@ internal class OpprettJournalfoerOgDistribuer {
                 coEvery { it.hentBrev(any()) } returns brev
             }
         val distribusjonService =
-            mockk<DistribusjonService>().also {
-                coEvery { it.distribuerJournalpost(brev.id, any(), any(), any(), any()) } returns ""
+            mockk<Brevdistribuerer>().also {
+                coEvery { it.distribuer(brev.id, any(), any()) } returns ""
             }
         val testRapid =
             TestRapid().apply {
@@ -100,8 +100,8 @@ internal class OpprettJournalfoerOgDistribuer {
                 coEvery { it.ferdigstillVedtaksbrev(behandlingId, any(), true) } just runs
             }
         val distribusjonService =
-            mockk<DistribusjonService>().also {
-                coEvery { it.distribuerJournalpost(brev.id, any(), any(), any(), any()) } returns ""
+            mockk<Brevdistribuerer>().also {
+                coEvery { it.distribuer(brev.id, any(), any()) } returns ""
             }
         val testRapid =
             TestRapid().apply {

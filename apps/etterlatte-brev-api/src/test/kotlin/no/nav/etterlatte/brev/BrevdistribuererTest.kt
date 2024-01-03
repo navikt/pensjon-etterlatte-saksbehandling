@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType

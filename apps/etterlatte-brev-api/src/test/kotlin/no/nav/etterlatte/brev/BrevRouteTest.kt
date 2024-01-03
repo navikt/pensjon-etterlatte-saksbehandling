@@ -24,6 +24,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.BrevService.BrevPayload
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev

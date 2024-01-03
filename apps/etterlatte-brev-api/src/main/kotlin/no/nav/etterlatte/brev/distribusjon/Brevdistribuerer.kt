@@ -1,10 +1,6 @@
-package no.nav.etterlatte.brev
+package no.nav.etterlatte.brev.distribusjon
 
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.distribusjon.BestillingsID
-import no.nav.etterlatte.brev.distribusjon.DistribusjonService
-import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
-import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Status
 import org.slf4j.LoggerFactory

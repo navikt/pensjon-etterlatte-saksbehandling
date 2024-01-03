@@ -6,8 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.VedtaksbrevService
-import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
-import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
@@ -22,9 +21,9 @@ import java.util.UUID
 
 internal class DistribuerBrevRiverTest {
     private val brevService = mockk<VedtaksbrevService>()
-    private val distribusjonService = mockk<DistribusjonServiceImpl>(relaxed = true)
+    private val brevdistribuerer = mockk<Brevdistribuerer>(relaxed = true)
 
-    private val inspector = TestRapid().apply { DistribuerBrevRiver(this, distribusjonService) }
+    private val inspector = TestRapid().apply { DistribuerBrevRiver(this, brevdistribuerer) }
 
     private val brevId = 100L
     private val journalpostId = "11111"
@@ -42,7 +41,7 @@ internal class DistribuerBrevRiverTest {
     fun before() = clearAllMocks()
 
     @AfterEach
-    fun after() = confirmVerified(distribusjonService, brevService)
+    fun after() = confirmVerified(brevdistribuerer, brevService)
 
     @Test
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
@@ -67,15 +66,7 @@ internal class DistribuerBrevRiverTest {
         inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         verify(exactly = 1) {
-            brevService.hentBrev(brevId)
-
-            distribusjonService.distribuerJournalpost(
-                brevId,
-                journalpostId,
-                DistribusjonsType.VEDTAK,
-                DistribusjonsTidspunktType.KJERNETID,
-                adresse,
-            )
+            brevdistribuerer.distribuer(brevId, DistribusjonsType.VEDTAK, journalpostId)
         }
     }
 }

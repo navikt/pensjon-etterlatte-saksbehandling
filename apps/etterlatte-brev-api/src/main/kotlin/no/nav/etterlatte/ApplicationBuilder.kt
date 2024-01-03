@@ -6,7 +6,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
-import no.nav.etterlatte.brev.Brevdistribuerer
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -20,6 +19,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONParagraphMixIn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
@@ -214,7 +214,7 @@ class ApplicationBuilder {
 
                 JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
-                DistribuerBrevRiver(this, distribusjonService)
+                DistribuerBrevRiver(this, brevdistribuerer)
             }
 
     private fun fiksEnkeltbrev() {

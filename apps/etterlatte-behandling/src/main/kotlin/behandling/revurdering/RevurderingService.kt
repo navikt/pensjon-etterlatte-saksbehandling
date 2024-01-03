@@ -312,9 +312,7 @@ class RevurderingService(
 
             behandlingDao.hentBehandling(opprettBehandling.id)!! as Revurdering
         }.let {
-            RevurderingOgOppfoelging(it) { revurdering ->
-                grunnlagService.leggInnNyttGrunnlag(revurdering, persongalleri)
-
+            RevurderingOgOppfoelging(it, { grunnlagService.leggInnNyttGrunnlag(it, persongalleri) }) { revurdering ->
                 val oppgave =
                     oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                         referanse = revurdering.id.toString(),
@@ -341,8 +339,13 @@ class RevurderingService(
     }
 }
 
-data class RevurderingOgOppfoelging(val revurdering: Revurdering, private val oppfoelging: (Revurdering) -> Unit) {
+data class RevurderingOgOppfoelging(
+    val revurdering: Revurdering,
+    val leggInnGrunnlag: () -> Unit,
+    private val oppfoelging: (Revurdering) -> Unit,
+) {
     fun oppdater(): Revurdering {
+        leggInnGrunnlag()
         oppfoelging(revurdering)
         return revurdering
     }

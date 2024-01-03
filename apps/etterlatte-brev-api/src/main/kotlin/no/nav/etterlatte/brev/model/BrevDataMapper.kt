@@ -31,6 +31,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
+import no.nav.etterlatte.brev.model.bp.AvslagBrevData
 import no.nav.etterlatte.brev.model.bp.EndringHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
@@ -426,7 +427,16 @@ class BrevDataMapper(
                 }
             }
 
-            BARNEPENSJON_AVSLAG -> ManueltBrevData.fra(innholdMedVedlegg.innhold())
+            BARNEPENSJON_AVSLAG -> {
+                coroutineScope {
+                    AvslagBrevData.fra(
+                        innhold = innholdMedVedlegg,
+                        // TODO må kunne sette brevutfall ved avslag. Det er pr nå ikke mulig da dette ligger i beregningssteget.
+                        brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
+                        utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+                    )
+                }
+            }
 
             OMS_FOERSTEGANGSVEDTAK_INNVILGELSE -> {
                 coroutineScope {

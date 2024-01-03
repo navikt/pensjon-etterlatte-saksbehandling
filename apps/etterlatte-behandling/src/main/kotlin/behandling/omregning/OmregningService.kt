@@ -5,11 +5,11 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
+import no.nav.etterlatte.behandling.revurdering.RevurderingOgOppfoelging
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.LocalDate
 import java.util.UUID
 
@@ -30,11 +30,11 @@ class OmregningService(
         prosessType: Prosesstype,
         forrigeBehandling: Behandling,
         persongalleri: Persongalleri,
-    ): Pair<UUID, SakType> {
+    ): RevurderingOgOppfoelging {
         if (prosessType == Prosesstype.MANUELL) {
             throw Exception("Støtter ikke prosesstype MANUELL")
         }
-        val behandling =
+        return requireNotNull(
             revurderingService.opprettAutomatiskRevurdering(
                 sakId = sakId,
                 forrigeBehandling = forrigeBehandling,
@@ -42,7 +42,9 @@ class OmregningService(
                 virkningstidspunkt = fraDato,
                 kilde = Vedtaksloesning.GJENNY,
                 persongalleri = persongalleri,
-            )?.oppdater() ?: throw Exception("Opprettelse av revurdering feilet for $sakId")
-        return Pair(behandling.id, behandling.sak.sakType)
+            ),
+        ) {
+            throw Exception("Opprettelse av revurdering feilet for $sakId")
+        }
     }
 }

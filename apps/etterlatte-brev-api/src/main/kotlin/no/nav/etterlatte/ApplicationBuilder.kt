@@ -6,6 +6,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.Brevdistribuerer
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -163,10 +164,11 @@ class ApplicationBuilder {
             soekerService,
             adresseService,
             dokarkivService,
-            distribusjonService,
             brevbakerService,
             brevdataFacade,
         )
+
+    private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
@@ -190,7 +192,7 @@ class ApplicationBuilder {
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, tilgangssjekker)
+                    brevRoute(brevService, brevdistribuerer, tilgangssjekker)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(journalpostService, dokarkivService, tilgangssjekker)
                 }

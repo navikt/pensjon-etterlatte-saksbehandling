@@ -16,8 +16,6 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
-import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
-import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -64,7 +62,6 @@ internal class BrevServiceTest {
             soekerService,
             adresseService,
             dokarkivService,
-            distribusjonService,
             BrevbakerService(brevbaker, adresseService, brevDataMapper),
             brevDataFacade,
         )
@@ -203,71 +200,6 @@ internal class BrevServiceTest {
                 assertThrows<IllegalStateException> {
                     brevService.journalfoer(brev.id, bruker)
                 }
-            }
-
-            verify {
-                db.hentBrev(brev.id)
-            }
-        }
-    }
-
-    @Nested
-    inner class DistribusjonAvBrev {
-        @Test
-        fun `Distribusjon fungerer som forventet`() {
-            val brev = opprettBrev(Status.JOURNALFOERT, BrevProsessType.MANUELL)
-            val journalpostId = "1"
-
-            every { db.hentBrev(any()) } returns brev
-            every { db.hentJournalpostId(any()) } returns journalpostId
-            every { distribusjonService.distribuerJournalpost(any(), any(), any(), any(), any()) } returns "123"
-
-            val bestillingsID = brevService.distribuer(brev.id)
-            bestillingsID shouldBe "123"
-
-            verify {
-                db.hentBrev(brev.id)
-                db.hentJournalpostId(brev.id)
-                distribusjonService.distribuerJournalpost(
-                    brev.id,
-                    journalpostId,
-                    DistribusjonsType.ANNET,
-                    DistribusjonsTidspunktType.KJERNETID,
-                    brev.mottaker!!.adresse,
-                )
-            }
-        }
-
-        @Test
-        fun `Distribusjon avbrytes hvis journalpostId mangler`() {
-            val brev = opprettBrev(Status.JOURNALFOERT, BrevProsessType.MANUELL)
-
-            every { db.hentBrev(any()) } returns brev
-            every { db.hentJournalpostId(any()) } returns null
-
-            assertThrows<IllegalArgumentException> {
-                brevService.distribuer(brev.id)
-            }
-
-            verify {
-                db.hentBrev(brev.id)
-                db.hentJournalpostId(brev.id)
-            }
-        }
-
-        @ParameterizedTest
-        @EnumSource(
-            Status::class,
-            mode = EnumSource.Mode.EXCLUDE,
-            names = ["JOURNALFOERT"],
-        )
-        fun `Distribusjon avbrytes ved feil status`(status: Status) {
-            val brev = opprettBrev(status, BrevProsessType.MANUELL)
-
-            every { db.hentBrev(any()) } returns brev
-
-            assertThrows<IllegalStateException> {
-                brevService.distribuer(brev.id)
             }
 
             verify {

@@ -34,6 +34,7 @@ inline val PipelineContext<*, ApplicationCall>.brevId: Long
 @OptIn(ExperimentalTime::class)
 fun Route.brevRoute(
     service: BrevService,
+    distribuerer: Brevdistribuerer,
     tilgangssjekker: Tilgangssjekker,
 ) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.BrevRoute")
@@ -117,7 +118,7 @@ fun Route.brevRoute(
 
         post("distribuer") {
             withSakId(tilgangssjekker, skrivetilgang = true) {
-                val bestillingsId = service.distribuer(brevId)
+                val bestillingsId = distribuerer.distribuer(brevId)
 
                 call.respond(BestillingsIdDto(bestillingsId))
             }

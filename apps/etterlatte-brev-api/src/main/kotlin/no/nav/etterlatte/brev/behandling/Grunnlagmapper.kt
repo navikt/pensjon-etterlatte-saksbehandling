@@ -171,6 +171,7 @@ private fun Grunnlag.erOver18(brevutfallDto: BrevutfallDto?): Boolean {
         return true
     }
     // TODO henting fra PDL skal fjernes når migrering er unnagjort. Da kan vi alltid bruke brevutfall
+    // TODO denne brukes nå også midlertidig av avslagsbrev siden vi ikke har noe brevutfall der enda
     val dato18Aar =
         requireNotNull(this.soeker.hentFoedselsdato()) {
             "Barnet har ikke fødselsdato i grunnlag. Dette skal ikke skje, vi " +

@@ -148,21 +148,26 @@ class DokarkivServiceImpl(
         brevId: BrevID,
         vedtak: VedtakTilJournalfoering,
     ): OpprettJournalpostRequest {
-        val innhold = requireNotNull(db.hentBrevInnhold(brevId))
-        val pdf = requireNotNull(db.hentPdf(brevId))
+        val brukerident = vedtak.sak.ident
+        val eksternReferansePrefiks = vedtak.behandlingId
+        val sakId = vedtak.sak.id
+        val sak = vedtak.sak
+        val journalfoerendeEnhet = vedtak.ansvarligEnhet
         val brev = requireNotNull(db.hentBrev(brevId))
 
+        val innhold = requireNotNull(db.hentBrevInnhold(brevId))
+        val pdf = requireNotNull(db.hentPdf(brevId))
         return OpprettJournalpostRequest(
             tittel = innhold.tittel,
             journalposttype = JournalPostType.UTGAAENDE,
             avsenderMottaker = brev.avsenderMottaker(),
-            bruker = Bruker(vedtak.sak.ident),
-            eksternReferanseId = "${vedtak.behandlingId}.$brevId",
-            sak = JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString()),
+            bruker = Bruker(brukerident),
+            eksternReferanseId = "$eksternReferansePrefiks.$brevId",
+            sak = JournalpostSak(Sakstype.FAGSAK, sakId.toString()),
             dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
-            tema = vedtak.sak.sakType.tema,
+            tema = sak.sakType.tema,
             kanal = "S",
-            journalfoerendeEnhet = vedtak.ansvarligEnhet,
+            journalfoerendeEnhet = journalfoerendeEnhet,
         )
     }
 
@@ -170,20 +175,25 @@ class DokarkivServiceImpl(
         brev: Brev,
         sak: Sak,
     ): OpprettJournalpostRequest {
-        val innhold = requireNotNull(db.hentBrevInnhold(brev.id))
-        val pdf = requireNotNull(db.hentPdf(brev.id))
+        val brukerident = brev.soekerFnr
+        val eksternReferansePrefiks = brev.sakId
+        val sakId = brev.sakId
+        val journalfoerendeEnhet = sak.enhet
+        val brevId = brev.id
 
+        val innhold = requireNotNull(db.hentBrevInnhold(brevId))
+        val pdf = requireNotNull(db.hentPdf(brevId))
         return OpprettJournalpostRequest(
             tittel = innhold.tittel,
             journalposttype = JournalPostType.UTGAAENDE,
             avsenderMottaker = brev.avsenderMottaker(),
-            bruker = Bruker(brev.soekerFnr),
-            eksternReferanseId = "${brev.sakId}.${brev.id}",
-            sak = JournalpostSak(Sakstype.FAGSAK, brev.sakId.toString()),
+            bruker = Bruker(brukerident),
+            eksternReferanseId = "$eksternReferansePrefiks.$brevId",
+            sak = JournalpostSak(Sakstype.FAGSAK, sakId.toString()),
             dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
             tema = sak.sakType.tema,
             kanal = "S",
-            journalfoerendeEnhet = sak.enhet,
+            journalfoerendeEnhet = journalfoerendeEnhet,
         )
     }
 

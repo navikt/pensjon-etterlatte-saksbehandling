@@ -235,7 +235,7 @@ class PersonHendelseFordeler(
     ) {
         logger.info(
             "Publiserer at en person med fnr=${hendelse.fnr.maskerFnr()} har mottatt hendelse " +
-                "med id=${hendelse.hendelseId} og type=$opplysningstype",
+                "med id=${hendelse.hendelseId}, endringstype=${hendelse.endringstype} og type=$opplysningstype",
         )
 
         kafkaProduser.publiser(

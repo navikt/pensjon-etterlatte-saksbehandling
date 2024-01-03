@@ -15,7 +15,7 @@ import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
 import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
 
-import { isFailureWithCode, isFailure, isPending } from '~shared/api/apiUtils'
+import { isFailure, isFailureWithCode, isPending } from '~shared/api/apiUtils'
 
 type Props = {
   eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined
@@ -29,21 +29,38 @@ const initialState = (type: ITrygdetidGrunnlagType) => {
   return { type: type, bosted: '', poengInnAar: false, poengUtAar: false, prorata: true }
 }
 
-export const TrygdetidGrunnlag: React.FC<Props> = ({
+function finnFeilITrygdetidgrunnlag(trygdetidgrunnlag: OppdaterTrygdetidGrunnlag): string | null {
+  if (!!trygdetidgrunnlag.periodeFra) {
+    return 'Trygdetidsgrunnlaget mangler periode fra. Legg inn den og lagre på nytt.'
+  }
+  if (!!trygdetidgrunnlag.periodeTil) {
+    return 'Trygdetidsgrunnlaget mangler periode til. Legg inn den og lagre på nytt.'
+  }
+  return null
+}
+
+export const TrygdetidGrunnlag = ({
   eksisterendeGrunnlag,
   setTrygdetid,
   avbryt,
   trygdetidGrunnlagType,
   landListe,
-}) => {
+}: Props) => {
   const { behandlingId } = useParams()
   const [trygdetidgrunnlag, setTrygdetidgrunnlag] = useState<OppdaterTrygdetidGrunnlag>(
     eksisterendeGrunnlag ? eksisterendeGrunnlag : initialState(trygdetidGrunnlagType)
   )
+  const [feilIGrunnlag, setFeilIGrunnlag] = useState<string>('')
   const [trygdetidgrunnlagStatus, requestLagreTrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault()
+    setFeilIGrunnlag('')
+    const feilmelding = finnFeilITrygdetidgrunnlag(trygdetidgrunnlag)
+    if (feilmelding) {
+      setFeilIGrunnlag(feilmelding)
+      return
+    }
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     requestLagreTrygdetidgrunnlag(
       {
@@ -182,6 +199,8 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
                 </>
               )}
             </FormWrapper>
+
+            {feilIGrunnlag.length > 0 && <ApiErrorAlert>{feilIGrunnlag}</ApiErrorAlert>}
 
             <FormKnapper>
               <Button size="small" loading={isPending(trygdetidgrunnlagStatus)} type="submit">

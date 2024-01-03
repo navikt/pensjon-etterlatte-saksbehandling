@@ -22,6 +22,8 @@ interface DokarkivService {
         sak: Sak,
     ): OpprettJournalpostResponse
 
+    suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse
+
     suspend fun oppdater(
         journalpostId: String,
         forsoekFerdistill: Boolean,
@@ -65,7 +67,11 @@ class DokarkivServiceImpl(
         sak: Sak,
     ): OpprettJournalpostResponse = journalfoer(brev.id) { mapTilJournalpostRequest(brev, sak) }
 
-    private suspend fun journalfoer(
+    override suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse {
+        return journalfoer(request.brevId) { mapTilJournalpostRequest(request) }
+    }
+
+    suspend fun journalfoer(
         brevId: BrevID,
         request: () -> OpprettJournalpostRequest,
     ): OpprettJournalpostResponse {
@@ -150,13 +156,15 @@ class DokarkivServiceImpl(
         vedtak: VedtakTilJournalfoering,
     ): OpprettJournalpostRequest =
         mapTilJournalpostRequest(
-            brevId = brevId,
-            brev = requireNotNull(db.hentBrev(brevId)),
-            brukerident = vedtak.sak.ident,
-            eksternReferansePrefiks = vedtak.behandlingId,
-            sakId = vedtak.sak.id,
-            sakType = vedtak.sak.sakType,
-            journalfoerendeEnhet = vedtak.ansvarligEnhet,
+            JournalfoeringsMappingRequest(
+                brevId = brevId,
+                brev = requireNotNull(db.hentBrev(brevId)),
+                brukerident = vedtak.sak.ident,
+                eksternReferansePrefiks = vedtak.behandlingId,
+                sakId = vedtak.sak.id,
+                sakType = vedtak.sak.sakType,
+                journalfoerendeEnhet = vedtak.ansvarligEnhet,
+            ),
         )
 
     private fun mapTilJournalpostRequest(
@@ -164,37 +172,31 @@ class DokarkivServiceImpl(
         sak: Sak,
     ): OpprettJournalpostRequest =
         mapTilJournalpostRequest(
-            brevId = brev.id,
-            brev = brev,
-            brukerident = brev.soekerFnr,
-            eksternReferansePrefiks = brev.sakId,
-            sakId = brev.sakId,
-            sakType = sak.sakType,
-            journalfoerendeEnhet = sak.enhet,
+            JournalfoeringsMappingRequest(
+                brevId = brev.id,
+                brev = brev,
+                brukerident = brev.soekerFnr,
+                eksternReferansePrefiks = brev.sakId,
+                sakId = brev.sakId,
+                sakType = sak.sakType,
+                journalfoerendeEnhet = sak.enhet,
+            ),
         )
 
-    private fun mapTilJournalpostRequest(
-        brevId: BrevID,
-        brev: Brev,
-        brukerident: String,
-        eksternReferansePrefiks: Any,
-        sakId: Long,
-        sakType: SakType,
-        journalfoerendeEnhet: String,
-    ): OpprettJournalpostRequest {
-        val innhold = requireNotNull(db.hentBrevInnhold(brevId))
-        val pdf = requireNotNull(db.hentPdf(brevId))
+    private fun mapTilJournalpostRequest(request: JournalfoeringsMappingRequest): OpprettJournalpostRequest {
+        val innhold = requireNotNull(db.hentBrevInnhold(request.brevId))
+        val pdf = requireNotNull(db.hentPdf(request.brevId))
         return OpprettJournalpostRequest(
             tittel = innhold.tittel,
             journalposttype = JournalPostType.UTGAAENDE,
-            avsenderMottaker = brev.avsenderMottaker(),
-            bruker = Bruker(brukerident),
-            eksternReferanseId = "$eksternReferansePrefiks.$brevId",
-            sak = JournalpostSak(Sakstype.FAGSAK, sakId.toString()),
+            avsenderMottaker = request.avsenderMottaker(),
+            bruker = Bruker(request.brukerident),
+            eksternReferanseId = "$request.eksternReferansePrefiks.$request.brevId",
+            sak = JournalpostSak(Sakstype.FAGSAK, request.sakId.toString()),
             dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
-            tema = sakType.tema,
+            tema = request.sakType.tema,
             kanal = "S",
-            journalfoerendeEnhet = journalfoerendeEnhet,
+            journalfoerendeEnhet = request.journalfoerendeEnhet,
         )
     }
 
@@ -204,9 +206,21 @@ class DokarkivServiceImpl(
             brevkode = BREV_KODE,
             dokumentvarianter = listOf(DokumentVariant.ArkivPDF(Base64.getEncoder().encodeToString(bytes))),
         )
+}
 
-    private fun Brev.avsenderMottaker(): AvsenderMottaker {
-        return AvsenderMottaker(
+data class JournalfoeringsMappingRequest(
+    val brevId: BrevID,
+    val brev: Brev,
+    val brukerident: String,
+    val eksternReferansePrefiks: Any,
+    val sakId: Long,
+    val sakType: SakType,
+    val journalfoerendeEnhet: String,
+) {
+    fun avsenderMottaker() = brev.avsenderMottaker()
+
+    private fun Brev.avsenderMottaker(): AvsenderMottaker =
+        AvsenderMottaker(
             id = this.mottaker.foedselsnummer?.value ?: this.mottaker.orgnummer,
             idType =
                 if (this.mottaker.foedselsnummer != null) {
@@ -223,5 +237,4 @@ class DokarkivServiceImpl(
                     this.mottaker.navn
                 },
         )
-    }
 }

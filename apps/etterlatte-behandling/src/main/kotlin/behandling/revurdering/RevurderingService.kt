@@ -29,7 +29,6 @@ import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
-import no.nav.etterlatte.libs.common.behandling.tilVirkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -38,10 +37,8 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -243,32 +240,6 @@ class RevurderingService(
             }
         }
 
-    fun opprettAutomatiskRevurdering(
-        sakId: Long,
-        forrigeBehandling: Behandling,
-        revurderingAarsak: Revurderingaarsak,
-        virkningstidspunkt: LocalDate? = null,
-        kilde: Vedtaksloesning,
-        persongalleri: Persongalleri,
-        mottattDato: String? = null,
-        begrunnelse: String? = null,
-    ) = forrigeBehandling.sjekkEnhet()?.let {
-        opprettRevurdering(
-            sakId = sakId,
-            persongalleri = persongalleri,
-            forrigeBehandling = forrigeBehandling.id,
-            mottattDato = mottattDato,
-            prosessType = Prosesstype.AUTOMATISK,
-            kilde = kilde,
-            revurderingAarsak = revurderingAarsak,
-            virkningstidspunkt = virkningstidspunkt?.tilVirkningstidspunkt("Opprettet automatisk"),
-            utlandstilknytning = forrigeBehandling.utlandstilknytning,
-            boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-            begrunnelse = begrunnelse ?: "Automatisk revurdering - ${revurderingAarsak.name.lowercase()}",
-            saksbehandlerIdent = Fagsaksystem.EY.navn,
-        )
-    }
-
     private fun behandlingErAvTypenRevurderingOgKanEndres(behandlingId: UUID) {
         val behandling = hentBehandling(behandlingId)
         if (behandling?.type != BehandlingType.REVURDERING) {
@@ -289,7 +260,9 @@ class RevurderingService(
         revurderingDao.lagreRevurderingInfo(behandlingId, revurderingInfoMedBegrunnelse, kilde)
     }
 
-    private fun opprettRevurdering(
+    // Denne burde nok ha vore private eller noko, men for å ikkje få ei altfor stor omskriving
+    // gjer eg han til internal for no
+    internal fun opprettRevurdering(
         sakId: Long,
         persongalleri: Persongalleri,
         forrigeBehandling: UUID?,

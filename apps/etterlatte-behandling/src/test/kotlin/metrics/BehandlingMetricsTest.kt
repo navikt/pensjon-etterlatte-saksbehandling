@@ -1,8 +1,9 @@
-package metrics
+package no.nav.etterlatte.metrics
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import io.prometheus.client.CollectorRegistry
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -16,9 +17,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.metrics.BehandlingMetrics
-import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
-import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.AfterAll
@@ -38,6 +36,8 @@ internal class BehandlingMetricsTest {
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingMetrics: BehandlingMetrics
+
+    private val testreg = CollectorRegistry(true)
 
     @BeforeAll
     fun beforeAll() {
@@ -63,7 +63,7 @@ internal class BehandlingMetricsTest {
 
         behandlingMetrikkerDao = BehandlingMetrikkerDao(ds)
         oppgaveDao = OppgaveMetrikkerDao(ds)
-        behandlingMetrics = BehandlingMetrics(oppgaveDao, behandlingMetrikkerDao)
+        behandlingMetrics = BehandlingMetrics(oppgaveDao, behandlingMetrikkerDao, testreg)
 
         behandlingMetrics.run()
     }

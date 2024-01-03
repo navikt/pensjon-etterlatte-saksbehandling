@@ -15,7 +15,7 @@ class BehandlingMetrikkerDao(private val dataSource: DataSource) {
             val statement =
                 it.prepareStatement(
                     """
-                    select count(*), saktype, behandlingstype, revurdering_aarsak, kilde, status,
+                    select count(*) antall, saktype, behandlingstype, revurdering_aarsak, kilde, status,
                        CASE virkningstidspunkt::JSONB -> 'kilde' ->> 'ident'
                            WHEN 'PESYS' THEN 'true'
                            ELSE 'false'
@@ -32,7 +32,7 @@ class BehandlingMetrikkerDao(private val dataSource: DataSource) {
 
     private fun ResultSet.asBehandlingAntall(): BehandlingAntall {
         return BehandlingAntall(
-            antall = getInt("count"),
+            antall = getInt("antall"),
             saktype = SakType.valueOf(getString("saktype")),
             behandlingstype = BehandlingType.valueOf(getString("behandlingstype")),
             revurderingsaarsak = getString("revurdering_aarsak")?.let { Revurderingaarsak.valueOf(it) },

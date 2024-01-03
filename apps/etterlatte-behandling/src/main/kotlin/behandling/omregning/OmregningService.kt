@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import java.time.LocalDate
 import java.util.UUID
 
@@ -32,7 +33,7 @@ class OmregningService(
         persongalleri: Persongalleri,
     ): RevurderingOgOppfoelging {
         if (prosessType == Prosesstype.MANUELL) {
-            throw Exception("Støtter ikke prosesstype MANUELL")
+            throw StoetterIkkeProsesstypeManuell()
         }
         return requireNotNull(
             revurderingService.opprettAutomatiskRevurdering(
@@ -48,3 +49,8 @@ class OmregningService(
         }
     }
 }
+
+class StoetterIkkeProsesstypeManuell : UgyldigForespoerselException(
+    code = "StoetterIkkeProsesstypeManuell",
+    detail = "Støtter ikke omregning for manuell behandling",
+)

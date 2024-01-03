@@ -105,14 +105,14 @@ interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid? {
-        return hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo).firstOrNull()
+        return hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo).minByOrNull { it.ident }
     }
 
     override suspend fun opprettTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
-        return opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo).first()
+        return opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo).minBy { it.ident }
     }
 
     override suspend fun lagreTrygdetidGrunnlag(
@@ -159,7 +159,7 @@ interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
         forrigeBehandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Trygdetid {
-        return kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, brukerTokenInfo).first()
+        return kopierSisteTrygdetidberegninger(behandlingId, forrigeBehandlingId, brukerTokenInfo).minBy { it.ident }
     }
 
     override fun overstyrBeregnetTrygdetid(
@@ -441,7 +441,7 @@ class TrygdetidServiceImpl(
     ): Trygdetid {
         return tilstandssjekk(behandlingId, brukerTokenInfo) {
             val gjeldendeTrygdetid: Trygdetid =
-                trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).firstOrNull()
+                trygdetidRepository.hentTrygdetiderForBehandling(behandlingId).minByOrNull { it.ident }
                     ?: throw Exception("Fant ikke gjeldende trygdetid for behandlingId=$behandlingId")
 
             val sjekketGjeldendeTrygdetid =
@@ -657,7 +657,10 @@ class TrygdetidServiceImpl(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         logger.info("Oppretter manuell overstyrt trygdetid for behandling $behandlingId")
 
-        val avdoed = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede().firstOrNull()
+        val avdoed =
+            grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
+                .hentAvdoede().minByOrNull { it.hentDoedsdato()?.verdi ?: LocalDate.MAX }
+        // TODO: Det er mest sannsynlig den med tidligst dødsdato som er aktuell, men dette er midlertidig løsning
         val trygdetid =
             Trygdetid(
                 sakId = behandling.sak,

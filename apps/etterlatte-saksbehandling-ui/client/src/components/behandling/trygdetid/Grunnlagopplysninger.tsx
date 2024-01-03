@@ -50,9 +50,8 @@ export const Grunnlagopplysninger = ({
             loading={isPending(oppdatertTrygdetid)}
             variant="primary"
             onClick={() =>
-              oppdaterTrygdetidOpplysningsgrunnlag(trygdetid.behandlingId, (oppdaterteTrygdetider) => {
-                const oppdatert = oppdaterteTrygdetider.filter((tid) => tid.id == trygdetid.id)[0]
-                onOppdatert(oppdatert)
+              oppdaterTrygdetidOpplysningsgrunnlag(trygdetid.behandlingId, (oppdatertTrygdetid) => {
+                onOppdatert(oppdatertTrygdetid)
               })
             }
           >

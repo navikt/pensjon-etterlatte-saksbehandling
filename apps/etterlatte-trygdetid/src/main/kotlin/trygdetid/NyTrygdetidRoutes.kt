@@ -68,12 +68,13 @@ fun Route.trygdetidV2(
 
         post("oppdater-opplysningsgrunnlag") {
             withBehandlingId(behandlingKlient) {
-                logger.info("Oppretter trygdetid(er) for behandling $behandlingId")
+                logger.info("Oppdaterer opplysningsgrunnlag på trygdetider for behandling $behandlingId")
 
                 trygdetidService.oppdaterOpplysningsgrunnlagForTrygdetider(behandlingId, brukerTokenInfo)
                 call.respond(
                     trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
-                        .map { it.toDto() },
+                        .minBy { it.ident }
+                        .toDto(),
                 )
             }
         }

@@ -30,7 +30,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     }
 
     fun hentTrygdetid(behandlingId: UUID): Trygdetid? {
-        return hentTrygdetiderForBehandling(behandlingId).firstOrNull()
+        return hentTrygdetiderForBehandling(behandlingId).minByOrNull { it.ident }
     }
 
     fun hentTrygdetiderForBehandling(behandlingId: UUID): List<Trygdetid> =

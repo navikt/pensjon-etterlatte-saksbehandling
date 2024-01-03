@@ -2,7 +2,9 @@ package no.nav.etterlatte.rivers
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.VedtaksbrevService
+import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
+import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -12,7 +14,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -23,6 +24,8 @@ import java.util.UUID
 internal class JournalfoerVedtaksbrevRiver(
     private val rapidsConnection: RapidsConnection,
     private val service: VedtaksbrevService,
+    private val db: BrevRepository,
+    private val dokarkivService: DokarkivServiceImpl,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(JournalfoerVedtaksbrevRiver::class.java)
 
@@ -56,6 +59,7 @@ internal class JournalfoerVedtaksbrevRiver(
                     behandlingId = hentBehandling(packet),
                     ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText(),
                 )
+
             logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
             val behandlingId = vedtak.behandlingId
 
@@ -73,17 +77,8 @@ internal class JournalfoerVedtaksbrevRiver(
                 try {
                     service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
                 } catch (e: Exception) {
-                    val saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText()
-                    if (saksbehandler == Fagsaksystem.EY.navn) {
-                        logger.error(
-                            "Feila på å journalføre brev ${vedtaksbrev.id}. " +
-                                "Dette må følges opp manuelt av migreringsutviklerne.",
-                        )
-                        return
-                    } else {
-                        logger.error("Feila på å journalføre brev ${vedtaksbrev.id}")
-                        throw e
-                    }
+                    logger.error("Feila på å journalføre brev ${vedtaksbrev.id}")
+                    throw e
                 }
 
             logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK")
@@ -94,17 +89,8 @@ internal class JournalfoerVedtaksbrevRiver(
                 response.journalpostId,
             )
         } catch (e: Exception) {
-            val saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText()
-            if (saksbehandler == Fagsaksystem.EY.navn) {
-                logger.error(
-                    "Feila på å journalføre brev for behandling ${hentBehandling(packet)}. " +
-                        "Dette må følges opp manuelt av migreringsutviklerne.",
-                )
-                return
-            } else {
-                logger.error("Feil ved ferdigstilling av vedtaksbrev: ", e)
-                throw e
-            }
+            logger.error("Feil ved ferdigstilling av vedtaksbrev: ", e)
+            throw e
         }
     }
 

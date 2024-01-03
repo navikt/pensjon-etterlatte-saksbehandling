@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling.revurdering
 
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
@@ -12,9 +11,9 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
+import no.nav.etterlatte.behandling.domain.sjekkEnhet
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
-import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
@@ -361,11 +360,4 @@ class RevurderingService(
         val revurderingInfo = RevurderingInfo.RevurderingAarsakAnnen(fritekstAarsak)
         lagreRevurderingInfo(behandlingId, RevurderingInfoMedBegrunnelse(revurderingInfo, null), saksbehandlerIdent)
     }
-
-    private fun <T : Behandling> T?.sjekkEnhet() =
-        this?.let { behandling ->
-            listOf(behandling).filterBehandlingerForEnheter(
-                Kontekst.get().AppUser,
-            ).firstOrNull()
-        }
 }

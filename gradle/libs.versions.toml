@@ -3,11 +3,11 @@ avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.9.1" }
 cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
 
 [versions]
-jackson-version = "2.15.3"
+jackson-version = "2.16.1"
 jupiter-version = "5.10.1"
 kotlinx-version = "1.7.3"
 ktor2-version = "2.3.7"
-navfelles-token-version = "3.1.8"
+navfelles-token-version = "3.2.0"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.19.3"
 
@@ -15,9 +15,9 @@ testcontainer-version = "1.19.3"
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.0.0" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.0.0" }
-database-postgresql = { module = "org.postgresql:postgresql", version = "42.6.0" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.4.1" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.4.1" }
+database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.1" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
 jackson-datatypejsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson-version" }
@@ -73,7 +73,7 @@ ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2
 etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.01.02-10.19.0e33fefa10eb"}
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
-logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.9" }
+logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.10" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.14" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "7.4" }
 

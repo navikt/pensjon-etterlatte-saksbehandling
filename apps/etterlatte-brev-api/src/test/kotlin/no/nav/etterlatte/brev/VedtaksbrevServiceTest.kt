@@ -709,7 +709,7 @@ internal class VedtaksbrevServiceTest {
             val forventetBrev = opprettBrev(Status.FERDIGSTILT, mockk())
 
             val forventetResponse = OpprettJournalpostResponse("1", true)
-            coEvery { dokarkivService.journalfoer(any<BrevID>(), any()) } returns forventetResponse
+            coEvery { dokarkivService.journalfoer(any<BrevID>(), any<VedtakTilJournalfoering>()) } returns forventetResponse
 
             val vedtak = opprettVedtak()
 

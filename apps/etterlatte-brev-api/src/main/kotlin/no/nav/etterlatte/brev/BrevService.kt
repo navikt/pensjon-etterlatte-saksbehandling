@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.LanguageCode
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.hentinformasjon.SoekerService
@@ -24,7 +23,6 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -34,9 +32,9 @@ class BrevService(
     private val sakService: SakService,
     private val soekerService: SoekerService,
     private val adresseService: AdresseService,
-    private val dokarkivService: DokarkivService,
     private val brevbakerService: BrevbakerService,
     private val brevDataFacade: BrevdataFacade,
+    private val journalfoerBrevService: JournalfoerBrevService,
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
 
@@ -172,22 +170,7 @@ class BrevService(
     suspend fun journalfoer(
         id: BrevID,
         bruker: BrukerTokenInfo,
-    ): String {
-        val brev = hentBrev(id)
-
-        if (brev.status != Status.FERDIGSTILT) {
-            throw IllegalStateException("Ugyldig status ${brev.status} på brev (id=${brev.id})")
-        }
-
-        val sak = sakService.hentSak(brev.sakId, bruker)
-
-        val response = dokarkivService.journalfoer(brev, sak)
-
-        db.settBrevJournalfoert(brev.id, response)
-        logger.info("Brev med id=${brev.id} markert som journalført")
-
-        return response.journalpostId
-    }
+    ) = journalfoerBrevService.journalfoer(id, bruker)
 
     private fun sjekkOmBrevKanEndres(brevID: BrevID) {
         val brev = db.hentBrev(brevID)

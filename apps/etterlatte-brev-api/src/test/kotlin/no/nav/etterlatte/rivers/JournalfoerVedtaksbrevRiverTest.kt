@@ -8,7 +8,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.brev.VedtaksbrevService
+import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
+import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -39,9 +41,11 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class JournalfoerVedtaksbrevRiverTest {
+    private val db = mockk<BrevRepository>()
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
+    private val dokarkivService = mockk<DokarkivService>()
 
-    private val testRapid = TestRapid().apply { JournalfoerVedtaksbrevRiver(this, vedtaksbrevService) }
+    private val testRapid = TestRapid().apply { JournalfoerVedtaksbrevRiver(this, vedtaksbrevService, db, dokarkivService) }
 
     @BeforeEach
     fun before() = clearMocks(vedtaksbrevService)

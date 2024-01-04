@@ -17,11 +17,6 @@ interface DokarkivService {
         vedtak: VedtakTilJournalfoering,
     ): OpprettJournalpostResponse
 
-    suspend fun journalfoer(
-        brev: Brev,
-        sak: Sak,
-    ): OpprettJournalpostResponse
-
     suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse
 
     suspend fun oppdater(
@@ -61,11 +56,6 @@ class DokarkivServiceImpl(
         brevId: BrevID,
         vedtak: VedtakTilJournalfoering,
     ): OpprettJournalpostResponse = journalfoer(brevId) { mapTilJournalpostRequest(brevId, vedtak) }
-
-    override suspend fun journalfoer(
-        brev: Brev,
-        sak: Sak,
-    ): OpprettJournalpostResponse = journalfoer(brev.id) { mapTilJournalpostRequest(brev, sak) }
 
     override suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse {
         return journalfoer(request.brevId) { mapTilJournalpostRequest(request) }
@@ -167,22 +157,6 @@ class DokarkivServiceImpl(
             ),
         )
 
-    private fun mapTilJournalpostRequest(
-        brev: Brev,
-        sak: Sak,
-    ): OpprettJournalpostRequest =
-        mapTilJournalpostRequest(
-            JournalfoeringsMappingRequest(
-                brevId = brev.id,
-                brev = brev,
-                brukerident = brev.soekerFnr,
-                eksternReferansePrefiks = brev.sakId,
-                sakId = brev.sakId,
-                sakType = sak.sakType,
-                journalfoerendeEnhet = sak.enhet,
-            ),
-        )
-
     private fun mapTilJournalpostRequest(request: JournalfoeringsMappingRequest): OpprettJournalpostRequest {
         val innhold = requireNotNull(db.hentBrevInnhold(request.brevId))
         val pdf = requireNotNull(db.hentPdf(request.brevId))
@@ -191,7 +165,7 @@ class DokarkivServiceImpl(
             journalposttype = JournalPostType.UTGAAENDE,
             avsenderMottaker = request.avsenderMottaker(),
             bruker = Bruker(request.brukerident),
-            eksternReferanseId = "$request.eksternReferansePrefiks.$request.brevId",
+            eksternReferanseId = "${request.eksternReferansePrefiks}.${request.brevId}",
             sak = JournalpostSak(Sakstype.FAGSAK, request.sakId.toString()),
             dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
             tema = request.sakType.tema,

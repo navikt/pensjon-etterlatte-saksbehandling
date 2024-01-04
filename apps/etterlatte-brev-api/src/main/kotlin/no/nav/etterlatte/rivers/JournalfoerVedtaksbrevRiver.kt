@@ -5,7 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
-import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
+import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -26,7 +26,7 @@ internal class JournalfoerVedtaksbrevRiver(
     private val rapidsConnection: RapidsConnection,
     private val service: VedtaksbrevService,
     private val db: BrevRepository,
-    private val dokarkivService: DokarkivServiceImpl,
+    private val dokarkivService: DokarkivService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(JournalfoerVedtaksbrevRiver::class.java)
 

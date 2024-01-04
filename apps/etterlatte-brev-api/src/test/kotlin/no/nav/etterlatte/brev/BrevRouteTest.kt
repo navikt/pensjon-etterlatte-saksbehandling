@@ -24,6 +24,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.BrevService.BrevPayload
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
@@ -53,6 +54,7 @@ internal class BrevRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val brevService = mockk<BrevService>()
+    private val brevdistribuerer = mockk<Brevdistribuerer>()
     private val tilgangssjekker = mockk<Tilgangssjekker>()
 
     @BeforeAll
@@ -253,6 +255,7 @@ internal class BrevRouteTest {
             restModule(this.log, routePrefix = "api") {
                 brevRoute(
                     brevService,
+                    brevdistribuerer,
                     tilgangssjekker,
                 )
             }

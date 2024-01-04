@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerJSONParagraphMixIn
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
@@ -163,10 +164,11 @@ class ApplicationBuilder {
             soekerService,
             adresseService,
             dokarkivService,
-            distribusjonService,
             brevbakerService,
             brevdataFacade,
         )
+
+    private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
@@ -190,7 +192,7 @@ class ApplicationBuilder {
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, tilgangssjekker)
+                    brevRoute(brevService, brevdistribuerer, tilgangssjekker)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(journalpostService, dokarkivService, tilgangssjekker)
                 }
@@ -212,7 +214,7 @@ class ApplicationBuilder {
 
                 JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
-                DistribuerBrevRiver(this, vedtaksbrevService, distribusjonService)
+                DistribuerBrevRiver(this, brevdistribuerer)
             }
 
     private fun fiksEnkeltbrev() {

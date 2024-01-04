@@ -10,6 +10,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.Mottaker
@@ -34,6 +35,7 @@ inline val PipelineContext<*, ApplicationCall>.brevId: Long
 @OptIn(ExperimentalTime::class)
 fun Route.brevRoute(
     service: BrevService,
+    distribuerer: Brevdistribuerer,
     tilgangssjekker: Tilgangssjekker,
 ) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.BrevRoute")
@@ -117,7 +119,7 @@ fun Route.brevRoute(
 
         post("distribuer") {
             withSakId(tilgangssjekker, skrivetilgang = true) {
-                val bestillingsId = service.distribuer(brevId)
+                val bestillingsId = distribuerer.distribuer(brevId)
 
                 call.respond(BestillingsIdDto(bestillingsId))
             }

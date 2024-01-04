@@ -15,7 +15,7 @@ interface DistribusjonService {
     ): BestillingsID
 }
 
-class DistribusjonServiceImpl(
+internal class DistribusjonServiceImpl(
     private val klient: DistribusjonKlient,
     private val db: BrevRepository,
 ) : DistribusjonService {

@@ -16,7 +16,7 @@ import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
 
-import { mapApiResult } from '~shared/api/apiUtils'
+import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 
 enum Fane {
   SAKER = 'SAKER',
@@ -42,10 +42,15 @@ export const Person = () => {
 
   useEffect(() => {
     if (fnrHarGyldigFormat(fnr)) {
-      hentPerson(fnr!!)
       hentSak(fnr!!)
     }
   }, [fnr])
+
+  useEffect(() => {
+    if (isSuccess(sakStatus)) {
+      hentPerson(fnr!!)
+    }
+  }, [sakStatus])
 
   const handleError = (error: ApiError) => {
     if (error.status === 400) {

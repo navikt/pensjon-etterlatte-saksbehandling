@@ -37,7 +37,9 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
         sakStatus,
         <Spinner visible={true} label="Henter sak og behandlinger" />,
         (error) => (
-          <Alert variant="error">{JSON.stringify(error)}</Alert>
+          <MainContent>
+            <Alert variant="error">{JSON.stringify(error)}</Alert>
+          </MainContent>
         ),
         (sakOgBehandlinger) => (
           <>

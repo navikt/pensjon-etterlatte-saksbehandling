@@ -1,6 +1,7 @@
 package no.nav.etterlatte.rivers
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
@@ -75,7 +76,15 @@ internal class JournalfoerVedtaksbrevRiver(
 
             val response =
                 try {
-                    service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
+                    if (vedtaksbrev.status != Status.FERDIGSTILT) {
+                        throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
+                    }
+
+                    val journalfoeringResponse = runBlocking { dokarkivService.journalfoer(vedtaksbrev.id, vedtak) }
+
+                    db.settBrevJournalfoert(vedtaksbrev.id, journalfoeringResponse)
+                    logger.info("Brev med id=${vedtaksbrev.id} markert som journalført")
+                    journalfoeringResponse
                 } catch (e: Exception) {
                     logger.error("Feila på å journalføre brev ${vedtaksbrev.id}")
                     throw e

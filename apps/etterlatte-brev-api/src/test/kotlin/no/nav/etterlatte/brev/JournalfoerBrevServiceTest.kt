@@ -19,7 +19,9 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.Test
@@ -99,6 +101,46 @@ class JournalfoerBrevServiceTest {
         }
     }
 
+    @Test
+    fun `Brev finnes ikke for behandling`() {
+        every { vedtaksbrevService.hentVedtaksbrev(any()) } returns null
+
+        val vedtak = opprettVedtak()
+
+        val service = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
+        assertThrows<NoSuchElementException> {
+            runBlocking { service.journalfoerVedtaksbrev(vedtak) }
+        }
+
+        verify { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
+    }
+
+    @Test
+    fun `Brev er allerede journalfoert`() {
+        val brev =
+            Brev(
+                1,
+                41,
+                BEHANDLING_ID,
+                "tittel",
+                BrevProsessType.AUTOMATISK,
+                "fnr",
+                Status.JOURNALFOERT,
+                Tidspunkt.now(),
+                Tidspunkt.now(),
+                mottaker = mockk(),
+            )
+
+        every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
+
+        val vedtak = opprettVedtak()
+
+        val service = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
+        runBlocking { service.journalfoerVedtaksbrev(vedtak) }
+
+        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
+    }
+
     private fun opprettBrev(
         status: Status,
         prosessType: BrevProsessType,
@@ -130,4 +172,16 @@ class JournalfoerBrevServiceTest {
                     landkode = "NOR",
                 ),
         )
+
+    private fun opprettVedtak(): VedtakTilJournalfoering =
+        VedtakTilJournalfoering(
+            vedtakId = 1L,
+            sak = VedtakSak("Z123456", SakType.BARNEPENSJON, 2L),
+            behandlingId = UUID.randomUUID(),
+            ansvarligEnhet = "1234",
+        )
+
+    private companion object {
+        private val BEHANDLING_ID = UUID.randomUUID()
+    }
 }

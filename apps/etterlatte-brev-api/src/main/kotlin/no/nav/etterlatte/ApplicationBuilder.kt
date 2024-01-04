@@ -215,7 +215,7 @@ class ApplicationBuilder {
 
                 OpprettVedtaksbrevForOmregningNyRegelRiver(this, vedtaksbrevService)
 
-                JournalfoerVedtaksbrevRiver(this, vedtaksbrevService, db, dokarkivService)
+                JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, brevdistribuerer)
             }

@@ -41,7 +41,7 @@ class JournalfoerBrevService(
         ).journalpostId
     }
 
-    suspend fun journalfoerVedtaksbrev(vedtak: VedtakTilJournalfoering): OpprettJournalpostResponse? {
+    suspend fun journalfoerVedtaksbrev(vedtak: VedtakTilJournalfoering): Pair<OpprettJournalpostResponse, BrevID>? {
         logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
         val behandlingId = vedtak.behandlingId
 
@@ -68,6 +68,7 @@ class JournalfoerBrevService(
 
         return journalfoer(brev, mappingRequest)
             .also { logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK") }
+            .let { Pair(it, brev.id) }
     }
 
     private suspend fun journalfoer(

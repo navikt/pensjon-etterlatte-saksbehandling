@@ -2,12 +2,9 @@ package no.nav.etterlatte.rivers
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.VedtaksbrevService
-import no.nav.etterlatte.brev.db.BrevRepository
+import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
-import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -24,9 +21,7 @@ import java.util.UUID
 
 internal class JournalfoerVedtaksbrevRiver(
     private val rapidsConnection: RapidsConnection,
-    private val service: VedtaksbrevService,
-    private val db: BrevRepository,
-    private val dokarkivService: DokarkivService,
+    private val journalfoerBrevService: JournalfoerBrevService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(JournalfoerVedtaksbrevRiver::class.java)
 
@@ -62,40 +57,11 @@ internal class JournalfoerVedtaksbrevRiver(
                 )
 
             logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
-            val behandlingId = vedtak.behandlingId
-
-            val vedtaksbrev =
-                service.hentVedtaksbrev(behandlingId)
-                    ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
-
-            // TODO: Forbedre denne "fiksen". Gjøres nå for å lappe sammen
-            if (vedtaksbrev.status in listOf(Status.JOURNALFOERT, Status.DISTRIBUERT, Status.SLETTET)) {
-                logger.warn("Vedtaksbrev (id=${vedtaksbrev.id}) er allerede ${vedtaksbrev.status}.")
-                return
-            }
-
-            val response =
-                try {
-                    if (vedtaksbrev.status != Status.FERDIGSTILT) {
-                        throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
-                    }
-
-                    val journalfoeringResponse = runBlocking { dokarkivService.journalfoer(vedtaksbrev.id, vedtak) }
-
-                    db.settBrevJournalfoert(vedtaksbrev.id, journalfoeringResponse)
-                    logger.info("Brev med id=${vedtaksbrev.id} markert som journalført")
-                    journalfoeringResponse
-                } catch (e: Exception) {
-                    logger.error("Feila på å journalføre brev ${vedtaksbrev.id}")
-                    throw e
-                }
-
-            logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK")
-
+            val response = runBlocking { journalfoerBrevService.journalfoerVedtaksbrev(vedtak) } ?: return
             rapidsConnection.svarSuksess(
                 packet,
-                vedtaksbrev.id,
-                response.journalpostId,
+                response.second,
+                response.first.journalpostId,
             )
         } catch (e: Exception) {
             logger.error("Feil ved ferdigstilling av vedtaksbrev: ", e)

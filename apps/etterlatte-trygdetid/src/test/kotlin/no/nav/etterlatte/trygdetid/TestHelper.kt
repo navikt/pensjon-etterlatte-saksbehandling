@@ -1,4 +1,4 @@
-package trygdetid
+package no.nav.etterlatte.trygdetid
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -12,21 +12,18 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
+import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.trygdetid.BeregnetTrygdetidGrunnlag
-import no.nav.etterlatte.trygdetid.DetaljertBeregnetTrygdetid
-import no.nav.etterlatte.trygdetid.LandNormalisert
-import no.nav.etterlatte.trygdetid.Opplysningsgrunnlag
-import no.nav.etterlatte.trygdetid.Trygdetid
-import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
-import no.nav.etterlatte.trygdetid.TrygdetidPeriode
-import no.nav.etterlatte.trygdetid.TrygdetidType
 import java.time.LocalDate
 import java.time.Period
 import java.util.UUID
 import java.util.UUID.randomUUID
 
 val saksbehandler = Saksbehandler("token", "ident", null)
+
+private val pdlKilde: Grunnlagsopplysning.Pdl = Grunnlagsopplysning.Pdl(Tidspunkt.now(), null, "opplysningsId1")
+
+private val regelKilde: Grunnlagsopplysning.RegelKilde = Grunnlagsopplysning.RegelKilde("regel", Tidspunkt.now(), "1")
 
 fun behandling(
     behandlingId: UUID = randomUUID(),
@@ -51,10 +48,10 @@ fun behandling(
 fun trygdetid(
     behandlingId: UUID = randomUUID(),
     sakId: Long = 1,
-    ident: String = "en ident",
+    ident: String = GrunnlagTestData().avdoed.foedselsnummer.value,
     beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null,
     trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
-    opplysninger: List<Opplysningsgrunnlag> = emptyList(),
+    opplysninger: List<Opplysningsgrunnlag> = standardOpplysningsgrunnlag(),
 ) = Trygdetid(
     id = randomUUID(),
     sakId = sakId,
@@ -64,6 +61,29 @@ fun trygdetid(
     beregnetTrygdetid = beregnetTrygdetid,
     ident = ident,
 )
+
+fun standardOpplysningsgrunnlag(): List<Opplysningsgrunnlag> {
+    val foedselsdato = LocalDate.of(2000, 1, 1)
+    val doedsdato = LocalDate.of(2020, 1, 1)
+    val seksten = LocalDate.of(2016, 1, 1)
+    val seksti = LocalDate.of(2066, 1, 1)
+
+    return opplysningsgrunnlag(foedselsdato, doedsdato, seksten, seksti)
+}
+
+private fun opplysningsgrunnlag(
+    foedselsdato: LocalDate,
+    doedsdato: LocalDate,
+    seksten: LocalDate,
+    seksti: LocalDate,
+): List<Opplysningsgrunnlag> {
+    return listOf(
+        Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, pdlKilde, foedselsdato),
+        Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, pdlKilde, doedsdato),
+        Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLT_16, regelKilde, seksten),
+        Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FYLLER_66, regelKilde, seksti),
+    )
+}
 
 fun trygdetidGrunnlag(
     beregnetTrygdetidGrunnlag: BeregnetTrygdetidGrunnlag? = beregnetTrygdetidGrunnlag(),

@@ -87,6 +87,7 @@ spec:
         - application: etterlatte-brev-api
         - application: etterlatte-trygdetid-kafka
         - application: etterlatte-beregning-kafka
+        - application: etterlatte-vedtaksvurdering
     outbound:
       rules:
         - application: etterlatte-behandling

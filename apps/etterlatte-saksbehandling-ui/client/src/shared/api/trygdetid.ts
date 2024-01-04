@@ -32,6 +32,9 @@ export const hentAlleLand = async (): Promise<ApiResponse<ILand[]>> =>
 export const oppdaterStatus = async (behandlingId: string): Promise<ApiResponse<StatusOppdatert>> =>
   apiClient.post(`/trygdetid/${behandlingId}/oppdater-status`, {})
 
+export const oppdaterOpplysningsgrunnlag = async (behandlingId: string): Promise<ApiResponse<ITrygdetid>> =>
+  apiClient.post(`/trygdetid_v2/${behandlingId}/oppdater-opplysningsgrunnlag`, {})
+
 export interface StatusOppdatert {
   statusOppdatert: boolean
 }
@@ -138,6 +141,7 @@ export interface ITrygdetid {
   trygdetidGrunnlag: ITrygdetidGrunnlag[]
   opplysninger: IGrunnlagOpplysninger
   overstyrtNorskPoengaar: number | undefined
+  opplysningerDifferanse: IOpplysningerDifferanse | undefined
 }
 
 export interface ITrygdetidOverstyring {
@@ -243,4 +247,9 @@ export interface ILand {
     term: string
     tekst: string
   }
+}
+
+export interface IOpplysningerDifferanse {
+  differanse: Boolean
+  oppdaterteGrunnlagsopplysninger: IGrunnlagOpplysninger
 }

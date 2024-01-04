@@ -41,6 +41,7 @@ import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
@@ -580,6 +581,7 @@ internal class BeregnBarnepensjonServiceTest {
                 trygdetidGrunnlag = emptyList(),
                 opplysninger = GrunnlagOpplysningerDto(null, null, null, null),
                 overstyrtNorskPoengaar = null,
+                opplysningerDifferanse = OpplysningerDifferanse(false, mockk<GrunnlagOpplysningerDto>()),
             )
         featureToggleService.settBryter(BrukNyttRegelverkIBeregning, true)
 

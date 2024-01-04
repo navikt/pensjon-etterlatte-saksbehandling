@@ -1,13 +1,13 @@
-package no.nav.etterlatte.trygdetid.klienter
+package no.nav.etterlatte.vedtaksvurdering.klienter
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.RetryResult
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -15,43 +15,42 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class GrunnlagKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
+class TrygdetidKlientException(override val message: String, override val cause: Throwable) :
+    Exception(message, cause)
 
-class GrunnlagKlient(config: Config, httpClient: HttpClient) {
-    private val logger = LoggerFactory.getLogger(GrunnlagKlient::class.java)
-
+class TrygdetidKlient(config: Config, httpClient: HttpClient) {
+    private val logger = LoggerFactory.getLogger(TrygdetidKlient::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, httpClient)
 
-    private val clientId = config.getString("grunnlag.client.id")
-    private val resourceUrl = config.getString("grunnlag.resource.url")
+    private val clientId = config.getString("trygdetid.client.id")
+    private val resourceUrl = config.getString("trygdetid.resource.url")
 
-    suspend fun hentGrunnlag(
+    suspend fun hentTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Grunnlag {
-        logger.info("Henter grunnlag for behandling med id=$behandlingId")
-
-        return retry<Grunnlag> {
+    ): TrygdetidDto? {
+        logger.info("Henter trygdetid med behandlingid $behandlingId")
+        return retry<TrygdetidDto?> {
             downstreamResourceClient
                 .get(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/api/grunnlag/behandling/$behandlingId",
+                            url = "$resourceUrl/api/trygdetid/$behandlingId",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )
                 .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
-                    throw GrunnlagKlientException(
-                        "Klarte ikke hente grunnlag for behandling med id=$behandlingId",
+                    throw TrygdetidKlientException(
+                        "Klarte ikke hente trygdetid for behandling med behandlingId=$behandlingId",
                         it.samlaExceptions(),
                     )
                 }

@@ -58,8 +58,24 @@ fun Route.trygdetidV2(
         post {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Oppretter trygdetid(er) for behandling $behandlingId")
-                val trygdetid = trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo)
-                call.respond(trygdetid.map { it.toDto() })
+                trygdetidService.opprettTrygdetiderForBehandling(behandlingId, brukerTokenInfo)
+                call.respond(
+                    trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                        .map { it.toDto() },
+                )
+            }
+        }
+
+        post("oppdater-opplysningsgrunnlag") {
+            withBehandlingId(behandlingKlient) {
+                logger.info("Oppdaterer opplysningsgrunnlag på trygdetider for behandling $behandlingId")
+
+                trygdetidService.oppdaterOpplysningsgrunnlagForTrygdetider(behandlingId, brukerTokenInfo)
+                call.respond(
+                    trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                        .minBy { it.ident }
+                        .toDto(),
+                )
             }
         }
 
@@ -68,14 +84,19 @@ fun Route.trygdetidV2(
                 logger.info("Oppdater trygdetid (overstyring) for behandling $behandlingId")
                 val trygdetidOverstyringDto = call.receive<TrygdetidOverstyringDto>()
 
-                val trygdetid =
-                    trygdetidService.overstyrNorskPoengaaarForTrygdetid(
-                        trygdetidOverstyringDto.id,
+                trygdetidService.overstyrNorskPoengaaarForTrygdetid(
+                    trygdetidOverstyringDto.id,
+                    behandlingId,
+                    trygdetidOverstyringDto.overstyrtNorskPoengaar,
+                    brukerTokenInfo,
+                )
+                call.respond(
+                    trygdetidService.hentTrygdetidIBehandlingMedId(
                         behandlingId,
-                        trygdetidOverstyringDto.overstyrtNorskPoengaar,
+                        trygdetidOverstyringDto.id,
                         brukerTokenInfo,
-                    )
-                call.respond(trygdetid.toDto())
+                    )!!.toDto(),
+                )
             }
         }
 
@@ -90,17 +111,32 @@ fun Route.trygdetidV2(
                         trygdetidId(),
                         trygdetidgrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo),
                         brukerTokenInfo,
-                    ).let { trygdetid -> call.respond(trygdetid.toDto()) }
+                    )
+                    call.respond(
+                        trygdetidService.hentTrygdetidIBehandlingMedId(
+                            behandlingId,
+                            trygdetidId(),
+                            brukerTokenInfo,
+                        )!!.toDto(),
+                    )
                 }
             }
 
             post("/grunnlag/yrkesskade") {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     logger.info("Legger til yrkesskade trygdetidsgrunnlag for behandling $behandlingId")
-                    trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
-                        behandlingId,
-                        brukerTokenInfo,
-                    ).let { trygdetid -> call.respond(trygdetid.toDto()) }
+                    val trygdetid =
+                        trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
+                            behandlingId,
+                            brukerTokenInfo,
+                        )
+                    call.respond(
+                        trygdetidService.hentTrygdetidIBehandlingMedId(
+                            behandlingId,
+                            trygdetid.id,
+                            brukerTokenInfo,
+                        )!!.toDto(),
+                    )
                 }
             }
 
@@ -108,14 +144,19 @@ fun Route.trygdetidV2(
                 withBehandlingId(behandlingKlient, skrivetilgang = true) {
                     withParam("trygdetidGrunnlagId") { trygdetidGrunnlagId ->
                         logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingId")
-                        val trygdetid =
-                            trygdetidService.slettTrygdetidGrunnlagForTrygdetid(
+                        trygdetidService.slettTrygdetidGrunnlagForTrygdetid(
+                            behandlingId,
+                            trygdetidId(),
+                            trygdetidGrunnlagId,
+                            brukerTokenInfo,
+                        )
+                        call.respond(
+                            trygdetidService.hentTrygdetidIBehandlingMedId(
                                 behandlingId,
                                 trygdetidId(),
-                                trygdetidGrunnlagId,
                                 brukerTokenInfo,
-                            )
-                        call.respond(trygdetid.toDto())
+                            )!!.toDto(),
+                        )
                     }
                 }
             }
@@ -136,12 +177,15 @@ fun Route.trygdetidV2(
 
                 val overstyringDto = call.receive<MigreringOverstyringDto>()
 
+                trygdetidService.overstyrBeregnetTrygdetidForAvdoed(
+                    behandlingId,
+                    overstyringDto.ident,
+                    overstyringDto.detaljertBeregnetTrygdetidResultat,
+                )
                 call.respond(
-                    trygdetidService.overstyrBeregnetTrygdetidForAvdoed(
-                        behandlingId,
-                        overstyringDto.ident,
-                        overstyringDto.detaljertBeregnetTrygdetidResultat,
-                    ).toDto(),
+                    trygdetidService.hentTrygdetiderIBehandling(behandlingId, brukerTokenInfo)
+                        .first { trygdetid -> trygdetid.ident == overstyringDto.ident }
+                        .toDto(),
                 )
             }
         }

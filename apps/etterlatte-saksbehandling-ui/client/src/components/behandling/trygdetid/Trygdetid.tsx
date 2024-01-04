@@ -17,7 +17,7 @@ import { BodyShort, Heading } from '@navikt/ds-react'
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
-import { IBehandlingStatus, IDetaljertBehandling, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
@@ -146,7 +146,7 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
       </LovtekstMedLenke>
       {trygdetid && landListe && (
         <>
-          <Grunnlagopplysninger opplysninger={trygdetid.opplysninger} />
+          <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} />
 
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}

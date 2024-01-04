@@ -1,4 +1,4 @@
-package trygdetid.regler
+package no.nav.etterlatte.trygdetid.regler
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.IntBroek
@@ -13,18 +13,6 @@ import no.nav.etterlatte.trygdetid.LandNormalisert
 import no.nav.etterlatte.trygdetid.TrygdetidGrunnlag
 import no.nav.etterlatte.trygdetid.TrygdetidPeriode
 import no.nav.etterlatte.trygdetid.TrygdetidType
-import no.nav.etterlatte.trygdetid.regler.TotalTrygdetidGrunnlag
-import no.nav.etterlatte.trygdetid.regler.TrygdetidGrunnlagMedAvdoed
-import no.nav.etterlatte.trygdetid.regler.TrygdetidGrunnlagMedAvdoedGrunnlag
-import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeGrunnlag
-import no.nav.etterlatte.trygdetid.regler.TrygdetidPeriodeMedPoengaar
-import no.nav.etterlatte.trygdetid.regler.beregnAntallAarTotalTrygdetid
-import no.nav.etterlatte.trygdetid.regler.beregnDetaljertBeregnetTrygdetid
-import no.nav.etterlatte.trygdetid.regler.beregnTrygdetidForPeriode
-import no.nav.etterlatte.trygdetid.regler.dagerPrMaanedTrygdetid
-import no.nav.etterlatte.trygdetid.regler.maksTrygdetid
-import no.nav.etterlatte.trygdetid.regler.totalTrygdetidAvrundet
-import no.nav.etterlatte.trygdetid.regler.totalTrygdetidFraPerioder
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments

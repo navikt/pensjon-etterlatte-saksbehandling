@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -63,6 +64,7 @@ internal class MigreringHendelserRiverTest {
                     ),
                 overstyrtNorskPoengaar = null,
                 ident = AVDOED_FOEDSELSNUMMER.value,
+                opplysningerDifferanse = dummyOpplysningerDifferanse(),
             )
         val request =
             MigreringRequest(
@@ -178,6 +180,7 @@ internal class MigreringHendelserRiverTest {
                     ),
                 overstyrtNorskPoengaar = null,
                 ident = AVDOED_FOEDSELSNUMMER.value,
+                opplysningerDifferanse = dummyOpplysningerDifferanse(),
             )
         val request =
             MigreringRequest(
@@ -269,6 +272,7 @@ internal class MigreringHendelserRiverTest {
                     ),
                 overstyrtNorskPoengaar = null,
                 ident = AVDOED_FOEDSELSNUMMER.value,
+                opplysningerDifferanse = dummyOpplysningerDifferanse(),
             )
         val request =
             MigreringRequest(
@@ -387,6 +391,7 @@ internal class MigreringHendelserRiverTest {
                     ),
                 overstyrtNorskPoengaar = null,
                 ident = AVDOED_FOEDSELSNUMMER.value,
+                opplysningerDifferanse = dummyOpplysningerDifferanse(),
             )
         val request =
             MigreringRequest(
@@ -510,6 +515,7 @@ internal class MigreringHendelserRiverTest {
                     ),
                 overstyrtNorskPoengaar = null,
                 ident = AVDOED_FOEDSELSNUMMER.value,
+                opplysningerDifferanse = dummyOpplysningerDifferanse(),
             )
         val request =
             MigreringRequest(
@@ -554,5 +560,12 @@ internal class MigreringHendelserRiverTest {
         coVerify(exactly = 0) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }
         coVerify(exactly = 0) { trygdetidService.overstyrBeregnetTrygdetid(behandlingId.captured, any()) }
         coVerify(exactly = 1) { trygdetidService.opprettGrunnlagVedYrkesskade(behandlingId.captured) }
+    }
+
+    private fun dummyOpplysningerDifferanse(): OpplysningerDifferanse {
+        return OpplysningerDifferanse(
+            false,
+            GrunnlagOpplysningerDto(null, null, null, null),
+        )
     }
 }

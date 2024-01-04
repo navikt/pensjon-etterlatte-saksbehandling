@@ -24,6 +24,7 @@ import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlientImpl
+import no.nav.etterlatte.vedtaksvurdering.klienter.TrygdetidKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.VilkaarsvurderingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.samordningsvedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.tilbakekrevingvedtakRoute
@@ -63,6 +64,7 @@ class ApplicationBuilder {
                 azureAppScope = config.getString("samordnevedtak.azure.scope"),
             ),
         )
+    private val trygdetidKlient = TrygdetidKlient(config, httpClient())
     private val vedtaksvurderingService =
         VedtaksvurderingService(repository = VedtaksvurderingRepository.using(dataSource))
     private val vedtakBehandlingService =
@@ -72,6 +74,8 @@ class ApplicationBuilder {
             vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient()),
             behandlingKlient = behandlingKlient,
             samKlient = samKlient,
+            trygdetidKlient = trygdetidKlient,
+            featureToggleService = featureToggleService,
         )
     private val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)
     private val vedtakTilbakekrevingService =
@@ -117,11 +121,11 @@ class ApplicationBuilder {
     ) {
         rapidsConnection.publish(message = melding, key = key.toString())
     }
-}
 
-private fun featureToggleProperties(config: Config) =
-    FeatureToggleProperties(
-        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-        host = config.getString("funksjonsbrytere.unleash.host"),
-        apiKey = config.getString("funksjonsbrytere.unleash.token"),
-    )
+    private fun featureToggleProperties(config: Config) =
+        FeatureToggleProperties(
+            applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
+            host = config.getString("funksjonsbrytere.unleash.host"),
+            apiKey = config.getString("funksjonsbrytere.unleash.token"),
+        )
+}

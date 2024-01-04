@@ -18,9 +18,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
-import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
-import no.nav.etterlatte.libs.common.trygdetid.OpplysningkildeDto
-import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.StatusOppdatertDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
@@ -57,8 +54,8 @@ fun Route.trygdetid(
         post {
             withBehandlingId(behandlingKlient) {
                 logger.info("Oppretter trygdetid for behandling $behandlingId")
-                val trygdetid = trygdetidService.opprettTrygdetid(behandlingId, brukerTokenInfo)
-                call.respond(trygdetid.toDto())
+                trygdetidService.opprettTrygdetid(behandlingId, brukerTokenInfo)
+                call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
             }
         }
 
@@ -67,14 +64,13 @@ fun Route.trygdetid(
                 logger.info("Oppdater trygdetid (overstyring) for behandling $behandlingId")
                 val trygdetidOverstyringDto = call.receive<TrygdetidOverstyringDto>()
 
-                val trygdetid =
-                    trygdetidService.overstyrNorskPoengaar(
-                        trygdetidOverstyringDto.id,
-                        behandlingId,
-                        trygdetidOverstyringDto.overstyrtNorskPoengaar,
-                        brukerTokenInfo,
-                    )
-                call.respond(trygdetid.toDto())
+                trygdetidService.overstyrNorskPoengaar(
+                    trygdetidOverstyringDto.id,
+                    behandlingId,
+                    trygdetidOverstyringDto.overstyrtNorskPoengaar,
+                    brukerTokenInfo,
+                )
+                call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
             }
         }
 
@@ -88,7 +84,8 @@ fun Route.trygdetid(
                         behandlingId,
                         brukerTokenInfo,
                         trygdetidgrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo),
-                    ).let { trygdetid -> call.respond(trygdetid.toDto()) }
+                    )
+                    call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
                 } catch (overlappendePeriodeException: OverlappendePeriodeException) {
                     logger.info("Klarte ikke legge til ny trygdetidsperiode for $behandlingId pga overlapp.")
                     call.respond(HttpStatusCode.Conflict)
@@ -102,7 +99,8 @@ fun Route.trygdetid(
                 trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
                     behandlingId,
                     brukerTokenInfo,
-                ).let { trygdetid -> call.respond(trygdetid.toDto()) }
+                )
+                call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
             }
         }
 
@@ -110,13 +108,14 @@ fun Route.trygdetid(
             withBehandlingId(behandlingKlient) {
                 withParam("trygdetidGrunnlagId") { trygdetidGrunnlagId ->
                     logger.info("Sletter trygdetidsgrunnlag for behandling $behandlingId")
-                    val trygdetid =
-                        trygdetidService.slettTrygdetidGrunnlag(
-                            behandlingId,
-                            trygdetidGrunnlagId,
-                            brukerTokenInfo,
-                        )
-                    call.respond(trygdetid.toDto())
+                    trygdetidService.slettTrygdetidGrunnlag(
+                        behandlingId,
+                        trygdetidGrunnlagId,
+                        brukerTokenInfo,
+                    )
+                    call.respond(
+                        trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto(),
+                    )
                 }
             }
         }
@@ -137,7 +136,8 @@ fun Route.trygdetid(
 
                     val beregnetTrygdetid = call.receive<DetaljertBeregnetTrygdetidResultat>()
 
-                    call.respond(trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid).toDto())
+                    trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
+                    call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
                 }
             }
 
@@ -157,7 +157,7 @@ fun Route.trygdetid(
                     val dto = trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid).toDto()
                     behandlingKlient.settBehandlingStatusTrygdetidOppdatert(dto.behandlingId, brukerTokenInfo)
 
-                    call.respond(dto)
+                    call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
                 }
             }
 
@@ -168,13 +168,12 @@ fun Route.trygdetid(
                     val trygdetid = trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)
 
                     if (trygdetid != null) {
-                        call.respond(
-                            trygdetidService.reberegnUtenFremtidigTrygdetid(
-                                behandlingId,
-                                trygdetid.id,
-                                brukerTokenInfo,
-                            ).toDto(),
-                        )
+                        trygdetidService.reberegnUtenFremtidigTrygdetid(
+                            behandlingId,
+                            trygdetid.id,
+                            brukerTokenInfo,
+                        ).toDto()
+                        call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
                     } else {
                         call.respond(HttpStatusCode.NoContent)
                     }
@@ -201,44 +200,13 @@ fun Trygdetid.toDto(): TrygdetidDto =
         opplysninger = this.opplysninger.toDto(),
         overstyrtNorskPoengaar = this.overstyrtNorskPoengaar,
         ident = this.ident,
+        opplysningerDifferanse = requireNotNull(opplysningerDifferanse),
     )
 
 private fun DetaljertBeregnetTrygdetid.toDto(): DetaljertBeregnetTrygdetidDto =
     DetaljertBeregnetTrygdetidDto(
         resultat = resultat,
         tidspunkt = tidspunkt,
-    )
-
-private fun List<Opplysningsgrunnlag>.toDto(): GrunnlagOpplysningerDto =
-    GrunnlagOpplysningerDto(
-        avdoedFoedselsdato = this.finnOpplysning(TrygdetidOpplysningType.FOEDSELSDATO),
-        avdoedDoedsdato = this.finnOpplysning(TrygdetidOpplysningType.DOEDSDATO),
-        avdoedFylteSeksten = this.finnOpplysning(TrygdetidOpplysningType.FYLT_16),
-        avdoedFyllerSeksti = this.finnOpplysning(TrygdetidOpplysningType.FYLLER_66),
-    )
-
-private fun List<Opplysningsgrunnlag>.finnOpplysning(type: TrygdetidOpplysningType): OpplysningsgrunnlagDto? =
-    this.find { opplysning -> opplysning.type == type }?.toDto()
-
-private fun Opplysningsgrunnlag.toDto(): OpplysningsgrunnlagDto =
-    OpplysningsgrunnlagDto(
-        opplysning = this.opplysning,
-        kilde =
-            when (this.kilde) {
-                is Grunnlagsopplysning.Pdl ->
-                    OpplysningkildeDto(
-                        type = this.kilde.type,
-                        tidspunkt = this.kilde.tidspunktForInnhenting.toString(),
-                    )
-
-                is Grunnlagsopplysning.RegelKilde ->
-                    OpplysningkildeDto(
-                        type = this.kilde.type,
-                        tidspunkt = this.kilde.ts.toString(),
-                    )
-
-                else -> throw Exception("Mangler gyldig kilde for opplysning $id")
-            },
     )
 
 fun TrygdetidGrunnlagDto.toTrygdetidGrunnlag(brukerTokenInfo: BrukerTokenInfo): TrygdetidGrunnlag =

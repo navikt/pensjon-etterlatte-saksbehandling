@@ -152,9 +152,7 @@ class VedtakBehandlingService(
         beregningOgAvkorting: BeregningOgAvkorting?,
         trygdetid: TrygdetidDto?,
     ) {
-        if (featureToggleService.isEnabled(VedtaksvurderingFeatureToggle.ValiderGrunnlagsversjon, false)) {
-            validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetid)
-        }
+        validerVersjon(vilkaarsvurdering, beregningOgAvkorting, trygdetid)
     }
 
     suspend fun attesterVedtak(
@@ -569,7 +567,7 @@ class VedtakBehandlingService(
         return coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             val sak = behandlingKlient.hentSak(behandling.sak, brukerTokenInfo)
-            val trygdetid = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
+            val trygdetid = if (brukTrygdetid()) trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo) else null
 
             when (behandling.behandlingType) {
                 BehandlingType.MANUELT_OPPHOER -> VedtakData(behandling, null, null, sak, trygdetid)
@@ -593,6 +591,13 @@ class VedtakBehandlingService(
                 }
             }
         }
+    }
+
+    private fun brukTrygdetid(): Boolean {
+        return featureToggleService.isEnabled(
+            VedtaksvurderingFeatureToggle.BrukTrygdetidIValiderGrunnlagsversjon,
+            false,
+        )
     }
 
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =

@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
@@ -148,6 +149,9 @@ class BehandlingFactory(
             }
 
         return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
+            if (kilde == Vedtaksloesning.PESYS) {
+                throw ManuellMigreringHarEksisterendeIverksattBehandling()
+            }
             val forrigeBehandling = harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }
             revurderingService.opprettAutomatiskRevurdering(
                 sakId = sakId,
@@ -217,3 +221,8 @@ class BehandlingFactory(
 }
 
 data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveIntern?)
+
+class ManuellMigreringHarEksisterendeIverksattBehandling : UgyldigForespoerselException(
+    code = "MANUELL_MIGRERING_EKSISTERENDE_IVERKSATT",
+    detail = "Det eksisterer allerede en sak med en iverksatt behandling for angitt søker",
+)

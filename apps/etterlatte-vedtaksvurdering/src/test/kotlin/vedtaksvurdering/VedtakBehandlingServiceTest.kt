@@ -117,7 +117,12 @@ internal class VedtakBehandlingServiceTest {
                 trygdetidKlient = trygdetidKlientMock,
                 featureToggleService =
                     DummyFeatureToggleService()
-                        .also { toggle -> toggle.settBryter(VedtaksvurderingFeatureToggle.ValiderGrunnlagsversjon, true) },
+                        .also { toggle ->
+                            toggle.settBryter(
+                                VedtaksvurderingFeatureToggle.BrukTrygdetidIValiderGrunnlagsversjon,
+                                true,
+                            )
+                        },
             )
     }
 

@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
+import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -493,8 +494,10 @@ class TrygdetidServiceImpl(
 
     private fun hentDatoerForBehandling(trygdetid: Trygdetid): DatoerForBehandling =
         DatoerForBehandling(
-            toLocalDate(trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FOEDSELSDATO }),
-            toLocalDate(trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.DOEDSDATO }),
+            toLocalDate(trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FOEDSELSDATO })
+                ?: throw Exception("Fant ikke foedselsdato for avdoed for trygdetidId=${trygdetid.id}"),
+            toLocalDate(trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.DOEDSDATO })
+                ?: throw Exception("Fant ikke doedsdato for avdoed for trygdetidId=${trygdetid.id}"),
         )
 
     override suspend fun slettTrygdetidGrunnlagForTrygdetid(
@@ -813,18 +816,24 @@ class TrygdetidServiceImpl(
     ): OpplysningerDifferanse {
         val nyAvdoedGrunnlag =
             grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).hentAvdoede()
-                .first { it.hentFoedselsnummer()?.verdi?.value == trygdetid.ident }
+                .firstOrNull { it.hentFoedselsnummer()?.verdi?.value == trygdetid.ident }
 
-        val nyeOpplysninger = hentOpplysninger(nyAvdoedGrunnlag, trygdetid.behandlingId)
-        val nyFoedselsdato = nyeOpplysninger.first { it.type == TrygdetidOpplysningType.FOEDSELSDATO }
-        val nyDoedsdato = nyeOpplysninger.first { it.type == TrygdetidOpplysningType.DOEDSDATO }
-        val nyFylt16 = nyeOpplysninger.first { it.type == TrygdetidOpplysningType.FYLT_16 }
-        val nyFyller66 = nyeOpplysninger.first { it.type == TrygdetidOpplysningType.FYLLER_66 }
+        val nyeOpplysninger =
+            if (nyAvdoedGrunnlag != null) hentOpplysninger(nyAvdoedGrunnlag, trygdetid.behandlingId) else emptyList()
 
-        val eksisterendeFoedselsdato = trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FOEDSELSDATO }
-        val eksisterendeDoedsdato = trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.DOEDSDATO }
-        val eksisterendeFylt16 = trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FYLT_16 }
-        val eksisterendeFyller66 = trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FYLLER_66 }
+        if (nyeOpplysninger.isEmpty() && trygdetid.opplysninger.isEmpty()) {
+            return OpplysningerDifferanse(false, GrunnlagOpplysningerDto(null, null, null, null))
+        }
+
+        val nyFoedselsdato = nyeOpplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FOEDSELSDATO }
+        val nyDoedsdato = nyeOpplysninger.firstOrNull { it.type == TrygdetidOpplysningType.DOEDSDATO }
+        val nyFylt16 = nyeOpplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FYLT_16 }
+        val nyFyller66 = nyeOpplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FYLLER_66 }
+
+        val eksisterendeFoedselsdato = trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FOEDSELSDATO }
+        val eksisterendeDoedsdato = trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.DOEDSDATO }
+        val eksisterendeFylt16 = trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FYLT_16 }
+        val eksisterendeFyller66 = trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FYLLER_66 }
         val diff =
             toLocalDate(nyFoedselsdato) != toLocalDate(eksisterendeFoedselsdato) ||
                 toLocalDate(nyDoedsdato) != toLocalDate(eksisterendeDoedsdato) ||
@@ -837,8 +846,10 @@ class TrygdetidServiceImpl(
         )
     }
 
-    private fun toLocalDate(opplysningsgrunnlag: Opplysningsgrunnlag): LocalDate =
-        objectMapper.readValue(opplysningsgrunnlag.opplysning.toString())
+    private fun toLocalDate(opplysningsgrunnlag: Opplysningsgrunnlag?): LocalDate? =
+        opplysningsgrunnlag?.let {
+            objectMapper.readValue(it.opplysning.toString())
+        }
 
     override suspend fun overstyrNorskPoengaaarForTrygdetid(
         trygdetidId: UUID,

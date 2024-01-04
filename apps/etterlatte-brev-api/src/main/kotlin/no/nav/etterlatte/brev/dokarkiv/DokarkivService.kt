@@ -7,16 +7,10 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
 interface DokarkivService {
-    suspend fun journalfoer(
-        brevId: BrevID,
-        vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostResponse
-
     suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse
 
     suspend fun oppdater(
@@ -46,27 +40,15 @@ interface DokarkivService {
     ): KnyttTilAnnenSakResponse
 }
 
-class DokarkivServiceImpl(
+internal class DokarkivServiceImpl(
     private val client: DokarkivKlient,
     private val db: BrevRepository,
 ) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
-    override suspend fun journalfoer(
-        brevId: BrevID,
-        vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostResponse = journalfoer(brevId) { mapTilJournalpostRequest(brevId, vedtak) }
-
     override suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse {
-        return journalfoer(request.brevId) { mapTilJournalpostRequest(request) }
-    }
-
-    private suspend fun journalfoer(
-        brevId: BrevID,
-        request: () -> OpprettJournalpostRequest,
-    ): OpprettJournalpostResponse {
-        logger.info("Oppretter journalpost for brev med id=$brevId")
-        return client.opprettJournalpost(request(), true).also {
+        logger.info("Oppretter journalpost for brev med id=${request.brevId}")
+        return client.opprettJournalpost(mapTilJournalpostRequest(request), true).also {
             logger.info(
                 "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
             )
@@ -140,22 +122,6 @@ class DokarkivServiceImpl(
             logger.info("Journalpost knyttet til annen sak (nyJournalpostId=${it.nyJournalpostId})\n$request")
         }
     }
-
-    private fun mapTilJournalpostRequest(
-        brevId: BrevID,
-        vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostRequest =
-        mapTilJournalpostRequest(
-            JournalfoeringsMappingRequest(
-                brevId = brevId,
-                brev = requireNotNull(db.hentBrev(brevId)),
-                brukerident = vedtak.sak.ident,
-                eksternReferansePrefiks = vedtak.behandlingId,
-                sakId = vedtak.sak.id,
-                sakType = vedtak.sak.sakType,
-                journalfoerendeEnhet = vedtak.ansvarligEnhet,
-            ),
-        )
 
     private fun mapTilJournalpostRequest(request: JournalfoeringsMappingRequest): OpprettJournalpostRequest {
         val innhold = requireNotNull(db.hentBrevInnhold(request.brevId))

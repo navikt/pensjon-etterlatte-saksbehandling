@@ -16,6 +16,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.time.Month
 
 internal class Verifiserer(
     private val repository: PesysRepository,
@@ -41,9 +42,10 @@ internal class Verifiserer(
             val soeker = personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()
             if (soeker != null) {
                 feil.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
-                // TODO
-                feil.addAll(sjekkOmSoekerHarBoddUtland(soeker))
-                feil.addAll(sjekkOmSoekerHarFlereAvoede(request))
+                if (!request.erUnder18) {
+                    feil.addAll(sjekkOmSoekerHarBoddUtland(soeker))
+                    feil.addAll(sjekkOmSoekerHarFlereAvoede(request))
+                }
             }
         }
 
@@ -86,13 +88,13 @@ internal class Verifiserer(
                     val foedselsdato: LocalDate =
                         person.getOrNull()?.foedselsdato?.verdi
                             ?: request.soeker.getBirthDate()
-                    /*
-                    TODO Må fjernes
-                    if (foedselsdato.isBefore(LocalDate.of(2005, Month.DECEMBER, 1)) && !request.dodAvYrkesskade) {
+                    if (foedselsdato.isBefore(LocalDate.of(2005, Month.DECEMBER, 1)) &&
+                        !request.dodAvYrkesskade &&
+                        request.erUnder18
+                    ) {
                         logger.warn("Søker er over 18 år og det er ikke yrkesskade")
                         return listOf(SoekerErOver18)
                     }
-                     */
 
                     if (person.getOrNull()?.doedsdato != null) {
                         return listOf(SoekerErDoed)

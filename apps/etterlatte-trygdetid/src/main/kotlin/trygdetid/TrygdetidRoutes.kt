@@ -154,8 +154,8 @@ fun Route.trygdetid(
                     logger.info("Oppdaterer trygdetid med overstyrt for behandling $behandlingId")
                     val beregnetTrygdetid = call.receive<DetaljertBeregnetTrygdetidResultat>()
 
-                    val dto = trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid).toDto()
-                    behandlingKlient.settBehandlingStatusTrygdetidOppdatert(dto.behandlingId, brukerTokenInfo)
+                    val trygdetid = trygdetidService.overstyrBeregnetTrygdetid(behandlingId, beregnetTrygdetid)
+                    behandlingKlient.settBehandlingStatusTrygdetidOppdatert(trygdetid.behandlingId, brukerTokenInfo)
 
                     call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
                 }
@@ -172,7 +172,7 @@ fun Route.trygdetid(
                             behandlingId,
                             trygdetid.id,
                             brukerTokenInfo,
-                        ).toDto()
+                        )
                         call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
                     } else {
                         call.respond(HttpStatusCode.NoContent)

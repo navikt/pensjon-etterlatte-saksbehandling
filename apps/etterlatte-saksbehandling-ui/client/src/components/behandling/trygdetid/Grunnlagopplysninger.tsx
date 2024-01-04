@@ -77,11 +77,15 @@ const Opplysningsgrunnlag = ({
   opplysningsgrunnlag,
 }: {
   label: string
-  opplysningsgrunnlag: IOpplysningsgrunnlag
+  opplysningsgrunnlag: IOpplysningsgrunnlag | undefined
 }) => (
   <Info
     label={label}
-    tekst={opplysningsgrunnlag.opplysning ? formaterStringDato(opplysningsgrunnlag.opplysning) : 'n/a'}
-    undertekst={opplysningsgrunnlag.kilde.type + ': ' + formaterStringDato(opplysningsgrunnlag.kilde.tidspunkt)}
+    tekst={opplysningsgrunnlag?.opplysning ? formaterStringDato(opplysningsgrunnlag.opplysning) : 'n/a'}
+    undertekst={
+      opplysningsgrunnlag?.kilde
+        ? opplysningsgrunnlag?.kilde.type + ': ' + formaterStringDato(opplysningsgrunnlag?.kilde.tidspunkt)
+        : 'n/a'
+    }
   />
 )

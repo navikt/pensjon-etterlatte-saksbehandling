@@ -89,9 +89,11 @@ const Virkningstidspunkt = (props: {
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
         onSuccess?.()
       },
-      () =>
+      (error) =>
         setErrorTekst(
-          'Kunne ikke sette virkningstidspunkt. Last siden på nytt og prøv igjen, meld sak hvis problemet vedvarer'
+          `Kunne ikke sette virkningstidspunkt. ${
+            error.detail ? error.detail : 'Last siden på nytt og prøv igjen, meld sak hvis problemet vedvarer'
+          }`
         )
     )
   }

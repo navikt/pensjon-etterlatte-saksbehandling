@@ -99,6 +99,7 @@ internal class MigrerSpesifikkSakRiver(
             sendSakTilMigrering(packet, verifisertRequest, context, pesyssak)
         } else {
             logger.info("Migrering er skrudd av. Sender ikke pesys-sak ${pesyssak.id} videre.")
+            pesysRepository.lagreGyldigDryRun(verifisertRequest)
         }
     }
 

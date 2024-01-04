@@ -56,7 +56,6 @@ internal class JournalfoerVedtaksbrevRiver(
                     ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText(),
                 )
 
-            logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
             val response = runBlocking { journalfoerBrevService.journalfoerVedtaksbrev(vedtak) } ?: return
             rapidsConnection.svarSuksess(
                 packet,

@@ -147,6 +147,43 @@ internal class TrygdetidServiceImplIntegrationTest {
         }
     }
 
+    @Test
+    fun `skal hente trygdetid uten opplysningsgrunnlag`() {
+        val behandlingId = UUID.randomUUID()
+        val grunnlagTestData = GrunnlagTestData()
+        val standardOpplysningsgrunnlag = grunnlagTestData.hentOpplysningsgrunnlag()
+
+        coEvery {
+            grunnlagKlient.hentGrunnlag(any(), any())
+        } returns
+            Grunnlag(
+                soeker = standardOpplysningsgrunnlag.soeker,
+                familie = emptyList(),
+                sak = standardOpplysningsgrunnlag.sak,
+                metadata = standardOpplysningsgrunnlag.metadata,
+            )
+
+        repository.opprettTrygdetid(
+            trygdetid(
+                behandlingId = behandlingId,
+                sakId = SecureRandom().nextLong(100_000),
+                opplysninger = emptyList(),
+            ),
+        )
+
+        val trygdetid = runBlocking { trygdetidService.hentTrygdetid(behandlingId, saksbehandler) }
+
+        with(trygdetid?.opplysningerDifferanse!!) {
+            differanse shouldBe false
+            with(oppdaterteGrunnlagsopplysninger) {
+                avdoedFoedselsdato shouldBe null
+                avdoedDoedsdato shouldBe null
+                avdoedFylteSeksten shouldBe null
+                avdoedFyllerSeksti shouldBe null
+            }
+        }
+    }
+
     private fun opplysningsgrunnlag(grunnlagTestData: GrunnlagTestData): List<Opplysningsgrunnlag> {
         val foedselsdato = grunnlagTestData.avdoed.foedselsdato!!
         val doedsdato = grunnlagTestData.avdoed.doedsdato!!

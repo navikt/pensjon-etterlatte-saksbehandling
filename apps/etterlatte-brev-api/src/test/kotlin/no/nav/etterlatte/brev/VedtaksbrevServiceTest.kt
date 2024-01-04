@@ -28,14 +28,12 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerPdfResponse
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataFeatureToggle
 import no.nav.etterlatte.brev.model.BrevDataMapper
-import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.Mottaker
@@ -50,13 +48,11 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.pensjon.brevbaker.api.model.Kroner
@@ -64,7 +60,6 @@ import no.nav.pensjon.brevbaker.api.model.LetterMetadata
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -96,7 +91,6 @@ internal class VedtaksbrevServiceTest {
             brevdataFacade,
             vedtaksvurderingService,
             adresseService,
-            dokarkivService,
             BrevbakerService(brevbaker, adresseService, brevDataMapper),
             brevDataMapper,
             brevProsessTypeFactory,
@@ -702,70 +696,6 @@ internal class VedtaksbrevServiceTest {
         }
     }
 
-    @Nested
-    inner class JournalfoerVedtaksbrevRiver {
-        @Test
-        fun `Vedtaksbrev journalfoeres som forventet`() {
-            val forventetBrev = opprettBrev(Status.FERDIGSTILT, mockk())
-
-            val forventetResponse = OpprettJournalpostResponse("1", true)
-            coEvery { dokarkivService.journalfoer(any<BrevID>(), any<VedtakTilJournalfoering>()) } returns forventetResponse
-
-            val vedtak = opprettVedtak()
-
-            val response =
-                runBlocking {
-                    vedtaksbrevService.journalfoerVedtaksbrev(forventetBrev, vedtak)
-                }
-
-            assertEquals(forventetResponse, response)
-
-            coVerify(exactly = 1) {
-                dokarkivService.journalfoer(forventetBrev.id, vedtak)
-            }
-            verify(exactly = 1) {
-                db.settBrevJournalfoert(forventetBrev.id, response)
-            }
-
-            verify {
-                listOf(brevdataFacade, adresseService) wasNot Called
-            }
-        }
-
-        @ParameterizedTest
-        @EnumSource(
-            Status::class,
-            mode = EnumSource.Mode.EXCLUDE,
-            names = ["FERDIGSTILT"],
-        )
-        fun `Journalfoering av brev med ugyldig status`(status: Status) {
-            val brev =
-                Brev(
-                    Random.nextLong(),
-                    Random.nextLong(),
-                    BEHANDLING_ID,
-                    "tittel",
-                    BrevProsessType.AUTOMATISK,
-                    "fnr",
-                    status,
-                    Tidspunkt.now(),
-                    Tidspunkt.now(),
-                    opprettMottaker(),
-                )
-
-            runBlocking {
-                assertThrows<IllegalArgumentException> {
-                    vedtaksbrevService.journalfoerVedtaksbrev(brev, opprettVedtak())
-                }
-            }
-
-            verify {
-                listOf(brevdataFacade, adresseService, dokarkivService)
-                    .wasNot(Called)
-            }
-        }
-    }
-
     private fun opprettBrev(
         status: Status,
         prosessType: BrevProsessType,
@@ -781,14 +711,6 @@ internal class VedtaksbrevServiceTest {
         Tidspunkt.now(),
         mottaker = opprettMottaker(),
     )
-
-    private fun opprettVedtak() =
-        VedtakTilJournalfoering(
-            vedtakId = 1234,
-            sak = VedtakSak("ident", SakType.BARNEPENSJON, 4),
-            behandlingId = BEHANDLING_ID,
-            ansvarligEnhet = "ansvarlig enhet",
-        )
 
     private fun opprettGenerellBrevdata(
         sakType: SakType,

@@ -61,7 +61,7 @@ class DokarkivServiceImpl(
         return journalfoer(request.brevId) { mapTilJournalpostRequest(request) }
     }
 
-    suspend fun journalfoer(
+    private suspend fun journalfoer(
         brevId: BrevID,
         request: () -> OpprettJournalpostRequest,
     ): OpprettJournalpostResponse {

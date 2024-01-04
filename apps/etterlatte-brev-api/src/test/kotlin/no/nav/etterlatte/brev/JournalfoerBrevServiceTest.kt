@@ -5,10 +5,12 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
+import no.nav.etterlatte.brev.dokarkiv.JournalfoeringsMappingRequest
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Adresse
@@ -139,6 +141,63 @@ class JournalfoerBrevServiceTest {
         runBlocking { service.journalfoerVedtaksbrev(vedtak) }
 
         verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class)
+    fun `Journalfoeringsrequest mappes korrekt`(type: SakType) {
+        val forventetBrevMottakerFnr = "01018012345"
+        val forventetBrev =
+            Brev(
+                id = 123,
+                sakId = 41,
+                behandlingId = null,
+                tittel = null,
+                prosessType = BrevProsessType.AUTOMATISK,
+                soekerFnr = "soeker_fnr",
+                status = Status.FERDIGSTILT,
+                statusEndret = Tidspunkt.now(),
+                opprettet = Tidspunkt.now(),
+                mottaker =
+                    Mottaker(
+                        "Stor Snerk",
+                        Foedselsnummer(forventetBrevMottakerFnr),
+                        null,
+                        Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
+                    ),
+            )
+
+        coEvery { vedtaksbrevService.hentVedtaksbrev(any()) } returns forventetBrev
+        every { db.hentBrev(any()) } returns forventetBrev
+
+        val vedtak =
+            VedtakTilJournalfoering(
+                1,
+                VedtakSak("ident", type, forventetBrev.sakId),
+                UUID.randomUUID(),
+                "ansvarligEnhet",
+            )
+
+        val service = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
+        coEvery { dokarkivService.journalfoer(any()) } returns mockk()
+
+        runBlocking { service.journalfoerVedtaksbrev(vedtak) }
+
+        val requestSlot = slot<JournalfoeringsMappingRequest>()
+        coVerify { dokarkivService.journalfoer(capture(requestSlot)) }
+        verify {
+            db.hentBrev(forventetBrev.id)
+        }
+
+        with(requestSlot.captured) {
+            brevId shouldBe forventetBrev.id
+            brev shouldBe forventetBrev
+            brukerident shouldBe vedtak.sak.ident
+            eksternReferansePrefiks shouldBe vedtak.behandlingId
+            sakId shouldBe forventetBrev.sakId
+            sakType shouldBe type
+            journalfoerendeEnhet shouldBe vedtak.ansvarligEnhet
+        }
     }
 
     private fun opprettBrev(

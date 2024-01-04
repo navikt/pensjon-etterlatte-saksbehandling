@@ -166,7 +166,6 @@ class ApplicationBuilder {
             brevdataFacade,
             vedtaksvurderingService,
             adresseService,
-            dokarkivService,
             brevbakerService,
             brevDataMapper,
             brevProsessTypeFactory,

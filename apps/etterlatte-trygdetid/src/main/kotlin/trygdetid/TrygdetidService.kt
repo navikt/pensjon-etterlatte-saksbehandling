@@ -494,10 +494,10 @@ class TrygdetidServiceImpl(
 
     private fun hentDatoerForBehandling(trygdetid: Trygdetid): DatoerForBehandling =
         DatoerForBehandling(
-            toLocalDate(trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.FOEDSELSDATO })
-                ?: throw Exception("Fant ikke foedselsdato for avdoed for trygdetidId=${trygdetid.id}"),
-            toLocalDate(trygdetid.opplysninger.first { it.type == TrygdetidOpplysningType.DOEDSDATO })
-                ?: throw Exception("Fant ikke doedsdato for avdoed for trygdetidId=${trygdetid.id}"),
+            toLocalDate(trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FOEDSELSDATO })
+                ?: throw Exception("Fant ikke fødselsdato for avdoed for trygdetidId=${trygdetid.id}"),
+            toLocalDate(trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.DOEDSDATO })
+                ?: throw Exception("Fant ikke dødsdato for avdoed for trygdetidId=${trygdetid.id}"),
         )
 
     override suspend fun slettTrygdetidGrunnlagForTrygdetid(

@@ -75,6 +75,7 @@ class JournalfoerBrevService(
         brev: Brev,
         mappingRequest: JournalfoeringsMappingRequest,
     ): OpprettJournalpostResponse {
+        logger.info("Skal journalføre brev ${brev.id}")
         if (brev.status != Status.FERDIGSTILT) {
             throw IllegalStateException("Ugyldig status ${brev.status} på brev (id=${brev.id})")
         }

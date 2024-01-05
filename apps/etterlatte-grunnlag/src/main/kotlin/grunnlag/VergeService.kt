@@ -34,7 +34,7 @@ class VergeService(private val persondataKlient: PersondataKlient) {
         if ((vergeListe?.size ?: 0) > 1) {
             sikkerLogg.warn("Flere verger for fødselsnummer " + pdlPerson.foedselsnummer)
         }
-        return hentRelevantVerge(vergeListe)
+        return hentRelevantVerge(vergeListe, pdlPerson.foedselsnummer)
     }
 
     private fun hentVergesAdresse(relevantVerge: VergemaalEllerFremtidsfullmakt): Grunnlagsopplysning<BrevMottaker>? {

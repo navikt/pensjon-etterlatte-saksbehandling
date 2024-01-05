@@ -89,7 +89,11 @@ fun Grunnlag.mapVerge(
     brevutfallDto: BrevutfallDto?,
 ): Verge? =
     with(this) {
-        val relevantVerge = hentRelevantVerge(soeker.hentVergemaalellerfremtidsfullmakt()?.verdi)
+        val relevantVerge =
+            hentRelevantVerge(
+                soeker.hentVergemaalellerfremtidsfullmakt()?.verdi,
+                soeker.hentFoedselsnummer()?.verdi,
+            )
         if (relevantVerge != null) {
             return hentVergemaal(relevantVerge, behandlingId)
         }

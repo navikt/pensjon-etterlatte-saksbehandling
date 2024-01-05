@@ -41,7 +41,6 @@ import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -60,8 +59,6 @@ import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForOmregningNyRegelRiver
-import no.nav.etterlatte.rivers.migrering.SUM
-import no.nav.etterlatte.rivers.migrering.UTLANDSTILKNYTNINGTYPE
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -207,7 +204,7 @@ class ApplicationBuilder {
                     },
                 )
                 OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
-                FiksEnkeltbrevRiver(this, vedtaksbrevService, vedtaksvurderingService)
+                FiksEnkeltbrevRiver(this, vedtaksvurderingService)
                     .also { fiksEnkeltbrev() }
 
                 OpprettVedtaksbrevForOmregningNyRegelRiver(this, vedtaksbrevService)
@@ -230,20 +227,18 @@ class ApplicationBuilder {
         }
     }
 
-    private fun lagMelding(behandlingId: Triple<String, Int, UtlandstilknytningType>) =
+    private fun lagMelding(behandlingId: String) =
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
-                BEHANDLING_ID_KEY to behandlingId.first,
+                BEHANDLING_ID_KEY to behandlingId,
                 FIKS_BREV_MIGRERING to true,
-                SUM to behandlingId.second,
-                UTLANDSTILKNYTNINGTYPE to behandlingId.third.name,
             ),
         ).toJson()
 
     private val behandlingerAaLageBrevFor =
-        listOf<Triple<String, Int, UtlandstilknytningType>>(
-            Triple("68c4b1a7-c332-4305-9d90-85a2144abf9d", 2471, UtlandstilknytningType.UTLANDSTILSNITT),
+        listOf(
+            "68c4b1a7-c332-4305-9d90-85a2144abf9d",
         )
 
     private fun featureToggleProperties(config: Config) =

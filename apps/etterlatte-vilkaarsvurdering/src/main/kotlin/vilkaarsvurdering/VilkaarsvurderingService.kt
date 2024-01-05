@@ -197,7 +197,6 @@ class VilkaarsvurderingService(
     ): Vilkaarsvurdering {
         val vilkaar =
             finnVilkaarForNyVilkaarsvurdering(
-                grunnlag,
                 virkningstidspunkt,
                 behandling.behandlingType,
                 behandling.sakType,
@@ -214,7 +213,6 @@ class VilkaarsvurderingService(
     }
 
     private fun finnVilkaarForNyVilkaarsvurdering(
-        grunnlag: Grunnlag,
         virkningstidspunkt: Virkningstidspunkt,
         behandlingType: BehandlingType,
         sakType: SakType,
@@ -226,9 +224,9 @@ class VilkaarsvurderingService(
                     BehandlingType.REVURDERING,
                     ->
                         if (virkningstidspunkt.erPaaNyttRegelverk()) {
-                            BarnepensjonVilkaar2024.inngangsvilkaar(grunnlag)
+                            BarnepensjonVilkaar2024.inngangsvilkaar()
                         } else {
-                            BarnepensjonVilkaar1967.inngangsvilkaar(grunnlag)
+                            BarnepensjonVilkaar1967.inngangsvilkaar()
                         }
 
                     BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
@@ -239,7 +237,7 @@ class VilkaarsvurderingService(
             SakType.OMSTILLINGSSTOENAD ->
                 when (behandlingType) {
                     BehandlingType.FØRSTEGANGSBEHANDLING ->
-                        OmstillingstoenadVilkaar.inngangsvilkaar(grunnlag)
+                        OmstillingstoenadVilkaar.inngangsvilkaar()
 
                     BehandlingType.REVURDERING,
                     BehandlingType.MANUELT_OPPHOER,

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -19,17 +18,12 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
-import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
-import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -53,7 +47,6 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -146,21 +139,6 @@ internal class VilkaarsvurderingServiceTest {
                 VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024,
                 VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_EOES_2024,
             )
-        vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_ALDER_BARN_2024 }.let { vilkaar ->
-            vilkaar.grunnlag shouldNotBe null
-            vilkaar.grunnlag shouldHaveSize 2
-
-            vilkaar.grunnlag[0].let {
-                it.opplysningsType shouldBe VilkaarOpplysningType.SOEKER_FOEDSELSDATO
-                val opplysning: LocalDate = objectMapper.readValue(it.opplysning!!.toJson())
-                opplysning shouldBe grunnlag.soeker.hentFoedselsdato()?.verdi
-            }
-            vilkaar.grunnlag[1].let {
-                it.opplysningsType shouldBe VilkaarOpplysningType.AVDOED_DOEDSDATO
-                val opplysning: LocalDate? = objectMapper.readValue(it.opplysning!!.toJson())
-                opplysning shouldBe grunnlag.hentAvdoede().first().hentDoedsdato()?.verdi
-            }
-        }
     }
 
     @Test
@@ -197,21 +175,6 @@ internal class VilkaarsvurderingServiceTest {
                 VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_2024,
                 VilkaarType.BP_FORUTGAAENDE_MEDLEMSKAP_EOES_2024,
             )
-        vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.BP_ALDER_BARN_2024 }.let { vilkaar ->
-            vilkaar.grunnlag shouldNotBe null
-            vilkaar.grunnlag shouldHaveSize 2
-
-            vilkaar.grunnlag[0].let {
-                it.opplysningsType shouldBe VilkaarOpplysningType.SOEKER_FOEDSELSDATO
-                val opplysning: LocalDate = objectMapper.readValue(it.opplysning!!.toJson())
-                opplysning shouldBe grunnlag.soeker.hentFoedselsdato()?.verdi
-            }
-            vilkaar.grunnlag[1].let {
-                it.opplysningsType shouldBe VilkaarOpplysningType.AVDOED_DOEDSDATO
-                val opplysning: LocalDate? = objectMapper.readValue(it.opplysning!!.toJson())
-                opplysning shouldBe grunnlag.hentAvdoede().first().hentDoedsdato()?.verdi
-            }
-        }
     }
 
     @Test
@@ -259,34 +222,6 @@ internal class VilkaarsvurderingServiceTest {
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
         vilkaarsvurdering.vilkaar shouldHaveSize 10
-        vilkaarsvurdering.vilkaar.first { it.hovedvilkaar.type == VilkaarType.OMS_ETTERLATTE_LEVER }.let { vilkaar ->
-            vilkaar.grunnlag shouldBe emptyList()
-        }
-
-        vilkaarsvurdering.vilkaar.find {
-            it.hovedvilkaar.type == VilkaarType.OMS_AKTIVITET_ETTER_6_MND
-        }!!.let { vilkaar ->
-            vilkaar.grunnlag shouldNotBe null
-            vilkaar.grunnlag shouldHaveSize 2
-
-            val avdoedDoedsdatoOpplysning =
-                vilkaar.grunnlag.find {
-                    it.opplysningsType == VilkaarOpplysningType.AVDOED_DOEDSDATO
-                }
-            requireNotNull(avdoedDoedsdatoOpplysning).let {
-                val opplysning: LocalDate = objectMapper.readValue(it.opplysning!!.toJson())
-                opplysning shouldBe grunnlag.hentAvdoede().first().hentDoedsdato()?.verdi
-            }
-
-            val soeknadMottatDatoOpplysning =
-                vilkaar.grunnlag.find {
-                    it.opplysningsType == VilkaarOpplysningType.SOEKNAD_MOTTATT_DATO
-                }
-            requireNotNull(soeknadMottatDatoOpplysning).let {
-                val opplysning: SoeknadMottattDato = objectMapper.readValue(it.opplysning!!.toJson())
-                opplysning.mottattDato shouldBe soeknadMottattDato
-            }
-        }
     }
 
     @Test

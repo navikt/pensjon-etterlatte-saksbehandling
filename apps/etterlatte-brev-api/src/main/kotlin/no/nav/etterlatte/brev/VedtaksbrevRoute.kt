@@ -17,10 +17,8 @@ import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
-@OptIn(ExperimentalTime::class)
 fun Route.vedtaksbrevRoute(
     service: VedtaksbrevService,
     tilgangssjekker: Tilgangssjekker,

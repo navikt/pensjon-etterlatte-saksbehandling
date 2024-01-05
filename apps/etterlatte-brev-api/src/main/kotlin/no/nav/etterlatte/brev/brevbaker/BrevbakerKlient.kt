@@ -14,14 +14,12 @@ import no.nav.pensjon.brevbaker.api.model.LetterMetadata
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
 class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String) {
     private val logger = LoggerFactory.getLogger(BrevbakerKlient::class.java)
     private val sikkerlogg = sikkerlogger()
 
-    @OptIn(ExperimentalTime::class)
     suspend fun genererPdf(brevRequest: BrevbakerRequest): BrevbakerPdfResponse =
         try {
             measureTimedValue {
@@ -38,7 +36,6 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
             throw BrevbakerException("Feil ved kall til brevbaker", ex)
         }
 
-    @OptIn(ExperimentalTime::class)
     suspend fun genererHTML(brevRequest: BrevbakerRequest): BrevbakerHTMLResponse =
         try {
             measureTimedValue {
@@ -55,7 +52,6 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
             throw BrevbakerException("Feil ved kall til brevbaker", ex)
         }
 
-    @OptIn(ExperimentalTime::class)
     suspend fun genererJSON(brevRequest: BrevbakerRequest): RenderedJsonLetter =
         try {
             measureTimedValue {

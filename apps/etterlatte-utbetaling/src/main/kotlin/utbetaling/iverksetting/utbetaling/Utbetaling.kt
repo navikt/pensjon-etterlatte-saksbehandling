@@ -81,6 +81,28 @@ data class Utbetalingslinje(
     val kjoereplan: Kjoereplan,
 )
 
+/**
+ * Samme som [Utbetaling], men noen felt er ekskludert da de ikke benyttes
+ * av konsistensavstemmingen og krever mye prosessering for å lastes.
+ */
+data class UtbetalingForKonsistensavstemming(
+    val id: UUID,
+    val sakId: SakId,
+    val sakType: Saktype,
+    val behandlingId: BehandlingId,
+    val vedtakId: VedtakId,
+    val opprettet: Tidspunkt,
+    val endret: Tidspunkt,
+    val avstemmingsnoekkel: Tidspunkt,
+    val stoenadsmottaker: Foedselsnummer,
+    val saksbehandler: NavIdent,
+    val saksbehandlerEnhet: String? = null,
+    val attestant: NavIdent,
+    val attestantEnhet: String? = null,
+    val utbetalingslinjer: List<Utbetalingslinje>,
+    val utbetalingshendelser: List<Utbetalingshendelse>,
+)
+
 enum class Kjoereplan(private val oppdragVerdi: String) {
     // ref. https://confluence.adeo.no/display/OKSY/Inputdata+fra+fagrutinen+til+Oppdragssystemet:
     // "Bruk-kjoreplan gjør det mulig å velge om delytelsen skal beregnes/utbetales i henhold til kjøreplanen eller om

@@ -210,7 +210,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
         aktivFraOgMed: Tidspunkt,
         opprettetFramTilOgMed: Tidspunkt,
         saktype: Saktype,
-    ): List<Utbetaling> =
+    ): List<UtbetalingForKonsistensavstemming> =
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement =
@@ -236,7 +236,7 @@ class UtbetalingDao(private val dataSource: DataSource) {
                     it.map { row ->
                         val utbetalingslinjer = hentUtbetalingslinjerForUtbetaling(row.uuid("id"))
                         val utbetalingshendelser = hentUtbetalingsHendelserForUtbetaling(row.uuid("id"))
-                        toUtbetaling(row, utbetalingslinjer, utbetalingshendelser)
+                        toUtbetalingKonsistensavstemming(row, utbetalingslinjer, utbetalingshendelser)
                     }.asList,
                 )
             }
@@ -377,6 +377,34 @@ class UtbetalingDao(private val dataSource: DataSource) {
                         kode = stringOrNull("kvittering_kode"),
                     )
                 },
+            utbetalingslinjer = utbetalingslinjer,
+            utbetalingshendelser = utbetalingshendelser,
+        )
+    }
+
+    private fun toUtbetalingKonsistensavstemming(
+        row: Row,
+        utbetalingslinjer: List<Utbetalingslinje>,
+        utbetalingshendelser: List<Utbetalingshendelse>,
+    ) = with(row) {
+        UtbetalingForKonsistensavstemming(
+            id = uuid("id"),
+            sakId = SakId(long("sak_id")),
+            sakType = Saktype.valueOf(string("saktype")),
+            behandlingId =
+                BehandlingId(
+                    value = uuid("behandling_id"),
+                    shortValue = UUID30(string("behandling_id_til_oppdrag")),
+                ),
+            vedtakId = VedtakId(long("vedtak_id")),
+            opprettet = sqlTimestamp("opprettet").toTidspunkt(),
+            endret = sqlTimestamp("endret").toTidspunkt(),
+            avstemmingsnoekkel = sqlTimestamp("avstemmingsnoekkel").toTidspunkt(),
+            stoenadsmottaker = Foedselsnummer(string("stoenadsmottaker")),
+            saksbehandler = NavIdent(string("saksbehandler")),
+            saksbehandlerEnhet = string("saksbehandler_enhet"),
+            attestant = NavIdent(string("attestant")),
+            attestantEnhet = string("attestant_enhet"),
             utbetalingslinjer = utbetalingslinjer,
             utbetalingshendelser = utbetalingshendelser,
         )

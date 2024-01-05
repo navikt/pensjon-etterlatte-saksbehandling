@@ -59,6 +59,7 @@ import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForOmregningNyRegelRiver
+import no.nav.etterlatte.rivers.migrering.behandlingerAaJournalfoereBrevFor
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -217,7 +218,7 @@ class ApplicationBuilder {
     private fun fiksEnkeltbrev() {
         thread {
             Thread.sleep(60_000)
-            behandlingerAaLageBrevFor.forEach {
+            behandlingerAaJournalfoereBrevFor.forEach {
                 rapidsConnection.publish(
                     message = lagMelding(behandlingId = it),
                     key = UUID.randomUUID().toString(),
@@ -235,11 +236,6 @@ class ApplicationBuilder {
                 FIKS_BREV_MIGRERING to true,
             ),
         ).toJson()
-
-    private val behandlingerAaLageBrevFor =
-        listOf(
-            "68c4b1a7-c332-4305-9d90-85a2144abf9d",
-        )
 
     private fun featureToggleProperties(config: Config) =
         FeatureToggleProperties(

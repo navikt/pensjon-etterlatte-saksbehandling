@@ -15,7 +15,7 @@ enum FeatureStatus {
 unleashRouter.post('/', express.json(), (req: Request, res: Response) => {
   const toggles: string[] = req.body.features
 
-  const isEnabled = (toggle: string): String => {
+  const isEnabled = (toggle: string): string => {
     if (!unleash) {
       return FeatureStatus.UDEFINERT
     }

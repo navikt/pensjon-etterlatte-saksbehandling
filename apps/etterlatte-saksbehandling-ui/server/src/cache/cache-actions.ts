@@ -16,6 +16,6 @@ export function getTokenInCache(cacheKey: string): [cacheHit: true, value: strin
 export function setTokenInCache(cacheKey: string, access_token: string, expires_in: number): void {
   if (access_token == null) return
 
-  let calculatedExpiration = (expires_in ?? 65) - 5
+  const calculatedExpiration = (expires_in ?? 65) - 5
   tokenCache.set(cacheKey, access_token, calculatedExpiration)
 }

@@ -3,7 +3,7 @@
     <envs>
       <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="NAIS_APP_NAME" value="etterlatte-utbetaling" />
-      <env name="HTTP_PORT" value="8090" />
+      <env name="HTTP_PORT" value="8096" />
       <env name="KAFKA_RAPID_TOPIC" value="etterlatte" />
       <env name="KAFKA_BOOTSTRAP_SERVERS" value="0.0.0.0:9092" />
       <env name="DB_DATABASE" value="postgres" />

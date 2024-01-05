@@ -19,6 +19,16 @@ export const teksterKabalUtfall: Record<KabalResultat, string> = {
   MEDHOLD: 'Medhold',
 }
 
+export interface NyKlageRequestUtfylling {
+  mottattDato: string
+}
+
+export interface NyKlageRequest extends NyKlageRequestUtfylling {
+  sakId: number
+  journalpostId: string
+  innsender?: string
+}
+
 export interface Klage {
   id: string
   sak: ISak

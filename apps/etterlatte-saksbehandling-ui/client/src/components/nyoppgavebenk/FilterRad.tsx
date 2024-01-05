@@ -18,9 +18,9 @@ import {
   YtelseFilterKeys,
 } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
 import { FlexRow } from '~shared/styled'
 import { OppgaveDTO } from '~shared/api/oppgaver'
+import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 
 export const FilterRad = (props: {
   hentOppgaver: () => void

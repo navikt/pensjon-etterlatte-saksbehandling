@@ -31,6 +31,7 @@ dependencies {
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.test.wiremock)
     testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures(project(":libs:etterlatte-mq")))

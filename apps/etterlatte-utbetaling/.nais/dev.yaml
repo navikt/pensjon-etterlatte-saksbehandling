@@ -37,7 +37,7 @@ spec:
     - secret: my-application-unleash-api-token
   resources:
     requests:
-      cpu: 25m
+      cpu: 40m
       memory: 320Mi
   replicas:
     cpuThresholdPercentage: 90

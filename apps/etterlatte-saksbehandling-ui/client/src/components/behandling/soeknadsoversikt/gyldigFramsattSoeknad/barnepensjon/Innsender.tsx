@@ -39,7 +39,7 @@ export const Innsender = ({ harKildePesys }: Props) => {
     </InfoWrapper>
   )
 
-  function beskrivelseInnsender(soeker?: IPdlPerson, innsender?: IPdlPerson, gjenlevende?: IPdlPerson): string {
+  function beskrivelseInnsender(soeker?: IPdlPerson, gjenlevende?: IPdlPerson, innsender?: IPdlPerson): string {
     if (!innsender?.foedselsnummer) {
       return 'Mangler info'
     }

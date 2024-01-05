@@ -21,9 +21,8 @@ export const BrevutfallSkjema = (props: {
   brevutfallOgEtterbetaling: BrevutfallOgEtterbetaling
   setBrevutfallOgEtterbetaling: (brevutfall: BrevutfallOgEtterbetaling) => void
   setVisSkjema: (visSkjema: boolean) => void
-  onAvbryt: () => void
 }) => {
-  const { behandling, brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling, setVisSkjema, onAvbryt } = props
+  const { behandling, brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling, setVisSkjema } = props
   const [harEtterbetaling, setHarEtterbetaling] = useState<HarEtterbetaling>(
     brevutfallOgEtterbetaling.etterbetaling === undefined
       ? HarEtterbetaling.IKKE_VALGT
@@ -204,7 +203,6 @@ export const BrevutfallSkjema = (props: {
           variant="secondary"
           size="small"
           onClick={() => {
-            onAvbryt()
             setVisSkjema(false)
           }}
         >

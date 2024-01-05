@@ -45,7 +45,7 @@ class AvstemmingDao(private val dataSource: DataSource) {
         using(sessionOf(dataSource)) { session ->
             queryOf(
                 statement = """
-                    SELECT opprettet_tom 
+                    SELECT opprettet 
                     FROM avstemming 
                     WHERE avstemmingtype = :avstemmingtype
                     AND saktype = :saktype
@@ -57,7 +57,7 @@ class AvstemmingDao(private val dataSource: DataSource) {
                         "avstemmingtype" to Avstemmingtype.KONSISTENSAVSTEMMING.name.param(),
                         "saktype" to saktype.name.param(),
                     ),
-            ).let { session.run(it.map { row -> row.tidspunkt("opprettet_tom") }.asSingle) }
+            ).let { session.run(it.map { row -> row.tidspunkt("opprettet") }.asSingle) }
         }
 
     fun opprettGrensesnittavstemming(grensesnittavstemming: Grensesnittavstemming): Int =

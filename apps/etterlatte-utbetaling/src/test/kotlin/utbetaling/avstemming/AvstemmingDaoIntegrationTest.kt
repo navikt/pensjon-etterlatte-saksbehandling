@@ -68,7 +68,7 @@ internal class AvstemmingDaoIntegrationTest {
         avstemmingDao.opprettKonsistensavstemming(konsistensavstemming3)
 
         val datoSisteKonsistensavstemming = avstemmingDao.hentDatoOpprettetForSisteKonsistensavstemming(Saktype.BARNEPENSJON)
-        assertEquals(konsistensavstemming1.opprettetTilOgMed, datoSisteKonsistensavstemming)
+        assertEquals(konsistensavstemming1.opprettet, datoSisteKonsistensavstemming)
     }
 
     @Test
@@ -82,7 +82,7 @@ internal class AvstemmingDaoIntegrationTest {
         avstemmingDao.opprettKonsistensavstemming(konsistensavstemming3)
 
         val datoOpprettetSisteKonsistensavstemming = avstemmingDao.hentDatoOpprettetForSisteKonsistensavstemming(Saktype.OMSTILLINGSSTOENAD)
-        assertEquals(konsistensavstemming1.opprettetTilOgMed, datoOpprettetSisteKonsistensavstemming)
+        assertEquals(konsistensavstemming1.opprettet, datoOpprettetSisteKonsistensavstemming)
     }
 
     @Test

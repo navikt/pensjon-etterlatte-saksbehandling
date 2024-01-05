@@ -89,9 +89,12 @@ app.use(/^(?!.*\/(internal|static)\/).*$/, (_req: Request, res: Response) => {
 })
 
 app.use(function (req, res) {
-  const time = Date.now() - res.locals.start
+  const request_time = Date.now() - res.locals.start
   if (kanLoggeRequest(req.url)) {
-    logger.info(`${sanitize(req.method)} ${sanitizeUrl(req.url)} ms: ${time}`)
+    logger.info({
+      message: `${sanitize(req.method)} ${sanitizeUrl(req.url)} ms: ${request_time}`,
+      ...(request_time && { x_request_time: request_time }),
+    })
   }
 })
 

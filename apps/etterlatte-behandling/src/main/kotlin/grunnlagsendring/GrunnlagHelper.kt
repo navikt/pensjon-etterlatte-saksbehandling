@@ -84,7 +84,7 @@ fun Grunnlag.barn(saksrolle: Saksrolle) =
             hentAvdoede().flatMap { it.hentFamilierelasjon()?.verdi?.barn ?: emptyList() }.ifEmpty { null }
         }
         Saksrolle.GJENLEVENDE -> {
-            hentGjenlevende().hentFamilierelasjon()?.verdi?.barn
+            hentPotensiellGjenlevende()?.hentFamilierelasjon()?.verdi?.barn
         }
         Saksrolle.SOEKER -> {
             soeker.hentFamilierelasjon()?.verdi?.barn

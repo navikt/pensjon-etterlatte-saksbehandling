@@ -22,7 +22,6 @@ import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
 const val BREV_ID_CALL_PARAMETER = "id"
@@ -32,7 +31,6 @@ inline val PipelineContext<*, ApplicationCall>.brevId: Long
             "Brev id er ikke i path params",
         )
 
-@OptIn(ExperimentalTime::class)
 fun Route.brevRoute(
     service: BrevService,
     distribuerer: Brevdistribuerer,

@@ -7,6 +7,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.tidspunkt
@@ -40,6 +41,25 @@ class AvstemmingDao(private val dataSource: DataSource) {
                     it.asUpdate,
                 )
             }.also { require(it == 1) { "Kunne ikke opprette avstemming" } }
+        }
+
+    fun hentDatoOpprettetForSisteKonsistensavstemming(saktype: Saktype): Tidspunkt? =
+        using(sessionOf(dataSource)) { session ->
+            queryOf(
+                statement = """
+                    SELECT opprettet_tom 
+                    FROM avstemming 
+                    WHERE avstemmingtype = :avstemmingtype
+                    AND saktype = :saktype
+                    ORDER BY opprettet_tom DESC 
+                    LIMIT 1
+                    """,
+                paramMap =
+                    mapOf(
+                        "avstemmingtype" to Avstemmingtype.KONSISTENSAVSTEMMING.name.param(),
+                        "saktype" to saktype.name.param(),
+                    ),
+            ).let { session.run(it.map { row -> row.tidspunkt("opprettet_tom") }.asSingle) }
         }
 
     fun hentSisteKonsistensavsvemming(saktype: Saktype): Konsistensavstemming? =

@@ -4,7 +4,11 @@
   "telefonnummer": "55553333",
   "telefonnummerKommentar": null,
   "faksnummer": null,
-  "epost": null,
+  "epost": {
+    "adresse": "porsgrunn@nav.no",
+    "kommentar": "ingen",
+    "kunIntern": false
+  },
   "postadresse": {
     "type": "stedsadresse",
     "postnummer": "3915",

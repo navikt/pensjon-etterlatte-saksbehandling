@@ -10,7 +10,8 @@ import prometheus from './monitoring/prometheus'
 import { innloggetBrukerRouter } from './routers/innloggetBrukerRouter'
 import { norg2Router } from './routers/norg2Router'
 import { unleashRouter } from './routers/unleashRouter'
-import { requestLoggerMiddleware } from './middleware/logging'
+import { kanLoggeRequest, requestLoggerMiddleware } from './middleware/logging'
+import { sanitize, sanitizeUrl } from './utils/sanitize'
 
 logger.info(`environment: ${process.env.NODE_ENV}`)
 
@@ -18,6 +19,11 @@ const clientPath = path.resolve(__dirname, '..', 'client')
 
 const app = express()
 app.set('trust proxy', 1)
+app.use(function (req, res, next) {
+  res.locals.start = Date.now()
+  next()
+})
+
 app.use('/', express.static(clientPath))
 app.use(requestLoggerMiddleware)
 
@@ -80,6 +86,13 @@ app.get('/api/config', (_req: Request, res: Response) => res.send(ClientConfig))
 
 app.use(/^(?!.*\/(internal|static)\/).*$/, (_req: Request, res: Response) => {
   return res.sendFile(`${clientPath}/index.html`)
+})
+
+app.use(function (req, res) {
+  const time = Date.now() - res.locals.start
+  if (kanLoggeRequest(req.url)) {
+    logger.info(`${sanitize(req.method)} ${sanitizeUrl(req.url)} ms: ${time}`)
+  }
 })
 
 app.listen(appConf.port, () => {

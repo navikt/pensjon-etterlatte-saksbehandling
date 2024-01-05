@@ -8,11 +8,11 @@ export const requestLoggerMiddleware = (req: Request, res: Response, next: NextF
   if (kanLoggeRequest(req.url)) {
     res.locals.start = Date.now()
     res.on('finish', function () {
-      const request_time = Date.now() - res.locals.start
+      const response_time = Date.now() - res.locals.start
       if (kanLoggeRequest(req.url)) {
         logger.info({
-          message: `${sanitize(req.method)} ${sanitizeUrl(req.url)} ms: ${request_time}`,
-          ...(request_time && { x_request_time: request_time }),
+          message: `${sanitize(req.method)} ${sanitizeUrl(req.url)} ms: ${response_time}`,
+          ...(response_time && { x_response_time: response_time }),
         })
       }
     })

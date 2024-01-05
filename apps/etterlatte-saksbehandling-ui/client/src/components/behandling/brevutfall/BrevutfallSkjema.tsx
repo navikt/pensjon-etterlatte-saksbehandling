@@ -8,6 +8,7 @@ import { lagreBrevutfallApi } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Aldersgruppe, BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
+import { isAfter } from 'date-fns'
 
 enum HarEtterbetaling {
   JA = 'JA',
@@ -27,8 +28,8 @@ export const BrevutfallSkjema = (props: {
     brevutfallOgEtterbetaling.etterbetaling === undefined
       ? HarEtterbetaling.IKKE_VALGT
       : brevutfallOgEtterbetaling.etterbetaling
-      ? HarEtterbetaling.JA
-      : HarEtterbetaling.NEI
+        ? HarEtterbetaling.JA
+        : HarEtterbetaling.NEI
   )
   const [lagreBrevutfallResultat, lagreBrevutfallRequest, lagreBrevutfallReset] = useApiCall(lagreBrevutfallApi)
   const [valideringsfeil, setValideringsfeil] = useState<Array<string>>([])
@@ -74,7 +75,7 @@ export const BrevutfallSkjema = (props: {
         feilmeldinger.push('Fra-måned kan ikke være før virkningstidspunkt.')
       }
 
-      if (til.getMonth() > new Date().getMonth()) {
+      if (isAfter(new Date(), til)) {
         feilmeldinger.push('Til-måned kan ikke være i framtida.')
       }
     }

@@ -154,7 +154,7 @@ class KonsistensavstemmingService(
         idag: LocalDate,
     ): Boolean {
         val tidspunktForSisteKonsistensavstemming: Tidspunkt? =
-            hentSisteKonsistensavstemming(saktype)?.opprettet
+            hentOpprettetDatoForSisteKonsistensavstemming(saktype)
 
         val datoForSisteKonsistensavstemming =
             tidspunktForSisteKonsistensavstemming?.toNorskTid()?.toLocalDate()
@@ -162,7 +162,10 @@ class KonsistensavstemmingService(
         return datoForSisteKonsistensavstemming == idag
     }
 
-    fun hentSisteKonsistensavstemming(saktype: Saktype): Konsistensavstemming? = avstemmingDao.hentSisteKonsistensavsvemming(saktype)
+    fun hentOpprettetDatoForSisteKonsistensavstemming(saktype: Saktype): Tidspunkt? =
+        avstemmingDao.hentDatoOpprettetForSisteKonsistensavstemming(
+            saktype,
+        )
 }
 
 /**

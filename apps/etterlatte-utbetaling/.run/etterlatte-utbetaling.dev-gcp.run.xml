@@ -3,6 +3,7 @@
     <envs>
       <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="NAIS_APP_NAME" value="etterlatte-utbetaling" />
+      <env name="HTTP_PORT" value="8096" />
       <env name="KAFKA_RAPID_TOPIC" value="etterlatte" />
       <env name="KAFKA_BOOTSTRAP_SERVERS" value="0.0.0.0:9092" />
       <env name="DB_DATABASE" value="postgres" />
@@ -21,7 +22,9 @@
       <env name="srvpwd" value="passw0rd" />
       <env name="ELECTOR_PATH" value="localhost:1080" />
       <env name="GRENSESNITTAVSTEMMING_ENABLED" value="true" />
+      <env name="GRENSESNITTAVSTEMMING_OMS_ENABLED" value="true" />
       <env name="KONSISTENSAVSTEMMING_ENABLED" value="true" />
+      <env name="KONSISTENSAVSTEMMING_OMS_ENABLED" value="true" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
     <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-utbetaling.main" />

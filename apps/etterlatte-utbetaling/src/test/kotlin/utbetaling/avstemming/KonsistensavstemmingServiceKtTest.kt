@@ -61,7 +61,7 @@ internal class KonsistensavstemmingServiceKtTest {
     @Test
     fun `konsistensavstemmingErKjoertIDag skal returnere false dersom det ikke finnes noen konsistensavstemminger`() {
         every {
-            avstemmingDao.hentSisteKonsistensavsvemming(Saktype.BARNEPENSJON)
+            avstemmingDao.hentDatoOpprettetForSisteKonsistensavstemming(Saktype.BARNEPENSJON)
         } returns null
 
         val idag = LocalDate.now()
@@ -81,11 +81,8 @@ internal class KonsistensavstemmingServiceKtTest {
         val idag = LocalDate.now()
         val igaar = Tidspunkt.now().minus(1, ChronoUnit.DAYS)
         every {
-            avstemmingDao.hentSisteKonsistensavsvemming(Saktype.BARNEPENSJON)
-        } returns
-            mockk {
-                every { opprettet } returns igaar
-            }
+            avstemmingDao.hentDatoOpprettetForSisteKonsistensavstemming(Saktype.BARNEPENSJON)
+        } returns igaar
 
         val service =
             KonsistensavstemmingService(
@@ -103,11 +100,8 @@ internal class KonsistensavstemmingServiceKtTest {
         val idagDato = LocalDate.now()
         val idagTidspunkt = Tidspunkt.now()
         every {
-            avstemmingDao.hentSisteKonsistensavsvemming(Saktype.BARNEPENSJON)
-        } returns
-            mockk {
-                every { opprettet } returns idagTidspunkt
-            }
+            avstemmingDao.hentDatoOpprettetForSisteKonsistensavstemming(Saktype.BARNEPENSJON)
+        } returns idagTidspunkt
 
         val service =
             KonsistensavstemmingService(

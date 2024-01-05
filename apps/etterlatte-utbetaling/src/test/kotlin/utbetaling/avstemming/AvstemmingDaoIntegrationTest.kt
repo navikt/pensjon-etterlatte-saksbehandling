@@ -67,8 +67,8 @@ internal class AvstemmingDaoIntegrationTest {
         avstemmingDao.opprettKonsistensavstemming(konsistensavstemming2)
         avstemmingDao.opprettKonsistensavstemming(konsistensavstemming3)
 
-        val sisteKonsistensavstemming = avstemmingDao.hentSisteKonsistensavsvemming(Saktype.BARNEPENSJON)
-        assertEquals(konsistensavstemming1, sisteKonsistensavstemming)
+        val datoSisteKonsistensavstemming = avstemmingDao.hentDatoOpprettetForSisteKonsistensavstemming(Saktype.BARNEPENSJON)
+        assertEquals(konsistensavstemming1.opprettet, datoSisteKonsistensavstemming)
     }
 
     @Test
@@ -81,8 +81,8 @@ internal class AvstemmingDaoIntegrationTest {
         avstemmingDao.opprettKonsistensavstemming(konsistensavstemming2)
         avstemmingDao.opprettKonsistensavstemming(konsistensavstemming3)
 
-        val sisteKonsistensavstemming = avstemmingDao.hentSisteKonsistensavsvemming(Saktype.OMSTILLINGSSTOENAD)
-        assertEquals(konsistensavstemming1, sisteKonsistensavstemming)
+        val datoOpprettetSisteKonsistensavstemming = avstemmingDao.hentDatoOpprettetForSisteKonsistensavstemming(Saktype.OMSTILLINGSSTOENAD)
+        assertEquals(konsistensavstemming1.opprettet, datoOpprettetSisteKonsistensavstemming)
     }
 
     @Test
@@ -185,9 +185,9 @@ internal class AvstemmingDaoIntegrationTest {
 
     @Test
     fun `skal gi null dersom det ikke finnes noen konsistensavstemming`() {
-        val nyesteAvstemming = avstemmingDao.hentSisteKonsistensavsvemming(saktype = Saktype.BARNEPENSJON)
+        val datoNyesteAvstemming = avstemmingDao.hentDatoOpprettetForSisteKonsistensavstemming(saktype = Saktype.BARNEPENSJON)
 
-        assertNull(nyesteAvstemming)
+        assertNull(datoNyesteAvstemming)
     }
 
     @AfterEach

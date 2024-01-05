@@ -1,12 +1,10 @@
 package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.param
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
@@ -61,37 +59,6 @@ class AvstemmingDao(private val dataSource: DataSource) {
                     ),
             ).let { session.run(it.map { row -> row.tidspunkt("opprettet_tom") }.asSingle) }
         }
-
-    fun hentSisteKonsistensavsvemming(saktype: Saktype): Konsistensavstemming? =
-        using(sessionOf(dataSource)) { session ->
-            queryOf(
-                statement = """
-                    SELECT id, opprettet, loepende_fom, opprettet_tom, antall_oppdrag, avstemmingsdata, 
-                         avstemmingtype, saktype, loepende_utbetalinger 
-                    FROM avstemming 
-                    WHERE avstemmingtype = :avstemmingtype
-                    AND saktype = :saktype
-                    ORDER BY opprettet_tom DESC 
-                    LIMIT 1
-                    """,
-                paramMap =
-                    mapOf(
-                        "avstemmingtype" to Avstemmingtype.KONSISTENSAVSTEMMING.name.param(),
-                        "saktype" to saktype.name.param(),
-                    ),
-            ).let { session.run(it.map(::toKonsistensavstemming).asSingle) }
-        }
-
-    private fun toKonsistensavstemming(row: Row) =
-        Konsistensavstemming(
-            id = UUIDBase64(row.string("id")),
-            sakType = row.string("saktype").let { Saktype.fraString(it) },
-            opprettet = row.tidspunkt("opprettet"),
-            avstemmingsdata = row.string("avstemmingsdata"),
-            loependeFraOgMed = row.tidspunkt("loepende_fom"),
-            opprettetTilOgMed = row.tidspunkt("opprettet_tom"),
-            loependeUtbetalinger = objectMapper.readValue(row.string("loepende_utbetalinger")),
-        )
 
     fun opprettGrensesnittavstemming(grensesnittavstemming: Grensesnittavstemming): Int =
         using(sessionOf(dataSource)) { session ->

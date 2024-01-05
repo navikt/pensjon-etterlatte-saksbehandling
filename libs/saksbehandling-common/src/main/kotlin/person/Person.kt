@@ -279,7 +279,7 @@ private fun harVergensFnr(
     if (manglerFnr) {
         sikkerlogger()
             .error(
-                "Vergemålet for person '$soekersFnr' i PDL mangler vergens fødselsnummer. " +
+                "Et vergemål for person '${soekersFnr?.value}' i PDL mangler vergens fødselsnummer. " +
                     "Vergens navn: ${vergemaal.vergeEllerFullmektig.navn}.",
             )
     }

@@ -43,7 +43,7 @@ loggerRouter.post('/', express.json(), (req, res) => {
     frontendLogger.info('Frontendlogging: ', JSON.stringify(logEvent))
   } else {
     if (logEvent.stackInfo && isStackInfoValid(logEvent.stackInfo)) {
-      sourceMapMapper(logEvent.stackInfo!!)
+      sourceMapMapper(logEvent.stackInfo!)
         .then((position) => {
           const message = logEvent.stackInfo?.message
           const stackInfoError = JSON.stringify(logEvent.stackInfo?.error)

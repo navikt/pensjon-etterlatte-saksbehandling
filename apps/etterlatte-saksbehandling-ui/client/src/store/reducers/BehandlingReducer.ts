@@ -16,6 +16,7 @@ import {
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { RevurderingInfo } from '~shared/types/RevurderingInfo'
+import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 
 export const setBehandling = createAction<IDetaljertBehandling>('behandling/set')
 export const resetBehandling = createAction('behandling/reset')
@@ -24,6 +25,10 @@ export const oppdaterGyldighetsproeving = createAction<IGyldighetResultat>('beha
 export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('behandling/virkningstidspunkt')
 export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering | undefined>(
   'behandling/update_vilkaarsvurdering'
+)
+
+export const updateBrevutfallOgEtterbetaling = createAction<BrevutfallOgEtterbetaling | undefined>(
+  'behandling/update_brevutfallogetterbetaling'
 )
 export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
 
@@ -50,6 +55,7 @@ export interface IBehandlingReducer extends IDetaljertBehandling {
   overstyrBeregning?: OverstyrBeregningGrunnlagPostDTO
   beregning?: Beregning
   vilkårsprøving?: IVilkaarsvurdering
+  brevutfallOgEtterbetaling?: BrevutfallOgEtterbetaling
 }
 
 const initialState: { behandling: IBehandlingReducer | null } = {
@@ -65,6 +71,9 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(updateVilkaarsvurdering, (state, action) => {
     state.behandling!!.vilkårsprøving = action.payload
+  })
+  builder.addCase(updateBrevutfallOgEtterbetaling, (state, action) => {
+    state.behandling!!.brevutfallOgEtterbetaling = action.payload
   })
   builder.addCase(resetBehandling, (state) => {
     state.behandling = null

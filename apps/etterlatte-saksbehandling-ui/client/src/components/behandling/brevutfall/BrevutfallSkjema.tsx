@@ -9,6 +9,8 @@ import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Aldersgruppe, BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 import { isAfter } from 'date-fns'
+import { updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
+import { useAppDispatch } from '~store/Store'
 
 enum HarEtterbetaling {
   JA = 'JA',
@@ -21,8 +23,15 @@ export const BrevutfallSkjema = (props: {
   brevutfallOgEtterbetaling: BrevutfallOgEtterbetaling
   setBrevutfallOgEtterbetaling: (brevutfall: BrevutfallOgEtterbetaling) => void
   setVisSkjema: (visSkjema: boolean) => void
+  resetBrevutfallvalidering: () => void
 }) => {
-  const { behandling, brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling, setVisSkjema } = props
+  const {
+    behandling,
+    brevutfallOgEtterbetaling,
+    setBrevutfallOgEtterbetaling,
+    setVisSkjema,
+    resetBrevutfallvalidering,
+  } = props
   const [harEtterbetaling, setHarEtterbetaling] = useState<HarEtterbetaling>(
     brevutfallOgEtterbetaling.etterbetaling === undefined
       ? HarEtterbetaling.IKKE_VALGT
@@ -32,6 +41,7 @@ export const BrevutfallSkjema = (props: {
   )
   const [lagreBrevutfallResultat, lagreBrevutfallRequest, lagreBrevutfallReset] = useApiCall(lagreBrevutfallApi)
   const [valideringsfeil, setValideringsfeil] = useState<Array<string>>([])
+  const dispatch = useAppDispatch()
 
   const submitBrevutfall = () => {
     lagreBrevutfallReset()
@@ -46,7 +56,9 @@ export const BrevutfallSkjema = (props: {
     lagreBrevutfallRequest(
       { behandlingId: behandling.id, brevutfall: brevutfallOgEtterbetaling },
       (brevutfall: BrevutfallOgEtterbetaling) => {
+        resetBrevutfallvalidering()
         setBrevutfallOgEtterbetaling(brevutfall)
+        dispatch(updateBrevutfallOgEtterbetaling(brevutfall))
         setVisSkjema(false)
       }
     )

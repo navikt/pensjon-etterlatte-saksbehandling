@@ -34,8 +34,8 @@
   },
   "scripts": {
     "dev": "ts-node-dev ./src/index.ts",
-    "build": "tsc",
-    "lint": "tsc && eslint src --ext .ts,.tsx",
+    "build": "yarn lint && tsc",
+    "lint": "eslint src --ext .ts,.tsx",
     "test": "mocha -r ts-node/register './src/tests/**/*.test.ts'"
   }
 }

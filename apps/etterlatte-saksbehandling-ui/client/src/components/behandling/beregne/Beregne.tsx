@@ -49,6 +49,10 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
   const visBrevutfall = useFeatureEnabledMedDefault('pensjon-etterlatte.brevutfall-og-etterbetaling', false)
+  const brevutfallOgEtterbetaling = useAppSelector(
+    (state) => state.behandlingReducer.behandling?.brevutfallOgEtterbetaling
+  )
+  const [manglerBrevutfall, setManglerbrevutfall] = useState(false)
 
   useEffect(() => {
     if (!erOpphoer) {
@@ -57,9 +61,17 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   }, [])
 
   const opprettEllerOppdaterVedtak = () => {
+    const erBarnepensjon = behandling.sakType === SakType.BARNEPENSJON
+    if (erBarnepensjon) {
+      if (!brevutfallOgEtterbetaling?.brevutfall) {
+        setManglerbrevutfall(true)
+        return
+      }
+    }
+    setManglerbrevutfall(false)
+
     oppdaterVedtakRequest(behandling.id, () => {
-      const nyStatus =
-        behandling.sakType === SakType.BARNEPENSJON ? IBehandlingStatus.BEREGNET : IBehandlingStatus.AVKORTET
+      const nyStatus = erBarnepensjon ? IBehandlingStatus.BEREGNET : IBehandlingStatus.AVKORTET
       dispatch(oppdaterBehandlingsstatus(nyStatus))
       if (behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)) {
         next()
@@ -117,13 +129,17 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                   </InfoAlert>
                 )}
 
-                {visBrevutfall && <Brevutfall behandling={behandling} />}
+                {visBrevutfall && (
+                  <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+                )}
+                {visBrevutfall && manglerBrevutfall && (
+                  <Alert variant="error">Du må fylle ut om brevet gjelder for person under eller over 18 år</Alert>
+                )}
               </BeregningWrapper>
             )
           )}
         </>
       )}
-
       <Border />
 
       {isFailureHandler({

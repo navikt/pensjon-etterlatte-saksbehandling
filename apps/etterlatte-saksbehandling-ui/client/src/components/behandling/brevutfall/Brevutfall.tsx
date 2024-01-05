@@ -10,7 +10,8 @@ import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallV
 import Spinner from '~shared/Spinner'
 import { MapApiResult } from '~shared/components/MapApiResult'
 import { SakType } from '~shared/types/sak'
-import { useAppSelector } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
+import { updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 
 export interface BrevutfallOgEtterbetaling {
   etterbetaling?: Etterbetaling | null
@@ -47,21 +48,24 @@ const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {
   }
 }
 
-export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
+export const Brevutfall = (props: { behandling: IDetaljertBehandling; resetBrevutfallvalidering: () => void }) => {
   const behandling = props.behandling
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-
+  const dispatch = useAppDispatch()
   const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
     initialBrevutfallOgEtterbetaling(behandling.sakType)
   )
-  const [hentBrevutfallResult, hentBrevutfallRequest] = useApiCall(hentBrevutfallOgEtterbetalingApi)
+  const [hentBrevutfallOgEtterbetalingResult, hentBrevutfallOgEtterbetalingRequest] = useApiCall(
+    hentBrevutfallOgEtterbetalingApi
+  )
   const [visSkjema, setVisSkjema] = useState(redigerbar)
 
   const hentBrevutfall = () => {
-    hentBrevutfallRequest(behandling.id, (brevutfall: BrevutfallOgEtterbetaling | null) => {
+    hentBrevutfallOgEtterbetalingRequest(behandling.id, (brevutfall: BrevutfallOgEtterbetaling | null) => {
       if (brevutfall) {
         setBrevutfallOgEtterbetaling(brevutfall)
+        dispatch(updateBrevutfallOgEtterbetaling(brevutfall))
         setVisSkjema(false)
       } else {
         setBrevutfallOgEtterbetaling(initialBrevutfallOgEtterbetaling(behandling.sakType))
@@ -84,17 +88,17 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling }) => {
       </BodyLong>
 
       <MapApiResult
-        result={hentBrevutfallResult}
+        result={hentBrevutfallOgEtterbetalingResult}
         mapInitialOrPending={<Spinner visible={true} label="Henter brevutfall .." />}
         mapError={(apiError) => <Alert variant="error">{apiError.detail}</Alert>}
         mapSuccess={() =>
           visSkjema ? (
             <BrevutfallSkjema
+              resetBrevutfallvalidering={props.resetBrevutfallvalidering}
               behandling={behandling}
               brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
               setBrevutfallOgEtterbetaling={setBrevutfallOgEtterbetaling}
               setVisSkjema={setVisSkjema}
-              onAvbryt={hentBrevutfall}
             />
           ) : (
             <BrevutfallVisning

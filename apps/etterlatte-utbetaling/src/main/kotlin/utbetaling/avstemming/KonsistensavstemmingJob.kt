@@ -2,9 +2,9 @@ package no.nav.etterlatte.utbetaling.avstemming
 
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
-import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.utbetaling.common.januar
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -55,7 +55,11 @@ class KonsistensavstemmingJob(
         private val log = LoggerFactory.getLogger(this::class.java)
 
         fun run() {
-            val idag = LocalDate.now(clock.norskKlokke())
+            // val idag = LocalDate.now(clock.norskKlokke())
+            val idag =
+                4.januar(
+                    2024,
+                ) // TODO quick-fiks for å sende feilet avstemming bakover i tid - krever at forrige avstemming er slettet
             kjoereplan.find { dato -> dato == idag }?.let {
                 if (leaderElection.isLeader()) {
                     log.info("Starter $jobbNavn")

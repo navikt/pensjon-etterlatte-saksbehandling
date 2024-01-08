@@ -179,7 +179,16 @@ class VedtaksbrevService(
                     )
             }
 
-        val brevRequest = BrevbakerRequest.fra(brevkodePar.ferdigstilling, brevData, generellBrevData, avsender)
+        val brevRequest =
+            BrevbakerRequest.fra(
+                brevkodePar.ferdigstilling,
+                brevData,
+                avsender,
+                generellBrevData.personerISak,
+                generellBrevData.sak.id,
+                generellBrevData.spraak,
+                generellBrevData.sak.sakType,
+            )
 
         return brevbaker.genererPdf(brev.id, brevRequest)
             .let {
@@ -191,8 +200,11 @@ class VedtaksbrevService(
                                 BrevbakerRequest.fra(
                                     EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
                                     brevData.data,
-                                    generellBrevData,
                                     avsender,
+                                    generellBrevData.personerISak,
+                                    generellBrevData.sak.id,
+                                    generellBrevData.spraak,
+                                    generellBrevData.sak.sakType,
                                 ),
                             )
                         forhaandsvarsel.medPdfAppended(it)

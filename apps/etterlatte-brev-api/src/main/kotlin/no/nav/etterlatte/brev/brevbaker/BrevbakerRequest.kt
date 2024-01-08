@@ -1,7 +1,7 @@
 package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.adresse.Avsender
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
 import no.nav.etterlatte.brev.model.Spraak
@@ -18,42 +18,54 @@ data class BrevbakerRequest(
         fun fra(
             brevKode: EtterlatteBrevKode,
             letterData: Any,
-            generellBrevData: GenerellBrevData,
             avsender: Avsender,
+            personerISak: PersonerISak,
+            sakId: Long,
+            spraak: Spraak,
+            sakType: SakType,
         ): BrevbakerRequest =
             BrevbakerRequest(
                 kode = brevKode,
                 letterData = letterData,
                 felles =
                     mapFelles(
-                        sakId = generellBrevData.sak.id,
-                        soeker = generellBrevData.personerISak.soeker,
+                        sakId = sakId,
+                        soeker = personerISak.soeker,
                         avsender = avsender,
-                        vergeNavn = finnVergesNavn(brevKode, generellBrevData),
+                        vergeNavn =
+                            finnVergesNavn(
+                                brevKode,
+                                personerISak,
+                                sakType,
+                            ),
                     ),
-                language = LanguageCode.spraakToLanguageCode(generellBrevData.spraak),
+                language = LanguageCode.spraakToLanguageCode(spraak),
             )
 
         private fun finnVergesNavn(
             brevKode: EtterlatteBrevKode,
-            generellBrevData: GenerellBrevData,
+            personerISak: PersonerISak,
+            sakType: SakType,
         ): String? {
-            val harVerge = harVerge(generellBrevData)
+            val harVerge = harVerge(personerISak, sakType)
             return if (erMigrering(brevKode) && harVerge) {
-                generellBrevData.personerISak.soeker.formaterNavn() + " ved verge"
+                personerISak.soeker.formaterNavn() + " ved verge"
             } else if (harVerge) {
-                generellBrevData.personerISak.verge?.navn()
-                    ?: (generellBrevData.personerISak.soeker.formaterNavn() + " ved verge")
+                personerISak.verge?.navn()
+                    ?: (personerISak.soeker.formaterNavn() + " ved verge")
             } else {
                 null
             }
         }
 
-        private fun harVerge(generellBrevData: GenerellBrevData): Boolean {
+        private fun harVerge(
+            personerISak: PersonerISak,
+            sakType: SakType,
+        ): Boolean {
             // Hvis under18 er true eller ukjent (null) sier vi at vi skal ha forelderverge i barnepensjonssaker
             val skalHaForelderVerge =
-                generellBrevData.sak.sakType == SakType.BARNEPENSJON && generellBrevData.personerISak.soeker.under18 != false
-            val harVerge = generellBrevData.personerISak.verge != null || skalHaForelderVerge
+                sakType == SakType.BARNEPENSJON && personerISak.soeker.under18 != false
+            val harVerge = personerISak.verge != null || skalHaForelderVerge
             return harVerge
         }
 

@@ -39,8 +39,11 @@ class BrevbakerService(
                     erOmregningNyRegel = redigerbarTekstRequest.migrering?.erOmregningGjenny ?: false,
                 ).redigering,
                 brevDataMapper.brevData(redigerbarTekstRequest),
-                redigerbarTekstRequest.generellBrevData,
                 adresseService.hentAvsender(redigerbarTekstRequest.generellBrevData.avsenderRequest()),
+                redigerbarTekstRequest.generellBrevData.personerISak,
+                redigerbarTekstRequest.generellBrevData.sak.id,
+                redigerbarTekstRequest.generellBrevData.spraak,
+                redigerbarTekstRequest.generellBrevData.sak.sakType,
             )
         val brevbakerResponse = brevbakerKlient.genererJSON(request)
         return BlockTilSlateKonverterer.konverter(brevbakerResponse)

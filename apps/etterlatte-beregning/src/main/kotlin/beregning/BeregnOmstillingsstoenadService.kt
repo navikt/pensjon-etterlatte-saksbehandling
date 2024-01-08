@@ -55,15 +55,14 @@ class BeregnOmstillingsstoenadService(
     ): Beregning {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo)
         val trygdetid =
-            trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo) ?: throw Exception(
-                "Forventa å ha trygdetid for behandlingId=${behandling.id}",
-            )
+            trygdetidKlient.hentTrygdetid(behandling.id, brukerTokenInfo)
+                ?: throw TrygdetidMangler(behandling.id)
+
         val behandlingType = behandling.behandlingType
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
         val beregningsgrunnlag =
-            requireNotNull(
-                beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(behandling.id, brukerTokenInfo),
-            ) { "Behandling med id: ${behandling.id} mangler beregningsgrunnlag oms" }
+            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(behandling.id, brukerTokenInfo)
+                ?: throw BeregningsgrunnlagMangler(behandling.id)
 
         logger.info("Beregner omstillingsstønad for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
@@ -131,14 +130,12 @@ class BeregnOmstillingsstoenadService(
                             )
 
                             val grunnbeloep =
-                                requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)) {
-                                    "Anvendt grunnbeløp ikke funnet for perioden"
-                                }
+                                periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)
+                                    ?: throw AnvendtGrunnbeloepIkkeFunnet()
 
                             val trygdetid =
-                                requireNotNull(periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)) {
-                                    "Anvendt trygdetid ikke funnet for perioden"
-                                }
+                                periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)
+                                    ?: throw AnvendtTrygdetidIkkeFunnet()
 
                             val trygdetidGrunnlagForPeriode =
                                 beregningsgrunnlag.avdoed.finnGrunnlagForPeriode(
@@ -213,9 +210,8 @@ class BeregnOmstillingsstoenadService(
         beregningsGrunnlagOMS: BeregningsGrunnlagOMS,
     ): PeriodisertOmstillingstoenadGrunnlag {
         val samletTrygdetid =
-            requireNotNull(trygdetid.toSamlet(beregningsGrunnlagOMS.beregningsMetode.beregningsMetode)) {
-                "Trygdetid ikke satt for behandling ${trygdetid.behandlingId}"
-            }
+            trygdetid.toSamlet(beregningsGrunnlagOMS.beregningsMetode.beregningsMetode)
+                ?: throw TrygdetidMangler(trygdetid.behandlingId)
 
         return PeriodisertOmstillingstoenadGrunnlag(
             avdoed =

@@ -55,6 +55,7 @@ import no.nav.etterlatte.token.Systembruker
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -308,6 +309,26 @@ internal class BeregnBarnepensjonServiceTest {
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe MAKS_TRYGDETID
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `Kaster feil hvis beregningsgrunnlag mangler`() {
+        val behandling = mockBehandling(BehandlingType.REVURDERING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns null
+
+        runBlocking {
+            assertThrows<BeregningsgrunnlagMangler> {
+                beregnBarnepensjonService().beregn(behandling, bruker)
             }
         }
     }

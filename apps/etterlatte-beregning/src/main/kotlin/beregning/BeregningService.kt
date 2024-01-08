@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.girOpphoer
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -162,3 +163,23 @@ class BeregningService(
         }
     }
 }
+
+class TrygdetidMangler(behandlingId: UUID) : UgyldigForespoerselException(
+    code = "TRYGDETID_MANGLER",
+    detail = "Trygdetid ikke satt for behandling $behandlingId",
+)
+
+class BeregningsgrunnlagMangler(behandlingId: UUID) : UgyldigForespoerselException(
+    code = "BEREGNINGSGRUNNLAG_MANGLER",
+    detail = "Behandling med id: $behandlingId mangler beregningsgrunnlag oms",
+)
+
+class AnvendtGrunnbeloepIkkeFunnet : UgyldigForespoerselException(
+    code = "ANVENDT_GRUNNBELOEP_IKKE_FUNNET",
+    detail = "Anvendt grunnbeløp ikke funnet for perioden",
+)
+
+class AnvendtTrygdetidIkkeFunnet : UgyldigForespoerselException(
+    code = "ANVENDT_TRYGDETID_IKKE_FUNNET",
+    detail = "Anvendt trygdetid ikke funnet for perioden",
+)

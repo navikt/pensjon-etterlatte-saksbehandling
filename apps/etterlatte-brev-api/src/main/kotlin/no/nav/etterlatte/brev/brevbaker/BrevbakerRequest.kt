@@ -20,10 +20,8 @@ data class BrevbakerRequest(
             letterData: Any,
             generellBrevData: GenerellBrevData,
             avsender: Avsender,
-        ): BrevbakerRequest {
-            val harVerge = harVerge(generellBrevData)
-
-            return BrevbakerRequest(
+        ): BrevbakerRequest =
+            BrevbakerRequest(
                 kode = brevKode,
                 letterData = letterData,
                 felles =
@@ -31,23 +29,24 @@ data class BrevbakerRequest(
                         sakId = generellBrevData.sak.id,
                         soeker = generellBrevData.personerISak.soeker,
                         avsender = avsender,
-                        vergeNavn = finnVergesNavn(brevKode, harVerge, generellBrevData),
+                        vergeNavn = finnVergesNavn(brevKode, generellBrevData),
                     ),
                 language = LanguageCode.spraakToLanguageCode(generellBrevData.spraak),
             )
-        }
 
         private fun finnVergesNavn(
             brevKode: EtterlatteBrevKode,
-            harVerge: Boolean,
             generellBrevData: GenerellBrevData,
-        ) = if (erMigrering(brevKode) && harVerge) {
-            generellBrevData.personerISak.soeker.formaterNavn() + " ved verge"
-        } else if (harVerge) {
-            generellBrevData.personerISak.verge?.navn()
-                ?: (generellBrevData.personerISak.soeker.formaterNavn() + " ved verge")
-        } else {
-            null
+        ): String? {
+            val harVerge = harVerge(generellBrevData)
+            return if (erMigrering(brevKode) && harVerge) {
+                generellBrevData.personerISak.soeker.formaterNavn() + " ved verge"
+            } else if (harVerge) {
+                generellBrevData.personerISak.verge?.navn()
+                    ?: (generellBrevData.personerISak.soeker.formaterNavn() + " ved verge")
+            } else {
+                null
+            }
         }
 
         private fun harVerge(generellBrevData: GenerellBrevData): Boolean {

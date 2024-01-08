@@ -37,11 +37,8 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.getRapidEnv
-import java.time.Clock
 import java.time.Duration
-import java.time.Instant
 import java.time.LocalTime
-import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 
 class ApplicationContext(
@@ -112,8 +109,7 @@ class ApplicationContext(
         GrensesnittsavstemmingJob(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
-            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(16, 0, 0)), // TODO fjern denne når avstemming er kjørt
-            // starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
+            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
             periode = Duration.of(1, ChronoUnit.DAYS),
             saktype = Saktype.BARNEPENSJON,
         )
@@ -121,8 +117,7 @@ class ApplicationContext(
         GrensesnittsavstemmingJob(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
-            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(16, 0, 0)), // TODO fjern denne når avstemming er kjørt
-            // starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
+            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
             periode = Duration.of(1, ChronoUnit.DAYS),
             saktype = Saktype.OMSTILLINGSSTOENAD,
         )
@@ -142,8 +137,7 @@ class ApplicationContext(
             leaderElection,
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(4, ChronoUnit.HOURS),
-            // clock = clock,
-            clock = Clock.fixed(Instant.parse("2024-01-04T03:00:00.00Z"), ZoneOffset.UTC), // TODO fjern denne når ny avstemming er utført
+            clock = clock,
             saktype = Saktype.BARNEPENSJON,
         )
 

@@ -21,10 +21,7 @@ data class BrevbakerRequest(
             generellBrevData: GenerellBrevData,
             avsender: Avsender,
         ): BrevbakerRequest {
-            // Hvis under18 er true eller ukjent (null) sier vi at vi skal ha forelderverge i barnepensjonssaker
-            val skalHaForelderVerge =
-                generellBrevData.sak.sakType == SakType.BARNEPENSJON && generellBrevData.personerISak.soeker.under18 != false
-            val harVerge = generellBrevData.personerISak.verge != null || skalHaForelderVerge
+            val harVerge = harVerge(generellBrevData)
 
             return BrevbakerRequest(
                 kode = brevKode,
@@ -46,6 +43,14 @@ data class BrevbakerRequest(
                     ),
                 language = LanguageCode.spraakToLanguageCode(generellBrevData.spraak),
             )
+        }
+
+        private fun harVerge(generellBrevData: GenerellBrevData): Boolean {
+            // Hvis under18 er true eller ukjent (null) sier vi at vi skal ha forelderverge i barnepensjonssaker
+            val skalHaForelderVerge =
+                generellBrevData.sak.sakType == SakType.BARNEPENSJON && generellBrevData.personerISak.soeker.under18 != false
+            val harVerge = generellBrevData.personerISak.verge != null || skalHaForelderVerge
+            return harVerge
         }
 
         private fun erMigrering(brevKode: EtterlatteBrevKode): Boolean =

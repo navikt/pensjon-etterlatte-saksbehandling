@@ -606,7 +606,7 @@ class BehandlingFactoryTest {
                 kilde = Vedtaksloesning.GJENNY,
             )
 
-        every { sakServiceMock.finnEllerOpprettSak(any(), any()) } returns sak
+        every { sakServiceMock.finnEllerOpprettSak(any(), any(), gradering = any()) } returns sak
         every { sakServiceMock.finnSak(any<Long>()) } returns sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } just Runs
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
@@ -638,7 +638,7 @@ class BehandlingFactoryTest {
         Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
 
         verify(exactly = 1) {
-            sakServiceMock.finnEllerOpprettSak(persongalleri.soeker, SakType.BARNEPENSJON)
+            sakServiceMock.finnEllerOpprettSak(persongalleri.soeker, SakType.BARNEPENSJON, gradering = any())
             sakServiceMock.finnSak(sak.id)
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())

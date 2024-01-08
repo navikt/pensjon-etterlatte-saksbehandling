@@ -29,7 +29,7 @@ class MigreringBrevDataService(private val brevdataFacade: BrevdataFacade) {
 
             val utbetalingsinfo =
                 brevdataFacade.finnUtbetalingsinfo(
-                    generellBrevData.behandlingId,
+                    generellBrevData.behandlingId!!,
                     virkningstidspunkt,
                     brukerTokenInfo,
                     generellBrevData.sak.sakType,

@@ -215,7 +215,7 @@ internal class VedtaksbrevServiceTest {
             val behandling = opprettGenerellBrevdata(sakType, vedtakType)
             val mottaker = opprettMottaker()
 
-            every { db.hentBrevForBehandling(behandling.behandlingId) } returns null
+            every { db.hentBrevForBehandling(behandling.behandlingId!!) } returns null
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
             coEvery { brevdataFacade.hentBehandling(any(), any()) } returns
@@ -273,7 +273,7 @@ internal class VedtaksbrevServiceTest {
 
             coEvery { brevbaker.genererJSON(any()) } returns opprettRenderedJsonLetter()
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
-            every { db.hentBrevForBehandling(behandling.behandlingId) } returns null
+            every { db.hentBrevForBehandling(behandling.behandlingId!!) } returns null
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
             coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo

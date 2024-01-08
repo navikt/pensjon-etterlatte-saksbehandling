@@ -23,7 +23,7 @@ import java.util.UUID
 data class GenerellBrevData(
     val sak: Sak,
     val personerISak: PersonerISak,
-    val behandlingId: UUID,
+    val behandlingId: UUID?,
     val forenkletVedtak: ForenkletVedtak,
     val spraak: Spraak,
     val systemkilde: Vedtaksloesning,

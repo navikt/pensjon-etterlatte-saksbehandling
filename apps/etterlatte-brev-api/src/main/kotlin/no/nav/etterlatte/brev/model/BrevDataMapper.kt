@@ -67,16 +67,16 @@ enum class BrevDataFeatureToggle(private val key: String) : FeatureToggle {
 private class BrevDatafetcher(
     private val brevdataFacade: BrevdataFacade,
     private val brukerTokenInfo: BrukerTokenInfo,
-    private val behandlingId: UUID,
+    private val behandlingId: UUID?,
     private val vedtakVirkningstidspunkt: YearMonth,
     private val type: VedtakType,
     private val sak: Sak,
 ) {
-    suspend fun hentBrevutfall() = brevdataFacade.hentBrevutfall(behandlingId, brukerTokenInfo)
+    suspend fun hentBrevutfall() = behandlingId?.let { brevdataFacade.hentBrevutfall(it, brukerTokenInfo) }
 
     suspend fun hentUtbetaling() =
         brevdataFacade.finnUtbetalingsinfo(
-            behandlingId,
+            behandlingId!!,
             vedtakVirkningstidspunkt,
             brukerTokenInfo,
             sak.sakType,
@@ -93,23 +93,27 @@ private class BrevDatafetcher(
     suspend fun hentGrunnbeloep() = brevdataFacade.hentGrunnbeloep(brukerTokenInfo)
 
     suspend fun hentEtterbetaling() =
-        brevdataFacade.hentEtterbetaling(
-            behandlingId,
-            brukerTokenInfo,
-        )
+        behandlingId?.let {
+            brevdataFacade.hentEtterbetaling(
+                it,
+                brukerTokenInfo,
+            )
+        }
 
     suspend fun hentAvkortinginfo() =
-        brevdataFacade.finnAvkortingsinfo(
-            behandlingId,
-            sak.sakType,
-            vedtakVirkningstidspunkt,
-            type,
-            brukerTokenInfo,
-        )
+        behandlingId?.let {
+            brevdataFacade.finnAvkortingsinfo(
+                it,
+                sak.sakType,
+                vedtakVirkningstidspunkt,
+                type,
+                brukerTokenInfo,
+            )
+        }
 
     suspend fun hentInnvilgelsesdato() = brevdataFacade.hentInnvilgelsesdato(sak.id, brukerTokenInfo)
 
-    suspend fun hentTrygdetid() = brevdataFacade.finnTrygdetid(behandlingId, brukerTokenInfo)
+    suspend fun hentTrygdetid() = behandlingId?.let { brevdataFacade.finnTrygdetid(it, brukerTokenInfo) }
 }
 
 class BrevDataMapper(

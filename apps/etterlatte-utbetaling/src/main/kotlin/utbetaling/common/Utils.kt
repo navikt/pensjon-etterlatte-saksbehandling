@@ -65,7 +65,7 @@ fun UUID.toUUID30() = this.toString().replace("-", "").substring(0, 30).let { UU
 
 data class UUID30(val value: String)
 
-const val ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG = 70
+const val ANTALL_DETALJER_PER_AVSTEMMINGMELDING_OPPDRAG = 30
 
 val tidsstempelDatoOppdrag = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 val tidsstempelTimeOppdrag = DateTimeFormatter.ofPattern("yyyyMMddHH")

@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.pensjon.brevbaker.api.model.Felles
 
-data class BrevbakerRequest(
+data class BrevbakerRequest private constructor(
     val kode: EtterlatteBrevKode,
     val letterData: Any,
     val felles: Felles,
@@ -65,8 +65,7 @@ data class BrevbakerRequest(
             // Hvis under18 er true eller ukjent (null) sier vi at vi skal ha forelderverge i barnepensjonssaker
             val skalHaForelderVerge =
                 sakType == SakType.BARNEPENSJON && soekerOgEventuellVerge.soeker.under18 != false
-            val harVerge = soekerOgEventuellVerge.verge != null || skalHaForelderVerge
-            return harVerge
+            return soekerOgEventuellVerge.verge != null || skalHaForelderVerge
         }
 
         private fun erMigrering(brevKode: EtterlatteBrevKode): Boolean =

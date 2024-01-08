@@ -2,11 +2,10 @@ package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
-import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
-import no.nav.etterlatte.brev.brevbaker.LanguageCode
+import no.nav.etterlatte.brev.brevbaker.SoekerOgEventuellVerge
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.SakService
@@ -145,16 +144,14 @@ class BrevService(
 
         val (brevKode, brevData) = opprettBrevData(brev)
         val brevRequest =
-            BrevbakerRequest(
-                kode = brevKode,
+            BrevbakerRequest.fra(
+                brevKode = brevKode,
                 letterData = brevData,
-                felles =
-                    BrevbakerHelpers.mapFelles(
-                        sakId = brev.sakId,
-                        soeker = soeker,
-                        avsender = avsender,
-                    ),
-                language = LanguageCode.spraakToLanguageCode(Spraak.NB), // TODO: fikse spraak
+                avsender = avsender,
+                soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, null), // TODO verge her
+                sakId = sak.id,
+                spraak = Spraak.NB, // TODO: fikse spraak
+                sakType = sak.sakType,
             )
 
         return brevbakerService.genererPdf(brev.id, brevRequest)

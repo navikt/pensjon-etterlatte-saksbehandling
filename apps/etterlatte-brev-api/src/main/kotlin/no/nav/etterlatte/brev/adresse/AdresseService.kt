@@ -31,7 +31,7 @@ class AdresseService(
 
             val saksbehandlerEnhet =
                 async {
-                    hentEnhet(request.sakenhet)
+                    norg2Klient.hentEnhet(request.sakenhet)
                 }
 
             val attestantNavn =
@@ -48,8 +48,6 @@ class AdresseService(
         } else {
             navansattKlient.hentSaksbehandlerInfo(navn).fornavnEtternavn
         }
-
-    private suspend fun hentEnhet(navEnhetNr: String): Norg2Enhet = norg2Klient.hentEnhet(navEnhetNr)
 
     private fun mapTilAvsender(
         enhet: Norg2Enhet,

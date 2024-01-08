@@ -1,11 +1,11 @@
 package no.nav.etterlatte.brev.brevbaker
 
 import no.nav.etterlatte.brev.adresse.Avsender
-import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.pensjon.brevbaker.api.model.Felles
 
 data class BrevbakerRequest(
@@ -19,7 +19,7 @@ data class BrevbakerRequest(
             brevKode: EtterlatteBrevKode,
             letterData: Any,
             avsender: Avsender,
-            personerISak: PersonerISak,
+            soekerOgEventuellVerge: SoekerOgEventuellVerge,
             sakId: Long,
             spraak: Spraak,
             sakType: SakType,
@@ -30,12 +30,12 @@ data class BrevbakerRequest(
                 felles =
                     mapFelles(
                         sakId = sakId,
-                        soeker = personerISak.soeker,
+                        soeker = soekerOgEventuellVerge.soeker,
                         avsender = avsender,
                         vergeNavn =
                             finnVergesNavn(
                                 brevKode,
-                                personerISak,
+                                soekerOgEventuellVerge,
                                 sakType,
                             ),
                     ),
@@ -44,28 +44,28 @@ data class BrevbakerRequest(
 
         private fun finnVergesNavn(
             brevKode: EtterlatteBrevKode,
-            personerISak: PersonerISak,
+            soekerOgEventuellVerge: SoekerOgEventuellVerge,
             sakType: SakType,
         ): String? {
-            val harVerge = harVerge(personerISak, sakType)
+            val harVerge = harVerge(soekerOgEventuellVerge, sakType)
             return if (erMigrering(brevKode) && harVerge) {
-                personerISak.soeker.formaterNavn() + " ved verge"
+                soekerOgEventuellVerge.soeker.formaterNavn() + " ved verge"
             } else if (harVerge) {
-                personerISak.verge?.navn()
-                    ?: (personerISak.soeker.formaterNavn() + " ved verge")
+                soekerOgEventuellVerge.verge?.navn()
+                    ?: (soekerOgEventuellVerge.soeker.formaterNavn() + " ved verge")
             } else {
                 null
             }
         }
 
         private fun harVerge(
-            personerISak: PersonerISak,
+            soekerOgEventuellVerge: SoekerOgEventuellVerge,
             sakType: SakType,
         ): Boolean {
             // Hvis under18 er true eller ukjent (null) sier vi at vi skal ha forelderverge i barnepensjonssaker
             val skalHaForelderVerge =
-                sakType == SakType.BARNEPENSJON && personerISak.soeker.under18 != false
-            val harVerge = personerISak.verge != null || skalHaForelderVerge
+                sakType == SakType.BARNEPENSJON && soekerOgEventuellVerge.soeker.under18 != false
+            val harVerge = soekerOgEventuellVerge.verge != null || skalHaForelderVerge
             return harVerge
         }
 
@@ -125,3 +125,5 @@ enum class EtterlatteBrevKode {
     TOM_MAL_INFORMASJONSBREV,
     TOM_MAL,
 }
+
+data class SoekerOgEventuellVerge(val soeker: Soeker, val verge: Verge?)

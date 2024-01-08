@@ -40,7 +40,7 @@ class BrevbakerService(
                 ).redigering,
                 brevDataMapper.brevData(redigerbarTekstRequest),
                 adresseService.hentAvsender(redigerbarTekstRequest.generellBrevData.avsenderRequest()),
-                redigerbarTekstRequest.generellBrevData.personerISak,
+                redigerbarTekstRequest.generellBrevData.personerISak.soekerOgEventuellVerge(),
                 redigerbarTekstRequest.generellBrevData.sak.id,
                 redigerbarTekstRequest.generellBrevData.spraak,
                 redigerbarTekstRequest.generellBrevData.sak.sakType,

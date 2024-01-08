@@ -85,7 +85,7 @@ fun Grunnlag.mapSpraak(): Spraak =
 
 fun Grunnlag.mapVerge(
     sakType: SakType,
-    behandlingId: UUID,
+    behandlingId: UUID?,
     brevutfallDto: BrevutfallDto?,
 ): Verge? =
     with(this) {
@@ -146,7 +146,7 @@ private fun forelderVerge(gjenlevende: Grunnlagsdata<JsonNode>): ForelderVerge? 
 
 private fun Grunnlag.hentVergemaal(
     pdlVerge: VergemaalEllerFremtidsfullmakt,
-    behandlingId: UUID,
+    behandlingId: UUID?,
 ): Vergemaal {
     val vergeadresse = sak.hentVergeadresse()?.verdi
 
@@ -185,9 +185,9 @@ private fun Grunnlag.erOver18(brevutfallDto: BrevutfallDto?): Boolean {
 }
 
 class VergeManglerNavnException(
-    behandlingId: UUID,
+    behandlingId: UUID?,
 ) : InternfeilException("Finner ikke navn for verge i behandling med id=$behandlingId")
 
 class VergeManglerAdresseException(
-    behandlingId: UUID,
+    behandlingId: UUID?,
 ) : InternfeilException("Finner ikke adresse for verge i behandling med id=$behandlingId")

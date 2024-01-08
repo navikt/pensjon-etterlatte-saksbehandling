@@ -12,7 +12,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingslinjeId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinjetype
-import no.nav.etterlatte.utbetaling.utbetaling
+import no.nav.etterlatte.utbetaling.utbetalingKonsistensavstemming
 import no.nav.etterlatte.utbetaling.utbetalingslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -30,7 +30,7 @@ internal class KonsistensavstemmingServiceKtTest {
 
     @Test
     fun `skal starte konsistensavstemming for Barnepensjon`() {
-        val utbetaling = utbetaling()
+        val utbetaling = utbetalingKonsistensavstemming()
         every {
             utbetalingDao.hentUtbetalingerForKonsistensavstemming(
                 any(),
@@ -151,11 +151,11 @@ internal class KonsistensavstemmingServiceKtTest {
             )
         } returns
             listOf(
-                utbetaling(
+                utbetalingKonsistensavstemming(
                     periodeFra = idag.minusDays(200),
                     periodeTil = idag.minusDays(50),
                 ),
-                utbetaling(
+                utbetalingKonsistensavstemming(
                     utbetalingslinjer =
                         listOf(
                             utbetalingslinje(periodeFra = idag.minusDays(300)),
@@ -206,9 +206,9 @@ internal class KonsistensavstemmingServiceKtTest {
 
         val opprettet = LocalDateTime.of(1997, 12, 1, 0, 0).toNorskTidspunkt()
 
-        val utbetaling1 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje1))
-        val utbetaling2 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje2))
-        val utbetaling3 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje3))
+        val utbetaling1 = utbetalingKonsistensavstemming(opprettet = opprettet, utbetalingslinjer = listOf(linje1))
+        val utbetaling2 = utbetalingKonsistensavstemming(opprettet = opprettet, utbetalingslinjer = listOf(linje2))
+        val utbetaling3 = utbetalingKonsistensavstemming(opprettet = opprettet, utbetalingslinjer = listOf(linje3))
         val utbetalingsliste = listOf(utbetaling1, utbetaling2, utbetaling3)
 
         every { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), any()) } returns utbetalingsliste
@@ -285,9 +285,9 @@ internal class KonsistensavstemmingServiceKtTest {
 
         val opprettet = LocalDateTime.of(1997, 12, 1, 0, 0).toNorskTidspunkt()
 
-        val utbetaling1 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje1))
-        val utbetaling2 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje2))
-        val utbetaling3 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje3))
+        val utbetaling1 = utbetalingKonsistensavstemming(opprettet = opprettet, utbetalingslinjer = listOf(linje1))
+        val utbetaling2 = utbetalingKonsistensavstemming(opprettet = opprettet, utbetalingslinjer = listOf(linje2))
+        val utbetaling3 = utbetalingKonsistensavstemming(opprettet = opprettet, utbetalingslinjer = listOf(linje3))
         val utbetalingsliste = listOf(utbetaling1, utbetaling2, utbetaling3)
 
         every { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), any()) } returns utbetalingsliste
@@ -367,10 +367,10 @@ internal class KonsistensavstemmingServiceKtTest {
                 type = Utbetalingslinjetype.OPPHOER,
             )
 
-        val utbetaling1 = utbetaling(opprettet = opprettet1, utbetalingslinjer = listOf(linje1))
-        val utbetaling2 = utbetaling(opprettet = opprettet2, utbetalingslinjer = listOf(linje2))
-        val utbetaling3 = utbetaling(opprettet = opprettet3, utbetalingslinjer = listOf(linje3))
-        val utbetaling4 = utbetaling(opprettet = opprettet4, utbetalingslinjer = listOf(linje4))
+        val utbetaling1 = utbetalingKonsistensavstemming(opprettet = opprettet1, utbetalingslinjer = listOf(linje1))
+        val utbetaling2 = utbetalingKonsistensavstemming(opprettet = opprettet2, utbetalingslinjer = listOf(linje2))
+        val utbetaling3 = utbetalingKonsistensavstemming(opprettet = opprettet3, utbetalingslinjer = listOf(linje3))
+        val utbetaling4 = utbetalingKonsistensavstemming(opprettet = opprettet4, utbetalingslinjer = listOf(linje4))
         val utbetalingsliste = listOf(utbetaling1, utbetaling2, utbetaling3, utbetaling4)
 
         every { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), any()) } returns utbetalingsliste
@@ -459,10 +459,10 @@ internal class KonsistensavstemmingServiceKtTest {
                 type = Utbetalingslinjetype.OPPHOER,
             )
 
-        val utbetaling1 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje1))
-        val utbetaling2 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje2))
-        val utbetaling3 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje3))
-        val utbetaling4 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje4))
+        val utbetaling1 = utbetalingKonsistensavstemming(opprettet = opprettet, utbetalingslinjer = listOf(linje1))
+        val utbetaling2 = utbetalingKonsistensavstemming(opprettet = opprettet, utbetalingslinjer = listOf(linje2))
+        val utbetaling3 = utbetalingKonsistensavstemming(opprettet = opprettet, utbetalingslinjer = listOf(linje3))
+        val utbetaling4 = utbetalingKonsistensavstemming(opprettet = opprettet, utbetalingslinjer = listOf(linje4))
         val utbetalingsliste = listOf(utbetaling1, utbetaling2, utbetaling3, utbetaling4)
 
         every { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), any()) } returns utbetalingsliste
@@ -531,8 +531,8 @@ internal class KonsistensavstemmingServiceKtTest {
                 type = Utbetalingslinjetype.OPPHOER,
             )
 
-        val utbetaling1 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje1))
-        val utbetaling2 = utbetaling(opprettet = opprettet, utbetalingslinjer = listOf(linje2))
+        val utbetaling1 = utbetalingKonsistensavstemming(opprettet = opprettet, utbetalingslinjer = listOf(linje1))
+        val utbetaling2 = utbetalingKonsistensavstemming(opprettet = opprettet, utbetalingslinjer = listOf(linje2))
         val utbetalingsliste = listOf(utbetaling1, utbetaling2)
 
         every { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), any()) } returns utbetalingsliste
@@ -606,13 +606,13 @@ internal class KonsistensavstemmingServiceKtTest {
         val sak1 = SakId(1L)
         val sak2 = SakId(2L)
         val utbetaling1 =
-            utbetaling(sakId = sak1, opprettet = opprettet1, utbetalingslinjer = listOf(linje1Sak1))
+            utbetalingKonsistensavstemming(sakId = sak1, opprettet = opprettet1, utbetalingslinjer = listOf(linje1Sak1))
         val utbetaling2 =
-            utbetaling(sakId = sak1, opprettet = opprettet2, utbetalingslinjer = listOf(linje2Sak1))
+            utbetalingKonsistensavstemming(sakId = sak1, opprettet = opprettet2, utbetalingslinjer = listOf(linje2Sak1))
         val utbetaling3 =
-            utbetaling(sakId = sak2, opprettet = opprettet3, utbetalingslinjer = listOf(linje1Sak2))
+            utbetalingKonsistensavstemming(sakId = sak2, opprettet = opprettet3, utbetalingslinjer = listOf(linje1Sak2))
         val utbetaling4 =
-            utbetaling(sakId = sak2, opprettet = opprettet2, utbetalingslinjer = listOf(linje2Sak2))
+            utbetalingKonsistensavstemming(sakId = sak2, opprettet = opprettet2, utbetalingslinjer = listOf(linje2Sak2))
         val utbetalingsliste = listOf(utbetaling1, utbetaling2, utbetaling3, utbetaling4)
 
         every { utbetalingDao.hentUtbetalingerForKonsistensavstemming(any(), any(), any()) } returns utbetalingsliste

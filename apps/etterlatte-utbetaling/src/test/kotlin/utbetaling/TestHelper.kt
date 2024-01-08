@@ -23,6 +23,7 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Sak
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.SakId
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetaling
+import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingForKonsistensavstemming
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingStatus
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingshendelse
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Utbetalingslinje
@@ -126,6 +127,53 @@ fun oppdragMedFeiletKvittering(
             beskrMelding = "Beskrivelse"
         }
 }
+
+fun utbetalingKonsistensavstemming(
+    id: UUID = UUID.randomUUID(),
+    sakId: SakId = SakId(1),
+    sakType: Saktype? = Saktype.BARNEPENSJON,
+    vedtakId: Long = 1,
+    avstemmingsnoekkel: Tidspunkt = Tidspunkt.now(),
+    opprettet: Tidspunkt = Tidspunkt.now(),
+    utbetalingslinjeId: Long = 1L,
+    periodeFra: LocalDate = LocalDate.parse("2022-01-01"),
+    periodeTil: LocalDate? = null,
+    utbetalingslinjer: List<Utbetalingslinje> =
+        listOf(
+            utbetalingslinje(
+                id,
+                sakId,
+                utbetalingslinjeId,
+                periodeFra = periodeFra,
+                periodeTil = periodeTil,
+                opprettet = opprettet,
+            ),
+        ),
+    utbetalingshendelser: List<Utbetalingshendelse> =
+        listOf(
+            utbetalingshendelse(
+                utbetalingId = id,
+                tidspunkt = opprettet,
+            ),
+        ),
+    behandlingId: UUID = UUID.randomUUID(),
+) = UtbetalingForKonsistensavstemming(
+    id = id,
+    vedtakId = VedtakId(vedtakId),
+    behandlingId = BehandlingId(behandlingId, behandlingId.toUUID30()),
+    sakType = sakType ?: Saktype.BARNEPENSJON,
+    sakId = sakId,
+    opprettet = opprettet,
+    endret = Tidspunkt.now(),
+    avstemmingsnoekkel = avstemmingsnoekkel,
+    stoenadsmottaker = Foedselsnummer("12345678903"),
+    saksbehandler = NavIdent("12345678"),
+    saksbehandlerEnhet = "4819",
+    attestant = NavIdent("87654321"),
+    attestantEnhet = "4819",
+    utbetalingslinjer = utbetalingslinjer,
+    utbetalingshendelser = utbetalingshendelser,
+)
 
 fun utbetaling(
     id: UUID = UUID.randomUUID(),

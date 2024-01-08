@@ -307,7 +307,9 @@ class PersonService(
         logger.info("Henter geografisk tilknytning med fnr=${request.foedselsnummer} fra PDL")
 
         return pdlKlient.hentGeografiskTilknytning(request).let {
-            if (it.data?.hentGeografiskTilknytning == null) {
+            val geografiskTilknytning = it.data?.hentGeografiskTilknytning
+
+            if (geografiskTilknytning == null) {
                 if (it.errors == null) {
                     logger.warn("Geografisk tilknytning er null i PDL (fnr=${request.foedselsnummer})")
                     sikkerLogg.warn("Geografisk tilknytning er null i PDL (fnr=${request.foedselsnummer.value})")
@@ -322,7 +324,8 @@ class PersonService(
                     )
                 }
             } else {
-                GeografiskTilknytningMapper.mapGeografiskTilknytning(it.data.hentGeografiskTilknytning)
+                logger.info("Fant geografisk tilknytning: $geografiskTilknytning")
+                GeografiskTilknytningMapper.mapGeografiskTilknytning(geografiskTilknytning)
             }
         }
     }

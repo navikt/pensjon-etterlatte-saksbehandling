@@ -83,6 +83,12 @@ class VedtaksbrevService(
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
         }
 
+        brevdataFacade.hentBehandling(behandlingId, brukerTokenInfo).status.let { status ->
+            require(status.kanEndres()) {
+                "Behandling (id=$behandlingId) har status $status og kan ikke opprette vedtaksbrev"
+            }
+        }
+
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo) }
 

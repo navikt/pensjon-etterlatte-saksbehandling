@@ -70,7 +70,7 @@ data class OmregnetBPNyttRegelverk(
                         else -> Pair(migreringRequest.utlandstilknytningType, migreringRequest.yrkesskade)
                     }
 
-                if (generellBrevData.forenkletVedtak.saksbehandlerIdent == Fagsaksystem.EY.navn &&
+                if (generellBrevData.forenkletVedtak?.saksbehandlerIdent == Fagsaksystem.EY.navn &&
                     defaultBrevdataOmregning.erForeldreloes
                 ) {
                     throw IllegalStateException(

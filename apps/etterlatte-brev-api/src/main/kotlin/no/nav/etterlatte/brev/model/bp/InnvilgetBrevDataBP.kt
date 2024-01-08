@@ -44,7 +44,7 @@ data class InnvilgetBrevDataEnkel(
             if (etterbetaling != null) {
                 return YearMonth.from(etterbetaling.datoTom).plusMonths(1)
             }
-            return generellBrevData.forenkletVedtak.vedtaksdato?.let { YearMonth.from(it) }
+            return generellBrevData.forenkletVedtak?.vedtaksdato?.let { YearMonth.from(it) }
                 ?: YearMonth.now()
         }
     }

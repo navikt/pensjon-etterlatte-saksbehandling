@@ -56,5 +56,5 @@ data class RedigerbarTekstRequest(
     val prosessType: BrevProsessType,
     val migrering: MigreringBrevRequest? = null,
 ) {
-    fun vedtakstype() = generellBrevData.forenkletVedtak.type.name.lowercase()
+    fun vedtakstype() = generellBrevData.forenkletVedtak?.type?.name?.lowercase()
 }

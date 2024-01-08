@@ -24,19 +24,20 @@ data class GenerellBrevData(
     val sak: Sak,
     val personerISak: PersonerISak,
     val behandlingId: UUID?,
-    val forenkletVedtak: ForenkletVedtak,
+    val forenkletVedtak: ForenkletVedtak?,
     val spraak: Spraak,
     val systemkilde: Vedtaksloesning,
     val utlandstilknytning: Utlandstilknytning? = null,
     val revurderingsaarsak: Revurderingaarsak? = null,
 ) {
-    fun avsenderRequest(): AvsenderRequest {
-        return AvsenderRequest(
-            saksbehandlerIdent = forenkletVedtak.saksbehandlerIdent,
-            sakenhet = forenkletVedtak.sakenhet,
-            attestantIdent = forenkletVedtak.attestantIdent,
-        )
-    }
+    fun avsenderRequest() =
+        forenkletVedtak?.let {
+            AvsenderRequest(
+                saksbehandlerIdent = it.saksbehandlerIdent,
+                sakenhet = it.sakenhet,
+                attestantIdent = it.attestantIdent,
+            )
+        } ?: AvsenderRequest("", "")
 }
 
 data class Trygdetid(

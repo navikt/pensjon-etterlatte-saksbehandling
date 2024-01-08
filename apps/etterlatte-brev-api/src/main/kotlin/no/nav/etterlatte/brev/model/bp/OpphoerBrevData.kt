@@ -23,12 +23,12 @@ data class AdopsjonRevurderingBrevdata(
             val revurderingInfo =
                 valider<RevurderingInfo.Adopsjon>(
                     generellBrevData.revurderingsaarsak,
-                    generellBrevData.forenkletVedtak.revurderingInfo,
+                    generellBrevData.forenkletVedtak?.revurderingInfo,
                     Revurderingaarsak.ADOPSJON,
                 )
 
             val virkningstidspunkt =
-                requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {
+                requireNotNull(generellBrevData.forenkletVedtak?.virkningstidspunkt) {
                     "brev for behandling=${generellBrevData.behandlingId} må ha virkningstidspunkt"
                 }
             return AdopsjonRevurderingBrevdata(
@@ -55,11 +55,11 @@ data class OmgjoeringAvFarskapRevurderingBrevdata(
             val revurderingInfo =
                 valider<RevurderingInfo.OmgjoeringAvFarskap>(
                     generellBrevData.revurderingsaarsak,
-                    generellBrevData.forenkletVedtak.revurderingInfo,
+                    generellBrevData.forenkletVedtak?.revurderingInfo,
                     Revurderingaarsak.OMGJOERING_AV_FARSKAP,
                 )
             val virkningstidspunkt =
-                requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {
+                requireNotNull(generellBrevData.forenkletVedtak?.virkningstidspunkt) {
                     "Mangler virkningstidspunkt ${generellBrevData.behandlingId}"
                 }
             return OmgjoeringAvFarskapRevurderingBrevdata(

@@ -23,7 +23,7 @@ class MigreringBrevDataService(private val brevdataFacade: BrevdataFacade) {
         }
         return coroutineScope {
             val virkningstidspunkt =
-                requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {
+                requireNotNull(generellBrevData.forenkletVedtak!!.virkningstidspunkt) {
                     "Migreringsvedtaket må ha et virkningstidspunkt"
                 }
 

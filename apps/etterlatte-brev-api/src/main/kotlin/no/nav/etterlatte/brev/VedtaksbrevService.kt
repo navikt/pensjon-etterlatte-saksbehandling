@@ -216,7 +216,7 @@ class VedtaksbrevService(
             .also { pdf ->
                 lagrePdfHvisVedtakFattet(
                     brev.id,
-                    generellBrevData.forenkletVedtak,
+                    generellBrevData.forenkletVedtak!!,
                     pdf,
                     brukerTokenInfo,
                     automatiskMigreringRequest != null,

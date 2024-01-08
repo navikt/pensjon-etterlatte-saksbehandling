@@ -110,11 +110,11 @@ internal class BrevdataFacadeImplTest {
             Assertions.assertEquals("Barn", etternavn)
         }
         Assertions.assertEquals("Død Mellom Far", generellBrevData.personerISak.avdoede.first().navn)
-        Assertions.assertEquals(VedtakType.INNVILGELSE, generellBrevData.forenkletVedtak.type)
-        Assertions.assertEquals(123L, generellBrevData.forenkletVedtak.id)
-        Assertions.assertEquals(ENHET, generellBrevData.forenkletVedtak.sakenhet)
-        Assertions.assertEquals(SAKSBEHANDLER_IDENT, generellBrevData.forenkletVedtak.saksbehandlerIdent)
-        Assertions.assertEquals(ATTESTANT_IDENT, generellBrevData.forenkletVedtak.attestantIdent)
+        Assertions.assertEquals(VedtakType.INNVILGELSE, generellBrevData.forenkletVedtak?.type)
+        Assertions.assertEquals(123L, generellBrevData.forenkletVedtak?.id)
+        Assertions.assertEquals(ENHET, generellBrevData.forenkletVedtak?.sakenhet)
+        Assertions.assertEquals(SAKSBEHANDLER_IDENT, generellBrevData.forenkletVedtak?.saksbehandlerIdent)
+        Assertions.assertEquals(ATTESTANT_IDENT, generellBrevData.forenkletVedtak?.attestantIdent)
 
         coVerify(exactly = 1) {
             grunnlagKlient.hentGrunnlag(BEHANDLING_ID, any())
@@ -144,7 +144,7 @@ internal class BrevdataFacadeImplTest {
             mellomnavn shouldBe "Mellom"
             etternavn shouldBe "Barn"
         }
-        with(generellBrevData.forenkletVedtak) {
+        with(generellBrevData.forenkletVedtak!!) {
             type shouldBe VedtakType.TILBAKEKREVING
             sakenhet shouldBe ENHET
             id shouldBe 123L

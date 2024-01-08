@@ -57,7 +57,7 @@ class BehandlingFactory(
     suspend fun opprettSakOgBehandlingForOppgave(request: NyBehandlingRequest): Behandling {
         val soeker = request.persongalleri.soeker
 
-        val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType) }
+        val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType, gradering = request.gradering) }
 
         if (
             sak.enhet != request.enhet &&

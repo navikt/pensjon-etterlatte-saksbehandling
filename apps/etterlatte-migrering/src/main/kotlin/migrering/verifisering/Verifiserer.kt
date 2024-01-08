@@ -44,7 +44,7 @@ internal class Verifiserer(
                 feil.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
                 if (!request.erUnder18) {
                     feil.addAll(sjekkOmSoekerHarBoddUtland(soeker))
-                    feil.addAll(sjekkOmSoekerHarFlereAvoede(request))
+                    feil.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(request))
                 }
             }
         }
@@ -145,7 +145,7 @@ internal class Verifiserer(
         return emptyList()
     }
 
-    private fun sjekkOmSoekerHarFlereAvoede(request: MigreringRequest): List<Verifiseringsfeil> {
+    private fun sjekkOmSoekerHarFlereAvoedeForeldre(request: MigreringRequest): List<Verifiseringsfeil> {
         if (request.avdoedForelder.size > 1) {
             return listOf(SoekerHarFlereAvdoede)
         }

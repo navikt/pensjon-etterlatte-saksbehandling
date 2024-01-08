@@ -173,7 +173,7 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
     ) = tx.session {
         opprett(
             """
-                INSERT INTO gyldigdryrun(
+                INSERT INTO dryrun(
                     ${DryRun.PESYS_ID},
                     ${DryRun.REQUEST}
                 )

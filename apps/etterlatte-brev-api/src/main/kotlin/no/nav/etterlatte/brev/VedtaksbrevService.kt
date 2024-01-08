@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Saksbehandler
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -83,9 +84,11 @@ class VedtaksbrevService(
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
         }
 
-        brevdataFacade.hentBehandling(behandlingId, brukerTokenInfo).status.let { status ->
-            require(status.kanEndres()) {
-                "Behandling (id=$behandlingId) har status $status og kan ikke opprette vedtaksbrev"
+        if (brukerTokenInfo is Saksbehandler) {
+            brevdataFacade.hentBehandling(behandlingId, brukerTokenInfo).status.let { status ->
+                require(status.kanEndres()) {
+                    "Behandling (id=$behandlingId) har status $status og kan ikke opprette vedtaksbrev"
+                }
             }
         }
 
@@ -97,6 +100,7 @@ class VedtaksbrevService(
                 when (verge) {
                     is Vergemaal ->
                         verge.toMottaker()
+
                     else -> {
                         val mottakerFnr =
                             innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
@@ -165,7 +169,11 @@ class VedtaksbrevService(
                 false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
                 true ->
                     OmregnetBPNyttRegelverkFerdig(
-                        innhold = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }).innhold(),
+                        innhold =
+                            InnholdMedVedlegg(
+                                { hentLagretInnhold(brev) },
+                                { hentLagretInnholdVedlegg(brev) },
+                            ).innhold(),
                         data = (
                             migreringBrevDataService.opprettMigreringBrevdata(
                                 generellBrevData,
@@ -181,20 +189,19 @@ class VedtaksbrevService(
         return brevbaker.genererPdf(brev.id, brevRequest)
             .let {
                 when (brevData) {
-                    is OmregnetBPNyttRegelverkFerdig ->
-                        {
-                            val forhaandsvarsel =
-                                brevbaker.genererPdf(
-                                    brev.id,
-                                    BrevbakerRequest.fra(
-                                        EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                                        brevData.data,
-                                        generellBrevData,
-                                        avsender,
-                                    ),
-                                )
-                            forhaandsvarsel.medPdfAppended(it)
-                        }
+                    is OmregnetBPNyttRegelverkFerdig -> {
+                        val forhaandsvarsel =
+                            brevbaker.genererPdf(
+                                brev.id,
+                                BrevbakerRequest.fra(
+                                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
+                                    brevData.data,
+                                    generellBrevData,
+                                    avsender,
+                                ),
+                            )
+                        forhaandsvarsel.medPdfAppended(it)
+                    }
 
                     else -> it
                 }
@@ -261,7 +268,8 @@ class VedtaksbrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevService.BrevPayload {
-        val generellBrevData = retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo) }
+        val generellBrevData =
+            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo) }
         val prosessType = brevProsessTypeFactory.fra(generellBrevData)
         val innhold = opprettInnhold(RedigerbarTekstRequest(generellBrevData, brukerTokenInfo, prosessType))
         val innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType)

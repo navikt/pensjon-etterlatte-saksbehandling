@@ -275,6 +275,11 @@ class BrevdataFacade(
 
         return trygdetidService.finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
     }
+
+    suspend fun hentBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 }
 
 fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> {

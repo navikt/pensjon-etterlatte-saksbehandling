@@ -46,6 +46,8 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -222,6 +224,10 @@ internal class VedtaksbrevServiceTest {
             every { db.hentBrevForBehandling(behandling.behandlingId) } returns null
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
+            coEvery { brevdataFacade.hentBehandling(any(), any()) } returns
+                mockk<DetaljertBehandling>().apply {
+                    every { status } returns BehandlingStatus.BEREGNET
+                }
 
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(
@@ -278,6 +284,10 @@ internal class VedtaksbrevServiceTest {
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
             coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
             coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
+            coEvery { brevdataFacade.hentBehandling(any(), any()) } returns
+                mockk<DetaljertBehandling>().apply {
+                    every { status } returns BehandlingStatus.BEREGNET
+                }
 
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(
@@ -335,6 +345,40 @@ internal class VedtaksbrevServiceTest {
                 adresseService wasNot Called
                 dokarkivService wasNot Called
                 brevdataFacade wasNot Called
+            }
+        }
+
+        @Test
+        fun `Behandling er i feil status - skal kaste feil`() {
+            val sakId = Random.nextLong()
+            val behandling = opprettGenerellBrevdata(SakType.BARNEPENSJON, VedtakType.INNVILGELSE)
+            val mottaker = opprettMottaker()
+
+            every { db.hentBrevForBehandling(behandling.behandlingId) } returns null
+            coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
+            coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
+
+            coEvery { brevdataFacade.hentBehandling(any(), any()) } returns
+                mockk<DetaljertBehandling>().apply {
+                    every { status } returns BehandlingStatus.IVERKSATT
+                }
+
+            assertThrows<IllegalArgumentException> {
+                runBlocking {
+                    vedtaksbrevService.opprettVedtaksbrev(
+                        sakId,
+                        behandling.behandlingId,
+                        SAKSBEHANDLER,
+                    )
+                }
+            }
+
+            coVerify {
+                db.hentBrevForBehandling(BEHANDLING_ID)
+                brevdataFacade.hentBehandling(BEHANDLING_ID, SAKSBEHANDLER)
+                brevbaker wasNot Called
+                adresseService wasNot Called
+                dokarkivService wasNot Called
             }
         }
     }

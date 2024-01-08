@@ -37,8 +37,11 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.getRapidEnv
+import java.time.Clock
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalTime
+import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
 
 class ApplicationContext(
@@ -137,7 +140,8 @@ class ApplicationContext(
             leaderElection,
             initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(4, ChronoUnit.HOURS),
-            clock = clock,
+            // clock = clock,
+            clock = Clock.fixed(Instant.parse("2024-01-04T03:00:00.00Z"), ZoneOffset.UTC), // TODO fjern denne når ny avstemming er utført
             saktype = Saktype.BARNEPENSJON,
         )
 

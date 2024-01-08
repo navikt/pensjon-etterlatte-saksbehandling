@@ -112,7 +112,8 @@ class ApplicationContext(
         GrensesnittsavstemmingJob(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
-            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
+            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(15, 55, 0)), // TODO fjern denne når avstemming er kjørt
+            // starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
             periode = Duration.of(1, ChronoUnit.DAYS),
             saktype = Saktype.BARNEPENSJON,
         )
@@ -120,7 +121,8 @@ class ApplicationContext(
         GrensesnittsavstemmingJob(
             grensesnittsavstemmingService = grensesnittsavstemmingService,
             leaderElection = leaderElection,
-            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
+            starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(15, 55, 0)), // TODO fjern denne når avstemming er kjørt
+            // starttidspunkt = Tidspunkt.now(norskKlokke()).next(LocalTime.of(3, 0, 0)),
             periode = Duration.of(1, ChronoUnit.DAYS),
             saktype = Saktype.OMSTILLINGSSTOENAD,
         )

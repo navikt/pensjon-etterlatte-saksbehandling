@@ -54,17 +54,17 @@ internal class GrensesnittsavstemmingsJobTest {
     @Test
     fun `skal grensesnittsavstemme siden pod er leader`() {
         every { leaderElection.isLeader() } returns true
-        every { grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.BARNEPENSJON) } returns Unit
-        every { grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.OMSTILLINGSSTOENAD) } returns Unit
+        every { grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.BARNEPENSJON, any()) } returns Unit
+        every { grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.OMSTILLINGSSTOENAD, any()) } returns Unit
 
         grensesnittavstemming.run()
         omsGrensesnittavstemming.run()
 
         verify(exactly = 1) {
-            grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.BARNEPENSJON)
+            grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.BARNEPENSJON, any())
         }
         verify(exactly = 1) {
-            grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.OMSTILLINGSSTOENAD)
+            grensesnittavstemmingService.startGrensesnittsavstemming(saktype = Saktype.OMSTILLINGSSTOENAD, any())
         }
         assertTrue(leaderElection.isLeader())
     }

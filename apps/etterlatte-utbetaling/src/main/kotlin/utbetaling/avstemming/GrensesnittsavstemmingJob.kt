@@ -2,6 +2,7 @@ package no.nav.etterlatte.utbetaling.grensesnittavstemming
 
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
@@ -49,7 +50,15 @@ class GrensesnittsavstemmingJob(
         fun run() {
             log.info("Starter $jobbNavn")
             if (leaderElection.isLeader()) {
-                grensesnittsavstemmingService.startGrensesnittsavstemming(saktype)
+                grensesnittsavstemmingService.startGrensesnittsavstemming(
+                    saktype = saktype,
+                    // TODO skal fjernes når avstemming for 05.01.2024 er sendt over på nytt
+                    periode =
+                        Avstemmingsperiode(
+                            fraOgMed = Tidspunkt.parse("2024-01-04T23:00:00.00Z"),
+                            til = Tidspunkt.parse("2024-01-05T23:00:00.00Z"),
+                        ),
+                )
             }
         }
     }

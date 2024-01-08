@@ -5,7 +5,6 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
 
@@ -25,18 +24,6 @@ class AdresseService(
             Mottaker.fra(fnr, regoppslag)
         }
     }
-
-    suspend fun hentAvsender(
-        sak: Sak,
-        saksbehandlerIdent: String,
-    ): Avsender =
-        coroutineScope {
-            val saksbehandlerNavn = async { hentSaksbehandlerNavn(saksbehandlerIdent) }
-
-            val saksbehandlerEnhet = async { hentEnhet(sak.enhet) }
-
-            mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await(), attestantNavn = null)
-        }
 
     suspend fun hentAvsender(request: AvsenderRequest): Avsender =
         coroutineScope {
@@ -84,5 +71,5 @@ class AdresseService(
 data class AvsenderRequest(
     val saksbehandlerIdent: String,
     val sakenhet: String,
-    val attestantIdent: String?,
+    val attestantIdent: String? = null,
 )

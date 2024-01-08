@@ -75,7 +75,7 @@ internal class AdresseServiceTest {
 
         val faktiskAvsender =
             runBlocking {
-                adresseService.hentAvsender(sak, zIdent)
+                adresseService.hentAvsender(AvsenderRequest(saksbehandlerIdent = zIdent, sakenhet = sak.enhet))
             }
 
         faktiskAvsender.saksbehandler shouldBe "saks behandler"

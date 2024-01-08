@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
@@ -139,7 +140,8 @@ class BrevService(
             }
         val sak = sakService.hentSak(brev.sakId, bruker)
         val soeker = soekerService.hentSoeker(brev.sakId, bruker, brevutfall)
-        val avsender = adresseService.hentAvsender(sak, bruker.ident())
+        val avsender =
+            adresseService.hentAvsender(AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = sak.enhet))
 
         val (brevKode, brevData) = opprettBrevData(brev)
         val brevRequest =

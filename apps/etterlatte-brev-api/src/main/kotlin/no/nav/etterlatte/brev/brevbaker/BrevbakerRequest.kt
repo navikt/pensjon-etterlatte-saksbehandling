@@ -31,18 +31,23 @@ data class BrevbakerRequest(
                         sakId = generellBrevData.sak.id,
                         soeker = generellBrevData.personerISak.soeker,
                         avsender = avsender,
-                        vergeNavn =
-                            if (erMigrering(brevKode) && harVerge) {
-                                generellBrevData.personerISak.soeker.formaterNavn() + " ved verge"
-                            } else if (harVerge) {
-                                generellBrevData.personerISak.verge?.navn()
-                                    ?: (generellBrevData.personerISak.soeker.formaterNavn() + " ved verge")
-                            } else {
-                                null
-                            },
+                        vergeNavn = finnVergesNavn(brevKode, harVerge, generellBrevData),
                     ),
                 language = LanguageCode.spraakToLanguageCode(generellBrevData.spraak),
             )
+        }
+
+        private fun finnVergesNavn(
+            brevKode: EtterlatteBrevKode,
+            harVerge: Boolean,
+            generellBrevData: GenerellBrevData,
+        ) = if (erMigrering(brevKode) && harVerge) {
+            generellBrevData.personerISak.soeker.formaterNavn() + " ved verge"
+        } else if (harVerge) {
+            generellBrevData.personerISak.verge?.navn()
+                ?: (generellBrevData.personerISak.soeker.formaterNavn() + " ved verge")
+        } else {
+            null
         }
 
         private fun harVerge(generellBrevData: GenerellBrevData): Boolean {

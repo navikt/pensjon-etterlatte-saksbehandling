@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.adresse
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
-import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -39,18 +38,18 @@ class AdresseService(
             mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await(), attestantNavn = null)
         }
 
-    suspend fun hentAvsender(vedtak: ForenkletVedtak): Avsender =
+    suspend fun hentAvsender(request: AvsenderRequest): Avsender =
         coroutineScope {
-            val saksbehandlerNavn = async { hentSaksbehandlerNavn(vedtak.saksbehandlerIdent) }
+            val saksbehandlerNavn = async { hentSaksbehandlerNavn(request.saksbehandlerIdent) }
 
             val saksbehandlerEnhet =
                 async {
-                    hentEnhet(vedtak.sakenhet)
+                    hentEnhet(request.sakenhet)
                 }
 
             val attestantNavn =
                 async {
-                    vedtak.attestantIdent?.let { hentSaksbehandlerNavn(it) }
+                    request.attestantIdent?.let { hentSaksbehandlerNavn(it) }
                 }
 
             mapTilAvsender(saksbehandlerEnhet.await(), saksbehandlerNavn.await(), attestantNavn.await())
@@ -81,3 +80,9 @@ class AdresseService(
         )
     }
 }
+
+data class AvsenderRequest(
+    val saksbehandlerIdent: String,
+    val sakenhet: String,
+    val attestantIdent: String?,
+)

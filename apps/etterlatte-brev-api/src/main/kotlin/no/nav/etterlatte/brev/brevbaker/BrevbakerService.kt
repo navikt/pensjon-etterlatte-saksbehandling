@@ -40,7 +40,7 @@ class BrevbakerService(
                 ).redigering,
                 brevDataMapper.brevData(redigerbarTekstRequest),
                 redigerbarTekstRequest.generellBrevData,
-                adresseService.hentAvsender(redigerbarTekstRequest.generellBrevData.forenkletVedtak),
+                adresseService.hentAvsender(redigerbarTekstRequest.generellBrevData.avsenderRequest()),
             )
         val brevbakerResponse = brevbakerKlient.genererJSON(request)
         return BlockTilSlateKonverterer.konverter(brevbakerResponse)

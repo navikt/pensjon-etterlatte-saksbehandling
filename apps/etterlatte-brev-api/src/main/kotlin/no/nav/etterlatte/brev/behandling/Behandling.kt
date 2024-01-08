@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
+import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
@@ -28,7 +29,15 @@ data class GenerellBrevData(
     val systemkilde: Vedtaksloesning,
     val utlandstilknytning: Utlandstilknytning? = null,
     val revurderingsaarsak: Revurderingaarsak? = null,
-)
+) {
+    fun avsenderRequest(): AvsenderRequest {
+        return AvsenderRequest(
+            saksbehandlerIdent = forenkletVedtak.saksbehandlerIdent,
+            sakenhet = forenkletVedtak.sakenhet,
+            attestantIdent = forenkletVedtak.attestantIdent,
+        )
+    }
+}
 
 data class Trygdetid(
     val aarTrygdetid: Int,

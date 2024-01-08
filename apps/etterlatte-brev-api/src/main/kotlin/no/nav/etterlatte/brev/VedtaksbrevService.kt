@@ -147,7 +147,7 @@ class VedtaksbrevService(
 
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, brukerTokenInfo) }
-        val avsender = adresseService.hentAvsender(generellBrevData.forenkletVedtak)
+        val avsender = adresseService.hentAvsender(generellBrevData.avsenderRequest())
 
         val brevkodePar =
             brevDataMapper.brevKode(

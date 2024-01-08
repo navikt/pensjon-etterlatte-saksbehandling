@@ -36,7 +36,10 @@ class Server(private val context: ApplicationContext) {
                     applicationEngineEnvironment {
                         config = HoconApplicationConfig(context.config)
                         module {
-                            restModule(sikkerLogg, withMetrics = true) {
+                            restModule(
+                                sikkerLogg,
+                                withMetrics = true,
+                            ) {
                                 trygdetid(trygdetidService, behandlingKlient)
                                 trygdetidV2(trygdetidService, behandlingKlient)
                                 avtale(avtaleService, behandlingKlient)

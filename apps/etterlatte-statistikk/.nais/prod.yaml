@@ -45,6 +45,7 @@ spec:
   resources:
     requests:
       cpu: 25m
+      memory: 384Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1

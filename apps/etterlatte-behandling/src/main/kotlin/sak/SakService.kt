@@ -121,13 +121,17 @@ class SakServiceImpl(
         gradering: AdressebeskyttelseGradering?,
         sjekkEnhetMotNorg: Boolean,
     ): Sak {
-        val enhet =
-            if (sjekkEnhetMotNorg) {
-                sjekkEnhet(fnr, type, overstyrendeEnhet)
-            } else {
-                overstyrendeEnhet!!
-            }
-        val sak = finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(fnr, type, enhet)
+        var sak = finnSakerForPersonOgType(fnr, type)
+        if (sak == null) {
+            val enhet =
+                if (sjekkEnhetMotNorg) {
+                    sjekkEnhet(fnr, type, overstyrendeEnhet)
+                } else {
+                    overstyrendeEnhet!!
+                }
+            sak = dao.opprettSak(fnr, type, enhet)
+        }
+
         sjekkSkjerming(fnr = fnr, sakId = sak.id)
         gradering?.let {
             oppdaterAdressebeskyttelse(sak.id, it)

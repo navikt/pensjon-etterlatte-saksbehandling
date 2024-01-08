@@ -34,11 +34,18 @@ export default function ManuellBehandling() {
 
   const [pesysId, setPesysId] = useState<number | undefined>(undefined)
 
-  const [enhetsFilter, setEnhetsfilter] = useState<EnhetFilterKeys>('VELGENHET')
+  const [enhet, setEnhet] = useState<EnhetFilterKeys>('VELGENHET')
 
   const [erForeldreloes, setErForeldreloes] = useState<boolean>(false)
 
+  const [gradering, setGradering] = useState<string>('')
+  const [error, setError] = useState<boolean>(false)
+
   const ferdigstill = () => {
+    if (!gradering) {
+      setError(true)
+      return
+    }
     opprettNyBehandling(
       {
         ...nyBehandlingRequest,
@@ -46,8 +53,9 @@ export default function ManuellBehandling() {
         mottattDato: nyBehandlingRequest!!.mottattDato!!.replace('Z', ''),
         kilde: erMigrering ? 'PESYS' : undefined,
         pesysId: pesysId,
-        enhet: enhetsFilter === 'VELGENHET' ? undefined : filtrerEnhet(enhetsFilter),
+        enhet: enhet === 'VELGENHET' ? undefined : filtrerEnhet(enhet),
         foreldreloes: erForeldreloes,
+        gradering: gradering,
       },
       (nyBehandlingRespons) => {
         if (overstyrBeregning) {
@@ -93,11 +101,34 @@ export default function ManuellBehandling() {
           onChange={(e) => setPesysId(Number(e.target.value))}
         />
       </InputRow>
+      {error && <Alert variant="error">Gradering må velges</Alert>}
+      <Select
+        label="Gradering - Adressebeskyttelse(obligatorisk)"
+        value={gradering}
+        onChange={(e) => {
+          setGradering(e.target.value)
+          setError(false)
+        }}
+      >
+        <option>Velg ...</option>
 
+        <option key="STRENGT_FORTROLIG" value="STRENGT_FORTROLIG">
+          Strengt fortrolig
+        </option>
+        <option key="STRENGT_FORTROLIG_UTLAND" value="STRENGT_FORTROLIG_UTLAND">
+          Strengt fortrolig utland
+        </option>
+        <option key="FORTROLIG" value="fortrolig">
+          Fortrolig
+        </option>
+        <option key="UGRADERT" value="UGRADERT">
+          Ugradert
+        </option>
+      </Select>
       <Select
         label="Overstyre enhet (valgfritt)"
-        value={enhetsFilter}
-        onChange={(e) => setEnhetsfilter(e.target.value as EnhetFilterKeys)}
+        value={enhet}
+        onChange={(e) => setEnhet(e.target.value as EnhetFilterKeys)}
       >
         {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
           <option key={status} value={status}>

@@ -37,7 +37,7 @@ data class GenerellBrevData(
                 sakenhet = it.sakenhet,
                 attestantIdent = it.attestantIdent,
             )
-        } ?: AvsenderRequest("", "")
+        } ?: AvsenderRequest(saksbehandlerIdent = sak.ident, sakenhet = sak.enhet)
 }
 
 data class Trygdetid(

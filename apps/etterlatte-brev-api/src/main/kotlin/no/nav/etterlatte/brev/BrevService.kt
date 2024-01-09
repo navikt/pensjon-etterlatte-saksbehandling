@@ -23,6 +23,7 @@ import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -133,24 +134,27 @@ class BrevService(
             return requireNotNull(db.hentPdf(brev.id))
         }
 
+        val generellBrevData =
+            retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId, bruker) }
+
         val brevutfall =
             brev.behandlingId?.let {
                 brevDataFacade.hentBrevutfall(brev.behandlingId, bruker)
             }
-        val sak = sakService.hentSak(brev.sakId, bruker)
+        val sak = generellBrevData.sak
         val soeker = soekerService.hentSoeker(brev.sakId, bruker, brevutfall)
         val avsender =
             adresseService.hentAvsender(AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = sak.enhet))
 
-        val (brevKode, brevData) = opprettBrevData(brev)
+        val (brevKode, brevData) = opprettBrevData(brev) // TODO samme mekanisme som elles?
         val brevRequest =
             BrevbakerRequest.fra(
                 brevKode = brevKode,
                 letterData = brevData,
                 avsender = avsender,
-                soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, null), // TODO verge her
+                soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, generellBrevData.personerISak.verge),
                 sakId = sak.id,
-                spraak = Spraak.NB, // TODO: fikse spraak
+                spraak = generellBrevData.spraak,
                 sakType = sak.sakType,
             )
 

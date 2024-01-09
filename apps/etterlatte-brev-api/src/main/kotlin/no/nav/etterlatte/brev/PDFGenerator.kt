@@ -2,15 +2,15 @@ package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -27,6 +27,9 @@ class PDFGenerator(
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
+        avsenderRequest: (GenerellBrevData) -> AvsenderRequest,
+        brevKode: (GenerellBrevData, Brev, MigreringBrevRequest?) -> BrevDataMapper.BrevkodePar,
+        brevData: (GenerellBrevData, Brev) -> BrevData,
     ): Pdf {
         val brev = db.hentBrev(id)
 
@@ -40,13 +43,13 @@ class PDFGenerator(
 
         val sak = generellBrevData.sak
         val avsender =
-            adresseService.hentAvsender(AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = sak.enhet))
+            adresseService.hentAvsender(avsenderRequest(generellBrevData))
 
-        val (brevKode, brevData) = opprettBrevData(brev) // TODO samme mekanisme som elles?
+        val brevkodePar = brevKode(generellBrevData, brev, null)
         val brevRequest =
             BrevbakerRequest.fra(
-                brevKode = brevKode,
-                letterData = brevData,
+                brevKode = brevkodePar.ferdigstilling,
+                letterData = brevData(generellBrevData, brev),
                 avsender = avsender,
                 soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
                 sakId = sak.id,
@@ -55,11 +58,5 @@ class PDFGenerator(
             )
 
         return brevbakerService.genererPdf(brev.id, brevRequest)
-    }
-
-    private fun opprettBrevData(brev: Brev): Pair<EtterlatteBrevKode, BrevData> {
-        val payload = requireNotNull(db.hentBrevPayload(brev.id))
-
-        return Pair(EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV, ManueltBrevMedTittelData(payload.elements, brev.tittel))
     }
 }

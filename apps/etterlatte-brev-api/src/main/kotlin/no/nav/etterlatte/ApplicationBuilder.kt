@@ -176,7 +176,6 @@ class ApplicationBuilder {
             db,
             sakService,
             adresseService,
-            brevbakerService,
             brevdataFacade,
             journalfoerBrevService,
         )

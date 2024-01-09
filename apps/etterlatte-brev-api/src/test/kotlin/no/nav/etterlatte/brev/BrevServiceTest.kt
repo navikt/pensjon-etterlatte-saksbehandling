@@ -11,7 +11,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevService.BrevPayload
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
-import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -52,7 +51,6 @@ internal class BrevServiceTest {
             db,
             sakService,
             adresseService,
-            BrevbakerService(brevbaker, adresseService, brevDataMapper),
             brevDataFacade,
             journalfoerBrevService,
         )

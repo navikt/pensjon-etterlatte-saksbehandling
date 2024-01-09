@@ -145,7 +145,7 @@ class JournalfoerBrevServiceTest {
 
     @ParameterizedTest
     @EnumSource(SakType::class)
-    fun `Journalfoeringsrequest mappes korrekt`(type: SakType) {
+    fun `Journalfoeringsrequest for vedtaksbrev mappes korrekt`(type: SakType) {
         val forventetBrevMottakerFnr = "01018012345"
         val forventetBrev =
             Brev(
@@ -163,7 +163,14 @@ class JournalfoerBrevServiceTest {
                         "Stor Snerk",
                         Foedselsnummer(forventetBrevMottakerFnr),
                         null,
-                        Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
+                        Adresse(
+                            adresseType = "NORSKPOSTADRESSE",
+                            "Testgaten 13",
+                            "1234",
+                            "OSLO",
+                            land = "Norge",
+                            landkode = "NOR",
+                        ),
                     ),
             )
 
@@ -197,6 +204,71 @@ class JournalfoerBrevServiceTest {
             sakId shouldBe forventetBrev.sakId
             sakType shouldBe type
             journalfoerendeEnhet shouldBe vedtak.ansvarligEnhet
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class)
+    fun `Journalfoeringsrequest for informasjonsbrev mappes korrekt`(type: SakType) {
+        val forventetBrevMottakerFnr = "01018012345"
+        val forventetBrev =
+            Brev(
+                id = 123,
+                sakId = 41,
+                behandlingId = null,
+                tittel = null,
+                prosessType = BrevProsessType.AUTOMATISK,
+                soekerFnr = "soeker_fnr1",
+                status = Status.FERDIGSTILT,
+                statusEndret = Tidspunkt.now(),
+                opprettet = Tidspunkt.now(),
+                mottaker =
+                    Mottaker(
+                        "Stor Snerk",
+                        Foedselsnummer(forventetBrevMottakerFnr),
+                        null,
+                        Adresse(
+                            adresseType = "NORSKPOSTADRESSE",
+                            "Testgaten 13",
+                            "1234",
+                            "OSLO",
+                            land = "Norge",
+                            landkode = "NOR",
+                        ),
+                    ),
+            )
+
+        every { db.hentBrev(any()) } returns forventetBrev
+
+        coEvery { dokarkivService.journalfoer(any()) } returns
+            OpprettJournalpostResponse(
+                "444",
+                journalpostferdigstilt = true,
+            )
+
+        coEvery { sakService.hentSak(any(), any()) } returns
+            Sak(
+                ident = "I1",
+                sakType = type,
+                id = forventetBrev.sakId,
+                enhet = "enhet1",
+            )
+
+        val service = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
+        runBlocking { service.journalfoer(forventetBrev.id, bruker) }
+
+        val requestSlot = slot<JournalfoeringsMappingRequest>()
+        coVerify { dokarkivService.journalfoer(capture(requestSlot)) }
+        verify { db.hentBrev(forventetBrev.id) }
+
+        with(requestSlot.captured) {
+            brevId shouldBe forventetBrev.id
+            brev shouldBe forventetBrev
+            brukerident shouldBe forventetBrev.soekerFnr
+            eksternReferansePrefiks shouldBe 41L
+            sakId shouldBe forventetBrev.sakId
+            sakType shouldBe type
+            journalfoerendeEnhet shouldBe "enhet1"
         }
     }
 

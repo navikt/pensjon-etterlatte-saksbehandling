@@ -1,36 +1,22 @@
 package no.nav.etterlatte.brev.dokument
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.log
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
-import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
-import no.nav.etterlatte.libs.common.FoedselsnummerDTO
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -66,46 +52,6 @@ internal class DokumentRouteTest {
     }
 
     @Test
-    fun `Endepunkt for uthenting av alle dokumenter tilknyttet brukeren`() {
-        coEvery { journalpostService.hentDokumenter(any(), any(), any(), any()) } returns HentDokumentoversiktBrukerResult()
-        coEvery { tilgangssjekker.harTilgangTilPerson(any(), any(), any()) } returns true
-
-        val token = accessToken
-        val fnr = SOEKER_FOEDSELSNUMMER.value
-
-        testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log, routePrefix = "api") {
-                    dokumentRoute(
-                        journalpostService,
-                        dokarkivService,
-                        tilgangssjekker,
-                    )
-                }
-            }
-            val httpClient =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
-                }
-            val response =
-                httpClient.post("/api/dokumenter") {
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                    header(HttpHeaders.Authorization, "Bearer $token")
-                }
-
-            assertEquals(HttpStatusCode.OK, response.status)
-        }
-
-        coVerify(exactly = 1) { journalpostService.hentDokumenter(fnr, false, BrukerIdType.FNR, any()) }
-    }
-
-    @Test
     fun `Endepunkt for uthenting av bestemt dokument`() {
         coEvery { journalpostService.hentDokumentPDF(any(), any(), any()) } returns "dokument".toByteArray()
 
@@ -135,46 +81,6 @@ internal class DokumentRouteTest {
         }
 
         coVerify(exactly = 1) { journalpostService.hentDokumentPDF(journalpostId, dokumentInfoId, any()) }
-    }
-
-    @Test
-    fun `Endepunkt for å ferdigstille journalpost`() {
-        coEvery { dokarkivService.ferdigstill(any(), any()) } just Runs
-
-        val journalpostId = "111"
-
-        testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log, routePrefix = "api") {
-                    dokumentRoute(
-                        journalpostService,
-                        dokarkivService,
-                        tilgangssjekker,
-                    )
-                }
-            }
-
-            val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson()
-                    }
-                }
-
-            val response =
-                client.post("/api/dokumenter/$journalpostId/ferdigstill") {
-                    header(HttpHeaders.Authorization, "Bearer $accessToken")
-                    contentType(ContentType.Application.Json)
-                    setBody(Sak("ident", SakType.OMSTILLINGSSTOENAD, 1L, "4808"))
-                }
-
-            assertEquals(HttpStatusCode.OK, response.status)
-        }
-
-        coVerify(exactly = 1) { dokarkivService.ferdigstill(journalpostId, any()) }
     }
 
     @Test

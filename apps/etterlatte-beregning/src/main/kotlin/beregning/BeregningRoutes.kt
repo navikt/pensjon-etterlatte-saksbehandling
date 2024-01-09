@@ -72,12 +72,5 @@ fun Route.beregning(
                 call.respond(beregning.toDTO())
             }
         }
-
-        post("/opprettForOpphoer/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                beregningService.opprettForOpphoer(it, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
-            }
-        }
     }
 }

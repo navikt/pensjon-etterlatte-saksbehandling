@@ -133,7 +133,7 @@ class BrevService(
                     request.brev.tittel,
                 )
             },
-        ) { _, _, _ -> run {} }
+        )
 
     suspend fun ferdigstill(
         id: BrevID,

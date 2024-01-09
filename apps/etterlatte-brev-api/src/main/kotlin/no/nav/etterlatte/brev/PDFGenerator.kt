@@ -33,7 +33,7 @@ class PDFGenerator(
         avsenderRequest: (GenerellBrevData) -> AvsenderRequest,
         brevKode: (GenerellBrevData, Brev, MigreringBrevRequest?) -> BrevkodePar,
         brevData: suspend (BrevDataRequest) -> BrevData,
-        lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit,
+        lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
 

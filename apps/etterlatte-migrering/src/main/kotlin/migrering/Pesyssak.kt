@@ -36,5 +36,6 @@ data class Pesyssak(
             beregning = beregning,
             trygdetid = trygdetid,
             spraak = spraak,
+            erUnder18 = soeker.getAge() < 18,
         )
 }

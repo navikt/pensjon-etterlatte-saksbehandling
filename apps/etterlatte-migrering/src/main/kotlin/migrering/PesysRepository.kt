@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.opprett
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -165,6 +166,28 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
                 objectMapper.readValue<Pesyssak>(it.string("sak"))
             }
         }
+
+    fun lagreGyldigDryRun(
+        request: MigreringRequest,
+        tx: TransactionalSession? = null,
+    ) = tx.session {
+        opprett(
+            """
+                INSERT INTO dryrun(
+                    ${DryRun.PESYS_ID},
+                    ${DryRun.REQUEST}
+                )
+                VALUES(
+                    :${DryRun.PESYS_ID},
+                    :${DryRun.REQUEST}::jsonb
+                )""",
+            mapOf(
+                DryRun.PESYS_ID to request.pesysId.id,
+                DryRun.REQUEST to request.toJson(),
+            ),
+            "Lagra gyldig dry run for ${request.pesysId.id}",
+        )
+    }
 }
 
 private object Pesyskoplingtabell {
@@ -179,4 +202,9 @@ private object Feilkjoering {
     const val REQUEST = "request"
     const val FEILMELDING = "feilmelding"
     const val FEILENDE_STEG = "feilendeSteg"
+}
+
+private object DryRun {
+    const val PESYS_ID = "pesys_id"
+    const val REQUEST = "request"
 }

@@ -28,6 +28,7 @@ data class MigreringRequest(
     val flyktningStatus: Boolean = false,
     val spraak: Spraak,
     val utlandstilknytningType: UtlandstilknytningType? = null,
+    val erUnder18: Boolean = true,
 ) {
     fun opprettPersongalleri() =
         Persongalleri(

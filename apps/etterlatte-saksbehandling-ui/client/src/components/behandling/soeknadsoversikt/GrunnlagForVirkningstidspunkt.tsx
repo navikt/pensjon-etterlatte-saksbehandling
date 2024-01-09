@@ -14,7 +14,13 @@ export const GrunnlagForVirkningstidspunkt = () => {
         <Info
           key={index}
           label="Dødsdato"
-          tekst={avdod?.opplysning.doedsdato ? formaterStringDato(avdod?.opplysning.doedsdato) : 'Ikke registrert'}
+          tekst={
+            <>
+              {`${avdod.opplysning.fornavn} ${avdod.opplysning.etternavn}`}
+              <br />
+              {avdod.opplysning.doedsdato ? formaterStringDato(avdod?.opplysning.doedsdato) : 'Ikke registrert'}
+            </>
+          }
           undertekst={formaterGrunnlagKilde(avdod?.kilde)}
         />
       ))}

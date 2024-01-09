@@ -1,7 +1,6 @@
 import { isAfter } from 'date-fns'
 import { IAdresse } from '~shared/types/IAdresse'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { IBehandlingsammendrag } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
@@ -67,16 +66,6 @@ export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
     status === IBehandlingStatus.AVBRUTT
   )
 }
-
-export const harIngenUavbrutteManuelleOpphoer = (behandlingliste: IBehandlingsammendrag[]): boolean =>
-  behandlingliste.every(
-    (behandling) =>
-      behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER || behandling.status === IBehandlingStatus.AVBRUTT
-  )
-
-export const kunIverksatteBehandlinger = (behandlingliste: IBehandlingsammendrag[]): IBehandlingsammendrag[] =>
-  behandlingliste.filter((behandling) => behandling.status === IBehandlingStatus.IVERKSATT)
-
 export const behandlingErIverksattEllerSamordnet = (behandlingStatus: IBehandlingStatus): boolean =>
   behandlingStatus === IBehandlingStatus.IVERKSATT ||
   behandlingStatus === IBehandlingStatus.SAMORDNET ||

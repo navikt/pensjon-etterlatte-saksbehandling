@@ -14,7 +14,7 @@ type Props = {
   valgtBegrunnelse: string
 }
 
-export const UnderkjennYtelse: React.FC<Props> = ({ behandlingId, kommentar, valgtBegrunnelse }) => {
+export const UnderkjennYtelse = ({ behandlingId, kommentar, valgtBegrunnelse }: Props) => {
   const [modalisOpen, setModalisOpen] = useState(false)
   const navigate = useNavigate()
 

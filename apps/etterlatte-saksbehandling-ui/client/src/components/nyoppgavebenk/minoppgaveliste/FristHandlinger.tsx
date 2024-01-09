@@ -32,8 +32,7 @@ export const FristHandlinger = (props: {
 
   const generateFromDate = () => {
     // Legger til 1 dag siden ny frist må være fremover i tid
-    const naa = add(new Date(), { days: 1 })
-    return naa
+    return add(new Date(), { days: 1 })
   }
   const generateToDate = () => {
     const naa = new Date()

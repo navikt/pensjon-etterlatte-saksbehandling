@@ -15,8 +15,6 @@ import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.Month
 
 internal class Verifiserer(
     private val repository: PesysRepository,
@@ -40,11 +38,13 @@ internal class Verifiserer(
             }
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
             val soeker = personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()
+
             if (soeker != null) {
                 feil.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
                 if (!request.erUnder18) {
-                    feil.addAll(sjekkOmSoekerHarBoddUtland(soeker))
+                    feil.addAll(sjekkOmSoekerBorEllerHarBoddUtland(soeker))
                     feil.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(request))
+                    feil.addAll(sjekkOmForandringIForeldreforhold(request, soeker))
                 }
             }
         }
@@ -85,17 +85,6 @@ internal class Verifiserer(
                 val person = personHenter.hentPerson(it.first, it.second)
 
                 if (it.first == PersonRolle.BARN) {
-                    val foedselsdato: LocalDate =
-                        person.getOrNull()?.foedselsdato?.verdi
-                            ?: request.soeker.getBirthDate()
-                    if (foedselsdato.isBefore(LocalDate.of(2005, Month.DECEMBER, 1)) &&
-                        !request.dodAvYrkesskade &&
-                        request.erUnder18
-                    ) {
-                        logger.warn("Søker er over 18 år og det er ikke yrkesskade")
-                        return listOf(SoekerErOver18)
-                    }
-
                     if (person.getOrNull()?.doedsdato != null) {
                         return listOf(SoekerErDoed)
                     }
@@ -136,7 +125,12 @@ internal class Verifiserer(
         }
     }
 
-    private fun sjekkOmSoekerHarBoddUtland(person: PersonDTO): List<Verifiseringsfeil> {
+    private fun sjekkOmSoekerBorEllerHarBoddUtland(person: PersonDTO): List<Verifiseringsfeil> {
+        person.bostedsadresse?.forEach {
+            if (it.verdi.land != "NOR") {
+                return listOf(SoekerBorUtland)
+            }
+        }
         val harFlyttetFraNorge = person.utland?.verdi?.utflyttingFraNorge?.isNotEmpty() ?: false
         val harFlyttetTilNorge = person.utland?.verdi?.innflyttingTilNorge?.isNotEmpty() ?: false
         if (harFlyttetTilNorge || harFlyttetFraNorge) {
@@ -149,12 +143,25 @@ internal class Verifiserer(
         if (request.avdoedForelder.size > 1) {
             return listOf(SoekerHarFlereAvdoede)
         }
-        val gjenlevendeErDoed =
+        val gjenlevende =
             request.gjenlevendeForelder?.let {
                 personHenter.hentPerson(PersonRolle.AVDOED, it).getOrNull()
             }
-        if (gjenlevendeErDoed != null) {
+
+        if (gjenlevende?.doedsdato != null) {
             return listOf(SoekerHarFlereAvdoede)
+        }
+        return emptyList()
+    }
+
+    private fun sjekkOmForandringIForeldreforhold(
+        request: MigreringRequest,
+        soeker: PersonDTO,
+    ): List<Exception> {
+        val tidligereForeldre = request.avdoedForelder.map { it.ident.value } + listOfNotNull(request.gjenlevendeForelder).map { it.value }
+        val nyeForeldre = soeker.familieRelasjon?.verdi?.foreldre?.map { it.value }
+        if (nyeForeldre == null || (tidligereForeldre.containsAll(nyeForeldre))) {
+            listOf(ForeldreForholdHarEndretSeg)
         }
         return emptyList()
     }
@@ -207,6 +214,11 @@ object SoekerErDoed : Verifiseringsfeil() {
         get() = "Søker er død"
 }
 
+object SoekerBorUtland : Verifiseringsfeil() {
+    override val message: String
+        get() = "Søker bor utlands"
+}
+
 object SoekerHarBoddUtland : Verifiseringsfeil() {
     override val message: String
         get() = "Søker har bodd utlands"
@@ -215,4 +227,9 @@ object SoekerHarBoddUtland : Verifiseringsfeil() {
 object SoekerHarFlereAvdoede : Verifiseringsfeil() {
     override val message: String
         get() = "Søker har flere avøde"
+}
+
+object ForeldreForholdHarEndretSeg : Verifiseringsfeil() {
+    override val message: String
+        get() = "Søker har oppdatert foreldreforhold"
 }

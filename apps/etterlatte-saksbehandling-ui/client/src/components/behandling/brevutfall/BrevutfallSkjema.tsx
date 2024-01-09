@@ -1,16 +1,15 @@
 import styled from 'styled-components'
 import { Alert, Button, ErrorSummary, HelpText, HStack, Radio, RadioGroup, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import MaanedVelger from '~components/behandling/beregningsgrunnlag/MaanedVelger'
 import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBrevutfallApi } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Aldersgruppe, BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
-import { isAfter } from 'date-fns'
 import { updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
+import { DatoVelger } from '~shared/DatoVelger'
 
 enum HarEtterbetaling {
   JA = 'JA',
@@ -86,7 +85,7 @@ export const BrevutfallSkjema = (props: {
         feilmeldinger.push('Fra-måned kan ikke være før virkningstidspunkt.')
       }
 
-      if (isAfter(new Date(), til)) {
+      if (til > new Date()) {
         feilmeldinger.push('Til-måned kan ikke være i framtida.')
       }
     }
@@ -133,7 +132,7 @@ export const BrevutfallSkjema = (props: {
 
         {harEtterbetaling == HarEtterbetaling.JA && (
           <HStack gap="4">
-            <MaanedVelger
+            <DatoVelger
               value={
                 brevutfallOgEtterbetaling.etterbetaling?.datoFom
                   ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
@@ -150,7 +149,7 @@ export const BrevutfallSkjema = (props: {
               }
               label="Fra og med"
             />
-            <MaanedVelger
+            <DatoVelger
               value={
                 brevutfallOgEtterbetaling.etterbetaling?.datoTom
                   ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoTom)

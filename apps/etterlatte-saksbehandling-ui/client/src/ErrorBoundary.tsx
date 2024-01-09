@@ -6,7 +6,7 @@ import { Alert } from '@navikt/ds-react'
 import { Link } from 'react-router-dom'
 
 type Props = {
-  children: JSX.Element
+  children: React.JSX.Element
 }
 
 class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {

@@ -29,13 +29,13 @@ const initialState = (type: ITrygdetidGrunnlagType) => {
   return { type: type, bosted: '', poengInnAar: false, poengUtAar: false, prorata: true }
 }
 
-export const TrygdetidGrunnlag: React.FC<Props> = ({
+export const TrygdetidGrunnlag = ({
   eksisterendeGrunnlag,
   setTrygdetid,
   avbryt,
   trygdetidGrunnlagType,
   landListe,
-}) => {
+}: Props) => {
   const { behandlingId } = useParams()
   const [trygdetidgrunnlag, setTrygdetidgrunnlag] = useState<OppdaterTrygdetidGrunnlag>(
     eksisterendeGrunnlag ? eksisterendeGrunnlag : initialState(trygdetidGrunnlagType)

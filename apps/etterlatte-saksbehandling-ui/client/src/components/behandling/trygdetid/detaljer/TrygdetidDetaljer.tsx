@@ -13,7 +13,7 @@ type Props = {
   beregnetTrygdetid: IDetaljertBeregnetTrygdetidResultat
 }
 
-export const TrygdetidDetaljer: React.FC<Props> = ({ beregnetTrygdetid }) => {
+export const TrygdetidDetaljer = ({ beregnetTrygdetid }: Props) => {
   return (
     <TrygdetidBeregnet>
       <FlexHeader>

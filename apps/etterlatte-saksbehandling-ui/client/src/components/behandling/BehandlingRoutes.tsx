@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useMatch, useNavigate } from 'react-router'
 import { Beregne } from './beregne/Beregne'
 import { Vilkaarsvurdering } from './vilkaarsvurdering/Vilkaarsvurdering'
@@ -37,7 +37,7 @@ export interface BehandlingRouteTypes {
 
 const behandlingRoutes = (
   behandling: IBehandlingReducer
-): Array<{ path: behandlingRouteTypes; element: JSX.Element }> => [
+): Array<{ path: behandlingRouteTypes; element: React.JSX.Element }> => [
   { path: 'soeknadsoversikt', element: <Soeknadsoversikt behandling={behandling} /> },
   { path: 'revurderingsoversikt', element: <Revurderingsoversikt behandling={behandling} /> },
   { path: 'opphoeroversikt', element: <ManueltOpphoerOversikt behandling={behandling} /> },

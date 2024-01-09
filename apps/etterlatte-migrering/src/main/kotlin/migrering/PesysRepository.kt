@@ -174,14 +174,17 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         opprett(
             """
                 INSERT INTO dryrun(
+                    ${DryRun.ID},
                     ${DryRun.PESYS_ID},
                     ${DryRun.REQUEST}
                 )
                 VALUES(
+                    :${DryRun.ID},
                     :${DryRun.PESYS_ID},
                     :${DryRun.REQUEST}::jsonb
                 )""",
             mapOf(
+                DryRun.ID to UUID.randomUUID(),
                 DryRun.PESYS_ID to request.pesysId.id,
                 DryRun.REQUEST to request.toJson(),
             ),
@@ -205,6 +208,7 @@ private object Feilkjoering {
 }
 
 private object DryRun {
+    const val ID = "id"
     const val PESYS_ID = "pesys_id"
     const val REQUEST = "request"
 }

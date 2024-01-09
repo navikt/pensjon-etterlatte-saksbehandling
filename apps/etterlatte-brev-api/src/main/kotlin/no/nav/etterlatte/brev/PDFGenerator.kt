@@ -33,7 +33,6 @@ class PDFGenerator(
         avsenderRequest: (GenerellBrevData) -> AvsenderRequest,
         brevKode: (GenerellBrevData, Brev, MigreringBrevRequest?) -> BrevkodePar,
         brevData: suspend (BrevDataRequest) -> BrevData,
-        leggPaaForhaandsvarsel: Boolean = false,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit,
     ): Pdf {
         val brev = db.hentBrev(id)
@@ -72,29 +71,25 @@ class PDFGenerator(
             )
 
         return brevbakerService.genererPdf(brev.id, brevRequest).let {
-            if (!leggPaaForhaandsvarsel) {
-                it
-            } else {
-                when (letterData) {
-                    is OmregnetBPNyttRegelverkFerdig -> {
-                        val forhaandsvarsel =
-                            brevbakerService.genererPdf(
-                                brev.id,
-                                BrevbakerRequest.fra(
-                                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                                    letterData.data,
-                                    avsender,
-                                    generellBrevData.personerISak.soekerOgEventuellVerge(),
-                                    sak.id,
-                                    generellBrevData.spraak,
-                                    sak.sakType,
-                                ),
-                            )
-                        forhaandsvarsel.medPdfAppended(it)
-                    }
-
-                    else -> it
+            when (letterData) {
+                is OmregnetBPNyttRegelverkFerdig -> {
+                    val forhaandsvarsel =
+                        brevbakerService.genererPdf(
+                            brev.id,
+                            BrevbakerRequest.fra(
+                                EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
+                                letterData.data,
+                                avsender,
+                                generellBrevData.personerISak.soekerOgEventuellVerge(),
+                                sak.id,
+                                generellBrevData.spraak,
+                                sak.sakType,
+                            ),
+                        )
+                    forhaandsvarsel.medPdfAppended(it)
                 }
+
+                else -> it
             }
         }.also { lagrePdfHvisVedtakFattet(generellBrevData, brev, it) }
     }

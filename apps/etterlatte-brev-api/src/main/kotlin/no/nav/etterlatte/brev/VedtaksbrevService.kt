@@ -152,17 +152,15 @@ class VedtaksbrevService(
             brevData = { req ->
                 brevData(req.generellBrevData, req.automatiskMigreringRequest, req.brev, req.bruker, req.brevkodePar)
             },
-            leggPaaForhaandsvarsel = true,
-            lagrePdfHvisVedtakFattet = { generellBrevData, brev, pdf ->
-                lagrePdfHvisVedtakFattet(
-                    brev.id,
-                    generellBrevData.forenkletVedtak!!,
-                    pdf,
-                    bruker,
-                    automatiskMigreringRequest != null,
-                )
-            },
-        )
+        ) { generellBrevData, brev, pdf ->
+            lagrePdfHvisVedtakFattet(
+                brev.id,
+                generellBrevData.forenkletVedtak!!,
+                pdf,
+                bruker,
+                automatiskMigreringRequest != null,
+            )
+        }
 
     private suspend fun VedtaksbrevService.brevData(
         generellBrevData: GenerellBrevData,

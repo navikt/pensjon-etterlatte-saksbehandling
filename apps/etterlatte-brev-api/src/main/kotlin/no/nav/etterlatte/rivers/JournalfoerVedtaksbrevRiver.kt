@@ -63,7 +63,7 @@ internal class JournalfoerVedtaksbrevRiver(
                 response.first.journalpostId,
             )
         } catch (e: Exception) {
-            logger.error("Feil ved ferdigstilling av vedtaksbrev: ", e)
+            logger.error("Feil ved journalføring av vedtaksbrev: ", e)
             throw e
         }
     }

@@ -97,6 +97,9 @@ spec:
           permissions:
             roles:
               - samordning-write
+        - application: azure-token-generator
+          namespace: aura
+          cluster: dev-gcp
     outbound:
       rules:
         - application: etterlatte-vilkaarsvurdering

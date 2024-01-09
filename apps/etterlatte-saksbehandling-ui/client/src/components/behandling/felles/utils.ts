@@ -102,20 +102,6 @@ export const behandlingSkalSendeBrev = (
   }
 }
 
-export const manueltBrevKanRedigeres = (status: IBehandlingStatus): boolean => {
-  switch (status) {
-    case IBehandlingStatus.OPPRETTET:
-    case IBehandlingStatus.VILKAARSVURDERT:
-    case IBehandlingStatus.TRYGDETID_OPPDATERT:
-    case IBehandlingStatus.BEREGNET:
-    case IBehandlingStatus.AVKORTET:
-    case IBehandlingStatus.RETURNERT:
-      return true
-    default:
-      return false
-  }
-}
-
 export function requireNotNull<T>(value: T | null, message: string): T {
   if (!!value) return value
   else throw Error(message)

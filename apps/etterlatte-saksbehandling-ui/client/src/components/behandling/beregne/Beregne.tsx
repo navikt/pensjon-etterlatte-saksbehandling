@@ -62,7 +62,8 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
   const opprettEllerOppdaterVedtak = () => {
     const erBarnepensjon = behandling.sakType === SakType.BARNEPENSJON
-    if (!erOpphoer && erBarnepensjon) {
+    const skalSendeBrev = behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
+    if (skalSendeBrev && erBarnepensjon) {
       if (!brevutfallOgEtterbetaling?.brevutfall) {
         setManglerbrevutfall(true)
         return
@@ -73,7 +74,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     oppdaterVedtakRequest(behandling.id, () => {
       const nyStatus = erBarnepensjon ? IBehandlingStatus.BEREGNET : IBehandlingStatus.AVKORTET
       dispatch(oppdaterBehandlingsstatus(nyStatus))
-      if (behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)) {
+      if (skalSendeBrev) {
         next()
       } else {
         setVisAttesteringsmodal(true)

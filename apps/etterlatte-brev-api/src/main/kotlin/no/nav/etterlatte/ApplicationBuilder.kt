@@ -31,7 +31,6 @@ import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.SakService
-import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
@@ -154,8 +153,6 @@ class ApplicationBuilder {
 
     private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
 
-    private val soekerService = SoekerService(grunnlagKlient)
-
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
@@ -178,7 +175,6 @@ class ApplicationBuilder {
         BrevService(
             db,
             sakService,
-            soekerService,
             adresseService,
             brevbakerService,
             brevdataFacade,

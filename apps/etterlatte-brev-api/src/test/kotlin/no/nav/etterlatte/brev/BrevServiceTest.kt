@@ -16,7 +16,6 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.SakService
-import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataMapper
@@ -42,7 +41,6 @@ internal class BrevServiceTest {
     private val brevbaker = mockk<BrevbakerKlient>()
     private val sakOgBehandlingService = mockk<BrevdataFacade>()
     private val sakService = mockk<SakService>()
-    private val soekerService = mockk<SoekerService>()
     private val adresseService = mockk<AdresseService>()
     private val journalfoerBrevService = mockk<JournalfoerBrevService>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
@@ -53,7 +51,6 @@ internal class BrevServiceTest {
         BrevService(
             db,
             sakService,
-            soekerService,
             adresseService,
             BrevbakerService(brevbaker, adresseService, brevDataMapper),
             brevDataFacade,

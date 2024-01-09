@@ -5,11 +5,9 @@ import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
-import no.nav.etterlatte.brev.brevbaker.SoekerOgEventuellVerge
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.SakService
-import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevID
@@ -31,7 +29,6 @@ import org.slf4j.LoggerFactory
 class BrevService(
     private val db: BrevRepository,
     private val sakService: SakService,
-    private val soekerService: SoekerService,
     private val adresseService: AdresseService,
     private val brevbakerService: BrevbakerService,
     private val brevDataFacade: BrevdataFacade,
@@ -137,12 +134,7 @@ class BrevService(
         val generellBrevData =
             retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId, bruker) }
 
-        val brevutfall =
-            brev.behandlingId?.let {
-                brevDataFacade.hentBrevutfall(brev.behandlingId, bruker)
-            }
         val sak = generellBrevData.sak
-        val soeker = soekerService.hentSoeker(brev.sakId, bruker, brevutfall)
         val avsender =
             adresseService.hentAvsender(AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = sak.enhet))
 
@@ -152,7 +144,7 @@ class BrevService(
                 brevKode = brevKode,
                 letterData = brevData,
                 avsender = avsender,
-                soekerOgEventuellVerge = SoekerOgEventuellVerge(soeker, generellBrevData.personerISak.verge),
+                soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
                 sakId = sak.id,
                 spraak = generellBrevData.spraak,
                 sakType = sak.sakType,

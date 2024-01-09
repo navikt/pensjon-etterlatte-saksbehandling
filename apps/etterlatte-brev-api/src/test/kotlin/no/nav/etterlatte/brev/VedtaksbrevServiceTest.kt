@@ -392,7 +392,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns avkortingsinfo
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
             }
 
             verify {
@@ -421,7 +421,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns avkortingsinfo
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = ATTESTANT)
+                vedtaksbrevService.genererPdf(brev.id, bruker = ATTESTANT)
             }
 
             verify {
@@ -456,7 +456,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns avkortingsinfo
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = ATTESTANT)
+                vedtaksbrevService.genererPdf(brev.id, bruker = ATTESTANT)
             }
 
             verify {
@@ -580,7 +580,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevdataFacade.finnAvkortingsinfo(any(), any(), any(), any(), any()) } returns avkortingsinfo
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
             }
 
             verify {
@@ -608,7 +608,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
             }
 
             verify {
@@ -635,7 +635,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = ATTESTANT)
+                vedtaksbrevService.genererPdf(brev.id, bruker = ATTESTANT)
             }
 
             verify {
@@ -663,7 +663,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbaker.genererPdf(any()) } returns opprettBrevbakerResponse()
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
             }
 
             verify {
@@ -724,7 +724,7 @@ internal class VedtaksbrevServiceTest {
             every { db.hentPdf(any()) } returns Pdf(PDF_BYTES)
 
             runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, brukerTokenInfo = SAKSBEHANDLER)
+                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
             }
 
             verify {

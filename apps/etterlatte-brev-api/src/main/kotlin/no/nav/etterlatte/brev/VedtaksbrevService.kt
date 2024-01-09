@@ -136,7 +136,7 @@ class VedtaksbrevService(
 
     suspend fun genererPdf(
         id: BrevID,
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): Pdf {
         val avsenderRequest: (GenerellBrevData) -> AvsenderRequest = { it.avsenderRequest() }
@@ -147,6 +147,9 @@ class VedtaksbrevService(
                 erOmregningNyRegel = mr?.erOmregningGjenny ?: false,
             )
         }
+        val brevData: (suspend (BrevDataRequest) -> BrevData) = { b: BrevDataRequest ->
+            brevData(b.generellBrevData, b.automatiskMigreringRequest, b.brev, b.bruker, b.brevkodePar)
+        }
 
         val brev = hentBrev(id)
 
@@ -156,18 +159,25 @@ class VedtaksbrevService(
         }
 
         val generellBrevData =
-            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId, brukerTokenInfo) }
+            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId, bruker) }
         val avsender = adresseService.hentAvsender(avsenderRequest(generellBrevData))
 
         val brevkodePar = brevKode(generellBrevData, brev, automatiskMigreringRequest)
-
-        val brevData = brevData(generellBrevData, automatiskMigreringRequest, brev, brukerTokenInfo, brevkodePar)
 
         val sak = generellBrevData.sak
         val brevRequest =
             BrevbakerRequest.fra(
                 brevKode = brevkodePar.ferdigstilling,
-                letterData = brevData,
+                letterData =
+                    brevData(
+                        BrevDataRequest(
+                            generellBrevData,
+                            automatiskMigreringRequest,
+                            brev,
+                            bruker,
+                            brevkodePar,
+                        ),
+                    ),
                 avsender = avsender,
                 soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
                 sakId = sak.id,
@@ -177,14 +187,24 @@ class VedtaksbrevService(
 
         return brevbaker.genererPdf(brev.id, brevRequest)
             .let {
-                when (brevData) {
+                val bd =
+                    brevData(
+                        BrevDataRequest(
+                            generellBrevData,
+                            automatiskMigreringRequest,
+                            brev,
+                            bruker,
+                            brevkodePar,
+                        ),
+                    )
+                when (bd) {
                     is OmregnetBPNyttRegelverkFerdig -> {
                         val forhaandsvarsel =
                             brevbaker.genererPdf(
                                 brev.id,
                                 BrevbakerRequest.fra(
                                     EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                                    brevData.data,
+                                    bd.data,
                                     avsender,
                                     generellBrevData.personerISak.soekerOgEventuellVerge(),
                                     sak.id,
@@ -203,7 +223,7 @@ class VedtaksbrevService(
                     brev.id,
                     generellBrevData.forenkletVedtak!!,
                     pdf,
-                    brukerTokenInfo,
+                    bruker,
                     automatiskMigreringRequest != null,
                 )
             }

@@ -30,13 +30,13 @@ class PDFGenerator(
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (GenerellBrevData) -> AvsenderRequest,
         brevKode: (GenerellBrevData, Brev, MigreringBrevRequest?) -> BrevkodePar,
-        brevData: (GenerellBrevData, Brev, BrevkodePar) -> BrevData,
-    ): Pdf {
+        brevData: (BrevDataRequest) -> BrevData,
+    ): Pair<Pdf, BrevData?> {
         val brev = db.hentBrev(id)
 
         if (!brev.kanEndres()) {
             logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
-            return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke brev med id ${brev.id}" }
+            return Pair(requireNotNull(db.hentPdf(brev.id)) { "Fant ikke brev med id ${brev.id}" }, null)
         }
 
         val generellBrevData =
@@ -46,10 +46,20 @@ class PDFGenerator(
         val brevkodePar = brevKode(generellBrevData, brev, automatiskMigreringRequest)
 
         val sak = generellBrevData.sak
+        val letterData =
+            brevData(
+                BrevDataRequest(
+                    generellBrevData,
+                    automatiskMigreringRequest,
+                    brev,
+                    bruker,
+                    brevkodePar,
+                ),
+            )
         val brevRequest =
             BrevbakerRequest.fra(
                 brevKode = brevkodePar.ferdigstilling,
-                letterData = brevData(generellBrevData, brev, brevkodePar),
+                letterData = letterData,
                 avsender = avsender,
                 soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
                 sakId = sak.id,
@@ -57,6 +67,14 @@ class PDFGenerator(
                 sakType = sak.sakType,
             )
 
-        return brevbakerService.genererPdf(brev.id, brevRequest)
+        return Pair(brevbakerService.genererPdf(brev.id, brevRequest), letterData)
     }
 }
+
+data class BrevDataRequest(
+    val generellBrevData: GenerellBrevData,
+    val automatiskMigreringRequest: MigreringBrevRequest? = null,
+    val brev: Brev,
+    val bruker: BrukerTokenInfo,
+    val brevkodePar: BrevkodePar,
+)

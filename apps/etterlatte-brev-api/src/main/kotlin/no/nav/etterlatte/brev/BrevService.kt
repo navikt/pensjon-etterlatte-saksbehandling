@@ -127,10 +127,13 @@ class BrevService(
                 AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = it.sak.enhet)
             },
             brevKode = { _, _, _ -> BrevDataMapper.BrevkodePar(EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV) },
-            brevData = { _, brev, _ ->
-                ManueltBrevMedTittelData(requireNotNull(db.hentBrevPayload(brev.id)).elements, brev.tittel)
+            brevData = { request ->
+                ManueltBrevMedTittelData(
+                    requireNotNull(db.hentBrevPayload(request.brev.id)).elements,
+                    request.brev.tittel,
+                )
             },
-        )
+        ).first
 
     suspend fun ferdigstill(
         id: BrevID,

@@ -8,6 +8,8 @@ import no.nav.etterlatte.libs.common.behandling.Utfall.IkkeOpphoerSkalSendeBrev
 import no.nav.etterlatte.libs.common.behandling.Utfall.OpphoerMedBrev
 import no.nav.etterlatte.libs.common.behandling.Utfall.OpphoerUtenBrev
 import no.nav.etterlatte.libs.common.clusternavn
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 private val SAKTYPE_OMS = listOf(SakType.OMSTILLINGSSTOENAD)
 private val SAKTYPE_BP = listOf(SakType.BARNEPENSJON)
@@ -17,17 +19,17 @@ private sealed class KanBrukesIMiljoe {
     abstract val prod: Boolean
     abstract val dev: Boolean
 
-    object KunIDev : KanBrukesIMiljoe() {
+    data object KunIDev : KanBrukesIMiljoe() {
         override val prod = false
         override val dev = true
     }
 
-    object DevOgProd : KanBrukesIMiljoe() {
+    data object DevOgProd : KanBrukesIMiljoe() {
         override val prod = true
         override val dev = true
     }
 
-    object IngenMiljoe : KanBrukesIMiljoe() {
+    data object IngenMiljoe : KanBrukesIMiljoe() {
         override val prod = false
         override val dev = false
     }
@@ -37,22 +39,22 @@ sealed class Utfall {
     abstract val girOpphoer: Boolean
     abstract val skalSendeBrev: Boolean
 
-    object OpphoerUtenBrev : Utfall() {
+    data object OpphoerUtenBrev : Utfall() {
         override val girOpphoer = true
         override val skalSendeBrev = false
     }
 
-    object OpphoerMedBrev : Utfall() {
+    data object OpphoerMedBrev : Utfall() {
         override val girOpphoer = true
         override val skalSendeBrev = true
     }
 
-    object IkkeOpphoerSkalSendeBrev : Utfall() {
+    data object IkkeOpphoerSkalSendeBrev : Utfall() {
         override val girOpphoer = false
         override val skalSendeBrev = true
     }
 
-    object IkkeOpphoerSkalIkkeSendeBrev : Utfall() {
+    data object IkkeOpphoerSkalIkkeSendeBrev : Utfall() {
         override val girOpphoer = false
         override val skalSendeBrev = false
     }
@@ -87,13 +89,23 @@ enum class Revurderingaarsak(
     OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
     ;
 
-    fun kanBrukesIMiljo(): Boolean =
-        when (clusternavn()) {
-            null -> true
-            GcpEnv.PROD.name -> miljoe.prod
-            GcpEnv.DEV.name -> miljoe.dev
-            else -> miljoe.dev
-        }
+    private val log: Logger = LoggerFactory.getLogger(Revurderingaarsak::class.java)
+
+    fun kanBrukesIMiljo(): Boolean {
+        val clusternavn = clusternavn()
+
+        val kanBrukes =
+            when (clusternavn) {
+                null -> true
+                GcpEnv.PROD.name -> miljoe.prod
+                GcpEnv.DEV.name -> miljoe.dev
+                else -> miljoe.dev
+            }
+
+        log.info("Miljøsjekk i cluster: $clusternavn for $this med $miljoe ga resultat $kanBrukes")
+
+        return kanBrukes
+    }
 
     fun gyldigForSakType(sakType: SakType): Boolean = gyldigFor.any { it == sakType }
 

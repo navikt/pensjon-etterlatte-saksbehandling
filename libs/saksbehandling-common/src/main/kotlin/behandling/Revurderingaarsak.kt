@@ -8,8 +8,6 @@ import no.nav.etterlatte.libs.common.behandling.Utfall.IkkeOpphoerSkalSendeBrev
 import no.nav.etterlatte.libs.common.behandling.Utfall.OpphoerMedBrev
 import no.nav.etterlatte.libs.common.behandling.Utfall.OpphoerUtenBrev
 import no.nav.etterlatte.libs.common.clusternavn
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 private val SAKTYPE_OMS = listOf(SakType.OMSTILLINGSSTOENAD)
 private val SAKTYPE_BP = listOf(SakType.BARNEPENSJON)
@@ -89,23 +87,13 @@ enum class Revurderingaarsak(
     OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
     ;
 
-    private val log: Logger = LoggerFactory.getLogger(Revurderingaarsak::class.java)
-
-    fun kanBrukesIMiljo(): Boolean {
-        val clusternavn = clusternavn()
-
-        val kanBrukes =
-            when (clusternavn) {
-                null -> true
-                GcpEnv.PROD.name -> miljoe.prod
-                GcpEnv.DEV.name -> miljoe.dev
-                else -> miljoe.dev
-            }
-
-        log.info("Miljøsjekk i cluster: $clusternavn for $this med $miljoe ga resultat $kanBrukes")
-
-        return kanBrukes
-    }
+    fun kanBrukesIMiljo(): Boolean =
+        when (clusternavn()) {
+            null -> true
+            GcpEnv.PROD.env -> miljoe.prod
+            GcpEnv.DEV.env -> miljoe.dev
+            else -> miljoe.dev
+        }
 
     fun gyldigForSakType(sakType: SakType): Boolean = gyldigFor.any { it == sakType }
 

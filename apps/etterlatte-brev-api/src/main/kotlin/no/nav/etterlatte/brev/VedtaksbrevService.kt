@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.adresse.AdresseService
+import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
@@ -138,6 +139,15 @@ class VedtaksbrevService(
         brukerTokenInfo: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): Pdf {
+        val avsenderRequest: (GenerellBrevData) -> AvsenderRequest = { it.avsenderRequest() }
+        val brevKode = { gbd: GenerellBrevData, b: Brev, mr: MigreringBrevRequest? ->
+            brevDataMapper.brevKode(
+                gbd,
+                b.prosessType,
+                erOmregningNyRegel = mr?.erOmregningGjenny ?: false,
+            )
+        }
+
         val brev = hentBrev(id)
 
         if (!brev.kanEndres()) {
@@ -146,23 +156,17 @@ class VedtaksbrevService(
         }
 
         val generellBrevData =
-            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, brukerTokenInfo) }
-        val avsender = adresseService.hentAvsender(generellBrevData.avsenderRequest())
+            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId, brukerTokenInfo) }
+        val avsender = adresseService.hentAvsender(avsenderRequest(generellBrevData))
 
-        val brevkodePar =
-            brevDataMapper.brevKode(
-                generellBrevData,
-                brev.prosessType,
-                erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
-            )
+        val brevkodePar = brevKode(generellBrevData, brev, automatiskMigreringRequest)
 
         val brevData = brevData(generellBrevData, automatiskMigreringRequest, brev, brukerTokenInfo, brevkodePar)
 
         val sak = generellBrevData.sak
-        val brevKode = brevkodePar.ferdigstilling
         val brevRequest =
             BrevbakerRequest.fra(
-                brevKode = brevKode,
+                brevKode = brevkodePar.ferdigstilling,
                 letterData = brevData,
                 avsender = avsender,
                 soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),

@@ -122,11 +122,12 @@ class BrevService(
         pdfGenerator.genererPdf(
             id,
             bruker,
+            null,
             avsenderRequest = {
                 AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = it.sak.enhet)
             },
             brevKode = { _, _, _ -> BrevDataMapper.BrevkodePar(EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV) },
-            brevData = { _, brev ->
+            brevData = { _, brev, _ ->
                 ManueltBrevMedTittelData(requireNotNull(db.hentBrevPayload(brev.id)).elements, brev.tittel)
             },
         )

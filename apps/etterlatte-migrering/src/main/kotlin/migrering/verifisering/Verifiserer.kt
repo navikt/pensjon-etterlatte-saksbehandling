@@ -126,11 +126,14 @@ internal class Verifiserer(
     }
 
     private fun sjekkOmSoekerBorEllerHarBoddUtland(person: PersonDTO): List<Verifiseringsfeil> {
-        person.bostedsadresse?.forEach {
+        val kontaktadresse = person.kontaktadresse ?: emptyList()
+        val bostedsadresse = person.bostedsadresse ?: emptyList()
+        (kontaktadresse + bostedsadresse).forEach {
             if (it.verdi.land != "NOR") {
                 return listOf(SoekerBorUtland)
             }
         }
+
         val harFlyttetFraNorge = person.utland?.verdi?.utflyttingFraNorge?.isNotEmpty() ?: false
         val harFlyttetTilNorge = person.utland?.verdi?.innflyttingTilNorge?.isNotEmpty() ?: false
         if (harFlyttetTilNorge || harFlyttetFraNorge) {

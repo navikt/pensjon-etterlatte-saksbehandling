@@ -133,7 +133,8 @@ class BrevService(
                     request.brev.tittel,
                 )
             },
-        ).first
+            lagrePdfHvisVedtakFattet = { _, _, _ -> run {} },
+        )
 
     suspend fun ferdigstill(
         id: BrevID,

@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
@@ -12,6 +13,7 @@ import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevDataMapper.BrevkodePar
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -30,13 +32,15 @@ class PDFGenerator(
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (GenerellBrevData) -> AvsenderRequest,
         brevKode: (GenerellBrevData, Brev, MigreringBrevRequest?) -> BrevkodePar,
-        brevData: (BrevDataRequest) -> BrevData,
-    ): Pair<Pdf, BrevData?> {
+        brevData: suspend (BrevDataRequest) -> BrevData,
+        leggPaaForhaandsvarsel: Boolean = false,
+        lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit,
+    ): Pdf {
         val brev = db.hentBrev(id)
 
         if (!brev.kanEndres()) {
             logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
-            return Pair(requireNotNull(db.hentPdf(brev.id)) { "Fant ikke brev med id ${brev.id}" }, null)
+            return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke brev med id ${brev.id}" }
         }
 
         val generellBrevData =
@@ -67,7 +71,32 @@ class PDFGenerator(
                 sakType = sak.sakType,
             )
 
-        return Pair(brevbakerService.genererPdf(brev.id, brevRequest), letterData)
+        return brevbakerService.genererPdf(brev.id, brevRequest).let {
+            if (!leggPaaForhaandsvarsel) {
+                it
+            } else {
+                when (letterData) {
+                    is OmregnetBPNyttRegelverkFerdig -> {
+                        val forhaandsvarsel =
+                            brevbakerService.genererPdf(
+                                brev.id,
+                                BrevbakerRequest.fra(
+                                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
+                                    letterData.data,
+                                    avsender,
+                                    generellBrevData.personerISak.soekerOgEventuellVerge(),
+                                    sak.id,
+                                    generellBrevData.spraak,
+                                    sak.sakType,
+                                ),
+                            )
+                        forhaandsvarsel.medPdfAppended(it)
+                    }
+
+                    else -> it
+                }
+            }
+        }.also { lagrePdfHvisVedtakFattet(generellBrevData, brev, it) }
     }
 }
 

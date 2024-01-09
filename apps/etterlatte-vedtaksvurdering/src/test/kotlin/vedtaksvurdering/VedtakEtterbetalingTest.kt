@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import io.kotest.matchers.shouldBe
+import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -20,26 +21,40 @@ import java.time.Month
 import java.time.YearMonth
 import kotlin.random.Random
 
-class VedtakEtterbetalingKtTest {
+class VedtakEtterbetalingTest {
     private val januar2024 = YearMonth.of(2024, Month.JANUARY)
     private val februar2024 = YearMonth.of(2024, Month.FEBRUARY)
     private val mars2024 = YearMonth.of(2024, Month.MARCH)
 
-    private val klokkeMars2023: Clock = Clock.fixed(Instant.parse("2024-03-06T10:00:00Z"), norskTidssone)
+    private val klokkeJanuar2024: Clock = Clock.fixed(Instant.parse("2024-01-20T11:00:00Z"), norskTidssone)
+    private val klokkeMars2024: Clock = Clock.fixed(Instant.parse("2024-03-06T10:00:00Z"), norskTidssone)
 
     private val repository = mockk<VedtaksvurderingRepository>()
 
     @Test
-    fun `ikke etterbetaling, ingen tidligere periode`() {
+    fun `ikke etterbetaling grunnet ikke tilbake i tid`() {
         val vedtak = vedtak(virkningstidspunkt = februar2024)
 
         every { repository.hentFerdigstilteVedtak(vedtak.soeker) } returns emptyList()
 
-        val resultat = erVedtakMedEtterbetaling(vedtak, repository, klokkeMars2023)
+        val resultat = erVedtakMedEtterbetaling(vedtak, repository, klokkeJanuar2024)
+
+        verify { repository wasNot called }
+
+        resultat shouldBe false
+    }
+
+    @Test
+    fun `etterbetaling grunnet utbetaling tilbake i tid og ingen tidligere periode`() {
+        val vedtak = vedtak(virkningstidspunkt = februar2024)
+
+        every { repository.hentFerdigstilteVedtak(vedtak.soeker) } returns emptyList()
+
+        val resultat = erVedtakMedEtterbetaling(vedtak, repository, klokkeMars2024)
 
         verify { repository.hentFerdigstilteVedtak(vedtak.soeker) }
 
-        resultat shouldBe false
+        resultat shouldBe true
     }
 
     @Test
@@ -60,7 +75,7 @@ class VedtakEtterbetalingKtTest {
                 ),
             )
 
-        val resultat = erVedtakMedEtterbetaling(nyttVedtak, repository, klokkeMars2023)
+        val resultat = erVedtakMedEtterbetaling(nyttVedtak, repository, klokkeMars2024)
 
         resultat shouldBe false
     }
@@ -83,7 +98,7 @@ class VedtakEtterbetalingKtTest {
                 ),
             )
 
-        val resultat = erVedtakMedEtterbetaling(nyttVedtak, repository, klokkeMars2023)
+        val resultat = erVedtakMedEtterbetaling(nyttVedtak, repository, klokkeMars2024)
 
         resultat shouldBe true
     }
@@ -116,7 +131,7 @@ class VedtakEtterbetalingKtTest {
                 ),
             )
 
-        val resultat = erVedtakMedEtterbetaling(nyttVedtak, repository, klokkeMars2023)
+        val resultat = erVedtakMedEtterbetaling(nyttVedtak, repository, klokkeMars2024)
 
         resultat shouldBe true
     }

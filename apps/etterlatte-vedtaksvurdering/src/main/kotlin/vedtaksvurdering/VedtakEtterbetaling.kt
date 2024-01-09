@@ -32,13 +32,15 @@ internal fun erVedtakMedEtterbetaling(
                 return innhold.utbetalingsperioder
                     .filter { it.periode.fom < now }
                     .associateWith { tidligereUtbetalingsperioder.find { up -> up.overlapper(it) } }
-                    .any { entry -> entry.value?.beloep?.compareTo(entry.key.beloep) == -1 }
+                    .any { entry -> entry.value?.beloepErMindreEnn(entry.key) ?: true }
             }
             return false
         }
         is VedtakTilbakekrevingInnhold -> throw IllegalArgumentException("Ikke aktuelt for tilbakekreving")
     }
 }
+
+internal fun Utbetalingsperiode.beloepErMindreEnn(that: Utbetalingsperiode) = this.beloep?.compareTo(that.beloep) == -1
 
 internal fun Utbetalingsperiode.overlapper(other: Utbetalingsperiode): Boolean {
     return periode.overlapper(other.periode)

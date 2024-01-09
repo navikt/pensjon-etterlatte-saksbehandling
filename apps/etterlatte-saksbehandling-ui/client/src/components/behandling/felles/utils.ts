@@ -85,7 +85,8 @@ export const behandlingSkalSendeBrev = (
         //revurderingsaarsak === Revurderingaarsak.REGULERING || TODO EY-3232 Fjern utkommentering
         (
           revurderingsaarsak === Revurderingaarsak.DOEDSFALL ||
-          revurderingsaarsak === Revurderingaarsak.OPPHOER_UTEN_BREV
+          revurderingsaarsak === Revurderingaarsak.OPPHOER_UTEN_BREV ||
+          revurderingsaarsak === Revurderingaarsak.ALDERSOVERGANG
         )
       )
   }

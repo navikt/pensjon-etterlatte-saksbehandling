@@ -231,17 +231,17 @@ sealed class GyldigForYtelse {
         }
     }
 
-    object OmsOgBp : GyldigForYtelse() {
+    data object OmsOgBp : GyldigForYtelse() {
         override val gyldigForBarnepensjon = true
         override val gyldigForOmstillingsstoenad = true
     }
 
-    object KunOms : GyldigForYtelse() {
+    data object KunOms : GyldigForYtelse() {
         override val gyldigForBarnepensjon = false
         override val gyldigForOmstillingsstoenad = true
     }
 
-    object KunBp : GyldigForYtelse() {
+    data object KunBp : GyldigForYtelse() {
         override val gyldigForBarnepensjon = true
         override val gyldigForOmstillingsstoenad = false
     }

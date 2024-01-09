@@ -174,17 +174,17 @@ data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikat
         get() = toString()
 }
 
-object BarnetHarFlereVerger : Verifiseringsfeil() {
+data object BarnetHarFlereVerger : Verifiseringsfeil() {
     override val message: String
         get() = "Barnet har flere verger"
 }
 
-object BarnetHarVergemaal : Verifiseringsfeil() {
+data object BarnetHarVergemaal : Verifiseringsfeil() {
     override val message: String
         get() = "Barn har vergemål eller framtidsfullmakt, støtte for det er deaktivert"
 }
 
-object StrengtFortrolig : Verifiseringsfeil() {
+data object StrengtFortrolig : Verifiseringsfeil() {
     override val message: String
         get() = "Skal ikke migrere strengt fortrolig sak"
 }
@@ -194,22 +194,22 @@ data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
         get() = kilde.message
 }
 
-object SoekerErOver18 : Verifiseringsfeil() {
+data object SoekerErOver18 : Verifiseringsfeil() {
     override val message: String
         get() = "Skal ikke per nå migrere søker der søker er over 18"
 }
 
-object VergeManglerAdresseFraPDL : Verifiseringsfeil() {
+data object VergeManglerAdresseFraPDL : Verifiseringsfeil() {
     override val message: String
         get() = "Verge mangler adresse i PDL"
 }
 
-object FeilUnderHentingAvVergesAdresse : Verifiseringsfeil() {
+data object FeilUnderHentingAvVergesAdresse : Verifiseringsfeil() {
     override val message: String
         get() = "Noe feil skjedde under henting av verges adresse, se detaljer i logg"
 }
 
-object SoekerErDoed : Verifiseringsfeil() {
+data object SoekerErDoed : Verifiseringsfeil() {
     override val message: String
         get() = "Søker er død"
 }

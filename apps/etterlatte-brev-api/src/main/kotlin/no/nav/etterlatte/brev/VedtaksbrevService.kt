@@ -156,38 +156,19 @@ class VedtaksbrevService(
                 erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
             )
 
-        val brevData =
-            when (
-                generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
-                    automatiskMigreringRequest?.erOmregningGjenny ?: false
-            ) {
-                false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
-                true ->
-                    OmregnetBPNyttRegelverkFerdig(
-                        innhold =
-                            InnholdMedVedlegg(
-                                { hentLagretInnhold(brev) },
-                                { hentLagretInnholdVedlegg(brev) },
-                            ).innhold(),
-                        data = (
-                            migreringBrevDataService.opprettMigreringBrevdata(
-                                generellBrevData,
-                                automatiskMigreringRequest,
-                                brukerTokenInfo,
-                            ) as OmregnetBPNyttRegelverk
-                        ),
-                    )
-            }
+        val brevData = brevData(generellBrevData, automatiskMigreringRequest, brev, brukerTokenInfo, brevkodePar)
 
+        val sak = generellBrevData.sak
+        val brevKode = brevkodePar.ferdigstilling
         val brevRequest =
             BrevbakerRequest.fra(
-                brevkodePar.ferdigstilling,
-                brevData,
-                avsender,
-                generellBrevData.personerISak.soekerOgEventuellVerge(),
-                generellBrevData.sak.id,
-                generellBrevData.spraak,
-                generellBrevData.sak.sakType,
+                brevKode = brevKode,
+                letterData = brevData,
+                avsender = avsender,
+                soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
+                sakId = sak.id,
+                spraak = generellBrevData.spraak,
+                sakType = sak.sakType,
             )
 
         return brevbaker.genererPdf(brev.id, brevRequest)
@@ -202,9 +183,9 @@ class VedtaksbrevService(
                                     brevData.data,
                                     avsender,
                                     generellBrevData.personerISak.soekerOgEventuellVerge(),
-                                    generellBrevData.sak.id,
+                                    sak.id,
                                     generellBrevData.spraak,
-                                    generellBrevData.sak.sakType,
+                                    sak.sakType,
                                 ),
                             )
                         forhaandsvarsel.medPdfAppended(it)
@@ -222,6 +203,30 @@ class VedtaksbrevService(
                     automatiskMigreringRequest != null,
                 )
             }
+    }
+
+    private suspend fun VedtaksbrevService.brevData(
+        generellBrevData: GenerellBrevData,
+        automatiskMigreringRequest: MigreringBrevRequest?,
+        brev: Brev,
+        brukerTokenInfo: BrukerTokenInfo,
+        brevkodePar: BrevDataMapper.BrevkodePar,
+    ) = when (
+        generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
+            automatiskMigreringRequest?.erOmregningGjenny ?: false
+    ) {
+        false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
+        true ->
+            OmregnetBPNyttRegelverkFerdig(
+                innhold = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }).innhold(),
+                data = (
+                    migreringBrevDataService.opprettMigreringBrevdata(
+                        generellBrevData,
+                        automatiskMigreringRequest,
+                        brukerTokenInfo,
+                    ) as OmregnetBPNyttRegelverk
+                ),
+            )
     }
 
     suspend fun ferdigstillVedtaksbrev(

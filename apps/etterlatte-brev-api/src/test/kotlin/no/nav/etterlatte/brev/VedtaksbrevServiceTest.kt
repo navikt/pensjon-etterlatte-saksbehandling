@@ -86,6 +86,8 @@ internal class VedtaksbrevServiceTest {
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
     private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade, migreringBrevDataService)
     private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper)
+    private val pdfGenerator = PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
@@ -93,10 +95,11 @@ internal class VedtaksbrevServiceTest {
             brevdataFacade,
             vedtaksvurderingService,
             adresseService,
-            BrevbakerService(brevbaker, adresseService, brevDataMapper),
+            brevbakerService,
             brevDataMapper,
             brevProsessTypeFactory,
             migreringBrevDataService,
+            pdfGenerator,
         )
 
     @BeforeEach

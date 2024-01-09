@@ -45,14 +45,15 @@ internal class BrevServiceTest {
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
     private val brevDataMapper = mockk<BrevDataMapper>()
     private val brevDataFacade = mockk<BrevdataFacade>()
+    private val pdfGenerator = mockk<PDFGenerator>()
 
     private val brevService =
         BrevService(
             db,
             sakService,
             adresseService,
-            brevDataFacade,
             journalfoerBrevService,
+            pdfGenerator,
         )
 
     private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null)

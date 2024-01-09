@@ -8,6 +8,7 @@ import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.MigreringBrevDataService
+import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
@@ -157,6 +158,8 @@ class ApplicationBuilder {
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
+    private val pdfGenerator = PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
+
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
@@ -167,8 +170,8 @@ class ApplicationBuilder {
             brevDataMapper,
             brevProsessTypeFactory,
             migreringBrevDataService,
+            pdfGenerator,
         )
-
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 
     private val brevService =
@@ -176,8 +179,8 @@ class ApplicationBuilder {
             db,
             sakService,
             adresseService,
-            brevdataFacade,
             journalfoerBrevService,
+            pdfGenerator,
         )
 
     private val journalpostService =

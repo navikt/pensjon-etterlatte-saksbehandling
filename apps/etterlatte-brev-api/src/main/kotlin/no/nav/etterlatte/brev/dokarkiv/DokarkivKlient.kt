@@ -54,24 +54,6 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
             setBody(request)
         }.body()
 
-    internal suspend fun oppdaterFagsak(
-        journalpostId: String,
-        request: OppdaterJournalpostSakRequest,
-    ): String =
-        client.put("$url/$journalpostId") {
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }.body()
-
-    internal suspend fun endreTema(
-        journalpostId: String,
-        nyttTema: String,
-    ): String =
-        client.put("$url/$journalpostId") {
-            contentType(ContentType.Application.Json)
-            setBody(OppdaterJournalpostTemaRequest(nyttTema))
-        }.body()
-
     internal suspend fun feilregistrerSakstilknytning(journalpostId: String): String =
         client.patch("$url/$journalpostId/feilregistrer/feilregistrerSakstilknytning") {
             contentType(ContentType.Application.Json)

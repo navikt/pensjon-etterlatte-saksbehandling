@@ -14,7 +14,6 @@ import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.KnyttTilAnnenSakRequest
 import no.nav.etterlatte.brev.dokarkiv.OppdaterJournalpostRequest
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
@@ -57,25 +56,6 @@ fun Route.dokumentRoute(
                 val response = dokarkivService.oppdater(journalpostId, forsoekFerdistill, journalfoerendeEnhet, request)
 
                 call.respond(response)
-            }
-
-            post("/ferdigstill") {
-                val sak = call.receive<Sak>()
-                val journalpostId =
-                    requireNotNull(call.parameters["journalpostId"]) {
-                        "JournalpostID er påkrevd for å kunne ferdigstille journalposten"
-                    }
-
-                dokarkivService.ferdigstill(journalpostId, sak)
-                call.respond(HttpStatusCode.OK)
-            }
-
-            put("/tema/{nyttTema}") {
-                val journalpostId = call.parameters["journalpostId"]!!
-                val nyttTema = call.parameters["nyttTema"]!!
-
-                dokarkivService.endreTema(journalpostId, nyttTema)
-                call.respond(HttpStatusCode.OK)
             }
 
             put("/knyttTilAnnenSak") {

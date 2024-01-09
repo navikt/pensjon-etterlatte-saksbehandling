@@ -28,16 +28,6 @@ interface DokarkivService {
         request: OppdaterJournalpostRequest,
     ): OppdaterJournalpostResponse
 
-    suspend fun ferdigstill(
-        journalpostId: String,
-        sak: Sak,
-    )
-
-    suspend fun endreTema(
-        journalpostId: String,
-        nyttTema: String,
-    )
-
     suspend fun feilregistrerSakstilknytning(journalpostId: String)
 
     suspend fun opphevFeilregistrertSakstilknytning(journalpostId: String)
@@ -105,35 +95,6 @@ class DokarkivServiceImpl(
         }
 
         return response
-    }
-
-    override suspend fun ferdigstill(
-        journalpostId: String,
-        sak: Sak,
-    ) {
-        val request =
-            OppdaterJournalpostSakRequest(
-                tema = sak.sakType.tema,
-                bruker = Bruker(id = sak.ident),
-                sak =
-                    JournalpostSak(
-                        sakstype = Sakstype.FAGSAK,
-                        fagsakId = sak.id.toString(),
-                        tema = sak.sakType.tema,
-                    ),
-            )
-
-        client.oppdaterFagsak(journalpostId, request)
-        client.ferdigstillJournalpost(journalpostId, sak.enhet)
-
-        logger.info("Journalpost med id=$journalpostId ferdigstilt")
-    }
-
-    override suspend fun endreTema(
-        journalpostId: String,
-        nyttTema: String,
-    ) {
-        client.endreTema(journalpostId, nyttTema)
     }
 
     override suspend fun feilregistrerSakstilknytning(journalpostId: String) {

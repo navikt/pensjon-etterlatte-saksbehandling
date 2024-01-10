@@ -351,7 +351,7 @@ internal class VedtaksbrevServiceTest {
             val behandling = opprettGenerellBrevdata(SakType.BARNEPENSJON, VedtakType.INNVILGELSE)
             val mottaker = opprettMottaker()
 
-            every { db.hentBrevForBehandling(behandling.behandlingId) } returns null
+            every { db.hentBrevForBehandling(behandling.behandlingId!!) } returns null
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
 
@@ -364,7 +364,7 @@ internal class VedtaksbrevServiceTest {
                 runBlocking {
                     vedtaksbrevService.opprettVedtaksbrev(
                         sakId,
-                        behandling.behandlingId,
+                        behandling.behandlingId!!,
                         SAKSBEHANDLER,
                     )
                 }

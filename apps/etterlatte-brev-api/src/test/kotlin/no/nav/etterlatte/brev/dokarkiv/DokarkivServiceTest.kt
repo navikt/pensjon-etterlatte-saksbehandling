@@ -55,10 +55,14 @@ internal class DokarkivServiceTest {
         val forventetInnhold = BrevInnhold("tittel", Spraak.NB, mockk())
         val forventetPdf = Pdf("Hello world!".toByteArray())
         val forventetBrevMottakerFnr = "01018012345"
+
+        val brevId = Random.nextLong()
+        val sakId = Random.nextLong()
+
         val forventetBrev =
             Brev(
-                id = 123,
-                sakId = 41,
+                id = brevId,
+                sakId = sakId,
                 behandlingId = null,
                 tittel = null,
                 prosessType = BrevProsessType.AUTOMATISK,
@@ -79,19 +83,26 @@ internal class DokarkivServiceTest {
         coEvery { mockKlient.opprettJournalpost(any(), any()) } returns forventetResponse
         every { mockDb.hentBrevInnhold(any()) } returns forventetInnhold
         every { mockDb.hentPdf(any()) } returns forventetPdf
-        every { mockDb.hentBrev(any()) } returns forventetBrev
-
-        val brevId = Random.nextLong()
 
         val vedtak =
             VedtakTilJournalfoering(
                 1,
-                VedtakSak("ident", type, Random.nextLong()),
+                VedtakSak("ident", type, sakId),
                 UUID.randomUUID(),
                 "ansvarligEnhet",
             )
 
-        val response = runBlocking { service.journalfoer(brevId, vedtak) }
+        val request =
+            JournalfoeringsMappingRequest(
+                brevId = brevId,
+                brev = forventetBrev,
+                brukerident = vedtak.sak.ident,
+                eksternReferansePrefiks = vedtak.behandlingId,
+                sakId = sakId,
+                sakType = type,
+                journalfoerendeEnhet = vedtak.ansvarligEnhet,
+            )
+        val response = runBlocking { service.journalfoer(request) }
         response shouldBe forventetResponse
 
         val requestSlot = slot<OpprettJournalpostRequest>()
@@ -99,7 +110,6 @@ internal class DokarkivServiceTest {
         verify {
             mockDb.hentBrevInnhold(brevId)
             mockDb.hentPdf(brevId)
-            mockDb.hentBrev(brevId)
         }
 
         with(requestSlot.captured) {

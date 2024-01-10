@@ -2,11 +2,14 @@ package no.nav.etterlatte.rivers
 
 import io.mockk.Called
 import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
@@ -34,14 +37,14 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
 import java.util.UUID
 
 internal class JournalfoerVedtaksbrevRiverTest {
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
+    private val journalfoerBrevService = mockk<JournalfoerBrevService>()
 
-    private val testRapid = TestRapid().apply { JournalfoerVedtaksbrevRiver(this, vedtaksbrevService) }
+    private val testRapid = TestRapid().apply { JournalfoerVedtaksbrevRiver(this, journalfoerBrevService) }
 
     @BeforeEach
     fun before() = clearMocks(vedtaksbrevService)
@@ -67,7 +70,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val response = OpprettJournalpostResponse("1234", true, emptyList())
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
-        every { vedtaksbrevService.journalfoerVedtaksbrev(any(), any()) } returns response
+        coEvery { journalfoerBrevService.journalfoerVedtaksbrev(any()) } returns Pair(response, 1)
 
         val vedtak = opprettVedtak()
         val melding = opprettMelding(vedtak)
@@ -75,9 +78,8 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         val vedtakCapture = slot<VedtakTilJournalfoering>()
-        verify(exactly = 1) {
-            vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId)
-            vedtaksbrevService.journalfoerVedtaksbrev(any(), capture(vedtakCapture))
+        coVerify(exactly = 1) {
+            journalfoerBrevService.journalfoerVedtaksbrev(capture(vedtakCapture))
         }
 
         val vedtakActual = vedtakCapture.captured
@@ -91,34 +93,6 @@ internal class JournalfoerVedtaksbrevRiverTest {
         assertEquals(brev.id, actualMessage.get("brevId").asLong())
         assertEquals(response.journalpostId, actualMessage.get("journalpostId").asText())
         assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asText())
-    }
-
-    @Test
-    fun `Brev er allerede journalfoert`() {
-        val brev =
-            Brev(
-                1,
-                41,
-                BEHANDLING_ID,
-                "tittel",
-                BrevProsessType.AUTOMATISK,
-                "fnr",
-                Status.JOURNALFOERT,
-                Tidspunkt.now(),
-                Tidspunkt.now(),
-                mottaker = mockk(),
-            )
-
-        every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
-
-        val vedtak = opprettVedtak()
-        val melding = opprettMelding(vedtak)
-
-        val inspektoer = testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
-
-        assertEquals(0, inspektoer.size)
-
-        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
     }
 
     @Test
@@ -154,20 +128,6 @@ internal class JournalfoerVedtaksbrevRiverTest {
         testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         verify { vedtaksbrevService wasNot Called }
-    }
-
-    @Test
-    fun `Brev finnes ikke for behandling`() {
-        every { vedtaksbrevService.hentVedtaksbrev(any()) } returns null
-
-        val vedtak = opprettVedtak()
-        val melding = opprettMelding(vedtak)
-
-        assertThrows<NoSuchElementException> {
-            testRapid.apply { sendTestMessage(melding.toJson()) }
-        }
-
-        verify { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
     }
 
     private fun opprettMelding(vedtak: VedtakNyDto): JsonMessage {

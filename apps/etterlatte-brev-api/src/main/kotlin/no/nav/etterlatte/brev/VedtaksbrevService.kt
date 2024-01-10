@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
@@ -10,8 +9,6 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Adresse
@@ -41,7 +38,6 @@ import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -53,7 +49,6 @@ class VedtaksbrevService(
     private val brevdataFacade: BrevdataFacade,
     private val vedtaksvurderingService: VedtaksvurderingService,
     private val adresseService: AdresseService,
-    private val dokarkivService: DokarkivServiceImpl,
     private val brevbaker: BrevbakerService,
     private val brevDataMapper: BrevDataMapper,
     private val brevProsessTypeFactory: BrevProsessTypeFactory,
@@ -362,21 +357,6 @@ class VedtaksbrevService(
                     " og attestant (${brukerTokenInfo.ident()}) er samme person.",
             )
         }
-    }
-
-    fun journalfoerVedtaksbrev(
-        vedtaksbrev: Brev,
-        vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostResponse {
-        if (vedtaksbrev.status != Status.FERDIGSTILT) {
-            throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
-        }
-
-        val journalfoeringResponse = runBlocking { dokarkivService.journalfoer(vedtaksbrev.id, vedtak) }
-
-        db.settBrevJournalfoert(vedtaksbrev.id, journalfoeringResponse)
-        logger.info("Brev med id=${vedtaksbrev.id} markert som journalført")
-        return journalfoeringResponse
     }
 
     fun fjernFerdigstiltStatusUnderkjentVedtak(

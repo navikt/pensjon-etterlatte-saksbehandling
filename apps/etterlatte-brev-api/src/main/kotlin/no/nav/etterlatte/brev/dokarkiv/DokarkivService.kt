@@ -5,21 +5,13 @@ import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder.Companion.BREV_KODE
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
 interface DokarkivService {
-    suspend fun journalfoer(
-        brevId: BrevID,
-        vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostResponse
-
-    suspend fun journalfoer(
-        brev: Brev,
-        sak: Sak,
-    ): OpprettJournalpostResponse
+    suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse
 
     suspend fun oppdater(
         journalpostId: String,
@@ -38,41 +30,19 @@ interface DokarkivService {
     ): KnyttTilAnnenSakResponse
 }
 
-class DokarkivServiceImpl(
+internal class DokarkivServiceImpl(
     private val client: DokarkivKlient,
     private val db: BrevRepository,
 ) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
-    override suspend fun journalfoer(
-        brevId: BrevID,
-        vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostResponse {
-        logger.info("Oppretter journalpost for brev med id=$brevId")
-
-        val request = mapTilJournalpostRequest(brevId, vedtak)
-
-        return client.opprettJournalpost(request, true).also {
+    override suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse {
+        logger.info("Oppretter journalpost for brev med id=${request.brevId}")
+        return client.opprettJournalpost(mapTilJournalpostRequest(request), true).also {
             logger.info(
                 "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
             )
         }
-    }
-
-    override suspend fun journalfoer(
-        brev: Brev,
-        sak: Sak,
-    ): OpprettJournalpostResponse {
-        logger.info("Oppretter journalpost for brev med id=${brev.id}")
-
-        val request = mapTilJournalpostRequest(brev, sak)
-
-        return client.opprettJournalpost(request, true)
-            .also {
-                logger.info(
-                    "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
-                )
-            }
     }
 
     override suspend fun oppdater(
@@ -114,46 +84,20 @@ class DokarkivServiceImpl(
         }
     }
 
-    private fun mapTilJournalpostRequest(
-        brevId: BrevID,
-        vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostRequest {
-        val innhold = requireNotNull(db.hentBrevInnhold(brevId))
-        val pdf = requireNotNull(db.hentPdf(brevId))
-        val brev = requireNotNull(db.hentBrev(brevId))
-
+    private fun mapTilJournalpostRequest(request: JournalfoeringsMappingRequest): OpprettJournalpostRequest {
+        val innhold = requireNotNull(db.hentBrevInnhold(request.brevId))
+        val pdf = requireNotNull(db.hentPdf(request.brevId))
         return OpprettJournalpostRequest(
             tittel = innhold.tittel,
             journalposttype = JournalPostType.UTGAAENDE,
-            avsenderMottaker = brev.avsenderMottaker(),
-            bruker = Bruker(vedtak.sak.ident),
-            eksternReferanseId = "${vedtak.behandlingId}.$brevId",
-            sak = JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString()),
+            avsenderMottaker = request.avsenderMottaker(),
+            bruker = Bruker(request.brukerident),
+            eksternReferanseId = "${request.eksternReferansePrefiks}.${request.brevId}",
+            sak = JournalpostSak(Sakstype.FAGSAK, request.sakId.toString()),
             dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
-            tema = vedtak.sak.sakType.tema,
+            tema = request.sakType.tema,
             kanal = "S",
-            journalfoerendeEnhet = vedtak.ansvarligEnhet,
-        )
-    }
-
-    private fun mapTilJournalpostRequest(
-        brev: Brev,
-        sak: Sak,
-    ): OpprettJournalpostRequest {
-        val innhold = requireNotNull(db.hentBrevInnhold(brev.id))
-        val pdf = requireNotNull(db.hentPdf(brev.id))
-
-        return OpprettJournalpostRequest(
-            tittel = innhold.tittel,
-            journalposttype = JournalPostType.UTGAAENDE,
-            avsenderMottaker = brev.avsenderMottaker(),
-            bruker = Bruker(brev.soekerFnr),
-            eksternReferanseId = "${brev.sakId}.${brev.id}",
-            sak = JournalpostSak(Sakstype.FAGSAK, brev.sakId.toString()),
-            dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
-            tema = sak.sakType.tema,
-            kanal = "S",
-            journalfoerendeEnhet = sak.enhet,
+            journalfoerendeEnhet = request.journalfoerendeEnhet,
         )
     }
 
@@ -163,9 +107,21 @@ class DokarkivServiceImpl(
             brevkode = BREV_KODE,
             dokumentvarianter = listOf(DokumentVariant.ArkivPDF(Base64.getEncoder().encodeToString(bytes))),
         )
+}
 
-    private fun Brev.avsenderMottaker(): AvsenderMottaker {
-        return AvsenderMottaker(
+data class JournalfoeringsMappingRequest(
+    val brevId: BrevID,
+    val brev: Brev,
+    val brukerident: String,
+    val eksternReferansePrefiks: Any,
+    val sakId: Long,
+    val sakType: SakType,
+    val journalfoerendeEnhet: String,
+) {
+    fun avsenderMottaker() = brev.avsenderMottaker()
+
+    private fun Brev.avsenderMottaker(): AvsenderMottaker =
+        AvsenderMottaker(
             id = this.mottaker.foedselsnummer?.value ?: this.mottaker.orgnummer,
             idType =
                 if (this.mottaker.foedselsnummer != null) {
@@ -182,5 +138,4 @@ class DokarkivServiceImpl(
                     this.mottaker.navn
                 },
         )
-    }
 }

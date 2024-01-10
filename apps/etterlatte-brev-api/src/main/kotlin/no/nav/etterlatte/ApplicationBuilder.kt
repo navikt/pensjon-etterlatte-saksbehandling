@@ -6,6 +6,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -141,8 +142,8 @@ class ApplicationBuilder {
 
     private val distribusjonKlient =
         DistribusjonKlient(httpClient("DOKDIST_SCOPE", false), env.requireEnvValue("DOKDIST_URL"))
-    private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
+    private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
     private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
@@ -157,17 +158,6 @@ class ApplicationBuilder {
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
-    private val brevService =
-        BrevService(
-            db,
-            sakService,
-            soekerService,
-            adresseService,
-            dokarkivService,
-            brevbakerService,
-            brevdataFacade,
-        )
-
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
     private val vedtaksbrevService =
@@ -176,11 +166,23 @@ class ApplicationBuilder {
             brevdataFacade,
             vedtaksvurderingService,
             adresseService,
-            dokarkivService,
             brevbakerService,
             brevDataMapper,
             brevProsessTypeFactory,
             migreringBrevDataService,
+        )
+
+    private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
+
+    private val brevService =
+        BrevService(
+            db,
+            sakService,
+            soekerService,
+            adresseService,
+            brevbakerService,
+            brevdataFacade,
+            journalfoerBrevService,
         )
 
     private val journalpostService =
@@ -212,7 +214,7 @@ class ApplicationBuilder {
 
                 OpprettVedtaksbrevForOmregningNyRegelRiver(this, vedtaksbrevService)
 
-                JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
+                JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, brevdistribuerer)
             }

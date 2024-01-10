@@ -141,6 +141,7 @@ class JournalfoerBrevServiceTest {
         runBlocking { service.journalfoerVedtaksbrev(vedtak) }
 
         verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
+        coVerify(exactly = 0) { dokarkivService.journalfoer(any()) }
     }
 
     @ParameterizedTest

@@ -15,7 +15,7 @@ import { LovtekstMedLenke } from '~components/behandling/soeknadsoversikt/Lovtek
 import styled from 'styled-components'
 import { BodyShort, Heading } from '@navikt/ds-react'
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
-import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
+import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/grunnlag/TrygdetidGrunnlagListe'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'

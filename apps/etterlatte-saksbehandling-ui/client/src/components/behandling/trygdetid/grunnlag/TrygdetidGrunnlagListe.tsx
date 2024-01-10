@@ -13,7 +13,7 @@ import { formaterStringDato } from '~utils/formattering'
 import React, { useState } from 'react'
 import styled from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/TrygdetidGrunnlag'
+import { TrygdetidGrunnlag } from '~components/behandling/trygdetid/grunnlag/TrygdetidGrunnlag'
 import Spinner from '~shared/Spinner'
 
 import { isPending } from '~shared/api/apiUtils'

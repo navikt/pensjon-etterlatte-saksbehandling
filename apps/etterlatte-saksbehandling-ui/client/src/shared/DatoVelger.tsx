@@ -15,7 +15,7 @@ export const DatoVelger = ({
 }: {
   value: Date | undefined
   onChange: (date: Date | undefined) => void
-  label: React.ReactNode
+  label: ReactNode
   description?: ReactNode
   error?: ReactNode
   disabled?: boolean

@@ -254,6 +254,51 @@ enum class AdressebeskyttelseGradering {
     }
 }
 
+fun finnAdressebeskyttetPerson(personer: List<Person>): Person? {
+    val strengtFortroligPerson =
+        personer.find {
+            it.adressebeskyttelse in
+                listOf(
+                    AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                    AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
+                )
+        }
+    if (strengtFortroligPerson != null) {
+        return strengtFortroligPerson
+    }
+    val fortroligPerson =
+        personer.find {
+            it.adressebeskyttelse == AdressebeskyttelseGradering.FORTROLIG
+        }
+    if (fortroligPerson != null) {
+        return fortroligPerson
+    }
+    return personer.firstOrNull()
+}
+
+fun finnHoyesteGradering(
+    gradering: AdressebeskyttelseGradering,
+    graderingTo: AdressebeskyttelseGradering,
+): AdressebeskyttelseGradering {
+    if (gradering in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)) {
+        return gradering
+    }
+
+    if (graderingTo in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)) {
+        return gradering
+    }
+
+    if (gradering == AdressebeskyttelseGradering.FORTROLIG) {
+        return gradering
+    }
+
+    if (graderingTo == AdressebeskyttelseGradering.FORTROLIG) {
+        return gradering
+    }
+
+    return gradering
+}
+
 fun List<AdressebeskyttelseGradering?>.hentPrioritertGradering() = this.filterNotNull().minOrNull() ?: AdressebeskyttelseGradering.UGRADERT
 
 fun hentRelevantVerge(

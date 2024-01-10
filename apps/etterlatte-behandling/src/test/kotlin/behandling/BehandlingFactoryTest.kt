@@ -2,6 +2,7 @@ package behandling
 
 import io.mockk.Runs
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
@@ -30,6 +31,7 @@ import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -48,6 +50,9 @@ import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakService
@@ -72,6 +77,7 @@ class BehandlingFactoryTest {
     private val behandlingService = mockk<BehandlingService>()
     private val sakServiceMock = mockk<SakService>()
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>(relaxUnitFun = true)
+    private val pdlKlientMock = mockk<PdlKlient>()
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "behandling",
@@ -111,6 +117,7 @@ class BehandlingFactoryTest {
             hendelseDaoMock,
             behandlingHendelserKafkaProducerMock,
             mockk(),
+            pdlKlientMock,
         )
 
     @BeforeEach
@@ -577,10 +584,10 @@ class BehandlingFactoryTest {
         val persongalleri =
             Persongalleri(
                 "11057523044",
-                "Innsender",
+                INNSENDER_FOEDSELSNUMMER.value,
                 emptyList(),
-                listOf("Avdoed"),
-                listOf("Gjenlevende"),
+                listOf(AVDOED_FOEDSELSNUMMER.value),
+                listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
             )
 
         val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enheter.defaultEnhet.enhetNr)
@@ -614,6 +621,8 @@ class BehandlingFactoryTest {
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
+
+        coEvery { pdlKlientMock.hentPerson(any()) } returns null
 
         val resultat =
             runBlocking {

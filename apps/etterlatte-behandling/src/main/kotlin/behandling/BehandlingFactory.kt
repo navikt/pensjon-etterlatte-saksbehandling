@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -10,6 +11,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -19,6 +21,7 @@ import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -28,6 +31,13 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.finnAdressebeskyttetPerson
+import no.nav.etterlatte.libs.common.person.finnHoyesteGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -48,16 +58,75 @@ class BehandlingFactory(
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val migreringKlient: MigreringKlient,
+    private val pdlKlient: PdlKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    private suspend fun finnHoyesteGraderingForPersongalleri(
+        persongalleri: Persongalleri,
+        sakType: SakType,
+    ): Person? {
+        val personer =
+            coroutineScope {
+                val soeker =
+                    async {
+                        pdlKlient.hentPerson(
+                            HentPersonRequest(
+                                Folkeregisteridentifikator.of(persongalleri.soeker),
+                                PersonRolle.BARN,
+                                sakType,
+                            ),
+                        )
+                    }
+                val avdoed =
+                    async {
+                        persongalleri.avdoed.map {
+                            pdlKlient.hentPerson(
+                                HentPersonRequest(
+                                    Folkeregisteridentifikator.of(it),
+                                    PersonRolle.AVDOED,
+                                    sakType,
+                                ),
+                            )
+                        }
+                    }
+
+                val gjenlevende =
+                    async {
+                        persongalleri.gjenlevende.map {
+                            pdlKlient.hentPerson(
+                                HentPersonRequest(
+                                    Folkeregisteridentifikator.of(it),
+                                    PersonRolle.GJENLEVENDE,
+                                    sakType,
+                                ),
+                            )
+                        }
+                    }
+
+                listOf(soeker.await()).plus(avdoed.await()).plus(gjenlevende.await())
+            }
+
+        return finnAdressebeskyttetPerson(personer.filterNotNull())
+    }
 
     /*
      * Brukes av frontend for å kunne opprette sak og behandling for en Gosys-oppgave.
      */
     suspend fun opprettSakOgBehandlingForOppgave(request: NyBehandlingRequest): Behandling {
         val soeker = request.persongalleri.soeker
+        val personMedHoyesteGradering = finnHoyesteGraderingForPersongalleri(request.persongalleri, request.sakType)
 
-        val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType, gradering = request.gradering) }
+        val gradering: AdressebeskyttelseGradering? =
+            if (request.gradering != null &&
+                personMedHoyesteGradering != null && personMedHoyesteGradering.adressebeskyttelse != null
+            ) {
+                finnHoyesteGradering(request.gradering!!, personMedHoyesteGradering.adressebeskyttelse!!)
+            } else {
+                personMedHoyesteGradering?.adressebeskyttelse
+            }
+
+        val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType, gradering = gradering) }
 
         if (
             sak.enhet != request.enhet &&

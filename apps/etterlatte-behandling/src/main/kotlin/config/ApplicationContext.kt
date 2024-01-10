@@ -317,6 +317,7 @@ internal class ApplicationContext(
             hendelseDao = hendelseDao,
             behandlingHendelser = behandlingsHendelser,
             migreringKlient = migreringKlient,
+            pdlKlient = pdlKlient,
         )
 
     val migreringService =

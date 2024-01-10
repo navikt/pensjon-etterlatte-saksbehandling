@@ -8,7 +8,7 @@ import { lagreBrevutfallApi } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Aldersgruppe, BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
-import { add, lastDayOfMonth, startOfDay } from 'date-fns'
+import { add, formatISO, lastDayOfMonth, startOfDay, startOfMonth } from 'date-fns'
 import { updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 
@@ -24,6 +24,7 @@ export const BrevutfallSkjema = (props: {
   setBrevutfallOgEtterbetaling: (brevutfall: BrevutfallOgEtterbetaling) => void
   setVisSkjema: (visSkjema: boolean) => void
   resetBrevutfallvalidering: () => void
+  onAvbryt: () => void
 }) => {
   const {
     behandling,
@@ -31,6 +32,7 @@ export const BrevutfallSkjema = (props: {
     setBrevutfallOgEtterbetaling,
     setVisSkjema,
     resetBrevutfallvalidering,
+    onAvbryt,
   } = props
   const [harEtterbetaling, setHarEtterbetaling] = useState<HarEtterbetaling>(
     brevutfallOgEtterbetaling.etterbetaling === undefined
@@ -77,6 +79,7 @@ export const BrevutfallSkjema = (props: {
 
       const fra = startOfDay(new Date(fom))
       const til = startOfDay(new Date(tom))
+
       if (fra > til) {
         feilmeldinger.push('Fra-måned kan ikke være etter til-måned.')
         return feilmeldinger
@@ -150,7 +153,7 @@ export const BrevutfallSkjema = (props: {
                   ...brevutfallOgEtterbetaling,
                   etterbetaling: {
                     ...brevutfallOgEtterbetaling.etterbetaling,
-                    datoFom: date ? date.toISOString() : undefined,
+                    datoFom: date ? formatISO(startOfMonth(date), { representation: 'date' }) : undefined,
                   },
                 })
               }
@@ -169,7 +172,7 @@ export const BrevutfallSkjema = (props: {
                   ...brevutfallOgEtterbetaling,
                   etterbetaling: {
                     ...brevutfallOgEtterbetaling.etterbetaling,
-                    datoTom: date ? lastDayOfMonth(date).toISOString() : undefined,
+                    datoTom: date ? formatISO(lastDayOfMonth(date), { representation: 'date' }) : undefined,
                   },
                 })
               }
@@ -223,6 +226,7 @@ export const BrevutfallSkjema = (props: {
           variant="secondary"
           size="small"
           onClick={() => {
+            onAvbryt()
             setVisSkjema(false)
           }}
         >

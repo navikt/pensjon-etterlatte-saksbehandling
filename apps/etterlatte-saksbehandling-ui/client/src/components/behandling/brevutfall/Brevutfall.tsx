@@ -99,6 +99,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling; resetBrevu
               brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
               setBrevutfallOgEtterbetaling={setBrevutfallOgEtterbetaling}
               setVisSkjema={setVisSkjema}
+              onAvbryt={hentBrevutfall}
             />
           ) : (
             <BrevutfallVisning

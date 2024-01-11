@@ -42,7 +42,7 @@ internal class Verifiserer(
             if (soeker != null) {
                 feil.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
                 if (!request.erUnder18) {
-                    feil.addAll(sjekkAdresseOgUtlandsopphold(soeker))
+                    feil.addAll(sjekkAdresseOgUtlandsopphold(request.pesysId.id, soeker))
                     feil.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(request))
                     feil.addAll(sjekkOmForandringIForeldreforhold(request, soeker))
                 }
@@ -125,18 +125,28 @@ internal class Verifiserer(
         }
     }
 
-    private fun sjekkAdresseOgUtlandsopphold(person: PersonDTO): List<Verifiseringsfeil> {
+    private fun sjekkAdresseOgUtlandsopphold(
+        pesysId: Long,
+        person: PersonDTO,
+    ): List<Verifiseringsfeil> {
         val utlandSjekker = mutableListOf<Verifiseringsfeil>()
-        val kontaktadresse = person.kontaktadresse ?: emptyList()
-        val bostedsadresse = person.bostedsadresse ?: emptyList()
-        val oppholdsadresse = person.oppholdsadresse ?: emptyList()
-        val adresser = kontaktadresse + bostedsadresse + oppholdsadresse
+        val kontaktadresse = person.kontaktadresse?.map { it.verdi.land } ?: emptyList()
+        val bostedsadresse = person.bostedsadresse?.map { it.verdi.land } ?: emptyList()
+        val oppholdsadresse = person.oppholdsadresse?.map { it.verdi.land } ?: emptyList()
+        val adresseland = kontaktadresse + bostedsadresse + oppholdsadresse
 
-        if (adresser.any { it.verdi.land != "NOR" }) {
+        logger.info(
+            "Sak med pesysId=$pesysId har adresseland: kontaktadresse=$kontaktadresse, bosted=$bostedsadresse, opphold?$oppholdsadresse",
+        )
+
+        if (adresseland.filterNotNull().any { it.uppercase() != "NOR" }) {
             utlandSjekker.add(SoekerBorUtland)
         }
+        if (adresseland.none { it != null }) {
+            utlandSjekker.add(UkjentLand)
+        }
 
-        if (adresser.isEmpty()) {
+        if (adresseland.isEmpty()) {
             utlandSjekker.add(BrukerManglerAdresse)
         }
 
@@ -232,6 +242,11 @@ data object SoekerBorUtland : Verifiseringsfeil() {
 data object SoekerHarBoddUtland : Verifiseringsfeil() {
     override val message: String
         get() = "Søker har bodd utlands"
+}
+
+data object UkjentLand : Verifiseringsfeil() {
+    override val message: String
+        get() = "Alle land er null"
 }
 
 data object SoekerHarFlereAvdoede : Verifiseringsfeil() {

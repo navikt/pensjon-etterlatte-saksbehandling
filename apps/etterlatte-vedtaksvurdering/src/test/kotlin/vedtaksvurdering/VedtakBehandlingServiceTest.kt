@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -1128,11 +1129,17 @@ internal class VedtakBehandlingServiceTest {
         val behandlingId = randomUUID()
 
         coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
-        coEvery { behandlingKlientMock.harEtterbetaling(behandlingId, attestant) } returns false
         coEvery { samKlientMock.samordneVedtak(any(), false, attestant) } returns true
 
         runBlocking {
-            repository.opprettVedtak(opprettVedtak(behandlingId = behandlingId, status = VedtakStatus.ATTESTERT))
+            repository.opprettVedtak(
+                opprettVedtak(
+                    behandlingId = behandlingId,
+                    status = VedtakStatus.ATTESTERT,
+                    soeker = Folkeregisteridentifikator.of("08815997000"),
+                ),
+            )
+
             val oppdatertVedtak = service.tilSamordningVedtak(behandlingId, attestant)
 
             oppdatertVedtak.vedtak.status shouldBe VedtakStatus.TIL_SAMORDNING
@@ -1146,7 +1153,6 @@ internal class VedtakBehandlingServiceTest {
         val behandlingId = randomUUID()
 
         coEvery { behandlingKlientMock.tilSamordning(behandlingId, attestant, any()) } returns true
-        coEvery { behandlingKlientMock.harEtterbetaling(behandlingId, attestant) } returns false
         coEvery { samKlientMock.samordneVedtak(any(), false, attestant) } returns false
         coEvery { behandlingKlientMock.samordnet(any(), any(), any()) } returns true
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()

@@ -12,7 +12,6 @@ import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -56,7 +55,6 @@ class SamordningsvedtakRouteTest {
 
     @AfterEach
     fun afterEach() {
-        confirmVerified()
         clearAllMocks()
     }
 

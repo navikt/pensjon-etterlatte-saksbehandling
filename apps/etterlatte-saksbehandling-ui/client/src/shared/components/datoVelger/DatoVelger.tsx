@@ -1,7 +1,6 @@
 import { DatePicker, useDatepicker } from '@navikt/ds-react'
 import { UseDatepickerOptions } from '@navikt/ds-react/esm/date/hooks/useDatepicker'
 import React, { ReactNode } from 'react'
-import { format } from 'date-fns'
 
 export const DatoVelger = ({
   value,
@@ -15,7 +14,7 @@ export const DatoVelger = ({
 }: {
   value: Date | undefined
   onChange: (date: Date | undefined) => void
-  label: React.ReactNode
+  label: ReactNode
   description?: ReactNode
   error?: ReactNode
   disabled?: boolean
@@ -37,6 +36,3 @@ export const DatoVelger = ({
     </DatePicker>
   )
 }
-
-export const formatDateToLocaleDateOrEmptyString = (date: Date | undefined) =>
-  date === undefined ? '' : format(date, 'yyyy-MM-dd')

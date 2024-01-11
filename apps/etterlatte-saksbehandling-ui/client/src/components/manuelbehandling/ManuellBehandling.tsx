@@ -1,7 +1,7 @@
 import { Alert, Button, Checkbox, Select, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { SakType } from '~shared/types/sak'
-import { DatoVelger } from '~shared/DatoVelger'
+import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import styled from 'styled-components'

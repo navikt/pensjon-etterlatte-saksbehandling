@@ -1,4 +1,4 @@
-package no.nav.etterlatte.vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering.migrering
 
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.header
@@ -32,7 +32,15 @@ import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.token.Fagsaksystem
+import no.nav.etterlatte.vedtaksvurdering.AutomatiskBehandlingService
+import no.nav.etterlatte.vedtaksvurdering.RapidInfo
+import no.nav.etterlatte.vedtaksvurdering.SAKSBEHANDLER_1
+import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
+import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
+import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
+import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
+import no.nav.etterlatte.vedtaksvurdering.vedtak
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -44,8 +52,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import vedtaksvurdering.SAKSBEHANDLER_1
-import vedtaksvurdering.vedtak
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

@@ -2,6 +2,7 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import io.kotest.matchers.shouldBe
 import io.mockk.called
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -11,9 +12,9 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import vedtaksvurdering.vedtak
 import java.math.BigDecimal
 import java.time.Clock
 import java.time.Instant
@@ -30,6 +31,9 @@ class VedtakEtterbetalingTest {
     private val klokkeMars2024: Clock = Clock.fixed(Instant.parse("2024-03-06T10:00:00Z"), norskTidssone)
 
     private val repository = mockk<VedtaksvurderingRepository>()
+
+    @AfterEach
+    fun afterEach() = clearAllMocks()
 
     @Test
     fun `ikke etterbetaling grunnet ikke tilbake i tid`() {

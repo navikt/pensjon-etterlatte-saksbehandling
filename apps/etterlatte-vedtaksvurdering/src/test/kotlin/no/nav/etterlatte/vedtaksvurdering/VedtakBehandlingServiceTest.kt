@@ -1,4 +1,4 @@
-package vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -48,15 +48,6 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.vedtaksvurdering.BehandlingstilstandException
-import no.nav.etterlatte.vedtaksvurdering.BeregningOgAvkorting
-import no.nav.etterlatte.vedtaksvurdering.OpphoersrevurderingErIkkeOpphoersvedtakException
-import no.nav.etterlatte.vedtaksvurdering.UgyldigAttestantException
-import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
-import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
-import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
-import no.nav.etterlatte.vedtaksvurdering.VedtakTilstandException
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.config.VedtaksvurderingFeatureToggle
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient

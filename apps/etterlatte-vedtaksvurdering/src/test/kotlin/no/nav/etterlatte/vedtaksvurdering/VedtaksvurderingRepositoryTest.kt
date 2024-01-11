@@ -1,4 +1,4 @@
-package vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeExactly
@@ -22,9 +22,6 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
-import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test

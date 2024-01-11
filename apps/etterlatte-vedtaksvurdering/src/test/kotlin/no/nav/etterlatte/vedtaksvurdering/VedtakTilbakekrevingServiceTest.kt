@@ -1,4 +1,4 @@
-package vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
@@ -14,11 +14,6 @@ import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.vedtaksvurdering.Vedtak
-import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
-import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingService
-import no.nav.etterlatte.vedtaksvurdering.VedtakTilstandException
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.UUID

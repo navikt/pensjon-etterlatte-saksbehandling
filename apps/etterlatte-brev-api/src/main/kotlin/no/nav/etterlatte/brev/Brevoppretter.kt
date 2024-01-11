@@ -52,12 +52,7 @@ class Brevoppretter(
             }
         }
 
-        return opprettBrev(
-            sakId,
-            behandlingId,
-            brukerTokenInfo,
-            automatiskMigreringRequest,
-        )
+        return opprettBrev(sakId, behandlingId, brukerTokenInfo, automatiskMigreringRequest)
     }
 
     suspend fun opprettBrev(
@@ -65,7 +60,51 @@ class Brevoppretter(
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
-    ): Brev {
+    ): Brev =
+        with(hentInnData(sakId, behandlingId, bruker, automatiskMigreringRequest)) {
+            val nyttBrev =
+                OpprettNyttBrev(
+                    sakId = sakId,
+                    behandlingId = behandlingId,
+                    prosessType = prosessType,
+                    soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
+                    mottaker = finnMottaker(generellBrevData.personerISak),
+                    opprettet = Tidspunkt.now(),
+                    innhold =
+                    innhold,
+                    innholdVedlegg = innholdVedlegg,
+                )
+            return db.opprettBrev(nyttBrev)
+        }
+
+    suspend fun hentNyttInnhold(
+        sakId: Long,
+        brevId: Long,
+        behandlingId: UUID,
+        bruker: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest? = null,
+    ): BrevService.BrevPayload =
+        with(hentInnData(sakId, behandlingId, bruker, automatiskMigreringRequest)) {
+            if (innhold.payload != null) {
+                db.oppdaterPayload(brevId, innhold.payload)
+            }
+
+            if (innholdVedlegg != null) {
+                db.oppdaterPayloadVedlegg(brevId, innholdVedlegg)
+            }
+
+            return BrevService.BrevPayload(
+                innhold.payload ?: db.hentBrevPayload(brevId),
+                innholdVedlegg ?: db.hentBrevPayloadVedlegg(brevId),
+            )
+        }
+
+    private suspend fun hentInnData(
+        sakId: Long,
+        behandlingId: UUID?,
+        bruker: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest? = null,
+    ): OpprettBrevRequest {
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
 
@@ -75,27 +114,11 @@ class Brevoppretter(
                 erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
             )
 
-        val nyttBrev =
-            OpprettNyttBrev(
-                sakId = sakId,
-                behandlingId = behandlingId,
-                prosessType = prosessType,
-                soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
-                mottaker = finnMottaker(generellBrevData.personerISak),
-                opprettet = Tidspunkt.now(),
-                innhold =
-                    opprettInnhold(
-                        RedigerbarTekstRequest(
-                            generellBrevData,
-                            bruker,
-                            prosessType,
-                            automatiskMigreringRequest,
-                        ),
-                    ),
-                innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType),
-            )
+        val innhold =
+            opprettInnhold(RedigerbarTekstRequest(generellBrevData, bruker, prosessType, automatiskMigreringRequest))
 
-        return db.opprettBrev(nyttBrev)
+        val innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType)
+        return OpprettBrevRequest(generellBrevData, prosessType, innhold, innholdVedlegg)
     }
 
     private suspend fun finnMottaker(personerISak: PersonerISak): Mottaker =
@@ -141,3 +164,10 @@ class Brevoppretter(
             BrevProsessType.MANUELL -> null
         }
 }
+
+private data class OpprettBrevRequest(
+    val generellBrevData: GenerellBrevData,
+    val prosessType: BrevProsessType,
+    val innhold: BrevInnhold,
+    val innholdVedlegg: List<BrevInnholdVedlegg>?,
+)

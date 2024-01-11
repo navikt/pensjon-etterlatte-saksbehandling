@@ -1,18 +1,19 @@
 import React, { ReactNode, useState } from 'react'
 import { DatePicker, DateValidationT, useDatepicker } from '@navikt/ds-react'
 import { UseDatepickerOptions } from '@navikt/ds-react/esm/date/hooks/useDatepicker'
-import { Control, useController } from 'react-hook-form'
-import { format } from 'date-fns'
-import { OppdaterTrygdetidGrunnlag } from '~shared/api/trygdetid'
+import { Control, FieldValues, Path, useController } from 'react-hook-form'
+import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
 
-export const ControlledDatoVelger = ({
+export const ControlledDatoVelger = <T extends FieldValues>({
   name,
   label,
   control,
+  errorVedTomInput,
 }: {
-  name: 'periodeFra' | 'periodeTil'
+  name: Path<T>
   label: string
-  control: Control<OppdaterTrygdetidGrunnlag>
+  control: Control<T>
+  errorVedTomInput: string
 }): ReactNode => {
   const [, setDateError] = useState<DateValidationT | null>(null)
 
@@ -25,7 +26,7 @@ export const ControlledDatoVelger = ({
     rules: {
       validate: (value) => {
         if (!value) {
-          return 'Obligatorisk'
+          return errorVedTomInput
         }
         return undefined
       },
@@ -48,6 +49,3 @@ export const ControlledDatoVelger = ({
     </DatePicker>
   )
 }
-
-const formatDateToLocaleDateOrEmptyString = (date: Date | undefined) =>
-  date === undefined ? '' : format(date, 'yyyy-MM-dd')

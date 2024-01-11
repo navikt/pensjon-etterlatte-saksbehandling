@@ -93,10 +93,20 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
               </Land>
 
               <DatoSection>
-                <ControlledDatoVelger name="periodeFra" label="Fra dato" control={control} />
+                <ControlledDatoVelger
+                  name="periodeFra"
+                  label="Fra dato"
+                  control={control}
+                  errorVedTomInput="Obligatorisk"
+                />
               </DatoSection>
               <DatoSection>
-                <ControlledDatoVelger name="periodeTil" label="Til dato" control={control} />
+                <ControlledDatoVelger
+                  name="periodeTil"
+                  label="Til dato"
+                  control={control}
+                  errorVedTomInput="Obligatorisk"
+                />
               </DatoSection>
             </FormWrapper>
 

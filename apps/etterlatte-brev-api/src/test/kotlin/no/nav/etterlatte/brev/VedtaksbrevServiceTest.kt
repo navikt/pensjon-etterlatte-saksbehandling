@@ -93,11 +93,8 @@ internal class VedtaksbrevServiceTest {
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
-            brevdataFacade,
             vedtaksvurderingService,
-            brevbakerService,
             brevDataMapper,
-            brevProsessTypeFactory,
             migreringBrevDataService,
             brevoppretter,
             pdfGenerator,

@@ -1,4 +1,4 @@
-package regulering
+package no.nav.etterlatte
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -8,7 +8,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.Url
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
-import no.nav.etterlatte.VedtakServiceImpl
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO

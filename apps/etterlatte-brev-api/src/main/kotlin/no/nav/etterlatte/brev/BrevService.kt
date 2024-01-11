@@ -5,9 +5,9 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.model.BrevkodePar
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
@@ -106,7 +106,7 @@ class BrevService(
             avsenderRequest = {
                 AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = it.sak.enhet)
             },
-            brevKode = { _, _, _ -> BrevDataMapper.BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV) },
+            brevKode = { _, _, _ -> BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV) },
         )
 
     suspend fun ferdigstill(

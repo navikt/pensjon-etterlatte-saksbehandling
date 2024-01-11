@@ -4,32 +4,13 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_ENKEL
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_ENKEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG_BEGRUNNELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE_UTFALL
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_OPPHOER_MANUELL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_ENDRING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHOER
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHOER_GENERELL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_INNHOLD
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
@@ -123,109 +104,6 @@ class BrevDataMapper(
     private val brevdataFacade: BrevdataFacade,
     private val migreringBrevDataService: MigreringBrevDataService,
 ) {
-    fun brevKode(
-        generellBrevData: GenerellBrevData,
-        brevProsessType: BrevProsessType,
-        erOmregningNyRegel: Boolean = false,
-    ) = when (brevProsessType) {
-        BrevProsessType.AUTOMATISK -> brevKodeAutomatisk(generellBrevData, erOmregningNyRegel)
-        BrevProsessType.REDIGERBAR -> brevKodeAutomatisk(generellBrevData, erOmregningNyRegel)
-        BrevProsessType.MANUELL -> BrevkodePar(OMS_OPPHOER_MANUELL)
-    }
-
-    private fun brevKodeAutomatisk(
-        generellBrevData: GenerellBrevData,
-        erOmregningNyRegel: Boolean = false,
-    ): BrevkodePar {
-        if (generellBrevData.systemkilde == Vedtaksloesning.PESYS || erOmregningNyRegel) {
-            assert(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(generellBrevData.forenkletVedtak?.type))
-            return BrevkodePar(BARNEPENSJON_VEDTAK_OMREGNING, BARNEPENSJON_VEDTAK_OMREGNING_FERDIG)
-        }
-
-        return when (generellBrevData.sak.sakType) {
-            SakType.BARNEPENSJON -> {
-                when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE ->
-                        when (brukNyInnvilgelsesmal()) {
-                            true -> BrevkodePar(BARNEPENSJON_INNVILGELSE_ENKEL, BARNEPENSJON_INNVILGELSE_NY)
-                            false -> BrevkodePar(BARNEPENSJON_INNVILGELSE)
-                        }
-
-                    VedtakType.AVSLAG -> BrevkodePar(BARNEPENSJON_AVSLAG_ENKEL, BARNEPENSJON_AVSLAG)
-
-                    VedtakType.ENDRING ->
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.SOESKENJUSTERING -> BrevkodePar(BARNEPENSJON_REVURDERING_SOESKENJUSTERING)
-                            Revurderingaarsak.INSTITUSJONSOPPHOLD ->
-                                BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
-
-                            Revurderingaarsak.YRKESSKADE ->
-                                BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
-
-                            Revurderingaarsak.ANNEN -> BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
-
-                            else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
-                        }
-
-                    VedtakType.OPPHOER ->
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.ADOPSJON ->
-                                BrevkodePar(BARNEPENSJON_REVURDERING_ADOPSJON, BARNEPENSJON_REVURDERING_OPPHOER)
-
-                            Revurderingaarsak.OMGJOERING_AV_FARSKAP ->
-                                BrevkodePar(
-                                    BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP,
-                                    BARNEPENSJON_REVURDERING_OPPHOER,
-                                )
-
-                            Revurderingaarsak.FENGSELSOPPHOLD ->
-                                BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
-
-                            Revurderingaarsak.UT_AV_FENGSEL ->
-                                BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING_ENDRING)
-
-                            else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
-                        }
-
-                    VedtakType.TILBAKEKREVING -> BrevkodePar(TILBAKEKREVING_INNHOLD, TILBAKEKREVING_FERDIG)
-                    null -> BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV)
-                }
-            }
-
-            SakType.OMSTILLINGSSTOENAD -> {
-                when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE ->
-                        BrevkodePar(
-                            OMS_FOERSTEGANGSVEDTAK_INNVILGELSE_UTFALL,
-                            OMS_FOERSTEGANGSVEDTAK_INNVILGELSE,
-                        )
-
-                    VedtakType.AVSLAG -> BrevkodePar(OMS_AVSLAG_BEGRUNNELSE, OMS_AVSLAG)
-                    VedtakType.ENDRING ->
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.INNTEKTSENDRING,
-                            Revurderingaarsak.ANNEN,
-                            ->
-                                BrevkodePar(TOM_MAL, OMS_REVURDERING_ENDRING)
-
-                            else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
-                        }
-
-                    VedtakType.OPPHOER ->
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.SIVILSTAND ->
-                                BrevkodePar(OMS_REVURDERING_OPPHOER_GENERELL, OMS_REVURDERING_OPPHOER)
-
-                            else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
-                        }
-
-                    VedtakType.TILBAKEKREVING -> BrevkodePar(TILBAKEKREVING_INNHOLD, TILBAKEKREVING_FERDIG)
-                    null -> BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV)
-                }
-            }
-        }
-    }
-
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
         when (
             redigerbarTekstRequest.generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
@@ -512,10 +390,6 @@ class BrevDataMapper(
         generellBrevData.forenkletVedtak?.type,
         generellBrevData.sak,
     )
-
-    data class BrevkodePar(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering) {
-        fun erInformasjonsbrev() = ferdigstilling == TOM_MAL_INFORMASJONSBREV
-    }
 
     private fun brukNyInnvilgelsesmal() = featureToggleService.isEnabled(BrevDataFeatureToggle.NyMalInnvilgelse, false)
 }

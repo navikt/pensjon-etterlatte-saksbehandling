@@ -34,6 +34,7 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataFeatureToggle
 import no.nav.etterlatte.brev.model.BrevDataMapper
+import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.Mottaker
@@ -86,7 +87,8 @@ internal class VedtaksbrevServiceTest {
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
     private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade, migreringBrevDataService)
     private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper)
+    private val brevKodeMapper = BrevKodeMapper(featureToggleService)
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper, brevKodeMapper)
     private val pdfGenerator = PDFGenerator(db, brevdataFacade, brevDataMapper, adresseService, brevbakerService, migreringBrevDataService)
     private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevProsessTypeFactory, brevbakerService)
 
@@ -94,7 +96,7 @@ internal class VedtaksbrevServiceTest {
         VedtaksbrevService(
             db,
             vedtaksvurderingService,
-            brevDataMapper,
+            brevKodeMapper,
             brevoppretter,
             pdfGenerator,
         )

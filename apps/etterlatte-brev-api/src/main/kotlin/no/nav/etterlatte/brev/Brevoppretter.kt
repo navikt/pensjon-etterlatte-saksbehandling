@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
@@ -14,6 +13,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.SlateHelper
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class Brevoppretter(
-    private val sakService: SakService,
     private val adresseService: AdresseService,
     private val db: BrevRepository,
     private val brevdataFacade: BrevdataFacade,
@@ -51,8 +50,22 @@ class Brevoppretter(
             }
         }
 
+        return opprettBrev(
+            sakId,
+            behandlingId,
+            brukerTokenInfo,
+            automatiskMigreringRequest,
+        )
+    }
+
+    suspend fun opprettBrev(
+        sakId: Long,
+        behandlingId: UUID?,
+        bruker: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest? = null,
+    ): Brev {
         val generellBrevData =
-            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo) }
+            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
 
         val mottaker =
             with(generellBrevData.personerISak) {
@@ -62,54 +75,12 @@ class Brevoppretter(
 
                     else -> {
                         val mottakerFnr =
-                            innsender?.fnr?.value?.takeUnless { it == no.nav.etterlatte.libs.common.Vedtaksloesning.PESYS.name }
+                            innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name }
                                 ?: soeker.fnr.value
                         adresseService.hentMottakerAdresse(mottakerFnr)
                     }
                 }
             }
-
-        val prosessType =
-            brevProsessTypeFactory.fra(
-                generellBrevData,
-                erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
-            )
-
-        val nyttBrev =
-            OpprettNyttBrev(
-                sakId = sakId,
-                behandlingId = behandlingId,
-                prosessType = prosessType,
-                soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
-                mottaker = mottaker,
-                opprettet = Tidspunkt.now(),
-                innhold =
-                    opprettInnhold(
-                        RedigerbarTekstRequest(
-                            generellBrevData,
-                            brukerTokenInfo,
-                            prosessType,
-                            automatiskMigreringRequest,
-                        ),
-                    ),
-                innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType),
-            )
-
-        return db.opprettBrev(nyttBrev)
-    }
-
-    suspend fun opprettBrev(
-        sakId: Long,
-        behandlingId: UUID?,
-        bruker: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
-    ): Brev {
-        val sak = sakService.hentSak(sakId, bruker)
-
-        val generellBrevData =
-            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
-
-        val mottaker = adresseService.hentMottakerAdresse(sak.ident)
 
         val prosessType =
             brevProsessTypeFactory.fra(

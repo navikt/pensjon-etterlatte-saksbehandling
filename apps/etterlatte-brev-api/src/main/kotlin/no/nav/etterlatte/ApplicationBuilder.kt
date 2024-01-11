@@ -6,6 +6,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.PDFGenerator
@@ -156,6 +157,8 @@ class ApplicationBuilder {
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
+    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevProsessTypeFactory, brevbakerService)
+
     private val pdfGenerator = PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
 
     private val vedtaksbrevService =
@@ -163,11 +166,11 @@ class ApplicationBuilder {
             db,
             brevdataFacade,
             vedtaksvurderingService,
-            adresseService,
             brevbakerService,
             brevDataMapper,
             brevProsessTypeFactory,
             migreringBrevDataService,
+            brevoppretter,
             pdfGenerator,
         )
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
@@ -175,8 +178,7 @@ class ApplicationBuilder {
     private val brevService =
         BrevService(
             db,
-            sakService,
-            adresseService,
+            brevoppretter,
             journalfoerBrevService,
             pdfGenerator,
         )

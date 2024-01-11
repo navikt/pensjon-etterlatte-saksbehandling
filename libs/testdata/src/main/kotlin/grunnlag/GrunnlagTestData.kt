@@ -3,10 +3,13 @@ package no.nav.etterlatte.libs.testdata.grunnlag
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOEDESBARN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.pdl.personTestData
@@ -29,6 +32,20 @@ data class GrunnlagTestData(
         get() = personTestData(halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides)
     val gjenlevende
         get() = personTestData(gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides)
+
+    val sak: Map<Opplysningstype, Opplysning<JsonNode>> =
+        opplysningsmapSakOverrides +
+            mapOf(
+                PERSONGALLERI_V1 to
+                    Opplysning.Konstant.create(
+                        lagOpplysning(
+                            opplysningsType = PERSONGALLERI_V1,
+                            kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                            opplysning = hentPersonGalleri().toJsonNode(),
+                            periode = null,
+                        ),
+                    ),
+            )
 
     private val avdoedesBarnOverrides
         get() =
@@ -83,7 +100,7 @@ data class GrunnlagTestData(
                     gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
                     halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides,
                 ),
-            sak = opplysningsmapSakOverrides,
+            sak = sak,
             metadata = Metadata(1, 15),
         )
 
@@ -97,7 +114,7 @@ data class GrunnlagTestData(
                     gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
                     halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides,
                 ),
-            sak = opplysningsmapSakOverrides,
+            sak = sak,
             metadata = Metadata(1, 15),
         )
 
@@ -117,7 +134,7 @@ data class GrunnlagTestData(
                 listOf(
                     gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
                 ),
-            sak = opplysningsmapSakOverrides,
+            sak = sak,
             metadata = Metadata(1, 1),
         )
 }

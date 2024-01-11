@@ -88,17 +88,18 @@ internal class VedtaksbrevServiceTest {
     private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
     private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper)
     private val pdfGenerator = PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
+    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevProsessTypeFactory, brevbakerService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
             brevdataFacade,
             vedtaksvurderingService,
-            adresseService,
             brevbakerService,
             brevDataMapper,
             brevProsessTypeFactory,
             migreringBrevDataService,
+            brevoppretter,
             pdfGenerator,
         )
 

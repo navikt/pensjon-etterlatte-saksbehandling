@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
@@ -24,7 +23,6 @@ import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
@@ -35,10 +33,8 @@ import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Saksbehandler
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -47,11 +43,11 @@ class VedtaksbrevService(
     private val db: BrevRepository,
     private val brevdataFacade: BrevdataFacade,
     private val vedtaksvurderingService: VedtaksvurderingService,
-    private val adresseService: AdresseService,
     private val brevbaker: BrevbakerService,
     private val brevDataMapper: BrevDataMapper,
     private val brevProsessTypeFactory: BrevProsessTypeFactory,
     private val migreringBrevDataService: MigreringBrevDataService,
+    private val brevoppretter: Brevoppretter,
     private val pdfGenerator: PDFGenerator,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
@@ -75,62 +71,12 @@ class VedtaksbrevService(
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         // TODO EY-3232 - Fjerne migreringstilpasning
     ): Brev {
-        require(hentVedtaksbrev(behandlingId) == null) {
-            "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
-        }
-
-        if (brukerTokenInfo is Saksbehandler) {
-            brevdataFacade.hentBehandling(behandlingId, brukerTokenInfo).status.let { status ->
-                require(status.kanEndres()) {
-                    "Behandling (id=$behandlingId) har status $status og kan ikke opprette vedtaksbrev"
-                }
-            }
-        }
-
-        val generellBrevData =
-            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo) }
-
-        val mottaker =
-            with(generellBrevData.personerISak) {
-                when (verge) {
-                    is Vergemaal ->
-                        verge.toMottaker()
-
-                    else -> {
-                        val mottakerFnr =
-                            innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
-                        adresseService.hentMottakerAdresse(mottakerFnr)
-                    }
-                }
-            }
-
-        val prosessType =
-            brevProsessTypeFactory.fra(
-                generellBrevData,
-                erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
-            )
-
-        val nyttBrev =
-            OpprettNyttBrev(
-                sakId = sakId,
-                behandlingId = behandlingId,
-                prosessType = prosessType,
-                soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
-                mottaker = mottaker,
-                opprettet = Tidspunkt.now(),
-                innhold =
-                    opprettInnhold(
-                        RedigerbarTekstRequest(
-                            generellBrevData,
-                            brukerTokenInfo,
-                            prosessType,
-                            automatiskMigreringRequest,
-                        ),
-                    ),
-                innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType),
-            )
-
-        return db.opprettBrev(nyttBrev)
+        return brevoppretter.opprettVedtaksbrev(
+            sakId = sakId,
+            behandlingId = behandlingId,
+            brukerTokenInfo = brukerTokenInfo,
+            automatiskMigreringRequest = automatiskMigreringRequest,
+        )
     }
 
     suspend fun genererPdf(

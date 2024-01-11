@@ -1,4 +1,4 @@
-package vilkaarsvurdering
+package no.nav.etterlatte.vilkaarsvurdering
 
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -17,7 +17,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
-import no.nav.etterlatte.vilkaarsvurdering.MigreringRiver
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid

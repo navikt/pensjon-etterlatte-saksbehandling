@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
+import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
@@ -67,27 +68,29 @@ internal class GrunnlagServiceTest {
     private val grunnlagHenter = mockk<GrunnlagHenter>()
     private val grunnlagService =
         RealGrunnlagService(
-            pdlTjenesterKlientImpl,
-            opplysningDaoMock,
-            mockk(),
-            grunnlagHenter,
-            vergeService,
+            pdltjenesterKlient = pdlTjenesterKlientImpl,
+            opplysningDao = opplysningDaoMock,
+            sporingslogg = mockk(),
+            grunnlagHenter = grunnlagHenter,
+            vergeService = vergeService,
         )
 
     private val testData = GrunnlagTestData()
+    private val persongalleri =
+        lagGrunnlagHendelse(
+            sakId = 1,
+            hendelseNummer = 4,
+            opplysningType = PERSONGALLERI_V1,
+            id = statiskUuid,
+            fnr = null,
+            verdi = testData.hentPersonGalleri().toJsonNode(),
+            kilde = kilde,
+        )
 
     @BeforeAll
     fun beforeAll() {
-        every { opplysningDaoMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns
-            lagGrunnlagHendelse(
-                1,
-                4,
-                PERSONGALLERI_V1,
-                id = statiskUuid,
-                fnr = testData.soeker.foedselsnummer,
-                verdi = testData.hentPersonGalleri().toJsonNode(),
-                kilde = kilde,
-            )
+        every { opplysningDaoMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns persongalleri
+        every { opplysningDaoMock.finnNyesteGrunnlagForSak(any(), PERSONGALLERI_V1) } returns persongalleri
     }
 
     @Nested
@@ -98,44 +101,87 @@ internal class GrunnlagServiceTest {
         private fun lagGrunnlagForPerson(
             fnr: Folkeregisteridentifikator,
             personRolle: PersonRolle,
-        ) = listOf(
-            lagGrunnlagHendelse(
-                1,
-                1,
-                NAVN,
-                id = statiskUuid,
-                fnr = fnr,
-                verdi = nyttNavn.toJsonNode(),
-                kilde = kilde,
-            ),
-            lagGrunnlagHendelse(
-                1,
-                2,
-                FOEDSELSDATO,
-                id = statiskUuid,
-                fnr = fnr,
-                verdi = nyFødselsdag.toJsonNode(),
-                kilde = kilde,
-            ),
-            lagGrunnlagHendelse(
-                1,
-                3,
-                PERSONROLLE,
-                id = statiskUuid,
-                fnr = fnr,
-                verdi = personRolle.toJsonNode(),
-                kilde = kilde,
-            ),
-            lagGrunnlagHendelse(
-                1,
-                4,
-                PERSONGALLERI_V1,
-                id = statiskUuid,
-                fnr = fnr,
-                verdi = testData.hentPersonGalleri().toJsonNode(),
-                kilde = kilde,
-            ),
-        )
+        ): List<OpplysningDao.GrunnlagHendelse> {
+            val persongalleri =
+                when (personRolle) {
+                    PersonRolle.INNSENDER ->
+                        Persongalleri(
+                            soeker = "",
+                            innsender = fnr.value,
+                        )
+
+                    PersonRolle.BARN ->
+                        Persongalleri(
+                            soeker = fnr.value,
+                            soesken = listOf(fnr.value),
+                        )
+
+                    PersonRolle.AVDOED ->
+                        Persongalleri(
+                            soeker = "",
+                            avdoed = listOf(fnr.value),
+                        )
+
+                    PersonRolle.GJENLEVENDE ->
+                        Persongalleri(
+                            soeker = "",
+                            gjenlevende = listOf(fnr.value),
+                        )
+
+                    PersonRolle.TILKNYTTET_BARN ->
+                        Persongalleri(
+                            soeker = "",
+                            soesken = listOf(fnr.value),
+                        )
+                }
+            return listOf(
+                lagGrunnlagHendelse(
+                    sakId = 1,
+                    hendelseNummer = 1,
+                    opplysningType = NAVN,
+                    id = statiskUuid,
+                    fnr = fnr,
+                    verdi = nyttNavn.toJsonNode(),
+                    kilde = kilde,
+                ),
+                lagGrunnlagHendelse(
+                    sakId = 1,
+                    hendelseNummer = 2,
+                    opplysningType = FOEDSELSDATO,
+                    id = statiskUuid,
+                    fnr = fnr,
+                    verdi = nyFødselsdag.toJsonNode(),
+                    kilde = kilde,
+                ),
+                lagGrunnlagHendelse(
+                    sakId = 1,
+                    hendelseNummer = 3,
+                    opplysningType = PERSONROLLE,
+                    id = statiskUuid,
+                    fnr = fnr,
+                    verdi = personRolle.toJsonNode(),
+                    kilde = kilde,
+                ),
+                lagGrunnlagHendelse(
+                    sakId = 1,
+                    hendelseNummer = 5,
+                    opplysningType = FOEDSELSNUMMER,
+                    id = statiskUuid,
+                    fnr = fnr,
+                    verdi = fnr.toJsonNode(),
+                    kilde = kilde,
+                ),
+                lagGrunnlagHendelse(
+                    sakId = 1,
+                    hendelseNummer = 4,
+                    opplysningType = PERSONGALLERI_V1,
+                    id = statiskUuid,
+                    fnr = null,
+                    verdi = persongalleri.toJsonNode(),
+                    kilde = kilde,
+                ),
+            )
+        }
 
         @Test
         fun `skal mappe om dataen fra DB til søker`() {
@@ -156,7 +202,7 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `skal mappe om dataen fra DB til avdød`() {
-            val grunnlagshendelser = lagGrunnlagForPerson(testData.avdoed.foedselsnummer, PersonRolle.AVDOED)
+            val grunnlagshendelser = lagGrunnlagForPerson(testData.avdoede.first().foedselsnummer, PersonRolle.AVDOED)
 
             every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns grunnlagshendelser
 
@@ -166,6 +212,7 @@ internal class GrunnlagServiceTest {
                     NAVN to Opplysning.Konstant(statiskUuid, kilde, nyttNavn.toJsonNode()),
                     FOEDSELSDATO to Opplysning.Konstant(statiskUuid, kilde, nyFødselsdag.toJsonNode()),
                     PERSONROLLE to Opplysning.Konstant(statiskUuid, kilde, PersonRolle.AVDOED.toJsonNode()),
+                    FOEDSELSNUMMER to Opplysning.Konstant(statiskUuid, kilde, testData.avdoede.first().foedselsnummer),
                 )
 
             assertEquals(expected[NAVN], actual.hentAvdoede()[0][NAVN])
@@ -186,7 +233,7 @@ internal class GrunnlagServiceTest {
                     PERSONROLLE to Opplysning.Konstant(statiskUuid, kilde, PersonRolle.GJENLEVENDE.toJsonNode()),
                 )
 
-            assertEquals(expected[NAVN], actual.hentGjenlevende()[NAVN])
+            assertEquals(expected[NAVN], actual.hentPotensiellGjenlevende()?.get(NAVN))
             assertEquals(expected[FOEDSELSDATO], actual.hentGjenlevende()[FOEDSELSDATO])
         }
 
@@ -494,21 +541,34 @@ internal class GrunnlagServiceTest {
 
         @Test
         fun `Kan mappe og hente innsender`() {
-            every { opplysningDaoMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns
+            val persongalleri =
                 lagGrunnlagHendelse(
                     1,
                     1,
                     PERSONGALLERI_V1,
                     id = statiskUuid,
-                    verdi = testData.hentPersonGalleri().toJsonNode(),
+                    verdi =
+                        testData.hentPersonGalleri()
+                            .copy(innsender = INNSENDER_FOEDSELSNUMMER.value)
+                            .toJsonNode(),
                     kilde = kilde,
                 )
-
+            every { opplysningDaoMock.finnNyesteGrunnlagForBehandling(any(), PERSONGALLERI_V1) } returns persongalleri
+            every { opplysningDaoMock.finnNyesteGrunnlagForSak(any(), PERSONGALLERI_V1) } returns persongalleri
             every { opplysningDaoMock.hentAlleGrunnlagForSak(1) } returns
                 listOf(
                     lagGrunnlagHendelse(
                         1,
                         2,
+                        FOEDSELSNUMMER,
+                        id = statiskUuid,
+                        fnr = INNSENDER_FOEDSELSNUMMER,
+                        verdi = INNSENDER_FOEDSELSNUMMER.toJsonNode(),
+                        kilde = kilde,
+                    ),
+                    lagGrunnlagHendelse(
+                        1,
+                        3,
                         NAVN,
                         id = statiskUuid,
                         fnr = INNSENDER_FOEDSELSNUMMER,
@@ -517,28 +577,21 @@ internal class GrunnlagServiceTest {
                     ),
                     lagGrunnlagHendelse(
                         1,
-                        2,
+                        4,
                         PERSONROLLE,
                         id = statiskUuid,
                         fnr = INNSENDER_FOEDSELSNUMMER,
                         verdi = PersonRolle.INNSENDER.toJsonNode(),
                         kilde = kilde,
                     ),
-                    lagGrunnlagHendelse(
-                        1,
-                        3,
-                        PERSONGALLERI_V1,
-                        id = statiskUuid,
-                        verdi = testData.hentPersonGalleri().toJsonNode(),
-                        kilde = kilde,
-                    ),
+                    persongalleri,
                 )
 
             val opplysningsgrunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(1)!!
 
             assertEquals(1, opplysningsgrunnlag.sak.size)
             assertEquals(1, opplysningsgrunnlag.familie.size)
-            assertEquals(2, opplysningsgrunnlag.hentInnsender().size)
+            assertEquals(INNSENDER_FOEDSELSNUMMER, opplysningsgrunnlag.hentInnsender().hentFoedselsnummer()?.verdi)
         }
     }
 
@@ -732,45 +785,45 @@ internal class GrunnlagServiceTest {
             } returns
                 listOf(
                     lagGrunnlagHendelse(
-                        1,
-                        1,
-                        Opplysningstype.SOEKER_PDL_V1,
+                        sakId = 1,
+                        hendelseNummer = 1,
+                        opplysningType = Opplysningstype.SOEKER_PDL_V1,
                         id = behandlingsid,
                         fnr = SOEKER_FOEDSELSNUMMER,
                         verdi = testData.soeker.toJsonNode(),
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        1,
-                        2,
-                        Opplysningstype.INNSENDER_PDL_V1,
+                        sakId = 1,
+                        hendelseNummer = 2,
+                        opplysningType = Opplysningstype.INNSENDER_PDL_V1,
                         id = behandlingsid,
                         fnr = SOEKER_FOEDSELSNUMMER,
                         verdi = testData.soeker.toJsonNode(),
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        1,
-                        3,
-                        Opplysningstype.AVDOED_PDL_V1,
+                        sakId = 1,
+                        hendelseNummer = 3,
+                        opplysningType = Opplysningstype.AVDOED_PDL_V1,
                         id = behandlingsid,
                         fnr = AVDOED_FOEDSELSNUMMER,
-                        verdi = testData.avdoed.toJsonNode(),
+                        verdi = testData.avdoede.first().toJsonNode(),
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        1,
-                        4,
-                        Opplysningstype.AVDOED_PDL_V1,
+                        sakId = 1,
+                        hendelseNummer = 4,
+                        opplysningType = Opplysningstype.AVDOED_PDL_V1,
                         id = behandlingsid,
                         fnr = GJENLEVENDE_FOEDSELSNUMMER, // litt dum gjenbruk inn i annen opplysning
                         verdi = testData.gjenlevende.toJsonNode(),
                         kilde = kilde,
                     ),
                     lagGrunnlagHendelse(
-                        1,
-                        5,
-                        Opplysningstype.PERSONGALLERI_V1,
+                        sakId = 1,
+                        hendelseNummer = 5,
+                        opplysningType = PERSONGALLERI_V1,
                         id = behandlingsid,
                         verdi =
                             Persongalleri(
@@ -830,7 +883,7 @@ internal class GrunnlagServiceTest {
         meta = objectMapper.createObjectNode(),
         opplysning = opplysning,
         attestering = null,
-        fnr,
+        fnr = fnr,
         periode =
             Periode(
                 fom = YearMonth.of(2022, 1),

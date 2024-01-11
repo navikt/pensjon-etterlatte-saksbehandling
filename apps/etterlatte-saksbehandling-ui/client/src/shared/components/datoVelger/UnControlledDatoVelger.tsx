@@ -3,7 +3,7 @@ import { UseDatepickerOptions } from '@navikt/ds-react/esm/date/hooks/useDatepic
 import React, { ReactNode } from 'react'
 import { format } from 'date-fns'
 
-export const DatoVelger = ({
+export const UnControlledDatoVelger = ({
   value,
   onChange,
   label,

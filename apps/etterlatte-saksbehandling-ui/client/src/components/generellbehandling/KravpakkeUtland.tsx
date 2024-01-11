@@ -32,7 +32,10 @@ import { opprettBrevForSak } from '~shared/api/brev'
 import { ABlue500 } from '@navikt/ds-tokens/dist/tokens'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { ConfigContext } from '~clientConfig'
-import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
+import {
+  UnControlledDatoVelger,
+  formatDateToLocaleDateOrEmptyString,
+} from '~shared/components/datoVelger/UnControlledDatoVelger'
 import { getGrunnlagsAvOpplysningstype } from '~shared/api/grunnlag'
 import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { formaterNavn, IPdlPerson } from '~shared/types/Person'
@@ -385,7 +388,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                         </Checkbox>
                       </Table.DataCell>
                       <Table.DataCell>
-                        <DatoVelger
+                        <UnControlledDatoVelger
                           disabled={!redigerbar}
                           label=""
                           value={dokument.dato ? new Date(dokument.dato) : undefined}

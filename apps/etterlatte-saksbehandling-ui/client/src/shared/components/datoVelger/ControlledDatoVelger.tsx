@@ -5,7 +5,7 @@ import { Control, useController } from 'react-hook-form'
 import { format } from 'date-fns'
 import { OppdaterTrygdetidGrunnlag } from '~shared/api/trygdetid'
 
-export const TrygdetidGrunnlagDatoVelger = ({
+export const ControlledDatoVelger = ({
   name,
   label,
   control,

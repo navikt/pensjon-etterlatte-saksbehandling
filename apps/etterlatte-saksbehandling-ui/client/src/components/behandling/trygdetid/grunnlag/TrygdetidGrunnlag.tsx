@@ -15,7 +15,7 @@ import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
 import { isFailureWithCode, isFailure, isPending } from '~shared/api/apiUtils'
 import { useForm } from 'react-hook-form'
-import { TrygdetidGrunnlagDatoVelger } from '~components/behandling/trygdetid/grunnlag/TrygdetidGrunnlagDatoVelger'
+import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 
 type Props = {
   eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined
@@ -93,10 +93,10 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
               </Land>
 
               <DatoSection>
-                <TrygdetidGrunnlagDatoVelger name="periodeFra" label="Fra dato" control={control} />
+                <ControlledDatoVelger name="periodeFra" label="Fra dato" control={control} />
               </DatoSection>
               <DatoSection>
-                <TrygdetidGrunnlagDatoVelger name="periodeTil" label="Til dato" control={control} />
+                <ControlledDatoVelger name="periodeTil" label="Til dato" control={control} />
               </DatoSection>
             </FormWrapper>
 

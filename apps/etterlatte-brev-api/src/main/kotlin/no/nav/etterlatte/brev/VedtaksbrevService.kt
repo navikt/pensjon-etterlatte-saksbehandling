@@ -401,5 +401,4 @@ fun Vergemaal.toMottaker(): Mottaker {
     }
 
     return Mottaker.tom(Folkeregisteridentifikator.of(mottaker.foedselsnummer!!.value))
-        .copy(navn = mottaker.navn ?: "N/A")
 }

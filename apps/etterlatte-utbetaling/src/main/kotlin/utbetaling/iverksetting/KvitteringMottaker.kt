@@ -25,6 +25,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.slf4j.LoggerFactory
+import kotlin.system.exitProcess
 
 class KvitteringMottaker(
     private val rapidsConnection: RapidsConnection,
@@ -35,7 +36,14 @@ class KvitteringMottaker(
     init {
         jmsConnectionFactory.start(
             listener = {
-                logger.error("En feil oppstod med tilkobling mot MQ: ${it.message}", it)
+                logger.error(
+                    "En feil oppstod med tilkobling mot MQ: ${it.message}. Restarter appen " +
+                        "for å sette opp tilkobling på nytt",
+                    it,
+                )
+
+                // Trigger restart av appen for å sette opp tilkobling mot MQ på nytt
+                exitProcess(-1)
             },
             queue = queue,
             messageListener = this,

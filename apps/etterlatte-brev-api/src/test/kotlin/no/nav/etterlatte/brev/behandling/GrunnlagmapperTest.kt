@@ -60,19 +60,21 @@ class GrunnlagmapperTest {
         val verge = opplysningsgrunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID(), null)!! as Vergemaal
 
         verge.navn() shouldBe "ADVOKAT VERA V VERGE"
-        verge.mottaker.foedselsnummer shouldBe MottakerFoedselsnummer(vergesAdresseFnr)
-        verge.mottaker.navn shouldBe "ADVOKAT VERA V VERGE"
-        verge.mottaker.adresse shouldBe
-            MottakerAdresse(
-                adresseType = "NORSKPOSTADRESSE",
-                adresselinje1 = "c/o ADVOKAT VERA",
-                adresselinje2 = "POSTBOKS 1064",
-                adresselinje3 = "1510 MOSS",
-                postnummer = "1510",
-                poststed = "MOSS",
-                landkode = "NO",
-                land = "NORGE",
-            )
+        with(verge.mottaker!!) {
+            foedselsnummer shouldBe MottakerFoedselsnummer(vergesAdresseFnr)
+            navn shouldBe "ADVOKAT VERA V VERGE"
+            adresse shouldBe
+                MottakerAdresse(
+                    adresseType = "NORSKPOSTADRESSE",
+                    adresselinje1 = "c/o ADVOKAT VERA",
+                    adresselinje2 = "POSTBOKS 1064",
+                    adresselinje3 = "1510 MOSS",
+                    postnummer = "1510",
+                    poststed = "MOSS",
+                    landkode = "NO",
+                    land = "NORGE",
+                )
+        }
     }
 
     private fun vergemaal(

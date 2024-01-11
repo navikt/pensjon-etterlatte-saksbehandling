@@ -187,12 +187,12 @@ data class GeografiskTilknytning(
 }
 
 interface Verge {
-    fun navn(): String
+    fun navn(): String?
 }
 
 data class Vergemaal(val mottaker: BrevMottaker) : Verge {
-    override fun navn(): String {
-        return mottaker.navn!!
+    override fun navn(): String? {
+        return mottaker.navn
     }
 }
 
@@ -206,7 +206,7 @@ data class ForelderVerge(val foedselsnummer: Folkeregisteridentifikator, val nav
 data class BrevMottaker(
     val navn: String?,
     val foedselsnummer: MottakerFoedselsnummer?,
-    val adresse: MottakerAdresse,
+    val adresse: MottakerAdresse?,
     val adresseTypeIKilde: String? = null,
 )
 

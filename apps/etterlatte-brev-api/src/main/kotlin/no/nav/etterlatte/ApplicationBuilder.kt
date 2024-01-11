@@ -159,14 +159,13 @@ class ApplicationBuilder {
 
     private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevProsessTypeFactory, brevbakerService)
 
-    private val pdfGenerator = PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
+    private val pdfGenerator = PDFGenerator(db, brevdataFacade, brevDataMapper, adresseService, brevbakerService, migreringBrevDataService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
             vedtaksvurderingService,
             brevDataMapper,
-            migreringBrevDataService,
             brevoppretter,
             pdfGenerator,
         )

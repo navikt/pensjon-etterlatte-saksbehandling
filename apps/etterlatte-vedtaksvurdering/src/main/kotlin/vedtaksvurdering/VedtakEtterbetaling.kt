@@ -9,6 +9,8 @@ import java.time.YearMonth
 
 val WAY_INTO_THE_FUTURE: YearMonth = YearMonth.of(2999, Month.DECEMBER)
 
+val OMS_START_YTELSE: YearMonth = YearMonth.of(2024, Month.JANUARY)
+
 internal fun erVedtakMedEtterbetaling(
     vedtakSomBehandles: Vedtak,
     vedtaksvurderingRepository: VedtaksvurderingRepository,
@@ -20,7 +22,7 @@ internal fun erVedtakMedEtterbetaling(
 
             if (innhold.virkningstidspunkt < now) {
                 val ferdigstilteVedtak = vedtaksvurderingRepository.hentFerdigstilteVedtak(vedtakSomBehandles.soeker)
-                val tidligereVedtakTidslinje = Vedtakstidslinje(ferdigstilteVedtak).sammenstill(YearMonth.of(2024, Month.JANUARY))
+                val tidligereVedtakTidslinje = Vedtakstidslinje(ferdigstilteVedtak).sammenstill(OMS_START_YTELSE)
                 val tidligereUtbetalingsperioder =
                     tidligereVedtakTidslinje
                         .filter { it.innhold is VedtakBehandlingInnhold }

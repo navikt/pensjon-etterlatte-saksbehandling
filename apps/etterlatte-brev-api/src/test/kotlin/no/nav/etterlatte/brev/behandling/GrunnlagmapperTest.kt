@@ -114,7 +114,9 @@ class GrunnlagmapperTest {
         }
 
         verge.navn() shouldBe "Vera Verge"
-        verge.toMottaker() shouldBeEqual Mottaker.tom(Folkeregisteridentifikator.of(pdlVergeOekonomiskFnr))
+        verge.toMottaker() shouldBeEqual
+            Mottaker.tom(Folkeregisteridentifikator.of(pdlVergeOekonomiskFnr))
+                .copy(navn = "Vera Verge")
     }
 
     private fun vergemaal(

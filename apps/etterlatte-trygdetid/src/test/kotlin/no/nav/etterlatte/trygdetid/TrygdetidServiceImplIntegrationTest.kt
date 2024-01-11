@@ -85,7 +85,7 @@ internal class TrygdetidServiceImplIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val grunnlagTestData = GrunnlagTestData()
 
-        val nyDoedsdato = grunnlagTestData.avdoed.doedsdato!!.plusDays(6)
+        val nyDoedsdato = grunnlagTestData.avdoede.first().doedsdato!!.plusDays(6)
         coEvery {
             grunnlagKlient.hentGrunnlag(any(), any())
         } returns grunnlagMedNyDoedsdato(nyDoedsdato)
@@ -106,10 +106,10 @@ internal class TrygdetidServiceImplIntegrationTest {
         with(trygdetid?.opplysningerDifferanse!!) {
             differanse shouldBe true
             with(oppdaterteGrunnlagsopplysninger) {
-                toLocalDate(avdoedFoedselsdato) shouldBe grunnlagTestData.avdoed.foedselsdato
+                toLocalDate(avdoedFoedselsdato) shouldBe grunnlagTestData.avdoede.first().foedselsdato
                 toLocalDate(avdoedDoedsdato) shouldBe nyDoedsdato
-                toLocalDate(avdoedFylteSeksten) shouldBe grunnlagTestData.avdoed.foedselsdato!!.plusYears(16)
-                toLocalDate(avdoedFyllerSeksti) shouldBe grunnlagTestData.avdoed.foedselsdato!!.plusYears(66)
+                toLocalDate(avdoedFylteSeksten) shouldBe grunnlagTestData.avdoede.first().foedselsdato!!.plusYears(16)
+                toLocalDate(avdoedFyllerSeksti) shouldBe grunnlagTestData.avdoede.first().foedselsdato!!.plusYears(66)
             }
         }
     }
@@ -139,10 +139,10 @@ internal class TrygdetidServiceImplIntegrationTest {
         with(trygdetid?.opplysningerDifferanse!!) {
             differanse shouldBe false
             with(oppdaterteGrunnlagsopplysninger) {
-                toLocalDate(avdoedFoedselsdato) shouldBe grunnlagTestData.avdoed.foedselsdato
-                toLocalDate(avdoedDoedsdato) shouldBe grunnlagTestData.avdoed.doedsdato
-                toLocalDate(avdoedFylteSeksten) shouldBe grunnlagTestData.avdoed.foedselsdato!!.plusYears(16)
-                toLocalDate(avdoedFyllerSeksti) shouldBe grunnlagTestData.avdoed.foedselsdato!!.plusYears(66)
+                toLocalDate(avdoedFoedselsdato) shouldBe grunnlagTestData.avdoede.first().foedselsdato
+                toLocalDate(avdoedDoedsdato) shouldBe grunnlagTestData.avdoede.first().doedsdato
+                toLocalDate(avdoedFylteSeksten) shouldBe grunnlagTestData.avdoede.first().foedselsdato!!.plusYears(16)
+                toLocalDate(avdoedFyllerSeksti) shouldBe grunnlagTestData.avdoede.first().foedselsdato!!.plusYears(66)
             }
         }
     }
@@ -185,10 +185,10 @@ internal class TrygdetidServiceImplIntegrationTest {
     }
 
     private fun opplysningsgrunnlag(grunnlagTestData: GrunnlagTestData): List<Opplysningsgrunnlag> {
-        val foedselsdato = grunnlagTestData.avdoed.foedselsdato!!
-        val doedsdato = grunnlagTestData.avdoed.doedsdato!!
-        val seksten = grunnlagTestData.avdoed.foedselsdato!!.plusYears(16)
-        val sekstiseks = grunnlagTestData.avdoed.foedselsdato!!.plusYears(66)
+        val foedselsdato = grunnlagTestData.avdoede.first().foedselsdato!!
+        val doedsdato = grunnlagTestData.avdoede.first().doedsdato!!
+        val seksten = grunnlagTestData.avdoede.first().foedselsdato!!.plusYears(16)
+        val sekstiseks = grunnlagTestData.avdoede.first().foedselsdato!!.plusYears(66)
         return listOf(
             Opplysningsgrunnlag.ny(TrygdetidOpplysningType.FOEDSELSDATO, pdlKilde, foedselsdato),
             Opplysningsgrunnlag.ny(TrygdetidOpplysningType.DOEDSDATO, pdlKilde, doedsdato),

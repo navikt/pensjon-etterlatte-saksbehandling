@@ -513,7 +513,9 @@ class BrevDataMapper(
         generellBrevData.sak,
     )
 
-    data class BrevkodePar(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering)
+    data class BrevkodePar(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering) {
+        fun erInformasjonsbrev() = ferdigstilling == TOM_MAL_INFORMASJONSBREV
+    }
 
     private fun brukNyInnvilgelsesmal() = featureToggleService.isEnabled(BrevDataFeatureToggle.NyMalInnvilgelse, false)
 }

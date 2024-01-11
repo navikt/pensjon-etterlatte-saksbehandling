@@ -27,7 +27,9 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHO
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_OPPHOER_GENERELL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_INNHOLD
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
@@ -186,7 +188,7 @@ class BrevDataMapper(
                         }
 
                     VedtakType.TILBAKEKREVING -> BrevkodePar(TILBAKEKREVING_INNHOLD, TILBAKEKREVING_FERDIG)
-                    null -> BrevkodePar(EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV)
+                    null -> BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV)
                 }
             }
 
@@ -218,7 +220,7 @@ class BrevDataMapper(
                         }
 
                     VedtakType.TILBAKEKREVING -> BrevkodePar(TILBAKEKREVING_INNHOLD, TILBAKEKREVING_FERDIG)
-                    null -> BrevkodePar(EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV)
+                    null -> BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV)
                 }
             }
         }

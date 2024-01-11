@@ -1,7 +1,8 @@
 package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataMapper
@@ -106,7 +107,7 @@ class BrevService(
             avsenderRequest = {
                 AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = it.sak.enhet)
             },
-            brevKode = { _, _, _ -> BrevDataMapper.BrevkodePar(EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV) },
+            brevKode = { _, _, _ -> BrevDataMapper.BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV) },
             brevData = { request ->
                 ManueltBrevMedTittelData(
                     requireNotNull(db.hentBrevPayload(request.brev.id)).elements,

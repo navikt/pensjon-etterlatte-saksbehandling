@@ -31,6 +31,10 @@ spec:
         databases:
           - name: fordeling
             envVarPrefix: DB
+  resources:
+    requests:
+      cpu: 10m
+      memory: 320Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1

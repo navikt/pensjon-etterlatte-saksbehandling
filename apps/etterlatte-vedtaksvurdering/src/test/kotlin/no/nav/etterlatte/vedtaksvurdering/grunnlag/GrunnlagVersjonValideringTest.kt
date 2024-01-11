@@ -1,5 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering.grunnlag
 
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
@@ -7,11 +8,15 @@ import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.vedtaksvurdering.BeregningOgAvkorting
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 internal class GrunnlagVersjonValideringTest {
+    @AfterEach
+    fun reset() = clearAllMocks()
+
     @Test
     fun `Vilkaar eller beregning er null`() {
         assertDoesNotThrow {

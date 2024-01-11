@@ -15,6 +15,7 @@ import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 internal class Verifiserer(
     private val repository: PesysRepository,
@@ -42,7 +43,7 @@ internal class Verifiserer(
             if (soeker != null) {
                 feil.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
                 if (!request.erUnder18) {
-                    feil.addAll(sjekkAdresseOgUtlandsopphold(soeker))
+                    feil.addAll(sjekkAdresseOgUtlandsopphold(request.pesysId.id, soeker))
                     feil.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(request))
                     feil.addAll(sjekkOmForandringIForeldreforhold(request, soeker))
                 }
@@ -125,18 +126,28 @@ internal class Verifiserer(
         }
     }
 
-    private fun sjekkAdresseOgUtlandsopphold(person: PersonDTO): List<Verifiseringsfeil> {
+    private fun sjekkAdresseOgUtlandsopphold(
+        pesysId: Long,
+        person: PersonDTO,
+    ): List<Verifiseringsfeil> {
         val utlandSjekker = mutableListOf<Verifiseringsfeil>()
         val kontaktadresse = person.kontaktadresse ?: emptyList()
         val bostedsadresse = person.bostedsadresse ?: emptyList()
         val oppholdsadresse = person.oppholdsadresse ?: emptyList()
-        val adresser = kontaktadresse + bostedsadresse + oppholdsadresse
+        val adresseland = kontaktadresse + bostedsadresse + oppholdsadresse
 
-        if (adresser.any { it.verdi.land != "NOR" }) {
+        logger.info(
+            "Sak med pesysId=$pesysId har adresseland:" +
+                " kontaktadresse=${kontaktadresse.map { it.verdi.land }}," +
+                " bosted=${bostedsadresse.map { it.verdi.land }}," +
+                " opphold?${oppholdsadresse.map { it.verdi.land }}",
+        )
+
+        if (adresseland.mapNotNull { it.verdi.land }.any { it.uppercase() != "NOR" }) {
             utlandSjekker.add(SoekerBorUtland)
         }
 
-        if (adresser.isEmpty()) {
+        if (adresseland.none { it.verdi.gyldigTilOgMed.let { tilOgMed -> tilOgMed == null || tilOgMed > LocalDateTime.now() } }) {
             utlandSjekker.add(BrukerManglerAdresse)
         }
 

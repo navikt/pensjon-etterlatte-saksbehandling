@@ -2,23 +2,13 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.BrevProsessType.AUTOMATISK
-import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
-import no.nav.etterlatte.brev.model.BrevProsessType.REDIGERBAR
-import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
-import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -29,7 +19,6 @@ class VedtaksbrevService(
     private val db: BrevRepository,
     private val vedtaksvurderingService: VedtaksvurderingService,
     private val brevDataMapper: BrevDataMapper,
-    private val migreringBrevDataService: MigreringBrevDataService,
     private val brevoppretter: Brevoppretter,
     private val pdfGenerator: PDFGenerator,
 ) {
@@ -79,9 +68,6 @@ class VedtaksbrevService(
                     migreringBrevRequest?.erOmregningGjenny ?: false,
                 )
             },
-            brevData = { req ->
-                brevData(req.generellBrevData, req.automatiskMigreringRequest, req.brev, req.bruker, req.brevkodePar)
-            },
         ) { generellBrevData, brev, pdf ->
             lagrePdfHvisVedtakFattet(
                 brev.id,
@@ -91,30 +77,6 @@ class VedtaksbrevService(
                 automatiskMigreringRequest != null,
             )
         }
-
-    private suspend fun VedtaksbrevService.brevData(
-        generellBrevData: GenerellBrevData,
-        automatiskMigreringRequest: MigreringBrevRequest?,
-        brev: Brev,
-        brukerTokenInfo: BrukerTokenInfo,
-        brevkodePar: BrevDataMapper.BrevkodePar,
-    ) = when (
-        generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
-            automatiskMigreringRequest?.erOmregningGjenny ?: false
-    ) {
-        false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
-        true ->
-            OmregnetBPNyttRegelverkFerdig(
-                innhold = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }).innhold(),
-                data = (
-                    migreringBrevDataService.opprettMigreringBrevdata(
-                        generellBrevData,
-                        automatiskMigreringRequest,
-                        brukerTokenInfo,
-                    ) as OmregnetBPNyttRegelverk
-                ),
-            )
-    }
 
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
@@ -167,35 +129,6 @@ class VedtaksbrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevService.BrevPayload = brevoppretter.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo)
-
-    private suspend fun opprettBrevData(
-        brev: Brev,
-        generellBrevData: GenerellBrevData,
-        brukerTokenInfo: BrukerTokenInfo,
-        brevkode: BrevDataMapper.BrevkodePar,
-    ): BrevData =
-        when (brev.prosessType) {
-            REDIGERBAR ->
-                brevDataMapper.brevDataFerdigstilling(
-                    generellBrevData,
-                    brukerTokenInfo,
-                    InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
-                    brevkode,
-                )
-
-            AUTOMATISK -> brevDataMapper.brevData(generellBrevData, brukerTokenInfo)
-            MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
-        }
-
-    private fun hentLagretInnhold(brev: Brev) =
-        requireNotNull(
-            db.hentBrevPayload(brev.id),
-        ) { "Fant ikke payload for brev ${brev.id}" }.elements
-
-    private fun hentLagretInnholdVedlegg(brev: Brev) =
-        requireNotNull(db.hentBrevPayloadVedlegg(brev.id)) {
-            "Fant ikke payloadvedlegg for brev ${brev.id}"
-        }
 
     private fun lagrePdfHvisVedtakFattet(
         brevId: BrevID,

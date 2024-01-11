@@ -8,7 +8,6 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
-import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
@@ -108,12 +107,6 @@ class BrevService(
                 AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = it.sak.enhet)
             },
             brevKode = { _, _, _ -> BrevDataMapper.BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV) },
-            brevData = { request ->
-                ManueltBrevMedTittelData(
-                    requireNotNull(db.hentBrevPayload(request.brev.id)).elements,
-                    request.brev.tittel,
-                )
-            },
         )
 
     suspend fun ferdigstill(

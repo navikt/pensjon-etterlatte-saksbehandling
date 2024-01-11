@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
@@ -11,6 +12,7 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
+import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -67,21 +69,6 @@ class Brevoppretter(
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
 
-        val mottaker =
-            with(generellBrevData.personerISak) {
-                when (verge) {
-                    is Vergemaal ->
-                        verge.toMottaker()
-
-                    else -> {
-                        val mottakerFnr =
-                            innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name }
-                                ?: soeker.fnr.value
-                        adresseService.hentMottakerAdresse(mottakerFnr)
-                    }
-                }
-            }
-
         val prosessType =
             brevProsessTypeFactory.fra(
                 generellBrevData,
@@ -94,7 +81,7 @@ class Brevoppretter(
                 behandlingId = behandlingId,
                 prosessType = prosessType,
                 soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
-                mottaker = mottaker,
+                mottaker = finnMottaker(generellBrevData.personerISak),
                 opprettet = Tidspunkt.now(),
                 innhold =
                     opprettInnhold(
@@ -110,6 +97,20 @@ class Brevoppretter(
 
         return db.opprettBrev(nyttBrev)
     }
+
+    private suspend fun finnMottaker(personerISak: PersonerISak): Mottaker =
+        with(personerISak) {
+            when (verge) {
+                is Vergemaal -> verge.toMottaker()
+
+                else -> {
+                    val mottakerFnr =
+                        innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name }
+                            ?: soeker.fnr.value
+                    adresseService.hentMottakerAdresse(mottakerFnr)
+                }
+            }
+        }
 
     fun hentVedtaksbrev(behandlingId: UUID): Brev? {
         logger.info("Henter vedtaksbrev for behandling (id=$behandlingId)")

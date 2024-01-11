@@ -1,4 +1,4 @@
-package vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -12,9 +12,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.vedtaksvurdering.Vedtak
-import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
-import no.nav.etterlatte.vedtaksvurdering.Vedtakstidslinje
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested

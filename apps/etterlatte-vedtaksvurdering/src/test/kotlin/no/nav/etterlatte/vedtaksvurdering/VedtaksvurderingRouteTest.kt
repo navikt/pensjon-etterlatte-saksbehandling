@@ -1,4 +1,4 @@
-package vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -39,16 +39,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
-import no.nav.etterlatte.vedtaksvurdering.LoependeYtelse
-import no.nav.etterlatte.vedtaksvurdering.UnderkjennVedtakDto
-import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
-import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
-import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
-import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
-import no.nav.etterlatte.vedtaksvurdering.vedtaksvurderingRoute
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach

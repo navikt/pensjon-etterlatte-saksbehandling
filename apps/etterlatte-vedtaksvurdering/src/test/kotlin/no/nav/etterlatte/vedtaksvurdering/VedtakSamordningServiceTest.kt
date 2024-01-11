@@ -1,4 +1,4 @@
-package vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
@@ -16,8 +16,6 @@ import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.vedtaksvurdering.VedtakSamordningService
-import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import java.math.BigDecimal

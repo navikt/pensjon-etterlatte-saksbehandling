@@ -1,4 +1,4 @@
-package vedtaksvurdering
+package no.nav.etterlatte.vedtaksvurdering
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -14,10 +14,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.token.Saksbehandler
-import no.nav.etterlatte.vedtaksvurdering.OpprettVedtak
-import no.nav.etterlatte.vedtaksvurdering.Vedtak
-import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
-import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth

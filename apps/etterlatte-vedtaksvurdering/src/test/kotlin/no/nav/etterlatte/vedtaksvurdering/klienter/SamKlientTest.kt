@@ -1,12 +1,11 @@
-package vedtaksvurdering.klienter
+package no.nav.etterlatte.vedtaksvurdering.klienter
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType.UTBETALING
-import no.nav.etterlatte.vedtaksvurdering.klienter.tilSamordneRequest
+import no.nav.etterlatte.vedtaksvurdering.vedtak
 import org.junit.jupiter.api.Test
-import vedtaksvurdering.vedtak
 import java.math.BigDecimal
 import java.time.Month.APRIL
 import java.time.Month.FEBRUARY

@@ -13,7 +13,6 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import vedtaksvurdering.vedtak
 import java.math.BigDecimal
 import java.time.Clock
 import java.time.Instant

@@ -82,9 +82,10 @@ class PesysRepositoryTest {
     }
 
     @Test
-    fun `Lagre gyldige dry runs`() {
+    fun `Lagre gyldige dry runs flere ganger`() {
         val pesyssak = pesysSak(123L)
         repository.lagrePesyssak(pesyssak)
+        repository.lagreGyldigDryRun(pesyssak.tilMigreringsrequest())
         repository.lagreGyldigDryRun(pesyssak.tilMigreringsrequest())
     }
 

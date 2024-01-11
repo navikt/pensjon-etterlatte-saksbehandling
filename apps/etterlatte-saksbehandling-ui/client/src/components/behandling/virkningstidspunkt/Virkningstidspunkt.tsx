@@ -14,7 +14,7 @@ import { VurderingsboksWrapper } from '~components/vurderingsboks/Vurderingsboks
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { hentMinimumsVirkningstidspunkt } from '~components/behandling/virkningstidspunkt/utils'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
-import { UnControlledDatoVelger } from '~shared/components/datoVelger/UnControlledDatoVelger'
+import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import styled from 'styled-components'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
@@ -175,7 +175,7 @@ const Virkningstidspunkt = (props: {
                 <VurderingsTitle title={tittel} />
 
                 {erBosattUtland && (
-                  <UnControlledDatoVelger
+                  <DatoVelger
                     label={
                       <HelpTextWrapper>
                         Kravdato utland

@@ -11,7 +11,7 @@ import styled from 'styled-components'
 import { gyldigBehandlingRequest } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import { FlexRow } from '~shared/styled'
 import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
-import { UnControlledDatoVelger } from '~shared/components/datoVelger/UnControlledDatoVelger'
+import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import React from 'react'
 import { useAppDispatch } from '~store/Store'
 import { Spraak } from '~shared/types/Brev'
@@ -52,7 +52,7 @@ export default function OpprettNyBehandling() {
         <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
       </Select>
 
-      <UnControlledDatoVelger
+      <DatoVelger
         label="Mottatt dato"
         description="Datoen søknaden ble mottatt"
         value={nyBehandlingRequest?.mottattDato ? new Date(nyBehandlingRequest?.mottattDato) : undefined}

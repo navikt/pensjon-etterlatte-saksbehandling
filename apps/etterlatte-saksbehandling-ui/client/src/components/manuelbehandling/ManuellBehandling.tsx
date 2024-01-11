@@ -1,7 +1,7 @@
 import { Alert, Button, Checkbox, Select, TextField } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { SakType } from '~shared/types/sak'
-import { UnControlledDatoVelger } from '~shared/components/datoVelger/UnControlledDatoVelger'
+import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import styled from 'styled-components'
@@ -158,7 +158,7 @@ export default function ManuellBehandling() {
         <option value="en">Engelsk</option>
       </Select>
 
-      <UnControlledDatoVelger
+      <DatoVelger
         label="Mottatt dato"
         description="Datoen søknaden ble mottatt"
         value={nyBehandlingRequest?.mottattDato ? new Date(nyBehandlingRequest?.mottattDato) : undefined}

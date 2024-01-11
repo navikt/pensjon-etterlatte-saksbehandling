@@ -1,8 +1,6 @@
 import { Button, HStack, TextField } from '@navikt/ds-react'
-import {
-  UnControlledDatoVelger,
-  formatDateToLocaleDateOrEmptyString,
-} from '~shared/components/datoVelger/UnControlledDatoVelger'
+import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
+import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
 import React from 'react'
 import { XMarkIcon } from '@navikt/aksel-icons'
 import { MottattDokument } from '~shared/types/RevurderingInfo'
@@ -28,7 +26,7 @@ export default function DokumentRad({
         value={dokument.dokumenttype}
         onChange={(e) => oppdaterDokument('dokumenttype', e.target.value)}
       />
-      <UnControlledDatoVelger
+      <DatoVelger
         disabled={lesevisning}
         label={label ? label : 'Datovelger'}
         value={dokument.dato ? new Date(dokument.dato) : undefined}

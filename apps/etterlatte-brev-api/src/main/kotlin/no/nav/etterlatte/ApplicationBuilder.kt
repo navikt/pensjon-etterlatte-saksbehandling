@@ -39,6 +39,7 @@ import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapper
+import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
@@ -149,7 +150,9 @@ class ApplicationBuilder {
 
     private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade, migreringBrevDataService)
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper)
+    private val brevKodeMapper = BrevKodeMapper(featureToggleService)
+
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper, brevKodeMapper)
 
     private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
 
@@ -165,7 +168,7 @@ class ApplicationBuilder {
         VedtaksbrevService(
             db,
             vedtaksvurderingService,
-            brevDataMapper,
+            brevKodeMapper,
             brevoppretter,
             pdfGenerator,
         )

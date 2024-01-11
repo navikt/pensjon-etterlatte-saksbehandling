@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
-import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevDataMapper
@@ -15,18 +14,14 @@ import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
 import no.nav.etterlatte.brev.model.BrevProsessType.REDIGERBAR
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
-import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -243,29 +238,3 @@ data class MigreringBrevRequest(
     val utlandstilknytningType: UtlandstilknytningType?,
     val erOmregningGjenny: Boolean = false,
 )
-
-fun Vergemaal.toMottaker(): Mottaker {
-    if (mottaker.adresse != null) {
-        return Mottaker(
-            navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!,
-            foedselsnummer = mottaker.foedselsnummer?.let { Foedselsnummer(it.value) },
-            orgnummer = null,
-            adresse =
-                with(mottaker.adresse!!) {
-                    Adresse(
-                        adresseType,
-                        adresselinje1,
-                        adresselinje2,
-                        adresselinje3,
-                        postnummer,
-                        poststed,
-                        landkode,
-                        land,
-                    )
-                },
-        )
-    }
-
-    return Mottaker.tom(Folkeregisteridentifikator.of(mottaker.foedselsnummer!!.value))
-        .copy(navn = mottaker.navn ?: "N/A")
-}

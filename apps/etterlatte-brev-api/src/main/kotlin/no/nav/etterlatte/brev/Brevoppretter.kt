@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
+import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -170,3 +172,15 @@ private data class OpprettBrevRequest(
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
 )
+
+fun Vergemaal.toMottaker(): Mottaker {
+    return Mottaker(
+        navn = mottaker.navn!!,
+        foedselsnummer = mottaker.foedselsnummer?.let { Foedselsnummer(it.value) },
+        orgnummer = null,
+        adresse =
+            with(mottaker.adresse) {
+                Adresse(adresseType, adresselinje1, adresselinje2, adresselinje3, postnummer, poststed, landkode, land)
+            },
+    )
+}

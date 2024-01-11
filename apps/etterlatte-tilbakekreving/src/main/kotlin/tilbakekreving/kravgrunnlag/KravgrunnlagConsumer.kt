@@ -12,6 +12,7 @@ import no.nav.etterlatte.tilbakekreving.kravgrunnlag.KravgrunnlagJaxb.toDetaljer
 import no.nav.tilbakekreving.kravgrunnlag.detalj.v1.DetaljertKravgrunnlagDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import kotlin.system.exitProcess
 
 class KravgrunnlagConsumer(
     private val connectionFactory: EtterlatteJmsConnectionFactory,
@@ -64,7 +65,14 @@ class KravgrunnlagConsumer(
 
     private fun exceptionListener() =
         ExceptionListener {
-            logger.error("En feil oppstod med tilkoblingen mot tilbakekrevingskomponenten: ${it.message}", it)
+            logger.error(
+                "En feil oppstod med tilkoblingen mot tilbakekrevingskomponenten: ${it.message}. " +
+                    "Restarter appen for å sette opp tilkobling på nytt",
+                it,
+            )
+
+            // Trigger restart av appen for å sette opp tilkobling mot MQ på nytt
+            exitProcess(-1)
         }
 
     private fun Message.deliveryCount() = this.getLongProperty("JMSXDeliveryCount")

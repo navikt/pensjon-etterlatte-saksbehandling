@@ -70,8 +70,7 @@ class Brevoppretter(
                     soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
                     mottaker = finnMottaker(generellBrevData.personerISak),
                     opprettet = Tidspunkt.now(),
-                    innhold =
-                    innhold,
+                    innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
                 )
             return db.opprettBrev(nyttBrev)

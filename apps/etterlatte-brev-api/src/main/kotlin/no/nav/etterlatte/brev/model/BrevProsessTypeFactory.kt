@@ -39,7 +39,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
                 }
 
             VedtakType.TILBAKEKREVING -> BrevProsessType.REDIGERBAR
-            null -> BrevProsessType.REDIGERBAR
+            null -> BrevProsessType.MANUELL
         }
     }
 
@@ -80,7 +80,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
 
             VedtakType.AVSLAG -> BrevProsessType.REDIGERBAR
             VedtakType.TILBAKEKREVING -> BrevProsessType.REDIGERBAR
-            null -> BrevProsessType.REDIGERBAR
+            null -> BrevProsessType.MANUELL
         }
     }
 }

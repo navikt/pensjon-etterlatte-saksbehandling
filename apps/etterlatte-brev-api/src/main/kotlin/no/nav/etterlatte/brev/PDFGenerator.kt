@@ -107,7 +107,7 @@ class PDFGenerator(
         brukerTokenInfo: BrukerTokenInfo,
         brevkodePar: BrevkodePar,
     ): BrevData {
-        if (brevkodePar.ferdigstilling == EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV) {
+        if (brevkodePar.erInformasjonsbrev()) {
             return ManueltBrevMedTittelData(
                 requireNotNull(db.hentBrevPayload(brev.id)).elements,
                 brev.tittel,

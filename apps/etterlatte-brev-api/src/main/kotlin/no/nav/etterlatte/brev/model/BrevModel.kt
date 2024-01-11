@@ -73,7 +73,7 @@ data class Mottaker(
 
         fun tom(fnr: Folkeregisteridentifikator) =
             Mottaker(
-                navn = "",
+                navn = "N/A",
                 foedselsnummer = Foedselsnummer(fnr.value),
                 adresse =
                     Adresse(

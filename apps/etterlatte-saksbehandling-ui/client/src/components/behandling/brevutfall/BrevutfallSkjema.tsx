@@ -8,7 +8,7 @@ import { lagreBrevutfallApi } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import { Aldersgruppe, BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
-import { isAfter } from 'date-fns'
+import { add, formatISO, lastDayOfMonth, startOfDay, startOfMonth } from 'date-fns'
 import { updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 
@@ -24,6 +24,7 @@ export const BrevutfallSkjema = (props: {
   setBrevutfallOgEtterbetaling: (brevutfall: BrevutfallOgEtterbetaling) => void
   setVisSkjema: (visSkjema: boolean) => void
   resetBrevutfallvalidering: () => void
+  onAvbryt: () => void
 }) => {
   const {
     behandling,
@@ -31,13 +32,14 @@ export const BrevutfallSkjema = (props: {
     setBrevutfallOgEtterbetaling,
     setVisSkjema,
     resetBrevutfallvalidering,
+    onAvbryt,
   } = props
   const [harEtterbetaling, setHarEtterbetaling] = useState<HarEtterbetaling>(
     brevutfallOgEtterbetaling.etterbetaling === undefined
       ? HarEtterbetaling.IKKE_VALGT
       : brevutfallOgEtterbetaling.etterbetaling
-        ? HarEtterbetaling.JA
-        : HarEtterbetaling.NEI
+      ? HarEtterbetaling.JA
+      : HarEtterbetaling.NEI
   )
   const [lagreBrevutfallResultat, lagreBrevutfallRequest, lagreBrevutfallReset] = useApiCall(lagreBrevutfallApi)
   const [valideringsfeil, setValideringsfeil] = useState<Array<string>>([])
@@ -69,25 +71,30 @@ export const BrevutfallSkjema = (props: {
     if (brevutfallOgEtterbetaling.etterbetaling || harEtterbetaling === HarEtterbetaling.JA) {
       const fom = brevutfallOgEtterbetaling.etterbetaling?.datoFom
       const tom = brevutfallOgEtterbetaling.etterbetaling?.datoTom
+
       if (!fom || !tom) {
         feilmeldinger.push('Både fra- og til-måned for etterbetaling må fylles ut.')
         return feilmeldinger
       }
 
-      const fra = new Date(fom)
-      const til = new Date(tom)
+      const fra = startOfDay(new Date(fom))
+      const til = startOfDay(new Date(tom))
+
       if (fra > til) {
         feilmeldinger.push('Fra-måned kan ikke være etter til-måned.')
         return feilmeldinger
       }
 
       const virkningstidspunkt = behandling.virkningstidspunkt?.dato
-      if (virkningstidspunkt && fra < new Date(virkningstidspunkt)) {
+      if (virkningstidspunkt && fra < startOfDay(new Date(virkningstidspunkt))) {
         feilmeldinger.push('Fra-måned kan ikke være før virkningstidspunkt.')
       }
 
-      if (isAfter(new Date(), til)) {
-        feilmeldinger.push('Til-måned kan ikke være i framtida.')
+      // Til og med kan ikke settes lenger frem enn inneværende måned. Inneværende måned vil måtte etterbetales
+      // dersom utbetaling allerede er kjørt.
+      const sisteDagIMnd = startOfDay(lastDayOfMonth(new Date()))
+      if (til > sisteDagIMnd) {
+        feilmeldinger.push('Til-måned kan ikke være etter inneværende måned.')
       }
     }
     if (harEtterbetaling === undefined) {
@@ -134,34 +141,38 @@ export const BrevutfallSkjema = (props: {
         {harEtterbetaling == HarEtterbetaling.JA && (
           <HStack gap="4">
             <MaanedVelger
+              fromDate={new Date(behandling.virkningstidspunkt?.dato ?? new Date())}
+              toDate={new Date()}
               value={
                 brevutfallOgEtterbetaling.etterbetaling?.datoFom
                   ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
                   : undefined
               }
-              onChange={(e) =>
+              onChange={(date) =>
                 setBrevutfallOgEtterbetaling({
                   ...brevutfallOgEtterbetaling,
                   etterbetaling: {
                     ...brevutfallOgEtterbetaling.etterbetaling,
-                    datoFom: e ? e.toISOString() : undefined,
+                    datoFom: date ? formatISO(startOfMonth(date), { representation: 'date' }) : undefined,
                   },
                 })
               }
               label="Fra og med"
             />
             <MaanedVelger
+              fromDate={new Date(behandling.virkningstidspunkt?.dato ?? new Date())}
+              toDate={add(new Date(), { months: 1 })}
               value={
                 brevutfallOgEtterbetaling.etterbetaling?.datoTom
                   ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoTom)
                   : undefined
               }
-              onChange={(e) =>
+              onChange={(date) =>
                 setBrevutfallOgEtterbetaling({
                   ...brevutfallOgEtterbetaling,
                   etterbetaling: {
                     ...brevutfallOgEtterbetaling.etterbetaling,
-                    datoTom: e ? e.toISOString() : undefined,
+                    datoTom: date ? formatISO(lastDayOfMonth(date), { representation: 'date' }) : undefined,
                   },
                 })
               }
@@ -215,6 +226,7 @@ export const BrevutfallSkjema = (props: {
           variant="secondary"
           size="small"
           onClick={() => {
+            onAvbryt()
             setVisSkjema(false)
           }}
         >

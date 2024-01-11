@@ -32,6 +32,7 @@ import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -352,13 +353,27 @@ data class MigreringBrevRequest(
 )
 
 fun Vergemaal.toMottaker(): Mottaker {
-    return Mottaker(
-        navn = mottaker.navn!!,
-        foedselsnummer = mottaker.foedselsnummer?.let { Foedselsnummer(it.value) },
-        orgnummer = null,
-        adresse =
-            with(mottaker.adresse) {
-                Adresse(adresseType, adresselinje1, adresselinje2, adresselinje3, postnummer, poststed, landkode, land)
-            },
-    )
+    if (mottaker.adresse != null) {
+        return Mottaker(
+            navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!,
+            foedselsnummer = mottaker.foedselsnummer?.let { Foedselsnummer(it.value) },
+            orgnummer = null,
+            adresse =
+                with(mottaker.adresse!!) {
+                    Adresse(
+                        adresseType,
+                        adresselinje1,
+                        adresselinje2,
+                        adresselinje3,
+                        postnummer,
+                        poststed,
+                        landkode,
+                        land,
+                    )
+                },
+        )
+    }
+
+    return Mottaker.tom(Folkeregisteridentifikator.of(mottaker.foedselsnummer!!.value))
+        .copy(navn = mottaker.navn ?: "N/A")
 }

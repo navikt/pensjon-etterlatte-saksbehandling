@@ -15,6 +15,7 @@ import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 internal class Verifiserer(
     private val repository: PesysRepository,
@@ -42,7 +43,7 @@ internal class Verifiserer(
             if (soeker != null) {
                 feil.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
                 if (!request.erUnder18) {
-                    feil.addAll(sjekkOmSoekerBorEllerHarBoddUtland(soeker))
+                    feil.addAll(sjekkAdresseOgUtlandsopphold(request.pesysId.id, soeker))
                     feil.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(request))
                     feil.addAll(sjekkOmForandringIForeldreforhold(request, soeker))
                 }
@@ -125,21 +126,38 @@ internal class Verifiserer(
         }
     }
 
-    private fun sjekkOmSoekerBorEllerHarBoddUtland(person: PersonDTO): List<Verifiseringsfeil> {
+    private fun sjekkAdresseOgUtlandsopphold(
+        pesysId: Long,
+        person: PersonDTO,
+    ): List<Verifiseringsfeil> {
+        val utlandSjekker = mutableListOf<Verifiseringsfeil>()
         val kontaktadresse = person.kontaktadresse ?: emptyList()
         val bostedsadresse = person.bostedsadresse ?: emptyList()
-        (kontaktadresse + bostedsadresse).forEach {
-            if (it.verdi.land != "NOR") {
-                return listOf(SoekerBorUtland)
-            }
+        val oppholdsadresse = person.oppholdsadresse ?: emptyList()
+        val adresseland = kontaktadresse + bostedsadresse + oppholdsadresse
+
+        logger.info(
+            "Sak med pesysId=$pesysId har adresseland:" +
+                " kontaktadresse=${kontaktadresse.map { it.verdi.land }}," +
+                " bosted=${bostedsadresse.map { it.verdi.land }}," +
+                " opphold?${oppholdsadresse.map { it.verdi.land }}",
+        )
+
+        if (adresseland.mapNotNull { it.verdi.land }.any { it.uppercase() != "NOR" }) {
+            utlandSjekker.add(SoekerBorUtland)
+        }
+
+        if (adresseland.none { it.verdi.gyldigTilOgMed.let { tilOgMed -> tilOgMed == null || tilOgMed > LocalDateTime.now() } }) {
+            utlandSjekker.add(BrukerManglerAdresse)
         }
 
         val harFlyttetFraNorge = person.utland?.verdi?.utflyttingFraNorge?.isNotEmpty() ?: false
         val harFlyttetTilNorge = person.utland?.verdi?.innflyttingTilNorge?.isNotEmpty() ?: false
         if (harFlyttetTilNorge || harFlyttetFraNorge) {
-            return listOf(SoekerHarBoddUtland)
+            utlandSjekker.add(SoekerHarBoddUtland)
         }
-        return emptyList()
+
+        return utlandSjekker
     }
 
     private fun sjekkOmSoekerHarFlereAvoedeForeldre(request: MigreringRequest): List<Verifiseringsfeil> {
@@ -217,22 +235,27 @@ data object SoekerErDoed : Verifiseringsfeil() {
         get() = "Søker er død"
 }
 
-object SoekerBorUtland : Verifiseringsfeil() {
+data object SoekerBorUtland : Verifiseringsfeil() {
     override val message: String
         get() = "Søker bor utlands"
 }
 
-object SoekerHarBoddUtland : Verifiseringsfeil() {
+data object SoekerHarBoddUtland : Verifiseringsfeil() {
     override val message: String
         get() = "Søker har bodd utlands"
 }
 
-object SoekerHarFlereAvdoede : Verifiseringsfeil() {
+data object SoekerHarFlereAvdoede : Verifiseringsfeil() {
     override val message: String
         get() = "Søker har flere avøde"
 }
 
-object ForeldreForholdHarEndretSeg : Verifiseringsfeil() {
+data object ForeldreForholdHarEndretSeg : Verifiseringsfeil() {
     override val message: String
         get() = "Søker har oppdatert foreldreforhold"
+}
+
+data object BrukerManglerAdresse : Verifiseringsfeil() {
+    override val message: String
+        get() = "Bruker mangler adresse i PDL"
 }

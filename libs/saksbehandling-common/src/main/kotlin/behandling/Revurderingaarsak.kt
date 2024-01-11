@@ -85,7 +85,7 @@ enum class Revurderingaarsak(
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
-    ALDERSOVERGANG(SAKTYPE_BP, KunIDev, OpphoerUtenBrev),
+    ALDERSOVERGANG(SAKTYPE_BP, DevOgProd, OpphoerUtenBrev),
     ;
 
     fun kanBrukesIMiljo(): Boolean =

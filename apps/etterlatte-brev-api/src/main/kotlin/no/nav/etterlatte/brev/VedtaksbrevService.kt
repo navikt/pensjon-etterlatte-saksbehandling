@@ -381,7 +381,7 @@ data class MigreringBrevRequest(
 fun Vergemaal.toMottaker(): Mottaker {
     if (mottaker.adresse != null) {
         return Mottaker(
-            navn = mottaker.navn ?: "N/A",
+            navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!,
             foedselsnummer = mottaker.foedselsnummer?.let { Foedselsnummer(it.value) },
             orgnummer = null,
             adresse =

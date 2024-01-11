@@ -277,26 +277,26 @@ fun finnAdressebeskyttetPerson(personer: List<Person>): Person? {
 }
 
 fun finnHoyesteGradering(
-    gradering: AdressebeskyttelseGradering,
+    graderingEn: AdressebeskyttelseGradering,
     graderingTo: AdressebeskyttelseGradering,
 ): AdressebeskyttelseGradering {
-    if (gradering in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)) {
-        return gradering
+    if (graderingEn in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)) {
+        return graderingEn
     }
 
     if (graderingTo in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)) {
-        return gradering
+        return graderingTo
     }
 
-    if (gradering == AdressebeskyttelseGradering.FORTROLIG) {
-        return gradering
+    if (graderingEn == AdressebeskyttelseGradering.FORTROLIG) {
+        return graderingEn
     }
 
     if (graderingTo == AdressebeskyttelseGradering.FORTROLIG) {
-        return gradering
+        return graderingTo
     }
 
-    return gradering
+    return graderingEn
 }
 
 fun List<AdressebeskyttelseGradering?>.hentPrioritertGradering() = this.filterNotNull().minOrNull() ?: AdressebeskyttelseGradering.UGRADERT

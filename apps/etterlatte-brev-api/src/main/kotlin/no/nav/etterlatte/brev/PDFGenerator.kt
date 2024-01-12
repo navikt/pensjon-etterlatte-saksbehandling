@@ -105,14 +105,8 @@ class PDFGenerator(
         brev: Brev,
         brukerTokenInfo: BrukerTokenInfo,
         brevkodePar: BrevkodePar,
-    ): BrevData {
-        if (brevkodePar.erInformasjonsbrev()) {
-            return ManueltBrevMedTittelData(
-                requireNotNull(db.hentBrevPayload(brev.id)).elements,
-                brev.tittel,
-            )
-        }
-        return when (generellBrevData.erMigrering() || automatiskMigreringRequest?.erOmregningGjenny ?: false) {
+    ): BrevData =
+        when (generellBrevData.erMigrering() || automatiskMigreringRequest?.erOmregningGjenny ?: false) {
             false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
             true ->
                 OmregnetBPNyttRegelverkFerdig(
@@ -130,15 +124,20 @@ class PDFGenerator(
                     ),
                 )
         }
-    }
 
     private suspend fun opprettBrevData(
         brev: Brev,
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
         brevkode: BrevkodePar,
-    ): BrevData =
-        when (brev.prosessType) {
+    ): BrevData {
+        if (brevkode.erInformasjonsbrev()) {
+            return ManueltBrevMedTittelData(
+                requireNotNull(db.hentBrevPayload(brev.id)).elements,
+                brev.tittel,
+            )
+        }
+        return when (brev.prosessType) {
             BrevProsessType.REDIGERBAR ->
                 brevDataMapper.brevDataFerdigstilling(
                     generellBrevData,
@@ -150,6 +149,7 @@ class PDFGenerator(
             BrevProsessType.AUTOMATISK -> brevDataMapper.brevData(generellBrevData, brukerTokenInfo)
             BrevProsessType.MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }
+    }
 
     private fun hentLagretInnhold(brev: Brev) =
         requireNotNull(

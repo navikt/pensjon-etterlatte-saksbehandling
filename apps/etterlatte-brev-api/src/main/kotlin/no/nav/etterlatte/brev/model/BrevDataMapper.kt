@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_ENDRING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
@@ -254,8 +255,12 @@ class BrevDataMapper(
         brukerTokenInfo: BrukerTokenInfo,
         innholdMedVedlegg: InnholdMedVedlegg,
         kode: BrevkodePar,
+        tittel: String? = null,
     ): BrevData {
         return when (kode.ferdigstilling) {
+            TOM_MAL_INFORMASJONSBREV -> {
+                ManueltBrevMedTittelData(innholdMedVedlegg.innhold(), tittel)
+            }
             BARNEPENSJON_REVURDERING_ENDRING -> {
                 coroutineScope {
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)

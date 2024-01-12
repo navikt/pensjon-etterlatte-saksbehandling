@@ -16,7 +16,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodePar
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
-import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
@@ -131,12 +130,6 @@ class PDFGenerator(
         brukerTokenInfo: BrukerTokenInfo,
         brevkode: BrevkodePar,
     ): BrevData {
-        if (brevkode.erInformasjonsbrev()) {
-            return ManueltBrevMedTittelData(
-                requireNotNull(db.hentBrevPayload(brev.id)).elements,
-                brev.tittel,
-            )
-        }
         return when (brev.prosessType) {
             BrevProsessType.REDIGERBAR ->
                 brevDataMapper.brevDataFerdigstilling(
@@ -144,6 +137,7 @@ class PDFGenerator(
                     brukerTokenInfo,
                     InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
                     brevkode,
+                    brev.tittel,
                 )
 
             BrevProsessType.AUTOMATISK -> brevDataMapper.brevData(generellBrevData, brukerTokenInfo)

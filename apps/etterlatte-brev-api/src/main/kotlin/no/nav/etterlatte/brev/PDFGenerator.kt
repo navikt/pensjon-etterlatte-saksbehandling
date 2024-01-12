@@ -129,8 +129,8 @@ class PDFGenerator(
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
         brevkode: BrevkodePar,
-    ): BrevData {
-        return when (brev.prosessType) {
+    ): BrevData =
+        when (brev.prosessType) {
             BrevProsessType.REDIGERBAR ->
                 brevDataMapper.brevDataFerdigstilling(
                     generellBrevData,
@@ -143,7 +143,6 @@ class PDFGenerator(
             BrevProsessType.AUTOMATISK -> brevDataMapper.brevData(generellBrevData, brukerTokenInfo)
             BrevProsessType.MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
         }
-    }
 
     private fun hentLagretInnhold(brev: Brev) =
         requireNotNull(

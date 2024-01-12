@@ -36,7 +36,7 @@ const Virkningstidspunkt = (props: {
   const dispatch = useAppDispatch()
   const [, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
 
-  const [vurdert, setVurdert] = useState(behandling.virkningstidspunkt !== null)
+  const [vurdert, setVurdert] = useState<boolean>(behandling.virkningstidspunkt !== null)
   const [virkningstidspunkt, setVirkningstidspunkt] = useState<Date | null>(
     behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null
   )
@@ -47,12 +47,9 @@ const Virkningstidspunkt = (props: {
 
   const [errorTekst, setErrorTekst] = useState<string>('')
 
-  const avdoedDoedsdato = avdoede?.opplysning?.doedsdato
-  const tittel = 'Hva er virkningstidspunkt for behandlingen?'
-
   const { monthpickerProps, inputProps } = useMonthpicker({
     fromDate: hentMinimumsVirkningstidspunkt(
-      avdoedDoedsdato,
+      avdoede?.opplysning?.doedsdato,
       erBosattUtland ? subYears(new Date(), 20) : new Date(behandling.soeknadMottattDato)
     ),
     toDate: addMonths(new Date(), 1),
@@ -127,7 +124,7 @@ const Virkningstidspunkt = (props: {
             <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
           ) : (
             <VurderingsboksWrapper
-              tittel={tittel}
+              tittel="Hva er virkningstidspunkt for behandlingen?"
               subtittelKomponent={
                 <VStack gap="4">
                   {erBosattUtland && (
@@ -172,7 +169,7 @@ const Virkningstidspunkt = (props: {
               defaultRediger={behandling.virkningstidspunkt === null}
             >
               <VStack gap="4">
-                <VurderingsTitle title={tittel} />
+                <VurderingsTitle title="Hva er virkningstidspunkt for behandlingen?" />
 
                 {erBosattUtland && (
                   <DatoVelger

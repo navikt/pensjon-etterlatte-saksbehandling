@@ -6,13 +6,13 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.Pesyssak
 import no.nav.etterlatte.migrering.grunnlag.GrunnlagKlient
-import no.nav.etterlatte.migrering.verifisering.PDLKlient
+import no.nav.etterlatte.migrering.verifisering.PdlTjenesterKlient
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import org.slf4j.LoggerFactory
 import kotlin.concurrent.thread
 
 internal class SjekkVergeadresserJobb(
-    private val pdlKlient: PDLKlient,
+    private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val repository: PesysRepository,
     private val vergeRepository: VergeRepository,
     private val grunnlagKlient: GrunnlagKlient,
@@ -51,7 +51,7 @@ internal class SjekkVergeadresserJobb(
     }
 
     private fun sjekkPDL(sak: Pesyssak): String {
-        val resultatFraPDL = pdlKlient.hentPerson(PersonRolle.BARN, sak.soeker)
+        val resultatFraPDL = pdlTjenesterKlient.hentPerson(PersonRolle.BARN, sak.soeker)
         val vergemaalFraPDL = resultatFraPDL.vergemaalEllerFremtidsfullmakt ?: listOf()
 
         if (vergemaalFraPDL.size != 1) {
@@ -75,7 +75,7 @@ internal class SjekkVergeadresserJobb(
             return "".toJson()
         }
 
-        val svarFraPDL = pdlKlient.hentPerson(PersonRolle.TILKNYTTET_BARN, vergeFraPDL)
+        val svarFraPDL = pdlTjenesterKlient.hentPerson(PersonRolle.TILKNYTTET_BARN, vergeFraPDL)
         return svarFraPDL.toJson()
     }
 

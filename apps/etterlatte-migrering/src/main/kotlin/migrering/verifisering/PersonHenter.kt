@@ -9,7 +9,7 @@ import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import org.slf4j.LoggerFactory
 
 internal class PersonHenter(
-    private val pdlKlient: PDLKlient,
+    private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val featureToggleService: FeatureToggleService,
 ) {
     private val sikkerlogg = sikkerlogger()
@@ -20,7 +20,7 @@ internal class PersonHenter(
         folkeregisteridentifikator: Folkeregisteridentifikator,
     ): Result<PersonDTO?> =
         try {
-            Result.success(pdlKlient.hentPerson(rolle, folkeregisteridentifikator))
+            Result.success(pdlTjenesterKlient.hentPerson(rolle, folkeregisteridentifikator))
         } catch (e: Exception) {
             sikkerlogg.warn("Fant ikke person $folkeregisteridentifikator med rolle $rolle i PDL", e)
             if (featureToggleService.isEnabled(MigreringFeatureToggle.VerifiserFoerMigrering, true)) {

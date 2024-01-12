@@ -3,10 +3,13 @@ package no.nav.etterlatte.libs.testdata.grunnlag
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.AVDOEDESBARN
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.PERSONGALLERI_V1
 import no.nav.etterlatte.libs.common.person.AvdoedesBarn
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.pdl.personTestData
@@ -17,6 +20,7 @@ data class GrunnlagTestData(
     val opplysningsmapSoekerOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
     val opplysningsmapSoeskenOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
     val opplysningsmapAvdoedOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
+    val opplysningsmapAvdoedeOverrides: List<Map<Opplysningstype, Opplysning<JsonNode>>> = emptyList(),
     val opplysningsmapGjenlevendeOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
     val opplysningsmapHalvsoeskenOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
     val opplysningsmapSakOverrides: Map<Opplysningstype, Opplysning<JsonNode>> = emptyMap(),
@@ -29,6 +33,20 @@ data class GrunnlagTestData(
         get() = personTestData(halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides)
     val gjenlevende
         get() = personTestData(gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides)
+
+    val sak: Map<Opplysningstype, Opplysning<JsonNode>> =
+        opplysningsmapSakOverrides +
+            mapOf(
+                PERSONGALLERI_V1 to
+                    Opplysning.Konstant.create(
+                        lagOpplysning(
+                            opplysningsType = PERSONGALLERI_V1,
+                            kilde = Grunnlagsopplysning.automatiskSaksbehandler,
+                            opplysning = hentPersonGalleri().toJsonNode(),
+                            periode = null,
+                        ),
+                    ),
+            )
 
     private val avdoedesBarnOverrides
         get() =
@@ -70,20 +88,25 @@ data class GrunnlagTestData(
                     ),
             )
 
-    val avdoed
-        get() = personTestData(avdoedTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdoedOverrides)
+    val avdoede
+        get() =
+            when (opplysningsmapAvdoedeOverrides.isEmpty()) {
+                true -> listOf(personTestData(avdoedTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdoedOverrides))
+                false -> opplysningsmapAvdoedeOverrides.map { personTestData(it) }
+            }
 
     fun hentOpplysningsgrunnlag(): Grunnlag =
         Grunnlag(
             soeker = soekerTestopplysningerMap + opplysningsmapSoekerOverrides,
             familie =
-                listOf(
+                listOfNotNull(
                     soeskenTestopplysningerMap + opplysningsmapSoeskenOverrides,
-                    avdoedTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdoedOverrides,
+                    (avdoedTestopplysningerMap + avdoedesBarnOverrides + opplysningsmapAvdoedOverrides)
+                        .takeIf { opplysningsmapAvdoedeOverrides.isEmpty() },
                     gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
                     halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides,
-                ),
-            sak = opplysningsmapSakOverrides,
+                ) + opplysningsmapAvdoedeOverrides,
+            sak = sak,
             metadata = Metadata(1, 15),
         )
 
@@ -91,13 +114,14 @@ data class GrunnlagTestData(
         Grunnlag(
             soeker = soekerTestopplysningerMap + opplysningsmapSoekerOverrides,
             familie =
-                listOf(
+                listOfNotNull(
                     soeskenTestopplysningerMap + opplysningsmapSoeskenOverrides,
-                    avdoedTestopplysningerMap + avdoedesBarnMedEnDoed + opplysningsmapAvdoedOverrides,
+                    (avdoedTestopplysningerMap + avdoedesBarnMedEnDoed + opplysningsmapAvdoedOverrides)
+                        .takeIf { opplysningsmapAvdoedeOverrides.isEmpty() },
                     gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
                     halvsoeskenTestopplysningerMap + opplysningsmapHalvsoeskenOverrides,
-                ),
-            sak = opplysningsmapSakOverrides,
+                ) + opplysningsmapAvdoedeOverrides,
+            sak = sak,
             metadata = Metadata(1, 15),
         )
 
@@ -106,7 +130,7 @@ data class GrunnlagTestData(
             soeker = soeker.foedselsnummer.value,
             innsender = gjenlevende.foedselsnummer.value,
             soesken = listOf(soesken.foedselsnummer.value, halvsoesken.foedselsnummer.value),
-            avdoed = listOf(avdoed.foedselsnummer.value),
+            avdoed = avdoede.map { it.foedselsnummer.value },
             gjenlevende = listOf(gjenlevende.foedselsnummer.value),
         )
 
@@ -117,7 +141,7 @@ data class GrunnlagTestData(
                 listOf(
                     gjenlevendeTestopplysningerMap + opplysningsmapGjenlevendeOverrides,
                 ),
-            sak = opplysningsmapSakOverrides,
+            sak = sak,
             metadata = Metadata(1, 1),
         )
 }

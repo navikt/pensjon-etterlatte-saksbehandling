@@ -48,7 +48,7 @@ fun behandling(
 fun trygdetid(
     behandlingId: UUID = randomUUID(),
     sakId: Long = 1,
-    ident: String = GrunnlagTestData().avdoed.foedselsnummer.value,
+    ident: String = GrunnlagTestData().avdoede.first().foedselsnummer.value,
     beregnetTrygdetid: DetaljertBeregnetTrygdetid? = null,
     trygdetidGrunnlag: List<TrygdetidGrunnlag> = emptyList(),
     opplysninger: List<Opplysningsgrunnlag> = standardOpplysningsgrunnlag(),

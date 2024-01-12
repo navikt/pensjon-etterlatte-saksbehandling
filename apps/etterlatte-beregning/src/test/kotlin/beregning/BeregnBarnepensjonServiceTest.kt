@@ -248,7 +248,11 @@ internal class BeregnBarnepensjonServiceTest {
                 any(),
                 any(),
             )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER))
+        } returns
+            barnepensjonBeregningsGrunnlag(
+                behandling.id,
+                listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER),
+            )
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
 
         runBlocking {
@@ -619,22 +623,17 @@ internal class BeregnBarnepensjonServiceTest {
     }
 
     private fun grunnlagMedEkstraAvdoedForelder(doedsdato: LocalDate): Grunnlag {
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val grunnlagEnAvdoed = GrunnlagTestData().hentOpplysningsgrunnlag()
         val nyligAvdoedFoedselsnummer = AVDOED2_FOEDSELSNUMMER
-        val nyligAvdoed: List<Grunnlagsdata<JsonNode>> =
-            listOf(
-                mapOf(
-                    Opplysningstype.DOEDSDATO to konstantOpplysning(doedsdato),
-                    Opplysningstype.PERSONROLLE to konstantOpplysning(AVDOED),
-                    Opplysningstype.FOEDSELSNUMMER to konstantOpplysning(nyligAvdoedFoedselsnummer),
-                ),
+        val nyligAvdoed: Grunnlagsdata<JsonNode> =
+            mapOf(
+                Opplysningstype.DOEDSDATO to konstantOpplysning(doedsdato),
+                Opplysningstype.PERSONROLLE to konstantOpplysning(AVDOED),
+                Opplysningstype.FOEDSELSNUMMER to konstantOpplysning(nyligAvdoedFoedselsnummer),
             )
-        return Grunnlag(
-            grunnlag.soeker,
-            grunnlag.familie + nyligAvdoed,
-            grunnlag.sak,
-            grunnlag.metadata,
-        )
+        return GrunnlagTestData(
+            opplysningsmapAvdoedeOverrides = listOf(nyligAvdoed) + grunnlagEnAvdoed.hentAvdoede(),
+        ).hentOpplysningsgrunnlag()
     }
 
     private fun <T : Any> konstantOpplysning(a: T): Opplysning.Konstant<JsonNode> {

@@ -1,5 +1,5 @@
 import { Button, Heading, Modal } from '@navikt/ds-react'
-import { FilePdfIcon } from '@navikt/aksel-icons'
+import { FilePdfFillIcon } from '@navikt/aksel-icons'
 import { useState } from 'react'
 import { IBrev } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
@@ -9,7 +9,7 @@ export default function BrevModal({ brev }: { brev: IBrev }) {
 
   return (
     <>
-      <Button variant="secondary" title="Vis PDF" icon={<FilePdfIcon />} onClick={() => setOpen(true)} />
+      <Button variant="secondary" title="Vis PDF" icon={<FilePdfFillIcon />} onClick={() => setOpen(true)} />
 
       <Modal open={open} onClose={() => setOpen(false)} style={{ maxWidth: '100%' }} closeOnBackdropClick={true}>
         <Modal.Header>

@@ -149,6 +149,20 @@ class BrevService(
         bruker: BrukerTokenInfo,
     ) = journalfoerBrevService.journalfoer(id, bruker)
 
+    fun slett(
+        id: BrevID,
+        bruker: BrukerTokenInfo,
+    ) {
+        logger.info("Sjekker om brev med id=$id kan slettes")
+
+        val brev = db.hentBrev(id)
+        check(brev.kanEndres()) { "Brev med id=$id kan ikke endres, siden det har status ${brev.status}" }
+        check(brev.behandlingId == null) { "Brev med id=$id er et vedtaksbrev og kan ikke slettes" }
+
+        val result = db.settBrevSlettet(id, bruker)
+        logger.info("Brev med id=$id slettet=$result")
+    }
+
     private fun sjekkOmBrevKanEndres(brevID: BrevID) {
         val brev = db.hentBrev(brevID)
         if (!brev.kanEndres()) {

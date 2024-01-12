@@ -170,6 +170,4 @@ class BrevKodeMapper(private val featureToggleService: FeatureToggleService) {
     private fun brukNyInnvilgelsesmal() = featureToggleService.isEnabled(BrevDataFeatureToggle.NyMalInnvilgelse, false)
 }
 
-data class BrevkodePar(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering) {
-    fun erInformasjonsbrev() = ferdigstilling == EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
-}
+data class BrevkodePar(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering)

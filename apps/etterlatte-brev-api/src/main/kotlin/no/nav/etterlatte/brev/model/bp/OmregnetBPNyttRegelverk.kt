@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.IntBroek
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.token.Fagsaksystem
@@ -51,10 +50,7 @@ data class OmregnetBPNyttRegelverk(
                             ),
                     erUnder18Aar = erUnder18Aar,
                 )
-            if (
-                generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
-                migreringRequest?.erOmregningGjenny ?: false
-            ) {
+            if (generellBrevData.erMigrering() || migreringRequest?.erOmregningGjenny == true) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
                 val (pesysUtenlandstilknytning, yrkesskade) =
                     when (migreringRequest) {

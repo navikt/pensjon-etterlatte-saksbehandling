@@ -124,6 +124,13 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/samordning") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                val respons = vedtakBehandlingService.samordningsinfo(behandlingId)
+                call.respond(respons)
+            }
+        }
+
         post("/{$BEHANDLINGID_CALL_PARAMETER}/underkjenn") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Underkjenner vedtak for behandling $behandlingId")

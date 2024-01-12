@@ -71,6 +71,7 @@ class BehandlingFactory(
                         pdltjenesterKlient.hentAdressebeskyttelseForPerson(
                             HentAdressebeskyttelseRequest(
                                 PersonIdent(persongalleri.soeker),
+                                sakType,
                             ),
                         )
                     }
@@ -80,6 +81,7 @@ class BehandlingFactory(
                             pdltjenesterKlient.hentAdressebeskyttelseForPerson(
                                 HentAdressebeskyttelseRequest(
                                     PersonIdent(it),
+                                    sakType,
                                 ),
                             )
                         }
@@ -91,6 +93,7 @@ class BehandlingFactory(
                             pdltjenesterKlient.hentAdressebeskyttelseForPerson(
                                 HentAdressebeskyttelseRequest(
                                     PersonIdent(persongalleri.soeker),
+                                    sakType,
                                 ),
                             )
                         }

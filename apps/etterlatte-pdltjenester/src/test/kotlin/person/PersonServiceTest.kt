@@ -332,7 +332,9 @@ internal class PersonServiceTest {
 
         val gradering =
             runBlocking {
-                personService.hentAdressebeskyttelseGradering(HentAdressebeskyttelseRequest(PersonIdent(TRIVIELL_MIDTPUNKT.value)))
+                personService.hentAdressebeskyttelseGradering(
+                    HentAdressebeskyttelseRequest(PersonIdent(TRIVIELL_MIDTPUNKT.value), SakType.BARNEPENSJON),
+                )
             }
 
         assertEquals(AdressebeskyttelseGradering.valueOf(pdlGradering.name), gradering)

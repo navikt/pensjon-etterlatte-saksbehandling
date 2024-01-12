@@ -76,7 +76,7 @@ internal class JoarkHendelseHandlerTest {
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
-            coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelse(any()) } returns AdressebeskyttelseGradering.UGRADERT
+            coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelse(any(), any()) } returns AdressebeskyttelseGradering.UGRADERT
 
             val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.JOURNALPOST_MOTTATT)
 
@@ -87,7 +87,7 @@ internal class JoarkHendelseHandlerTest {
             coVerify(exactly = 1) {
                 safKlientMock.hentJournalpost(journalpostId)
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
-                pdlTjenesterKlientMock.hentAdressebeskyttelse(ident)
+                pdlTjenesterKlientMock.hentAdressebeskyttelse(ident, sakType)
                 behandlingKlientMock.hentEllerOpprettSak(ident, sakType, AdressebeskyttelseGradering.UGRADERT)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }
@@ -106,7 +106,7 @@ internal class JoarkHendelseHandlerTest {
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
-            coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelse(any()) } returns AdressebeskyttelseGradering.UGRADERT
+            coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelse(any(), any()) } returns AdressebeskyttelseGradering.UGRADERT
 
             val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.TEMA_ENDRET)
 
@@ -117,7 +117,7 @@ internal class JoarkHendelseHandlerTest {
             coVerify(exactly = 1) {
                 safKlientMock.hentJournalpost(journalpostId)
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
-                pdlTjenesterKlientMock.hentAdressebeskyttelse(ident)
+                pdlTjenesterKlientMock.hentAdressebeskyttelse(ident, sakType)
                 behandlingKlientMock.hentEllerOpprettSak(ident, sakType, AdressebeskyttelseGradering.UGRADERT)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }
@@ -136,7 +136,7 @@ internal class JoarkHendelseHandlerTest {
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
-            coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelse(any()) } returns AdressebeskyttelseGradering.UGRADERT
+            coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelse(any(), any()) } returns AdressebeskyttelseGradering.UGRADERT
             coEvery { behandlingKlientMock.hentSak(any(), any()) } returns null
 
             val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.ENDELIG_JOURNALFOERT)
@@ -149,7 +149,7 @@ internal class JoarkHendelseHandlerTest {
                 safKlientMock.hentJournalpost(journalpostId)
                 pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
                 behandlingKlientMock.hentSak(ident, sakType)
-                pdlTjenesterKlientMock.hentAdressebeskyttelse(ident)
+                pdlTjenesterKlientMock.hentAdressebeskyttelse(ident, sakType)
                 behandlingKlientMock.hentEllerOpprettSak(ident, sakType, AdressebeskyttelseGradering.UGRADERT)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }

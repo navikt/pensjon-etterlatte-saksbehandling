@@ -63,8 +63,11 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 variables = PdlAdressebeskyttelseVariables(hentAdressebeskyttelseRequest.ident.value),
             )
 
+        val behandlingsnummer = findBehandlingsnummerFromSaktype(hentAdressebeskyttelseRequest.saktype)
+
         return retry<PdlAdressebeskyttelseResponse>(times = 3) {
             httpClient.post(apiUrl) {
+                header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
                 header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)

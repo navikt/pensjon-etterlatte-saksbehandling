@@ -41,7 +41,7 @@ class BehandlingService(
         ident: String,
         sakType: SakType,
     ): Long {
-        val gradering = pdlTjenesterKlient.hentAdressebeskyttelse(ident)
+        val gradering = pdlTjenesterKlient.hentAdressebeskyttelse(ident, sakType)
         logger.info("Bruker=${ident.maskerFnr()} har gradering $gradering")
 
         logger.info("Henter/oppretter sak av type=${sakType.name.lowercase()} for bruker=${ident.maskerFnr()} med gradering=$gradering")

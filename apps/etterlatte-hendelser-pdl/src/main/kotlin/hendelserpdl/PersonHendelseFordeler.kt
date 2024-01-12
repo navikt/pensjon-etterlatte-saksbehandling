@@ -7,7 +7,7 @@ import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.FORELDERBARNRELASJON
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.SIVILSTAND_V1
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.UTFLYTTING_FRA_NORGE
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1
-import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
+import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -41,7 +41,7 @@ enum class LeesahOpplysningstype {
 
 class PersonHendelseFordeler(
     private val kafkaProduser: KafkaProdusent<String, JsonMessage>,
-    private val pdlKlient: PdlKlient,
+    private val pdlTjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(PersonHendelseFordeler::class.java)
     private val sikkerLogg: Logger = sikkerlogger()
@@ -54,7 +54,7 @@ class PersonHendelseFordeler(
 
         val ident =
             hendelse.personidenter.firstOrNull()?.let {
-                pdlKlient.hentPdlIdentifikator(it)
+                pdlTjenesterKlient.hentPdlIdentifikator(it)
             }
 
         try {

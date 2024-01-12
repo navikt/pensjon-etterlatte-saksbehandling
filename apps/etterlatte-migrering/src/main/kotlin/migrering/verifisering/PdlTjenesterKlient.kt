@@ -18,7 +18,7 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.common.person.PersonRolle
 
-internal class PDLKlient(config: Config, private val pdl_app: HttpClient) {
+internal class PdlTjenesterKlient(config: Config, private val pdl_app: HttpClient) {
     private val url = config.getString("pdltjenester.url")
 
     fun hentPerson(

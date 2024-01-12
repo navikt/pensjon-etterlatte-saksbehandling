@@ -15,7 +15,7 @@ import no.nav.etterlatte.libs.common.retry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class PdlKlient(
+class PdlTjenesterKlient(
     private val httpClient: HttpClient,
     private val url: String,
 ) {
@@ -39,6 +39,6 @@ class PdlKlient(
     }
 
     companion object {
-        val logger: Logger = LoggerFactory.getLogger(PdlKlient::class.java)
+        val logger: Logger = LoggerFactory.getLogger(PdlTjenesterKlient::class.java)
     }
 }

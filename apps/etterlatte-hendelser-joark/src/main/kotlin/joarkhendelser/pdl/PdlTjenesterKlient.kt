@@ -16,11 +16,11 @@ import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.retry
 import org.slf4j.LoggerFactory
 
-class PdlKlient(
+class PdlTjenesterKlient(
     private val httpClient: HttpClient,
     private val url: String,
 ) {
-    private val logger = LoggerFactory.getLogger(PdlKlient::class.java)
+    private val logger = LoggerFactory.getLogger(PdlTjenesterKlient::class.java)
 
     suspend fun hentPdlIdentifikator(ident: String): PdlIdentifikator? {
         logger.info("Henter ident fra PDL for fnr=${ident.maskerFnr()}")

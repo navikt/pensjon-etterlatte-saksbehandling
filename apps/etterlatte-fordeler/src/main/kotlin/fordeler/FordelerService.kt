@@ -16,8 +16,8 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.finnHoyestGradering
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.pdltjenester.PersonFinnesIkkeException
@@ -131,13 +131,15 @@ class FordelerService(
                 if ((it.kandidat || tillatAlleScenarier) &&
                     fordelerRepository.antallFordeltTil(Vedtaksloesning.GJENNY.name) < maxFordelingTilGjenny
                 ) {
-                    val adressebeskyttetPerson =
-                        finnAdressebeskyttetPerson(listOfNotNull(barn, avdoed, gjenlevende))
+                    val hoyesteGradering =
+                        finnHoyestGradering(
+                            listOfNotNull(barn.adressebeskyttelse, avdoed.adressebeskyttelse, gjenlevende?.adressebeskyttelse),
+                        )
                     Fordeling(
                         event.soeknadId,
                         Vedtaksloesning.GJENNY,
                         emptyList(),
-                        adressebeskyttetPerson?.adressebeskyttelse,
+                        hoyesteGradering,
                     )
                 } else {
                     Fordeling(event.soeknadId, Vedtaksloesning.PESYS, it.forklaring)
@@ -147,12 +149,6 @@ class FordelerService(
 
     private fun alleScenarierTillates(featureToggleService: FeatureToggleService) =
         featureToggleService.isEnabled(FordelerFeatureToggle.TillatAlleScenarier, false)
-
-    private fun finnAdressebeskyttetPerson(personer: List<Person>): Person? {
-        return personer.firstOrNull {
-            it.adressebeskyttelse != AdressebeskyttelseGradering.UGRADERT
-        }
-    }
 
     private fun ugyldigHendelse(event: FordelerEvent) = event.hendelseGyldigTil.isBefore(OffsetDateTime.now(klokke))
 

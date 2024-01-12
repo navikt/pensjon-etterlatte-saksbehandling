@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class PdlKlientTest {
+internal class PdlTjenesterKlientTest {
     private val defaultHeaders = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
 
     private val config: Config = mockk(relaxed = true)
@@ -34,7 +34,7 @@ internal class PdlKlientTest {
     @Test
     fun `hent pdlModell skal returnere en Person`() {
         val klient = mockHttpClient(mockPerson())
-        val pdlService = PdlKlientImpl(config, klient)
+        val pdlService = PdlTjenesterKlientImpl(config, klient)
         val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON)
@@ -46,7 +46,7 @@ internal class PdlKlientTest {
     @Test
     fun `skal hente doedsdato`() {
         val klient = mockHttpClient(mockPerson())
-        val pdlService = PdlKlientImpl(config, klient)
+        val pdlService = PdlTjenesterKlientImpl(config, klient)
         val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentDoedsdato()
@@ -58,7 +58,7 @@ internal class PdlKlientTest {
         val familierelasjon = FamilieRelasjon(ansvarligeForeldre = listOf(JOVIAL_LAMA), barn = null, foreldre = null)
         val mockperson = mockPerson(familieRelasjon = familierelasjon)
         val klient = mockHttpClient(mockperson)
-        val pdlService = PdlKlientImpl(config, klient)
+        val pdlService = PdlTjenesterKlientImpl(config, klient)
         val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentAnsvarligeForeldre()
@@ -70,7 +70,7 @@ internal class PdlKlientTest {
         val familierelasjon = FamilieRelasjon(barn = listOf(JOVIAL_LAMA), ansvarligeForeldre = null, foreldre = null)
         val mockperson = mockPerson(familieRelasjon = familierelasjon)
         val klient = mockHttpClient(mockperson)
-        val pdlService = PdlKlientImpl(config, klient)
+        val pdlService = PdlTjenesterKlientImpl(config, klient)
         val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentBarn()
@@ -80,7 +80,7 @@ internal class PdlKlientTest {
     @Test
     fun `skal hente geografisk tilknytning`() {
         val klient = mockHttpClient(GeografiskTilknytning(kommune = "0301", ukjent = false))
-        val pdlService = PdlKlientImpl(config, klient)
+        val pdlService = PdlTjenesterKlientImpl(config, klient)
         val fnr = KONTANT_FOT
         val resultat = pdlService.hentGeografiskTilknytning(fnr.value, SakType.BARNEPENSJON).geografiskTilknytning()
         Assertions.assertEquals("0301", resultat)
@@ -101,7 +101,7 @@ internal class PdlKlientTest {
             )
         val mockperson = mockPerson(utland = utland)
         val klient = mockHttpClient(mockperson)
-        val pdlService = PdlKlientImpl(config, klient)
+        val pdlService = PdlTjenesterKlientImpl(config, klient)
         val fnr = KONTANT_FOT
         val rolle = PersonRolle.BARN
         val resultat = pdlService.hentPdlModell(fnr.value, rolle, SakType.BARNEPENSJON).hentUtland()

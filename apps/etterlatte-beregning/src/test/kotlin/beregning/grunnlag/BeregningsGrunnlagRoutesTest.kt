@@ -23,7 +23,6 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import no.nav.etterlatte.beregning.regler.toGrunnlag
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -59,8 +58,7 @@ internal class BeregningsGrunnlagRoutesTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val repository = mockk<BeregningsGrunnlagRepository>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
-    private val featureToggleService = DummyFeatureToggleService()
-    private val service = BeregningsGrunnlagService(repository, behandlingKlient, featureToggleService, grunnlagKlient)
+    private val service = BeregningsGrunnlagService(repository, behandlingKlient, grunnlagKlient)
 
     @BeforeAll
     fun before() {

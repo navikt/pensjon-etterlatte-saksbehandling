@@ -1,11 +1,11 @@
 package no.nav.etterlatte.beregning.grunnlag
 
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Companion.automatiskSaksbehandler
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
@@ -13,16 +13,9 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(msg: String) : Exception(msg)
-
-class BPBeregningsgrunnlagSoeskenMarkertDoedException(msg: String) : Exception(msg)
-
-class BPBeregningsgrunnlagMerEnnEnAvdoedException(msg: String) : Exception(msg)
-
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
     private val behandlingKlient: BehandlingKlient,
-    private val featureToggleService: FeatureToggleService,
     private val grunnlagKlient: GrunnlagKlient,
 ) {
     private val logger = LoggerFactory.getLogger(BeregningsGrunnlagService::class.java)
@@ -34,7 +27,7 @@ class BeregningsGrunnlagService(
     ) {
         val grunnlag = grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo)
         if (grunnlag.hentAvdoede().size > 1) {
-            throw BPBeregningsgrunnlagMerEnnEnAvdoedException("Kan maks ha en avdød, behandlingid: $behandlingId")
+            throw BPBeregningsgrunnlagMerEnnEnAvdoedException(behandlingId)
         }
 
         val soeskensFoedselsnummere =
@@ -47,17 +40,13 @@ class BeregningsGrunnlagService(
 
             val alleSoeskenFinnes = soeskensFoedselsnummere.all { fnr -> avdoedesBarn.contains(fnr) }
             if (!alleSoeskenFinnes) {
-                throw BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(
-                    "Barnepensjon beregningsgrunnlag har søsken fnr som ikke er avdødeds barn. behandlingId: $behandlingId",
-                )
+                throw BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(behandlingId)
             }
 
             val alleSoeskenIberegningenErlevende =
                 soeskensFoedselsnummere.all { fnr -> avdoedesBarn[fnr]?.doedsdato === null }
             if (!alleSoeskenIberegningenErlevende) {
-                throw BPBeregningsgrunnlagSoeskenMarkertDoedException(
-                    "Barnpensjon beregningsgrunnlag bruker søsken som er døde i beregningen. behandlingId: $behandlingId",
-                )
+                throw BPBeregningsgrunnlagSoeskenMarkertDoedException(behandlingId)
             }
         }
     }
@@ -254,23 +243,6 @@ class BeregningsGrunnlagService(
         beregningsGrunnlagRepository.lagre(forrigeGrunnlagBP.copy(behandlingId = behandlingId))
     }
 
-    fun dupliserBeregningsGrunnlagOMS(
-        behandlingId: UUID,
-        forrigeBehandlingId: UUID,
-    ) {
-        logger.info("Dupliser grunnlag for $behandlingId fra $forrigeBehandlingId")
-
-        val forrigeGrunnlagOMS =
-            beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(forrigeBehandlingId)
-                ?: throw RuntimeException("Ingen grunnlag funnet for $forrigeBehandlingId")
-
-        if (beregningsGrunnlagRepository.finnOmstillingstoenadGrunnlagForBehandling(behandlingId) != null) {
-            throw RuntimeException("Eksisterende grunnlag funnet for $behandlingId")
-        }
-
-        beregningsGrunnlagRepository.lagreOMS(forrigeGrunnlagOMS.copy(behandlingId = behandlingId))
-    }
-
     fun hentOverstyrBeregningGrunnlag(behandlingId: UUID): OverstyrBeregningGrunnlag {
         logger.info("Henter overstyr beregning grunnlag $behandlingId")
 
@@ -329,3 +301,21 @@ class BeregningsGrunnlagService(
         return hentOverstyrBeregningGrunnlag(behandlingId)
     }
 }
+
+class BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException(behandlingId: UUID) : UgyldigForespoerselException(
+    code = "BP_BEREGNING_SOESKEN_IKKE_AVDOEDES_BARN",
+    detail = "Barnepensjon beregningsgrunnlag har søsken fnr som ikke er avdødeds barn",
+    meta = mapOf("behandlingId" to behandlingId),
+)
+
+class BPBeregningsgrunnlagSoeskenMarkertDoedException(behandlingId: UUID) : UgyldigForespoerselException(
+    code = "BP_BEREGNING_SOESKEN_MARKERT_DOED",
+    detail = "Barnpensjon beregningsgrunnlag bruker søsken som er døde i beregningen",
+    meta = mapOf("behandlingId" to behandlingId),
+)
+
+class BPBeregningsgrunnlagMerEnnEnAvdoedException(behandlingId: UUID) : UgyldigForespoerselException(
+    code = "BP_BEREGNING_MER_ENN_EN_AVDOED",
+    detail = "Kan maks ha en avdød",
+    meta = mapOf("behandlingId" to behandlingId),
+)

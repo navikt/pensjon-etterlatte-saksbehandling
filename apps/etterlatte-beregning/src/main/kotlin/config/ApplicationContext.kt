@@ -53,7 +53,6 @@ class ApplicationContext {
         BeregningsGrunnlagService(
             beregningsGrunnlagRepository = beregningsGrunnlagRepository,
             behandlingKlient = behandlingKlient,
-            featureToggleService = featureToggleService,
             grunnlagKlient = grunnlagKlient,
         )
 

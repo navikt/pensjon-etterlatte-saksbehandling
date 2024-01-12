@@ -5,6 +5,8 @@ import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -146,6 +148,8 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                 brukerTokenInfo,
                 body = GosysEndreSaksbehandlerRequest(oppgaveVersjon, tildeles),
             )
+        } catch (e: GosysKonfliktException) {
+            throw e
         } catch (e: Exception) {
             logger.error("Noe feilet mot Gosys, ident=${brukerTokenInfo.ident()}]", e)
             throw e
@@ -166,6 +170,8 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                 brukerTokenInfo,
                 body = GosysEndreFristRequest(oppgaveVersjon, nyFrist),
             )
+        } catch (e: GosysKonfliktException) {
+            throw e
         } catch (e: Exception) {
             logger.error("Noe feilet mot Gosys, ident=${brukerTokenInfo.ident()}]", e)
             throw e
@@ -187,6 +193,18 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                 brukerTokenInfo = brukerTokenInfo,
                 patchBody = objectMapper.writeValueAsString(body),
             )
-            .mapError { errorResponse -> throw errorResponse }
+            .mapError { errorResponse ->
+                if (errorResponse.response?.status == HttpStatusCode.Conflict) {
+                    throw GosysKonfliktException(errorResponse.detail)
+                } else {
+                    throw errorResponse
+                }
+            }
     }
 }
+
+class GosysKonfliktException(detail: String) : ForespoerselException(
+    status = 409,
+    code = "GOSYS_OPTIMISTISK_LAAS",
+    detail = detail,
+)

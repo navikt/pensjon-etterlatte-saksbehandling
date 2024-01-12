@@ -38,7 +38,7 @@ class BeregningsGrunnlagService(
         }
 
         val soeskensFoedselsnummere =
-            barnepensjonBeregningsGrunnlag.soeskenMedIBeregning.flatMap { grunnlag -> grunnlag.data }
+            barnepensjonBeregningsGrunnlag.soeskenMedIBeregning.flatMap { soeskenGrunnlag -> soeskenGrunnlag.data }
                 .map { it.foedselsnummer.value }
 
         if (soeskensFoedselsnummere.isNotEmpty()) {

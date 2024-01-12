@@ -20,9 +20,9 @@ data class HentPdlIdentRequest(
     val ident: PersonIdent,
 )
 
-// TODO: må få med sakstype her og endre til folkeregisteridentifikator
 data class HentAdressebeskyttelseRequest(
     val ident: PersonIdent,
+    val saktype: SakType,
 )
 
 data class PersonIdent

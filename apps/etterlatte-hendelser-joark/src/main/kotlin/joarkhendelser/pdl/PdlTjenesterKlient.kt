@@ -7,6 +7,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
@@ -41,13 +42,16 @@ class PdlTjenesterKlient(
         }
     }
 
-    suspend fun hentAdressebeskyttelse(fnr: String): AdressebeskyttelseGradering {
+    suspend fun hentAdressebeskyttelse(
+        fnr: String,
+        sakType: SakType,
+    ): AdressebeskyttelseGradering {
         logger.info("Henter adressebeskyttelse/gradering fra PDL for fnr=${fnr.maskerFnr()}")
 
         return retry<AdressebeskyttelseGradering> {
             httpClient.post("$url/person/adressebeskyttelse") {
                 contentType(ContentType.Application.Json)
-                setBody(HentAdressebeskyttelseRequest(PersonIdent(fnr)))
+                setBody(HentAdressebeskyttelseRequest(PersonIdent(fnr), sakType))
             }.body()
         }.let { result ->
             when (result) {

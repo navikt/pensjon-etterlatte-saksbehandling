@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -174,13 +175,27 @@ private data class OpprettBrevRequest(
 )
 
 fun Vergemaal.toMottaker(): Mottaker {
-    return Mottaker(
-        navn = mottaker.navn!!,
-        foedselsnummer = mottaker.foedselsnummer?.let { Foedselsnummer(it.value) },
-        orgnummer = null,
-        adresse =
-            with(mottaker.adresse) {
-                Adresse(adresseType, adresselinje1, adresselinje2, adresselinje3, postnummer, poststed, landkode, land)
-            },
-    )
+    if (mottaker.adresse != null) {
+        return Mottaker(
+            navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!,
+            foedselsnummer = mottaker.foedselsnummer?.let { Foedselsnummer(it.value) },
+            orgnummer = null,
+            adresse =
+                with(mottaker.adresse!!) {
+                    Adresse(
+                        adresseType,
+                        adresselinje1,
+                        adresselinje2,
+                        adresselinje3,
+                        postnummer,
+                        poststed,
+                        landkode,
+                        land,
+                    )
+                },
+        )
+    }
+
+    return Mottaker.tom(Folkeregisteridentifikator.of(mottaker.foedselsnummer!!.value))
+        .copy(navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!)
 }

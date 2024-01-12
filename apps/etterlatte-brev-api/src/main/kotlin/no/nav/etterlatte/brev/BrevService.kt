@@ -153,8 +153,11 @@ class BrevService(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ) {
-        logger.info("Forsøker sletting av brev med id=$id")
-        sjekkOmBrevKanEndres(id)
+        logger.info("Sjekker om brev med id=$id kan slettes")
+
+        val brev = db.hentBrev(id)
+        check(brev.kanEndres()) { "Brev med id=$id kan ikke endres, siden det har status ${brev.status}" }
+        check(brev.behandlingId == null) { "Brev med id=$id er et vedtaksbrev og kan ikke slettes" }
 
         val result = db.settBrevSlettet(id, bruker)
         logger.info("Brev med id=$id slettet=$result")

@@ -216,15 +216,33 @@ internal class BrevServiceTest {
                 db.settBrevSlettet(any(), any())
             }
         }
+
+        @ParameterizedTest
+        @EnumSource(Status::class)
+        fun `Skal ikke kunne slette vedtaksbrev, uavhengig av status`(status: Status) {
+            val behandlingId = UUID.randomUUID()
+            val brev = opprettBrev(status, BrevProsessType.MANUELL, behandlingId)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<IllegalStateException> {
+                brevService.slett(brev.id, bruker)
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
     }
 
     private fun opprettBrev(
         status: Status,
         prosessType: BrevProsessType,
+        behandlingId: UUID? = null,
     ) = Brev(
         id = Random.nextLong(10000),
         sakId = Random.nextLong(10000),
-        behandlingId = null,
+        behandlingId = behandlingId,
         tittel = null,
         prosessType = prosessType,
         soekerFnr = "fnr",

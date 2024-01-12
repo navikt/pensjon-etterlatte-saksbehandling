@@ -5,11 +5,11 @@ import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJ
 import { Button, Heading, Tag } from '@navikt/ds-react'
 import { formaterSakstype } from '~utils/formattering'
 import { FlexRow } from '~shared/styled'
-import { DatoVelger } from '~shared/DatoVelger'
 import { settNyKlageRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { useState } from 'react'
 import { opprettKlageErUtfylt } from '~components/person/journalfoeringsoppgave/oppretteklage/OppsummeringKlagebehandling'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 
 export default function OpprettKlagebehandling() {
   const { oppgave, nyKlageRequest } = useJournalfoeringOppgave()

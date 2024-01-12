@@ -210,6 +210,15 @@ class KlageServiceImpl(
                 BehandlingResultat.MEDHOLD -> lagOppgaveForOmgjoering(opprinneligKlage)
             }
         }
+        hendelseDao.klageHendelse(
+            klageId = klageId,
+            sakId = opprinneligKlage.sak.id,
+            hendelse = KlageHendelseType.KABAL_SVAR,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = null,
+            kommentar = "Mottok melding fra kabal med status=${kabalrespons.kabalStatus} og resultat=${kabalrespons.resultat}",
+            begrunnelse = null,
+        )
 
         klageDao.oppdaterKabalStatus(klageId, kabalrespons)
     }

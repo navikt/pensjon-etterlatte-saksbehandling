@@ -433,6 +433,7 @@ data class FormkravMedBeslutter(
 enum class KlageHendelseType {
     OPPRETTET,
     FERDIGSTILT,
+    KABAL_SVAR,
 }
 
 data class KlageOversendelseDto(val klage: Klage, val ekstraData: EkstradataInnstilling)

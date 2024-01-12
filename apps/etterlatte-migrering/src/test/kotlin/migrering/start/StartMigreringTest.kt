@@ -48,7 +48,7 @@ internal class StartMigreringTest {
     fun `starter migrering`() {
         dataSource.transaction { tx ->
             queryOf(
-                "INSERT INTO ${StartMigreringRepository.Databasetabell.TABELLNAVN}" +
+                "   INSERT INTO ${StartMigreringRepository.Databasetabell.TABELLNAVN}" +
                     " (${StartMigreringRepository.Databasetabell.SAKID})" +
                     "VALUES(123)",
             ).let { query -> tx.run(query.asUpdate) }

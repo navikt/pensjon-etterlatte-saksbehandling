@@ -24,6 +24,8 @@ class StartInformasjonsbrevgenereringRiver(
     private val repository: StartBrevgenereringRepository,
     private val rapidsConnection: RapidsConnection,
     private val featureToggleService: FeatureToggleService,
+    private val sleep: (millis: Long) -> Unit = { Thread.sleep(it) },
+    private val iTraad: (handling: (() -> Unit)) -> Unit = { thread { it() } },
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -36,16 +38,17 @@ class StartInformasjonsbrevgenereringRiver(
         val fnr =
             repository.hentFnrTilBrevgenerering().distinct().also { logger.info("Genererer ${it.size} brev") }
         repository.settBrevPaastarta(fnr)
-        if (fnr.isNotEmpty()) {
-            thread {
-                Thread.sleep(60_000)
-                val opprettBrev =
-                    featureToggleService.isEnabled(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, false)
-                fnr.forEach {
-                    rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
-                    if (opprettBrev) {
-                        Thread.sleep(3000)
-                    }
+        if (fnr.isEmpty()) {
+            return
+        }
+        iTraad {
+            sleep(60_000)
+            val opprettBrev =
+                featureToggleService.isEnabled(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, false)
+            fnr.forEach {
+                rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
+                if (opprettBrev) {
+                    sleep(3000)
                 }
             }
         }
@@ -94,7 +97,7 @@ class StartBrevgenereringRepository(private val dataSource: DataSource) : Transa
                     "${Databasetabell.FNR} = ANY(:saker)",
             params =
                 mapOf(
-                    "fnr" to createArrayOf("string", fnr.map { it.fnr }),
+                    "fnr" to createArrayOf("text", fnr.map { it.fnr }),
                 ),
             loggtekst = "Markerte $fnr som påstarta for brevgenerering",
         )

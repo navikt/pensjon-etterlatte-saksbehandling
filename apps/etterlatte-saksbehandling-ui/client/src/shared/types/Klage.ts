@@ -38,6 +38,13 @@ export interface Klage {
   formkrav?: FormkravMedSaksbehandler
   utfall?: KlageUtfall
   kabalResultat?: KabalResultat
+  innkommendeDokument?: InnkommendeKlage
+}
+
+export interface InnkommendeKlage {
+  mottattDato: string
+  journalpostId: string
+  innsender?: string
 }
 
 export enum KlageStatus {

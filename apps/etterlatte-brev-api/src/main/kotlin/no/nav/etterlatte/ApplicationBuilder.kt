@@ -8,6 +8,7 @@ import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.MigreringBrevDataService
+import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
@@ -31,7 +32,6 @@ import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.SakService
-import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
@@ -152,11 +152,11 @@ class ApplicationBuilder {
 
     private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
 
-    private val soekerService = SoekerService(grunnlagKlient)
-
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
+
+    private val pdfGenerator = PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
@@ -168,19 +168,17 @@ class ApplicationBuilder {
             brevDataMapper,
             brevProsessTypeFactory,
             migreringBrevDataService,
+            pdfGenerator,
         )
-
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 
     private val brevService =
         BrevService(
             db,
             sakService,
-            soekerService,
             adresseService,
-            brevbakerService,
-            brevdataFacade,
             journalfoerBrevService,
+            pdfGenerator,
         )
 
     private val journalpostService =

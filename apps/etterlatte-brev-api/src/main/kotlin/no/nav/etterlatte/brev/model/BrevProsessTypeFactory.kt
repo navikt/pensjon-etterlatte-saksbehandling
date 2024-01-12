@@ -19,7 +19,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
     }
 
     private fun omsBrev(generellBrevData: GenerellBrevData): BrevProsessType {
-        return when (generellBrevData.forenkletVedtak.type) {
+        return when (generellBrevData.forenkletVedtak?.type) {
             VedtakType.INNVILGELSE -> BrevProsessType.REDIGERBAR
             VedtakType.OPPHOER ->
                 when (generellBrevData.revurderingsaarsak?.redigerbartBrev) {
@@ -39,6 +39,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
                 }
 
             VedtakType.TILBAKEKREVING -> BrevProsessType.REDIGERBAR
+            null -> BrevProsessType.REDIGERBAR
         }
     }
 
@@ -49,7 +50,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
         if (generellBrevData.systemkilde == Vedtaksloesning.PESYS || erOmregningNyRegel) {
             return BrevProsessType.REDIGERBAR
         }
-        return when (generellBrevData.forenkletVedtak.type) {
+        return when (generellBrevData.forenkletVedtak?.type) {
             VedtakType.INNVILGELSE ->
                 when (
                     featureToggleService.isEnabled(
@@ -79,6 +80,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
 
             VedtakType.AVSLAG -> BrevProsessType.REDIGERBAR
             VedtakType.TILBAKEKREVING -> BrevProsessType.REDIGERBAR
+            null -> BrevProsessType.REDIGERBAR
         }
     }
 }

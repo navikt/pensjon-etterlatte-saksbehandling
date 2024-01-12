@@ -9,15 +9,11 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.adresse.navansatt.SaksbehandlerInfo
-import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
 import kotlin.random.Random
 
 internal class AdresseServiceTest {
@@ -45,31 +41,24 @@ internal class AdresseServiceTest {
         coEvery { navansattMock.hentSaksbehandlerInfo(ATTESTANT) }
             .returns(opprettSaksbehandlerInfo(ATTESTANT, "att", "estant"))
 
-        val vedtak =
-            ForenkletVedtak(
-                1,
-                VedtakStatus.FATTET_VEDTAK,
-                VedtakType.INNVILGELSE,
-                ANSVARLIG_ENHET,
-                SAKSBEHANDLER,
-                ATTESTANT,
-                vedtaksdato = null,
-                virkningstidspunkt = YearMonth.now(),
-                revurderingInfo = null,
+        val avsenderRequest =
+            AvsenderRequest(
+                saksbehandlerIdent = SAKSBEHANDLER,
+                sakenhet = ANSVARLIG_ENHET,
+                attestantIdent = ATTESTANT,
             )
-
         val faktiskAvsender =
             runBlocking {
-                adresseService.hentAvsender(vedtak)
+                adresseService.hentAvsender(avsenderRequest)
             }
 
         faktiskAvsender.saksbehandler shouldBe "saks behandler"
         faktiskAvsender.attestant shouldBe "att estant"
 
         coVerify(exactly = 1) {
-            norg2Mock.hentEnhet(vedtak.sakenhet)
-            navansattMock.hentSaksbehandlerInfo(vedtak.saksbehandlerIdent)
-            navansattMock.hentSaksbehandlerInfo(vedtak.attestantIdent!!)
+            norg2Mock.hentEnhet(avsenderRequest.sakenhet)
+            navansattMock.hentSaksbehandlerInfo(avsenderRequest.saksbehandlerIdent)
+            navansattMock.hentSaksbehandlerInfo(avsenderRequest.attestantIdent!!)
         }
     }
 
@@ -86,7 +75,7 @@ internal class AdresseServiceTest {
 
         val faktiskAvsender =
             runBlocking {
-                adresseService.hentAvsender(sak, zIdent)
+                adresseService.hentAvsender(AvsenderRequest(saksbehandlerIdent = zIdent, sakenhet = sak.enhet))
             }
 
         faktiskAvsender.saksbehandler shouldBe "saks behandler"

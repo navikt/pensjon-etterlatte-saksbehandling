@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -54,6 +52,7 @@ class VedtaksbrevService(
     private val brevDataMapper: BrevDataMapper,
     private val brevProsessTypeFactory: BrevProsessTypeFactory,
     private val migreringBrevDataService: MigreringBrevDataService,
+    private val pdfGenerator: PDFGenerator,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -136,81 +135,56 @@ class VedtaksbrevService(
 
     suspend fun genererPdf(
         id: BrevID,
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
-    ): Pdf {
-        val brev = hentBrev(id)
-
-        if (!brev.kanEndres()) {
-            logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
-            return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke brev med id ${brev.id}" }
+    ): Pdf =
+        pdfGenerator.genererPdf(
+            id = id,
+            bruker = bruker,
+            automatiskMigreringRequest = automatiskMigreringRequest,
+            avsenderRequest = { it.avsenderRequest() },
+            brevKode = { generellBrevData, brev, migreringBrevRequest ->
+                brevDataMapper.brevKode(
+                    generellBrevData,
+                    brev.prosessType,
+                    migreringBrevRequest?.erOmregningGjenny ?: false,
+                )
+            },
+            brevData = { req ->
+                brevData(req.generellBrevData, req.automatiskMigreringRequest, req.brev, req.bruker, req.brevkodePar)
+            },
+        ) { generellBrevData, brev, pdf ->
+            lagrePdfHvisVedtakFattet(
+                brev.id,
+                generellBrevData.forenkletVedtak!!,
+                pdf,
+                bruker,
+                automatiskMigreringRequest != null,
+            )
         }
 
-        val generellBrevData =
-            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, brukerTokenInfo) }
-        val avsender = adresseService.hentAvsender(generellBrevData.forenkletVedtak)
-
-        val brevkodePar =
-            brevDataMapper.brevKode(
-                generellBrevData,
-                brev.prosessType,
-                erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
+    private suspend fun VedtaksbrevService.brevData(
+        generellBrevData: GenerellBrevData,
+        automatiskMigreringRequest: MigreringBrevRequest?,
+        brev: Brev,
+        brukerTokenInfo: BrukerTokenInfo,
+        brevkodePar: BrevDataMapper.BrevkodePar,
+    ) = when (
+        generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
+            automatiskMigreringRequest?.erOmregningGjenny ?: false
+    ) {
+        false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
+        true ->
+            OmregnetBPNyttRegelverkFerdig(
+                innhold = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }).innhold(),
+                data = (
+                    migreringBrevDataService.opprettMigreringBrevdata(
+                        generellBrevData,
+                        automatiskMigreringRequest,
+                        brukerTokenInfo,
+                    ) as OmregnetBPNyttRegelverk
+                ),
             )
-
-        val brevData =
-            when (
-                generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
-                    automatiskMigreringRequest?.erOmregningGjenny ?: false
-            ) {
-                false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
-                true ->
-                    OmregnetBPNyttRegelverkFerdig(
-                        innhold =
-                            InnholdMedVedlegg(
-                                { hentLagretInnhold(brev) },
-                                { hentLagretInnholdVedlegg(brev) },
-                            ).innhold(),
-                        data = (
-                            migreringBrevDataService.opprettMigreringBrevdata(
-                                generellBrevData,
-                                automatiskMigreringRequest,
-                                brukerTokenInfo,
-                            ) as OmregnetBPNyttRegelverk
-                        ),
-                    )
-            }
-
-        val brevRequest = BrevbakerRequest.fra(brevkodePar.ferdigstilling, brevData, generellBrevData, avsender)
-
-        return brevbaker.genererPdf(brev.id, brevRequest)
-            .let {
-                when (brevData) {
-                    is OmregnetBPNyttRegelverkFerdig -> {
-                        val forhaandsvarsel =
-                            brevbaker.genererPdf(
-                                brev.id,
-                                BrevbakerRequest.fra(
-                                    EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                                    brevData.data,
-                                    generellBrevData,
-                                    avsender,
-                                ),
-                            )
-                        forhaandsvarsel.medPdfAppended(it)
-                    }
-
-                    else -> it
-                }
-            }
-            .also { pdf ->
-                lagrePdfHvisVedtakFattet(
-                    brev.id,
-                    generellBrevData.forenkletVedtak,
-                    pdf,
-                    brukerTokenInfo,
-                    automatiskMigreringRequest != null,
-                )
-            }
     }
 
     suspend fun ferdigstillVedtaksbrev(

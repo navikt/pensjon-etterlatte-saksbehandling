@@ -86,7 +86,7 @@ fun Grunnlag.mapSpraak(): Spraak =
 
 fun Grunnlag.mapVerge(
     sakType: SakType,
-    behandlingId: UUID,
+    behandlingId: UUID?,
     brevutfallDto: BrevutfallDto?,
 ): Verge? =
     with(this) {
@@ -147,7 +147,7 @@ private fun forelderVerge(gjenlevende: Grunnlagsdata<JsonNode>): ForelderVerge? 
 
 private fun Grunnlag.hentVergemaal(
     pdlVerge: VergemaalEllerFremtidsfullmakt,
-    behandlingId: UUID,
+    behandlingId: UUID?,
 ): Vergemaal {
     val vergeadresse = sak.hentVergeadresse()?.verdi
 

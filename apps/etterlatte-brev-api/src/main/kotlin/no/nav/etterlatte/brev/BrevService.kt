@@ -1,17 +1,12 @@
 package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers
-import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
-import no.nav.etterlatte.brev.brevbaker.BrevbakerService
+import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
-import no.nav.etterlatte.brev.brevbaker.LanguageCode
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.SakService
-import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
@@ -30,11 +25,9 @@ import org.slf4j.LoggerFactory
 class BrevService(
     private val db: BrevRepository,
     private val sakService: SakService,
-    private val soekerService: SoekerService,
     private val adresseService: AdresseService,
-    private val brevbakerService: BrevbakerService,
-    private val brevDataFacade: BrevdataFacade,
     private val journalfoerBrevService: JournalfoerBrevService,
+    private val pdfGenerator: PDFGenerator,
 ) {
     private val logger = LoggerFactory.getLogger(BrevService::class.java)
 
@@ -125,38 +118,22 @@ class BrevService(
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
-    ): Pdf {
-        val brev = hentBrev(id)
-
-        if (!brev.kanEndres()) {
-            logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
-            return requireNotNull(db.hentPdf(brev.id))
-        }
-
-        val brevutfall =
-            brev.behandlingId?.let {
-                brevDataFacade.hentBrevutfall(brev.behandlingId, bruker)
-            }
-        val sak = sakService.hentSak(brev.sakId, bruker)
-        val soeker = soekerService.hentSoeker(brev.sakId, bruker, brevutfall)
-        val avsender = adresseService.hentAvsender(sak, bruker.ident())
-
-        val (brevKode, brevData) = opprettBrevData(brev)
-        val brevRequest =
-            BrevbakerRequest(
-                kode = brevKode,
-                letterData = brevData,
-                felles =
-                    BrevbakerHelpers.mapFelles(
-                        sakId = brev.sakId,
-                        soeker = soeker,
-                        avsender = avsender,
-                    ),
-                language = LanguageCode.spraakToLanguageCode(Spraak.NB), // TODO: fikse spraak
-            )
-
-        return brevbakerService.genererPdf(brev.id, brevRequest)
-    }
+    ): Pdf =
+        pdfGenerator.genererPdf(
+            id,
+            bruker,
+            null,
+            avsenderRequest = {
+                AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = it.sak.enhet)
+            },
+            brevKode = { _, _, _ -> BrevDataMapper.BrevkodePar(EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV) },
+            brevData = { request ->
+                ManueltBrevMedTittelData(
+                    requireNotNull(db.hentBrevPayload(request.brev.id)).elements,
+                    request.brev.tittel,
+                )
+            },
+        )
 
     suspend fun ferdigstill(
         id: BrevID,
@@ -177,11 +154,5 @@ class BrevService(
         if (!brev.kanEndres()) {
             throw IllegalStateException("Brev med id=$brevID kan ikke endres, siden det har status ${brev.status}")
         }
-    }
-
-    private fun opprettBrevData(brev: Brev): Pair<EtterlatteBrevKode, BrevData> {
-        val payload = requireNotNull(db.hentBrevPayload(brev.id))
-
-        return Pair(EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV, ManueltBrevMedTittelData(payload.elements, brev.tittel))
     }
 }

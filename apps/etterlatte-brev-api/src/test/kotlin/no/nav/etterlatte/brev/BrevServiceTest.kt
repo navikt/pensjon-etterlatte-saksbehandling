@@ -11,12 +11,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevService.BrevPayload
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
-import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.SakService
-import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataMapper
@@ -42,22 +40,20 @@ internal class BrevServiceTest {
     private val brevbaker = mockk<BrevbakerKlient>()
     private val sakOgBehandlingService = mockk<BrevdataFacade>()
     private val sakService = mockk<SakService>()
-    private val soekerService = mockk<SoekerService>()
     private val adresseService = mockk<AdresseService>()
     private val journalfoerBrevService = mockk<JournalfoerBrevService>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
     private val brevDataMapper = mockk<BrevDataMapper>()
     private val brevDataFacade = mockk<BrevdataFacade>()
+    private val pdfGenerator = mockk<PDFGenerator>()
 
     private val brevService =
         BrevService(
             db,
             sakService,
-            soekerService,
             adresseService,
-            BrevbakerService(brevbaker, adresseService, brevDataMapper),
-            brevDataFacade,
             journalfoerBrevService,
+            pdfGenerator,
         )
 
     private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null)

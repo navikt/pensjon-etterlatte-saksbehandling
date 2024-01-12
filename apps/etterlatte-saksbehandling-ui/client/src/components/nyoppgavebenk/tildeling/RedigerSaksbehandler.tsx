@@ -11,7 +11,7 @@ export interface RedigerSaksbehandlerProps {
   sakId: number
   oppdaterTildeling: (id: string, saksbehandler: string | null) => void
   erRedigerbar: boolean
-  versjon: string | null
+  versjon: number | null
   type: Oppgavetype
 }
 

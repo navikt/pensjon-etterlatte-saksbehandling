@@ -63,6 +63,10 @@ export const ToggleMinOppgaveliste = () => {
       const index = oppdatertOppgaveState.findIndex((o) => o.id === id)
       oppdatertOppgaveState[index].saksbehandler = saksbehandler
       oppdatertOppgaveState[index].status = 'UNDER_BEHANDLING'
+      let gjeldendeVersjon = oppdatertOppgaveState[index].versjon
+      if (gjeldendeVersjon) {
+        oppdatertOppgaveState[index].versjon = ++gjeldendeVersjon
+      }
       setHentedeOppgaver(oppdatertOppgaveState)
     }, 2000)
   }

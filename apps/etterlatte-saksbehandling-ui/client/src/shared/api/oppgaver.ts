@@ -19,7 +19,7 @@ export interface OppgaveDTO {
   // GOSYS-spesifikt
   beskrivelse: string | null
   gjelder: string | null
-  versjon: string | null
+  versjon: number | null
 }
 
 export interface NyOppgaveDto {
@@ -61,7 +61,7 @@ export const ferdigstillOppgave = async (id: string): Promise<ApiResponse<any>> 
 
 export interface SaksbehandlerEndringDto {
   saksbehandler: string
-  versjon: string | null
+  versjon: number | null
 }
 
 export const tildelSaksbehandlerApi = async (args: {
@@ -92,7 +92,7 @@ export const fjernSaksbehandlerApi = async (args: {
   oppgaveId: string
   sakId: number
   type: string
-  versjon: string | null
+  versjon: number | null
 }): Promise<ApiResponse<void>> => {
   if (args.type == 'GOSYS') {
     return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, {
@@ -106,7 +106,7 @@ export const fjernSaksbehandlerApi = async (args: {
 
 export interface RedigerFristRequest {
   frist: Date
-  versjon: string | null
+  versjon: number | null
 }
 export const redigerFristApi = async (args: {
   oppgaveId: string

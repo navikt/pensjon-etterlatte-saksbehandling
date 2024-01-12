@@ -31,7 +31,7 @@ import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -47,6 +47,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -77,7 +78,7 @@ class BehandlingFactoryTest {
     private val behandlingService = mockk<BehandlingService>()
     private val sakServiceMock = mockk<SakService>()
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>(relaxUnitFun = true)
-    private val pdlKlientMock = mockk<PdlKlient>()
+    private val pdlTjenesterKlientMock = mockk<PdlTjenesterKlient>()
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "behandling",
@@ -117,7 +118,7 @@ class BehandlingFactoryTest {
             hendelseDaoMock,
             behandlingHendelserKafkaProducerMock,
             mockk(),
-            pdlKlientMock,
+            pdlTjenesterKlientMock,
         )
 
     @BeforeEach
@@ -622,7 +623,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
 
-        coEvery { pdlKlientMock.hentPerson(any()) } returns null
+        coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelseForPerson(any()) } returns AdressebeskyttelseGradering.UGRADERT
 
         val resultat =
             runBlocking {

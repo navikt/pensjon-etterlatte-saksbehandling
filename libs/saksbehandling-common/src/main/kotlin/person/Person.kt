@@ -254,26 +254,27 @@ enum class AdressebeskyttelseGradering {
     }
 }
 
-fun finnAdressebeskyttetPerson(personer: List<Person>): Person? {
-    val strengtFortroligPerson =
-        personer.find {
-            it.adressebeskyttelse in
+fun finnHoyestGradering(graderinger: List<AdressebeskyttelseGradering>): AdressebeskyttelseGradering {
+    val strengtFortroligGradering =
+        graderinger.find {
+            it in
                 listOf(
                     AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                     AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
                 )
         }
-    if (strengtFortroligPerson != null) {
-        return strengtFortroligPerson
+
+    if (strengtFortroligGradering != null) {
+        return strengtFortroligGradering
     }
-    val fortroligPerson =
-        personer.find {
-            it.adressebeskyttelse == AdressebeskyttelseGradering.FORTROLIG
-        }
-    if (fortroligPerson != null) {
-        return fortroligPerson
+
+    val fortrolig = graderinger.find { it == AdressebeskyttelseGradering.FORTROLIG }
+
+    if (fortrolig != null) {
+        return fortrolig
     }
-    return personer.firstOrNull()
+
+    return AdressebeskyttelseGradering.UGRADERT
 }
 
 fun finnHoyesteGradering(

@@ -22,7 +22,7 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlKlientImpl
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.hentDoedsdato
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
@@ -75,7 +75,7 @@ import kotlin.random.Random
 internal class GrunnlagsendringshendelseServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao>(relaxUnitFun = true)
-    private val pdlService = mockk<PdlKlientImpl>()
+    private val pdlService = mockk<PdlTjenesterKlientImpl>()
     private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
     private val sakService = mockk<SakService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()

@@ -12,7 +12,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -27,10 +27,10 @@ import java.time.temporal.ChronoUnit
 
 class GosysOppgaveServiceImplTest {
     private val gosysOppgaveKlient = mockk<GosysOppgaveKlient>()
-    private val pdlKlient = mockk<PdlKlient>()
+    private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
     private val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
-    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient)
+    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdltjenesterKlient)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     private fun setNewKontekstWithMockUser(userMock: User) {
@@ -139,7 +139,7 @@ class GosysOppgaveServiceImplTest {
                         ),
                     ),
             )
-        every { pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf("53771238272763", "78324720383742")) } returns
+        every { pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf("53771238272763", "78324720383742")) } returns
             mapOf(
                 "53771238272763" to "01010812345",
                 "78324720383742" to "29048012345",
@@ -222,7 +222,7 @@ class GosysOppgaveServiceImplTest {
                 ),
             )
 
-        every { pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf("78324720383742")) } returns
+        every { pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf("78324720383742")) } returns
             mapOf(
                 "78324720383742" to "29048012345",
             )

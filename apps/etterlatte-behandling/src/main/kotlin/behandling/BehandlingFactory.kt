@@ -11,7 +11,7 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -32,11 +32,9 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.HentPersonRequest
-import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.person.finnAdressebeskyttetPerson
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
+import no.nav.etterlatte.libs.common.person.PersonIdent
+import no.nav.etterlatte.libs.common.person.finnHoyestGradering
 import no.nav.etterlatte.libs.common.person.finnHoyesteGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -58,34 +56,30 @@ class BehandlingFactory(
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val migreringKlient: MigreringKlient,
-    private val pdlKlient: PdlKlient,
+    private val pdltjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private suspend fun finnHoyesteGraderingForPersongalleri(
         persongalleri: Persongalleri,
         sakType: SakType,
-    ): Person? {
-        val personer =
+    ): AdressebeskyttelseGradering {
+        val graderinger =
             coroutineScope {
                 val soeker =
                     async {
-                        pdlKlient.hentPerson(
-                            HentPersonRequest(
-                                Folkeregisteridentifikator.of(persongalleri.soeker),
-                                PersonRolle.BARN,
-                                sakType,
+                        pdltjenesterKlient.hentAdressebeskyttelseForPerson(
+                            HentAdressebeskyttelseRequest(
+                                PersonIdent(persongalleri.soeker),
                             ),
                         )
                     }
                 val avdoed =
                     async {
                         persongalleri.avdoed.map {
-                            pdlKlient.hentPerson(
-                                HentPersonRequest(
-                                    Folkeregisteridentifikator.of(it),
-                                    PersonRolle.AVDOED,
-                                    sakType,
+                            pdltjenesterKlient.hentAdressebeskyttelseForPerson(
+                                HentAdressebeskyttelseRequest(
+                                    PersonIdent(it),
                                 ),
                             )
                         }
@@ -94,11 +88,9 @@ class BehandlingFactory(
                 val gjenlevende =
                     async {
                         persongalleri.gjenlevende.map {
-                            pdlKlient.hentPerson(
-                                HentPersonRequest(
-                                    Folkeregisteridentifikator.of(it),
-                                    PersonRolle.GJENLEVENDE,
-                                    sakType,
+                            pdltjenesterKlient.hentAdressebeskyttelseForPerson(
+                                HentAdressebeskyttelseRequest(
+                                    PersonIdent(persongalleri.soeker),
                                 ),
                             )
                         }
@@ -107,7 +99,7 @@ class BehandlingFactory(
                 listOf(soeker.await()).plus(avdoed.await()).plus(gjenlevende.await())
             }
 
-        return finnAdressebeskyttetPerson(personer.filterNotNull())
+        return finnHoyestGradering(graderinger)
     }
 
     /*
@@ -115,15 +107,13 @@ class BehandlingFactory(
      */
     suspend fun opprettSakOgBehandlingForOppgave(request: NyBehandlingRequest): Behandling {
         val soeker = request.persongalleri.soeker
-        val personMedHoyesteGradering = finnHoyesteGraderingForPersongalleri(request.persongalleri, request.sakType)
+        val hoyesteGradering = finnHoyesteGraderingForPersongalleri(request.persongalleri, request.sakType)
 
-        val gradering: AdressebeskyttelseGradering? =
-            if (request.gradering != null &&
-                personMedHoyesteGradering != null && personMedHoyesteGradering.adressebeskyttelse != null
-            ) {
-                finnHoyesteGradering(request.gradering!!, personMedHoyesteGradering.adressebeskyttelse!!)
+        val gradering: AdressebeskyttelseGradering =
+            if (request.gradering != null) {
+                finnHoyesteGradering(request.gradering!!, hoyesteGradering)
             } else {
-                personMedHoyesteGradering?.adressebeskyttelse
+                hoyesteGradering
             }
 
         val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType, gradering = gradering) }

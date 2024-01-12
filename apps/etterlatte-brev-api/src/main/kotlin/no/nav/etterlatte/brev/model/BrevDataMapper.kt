@@ -67,16 +67,16 @@ enum class BrevDataFeatureToggle(private val key: String) : FeatureToggle {
 private class BrevDatafetcher(
     private val brevdataFacade: BrevdataFacade,
     private val brukerTokenInfo: BrukerTokenInfo,
-    private val behandlingId: UUID,
+    private val behandlingId: UUID?,
     private val vedtakVirkningstidspunkt: YearMonth,
-    private val type: VedtakType,
+    private val type: VedtakType?,
     private val sak: Sak,
 ) {
-    suspend fun hentBrevutfall() = brevdataFacade.hentBrevutfall(behandlingId, brukerTokenInfo)
+    suspend fun hentBrevutfall() = behandlingId?.let { brevdataFacade.hentBrevutfall(it, brukerTokenInfo) }
 
     suspend fun hentUtbetaling() =
         brevdataFacade.finnUtbetalingsinfo(
-            behandlingId,
+            behandlingId!!,
             vedtakVirkningstidspunkt,
             brukerTokenInfo,
             sak.sakType,
@@ -93,23 +93,27 @@ private class BrevDatafetcher(
     suspend fun hentGrunnbeloep() = brevdataFacade.hentGrunnbeloep(brukerTokenInfo)
 
     suspend fun hentEtterbetaling() =
-        brevdataFacade.hentEtterbetaling(
-            behandlingId,
-            brukerTokenInfo,
-        )
+        behandlingId?.let {
+            brevdataFacade.hentEtterbetaling(
+                it,
+                brukerTokenInfo,
+            )
+        }
 
     suspend fun hentAvkortinginfo() =
-        brevdataFacade.finnAvkortingsinfo(
-            behandlingId,
-            sak.sakType,
-            vedtakVirkningstidspunkt,
-            type,
-            brukerTokenInfo,
-        )
+        behandlingId?.let {
+            brevdataFacade.finnAvkortingsinfo(
+                it,
+                sak.sakType,
+                vedtakVirkningstidspunkt,
+                type!!,
+                brukerTokenInfo,
+            )
+        }
 
     suspend fun hentInnvilgelsesdato() = brevdataFacade.hentInnvilgelsesdato(sak.id, brukerTokenInfo)
 
-    suspend fun hentTrygdetid() = brevdataFacade.finnTrygdetid(behandlingId, brukerTokenInfo)
+    suspend fun hentTrygdetid() = behandlingId?.let { brevdataFacade.finnTrygdetid(it, brukerTokenInfo) }
 }
 
 class BrevDataMapper(
@@ -132,13 +136,13 @@ class BrevDataMapper(
         erOmregningNyRegel: Boolean = false,
     ): BrevkodePar {
         if (generellBrevData.systemkilde == Vedtaksloesning.PESYS || erOmregningNyRegel) {
-            assert(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(generellBrevData.forenkletVedtak.type))
+            assert(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(generellBrevData.forenkletVedtak?.type))
             return BrevkodePar(BARNEPENSJON_VEDTAK_OMREGNING, BARNEPENSJON_VEDTAK_OMREGNING_FERDIG)
         }
 
         return when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
-                when (val vedtakType = generellBrevData.forenkletVedtak.type) {
+                when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE ->
                         when (brukNyInnvilgelsesmal()) {
                             true -> BrevkodePar(BARNEPENSJON_INNVILGELSE_ENKEL, BARNEPENSJON_INNVILGELSE_NY)
@@ -182,11 +186,12 @@ class BrevDataMapper(
                         }
 
                     VedtakType.TILBAKEKREVING -> BrevkodePar(TILBAKEKREVING_INNHOLD, TILBAKEKREVING_FERDIG)
+                    null -> BrevkodePar(EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV)
                 }
             }
 
             SakType.OMSTILLINGSSTOENAD -> {
-                when (val vedtakType = generellBrevData.forenkletVedtak.type) {
+                when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE ->
                         BrevkodePar(
                             OMS_FOERSTEGANGSVEDTAK_INNVILGELSE_UTFALL,
@@ -213,6 +218,7 @@ class BrevDataMapper(
                         }
 
                     VedtakType.TILBAKEKREVING -> BrevkodePar(TILBAKEKREVING_INNHOLD, TILBAKEKREVING_FERDIG)
+                    null -> BrevkodePar(EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV)
                 }
             }
         }
@@ -242,7 +248,7 @@ class BrevDataMapper(
     ): BrevData {
         return when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
-                when (val vedtakType = generellBrevData.forenkletVedtak.type) {
+                when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE ->
                         when (brukNyInnvilgelsesmal()) {
                             true -> {
@@ -321,11 +327,12 @@ class BrevDataMapper(
                         }
 
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
+                    null -> ManueltBrevData.fra(emptyList())
                 }
             }
 
             SakType.OMSTILLINGSSTOENAD -> {
-                when (val vedtakType = generellBrevData.forenkletVedtak.type) {
+                when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> {
                         coroutineScope {
                             val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
@@ -357,6 +364,7 @@ class BrevDataMapper(
                         }
 
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
+                    null -> ManueltBrevData.fra(emptyList())
                 }
             }
         }
@@ -496,10 +504,10 @@ class BrevDataMapper(
         brevdataFacade,
         brukerTokenInfo,
         generellBrevData.behandlingId,
-        requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {
+        requireNotNull(generellBrevData.forenkletVedtak?.virkningstidspunkt) {
             "brev for behandling=${generellBrevData.behandlingId} må ha virkningstidspunkt"
         },
-        generellBrevData.forenkletVedtak.type,
+        generellBrevData.forenkletVedtak?.type,
         generellBrevData.sak,
     )
 

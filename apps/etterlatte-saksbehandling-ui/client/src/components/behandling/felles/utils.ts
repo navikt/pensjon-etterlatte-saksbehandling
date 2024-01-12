@@ -1,7 +1,6 @@
 import { isAfter } from 'date-fns'
 import { IAdresse } from '~shared/types/IAdresse'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { IBehandlingsammendrag } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 import { JaNei } from '~shared/types/ISvar'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
@@ -67,16 +66,6 @@ export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
     status === IBehandlingStatus.AVBRUTT
   )
 }
-
-export const harIngenUavbrutteManuelleOpphoer = (behandlingliste: IBehandlingsammendrag[]): boolean =>
-  behandlingliste.every(
-    (behandling) =>
-      behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER || behandling.status === IBehandlingStatus.AVBRUTT
-  )
-
-export const kunIverksatteBehandlinger = (behandlingliste: IBehandlingsammendrag[]): IBehandlingsammendrag[] =>
-  behandlingliste.filter((behandling) => behandling.status === IBehandlingStatus.IVERKSATT)
-
 export const behandlingErIverksattEllerSamordnet = (behandlingStatus: IBehandlingStatus): boolean =>
   behandlingStatus === IBehandlingStatus.IVERKSATT ||
   behandlingStatus === IBehandlingStatus.SAMORDNET ||
@@ -96,23 +85,10 @@ export const behandlingSkalSendeBrev = (
         //revurderingsaarsak === Revurderingaarsak.REGULERING || TODO EY-3232 Fjern utkommentering
         (
           revurderingsaarsak === Revurderingaarsak.DOEDSFALL ||
-          revurderingsaarsak === Revurderingaarsak.OPPHOER_UTEN_BREV
+          revurderingsaarsak === Revurderingaarsak.OPPHOER_UTEN_BREV ||
+          revurderingsaarsak === Revurderingaarsak.ALDERSOVERGANG
         )
       )
-  }
-}
-
-export const manueltBrevKanRedigeres = (status: IBehandlingStatus): boolean => {
-  switch (status) {
-    case IBehandlingStatus.OPPRETTET:
-    case IBehandlingStatus.VILKAARSVURDERT:
-    case IBehandlingStatus.TRYGDETID_OPPDATERT:
-    case IBehandlingStatus.BEREGNET:
-    case IBehandlingStatus.AVKORTET:
-    case IBehandlingStatus.RETURNERT:
-      return true
-    default:
-      return false
   }
 }
 

@@ -9,13 +9,13 @@ import {
   lagreTrygdetidgrunnlag,
   OppdaterTrygdetidGrunnlag,
 } from '~shared/api/trygdetid'
-import React, { FormEvent, useState } from 'react'
+import React from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
-import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
-
 import { isFailureWithCode, isFailure, isPending } from '~shared/api/apiUtils'
+import { useForm } from 'react-hook-form'
+import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 
 type Props = {
   eksisterendeGrunnlag: ITrygdetidGrunnlag | undefined
@@ -26,35 +26,39 @@ type Props = {
 }
 
 const initialState = (type: ITrygdetidGrunnlagType) => {
-  return { type: type, bosted: '', poengInnAar: false, poengUtAar: false, prorata: true }
+  return { type: type, bosted: '', poengInnAar: false, poengUtAar: false, prorata: false }
 }
 
-export const TrygdetidGrunnlag: React.FC<Props> = ({
+export const TrygdetidGrunnlag = ({
   eksisterendeGrunnlag,
   setTrygdetid,
   avbryt,
   trygdetidGrunnlagType,
   landListe,
-}) => {
+}: Props) => {
   const { behandlingId } = useParams()
-  const [trygdetidgrunnlag, setTrygdetidgrunnlag] = useState<OppdaterTrygdetidGrunnlag>(
-    eksisterendeGrunnlag ? eksisterendeGrunnlag : initialState(trygdetidGrunnlagType)
-  )
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    control,
+    getValues,
+  } = useForm<OppdaterTrygdetidGrunnlag>({
+    defaultValues: eksisterendeGrunnlag ? eksisterendeGrunnlag : initialState(trygdetidGrunnlagType),
+  })
+
   const [trygdetidgrunnlagStatus, requestLagreTrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)
 
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault()
+  const onSubmit = (data: OppdaterTrygdetidGrunnlag) => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     requestLagreTrygdetidgrunnlag(
       {
         behandlingId: behandlingId,
-        trygdetidgrunnlag: trygdetidgrunnlag,
+        // Flippe verdi av prorata for å matche PESYS
+        trygdetidgrunnlag: { ...data, prorata: !data.prorata },
       },
       (respons) => {
-        const eksisterendeGrunnlag = respons.trygdetidGrunnlag.find(
-          (grunnlag) => grunnlag.type === trygdetidGrunnlagType
-        )
-        eksisterendeGrunnlag && setTrygdetidgrunnlag(eksisterendeGrunnlag)
         setTrygdetid(respons)
       }
     )
@@ -63,21 +67,21 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
   return (
     <TrygdetidGrunnlagWrapper>
       <Innhold>
-        <TrygdetidForm onSubmit={onSubmit}>
+        <TrygdetidForm onSubmit={handleSubmit((data) => onSubmit(data))}>
           <Rows>
             <FormWrapper>
               <Land>
                 <Select
+                  {...register('bosted', {
+                    required: {
+                      value: true,
+                      message: 'Obligatorisk',
+                    },
+                  })}
                   label="Land"
-                  value={trygdetidgrunnlag.bosted}
-                  key={`${trygdetidgrunnlag.bosted}-${trygdetidGrunnlagType}`}
-                  onChange={(e) =>
-                    setTrygdetidgrunnlag({
-                      ...trygdetidgrunnlag,
-                      bosted: e.target.value,
-                    })
-                  }
+                  key={`${getValues().bosted}-${trygdetidGrunnlagType}`}
                   autoComplete="off"
+                  error={errors.bosted?.message}
                 >
                   <option value="">Velg land</option>
                   {landListe.map((land) => (
@@ -89,93 +93,47 @@ export const TrygdetidGrunnlag: React.FC<Props> = ({
               </Land>
 
               <DatoSection>
-                <DatoVelger
-                  value={trygdetidgrunnlag.periodeFra == null ? undefined : new Date(trygdetidgrunnlag.periodeFra)}
-                  onChange={(date) =>
-                    setTrygdetidgrunnlag({
-                      ...trygdetidgrunnlag,
-                      periodeFra: formatDateToLocaleDateOrEmptyString(date),
-                    })
-                  }
+                <ControlledDatoVelger
+                  name="periodeFra"
                   label="Fra dato"
+                  control={control}
+                  errorVedTomInput="Obligatorisk"
                 />
               </DatoSection>
               <DatoSection>
-                <DatoVelger
-                  value={
-                    trygdetidgrunnlag.periodeTil === undefined ? undefined : new Date(trygdetidgrunnlag.periodeTil)
-                  }
-                  onChange={(date) =>
-                    setTrygdetidgrunnlag({
-                      ...trygdetidgrunnlag,
-                      periodeTil: formatDateToLocaleDateOrEmptyString(date),
-                    })
-                  }
+                <ControlledDatoVelger
+                  name="periodeTil"
                   label="Til dato"
+                  control={control}
+                  errorVedTomInput="Obligatorisk"
                 />
               </DatoSection>
             </FormWrapper>
 
             <FormWrapper>
               <Begrunnelse
-                value={trygdetidgrunnlag.begrunnelse ?? ''}
+                {...register('begrunnelse', {
+                  required: {
+                    value: true,
+                    message: 'Obligatorisk',
+                  },
+                })}
                 key={`begrunnelse-${trygdetidGrunnlagType}`}
-                onChange={(e) =>
-                  setTrygdetidgrunnlag({
-                    ...trygdetidgrunnlag,
-                    begrunnelse: e.target.value,
-                  })
-                }
+                error={errors.begrunnelse?.message}
               />
               {trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK && (
                 <>
-                  <PoengAar
-                    legend="Poeng i inn/ut år"
-                    value={[
-                      trygdetidgrunnlag.poengInnAar ? 'PIA' : '',
-                      trygdetidgrunnlag.poengUtAar ? 'PUA' : '',
-                    ].filter((val) => val !== '')}
-                  >
-                    <Checkbox
-                      value="PIA"
-                      key={`poeng-inn-aar-${trygdetidGrunnlagType}`}
-                      onChange={() => {
-                        setTrygdetidgrunnlag({
-                          ...trygdetidgrunnlag,
-                          poengInnAar: !trygdetidgrunnlag.poengInnAar!!,
-                        })
-                      }}
-                    >
+                  <PoengAar legend="Poeng i inn/ut år">
+                    <Checkbox {...register('poengInnAar')} value={getValues().poengInnAar}>
                       Poeng i inn år
                     </Checkbox>
-                    <Checkbox
-                      value="PUA"
-                      key={`poeng-ut-aar-${trygdetidGrunnlagType}`}
-                      onChange={() =>
-                        setTrygdetidgrunnlag({
-                          ...trygdetidgrunnlag,
-                          poengUtAar: !trygdetidgrunnlag.poengUtAar!!,
-                        })
-                      }
-                    >
+                    <Checkbox {...register('poengUtAar')} value={getValues().poengUtAar}>
                       Poeng i ut år
                     </Checkbox>
                   </PoengAar>
 
-                  <Prorata
-                    legend="Prorata"
-                    value={[!trygdetidgrunnlag.prorata ? 'IKKEPRORATA' : ''].filter((val) => val !== '')}
-                  >
-                    <Checkbox
-                      value="IKKEPRORATA"
-                      key={`prorata-${trygdetidGrunnlagType}`}
-                      onChange={() => {
-                        setTrygdetidgrunnlag({
-                          ...trygdetidgrunnlag,
-                          prorata: !trygdetidgrunnlag.prorata!!,
-                        })
-                      }}
-                    >
+                  <Prorata legend="Prorata">
+                    <Checkbox {...register('prorata')} value={getValues().prorata}>
                       Ikke med i prorata
                     </Checkbox>
                   </Prorata>

@@ -86,12 +86,8 @@ internal class BeregningsGrunnlagServiceTest {
                     Opplysningstype.FOEDSELSNUMMER to konstantOpplysning(nyligAvdoedFoedselsnummer),
                 ),
             )
-        return Grunnlag(
-            grunnlag.soeker,
-            grunnlag.familie + nyligAvdoed,
-            grunnlag.sak,
-            grunnlag.metadata,
-        )
+
+        return GrunnlagTestData(opplysningsmapAvdoedeOverrides = grunnlag.hentAvdoede() + nyligAvdoed).hentOpplysningsgrunnlag()
     }
 
     private fun <T : Any> konstantOpplysning(a: T): Opplysning.Konstant<JsonNode> {

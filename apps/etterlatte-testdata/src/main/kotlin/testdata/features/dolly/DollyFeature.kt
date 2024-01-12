@@ -9,6 +9,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
+import no.nav.etterlatte.brukerIdFraToken
 import no.nav.etterlatte.getDollyAccessToken
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.toJson
@@ -17,7 +18,6 @@ import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.DollyService
-import no.nav.etterlatte.usernameFraToken
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import testdata.features.soeknad.SoeknadMapper.opprettJsonMessage
@@ -34,8 +34,8 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
         get() = {
             get {
                 val accessToken = getDollyAccessToken()
-                logger.info("got accesstoken")
-                val gruppeId = dollyService.hentTestGruppe(usernameFraToken()!!, accessToken)
+
+                val gruppeId = dollyService.hentTestGruppeId(brukerIdFraToken()!!, accessToken)
 
                 call.respond(
                     MustacheContent(

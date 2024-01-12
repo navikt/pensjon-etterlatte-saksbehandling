@@ -11,9 +11,9 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.adresse.Norg2Epost
 import no.nav.etterlatte.brev.adresse.Norg2Klient
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
@@ -42,7 +42,7 @@ internal class Norg2KlientTest {
         assertEquals("LOKAL", enhet.type)
 
         val kontaktinfo = enhet.kontaktinfo!!
-        assertNull(kontaktinfo.epost)
+        assertEquals(Norg2Epost(adresse = "porsgrunn@nav.no", kommentar = "ingen", kunIntern = false), kontaktinfo.epost)
         assertEquals("55553333", kontaktinfo.telefonnummer)
         assertEquals("stedsadresse", kontaktinfo.postadresse!!.type)
         assertEquals("3915", kontaktinfo.postadresse!!.postnummer)

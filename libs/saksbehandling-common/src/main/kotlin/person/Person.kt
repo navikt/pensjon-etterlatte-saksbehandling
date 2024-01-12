@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.innsendtsoeknad.OppholdUtlandType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -186,12 +187,12 @@ data class GeografiskTilknytning(
 }
 
 interface Verge {
-    fun navn(): String
+    fun navn(): String?
 }
 
 data class Vergemaal(val mottaker: BrevMottaker) : Verge {
-    override fun navn(): String {
-        return mottaker.navn!!
+    override fun navn(): String? {
+        return mottaker.navn
     }
 }
 
@@ -205,7 +206,7 @@ data class ForelderVerge(val foedselsnummer: Folkeregisteridentifikator, val nav
 data class BrevMottaker(
     val navn: String?,
     val foedselsnummer: MottakerFoedselsnummer?,
-    val adresse: MottakerAdresse,
+    val adresse: MottakerAdresse?,
     val adresseTypeIKilde: String? = null,
 )
 
@@ -255,12 +256,34 @@ enum class AdressebeskyttelseGradering {
 
 fun List<AdressebeskyttelseGradering?>.hentPrioritertGradering() = this.filterNotNull().minOrNull() ?: AdressebeskyttelseGradering.UGRADERT
 
-fun hentRelevantVerge(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): VergemaalEllerFremtidsfullmakt? {
+fun hentRelevantVerge(
+    vergeListe: List<VergemaalEllerFremtidsfullmakt>?,
+    soekersFnr: Folkeregisteridentifikator?,
+): VergemaalEllerFremtidsfullmakt? {
     val oekonomisk =
-        vergeListe?.firstOrNull {
-            it.vergeEllerFullmektig.tjenesteomraade in alleVergeOmfangMedOekonomiskeInteresser
+        vergeListe?.firstOrNull { vergemaal ->
+            vergemaal.vergeEllerFullmektig.tjenesteomraade in alleVergeOmfangMedOekonomiskeInteresser &&
+                harVergensFnr(vergemaal, soekersFnr)
         }
-    return oekonomisk ?: vergeListe?.firstOrNull()
+
+    return oekonomisk ?: vergeListe?.firstOrNull { vergemaal ->
+        harVergensFnr(vergemaal, soekersFnr)
+    }
+}
+
+private fun harVergensFnr(
+    vergemaal: VergemaalEllerFremtidsfullmakt,
+    soekersFnr: Folkeregisteridentifikator?,
+): Boolean {
+    val manglerFnr = vergemaal.vergeEllerFullmektig.motpartsPersonident == null
+    if (manglerFnr) {
+        sikkerlogger()
+            .error(
+                "Et vergemål for person '${soekersFnr?.value}' i PDL mangler vergens fødselsnummer. " +
+                    "Vergens navn: ${vergemaal.vergeEllerFullmektig.navn}.",
+            )
+    }
+    return !manglerFnr
 }
 
 fun flereVergerMedOekonomiskInteresse(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): Boolean {

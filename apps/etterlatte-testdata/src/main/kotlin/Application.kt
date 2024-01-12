@@ -169,7 +169,7 @@ private fun Route.api() {
 
 fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.firstValidTokenClaims()?.get("NAVident")?.toString()
 
-fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() = call.firstValidTokenClaims()?.get("preferred_username")?.toString()
+fun PipelineContext<Unit, ApplicationCall>.brukerIdFraToken() = call.firstValidTokenClaims()?.get("oid")?.toString()
 
 fun getDollyAccessToken(): String =
     runBlocking {

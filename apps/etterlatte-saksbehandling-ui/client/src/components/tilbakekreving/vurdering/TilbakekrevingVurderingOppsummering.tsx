@@ -8,7 +8,7 @@ import { NOK } from '~utils/formattering'
 export function TilbakekrevingVurderingOppsummering({ behandling }: { behandling: TilbakekrevingBehandling }) {
   function sum(beloeper: (number | null)[]) {
     if (beloeper.length === 0) return 0
-    return beloeper.map((beloep) => (beloep ? beloep : 0)).reduce((sum, current) => (sum += current))
+    return beloeper.map((beloep) => (beloep ? beloep : 0)).reduce((sum, current) => sum + current)
   }
   const tilbakekreving = behandling.tilbakekreving
   const sumFeilutbetaling = sum(tilbakekreving.perioder.map((it) => it.ytelse.beregnetFeilutbetaling))

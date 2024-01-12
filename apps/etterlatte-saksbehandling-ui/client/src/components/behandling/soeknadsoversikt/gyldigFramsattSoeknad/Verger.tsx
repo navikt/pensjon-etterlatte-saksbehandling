@@ -47,7 +47,11 @@ export const Verger = ({ sakId, behandlingId }: Props) => {
             label="Verge"
             tekst={
               <>
-                <KopierbarVerdi value={it.vergeEllerFullmektig.motpartsPersonident!} />
+                {it.vergeEllerFullmektig.motpartsPersonident ? (
+                  <KopierbarVerdi value={it.vergeEllerFullmektig.motpartsPersonident!} />
+                ) : (
+                  'Fødselsnummer ikke registrert'
+                )}
                 <br />
                 {it.vergeEllerFullmektig.omfang &&
                   (omfangMap.get(it.vergeEllerFullmektig.omfang) ?? it.vergeEllerFullmektig.omfang)}

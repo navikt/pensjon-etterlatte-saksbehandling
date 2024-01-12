@@ -88,6 +88,8 @@ spec:
       value: https://gosys.intern.nav.no/gosys
     - name: RINA_URL
       value: http://rina-ss1.adeo.no
+    - name: NORG2_URL
+      value: https://norg2.prod-fss-pub.nais.io
     - name: APP_VERSION
       value: "{{ image }}"
   envFrom:

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 
 data class BehandlingsBehov(
     val sakId: Long,
@@ -17,4 +18,5 @@ data class NyBehandlingRequest(
     val pesysId: Long?,
     val enhet: String?,
     val foreldreloes: Boolean = false,
+    val gradering: AdressebeskyttelseGradering? = AdressebeskyttelseGradering.UGRADERT,
 )

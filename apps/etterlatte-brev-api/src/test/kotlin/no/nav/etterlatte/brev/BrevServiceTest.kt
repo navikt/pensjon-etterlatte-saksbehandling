@@ -3,8 +3,6 @@ package no.nav.etterlatte.brev
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -13,14 +11,10 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevService.BrevPayload
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
-import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
-import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.SakService
-import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataMapper
@@ -28,8 +22,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -48,22 +40,20 @@ internal class BrevServiceTest {
     private val brevbaker = mockk<BrevbakerKlient>()
     private val sakOgBehandlingService = mockk<BrevdataFacade>()
     private val sakService = mockk<SakService>()
-    private val soekerService = mockk<SoekerService>()
     private val adresseService = mockk<AdresseService>()
-    private val dokarkivService = mockk<DokarkivServiceImpl>()
+    private val journalfoerBrevService = mockk<JournalfoerBrevService>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
     private val brevDataMapper = mockk<BrevDataMapper>()
     private val brevDataFacade = mockk<BrevdataFacade>()
+    private val pdfGenerator = mockk<PDFGenerator>()
 
     private val brevService =
         BrevService(
             db,
             sakService,
-            soekerService,
             adresseService,
-            dokarkivService,
-            BrevbakerService(brevbaker, adresseService, brevDataMapper),
-            brevDataFacade,
+            journalfoerBrevService,
+            pdfGenerator,
         )
 
     private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null)
@@ -75,7 +65,7 @@ internal class BrevServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(db, sakOgBehandlingService, adresseService, dokarkivService, distribusjonService, brevbaker)
+        confirmVerified(db, sakOgBehandlingService, adresseService, journalfoerBrevService, distribusjonService, brevbaker)
     }
 
     @Nested
@@ -152,58 +142,6 @@ internal class BrevServiceTest {
             verify {
                 db.hentBrevPayload(brev.id)
                 db.hentBrevPayloadVedlegg(brev.id)
-            }
-        }
-    }
-
-    @Nested
-    inner class JournalfoeringAvBrev {
-        @Test
-        fun `Journalfoering fungerer som forventet`() {
-            val brev = opprettBrev(Status.FERDIGSTILT, BrevProsessType.MANUELL)
-            val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, "1234")
-            val journalpostResponse = OpprettJournalpostResponse("444", journalpostferdigstilt = true)
-
-            coEvery { sakService.hentSak(any(), any()) } returns sak
-            coEvery { dokarkivService.journalfoer(any<Brev>(), any()) } returns journalpostResponse
-            every { db.hentBrev(any()) } returns brev
-            every { db.settBrevJournalfoert(any(), any()) } returns true
-
-            val faktiskJournalpostId =
-                runBlocking {
-                    brevService.journalfoer(brev.id, bruker)
-                }
-
-            faktiskJournalpostId shouldBe journalpostResponse.journalpostId
-
-            verify {
-                db.hentBrev(brev.id)
-                db.settBrevJournalfoert(brev.id, journalpostResponse)
-            }
-            coVerify {
-                sakService.hentSak(sak.id, bruker)
-                dokarkivService.journalfoer(brev, sak)
-            }
-        }
-
-        @ParameterizedTest
-        @EnumSource(
-            Status::class,
-            mode = EnumSource.Mode.EXCLUDE,
-            names = ["FERDIGSTILT"],
-        )
-        fun `Journalfoering feiler hvis status er feil`(status: Status) {
-            val brev = opprettBrev(status, BrevProsessType.MANUELL)
-            every { db.hentBrev(any()) } returns brev
-
-            runBlocking {
-                assertThrows<IllegalStateException> {
-                    brevService.journalfoer(brev.id, bruker)
-                }
-            }
-
-            verify {
-                db.hentBrev(brev.id)
             }
         }
     }

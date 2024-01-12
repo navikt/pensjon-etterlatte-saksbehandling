@@ -50,7 +50,7 @@ spec:
       memory: 640Mi
     requests:
       cpu: 20m
-      memory: 320Mi
+      memory: 384Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -97,6 +97,9 @@ spec:
           permissions:
             roles:
               - samordning-write
+        - application: azure-token-generator
+          namespace: aura
+          cluster: dev-gcp
     outbound:
       rules:
         - application: etterlatte-vilkaarsvurdering

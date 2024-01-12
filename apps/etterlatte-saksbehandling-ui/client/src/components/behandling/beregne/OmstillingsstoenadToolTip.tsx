@@ -1,11 +1,11 @@
-import { useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { BodyShort, Button, Popover } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { InformationSquareIcon } from '@navikt/aksel-icons'
 
 export const OmstillingsstoenadToolTip = (props: {
   title: string
-  children: string | JSX.Element | (string | JSX.Element)[]
+  children: string | React.JSX.Element | (string | React.JSX.Element)[]
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const ref = useRef(null)

@@ -47,13 +47,11 @@ spec:
     - secret: etterlatte-secrets
     - secret: my-application-unleash-api-token
   resources:
-    limits:
-      memory: 4096Mi
     requests:
-      cpu: 2000m
-      memory: 640Mi
+      cpu: 40m
+      memory: 384Mi
   replicas:
-    cpuThresholdPercentage: 95
+    cpuThresholdPercentage: 90
     max: 1
     min: 1
   env:

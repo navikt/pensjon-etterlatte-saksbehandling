@@ -32,13 +32,13 @@ const initialEndreModusState = {
   trygdetidGrunnlagId: '',
 }
 
-export const TrygdetidGrunnlagListe: React.FC<Props> = ({
+export const TrygdetidGrunnlagListe = ({
   trygdetid,
   setTrygdetid,
   trygdetidGrunnlagType,
   landListe,
   redigerbar,
-}) => {
+}: Props) => {
   const [endreModus, setEndreModus] = useState(initialEndreModusState)
   const trygdetidGrunnlagListe = trygdetid.trygdetidGrunnlag
     .filter((tg) => tg.type == trygdetidGrunnlagType)

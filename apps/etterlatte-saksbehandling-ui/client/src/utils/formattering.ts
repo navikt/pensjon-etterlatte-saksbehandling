@@ -15,8 +15,6 @@ export const formaterEnumTilLesbarString = (string: string): string => {
   return storForbokstav.replace('_', ' ')
 }
 
-export const formaterDatoTilYearMonth = (dato: Date | null) => (dato ? format(dato, 'yyyy-MM').toString() : '')
-
 export const formaterDato = (dato: Date) => format(dato, 'dd.MM.yyyy').toString()
 
 export const formaterStringDato = (dato: string) => format(new Date(dato), 'dd.MM.yyyy').toString()

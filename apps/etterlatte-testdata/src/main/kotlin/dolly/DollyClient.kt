@@ -16,7 +16,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 interface DollyClient {
-    suspend fun hentDollyBrukere(accessToken: String): List<Bruker>
+    suspend fun hentDollyBruker(
+        brukerId: String,
+        accessToken: String,
+    ): Bruker?
 
     suspend fun hentBrukersGrupper(
         brukerId: String,
@@ -52,9 +55,12 @@ class DollyClientImpl(config: Config, private val httpClient: HttpClient) : Doll
 
     private val dollyUrl = config.getString("dolly.resource.url")
 
-    override suspend fun hentDollyBrukere(accessToken: String): List<Bruker> {
-        logger.info("henter dollyting på url: $dollyUrl")
-        return httpClient.get("$dollyUrl/bruker") {
+    override suspend fun hentDollyBruker(
+        brukerId: String,
+        accessToken: String,
+    ): Bruker? {
+        logger.info("Henter bruker med id=$brukerId fra Dolly ")
+        return httpClient.get("$dollyUrl/bruker/$brukerId") {
             header(HttpHeaders.Authorization, "Bearer $accessToken")
         }.body()
     }

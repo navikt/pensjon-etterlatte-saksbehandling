@@ -4,6 +4,7 @@ import sourceMap, { NullableMappedPosition } from 'source-map'
 import * as fs from 'fs'
 import { parseJwt } from '../utils/parsejwt'
 import { sanitize, sanitizeUrl } from '../utils/sanitize'
+/* eslint @typescript-eslint/no-explicit-any: 0 */ // --> OFF
 
 export const loggerRouter = express.Router()
 
@@ -43,7 +44,7 @@ loggerRouter.post('/', express.json(), (req, res) => {
     frontendLogger.info('Frontendlogging: ', JSON.stringify(logEvent))
   } else {
     if (logEvent.stackInfo && isStackInfoValid(logEvent.stackInfo)) {
-      sourceMapMapper(logEvent.stackInfo!!)
+      sourceMapMapper(logEvent.stackInfo!)
         .then((position) => {
           const message = logEvent.stackInfo?.message
           const stackInfoError = JSON.stringify(logEvent.stackInfo?.error)

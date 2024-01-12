@@ -81,6 +81,14 @@ class PesysRepositoryTest {
         assertEquals(Migreringsstatus.UNDER_MIGRERING_MANUELT, manuellMigrering)
     }
 
+    @Test
+    fun `Lagre gyldige dry runs flere ganger`() {
+        val pesyssak = pesysSak(123L)
+        repository.lagrePesyssak(pesyssak)
+        repository.lagreGyldigDryRun(pesyssak.tilMigreringsrequest())
+        repository.lagreGyldigDryRun(pesyssak.tilMigreringsrequest())
+    }
+
     private fun sakMedKobling(
         pesyssak: Pesyssak,
         behandlingsId: UUID,

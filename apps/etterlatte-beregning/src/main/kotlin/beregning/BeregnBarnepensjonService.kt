@@ -79,9 +79,8 @@ class BeregnBarnepensjonService(
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
 
         val beregningsGrunnlag =
-            requireNotNull(
-                beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, brukerTokenInfo),
-            ) { "Behandling ${behandling.id} mangler beregningsgrunnlag" }
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, brukerTokenInfo)
+                ?: throw BeregningsgrunnlagMangler(behandling.id)
 
         val trygdetid =
             try {
@@ -181,14 +180,12 @@ class BeregnBarnepensjonService(
                             )
 
                             val grunnbeloep =
-                                requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)) {
-                                    "Anvendt grunnbeløp ikke funnet for perioden"
-                                }
+                                periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)
+                                    ?: throw AnvendtGrunnbeloepIkkeFunnet()
 
                             val trygdetid =
-                                requireNotNull(periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)) {
-                                    "Anvendt trygdetid ikke funnet for perioden"
-                                }
+                                periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)
+                                    ?: throw AnvendtTrygdetidIkkeFunnet()
 
                             val trygdetidGrunnlagForPeriode =
                                 beregningsgrunnlag.avdoedesTrygdetid.finnGrunnlagForPeriode(

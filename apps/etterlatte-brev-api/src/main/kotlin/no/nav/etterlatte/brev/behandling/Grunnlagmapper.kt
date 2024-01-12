@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
@@ -20,7 +19,9 @@ import no.nav.etterlatte.libs.common.grunnlag.hentVergeadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentVergemaalellerfremtidsfullmakt
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.ForelderVerge
+import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.Verge
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
@@ -85,11 +86,15 @@ fun Grunnlag.mapSpraak(): Spraak =
 
 fun Grunnlag.mapVerge(
     sakType: SakType,
-    behandlingId: UUID,
+    behandlingId: UUID?,
     brevutfallDto: BrevutfallDto?,
 ): Verge? =
     with(this) {
-        val relevantVerge = hentRelevantVerge(soeker.hentVergemaalellerfremtidsfullmakt()?.verdi)
+        val relevantVerge =
+            hentRelevantVerge(
+                soeker.hentVergemaalellerfremtidsfullmakt()?.verdi,
+                soeker.hentFoedselsnummer()?.verdi,
+            )
         if (relevantVerge != null) {
             return hentVergemaal(relevantVerge, behandlingId)
         }
@@ -142,20 +147,36 @@ private fun forelderVerge(gjenlevende: Grunnlagsdata<JsonNode>): ForelderVerge? 
 
 private fun Grunnlag.hentVergemaal(
     pdlVerge: VergemaalEllerFremtidsfullmakt,
-    behandlingId: UUID,
+    behandlingId: UUID?,
 ): Vergemaal {
     val vergeadresse = sak.hentVergeadresse()?.verdi
 
-    if (vergeadresse?.navn == null && pdlVerge.vergeEllerFullmektig.navn == null) {
-        throw VergeManglerNavnException(behandlingId)
+    val vergesNavn = vergeadresse?.navn ?: pdlVerge.vergeEllerFullmektig.navn
+    val vergesFoedselsnummer = pdlVerge.vergeEllerFullmektig.motpartsPersonident!!.value
+    if (vergesNavn == null) {
+        logger.warn("Finner ikke navn for verge i behandling med id=$behandlingId")
+        return vergemaalUtenAdresse(vergesNavn, vergesFoedselsnummer)
     }
     if (vergeadresse == null) {
-        throw VergeManglerAdresseException(behandlingId)
+        logger.warn("Finner ikke adresse for verge i behandling med id=$behandlingId")
+        return vergemaalUtenAdresse(vergesNavn, vergesFoedselsnummer)
     }
     return Vergemaal(
-        mottaker = vergeadresse.copy(navn = vergeadresse.navn ?: pdlVerge.vergeEllerFullmektig.navn!!),
+        mottaker = vergeadresse.copy(navn = vergesNavn),
     )
 }
+
+private fun vergemaalUtenAdresse(
+    vergesNavn: String?,
+    vergesFoedselsnummer: String,
+) = Vergemaal(
+    mottaker =
+        BrevMottaker(
+            vergesNavn,
+            foedselsnummer = MottakerFoedselsnummer(vergesFoedselsnummer),
+            adresse = null,
+        ),
+)
 
 private fun Navn.fulltNavn(): String = listOfNotNull(fornavn, mellomnavn, etternavn).joinToString(" ") { it.storForbokstav() }
 
@@ -179,11 +200,3 @@ private fun Grunnlag.erOver18(brevutfallDto: BrevutfallDto?): Boolean {
         }.verdi.plusYears(18)
     return LocalDate.now() >= dato18Aar
 }
-
-class VergeManglerNavnException(
-    behandlingId: UUID,
-) : InternfeilException("Finner ikke navn for verge i behandling med id=$behandlingId")
-
-class VergeManglerAdresseException(
-    behandlingId: UUID,
-) : InternfeilException("Finner ikke adresse for verge i behandling med id=$behandlingId")

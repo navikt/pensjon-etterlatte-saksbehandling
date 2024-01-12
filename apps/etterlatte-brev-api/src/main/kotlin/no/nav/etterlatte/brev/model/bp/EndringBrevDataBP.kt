@@ -53,7 +53,7 @@ data class SoeskenjusteringRevurderingBrevdata(
             val revurderingsinfo =
                 valider<RevurderingInfo.Soeskenjustering>(
                     generellBrevData.revurderingsaarsak,
-                    generellBrevData.forenkletVedtak.revurderingInfo,
+                    generellBrevData.forenkletVedtak?.revurderingInfo,
                     Revurderingaarsak.SOESKENJUSTERING,
                 )
 

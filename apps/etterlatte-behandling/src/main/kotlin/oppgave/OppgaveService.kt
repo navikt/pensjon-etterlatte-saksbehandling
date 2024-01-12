@@ -379,16 +379,6 @@ class OppgaveService(
         )
     }
 
-    fun hentFerdigstiltAttesteringsOppgave(referanse: String): String? {
-        val oppgaverForBehandlingUtenAttesterting =
-            oppgaveDao.hentOppgaverForReferanse(referanse)
-                .filter {
-                    it.type === OppgaveType.ATTESTERING &&
-                        it.erFerdigstilt()
-                }
-        return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
-    }
-
     fun hentSisteSaksbehandlerIkkeAttestertOppgave(referanse: String): String? {
         val oppgaverForBehandlingUtenAttesterting =
             oppgaveDao.hentOppgaverForReferanse(referanse)

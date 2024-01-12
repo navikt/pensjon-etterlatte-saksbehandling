@@ -55,6 +55,7 @@ import no.nav.etterlatte.token.Systembruker
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -247,7 +248,11 @@ internal class BeregnBarnepensjonServiceTest {
                 any(),
                 any(),
             )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER))
+        } returns
+            barnepensjonBeregningsGrunnlag(
+                behandling.id,
+                listOf(HELSOESKEN_FOEDSELSNUMMER, HELSOESKEN2_FOEDSELSNUMMER),
+            )
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
 
         runBlocking {
@@ -308,6 +313,26 @@ internal class BeregnBarnepensjonServiceTest {
                     soeskenFlokk shouldBe emptyList()
                     trygdetid shouldBe MAKS_TRYGDETID
                 }
+            }
+        }
+    }
+
+    @Test
+    fun `Kaster feil hvis beregningsgrunnlag mangler`() {
+        val behandling = mockBehandling(BehandlingType.REVURDERING)
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery {
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
+                any(),
+                any(),
+            )
+        } returns null
+
+        runBlocking {
+            assertThrows<BeregningsgrunnlagMangler> {
+                beregnBarnepensjonService().beregn(behandling, bruker)
             }
         }
     }
@@ -598,22 +623,17 @@ internal class BeregnBarnepensjonServiceTest {
     }
 
     private fun grunnlagMedEkstraAvdoedForelder(doedsdato: LocalDate): Grunnlag {
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        val grunnlagEnAvdoed = GrunnlagTestData().hentOpplysningsgrunnlag()
         val nyligAvdoedFoedselsnummer = AVDOED2_FOEDSELSNUMMER
-        val nyligAvdoed: List<Grunnlagsdata<JsonNode>> =
-            listOf(
-                mapOf(
-                    Opplysningstype.DOEDSDATO to konstantOpplysning(doedsdato),
-                    Opplysningstype.PERSONROLLE to konstantOpplysning(AVDOED),
-                    Opplysningstype.FOEDSELSNUMMER to konstantOpplysning(nyligAvdoedFoedselsnummer),
-                ),
+        val nyligAvdoed: Grunnlagsdata<JsonNode> =
+            mapOf(
+                Opplysningstype.DOEDSDATO to konstantOpplysning(doedsdato),
+                Opplysningstype.PERSONROLLE to konstantOpplysning(AVDOED),
+                Opplysningstype.FOEDSELSNUMMER to konstantOpplysning(nyligAvdoedFoedselsnummer),
             )
-        return Grunnlag(
-            grunnlag.soeker,
-            grunnlag.familie + nyligAvdoed,
-            grunnlag.sak,
-            grunnlag.metadata,
-        )
+        return GrunnlagTestData(
+            opplysningsmapAvdoedeOverrides = listOf(nyligAvdoed) + grunnlagEnAvdoed.hentAvdoede(),
+        ).hentOpplysningsgrunnlag()
     }
 
     private fun <T : Any> konstantOpplysning(a: T): Opplysning.Konstant<JsonNode> {

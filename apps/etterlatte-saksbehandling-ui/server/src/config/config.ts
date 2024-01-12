@@ -63,7 +63,7 @@ const LOKAL_API_CONFIG = () => {
   }
 }
 
-function requireEnvValue(key: string): string {
+export function requireEnvValue(key: string): string {
   const envValue = process.env[key]
   if (envValue) {
     return envValue

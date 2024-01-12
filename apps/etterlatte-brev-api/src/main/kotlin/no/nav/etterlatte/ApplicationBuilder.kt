@@ -6,7 +6,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.MigreringBrevDataService
+import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
@@ -30,7 +32,6 @@ import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
 import no.nav.etterlatte.brev.hentinformasjon.SakService
-import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
@@ -41,7 +42,6 @@ import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -60,8 +60,7 @@ import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForOmregningNyRegelRiver
-import no.nav.etterlatte.rivers.migrering.SUM
-import no.nav.etterlatte.rivers.migrering.UTLANDSTILKNYTNINGTYPE
+import no.nav.etterlatte.rivers.migrering.behandlingerAaJournalfoereBrevFor
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -141,8 +140,8 @@ class ApplicationBuilder {
 
     private val distribusjonKlient =
         DistribusjonKlient(httpClient("DOKDIST_SCOPE", false), env.requireEnvValue("DOKDIST_URL"))
-    private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
+    private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
     private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
@@ -153,22 +152,11 @@ class ApplicationBuilder {
 
     private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
 
-    private val soekerService = SoekerService(grunnlagKlient)
-
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
-    private val brevService =
-        BrevService(
-            db,
-            sakService,
-            soekerService,
-            adresseService,
-            dokarkivService,
-            brevbakerService,
-            brevdataFacade,
-        )
-
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
+
+    private val pdfGenerator = PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
@@ -176,11 +164,21 @@ class ApplicationBuilder {
             brevdataFacade,
             vedtaksvurderingService,
             adresseService,
-            dokarkivService,
             brevbakerService,
             brevDataMapper,
             brevProsessTypeFactory,
             migreringBrevDataService,
+            pdfGenerator,
+        )
+    private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
+
+    private val brevService =
+        BrevService(
+            db,
+            sakService,
+            adresseService,
+            journalfoerBrevService,
+            pdfGenerator,
         )
 
     private val journalpostService =
@@ -207,12 +205,12 @@ class ApplicationBuilder {
                     },
                 )
                 OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
-                FiksEnkeltbrevRiver(this, vedtaksbrevService, vedtaksvurderingService)
+                FiksEnkeltbrevRiver(this, vedtaksvurderingService)
                     .also { fiksEnkeltbrev() }
 
                 OpprettVedtaksbrevForOmregningNyRegelRiver(this, vedtaksbrevService)
 
-                JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
+                JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)
                 DistribuerBrevRiver(this, brevdistribuerer)
             }
@@ -220,7 +218,7 @@ class ApplicationBuilder {
     private fun fiksEnkeltbrev() {
         thread {
             Thread.sleep(60_000)
-            behandlingerAaLageBrevFor.forEach {
+            behandlingerAaJournalfoereBrevFor.forEach {
                 rapidsConnection.publish(
                     message = lagMelding(behandlingId = it),
                     key = UUID.randomUUID().toString(),
@@ -230,21 +228,14 @@ class ApplicationBuilder {
         }
     }
 
-    private fun lagMelding(behandlingId: Triple<String, Int, UtlandstilknytningType>) =
+    private fun lagMelding(behandlingId: String) =
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
-                BEHANDLING_ID_KEY to behandlingId.first,
+                BEHANDLING_ID_KEY to behandlingId,
                 FIKS_BREV_MIGRERING to true,
-                SUM to behandlingId.second,
-                UTLANDSTILKNYTNINGTYPE to behandlingId.third.name,
             ),
         ).toJson()
-
-    private val behandlingerAaLageBrevFor =
-        listOf<Triple<String, Int, UtlandstilknytningType>>(
-            Triple("68c4b1a7-c332-4305-9d90-85a2144abf9d", 2471, UtlandstilknytningType.UTLANDSTILSNITT),
-        )
 
     private fun featureToggleProperties(config: Config) =
         FeatureToggleProperties(

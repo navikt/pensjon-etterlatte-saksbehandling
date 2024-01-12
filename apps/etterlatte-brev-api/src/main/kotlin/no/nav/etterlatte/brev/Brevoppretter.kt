@@ -55,7 +55,7 @@ class Brevoppretter(
             }
         }
 
-        return opprettBrev(sakId, behandlingId, brukerTokenInfo, automatiskMigreringRequest)
+        return opprettBrev(sakId, behandlingId, brukerTokenInfo, automatiskMigreringRequest).first
     }
 
     suspend fun opprettBrev(
@@ -63,7 +63,7 @@ class Brevoppretter(
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
-    ): Brev =
+    ): Pair<Brev, GenerellBrevData> =
         with(hentInnData(sakId, behandlingId, bruker, automatiskMigreringRequest)) {
             val nyttBrev =
                 OpprettNyttBrev(
@@ -76,7 +76,7 @@ class Brevoppretter(
                     innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
                 )
-            return db.opprettBrev(nyttBrev)
+            return Pair(db.opprettBrev(nyttBrev), generellBrevData)
         }
 
     suspend fun hentNyttInnhold(

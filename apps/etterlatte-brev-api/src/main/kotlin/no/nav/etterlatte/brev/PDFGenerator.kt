@@ -20,7 +20,6 @@ import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -113,10 +112,7 @@ class PDFGenerator(
                 brev.tittel,
             )
         }
-        return when (
-            generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
-                automatiskMigreringRequest?.erOmregningGjenny ?: false
-        ) {
+        return when (generellBrevData.erMigrering() || automatiskMigreringRequest?.erOmregningGjenny ?: false) {
             false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
             true ->
                 OmregnetBPNyttRegelverkFerdig(

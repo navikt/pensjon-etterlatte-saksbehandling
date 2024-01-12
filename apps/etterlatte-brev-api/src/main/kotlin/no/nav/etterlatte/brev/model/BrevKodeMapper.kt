@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.model
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -23,7 +22,7 @@ class BrevKodeMapper(private val featureToggleService: FeatureToggleService) {
         generellBrevData: GenerellBrevData,
         erOmregningNyRegel: Boolean = false,
     ): BrevkodePar {
-        if (generellBrevData.systemkilde == Vedtaksloesning.PESYS || erOmregningNyRegel) {
+        if (generellBrevData.erMigrering() || erOmregningNyRegel) {
             assert(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(generellBrevData.forenkletVedtak?.type))
             return BrevkodePar(
                 EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,

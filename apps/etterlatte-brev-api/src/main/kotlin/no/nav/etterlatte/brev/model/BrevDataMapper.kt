@@ -29,7 +29,6 @@ import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -106,7 +105,7 @@ class BrevDataMapper(
 ) {
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
         when (
-            redigerbarTekstRequest.generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
+            redigerbarTekstRequest.generellBrevData.erMigrering() ||
                 redigerbarTekstRequest.migrering?.erOmregningGjenny ?: false
         ) {
             false ->

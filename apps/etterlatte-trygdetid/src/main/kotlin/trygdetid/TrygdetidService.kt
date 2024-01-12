@@ -815,8 +815,7 @@ class TrygdetidServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): OpplysningerDifferanse {
         if (
-            trygdetid.beregnetTrygdetid?.resultat?.overstyrt.let { it != null && it } &&
-            trygdetid.opplysninger.isEmpty()
+            trygdetid.beregnetTrygdetid?.resultat?.overstyrt.let { it != null && it }
         ) {
             return OpplysningerDifferanse(
                 differanse = false,

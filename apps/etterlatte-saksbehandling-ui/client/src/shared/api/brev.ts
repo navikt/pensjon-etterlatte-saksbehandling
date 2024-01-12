@@ -35,6 +35,9 @@ export const oppdaterTittel = async (args: {
 }): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/${args.brevId}/tittel?sakId=${args.sakId}`, { tittel: args.tittel })
 
+export const slettBrev = async (args: { brevId: number; sakId: number }): Promise<ApiResponse<IBrev>> =>
+  apiClient.delete(`/brev/${args.brevId}?sakId=${args.sakId}`)
+
 export const genererPdf = async (props: {
   brevId: number
   sakId?: number

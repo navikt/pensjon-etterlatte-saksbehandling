@@ -149,6 +149,17 @@ class BrevService(
         bruker: BrukerTokenInfo,
     ) = journalfoerBrevService.journalfoer(id, bruker)
 
+    fun slett(
+        id: BrevID,
+        bruker: BrukerTokenInfo,
+    ) {
+        logger.info("Forsøker sletting av brev med id=$id")
+        sjekkOmBrevKanEndres(id)
+
+        val result = db.settBrevSlettet(id, bruker)
+        logger.info("Brev med id=$id slettet=$result")
+    }
+
     private fun sjekkOmBrevKanEndres(brevID: BrevID) {
         val brev = db.hentBrev(brevID)
         if (!brev.kanEndres()) {

@@ -181,6 +181,43 @@ internal class BrevServiceTest {
         }
     }
 
+    @Nested
+    inner class SlettingAvBrev {
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Sletting av brev som er under arbeid skal virke`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+
+            every { db.hentBrev(any()) } returns brev
+
+            brevService.slett(brev.id, bruker)
+
+            verify {
+                db.hentBrev(brev.id)
+                db.settBrevSlettet(brev.id, bruker)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.EXCLUDE)
+        fun `Brev som ikke lenger er under arbeid skal IKKE kunne slettes`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<IllegalStateException> {
+                brevService.slett(brev.id, bruker)
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+            verify(exactly = 0) {
+                db.settBrevSlettet(any(), any())
+            }
+        }
+    }
+
     private fun opprettBrev(
         status: Status,
         prosessType: BrevProsessType,

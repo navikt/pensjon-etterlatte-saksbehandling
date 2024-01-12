@@ -17,6 +17,7 @@ import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
+import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
@@ -65,6 +67,14 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             val klage: Klage =
                 client.post("/api/klage/opprett/${sak.id}") {
                     addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        InnkommendeKlage(
+                            mottattDato = LocalDate.now(),
+                            journalpostId = "",
+                            innsender = "En klager",
+                        ),
+                    )
                 }.body()
             val response =
                 client.get("/api/klage/${klage.id}") {
@@ -112,6 +122,14 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             val klage: Klage =
                 client.post("/api/klage/opprett/${sak.id}") {
                     addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        InnkommendeKlage(
+                            mottattDato = LocalDate.now(),
+                            journalpostId = "",
+                            innsender = "En klager",
+                        ),
+                    )
                 }.body()
             val response =
                 client.get("/api/klage/${klage.id}") {

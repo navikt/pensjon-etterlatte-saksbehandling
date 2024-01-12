@@ -814,6 +814,16 @@ class TrygdetidServiceImpl(
         trygdetid: Trygdetid,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpplysningerDifferanse {
+        if (
+            trygdetid.beregnetTrygdetid?.resultat?.overstyrt.let { it != null && it } &&
+            trygdetid.opplysninger.isEmpty()
+        ) {
+            return OpplysningerDifferanse(
+                differanse = false,
+                GrunnlagOpplysningerDto.tomt(),
+            )
+        }
+
         val nyAvdoedGrunnlag =
             grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).hentAvdoede()
                 .firstOrNull { it.hentFoedselsnummer()?.verdi?.value == trygdetid.ident }

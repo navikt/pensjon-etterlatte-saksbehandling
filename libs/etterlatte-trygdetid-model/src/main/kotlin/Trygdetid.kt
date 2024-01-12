@@ -31,7 +31,17 @@ data class GrunnlagOpplysningerDto(
     val avdoedFoedselsdato: OpplysningsgrunnlagDto?,
     val avdoedFylteSeksten: OpplysningsgrunnlagDto?,
     val avdoedFyllerSeksti: OpplysningsgrunnlagDto?,
-)
+) {
+    companion object {
+        fun tomt() =
+            GrunnlagOpplysningerDto(
+                null,
+                null,
+                null,
+                null,
+            )
+    }
+}
 
 data class OpplysningsgrunnlagDto(
     val opplysning: JsonNode,

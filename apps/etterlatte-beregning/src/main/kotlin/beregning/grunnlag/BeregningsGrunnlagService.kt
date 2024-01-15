@@ -76,9 +76,9 @@ class BeregningsGrunnlagService(
 
                 val soeskenMedIBeregning =
                     barnepensjonBeregningsGrunnlag.soeskenMedIBeregning.ifEmpty {
-                        when (val virkningstidspunkt = behandling.virkningstidspunkt) {
+                        when (behandling.virkningstidspunkt) {
                             null -> throw RuntimeException("Kan ikke lagre default soeskenjustering uten virkningstidspunkt")
-                            else -> listOf(GrunnlagMedPeriode(emptyList(), virkningstidspunkt.dato.atDay(1), null))
+                            else -> emptyList()
                         }
                     }
 

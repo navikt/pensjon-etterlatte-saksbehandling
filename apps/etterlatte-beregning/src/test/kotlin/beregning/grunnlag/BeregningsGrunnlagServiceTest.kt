@@ -462,53 +462,6 @@ internal class BeregningsGrunnlagServiceTest {
     }
 
     @Test
-    fun `skal lagre default soeksken med i beregning hvis det er tom`() {
-        val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> = emptyList()
-
-        val institusjonsoppholdBeregningsgrunnlag =
-            listOf(
-                GrunnlagMedPeriode(
-                    fom = LocalDate.of(2022, 8, 1),
-                    tom = null,
-                    data = InstitusjonsoppholdBeregningsgrunnlag(Reduksjon.NEI_KORT_OPPHOLD),
-                ),
-            )
-
-        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
-
-        val slot = slot<BeregningsGrunnlag>()
-
-        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
-        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
-        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
-        every { beregningsGrunnlagRepository.lagre(capture(slot)) } returns true
-        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
-        runBlocking {
-            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
-                randomUUID(),
-                BarnepensjonBeregningsGrunnlag(soeskenMedIBeregning, institusjonsoppholdBeregningsgrunnlag),
-                mockk {
-                    every { ident() } returns "Z123456"
-                },
-            )
-
-            assertEquals(
-                listOf<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>>(
-                    GrunnlagMedPeriode(
-                        fom = behandling.virkningstidspunkt!!.dato.atDay(1),
-                        tom = null,
-                        data = emptyList(),
-                    ),
-                ),
-                slot.captured.soeskenMedIBeregning,
-            )
-
-            verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
-        }
-    }
-
-    @Test
     fun `skal lagre beregningsmetode`() {
         val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
         val slot = slot<BeregningsGrunnlag>()

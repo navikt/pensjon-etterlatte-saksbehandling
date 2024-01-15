@@ -62,7 +62,6 @@ import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForOmregningNyRegelRiver
 import no.nav.etterlatte.rivers.migrering.SUM
-import no.nav.etterlatte.rivers.migrering.UTLANDSTILKNYTNINGTYPE
 import no.nav.etterlatte.rivers.migrering.behandlingerAaJournalfoereBrevFor
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -231,14 +230,13 @@ class ApplicationBuilder {
         }
     }
 
-    private fun lagMelding(behandlingId: Triple<String, Int, UtlandstilknytningType>) =
+    private fun lagMelding(behandlingId: Triple<String, Int, UtlandstilknytningType?>) =
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
                 BEHANDLING_ID_KEY to behandlingId.first,
                 FIKS_BREV_MIGRERING to true,
                 SUM to behandlingId.second,
-                UTLANDSTILKNYTNINGTYPE to behandlingId.third.name,
             ),
         ).toJson()
 

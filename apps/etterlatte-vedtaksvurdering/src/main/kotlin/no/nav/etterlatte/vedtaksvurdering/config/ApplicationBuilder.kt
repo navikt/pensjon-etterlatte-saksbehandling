@@ -5,14 +5,19 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.jobs.MetrikkerJob
+import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
 import no.nav.etterlatte.vedtaksvurdering.AutomatiskBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingService
 import no.nav.etterlatte.vedtaksvurdering.VedtakSamordningService
@@ -33,6 +38,8 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import rapidsandrivers.getRapidEnv
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -92,6 +99,16 @@ class ApplicationBuilder {
             behandlingKlient,
         )
 
+    val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), httpClient())
+    private val metrikkerJob: MetrikkerJob by lazy {
+        MetrikkerJob(
+            VedtakMetrics(VedtakMetrikkerDao.using(dataSource)),
+            leaderElectionKlient,
+            Duration.of(10, ChronoUnit.MINUTES).toMillis(),
+            periode = Duration.of(5, ChronoUnit.MINUTES),
+        )
+    }
+
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(getRapidEnv()))
             .withKtorModule {
@@ -100,6 +117,7 @@ class ApplicationBuilder {
                     automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient)
                     samordningsvedtakRoute(vedtakSamordningService)
                     tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
+                    metrikkerJob.schedule().also { addShutdownHook(it) }
                 }
             }
             .build()

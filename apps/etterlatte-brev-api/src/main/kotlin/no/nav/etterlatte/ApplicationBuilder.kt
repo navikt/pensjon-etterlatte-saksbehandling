@@ -42,7 +42,6 @@ import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -61,7 +60,6 @@ import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForOmregningNyRegelRiver
-import no.nav.etterlatte.rivers.migrering.SUM
 import no.nav.etterlatte.rivers.migrering.behandlingerAaJournalfoereBrevFor
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -207,7 +205,7 @@ class ApplicationBuilder {
                     },
                 )
                 OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
-                FiksEnkeltbrevRiver(this, vedtaksbrevService, vedtaksvurderingService)
+                FiksEnkeltbrevRiver(this, vedtaksvurderingService)
                     .also { fiksEnkeltbrev() }
 
                 OpprettVedtaksbrevForOmregningNyRegelRiver(this, vedtaksbrevService)
@@ -230,13 +228,12 @@ class ApplicationBuilder {
         }
     }
 
-    private fun lagMelding(behandlingId: Triple<String, Int, UtlandstilknytningType?>) =
+    private fun lagMelding(behandlingId: String) =
         JsonMessage.newMessage(
             mapOf(
                 EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
-                BEHANDLING_ID_KEY to behandlingId.first,
+                BEHANDLING_ID_KEY to behandlingId,
                 FIKS_BREV_MIGRERING to true,
-                SUM to behandlingId.second,
             ),
         ).toJson()
 

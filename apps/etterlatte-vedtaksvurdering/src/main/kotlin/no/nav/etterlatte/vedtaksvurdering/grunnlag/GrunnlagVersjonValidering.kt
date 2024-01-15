@@ -1,7 +1,6 @@
 package no.nav.etterlatte.vedtaksvurdering.grunnlag
 
-import io.ktor.http.HttpStatusCode
-import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.vedtaksvurdering.BeregningOgAvkorting
@@ -37,8 +36,7 @@ object GrunnlagVersjonValidering {
     }
 }
 
-class UlikVersjonGrunnlag(detail: String) : ForespoerselException(
+class UlikVersjonGrunnlag(detail: String) : UgyldigForespoerselException(
     code = "ULIK_VERSJON_GRUNNLAG",
-    status = HttpStatusCode.BadRequest.value,
     detail = detail,
 )

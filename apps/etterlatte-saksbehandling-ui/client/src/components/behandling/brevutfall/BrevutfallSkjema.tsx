@@ -16,7 +16,6 @@ import { ControlledMaanedVelger } from '~shared/components/maanedVelger/Controll
 enum HarEtterbetaling {
   JA = 'JA',
   NEI = 'NEI',
-  IKKE_VALGT = 'IKKE_VALGT',
 }
 
 interface BrevutfallSkjemaData {
@@ -55,12 +54,11 @@ export const BrevutfallSkjema = ({
     watch,
   } = useForm<BrevutfallSkjemaData>({
     defaultValues: {
-      harEtterbetaling:
-        brevutfallOgEtterbetaling.etterbetaling === undefined
-          ? HarEtterbetaling.IKKE_VALGT
-          : brevutfallOgEtterbetaling.etterbetaling
-            ? HarEtterbetaling.JA
-            : HarEtterbetaling.NEI,
+      harEtterbetaling: brevutfallOgEtterbetaling.etterbetaling
+        ? brevutfallOgEtterbetaling.etterbetaling
+          ? HarEtterbetaling.JA
+          : HarEtterbetaling.NEI
+        : undefined,
     },
   })
 

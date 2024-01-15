@@ -72,8 +72,6 @@ const val SUM = "sum"
 
 val behandlingerAaJournalfoereBrevFor =
     listOf<Triple<String, Int, UtlandstilknytningType?>>(
-        Triple("4e1f7e4e-70bb-4794-b1a6-4cc899361995", 3954, null),
-        Triple("7ac97ed5-2bf5-4142-a0a5-674b4f58b416", 2650, null),
         Triple("f2ca8e19-4c4f-4691-8521-f996a7f8c9ea", 3954, null),
         Triple("16f36950-1e9d-4b52-a21c-26d229caaf28", 3954, null),
     )

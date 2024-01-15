@@ -10,7 +10,7 @@ export const TildelSaksbehandler = (props: {
   oppgaveId: string
   oppdaterTildeling: (id: string, saksbehandler: string) => void
   erRedigerbar: boolean
-  versjon: string | null
+  versjon: number | null
   type: Oppgavetype
 }) => {
   const { oppgaveId, oppdaterTildeling, erRedigerbar, versjon, type } = props

@@ -182,26 +182,28 @@ internal fun Route.oppgaveRoutes(
                 post("tildel-saksbehandler") {
                     kunSaksbehandlerMedSkrivetilgang {
                         val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
-                        gosysOppgaveService.tildelOppgaveTilSaksbehandler(
-                            gosysOppgaveId,
-                            saksbehandlerEndringDto.versjon,
-                            saksbehandlerEndringDto.saksbehandler,
-                            brukerTokenInfo,
-                        )
-                        call.respond(HttpStatusCode.OK)
+                        val oppdatertVersjon =
+                            gosysOppgaveService.tildelOppgaveTilSaksbehandler(
+                                gosysOppgaveId,
+                                saksbehandlerEndringDto.versjon,
+                                saksbehandlerEndringDto.saksbehandler,
+                                brukerTokenInfo,
+                            )
+                        call.respond(GosysOppgaveversjon(oppdatertVersjon))
                     }
                 }
 
                 post("endre-frist") {
                     kunSaksbehandlerMedSkrivetilgang {
                         val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
-                        gosysOppgaveService.endreFrist(
-                            gosysOppgaveId,
-                            redigerFristRequest.versjon,
-                            redigerFristRequest.frist,
-                            brukerTokenInfo,
-                        )
-                        call.respond(HttpStatusCode.OK)
+                        val oppdatertVersjon =
+                            gosysOppgaveService.endreFrist(
+                                gosysOppgaveId,
+                                redigerFristRequest.versjon,
+                                redigerFristRequest.frist,
+                                brukerTokenInfo,
+                            )
+                        call.respond(GosysOppgaveversjon(oppdatertVersjon))
                     }
                 }
             }
@@ -227,3 +229,5 @@ internal fun Route.oppgaveRoutes(
         }
     }
 }
+
+internal data class GosysOppgaveversjon(val versjon: Long)

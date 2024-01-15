@@ -27,14 +27,14 @@ interface GosysOppgaveService {
         oppgaveVersjon: Long,
         tilordnes: String,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): Long
 
     suspend fun endreFrist(
         oppgaveId: String,
         oppgaveVersjon: Long,
         nyFrist: Tidspunkt,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): Long
 }
 
 class GosysOppgaveServiceImpl(
@@ -71,7 +71,7 @@ class GosysOppgaveServiceImpl(
 
     private fun List<GosysOppgave>.filterForEnheter(bruker: User) = this.filterOppgaverForEnheter(bruker)
 
-    fun List<GosysOppgave>.filterOppgaverForEnheter(user: User) =
+    private fun List<GosysOppgave>.filterOppgaverForEnheter(user: User) =
         this.filterForEnheter(
             user,
         ) { item, enheter ->
@@ -92,8 +92,8 @@ class GosysOppgaveServiceImpl(
         oppgaveVersjon: Long,
         tilordnes: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(oppgaveId, oppgaveVersjon, tilordnes, brukerTokenInfo)
+    ): Long {
+        return gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(oppgaveId, oppgaveVersjon, tilordnes, brukerTokenInfo).versjon
     }
 
     override suspend fun endreFrist(
@@ -101,8 +101,8 @@ class GosysOppgaveServiceImpl(
         oppgaveVersjon: Long,
         nyFrist: Tidspunkt,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo)
+    ): Long {
+        return gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo).versjon
     }
 
     companion object {

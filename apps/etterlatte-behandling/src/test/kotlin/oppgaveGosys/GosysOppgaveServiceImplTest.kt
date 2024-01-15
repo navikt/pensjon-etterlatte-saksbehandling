@@ -243,7 +243,21 @@ class GosysOppgaveServiceImplTest {
             gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(
                 oppgaveId = "123", oppgaveVersjon = 2L, tildeles = "A012345", brukerTokenInfo,
             )
-        } returns Unit
+        } returns
+            GosysApiOppgave(
+                id = 123,
+                versjon = 2,
+                tema = "EYO",
+                behandlingstema = "",
+                oppgavetype = "",
+                opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
+                tildeltEnhetsnr = Enheter.STEINKJER.enhetNr,
+                tilordnetRessurs = "A012345",
+                aktoerId = "78324720383742",
+                beskrivelse = "Omstillingsstønad oppgavebeskrivelse",
+                status = "NY",
+                fristFerdigstillelse = LocalDate.now().plusDays(4),
+            )
 
         runBlocking {
             service.tildelOppgaveTilSaksbehandler(oppgaveId = "123", oppgaveVersjon = 2L, "A012345", brukerTokenInfo)

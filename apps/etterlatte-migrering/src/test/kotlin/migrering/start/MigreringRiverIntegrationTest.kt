@@ -107,6 +107,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
                                         every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
                                         every { it.doedsdato } returns null
+                                        every { it.adressebeskyttelse } returns null
                                     }
                             }
                         val personHenter = PersonHenter(pdlTjenesterKlient, featureToggleService)
@@ -201,6 +202,7 @@ internal class MigreringRiverIntegrationTest {
                                     mockk<PersonDTO>().also {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
                                         every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
+                                        every { it.adressebeskyttelse } returns null
                                         every { it.doedsdato } returns null
                                     }
                             }
@@ -307,6 +309,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
                                         every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
                                         every { it.doedsdato } returns null
+                                        every { it.adressebeskyttelse } returns null
                                     }
                             }
                         val personHenter = PersonHenter(pdlTjenesterKlient, featureToggleService)
@@ -493,6 +496,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.vergemaalEllerFremtidsfullmakt } returns listOf
                                         every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
                                         every { it.doedsdato } returns null
+                                        every { it.adressebeskyttelse } returns null
                                     }
                             }
                         val personHenter = PersonHenter(pdlTjenesterKlient, featureToggleService)

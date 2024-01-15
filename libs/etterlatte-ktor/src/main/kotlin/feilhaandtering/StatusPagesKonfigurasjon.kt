@@ -136,7 +136,7 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
             )
         }
 
-        this.info("En forespørselsfeil oppstod i et endepunkt, detaljer: ${internfeil.detail}", internfeil)
+        this.info("En forespørselsfeil oppstod i et endepunkt, detaljer: ${internfeil.detail}", internfeil.cause ?: internfeil)
     }
 
     private suspend fun ApplicationCall.respond(feil: ForespoerselException) {

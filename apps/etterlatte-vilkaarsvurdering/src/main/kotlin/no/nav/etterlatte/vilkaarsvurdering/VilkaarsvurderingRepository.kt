@@ -273,6 +273,23 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
             ),
     ).let { tx.run(it.asExecute) }
 
+    fun oppdaterGrunnlagsversjon(
+        behandlingId: UUID,
+        grunnlagVersjon: Long,
+    ) {
+        ds.transaction { tx ->
+            val vilkaarsvurdering = hentNonNull(behandlingId)
+            queryOf(
+                statement = Queries.OPPDATER_GRUNNLAGSVERSJON,
+                paramMap =
+                    mapOf(
+                        "id" to vilkaarsvurdering.id,
+                        "grunnlag_versjon" to grunnlagVersjon,
+                    ),
+            ).let { tx.run(it.asUpdate) }
+        }
+    }
+
     private fun Row.toVilkaarsvurdering(vilkaar: List<Vilkaar>) =
         Vilkaarsvurdering(
             id = uuid("id"),
@@ -375,6 +392,12 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
 
         const val SLETT_VILKAARSVURDERING = """
             DELETE FROM vilkaarsvurdering
+            WHERE id = :id
+        """
+
+        const val OPPDATER_GRUNNLAGSVERSJON = """
+            UPDATE vilkaarsvurdering
+            SET grunnlag_versjon = :grunnlag_versjon 
             WHERE id = :id
         """
     }

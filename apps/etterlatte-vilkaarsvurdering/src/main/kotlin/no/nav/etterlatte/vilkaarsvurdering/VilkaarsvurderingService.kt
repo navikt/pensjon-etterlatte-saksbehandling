@@ -42,16 +42,20 @@ class VilkaarsvurderingService(
         resultat: VilkaarsvurderingResultat,
     ): Vilkaarsvurdering =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
+            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
             val virkningstidspunkt =
-                behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).let {
-                    it.virkningstidspunkt?.dato?.atDay(1)
-                } ?: throw IllegalStateException("Virkningstidspunkt må være satt for å sette en vurdering")
+                behandling.virkningstidspunkt?.dato?.atDay(1)
+                    ?: throw IllegalStateException("Virkningstidspunkt må være satt for å sette en vurdering")
             val vilkaarsvurdering =
                 vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
                     behandlingId = behandlingId,
                     virkningstidspunkt = virkningstidspunkt,
                     resultat = resultat,
                 )
+            vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(
+                behandlingId = behandlingId,
+                grunnlagVersjon = grunnlag.metadata.versjon,
+            )
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
             vilkaarsvurdering
         }

@@ -111,16 +111,7 @@ export const TrygdetidGrunnlag = ({
             </FormWrapper>
 
             <FormWrapper>
-              <Begrunnelse
-                {...register('begrunnelse', {
-                  required: {
-                    value: true,
-                    message: 'Obligatorisk',
-                  },
-                })}
-                key={`begrunnelse-${trygdetidGrunnlagType}`}
-                error={errors.begrunnelse?.message}
-              />
+              <Begrunnelse {...register('begrunnelse')} key={`begrunnelse-${trygdetidGrunnlagType}`} />
               {trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK && (
                 <>
                   <PoengAar legend="Poeng i inn/ut år">

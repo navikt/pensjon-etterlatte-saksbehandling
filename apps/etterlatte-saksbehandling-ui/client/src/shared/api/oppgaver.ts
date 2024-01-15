@@ -59,6 +59,10 @@ export const opprettOppgave = async (args: {
 export const ferdigstillOppgave = async (id: string): Promise<ApiResponse<any>> =>
   apiClient.put(`/oppgaver/${id}/ferdigstill`, {})
 
+export interface OppdatertOppgaveversjonResponseDto {
+  versjon: number | null
+}
+
 export interface SaksbehandlerEndringDto {
   saksbehandler: string
   versjon: number | null
@@ -68,7 +72,7 @@ export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string
   type: string
   nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<void>> => {
+}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
   if (args.type == 'GOSYS') {
     return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
   } else {
@@ -80,7 +84,7 @@ export const byttSaksbehandlerApi = async (args: {
   oppgaveId: string
   type: string
   nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<void>> => {
+}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
   if (args.type == 'GOSYS') {
     return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
   } else {
@@ -93,7 +97,7 @@ export const fjernSaksbehandlerApi = async (args: {
   sakId: number
   type: string
   versjon: number | null
-}): Promise<ApiResponse<void>> => {
+}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
   if (args.type == 'GOSYS') {
     return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, {
       saksbehandler: '',

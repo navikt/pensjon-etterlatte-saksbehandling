@@ -8,7 +8,7 @@ import { mapAllApiResult } from '~shared/api/apiUtils'
 
 export const TildelSaksbehandler = (props: {
   oppgaveId: string
-  oppdaterTildeling: (id: string, saksbehandler: string) => void
+  oppdaterTildeling: (id: string, saksbehandler: string, versjon: number | null) => void
   erRedigerbar: boolean
   versjon: number | null
   type: Oppgavetype
@@ -24,8 +24,8 @@ export const TildelSaksbehandler = (props: {
   const tildelSaksbehandlerWrapper = () => {
     const nysaksbehandler = { saksbehandler: innloggetSaksbehandler.ident, versjon }
 
-    tildelSaksbehandler({ oppgaveId, type, nysaksbehandler }, () => {
-      oppdaterTildeling(oppgaveId, innloggetSaksbehandler.ident)
+    tildelSaksbehandler({ oppgaveId, type, nysaksbehandler }, (result) => {
+      oppdaterTildeling(oppgaveId, innloggetSaksbehandler.ident, result.versjon)
     })
   }
 

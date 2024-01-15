@@ -23,7 +23,7 @@ const SelectWrapper = styled.div`
 interface Props {
   oppgaver: OppgaveDTO[]
   hentOppgaver: () => void
-  oppdaterTildeling: (id: string, saksbehandler: string | null) => void
+  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
 }
 
 export const MinOppgaveliste = ({ oppgaver, hentOppgaver, oppdaterTildeling }: Props) => {

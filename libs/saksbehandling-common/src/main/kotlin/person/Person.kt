@@ -252,6 +252,10 @@ enum class AdressebeskyttelseGradering {
     fun erGradert(): Boolean {
         return this == STRENGT_FORTROLIG_UTLAND || this == STRENGT_FORTROLIG || this == FORTROLIG
     }
+
+    fun erStrengtFortrolig(): Boolean {
+        return this == STRENGT_FORTROLIG_UTLAND || this == STRENGT_FORTROLIG
+    }
 }
 
 fun List<AdressebeskyttelseGradering?>.hentPrioritertGradering() = this.filterNotNull().minOrNull() ?: AdressebeskyttelseGradering.UGRADERT
@@ -286,25 +290,9 @@ private fun harVergensFnr(
     return !manglerFnr
 }
 
-fun flereVergerMedOekonomiskInteresse(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): Boolean {
-    val verger =
-        vergeListe?.filter {
-            it.vergeEllerFullmektig.tjenesteomraade in alleVergeOmfangMedOekonomiskeInteresser
-        } ?: emptyList()
-    return verger.size > 1
-}
-
-fun finnesVergeMedUkjentOmfang(vergeListe: List<VergemaalEllerFremtidsfullmakt>?) =
-    vergeListe.orEmpty().any {
-        it.vergeEllerFullmektig.tjenesteomraade !in alleKjenteVergeOmfang
-    }
-
 private val alleVergeOmfangMedOekonomiskeInteresser =
     listOf(
         "utlendingssakerPersonligeOgOekonomiskeInteresser",
         "personligeOgOekonomiskeInteresser",
         "oekonomiskeInteresser",
     )
-
-private val alleKjenteVergeOmfang =
-    alleVergeOmfangMedOekonomiskeInteresser + listOf("personligeInteresser")

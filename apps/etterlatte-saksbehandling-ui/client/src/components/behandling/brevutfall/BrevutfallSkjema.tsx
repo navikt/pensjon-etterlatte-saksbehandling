@@ -70,7 +70,12 @@ export const BrevutfallSkjema = ({
         aldersgruppe: data.aldersgruppe,
       },
       etterbetaling:
-        data.datoFom && data.datoTom ? { datoFom: formatISO(data.datoFom), datoTom: formatISO(data.datoTom) } : null,
+        data.datoFom && data.datoTom
+          ? {
+              datoFom: formatISO(data.datoFom, { representation: 'date' }),
+              datoTom: formatISO(data.datoTom, { representation: 'date' }),
+            }
+          : null,
     }
 
     lagreBrevutfallRequest(

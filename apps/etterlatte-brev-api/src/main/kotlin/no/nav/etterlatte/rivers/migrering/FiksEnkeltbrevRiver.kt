@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.BrevEventTypes
@@ -47,20 +48,22 @@ internal class FiksEnkeltbrevRiver(
         val migreringBrevRequest =
             MigreringBrevRequest(brutto = sum, yrkesskade = false, utlandstilknytningType = utlandstilknytningType)
         runBlocking {
-            val sakId = vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo).sak.id
+            val sakId = retryOgPakkUt { vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo).sak.id }
             val vedtaksbrev: Brev =
-                service.opprettVedtaksbrev(
-                    sakId,
-                    behandlingId,
-                    brukerTokenInfo,
-                    migreringBrevRequest,
-                )
-            service.genererPdf(vedtaksbrev.id, brukerTokenInfo, migreringBrevRequest)
-            service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)
+                retryOgPakkUt {
+                    service.opprettVedtaksbrev(
+                        sakId,
+                        behandlingId,
+                        brukerTokenInfo,
+                        migreringBrevRequest,
+                    )
+                }
+            retryOgPakkUt { service.genererPdf(vedtaksbrev.id, brukerTokenInfo, migreringBrevRequest) }
+            retryOgPakkUt { service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true) }
             logger.info("Har oppretta vedtaksbrev for behandling $behandlingId")
 
             packet.eventName = VedtakKafkaHendelseType.ATTESTERT.toString()
-            val vedtak = vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo)
+            val vedtak = retryOgPakkUt { vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo) }
             packet["vedtak"] = vedtak
         }
         context.publish(packet.toJson())

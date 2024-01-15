@@ -20,6 +20,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -54,6 +55,7 @@ internal class SakRoutesTest {
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>(relaxUnitFun = true)
     private val tilgangService = mockk<TilgangService>(relaxUnitFun = true)
     private val oppgaveService = mockk<OppgaveService>(relaxUnitFun = true)
+    private val hendelseDao = mockk<HendelseDao>(relaxUnitFun = true)
     private val requestLogger = mockk<BehandlingRequestLogger>()
 
     @BeforeAll
@@ -228,6 +230,7 @@ internal class SakRoutesTest {
                 sakService,
                 behandlingService,
                 requestLogger,
+                hendelseDao,
             )
             sakWebRoutes(
                 tilgangService,

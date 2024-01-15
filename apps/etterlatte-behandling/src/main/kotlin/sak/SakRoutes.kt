@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -24,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
@@ -45,6 +47,7 @@ internal fun Route.sakSystemRoutes(
     sakService: SakService,
     behandlingService: BehandlingService,
     requestLogger: BehandlingRequestLogger,
+    hendelseDao: HendelseDao,
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -85,6 +88,18 @@ internal fun Route.sakSystemRoutes(
                     }
 
                 call.respond(sisteIverksatteBehandling ?: HttpStatusCode.NotFound)
+            }
+
+            get("/hendelser") {
+                logger.info("Henter hendelser for sak med id=$sakId")
+                val hendelser =
+                    inTransaction {
+                        hendelseDao.finnHendelserISak(sakId)
+                    }
+                when (hendelser.isEmpty()) {
+                    true -> throw GenerellIkkeFunnetException()
+                    false -> call.respond(hendelser)
+                }
             }
         }
     }

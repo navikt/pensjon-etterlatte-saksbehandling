@@ -164,6 +164,21 @@ class HendelseDao(private val connection: () -> Connection) {
         ),
     )
 
+    fun finnHendelserISak(sakId: Long): List<LagretHendelse> {
+        val stmt =
+            connection().prepareStatement(
+                """
+                SELECT id, hendelse, opprettet, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse 
+                FROM behandlinghendelse
+                where sakid = ?
+                """.trimIndent(),
+            )
+        stmt.setLong(1, sakId)
+        return stmt.executeQuery().toList {
+            somLagretHendelse()
+        }
+    }
+
     fun finnHendelserIBehandling(behandling: UUID): List<LagretHendelse> {
         val stmt =
             connection().prepareStatement(
@@ -175,19 +190,7 @@ class HendelseDao(private val connection: () -> Connection) {
             )
         stmt.setObject(1, behandling)
         return stmt.executeQuery().toList {
-            LagretHendelse(
-                getLong("id"),
-                getString("hendelse"),
-                getTidspunkt("opprettet"),
-                getTidspunktOrNull("inntruffet"),
-                getLongOrNull("vedtakid"),
-                getUUID("behandlingid"),
-                getLong("sakid"),
-                getString("ident"),
-                getString("identType"),
-                getString("kommentar"),
-                getString("valgtBegrunnelse"),
-            )
+            somLagretHendelse()
         }
     }
 
@@ -213,6 +216,22 @@ class HendelseDao(private val connection: () -> Connection) {
 
         logger.info("lagret hendelse: $hendelse")
     }
+}
+
+private fun ResultSet.somLagretHendelse(): LagretHendelse {
+    return LagretHendelse(
+        getLong("id"),
+        getString("hendelse"),
+        getTidspunkt("opprettet"),
+        getTidspunktOrNull("inntruffet"),
+        getLongOrNull("vedtakid"),
+        getUUID("behandlingid"),
+        getLong("sakid"),
+        getString("ident"),
+        getString("identType"),
+        getString("kommentar"),
+        getString("valgtBegrunnelse"),
+    )
 }
 
 fun PreparedStatement.setLong(

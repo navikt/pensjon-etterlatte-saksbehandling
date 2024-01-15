@@ -91,6 +91,7 @@ internal fun Application.module(context: ApplicationContext) {
                 sakService = sakService,
                 behandlingService = behandlingService,
                 requestLogger = behandlingRequestLogger,
+                hendelseDao = hendelseDao,
             )
             sakWebRoutes(
                 tilgangService = tilgangService,

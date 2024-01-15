@@ -18,6 +18,8 @@ import { VedtakKolonner } from '~components/person/VedtakKoloner'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { SamordningModal } from '~components/person/Samordning'
 
 const BehandlingPanel = styled.div`
   margin: 3rem 0;
@@ -88,7 +90,11 @@ export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehan
                   </Table.DataCell>
                   <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>
                   <Table.DataCell>
-                    {formaterEnumTilLesbarString(behandlingStatusTilLesbartnavn(behandling.status))}
+                    {behandling.status === IBehandlingStatus.TIL_SAMORDNING && (
+                      <SamordningModal behandlingId={behandling.id} />
+                    )}
+                    {behandling.status !== IBehandlingStatus.TIL_SAMORDNING &&
+                      formaterEnumTilLesbarString(behandlingStatusTilLesbartnavn(behandling.status))}
                   </Table.DataCell>
                   <Table.DataCell>
                     {behandling.virkningstidspunkt ? formaterStringDato(behandling.virkningstidspunkt!!.dato) : ''}

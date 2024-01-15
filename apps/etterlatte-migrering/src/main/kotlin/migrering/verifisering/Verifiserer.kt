@@ -180,7 +180,7 @@ internal class Verifiserer(
             }
 
         if (gjenlevende?.doedsdato != null) {
-            return listOf(SoekerHarFlereAvdoede)
+            return listOf(SoekerHarFlereAvdoedePaaGjenoppstaattYtelse)
         }
         return emptyList()
     }
@@ -264,6 +264,11 @@ data object SoekerHarUtflyttingFraNorgeEtter18Aar : Verifiseringsfeil() {
 data object SoekerHarFlereAvdoede : Verifiseringsfeil() {
     override val message: String
         get() = "Søker har flere avøde"
+}
+
+data object SoekerHarFlereAvdoedePaaGjenoppstaattYtelse : Verifiseringsfeil() {
+    override val message: String
+        get() = "Søker har flere avdøde på gjenoppstått ytelse"
 }
 
 data object ForeldreForholdHarEndretSeg : Verifiseringsfeil() {

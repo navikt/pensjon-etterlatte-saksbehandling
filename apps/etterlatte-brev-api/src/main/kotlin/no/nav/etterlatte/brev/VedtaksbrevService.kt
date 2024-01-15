@@ -375,5 +375,5 @@ fun Vergemaal.toMottaker(): Mottaker {
     }
 
     return Mottaker.tom(Folkeregisteridentifikator.of(mottaker.foedselsnummer!!.value))
-        .copy(navn = mottaker.navn ?: "N/A")
+        .copy(navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!)
 }

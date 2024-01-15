@@ -104,7 +104,7 @@ export const BrevutfallSkjema = ({
     // Til og med kan ikke settes lenger frem enn inneværende måned. Inneværende måned vil måtte etterbetales
     // dersom utbetaling allerede er kjørt.
     else if (behandling.virkningstidspunkt?.dato && fom < startOfDay(new Date(behandling.virkningstidspunkt.dato))) {
-      return 'Fra-måned kan ikke være før virkningstidspunkt.'
+      return 'Fra-måned før virkningstidspunkt.'
     }
     return undefined
   }
@@ -115,7 +115,7 @@ export const BrevutfallSkjema = ({
     if (!value) {
       return 'Til-måned må settes'
     } else if (tom > startOfDay(lastDayOfMonth(new Date()))) {
-      return 'Til-måned kan ikke være etter inneværende måned.'
+      return 'Til-måned etter inneværende måned.'
     }
     return undefined
   }

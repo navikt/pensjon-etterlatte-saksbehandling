@@ -46,7 +46,7 @@ internal class Verifiserer(
                 }
                 feil.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
                 if (!request.erUnder18) {
-                    feil.addAll(sjekkOmSoekerHaddeFlyktningfortdel(request))
+                    feil.addAll(sjekkOmSoekerHaddeFlyktningerfordel(request))
                     feil.addAll(sjekkAdresseOgUtlandsopphold(request.pesysId.id, soeker, request))
                     feil.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(request))
                     feil.addAll(sjekkOmForandringIForeldreforhold(request, soeker))
@@ -62,9 +62,9 @@ internal class Verifiserer(
         )
     }
 
-    private fun sjekkOmSoekerHaddeFlyktningfortdel(request: MigreringRequest): List<Verifiseringsfeil> =
+    private fun sjekkOmSoekerHaddeFlyktningerfordel(request: MigreringRequest): List<Verifiseringsfeil> =
         when (request.anvendtFlyktningerfordel()) {
-            true -> listOf(SoekerHaddeFlyktningfordel)
+            true -> listOf(SoekerHaddeFlyktningerfordel)
             false -> emptyList()
         }
 
@@ -213,7 +213,7 @@ data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikat
         get() = toString()
 }
 
-data object SoekerHaddeFlyktningfordel : Verifiseringsfeil() {
+data object SoekerHaddeFlyktningerfordel : Verifiseringsfeil() {
     override val message: String
         get() = "Søker hadde flyktningfordel"
 }

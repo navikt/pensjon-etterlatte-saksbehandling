@@ -37,7 +37,7 @@ class PDFGenerator(
         id: BrevID,
         bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest?,
-        avsenderRequest: (GenerellBrevData) -> AvsenderRequest,
+        avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (GenerellBrevData, Brev, MigreringBrevRequest?) -> BrevkodePar,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {

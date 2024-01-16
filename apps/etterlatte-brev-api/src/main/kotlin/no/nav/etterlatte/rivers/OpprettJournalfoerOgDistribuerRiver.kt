@@ -59,7 +59,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                 id = brevId,
                 bruker = brukerTokenInfo,
                 automatiskMigreringRequest = null,
-                avsenderRequest = {
+                avsenderRequest = { _, _ ->
                     AvsenderRequest(
                         saksbehandlerIdent = Fagsaksystem.EY.navn,
                         sakenhet = brevOgData.second.sak.enhet,

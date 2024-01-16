@@ -1,14 +1,10 @@
 package no.nav.etterlatte.behandling
 
-import io.getunleash.UnleashContext
 import io.ktor.server.plugins.NotFoundException
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.ManuellRevurdering
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -22,13 +18,6 @@ import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
-
-enum class BehandlingStatusServiceFeatureToggle(private val key: String) : FeatureToggle {
-    OpphoerStatusovergang("pensjon-etterlatte.opphoer-statusovergang-vv-til-fattetv"),
-    ;
-
-    override fun key() = key
-}
 
 interface BehandlingStatusService {
     fun settOpprettet(
@@ -104,7 +93,6 @@ class BehandlingStatusServiceImpl(
     private val behandlingDao: BehandlingDao,
     private val behandlingService: BehandlingService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
-    private val featureToggleService: FeatureToggleService,
     private val generellBehandlingService: GenerellBehandlingService,
 ) : BehandlingStatusService {
     private val logger = LoggerFactory.getLogger(BehandlingStatusServiceImpl::class.java)
@@ -162,16 +150,7 @@ class BehandlingStatusServiceImpl(
     override fun sjekkOmKanFatteVedtak(behandlingId: UUID) {
         val behandling = hentBehandling(behandlingId)
 
-        if (behandling is ManuellRevurdering &&
-            featureToggleService.isEnabled(
-                toggleId = BehandlingStatusServiceFeatureToggle.OpphoerStatusovergang,
-                defaultValue = false,
-                context =
-                    UnleashContext.builder()
-                        .userId(Kontekst.get().AppUser.name())
-                        .build(),
-            )
-        ) {
+        if (behandling is ManuellRevurdering) {
             behandling.tilFattetVedtakUtvidet()
         } else {
             behandling.tilFattetVedtak()
@@ -182,16 +161,7 @@ class BehandlingStatusServiceImpl(
         behandling: Behandling,
         vedtakHendelse: VedtakHendelse,
     ) {
-        if (behandling is ManuellRevurdering &&
-            featureToggleService.isEnabled(
-                toggleId = BehandlingStatusServiceFeatureToggle.OpphoerStatusovergang,
-                defaultValue = false,
-                context =
-                    UnleashContext.builder()
-                        .userId(Kontekst.get().AppUser.name())
-                        .build(),
-            )
-        ) {
+        if (behandling is ManuellRevurdering) {
             lagreNyBehandlingStatus(behandling.tilFattetVedtakUtvidet())
         } else {
             lagreNyBehandlingStatus(behandling.tilFattetVedtak())

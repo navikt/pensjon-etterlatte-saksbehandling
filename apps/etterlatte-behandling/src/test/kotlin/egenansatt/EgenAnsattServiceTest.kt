@@ -13,7 +13,7 @@ import no.nav.etterlatte.behandling.BrukerServiceImpl
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -73,7 +73,7 @@ internal class EgenAnsattServiceTest {
                 password = postgreSQLContainer.password,
             ).apply { migrate() }
 
-        val pdlKlient = mockk<PdlKlient>()
+        val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
         val norg2Klient = mockk<Norg2Klient>()
         val featureToggleService = mockk<FeatureToggleService>()
         val skjermingKlient = mockk<SkjermingKlient>()
@@ -81,7 +81,7 @@ internal class EgenAnsattServiceTest {
         sakRepo = SakDao { connection }
         oppgaveRepo = OppgaveDaoImpl { connection }
         oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo) { connection }
-        val brukerService = BrukerServiceImpl(pdlKlient, norg2Klient)
+        val brukerService = BrukerServiceImpl(pdltjenesterKlient, norg2Klient)
         sakService =
             spyk(
                 SakServiceImpl(sakRepo, skjermingKlient, brukerService),
@@ -97,7 +97,7 @@ internal class EgenAnsattServiceTest {
         every { user.name() } returns "User"
 
         coEvery { skjermingKlient.personErSkjermet(any()) } returns false
-        every { pdlKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")
+        every { pdltjenesterKlient.hentGeografiskTilknytning(any(), any()) } returns GeografiskTilknytning(kommune = "0301")
         every {
             norg2Klient.hentEnheterForOmraade("EYB", "0301")
         } returns listOf(ArbeidsFordelingEnhet(Enheter.STEINKJER.navn, Enheter.STEINKJER.enhetNr))

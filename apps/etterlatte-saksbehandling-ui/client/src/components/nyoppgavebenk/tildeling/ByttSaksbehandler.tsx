@@ -24,7 +24,7 @@ export const ByttSaksbehandler = (props: RedigerSaksbehandlerProps) => {
 
   useEffect(() => {
     if (isSuccess(byttSaksbehandlerSvar)) {
-      oppdaterTildeling(oppgaveId, innloggetSaksbehandler.ident)
+      oppdaterTildeling(oppgaveId, innloggetSaksbehandler.ident, byttSaksbehandlerSvar.data.versjon)
     }
   }, [byttSaksbehandlerSvar])
 

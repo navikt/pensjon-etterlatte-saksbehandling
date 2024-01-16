@@ -57,7 +57,7 @@ internal class Server(private val context: ApplicationContext) {
                     FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)
                     StartMigrering(startMigreringRepository, rapidsConnection, featureToggleService)
                     SjekkVergeadresserJobb(
-                        pdlKlient,
+                        pdlTjenesterKlient,
                         pesysRepository,
                         vergeRepository,
                         grunnlagKlient,

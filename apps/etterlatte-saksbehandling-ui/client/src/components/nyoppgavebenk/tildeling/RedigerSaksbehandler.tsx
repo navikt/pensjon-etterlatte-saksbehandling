@@ -9,9 +9,9 @@ export interface RedigerSaksbehandlerProps {
   saksbehandler: string | null
   oppgaveId: string
   sakId: number
-  oppdaterTildeling: (id: string, saksbehandler: string | null) => void
+  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   erRedigerbar: boolean
-  versjon: string | null
+  versjon: number | null
   type: Oppgavetype
 }
 

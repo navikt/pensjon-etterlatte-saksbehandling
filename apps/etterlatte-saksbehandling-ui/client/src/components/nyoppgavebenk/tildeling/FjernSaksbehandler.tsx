@@ -22,7 +22,7 @@ export const FjernSaksbehandler = (props: RedigerSaksbehandlerProps) => {
 
   useEffect(() => {
     if (isSuccess(fjernSaksbehandlerSvar)) {
-      oppdaterTildeling(oppgaveId, null)
+      oppdaterTildeling(oppgaveId, null, fjernSaksbehandlerSvar.data.versjon)
     }
   }, [fjernSaksbehandlerSvar])
 

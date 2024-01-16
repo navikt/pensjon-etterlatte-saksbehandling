@@ -22,6 +22,7 @@ data class HentPdlIdentRequest(
 
 data class HentAdressebeskyttelseRequest(
     val ident: PersonIdent,
+    val saktype: SakType,
 )
 
 data class PersonIdent

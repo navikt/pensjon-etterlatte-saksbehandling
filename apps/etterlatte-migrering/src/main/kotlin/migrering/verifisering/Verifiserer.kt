@@ -35,15 +35,19 @@ internal class Verifiserer(
         }
         patchedRequest.onSuccess {
             if (request.enhet.nr == "2103") {
-                feil.add(StrengtFortrolig)
+                feil.add(StrengtFortroligPesys)
             }
             feil.addAll(sjekkAtPersonerFinsIPDL(it))
             val soeker = personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()
 
             if (soeker != null) {
+                if (soeker.adressebeskyttelse?.verdi?.erStrengtFortrolig() == true) {
+                    feil.add(StrengtFortroligPDL)
+                }
                 feil.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
                 if (!request.erUnder18) {
-                    feil.addAll(sjekkAdresseOgUtlandsopphold(request.pesysId.id, soeker))
+                    feil.addAll(sjekkOmSoekerHaddeFlyktningerfordel(request))
+                    feil.addAll(sjekkAdresseOgUtlandsopphold(request.pesysId.id, soeker, request))
                     feil.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(request))
                     feil.addAll(sjekkOmForandringIForeldreforhold(request, soeker))
                 }
@@ -57,6 +61,12 @@ internal class Verifiserer(
             utlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request),
         )
     }
+
+    private fun sjekkOmSoekerHaddeFlyktningerfordel(request: MigreringRequest): List<Verifiseringsfeil> =
+        when (request.anvendtFlyktningerfordel()) {
+            true -> listOf(SoekerHaddeFlyktningerfordel)
+            false -> emptyList()
+        }
 
     private fun haandterFeil(
         request: MigreringRequest,
@@ -129,6 +139,7 @@ internal class Verifiserer(
     private fun sjekkAdresseOgUtlandsopphold(
         pesysId: Long,
         person: PersonDTO,
+        request: MigreringRequest,
     ): List<Verifiseringsfeil> {
         val utlandSjekker = mutableListOf<Verifiseringsfeil>()
         val kontaktadresse = person.kontaktadresse ?: emptyList()
@@ -151,10 +162,16 @@ internal class Verifiserer(
             utlandSjekker.add(BrukerManglerAdresse)
         }
 
-        val harFlyttetFraNorge = person.utland?.verdi?.utflyttingFraNorge?.isNotEmpty() ?: false
-        val harFlyttetTilNorge = person.utland?.verdi?.innflyttingTilNorge?.isNotEmpty() ?: false
-        if (harFlyttetTilNorge || harFlyttetFraNorge) {
-            utlandSjekker.add(SoekerHarBoddUtland)
+        person.utland?.verdi?.let { utland ->
+            val foedselsdato = person.foedselsdato?.verdi ?: request.soeker.getBirthDate()
+            val datoFylte18 = foedselsdato.plusYears(18)
+
+            if (utland.innflyttingTilNorge?.any { it.dato == null || it.dato!! >= datoFylte18 } == true) {
+                utlandSjekker.add(SoekerHarInnflyttingTilNorgeEtter18Aar)
+            }
+            if (utland.utflyttingFraNorge?.any { it.dato == null || it.dato!! >= datoFylte18 } == true) {
+                utlandSjekker.add(SoekerHarUtflyttingFraNorgeEtter18Aar)
+            }
         }
 
         return utlandSjekker
@@ -170,7 +187,7 @@ internal class Verifiserer(
             }
 
         if (gjenlevende?.doedsdato != null) {
-            return listOf(SoekerHarFlereAvdoede)
+            return listOf(SoekerHarFlereAvdoedePaaGjenoppstaattYtelse)
         }
         return emptyList()
     }
@@ -179,7 +196,8 @@ internal class Verifiserer(
         request: MigreringRequest,
         soeker: PersonDTO,
     ): List<Exception> {
-        val tidligereForeldre = request.avdoedForelder.map { it.ident.value } + listOfNotNull(request.gjenlevendeForelder).map { it.value }
+        val tidligereForeldre =
+            request.avdoedForelder.map { it.ident.value } + listOfNotNull(request.gjenlevendeForelder).map { it.value }
         val nyeForeldre = soeker.familieRelasjon?.verdi?.foreldre?.map { it.value }
         if (nyeForeldre == null || (tidligereForeldre.containsAll(nyeForeldre))) {
             listOf(ForeldreForholdHarEndretSeg)
@@ -195,6 +213,11 @@ data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikat
         get() = toString()
 }
 
+data object SoekerHaddeFlyktningerfordel : Verifiseringsfeil() {
+    override val message: String
+        get() = "Søker hadde flyktningfordel"
+}
+
 data object BarnetHarFlereVerger : Verifiseringsfeil() {
     override val message: String
         get() = "Barnet har flere verger"
@@ -205,19 +228,19 @@ data object BarnetHarVergemaal : Verifiseringsfeil() {
         get() = "Barn har vergemål eller framtidsfullmakt, støtte for det er deaktivert"
 }
 
-data object StrengtFortrolig : Verifiseringsfeil() {
+data object StrengtFortroligPesys : Verifiseringsfeil() {
     override val message: String
-        get() = "Skal ikke migrere strengt fortrolig sak"
+        get() = "Skal ikke migrere strengt fortrolig saker (Pesys)"
+}
+
+data object StrengtFortroligPDL : Verifiseringsfeil() {
+    override val message: String
+        get() = "Skal ikke migrere strengt fortrolig saker (PDL)"
 }
 
 data class PDLException(val kilde: Throwable) : Verifiseringsfeil() {
     override val message: String?
         get() = kilde.message
-}
-
-data object SoekerErOver18 : Verifiseringsfeil() {
-    override val message: String
-        get() = "Skal ikke per nå migrere søker der søker er over 18"
 }
 
 data object VergeManglerAdresseFraPDL : Verifiseringsfeil() {
@@ -240,14 +263,24 @@ data object SoekerBorUtland : Verifiseringsfeil() {
         get() = "Søker bor utlands"
 }
 
-data object SoekerHarBoddUtland : Verifiseringsfeil() {
+data object SoekerHarInnflyttingTilNorgeEtter18Aar : Verifiseringsfeil() {
     override val message: String
-        get() = "Søker har bodd utlands"
+        get() = "Søker har registrert innflytting til Norge etter fylte 18 år eller manglende dato"
+}
+
+data object SoekerHarUtflyttingFraNorgeEtter18Aar : Verifiseringsfeil() {
+    override val message: String
+        get() = "Søker har registrert utflytting fra Norge etter fylte 18 år eller manglende dato"
 }
 
 data object SoekerHarFlereAvdoede : Verifiseringsfeil() {
     override val message: String
         get() = "Søker har flere avøde"
+}
+
+data object SoekerHarFlereAvdoedePaaGjenoppstaattYtelse : Verifiseringsfeil() {
+    override val message: String
+        get() = "Søker har flere avdøde på gjenoppstått ytelse"
 }
 
 data object ForeldreForholdHarEndretSeg : Verifiseringsfeil() {

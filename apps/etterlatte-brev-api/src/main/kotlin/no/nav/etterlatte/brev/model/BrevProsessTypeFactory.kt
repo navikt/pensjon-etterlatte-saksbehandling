@@ -1,20 +1,15 @@
 package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
-class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleService) {
-    fun fra(
-        generellBrevData: GenerellBrevData,
-        erOmregningNyRegel: Boolean = false,
-    ): BrevProsessType {
+class BrevProsessTypeFactory {
+    fun fra(generellBrevData: GenerellBrevData): BrevProsessType {
         return when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> omsBrev(generellBrevData)
-            SakType.BARNEPENSJON -> bpBrev(generellBrevData, erOmregningNyRegel)
+            SakType.BARNEPENSJON -> bpBrev(generellBrevData)
         }
     }
 
@@ -43,24 +38,13 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
         }
     }
 
-    private fun bpBrev(
-        generellBrevData: GenerellBrevData,
-        erOmregningNyRegel: Boolean = false,
-    ): BrevProsessType {
-        if (generellBrevData.systemkilde == Vedtaksloesning.PESYS || erOmregningNyRegel) {
+    private fun bpBrev(generellBrevData: GenerellBrevData): BrevProsessType {
+        if (generellBrevData.erMigrering()) {
             return BrevProsessType.REDIGERBAR
         }
         return when (generellBrevData.forenkletVedtak?.type) {
             VedtakType.INNVILGELSE ->
-                when (
-                    featureToggleService.isEnabled(
-                        BrevDataFeatureToggle.NyMalInnvilgelse,
-                        false,
-                    )
-                ) {
-                    true -> BrevProsessType.REDIGERBAR
-                    false -> BrevProsessType.AUTOMATISK
-                }
+                BrevProsessType.REDIGERBAR
 
             VedtakType.ENDRING ->
                 when (generellBrevData.revurderingsaarsak) {

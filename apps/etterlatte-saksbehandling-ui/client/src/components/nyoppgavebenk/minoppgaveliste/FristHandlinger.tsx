@@ -19,7 +19,7 @@ const FristWrapper = styled.span<{ fristHarPassert: boolean; utenKnapp?: boolean
 export const FristHandlinger = (props: {
   orginalFrist: string
   oppgaveId: string
-  oppgaveVersjon: string | null
+  oppgaveVersjon: number | null
   type: Oppgavetype
   hentOppgaver: () => void
   erRedigerbar: boolean

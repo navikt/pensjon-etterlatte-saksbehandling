@@ -1,0 +1,7 @@
+BEGIN TRANSACTION;
+DELETE FROM hendelse WHERE brev_id in (11049, 11014) and status_id='OPPRETTET';
+DELETE FROM innhold WHERE brev_id in (11049, 11014);
+DELETE FROM mottaker WHERE brev_id in (11049, 11014);
+DELETE FROM pdf WHERE brev_id in (11049, 11014);
+DELETE FROM brev WHERE id in (11049, 11014);
+COMMIT TRANSACTION;

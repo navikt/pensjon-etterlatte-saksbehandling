@@ -11,6 +11,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BrevService.BrevPayload
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
+import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -19,6 +20,7 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Status
@@ -46,12 +48,14 @@ internal class BrevServiceTest {
     private val brevDataMapper = mockk<BrevDataMapper>()
     private val brevDataFacade = mockk<BrevdataFacade>()
     private val pdfGenerator = mockk<PDFGenerator>()
+    private val brevProsessTypeFactory = mockk<BrevProsessTypeFactory>()
+    private val brevbakerService = mockk<BrevbakerService>()
+    private val brevoppretter = Brevoppretter(adresseService, db, brevDataFacade, brevProsessTypeFactory, brevbakerService)
 
     private val brevService =
         BrevService(
             db,
-            sakService,
-            adresseService,
+            brevoppretter,
             journalfoerBrevService,
             pdfGenerator,
         )
@@ -181,13 +185,68 @@ internal class BrevServiceTest {
         }
     }
 
+    @Nested
+    inner class SlettingAvBrev {
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Sletting av brev som er under arbeid skal virke`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+
+            every { db.hentBrev(any()) } returns brev
+
+            brevService.slett(brev.id, bruker)
+
+            verify {
+                db.hentBrev(brev.id)
+                db.settBrevSlettet(brev.id, bruker)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.EXCLUDE)
+        fun `Brev som ikke lenger er under arbeid skal IKKE kunne slettes`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<IllegalStateException> {
+                brevService.slett(brev.id, bruker)
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+            verify(exactly = 0) {
+                db.settBrevSlettet(any(), any())
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class)
+        fun `Skal ikke kunne slette vedtaksbrev, uavhengig av status`(status: Status) {
+            val behandlingId = UUID.randomUUID()
+            val brev = opprettBrev(status, BrevProsessType.MANUELL, behandlingId)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<IllegalStateException> {
+                brevService.slett(brev.id, bruker)
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
+    }
+
     private fun opprettBrev(
         status: Status,
         prosessType: BrevProsessType,
+        behandlingId: UUID? = null,
     ) = Brev(
         id = Random.nextLong(10000),
         sakId = Random.nextLong(10000),
-        behandlingId = null,
+        behandlingId = behandlingId,
         tittel = null,
         prosessType = prosessType,
         soekerFnr = "fnr",

@@ -19,7 +19,7 @@ import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
-import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 
@@ -44,7 +44,7 @@ class BrukerServiceTest {
             "",
         )
 
-    private val pdlKlient = mockk<PdlKlient>()
+    private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
     private val norg2Klient = mockk<Norg2Klient>()
 
     @Test

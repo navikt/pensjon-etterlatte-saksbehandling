@@ -14,6 +14,8 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -30,14 +32,18 @@ data class GenerellBrevData(
     val utlandstilknytning: Utlandstilknytning? = null,
     val revurderingsaarsak: Revurderingaarsak? = null,
 ) {
-    fun avsenderRequest() =
+    fun avsenderRequest(bruker: BrukerTokenInfo) =
         forenkletVedtak?.let {
             AvsenderRequest(
                 saksbehandlerIdent = it.saksbehandlerIdent,
                 sakenhet = it.sakenhet,
                 attestantIdent = it.attestantIdent,
             )
-        } ?: AvsenderRequest(saksbehandlerIdent = sak.ident, sakenhet = sak.enhet)
+        } ?: AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = sak.enhet)
+
+    fun erMigrering() =
+        systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null &&
+            forenkletVedtak?.saksbehandlerIdent == Fagsaksystem.EY.navn
 }
 
 data class Trygdetid(

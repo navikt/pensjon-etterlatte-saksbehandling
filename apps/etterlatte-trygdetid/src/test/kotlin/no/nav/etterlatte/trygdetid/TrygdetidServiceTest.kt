@@ -942,7 +942,6 @@ internal class TrygdetidServiceTest {
         coEvery {
             repository.hentTrygdetiderForBehandling(any())
         } returns listOf(trygdetid(behandlingId).copy(beregnetTrygdetid = beregnetYrkesskadeTrygdetid()))
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentOpplysningsgrunnlag()
 
         val trygdetid = runBlocking { service.hentTrygdetid(behandlingId, saksbehandler) }
 
@@ -956,7 +955,6 @@ internal class TrygdetidServiceTest {
 
         coVerify(exactly = 1) {
             vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any())
-            grunnlagKlient.hentGrunnlag(behandlingId, saksbehandler)
         }
     }
 

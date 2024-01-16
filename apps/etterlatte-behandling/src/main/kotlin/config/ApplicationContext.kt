@@ -48,7 +48,7 @@ import no.nav.etterlatte.behandling.sjekkliste.SjekklisteDao
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
-import no.nav.etterlatte.common.klienter.PdlKlientImpl
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.databaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
@@ -210,7 +210,7 @@ internal class ApplicationContext(
     val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
 
     // Klient
-    val pdlKlient = PdlKlientImpl(config, pdlHttpClient)
+    val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
@@ -254,7 +254,6 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
             behandlingHendelser = behandlingsHendelser,
-            featureToggleService = featureToggleService,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
@@ -289,7 +288,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             behandlingService = behandlingService,
-            pdlKlient = pdlKlient,
+            pdltjenesterKlient = pdlKlient,
             grunnlagKlient = grunnlagKlient,
             sakService = sakService,
             brukerService = enhetService,
@@ -300,7 +299,6 @@ internal class ApplicationContext(
             behandlingDao,
             behandlingService,
             grunnlagsendringshendelseService,
-            featureToggleService,
             generellBehandlingService,
         )
 
@@ -317,6 +315,7 @@ internal class ApplicationContext(
             hendelseDao = hendelseDao,
             behandlingHendelser = behandlingsHendelser,
             migreringKlient = migreringKlient,
+            pdltjenesterKlient = pdlKlient,
         )
 
     val migreringService =

@@ -57,12 +57,13 @@ export const ToggleMinOppgaveliste = () => {
 
   useEffect(() => hentAlleOppgaver(), [])
 
-  const oppdaterTildeling = (id: string, saksbehandler: string | null) => {
+  const oppdaterTildeling = (id: string, saksbehandler: string | null, versjon: number | null) => {
     setTimeout(() => {
       const oppdatertOppgaveState = [...hentedeOppgaver]
       const index = oppdatertOppgaveState.findIndex((o) => o.id === id)
       oppdatertOppgaveState[index].saksbehandler = saksbehandler
       oppdatertOppgaveState[index].status = 'UNDER_BEHANDLING'
+      oppdatertOppgaveState[index].versjon = versjon
       setHentedeOppgaver(oppdatertOppgaveState)
     }, 2000)
   }
@@ -124,7 +125,7 @@ export const ToggleMinOppgaveliste = () => {
             <MinOppgaveliste
               oppgaver={innloggetSaksbehandleroppgaver}
               hentOppgaver={hentAlleOppgaver}
-              oppdaterTildeling={(id) => oppdaterTildeling(id, null)}
+              oppdaterTildeling={(id, _saksbehandler, versjon) => oppdaterTildeling(id, null, versjon)}
             />
           )}
         </>

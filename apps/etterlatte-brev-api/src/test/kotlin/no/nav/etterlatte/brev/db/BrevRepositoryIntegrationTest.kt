@@ -4,6 +4,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.ints.shouldBeExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
@@ -280,6 +281,28 @@ internal class BrevRepositoryIntegrationTest {
         val brevMedOppdatertTittel = db.hentBrev(nyttBrev.id)
 
         assertEquals(nyTittel, brevMedOppdatertTittel.tittel)
+    }
+
+    @Test
+    fun `Sletting av brev fungerer som forventet`() {
+        val sakId = Random.nextLong()
+
+        repeat(9) {
+            db.opprettBrev(ulagretBrev(sakId))
+        }
+
+        val brevSkalSlettes = db.opprettBrev(ulagretBrev(sakId))
+
+        val brevForSak = db.hentBrevForSak(sakId)
+        assertEquals(10, brevForSak.size)
+
+        db.settBrevSlettet(brevSkalSlettes.id, mockk(relaxed = true))
+
+        val brevForSakEtterSletting = db.hentBrevForSak(sakId)
+        assertEquals(9, brevForSakEtterSletting.size)
+
+        val slettetBrev = db.hentBrev(brevSkalSlettes.id)
+        assertEquals(Status.SLETTET, slettetBrev.status)
     }
 
     @Nested

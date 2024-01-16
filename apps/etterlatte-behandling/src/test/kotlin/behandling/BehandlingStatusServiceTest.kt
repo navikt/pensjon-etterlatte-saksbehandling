@@ -77,7 +77,6 @@ internal class BehandlingStatusServiceTest {
                 behandlingdao,
                 behandlingService,
                 grlService,
-                featureToggleService,
                 generellBehandlingService,
             )
 
@@ -143,7 +142,6 @@ internal class BehandlingStatusServiceTest {
                 behandlingdao,
                 behandlingService,
                 grlService,
-                featureToggleService,
                 generellBehandlingService,
             )
 

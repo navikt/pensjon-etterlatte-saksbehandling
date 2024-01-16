@@ -57,7 +57,8 @@ class VedtakTilbakekrevingService(
             VedtakFattet(
                 ansvarligSaksbehandler = tilbakekrevingVedtakData.saksbehandler,
                 ansvarligEnhet = tilbakekrevingVedtakData.enhet,
-                tidspunkt = Tidspunkt.now(), // Blir ikke brukt fordi egen now() brukes i db..
+                // Blir ikke brukt fordi egen now() brukes i db..
+                tidspunkt = Tidspunkt.now(),
             ),
         ).id
     }
@@ -71,7 +72,8 @@ class VedtakTilbakekrevingService(
                 Attestasjon(
                     attestant = tilbakekrevingVedtakData.saksbehandler,
                     attesterendeEnhet = tilbakekrevingVedtakData.enhet,
-                    tidspunkt = Tidspunkt.now(), // Blir ikke brukt for egen now() brueks i db..
+                    // Blir ikke brukt for egen now() brukes i db.
+                    tidspunkt = Tidspunkt.now(),
                 ),
             )
         return requireNotNull(vedtak.vedtakFattet).let {

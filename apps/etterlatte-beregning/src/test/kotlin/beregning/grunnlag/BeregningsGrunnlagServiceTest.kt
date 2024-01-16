@@ -25,7 +25,6 @@ import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDao
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.toGrunnlag
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -66,12 +65,10 @@ internal class BeregningsGrunnlagServiceTest {
     private val behandlingKlient = mockk<BehandlingKlientImpl>()
     private val beregningsGrunnlagRepository = mockk<BeregningsGrunnlagRepository>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
-    private val featureToggleService = DummyFeatureToggleService()
     private val beregningsGrunnlagService: BeregningsGrunnlagService =
         BeregningsGrunnlagService(
             beregningsGrunnlagRepository,
             behandlingKlient,
-            featureToggleService,
             grunnlagKlient,
         )
 

@@ -2,7 +2,7 @@ package no.nav.etterlatte.joarkhendelser
 
 import isDev
 import joarkhendelser.joark.SafKlient
-import joarkhendelser.pdl.PdlKlient
+import joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory
 class JoarkHendelseHandler(
     private val behandlingService: BehandlingService,
     private val safKlient: SafKlient,
-    private val pdlKlient: PdlKlient,
+    private val pdlTjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(JoarkHendelseHandler::class.java)
 
@@ -79,7 +79,7 @@ class JoarkHendelseHandler(
             }
 
             val ident =
-                when (val pdlIdentifikator = pdlKlient.hentPdlIdentifikator(journalpost.bruker.id)) {
+                when (val pdlIdentifikator = pdlTjenesterKlient.hentPdlIdentifikator(journalpost.bruker.id)) {
                     is PdlIdentifikator.FolkeregisterIdent -> pdlIdentifikator.folkeregisterident.value
                     is PdlIdentifikator.Npid -> {
                         throw IllegalStateException("Bruker tilknyttet journalpost=$journalpostId har kun NPID!")

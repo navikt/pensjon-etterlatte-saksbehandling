@@ -16,7 +16,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
-import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
+import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
@@ -44,7 +44,7 @@ import java.util.Properties
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class IntegrationTest {
-    private lateinit var pdlKlient: PdlKlient
+    private lateinit var pdlTjenesterKlient: PdlTjenesterKlient
 
     @BeforeEach
     fun setup() {
@@ -67,7 +67,7 @@ class IntegrationTest {
                 LocalKafkaConfig(kafkaEnv.brokersURL).rapidsAndRiversProducer("etterlatte.dodsmelding"),
             )
 
-        val personHendelseFordeler = PersonHendelseFordeler(rapidsKafkaProducer, pdlKlient)
+        val personHendelseFordeler = PersonHendelseFordeler(rapidsKafkaProducer, pdlTjenesterKlient)
         val personhendelseKonsument =
             PersonhendelseKonsument(
                 LEESAH_TOPIC_PERSON,
@@ -171,7 +171,7 @@ class IntegrationTest {
                 install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             }
 
-        pdlKlient = PdlKlient(httpClient, "http://etterlatte-pdltjenester")
+        pdlTjenesterKlient = PdlTjenesterKlient(httpClient, "http://etterlatte-pdltjenester")
     }
 
     companion object {

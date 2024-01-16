@@ -39,10 +39,11 @@ fun opprettVedtak(
     vilkaarsvurdering: ObjectNode? = objectMapper.createObjectNode(),
     beregning: ObjectNode? = objectMapper.createObjectNode(),
     avkorting: ObjectNode? = objectMapper.createObjectNode(),
+    sakType: SakType = SakType.BARNEPENSJON,
 ) = OpprettVedtak(
     soeker = soeker,
     sakId = sakId,
-    sakType = SakType.BARNEPENSJON,
+    sakType = sakType,
     behandlingId = behandlingId,
     type = type,
     status = status,

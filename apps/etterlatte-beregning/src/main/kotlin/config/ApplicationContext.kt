@@ -53,7 +53,6 @@ class ApplicationContext {
         BeregningsGrunnlagService(
             beregningsGrunnlagRepository = beregningsGrunnlagRepository,
             behandlingKlient = behandlingKlient,
-            featureToggleService = featureToggleService,
             grunnlagKlient = grunnlagKlient,
         )
 
@@ -63,7 +62,6 @@ class ApplicationContext {
             vilkaarsvurderingKlient = vilkaarsvurderingKlient,
             beregningsGrunnlagService = beregningsGrunnlagService,
             trygdetidKlient = trygdetidKlient,
-            featureToggleService = featureToggleService,
         )
     val beregnOmstillingsstoenadService =
         BeregnOmstillingsstoenadService(

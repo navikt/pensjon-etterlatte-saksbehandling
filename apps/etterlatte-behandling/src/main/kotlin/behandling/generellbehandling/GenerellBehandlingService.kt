@@ -5,7 +5,6 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.generellbehandling.Attestant
 import no.nav.etterlatte.libs.common.generellbehandling.Behandler
@@ -345,22 +344,19 @@ class GenerellBehandlingService(
 }
 
 class FantIkkeAvdoedException(msg: String) :
-    ForespoerselException(
-        status = 400,
+    UgyldigForespoerselException(
         code = "FANT_IKKE_AVDOED",
         detail = msg,
     )
 
 class FantIkkeFoerstegangsbehandlingForKravpakkeOgSak(msg: String) :
-    ForespoerselException(
-        status = 400,
+    UgyldigForespoerselException(
         code = "FANT_IKKE_FOERSTEGANGSBEHANDLING_FOR_KRAVPAKKE",
         detail = msg,
     )
 
 class FantIkkeKravpakkeForFoerstegangsbehandling(msg: String) :
-    ForespoerselException(
-        status = 400,
+    UgyldigForespoerselException(
         code = "FANT_IKKE_KRAVPAKKE_FOR_FOERSTEGANGSBEHANDLING",
         detail = msg,
     )

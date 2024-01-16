@@ -111,7 +111,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                         mapOf(
                             "type" to oppdatertVedtak.type.name,
                             "behandlingid" to oppdatertVedtak.behandlingId,
-                            "tilbakekreving" to oppdatertVedtak.innhold.tilbakekreving?.toJson(),
+                            "tilbakekreving" to oppdatertVedtak.innhold.tilbakekreving.toJson(),
                         )
                 }
 

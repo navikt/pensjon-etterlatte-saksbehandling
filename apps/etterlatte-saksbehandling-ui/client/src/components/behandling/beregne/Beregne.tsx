@@ -30,7 +30,6 @@ import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -48,7 +47,6 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const erOpphoer = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
-  const visBrevutfall = useFeatureEnabledMedDefault('pensjon-etterlatte.brevutfall-og-etterbetaling', false)
   const brevutfallOgEtterbetaling = useAppSelector(
     (state) => state.behandlingReducer.behandling?.brevutfallOgEtterbetaling
   )
@@ -130,10 +128,8 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                   </InfoAlert>
                 )}
 
-                {visBrevutfall && (
-                  <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
-                )}
-                {visBrevutfall && manglerBrevutfall && (
+                <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+                {manglerBrevutfall && (
                   <Alert variant="error">Du må fylle ut om brevet gjelder for person under eller over 18 år</Alert>
                 )}
               </BeregningWrapper>

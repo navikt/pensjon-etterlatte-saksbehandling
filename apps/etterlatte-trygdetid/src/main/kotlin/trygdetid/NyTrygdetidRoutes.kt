@@ -32,7 +32,10 @@ fun PipelineContext<*, ApplicationCall>.trygdetidId(): UUID {
     return try {
         this.call.parameters[TRYGDETIDID_CALL_PARAMETER]?.let { UUID.fromString(it) }!!
     } catch (e: Exception) {
-        throw UgyldigForespoerselException("MANGLER_TRYGDETID_ID", "Kunne ikke lese ut parameteret trygdetidId")
+        throw UgyldigForespoerselException(
+            "MANGLER_TRYGDETID_ID",
+            "Kunne ikke lese ut parameteret trygdetidId",
+        )
     }
 }
 

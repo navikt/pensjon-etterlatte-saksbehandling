@@ -3,6 +3,7 @@ package no.nav.etterlatte.rivers.migrering
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.BrevEventTypes
@@ -37,7 +38,7 @@ internal class FiksEnkeltbrevRiver(
         val brukerTokenInfo = Systembruker("migrering", "migrering")
         runBlocking {
             packet.eventName = VedtakKafkaHendelseType.ATTESTERT.toString()
-            val vedtak = vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo)
+            val vedtak = retryOgPakkUt { vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo) }
             packet["vedtak"] = vedtak
         }
         context.publish(packet.toJson())

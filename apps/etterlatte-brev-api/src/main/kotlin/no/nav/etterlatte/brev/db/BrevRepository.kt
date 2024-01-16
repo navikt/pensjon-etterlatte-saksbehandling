@@ -39,6 +39,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.UUID
 import javax.sql.DataSource
@@ -310,6 +311,14 @@ class BrevRepository(private val ds: DataSource) {
             tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson()) > 0
         }
 
+    fun settBrevSlettet(
+        brevId: BrevID,
+        bruker: BrukerTokenInfo,
+    ): Boolean =
+        ds.transaction { tx ->
+            tx.lagreHendelse(brevId, Status.SLETTET, bruker.ident()) > 0
+        }
+
     private fun Session.lagreHendelse(
         brevId: BrevID,
         status: Status,
@@ -410,6 +419,7 @@ class BrevRepository(private val ds: DataSource) {
             INNER JOIN hendelse h on b.id = h.brev_id
             INNER JOIN innhold i on b.id = i.brev_id
             WHERE b.behandling_id = ?
+            AND h.status_id != 'SLETTET'
             AND h.id IN (
                 SELECT DISTINCT ON (brev_id) id
                 FROM hendelse
@@ -426,6 +436,7 @@ class BrevRepository(private val ds: DataSource) {
             INNER JOIN hendelse h on b.id = h.brev_id
             INNER JOIN innhold i on b.id = i.brev_id
             WHERE b.sak_id = ?
+            AND h.status_id != 'SLETTET'
             AND h.id IN (
                 SELECT DISTINCT ON (brev_id) id
                 FROM hendelse

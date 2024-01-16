@@ -543,7 +543,8 @@ internal class VedtaksvurderingRouteTest {
             )
         coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any(), any()) } returns
             VedtakOgRapid(
-                attestertVedtak.toDto(), mockk(),
+                attestertVedtak.toDto(),
+                mockk(),
             )
         coEvery { rapidService.sendToRapid(any()) } just runs
 

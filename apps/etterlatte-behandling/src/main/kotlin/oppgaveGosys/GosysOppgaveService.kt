@@ -4,7 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.GosysOppgave
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -27,19 +27,19 @@ interface GosysOppgaveService {
         oppgaveVersjon: Long,
         tilordnes: String,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): Long
 
     suspend fun endreFrist(
         oppgaveId: String,
         oppgaveVersjon: Long,
         nyFrist: Tidspunkt,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): Long
 }
 
 class GosysOppgaveServiceImpl(
     private val gosysOppgaveKlient: GosysOppgaveKlient,
-    private val pdlKlient: PdlKlient,
+    private val pdltjenesterKlient: PdlTjenesterKlient,
 ) : GosysOppgaveService {
     private val cache =
         Caffeine.newBuilder()
@@ -61,7 +61,7 @@ class GosysOppgaveServiceImpl(
                 emptyMap<String, String>()
             } else {
                 val aktoerIds = gosysOppgaver.oppgaver.mapNotNull { it.aktoerId }.toSet()
-                pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
+                pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
             }
 
         return gosysOppgaver.oppgaver
@@ -71,7 +71,7 @@ class GosysOppgaveServiceImpl(
 
     private fun List<GosysOppgave>.filterForEnheter(bruker: User) = this.filterOppgaverForEnheter(bruker)
 
-    fun List<GosysOppgave>.filterOppgaverForEnheter(user: User) =
+    private fun List<GosysOppgave>.filterOppgaverForEnheter(user: User) =
         this.filterForEnheter(
             user,
         ) { item, enheter ->
@@ -83,7 +83,7 @@ class GosysOppgaveServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgave {
         return cache.getIfPresent(id) ?: gosysOppgaveKlient.hentOppgave(id, brukerTokenInfo).let {
-            it.fraGosysOppgaveTilNy(pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId!!)))
+            it.fraGosysOppgaveTilNy(pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId!!)))
         }.also { cache.put(id, it) }
     }
 
@@ -92,8 +92,8 @@ class GosysOppgaveServiceImpl(
         oppgaveVersjon: Long,
         tilordnes: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(oppgaveId, oppgaveVersjon, tilordnes, brukerTokenInfo)
+    ): Long {
+        return gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(oppgaveId, oppgaveVersjon, tilordnes, brukerTokenInfo).versjon
     }
 
     override suspend fun endreFrist(
@@ -101,8 +101,8 @@ class GosysOppgaveServiceImpl(
         oppgaveVersjon: Long,
         nyFrist: Tidspunkt,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo)
+    ): Long {
+        return gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo).versjon
     }
 
     companion object {

@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
@@ -16,6 +17,7 @@ class BrevbakerService(
     private val brevbakerKlient: BrevbakerKlient,
     private val adresseService: AdresseService,
     private val brevDataMapper: BrevDataMapper,
+    private val brevKodeMapper: BrevKodeMapper,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -33,13 +35,14 @@ class BrevbakerService(
     suspend fun hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest: RedigerbarTekstRequest): Slate {
         val request =
             BrevbakerRequest.fra(
-                brevDataMapper.brevKode(
+                brevKodeMapper.brevKode(
                     redigerbarTekstRequest.generellBrevData,
                     BrevProsessType.REDIGERBAR,
-                    erOmregningNyRegel = redigerbarTekstRequest.migrering?.erOmregningGjenny ?: false,
                 ).redigering,
                 brevDataMapper.brevData(redigerbarTekstRequest),
-                adresseService.hentAvsender(redigerbarTekstRequest.generellBrevData.avsenderRequest()),
+                adresseService.hentAvsender(
+                    redigerbarTekstRequest.generellBrevData.avsenderRequest(redigerbarTekstRequest.brukerTokenInfo),
+                ),
                 redigerbarTekstRequest.generellBrevData.personerISak.soekerOgEventuellVerge(),
                 redigerbarTekstRequest.generellBrevData.sak.id,
                 redigerbarTekstRequest.generellBrevData.spraak,

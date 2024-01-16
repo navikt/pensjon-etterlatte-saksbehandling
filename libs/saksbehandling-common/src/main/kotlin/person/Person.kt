@@ -252,6 +252,56 @@ enum class AdressebeskyttelseGradering {
     fun erGradert(): Boolean {
         return this == STRENGT_FORTROLIG_UTLAND || this == STRENGT_FORTROLIG || this == FORTROLIG
     }
+
+    fun erStrengtFortrolig(): Boolean {
+        return this == STRENGT_FORTROLIG_UTLAND || this == STRENGT_FORTROLIG
+    }
+}
+
+fun finnHoyestGradering(graderinger: List<AdressebeskyttelseGradering>): AdressebeskyttelseGradering {
+    val strengtFortroligGradering =
+        graderinger.find {
+            it in
+                listOf(
+                    AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                    AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
+                )
+        }
+
+    if (strengtFortroligGradering != null) {
+        return strengtFortroligGradering
+    }
+
+    val fortrolig = graderinger.find { it == AdressebeskyttelseGradering.FORTROLIG }
+
+    if (fortrolig != null) {
+        return fortrolig
+    }
+
+    return AdressebeskyttelseGradering.UGRADERT
+}
+
+fun finnHoyesteGradering(
+    graderingEn: AdressebeskyttelseGradering,
+    graderingTo: AdressebeskyttelseGradering,
+): AdressebeskyttelseGradering {
+    if (graderingEn in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)) {
+        return graderingEn
+    }
+
+    if (graderingTo in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)) {
+        return graderingTo
+    }
+
+    if (graderingEn == AdressebeskyttelseGradering.FORTROLIG) {
+        return graderingEn
+    }
+
+    if (graderingTo == AdressebeskyttelseGradering.FORTROLIG) {
+        return graderingTo
+    }
+
+    return graderingEn
 }
 
 fun List<AdressebeskyttelseGradering?>.hentPrioritertGradering() = this.filterNotNull().minOrNull() ?: AdressebeskyttelseGradering.UGRADERT
@@ -286,25 +336,9 @@ private fun harVergensFnr(
     return !manglerFnr
 }
 
-fun flereVergerMedOekonomiskInteresse(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): Boolean {
-    val verger =
-        vergeListe?.filter {
-            it.vergeEllerFullmektig.tjenesteomraade in alleVergeOmfangMedOekonomiskeInteresser
-        } ?: emptyList()
-    return verger.size > 1
-}
-
-fun finnesVergeMedUkjentOmfang(vergeListe: List<VergemaalEllerFremtidsfullmakt>?) =
-    vergeListe.orEmpty().any {
-        it.vergeEllerFullmektig.tjenesteomraade !in alleKjenteVergeOmfang
-    }
-
 private val alleVergeOmfangMedOekonomiskeInteresser =
     listOf(
         "utlendingssakerPersonligeOgOekonomiskeInteresser",
         "personligeOgOekonomiskeInteresser",
         "oekonomiskeInteresser",
     )
-
-private val alleKjenteVergeOmfang =
-    alleVergeOmfangMedOekonomiskeInteresser + listOf("personligeInteresser")

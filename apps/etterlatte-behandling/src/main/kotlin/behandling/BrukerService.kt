@@ -6,7 +6,7 @@ import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
-import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -32,7 +32,7 @@ class GeografiskTilknytningMangler : IkkeFunnetException(
 )
 
 class BrukerServiceImpl(
-    private val pdlKlient: PdlKlient,
+    private val pdltjenesterKlient: PdlTjenesterKlient,
     private val norg2Klient: Norg2Klient,
 ) : BrukerService {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -41,7 +41,7 @@ class BrukerServiceImpl(
         fnr: String,
         saktype: SakType,
     ): Navkontor {
-        val tilknytning = pdlKlient.hentGeografiskTilknytning(fnr, saktype)
+        val tilknytning = pdltjenesterKlient.hentGeografiskTilknytning(fnr, saktype)
 
         return when {
             tilknytning.ukjent -> {
@@ -69,7 +69,7 @@ class BrukerServiceImpl(
         tema: String,
         saktype: SakType,
     ): ArbeidsFordelingEnhet {
-        val tilknytning = pdlKlient.hentGeografiskTilknytning(fnr, saktype)
+        val tilknytning = pdltjenesterKlient.hentGeografiskTilknytning(fnr, saktype)
         val geografiskTilknytning = tilknytning.geografiskTilknytning()
 
         return when {

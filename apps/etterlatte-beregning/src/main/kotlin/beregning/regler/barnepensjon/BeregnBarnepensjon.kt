@@ -21,26 +21,17 @@ data class PeriodisertBarnepensjonGrunnlag(
     val avdoedesTrygdetid: PeriodisertGrunnlag<FaktumNode<SamletTrygdetidMedBeregningsMetode>>,
     val institusjonsopphold: PeriodisertGrunnlag<FaktumNode<InstitusjonsoppholdBeregningsgrunnlag?>>,
     val avdoedeForeldre: PeriodisertGrunnlag<FaktumNode<List<Folkeregisteridentifikator>>>,
-    val brukNyttRegelverk: Boolean,
 ) : PeriodisertGrunnlag<BarnepensjonGrunnlag> {
     override fun finnAlleKnekkpunkter(): Set<LocalDate> {
         val soeskenkullKnekkpunkter =
-            if (brukNyttRegelverk) {
-                soeskenKull.finnAlleKnekkpunkter()
-                    .filter { it.isBefore(BP_2024_DATO) }
-                    .toSet()
-            } else {
-                soeskenKull.finnAlleKnekkpunkter()
-            }
+            soeskenKull.finnAlleKnekkpunkter()
+                .filter { it.isBefore(BP_2024_DATO) }
+                .toSet()
 
         val avdoedeForeldreKnekkpunkter =
-            if (brukNyttRegelverk) {
-                avdoedeForeldre.finnAlleKnekkpunkter()
-                    .filter { it.isAfter(BP_2024_DATO) }
-                    .toSet()
-            } else {
-                emptySet()
-            }
+            avdoedeForeldre.finnAlleKnekkpunkter()
+                .filter { it.isAfter(BP_2024_DATO) }
+                .toSet()
 
         return soeskenkullKnekkpunkter +
             avdoedesTrygdetid.finnAlleKnekkpunkter() +

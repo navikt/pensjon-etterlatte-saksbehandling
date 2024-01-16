@@ -1,5 +1,4 @@
-import styled from 'styled-components'
-import { Alert, Button, HelpText, HStack, Radio, RadioGroup, VStack } from '@navikt/ds-react'
+import { Alert, Button, HStack, Radio, VStack } from '@navikt/ds-react'
 import React, { ReactNode } from 'react'
 import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -10,8 +9,11 @@ import { Aldersgruppe, BrevutfallOgEtterbetaling } from '~components/behandling/
 import { add, formatISO, lastDayOfMonth, startOfDay } from 'date-fns'
 import { updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
+import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
+import { EtterbetalingHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/EtterbetalingHjelpeTekst'
+import { AldersgruppeHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/AldersgruppeHjelpeTekst'
 
 enum HarEtterbetaling {
   JA = 'JA',
@@ -27,7 +29,6 @@ interface BrevutfallSkjemaData {
 
 interface Props {
   behandling: IDetaljertBehandling
-  brevutfallOgEtterbetaling: BrevutfallOgEtterbetaling
   setBrevutfallOgEtterbetaling: (brevutfall: BrevutfallOgEtterbetaling) => void
   setVisSkjema: (visSkjema: boolean) => void
   resetBrevutfallvalidering: () => void
@@ -36,7 +37,6 @@ interface Props {
 
 export const BrevutfallSkjema = ({
   behandling,
-  brevutfallOgEtterbetaling,
   setBrevutfallOgEtterbetaling,
   setVisSkjema,
   resetBrevutfallvalidering,
@@ -46,21 +46,7 @@ export const BrevutfallSkjema = ({
 
   const dispatch = useAppDispatch()
 
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-    getValues,
-    watch,
-  } = useForm<BrevutfallSkjemaData>({
-    defaultValues: {
-      harEtterbetaling: brevutfallOgEtterbetaling.etterbetaling
-        ? brevutfallOgEtterbetaling.etterbetaling
-          ? HarEtterbetaling.JA
-          : HarEtterbetaling.NEI
-        : undefined,
-    },
-  })
+  const { handleSubmit, control, getValues, watch } = useForm<BrevutfallSkjemaData>()
 
   const submitBrevutfall = (data: BrevutfallSkjemaData) => {
     lagreBrevutfallReset()
@@ -124,39 +110,21 @@ export const BrevutfallSkjema = ({
     <form onSubmit={handleSubmit((data) => submitBrevutfall(data))}>
       <VStack gap="8">
         <VStack gap="4">
-          <Controller
+          <ControlledRadioGruppe
             name="harEtterbetaling"
-            rules={{
-              required: {
-                value: true,
-                message: 'Du må velge om det skal være etterbetaling eller ikke',
-              },
-            }}
             control={control}
-            render={({ field: { onChange } }) => (
-              <RadioGroup
-                onChange={onChange}
-                className="radioGroup"
-                error={errors.harEtterbetaling?.message}
-                legend={
-                  <HelpTextWrapper>
-                    Skal det etterbetales?
-                    <HelpText strategy="fixed">
-                      Velg ja hvis ytelsen er innvilget tilbake i tid og det blir utbetalt mer enn ett månedsbeløp. Da
-                      skal du registrere perioden fra innvilgelsesmåned til og med måneden som er klar for utbetaling.
-                      Vedlegg om etterbetaling skal da bli med i brevet.
-                    </HelpText>
-                  </HelpTextWrapper>
-                }
-              >
+            errorVedTomInput="Du må velge om det skal være etterbetaling eller ikke"
+            legend={<EtterbetalingHjelpeTekst />}
+            radios={
+              <>
                 <Radio size="small" value={HarEtterbetaling.JA}>
                   Ja
                 </Radio>
                 <Radio size="small" value={HarEtterbetaling.NEI}>
                   Nei
                 </Radio>
-              </RadioGroup>
-            )}
+              </>
+            }
           />
 
           {watch().harEtterbetaling == HarEtterbetaling.JA && (
@@ -184,39 +152,21 @@ export const BrevutfallSkjema = ({
 
         {behandling.sakType == SakType.BARNEPENSJON && (
           <VStack gap="4">
-            <Controller
+            <ControlledRadioGruppe
               name="aldersgruppe"
               control={control}
-              rules={{
-                required: {
-                  value: true,
-                  message: 'Du må velge om brevet gjelder under eller over 18 år',
-                },
-              }}
-              render={({ field: { onChange } }) => (
-                <RadioGroup
-                  className="radioGroup"
-                  onChange={onChange}
-                  error={errors.aldersgruppe?.message}
-                  legend={
-                    <HelpTextWrapper>
-                      Gjelder brevet under eller over 18 år?
-                      <HelpText strategy="fixed">
-                        Velg her gjeldende alternativ for barnet, slik at riktig informasjon kommer med i vedlegg 2. For
-                        barn under 18 år skal det stå &quot;Informasjon til deg som handler på vegne av barnet&quot;,
-                        mens for barn over 18 år skal det stå &quot;Informasjon til deg som mottar barnepensjon&quot;.
-                      </HelpText>
-                    </HelpTextWrapper>
-                  }
-                >
+              errorVedTomInput="Du må velge om brevet gjelder under eller over 18 år"
+              legend={<AldersgruppeHjelpeTekst />}
+              radios={
+                <>
                   <Radio size="small" value={Aldersgruppe.UNDER_18}>
                     Under 18 år
                   </Radio>
                   <Radio size="small" value={Aldersgruppe.OVER_18}>
                     Over 18 år
                   </Radio>
-                </RadioGroup>
-              )}
+                </>
+              }
             />
           </VStack>
         )}
@@ -242,8 +192,3 @@ export const BrevutfallSkjema = ({
     </form>
   )
 }
-
-const HelpTextWrapper = styled.div`
-  display: flex;
-  gap: 0.5em;
-`

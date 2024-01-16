@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
@@ -109,6 +110,8 @@ class BehandlingFactory(
      * Brukes av frontend for å kunne opprette sak og behandling for en Gosys-oppgave.
      */
     suspend fun opprettSakOgBehandlingForOppgave(request: NyBehandlingRequest): Behandling {
+        sikkerLogg.info("Oppretter sak og behandling for: $request")
+
         val soeker = request.persongalleri.soeker
         val hoyesteGradering = finnHoyesteGraderingForPersongalleri(request.persongalleri, request.sakType)
 

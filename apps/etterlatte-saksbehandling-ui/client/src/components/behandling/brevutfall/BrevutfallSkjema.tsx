@@ -18,17 +18,19 @@ import { AldersgruppeHjelpeTekst } from '~components/behandling/brevutfall/hjelp
 enum HarEtterbetaling {
   JA = 'JA',
   NEI = 'NEI',
+  IKKE_VALGT = 'IKKE_VALGT',
 }
 
 interface BrevutfallSkjemaData {
-  harEtterbetaling: HarEtterbetaling
-  datoFom?: Date
-  datoTom?: Date
-  aldersgruppe?: Aldersgruppe
+  harEtterbetaling: HarEtterbetaling | null
+  datoFom?: Date | null
+  datoTom?: Date | null
+  aldersgruppe?: Aldersgruppe | null
 }
 
 interface Props {
   behandling: IDetaljertBehandling
+  brevutfallOgEtterbetaling: BrevutfallOgEtterbetaling
   setBrevutfallOgEtterbetaling: (brevutfall: BrevutfallOgEtterbetaling) => void
   setVisSkjema: (visSkjema: boolean) => void
   resetBrevutfallvalidering: () => void
@@ -37,6 +39,7 @@ interface Props {
 
 export const BrevutfallSkjema = ({
   behandling,
+  brevutfallOgEtterbetaling,
   setBrevutfallOgEtterbetaling,
   setVisSkjema,
   resetBrevutfallvalidering,
@@ -46,7 +49,23 @@ export const BrevutfallSkjema = ({
 
   const dispatch = useAppDispatch()
 
-  const { handleSubmit, control, getValues, watch } = useForm<BrevutfallSkjemaData>()
+  const { handleSubmit, control, getValues, watch } = useForm<BrevutfallSkjemaData>({
+    defaultValues: {
+      harEtterbetaling:
+        brevutfallOgEtterbetaling.etterbetaling === undefined
+          ? HarEtterbetaling.IKKE_VALGT
+          : brevutfallOgEtterbetaling.etterbetaling
+            ? HarEtterbetaling.JA
+            : HarEtterbetaling.NEI,
+      datoFom: brevutfallOgEtterbetaling.etterbetaling?.datoFom
+        ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
+        : undefined,
+      datoTom: brevutfallOgEtterbetaling.etterbetaling?.datoFom
+        ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
+        : undefined,
+      aldersgruppe: brevutfallOgEtterbetaling.brevutfall.aldersgruppe,
+    },
+  })
 
   const submitBrevutfall = (data: BrevutfallSkjemaData) => {
     lagreBrevutfallReset()
@@ -56,10 +75,10 @@ export const BrevutfallSkjema = ({
         aldersgruppe: data.aldersgruppe,
       },
       etterbetaling:
-        data.datoFom && data.datoTom
+        data.harEtterbetaling === HarEtterbetaling.JA
           ? {
-              datoFom: formatISO(data.datoFom, { representation: 'date' }),
-              datoTom: formatISO(data.datoTom, { representation: 'date' }),
+              datoFom: formatISO(data.datoFom!, { representation: 'date' }),
+              datoTom: formatISO(data.datoTom!, { representation: 'date' }),
             }
           : null,
     }

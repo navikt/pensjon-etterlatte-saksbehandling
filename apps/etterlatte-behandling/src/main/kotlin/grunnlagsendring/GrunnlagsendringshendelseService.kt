@@ -244,7 +244,7 @@ class GrunnlagsendringshendelseService(
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
 
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
-        val sakerOgRollerGruppert = sakerOgRoller.groupBy { it }.keys
+        val sakerOgRollerGruppert = sakerOgRoller.distinct()
 
         val sakerForSoeker = sakerOgRollerGruppert.filter { Saksrolle.SOEKER == it.rolle }
 
@@ -289,7 +289,7 @@ class GrunnlagsendringshendelseService(
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
 
-        val sakerOgRollerGruppert = sakerOgRoller.groupBy { it }.keys
+        val sakerOgRollerGruppert = sakerOgRoller.distinct()
 
         return sakerOgRollerGruppert
             .filter { rolleOgSak -> sakService.finnSak(rolleOgSak.sakId) != null }

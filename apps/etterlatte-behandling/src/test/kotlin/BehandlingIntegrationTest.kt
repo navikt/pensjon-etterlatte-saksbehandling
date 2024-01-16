@@ -584,6 +584,10 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave {
+        return gosysApiOppgave()
+    }
+
+    private fun gosysApiOppgave(): GosysApiOppgave {
         return GosysApiOppgave(
             1,
             2,
@@ -605,8 +609,8 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         oppgaveVersjon: Long,
         tildeles: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        // NO-OP
+    ): GosysApiOppgave {
+        return gosysApiOppgave()
     }
 
     override suspend fun endreFrist(
@@ -614,8 +618,8 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         oppgaveVersjon: Long,
         nyFrist: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        // NO-OP
+    ): GosysApiOppgave {
+        return gosysApiOppgave()
     }
 }
 

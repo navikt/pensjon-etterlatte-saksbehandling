@@ -28,7 +28,7 @@ export const HeaderPadding = styled.span`
 
 export const Oppgavelista = (props: {
   oppgaver: ReadonlyArray<OppgaveDTO>
-  oppdaterTildeling: (id: string, saksbehandler: string | null) => void
+  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   filtrerteOppgaver: ReadonlyArray<OppgaveDTO>
 }) => {
   const { oppgaver, oppdaterTildeling, filtrerteOppgaver } = props

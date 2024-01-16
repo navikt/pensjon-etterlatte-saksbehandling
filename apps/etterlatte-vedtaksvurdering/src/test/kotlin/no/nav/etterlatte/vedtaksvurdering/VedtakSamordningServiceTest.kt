@@ -62,7 +62,9 @@ class VedtakSamordningServiceTest {
                     virkningstidspunkt = virkFom2024Januar,
                     vedtakFattet =
                         VedtakFattet(
-                            "SBH", "1014", Tidspunkt.parse("2023-12-05T14:20:50Z"),
+                            "SBH",
+                            "1014",
+                            Tidspunkt.parse("2023-12-05T14:20:50Z"),
                         ),
                     utbetalingsperioder =
                         listOf(
@@ -82,7 +84,9 @@ class VedtakSamordningServiceTest {
                     virkningstidspunkt = virkFom2024Februar,
                     vedtakFattet =
                         VedtakFattet(
-                            "SBH", "1014", Tidspunkt.parse("2024-01-11T09:43:04Z"),
+                            "SBH",
+                            "1014",
+                            Tidspunkt.parse("2024-01-11T09:43:04Z"),
                         ),
                     utbetalingsperioder =
                         listOf(

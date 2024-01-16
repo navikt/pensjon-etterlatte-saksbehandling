@@ -82,7 +82,6 @@ class ApplicationBuilder {
             behandlingKlient = behandlingKlient,
             samKlient = samKlient,
             trygdetidKlient = trygdetidKlient,
-            featureToggleService = featureToggleService,
         )
     private val vedtaksvurderingRapidService = VedtaksvurderingRapidService(publiser = ::publiser)
     private val vedtakTilbakekrevingService =

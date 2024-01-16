@@ -129,7 +129,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
                   tilbakestill={tilbakestill}
                   tilbakestillManuellPayloadStatus={isPending(tilbakestillManuellPayloadStatus)}
                   lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
-                  tilbakeStillSynlig={brev.behandlingId !== null}
+                  tilbakeStillSynlig={!!brev.behandlingId}
                 />
               )}
             </PanelWrapper>
@@ -170,7 +170,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
                     tilbakestill={tilbakestill}
                     tilbakestillManuellPayloadStatus={isPending(tilbakestillManuellPayloadStatus)}
                     lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
-                    tilbakeStillSynlig={brev.behandlingId !== null}
+                    tilbakeStillSynlig={!!brev.behandlingId}
                   />
                 )}
               </PanelWrapper>

@@ -124,6 +124,51 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
+    fun `Skal opprette hendelser for hendelse`() {
+        val sakId = 1L
+        val fnr = "Soeker"
+
+        every {
+            sakService.finnSak(sakId)
+        } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+        } returns emptyList()
+        coEvery { grunnlagClient.hentPersonSakOgRolle(any()) }
+            .returns(
+                PersonMedSakerOgRoller(
+                    fnr,
+                    listOf(
+                        SakOgRolle(1L, Saksrolle.GJENLEVENDE),
+                        SakOgRolle(1L, Saksrolle.GJENLEVENDE),
+                        SakOgRolle(1L, Saksrolle.GJENLEVENDE),
+                        SakOgRolle(1L, Saksrolle.SOESKEN),
+                        SakOgRolle(2L, Saksrolle.AVDOED),
+                        SakOgRolle(2L, Saksrolle.GJENLEVENDE),
+                        SakOgRolle(2L, Saksrolle.SOEKER),
+                        SakOgRolle(3L, Saksrolle.SOESKEN),
+                    ),
+                ),
+            )
+
+        val grunnlagsendringshendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                id = randomUUID(),
+                sakId = sakId,
+                fnr = fnr,
+                samsvarMellomKildeOgGrunnlag = null,
+            )
+
+        val opprettGrunnlagsendringshendelse = slot<Grunnlagsendringshendelse>()
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(opprettGrunnlagsendringshendelse))
+        } returns grunnlagsendringshendelse
+
+        val opprettedeHendelser = grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(fnr, GrunnlagsendringsType.DOEDSFALL)
+        assertEquals(6, opprettedeHendelser.size)
+    }
+
+    @Test
     fun `skal opprette grunnlagsendringshendelser i databasen for doedshendelser`() {
         val sakId = 1L
         val fnr = "Soeker"

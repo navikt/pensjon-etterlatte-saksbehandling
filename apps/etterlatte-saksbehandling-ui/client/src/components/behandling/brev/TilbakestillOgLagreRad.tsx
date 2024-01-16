@@ -26,7 +26,7 @@ export const TilbakestillOgLagreRad = ({
     <>
       <ButtonRow>
         <Button
-          icon={<FileResetIcon title="a11y-title" />}
+          icon={<FileResetIcon aria-hidden />}
           variant="secondary"
           onClick={() => setIsOpen(true)}
           disabled={!lagretStatus}
@@ -37,7 +37,7 @@ export const TilbakestillOgLagreRad = ({
         <div>
           {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
           <Button
-            icon={<FloppydiskIcon title="a11y-title" />}
+            icon={<FloppydiskIcon aria-hidden />}
             variant="primary"
             onClick={lagre}
             disabled={!lagretStatus}

@@ -11,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -58,6 +59,8 @@ interface BehandlingService {
         sakType: SakType,
         foedselsNummerMedGraderingDTO: FoedselsNummerMedGraderingDTO,
     ): Sak
+
+    fun hentBehandling(behandlingId: UUID): DetaljertBehandling
 }
 
 data class ReguleringFeiletHendelse(val sakId: Long)
@@ -185,6 +188,11 @@ class BehandlingServiceImpl(
             setBody(foedselsNummerMedGraderingDTO)
         }.body<Sak>()
     }
+
+    override fun hentBehandling(behandlingId: UUID): DetaljertBehandling =
+        runBlocking {
+            behandlingKlient.get("$url/behandlinger/$behandlingId").body()
+        }
 }
 
 data class OpprettOmregningResponse(val behandlingId: UUID, val forrigeBehandlingId: UUID, val sakType: SakType)

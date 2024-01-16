@@ -111,7 +111,8 @@ data class Foerstegangsbehandling(
 
         return hvisTilstandEr(
             listOf(
-                BehandlingStatus.VILKAARSVURDERT, // TODO EY-2927
+                // TODO EY-2927
+                BehandlingStatus.VILKAARSVURDERT,
                 BehandlingStatus.BEREGNET,
                 BehandlingStatus.AVKORTET,
                 BehandlingStatus.RETURNERT,

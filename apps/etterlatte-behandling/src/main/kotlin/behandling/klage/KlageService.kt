@@ -293,11 +293,15 @@ class KlageServiceImpl(
                 ekstradataInnstilling =
                     EkstradataInnstilling(
                         mottakerInnstilling = brev.mottaker,
-                        vergeEllerFullmektig = null, // TODO: Håndter verge
+                        // TODO: Håndter verge
+                        vergeEllerFullmektig = null,
                         journalpostInnstillingsbrev = journalpostId,
-                        journalpostKlage = null, // TODO: koble på når vi har inngang til klage
-                        journalpostSoeknad = null, // TODO: koble på når vi har journalpost soeknad inn
-                        journalpostVedtak = null, // TODO: hent ut vedtaksbrev for vedtaket
+                        // TODO: koble på når vi har inngang til klage
+                        journalpostKlage = null,
+                        // TODO: koble på når vi har journalpost soeknad inn
+                        journalpostSoeknad = null,
+                        // TODO: hent ut vedtaksbrev for vedtaket
+                        journalpostVedtak = null,
                     ),
             )
         }

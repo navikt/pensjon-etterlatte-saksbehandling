@@ -9,7 +9,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
-import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceTest
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
@@ -60,16 +59,12 @@ class ReguleringTest {
 
     @BeforeEach
     fun setup() {
-        every {
-            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning, false)
-        } returns true
         beregnBarnepensjonService =
             BeregnBarnepensjonService(
                 grunnlagKlient = grunnlagKlient,
                 vilkaarsvurderingKlient = vilkaarsvurderingKlient,
                 beregningsGrunnlagService = beregningsGrunnlagService,
                 trygdetidKlient = trygdetidKlient,
-                featureToggleService = featureToggleService,
             )
     }
 

@@ -158,7 +158,8 @@ internal class BehandlingTest {
                             ),
                         Opplysningstype.FOEDSELSDATO to
                             opprettOpplysning(
-                                LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
+                                // 11 år gammel
+                                LocalDate.now().minusYears(11).toJsonNode(),
                             ),
                         Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT to
                             opprettOpplysning(
@@ -179,7 +180,8 @@ internal class BehandlingTest {
                                 BrevMottaker(
                                     forventetVergeNavn,
                                     MottakerFoedselsnummer(""),
-                                    MottakerAdresse("", "", "", "", "", "", "", ""), "",
+                                    MottakerAdresse("", "", "", "", "", "", "", ""),
+                                    "",
                                 ).toJsonNode(),
                             ),
                     ),
@@ -207,7 +209,8 @@ internal class BehandlingTest {
                             ),
                         Opplysningstype.FOEDSELSDATO to
                             opprettOpplysning(
-                                LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
+                                // 11 år gammel
+                                LocalDate.now().minusYears(11).toJsonNode(),
                             ),
                         Opplysningstype.FAMILIERELASJON to
                             opprettOpplysning(
@@ -265,7 +268,8 @@ internal class BehandlingTest {
                             ),
                         Opplysningstype.FOEDSELSDATO to
                             opprettOpplysning(
-                                LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
+                                // 11 år gammel
+                                LocalDate.now().minusYears(11).toJsonNode(),
                             ),
                         Opplysningstype.FAMILIERELASJON to
                             opprettOpplysning(
@@ -310,7 +314,8 @@ internal class BehandlingTest {
                             ),
                         Opplysningstype.FOEDSELSDATO to
                             opprettOpplysning(
-                                LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
+                                // 11 år gammel
+                                LocalDate.now().minusYears(11).toJsonNode(),
                             ),
                         Opplysningstype.FAMILIERELASJON to
                             opprettOpplysning(
@@ -361,7 +366,8 @@ internal class BehandlingTest {
                             ),
                         Opplysningstype.FOEDSELSDATO to
                             opprettOpplysning(
-                                LocalDate.now().minusYears(19).toJsonNode(), // 19 år gammel
+                                // 19 år gammel
+                                LocalDate.now().minusYears(19).toJsonNode(),
                             ),
                     ),
                 familie =

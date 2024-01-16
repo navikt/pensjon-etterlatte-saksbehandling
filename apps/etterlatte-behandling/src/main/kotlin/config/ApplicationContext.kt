@@ -254,7 +254,6 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             grunnlagService = grunnlagsService,
             behandlingHendelser = behandlingsHendelser,
-            featureToggleService = featureToggleService,
             behandlingDao = behandlingDao,
             hendelseDao = hendelseDao,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
@@ -300,7 +299,6 @@ internal class ApplicationContext(
             behandlingDao,
             behandlingService,
             grunnlagsendringshendelseService,
-            featureToggleService,
             generellBehandlingService,
         )
 

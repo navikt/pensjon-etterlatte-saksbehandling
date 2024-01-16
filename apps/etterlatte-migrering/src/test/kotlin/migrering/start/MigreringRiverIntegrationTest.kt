@@ -110,7 +110,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.adressebeskyttelse } returns null
                                     }
                             }
-                        val personHenter = PersonHenter(pdlTjenesterKlient, featureToggleService)
+                        val personHenter = PersonHenter(pdlTjenesterKlient)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient =
@@ -206,7 +206,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.doedsdato } returns null
                                     }
                             }
-                        val personHenter = PersonHenter(pdlTjenesterKlient, featureToggleService)
+                        val personHenter = PersonHenter(pdlTjenesterKlient)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient = penKlient,
@@ -312,7 +312,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.adressebeskyttelse } returns null
                                     }
                             }
-                        val personHenter = PersonHenter(pdlTjenesterKlient, featureToggleService)
+                        val personHenter = PersonHenter(pdlTjenesterKlient)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient = penKlient,
@@ -429,7 +429,7 @@ internal class MigreringRiverIntegrationTest {
                                     )
                                 } throws IllegalStateException("")
                             }
-                        val personHenter = PersonHenter(pdlTjenesterKlient, featureToggleService)
+                        val personHenter = PersonHenter(pdlTjenesterKlient)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient =
@@ -499,7 +499,7 @@ internal class MigreringRiverIntegrationTest {
                                         every { it.adressebeskyttelse } returns null
                                     }
                             }
-                        val personHenter = PersonHenter(pdlTjenesterKlient, featureToggleService)
+                        val personHenter = PersonHenter(pdlTjenesterKlient)
                         MigrerSpesifikkSakRiver(
                             rapidsConnection = this,
                             penKlient =

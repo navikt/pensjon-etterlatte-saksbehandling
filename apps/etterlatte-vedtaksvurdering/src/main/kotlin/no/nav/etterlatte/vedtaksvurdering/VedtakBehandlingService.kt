@@ -2,7 +2,6 @@ package no.nav.etterlatte.vedtaksvurdering
 
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -30,7 +29,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.vedtaksvurdering.config.VedtaksvurderingFeatureToggle
 import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
@@ -49,7 +47,6 @@ class VedtakBehandlingService(
     private val behandlingKlient: BehandlingKlient,
     private val samKlient: SamKlient,
     private val trygdetidKlient: TrygdetidKlient,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(VedtakBehandlingService::class.java)
 
@@ -567,7 +564,7 @@ class VedtakBehandlingService(
         return coroutineScope {
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
             val sak = behandlingKlient.hentSak(behandling.sak, brukerTokenInfo)
-            val trygdetid = if (brukTrygdetid()) trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo) else null
+            val trygdetid = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
             when (behandling.behandlingType) {
                 BehandlingType.MANUELT_OPPHOER -> VedtakData(behandling, null, null, sak, trygdetid)
@@ -591,13 +588,6 @@ class VedtakBehandlingService(
                 }
             }
         }
-    }
-
-    private fun brukTrygdetid(): Boolean {
-        return featureToggleService.isEnabled(
-            VedtaksvurderingFeatureToggle.BrukTrygdetidIValiderGrunnlagsversjon,
-            false,
-        )
     }
 
     private fun vilkaarsvurderingUtfallNonNull(vilkaarsvurderingUtfall: VilkaarsvurderingUtfall?) =

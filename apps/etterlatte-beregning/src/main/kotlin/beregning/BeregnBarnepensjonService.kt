@@ -3,7 +3,6 @@ package no.nav.etterlatte.beregning
 import beregning.regler.finnAnvendtGrunnbeloep
 import beregning.regler.finnAnvendtTrygdetid
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
@@ -14,8 +13,6 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjon
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidBruktRegel
 import no.nav.etterlatte.beregning.regler.toSamlet
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -50,20 +47,12 @@ import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
-enum class BeregnBarnepensjonServiceFeatureToggle(private val key: String) : FeatureToggle {
-    BrukNyttRegelverkIBeregning("pensjon-etterlatte.bp-bruk-nytt-regelverk-i-beregning"),
-    ;
-
-    override fun key() = key
-}
-
 class BeregnBarnepensjonService(
     private val grunnlagKlient: GrunnlagKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val trygdetidKlient: TrygdetidKlient,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
@@ -346,7 +335,6 @@ class BeregnBarnepensjonService(
                     }
                 }
             },
-        brukNyttRegelverk = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false),
     )
 
     private fun List<Grunnlagsdata<JsonNode>>.toPeriodisertAvdoedeGrunnlag(): List<GrunnlagMedPeriode<List<Folkeregisteridentifikator>>> {

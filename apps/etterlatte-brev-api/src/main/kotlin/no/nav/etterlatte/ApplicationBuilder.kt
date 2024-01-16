@@ -147,13 +147,13 @@ class ApplicationBuilder {
 
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
 
-    private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade, migreringBrevDataService)
+    private val brevDataMapper = BrevDataMapper(brevdataFacade, migreringBrevDataService)
 
-    private val brevKodeMapper = BrevKodeMapper(featureToggleService)
+    private val brevKodeMapper = BrevKodeMapper()
 
     private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper, brevKodeMapper)
 
-    private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
+    private val brevProsessTypeFactory = BrevProsessTypeFactory()
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 

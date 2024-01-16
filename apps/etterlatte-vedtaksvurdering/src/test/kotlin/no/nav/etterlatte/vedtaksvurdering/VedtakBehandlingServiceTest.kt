@@ -13,7 +13,6 @@ import io.mockk.slot
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -48,7 +47,6 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.vedtaksvurdering.config.VedtaksvurderingFeatureToggle
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlient
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlient
@@ -107,14 +105,6 @@ internal class VedtakBehandlingServiceTest {
                 behandlingKlient = behandlingKlientMock,
                 samKlient = samKlientMock,
                 trygdetidKlient = trygdetidKlientMock,
-                featureToggleService =
-                    DummyFeatureToggleService()
-                        .also { toggle ->
-                            toggle.settBryter(
-                                VedtaksvurderingFeatureToggle.BrukTrygdetidIValiderGrunnlagsversjon,
-                                true,
-                            )
-                        },
             )
     }
 

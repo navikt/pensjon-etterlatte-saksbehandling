@@ -17,7 +17,6 @@ import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
 import no.nav.etterlatte.brev.model.bp.AvslagBrevData
 import no.nav.etterlatte.brev.model.bp.EndringHovedmalBrevData
-import no.nav.etterlatte.brev.model.bp.InnvilgetBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
 import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.OmgjoeringAvFarskapRevurderingBrevdata
@@ -28,8 +27,6 @@ import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
 import no.nav.etterlatte.brev.model.oms.InnvilgetBrevDataOMS
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -39,13 +36,6 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
-
-enum class BrevDataFeatureToggle(private val key: String) : FeatureToggle {
-    NyMalInnvilgelse("pensjon-etterlatte.bp-ny-mal-innvilgelse"),
-    ;
-
-    override fun key() = key
-}
 
 private class BrevDatafetcher(
     private val brevdataFacade: BrevdataFacade,
@@ -100,7 +90,6 @@ private class BrevDatafetcher(
 }
 
 class BrevDataMapper(
-    private val featureToggleService: FeatureToggleService,
     private val brevdataFacade: BrevdataFacade,
     private val migreringBrevDataService: MigreringBrevDataService,
 ) {
@@ -127,30 +116,15 @@ class BrevDataMapper(
             SakType.BARNEPENSJON -> {
                 when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE ->
-                        when (brukNyInnvilgelsesmal()) {
-                            true -> {
-                                coroutineScope {
-                                    val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
-                                    val utbetaling = async { fetcher.hentUtbetaling() }
-                                    val etterbetaling = async { fetcher.hentEtterbetaling() }
-                                    InnvilgetBrevDataEnkel.fra(
-                                        generellBrevData,
-                                        utbetaling.await(),
-                                        etterbetaling.await(),
-                                    )
-                                }
-                            }
-
-                            false -> {
-                                coroutineScope {
-                                    val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
-                                    val utbetaling =
-                                        async { fetcher.hentUtbetaling() }
-                                    val avkortinsinfo =
-                                        async { fetcher.hentAvkortinginfo() }
-                                    InnvilgetBrevData.fra(generellBrevData, utbetaling.await(), avkortinsinfo.await())
-                                }
-                            }
+                        coroutineScope {
+                            val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                            val utbetaling = async { fetcher.hentUtbetaling() }
+                            val etterbetaling = async { fetcher.hentEtterbetaling() }
+                            InnvilgetBrevDataEnkel.fra(
+                                generellBrevData,
+                                utbetaling.await(),
+                                etterbetaling.await(),
+                            )
                         }
 
                     VedtakType.AVSLAG -> ManueltBrevData.fra()
@@ -391,6 +365,4 @@ class BrevDataMapper(
         generellBrevData.forenkletVedtak?.type,
         generellBrevData.sak,
     )
-
-    private fun brukNyInnvilgelsesmal() = featureToggleService.isEnabled(BrevDataFeatureToggle.NyMalInnvilgelse, false)
 }

@@ -128,7 +128,13 @@ data class BrevgenereringRequest(
     val behandlingId: UUID?,
     val brevmal: EtterlatteBrevKode,
     val sakType: SakType,
-)
+) {
+    init {
+        require(fnr != null || behandlingId != null) {
+            "Enten fnr eller behandlingId må være definert"
+        }
+    }
+}
 
 enum class InformasjonsbrevFeatureToggle(private val key: String) : FeatureToggle {
     SendInformasjonsbrev("send-informasjonsbrev"),

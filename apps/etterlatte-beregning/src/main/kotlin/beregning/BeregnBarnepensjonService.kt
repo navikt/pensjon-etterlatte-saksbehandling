@@ -38,7 +38,6 @@ import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.KonstantGrunnlag
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
-import no.nav.etterlatte.libs.regler.TomtKonstantGrunnlag
 import no.nav.etterlatte.libs.regler.eksekver
 import no.nav.etterlatte.libs.regler.finnAnvendteRegler
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -281,7 +280,7 @@ class BeregnBarnepensjonService(
                     tom,
                 )
             } else {
-                TomtKonstantGrunnlag(FaktumNode(emptyList(), beregningsGrunnlag.kilde, "Søsken i kullet"))
+                KonstantGrunnlag(FaktumNode(emptyList(), beregningsGrunnlag.kilde, "Ingen søsken i kullet"))
             },
         avdoedesTrygdetid =
             trygdetid?.toSamlet(beregningsGrunnlag.beregningsMetode.beregningsMetode)?.let {

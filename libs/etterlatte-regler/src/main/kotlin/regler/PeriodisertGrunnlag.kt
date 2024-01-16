@@ -19,13 +19,3 @@ class KonstantGrunnlag<G>(private val konstantGrunnlag: G) : PeriodisertGrunnlag
 
     override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): G = konstantGrunnlag
 }
-
-class TomtKonstantGrunnlag<G>(private val notinuse: G) : PeriodisertGrunnlag<G> {
-    override fun finnAlleKnekkpunkter(): Set<LocalDate> = emptySet()
-
-    override fun finnKnekkpunkterInnenforPeriode(periode: RegelPeriode): Set<LocalDate> {
-        return emptySet()
-    }
-
-    override fun finnGrunnlagForPeriode(datoIPeriode: LocalDate): G = notinuse
-}

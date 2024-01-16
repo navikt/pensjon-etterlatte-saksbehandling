@@ -246,7 +246,7 @@ class GrunnlagsendringshendelseService(
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
         val sakerOgRollerGruppert = sakerOgRoller.groupBy { it }.keys
 
-        val sakerForSoeker = sakerOgRoller.filter { Saksrolle.SOEKER == it.rolle }
+        val sakerForSoeker = sakerOgRollerGruppert.filter { Saksrolle.SOEKER == it.rolle }
 
         return sakerForSoeker.let {
             inTransaction {

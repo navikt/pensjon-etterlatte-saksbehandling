@@ -53,6 +53,7 @@ internal class InnvilgetHovedmalBrevDataTest {
                         perioder = listOf(),
                         overstyrt = false,
                         prorataBroek = null,
+                        mindreEnnFireFemtedelerAvOpptjeningstiden = false,
                     ),
                 grunnbeloep =
                     Grunnbeloep(

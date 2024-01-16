@@ -55,6 +55,9 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
                 maanederTrygdetid = 0,
                 perioder = listOf(),
                 overstyrt = true,
+                mindreEnnFireFemtedelerAvOpptjeningstiden =
+                    trygdetidgrunnlagForAnvendtTrygdetid.beregnetTrygdetid
+                        ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
             )
         }
 
@@ -70,6 +73,9 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
             prorataBroek = prorataBroek,
             perioder = trygdetidsperioder,
             overstyrt = false,
+            mindreEnnFireFemtedelerAvOpptjeningstiden =
+                trygdetidgrunnlagForAnvendtTrygdetid.beregnetTrygdetid
+                    ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
         )
     }
 

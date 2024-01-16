@@ -86,12 +86,16 @@ export default function FullfoerKlageModal({ oppgave, klageRequest, journalpost 
           )}
           {isFailure(opprettKlageStatus) && (
             <Modal.Footer>
-              <Alert variant="error">Det oppsto en feil ved oppretting av klagebehandlingen.</Alert>
+              <Alert variant="error">
+                Det oppsto en feil ved oppretting av klagebehandlingen: {opprettKlageStatus.error.detail}
+              </Alert>
             </Modal.Footer>
           )}
           {isFailure(ferdigstillOppgaveStatus) && (
             <Modal.Footer>
-              <Alert variant="error">Det oppsto en feil ved lukking av oppgaven.</Alert>
+              <Alert variant="error">
+                Det oppsto en feil ved lukking av oppgaven: {ferdigstillOppgaveStatus.error.detail}
+              </Alert>
             </Modal.Footer>
           )}
         </Modal.Body>

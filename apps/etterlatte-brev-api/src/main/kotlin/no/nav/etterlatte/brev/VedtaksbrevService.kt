@@ -61,10 +61,10 @@ class VedtaksbrevService(
             bruker = bruker,
             automatiskMigreringRequest = automatiskMigreringRequest,
             avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
-            brevKode = { generellBrevData, brev, migreringBrevRequest ->
+            brevKode = { generellBrevData, brev ->
                 brevKodeMapper.brevKode(
                     generellBrevData,
-                    brev.prosessType
+                    brev.prosessType,
                 )
             },
         ) { generellBrevData, brev, pdf ->

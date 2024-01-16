@@ -66,7 +66,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                         attestantIdent = Fagsaksystem.EY.navn,
                     )
                 },
-                brevKode = { _, _, _ ->
+                brevKode = { _, _ ->
                     BrevkodePar(
                         brevKode,
                         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,

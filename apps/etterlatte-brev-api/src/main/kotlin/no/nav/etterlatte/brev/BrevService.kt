@@ -102,7 +102,7 @@ class BrevService(
             bruker,
             null,
             avsenderRequest = { b, g -> g.avsenderRequest(b) },
-            brevKode = { _, _, _ -> BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV) },
+            brevKode = { _, _ -> BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV) },
         )
 
     suspend fun ferdigstill(

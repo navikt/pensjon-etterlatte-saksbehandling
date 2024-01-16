@@ -98,19 +98,19 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
           <Tabs.Tab
             value={ManueltBrevFane.REDIGER}
             label={kanRedigeres ? 'Rediger' : 'Innhold'}
-            icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+            icon={<PencilIcon fontSize="1.5rem" aria-hidden />}
           />
           {vedlegg && (
             <Tabs.Tab
               value={ManueltBrevFane.REDIGER_VEDLEGG}
               label={kanRedigeres ? 'Rediger vedlegg' : 'Innhold vedlegg'}
-              icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+              icon={<PencilIcon fontSize="1.5rem" aria-hidden />}
             />
           )}
           <Tabs.Tab
             value={ManueltBrevFane.FORHAANDSVIS}
             label="Forhåndsvisning"
-            icon={<FilePdfIcon title="a11y-title" fontSize="1.5rem" />}
+            icon={<FilePdfIcon fontSize="1.5rem" aria-hidden />}
           />
         </Tabs.List>
 

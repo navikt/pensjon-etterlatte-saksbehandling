@@ -98,7 +98,6 @@ class BehandlingFactoryTest {
                 oppgaveService,
                 grunnlagService,
                 behandlingHendelserKafkaProducerMock,
-                featureToggleService,
                 behandlingDaoMock,
                 hendelseDaoMock,
                 grunnlagsendringshendelseDao,

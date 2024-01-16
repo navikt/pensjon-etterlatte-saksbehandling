@@ -105,7 +105,7 @@ class PDFGenerator(
         brukerTokenInfo: BrukerTokenInfo,
         brevkodePar: BrevkodePar,
     ): BrevData =
-        when (generellBrevData.erMigrering() || automatiskMigreringRequest?.erOmregningGjenny ?: false) {
+        when (generellBrevData.erMigrering()) {
             false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
             true ->
                 OmregnetBPNyttRegelverkFerdig(

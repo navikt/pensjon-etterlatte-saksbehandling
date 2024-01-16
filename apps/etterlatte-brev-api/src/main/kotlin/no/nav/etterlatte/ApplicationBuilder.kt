@@ -61,7 +61,6 @@ import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
-import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForOmregningNyRegelRiver
 import no.nav.etterlatte.rivers.migrering.behandlingerAaJournalfoereBrevFor
 import no.nav.etterlatte.security.ktor.clientCredential
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -208,8 +207,6 @@ class ApplicationBuilder {
                 OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
                 FiksEnkeltbrevRiver(this, vedtaksvurderingService)
                     .also { fiksEnkeltbrev() }
-
-                OpprettVedtaksbrevForOmregningNyRegelRiver(this, vedtaksbrevService)
 
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)

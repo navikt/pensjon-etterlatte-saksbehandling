@@ -64,8 +64,7 @@ class VedtaksbrevService(
             brevKode = { generellBrevData, brev, migreringBrevRequest ->
                 brevKodeMapper.brevKode(
                     generellBrevData,
-                    brev.prosessType,
-                    migreringBrevRequest?.erOmregningGjenny ?: false,
+                    brev.prosessType
                 )
             },
         ) { generellBrevData, brev, pdf ->
@@ -169,5 +168,4 @@ data class MigreringBrevRequest(
     val brutto: Int,
     val yrkesskade: Boolean,
     val utlandstilknytningType: UtlandstilknytningType?,
-    val erOmregningGjenny: Boolean = false,
 )

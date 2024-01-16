@@ -166,7 +166,6 @@ describe('behandlingSkalSendeBrev', () => {
     behandlingType: IBehandlingsType.REVURDERING,
     revurderingsaarsak: Revurderingaarsak.SOESKENJUSTERING,
   }
-  /* TODO EY-3232 Fjern utkommentering
   const regulering = {
     ...revurdering,
     revurderingsaarsak: Revurderingaarsak.REGULERING,
@@ -176,7 +175,6 @@ describe('behandlingSkalSendeBrev', () => {
     expect(behandlingSkalSendeBrev(regulering.behandlingType, regulering.revurderingsaarsak)).toBeFalsy()
     expect(behandlingSkalSendeBrev(manueltopphoer.behandlingType, manueltopphoer.revurderingsaarsak)).toBeFalsy()
   })
-*/
 
   it('skal gi true for foerstegangsbehandling og revurderinger som ikke er regulering', () => {
     expect(behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)).toBeTruthy()

@@ -526,45 +526,6 @@ class TrygdetidServiceImpl(
 
         val forrigeTrygdetid = hentTrygdetiderIBehandling(forrigeBehandlingId, brukerTokenInfo)
 
-        // TODO EY-3232 Skal fjernes
-        if (forrigeTrygdetid.isEmpty()) {
-            val avdoed = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede().firstOrNull()
-            val trygdetid =
-                Trygdetid(
-                    sakId = behandling.sak,
-                    behandlingId = behandlingId,
-                    opplysninger = avdoed?.let { hentOpplysninger(it, behandlingId) } ?: emptyList(),
-                    ident =
-                        requireNotNull(avdoed?.hentFoedselsnummer()?.verdi?.value) {
-                            "Kunne ikke hente identifikator for avdød til trygdetid i " +
-                                "behandlingen med id=$behandlingId"
-                        },
-                    trygdetidGrunnlag = emptyList(),
-                    beregnetTrygdetid =
-                        DetaljertBeregnetTrygdetid(
-                            resultat =
-                                DetaljertBeregnetTrygdetidResultat(
-                                    faktiskTrygdetidNorge = null,
-                                    faktiskTrygdetidTeoretisk = null,
-                                    fremtidigTrygdetidNorge = null,
-                                    fremtidigTrygdetidTeoretisk = null,
-                                    samletTrygdetidNorge = 40,
-                                    samletTrygdetidTeoretisk = null,
-                                    prorataBroek = null,
-                                    overstyrt = true,
-                                ),
-                            tidspunkt = Tidspunkt.now(),
-                            regelResultat = "MVP hardkodet trygdetid".toJsonNode(),
-                        ),
-                )
-            val opprettet = trygdetidRepository.opprettTrygdetid(trygdetid)
-            trygdetidRepository.oppdaterTrygdetid(
-                opprettet,
-                overstyrt = true,
-            ) // Holder ikke å sette overstyrt på detaljertBeregnetTrygdetid
-            return listOf(trygdetid)
-        }
-
         return kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetid)
     }
 

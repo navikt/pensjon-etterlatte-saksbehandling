@@ -1,7 +1,7 @@
-import { Accordion, Button, Detail, Tabs } from '@navikt/ds-react'
+import { Accordion, Tabs } from '@navikt/ds-react'
 import SlateEditor from '~components/behandling/brev/SlateEditor'
 import React, { useEffect, useState } from 'react'
-import { FilePdfIcon, FileResetIcon, FloppydiskIcon, PencilIcon } from '@navikt/aksel-icons'
+import { FilePdfIcon, PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { IBrev } from '~shared/types/Brev'
 import { format } from 'date-fns'
@@ -9,10 +9,9 @@ import { hentManuellPayload, lagreManuellPayload, tilbakestillManuellPayload } f
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
-import { GeneriskModal } from '~shared/modal/modal'
-
 import { isPending, isPendingOrInitial, isSuccess, isSuccessOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { TilbakestillOgLagreRad } from '~components/behandling/brev/TilbakestillOgLagreRad'
 
 enum ManueltBrevFane {
   REDIGER = 'REDIGER',
@@ -20,7 +19,7 @@ enum ManueltBrevFane {
   FORHAANDSVIS = 'FORHAANDSVIS',
 }
 
-interface LagretStatus {
+export interface LagretStatus {
   lagret: boolean
   beskrivelse?: string
 }
@@ -99,19 +98,19 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
           <Tabs.Tab
             value={ManueltBrevFane.REDIGER}
             label={kanRedigeres ? 'Rediger' : 'Innhold'}
-            icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+            icon={<PencilIcon fontSize="1.5rem" aria-hidden />}
           />
           {vedlegg && (
             <Tabs.Tab
               value={ManueltBrevFane.REDIGER_VEDLEGG}
               label={kanRedigeres ? 'Rediger vedlegg' : 'Innhold vedlegg'}
-              icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+              icon={<PencilIcon fontSize="1.5rem" aria-hidden />}
             />
           )}
           <Tabs.Tab
             value={ManueltBrevFane.FORHAANDSVIS}
             label="Forhåndsvisning"
-            icon={<FilePdfIcon title="a11y-title" fontSize="1.5rem" />}
+            icon={<FilePdfIcon fontSize="1.5rem" aria-hidden />}
           />
         </Tabs.List>
 
@@ -130,6 +129,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
                   tilbakestill={tilbakestill}
                   tilbakestillManuellPayloadStatus={isPending(tilbakestillManuellPayloadStatus)}
                   lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
+                  tilbakestillSynlig={!!brev.behandlingId}
                 />
               )}
             </PanelWrapper>
@@ -170,6 +170,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
                     tilbakestill={tilbakestill}
                     tilbakestillManuellPayloadStatus={isPending(tilbakestillManuellPayloadStatus)}
                     lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
+                    tilbakestillSynlig={!!brev.behandlingId}
                   />
                 )}
               </PanelWrapper>
@@ -190,76 +191,6 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
     </Container>
   )
 }
-
-interface TilbakestillOgLagreRadProps {
-  lagretStatus: LagretStatus
-  lagre: () => void
-  tilbakestill: () => void
-  tilbakestillManuellPayloadStatus: boolean
-  lagreManuellPayloadStatus: boolean
-}
-const TilbakestillOgLagreRad = ({
-  lagretStatus,
-  lagre,
-  tilbakestill,
-  tilbakestillManuellPayloadStatus,
-  lagreManuellPayloadStatus,
-}: TilbakestillOgLagreRadProps) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-
-  return (
-    <>
-      <ButtonRow>
-        <Button
-          icon={<FileResetIcon title="a11y-title" />}
-          variant="secondary"
-          onClick={() => setIsOpen(true)}
-          disabled={!lagretStatus}
-          loading={tilbakestillManuellPayloadStatus}
-        >
-          Tilbakestill brev
-        </Button>
-        <div>
-          {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
-          <Button
-            icon={<FloppydiskIcon title="a11y-title" />}
-            variant="primary"
-            onClick={lagre}
-            disabled={!lagretStatus}
-            loading={lagreManuellPayloadStatus}
-          >
-            Lagre endringer
-          </Button>
-        </div>
-      </ButtonRow>
-      <GeneriskModal
-        tittel="Tilbakestill brevet"
-        beskrivelse="Ønsker du å tilbakestille brevet og hente inn ny informasjon? Dette vil slette tidligere endringer, så husk å kopiere tekst du vil beholde først."
-        tekstKnappJa="Ja, hent alt innhold på nytt"
-        tekstKnappNei="Nei"
-        onYesClick={tilbakestill}
-        setModalisOpen={setIsOpen}
-        open={isOpen}
-      />
-    </>
-  )
-}
-
-const ButtonRow = styled.div`
-  padding: 1rem;
-  text-align: right;
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 100%;
-  z-index: 9999;
-  display: flex;
-  justify-content: space-between;
-
-  & > div > button {
-    margin-left: 10px;
-  }
-`
 
 interface StyledProps {
   forhaandsvisning?: boolean
@@ -282,5 +213,4 @@ const PanelWrapper = styled.div<StyledProps>`
   height: 100%;
   width: 100%;
   max-height: ${(p) => (p.forhaandsvisning ? 'calc(75vh - 3rem)' : 'calc(75vh - 5rem)')};
-  overflow: auto;
 `

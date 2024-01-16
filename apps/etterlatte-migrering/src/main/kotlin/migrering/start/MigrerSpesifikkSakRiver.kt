@@ -75,6 +75,8 @@ internal class MigrerSpesifikkSakRiver(
         if (migreringStatus in
             setOf(
                 Migreringsstatus.UNDER_MIGRERING,
+                Migreringsstatus.UTBETALING_OK,
+                Migreringsstatus.BREVUTSENDING_OK,
                 Migreringsstatus.FERDIG,
                 Migreringsstatus.PAUSE,
                 Migreringsstatus.MANUELL,

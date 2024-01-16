@@ -61,6 +61,30 @@ class PesysRepositoryTest {
     }
 
     @Test
+    fun `Skal oppdatere migreringsstatus til ferdig naar brevdistribusjon er ferdig foerst`() {
+        val behandlingId = UUID.randomUUID()
+        sakMedKobling(pesysSak(123L), behandlingId)
+
+        repository.oppdaterStatus(PesysId(123L), Migreringsstatus.BREVUTSENDING_OK)
+        assertEquals(Migreringsstatus.BREVUTSENDING_OK, repository.hentStatus(123L))
+
+        repository.oppdaterStatus(PesysId(123L), Migreringsstatus.UTBETALING_OK)
+        assertEquals(Migreringsstatus.FERDIG, repository.hentStatus(123L))
+    }
+
+    @Test
+    fun `Skal oppdatere migreringsstatus til ferdig naar utbetaling er godkjent foerst`() {
+        val behandlingId = UUID.randomUUID()
+        sakMedKobling(pesysSak(123L), behandlingId)
+
+        repository.oppdaterStatus(PesysId(123L), Migreringsstatus.UTBETALING_OK)
+        assertEquals(Migreringsstatus.UTBETALING_OK, repository.hentStatus(123L))
+
+        repository.oppdaterStatus(PesysId(123L), Migreringsstatus.BREVUTSENDING_OK)
+        assertEquals(Migreringsstatus.FERDIG, repository.hentStatus(123L))
+    }
+
+    @Test
     fun `lagre kobling til behandlingid oppdateres til ny behandlingsid`() {
         sakMedKobling(pesysSak(123L), UUID.randomUUID())
         val nyBehandlingId = UUID.randomUUID()

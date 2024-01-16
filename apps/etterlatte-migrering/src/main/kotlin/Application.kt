@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.migrering.ApplicationContext
 import no.nav.etterlatte.migrering.FeilendeMigreringLytterRiver
 import no.nav.etterlatte.migrering.LagreKoblingRiver
+import no.nav.etterlatte.migrering.LyttPaaDistribuerBrevRiver
 import no.nav.etterlatte.migrering.LyttPaaIverksattVedtakRiver
 import no.nav.etterlatte.migrering.PauseMigreringRiver
 import no.nav.etterlatte.migrering.start.MigrerSpesifikkSakRiver
@@ -54,6 +55,7 @@ internal class Server(private val context: ApplicationContext) {
                     LagreKoblingRiver(rapidsConnection, pesysRepository)
                     PauseMigreringRiver(rapidsConnection, pesysRepository)
                     LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)
+                    LyttPaaDistribuerBrevRiver(rapidsConnection, pesysRepository)
                     FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)
                     StartMigrering(startMigreringRepository, rapidsConnection, featureToggleService)
                     SjekkVergeadresserJobb(

@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
+import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -114,6 +115,7 @@ internal class BehandlingInfoRoutesTest {
             response.status shouldBe HttpStatusCode.OK
 
             opprettetBrevutfallOgEtterbetaling.brevutfall?.aldersgruppe shouldBe dto.brevutfall?.aldersgruppe
+            opprettetBrevutfallOgEtterbetaling.brevutfall?.lavEllerIngenInntekt shouldBe dto.brevutfall?.lavEllerIngenInntekt
             opprettetBrevutfallOgEtterbetaling.brevutfall?.kilde shouldNotBe null
 
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoFom shouldBe dto.etterbetaling?.datoFom
@@ -147,6 +149,7 @@ internal class BehandlingInfoRoutesTest {
             response.status shouldBe HttpStatusCode.OK
 
             hentetBrevutfall.brevutfall?.aldersgruppe shouldBe dto.brevutfall?.aldersgruppe
+            hentetBrevutfall.brevutfall?.lavEllerIngenInntekt shouldBe dto.brevutfall?.lavEllerIngenInntekt
         }
     }
 
@@ -193,6 +196,7 @@ internal class BehandlingInfoRoutesTest {
         Brevutfall(
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
+            lavEllerIngenInntekt = LavEllerIngenInntekt.JA,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
 
@@ -207,7 +211,7 @@ internal class BehandlingInfoRoutesTest {
     private fun brevutfallOgEtterbetalingDto(behandlingId: UUID = UUID.randomUUID()) =
         BrevutfallOgEtterbetalingDto(
             behandlingId = UUID.randomUUID(),
-            brevutfall = BrevutfallDto(behandlingId, Aldersgruppe.UNDER_18, null),
+            brevutfall = BrevutfallDto(behandlingId, Aldersgruppe.UNDER_18, LavEllerIngenInntekt.JA, null),
             etterbetaling =
                 EtterbetalingDto(
                     behandlingId = behandlingId,

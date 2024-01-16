@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -160,6 +161,7 @@ internal class BehandlingInfoDaoTest {
         Brevutfall(
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
+            lavEllerIngenInntekt = LavEllerIngenInntekt.NEI,
             kilde = Grunnlagsopplysning.Saksbehandler("Z1234567", Tidspunkt.now()),
         )
 

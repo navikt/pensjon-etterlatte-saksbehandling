@@ -105,6 +105,7 @@ private fun BrevutfallOgEtterbetalingDto.toBrevutfall(
     Brevutfall(
         behandlingId = behandlingId,
         aldersgruppe = brevutfall?.aldersgruppe,
+        lavEllerIngenInntekt = brevutfall?.lavEllerIngenInntekt,
         kilde = Grunnlagsopplysning.Saksbehandler.create(bruker.ident()),
     )
 
@@ -129,6 +130,7 @@ private fun Brevutfall.toDto() =
     BrevutfallDto(
         behandlingId = behandlingId,
         aldersgruppe = aldersgruppe,
+        lavEllerIngenInntekt = lavEllerIngenInntekt,
         kilde = kilde,
     )
 

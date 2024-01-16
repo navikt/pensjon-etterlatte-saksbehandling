@@ -5,7 +5,11 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBrevutfallApi } from '~shared/api/behandling'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
-import { Aldersgruppe, BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
+import {
+  Aldersgruppe,
+  BrevutfallOgEtterbetaling,
+  LavEllerIngenInntekt,
+} from '~components/behandling/brevutfall/Brevutfall'
 import { add, formatISO, lastDayOfMonth, startOfDay } from 'date-fns'
 import { updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
@@ -14,6 +18,7 @@ import { ControlledMaanedVelger } from '~shared/components/maanedVelger/Controll
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { EtterbetalingHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/EtterbetalingHjelpeTekst'
 import { AldersgruppeHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/AldersgruppeHjelpeTekst'
+import { LavEllerIngenInntektHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/LavEllerIngenInntektHjelpeTekst'
 
 enum HarEtterbetaling {
   JA = 'JA',
@@ -26,6 +31,7 @@ interface BrevutfallSkjemaData {
   datoFom?: Date | null
   datoTom?: Date | null
   aldersgruppe?: Aldersgruppe | null
+  lavEllerIngenInntekt?: LavEllerIngenInntekt | null
 }
 
 interface Props {
@@ -64,6 +70,7 @@ export const BrevutfallSkjema = ({
         ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
         : undefined,
       aldersgruppe: brevutfallOgEtterbetaling.brevutfall.aldersgruppe,
+      lavEllerIngenInntekt: brevutfallOgEtterbetaling.brevutfall.lavEllerIngenInntekt,
     },
   })
 
@@ -73,6 +80,7 @@ export const BrevutfallSkjema = ({
     const brevutfall: BrevutfallOgEtterbetaling = {
       brevutfall: {
         aldersgruppe: data.aldersgruppe,
+        lavEllerIngenInntekt: data.lavEllerIngenInntekt,
       },
       etterbetaling:
         data.harEtterbetaling === HarEtterbetaling.JA
@@ -183,6 +191,27 @@ export const BrevutfallSkjema = ({
                   </Radio>
                   <Radio size="small" value={Aldersgruppe.OVER_18}>
                     Over 18 år
+                  </Radio>
+                </>
+              }
+            />
+          </VStack>
+        )}
+
+        {behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
+          <VStack gap="4">
+            <ControlledRadioGruppe
+              name="lavEllerIngenInntekt"
+              control={control}
+              errorVedTomInput="Du må velge om OMS skal utbetales til søker fyller 67 år"
+              legend={<LavEllerIngenInntektHjelpeTekst />}
+              radios={
+                <>
+                  <Radio size="small" value={LavEllerIngenInntekt.JA}>
+                    Ja
+                  </Radio>
+                  <Radio size="small" value={LavEllerIngenInntekt.NEI}>
+                    Nei
                   </Radio>
                 </>
               }

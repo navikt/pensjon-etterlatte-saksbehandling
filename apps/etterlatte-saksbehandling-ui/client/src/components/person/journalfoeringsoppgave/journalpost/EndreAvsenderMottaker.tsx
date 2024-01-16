@@ -5,24 +5,32 @@ import React, { useState } from 'react'
 import { InputFlexRow } from './OppdaterJournalpost'
 import { FlexRow } from '~shared/styled'
 import { fnrHarGyldigFormat } from '~utils/fnr'
+import { useForm } from 'react-hook-form'
 
 export const EndreAvsenderMottaker = ({
-  initiellAvsenderMottaker,
+  avsenderMottaker,
   oppdaterAvsenderMottaker,
 }: {
-  initiellAvsenderMottaker: AvsenderMottaker
+  avsenderMottaker: AvsenderMottaker
   oppdaterAvsenderMottaker: (avsenderMottaker: AvsenderMottaker) => void
 }) => {
-  const [avsenderMottaker, setAvsenderMottaker] = useState(initiellAvsenderMottaker)
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+    getValues,
+    reset,
+  } = useForm<AvsenderMottaker>({ defaultValues: avsenderMottaker })
+
   const [rediger, setRediger] = useState(false)
 
   const lagreEndretMottaker = () => {
-    oppdaterAvsenderMottaker(avsenderMottaker)
+    oppdaterAvsenderMottaker(getValues())
     setRediger(false)
   }
 
   const avbryt = () => {
-    setAvsenderMottaker(initiellAvsenderMottaker)
+    reset({ ...avsenderMottaker })
     setRediger(false)
   }
 
@@ -35,15 +43,25 @@ export const EndreAvsenderMottaker = ({
       {rediger ? (
         <>
           <TextField
+            {...register('id', {
+              pattern: {
+                value: /[0-9]{11}/,
+                message: 'Fødselsnummer må bestå av 11 siffer',
+              },
+            })}
             label="Fødselsnummer"
-            value={avsenderMottaker.id || ''}
-            onChange={(e) => setAvsenderMottaker({ ...avsenderMottaker, id: e.target.value })}
+            error={errors?.id?.message}
           />
           <br />
           <TextField
+            {...register('navn', {
+              required: {
+                value: true,
+                message: 'Navn må fylles ut',
+              },
+            })}
             label="Navn"
-            value={avsenderMottaker.navn || ''}
-            onChange={(e) => setAvsenderMottaker({ ...avsenderMottaker, navn: e.target.value })}
+            error={errors?.navn?.message}
           />
 
           <br />
@@ -52,7 +70,7 @@ export const EndreAvsenderMottaker = ({
             <Button variant="tertiary" onClick={avbryt} size="small">
               Avbryt
             </Button>
-            <Button variant="secondary" onClick={lagreEndretMottaker} size="small">
+            <Button variant="secondary" onClick={handleSubmit(lagreEndretMottaker)} size="small">
               Lagre
             </Button>
           </FlexRow>

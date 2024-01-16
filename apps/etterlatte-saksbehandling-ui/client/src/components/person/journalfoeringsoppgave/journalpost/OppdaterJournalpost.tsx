@@ -61,7 +61,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
         <EndreBruker bruker={journalpost.bruker} />
 
         <EndreAvsenderMottaker
-          initiellAvsenderMottaker={journalpost.avsenderMottaker}
+          avsenderMottaker={journalpost.avsenderMottaker}
           oppdaterAvsenderMottaker={(avsenderMottaker) => setJournalpost({ ...journalpost, avsenderMottaker })}
         />
 

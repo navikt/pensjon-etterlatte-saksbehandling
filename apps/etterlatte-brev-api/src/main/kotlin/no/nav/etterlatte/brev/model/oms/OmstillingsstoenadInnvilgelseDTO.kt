@@ -59,7 +59,7 @@ data class OmstillingsstoenadInnvilgelseDTO(
                         inntekt = avkortingsinfo.inntekt,
                         grunnbeloep = avkortingsinfo.grunnbeloep,
                         beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = beregningsperioder.sortedBy { it.datoFOM }.first,
+                        sisteBeregningsperiode = beregningsperioder.minByOrNull { it.datoFOM }!!,
                         trygdetid =
                             OmstillingsstoenadTrygdetid(
                                 trygdetidsperioder = trygdetid.perioder,
@@ -67,8 +67,8 @@ data class OmstillingsstoenadInnvilgelseDTO(
                                 beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
                                 prorataBroek = trygdetid.prorataBroek,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
-                                beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first.beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first.beregningsMetodeAnvendt,
+                                beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
+                                beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
                             ),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =

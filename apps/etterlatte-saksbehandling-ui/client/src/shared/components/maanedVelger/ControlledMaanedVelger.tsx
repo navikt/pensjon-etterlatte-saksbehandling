@@ -35,7 +35,7 @@ export const ControlledMaanedVelger = <T extends FieldValues>({
     onMonthChange: (date: Date) => {
       date && field.onChange(date)
     },
-    defaultSelected: new Date(field.value),
+    defaultSelected: field.value ? new Date(field.value) : null,
     fromDate: fromDate ?? undefined,
     toDate: toDate ?? undefined,
     locale: 'nb',

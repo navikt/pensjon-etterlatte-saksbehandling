@@ -23,8 +23,8 @@ enum HarEtterbetaling {
 
 interface BrevutfallSkjemaData {
   harEtterbetaling: HarEtterbetaling | null
-  datoFom?: Date | string | null
-  datoTom?: Date | string | null
+  datoFom?: Date | null
+  datoTom?: Date | null
   aldersgruppe?: Aldersgruppe | null
 }
 
@@ -57,8 +57,12 @@ export const BrevutfallSkjema = ({
           : brevutfallOgEtterbetaling.etterbetaling
             ? HarEtterbetaling.JA
             : HarEtterbetaling.NEI,
-      datoFom: brevutfallOgEtterbetaling.etterbetaling?.datoFom,
-      datoTom: brevutfallOgEtterbetaling.etterbetaling?.datoFom,
+      datoFom: brevutfallOgEtterbetaling.etterbetaling?.datoFom
+        ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
+        : undefined,
+      datoTom: brevutfallOgEtterbetaling.etterbetaling?.datoFom
+        ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
+        : undefined,
       aldersgruppe: brevutfallOgEtterbetaling.brevutfall.aldersgruppe,
     },
   })
@@ -71,10 +75,10 @@ export const BrevutfallSkjema = ({
         aldersgruppe: data.aldersgruppe,
       },
       etterbetaling:
-        data.datoFom && data.datoTom
+        data.harEtterbetaling === HarEtterbetaling.JA
           ? {
-              datoFom: formatISO(data.datoFom as Date, { representation: 'date' }),
-              datoTom: formatISO(data.datoTom as Date, { representation: 'date' }),
+              datoFom: formatISO(data.datoFom!, { representation: 'date' }),
+              datoTom: formatISO(data.datoTom!, { representation: 'date' }),
             }
           : null,
     }

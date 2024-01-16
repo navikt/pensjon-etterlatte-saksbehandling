@@ -11,7 +11,7 @@ interface TilbakestillOgLagreRadProps {
   tilbakestill: () => void
   tilbakestillManuellPayloadStatus: boolean
   lagreManuellPayloadStatus: boolean
-  tilbakeStillSynlig: boolean
+  tilbakestillSynlig: boolean
 }
 
 export const TilbakestillOgLagreRad = ({
@@ -20,14 +20,14 @@ export const TilbakestillOgLagreRad = ({
   tilbakestill,
   tilbakestillManuellPayloadStatus,
   lagreManuellPayloadStatus,
-  tilbakeStillSynlig,
+  tilbakestillSynlig,
 }: TilbakestillOgLagreRadProps): ReactNode => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
   return (
     <>
       <ButtonRow>
-        {tilbakeStillSynlig && (
+        {tilbakestillSynlig && (
           <Button
             icon={<FileResetIcon aria-hidden />}
             variant="secondary"

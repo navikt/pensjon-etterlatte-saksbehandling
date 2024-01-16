@@ -45,11 +45,4 @@ internal class FiksEnkeltbrevRiver(
     }
 }
 
-val behandlingerAaJournalfoereBrevFor =
-    listOf(
-        "18118b9e-78ed-4d9a-b0de-b59c4a6bc061",
-        "81049810-a71f-4d72-84e8-d8c2343683ed",
-        "1d58ad45-d777-4fab-a92d-4e5e8f183850",
-        "1f902cb0-13ae-415b-968a-957c75dc3c3b",
-        "f54392e6-948b-4b31-b8f1-37fa249252f9",
-    )
+val behandlingerAaJournalfoereBrevFor = listOf<String>()

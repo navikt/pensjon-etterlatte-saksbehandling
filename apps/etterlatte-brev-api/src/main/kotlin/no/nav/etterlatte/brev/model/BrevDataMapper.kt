@@ -7,8 +7,8 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_ENDRING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
@@ -305,7 +305,7 @@ class BrevDataMapper(
                 )
             }
 
-            OMS_FOERSTEGANGSVEDTAK_INNVILGELSE -> {
+            OMSTILLINGSSTOENAD_INNVILGELSE -> {
                 coroutineScope {
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }

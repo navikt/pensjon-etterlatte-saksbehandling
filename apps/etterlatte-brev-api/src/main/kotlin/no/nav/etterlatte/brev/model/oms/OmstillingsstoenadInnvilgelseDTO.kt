@@ -33,6 +33,7 @@ data class OmstillingsstoenadInnvilgelseDTO(
             etterbetalinginfo: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             innholdMedVedlegg: InnholdMedVedlegg,
+            lavEllerIngenInntekt: Boolean,
         ): OmstillingsstoenadInnvilgelseDTO {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -74,7 +75,7 @@ data class OmstillingsstoenadInnvilgelseDTO(
                     avdoed.doedsdato
                         .plusMonths(4)
                         .isAfter(avkortingsinfo.virkningsdato),
-                lavEllerIngenInntekt = false, // TODO verdi hentes fra brevutfall når klart
+                lavEllerIngenInntekt = lavEllerIngenInntekt,
                 etterbetaling = OmstillingsstoenadEtterbetaling.fra(etterbetalinginfo, beregningsperioder),
             )
         }

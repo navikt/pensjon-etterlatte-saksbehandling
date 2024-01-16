@@ -1,31 +1,21 @@
 package no.nav.etterlatte.brev
 
-import no.nav.etterlatte.brev.adresse.AdresseService
-import no.nav.etterlatte.brev.adresse.AvsenderRequest
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
-import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
+import no.nav.etterlatte.brev.model.BrevkodePar
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.model.SlateHelper
-import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
 class BrevService(
     private val db: BrevRepository,
-    private val sakService: SakService,
-    private val adresseService: AdresseService,
+    private val brevoppretter: Brevoppretter,
     private val journalfoerBrevService: JournalfoerBrevService,
     private val pdfGenerator: PDFGenerator,
 ) {
@@ -43,23 +33,12 @@ class BrevService(
         sakId: Long,
         bruker: BrukerTokenInfo,
     ): Brev {
-        val sak = sakService.hentSak(sakId, bruker)
-
-        val mottaker = adresseService.hentMottakerAdresse(sak.ident)
-
-        val nyttBrev =
-            OpprettNyttBrev(
-                sakId = sakId,
-                behandlingId = null,
-                soekerFnr = sak.ident,
-                prosessType = BrevProsessType.MANUELL,
-                mottaker = mottaker,
-                opprettet = Tidspunkt.now(),
-                innhold = BrevInnhold("Tittel mangler", Spraak.NB, SlateHelper.opprettTomBrevmal()),
-                innholdVedlegg = null,
-            )
-
-        return db.opprettBrev(nyttBrev)
+        return brevoppretter.opprettBrev(
+            sakId = sakId,
+            behandlingId = null,
+            bruker = bruker,
+            automatiskMigreringRequest = null,
+        )
     }
 
     data class BrevPayload(
@@ -123,16 +102,8 @@ class BrevService(
             id,
             bruker,
             null,
-            avsenderRequest = {
-                AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = it.sak.enhet)
-            },
-            brevKode = { _, _, _ -> BrevDataMapper.BrevkodePar(EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV) },
-            brevData = { request ->
-                ManueltBrevMedTittelData(
-                    requireNotNull(db.hentBrevPayload(request.brev.id)).elements,
-                    request.brev.tittel,
-                )
-            },
+            avsenderRequest = { b, g -> g.avsenderRequest(b) },
+            brevKode = { _, _, _ -> BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV) },
         )
 
     suspend fun ferdigstill(

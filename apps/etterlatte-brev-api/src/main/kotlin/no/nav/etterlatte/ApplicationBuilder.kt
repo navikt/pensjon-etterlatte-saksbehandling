@@ -6,6 +6,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
+import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.PDFGenerator
@@ -38,6 +39,7 @@ import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapper
+import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
@@ -148,7 +150,9 @@ class ApplicationBuilder {
 
     private val brevDataMapper = BrevDataMapper(featureToggleService, brevdataFacade, migreringBrevDataService)
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper)
+    private val brevKodeMapper = BrevKodeMapper(featureToggleService)
+
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper, brevKodeMapper)
 
     private val brevProsessTypeFactory = BrevProsessTypeFactory(featureToggleService)
 
@@ -156,18 +160,16 @@ class ApplicationBuilder {
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
-    private val pdfGenerator = PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
+    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevProsessTypeFactory, brevbakerService)
+
+    private val pdfGenerator = PDFGenerator(db, brevdataFacade, brevDataMapper, adresseService, brevbakerService, migreringBrevDataService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
-            brevdataFacade,
             vedtaksvurderingService,
-            adresseService,
-            brevbakerService,
-            brevDataMapper,
-            brevProsessTypeFactory,
-            migreringBrevDataService,
+            brevKodeMapper,
+            brevoppretter,
             pdfGenerator,
         )
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
@@ -175,8 +177,7 @@ class ApplicationBuilder {
     private val brevService =
         BrevService(
             db,
-            sakService,
-            adresseService,
+            brevoppretter,
             journalfoerBrevService,
             pdfGenerator,
         )

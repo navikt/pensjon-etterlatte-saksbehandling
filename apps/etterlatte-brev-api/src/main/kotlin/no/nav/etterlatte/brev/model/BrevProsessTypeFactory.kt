@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -47,7 +46,7 @@ class BrevProsessTypeFactory(private val featureToggleService: FeatureToggleServ
         generellBrevData: GenerellBrevData,
         erOmregningNyRegel: Boolean = false,
     ): BrevProsessType {
-        if (generellBrevData.systemkilde == Vedtaksloesning.PESYS || erOmregningNyRegel) {
+        if (generellBrevData.erMigrering() || erOmregningNyRegel) {
             return BrevProsessType.REDIGERBAR
         }
         return when (generellBrevData.forenkletVedtak?.type) {

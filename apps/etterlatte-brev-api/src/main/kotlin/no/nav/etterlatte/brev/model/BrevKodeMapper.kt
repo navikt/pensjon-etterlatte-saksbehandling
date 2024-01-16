@@ -2,12 +2,11 @@ package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
-class BrevKodeMapper(private val featureToggleService: FeatureToggleService) {
+class BrevKodeMapper {
     fun brevKode(
         generellBrevData: GenerellBrevData,
         brevProsessType: BrevProsessType,
@@ -34,14 +33,10 @@ class BrevKodeMapper(private val featureToggleService: FeatureToggleService) {
             SakType.BARNEPENSJON -> {
                 when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE ->
-                        when (brukNyInnvilgelsesmal()) {
-                            true ->
-                                BrevkodePar(
-                                    EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_ENKEL,
-                                    EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY,
-                                )
-                            false -> BrevkodePar(EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE)
-                        }
+                        BrevkodePar(
+                            EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_ENKEL,
+                            EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY,
+                        )
 
                     VedtakType.AVSLAG ->
                         BrevkodePar(
@@ -166,8 +161,6 @@ class BrevKodeMapper(private val featureToggleService: FeatureToggleService) {
             }
         }
     }
-
-    private fun brukNyInnvilgelsesmal() = featureToggleService.isEnabled(BrevDataFeatureToggle.NyMalInnvilgelse, false)
 }
 
 data class BrevkodePar(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering)

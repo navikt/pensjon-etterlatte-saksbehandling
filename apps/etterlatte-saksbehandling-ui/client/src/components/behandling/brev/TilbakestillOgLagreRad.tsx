@@ -11,6 +11,7 @@ interface TilbakestillOgLagreRadProps {
   tilbakestill: () => void
   tilbakestillManuellPayloadStatus: boolean
   lagreManuellPayloadStatus: boolean
+  tilbakeStillSynlig: boolean
 }
 
 export const TilbakestillOgLagreRad = ({
@@ -19,21 +20,24 @@ export const TilbakestillOgLagreRad = ({
   tilbakestill,
   tilbakestillManuellPayloadStatus,
   lagreManuellPayloadStatus,
+  tilbakeStillSynlig,
 }: TilbakestillOgLagreRadProps): ReactNode => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
   return (
     <>
       <ButtonRow>
-        <Button
-          icon={<FileResetIcon aria-hidden />}
-          variant="secondary"
-          onClick={() => setIsOpen(true)}
-          disabled={!lagretStatus}
-          loading={tilbakestillManuellPayloadStatus}
-        >
-          Tilbakestill brev
-        </Button>
+        {tilbakeStillSynlig && (
+          <Button
+            icon={<FileResetIcon aria-hidden />}
+            variant="secondary"
+            onClick={() => setIsOpen(true)}
+            disabled={!lagretStatus}
+            loading={tilbakestillManuellPayloadStatus}
+          >
+            Tilbakestill brev
+          </Button>
+        )}
         <div>
           {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
           <Button

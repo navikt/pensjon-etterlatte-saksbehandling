@@ -9,7 +9,6 @@ import { hentManuellPayload, lagreManuellPayload, tilbakestillManuellPayload } f
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
-
 import { isPending, isPendingOrInitial, isSuccess, isSuccessOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { TilbakestillOgLagreRad } from '~components/behandling/brev/TilbakestillOgLagreRad'
@@ -130,6 +129,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
                   tilbakestill={tilbakestill}
                   tilbakestillManuellPayloadStatus={isPending(tilbakestillManuellPayloadStatus)}
                   lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
+                  tilbakeStillSynlig={brev.behandlingId !== null}
                 />
               )}
             </PanelWrapper>
@@ -170,6 +170,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
                     tilbakestill={tilbakestill}
                     tilbakestillManuellPayloadStatus={isPending(tilbakestillManuellPayloadStatus)}
                     lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
+                    tilbakeStillSynlig={brev.behandlingId !== null}
                   />
                 )}
               </PanelWrapper>

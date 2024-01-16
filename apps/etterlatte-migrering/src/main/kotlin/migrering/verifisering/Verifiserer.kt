@@ -46,6 +46,7 @@ internal class Verifiserer(
                 }
                 feil.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
                 if (!request.erUnder18) {
+                    feil.addAll(sjekkOmSoekerHaddeFlyktningfortdel(request))
                     feil.addAll(sjekkAdresseOgUtlandsopphold(request.pesysId.id, soeker, request))
                     feil.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(request))
                     feil.addAll(sjekkOmForandringIForeldreforhold(request, soeker))
@@ -60,6 +61,12 @@ internal class Verifiserer(
             utlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request),
         )
     }
+
+    private fun sjekkOmSoekerHaddeFlyktningfortdel(request: MigreringRequest): List<Verifiseringsfeil> =
+        when (request.anvendtFlyktningerfordel()) {
+            true -> listOf(SoekerHaddeFlyktningfordel)
+            false -> emptyList()
+        }
 
     private fun haandterFeil(
         request: MigreringRequest,
@@ -204,6 +211,11 @@ sealed class Verifiseringsfeil : Exception()
 data class FinsIkkeIPDL(val rolle: PersonRolle, val id: Folkeregisteridentifikator) : Verifiseringsfeil() {
     override val message: String
         get() = toString()
+}
+
+data object SoekerHaddeFlyktningfordel : Verifiseringsfeil() {
+    override val message: String
+        get() = "Søker hadde flyktningfordel"
 }
 
 data object BarnetHarFlereVerger : Verifiseringsfeil() {

@@ -45,7 +45,7 @@ internal class ApplicationContext {
                 azureAppScope = config.getString("pdl.azure.scope"),
             ),
         )
-    val personHenter = PersonHenter(pdlTjenesterKlient, featureToggleService)
+    val personHenter = PersonHenter(pdlTjenesterKlient)
     val gjenlevendeForelderPatcher = GjenlevendeForelderPatcher(pdlTjenesterKlient = pdlTjenesterKlient, personHenter)
     val grunnlagKlient =
         GrunnlagKlient(

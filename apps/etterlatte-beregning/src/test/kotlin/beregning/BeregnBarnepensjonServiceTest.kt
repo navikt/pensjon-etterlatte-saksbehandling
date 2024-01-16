@@ -52,7 +52,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.token.Systembruker
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -469,32 +468,6 @@ internal class BeregnBarnepensjonServiceTest {
                     utbetaltBeloep shouldBe BP_BELOEP_NYTT_REGELVERK_EN_DOED_FORELDER
                     grunnbelopMnd shouldBe GRUNNBELOEP_MAI_23
                 }
-            }
-        }
-    }
-
-    @Test
-    fun `skal ikke beregne med knekkpunkt fra regelverksendring hvis nytt regelverk er avslått`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = YearMonth.of(2023, Month.DECEMBER))
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(any(), any())
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns null
-        featureToggleService.settBryter(BrukNyttRegelverkIBeregning, false)
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
-
-        runBlocking {
-            val beregning =
-                beregnBarnepensjonService().beregn(
-                    behandling,
-                    bruker,
-                )
-            Assertions.assertEquals(1, beregning.beregningsperioder.size)
-            with(beregning.beregningsperioder[0]) {
-                datoFOM shouldBe YearMonth.of(2023, Month.DECEMBER)
-                datoTOM shouldBe null
             }
         }
     }

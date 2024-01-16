@@ -111,10 +111,7 @@ class Brevoppretter(
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
 
         val prosessType =
-            brevProsessTypeFactory.fra(
-                generellBrevData,
-                erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
-            )
+            brevProsessTypeFactory.fra(generellBrevData)
 
         val innhold =
             opprettInnhold(RedigerbarTekstRequest(generellBrevData, bruker, prosessType, automatiskMigreringRequest))

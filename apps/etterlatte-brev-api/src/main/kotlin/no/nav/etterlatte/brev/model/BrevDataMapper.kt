@@ -105,10 +105,7 @@ class BrevDataMapper(
     private val migreringBrevDataService: MigreringBrevDataService,
 ) {
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
-        when (
-            redigerbarTekstRequest.generellBrevData.erMigrering() ||
-                redigerbarTekstRequest.migrering?.erOmregningGjenny ?: false
-        ) {
+        when (redigerbarTekstRequest.generellBrevData.erMigrering()) {
             false ->
                 brevData(
                     redigerbarTekstRequest.generellBrevData,

@@ -38,7 +38,6 @@ class BrevbakerService(
                 brevKodeMapper.brevKode(
                     redigerbarTekstRequest.generellBrevData,
                     BrevProsessType.REDIGERBAR,
-                    erOmregningNyRegel = redigerbarTekstRequest.migrering?.erOmregningGjenny ?: false,
                 ).redigering,
                 brevDataMapper.brevData(redigerbarTekstRequest),
                 adresseService.hentAvsender(

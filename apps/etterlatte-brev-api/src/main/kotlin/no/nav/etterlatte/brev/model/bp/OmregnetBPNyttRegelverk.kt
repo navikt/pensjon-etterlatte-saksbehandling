@@ -50,7 +50,7 @@ data class OmregnetBPNyttRegelverk(
                             ),
                     erUnder18Aar = erUnder18Aar,
                 )
-            if (generellBrevData.erMigrering() || migreringRequest?.erOmregningGjenny == true) {
+            if (generellBrevData.erMigrering()) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
                 val (pesysUtenlandstilknytning, yrkesskade) =
                     when (migreringRequest) {

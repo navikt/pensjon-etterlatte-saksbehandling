@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgave
 
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -9,9 +10,6 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import org.junit.jupiter.api.AfterEach
@@ -19,34 +17,19 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(DatabaseExtension::class)
 internal class OppgaveDaoTest {
-    private lateinit var dataSource: DataSource
+    private val dataSource = DatabaseExtension.dataSource()
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var sakDao: SakDao
     private lateinit var saktilgangDao: SakTilgangDao
 
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
         val connection = dataSource.connection
         oppgaveDao = OppgaveDaoImpl { connection }
         sakDao = SakDao { connection }

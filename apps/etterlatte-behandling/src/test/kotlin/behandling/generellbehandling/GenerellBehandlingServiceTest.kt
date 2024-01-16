@@ -9,6 +9,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
@@ -34,9 +35,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
@@ -47,7 +45,6 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -55,20 +52,16 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID.randomUUID
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(DatabaseExtension::class)
 class GenerellBehandlingServiceTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
-    private lateinit var dataSource: DataSource
+    private val dataSource = DatabaseExtension.dataSource()
     private lateinit var dao: GenerellBehandlingDao
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var hendelseDao: HendelseDao
@@ -81,17 +74,6 @@ class GenerellBehandlingServiceTest {
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
         val connection = dataSource.connection
         dao = GenerellBehandlingDao { connection }
         oppgaveDao = OppgaveDaoImpl { connection }
@@ -112,11 +94,6 @@ class GenerellBehandlingServiceTest {
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE generellbehandling CASCADE; TRUNCATE oppgave CASCADE").execute()
         }
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     private val user = mockk<SaksbehandlerMedEnheterOgRoller>()

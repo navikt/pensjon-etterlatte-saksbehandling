@@ -3,6 +3,7 @@ package no.nav.etterlatte.metrics
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.prometheus.client.CollectorRegistry
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -11,24 +12,19 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.sak.SakDao
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(DatabaseExtension::class)
 internal class BehandlingMetricsOppgaveTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
+    private val ds = DatabaseExtension.dataSource()
 
     private lateinit var oppgaveDao: OppgaveDaoImpl
     private lateinit var sakDao: SakDao
@@ -41,14 +37,6 @@ internal class BehandlingMetricsOppgaveTest {
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-
-        val ds =
-            DataSourceBuilder.createDataSource(
-                postgreSQLContainer.jdbcUrl,
-                postgreSQLContainer.username,
-                postgreSQLContainer.password,
-            ).also { it.migrate() }
         val connection = ds.connection
         oppgaveDao = OppgaveDaoImpl { connection }
         sakDao = SakDao { connection }
@@ -60,11 +48,6 @@ internal class BehandlingMetricsOppgaveTest {
         behandlingMetrics = BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, testreg)
 
         behandlingMetrics.run()
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Nested

@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
@@ -21,9 +22,6 @@ import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
@@ -32,26 +30,21 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sak.SakServiceImpl
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.Logger
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
 import java.sql.Connection
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(DatabaseExtension::class)
 internal class EgenAnsattServiceTest {
     val sikkerLogg: Logger = sikkerlogger()
 
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
-    private lateinit var dataSource: DataSource
+    private val dataSource = DatabaseExtension.dataSource()
     private lateinit var sakRepo: SakDao
     private lateinit var oppgaveRepo: OppgaveDaoImpl
     private lateinit var oppgaveRepoMedSporing: OppgaveDaoMedEndringssporingImpl
@@ -62,17 +55,6 @@ internal class EgenAnsattServiceTest {
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
         val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
         val norg2Klient = mockk<Norg2Klient>()
         val featureToggleService = mockk<FeatureToggleService>()
@@ -121,11 +103,6 @@ internal class EgenAnsattServiceTest {
                 },
             ),
         )
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Test

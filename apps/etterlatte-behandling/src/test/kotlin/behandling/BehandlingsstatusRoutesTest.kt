@@ -64,6 +64,7 @@ internal class BehandlingsstatusRoutesTest {
 
     @AfterAll
     fun after() {
+        applicationContext.close()
         server.shutdown()
     }
 

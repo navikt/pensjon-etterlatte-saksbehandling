@@ -28,7 +28,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -53,11 +52,6 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
 
     @AfterAll
     fun shutdown() = afterAll()
-
-    @AfterEach
-    fun afterEach() {
-        resetDatabase()
-    }
 
     @Nested
     inner class KanOmregne {
@@ -112,11 +106,6 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                     .tilIverksatt()
 
             inTransaction { applicationContext.behandlingDao.lagreStatus(iverksattBehandling) }
-        }
-
-        @AfterEach
-        fun afterEach() {
-            resetDatabase()
         }
 
         @Test

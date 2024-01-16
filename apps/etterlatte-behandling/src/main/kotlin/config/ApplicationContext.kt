@@ -2,6 +2,7 @@ package no.nav.etterlatte.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -369,5 +370,9 @@ internal class ApplicationContext(
             Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(5, ChronoUnit.MINUTES),
         )
+    }
+
+    fun close() {
+        (dataSource as HikariDataSource).close()
     }
 }

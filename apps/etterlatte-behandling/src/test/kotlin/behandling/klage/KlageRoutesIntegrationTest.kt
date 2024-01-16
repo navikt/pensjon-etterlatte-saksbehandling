@@ -14,6 +14,7 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
@@ -42,7 +43,9 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                 mockk {
                     every { isEnabled(KlageFeatureToggle.KanBrukeKlageToggle, any()) } returns true
                 },
-        )
+        ).also {
+            DatabaseExtension.resetDb()
+        }
 
     @AfterEach
     fun afterEach() {

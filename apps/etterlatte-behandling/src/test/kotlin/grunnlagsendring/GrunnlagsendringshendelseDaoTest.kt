@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -20,13 +21,9 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.samsvarMellomPdlOgGrunnlagDoed
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -37,35 +34,20 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertAll
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.util.UUID
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(DatabaseExtension::class)
 internal class GrunnlagsendringshendelseDaoTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
-    private lateinit var dataSource: DataSource
+    private val dataSource = DatabaseExtension.dataSource()
     private lateinit var sakRepo: SakDao
     private lateinit var grunnlagsendringshendelsesRepo: GrunnlagsendringshendelseDao
     private lateinit var behandlingRepo: BehandlingDao
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
         behandlingRepo =
@@ -78,11 +60,6 @@ internal class GrunnlagsendringshendelseDaoTest {
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE grunnlagsendringshendelse CASCADE;").execute()
         }
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Test

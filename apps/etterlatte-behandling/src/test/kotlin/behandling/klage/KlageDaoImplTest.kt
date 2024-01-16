@@ -1,5 +1,6 @@
 package behandling.klage
 
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.FormkravMedBeslutter
@@ -9,43 +10,24 @@ import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.SakDao
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.temporal.ChronoUnit
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(DatabaseExtension::class)
 internal class KlageDaoImplTest {
-    private lateinit var dataSource: DataSource
+    private val dataSource = DatabaseExtension.dataSource()
     private lateinit var sakRepo: SakDao
     private lateinit var klageDao: KlageDaoImpl
 
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
     @BeforeAll
     fun setup() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
         val connection = dataSource.connection
         sakRepo = SakDao { connection }
         klageDao = KlageDaoImpl { connection }
@@ -57,11 +39,6 @@ internal class KlageDaoImplTest {
             .executeUpdate()
         dataSource.connection.prepareStatement("""TRUNCATE TABLE sak CASCADE """)
             .executeUpdate()
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Test

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.tilbakekreving
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
@@ -21,45 +22,27 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurderingUaktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.SakDao
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.YearMonth
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(DatabaseExtension::class)
 class TilbakekrevingDaoTest {
-    private lateinit var dataSource: DataSource
+    private val dataSource: DataSource = DatabaseExtension.dataSource()
     private lateinit var sakDao: SakDao
     private lateinit var tilbakekrevingDao: TilbakekrevingDao
 
     private lateinit var sak: Sak
 
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
     @BeforeAll
     fun setup() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
         val connection = dataSource.connection
         sakDao = SakDao { connection }
         tilbakekrevingDao = TilbakekrevingDao { connection }
@@ -74,11 +57,6 @@ class TilbakekrevingDaoTest {
         dataSource.connection.prepareStatement("""TRUNCATE TABLE sak CASCADE """)
             .executeUpdate()
         sak = sakDao.opprettSak(fnr = "en bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "1337")
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Test

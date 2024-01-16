@@ -300,7 +300,6 @@ internal class ApplicationContext(
             behandlingDao,
             behandlingService,
             grunnlagsendringshendelseService,
-            featureToggleService,
             generellBehandlingService,
         )
 

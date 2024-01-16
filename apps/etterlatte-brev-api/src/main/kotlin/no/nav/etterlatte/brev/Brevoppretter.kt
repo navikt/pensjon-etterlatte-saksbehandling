@@ -144,7 +144,7 @@ class Brevoppretter(
     }
 
     private suspend fun opprettInnhold(redigerbarTekstRequest: RedigerbarTekstRequest): BrevInnhold {
-        val tittel = "Vedtak om ${redigerbarTekstRequest.vedtakstype()}"
+        val tittel = redigerbarTekstRequest.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler"
 
         val payload =
             when (redigerbarTekstRequest.prosessType) {

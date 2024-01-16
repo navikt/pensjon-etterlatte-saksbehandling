@@ -60,7 +60,7 @@ class VedtaksbrevService(
             id = id,
             bruker = bruker,
             automatiskMigreringRequest = automatiskMigreringRequest,
-            avsenderRequest = { it.avsenderRequest() },
+            avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
             brevKode = { generellBrevData, brev, migreringBrevRequest ->
                 brevKodeMapper.brevKode(
                     generellBrevData,

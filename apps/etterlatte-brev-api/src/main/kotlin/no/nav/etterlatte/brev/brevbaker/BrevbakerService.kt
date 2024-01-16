@@ -41,7 +41,9 @@ class BrevbakerService(
                     erOmregningNyRegel = redigerbarTekstRequest.migrering?.erOmregningGjenny ?: false,
                 ).redigering,
                 brevDataMapper.brevData(redigerbarTekstRequest),
-                adresseService.hentAvsender(redigerbarTekstRequest.generellBrevData.avsenderRequest()),
+                adresseService.hentAvsender(
+                    redigerbarTekstRequest.generellBrevData.avsenderRequest(redigerbarTekstRequest.brukerTokenInfo),
+                ),
                 redigerbarTekstRequest.generellBrevData.personerISak.soekerOgEventuellVerge(),
                 redigerbarTekstRequest.generellBrevData.sak.id,
                 redigerbarTekstRequest.generellBrevData.spraak,

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev
 
-import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.db.BrevRepository
@@ -103,9 +102,7 @@ class BrevService(
             id,
             bruker,
             null,
-            avsenderRequest = {
-                AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = it.sak.enhet)
-            },
+            avsenderRequest = { b, g -> g.avsenderRequest(b) },
             brevKode = { _, _, _ -> BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV) },
         )
 

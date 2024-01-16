@@ -27,8 +27,8 @@ export const ControlledRadioGruppe = <T extends FieldValues>({
         },
       }}
       control={control}
-      render={({ field: { onChange }, fieldState: { error } }) => (
-        <RadioGroup onChange={onChange} error={error?.message} legend={legend}>
+      render={({ field: { onChange, value }, fieldState: { error } }) => (
+        <RadioGroup onChange={onChange} value={value} error={error?.message} legend={legend}>
           {radios}
         </RadioGroup>
       )}

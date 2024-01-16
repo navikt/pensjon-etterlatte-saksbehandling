@@ -32,8 +32,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.FNR_KEY
 import rapidsandrivers.SAK_ID_KEY
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -42,6 +44,8 @@ class InformasjonsbrevTest {
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var db: BrevRepository
     private lateinit var dataSource: DataSource
+
+    private val behandlingId = UUID.randomUUID()
 
     @BeforeAll
     fun beforeAll() {
@@ -119,7 +123,7 @@ class InformasjonsbrevTest {
             brevdistribuerer,
         )
 
-        assertEquals(1, testRapid.inspektør.size)
+        assertEquals(2, testRapid.inspektør.size)
         with(testRapid.inspektør.message(0)) {
             val fnr = get(FNR_KEY).also { assertEquals(SOEKER_FOEDSELSNUMMER.value, it.asText()) }
             val brevmal = get(BrevEventKeys.BREVMAL_KEY).also { assertEquals(brevkode.name, it.asText()) }
@@ -128,6 +132,20 @@ class InformasjonsbrevTest {
                 mapOf(
                     EVENT_NAME_KEY to BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER,
                     FNR_KEY to fnr,
+                    BrevEventKeys.BREVMAL_KEY to brevmal,
+                    SAK_TYPE_KEY to sakstype,
+                    SAK_ID_KEY to saksnr,
+                ),
+            ).also { testRapid.sendTestMessage(it.toJson()) }
+        }
+        with(testRapid.inspektør.message(1)) {
+            val behandling = get(BEHANDLING_ID_KEY).also { assertEquals(behandlingId.toString(), it.asText()) }
+            val brevmal = get(BrevEventKeys.BREVMAL_KEY).also { assertEquals(brevkode.name, it.asText()) }
+            val sakstype = get(SAK_TYPE_KEY).also { assertEquals(saktype.name, it.asText()) }
+            JsonMessage.newMessage(
+                mapOf(
+                    EVENT_NAME_KEY to BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER,
+                    BEHANDLING_ID_KEY to behandling,
                     BrevEventKeys.BREVMAL_KEY to brevmal,
                     SAK_TYPE_KEY to sakstype,
                     SAK_ID_KEY to saksnr,
@@ -147,6 +165,15 @@ class InformasjonsbrevTest {
                     "(${Databasetabell.FNR}, ${Databasetabell.BREVMAL}, ${Databasetabell.SAKTYPE}) " +
                     "VALUES" +
                     "('${SOEKER_FOEDSELSNUMMER.value}', '${brevkode.name}', '${saktype.name}');",
+            )
+                .let { query -> tx.run(query.asUpdate) }
+        }
+        dataSource.transaction { tx ->
+            queryOf(
+                "INSERT INTO ${Databasetabell.TABELLNAVN} " +
+                    "(${Databasetabell.BEHANDLING_ID}, ${Databasetabell.BREVMAL}, ${Databasetabell.SAKTYPE}) " +
+                    "VALUES" +
+                    "('$behandlingId', '${brevkode.name}', '${saktype.name}');",
             )
                 .let { query -> tx.run(query.asUpdate) }
         }

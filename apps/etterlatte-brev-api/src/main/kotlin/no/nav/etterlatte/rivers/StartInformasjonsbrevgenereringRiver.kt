@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.database.transaction
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.FNR_KEY
 import java.util.UUID
 import javax.sql.DataSource
@@ -35,17 +36,17 @@ class StartInformasjonsbrevgenereringRiver(
 
     private fun startBrevgenerering() {
         logger.info("Starter å generere informasjonsbrev for mottakerne som ligger i databasetabellen")
-        val fnr =
-            repository.hentFnrTilBrevgenerering().distinct().also { logger.info("Genererer ${it.size} brev") }
-        repository.settBrevPaastarta(fnr)
-        if (fnr.isEmpty()) {
+        val brevAaOpprette =
+            repository.hentTilBrevgenerering().distinct().also { logger.info("Genererer ${it.size} brev") }
+        repository.settBrevPaastarta(brevAaOpprette)
+        if (brevAaOpprette.isEmpty()) {
             return
         }
         iTraad {
             sleep(60_000)
             val opprettBrev =
                 featureToggleService.isEnabled(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, false)
-            fnr.forEach {
+            brevAaOpprette.forEach {
                 rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
                 if (opprettBrev) {
                     sleep(3000)
@@ -54,14 +55,17 @@ class StartInformasjonsbrevgenereringRiver(
         }
     }
 
-    private fun lagMelding(fnrTilBrevgenerering: FnrTilBrevgenerering) =
+    private fun lagMelding(brevgenereringRequest: BrevgenereringRequest) =
         JsonMessage.newMessage(
-            mapOf(
+            listOf(
                 EVENT_NAME_KEY to BrevEventKeys.OPPRETT_BREV,
-                FNR_KEY to fnrTilBrevgenerering.fnr,
-                BrevEventKeys.BREVMAL_KEY to fnrTilBrevgenerering.brevmal.name,
-                SAK_TYPE_KEY to fnrTilBrevgenerering.sakType.name,
-            ),
+                FNR_KEY to (brevgenereringRequest.fnr),
+                BEHANDLING_ID_KEY to (brevgenereringRequest.behandlingId?.toString()),
+                BrevEventKeys.BREVMAL_KEY to brevgenereringRequest.brevmal.name,
+                SAK_TYPE_KEY to brevgenereringRequest.sakType.name,
+            )
+                .filter { it.second != null }
+                .associate { it.first to it.second!! },
         ).toJson()
 }
 
@@ -71,35 +75,41 @@ class StartBrevgenereringRepository(private val dataSource: DataSource) : Transa
             this.block(it)
         }
 
-    fun hentFnrTilBrevgenerering(tx: TransactionalSession? = null) =
+    fun hentTilBrevgenerering(tx: TransactionalSession? = null) =
         tx.session {
             hentListe(
                 queryString =
-                    "SELECT ${Databasetabell.FNR}, ${Databasetabell.BREVMAL}, ${Databasetabell.SAKTYPE} " +
+                    "SELECT " +
+                        "${Databasetabell.FNR}, " +
+                        "${Databasetabell.BEHANDLING_ID}, " +
+                        "${Databasetabell.BREVMAL}, " +
+                        "${Databasetabell.SAKTYPE} " +
                         "FROM ${Databasetabell.TABELLNAVN} " +
                         "WHERE ${Databasetabell.HAANDTERT} = FALSE",
             ) {
-                FnrTilBrevgenerering(
-                    fnr = it.string(Databasetabell.FNR),
+                BrevgenereringRequest(
+                    fnr = it.stringOrNull(Databasetabell.FNR),
                     brevmal = EtterlatteBrevKode.valueOf(it.string(Databasetabell.BREVMAL)),
                     sakType = SakType.valueOf(it.string(Databasetabell.SAKTYPE)),
+                    behandlingId = it.uuidOrNull(Databasetabell.BEHANDLING_ID),
                 )
             }
         }
 
     fun settBrevPaastarta(
-        fnr: List<FnrTilBrevgenerering>,
+        brev: List<BrevgenereringRequest>,
         tx: TransactionalSession? = null,
     ) = tx.session {
         oppdater(
             query =
                 "UPDATE ${Databasetabell.TABELLNAVN} SET ${Databasetabell.HAANDTERT} = true WHERE " +
-                    "${Databasetabell.FNR} = ANY(:saker)",
+                    "(${Databasetabell.FNR} = ANY(:fnr) OR ${Databasetabell.BEHANDLING_ID} = ANY(:behandling))",
             params =
                 mapOf(
-                    "fnr" to createArrayOf("text", fnr.map { it.fnr }),
+                    "fnr" to createArrayOf("text", brev.mapNotNull { it.fnr }),
+                    "behandling" to createArrayOf("uuid", brev.mapNotNull { it.behandlingId }),
                 ),
-            loggtekst = "Markerte $fnr som påstarta for brevgenerering",
+            loggtekst = "Markerte $brev som påstarta for brevgenerering",
         )
     }
 
@@ -107,12 +117,18 @@ class StartBrevgenereringRepository(private val dataSource: DataSource) : Transa
         const val TABELLNAVN = "brev_til_generering"
         const val HAANDTERT = "haandtert"
         const val FNR = "fnr"
+        const val BEHANDLING_ID = "behandling"
         const val BREVMAL = "brevmal"
         const val SAKTYPE = "saktype"
     }
 }
 
-data class FnrTilBrevgenerering(val fnr: String, val brevmal: EtterlatteBrevKode, val sakType: SakType)
+data class BrevgenereringRequest(
+    val fnr: String?,
+    val behandlingId: UUID?,
+    val brevmal: EtterlatteBrevKode,
+    val sakType: SakType,
+)
 
 enum class InformasjonsbrevFeatureToggle(private val key: String) : FeatureToggle {
     SendInformasjonsbrev("send-informasjonsbrev"),

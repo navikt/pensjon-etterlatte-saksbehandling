@@ -52,6 +52,7 @@ data class Trygdetid(
     val maanederTrygdetid: Int,
     val perioder: List<Trygdetidsperiode>,
     val overstyrt: Boolean,
+    val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
 )
 
 data class Trygdetidsperiode(

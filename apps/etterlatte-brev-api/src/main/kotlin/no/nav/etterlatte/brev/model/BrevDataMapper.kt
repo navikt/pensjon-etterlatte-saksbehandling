@@ -22,9 +22,9 @@ import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.OmgjoeringAvFarskapRevurderingBrevdata
 import no.nav.etterlatte.brev.model.bp.SoeskenjusteringRevurderingBrevdata
 import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
-import no.nav.etterlatte.brev.model.oms.FoerstegangsvedtakUtfallDTO
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
-import no.nav.etterlatte.brev.model.oms.InnvilgetBrevDataOMS
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseDTO
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -189,11 +189,17 @@ class BrevDataMapper(
                             val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                             val utbetaling = async { fetcher.hentUtbetaling() }
                             val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
+                            val etterbetaling = async { fetcher.hentEtterbetaling() }
                             val avkortingHentet =
                                 requireNotNull(
                                     avkortingsinfo.await(),
                                 ) { "$vedtakType, ${generellBrevData.sak.sakType} må ha avkortingsinfo " }
-                            FoerstegangsvedtakUtfallDTO.fra(generellBrevData, utbetaling.await(), avkortingHentet)
+                            OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO.fra(
+                                generellBrevData,
+                                utbetaling.await(),
+                                avkortingHentet,
+                                etterbetaling.await() != null,
+                            )
                         }
                     }
 
@@ -309,7 +315,7 @@ class BrevDataMapper(
                     val avkortingsinfoHentet =
                         requireNotNull(avkortingsinfo.await()) { "${kode.ferdigstilling} Må ha avkortingsinfo" }
                     val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
-                    InnvilgetBrevDataOMS.fra(
+                    OmstillingsstoenadInnvilgelseDTO.fra(
                         generellBrevData,
                         utbetaling.await(),
                         avkortingsinfoHentet,

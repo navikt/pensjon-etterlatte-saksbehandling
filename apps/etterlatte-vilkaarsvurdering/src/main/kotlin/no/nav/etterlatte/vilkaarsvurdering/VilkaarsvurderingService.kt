@@ -52,10 +52,7 @@ class VilkaarsvurderingService(
                     virkningstidspunkt = virkningstidspunkt,
                     resultat = resultat,
                 )
-            vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(
-                behandlingId = behandlingId,
-                grunnlagVersjon = grunnlag.metadata.versjon,
-            )
+            vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(behandlingId, grunnlag.metadata.versjon)
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
             vilkaarsvurdering
         }
@@ -282,6 +279,17 @@ class VilkaarsvurderingService(
                 false
             }
         }
+
+    suspend fun oppdaterGrunnlagsversjon(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val (_, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
+        vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(
+            behandlingId = behandlingId,
+            grunnlagVersjon = grunnlag.metadata.versjon,
+        )
+    }
 
     private suspend fun <T> tilstandssjekkFoerKjoering(
         behandlingId: UUID,

@@ -21,6 +21,11 @@ class VirkningstidspunktBPErFoerReformMenManglerSoeskenjustering : UgyldigForesp
     detail = "Man må ha søskenjustering før reform for barnepensjon",
 )
 
+class ManglerVirkningstidspunktBP : UgyldigForespoerselException(
+    code = "MANGLER_VIRK_BP",
+    detail = "Mangler virkningstidspunkt for barnepensjon.",
+)
+
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
     private val behandlingKlient: BehandlingKlient,
@@ -85,7 +90,7 @@ class BeregningsGrunnlagService(
                 val soeskenMedIBeregning =
                     barnepensjonBeregningsGrunnlag.soeskenMedIBeregning.ifEmpty {
                         when (val virk = behandling.virkningstidspunkt) {
-                            null -> throw RuntimeException("Kan ikke lagre default soeskenjustering uten virkningstidspunkt")
+                            null -> throw ManglerVirkningstidspunktBP()
                             else -> {
                                 if (virk.dato.isBefore(REFORM_TIDSPUNKT_BP)) {
                                     throw VirkningstidspunktBPErFoerReformMenManglerSoeskenjustering()

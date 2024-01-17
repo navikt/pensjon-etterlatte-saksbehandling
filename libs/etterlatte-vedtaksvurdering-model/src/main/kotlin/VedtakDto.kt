@@ -27,8 +27,7 @@ data class VedtakSammendragDto(
     val datoAttestert: ZonedDateTime?,
 )
 
-// TODO Rename til VedtakDto når gammel dto er faset ut
-data class VedtakNyDto(
+data class VedtakDto(
     val id: Long,
     val behandlingId: UUID,
     val status: VedtakStatus,

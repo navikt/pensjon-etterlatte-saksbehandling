@@ -55,7 +55,7 @@ fun Route.vedtaksvurderingRoute(
                 if (vedtak == null) {
                     call.response.status(HttpStatusCode.NotFound)
                 } else {
-                    call.respond(vedtak.toNyDto())
+                    call.respond(vedtak.toDto())
                 }
             }
         }
@@ -76,7 +76,7 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
                 val nyttVedtak = vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
-                call.respond(nyttVedtak.toNyDto())
+                call.respond(nyttVedtak.toDto())
             }
         }
 
@@ -186,7 +186,7 @@ fun Route.vedtaksvurderingRoute(
 
             val nyeste = vedtakBehandlingService.hentNyesteBehandlingMedResultat(sakId, resultat)
             if (nyeste != null) {
-                call.respond(nyeste.toNyDto())
+                call.respond(nyeste.toDto())
             } else {
                 call.respond(HttpStatusCode.NoContent)
             }

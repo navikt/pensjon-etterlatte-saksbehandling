@@ -11,7 +11,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.vedtaksvurdering.VedtakOgRapid
 import java.time.LocalDate
@@ -36,11 +36,11 @@ interface VedtakService {
 
     fun tilbakestillVedtak(behandlingId: UUID)
 
-    fun tilSamordningVedtak(behandlingId: UUID): VedtakNyDto
+    fun tilSamordningVedtak(behandlingId: UUID): VedtakDto
 
-    fun samordnetVedtak(vedtakId: String): VedtakNyDto
+    fun samordnetVedtak(vedtakId: String): VedtakDto
 
-    fun iverksattVedtak(behandlingId: UUID): VedtakNyDto
+    fun iverksattVedtak(behandlingId: UUID): VedtakDto
 }
 
 class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: String) : VedtakService {
@@ -78,21 +78,21 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
         }
     }
 
-    override fun tilSamordningVedtak(behandlingId: UUID): VedtakNyDto =
+    override fun tilSamordningVedtak(behandlingId: UUID): VedtakDto =
         runBlocking {
             vedtakKlient.post("$url/api/vedtak/$behandlingId/tilsamordning") {
                 contentType(ContentType.Application.Json)
             }.body()
         }
 
-    override fun samordnetVedtak(vedtakId: String): VedtakNyDto =
+    override fun samordnetVedtak(vedtakId: String): VedtakDto =
         runBlocking {
             vedtakKlient.post("$url/vedtak/samordnet/$vedtakId") {
                 contentType(ContentType.Application.Json)
             }.body()
         }
 
-    override fun iverksattVedtak(behandlingId: UUID): VedtakNyDto =
+    override fun iverksattVedtak(behandlingId: UUID): VedtakDto =
         runBlocking {
             vedtakKlient.post("$url/api/vedtak/$behandlingId/iverksett") {
                 contentType(ContentType.Application.Json)

@@ -9,9 +9,9 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -105,7 +105,7 @@ class MigreringHendelserRiverTest {
     companion object {
         private val behandlingId = "a9d42eb9-561f-4320-8bba-2ba600e66e21"
         val vedtakDto =
-            VedtakNyDto(
+            VedtakDto(
                 123,
                 UUID.fromString(behandlingId),
                 VedtakStatus.OPPRETTET,
@@ -126,7 +126,7 @@ class MigreringHendelserRiverTest {
                 RapidInfo(
                     vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
                     vedtak =
-                        VedtakNyDto(
+                        VedtakDto(
                             123,
                             UUID.fromString(behandlingId),
                             VedtakStatus.OPPRETTET,

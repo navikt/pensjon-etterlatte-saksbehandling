@@ -10,9 +10,9 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.time.LocalDate
@@ -41,8 +41,8 @@ data class Vedtak(
     val attestasjon: Attestasjon? = null,
     val innhold: VedtakInnhold,
 ) {
-    fun toNyDto(): VedtakNyDto {
-        return VedtakNyDto(
+    fun toDto(): VedtakDto {
+        return VedtakDto(
             id = id,
             behandlingId = behandlingId,
             status = status,

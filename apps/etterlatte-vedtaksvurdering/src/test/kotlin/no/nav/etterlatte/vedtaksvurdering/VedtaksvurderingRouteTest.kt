@@ -31,9 +31,9 @@ import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -196,7 +196,7 @@ internal class VedtaksvurderingRouteTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakNyDto>(it.bodyAsText())
+                    deserialize<VedtakDto>(it.bodyAsText())
                 }
 
             with(vedtak) {
@@ -253,7 +253,7 @@ internal class VedtaksvurderingRouteTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakNyDto>(it.bodyAsText())
+                    deserialize<VedtakDto>(it.bodyAsText())
                 }
 
             with(vedtak) {
@@ -310,7 +310,7 @@ internal class VedtaksvurderingRouteTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakNyDto>(it.bodyAsText())
+                    deserialize<VedtakDto>(it.bodyAsText())
                 }
 
             with(vedtak) {
@@ -441,7 +441,7 @@ internal class VedtaksvurderingRouteTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakNyDto>(it.bodyAsText())
+                    deserialize<VedtakDto>(it.bodyAsText())
                 }
 
             with(vedtak) {
@@ -481,7 +481,7 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.FATTET_VEDTAK,
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             )
-        coEvery { vedtakBehandlingService.fattVedtak(any(), any(), any()) } returns VedtakOgRapid(fattetVedtak.toNyDto(), mockk())
+        coEvery { vedtakBehandlingService.fattVedtak(any(), any(), any()) } returns VedtakOgRapid(fattetVedtak.toDto(), mockk())
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -503,7 +503,7 @@ internal class VedtaksvurderingRouteTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakNyDto>(it.bodyAsText())
+                    deserialize<VedtakDto>(it.bodyAsText())
                 }
 
             with(vedtak) {
@@ -548,7 +548,7 @@ internal class VedtaksvurderingRouteTest {
             )
         coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any(), any()) } returns
             VedtakOgRapid(
-                attestertVedtak.toNyDto(),
+                attestertVedtak.toDto(),
                 mockk(),
             )
         coEvery { rapidService.sendToRapid(any()) } just runs
@@ -573,7 +573,7 @@ internal class VedtaksvurderingRouteTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakNyDto>(it.bodyAsText())
+                    deserialize<VedtakDto>(it.bodyAsText())
                 }
 
             with(vedtakDto) {
@@ -620,7 +620,7 @@ internal class VedtaksvurderingRouteTest {
             )
         val begrunnelse = UnderkjennVedtakDto("Ikke bra nok begrunnet", "Annet")
         coEvery { vedtakBehandlingService.underkjennVedtak(any(), any(), any()) } returns
-            VedtakOgRapid(underkjentVedtak.toNyDto(), mockk())
+            VedtakOgRapid(underkjentVedtak.toDto(), mockk())
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -643,7 +643,7 @@ internal class VedtaksvurderingRouteTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakNyDto>(it.bodyAsText())
+                    deserialize<VedtakDto>(it.bodyAsText())
                 }
 
             with(vedtak) {

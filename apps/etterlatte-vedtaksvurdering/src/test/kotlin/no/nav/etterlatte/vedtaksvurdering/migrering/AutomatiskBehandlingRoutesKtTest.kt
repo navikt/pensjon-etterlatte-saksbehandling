@@ -96,10 +96,10 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 opprettetVedtak
             coEvery { vedtakService.fattVedtak(behandlingId, any(), any()) } returns
                 VedtakOgRapid(
-                    opprettetVedtak.toNyDto(),
+                    opprettetVedtak.toDto(),
                     RapidInfo(
                         VedtakKafkaHendelseType.FATTET,
-                        opprettetVedtak.toNyDto(),
+                        opprettetVedtak.toDto(),
                         Tidspunkt.now(),
                         behandlingId,
                     ),
@@ -119,10 +119,10 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 )
             } returns
                 VedtakOgRapid(
-                    opprettetVedtak.toNyDto(),
+                    opprettetVedtak.toDto(),
                     RapidInfo(
                         VedtakKafkaHendelseType.ATTESTERT,
-                        opprettetVedtak.toNyDto(),
+                        opprettetVedtak.toDto(),
                         Tidspunkt.now(),
                         behandlingId,
                     ),
@@ -177,10 +177,10 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     opprettetVedtak
                 coEvery { vedtakService.fattVedtak(behandlingId, any(), any()) } returns
                     VedtakOgRapid(
-                        opprettetVedtak.toNyDto(),
+                        opprettetVedtak.toDto(),
                         RapidInfo(
                             VedtakKafkaHendelseType.FATTET,
-                            opprettetVedtak.toNyDto(),
+                            opprettetVedtak.toDto(),
                             Tidspunkt.now(),
                             behandlingId,
                         ),
@@ -200,10 +200,10 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     )
                 } returns
                     VedtakOgRapid(
-                        opprettetVedtak.toNyDto(),
+                        opprettetVedtak.toDto(),
                         RapidInfo(
                             VedtakKafkaHendelseType.ATTESTERT,
-                            opprettetVedtak.toNyDto(),
+                            opprettetVedtak.toDto(),
                             Tidspunkt.now(),
                             behandlingId,
                         ),
@@ -257,10 +257,10 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     opprettetVedtak
                 coEvery { runBlocking { vedtakService.fattVedtak(behandlingId, any(), any()) } } returns
                     VedtakOgRapid(
-                        opprettetVedtak.toNyDto(),
+                        opprettetVedtak.toDto(),
                         RapidInfo(
                             VedtakKafkaHendelseType.FATTET,
-                            opprettetVedtak.toNyDto(),
+                            opprettetVedtak.toDto(),
                             Tidspunkt.now(),
                             behandlingId,
                         ),
@@ -322,10 +322,10 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     }
                 } returns
                     VedtakOgRapid(
-                        opprettetVedtak.toNyDto(),
+                        opprettetVedtak.toDto(),
                         RapidInfo(
                             VedtakKafkaHendelseType.ATTESTERT,
-                            opprettetVedtak.toNyDto(),
+                            opprettetVedtak.toDto(),
                             Tidspunkt.now(),
                             behandlingId,
                         ),

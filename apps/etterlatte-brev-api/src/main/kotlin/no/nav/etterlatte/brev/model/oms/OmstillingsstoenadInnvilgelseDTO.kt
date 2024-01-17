@@ -33,6 +33,7 @@ data class OmstillingsstoenadInnvilgelseDTO(
             etterbetalinginfo: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             innholdMedVedlegg: InnholdMedVedlegg,
+            lavEllerIngenInntekt: Boolean,
         ): OmstillingsstoenadInnvilgelseDTO {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
@@ -58,7 +59,7 @@ data class OmstillingsstoenadInnvilgelseDTO(
                         inntekt = avkortingsinfo.inntekt,
                         grunnbeloep = avkortingsinfo.grunnbeloep,
                         beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = beregningsperioder.sortedBy { it.datoFOM }.first,
+                        sisteBeregningsperiode = beregningsperioder.maxByOrNull { it.datoFOM }!!,
                         trygdetid =
                             OmstillingsstoenadTrygdetid(
                                 trygdetidsperioder = trygdetid.perioder,
@@ -66,15 +67,15 @@ data class OmstillingsstoenadInnvilgelseDTO(
                                 beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
                                 prorataBroek = trygdetid.prorataBroek,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
-                                beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first.beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first.beregningsMetodeAnvendt,
+                                beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
+                                beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
                             ),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =
                     avdoed.doedsdato
                         .plusMonths(4)
                         .isAfter(avkortingsinfo.virkningsdato),
-                lavEllerIngenInntekt = false, // TODO verdi hentes fra brevutfall når klart
+                lavEllerIngenInntekt = lavEllerIngenInntekt,
                 etterbetaling = OmstillingsstoenadEtterbetaling.fra(etterbetalinginfo, beregningsperioder),
             )
         }

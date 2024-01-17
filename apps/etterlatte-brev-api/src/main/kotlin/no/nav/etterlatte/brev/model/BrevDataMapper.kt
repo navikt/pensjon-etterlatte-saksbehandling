@@ -28,6 +28,7 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbart
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -312,9 +313,14 @@ class BrevDataMapper(
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
                     val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
+                    val brevutfall = async { fetcher.hentBrevutfall() }
                     val avkortingsinfoHentet =
                         requireNotNull(avkortingsinfo.await()) { "${kode.ferdigstilling} Må ha avkortingsinfo" }
                     val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
+                    val brevutfallHentet =
+                        requireNotNull(brevutfall.await()) {
+                            "${kode.ferdigstilling} Må ha brevutfall for å avgjøre lav eller ingen inntekt"
+                        }
                     OmstillingsstoenadInnvilgelseDTO.fra(
                         generellBrevData,
                         utbetaling.await(),
@@ -322,6 +328,7 @@ class BrevDataMapper(
                         etterbetaling.await(),
                         trygdetidHentet,
                         innholdMedVedlegg,
+                        brevutfallHentet.lavEllerIngenInntekt == LavEllerIngenInntekt.JA,
                     )
                 }
             }

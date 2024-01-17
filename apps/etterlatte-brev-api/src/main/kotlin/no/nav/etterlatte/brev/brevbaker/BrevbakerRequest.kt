@@ -125,6 +125,7 @@ enum class EtterlatteBrevKode {
     TOM_DELMAL,
     TOM_MAL_INFORMASJONSBREV,
     TOM_MAL,
+    UTSATT_KLAGEFRIST,
 }
 
 data class SoekerOgEventuellVerge(val soeker: Soeker, val verge: Verge?)

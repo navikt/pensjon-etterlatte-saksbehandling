@@ -35,10 +35,9 @@ internal class FiksEnkeltbrevRiver(
         val behandlingId = packet.behandlingId
         logger.info("Fikser vedtaksbrev for behandling $behandlingId")
 
-        val brukerTokenInfo = Systembruker("migrering", "migrering")
         runBlocking {
             packet.eventName = VedtakKafkaHendelseType.ATTESTERT.toString()
-            val vedtak = retryOgPakkUt { vedtaksvurderingService.hentVedtak(behandlingId, brukerTokenInfo) }
+            val vedtak = retryOgPakkUt { vedtaksvurderingService.hentVedtak(behandlingId, Systembruker.migrering) }
             packet["vedtak"] = vedtak
         }
         context.publish(packet.toJson())

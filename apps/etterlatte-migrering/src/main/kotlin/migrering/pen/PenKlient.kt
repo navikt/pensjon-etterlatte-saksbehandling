@@ -33,7 +33,7 @@ class PenKlient(config: Config, pen: HttpClient) {
                         clientId = clientId,
                         url = "$resourceUrl/barnepensjon-migrering/grunnlag?sakId=$sakid&lopendeJanuar2024=$lopendeJanuar2024",
                     ),
-                brukerTokenInfo = migreringssystembruker,
+                brukerTokenInfo = Systembruker.migrering,
             )
             .mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -50,7 +50,7 @@ class PenKlient(config: Config, pen: HttpClient) {
                         clientId = clientId,
                         url = "$resourceUrl/barnepensjon-migrering/opphoer?sakId=${pesysId.id}",
                     ),
-                brukerTokenInfo = migreringssystembruker,
+                brukerTokenInfo = Systembruker.migrering,
                 postBody = {},
             )
             .mapBoth(
@@ -59,5 +59,3 @@ class PenKlient(config: Config, pen: HttpClient) {
             )
     }
 }
-
-val migreringssystembruker = Systembruker(oid = "migrering", sub = "migrering")

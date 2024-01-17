@@ -42,7 +42,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         context: MessageContext,
     ) = runBlocking {
         val brevkode = packet[BrevEventKeys.BREVMAL_KEY].asText().let { EtterlatteBrevKode.valueOf(it) }
-        opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker("brev", "brev"))
+        opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.brev)
     }
 
     private suspend fun opprettJournalfoerOgDistribuer(

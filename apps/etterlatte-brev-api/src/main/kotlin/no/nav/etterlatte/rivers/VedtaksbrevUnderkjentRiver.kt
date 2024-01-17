@@ -19,8 +19,8 @@ internal class VedtaksbrevUnderkjentRiver(
     init {
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.UNDERKJENT.toString()) {
             validate { it.requireKey("vedtak") }
-            validate { it.requireKey("vedtak.vedtakId") }
-            validate { it.requireKey("vedtak.behandling.id") }
+            validate { it.requireKey("vedtak.id") }
+            validate { it.requireKey("vedtak.behandlingId") }
             validate {
                 it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
             }
@@ -31,10 +31,10 @@ internal class VedtaksbrevUnderkjentRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val vedtakId = packet["vedtak.vedtakId"].asLong()
+        val vedtakId = packet["vedtak.id"].asLong()
 
         try {
-            val behandlingId = UUID.fromString(packet["vedtak.behandling.id"].asText())
+            val behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asText())
 
             logger.info("Vedtak (id=$vedtakId) er underkjent - åpner vedtaksbrev for nye endringer")
 

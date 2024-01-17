@@ -137,7 +137,7 @@ class VedtakBehandlingService(
             fattetVedtak.toDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.FATTET,
-                vedtak = fattetVedtak.toNyDto(),
+                vedtak = fattetVedtak.toDto(),
                 tekniskTid = fattetVedtak.vedtakFattet!!.tidspunkt,
                 behandlingId = behandlingId,
             ),
@@ -208,7 +208,7 @@ class VedtakBehandlingService(
             attestertVedtak.toDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
-                vedtak = attestertVedtak.toNyDto(),
+                vedtak = attestertVedtak.toDto(),
                 tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
                 behandlingId = behandlingId,
                 extraParams =
@@ -265,7 +265,7 @@ class VedtakBehandlingService(
             repository.hentVedtak(behandlingId)!!.toDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
-                vedtak = underkjentVedtak.toNyDto(),
+                vedtak = underkjentVedtak.toDto(),
                 tekniskTid = underkjentTid,
                 behandlingId = behandlingId,
             ),
@@ -294,7 +294,7 @@ class VedtakBehandlingService(
         val tilSamordning =
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.TIL_SAMORDNING,
-                vedtak = tilSamordningVedtakLocal.toNyDto(),
+                vedtak = tilSamordningVedtakLocal.toDto(),
                 tekniskTid = Tidspunkt.now(),
                 behandlingId = behandlingId,
             )
@@ -336,7 +336,7 @@ class VedtakBehandlingService(
             samordnetVedtakLocal.toDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.SAMORDNET,
-                vedtak = samordnetVedtakLocal.toNyDto(),
+                vedtak = samordnetVedtakLocal.toDto(),
                 tekniskTid = Tidspunkt.now(),
                 behandlingId = behandlingId,
             ),
@@ -366,7 +366,7 @@ class VedtakBehandlingService(
             iverksattVedtak.toDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
-                vedtak = iverksattVedtak.toNyDto(),
+                vedtak = iverksattVedtak.toDto(),
                 tekniskTid = Tidspunkt.now(),
                 behandlingId = behandlingId,
             ),

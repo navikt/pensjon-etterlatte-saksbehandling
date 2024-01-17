@@ -27,21 +27,7 @@ data class VedtakSammendragDto(
     val datoAttestert: ZonedDateTime?,
 )
 
-@Deprecated("VedtakDto skal ersttates av VedtakNyDto")
 data class VedtakDto(
-    val vedtakId: Long,
-    val status: VedtakStatus,
-    val virkningstidspunkt: YearMonth,
-    val sak: VedtakSak,
-    val behandling: Behandling,
-    val type: VedtakType,
-    val vedtakFattet: VedtakFattet?,
-    val attestasjon: Attestasjon?,
-    val utbetalingsperioder: List<Utbetalingsperiode>,
-)
-
-// TODO Rename til VedtakDto når gammel dto er faset ut
-data class VedtakNyDto(
     val id: Long,
     val behandlingId: UUID,
     val status: VedtakStatus,

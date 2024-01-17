@@ -1,8 +1,8 @@
 package no.nav.etterlatte.utbetaling.iverksetting.utbetaling
 
 import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -15,7 +15,7 @@ data class Utbetalingsvedtak(
     val attestasjon: Attestasjon,
 ) {
     companion object {
-        fun fra(vedtak: VedtakNyDto): Utbetalingsvedtak {
+        fun fra(vedtak: VedtakDto): Utbetalingsvedtak {
             val innhold = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
             return Utbetalingsvedtak(
                 vedtakId = vedtak.id,

@@ -6,8 +6,8 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.sikkerLogg
@@ -118,7 +118,7 @@ class VedtakMottakRiver(
 
     private fun lesVedtak(packet: JsonMessage): Utbetalingsvedtak =
         try {
-            val vedtak: VedtakNyDto = objectMapper.readValue(packet["vedtak"].toJson())
+            val vedtak: VedtakDto = objectMapper.readValue(packet["vedtak"].toJson())
             Utbetalingsvedtak.fra(vedtak)
         } catch (e: Exception) {
             throw KunneIkkeLeseVedtakException(e)

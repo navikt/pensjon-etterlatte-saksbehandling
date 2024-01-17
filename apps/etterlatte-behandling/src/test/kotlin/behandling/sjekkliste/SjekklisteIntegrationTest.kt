@@ -35,7 +35,7 @@ class SjekklisteIntegrationTest {
 
     private val behandlingService = mockk<BehandlingService>()
     private val oppgaveService = mockk<OppgaveService>()
-    private val dataSource = DatabaseExtension.dataSource()
+    private val dataSource = DatabaseExtension.dataSource
     private lateinit var sjekklisteDao: SjekklisteDao
     private lateinit var sjekklisteService: SjekklisteService
 

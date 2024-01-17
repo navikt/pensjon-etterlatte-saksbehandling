@@ -16,7 +16,7 @@ import java.time.LocalDate
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 internal class SakDaoTest {
-    private val dataSource = DatabaseExtension.dataSource()
+    private val dataSource = DatabaseExtension.dataSource
     private lateinit var sakRepo: SakDao
     private lateinit var tilgangService: TilgangService
 

@@ -24,7 +24,7 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 internal class BehandlingMetricsOppgaveTest {
-    private val ds = DatabaseExtension.dataSource()
+    private val ds = DatabaseExtension.dataSource
 
     private lateinit var oppgaveDao: OppgaveDaoImpl
     private lateinit var sakDao: SakDao

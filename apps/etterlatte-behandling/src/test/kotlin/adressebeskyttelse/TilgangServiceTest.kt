@@ -33,7 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 internal class TilgangServiceTest {
-    private val dataSource = DatabaseExtension.dataSource()
+    private val dataSource = DatabaseExtension.dataSource
     private lateinit var tilgangService: TilgangService
     private lateinit var sakService: SakService
     private lateinit var sakRepo: SakDao

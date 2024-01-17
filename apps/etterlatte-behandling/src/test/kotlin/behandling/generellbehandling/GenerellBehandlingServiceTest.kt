@@ -61,7 +61,7 @@ import java.util.UUID.randomUUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 class GenerellBehandlingServiceTest {
-    private val dataSource = DatabaseExtension.dataSource()
+    private val dataSource = DatabaseExtension.dataSource
     private lateinit var dao: GenerellBehandlingDao
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var hendelseDao: HendelseDao

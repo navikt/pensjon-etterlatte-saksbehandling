@@ -43,7 +43,7 @@ import java.time.YearMonth
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 internal class BehandlingDaoTest {
-    private val dataSource = DatabaseExtension.dataSource()
+    private val dataSource = DatabaseExtension.dataSource
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var kommerBarnetTilGodeDao: KommerBarnetTilGodeDao

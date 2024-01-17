@@ -44,7 +44,7 @@ import java.sql.Connection
 internal class EgenAnsattServiceTest {
     val sikkerLogg: Logger = sikkerlogger()
 
-    private val dataSource = DatabaseExtension.dataSource()
+    private val dataSource = DatabaseExtension.dataSource
     private lateinit var sakRepo: SakDao
     private lateinit var oppgaveRepo: OppgaveDaoImpl
     private lateinit var oppgaveRepoMedSporing: OppgaveDaoMedEndringssporingImpl

@@ -30,7 +30,7 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 internal class BehandlingInfoDaoTest {
-    private val dataSource: DataSource = DatabaseExtension.dataSource()
+    private val dataSource: DataSource = DatabaseExtension.dataSource
     private lateinit var behandlingDao: BehandlingDao
     private lateinit var sakDao: SakDao
     private lateinit var dao: BehandlingInfoDao

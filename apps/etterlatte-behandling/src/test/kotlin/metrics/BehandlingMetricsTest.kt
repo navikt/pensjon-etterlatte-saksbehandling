@@ -26,7 +26,7 @@ import java.time.YearMonth
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 internal class BehandlingMetricsTest {
-    private val ds = DatabaseExtension.dataSource()
+    private val ds = DatabaseExtension.dataSource
     private lateinit var behandlingMetrikkerDao: BehandlingMetrikkerDao
     private lateinit var oppgaveDao: OppgaveMetrikkerDao
     private lateinit var behandlingRepo: BehandlingDao

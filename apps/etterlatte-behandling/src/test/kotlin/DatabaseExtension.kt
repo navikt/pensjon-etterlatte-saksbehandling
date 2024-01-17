@@ -27,7 +27,7 @@ object DatabaseExtension : BeforeAllCallback, AfterAllCallback, ExtensionContext
             .also { logger.info("Starting shared Postgres testcontainer") }
             .also { it.start() }
 
-    private val dataSource: DataSource =
+    private val ds: DataSource =
         DataSourceBuilder.createDataSource(
             jdbcUrl = postgreSQLContainer.jdbcUrl,
             username = postgreSQLContainer.username,
@@ -47,12 +47,13 @@ object DatabaseExtension : BeforeAllCallback, AfterAllCallback, ExtensionContext
         resetDb()
 
         connections.forEach {
-            (dataSource as HikariDataSource).evictConnection(it)
+            (ds as HikariDataSource).evictConnection(it)
         }
         connections.clear()
     }
 
-    fun dataSource(): DataSource = DataSourceWrapper(dataSource, connections::add)
+    val dataSource: DataSource
+        get() = DataSourceWrapper(ds, connections::add)
 
     /**
      * Trigges av rammeverket når siste testinstans er kjørt.
@@ -67,7 +68,7 @@ object DatabaseExtension : BeforeAllCallback, AfterAllCallback, ExtensionContext
      */
     fun resetDb() {
         logger.info("Resetting database...")
-        dataSource().connection.use {
+        dataSource.connection.use {
             it.prepareStatement(
                 """
                 TRUNCATE behandling CASCADE;

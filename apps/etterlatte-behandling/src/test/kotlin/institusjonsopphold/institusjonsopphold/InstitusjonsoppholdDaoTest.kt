@@ -16,7 +16,7 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 internal class InstitusjonsoppholdDaoTest {
-    private val dataSource = DatabaseExtension.dataSource()
+    private val dataSource = DatabaseExtension.dataSource
     private lateinit var institusjonsoppholdDao: InstitusjonsoppholdDao
 
     @BeforeAll

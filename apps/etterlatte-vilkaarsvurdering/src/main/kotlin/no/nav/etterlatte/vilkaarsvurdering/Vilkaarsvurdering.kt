@@ -4,7 +4,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import java.time.YearMonth
 import java.util.UUID
@@ -16,16 +15,7 @@ data class Vilkaarsvurdering(
     val virkningstidspunkt: YearMonth,
     val vilkaar: List<Vilkaar>,
     val resultat: VilkaarsvurderingResultat? = null,
-) {
-    fun toDto() =
-        VilkaarsvurderingDto(
-            behandlingId = this.behandlingId,
-            virkningstidspunkt = this.virkningstidspunkt,
-            vilkaar = this.vilkaar,
-            resultat = this.resultat,
-            grunnlagVersjon = this.grunnlagVersjon,
-        )
-}
+)
 
 data class VilkaarTypeOgUtfall(
     val type: VilkaarType,

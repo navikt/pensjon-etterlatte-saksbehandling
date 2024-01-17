@@ -6,11 +6,7 @@ import React, { useState } from 'react'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { HeaderPadding, PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
-import {
-  filtrerOppgaveStatus,
-  OPPGAVESTATUSFILTER,
-  OppgavestatusFilterKeys,
-} from '~components/nyoppgavebenk/Oppgavelistafiltre'
+import { filtrerOppgaveStatus, OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
 import styled from 'styled-components'
 import { RedigerSaksbehandler } from '../tildeling/RedigerSaksbehandler'
@@ -27,11 +23,11 @@ interface Props {
 }
 
 export const MinOppgaveliste = ({ oppgaver, hentOppgaver, oppdaterTildeling }: Props) => {
-  const [oppgavestatusFilter, setOppgavestatusFilter] = useState<OppgavestatusFilterKeys>('UNDER_BEHANDLING')
+  const [oppgavestatusFilter, setOppgavestatusFilter] = useState<string>('UNDER_BEHANDLING')
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
 
-  const statusFiltrerteOppgaver = filtrerOppgaveStatus(oppgavestatusFilter, oppgaver)
+  const statusFiltrerteOppgaver = filtrerOppgaveStatus([oppgavestatusFilter], oppgaver)
   let paginerteOppgaver = statusFiltrerteOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
@@ -41,7 +37,7 @@ export const MinOppgaveliste = ({ oppgaver, hentOppgaver, oppdaterTildeling }: P
         <Select
           label="Oppgavestatus"
           value={oppgavestatusFilter}
-          onChange={(e) => setOppgavestatusFilter(e.target.value as OppgavestatusFilterKeys)}
+          onChange={(e) => setOppgavestatusFilter(e.target.value)}
         >
           {Object.entries(OPPGAVESTATUSFILTER).map(([status, statusbeskrivelse]) => (
             <option key={status} value={status}>
@@ -97,9 +93,7 @@ export const MinOppgaveliste = ({ oppgaver, hentOppgaver, oppdaterTildeling }: P
                       </Table.DataCell>
                       <Table.DataCell>{oppgave.sakType && <SaktypeTag sakType={oppgave.sakType} />}</Table.DataCell>
                       <Table.DataCell>{oppgave.merknad}</Table.DataCell>
-                      <Table.DataCell>
-                        {oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] ?? oppgave.status : 'Ukjent'}
-                      </Table.DataCell>
+                      <Table.DataCell>{oppgave.status ? oppgave.status : 'Ukjent'}</Table.DataCell>
                       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
                       <Table.DataCell>
                         <RedigerSaksbehandler

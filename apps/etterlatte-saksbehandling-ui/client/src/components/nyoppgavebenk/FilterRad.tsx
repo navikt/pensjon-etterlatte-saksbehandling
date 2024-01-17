@@ -10,7 +10,6 @@ import {
   OPPGAVEKILDEFILTER,
   OppgaveKildeFilterKeys,
   OPPGAVESTATUSFILTER,
-  OppgavestatusFilterKeys,
   oppgavetypefilter,
   OppgavetypeFilterKeys,
   SAKSBEHANDLERFILTER,
@@ -35,6 +34,24 @@ export const FilterRad = (props: {
   )
   const [saksbehandlerFilterLokal, setSaksbehandlerFilterLokal] = useState<string>(filter.saksbehandlerFilter)
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
+
+  const [oppgaveStatuserValgt, setOppgavestatuserValgt] = useState<Array<string>>(['NY', 'UNDER_BEHANDLING'])
+
+  const onOppgavestatusSelected = (option: string, isSelected: boolean) => {
+    let nyOppgavestatusSelected: Array<string> = []
+
+    if (isSelected) {
+      nyOppgavestatusSelected = [...oppgaveStatuserValgt, option]
+    } else {
+      nyOppgavestatusSelected = [...oppgaveStatuserValgt.filter((val) => val !== option)]
+    }
+    // setFilter må bli kalt før setOppgavestatuserValgt, ellers blokkerer react render loop at
+    // setFilter blir satt med oppdaterte statuser valgt
+    setFilter({ ...filter, oppgavestatusFilter: nyOppgavestatusSelected })
+
+    setOppgavestatuserValgt(nyOppgavestatusSelected)
+  }
+
   return (
     <>
       <FlexRow $spacing>
@@ -101,17 +118,41 @@ export const FilterRad = (props: {
             </option>
           ))}
         </Select>
-        <Select
+        {/*<Select*/}
+        {/*  label="Oppgavestatus"*/}
+        {/*  value={filter.oppgavestatusFilter}*/}
+        {/*  onChange={(e) => setFilter({ ...filter, oppgavestatusFilter: e.target.value as OppgavestatusFilterKeys })}*/}
+        {/*>*/}
+        {/*  {Object.entries(OPPGAVESTATUSFILTER).map(([status, statusbeskrivelse]) => (*/}
+        {/*    <option key={status} value={status}>*/}
+        {/*      {statusbeskrivelse}*/}
+        {/*    </option>*/}
+        {/*  ))}*/}
+        {/*</Select>*/}
+        <UNSAFE_Combobox
           label="Oppgavestatus"
-          value={filter.oppgavestatusFilter}
-          onChange={(e) => setFilter({ ...filter, oppgavestatusFilter: e.target.value as OppgavestatusFilterKeys })}
-        >
-          {Object.entries(OPPGAVESTATUSFILTER).map(([status, statusbeskrivelse]) => (
-            <option key={status} value={status}>
-              {statusbeskrivelse}
-            </option>
-          ))}
-        </Select>
+          options={OPPGAVESTATUSFILTER}
+          selectedOptions={oppgaveStatuserValgt}
+          onToggleSelected={(option, isSelected) => onOppgavestatusSelected(option, isSelected)}
+          isMultiSelect
+        />
+
+        {/*<UNSAFE_Combobox*/}
+        {/*    label="Saksbehandler"*/}
+        {/*    value={saksbehandlerFilterLokal}*/}
+        {/*    options={Object.entries(SAKSBEHANDLERFILTER)*/}
+        {/*        .map(([, beskrivelse]) => beskrivelse)*/}
+        {/*        .concat(Array.from(saksbehandlere))}*/}
+        {/*    onChange={(e) => {*/}
+        {/*      setSaksbehandlerFilterLokal(e?.target.value ? e?.target.value : '')*/}
+        {/*    }}*/}
+        {/*    onToggleSelected={(option, isSelected) => {*/}
+        {/*      if (isSelected) {*/}
+        {/*        setFilter({ ...filter, saksbehandlerFilter: option })*/}
+        {/*      }*/}
+        {/*    }}*/}
+        {/*/>*/}
+
         <Select
           label="Oppgavetype"
           value={filter.oppgavetypeFilter}

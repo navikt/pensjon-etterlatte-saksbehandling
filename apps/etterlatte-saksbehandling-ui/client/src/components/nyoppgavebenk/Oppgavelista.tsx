@@ -3,7 +3,6 @@ import { formaterStringDato } from '~utils/formattering'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
 import React, { ReactNode, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
@@ -26,9 +25,6 @@ export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver }:
   useEffect(() => {
     if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
   }, [paginerteOppgaver, filtrerteOppgaver])
-
-  // Filtrere bort ferdigstilte/avbrutte søknader på en spesifik saksbehandler / generelt
-  // Sette opp combobox for velging av oppgavestatus
 
   return (
     <>
@@ -74,9 +70,7 @@ export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver }:
                       </Table.DataCell>
                       <Table.DataCell>{oppgave.sakType && <SaktypeTag sakType={oppgave.sakType} />}</Table.DataCell>
                       <Table.DataCell>{oppgave.merknad}</Table.DataCell>
-                      <Table.DataCell>
-                        {oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] ?? oppgave.status : 'Ukjent'}
-                      </Table.DataCell>
+                      <Table.DataCell>{oppgave.status ? oppgave.status : 'Ukjent'}</Table.DataCell>
                       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
                       <Table.DataCell>
                         <RedigerSaksbehandler

@@ -1,29 +1,5 @@
-import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaver'
+import { OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/api/oppgaver'
 import { isBefore } from 'date-fns'
-
-export const SAKSBEHANDLERFILTER = {
-  visAlle: 'Vis alle',
-  Tildelt: 'Tildelt oppgave',
-  IkkeTildelt: 'Ikke tildelt oppgave',
-}
-
-function filtrerSaksbehandler(saksbehandlerFilter: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-  if (saksbehandlerFilter === SAKSBEHANDLERFILTER.visAlle) {
-    return oppgaver
-  } else {
-    return oppgaver.filter((o) => {
-      if (saksbehandlerFilter === SAKSBEHANDLERFILTER.Tildelt) {
-        return o.saksbehandler !== null
-      } else if (saksbehandlerFilter === SAKSBEHANDLERFILTER.IkkeTildelt) {
-        return o.saksbehandler === null
-      } else if (saksbehandlerFilter && saksbehandlerFilter !== '') {
-        return o.saksbehandler === saksbehandlerFilter
-      } else {
-        return true
-      }
-    })
-  }
-}
 
 export const ENHETFILTER = {
   visAlle: 'Vis alle',
@@ -63,26 +39,47 @@ function filtrerYtelse(ytelseFilter: YtelseFilterKeys, oppgaver: OppgaveDTO[]): 
   }
 }
 
-type visAlle = 'visAlle'
-export type OppgavestatusFilterKeys = Oppgavestatus | visAlle
-
-export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
+export const SAKSBEHANDLERFILTER = {
   visAlle: 'Vis alle',
-  NY: 'Ny',
-  UNDER_BEHANDLING: 'Under arbeid',
-  FERDIGSTILT: 'Ferdigstilt',
-  FEILREGISTRERT: 'Feilregistrert',
-  AVBRUTT: 'Avbrutt',
+  Tildelt: 'Tildelt oppgave',
+  IkkeTildelt: 'Ikke tildelt oppgave',
 }
 
-export function filtrerOppgaveStatus(
-  oppgavestatusFilterKeys: OppgavestatusFilterKeys,
-  oppgaver: OppgaveDTO[]
-): OppgaveDTO[] {
-  if (oppgavestatusFilterKeys === 'visAlle') {
+function filtrerSaksbehandler(saksbehandlerFilter: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
+  if (saksbehandlerFilter === SAKSBEHANDLERFILTER.visAlle) {
     return oppgaver
   } else {
-    return oppgaver.filter((o) => o.status === oppgavestatusFilterKeys)
+    return oppgaver.filter((o) => {
+      if (saksbehandlerFilter === SAKSBEHANDLERFILTER.Tildelt) {
+        return o.saksbehandler !== null
+      } else if (saksbehandlerFilter === SAKSBEHANDLERFILTER.IkkeTildelt) {
+        return o.saksbehandler === null
+      } else if (saksbehandlerFilter && saksbehandlerFilter !== '') {
+        return o.saksbehandler === saksbehandlerFilter
+      } else {
+        return true
+      }
+    })
+  }
+}
+
+type visAlle = 'visAlle'
+
+export const OPPGAVESTATUSFILTER: Array<string> = [
+  'VIS_ALLE',
+  'NY',
+  'UNDER_BEHANDLING',
+  'FERDIGSTILT',
+  'FEILREGISTRERT',
+  'AVBRUTT',
+]
+
+// Gjøre som på filtrering av saksbehandler, men istedenfor å sjekke 1 string, må man sjekke en array med strings
+export function filtrerOppgaveStatus(oppgavestatuser: Array<string>, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
+  if (oppgavestatuser.includes('VIS_ALLE') || oppgavestatuser.length === 0) {
+    return oppgaver
+  } else {
+    return oppgaver.filter((oppgave) => oppgavestatuser.includes(oppgave.status))
   }
 }
 
@@ -172,7 +169,7 @@ export function filtrerOppgaver(
   fristFilter: FristFilterKeys,
   saksbehandlerFilter: string,
   ytelseFilter: YtelseFilterKeys,
-  oppgavestatusFilter: OppgavestatusFilterKeys,
+  oppgavestatusFilter: Array<string>,
   oppgavetypeFilter: OppgavetypeFilterKeys,
   oppgaveKildeFilterKeys: OppgaveKildeFilterKeys,
   oppgaver: OppgaveDTO[],
@@ -194,7 +191,7 @@ export interface Filter {
   fristFilter: FristFilterKeys
   saksbehandlerFilter: string
   ytelseFilter: YtelseFilterKeys
-  oppgavestatusFilter: OppgavestatusFilterKeys
+  oppgavestatusFilter: Array<string>
   oppgavetypeFilter: OppgavetypeFilterKeys
   oppgavekildeFilter: OppgaveKildeFilterKeys
   fnrFilter: string
@@ -206,7 +203,7 @@ export const initialFilter = (): Filter => {
     fristFilter: 'visAlle',
     saksbehandlerFilter: SAKSBEHANDLERFILTER.IkkeTildelt,
     ytelseFilter: 'visAlle',
-    oppgavestatusFilter: 'visAlle',
+    oppgavestatusFilter: ['NY', 'UNDER_BEHANDLING'],
     oppgavetypeFilter: 'visAlle',
     oppgavekildeFilter: 'visAlle',
     fnrFilter: '',

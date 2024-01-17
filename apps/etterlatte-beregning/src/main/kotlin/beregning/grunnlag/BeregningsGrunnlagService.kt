@@ -11,7 +11,15 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning.Companion.auto
 import no.nav.etterlatte.libs.common.grunnlag.hentAvdoedesbarn
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.time.YearMonth
 import java.util.UUID
+
+val REFORM_TIDSPUNKT_BP = YearMonth.of(2024, 1)
+
+class VirkningstidspunktBPErFoerReformMenManglerSoeskenjustering : UgyldigForespoerselException(
+    code = "MANGLER_SØSKEN_FØR_REFORM_BP",
+    detail = "Man må ha søskenjustering før reform for barnepensjon",
+)
 
 class BeregningsGrunnlagService(
     private val beregningsGrunnlagRepository: BeregningsGrunnlagRepository,
@@ -76,9 +84,14 @@ class BeregningsGrunnlagService(
 
                 val soeskenMedIBeregning =
                     barnepensjonBeregningsGrunnlag.soeskenMedIBeregning.ifEmpty {
-                        when (behandling.virkningstidspunkt) {
+                        when (val virk = behandling.virkningstidspunkt) {
                             null -> throw RuntimeException("Kan ikke lagre default soeskenjustering uten virkningstidspunkt")
-                            else -> emptyList()
+                            else -> {
+                                if (virk.dato.isBefore(REFORM_TIDSPUNKT_BP)) {
+                                    throw VirkningstidspunktBPErFoerReformMenManglerSoeskenjustering()
+                                }
+                                emptyList()
+                            }
                         }
                     }
 

@@ -1,7 +1,5 @@
 import styled from 'styled-components'
 import { Border } from '../../styled'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { Person } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/Person'
 import { BarneListe } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/BarneListe'
 import { Sivilstand } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/Sivilstand'
@@ -12,11 +10,10 @@ import { Familieforhold } from '~shared/types/Person'
 import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
 
 export interface PropsFamilieforhold {
-  behandling: IDetaljertBehandling
   personopplysninger: Personopplysninger | null
 }
 
-export const FamilieforholdOmstillingsstoenad = ({ behandling, personopplysninger }: PropsFamilieforhold) => {
+export const FamilieforholdOmstillingsstoenad = ({ personopplysninger }: PropsFamilieforhold) => {
   if (personopplysninger == null || personopplysninger.soeker == null) {
     return (
       <FamilieforholdWrapper>
@@ -33,23 +30,17 @@ export const FamilieforholdOmstillingsstoenad = ({ behandling, personopplysninge
   return (
     <>
       <FamilieforholdWrapper>
-        {behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT ? (
-          <>
-            <SamsvarPersongalleri />
-            <FamilieforholdVoksne>
-              {avdoede.map((avdoed) => (
-                <Person person={avdoed.opplysning} kilde={avdoed.kilde} avdoed key={avdoed.id} />
-              ))}
-              <Person person={soeker.opplysning} kilde={soeker.kilde} />
-            </FamilieforholdVoksne>
-            {avdoede.map((avd) => (
-              <Sivilstand familieforhold={familieforhold} avdoed={avd.opplysning} key={avd.id} />
-            ))}
-            <BarneListe familieforhold={familieforhold} />
-          </>
-        ) : (
-          gjenlevende.map((person) => <Person person={person.opplysning} kilde={person.kilde} key={person.id} />)
-        )}
+        <SamsvarPersongalleri />
+        <FamilieforholdVoksne>
+          {avdoede.map((avdoed) => (
+            <Person person={avdoed.opplysning} kilde={avdoed.kilde} avdoed key={avdoed.id} />
+          ))}
+          <Person person={soeker.opplysning} kilde={soeker.kilde} />
+        </FamilieforholdVoksne>
+        {avdoede.map((avd) => (
+          <Sivilstand familieforhold={familieforhold} avdoed={avd.opplysning} key={avd.id} />
+        ))}
+        <BarneListe familieforhold={familieforhold} />
       </FamilieforholdWrapper>
       <Border />
     </>

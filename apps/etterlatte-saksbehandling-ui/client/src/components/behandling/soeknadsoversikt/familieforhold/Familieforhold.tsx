@@ -23,7 +23,7 @@ export const Familieforhold = ({ behandling, personopplysninger }: PropsFamilief
       {behandling.sakType === SakType.BARNEPENSJON ? (
         <FamilieforholdBarnepensjon personopplysninger={personopplysninger} />
       ) : (
-        <FamilieforholdOmstillingsstoenad behandling={behandling} personopplysninger={personopplysninger} />
+        <FamilieforholdOmstillingsstoenad personopplysninger={personopplysninger} />
       )}
     </>
   )

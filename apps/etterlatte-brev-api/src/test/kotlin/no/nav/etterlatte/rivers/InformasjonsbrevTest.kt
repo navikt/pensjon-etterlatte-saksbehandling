@@ -79,7 +79,7 @@ class InformasjonsbrevTest {
                 StartInformasjonsbrevgenereringRiver(
                     StartBrevgenereringRepository(dataSource),
                     this,
-                    DummyFeatureToggleService(),
+                    DummyFeatureToggleService().also { it.settBryter(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, true) },
                     sleep = { _ -> run {} },
                     iTraad = { it() },
                 )

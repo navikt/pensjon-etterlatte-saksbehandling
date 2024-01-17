@@ -17,6 +17,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.FNR_KEY
+import java.time.Duration
 import java.util.UUID
 import javax.sql.DataSource
 import kotlin.concurrent.thread
@@ -25,7 +26,7 @@ class StartInformasjonsbrevgenereringRiver(
     private val repository: StartBrevgenereringRepository,
     private val rapidsConnection: RapidsConnection,
     private val featureToggleService: FeatureToggleService,
-    private val sleep: (millis: Long) -> Unit = { Thread.sleep(it) },
+    private val sleep: (millis: Duration) -> Unit = { Thread.sleep(it) },
     private val iTraad: (handling: (() -> Unit)) -> Unit = { thread { it() } },
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -43,13 +44,13 @@ class StartInformasjonsbrevgenereringRiver(
             return
         }
         iTraad {
-            sleep(60_000)
+            sleep(Duration.ofMinutes(1))
             val opprettBrev =
                 featureToggleService.isEnabled(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, false)
             brevAaOpprette.forEach {
                 if (opprettBrev) {
                     rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
-                    sleep(3000)
+                    sleep(Duration.ofSeconds(3))
                 }
             }
         }

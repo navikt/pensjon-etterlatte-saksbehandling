@@ -1,7 +1,7 @@
-import { Pagination, Table } from '@navikt/ds-react'
+import { Alert, Pagination, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
-import React, { useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
@@ -10,29 +10,13 @@ import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
 import { RedigerSaksbehandler } from './tildeling/RedigerSaksbehandler'
 import { FristWrapper } from '~components/nyoppgavebenk/FristWrapper'
 
-export const PaginationWrapper = styled.div`
-  display: flex;
-  gap: 0.5em;
-  flex-wrap: wrap;
-  margin: 0.5em 0;
-
-  > p {
-    margin: 0;
-    line-height: 32px;
-  }
-`
-
-export const HeaderPadding = styled.span`
-  padding-left: 20px;
-`
-
-export const Oppgavelista = (props: {
+interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   filtrerteOppgaver: ReadonlyArray<OppgaveDTO>
-}) => {
-  const { oppgaver, oppdaterTildeling, filtrerteOppgaver } = props
+}
 
+export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver }: Props): ReactNode => {
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
 
@@ -42,6 +26,9 @@ export const Oppgavelista = (props: {
   useEffect(() => {
     if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
   }, [paginerteOppgaver, filtrerteOppgaver])
+
+  // Filtrere bort ferdigstilte/avbrutte søknader på en spesifik saksbehandler / generelt
+  // Sette opp combobox for velging av oppgavestatus
 
   return (
     <>
@@ -138,8 +125,24 @@ export const Oppgavelista = (props: {
           </PaginationWrapper>
         </>
       ) : (
-        <>Ingen oppgaver</>
+        <Alert variant="info">Ingen oppgaver</Alert>
       )}
     </>
   )
 }
+
+export const PaginationWrapper = styled.div`
+  display: flex;
+  gap: 0.5em;
+  flex-wrap: wrap;
+  margin: 0.5em 0;
+
+  > p {
+    margin: 0;
+    line-height: 32px;
+  }
+`
+
+export const HeaderPadding = styled.span`
+  padding-left: 20px;
+`

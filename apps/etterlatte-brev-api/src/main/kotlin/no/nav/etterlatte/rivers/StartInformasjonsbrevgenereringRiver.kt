@@ -47,8 +47,8 @@ class StartInformasjonsbrevgenereringRiver(
             val opprettBrev =
                 featureToggleService.isEnabled(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, false)
             brevAaOpprette.forEach {
-                rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
                 if (opprettBrev) {
+                    rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
                     sleep(3000)
                 }
             }

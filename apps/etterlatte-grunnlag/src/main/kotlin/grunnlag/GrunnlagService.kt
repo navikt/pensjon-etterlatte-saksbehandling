@@ -413,6 +413,7 @@ class RealGrunnlagService(
             in persongalleri.soesken -> Saksrolle.SOESKEN
             in persongalleri.avdoed -> Saksrolle.AVDOED
             in persongalleri.gjenlevende -> Saksrolle.GJENLEVENDE
+            persongalleri.innsender -> Saksrolle.INNSENDER
             else -> Saksrolle.UKJENT
         }
 

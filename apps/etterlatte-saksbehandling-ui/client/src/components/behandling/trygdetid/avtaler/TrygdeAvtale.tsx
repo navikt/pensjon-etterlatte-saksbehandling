@@ -34,7 +34,7 @@ interface TrygdetidAvtaleOptionProps {
   trygdeavtaleOptions: TrygdetidAvtaleOptions[]
 }
 
-const TrygdetidAvtaleOptions = ({ defaultBeskrivelse, trygdeavtaleOptions }: TrygdetidAvtaleOptionProps) => {
+const TrygdetidAvtaleOptionsView = ({ defaultBeskrivelse, trygdeavtaleOptions }: TrygdetidAvtaleOptionProps) => {
   return (
     <>
       <option value="">{defaultBeskrivelse}</option>
@@ -183,7 +183,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                       velgAvtale(e.target.value)
                     }}
                   >
-                    <TrygdetidAvtaleOptions
+                    <TrygdetidAvtaleOptionsView
                       defaultBeskrivelse="Velg avtale"
                       trygdeavtaleOptions={hentAlleTrygdetidAvtalerRequest.data}
                     />
@@ -197,7 +197,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                         setTrygdeavtale({ ...trygdeavtale, avtaleDatoKode: e.target.value })
                       }}
                     >
-                      <TrygdetidAvtaleOptions
+                      <TrygdetidAvtaleOptionsView
                         defaultBeskrivelse="Velg avtaledato"
                         trygdeavtaleOptions={valgtAvtale.datoer}
                       />
@@ -217,7 +217,7 @@ export const TrygdeAvtale = ({ redigerbar }: Props) => {
                           setTrygdeavtale({ ...trygdeavtale, avtaleKriteriaKode: e.target.value })
                         }}
                       >
-                        <TrygdetidAvtaleOptions
+                        <TrygdetidAvtaleOptionsView
                           defaultBeskrivelse="Velg kriteria"
                           trygdeavtaleOptions={hentAlleTrygdetidAvtalerKriterierRequest.data}
                         />

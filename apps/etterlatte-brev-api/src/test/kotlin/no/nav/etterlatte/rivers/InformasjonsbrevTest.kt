@@ -28,7 +28,6 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
@@ -71,7 +70,6 @@ class InformasjonsbrevTest {
     }
 
     @Test
-    @Disabled
     fun `starter generering av informasjonsbrev, og verifiserer at brevet faktisk blir oppretta og distribuert`() {
         val brevkode = EtterlatteBrevKode.OMREGNING_INFORMASJON
         val saktype = SakType.BARNEPENSJON

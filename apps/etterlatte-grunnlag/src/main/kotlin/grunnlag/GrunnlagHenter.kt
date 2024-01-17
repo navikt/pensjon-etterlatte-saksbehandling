@@ -161,7 +161,7 @@ class GrunnlagHenter(
             id = UUID.randomUUID(),
             kilde =
                 if (this.innsender == null) {
-                    Grunnlagsopplysning.Ukjent(Tidspunkt.now())
+                    Grunnlagsopplysning.UkjentInnsender(Tidspunkt.now())
                 } else if (this.innsender == Vedtaksloesning.PESYS.name) {
                     Grunnlagsopplysning.Pesys.create()
                 } else if (this.innsender!!.matches(Regex("[A-Z][0-9]+"))) {

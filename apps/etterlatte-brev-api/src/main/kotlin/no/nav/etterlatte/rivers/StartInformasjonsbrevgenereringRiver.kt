@@ -31,7 +31,7 @@ class StartInformasjonsbrevgenereringRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        startBrevgenerering()
+        // startBrevgenerering()
     }
 
     private fun startBrevgenerering() {

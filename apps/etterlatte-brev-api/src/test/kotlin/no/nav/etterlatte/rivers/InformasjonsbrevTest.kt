@@ -12,7 +12,6 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.BrevEventKeys
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -79,10 +78,8 @@ class InformasjonsbrevTest {
                 StartInformasjonsbrevgenereringRiver(
                     StartBrevgenereringRepository(dataSource),
                     this,
-                    DummyFeatureToggleService().also { it.settBryter(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, true) },
                     sleep = { _ -> run {} },
-                    iTraad = { it() },
-                )
+                ) { it() }
             }
 
         val brevId: Long = 2

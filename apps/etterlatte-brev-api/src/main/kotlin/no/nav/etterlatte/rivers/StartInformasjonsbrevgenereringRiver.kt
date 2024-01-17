@@ -2,8 +2,6 @@ package no.nav.etterlatte.rivers
 
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.BrevEventKeys
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -25,9 +23,8 @@ import kotlin.concurrent.thread
 class StartInformasjonsbrevgenereringRiver(
     private val repository: StartBrevgenereringRepository,
     private val rapidsConnection: RapidsConnection,
-    private val featureToggleService: FeatureToggleService,
     private val sleep: (millis: Duration) -> Unit = { Thread.sleep(it) },
-    private val iTraad: (handling: (() -> Unit)) -> Unit = { thread { it() } },
+    private val iTraad: (handling: () -> Unit) -> Unit = { thread { it() } },
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -45,13 +42,9 @@ class StartInformasjonsbrevgenereringRiver(
         }
         iTraad {
             sleep(Duration.ofMinutes(1))
-            val opprettBrev =
-                featureToggleService.isEnabled(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, false)
             brevAaOpprette.forEach {
-                if (opprettBrev) {
-                    rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
-                    sleep(Duration.ofSeconds(3))
-                }
+                rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
+                sleep(Duration.ofSeconds(3))
             }
         }
     }
@@ -135,11 +128,4 @@ data class BrevgenereringRequest(
             "Enten fnr eller behandlingId må være definert"
         }
     }
-}
-
-enum class InformasjonsbrevFeatureToggle(private val key: String) : FeatureToggle {
-    SendInformasjonsbrev("send-informasjonsbrev"),
-    ;
-
-    override fun key() = key
 }

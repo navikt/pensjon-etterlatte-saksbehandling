@@ -220,7 +220,6 @@ class ApplicationBuilder {
                 StartInformasjonsbrevgenereringRiver(
                     StartBrevgenereringRepository(datasource),
                     this,
-                    featureToggleService,
                 )
 
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)

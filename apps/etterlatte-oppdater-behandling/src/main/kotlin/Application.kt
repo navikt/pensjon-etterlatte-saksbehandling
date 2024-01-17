@@ -20,6 +20,6 @@ fun main() {
         MigrerEnEnkeltSakRiver(rapidsConnection, behandlingservice)
         ReguleringFeiletRiver(rapidsConnection, behandlingservice)
         AvbrytBehandlingHvisMigreringFeilaRiver(rapidsConnection, behandlingservice)
-        OpprettBrevRiver(rapidsConnection, behandlingservice)
+        OpprettBrevRiver(rapidsConnection, behandlingservice, appBuilder.featureToggleService)
     }.start()
 }

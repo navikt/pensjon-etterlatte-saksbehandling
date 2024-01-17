@@ -46,7 +46,6 @@ import no.nav.etterlatte.persongalleri
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -69,11 +68,6 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
 
         startServer()
         Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource)))
-    }
-
-    @AfterEach
-    fun afterEach() {
-        resetDatabase()
     }
 
     @AfterAll

@@ -65,6 +65,7 @@ internal class RevurderingRoutesTest {
 
     @AfterAll
     fun after() {
+        applicationContext.close()
         server.shutdown()
     }
 

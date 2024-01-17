@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling.domain
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -19,6 +21,14 @@ data class Grunnlagsendringshendelse(
     fun beskrivelse(): String {
         return listOfNotNull(type.beskrivelse(), kommentar).joinToString(separator = ": ")
     }
+
+    fun toPersonrolle(sakType: SakType) =
+        try {
+            hendelseGjelderRolle.toPersonrolle(sakType)
+        } catch (e: Exception) {
+            sikkerlogger().warn("Klarte ikke å finne personrolle for $gjelderPerson for sak $sakId for rolle $hendelseGjelderRolle", e)
+            throw e
+        }
 }
 
 enum class GrunnlagsendringsType {

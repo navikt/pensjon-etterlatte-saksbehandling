@@ -368,7 +368,7 @@ class GrunnlagsendringshendelseService(
 
     private fun verifiserOgHaandterHendelse(hendelse: Grunnlagsendringshendelse) {
         val sak = sakService.finnSak(hendelse.sakId)!!
-        val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
+        val personRolle = hendelse.toPersonrolle(sak.sakType)
         val pdlData = pdltjenesterKlient.hentPdlModell(hendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag =
             runBlocking {

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -34,7 +35,10 @@ enum class Saksrolle {
             AVDOED -> PersonRolle.AVDOED
             GJENLEVENDE -> PersonRolle.GJENLEVENDE
             INNSENDER -> PersonRolle.INNSENDER
-            UKJENT -> throw Exception("Ukjent Saksrolle kan ikke castes til PersonRolle")
+            UKJENT -> {
+                sikkerlogger().warn("Ukjent saks")
+                throw Exception("Ukjent Saksrolle kan ikke castes til PersonRolle")
+            }
         }
 
     companion object {

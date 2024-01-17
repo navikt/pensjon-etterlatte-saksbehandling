@@ -59,7 +59,7 @@ data class OmstillingsstoenadInnvilgelseDTO(
                         inntekt = avkortingsinfo.inntekt,
                         grunnbeloep = avkortingsinfo.grunnbeloep,
                         beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = beregningsperioder.minByOrNull { it.datoFOM }!!,
+                        sisteBeregningsperiode = beregningsperioder.maxByOrNull { it.datoFOM }!!,
                         trygdetid =
                             OmstillingsstoenadTrygdetid(
                                 trygdetidsperioder = trygdetid.perioder,

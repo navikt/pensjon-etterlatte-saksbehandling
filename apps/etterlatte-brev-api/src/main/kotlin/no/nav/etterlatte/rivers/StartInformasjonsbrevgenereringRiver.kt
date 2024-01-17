@@ -2,8 +2,6 @@ package no.nav.etterlatte.rivers
 
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.BrevEventKeys
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -17,6 +15,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.FNR_KEY
+import java.time.Duration
 import java.util.UUID
 import javax.sql.DataSource
 import kotlin.concurrent.thread
@@ -24,9 +23,8 @@ import kotlin.concurrent.thread
 class StartInformasjonsbrevgenereringRiver(
     private val repository: StartBrevgenereringRepository,
     private val rapidsConnection: RapidsConnection,
-    private val featureToggleService: FeatureToggleService,
-    private val sleep: (millis: Long) -> Unit = { Thread.sleep(it) },
-    private val iTraad: (handling: (() -> Unit)) -> Unit = { thread { it() } },
+    private val sleep: (millis: Duration) -> Unit = { Thread.sleep(it) },
+    private val iTraad: (handling: () -> Unit) -> Unit = { thread { it() } },
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -43,14 +41,10 @@ class StartInformasjonsbrevgenereringRiver(
             return
         }
         iTraad {
-            sleep(60_000)
-            val opprettBrev =
-                featureToggleService.isEnabled(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, false)
+            sleep(Duration.ofMinutes(1))
             brevAaOpprette.forEach {
-                if (opprettBrev) {
-                    rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
-                    sleep(3000)
-                }
+                rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
+                sleep(Duration.ofSeconds(3))
             }
         }
     }
@@ -134,11 +128,4 @@ data class BrevgenereringRequest(
             "Enten fnr eller behandlingId må være definert"
         }
     }
-}
-
-enum class InformasjonsbrevFeatureToggle(private val key: String) : FeatureToggle {
-    SendInformasjonsbrev("send-informasjonsbrev"),
-    ;
-
-    override fun key() = key
 }

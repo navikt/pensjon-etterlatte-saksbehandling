@@ -2,7 +2,9 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.BehandlingService
+import no.nav.etterlatte.InformasjonsbrevFeatureToggle
 import no.nav.etterlatte.OpprettBrevRiver
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.BrevEventKeys
@@ -25,7 +27,7 @@ class OpprettBrevRiverTest {
             mockk<BehandlingService>().also {
                 coEvery { it.finnEllerOpprettSak(any(), any()) } returns mockk<Sak>().also { every { it.id } returns 1 }
             }
-        val testRapid = TestRapid().apply { OpprettBrevRiver(this, behandlingService) }
+        val testRapid = TestRapid().apply { OpprettBrevRiver(this, behandlingService, featureToggleService()) }
         testRapid.sendTestMessage(
             JsonMessage.newMessage(
                 mapOf(
@@ -48,7 +50,7 @@ class OpprettBrevRiverTest {
             mockk<BehandlingService>().also {
                 coEvery { it.hentBehandling(any()) } returns mockk<DetaljertBehandling>().also { every { it.sak } returns 1L }
             }
-        val testRapid = TestRapid().apply { OpprettBrevRiver(this, behandlingService) }
+        val testRapid = TestRapid().apply { OpprettBrevRiver(this, behandlingService, featureToggleService()) }
         val behandlingId = UUID.randomUUID()
         testRapid.sendTestMessage(
             JsonMessage.newMessage(
@@ -65,4 +67,9 @@ class OpprettBrevRiverTest {
             assertEquals(behandlingId.toString(), get(BEHANDLING_ID_KEY).asText())
         }
     }
+
+    private fun featureToggleService() =
+        DummyFeatureToggleService().also {
+            it.settBryter(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, true)
+        }
 }

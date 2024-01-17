@@ -48,18 +48,6 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        get("/{$BEHANDLINGID_CALL_PARAMETER}") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Henter vedtak for behandling $behandlingId")
-                val vedtak = vedtakService.hentVedtakMedBehandlingId(behandlingId)
-                if (vedtak == null) {
-                    call.response.status(HttpStatusCode.NotFound)
-                } else {
-                    call.respond(vedtak.toDto())
-                }
-            }
-        }
-
         get("/{$BEHANDLINGID_CALL_PARAMETER}/ny") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")
@@ -88,7 +76,7 @@ fun Route.vedtaksvurderingRoute(
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
                 val nyttVedtak = vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
-                call.respond(nyttVedtak.toDto())
+                call.respond(nyttVedtak.toNyDto())
             }
         }
 
@@ -112,7 +100,7 @@ fun Route.vedtaksvurderingRoute(
                     rapidService.sendToRapid(attestert)
                 } catch (e: Exception) {
                     logger.error(
-                        "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.vedtakId} " +
+                        "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.id} " +
                             "Saknr: ${attestert.vedtak.sak.id}. " +
                             "Det betyr at vi ikke sender ut brev for vedtaket eller at en utbetaling går til oppdrag. " +
                             "Denne hendelsen må sendes ut manuelt straks.",
@@ -198,7 +186,7 @@ fun Route.vedtaksvurderingRoute(
 
             val nyeste = vedtakBehandlingService.hentNyesteBehandlingMedResultat(sakId, resultat)
             if (nyeste != null) {
-                call.respond(nyeste.toDto())
+                call.respond(nyeste.toNyDto())
             } else {
                 call.respond(HttpStatusCode.NoContent)
             }

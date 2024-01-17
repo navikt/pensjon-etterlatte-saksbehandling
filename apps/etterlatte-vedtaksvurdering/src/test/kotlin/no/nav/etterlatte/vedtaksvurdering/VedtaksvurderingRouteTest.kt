@@ -31,7 +31,6 @@ import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
@@ -101,7 +100,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             val response =
-                client.get("/api/vedtak/${UUID.randomUUID()}") {
+                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 }
 
@@ -127,7 +126,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             val response =
-                client.get("/api/vedtak/${UUID.randomUUID()}") {
+                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -159,7 +158,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             val response =
-                client.get("/api/vedtak/${UUID.randomUUID()}") {
+                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -192,32 +191,34 @@ internal class VedtaksvurderingRouteTest {
             }
 
             val vedtak =
-                client.get("/api/vedtak/${UUID.randomUUID()}") {
+                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
+                    deserialize<VedtakNyDto>(it.bodyAsText())
                 }
 
             with(vedtak) {
-                vedtakId shouldBe opprettetVedtak.id
+                id shouldBe opprettetVedtak.id
                 status shouldBe opprettetVedtak.status
-                behandling.id shouldBe opprettetVedtak.behandlingId
+                behandlingId shouldBe opprettetVedtak.behandlingId
                 sak.sakType shouldBe opprettetVedtak.sakType
                 sak.id shouldBe opprettetVedtak.sakId
                 type shouldBe opprettetVedtak.type
                 vedtakFattet shouldBe null
                 attestasjon shouldBe null
-                val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakBehandlingInnhold
-                virkningstidspunkt shouldBe opprettetVedtakInnhold.virkningstidspunkt
-                behandling.type shouldBe opprettetVedtakInnhold.behandlingType
-                utbetalingsperioder shouldHaveSize 1
-                with(utbetalingsperioder.first()) {
-                    id shouldBe 1L
-                    periode shouldBe Periode(opprettetVedtakInnhold.virkningstidspunkt, null)
-                    beloep shouldBe BigDecimal.valueOf(100)
-                    type shouldBe UtbetalingsperiodeType.UTBETALING
+                with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
+                    val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakBehandlingInnhold
+                    virkningstidspunkt shouldBe opprettetVedtakInnhold.virkningstidspunkt
+                    behandling.type shouldBe opprettetVedtakInnhold.behandlingType
+                    utbetalingsperioder shouldHaveSize 1
+                    with(utbetalingsperioder.first()) {
+                        id shouldBe 1L
+                        periode shouldBe Periode(opprettetVedtakInnhold.virkningstidspunkt, null)
+                        beloep shouldBe BigDecimal.valueOf(100)
+                        type shouldBe UtbetalingsperiodeType.UTBETALING
+                    }
                 }
             }
 
@@ -440,27 +441,29 @@ internal class VedtaksvurderingRouteTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
+                    deserialize<VedtakNyDto>(it.bodyAsText())
                 }
 
             with(vedtak) {
-                vedtakId shouldBe opprettetVedtak.id
+                id shouldBe opprettetVedtak.id
                 status shouldBe opprettetVedtak.status
-                behandling.id shouldBe opprettetVedtak.behandlingId
+                behandlingId shouldBe opprettetVedtak.behandlingId
                 sak.sakType shouldBe opprettetVedtak.sakType
                 sak.id shouldBe opprettetVedtak.sakId
                 type shouldBe opprettetVedtak.type
                 vedtakFattet shouldBe null
                 attestasjon shouldBe null
                 val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakBehandlingInnhold
-                virkningstidspunkt shouldBe opprettetVedtakInnhold.virkningstidspunkt
-                behandling.type shouldBe opprettetVedtakInnhold.behandlingType
-                utbetalingsperioder shouldHaveSize 1
-                with(utbetalingsperioder.first()) {
-                    id shouldBe 1L
-                    periode shouldBe Periode(opprettetVedtakInnhold.virkningstidspunkt, null)
-                    beloep shouldBe BigDecimal.valueOf(100)
-                    type shouldBe UtbetalingsperiodeType.UTBETALING
+                with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
+                    virkningstidspunkt shouldBe opprettetVedtakInnhold.virkningstidspunkt
+                    behandling.type shouldBe opprettetVedtakInnhold.behandlingType
+                    utbetalingsperioder shouldHaveSize 1
+                    with(utbetalingsperioder.first()) {
+                        id shouldBe 1L
+                        periode shouldBe Periode(opprettetVedtakInnhold.virkningstidspunkt, null)
+                        beloep shouldBe BigDecimal.valueOf(100)
+                        type shouldBe UtbetalingsperiodeType.UTBETALING
+                    }
                 }
             }
 
@@ -478,7 +481,7 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.FATTET_VEDTAK,
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             )
-        coEvery { vedtakBehandlingService.fattVedtak(any(), any(), any()) } returns VedtakOgRapid(fattetVedtak.toDto(), mockk())
+        coEvery { vedtakBehandlingService.fattVedtak(any(), any(), any()) } returns VedtakOgRapid(fattetVedtak.toNyDto(), mockk())
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -500,27 +503,29 @@ internal class VedtaksvurderingRouteTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
+                    deserialize<VedtakNyDto>(it.bodyAsText())
                 }
 
             with(vedtak) {
-                vedtakId shouldBe fattetVedtak.id
+                id shouldBe fattetVedtak.id
                 status shouldBe fattetVedtak.status
-                behandling.id shouldBe fattetVedtak.behandlingId
+                behandlingId shouldBe fattetVedtak.behandlingId
                 sak.sakType shouldBe fattetVedtak.sakType
                 sak.id shouldBe fattetVedtak.sakId
                 type shouldBe fattetVedtak.type
                 vedtakFattet shouldBe fattetVedtak.vedtakFattet
                 attestasjon shouldBe null
-                val fattetVedtakInnhold = fattetVedtak.innhold as VedtakBehandlingInnhold
-                virkningstidspunkt shouldBe fattetVedtakInnhold.virkningstidspunkt
-                behandling.type shouldBe fattetVedtakInnhold.behandlingType
-                utbetalingsperioder shouldHaveSize 1
-                with(utbetalingsperioder.first()) {
-                    id shouldBe 1L
-                    periode shouldBe Periode(fattetVedtakInnhold.virkningstidspunkt, null)
-                    beloep shouldBe BigDecimal.valueOf(100)
-                    type shouldBe UtbetalingsperiodeType.UTBETALING
+                with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
+                    val fattetVedtakInnhold = fattetVedtak.innhold as VedtakBehandlingInnhold
+                    virkningstidspunkt shouldBe fattetVedtakInnhold.virkningstidspunkt
+                    behandling.type shouldBe fattetVedtakInnhold.behandlingType
+                    utbetalingsperioder shouldHaveSize 1
+                    with(utbetalingsperioder.first()) {
+                        id shouldBe 1L
+                        periode shouldBe Periode(fattetVedtakInnhold.virkningstidspunkt, null)
+                        beloep shouldBe BigDecimal.valueOf(100)
+                        type shouldBe UtbetalingsperiodeType.UTBETALING
+                    }
                 }
             }
 
@@ -543,7 +548,7 @@ internal class VedtaksvurderingRouteTest {
             )
         coEvery { vedtakBehandlingService.attesterVedtak(any(), any(), any(), any()) } returns
             VedtakOgRapid(
-                attestertVedtak.toDto(),
+                attestertVedtak.toNyDto(),
                 mockk(),
             )
         coEvery { rapidService.sendToRapid(any()) } just runs
@@ -561,34 +566,36 @@ internal class VedtaksvurderingRouteTest {
                 }
             }
 
-            val vedtak =
+            val vedtakDto =
                 client.post("/api/vedtak/${UUID.randomUUID()}/attester") {
                     setBody(attestertVedtakKommentar.toJson())
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
+                    deserialize<VedtakNyDto>(it.bodyAsText())
                 }
 
-            with(vedtak) {
-                vedtakId shouldBe attestertVedtak.id
+            with(vedtakDto) {
+                id shouldBe attestertVedtak.id
                 status shouldBe attestertVedtak.status
-                behandling.id shouldBe attestertVedtak.behandlingId
+                behandlingId shouldBe attestertVedtak.behandlingId
                 sak.sakType shouldBe attestertVedtak.sakType
                 sak.id shouldBe attestertVedtak.sakId
                 type shouldBe attestertVedtak.type
                 vedtakFattet shouldBe attestertVedtak.vedtakFattet
                 attestasjon shouldBe attestertVedtak.attestasjon
-                val attestertVedtakInnhold = attestertVedtak.innhold as VedtakBehandlingInnhold
-                virkningstidspunkt shouldBe attestertVedtakInnhold.virkningstidspunkt
-                behandling.type shouldBe attestertVedtakInnhold.behandlingType
-                utbetalingsperioder shouldHaveSize 1
-                with(utbetalingsperioder.first()) {
-                    id shouldBe 1L
-                    periode shouldBe Periode(attestertVedtakInnhold.virkningstidspunkt, null)
-                    beloep shouldBe BigDecimal.valueOf(100)
-                    type shouldBe UtbetalingsperiodeType.UTBETALING
+                with(vedtakDto.innhold as VedtakInnholdDto.VedtakBehandlingDto) {
+                    val attestertVedtakInnhold = attestertVedtak.innhold as VedtakBehandlingInnhold
+                    virkningstidspunkt shouldBe attestertVedtakInnhold.virkningstidspunkt
+                    behandling.type shouldBe attestertVedtakInnhold.behandlingType
+                    utbetalingsperioder shouldHaveSize 1
+                    with(utbetalingsperioder.first()) {
+                        id shouldBe 1L
+                        periode shouldBe Periode(attestertVedtakInnhold.virkningstidspunkt, null)
+                        beloep shouldBe BigDecimal.valueOf(100)
+                        type shouldBe UtbetalingsperiodeType.UTBETALING
+                    }
                 }
             }
 
@@ -613,7 +620,7 @@ internal class VedtaksvurderingRouteTest {
             )
         val begrunnelse = UnderkjennVedtakDto("Ikke bra nok begrunnet", "Annet")
         coEvery { vedtakBehandlingService.underkjennVedtak(any(), any(), any()) } returns
-            VedtakOgRapid(underkjentVedtak.toDto(), mockk())
+            VedtakOgRapid(underkjentVedtak.toNyDto(), mockk())
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -636,27 +643,29 @@ internal class VedtaksvurderingRouteTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<VedtakDto>(it.bodyAsText())
+                    deserialize<VedtakNyDto>(it.bodyAsText())
                 }
 
             with(vedtak) {
-                vedtakId shouldBe underkjentVedtak.id
+                id shouldBe underkjentVedtak.id
                 status shouldBe underkjentVedtak.status
-                behandling.id shouldBe underkjentVedtak.behandlingId
+                behandlingId shouldBe underkjentVedtak.behandlingId
                 sak.sakType shouldBe underkjentVedtak.sakType
                 sak.id shouldBe underkjentVedtak.sakId
                 type shouldBe underkjentVedtak.type
                 vedtakFattet shouldBe null
                 attestasjon shouldBe null
-                val underkjentVedtakInnhold = underkjentVedtak.innhold as VedtakBehandlingInnhold
-                virkningstidspunkt shouldBe underkjentVedtakInnhold.virkningstidspunkt
-                behandling.type shouldBe underkjentVedtakInnhold.behandlingType
-                utbetalingsperioder shouldHaveSize 1
-                with(utbetalingsperioder.first()) {
-                    id shouldBe 1L
-                    periode shouldBe Periode(underkjentVedtakInnhold.virkningstidspunkt, null)
-                    beloep shouldBe BigDecimal.valueOf(100)
-                    type shouldBe UtbetalingsperiodeType.UTBETALING
+                with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
+                    val underkjentVedtakInnhold = underkjentVedtak.innhold as VedtakBehandlingInnhold
+                    virkningstidspunkt shouldBe underkjentVedtakInnhold.virkningstidspunkt
+                    behandling.type shouldBe underkjentVedtakInnhold.behandlingType
+                    utbetalingsperioder shouldHaveSize 1
+                    with(utbetalingsperioder.first()) {
+                        id shouldBe 1L
+                        periode shouldBe Periode(underkjentVedtakInnhold.virkningstidspunkt, null)
+                        beloep shouldBe BigDecimal.valueOf(100)
+                        type shouldBe UtbetalingsperiodeType.UTBETALING
+                    }
                 }
             }
 

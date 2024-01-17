@@ -134,7 +134,7 @@ class VedtakBehandlingService(
             }
 
         return VedtakOgRapid(
-            fattetVedtak.toDto(),
+            fattetVedtak.toNyDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.FATTET,
                 vedtak = fattetVedtak.toNyDto(),
@@ -205,7 +205,7 @@ class VedtakBehandlingService(
             }
 
         return VedtakOgRapid(
-            attestertVedtak.toDto(),
+            attestertVedtak.toNyDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
                 vedtak = attestertVedtak.toNyDto(),
@@ -262,7 +262,7 @@ class VedtakBehandlingService(
             }
 
         return VedtakOgRapid(
-            repository.hentVedtak(behandlingId)!!.toDto(),
+            repository.hentVedtak(behandlingId)!!.toNyDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
                 vedtak = underkjentVedtak.toNyDto(),
@@ -310,7 +310,7 @@ class VedtakBehandlingService(
             logger.info("Svar fra samordning: må vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
         }
 
-        return VedtakOgRapid(tilSamordningVedtakLocal.toDto(), tilSamordning)
+        return VedtakOgRapid(tilSamordningVedtakLocal.toNyDto(), tilSamordning)
     }
 
     fun samordnetVedtak(
@@ -333,7 +333,7 @@ class VedtakBehandlingService(
             }
 
         return VedtakOgRapid(
-            samordnetVedtakLocal.toDto(),
+            samordnetVedtakLocal.toNyDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.SAMORDNET,
                 vedtak = samordnetVedtakLocal.toNyDto(),
@@ -363,7 +363,7 @@ class VedtakBehandlingService(
             }
 
         return VedtakOgRapid(
-            iverksattVedtak.toDto(),
+            iverksattVedtak.toNyDto(),
             RapidInfo(
                 vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
                 vedtak = iverksattVedtak.toNyDto(),

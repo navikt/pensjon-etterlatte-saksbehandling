@@ -61,7 +61,7 @@ class GrunnlagsversjoneringRiver(
 
     init {
         initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
-            validate { it.requireKey("vedtak.behandling.id") }
+            validate { it.requireKey("vedtak.behandlingId") }
         }
     }
 
@@ -69,7 +69,7 @@ class GrunnlagsversjoneringRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val behandlingId = UUID.fromString(packet["vedtak.behandling.id"].asText())
+        val behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asText())
 
         try {
             logger.info("Mottok melding om attestert behandling (id=$behandlingId)")

@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
@@ -42,28 +41,6 @@ data class Vedtak(
     val attestasjon: Attestasjon? = null,
     val innhold: VedtakInnhold,
 ) {
-    @Deprecated("VedtakDto skal ersttates av VedtakNyDto")
-    fun toDto(): VedtakDto {
-        val innhold = innhold as VedtakBehandlingInnhold
-        return VedtakDto(
-            vedtakId = id,
-            status = status,
-            sak = VedtakSak(soeker.value, sakType, sakId),
-            type = type,
-            vedtakFattet = vedtakFattet,
-            attestasjon = attestasjon,
-            virkningstidspunkt = innhold.virkningstidspunkt,
-            behandling =
-                Behandling(
-                    innhold.behandlingType,
-                    behandlingId,
-                    innhold.revurderingAarsak,
-                    innhold.revurderingInfo,
-                ),
-            utbetalingsperioder = innhold.utbetalingsperioder,
-        )
-    }
-
     fun toNyDto(): VedtakNyDto {
         return VedtakNyDto(
             id = id,

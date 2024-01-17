@@ -4,7 +4,6 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -62,7 +61,7 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
             ).mapBoth(
                 success = { resource ->
                     resource.response?.toString()?.let {
-                        val deserialize: VedtakDto? = deserialize(it)
+                        val deserialize: VedtakNyDto? = deserialize(it)
                         deserialize?.vedtakFattet?.tidspunkt?.toLocalDate()
                     }
                 },

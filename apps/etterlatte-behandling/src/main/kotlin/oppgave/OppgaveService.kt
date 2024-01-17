@@ -114,9 +114,7 @@ class OppgaveService(
         if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
             oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
         } else {
-            throw BadRequestException(
-                "Oppgaven har allerede en saksbehandler, id: $oppgaveId",
-            )
+            throw OppgaveAlleredeTildeltException(oppgaveId)
         }
     }
 

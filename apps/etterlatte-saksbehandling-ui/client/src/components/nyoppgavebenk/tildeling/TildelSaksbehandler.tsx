@@ -35,9 +35,9 @@ export const TildelSaksbehandler = (props: {
     <Button icon={<PersonIcon />} variant="tertiary" size="small" onClick={tildelSaksbehandlerWrapper}>
       Tildel meg
     </Button>,
-    () => (
+    (err) => (
       <Alert variant="error" size="small">
-        Tildeling feilet
+        {err.code === 'OPPGAVEN_HAR_ALLEREDE_SAKSBEHANDLER' ? 'Allerede tildelt' : 'Tildeling feilet'}
       </Alert>
     ),
     () => (

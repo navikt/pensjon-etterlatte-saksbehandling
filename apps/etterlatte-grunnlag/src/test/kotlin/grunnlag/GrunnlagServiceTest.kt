@@ -234,7 +234,7 @@ internal class GrunnlagServiceTest {
                 )
 
             assertEquals(expected[NAVN], actual.hentPotensiellGjenlevende()?.get(NAVN))
-            assertEquals(expected[FOEDSELSDATO], actual.hentGjenlevende()[FOEDSELSDATO])
+            assertEquals(expected[FOEDSELSDATO], actual.hentPotensiellGjenlevende()!![FOEDSELSDATO])
         }
 
         @Test

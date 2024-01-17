@@ -12,7 +12,6 @@ import {
 import { IVilkaarsvurdering, Vilkaar, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
 import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
-import { VilkaarGrunnlagsStoette } from './vilkaar/VilkaarGrunnlagsStoette'
 import { Link } from '@navikt/ds-react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
@@ -73,7 +72,6 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
               )}
               <VilkaarBeskrivelse>{vilkaar.hovedvilkaar.beskrivelse}</VilkaarBeskrivelse>
             </VilkaarColumn>
-            <VilkaarGrunnlagsStoette vilkaar={vilkaar} />
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
             <VilkaarVurderingContainer>

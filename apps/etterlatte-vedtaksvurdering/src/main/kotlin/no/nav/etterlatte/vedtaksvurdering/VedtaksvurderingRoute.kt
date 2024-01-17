@@ -48,7 +48,7 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        get("/{$BEHANDLINGID_CALL_PARAMETER}/ny") {
+        get("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vedtak for behandling $behandlingId")
                 val vedtak = vedtakService.hentVedtakMedBehandlingId(behandlingId)

@@ -100,7 +100,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             val response =
-                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
+                client.get("/api/vedtak/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 }
 
@@ -126,7 +126,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             val response =
-                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
+                client.get("/api/vedtak/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -158,7 +158,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             val response =
-                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
+                client.get("/api/vedtak/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
@@ -191,7 +191,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             val vedtak =
-                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
+                client.get("/api/vedtak/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
@@ -248,7 +248,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             val vedtak =
-                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
+                client.get("/api/vedtak/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {
@@ -305,7 +305,7 @@ internal class VedtaksvurderingRouteTest {
             }
 
             val vedtak =
-                client.get("/api/vedtak/${UUID.randomUUID()}/ny") {
+                client.get("/api/vedtak/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }.let {

@@ -36,13 +36,13 @@ internal class OpprettBrevRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
+        val sakType = enumValueOf<SakType>(packet[SAK_TYPE_KEY].textValue())
+        val fnr = packet[rapidsandrivers.FNR_KEY].textValue()
+        val behandlingId = packet[BEHANDLING_ID_KEY].textValue()
         if (!featureToggleService.isEnabled(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, false)) {
             logger.info("Utsending av informasjonsbrev er skrudd av. Avbryter.")
             return
         }
-        val sakType = enumValueOf<SakType>(packet[SAK_TYPE_KEY].textValue())
-        val fnr = packet[rapidsandrivers.FNR_KEY].textValue()
-        val behandlingId = packet[BEHANDLING_ID_KEY].textValue()
         val sak =
             if (!fnr.isNullOrEmpty()) {
                 logger.info("Finner eller oppretter sak av type $sakType")

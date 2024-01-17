@@ -175,7 +175,7 @@ internal class BrevServiceTest {
 
             every { db.hentBrev(any()) } returns brev
 
-            assertThrows<IllegalStateException> {
+            assertThrows<BrevKanIkkeEndres> {
                 brevService.oppdaterTittel(brev.id, "Ny tittel skal feile")
             }
 
@@ -209,7 +209,7 @@ internal class BrevServiceTest {
 
             every { db.hentBrev(any()) } returns brev
 
-            assertThrows<IllegalStateException> {
+            assertThrows<BrevKanIkkeEndres> {
                 brevService.slett(brev.id, bruker)
             }
 
@@ -229,7 +229,7 @@ internal class BrevServiceTest {
 
             every { db.hentBrev(any()) } returns brev
 
-            assertThrows<IllegalStateException> {
+            assertThrows<Exception> {
                 brevService.slett(brev.id, bruker)
             }
 

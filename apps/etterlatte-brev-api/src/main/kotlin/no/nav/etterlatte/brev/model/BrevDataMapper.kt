@@ -101,6 +101,7 @@ class BrevDataMapper(
                     redigerbarTekstRequest.generellBrevData,
                     redigerbarTekstRequest.brukerTokenInfo,
                 )
+
             true ->
                 migreringBrevDataService.opprettMigreringBrevdata(
                     redigerbarTekstRequest.generellBrevData,
@@ -148,6 +149,7 @@ class BrevDataMapper(
                             Revurderingaarsak.YRKESSKADE,
                             Revurderingaarsak.ANNEN,
                             -> ManueltBrevData.fra()
+
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
 
@@ -206,6 +208,7 @@ class BrevDataMapper(
 
                     VedtakType.AVSLAG ->
                         AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, emptyList())
+
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
                             Revurderingaarsak.INNTEKTSENDRING,

@@ -1,9 +1,14 @@
 package no.nav.etterlatte.brev
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.PartData
+import io.ktor.http.content.readAllParts
+import io.ktor.http.content.streamProvider
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
+import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
@@ -13,12 +18,15 @@ import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
+import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -157,6 +165,29 @@ fun Route.brevRoute(
                 }
             }
         }
+
+        post("pdf") {
+            withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
+                try {
+                    val mp = call.receiveMultipart().readAllParts()
+
+                    val request =
+                        mp.first { it is PartData.FormItem }
+                            .let { objectMapper.readValue<BrevFraOpplastningRequest>((it as PartData.FormItem).value) }
+
+                    val fil: ByteArray =
+                        mp.first { it is PartData.FileItem }
+                            .let { (it as PartData.FileItem).streamProvider().readBytes() }
+
+                    val brev = service.lagrePdf(sakId, fil, request.innhold, request.sak)
+
+                    call.respond(brev)
+                } catch (e: Exception) {
+                    logger.error("Getting multipart error", e)
+                    call.respond(HttpStatusCode.BadRequest)
+                }
+            }
+        }
     }
 }
 
@@ -171,4 +202,9 @@ data class OppdaterMottakerRequest(
 
 data class OppdaterTittelRequest(
     val tittel: String,
+)
+
+data class BrevFraOpplastningRequest(
+    val innhold: BrevInnhold,
+    val sak: Sak,
 )

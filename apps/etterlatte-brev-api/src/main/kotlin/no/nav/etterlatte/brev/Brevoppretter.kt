@@ -148,6 +148,7 @@ class Brevoppretter(
                 BrevProsessType.REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest)
                 BrevProsessType.AUTOMATISK -> null
                 BrevProsessType.MANUELL -> SlateHelper.hentInitiellPayload(redigerbarTekstRequest.generellBrevData)
+                BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException("Payload ikke relevant for ${BrevProsessType.OPPLASTET_PDF}")
             }
 
         return BrevInnhold(tittel, redigerbarTekstRequest.generellBrevData.spraak, payload)
@@ -161,6 +162,9 @@ class Brevoppretter(
             BrevProsessType.REDIGERBAR -> SlateHelper.hentInitiellPayloadVedlegg(generellBrevData)
             BrevProsessType.AUTOMATISK -> null
             BrevProsessType.MANUELL -> null
+            BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException(
+                "Vedlegg payload ikke relevant for ${BrevProsessType.OPPLASTET_PDF}",
+            )
         }
 }
 

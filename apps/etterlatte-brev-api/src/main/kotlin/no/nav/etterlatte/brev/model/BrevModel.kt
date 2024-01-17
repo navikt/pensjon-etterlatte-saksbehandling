@@ -164,6 +164,7 @@ enum class BrevProsessType {
     MANUELL,
     REDIGERBAR,
     AUTOMATISK,
+    OPPLASTET_PDF,
 }
 
 data class EtterbetalingDTO(

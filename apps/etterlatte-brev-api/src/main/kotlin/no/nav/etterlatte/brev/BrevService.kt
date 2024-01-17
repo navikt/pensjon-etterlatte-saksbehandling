@@ -5,11 +5,18 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSB
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodePar
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
@@ -109,9 +116,14 @@ class BrevService(
         id: BrevID,
         bruker: BrukerTokenInfo,
     ) {
-        sjekkOmBrevKanEndres(id)
-        val pdf = genererPdf(id, bruker)
-        db.lagrePdfOgFerdigstillBrev(id, pdf)
+        val brev = sjekkOmBrevKanEndres(id)
+
+        if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
+            db.settBrevFerdigstilt(id)
+        } else {
+            val pdf = genererPdf(id, bruker)
+            db.lagrePdfOgFerdigstillBrev(id, pdf)
+        }
     }
 
     suspend fun journalfoer(
@@ -125,18 +137,55 @@ class BrevService(
     ) {
         logger.info("Sjekker om brev med id=$id kan slettes")
 
-        val brev = db.hentBrev(id)
-        check(brev.kanEndres()) { "Brev med id=$id kan ikke endres, siden det har status ${brev.status}" }
+        val brev = sjekkOmBrevKanEndres(id)
         check(brev.behandlingId == null) { "Brev med id=$id er et vedtaksbrev og kan ikke slettes" }
 
         val result = db.settBrevSlettet(id, bruker)
         logger.info("Brev med id=$id slettet=$result")
     }
 
-    private fun sjekkOmBrevKanEndres(brevID: BrevID) {
+    fun lagrePdf(
+        sakId: Long,
+        fil: ByteArray,
+        innhold: BrevInnhold,
+        sak: Sak,
+    ): Brev {
+        val brev =
+            db.opprettBrev(
+                OpprettNyttBrev(
+                    sakId = sakId,
+                    behandlingId = null,
+                    soekerFnr = sak.ident,
+                    prosessType = BrevProsessType.OPPLASTET_PDF,
+                    mottaker = Mottaker.tom(Folkeregisteridentifikator.of(sak.ident)),
+                    opprettet = Tidspunkt.now(),
+                    innhold = innhold,
+                    innholdVedlegg = null,
+                ),
+            )
+
+        db.lagrePdf(brev.id, Pdf(fil))
+
+        return brev
+    }
+
+    private fun sjekkOmBrevKanEndres(brevID: BrevID): Brev {
         val brev = db.hentBrev(brevID)
-        if (!brev.kanEndres()) {
-            throw IllegalStateException("Brev med id=$brevID kan ikke endres, siden det har status ${brev.status}")
+
+        return if (brev.kanEndres()) {
+            brev
+        } else {
+            throw BrevKanIkkeEndres(brev)
         }
     }
 }
+
+class BrevKanIkkeEndres(brev: Brev) : UgyldigForespoerselException(
+    code = "BREV_KAN_IKKE_ENDRES",
+    detail = "Brevet kan ikke endres siden det har status ${brev.status.name.lowercase()}",
+    meta =
+        mapOf(
+            "brevId" to brev.id,
+            "status" to brev.status,
+        ),
+)

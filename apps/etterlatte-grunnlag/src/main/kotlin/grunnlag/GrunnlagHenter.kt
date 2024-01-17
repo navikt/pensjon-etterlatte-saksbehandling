@@ -160,8 +160,12 @@ class GrunnlagHenter(
         return Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde =
-                if (this.innsender == Vedtaksloesning.PESYS.name) {
+                if (this.innsender == null) {
+                    Grunnlagsopplysning.UkjentInnsender(Tidspunkt.now())
+                } else if (this.innsender == Vedtaksloesning.PESYS.name) {
                     Grunnlagsopplysning.Pesys.create()
+                } else if (this.innsender!!.matches(Regex("[A-Z][0-9]+"))) {
+                    Grunnlagsopplysning.Saksbehandler(this.innsender!!, Tidspunkt.now())
                 } else {
                     Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now())
                 },

@@ -48,7 +48,7 @@ internal fun Route.behandlingRoutes(
     post("/api/behandling") {
         kunSaksbehandlerMedSkrivetilgang {
             val request = call.receive<NyBehandlingRequest>()
-            val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request)
+            val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request, brukerTokenInfo)
             call.respondText(behandling.id.toString())
         }
     }

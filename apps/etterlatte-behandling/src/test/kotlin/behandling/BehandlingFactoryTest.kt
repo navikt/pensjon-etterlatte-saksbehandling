@@ -57,6 +57,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -636,6 +637,7 @@ class BehandlingFactoryTest {
                         null,
                         null,
                     ),
+                    Saksbehandler("token", "Z123456", null),
                 )
             }
 

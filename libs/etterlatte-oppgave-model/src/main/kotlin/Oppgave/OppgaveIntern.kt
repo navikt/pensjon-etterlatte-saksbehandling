@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.oppgave
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import java.util.UUID
 
@@ -148,6 +149,7 @@ data class SakIdOgReferanse(
 data class VedtakEndringDTO(
     val sakIdOgReferanse: SakIdOgReferanse,
     val vedtakHendelse: VedtakHendelse,
+    val vedtakType: VedtakType,
 )
 
 data class NyOppgaveDto(

@@ -57,6 +57,7 @@ export enum IBehandlingStatus {
   SAMORDNET = 'SAMORDNET',
   IVERKSATT = 'IVERKSATT',
   AVBRUTT = 'AVBRUTT',
+  AVSLAG = 'AVSLAG',
 }
 
 export enum UtlandstilknytningType {

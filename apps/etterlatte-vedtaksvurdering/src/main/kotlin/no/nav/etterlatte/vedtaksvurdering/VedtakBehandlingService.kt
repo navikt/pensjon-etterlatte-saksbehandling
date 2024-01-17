@@ -127,6 +127,7 @@ class VedtakBehandlingService(
                                             inntruffet = fattetVedtak.vedtakFattet?.tidspunkt!!,
                                             saksbehandler = fattetVedtak.vedtakFattet.ansvarligSaksbehandler,
                                         ),
+                                    vedtakType = fattetVedtak.type,
                                 ),
                         )
                     }
@@ -198,6 +199,7 @@ class VedtakBehandlingService(
                                         saksbehandler = attestertVedtak.attestasjon.attestant,
                                         kommentar = kommentar,
                                     ),
+                                vedtakType = attestertVedtak.type,
                             ),
                     )
                 }
@@ -255,6 +257,7 @@ class VedtakBehandlingService(
                                     kommentar = begrunnelse.kommentar,
                                     valgtBegrunnelse = begrunnelse.valgtBegrunnelse,
                                 ),
+                            vedtakType = underkjentVedtak.type,
                         ),
                     )
                 }

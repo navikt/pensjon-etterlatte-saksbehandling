@@ -9,10 +9,12 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
+import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
@@ -61,7 +63,7 @@ interface BehandlingStatusService {
 
     fun settAttestertVedtak(
         behandling: Behandling,
-        vedtakHendelse: VedtakHendelse,
+        vedtak: VedtakEndringDTO,
     )
 
     fun sjekkOmKanReturnereVedtak(behandlingId: UUID)
@@ -176,10 +178,14 @@ class BehandlingStatusServiceImpl(
 
     override fun settAttestertVedtak(
         behandling: Behandling,
-        vedtakHendelse: VedtakHendelse,
+        vedtak: VedtakEndringDTO,
     ) {
-        lagreNyBehandlingStatus(behandling.tilAttestert())
-        registrerVedtakHendelse(behandling.id, vedtakHendelse, HendelseType.ATTESTERT)
+        if (vedtak.vedtakType == VedtakType.AVSLAG) {
+            lagreNyBehandlingStatus(behandling.tilAvslag())
+        } else {
+            lagreNyBehandlingStatus(behandling.tilAttestert())
+        }
+        registrerVedtakHendelse(behandling.id, vedtak.vedtakHendelse, HendelseType.ATTESTERT)
     }
 
     override fun sjekkOmKanReturnereVedtak(behandlingId: UUID) {

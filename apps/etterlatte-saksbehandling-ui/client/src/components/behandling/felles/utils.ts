@@ -63,11 +63,13 @@ export const erFerdigBehandlet = (status: IBehandlingStatus): boolean => {
     status === IBehandlingStatus.TIL_SAMORDNING ||
     status === IBehandlingStatus.SAMORDNET ||
     status === IBehandlingStatus.IVERKSATT ||
+    status === IBehandlingStatus.AVSLAG ||
     status === IBehandlingStatus.AVBRUTT
   )
 }
 export const behandlingErIverksattEllerSamordnet = (behandlingStatus: IBehandlingStatus): boolean =>
   behandlingStatus === IBehandlingStatus.IVERKSATT ||
+  behandlingStatus === IBehandlingStatus.AVSLAG ||
   behandlingStatus === IBehandlingStatus.SAMORDNET ||
   behandlingStatus === IBehandlingStatus.TIL_SAMORDNING
 

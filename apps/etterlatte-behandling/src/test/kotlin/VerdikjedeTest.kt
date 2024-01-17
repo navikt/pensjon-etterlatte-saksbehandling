@@ -318,6 +318,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                 referanse = behandlingId.toString(),
                             ),
                         vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "Saksbehandler01", null),
+                        vedtakType = VedtakType.INNVILGELSE,
                     ),
                 )
             }.also {
@@ -361,6 +362,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                 referanse = behandlingId.toString(),
                             ),
                         vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), saksbehandler02, null, null),
+                        vedtakType = VedtakType.INNVILGELSE,
                     ),
                 )
             }.also {

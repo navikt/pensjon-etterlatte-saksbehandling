@@ -137,7 +137,7 @@ internal fun Route.behandlingVedtakRoute(
                     call.respond(HttpStatusCode.NotFound, "Fant ingen behandling")
                 } else {
                     inTransaction {
-                        behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave.vedtakHendelse)
+                        behandlingsstatusService.settAttestertVedtak(behandling, attesterVedtakOppgave)
                         try {
                             oppgaveService.ferdigStillOppgaveUnderBehandling(
                                 referanse = attesterVedtakOppgave.sakIdOgReferanse.referanse,

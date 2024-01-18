@@ -31,6 +31,7 @@ class ApplicationContext {
             vilkaarsvurderingRepository = vilkaarsvurderingRepository,
             behandlingKlient = behandlingKlient,
             grunnlagKlient = GrunnlagKlientImpl(config, httpClient()),
+            featureToggleService = featureToggleService,
         )
     val migreringService = MigreringService(vilkaarsvurderingRepository)
 }

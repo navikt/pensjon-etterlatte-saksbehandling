@@ -93,6 +93,7 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
     }
 
@@ -675,6 +676,7 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
 
         testApplication {
@@ -702,6 +704,7 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
 
         testApplication {
@@ -732,6 +735,7 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
 
         testApplication {
@@ -764,6 +768,7 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
 
         testApplication {

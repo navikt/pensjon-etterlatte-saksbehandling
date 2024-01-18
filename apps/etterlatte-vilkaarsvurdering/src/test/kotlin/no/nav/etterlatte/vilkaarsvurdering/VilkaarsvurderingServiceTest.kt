@@ -1,6 +1,5 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import io.kotest.assertions.any
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -107,6 +106,7 @@ internal class VilkaarsvurderingServiceTest {
                 repository,
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
     }
 

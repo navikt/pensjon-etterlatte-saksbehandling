@@ -126,7 +126,10 @@ interface BehandlingService {
 
     fun hentFoersteVirk(sakId: Long): YearMonth?
 
-    fun oppdaterGrunnlagOgStatus(behandlingId: UUID)
+    fun oppdaterGrunnlagOgStatus(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 
     fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning?
 }
@@ -295,13 +298,16 @@ internal class BehandlingServiceImpl(
         return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
     }
 
-    override fun oppdaterGrunnlagOgStatus(behandlingId: UUID) {
+    override fun oppdaterGrunnlagOgStatus(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
         hentBehandlingOrThrow(behandlingId)
             .tilOpprettet()
             .let { behandling ->
                 grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
-
                 behandlingDao.lagreStatus(behandling)
+                hendelseDao.opppdatertGrunnlagHendelse(behandlingId, behandling.sak.id, brukerTokenInfo.ident())
             }
     }
 

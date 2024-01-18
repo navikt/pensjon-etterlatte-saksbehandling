@@ -93,6 +93,7 @@ class MigreringTest {
                 vilkaarsvurderingRepository,
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
 
         migreringService =

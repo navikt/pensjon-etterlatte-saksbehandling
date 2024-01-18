@@ -165,7 +165,9 @@ fun Route.vilkaarsvurdering(
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
-                vilkaarsvurderingService.oppdaterGrunnlagsversjon(behandlingId, brukerTokenInfo)
+                if (featureToggleService.isEnabled(VilkaarsvurderingFeatureToggle.OppdaterGrunnlagsversjon, false)) {
+                    vilkaarsvurderingService.oppdaterGrunnlagsversjon(behandlingId, brukerTokenInfo)
+                }
                 val statusOppdatert =
                     vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))

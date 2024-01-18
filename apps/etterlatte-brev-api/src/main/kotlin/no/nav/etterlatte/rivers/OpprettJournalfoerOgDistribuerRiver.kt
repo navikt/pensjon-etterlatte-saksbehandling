@@ -51,7 +51,15 @@ class OpprettJournalfoerOgDistribuerRiver(
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
-        val brevOgData = retryOgPakkUt { brevoppretter.opprettBrev(sakId, null, brukerTokenInfo) }
+        val brevOgData =
+            retryOgPakkUt {
+                brevoppretter.opprettBrev(
+                    sakId = sakId,
+                    behandlingId = null,
+                    bruker = brukerTokenInfo,
+                    brevKode = brevKode,
+                )
+            }
         logger.info("Ferdigstiller $brevKode-brev i sak $sakId")
         val brevId = brevOgData.first.id
         retryOgPakkUt {

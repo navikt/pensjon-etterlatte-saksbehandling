@@ -15,10 +15,10 @@ object OmstillingstoenadVilkaar {
             sivilstand(),
             yrkesskade(),
             avdoedesMedlemskap(),
+            avdoedesMedlemskapEoes(),
             gjenlevendesMedlemskap(),
             vurderingAvEksport(),
             aktivitetEtter6Maaneder(),
-            avdoedesMedlemskapEoes(),
         )
 
     private fun etterlatteLever() =

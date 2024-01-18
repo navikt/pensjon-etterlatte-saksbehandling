@@ -1,4 +1,4 @@
-package vilkaarsvurdering.migrering
+package no.nav.etterlatte.vilkaarsvurdering.migrering
 
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -36,8 +36,6 @@ import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingService
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
-import no.nav.etterlatte.vilkaarsvurdering.migrering.MigreringService
-import no.nav.etterlatte.vilkaarsvurdering.migrering.migrering
 import no.nav.etterlatte.vilkaarsvurdering.vilkaarsvurdering
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll

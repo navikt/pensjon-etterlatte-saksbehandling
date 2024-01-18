@@ -40,10 +40,12 @@ class StartInformasjonsbrevgenereringRiver(
         }
         iTraad {
             sleep(Duration.ofMinutes(1))
+            logger.info("Starter informasjonsbrev-genereringa")
             brevAaOpprette.forEach {
                 rapidsConnection.publish(message = lagMelding(it), key = UUID.randomUUID().toString())
                 sleep(Duration.ofSeconds(3))
             }
+            logger.info("Informasjonsbrev-generering ferdig")
         }
     }
 

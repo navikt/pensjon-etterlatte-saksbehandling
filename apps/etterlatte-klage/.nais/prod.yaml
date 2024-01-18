@@ -41,9 +41,9 @@ spec:
     - name: KABAL_URL
       value: http://kabal-api.klage
     - name: KABAL_AZURE_SCOPE
-      value: api://dev-gcp.klage.kabal-api/.default
+      value: api://prod-gcp.klage.kabal-api/.default
     - name: BEHANDLING_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
+      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
   envFrom:
@@ -54,9 +54,8 @@ spec:
         - application: etterlatte-behandling
         - application: kabal-api
           namespace: klage
-          cluster: dev-gcp
+          cluster: prod-gcp
 
-      external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
 
     inbound:

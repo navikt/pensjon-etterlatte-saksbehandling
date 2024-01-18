@@ -137,6 +137,8 @@ class ApplicationBuilder {
     private val datasource = DataSourceBuilder.createDataSource(env)
     private val db = BrevRepository(datasource)
 
+    private val brevgenereringRepository = StartBrevgenereringRepository(datasource)
+
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
 
     private val dokarkivKlient = DokarkivKlient(httpClient("DOKARKIV_SCOPE"), env.requireEnvValue("DOKARKIV_URL"))
@@ -202,7 +204,7 @@ class ApplicationBuilder {
             .apply {
                 val brevgenerering =
                     StartInformasjonsbrevgenereringRiver(
-                        StartBrevgenereringRepository(datasource),
+                        brevgenereringRepository,
                         this,
                     )
                 register(

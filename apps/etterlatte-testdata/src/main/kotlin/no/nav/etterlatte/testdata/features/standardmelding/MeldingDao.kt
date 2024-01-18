@@ -1,4 +1,4 @@
-package no.nav.etterlatte.batch
+package no.nav.etterlatte.testdata.features.standardmelding
 
 import java.time.LocalDateTime
 

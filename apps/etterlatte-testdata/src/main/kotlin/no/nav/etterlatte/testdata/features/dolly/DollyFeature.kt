@@ -18,9 +18,9 @@ import no.nav.etterlatte.objectMapper
 import no.nav.etterlatte.producer
 import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import no.nav.etterlatte.testdata.dolly.DollyService
+import no.nav.etterlatte.testdata.features.soeknad.SoeknadMapper.opprettJsonMessage
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import testdata.features.soeknad.SoeknadMapper.opprettJsonMessage
 import java.util.UUID
 
 class DollyFeature(private val dollyService: DollyService) : TestDataFeature {

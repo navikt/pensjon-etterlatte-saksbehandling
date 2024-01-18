@@ -92,7 +92,7 @@ class AzureAdClient(
 
     // Service-to-service access token request (client credentials grant)
     suspend fun getAccessTokenForResource(scopes: List<String>): Result<AccessToken, ThrowableErrorMessage> {
-        val params = { req: ClientCredentialsTokenRequest ->
+        val params = { _: ClientCredentialsTokenRequest ->
             Parameters.build {
                 append("client_id", config.getString("azure.app.client.id"))
                 append("client_secret", config.getString("azure.app.client.secret"))

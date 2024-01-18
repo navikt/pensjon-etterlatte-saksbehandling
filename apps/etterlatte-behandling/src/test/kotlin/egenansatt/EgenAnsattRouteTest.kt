@@ -44,7 +44,9 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
     private val norg2Klient = mockk<Norg2Klient>()
 
     @BeforeEach
-    fun start() = startServer(norg2Klient = norg2Klient)
+    fun start() =
+        startServer(norg2Klient = norg2Klient)
+            .also { resetDatabase() }
 
     @AfterEach
     fun afterEach() {

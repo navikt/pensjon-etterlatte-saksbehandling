@@ -46,7 +46,7 @@ internal class MigreringHendelserRiver(
                 packet.eventName = PAUSE
                 context.publish(packet.toJson())
             }
-            logger.info("Opprettet vedtak ${respons.vedtak.vedtakId} for migrert behandling: $behandlingId")
+            logger.info("Opprettet vedtak ${respons.vedtak.id} for migrert behandling: $behandlingId")
             RapidUtsender.sendUt(respons, packet, context)
         }
     }

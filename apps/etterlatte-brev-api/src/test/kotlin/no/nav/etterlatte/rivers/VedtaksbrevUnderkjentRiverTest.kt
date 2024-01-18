@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -51,7 +52,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
 
         testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id) }
+        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
     }
 
     @Test
@@ -66,7 +67,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
 
         testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id) }
+        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
         verify(exactly = 1) { vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(brev.id, any()) }
     }
 
@@ -84,7 +85,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
             testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
         }
 
-        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandling.id) }
+        verify(exactly = 1) { vedtaksbrevService.hentVedtaksbrev(vedtak.behandlingId) }
         verify(exactly = 1) { vedtaksbrevService.fjernFerdigstiltStatusUnderkjentVedtak(brev.id, any()) }
     }
 
@@ -99,16 +100,21 @@ internal class VedtaksbrevUnderkjentRiverTest {
     }
 
     private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): VedtakDto {
+        val behandlingsid = UUID.randomUUID()
         return VedtakDto(
-            vedtakId = 1L,
+            id = 1L,
+            behandlingId = behandlingsid,
             status = VedtakStatus.RETURNERT,
-            virkningstidspunkt = YearMonth.now(),
             sak = VedtakSak("Z123456", SakType.BARNEPENSJON, 2L),
-            behandling = Behandling(behandlingType, UUID.randomUUID()),
             type = VedtakType.INNVILGELSE,
-            utbetalingsperioder = emptyList(),
             vedtakFattet = VedtakFattet("Z00000", "1234", Tidspunkt.now()),
             attestasjon = Attestasjon("Z00000", "1234", Tidspunkt.now()),
+            innhold =
+                VedtakInnholdDto.VedtakBehandlingDto(
+                    virkningstidspunkt = YearMonth.now(),
+                    behandling = Behandling(behandlingType, behandlingsid),
+                    utbetalingsperioder = emptyList(),
+                ),
         )
     }
 

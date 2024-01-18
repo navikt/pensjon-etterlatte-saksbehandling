@@ -413,6 +413,7 @@ class RealGrunnlagService(
             in persongalleri.soesken -> Saksrolle.SOESKEN
             in persongalleri.avdoed -> Saksrolle.AVDOED
             in persongalleri.gjenlevende -> Saksrolle.GJENLEVENDE
+            persongalleri.innsender -> Saksrolle.INNSENDER
             else -> Saksrolle.UKJENT
         }
 
@@ -619,6 +620,7 @@ private fun Grunnlagsopplysning.Kilde.tilGenerellKilde() =
                 tidspunkt = this.tidspunkt,
                 detalj = this.ident,
             )
+        is Grunnlagsopplysning.UkjentInnsender -> GenerellKilde(this.type, this.tidspunkt, detalj = null)
     }
 
 data class GrunnlagsopplysningerPersonPdl(

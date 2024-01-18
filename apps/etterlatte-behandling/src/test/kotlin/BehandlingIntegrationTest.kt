@@ -50,8 +50,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
@@ -60,15 +58,14 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Claims
 import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
 import java.util.UUID
 
+@ExtendWith(DatabaseExtension::class)
 abstract class BehandlingIntegrationTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
+    private val postgreSQLContainer = DatabaseExtension.postgreSQLContainer
     private val server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
     protected lateinit var hoconApplicationConfig: HoconApplicationConfig
@@ -81,9 +78,6 @@ abstract class BehandlingIntegrationTest {
 
         val httpServer = server.config.httpServer
         hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
         applicationContext =
             ApplicationContext(
@@ -138,9 +132,7 @@ abstract class BehandlingIntegrationTest {
                 klageHttpClient = klageHttpClientTest(),
                 tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
                 migreringHttpClient = migreringHttpClientTest(),
-            ).also {
-                it.dataSource.migrate()
-            }
+            )
     }
 
     fun skjermingHttpClient(): HttpClient =
@@ -307,25 +299,12 @@ abstract class BehandlingIntegrationTest {
         }
 
     fun resetDatabase() {
-        applicationContext.dataSource.connection.use {
-            it.prepareStatement(
-                """
-                TRUNCATE behandling CASCADE;
-                TRUNCATE behandlinghendelse CASCADE;
-                TRUNCATE grunnlagsendringshendelse CASCADE;
-                TRUNCATE sak CASCADE;
-                TRUNCATE oppgave CASCADE;
-                
-                ALTER SEQUENCE behandlinghendelse_id_seq RESTART WITH 1;
-                ALTER SEQUENCE sak_id_seq RESTART WITH 1;
-                """.trimIndent(),
-            ).execute()
-        }
+        DatabaseExtension.resetDb()
     }
 
     protected fun afterAll() {
+        applicationContext.close()
         server.shutdown()
-        postgreSQLContainer.stop()
     }
 
     private val azureAdStrengtFortroligClaim: String by lazy {

@@ -76,6 +76,11 @@ data class ManueltOpphoer(
             endreTilStatus(BehandlingStatus.ATTESTERT)
         }
 
+    override fun tilAvslag() =
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
+            endreTilStatus(BehandlingStatus.AVSLAG)
+        }
+
     override fun tilReturnert() =
         hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
             endreTilStatus(BehandlingStatus.RETURNERT)

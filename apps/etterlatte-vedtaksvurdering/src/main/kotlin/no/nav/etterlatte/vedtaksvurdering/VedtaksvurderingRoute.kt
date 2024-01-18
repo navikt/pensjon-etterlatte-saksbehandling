@@ -60,18 +60,6 @@ fun Route.vedtaksvurderingRoute(
             }
         }
 
-        get("/{$BEHANDLINGID_CALL_PARAMETER}/ny") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
-                logger.info("Henter vedtak for behandling $behandlingId")
-                val vedtak = vedtakService.hentVedtakMedBehandlingId(behandlingId)
-                if (vedtak == null) {
-                    call.response.status(HttpStatusCode.NotFound)
-                } else {
-                    call.respond(vedtak.toNyDto())
-                }
-            }
-        }
-
         get("/{$BEHANDLINGID_CALL_PARAMETER}/sammendrag") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter sammendrag av vedtak for behandling $behandlingId")
@@ -112,7 +100,7 @@ fun Route.vedtaksvurderingRoute(
                     rapidService.sendToRapid(attestert)
                 } catch (e: Exception) {
                     logger.error(
-                        "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.vedtakId} " +
+                        "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.id} " +
                             "Saknr: ${attestert.vedtak.sak.id}. " +
                             "Det betyr at vi ikke sender ut brev for vedtaket eller at en utbetaling går til oppdrag. " +
                             "Denne hendelsen må sendes ut manuelt straks.",

@@ -16,9 +16,9 @@ import {
   YtelseFilterKeys,
 } from '~components/oppgavebenk/Oppgavelistafiltre'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
 import { FlexRow } from '~shared/styled'
 import { OppgaveDTO } from '~shared/api/oppgaver'
+import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
 
 interface Props {

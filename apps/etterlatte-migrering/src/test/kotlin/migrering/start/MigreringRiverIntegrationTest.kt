@@ -227,6 +227,7 @@ internal class MigreringRiverIntegrationTest {
                         )
                         LagreKoblingRiver(this, repository)
                         LyttPaaIverksattVedtakRiver(this, repository, penKlient, featureToggleService)
+                        LyttPaaDistribuerBrevRiver(this, repository)
                     }
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
@@ -271,7 +272,18 @@ internal class MigreringRiverIntegrationTest {
                 ).toJson(),
             )
             verify { runBlocking { penKlient.opphoerSak(pesysId) } }
-            assertEquals(repository.hentStatus(pesysId.id), Migreringsstatus.FERDIG)
+            assertEquals(Migreringsstatus.UTBETALING_OK, repository.hentStatus(pesysId.id))
+
+            inspector.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        EVENT_NAME_KEY to "BREV:DISTRIBUERT",
+                        "bestillingsId" to UUID.randomUUID().toString(),
+                        "vedtak" to VedtakMock(behandlingId = behandlingId),
+                    ),
+                ).toJson(),
+            )
+            assertEquals(Migreringsstatus.FERDIG, repository.hentStatus(pesysId.id))
         }
     }
 
@@ -621,3 +633,5 @@ private fun komplisertVergemaal(): List<OpplysningDTO<VergemaalEllerFremtidsfull
 
 private fun opplysningDTO(vergemaalEllerFremtidsfullmakt1: VergemaalEllerFremtidsfullmakt) =
     mockk<OpplysningDTO<VergemaalEllerFremtidsfullmakt>> { every { verdi } returns vergemaalEllerFremtidsfullmakt1 }
+
+data class VedtakMock(val behandlingId: UUID)

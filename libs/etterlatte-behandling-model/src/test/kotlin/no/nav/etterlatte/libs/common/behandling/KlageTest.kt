@@ -10,7 +10,7 @@ class KlageTest {
     @Test
     fun `oppdaterFormkrav sjekker at klagen har en status som kan oppdateres`() {
         val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = "1337")
-        val klage = Klage.ny(sak)
+        val klage = Klage.ny(sak, null)
 
         val oppdatertKlage =
             assertDoesNotThrow {
@@ -28,7 +28,7 @@ class KlageTest {
     @Test
     fun `oppdaterFormkrav setter riktig status på klagen basert på formkravene`() {
         val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = "1337")
-        val klage = Klage.ny(sak)
+        val klage = Klage.ny(sak, null)
         val klageMedFormkravOppfylt = klage.oppdaterFormkrav(alleFormkravOppfylt(), "en saksbehandler")
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, klageMedFormkravOppfylt.status)
 
@@ -39,7 +39,7 @@ class KlageTest {
     @Test
     fun `oppdaterFormkrav setter status tilbake fra vurdert hvis formkrav oppdateres`() {
         val sak = Sak(ident = "bruker", sakType = SakType.BARNEPENSJON, id = 1, enhet = "1337")
-        val klage = Klage.ny(sak).copy(status = KlageStatus.UTFALL_VURDERT)
+        val klage = Klage.ny(sak, null).copy(status = KlageStatus.UTFALL_VURDERT)
         val klageMedFormkravOppfylt = klage.oppdaterFormkrav(alleFormkravOppfylt(), "en saksbehandler")
         Assertions.assertEquals(KlageStatus.FORMKRAV_OPPFYLT, klageMedFormkravOppfylt.status)
     }

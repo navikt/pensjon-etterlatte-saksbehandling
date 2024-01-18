@@ -25,8 +25,6 @@ class Grunnlag(
 
     fun hentPotensiellGjenlevende(): Grunnlagsdata<JsonNode>? = hentFamiliemedlemNullable(PersonRolle.GJENLEVENDE)
 
-    fun hentGjenlevende(): Grunnlagsdata<JsonNode> = hentFamiliemedlem(PersonRolle.GJENLEVENDE)
-
     fun hentAvdoede(): List<Grunnlagsdata<JsonNode>> = hentFamiliemedlemmer(PersonRolle.AVDOED)
 
     @Deprecated(

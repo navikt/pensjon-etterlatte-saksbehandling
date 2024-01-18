@@ -58,6 +58,9 @@ import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
+import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
+import no.nav.etterlatte.rivers.StartBrevgenereringRepository
+import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
@@ -134,6 +137,8 @@ class ApplicationBuilder {
     private val datasource = DataSourceBuilder.createDataSource(env)
     private val db = BrevRepository(datasource)
 
+    private val brevgenereringRepository = StartBrevgenereringRepository(datasource)
+
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
 
     private val dokarkivKlient = DokarkivKlient(httpClient("DOKARKIV_SCOPE"), env.requireEnvValue("DOKARKIV_URL"))
@@ -197,16 +202,29 @@ class ApplicationBuilder {
             }
             .build()
             .apply {
+                val brevgenerering =
+                    StartInformasjonsbrevgenereringRiver(
+                        brevgenereringRepository,
+                        this,
+                    )
                 register(
                     object : RapidsConnection.StatusListener {
                         override fun onStartup(rapidsConnection: RapidsConnection) {
                             datasource.migrate()
+                            brevgenerering.init()
                         }
                     },
                 )
                 OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
                 FiksEnkeltbrevRiver(this, vedtaksvurderingService)
                     .also { fiksEnkeltbrev() }
+                OpprettJournalfoerOgDistribuerRiver(
+                    this,
+                    brevoppretter,
+                    pdfGenerator,
+                    journalfoerBrevService,
+                    brevdistribuerer,
+                )
 
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)

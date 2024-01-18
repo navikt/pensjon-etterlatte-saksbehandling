@@ -22,7 +22,6 @@ data class Vilkaar(
     val hovedvilkaar: Delvilkaar,
     val unntaksvilkaar: List<Delvilkaar> = emptyList(),
     val vurdering: VilkaarVurderingData? = null,
-    val grunnlag: List<Vilkaarsgrunnlag<out Any?>> = emptyList(),
     val id: UUID = UUID.randomUUID(),
 )
 

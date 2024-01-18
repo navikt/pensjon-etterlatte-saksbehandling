@@ -35,9 +35,9 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -254,7 +254,7 @@ internal class BrevdataFacadeImplTest {
         }
 
     private fun opprettBehandlingVedtak() =
-        mockk<VedtakNyDto> {
+        mockk<VedtakDto> {
             every { type } returns VedtakType.INNVILGELSE
             every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
             every { id } returns 123L
@@ -272,7 +272,7 @@ internal class BrevdataFacadeImplTest {
         }
 
     private fun opprettTilbakekrevingVedtak(vedtakInnhold: Tilbakekreving = tilbakekreving()) =
-        mockk<VedtakNyDto> {
+        mockk<VedtakDto> {
             every { type } returns VedtakType.TILBAKEKREVING
             every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
             every { id } returns 123L

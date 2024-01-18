@@ -41,7 +41,7 @@ internal class OpprettVedtaksbrevForMigreringRiver(
         val sakId = packet["vedtak.sak.id"].asLong()
         logger.info("Oppretter vedtaksbrev i sak $sakId")
         val behandlingId = UUID.fromString(packet["vedtak.behandlingId"].asText())
-        val brukerTokenInfo = Systembruker("migrering", "migrering")
+        val brukerTokenInfo = Systembruker.migrering
         runBlocking {
             val hendelseData = packet.hendelseData
             val migreringBrevRequest =

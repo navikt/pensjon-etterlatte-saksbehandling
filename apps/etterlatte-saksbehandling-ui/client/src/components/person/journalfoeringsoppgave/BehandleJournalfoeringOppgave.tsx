@@ -19,6 +19,10 @@ import OpprettNyBehandling from '~components/person/journalfoeringsoppgave/nybeh
 import OppsummeringOppgavebehandling from '~components/person/journalfoeringsoppgave/nybehandling/OppsummeringOppgavebehandling'
 import FerdigstillOppgave from '~components/person/journalfoeringsoppgave/ferdigstilloppgave/FerdigstillOppgave'
 import { kanEndreJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/validering'
+import OpprettKlagebehandling from '~components/person/journalfoeringsoppgave/oppretteklage/OpprettKlagebehandling'
+import OppsummeringKlagebehandling from '~components/person/journalfoeringsoppgave/oppretteklage/OppsummeringKlagebehandling'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 
 export default function BehandleJournalfoeringOppgave() {
   const { nyBehandlingRequest, journalpost, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -26,6 +30,7 @@ export default function BehandleJournalfoeringOppgave() {
 
   const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
   const [sakStatus, apiHentSak] = useApiCall(hentSakMedBehandlnger)
+  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   const { id: oppgaveId } = useParams()
 
@@ -79,6 +84,12 @@ export default function BehandleJournalfoeringOppgave() {
                     <Route index element={<OpprettNyBehandling />} />
                     <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
                   </Route>
+                  {kanBrukeKlage && (
+                    <Route path="oppretteklage">
+                      <Route index element={<OpprettKlagebehandling />} />
+                      <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
+                    </Route>
+                  )}
 
                   <Route path="ferdigstill" element={<FerdigstillOppgave />} />
                 </Routes>

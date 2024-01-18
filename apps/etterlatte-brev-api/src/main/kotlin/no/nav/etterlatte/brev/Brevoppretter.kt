@@ -4,6 +4,7 @@ import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -11,6 +12,7 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.Mottaker
@@ -55,16 +57,22 @@ class Brevoppretter(
             }
         }
 
-        return opprettBrev(sakId, behandlingId, brukerTokenInfo, automatiskMigreringRequest)
+        return opprettBrev(
+            sakId = sakId,
+            behandlingId = behandlingId,
+            bruker = brukerTokenInfo,
+            automatiskMigreringRequest = automatiskMigreringRequest,
+        ).first
     }
 
     suspend fun opprettBrev(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
+        brevKode: EtterlatteBrevKode? = null,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
-    ): Brev =
-        with(hentInnData(sakId, behandlingId, bruker, automatiskMigreringRequest)) {
+    ): Pair<Brev, GenerellBrevData> =
+        with(hentInnData(sakId, behandlingId, bruker, brevKode, automatiskMigreringRequest)) {
             val nyttBrev =
                 OpprettNyttBrev(
                     sakId = sakId,
@@ -76,17 +84,18 @@ class Brevoppretter(
                     innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
                 )
-            return db.opprettBrev(nyttBrev)
+            return Pair(db.opprettBrev(nyttBrev), generellBrevData)
         }
 
     suspend fun hentNyttInnhold(
         sakId: Long,
         brevId: Long,
-        behandlingId: UUID,
+        behandlingId: UUID?,
         bruker: BrukerTokenInfo,
+        brevKode: EtterlatteBrevKode? = null,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): BrevService.BrevPayload =
-        with(hentInnData(sakId, behandlingId, bruker, automatiskMigreringRequest)) {
+        with(hentInnData(sakId, behandlingId, bruker, brevKode, automatiskMigreringRequest)) {
             if (innhold.payload != null) {
                 db.oppdaterPayload(brevId, innhold.payload)
             }
@@ -105,6 +114,7 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
+        brevKode: EtterlatteBrevKode?,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): OpprettBrevRequest {
         val generellBrevData =
@@ -113,8 +123,26 @@ class Brevoppretter(
         val prosessType =
             brevProsessTypeFactory.fra(generellBrevData)
 
+        val brevkode: (mapper: BrevKodeMapper, g: GenerellBrevData) -> EtterlatteBrevKode =
+            if (brevKode != null) {
+                { _, _ -> brevKode }
+            } else {
+                { mapper, data ->
+                    mapper.brevKode(data, BrevProsessType.REDIGERBAR).redigering
+                }
+            }
+
         val innhold =
-            opprettInnhold(RedigerbarTekstRequest(generellBrevData, bruker, prosessType, automatiskMigreringRequest))
+            opprettInnhold(
+                RedigerbarTekstRequest(
+                    generellBrevData,
+                    bruker,
+                    prosessType,
+                    brevkode,
+                    automatiskMigreringRequest,
+                ),
+                brevKode?.tittel,
+            )
 
         val innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType)
         return OpprettBrevRequest(generellBrevData, prosessType, innhold, innholdVedlegg)
@@ -140,9 +168,11 @@ class Brevoppretter(
         return db.hentBrevForBehandling(behandlingId)
     }
 
-    private suspend fun opprettInnhold(redigerbarTekstRequest: RedigerbarTekstRequest): BrevInnhold {
-        val tittel = redigerbarTekstRequest.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler"
-
+    private suspend fun opprettInnhold(
+        redigerbarTekstRequest: RedigerbarTekstRequest,
+        muligTittel: String?,
+    ): BrevInnhold {
+        val tittel = muligTittel ?: (redigerbarTekstRequest.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
         val payload =
             when (redigerbarTekstRequest.prosessType) {
                 BrevProsessType.REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest)

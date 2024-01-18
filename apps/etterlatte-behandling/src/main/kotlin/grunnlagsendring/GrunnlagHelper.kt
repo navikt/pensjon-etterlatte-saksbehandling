@@ -20,7 +20,7 @@ fun Grunnlag.doedsdato(
         hentAvdoede().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentDoedsdato()
     }
     Saksrolle.GJENLEVENDE -> {
-        hentGjenlevende().hentDoedsdato()
+        hentPotensiellGjenlevende()?.hentDoedsdato()
     }
 
     Saksrolle.SOEKER -> {
@@ -45,7 +45,7 @@ fun Grunnlag.bostedsadresse(
     }
 
     Saksrolle.GJENLEVENDE -> {
-        hentGjenlevende().hentBostedsadresse()
+        hentPotensiellGjenlevende()?.hentBostedsadresse()
     }
 
     Saksrolle.SOEKER -> {
@@ -108,7 +108,7 @@ fun Grunnlag.utland(
         hentAvdoede().find { it.hentFoedselsnummer()?.verdi?.value == fnr }?.hentUtland()?.verdi
     }
     Saksrolle.GJENLEVENDE -> {
-        hentGjenlevende().hentUtland()?.verdi
+        hentPotensiellGjenlevende()?.hentUtland()?.verdi
     }
     else -> throw GrunnlagRolleException(
         "Proevde aa finne utland for $saksrolle, men det skal ikke kunne skje",
@@ -131,7 +131,7 @@ fun Grunnlag.sivilstand(saksrolle: Saksrolle) =
             soeker.hentSivilstand()?.verdi
         }
         Saksrolle.GJENLEVENDE -> {
-            hentGjenlevende().hentSivilstand()?.verdi
+            hentPotensiellGjenlevende()?.hentSivilstand()?.verdi
         }
         Saksrolle.AVDOED -> {
             // first er helt ok her, siden vi kun er interessert når vi er i OMS land og skal da ha kun

@@ -5,7 +5,7 @@ import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -36,7 +36,7 @@ internal class AttestertVedtakRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        val vedtak = objectMapper.readValue<VedtakNyDto>(packet["vedtak"].toJson())
+        val vedtak = objectMapper.readValue<VedtakDto>(packet["vedtak"].toJson())
         logger.info("Behandle til_samordning for vedtak [behandlingId=${vedtak.behandlingId}]")
 
         try {

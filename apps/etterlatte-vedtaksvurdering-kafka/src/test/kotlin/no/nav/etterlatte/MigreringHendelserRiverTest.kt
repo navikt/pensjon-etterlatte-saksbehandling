@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -108,14 +107,18 @@ class MigreringHendelserRiverTest {
         val vedtakDto =
             VedtakDto(
                 123,
+                UUID.fromString(behandlingId),
                 VedtakStatus.OPPRETTET,
-                YearMonth.now(),
                 VedtakSak("1", SakType.BARNEPENSJON, 1),
-                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, UUID.fromString(behandlingId)),
                 VedtakType.INNVILGELSE,
                 null,
                 null,
-                listOf(),
+                innhold =
+                    VedtakInnholdDto.VedtakBehandlingDto(
+                        YearMonth.now(),
+                        Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, UUID.fromString(behandlingId)),
+                        listOf(),
+                    ),
             )
         val vedtakOgRapid =
             VedtakOgRapid(
@@ -123,7 +126,7 @@ class MigreringHendelserRiverTest {
                 RapidInfo(
                     vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
                     vedtak =
-                        VedtakNyDto(
+                        VedtakDto(
                             123,
                             UUID.fromString(behandlingId),
                             VedtakStatus.OPPRETTET,

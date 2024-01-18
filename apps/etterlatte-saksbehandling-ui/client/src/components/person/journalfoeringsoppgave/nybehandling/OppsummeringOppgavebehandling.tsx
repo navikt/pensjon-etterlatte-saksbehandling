@@ -53,7 +53,7 @@ export default function OppsummeringOppgavebehandling() {
         <Info label="Innsender" tekst={persongalleri.innsender || <i>Ikke oppgitt</i>} />
 
         {oppgave.sakType === SakType.BARNEPENSJON &&
-          persongalleri.gjenlevende!!.map((gjenlevende) => (
+          persongalleri.gjenlevende?.map((gjenlevende) => (
             <Info key={gjenlevende} label="Gjenlevende" tekst={gjenlevende || ''} />
           ))}
 

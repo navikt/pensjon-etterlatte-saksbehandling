@@ -33,6 +33,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
+import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabalUtenBrev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
@@ -318,6 +319,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                 referanse = behandlingId.toString(),
                             ),
                         vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "Saksbehandler01", null),
+                        vedtakType = VedtakType.INNVILGELSE,
                     ),
                 )
             }.also {
@@ -361,6 +363,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                 referanse = behandlingId.toString(),
                             ),
                         vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), saksbehandler02, null, null),
+                        vedtakType = VedtakType.INNVILGELSE,
                     ),
                 )
             }.also {
@@ -406,6 +409,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             val klage: Klage =
                 client.post("/api/klage/opprett/${sak.id}") {
                     addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(InnkommendeKlage(mottattDato = LocalDate.now(), journalpostId = "123546", innsender = "en innsender"))
                 }.body()
             val medOppdatertFormkrav: Klage =
                 client.put("/api/klage/${klage.id}/formkrav") {

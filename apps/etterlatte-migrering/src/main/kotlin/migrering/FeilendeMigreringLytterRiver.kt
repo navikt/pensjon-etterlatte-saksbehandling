@@ -34,7 +34,7 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
             validate { it.interestedIn(FEILENDE_STEG) }
             validate { it.requireKey(KILDE_KEY) }
             validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
-            validate { it.interestedIn("vedtak.behandling.id") }
+            validate { it.interestedIn("vedtak.behandlingId") }
             validate { it.interestedIn(BEHANDLING_ID_KEY) }
             validate { it.interestedIn(PESYS_ID_KEY) }
             validate { it.interestedIn(HENDELSE_DATA_KEY) }
@@ -83,8 +83,8 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
             )
         } else if (packet.harVerdi(BEHANDLING_ID_KEY)) {
             repository.hentPesysId(packet.behandlingId)!!.let { Pair(it.pesysId, it.behandlingId) }
-        } else if (packet.harVerdi("vedtak.behandling.id")) {
-            val id = packet["vedtak.behandling.id"].asText().toUUID()
+        } else if (packet.harVerdi("vedtak.behandlingId")) {
+            val id = packet["vedtak.behandlingId"].asText().toUUID()
             repository.hentPesysId(id)
                 ?.let { Pair(it.pesysId, it.behandlingId) }
                 ?: Pair(null, id).also { logger.warn("Mangler pesys-identifikator for behandling $id") }

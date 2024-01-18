@@ -10,6 +10,8 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
+import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -20,6 +22,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -51,6 +54,13 @@ interface BehandlingService {
     fun migrer(hendelse: MigreringRequest): BehandlingOgSak
 
     fun avbryt(behandlingId: UUID): HttpResponse
+
+    fun finnEllerOpprettSak(
+        sakType: SakType,
+        foedselsNummerMedGraderingDTO: FoedselsNummerMedGraderingDTO,
+    ): Sak
+
+    fun hentBehandling(behandlingId: UUID): DetaljertBehandling
 }
 
 data class ReguleringFeiletHendelse(val sakId: Long)
@@ -167,6 +177,21 @@ class BehandlingServiceImpl(
             behandlingKlient.put("$url/migrering/$behandlingId/avbryt") {
                 contentType(ContentType.Application.Json)
             }
+        }
+
+    override fun finnEllerOpprettSak(
+        sakType: SakType,
+        foedselsNummerMedGraderingDTO: FoedselsNummerMedGraderingDTO,
+    ) = runBlocking {
+        behandlingKlient.post("$url/personer/saker/${sakType.name}") {
+            contentType(ContentType.Application.Json)
+            setBody(foedselsNummerMedGraderingDTO)
+        }.body<Sak>()
+    }
+
+    override fun hentBehandling(behandlingId: UUID): DetaljertBehandling =
+        runBlocking {
+            behandlingKlient.get("$url/behandlinger/$behandlingId").body()
         }
 }
 

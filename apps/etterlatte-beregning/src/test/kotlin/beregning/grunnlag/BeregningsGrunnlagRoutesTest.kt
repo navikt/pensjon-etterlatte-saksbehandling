@@ -35,11 +35,13 @@ import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
+import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -47,8 +49,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
-import java.time.Month
-import java.time.YearMonth
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -116,7 +116,7 @@ internal class BeregningsGrunnlagRoutesTest {
         val sakId = 123L
         val virkRevurdering =
             Virkningstidspunkt(
-                dato = YearMonth.of(2023, Month.JANUARY),
+                dato = REFORM_TIDSPUNKT_BP,
                 kilde =
                     Grunnlagsopplysning.Saksbehandler(
                         ident = "",
@@ -274,7 +274,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 virkningstidspunkt =
                     Virkningstidspunkt(
-                        YearMonth.of(2023, 1),
+                        REFORM_TIDSPUNKT_BP,
                         kilde =
                             Grunnlagsopplysning.Saksbehandler(
                                 ident = "",
@@ -334,7 +334,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 virkningstidspunkt =
                     Virkningstidspunkt(
-                        YearMonth.of(2023, 1),
+                        REFORM_TIDSPUNKT_BP,
                         kilde =
                             Grunnlagsopplysning.Saksbehandler(
                                 ident = "",
@@ -360,13 +360,23 @@ internal class BeregningsGrunnlagRoutesTest {
                         jackson { registerModule(JavaTimeModule()) }
                     }
                 }
-
+            val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> =
+                listOf(
+                    GrunnlagMedPeriode(
+                        fom = LocalDate.of(2022, 8, 1),
+                        tom = null,
+                        data =
+                            listOf(
+                                SoeskenMedIBeregning(HELSOESKEN_FOEDSELSNUMMER, true),
+                            ),
+                    ),
+                )
             client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 header(HttpHeaders.Authorization, "Bearer $token")
                 setBody(
                     BarnepensjonBeregningsGrunnlag(
-                        emptyList(),
+                        soeskenMedIBeregning,
                         emptyList(),
                     ),
                 )

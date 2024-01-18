@@ -97,7 +97,7 @@ enum class LanguageCode {
     }
 }
 
-enum class EtterlatteBrevKode {
+enum class EtterlatteBrevKode(val tittel: String? = null) {
     BARNEPENSJON_AVSLAG,
     BARNEPENSJON_AVSLAG_ENKEL,
     BARNEPENSJON_INNVILGELSE,
@@ -119,11 +119,13 @@ enum class EtterlatteBrevKode {
     BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
     BARNEPENSJON_VEDTAK_OMREGNING,
     BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
+    OMREGNING_INFORMASJON,
     TILBAKEKREVING_INNHOLD,
     TILBAKEKREVING_FERDIG,
     TOM_DELMAL,
     TOM_MAL_INFORMASJONSBREV,
     TOM_MAL,
+    UTSATT_KLAGEFRIST("Informasjon om barnepensjon fra 1. januar 2024"),
 }
 
 data class SoekerOgEventuellVerge(val soeker: Soeker, val verge: Verge?)

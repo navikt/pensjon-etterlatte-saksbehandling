@@ -99,7 +99,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     opprettetVedtak.toDto(),
                     RapidInfo(
                         VedtakKafkaHendelseType.FATTET,
-                        opprettetVedtak.toNyDto(),
+                        opprettetVedtak.toDto(),
                         Tidspunkt.now(),
                         behandlingId,
                     ),
@@ -122,7 +122,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     opprettetVedtak.toDto(),
                     RapidInfo(
                         VedtakKafkaHendelseType.ATTESTERT,
-                        opprettetVedtak.toNyDto(),
+                        opprettetVedtak.toDto(),
                         Tidspunkt.now(),
                         behandlingId,
                     ),
@@ -148,7 +148,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     deserialize<VedtakOgRapid>(it.bodyAsText())
                 }
 
-            assertEquals(respons.vedtak.vedtakId, opprettetVedtak.id)
+            assertEquals(respons.vedtak.id, opprettetVedtak.id)
             assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseType.FATTET)
             assertEquals(respons.rapidInfo2!!.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
 
@@ -180,7 +180,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         opprettetVedtak.toDto(),
                         RapidInfo(
                             VedtakKafkaHendelseType.FATTET,
-                            opprettetVedtak.toNyDto(),
+                            opprettetVedtak.toDto(),
                             Tidspunkt.now(),
                             behandlingId,
                         ),
@@ -203,7 +203,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         opprettetVedtak.toDto(),
                         RapidInfo(
                             VedtakKafkaHendelseType.ATTESTERT,
-                            opprettetVedtak.toNyDto(),
+                            opprettetVedtak.toDto(),
                             Tidspunkt.now(),
                             behandlingId,
                         ),
@@ -231,7 +231,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         deserialize<VedtakOgRapid>(it.bodyAsText())
                     }
 
-                assertEquals(respons.vedtak.vedtakId, opprettetVedtak.id)
+                assertEquals(respons.vedtak.id, opprettetVedtak.id)
                 assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseType.FATTET)
                 assertEquals(respons.rapidInfo2!!.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
 
@@ -260,7 +260,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         opprettetVedtak.toDto(),
                         RapidInfo(
                             VedtakKafkaHendelseType.FATTET,
-                            opprettetVedtak.toNyDto(),
+                            opprettetVedtak.toDto(),
                             Tidspunkt.now(),
                             behandlingId,
                         ),
@@ -292,7 +292,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         deserialize<VedtakOgRapid>(it.bodyAsText())
                     }
 
-                assertEquals(respons.vedtak.vedtakId, opprettetVedtak.id)
+                assertEquals(respons.vedtak.id, opprettetVedtak.id)
 
                 coVerify(exactly = 1) {
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
@@ -325,7 +325,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         opprettetVedtak.toDto(),
                         RapidInfo(
                             VedtakKafkaHendelseType.ATTESTERT,
-                            opprettetVedtak.toNyDto(),
+                            opprettetVedtak.toDto(),
                             Tidspunkt.now(),
                             behandlingId,
                         ),
@@ -351,7 +351,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         deserialize<VedtakOgRapid>(it.bodyAsText())
                     }
 
-                assertEquals(respons.vedtak.vedtakId, opprettetVedtak.id)
+                assertEquals(respons.vedtak.id, opprettetVedtak.id)
 
                 coVerify(exactly = 1) {
                     vedtakService.attesterVedtak(behandlingId, any(), any(), Fagsaksystem.EY.navn)

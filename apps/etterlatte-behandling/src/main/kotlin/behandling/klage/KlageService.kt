@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.klienter.KlageKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
+import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
@@ -32,7 +33,10 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 interface KlageService {
-    fun opprettKlage(sakId: Long): Klage
+    fun opprettKlage(
+        sakId: Long,
+        innkommendeKlage: InnkommendeKlage,
+    ): Klage
 
     fun hentKlage(id: UUID): Klage?
 
@@ -71,10 +75,13 @@ class KlageServiceImpl(
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun opprettKlage(sakId: Long): Klage {
+    override fun opprettKlage(
+        sakId: Long,
+        innkommendeKlage: InnkommendeKlage,
+    ): Klage {
         val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
 
-        val klage = Klage.ny(sak)
+        val klage = Klage.ny(sak, innkommendeKlage)
         logger.info("Oppretter klage med id=${klage.id} på sak med id=$sakId")
 
         klageDao.lagreKlage(klage)
@@ -296,8 +303,7 @@ class KlageServiceImpl(
                         // TODO: Håndter verge
                         vergeEllerFullmektig = null,
                         journalpostInnstillingsbrev = journalpostId,
-                        // TODO: koble på når vi har inngang til klage
-                        journalpostKlage = null,
+                        journalpostKlage = klage.innkommendeDokument?.journalpostId,
                         // TODO: koble på når vi har journalpost soeknad inn
                         journalpostSoeknad = null,
                         // TODO: hent ut vedtaksbrev for vedtaket

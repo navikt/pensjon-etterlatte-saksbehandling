@@ -221,7 +221,7 @@ internal class VilkaarsvurderingServiceTest {
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
-        vilkaarsvurdering.vilkaar shouldHaveSize 10
+        vilkaarsvurdering.vilkaar shouldHaveSize 11
     }
 
     @Test

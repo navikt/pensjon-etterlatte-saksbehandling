@@ -34,17 +34,19 @@ class BrevbakerService(
 
     suspend fun hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest: RedigerbarTekstRequest): Slate {
         val request =
-            BrevbakerRequest.fra(
-                redigerbarTekstRequest.brevkode(brevKodeMapper, redigerbarTekstRequest.generellBrevData),
-                brevDataMapper.brevData(redigerbarTekstRequest),
-                adresseService.hentAvsender(
-                    redigerbarTekstRequest.generellBrevData.avsenderRequest(redigerbarTekstRequest.brukerTokenInfo),
-                ),
-                redigerbarTekstRequest.generellBrevData.personerISak.soekerOgEventuellVerge(),
-                redigerbarTekstRequest.generellBrevData.sak.id,
-                redigerbarTekstRequest.generellBrevData.spraak,
-                redigerbarTekstRequest.generellBrevData.sak.sakType,
-            )
+            with(redigerbarTekstRequest) {
+                BrevbakerRequest.fra(
+                    brevkode(brevKodeMapper, generellBrevData),
+                    brevDataMapper.brevData(this),
+                    adresseService.hentAvsender(
+                        generellBrevData.avsenderRequest(brukerTokenInfo),
+                    ),
+                    generellBrevData.personerISak.soekerOgEventuellVerge(),
+                    generellBrevData.sak.id,
+                    generellBrevData.spraak,
+                    generellBrevData.sak.sakType,
+                )
+            }
         val brevbakerResponse = brevbakerKlient.genererJSON(request)
         return BlockTilSlateKonverterer.konverter(brevbakerResponse)
     }

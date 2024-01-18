@@ -12,11 +12,14 @@ import { FlexRow } from '~shared/styled'
 import { FristWrapper } from '~components/nyoppgavebenk/FristWrapper'
 import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { FormWrapper } from '../BehandleJournalfoeringOppgave'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 
 export default function StartOppgavebehandling({ antallBehandlinger }: { antallBehandlinger: number }) {
   const { oppgave, journalpost, oppgaveHandling } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   const neste = () => {
     switch (oppgaveHandling) {
@@ -24,6 +27,12 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
         return navigate('nybehandling', { relative: 'path' })
       case OppgaveHandling.FERDIGSTILL_OPPGAVE:
         return navigate('ferdigstill', { relative: 'path' })
+      case OppgaveHandling.NY_KLAGE:
+        if (kanBrukeKlage) {
+          return navigate('oppretteklage', { relative: 'path' })
+        } else {
+          return navigate('../', { relative: 'path' })
+        }
     }
   }
 
@@ -94,6 +103,11 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
         >
           Ferdigstill oppgaven
         </Radio>
+        {kanBrukeKlage && (
+          <Radio value={OppgaveHandling.NY_KLAGE} description="Opprett ny klagebehandling">
+            Opprett klagebehandling
+          </Radio>
+        )}
       </RadioGroup>
 
       <div>

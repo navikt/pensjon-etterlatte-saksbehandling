@@ -44,7 +44,7 @@ internal class KlageDaoImplTest {
     @Test
     fun `lagreKlage oppdaterer status og formkrav hvis klagen allerede eksisterer`() {
         val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = "1337")
-        val klage = Klage.ny(sak)
+        val klage = Klage.ny(sak, null)
         klageDao.lagreKlage(klage)
 
         val foersteHentedeKlage = klageDao.hentKlage(klage.id)
@@ -86,7 +86,7 @@ internal class KlageDaoImplTest {
     fun `lagreKlage oppdaterer ikke opprettet tidspunkt eller saken hvis klagen allerede eksisterer`() {
         val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = "1337")
         val sak2 = sakRepo.opprettSak(fnr = "en annen bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "3137")
-        val klage = Klage.ny(sak)
+        val klage = Klage.ny(sak, null)
         klageDao.lagreKlage(klage)
 
         val foersteHentedeKlage = klageDao.hentKlage(klage.id)

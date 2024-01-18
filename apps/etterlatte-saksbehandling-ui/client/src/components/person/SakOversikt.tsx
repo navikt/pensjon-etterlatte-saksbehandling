@@ -5,9 +5,8 @@ import Spinner from '~shared/Spinner'
 import RelevanteHendelser from '~components/person/uhaandtereHendelser/RelevanteHendelser'
 import { Alert, BodyShort, Heading, HelpText, HStack, Tag } from '@navikt/ds-react'
 import { formaterEnumTilLesbarString, formaterSakstype, formaterStringDato } from '~utils/formattering'
-import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE, OpprettKlage } from '~components/person/OpprettKlage'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
-import { KlageListe } from '~components/person/KlageListe'
+import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE, KlageListe } from '~components/person/KlageListe'
 import { tagColors } from '~shared/Tags'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { isSuccess, mapApiResult, Result } from '~shared/api/apiUtils'
@@ -15,8 +14,7 @@ import { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { EndreEnhet } from '~components/person/EndreEnhet'
-import { hentNavkontorForPerson } from '~shared/api/sak'
-import { hentFlyktningStatusForSak } from '~shared/api/sak'
+import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
@@ -56,10 +54,6 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
                     </Tag>
                   )}
                 </HStack>
-
-                <FlexRow justify="right">
-                  <OpprettKlage sakId={sakOgBehandlinger.sak.id} />
-                </FlexRow>
               </Heading>
               {isSuccess(hentFlyktningStatus) && hentFlyktningStatus.data?.erFlyktning && (
                 <>

@@ -1,8 +1,8 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { Formkrav, Klage, KlageUtfallUtenBrev } from '~shared/types/Klage'
+import { Formkrav, Klage, KlageUtfallUtenBrev, NyKlageRequest } from '~shared/types/Klage'
 
-export function opprettNyKlage(sakId: number): Promise<ApiResponse<Klage>> {
-  return apiClient.post(`/klage/opprett/${sakId}`, {})
+export function opprettNyKlage(nyKlageRequest: NyKlageRequest): Promise<ApiResponse<Klage>> {
+  return apiClient.post(`/klage/opprett/${nyKlageRequest.sakId}`, { ...nyKlageRequest })
 }
 
 export function hentKlage(klageId: string): Promise<ApiResponse<Klage>> {

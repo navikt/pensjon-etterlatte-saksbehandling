@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.grunnlag.opplysningstyper
+package no.nav.etterlatte.opplysningerfrasoknad.opplysningstyper
 
 import no.nav.etterlatte.libs.common.innsendtsoeknad.OppholdUtlandType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke

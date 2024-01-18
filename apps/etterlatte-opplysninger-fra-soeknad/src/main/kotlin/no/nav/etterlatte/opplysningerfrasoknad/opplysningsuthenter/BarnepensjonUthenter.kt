@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.InnsenderSoeknad
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
@@ -28,6 +27,7 @@ import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoeknadstypeOpplysni
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Utbetalingsinformasjon
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.UtenlandsadresseBarn
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Verge
+import no.nav.etterlatte.opplysningerfrasoknad.opplysningstyper.AvdoedSoeknad
 import java.time.YearMonth
 import java.util.UUID
 

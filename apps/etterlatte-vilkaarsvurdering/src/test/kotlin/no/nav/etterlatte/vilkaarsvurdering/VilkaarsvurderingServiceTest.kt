@@ -119,8 +119,6 @@ internal class VilkaarsvurderingServiceTest {
 
     @Test
     fun `Skal opprette vilkaarsvurdering for foerstegangsbehandling barnepensjon med grunnlagsopplysninger`() {
-        val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
         val vilkaarsvurdering =
             runBlocking {
                 service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
@@ -143,7 +141,6 @@ internal class VilkaarsvurderingServiceTest {
 
     @Test
     fun `Ny vilkaarsvurdering for BP med virk fom 1-1-2024 skal ha vilkaar etter nytt regelverk`() {
-        val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             mockk<DetaljertBehandling>().apply {
                 every { id } returns UUID.randomUUID()

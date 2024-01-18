@@ -233,7 +233,7 @@ class RestModuleTest {
         assertFalse(Exception("Hello").erDeserialiseringsException())
         assertFalse(Exception("Hello", OutOfMemoryError()).erDeserialiseringsException())
 
-        val jacksonException = JsonMappingException("Error")
+        val jacksonException = JsonMappingException.from(objectMapper.deserializationContext, "Error")
         val wrappedException = java.lang.RuntimeException("Err", jacksonException)
 
         assertTrue(jacksonException.erDeserialiseringsException())

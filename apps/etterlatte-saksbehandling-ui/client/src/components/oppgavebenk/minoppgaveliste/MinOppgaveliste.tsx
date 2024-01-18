@@ -28,10 +28,7 @@ export const MinOppgaveliste = ({ oppgaver, oppdaterTildeling, hentOppgaver }: P
 
   return (
     <>
-      <VelgOppgavestatuser
-        oppgavestatuserValgt={oppgavestatuserValgt}
-        setOppgavestatuserValgt={setOppgavestatuserValgt}
-      />
+      <VelgOppgavestatuser value={oppgavestatuserValgt} onChange={setOppgavestatuserValgt} />
 
       {paginerteOppgaver.length > 0 ? (
         <>

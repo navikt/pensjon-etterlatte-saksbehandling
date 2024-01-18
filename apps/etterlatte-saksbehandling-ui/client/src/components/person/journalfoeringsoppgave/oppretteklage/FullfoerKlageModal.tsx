@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Alert, BodyLong, BodyShort, Button, Heading, Modal } from '@navikt/ds-react'
-import { SaktypeTag } from '~components/nyoppgavebenk/Tags'
+import { SaktypeTag } from '~components/oppgavebenk/Tags'
 import { ferdigstillOppgave, OppgaveDTO } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useNavigate } from 'react-router-dom'

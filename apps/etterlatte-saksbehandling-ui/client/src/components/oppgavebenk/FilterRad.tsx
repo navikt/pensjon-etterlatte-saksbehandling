@@ -104,8 +104,6 @@ export const FilterRad = ({ hentOppgaver, filter, setFilter, alleOppgaver }: Pro
         <VelgOppgavestatuser
           value={filter.oppgavestatusFilter}
           onChange={(oppgavestatusFilter) => setFilter({ ...filter, oppgavestatusFilter })}
-          // oppgavestatuserValgt={oppgavestatuserValgt}
-          // setOppgavestatuserValgt={setOppgavestatuserValgt}
         />
 
         <Select

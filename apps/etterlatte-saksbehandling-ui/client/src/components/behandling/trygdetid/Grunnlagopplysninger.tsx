@@ -21,16 +21,19 @@ const InfoWrapperWithGap = styled.div`
 export const Grunnlagopplysninger = ({
   trygdetid,
   onOppdatert,
+  redigerbar,
 }: {
   trygdetid: ITrygdetid
   onOppdatert: (trygdetid: ITrygdetid) => void
+  redigerbar: boolean
 }) => {
   const [oppdatertTrygdetid, oppdaterTrygdetidOpplysningsgrunnlag] = useApiCall(oppdaterOpplysningsgrunnlag)
+  const opplysningerDifferanse = redigerbar ? trygdetid.opplysningerDifferanse : null
 
   return (
     <>
-      {!trygdetid.opplysningerDifferanse?.differanse && <OpplysningerTabell opplysninger={trygdetid.opplysninger} />}
-      {trygdetid.opplysningerDifferanse?.differanse && (
+      {!opplysningerDifferanse && <OpplysningerTabell opplysninger={trygdetid.opplysninger} />}
+      {opplysningerDifferanse && (
         <>
           <WarningAlert>
             OBS! Grunnlaget for trygdetiden har blitt oppdatert siden sist. <br />
@@ -45,7 +48,7 @@ export const Grunnlagopplysninger = ({
           <Heading size="small" level="4">
             Nytt grunnlag
           </Heading>
-          <OpplysningerTabell opplysninger={trygdetid.opplysningerDifferanse.oppdaterteGrunnlagsopplysninger} />
+          <OpplysningerTabell opplysninger={opplysningerDifferanse.oppdaterteGrunnlagsopplysninger} />
           <Button
             loading={isPending(oppdatertTrygdetid)}
             variant="primary"

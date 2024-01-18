@@ -58,9 +58,9 @@ class Brevoppretter(
         }
 
         return opprettBrev(
-            sakId,
-            behandlingId,
-            brukerTokenInfo,
+            sakId = sakId,
+            behandlingId = behandlingId,
+            bruker = brukerTokenInfo,
             automatiskMigreringRequest = automatiskMigreringRequest,
         ).first
     }

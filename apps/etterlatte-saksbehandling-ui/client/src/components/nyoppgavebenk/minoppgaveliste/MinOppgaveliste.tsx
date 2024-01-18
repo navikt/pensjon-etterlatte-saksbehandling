@@ -1,20 +1,14 @@
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
-import { Pagination, Select, Table } from '@navikt/ds-react'
+import { Alert, Pagination, Table, UNSAFE_Combobox } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { HeaderPadding, PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
 import { filtrerOppgaveStatus, OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltre'
 import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
-import styled from 'styled-components'
 import { RedigerSaksbehandler } from '../tildeling/RedigerSaksbehandler'
-
-const SelectWrapper = styled.div`
-  margin: 2rem 2rem 2rem 0rem;
-  max-width: 20rem;
-`
 
 interface Props {
   oppgaver: OppgaveDTO[]
@@ -23,29 +17,41 @@ interface Props {
 }
 
 export const MinOppgaveliste = ({ oppgaver, hentOppgaver, oppdaterTildeling }: Props) => {
-  const [oppgavestatusFilter, setOppgavestatusFilter] = useState<string>('UNDER_BEHANDLING')
+  const [oppgavestatuserValgt, setOppgavestatuserValgt] = useState<Array<string>>(['UNDER_BEHANDLING'])
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
+  const [paginerteOppgaver, setPaginerteOppgaver] = useState<Array<OppgaveDTO>>(
+    filtrerOppgaveStatus(oppgavestatuserValgt, oppgaver)
+  )
 
-  const statusFiltrerteOppgaver = filtrerOppgaveStatus([oppgavestatusFilter], oppgaver)
-  let paginerteOppgaver = statusFiltrerteOppgaver
-  paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+  const onOppgavestatusSelected = (option: string, isSelected: boolean) => {
+    let nyOppgavestatusSelected: Array<string>
+
+    if (isSelected) {
+      nyOppgavestatusSelected = [...oppgavestatuserValgt, option]
+    } else {
+      nyOppgavestatusSelected = [...oppgavestatuserValgt.filter((val) => val !== option)]
+    }
+
+    setOppgavestatuserValgt(nyOppgavestatusSelected)
+  }
+
+  useEffect(() => {
+    let filtrerteOppgaver = filtrerOppgaveStatus(oppgavestatuserValgt, oppgaver)
+    filtrerteOppgaver = filtrerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+    setPaginerteOppgaver(filtrerteOppgaver)
+  }, [oppgavestatuserValgt, oppgaver])
 
   return (
     <>
-      <SelectWrapper>
-        <Select
-          label="Oppgavestatus"
-          value={oppgavestatusFilter}
-          onChange={(e) => setOppgavestatusFilter(e.target.value)}
-        >
-          {Object.entries(OPPGAVESTATUSFILTER).map(([status, statusbeskrivelse]) => (
-            <option key={status} value={status}>
-              {statusbeskrivelse}
-            </option>
-          ))}
-        </Select>
-      </SelectWrapper>
+      <UNSAFE_Combobox
+        label="Oppgavestatus"
+        options={OPPGAVESTATUSFILTER}
+        selectedOptions={oppgavestatuserValgt}
+        onToggleSelected={(option, isSelected) => onOppgavestatusSelected(option, isSelected)}
+        isMultiSelect
+      />
+
       {paginerteOppgaver.length > 0 ? (
         <div>
           <Table>
@@ -118,12 +124,12 @@ export const MinOppgaveliste = ({ oppgaver, hentOppgaver, oppdaterTildeling }: P
             <Pagination
               page={page}
               onPageChange={setPage}
-              count={Math.ceil(statusFiltrerteOppgaver.length / rowsPerPage)}
+              count={Math.ceil(paginerteOppgaver.length / rowsPerPage)}
               size="small"
             />
             <p>
               Viser {(page - 1) * rowsPerPage + 1} - {(page - 1) * rowsPerPage + paginerteOppgaver.length} av{' '}
-              {statusFiltrerteOppgaver.length} oppgaver
+              {paginerteOppgaver.length} oppgaver
             </p>
             <select
               value={rowsPerPage}
@@ -141,7 +147,7 @@ export const MinOppgaveliste = ({ oppgaver, hentOppgaver, oppdaterTildeling }: P
           </PaginationWrapper>
         </div>
       ) : (
-        <>Du har ingen oppgaver</>
+        <Alert variant="info">Du har ingen oppgaver</Alert>
       )}
     </>
   )

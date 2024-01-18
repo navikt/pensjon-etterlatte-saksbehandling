@@ -1,5 +1,5 @@
 import { Button, Select, TextField, UNSAFE_Combobox } from '@navikt/ds-react'
-import React, { useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import {
   ENHETFILTER,
   EnhetFilterKeys,
@@ -21,29 +21,29 @@ import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
 import { FlexRow } from '~shared/styled'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 
-export const FilterRad = (props: {
+interface Props {
   hentOppgaver: () => void
   filter: Filter
   setFilter: (filter: Filter) => void
   alleOppgaver: OppgaveDTO[]
-}) => {
-  const { hentOppgaver, filter, setFilter, alleOppgaver } = props
+}
 
+export const FilterRad = ({ hentOppgaver, filter, setFilter, alleOppgaver }: Props): ReactNode => {
   const saksbehandlere = new Set(
     alleOppgaver.map((oppgave) => oppgave.saksbehandler).filter((s): s is Exclude<typeof s, null> => s !== null)
   )
   const [saksbehandlerFilterLokal, setSaksbehandlerFilterLokal] = useState<string>(filter.saksbehandlerFilter)
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
-  const [oppgaveStatuserValgt, setOppgavestatuserValgt] = useState<Array<string>>(['NY', 'UNDER_BEHANDLING'])
+  const [oppgavestatuserValgt, setOppgavestatuserValgt] = useState<Array<string>>(['NY', 'UNDER_BEHANDLING'])
 
   const onOppgavestatusSelected = (option: string, isSelected: boolean) => {
-    let nyOppgavestatusSelected: Array<string> = []
+    let nyOppgavestatusSelected: Array<string>
 
     if (isSelected) {
-      nyOppgavestatusSelected = [...oppgaveStatuserValgt, option]
+      nyOppgavestatusSelected = [...oppgavestatuserValgt, option]
     } else {
-      nyOppgavestatusSelected = [...oppgaveStatuserValgt.filter((val) => val !== option)]
+      nyOppgavestatusSelected = [...oppgavestatuserValgt.filter((val) => val !== option)]
     }
     // setFilter må bli kalt før setOppgavestatuserValgt, ellers blokkerer react render loop at
     // setFilter blir satt med oppdaterte statuser valgt
@@ -54,7 +54,7 @@ export const FilterRad = (props: {
 
   return (
     <>
-      <FlexRow $spacing>
+      <FlexRow $spacing align="start">
         <TextField
           label="Fødselsnummer"
           value={filter.fnrFilter}
@@ -118,40 +118,13 @@ export const FilterRad = (props: {
             </option>
           ))}
         </Select>
-        {/*<Select*/}
-        {/*  label="Oppgavestatus"*/}
-        {/*  value={filter.oppgavestatusFilter}*/}
-        {/*  onChange={(e) => setFilter({ ...filter, oppgavestatusFilter: e.target.value as OppgavestatusFilterKeys })}*/}
-        {/*>*/}
-        {/*  {Object.entries(OPPGAVESTATUSFILTER).map(([status, statusbeskrivelse]) => (*/}
-        {/*    <option key={status} value={status}>*/}
-        {/*      {statusbeskrivelse}*/}
-        {/*    </option>*/}
-        {/*  ))}*/}
-        {/*</Select>*/}
         <UNSAFE_Combobox
           label="Oppgavestatus"
           options={OPPGAVESTATUSFILTER}
-          selectedOptions={oppgaveStatuserValgt}
+          selectedOptions={oppgavestatuserValgt}
           onToggleSelected={(option, isSelected) => onOppgavestatusSelected(option, isSelected)}
           isMultiSelect
         />
-
-        {/*<UNSAFE_Combobox*/}
-        {/*    label="Saksbehandler"*/}
-        {/*    value={saksbehandlerFilterLokal}*/}
-        {/*    options={Object.entries(SAKSBEHANDLERFILTER)*/}
-        {/*        .map(([, beskrivelse]) => beskrivelse)*/}
-        {/*        .concat(Array.from(saksbehandlere))}*/}
-        {/*    onChange={(e) => {*/}
-        {/*      setSaksbehandlerFilterLokal(e?.target.value ? e?.target.value : '')*/}
-        {/*    }}*/}
-        {/*    onToggleSelected={(option, isSelected) => {*/}
-        {/*      if (isSelected) {*/}
-        {/*        setFilter({ ...filter, saksbehandlerFilter: option })*/}
-        {/*      }*/}
-        {/*    }}*/}
-        {/*/>*/}
 
         <Select
           label="Oppgavetype"

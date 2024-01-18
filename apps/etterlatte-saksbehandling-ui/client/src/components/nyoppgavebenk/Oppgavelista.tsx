@@ -1,13 +1,8 @@
-import { Alert, Pagination, Table } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
-import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
+import { Alert, Pagination } from '@navikt/ds-react'
+import { OppgaveDTO } from '~shared/api/oppgaver'
 import React, { ReactNode, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
-import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
-import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
-import { RedigerSaksbehandler } from './tildeling/RedigerSaksbehandler'
-import { FristWrapper } from '~components/nyoppgavebenk/FristWrapper'
+import { OppgaverTable } from '~components/nyoppgavebenk/oppgaverTable/OppgaverTable'
 
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
@@ -30,67 +25,7 @@ export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver }:
     <>
       {paginerteOppgaver && paginerteOppgaver.length > 0 ? (
         <>
-          <Table>
-            <Table.Header>
-              <Table.Row>
-                <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Frist</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Fødselsnummer</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Ytelse</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Merknad</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Status</Table.HeaderCell>
-                <Table.HeaderCell scope="col">Enhet</Table.HeaderCell>
-                <Table.HeaderCell scope="col">
-                  <HeaderPadding>Saksbehandler</HeaderPadding>
-                </Table.HeaderCell>
-                <Table.HeaderCell scope="col">Handlinger</Table.HeaderCell>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {paginerteOppgaver &&
-                paginerteOppgaver.map((oppgave) => {
-                  const erRedigerbar = erOppgaveRedigerbar(oppgave.status)
-
-                  return (
-                    <Table.Row key={oppgave.id}>
-                      <Table.HeaderCell>{formaterStringDato(oppgave.opprettet)}</Table.HeaderCell>
-                      <Table.DataCell>
-                        <FristWrapper dato={oppgave.frist} />
-                      </Table.DataCell>
-                      <Table.DataCell>
-                        <SaksoversiktLenke fnr={oppgave.fnr} />
-                      </Table.DataCell>
-                      <Table.DataCell>
-                        {oppgave.type ? (
-                          <OppgavetypeTag oppgavetype={oppgave.type} />
-                        ) : (
-                          <div>oppgaveid {oppgave.id}</div>
-                        )}
-                      </Table.DataCell>
-                      <Table.DataCell>{oppgave.sakType && <SaktypeTag sakType={oppgave.sakType} />}</Table.DataCell>
-                      <Table.DataCell>{oppgave.merknad}</Table.DataCell>
-                      <Table.DataCell>{oppgave.status ? oppgave.status : 'Ukjent'}</Table.DataCell>
-                      <Table.DataCell>{oppgave.enhet}</Table.DataCell>
-                      <Table.DataCell>
-                        <RedigerSaksbehandler
-                          saksbehandler={oppgave.saksbehandler}
-                          oppgaveId={oppgave.id}
-                          sakId={oppgave.sakId}
-                          oppdaterTildeling={oppdaterTildeling}
-                          erRedigerbar={erRedigerbar}
-                          versjon={oppgave.versjon}
-                          type={oppgave.type}
-                        />
-                      </Table.DataCell>
-                      <Table.DataCell>
-                        <HandlingerForOppgave oppgave={oppgave} />
-                      </Table.DataCell>
-                    </Table.Row>
-                  )
-                })}
-            </Table.Body>
-          </Table>
+          <OppgaverTable oppgaver={paginerteOppgaver} oppdaterTildeling={oppdaterTildeling} />
 
           <PaginationWrapper>
             <Pagination

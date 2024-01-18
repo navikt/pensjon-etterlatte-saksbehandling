@@ -77,7 +77,3 @@ export const PaginationWrapper = styled.div`
     line-height: 32px;
   }
 `
-
-export const HeaderPadding = styled.span`
-  padding-left: 20px;
-`

@@ -141,6 +141,7 @@ class Brevoppretter(
                     brevkode,
                     automatiskMigreringRequest,
                 ),
+                brevKode?.tittel,
             )
 
         val innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType)
@@ -167,9 +168,11 @@ class Brevoppretter(
         return db.hentBrevForBehandling(behandlingId)
     }
 
-    private suspend fun opprettInnhold(redigerbarTekstRequest: RedigerbarTekstRequest): BrevInnhold {
-        val tittel = redigerbarTekstRequest.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler"
-
+    private suspend fun opprettInnhold(
+        redigerbarTekstRequest: RedigerbarTekstRequest,
+        muligTittel: String?,
+    ): BrevInnhold {
+        val tittel = muligTittel ?: (redigerbarTekstRequest.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
         val payload =
             when (redigerbarTekstRequest.prosessType) {
                 BrevProsessType.REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest)

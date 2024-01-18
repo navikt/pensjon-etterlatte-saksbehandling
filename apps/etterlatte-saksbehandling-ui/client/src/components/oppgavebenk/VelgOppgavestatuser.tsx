@@ -1,30 +1,26 @@
-import React, { Dispatch, SetStateAction } from 'react'
+import React from 'react'
 import { UNSAFE_Combobox } from '@navikt/ds-react'
 import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/Oppgavelistafiltre'
 
 interface Props {
-  oppgavestatuserValgt: Array<string>
-  setOppgavestatuserValgt: Dispatch<SetStateAction<Array<string>>>
+  value: Array<string>
+  onChange: (statuser: Array<string>) => void
 }
 
-export const VelgOppgavestatuser = ({ oppgavestatuserValgt, setOppgavestatuserValgt }: Props) => {
+export const VelgOppgavestatuser = ({ value, onChange }: Props) => {
   const onOppgavestatusSelected = (option: string, isSelected: boolean) => {
-    let nyOppgavestatusSelected: Array<string>
-
     if (isSelected) {
-      nyOppgavestatusSelected = [...oppgavestatuserValgt, option]
+      onChange([...value, option])
     } else {
-      nyOppgavestatusSelected = [...oppgavestatuserValgt.filter((val) => val !== option)]
+      onChange([...value.filter((val) => val !== option)])
     }
-
-    setOppgavestatuserValgt(nyOppgavestatusSelected)
   }
 
   return (
     <UNSAFE_Combobox
       label="Oppgavestatus"
       options={OPPGAVESTATUSFILTER}
-      selectedOptions={oppgavestatuserValgt}
+      selectedOptions={value}
       onToggleSelected={(option, isSelected) => onOppgavestatusSelected(option, isSelected)}
       isMultiSelect
     />

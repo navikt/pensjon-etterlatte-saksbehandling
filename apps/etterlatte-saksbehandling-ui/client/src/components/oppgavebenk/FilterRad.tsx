@@ -1,5 +1,5 @@
 import { Button, Select, TextField, UNSAFE_Combobox } from '@navikt/ds-react'
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import {
   ENHETFILTER,
   EnhetFilterKeys,
@@ -34,12 +34,6 @@ export const FilterRad = ({ hentOppgaver, filter, setFilter, alleOppgaver }: Pro
   )
   const [saksbehandlerFilterLokal, setSaksbehandlerFilterLokal] = useState<string>(filter.saksbehandlerFilter)
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
-
-  const [oppgavestatuserValgt, setOppgavestatuserValgt] = useState<Array<string>>(['NY', 'UNDER_BEHANDLING'])
-
-  useEffect(() => {
-    setFilter({ ...filter, oppgavestatusFilter: oppgavestatuserValgt })
-  }, [oppgavestatuserValgt])
 
   return (
     <>
@@ -108,8 +102,10 @@ export const FilterRad = ({ hentOppgaver, filter, setFilter, alleOppgaver }: Pro
           ))}
         </Select>
         <VelgOppgavestatuser
-          oppgavestatuserValgt={oppgavestatuserValgt}
-          setOppgavestatuserValgt={setOppgavestatuserValgt}
+          value={filter.oppgavestatusFilter}
+          onChange={(oppgavestatusFilter) => setFilter({ ...filter, oppgavestatusFilter })}
+          // oppgavestatuserValgt={oppgavestatuserValgt}
+          // setOppgavestatuserValgt={setOppgavestatuserValgt}
         />
 
         <Select
@@ -126,7 +122,12 @@ export const FilterRad = ({ hentOppgaver, filter, setFilter, alleOppgaver }: Pro
         <Select
           label="Kilde"
           value={filter.oppgavekildeFilter}
-          onChange={(e) => setFilter({ ...filter, oppgavekildeFilter: e.target.value as OppgaveKildeFilterKeys })}
+          onChange={(e) =>
+            setFilter({
+              ...filter,
+              oppgavekildeFilter: e.target.value as OppgaveKildeFilterKeys,
+            })
+          }
         >
           {Object.entries(OPPGAVEKILDEFILTER).map(([type, typebeskrivelse]) => (
             <option key={type} value={type}>

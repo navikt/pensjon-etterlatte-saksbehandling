@@ -1,0 +1,69 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-klage
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: "{{image}}"
+  port: 8080
+  liveness:
+    initialDelay: 5
+    path: /health/isalive
+  readiness:
+    initialDelay: 5
+    path: /health/isready
+  strategy:
+    type: Recreate
+  secureLogs:
+    enabled: true
+  kafka:
+    pool: nav-prod
+  azure:
+    application:
+      enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 256Mi
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: KAFKA_RESET_POLICY
+      value: earliest
+    - name: KLAGE_GROUP_ID
+      value: "etterlatte-v1"
+    - name: KLAGE_TOPIC
+      value: "klage.behandling-events.v1"
+    - name: KABAL_URL
+      value: http://kabal-api.klage
+    - name: KABAL_AZURE_SCOPE
+      value: api://prod-gcp.klage.kabal-api/.default
+    - name: BEHANDLING_AZURE_SCOPE
+      value: api://prod-gcp.etterlatte.etterlatte-behandling/.default
+    - name: ETTERLATTE_BEHANDLING_URL
+      value: http://etterlatte-behandling
+    - name: ETTERLATTE_PROXY_URL
+      value: https://etterlatte-proxy.prod-fss-pub.nais.io/aad
+    - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
+      value: api://prod-fss.etterlatte.etterlatte-proxy/.default
+  envFrom:
+    - secret: my-application-unleash-api-token
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-behandling
+        - application: kabal-api
+          namespace: klage
+          cluster: prod-gcp
+
+      external:
+        - host: etterlatte-proxy.prod-fss-pub.nais.io
+        - host: etterlatte-unleash-api.nav.cloud.nais.io
+
+    inbound:
+      rules:
+        - application: etterlatte-behandling

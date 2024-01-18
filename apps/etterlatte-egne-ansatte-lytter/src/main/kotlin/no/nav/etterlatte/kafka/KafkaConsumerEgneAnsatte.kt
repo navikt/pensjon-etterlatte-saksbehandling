@@ -1,6 +1,5 @@
 package no.nav.etterlatte.kafka
 
-import no.nav.etterlatte.BehandlingKlient
 import no.nav.etterlatte.libs.common.requireEnvValue
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory

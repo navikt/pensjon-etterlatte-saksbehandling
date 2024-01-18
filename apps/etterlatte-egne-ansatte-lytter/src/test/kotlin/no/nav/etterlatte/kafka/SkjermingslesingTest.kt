@@ -1,3 +1,4 @@
+package no.nav.etterlatte.kafka
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.mockk.every
@@ -7,9 +8,6 @@ import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.common.KafkaEnvironment
-import no.nav.etterlatte.BehandlingKlient
-import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
-import no.nav.etterlatte.kafka.KafkaConsumerEgneAnsatte
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.KafkaProducer

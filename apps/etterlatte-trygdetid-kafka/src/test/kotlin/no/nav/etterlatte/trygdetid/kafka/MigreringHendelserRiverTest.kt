@@ -1,3 +1,5 @@
+package no.nav.etterlatte.trygdetid.kafka
+
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.coVerify
 import io.mockk.every
@@ -24,8 +26,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.etterlatte.trygdetid.TrygdetidType
-import no.nav.etterlatte.trygdetid.kafka.MigreringHendelserRiver
-import no.nav.etterlatte.trygdetid.kafka.TrygdetidService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals

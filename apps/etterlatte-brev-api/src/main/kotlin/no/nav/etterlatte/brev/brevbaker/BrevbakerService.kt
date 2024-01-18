@@ -35,10 +35,7 @@ class BrevbakerService(
     suspend fun hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest: RedigerbarTekstRequest): Slate {
         val request =
             BrevbakerRequest.fra(
-                brevKodeMapper.brevKode(
-                    redigerbarTekstRequest.generellBrevData,
-                    BrevProsessType.REDIGERBAR,
-                ).redigering,
+                redigerbarTekstRequest.brevkode(brevKodeMapper, redigerbarTekstRequest.generellBrevData),
                 brevDataMapper.brevData(redigerbarTekstRequest),
                 adresseService.hentAvsender(
                     redigerbarTekstRequest.generellBrevData.avsenderRequest(redigerbarTekstRequest.brukerTokenInfo),
@@ -57,6 +54,7 @@ data class RedigerbarTekstRequest(
     val generellBrevData: GenerellBrevData,
     val brukerTokenInfo: BrukerTokenInfo,
     val prosessType: BrevProsessType,
+    val brevkode: (mapper: BrevKodeMapper, g: GenerellBrevData) -> EtterlatteBrevKode,
     val migrering: MigreringBrevRequest? = null,
 ) {
     fun vedtakstype() = generellBrevData.forenkletVedtak?.type?.name?.lowercase()

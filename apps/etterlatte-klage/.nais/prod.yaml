@@ -56,6 +56,7 @@ spec:
           namespace: klage
           cluster: prod-gcp
 
+      external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
 
     inbound:

@@ -244,7 +244,9 @@ class GrunnlagsendringshendelseService(
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
 
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
-        val sakerForSoeker = sakerOgRoller.filter { Saksrolle.SOEKER == it.rolle }
+        val sakerOgRollerGruppert = sakerOgRoller.distinct()
+
+        val sakerForSoeker = sakerOgRollerGruppert.filter { Saksrolle.SOEKER == it.rolle }
 
         return sakerForSoeker.let {
             inTransaction {
@@ -279,7 +281,7 @@ class GrunnlagsendringshendelseService(
         }
     }
 
-    private fun opprettHendelseAvTypeForPerson(
+    fun opprettHendelseAvTypeForPerson(
         fnr: String,
         grunnlagendringType: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
@@ -287,7 +289,9 @@ class GrunnlagsendringshendelseService(
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
 
-        return sakerOgRoller
+        val sakerOgRollerGruppert = sakerOgRoller.distinct()
+
+        return sakerOgRollerGruppert
             .filter { rolleOgSak -> sakService.finnSak(rolleOgSak.sakId) != null }
             .filter { rolleOgSak ->
                 !hendelseEksistererFraFoer(

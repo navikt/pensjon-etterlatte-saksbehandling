@@ -21,10 +21,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
@@ -147,7 +147,7 @@ internal class OpprettJournalfoerOgDistribuer {
         )
 
     private fun lagVedtakDto(behandlingId: UUID) =
-        VedtakNyDto(
+        VedtakDto(
             id = 1L,
             status = VedtakStatus.IVERKSATT,
             sak =

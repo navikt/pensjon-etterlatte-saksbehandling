@@ -1,21 +1,17 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
 import kotliquery.Session
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import kotliquery.using
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -87,9 +83,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         val vilkaarsvurderingId = lagreVilkaarsvurdering(vilkaarsvurdering, tx)
         vilkaarsvurdering.vilkaar.forEach { vilkaar ->
             val vilkaarId = lagreVilkaar(vilkaarsvurderingId, vilkaar, tx)
-            vilkaar.grunnlag.forEach { grunnlag ->
-                lagreGrunnlag(vilkaarId, grunnlag, tx)
-            }
             delvilkaarRepository.opprettVilkaarsvurdering(vilkaarId, vilkaar, tx)
         }
     }
@@ -221,18 +214,10 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
                         row.toVilkaar(
                             hovedvilkaar = delvilkaarRepository.hentDelvilkaar(vilkaarId, true, session).first(),
                             unntaksvilkaar = delvilkaarRepository.hentDelvilkaar(vilkaarId, false, session),
-                            grunnlag = hentGrunnlag(vilkaarId, session),
                         )
                     }.asList,
                 ).sortedBy { it.hovedvilkaar.type.rekkefoelge }
             }
-
-    private fun hentGrunnlag(
-        vilkaarId: UUID,
-        session: Session,
-    ): List<Vilkaarsgrunnlag<JsonNode>> =
-        queryOf(Queries.HENT_GRUNNLAG, mapOf("vilkaar_id" to vilkaarId))
-            .let { session.run(it.map { row -> row.toGrunnlag() }.asList) }
 
     private fun lagreVilkaarsvurdering(
         vilkaarsvurdering: Vilkaarsvurdering,
@@ -309,7 +294,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
     private fun Row.toVilkaar(
         hovedvilkaar: Delvilkaar,
         unntaksvilkaar: List<Delvilkaar>,
-        grunnlag: List<Vilkaarsgrunnlag<JsonNode>>,
     ) = Vilkaar(
         id = uuid("id"),
         hovedvilkaar = hovedvilkaar,
@@ -322,16 +306,7 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
                     saksbehandler = string("resultat_saksbehandler"),
                 )
             },
-        grunnlag = grunnlag,
     )
-
-    private fun Row.toGrunnlag(): Vilkaarsgrunnlag<JsonNode> =
-        Vilkaarsgrunnlag(
-            id = uuid("id"),
-            opplysningsType = string("opplysning_type").let { VilkaarOpplysningType.valueOf(it) },
-            kilde = string("kilde").let { objectMapper.readValue(it) },
-            opplysning = string("opplysning").let { objectMapper.readValue(it) },
-        )
 
     private object Queries {
         const val LAGRE_VILKAARSVURDERING = """
@@ -379,10 +354,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         const val HENT_VILKAAR = """
             SELECT id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler FROM vilkaar 
             WHERE vilkaarsvurdering_id = :vilkaarsvurdering_id
-        """
-
-        const val HENT_GRUNNLAG = """
-            SELECT id, opplysning_type, kilde, opplysning FROM grunnlag WHERE vilkaar_id = :vilkaar_id
         """
 
         const val SLETT_VILKAARSVURDERING_RESULTAT = """

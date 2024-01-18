@@ -63,6 +63,8 @@ data class AutomatiskRevurdering(
 
     override fun tilAttestert() = endreTilStatus(BehandlingStatus.ATTESTERT)
 
+    override fun tilAvslag() = endreTilStatus(BehandlingStatus.AVSLAG)
+
     override fun tilReturnert() = endreTilStatus(BehandlingStatus.RETURNERT)
 
     override fun tilTilSamordning() = endreTilStatus(BehandlingStatus.TIL_SAMORDNING)

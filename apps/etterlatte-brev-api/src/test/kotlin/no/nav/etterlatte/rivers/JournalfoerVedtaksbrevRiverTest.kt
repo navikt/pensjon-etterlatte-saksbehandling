@@ -25,10 +25,10 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -130,7 +130,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         verify { vedtaksbrevService wasNot Called }
     }
 
-    private fun opprettMelding(vedtak: VedtakNyDto): JsonMessage {
+    private fun opprettMelding(vedtak: VedtakDto): JsonMessage {
         return JsonMessage.newMessage(
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
@@ -140,9 +140,9 @@ internal class JournalfoerVedtaksbrevRiverTest {
         )
     }
 
-    private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): VedtakNyDto {
+    private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): VedtakDto {
         val behandlingId = UUID.randomUUID()
-        return VedtakNyDto(
+        return VedtakDto(
             id = 1L,
             behandlingId = behandlingId,
             status = VedtakStatus.ATTESTERT,

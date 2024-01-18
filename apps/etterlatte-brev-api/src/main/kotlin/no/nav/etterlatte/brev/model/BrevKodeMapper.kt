@@ -114,8 +114,8 @@ class BrevKodeMapper {
                 when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE ->
                         BrevkodePar(
-                            EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE_UTFALL,
-                            EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE,
+                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE_UTFALL,
+                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE,
                         )
 
                     VedtakType.AVSLAG ->

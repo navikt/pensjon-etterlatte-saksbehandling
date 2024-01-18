@@ -11,9 +11,9 @@ import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
@@ -45,7 +45,7 @@ class StatistikkService(
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     fun registrerStatistikkForVedtak(
-        vedtak: VedtakNyDto,
+        vedtak: VedtakDto,
         vedtakKafkaHendelseType: VedtakKafkaHendelseType,
         tekniskTid: LocalDateTime,
     ): Pair<SakRad?, StoenadRad?> {
@@ -80,7 +80,7 @@ class StatistikkService(
     }
 
     private fun registrerSakStatistikkForVedtak(
-        vedtak: VedtakNyDto,
+        vedtak: VedtakDto,
         hendelse: VedtakKafkaHendelseType,
         tekniskTid: LocalDateTime,
     ): SakRad? {
@@ -95,7 +95,7 @@ class StatistikkService(
         }
     }
 
-    private fun hentAvkortingForBehandling(vedtak: VedtakNyDto): Avkorting? {
+    private fun hentAvkortingForBehandling(vedtak: VedtakDto): Avkorting? {
         if (vedtak.sak.sakType == SakType.OMSTILLINGSSTOENAD) {
             return runBlocking {
                 beregningKlient.hentAvkortingForBehandling(vedtak.behandlingId)
@@ -105,7 +105,7 @@ class StatistikkService(
     }
 
     private fun vedtakshendelseTilSakRad(
-        vedtak: VedtakNyDto,
+        vedtak: VedtakDto,
         hendelse: VedtakKafkaHendelseType,
         tekniskTid: LocalDateTime,
     ): SakRad {
@@ -180,7 +180,7 @@ class StatistikkService(
     }
 
     private fun behandlingResultatFraVedtak(
-        vedtak: VedtakNyDto,
+        vedtak: VedtakDto,
         vedtakKafkaHendelseType: VedtakKafkaHendelseType,
         statistikkBehandling: StatistikkBehandling,
     ): BehandlingResultat? {
@@ -211,7 +211,7 @@ class StatistikkService(
         }
 
     private fun vedtakTilStoenadsrad(
-        vedtak: VedtakNyDto,
+        vedtak: VedtakDto,
         tekniskTid: LocalDateTime,
         vedtaksloesning: Vedtaksloesning,
         pesysid: Long?,

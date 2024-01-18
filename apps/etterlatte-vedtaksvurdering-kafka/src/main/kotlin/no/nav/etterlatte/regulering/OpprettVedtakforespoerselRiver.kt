@@ -39,7 +39,7 @@ internal class OpprettVedtakforespoerselRiver(
 
         withFeilhaandtering(packet, context, OPPRETT_VEDTAK) {
             val respons = vedtak.opprettVedtakFattOgAttester(packet.sakId, behandlingId)
-            logger.info("Opprettet vedtak ${respons.vedtak.vedtakId} for sak: $sakId og behandling: $behandlingId")
+            logger.info("Opprettet vedtak ${respons.vedtak.id} for sak: $sakId og behandling: $behandlingId")
             RapidUtsender.sendUt(respons, packet, context)
         }
     }

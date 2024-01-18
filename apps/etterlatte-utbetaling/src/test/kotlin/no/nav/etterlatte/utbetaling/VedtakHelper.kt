@@ -10,10 +10,10 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.math.BigDecimal
@@ -40,7 +40,7 @@ fun vedtak(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
         ),
     saktype: SakType = SakType.BARNEPENSJON,
-) = VedtakNyDto(
+) = VedtakDto(
     id = vedtakId,
     behandlingId = behandling.id,
     status = VedtakStatus.ATTESTERT,
@@ -79,7 +79,7 @@ fun ugyldigVedtakTilUtbetaling(
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
         ),
     saktype: SakType = SakType.BARNEPENSJON,
-) = VedtakNyDto(
+) = VedtakDto(
     id = vedtakId,
     behandlingId = behandling.id,
     status = VedtakStatus.ATTESTERT,
@@ -114,7 +114,7 @@ fun ugyldigVedtakTilUtbetaling(
 )
 
 fun revurderingVedtak(
-    vedtak: VedtakNyDto,
+    vedtak: VedtakDto,
     behandling: Behandling =
         Behandling(
             id = UUID.randomUUID(),
@@ -131,7 +131,7 @@ fun revurderingVedtak(
                 ),
             )
         },
-) = VedtakNyDto(
+) = VedtakDto(
     id = vedtak.id + 1,
     behandlingId = behandling.id,
     status = VedtakStatus.ATTESTERT,
@@ -158,13 +158,13 @@ fun revurderingVedtak(
 )
 
 fun opphoersVedtak(
-    vedtak: VedtakNyDto,
+    vedtak: VedtakDto,
     behandling: Behandling =
         Behandling(
             id = UUID.randomUUID(),
             type = BehandlingType.REVURDERING,
         ),
-) = VedtakNyDto(
+) = VedtakDto(
     id = vedtak.id + 1,
     behandlingId = behandling.id,
     status = VedtakStatus.ATTESTERT,
@@ -232,7 +232,7 @@ fun genererEtterfolgendeUtbetalingsperioder(
     }
 }
 
-fun vedtakEvent(vedtakDto: VedtakNyDto) =
+fun vedtakEvent(vedtakDto: VedtakDto) =
     """
     {
       "@event_name": "${VedtakKafkaHendelseType.ATTESTERT}",

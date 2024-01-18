@@ -22,10 +22,10 @@ import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -107,7 +107,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         )
 
     private fun opprettMelding(
-        vedtak: VedtakNyDto,
+        vedtak: VedtakDto,
         migreringRequest: MigreringRequest?,
         hendelse: VedtakKafkaHendelseType = VedtakKafkaHendelseType.FATTET,
     ): JsonMessage {
@@ -130,7 +130,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
     }
 
     private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING) =
-        VedtakNyDto(
+        VedtakDto(
             id = 1L,
             status = VedtakStatus.ATTESTERT,
             behandlingId = behandlingId,

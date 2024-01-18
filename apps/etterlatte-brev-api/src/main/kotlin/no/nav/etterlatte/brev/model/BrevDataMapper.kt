@@ -7,8 +7,8 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_FOERSTEGANGSVEDTAK_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_ENDRING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
@@ -22,12 +22,13 @@ import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.OmgjoeringAvFarskapRevurderingBrevdata
 import no.nav.etterlatte.brev.model.bp.SoeskenjusteringRevurderingBrevdata
 import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
-import no.nav.etterlatte.brev.model.oms.FoerstegangsvedtakUtfallDTO
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
-import no.nav.etterlatte.brev.model.oms.InnvilgetBrevDataOMS
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseDTO
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -189,11 +190,17 @@ class BrevDataMapper(
                             val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                             val utbetaling = async { fetcher.hentUtbetaling() }
                             val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
+                            val etterbetaling = async { fetcher.hentEtterbetaling() }
                             val avkortingHentet =
                                 requireNotNull(
                                     avkortingsinfo.await(),
                                 ) { "$vedtakType, ${generellBrevData.sak.sakType} må ha avkortingsinfo " }
-                            FoerstegangsvedtakUtfallDTO.fra(generellBrevData, utbetaling.await(), avkortingHentet)
+                            OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO.fra(
+                                generellBrevData,
+                                utbetaling.await(),
+                                avkortingHentet,
+                                etterbetaling.await() != null,
+                            )
                         }
                     }
 
@@ -299,23 +306,29 @@ class BrevDataMapper(
                 )
             }
 
-            OMS_FOERSTEGANGSVEDTAK_INNVILGELSE -> {
+            OMSTILLINGSSTOENAD_INNVILGELSE -> {
                 coroutineScope {
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
                     val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
+                    val brevutfall = async { fetcher.hentBrevutfall() }
                     val avkortingsinfoHentet =
                         requireNotNull(avkortingsinfo.await()) { "${kode.ferdigstilling} Må ha avkortingsinfo" }
                     val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
-                    InnvilgetBrevDataOMS.fra(
+                    val brevutfallHentet =
+                        requireNotNull(brevutfall.await()) {
+                            "${kode.ferdigstilling} Må ha brevutfall for å avgjøre lav eller ingen inntekt"
+                        }
+                    OmstillingsstoenadInnvilgelseDTO.fra(
                         generellBrevData,
                         utbetaling.await(),
                         avkortingsinfoHentet,
                         etterbetaling.await(),
                         trygdetidHentet,
                         innholdMedVedlegg,
+                        brevutfallHentet.lavEllerIngenInntekt == LavEllerIngenInntekt.JA,
                     )
                 }
             }

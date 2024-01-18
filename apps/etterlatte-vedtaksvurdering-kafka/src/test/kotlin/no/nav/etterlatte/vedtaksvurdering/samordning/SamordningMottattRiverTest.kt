@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -29,7 +29,7 @@ internal class SamordningMottattRiverTest {
     fun `skal lese vedtak og oppdatere til samordnet`() {
         val vedtakId = "67300342"
         every { vedtakService.samordnetVedtak(vedtakId) } returns
-            mockk<VedtakNyDto> {
+            mockk<VedtakDto> {
                 every { behandlingId } returns UUID.randomUUID()
             }
 

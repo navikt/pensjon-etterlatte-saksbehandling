@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import io.prometheus.client.CollectorRegistry
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -14,23 +15,18 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(DatabaseExtension::class)
 internal class BehandlingMetricsTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
+    private val ds = DatabaseExtension.dataSource
     private lateinit var behandlingMetrikkerDao: BehandlingMetrikkerDao
     private lateinit var oppgaveDao: OppgaveMetrikkerDao
     private lateinit var behandlingRepo: BehandlingDao
@@ -41,14 +37,6 @@ internal class BehandlingMetricsTest {
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-
-        val ds =
-            DataSourceBuilder.createDataSource(
-                postgreSQLContainer.jdbcUrl,
-                postgreSQLContainer.username,
-                postgreSQLContainer.password,
-            ).also { it.migrate() }
         val connection = ds.connection
 
         sakRepo = SakDao { connection }
@@ -66,11 +54,6 @@ internal class BehandlingMetricsTest {
         behandlingMetrics = BehandlingMetrics(oppgaveDao, behandlingMetrikkerDao, testreg)
 
         behandlingMetrics.run()
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Test

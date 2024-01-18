@@ -33,12 +33,27 @@ class PDFGenerator(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    suspend fun ferdigstillOgGenererPDF(
+        id: BrevID,
+        bruker: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest?,
+        avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
+        brevKode: (GenerellBrevData, Brev) -> BrevkodePar,
+        lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
+    ): Pdf {
+        sjekkOmBrevKanEndres(id)
+        val pdf =
+            genererPdf(id, bruker, automatiskMigreringRequest, avsenderRequest, brevKode, lagrePdfHvisVedtakFattet)
+        db.lagrePdfOgFerdigstillBrev(id, pdf)
+        return pdf
+    }
+
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
-        brevKode: (GenerellBrevData, Brev, MigreringBrevRequest?) -> BrevkodePar,
+        brevKode: (GenerellBrevData, Brev) -> BrevkodePar,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
@@ -52,7 +67,7 @@ class PDFGenerator(
             retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId, bruker) }
         val avsender = adresseService.hentAvsender(avsenderRequest(bruker, generellBrevData))
 
-        val brevkodePar = brevKode(generellBrevData, brev, automatiskMigreringRequest)
+        val brevkodePar = brevKode(generellBrevData, brev)
 
         val sak = generellBrevData.sak
         val letterData =
@@ -153,4 +168,11 @@ class PDFGenerator(
         requireNotNull(db.hentBrevPayloadVedlegg(brev.id)) {
             "Fant ikke payloadvedlegg for brev ${brev.id}"
         }
+
+    private fun sjekkOmBrevKanEndres(brevID: BrevID) {
+        val brev = db.hentBrev(brevID)
+        if (!brev.kanEndres()) {
+            throw IllegalStateException("Brev med id=$brevID kan ikke endres, siden det har status ${brev.status}")
+        }
+    }
 }

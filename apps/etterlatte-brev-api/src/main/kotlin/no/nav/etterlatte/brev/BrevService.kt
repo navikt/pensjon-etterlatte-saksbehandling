@@ -32,14 +32,13 @@ class BrevService(
     suspend fun opprettBrev(
         sakId: Long,
         bruker: BrukerTokenInfo,
-    ): Brev {
-        return brevoppretter.opprettBrev(
+    ): Brev =
+        brevoppretter.opprettBrev(
             sakId = sakId,
             behandlingId = null,
             bruker = bruker,
             automatiskMigreringRequest = null,
-        )
-    }
+        ).first
 
     data class BrevPayload(
         val hoveddel: Slate?,
@@ -103,7 +102,7 @@ class BrevService(
             bruker,
             null,
             avsenderRequest = { b, g -> g.avsenderRequest(b) },
-            brevKode = { _, _, _ -> BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV) },
+            brevKode = { _, _ -> BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV) },
         )
 
     suspend fun ferdigstill(

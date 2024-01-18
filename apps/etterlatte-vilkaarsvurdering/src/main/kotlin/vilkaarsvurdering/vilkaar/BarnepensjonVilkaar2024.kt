@@ -2,23 +2,18 @@
 
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
-import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType.AVDOED_DOEDSDATO
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType.SOEKER_FOEDSELSDATO
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 
 object BarnepensjonVilkaar2024 {
-    fun inngangsvilkaar(grunnlag: Grunnlag) =
+    fun inngangsvilkaar() =
         listOf(
             formaal(),
             doedsfallForelder(),
             yrkesskadeAvdoed(),
-            alderBarn(grunnlag),
+            alderBarn(),
             barnetsMedlemskap(),
             vurderingAvEksport(),
             avdoedesForutgaaendeMedlemskap(),
@@ -62,7 +57,7 @@ object BarnepensjonVilkaar2024 {
             ),
         )
 
-    private fun alderBarn(grunnlag: Grunnlag): Vilkaar =
+    private fun alderBarn(): Vilkaar =
         Vilkaar(
             hovedvilkaar =
                 Delvilkaar(
@@ -83,15 +78,6 @@ object BarnepensjonVilkaar2024 {
                         ),
                 ),
             unntaksvilkaar = listOf(yrkesskadeFordelPaaGammeltRegelverk()),
-            grunnlag =
-                with(grunnlag) {
-                    val foedselsdatoBarn = soeker.hentFoedselsdato()?.toVilkaarsgrunnlag(SOEKER_FOEDSELSDATO)
-                    val doedsdatoAvdoede =
-                        hentAvdoede().mapNotNull { avdoed ->
-                            avdoed.hentDoedsdato()?.toVilkaarsgrunnlag(AVDOED_DOEDSDATO)
-                        }
-                    listOfNotNull(foedselsdatoBarn) + doedsdatoAvdoede
-                },
         )
 
     private fun barnetsMedlemskap() =

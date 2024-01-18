@@ -1,16 +1,12 @@
 package no.nav.etterlatte.vilkaarsvurdering.vilkaar
 
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
-import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
-import no.nav.etterlatte.libs.common.grunnlag.hentSoeknadMottattDato
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarOpplysningType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 
 object OmstillingstoenadVilkaar {
-    fun inngangsvilkaar(grunnlag: Grunnlag) =
+    fun inngangsvilkaar() =
         listOf(
             etterlatteLever(),
             doedsfall(),
@@ -19,9 +15,10 @@ object OmstillingstoenadVilkaar {
             sivilstand(),
             yrkesskade(),
             avdoedesMedlemskap(),
+            avdoedesMedlemskapEoes(),
             gjenlevendesMedlemskap(),
             vurderingAvEksport(),
-            aktivitetEtter6Maaneder(grunnlag),
+            aktivitetEtter6Maaneder(),
         )
 
     private fun etterlatteLever() =
@@ -328,7 +325,7 @@ object OmstillingstoenadVilkaar {
                 ),
         )
 
-    private fun aktivitetEtter6Maaneder(grunnlag: Grunnlag) =
+    private fun aktivitetEtter6Maaneder() =
         Vilkaar(
             hovedvilkaar =
                 Delvilkaar(
@@ -356,18 +353,6 @@ object OmstillingstoenadVilkaar {
                     aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt(),
                     aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar(),
                 ),
-            grunnlag =
-                with(grunnlag) {
-                    val doedsdatoAvdoedeGrunnlag =
-                        hentAvdoede().mapNotNull { avdoed ->
-                            avdoed.hentDoedsdato()?.toVilkaarsgrunnlag(VilkaarOpplysningType.AVDOED_DOEDSDATO)
-                        }
-                    val soeknadMottattDatoGrunnlag =
-                        sak.hentSoeknadMottattDato()?.toVilkaarsgrunnlag(
-                            VilkaarOpplysningType.SOEKNAD_MOTTATT_DATO,
-                        )
-                    listOfNotNull(soeknadMottattDatoGrunnlag) + doedsdatoAvdoedeGrunnlag
-                },
         )
 
     private fun vurderingAvEksport() =

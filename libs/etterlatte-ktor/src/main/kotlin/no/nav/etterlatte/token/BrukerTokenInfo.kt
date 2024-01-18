@@ -47,7 +47,7 @@ data class Systembruker(
     val ident: String? = null,
     val jwtTokenClaims: JwtTokenClaims? = null,
 ) : BrukerTokenInfo() {
-    constructor(oid: String, sub: String) : this(oid, sub, null)
+    private constructor(omraade: Systembrukere) : this(oid = omraade.oid, sub = omraade.oid)
 
     override fun ident() = ident ?: Fagsaksystem.EY.navn
 
@@ -61,6 +61,11 @@ data class Systembruker(
     override fun erSammePerson(ident: String?) = false
 
     override fun kanEndreOppgaverFor(ident: String?) = true
+
+    companion object {
+        val migrering = Systembruker(Systembrukere.MIGRERING)
+        val brev = Systembruker(Systembrukere.BREV)
+    }
 }
 
 data class Saksbehandler(
@@ -90,4 +95,9 @@ enum class Claims {
 
     @Suppress("ktlint:standard:enum-entry-name-case")
     sub,
+}
+
+enum class Systembrukere(val oid: String) {
+    BREV("brev"),
+    MIGRERING("migrering"),
 }

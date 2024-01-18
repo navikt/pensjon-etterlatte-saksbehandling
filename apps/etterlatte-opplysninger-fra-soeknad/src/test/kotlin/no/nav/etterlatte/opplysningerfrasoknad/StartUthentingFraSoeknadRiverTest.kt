@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandlingfrasoknad
+package no.nav.etterlatte.opplysningerfrasoknad
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.treeToValue
@@ -6,7 +6,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.opplysningerfrasoknad.StartUthentingFraSoeknadRiver
 import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsuthenter
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -2,7 +2,6 @@ package no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.libs.common.innsendtsoeknad.BankkontoType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.UtbetalingsInformasjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Avdoed
@@ -13,8 +12,9 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Utbetalingsinformasjon
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Utenlandsopphold as UtenlandsoppholdOpplysningstype
-import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.UtenlandsoppholdOpplysninger as UtenlandsoppholdOpplysningerOld
+import no.nav.etterlatte.opplysningerfrasoknad.opplysningstyper.AvdoedSoeknad
+import no.nav.etterlatte.opplysningerfrasoknad.opplysningstyper.Utenlandsopphold as UtenlandsoppholdOpplysningstype
+import no.nav.etterlatte.opplysningerfrasoknad.opplysningstyper.UtenlandsoppholdOpplysninger as UtenlandsoppholdOpplysningerOld
 
 class Opplysningsuthenter {
     fun lagOpplysningsListe(

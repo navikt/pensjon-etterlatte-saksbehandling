@@ -32,10 +32,10 @@ export const Grunnlagopplysninger = ({
       {!trygdetid.opplysningerDifferanse?.differanse && <OpplysningerTabell opplysninger={trygdetid.opplysninger} />}
       {trygdetid.opplysningerDifferanse?.differanse && (
         <>
-          <Alert variant="info">
+          <WarningAlert>
             OBS! Grunnlaget for trygdetiden har blitt oppdatert siden sist. <br />
             Du må se over periodene og lagre på nytt med oppdatert grunnlag.
-          </Alert>
+          </WarningAlert>
           <Heading size="small" level="4">
             Eksisterende grunnlag
           </Heading>
@@ -89,3 +89,8 @@ const Opplysningsgrunnlag = ({
     }
   />
 )
+
+const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`
+  margin: 2em 4em 0 4em;
+  max-width: fit-content;
+`

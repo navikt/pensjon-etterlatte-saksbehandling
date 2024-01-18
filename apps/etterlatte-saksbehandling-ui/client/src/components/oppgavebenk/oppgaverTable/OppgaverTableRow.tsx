@@ -2,12 +2,12 @@ import React, { ReactNode } from 'react'
 import { Table } from '@navikt/ds-react'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
 import { formaterStringDato } from '~utils/formattering'
-import { FristWrapper } from '~components/nyoppgavebenk/FristWrapper'
-import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
-import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
-import { RedigerSaksbehandler } from '~components/nyoppgavebenk/tildeling/RedigerSaksbehandler'
-import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
-import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
+import { FristWrapper } from '~components/oppgavebenk/FristWrapper'
+import SaksoversiktLenke from '~components/oppgavebenk/SaksoversiktLenke'
+import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/Tags'
+import { RedigerSaksbehandler } from '~components/oppgavebenk/tildeling/RedigerSaksbehandler'
+import { HandlingerForOppgave } from '~components/oppgavebenk/HandlingerForOppgave'
+import { FristHandlinger } from '~components/oppgavebenk/minoppgaveliste/FristHandlinger'
 
 interface Props {
   oppgave: OppgaveDTO

@@ -2,7 +2,7 @@ import { Alert, Pagination } from '@navikt/ds-react'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import React, { ReactNode, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { OppgaverTable } from '~components/nyoppgavebenk/oppgaverTable/OppgaverTable'
+import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>

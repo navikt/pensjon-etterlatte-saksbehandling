@@ -1,9 +1,9 @@
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { Alert, Pagination, UNSAFE_Combobox } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
-import { PaginationWrapper } from '~components/nyoppgavebenk/Oppgavelista'
-import { filtrerOppgaveStatus, OPPGAVESTATUSFILTER } from '~components/nyoppgavebenk/Oppgavelistafiltre'
-import { OppgaverTable } from '~components/nyoppgavebenk/oppgaverTable/OppgaverTable'
+import { PaginationWrapper } from '~components/oppgavebenk/Oppgavelista'
+import { filtrerOppgaveStatus, OPPGAVESTATUSFILTER } from '~components/oppgavebenk/Oppgavelistafiltre'
+import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 
 interface Props {
   oppgaver: OppgaveDTO[]

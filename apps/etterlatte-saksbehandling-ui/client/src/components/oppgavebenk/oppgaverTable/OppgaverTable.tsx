@@ -1,8 +1,8 @@
 import React, { ReactNode } from 'react'
 import { Table } from '@navikt/ds-react'
-import { OppgaverTableHeader } from '~components/nyoppgavebenk/oppgaverTable/OppgaverTableHeader'
+import { OppgaverTableHeader } from '~components/oppgavebenk/oppgaverTable/OppgaverTableHeader'
 import { OppgaveDTO } from '~shared/api/oppgaver'
-import { OppgaverTableRow } from '~components/nyoppgavebenk/oppgaverTable/OppgaverTableRow'
+import { OppgaverTableRow } from '~components/oppgavebenk/oppgaverTable/OppgaverTableRow'
 
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>

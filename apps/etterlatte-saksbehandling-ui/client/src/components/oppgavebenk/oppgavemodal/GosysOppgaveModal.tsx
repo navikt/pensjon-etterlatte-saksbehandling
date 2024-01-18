@@ -2,12 +2,12 @@ import { BodyShort, Button, Heading, Label, Modal } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { useContext, useState } from 'react'
-import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
+import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/Tags'
 import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { ConfigContext } from '~clientConfig'
 import { FlexRow } from '~shared/styled'
-import { FristWrapper } from '~components/nyoppgavebenk/FristWrapper'
+import { FristWrapper } from '~components/oppgavebenk/FristWrapper'
 
 const TagRow = styled.div`
   display: flex;

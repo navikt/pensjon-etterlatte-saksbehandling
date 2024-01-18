@@ -79,7 +79,7 @@ class InformasjonsbrevTest {
                     StartBrevgenereringRepository(dataSource),
                     this,
                     sleep = { _ -> run {} },
-                ) { it() }
+                ) { it() }.also { it.init() }
             }
 
         val brevId: Long = 2

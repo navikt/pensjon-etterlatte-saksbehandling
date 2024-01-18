@@ -23,6 +23,7 @@ data class BeregningsinfoBP(
     val prorataBroek: IntBroek?,
     val beregningsMetodeAnvendt: BeregningsMetode,
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
+    val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
 ) {
     companion object {
         fun fra(
@@ -41,6 +42,7 @@ data class BeregningsinfoBP(
             prorataBroek = trygdetid.prorataBroek,
             beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
             beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
+            mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
         )
     }
 }

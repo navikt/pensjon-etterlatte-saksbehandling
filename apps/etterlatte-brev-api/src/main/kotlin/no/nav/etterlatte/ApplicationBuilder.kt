@@ -137,6 +137,8 @@ class ApplicationBuilder {
     private val datasource = DataSourceBuilder.createDataSource(env)
     private val db = BrevRepository(datasource)
 
+    private val brevgenereringRepository = StartBrevgenereringRepository(datasource)
+
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
 
     private val dokarkivKlient = DokarkivKlient(httpClient("DOKARKIV_SCOPE"), env.requireEnvValue("DOKARKIV_URL"))
@@ -200,10 +202,16 @@ class ApplicationBuilder {
             }
             .build()
             .apply {
+                val brevgenerering =
+                    StartInformasjonsbrevgenereringRiver(
+                        brevgenereringRepository,
+                        this,
+                    )
                 register(
                     object : RapidsConnection.StatusListener {
                         override fun onStartup(rapidsConnection: RapidsConnection) {
                             datasource.migrate()
+                            brevgenerering.init()
                         }
                     },
                 )
@@ -216,10 +224,6 @@ class ApplicationBuilder {
                     pdfGenerator,
                     journalfoerBrevService,
                     brevdistribuerer,
-                )
-                StartInformasjonsbrevgenereringRiver(
-                    StartBrevgenereringRepository(datasource),
-                    this,
                 )
 
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)

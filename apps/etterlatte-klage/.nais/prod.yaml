@@ -19,7 +19,7 @@ spec:
   secureLogs:
     enabled: true
   kafka:
-    pool: nav-dev
+    pool: nav-prod
   azure:
     application:
       enabled: true

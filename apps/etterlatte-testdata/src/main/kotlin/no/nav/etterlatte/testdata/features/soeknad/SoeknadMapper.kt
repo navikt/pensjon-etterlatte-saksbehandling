@@ -1,4 +1,4 @@
-package testdata.features.soeknad
+package no.nav.etterlatte.testdata.features.soeknad
 
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.innsendtsoeknad.ArbeidOgUtdanningOMS

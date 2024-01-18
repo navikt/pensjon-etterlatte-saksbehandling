@@ -1,4 +1,4 @@
-package testdata.features.samordning
+package no.nav.etterlatte.testdata.features.samordning
 
 import io.ktor.server.application.call
 import io.ktor.server.mustache.MustacheContent

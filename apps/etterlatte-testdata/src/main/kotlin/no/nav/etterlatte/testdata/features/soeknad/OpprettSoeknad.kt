@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.producer
-import testdata.features.soeknad.SoeknadMapper
 
 object OpprettSoeknadFeature : TestDataFeature {
     override val beskrivelse: String

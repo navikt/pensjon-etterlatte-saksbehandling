@@ -8,6 +8,7 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing
+import no.nav.etterlatte.kafka.BehandlingKlient
 import no.nav.etterlatte.kafka.KafkaConsumerEgneAnsatte
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.libs.ktor.healthApi

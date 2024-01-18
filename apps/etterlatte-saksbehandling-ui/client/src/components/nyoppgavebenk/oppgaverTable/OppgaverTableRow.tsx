@@ -7,18 +7,32 @@ import SaksoversiktLenke from '~components/nyoppgavebenk/SaksoversiktLenke'
 import { OppgavetypeTag, SaktypeTag } from '~components/nyoppgavebenk/Tags'
 import { RedigerSaksbehandler } from '~components/nyoppgavebenk/tildeling/RedigerSaksbehandler'
 import { HandlingerForOppgave } from '~components/nyoppgavebenk/HandlingerForOppgave'
+import { FristHandlinger } from '~components/nyoppgavebenk/minoppgaveliste/FristHandlinger'
 
 interface Props {
   oppgave: OppgaveDTO
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
+  erMinOppgaveListe: boolean
+  hentOppgaver: () => void
 }
 
-export const OppgaverTableRow = ({ oppgave, oppdaterTildeling }: Props): ReactNode => {
+export const OppgaverTableRow = ({ oppgave, oppdaterTildeling, erMinOppgaveListe, hentOppgaver }: Props): ReactNode => {
   return (
     <Table.Row>
       <Table.HeaderCell>{formaterStringDato(oppgave.opprettet)}</Table.HeaderCell>
       <Table.DataCell>
-        <FristWrapper dato={oppgave.frist} />
+        {erMinOppgaveListe ? (
+          <FristHandlinger
+            orginalFrist={oppgave.frist}
+            oppgaveId={oppgave.id}
+            hentOppgaver={hentOppgaver}
+            erRedigerbar={erOppgaveRedigerbar(oppgave.status)}
+            oppgaveVersjon={oppgave.versjon}
+            type={oppgave.type}
+          />
+        ) : (
+          <FristWrapper dato={oppgave.frist} />
+        )}
       </Table.DataCell>
       <Table.DataCell>
         <SaksoversiktLenke fnr={oppgave.fnr} />

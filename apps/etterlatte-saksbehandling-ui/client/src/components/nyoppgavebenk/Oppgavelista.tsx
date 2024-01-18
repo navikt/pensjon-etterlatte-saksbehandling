@@ -25,7 +25,7 @@ export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver }:
     <>
       {paginerteOppgaver && paginerteOppgaver.length > 0 ? (
         <>
-          <OppgaverTable oppgaver={paginerteOppgaver} oppdaterTildeling={oppdaterTildeling} />
+          <OppgaverTable oppgaver={paginerteOppgaver} oppdaterTildeling={oppdaterTildeling} erMinOppgaveliste={false} />
 
           <PaginationWrapper>
             <Pagination

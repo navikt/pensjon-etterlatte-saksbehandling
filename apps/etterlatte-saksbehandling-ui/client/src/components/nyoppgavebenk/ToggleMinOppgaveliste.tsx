@@ -18,11 +18,6 @@ import { Tilgangsmelding } from '~components/nyoppgavebenk/Tilgangsmelding'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
-const TabsWidth = styled(Tabs)`
-  max-width: fit-content;
-  margin-bottom: 2rem;
-`
-
 export const ToggleMinOppgaveliste = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveTilgang) {
@@ -133,3 +128,8 @@ export const ToggleMinOppgaveliste = () => {
     </Container>
   )
 }
+
+const TabsWidth = styled(Tabs)`
+  max-width: fit-content;
+  margin-bottom: 2rem;
+`

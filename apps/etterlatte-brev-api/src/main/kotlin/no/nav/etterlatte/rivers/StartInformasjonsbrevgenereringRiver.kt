@@ -28,9 +28,7 @@ class StartInformasjonsbrevgenereringRiver(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    init {
-        startBrevgenerering()
-    }
+    fun init() = startBrevgenerering()
 
     private fun startBrevgenerering() {
         logger.info("Starter å generere informasjonsbrev for mottakerne som ligger i databasetabellen")

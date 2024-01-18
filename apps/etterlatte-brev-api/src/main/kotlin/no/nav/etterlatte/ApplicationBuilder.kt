@@ -200,10 +200,16 @@ class ApplicationBuilder {
             }
             .build()
             .apply {
+                val brevgenerering =
+                    StartInformasjonsbrevgenereringRiver(
+                        StartBrevgenereringRepository(datasource),
+                        this,
+                    )
                 register(
                     object : RapidsConnection.StatusListener {
                         override fun onStartup(rapidsConnection: RapidsConnection) {
                             datasource.migrate()
+                            brevgenerering.init()
                         }
                     },
                 )
@@ -216,10 +222,6 @@ class ApplicationBuilder {
                     pdfGenerator,
                     journalfoerBrevService,
                     brevdistribuerer,
-                )
-                StartInformasjonsbrevgenereringRiver(
-                    StartBrevgenereringRepository(datasource),
-                    this,
                 )
 
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)

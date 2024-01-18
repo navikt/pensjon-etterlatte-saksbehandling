@@ -22,6 +22,7 @@ object OmstillingstoenadVilkaar {
             gjenlevendesMedlemskap(),
             vurderingAvEksport(),
             aktivitetEtter6Maaneder(grunnlag),
+            avdoedesMedlemskapEoes(),
         )
 
     private fun etterlatteLever() =

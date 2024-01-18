@@ -11,7 +11,6 @@ import { FilterRad } from '~components/oppgavebenk/FilterRad'
 import { Filter, filtrerOppgaver, initialFilter } from '~components/oppgavebenk/Oppgavelistafiltre'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
-
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Tilgangsmelding } from '~components/oppgavebenk/Tilgangsmelding'
@@ -113,6 +112,7 @@ export const ToggleMinOppgaveliste = () => {
                 oppgaver={hentedeOppgaver}
                 filtrerteOppgaver={filtrerteOppgaver}
                 oppdaterTildeling={oppdaterTildeling}
+                hentOppgaver={hentAlleOppgaver}
               />
             </>
           )}

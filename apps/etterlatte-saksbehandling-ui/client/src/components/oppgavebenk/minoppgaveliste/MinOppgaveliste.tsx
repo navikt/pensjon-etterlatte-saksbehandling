@@ -1,9 +1,10 @@
 import { OppgaveDTO } from '~shared/api/oppgaver'
-import { Alert, Pagination, UNSAFE_Combobox } from '@navikt/ds-react'
+import { Alert, Pagination } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { PaginationWrapper } from '~components/oppgavebenk/Oppgavelista'
-import { filtrerOppgaveStatus, OPPGAVESTATUSFILTER } from '~components/oppgavebenk/Oppgavelistafiltre'
+import { filtrerOppgaveStatus } from '~components/oppgavebenk/Oppgavelistafiltre'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
+import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
 
 interface Props {
   oppgaver: OppgaveDTO[]
@@ -19,18 +20,6 @@ export const MinOppgaveliste = ({ oppgaver, oppdaterTildeling, hentOppgaver }: P
     filtrerOppgaveStatus(oppgavestatuserValgt, oppgaver)
   )
 
-  const onOppgavestatusSelected = (option: string, isSelected: boolean) => {
-    let nyOppgavestatusSelected: Array<string>
-
-    if (isSelected) {
-      nyOppgavestatusSelected = [...oppgavestatuserValgt, option]
-    } else {
-      nyOppgavestatusSelected = [...oppgavestatuserValgt.filter((val) => val !== option)]
-    }
-
-    setOppgavestatuserValgt(nyOppgavestatusSelected)
-  }
-
   useEffect(() => {
     let filtrerteOppgaver = filtrerOppgaveStatus(oppgavestatuserValgt, oppgaver)
     filtrerteOppgaver = filtrerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
@@ -39,12 +28,9 @@ export const MinOppgaveliste = ({ oppgaver, oppdaterTildeling, hentOppgaver }: P
 
   return (
     <>
-      <UNSAFE_Combobox
-        label="Oppgavestatus"
-        options={OPPGAVESTATUSFILTER}
-        selectedOptions={oppgavestatuserValgt}
-        onToggleSelected={(option, isSelected) => onOppgavestatusSelected(option, isSelected)}
-        isMultiSelect
+      <VelgOppgavestatuser
+        oppgavestatuserValgt={oppgavestatuserValgt}
+        setOppgavestatuserValgt={setOppgavestatuserValgt}
       />
 
       {paginerteOppgaver.length > 0 ? (

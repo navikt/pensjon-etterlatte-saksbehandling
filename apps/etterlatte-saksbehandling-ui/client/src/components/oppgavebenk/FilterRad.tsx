@@ -1,5 +1,5 @@
 import { Button, Select, TextField, UNSAFE_Combobox } from '@navikt/ds-react'
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import {
   ENHETFILTER,
   EnhetFilterKeys,
@@ -9,7 +9,6 @@ import {
   initialFilter,
   OPPGAVEKILDEFILTER,
   OppgaveKildeFilterKeys,
-  OPPGAVESTATUSFILTER,
   oppgavetypefilter,
   OppgavetypeFilterKeys,
   SAKSBEHANDLERFILTER,
@@ -20,6 +19,7 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/OpprettKlage'
 import { FlexRow } from '~shared/styled'
 import { OppgaveDTO } from '~shared/api/oppgaver'
+import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
 
 interface Props {
   hentOppgaver: () => void
@@ -37,20 +37,9 @@ export const FilterRad = ({ hentOppgaver, filter, setFilter, alleOppgaver }: Pro
 
   const [oppgavestatuserValgt, setOppgavestatuserValgt] = useState<Array<string>>(['NY', 'UNDER_BEHANDLING'])
 
-  const onOppgavestatusSelected = (option: string, isSelected: boolean) => {
-    let nyOppgavestatusSelected: Array<string>
-
-    if (isSelected) {
-      nyOppgavestatusSelected = [...oppgavestatuserValgt, option]
-    } else {
-      nyOppgavestatusSelected = [...oppgavestatuserValgt.filter((val) => val !== option)]
-    }
-    // setFilter må bli kalt før setOppgavestatuserValgt, ellers blokkerer react render loop at
-    // setFilter blir satt med oppdaterte statuser valgt
-    setFilter({ ...filter, oppgavestatusFilter: nyOppgavestatusSelected })
-
-    setOppgavestatuserValgt(nyOppgavestatusSelected)
-  }
+  useEffect(() => {
+    setFilter({ ...filter, oppgavestatusFilter: oppgavestatuserValgt })
+  }, [oppgavestatuserValgt])
 
   return (
     <>
@@ -118,12 +107,9 @@ export const FilterRad = ({ hentOppgaver, filter, setFilter, alleOppgaver }: Pro
             </option>
           ))}
         </Select>
-        <UNSAFE_Combobox
-          label="Oppgavestatus"
-          options={OPPGAVESTATUSFILTER}
-          selectedOptions={oppgavestatuserValgt}
-          onToggleSelected={(option, isSelected) => onOppgavestatusSelected(option, isSelected)}
-          isMultiSelect
+        <VelgOppgavestatuser
+          oppgavestatuserValgt={oppgavestatuserValgt}
+          setOppgavestatuserValgt={setOppgavestatuserValgt}
         />
 
         <Select

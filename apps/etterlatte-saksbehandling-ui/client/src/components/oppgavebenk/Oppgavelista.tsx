@@ -8,9 +8,10 @@ interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   filtrerteOppgaver: ReadonlyArray<OppgaveDTO>
+  hentOppgaver: () => void
 }
 
-export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver }: Props): ReactNode => {
+export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver, hentOppgaver }: Props): ReactNode => {
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
 
@@ -25,7 +26,12 @@ export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver }:
     <>
       {paginerteOppgaver && paginerteOppgaver.length > 0 ? (
         <>
-          <OppgaverTable oppgaver={paginerteOppgaver} oppdaterTildeling={oppdaterTildeling} erMinOppgaveliste={false} />
+          <OppgaverTable
+            oppgaver={paginerteOppgaver}
+            oppdaterTildeling={oppdaterTildeling}
+            erMinOppgaveliste={false}
+            hentOppgaver={hentOppgaver}
+          />
 
           <PaginationWrapper>
             <Pagination

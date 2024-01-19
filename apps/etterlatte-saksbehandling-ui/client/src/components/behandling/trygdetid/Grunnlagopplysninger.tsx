@@ -53,11 +53,11 @@ const Opplysningsgrunnlag = ({
 }) => (
   <Info
     label={label}
-    tekst={opplysningsgrunnlag?.opplysning ? formaterStringDato(opplysningsgrunnlag.opplysning) : 'n/a'}
+    tekst={opplysningsgrunnlag?.opplysning ? formaterStringDato(opplysningsgrunnlag.opplysning) : 'Ikke registrert'}
     undertekst={
       opplysningsgrunnlag?.kilde
         ? opplysningsgrunnlag?.kilde.type + ': ' + formaterStringDato(opplysningsgrunnlag?.kilde.tidspunkt)
-        : 'n/a'
+        : 'Ikke registrert'
     }
   />
 )
@@ -75,8 +75,8 @@ const DifferanseVisning = ({
   return (
     <>
       <WarningAlert>
-        OBS! Grunnlaget for trygdetiden har blitt oppdatert siden sist. <br />
-        Du må se over periodene og lagre på nytt med oppdatert grunnlag.
+        OBS! Grunnlaget for trygdetiden har blitt oppdatert. <br />
+        Sjekk at både faktisk og fremtidig trygdetid er korrekt.
       </WarningAlert>
 
       <Heading size="small" level="4">

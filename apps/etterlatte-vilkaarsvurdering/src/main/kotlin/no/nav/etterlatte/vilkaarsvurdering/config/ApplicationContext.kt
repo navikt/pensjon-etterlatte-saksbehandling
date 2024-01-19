@@ -4,6 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.vilkaarsvurdering.DelvilkaarRepository
@@ -16,12 +17,7 @@ import no.nav.etterlatte.vilkaarsvurdering.migrering.MigreringService
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
-    val dataSource =
-        DataSourceBuilder.createDataSource(
-            jdbcUrl = properties.jdbcUrl,
-            username = properties.dbUsername,
-            password = properties.dbPassword,
-        )
+    val dataSource = DataSourceBuilder.createDataSource(properties)
     val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
     private val delvilkaarRepository = DelvilkaarRepository()

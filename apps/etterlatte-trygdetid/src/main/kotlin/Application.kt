@@ -1,23 +1,14 @@
 package no.nav.etterlatte
 
-import io.ktor.server.cio.CIO
-import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.engine.applicationEngineEnvironment
-import io.ktor.server.engine.connector
-import io.ktor.server.engine.embeddedServer
+import initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
-import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.trygdetid.avtale.avtale
 import no.nav.etterlatte.trygdetid.config.ApplicationContext
 import no.nav.etterlatte.trygdetid.kodeverk
 import no.nav.etterlatte.trygdetid.trygdetid
 import no.nav.etterlatte.trygdetid.trygdetidV2
-import org.slf4j.Logger
-
-val sikkerLogg: Logger = sikkerlogger()
 
 fun main() {
     ApplicationContext().let { Server(it).run() }
@@ -30,25 +21,15 @@ class Server(private val context: ApplicationContext) {
 
     private val engine =
         with(context) {
-            embeddedServer(
-                factory = CIO,
-                environment =
-                    applicationEngineEnvironment {
-                        config = HoconApplicationConfig(context.config)
-                        module {
-                            restModule(
-                                sikkerLogg,
-                                withMetrics = true,
-                            ) {
-                                trygdetid(trygdetidService, behandlingKlient)
-                                trygdetidV2(trygdetidService, behandlingKlient)
-                                avtale(avtaleService, behandlingKlient)
-                                kodeverk(kodeverkService)
-                            }
-                        }
-                        connector { port = properties.httpPort }
-                    },
-            )
+            initEmbeddedServer(
+                httpPort = properties.httpPort,
+                applicationConfig = context.config,
+            ) {
+                trygdetid(trygdetidService, behandlingKlient)
+                trygdetidV2(trygdetidService, behandlingKlient)
+                avtale(avtaleService, behandlingKlient)
+                kodeverk(kodeverkService)
+            }
         }
 
     fun run() =

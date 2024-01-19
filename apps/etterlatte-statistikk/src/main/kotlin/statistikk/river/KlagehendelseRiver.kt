@@ -1,13 +1,13 @@
 package no.nav.etterlatte.statistikk.river
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.etterlatte.libs.common.event.BehandlingRiverKey
 import no.nav.etterlatte.libs.common.klage.KLAGE_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.klage.lagEventnameForType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.statistikk.service.StatistikkService
@@ -32,8 +32,8 @@ class KlagehendelseRiver(
     init {
         initialiserRiverUtenEventName(rapidsConnection) {
             validate { it.demandAny(EVENT_NAME_KEY, klagehendelser) }
-            validate { it.interestedIn(BehandlingRiverKey.behandlingObjectKey) }
             validate { it.requireKey(KLAGE_STATISTIKK_RIVER_KEY) }
+            validate { it.requireKey(TEKNISK_TID_KEY) }
         }
     }
 

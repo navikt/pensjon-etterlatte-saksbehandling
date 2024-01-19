@@ -24,6 +24,7 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Fagsaksystem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -264,10 +265,16 @@ class OppgaveService(
         logger.info("Oppgave med id=${oppgave.id} ferdigstilt av ${saksbehandler.ident()}")
     }
 
+    fun OppgaveIntern.saksbehandlerErSystemet(): Boolean = this.saksbehandler == Fagsaksystem.EY.navn
+
     private fun sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(
         oppgaveUnderBehandling: OppgaveIntern,
         saksbehandler: BrukerTokenInfo,
     ) {
+        if (oppgaveUnderBehandling.saksbehandlerErSystemet()) {
+            return
+        }
+
         if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandler)) {
             throw FeilSaksbehandlerPaaOppgaveException(
                 "Kan ikke lukke oppgave for en annen saksbehandler oppgave:" +

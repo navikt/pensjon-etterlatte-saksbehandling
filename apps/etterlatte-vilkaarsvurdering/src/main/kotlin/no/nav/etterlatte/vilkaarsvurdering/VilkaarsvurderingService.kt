@@ -64,7 +64,9 @@ class VilkaarsvurderingService(
                     virkningstidspunkt = virkningstidspunkt,
                     resultat = resultat,
                 )
-            if (featureToggleService.isEnabled(VilkaarsvurderingFeatureToggle.OppdaterGrunnlagsversjon, false)) {
+            if (featureToggleService.isEnabled(VilkaarsvurderingFeatureToggle.OppdaterGrunnlagsversjon, false) &&
+                vilkaarsvurdering.grunnlagVersjon != grunnlag.metadata.versjon
+            ) {
                 vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(behandlingId, grunnlag.metadata.versjon)
             }
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)

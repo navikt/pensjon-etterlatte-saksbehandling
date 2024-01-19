@@ -24,6 +24,7 @@ import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
+import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
 import no.nav.etterlatte.behandling.klage.KlageServiceImpl
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.BrevApiKlientObo
@@ -216,6 +217,7 @@ internal class ApplicationContext(
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
     val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
+    val klageHendelser = KlageHendelserServiceImpl(rapid)
     val klageKlient = KlageKlientImpl(klageHttpClient, resourceUrl = env.getValue("ETTERLATTE_KLAGE_API_URL"))
     val tilbakekrevingKlient =
         TilbakekrevingKlientImpl(tilbakekrevingHttpClient, resourceUrl = env.getValue("ETTERLATTE_TILBAKEKREVING_URL"))
@@ -340,6 +342,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             brevApiKlient = brevApiHttpClient,
             klageKlient = klageKlient,
+            klageHendelser = klageHendelser,
         )
 
     val tilbakekrevingService =

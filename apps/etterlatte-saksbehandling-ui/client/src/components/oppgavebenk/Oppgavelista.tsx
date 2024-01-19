@@ -1,8 +1,8 @@
-import { Alert, Pagination } from '@navikt/ds-react'
+import { Alert } from '@navikt/ds-react'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import React, { ReactNode, useEffect, useState } from 'react'
-import styled from 'styled-components'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
+import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
 
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
@@ -33,31 +33,16 @@ export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver, h
             hentOppgaver={hentOppgaver}
           />
 
-          <PaginationWrapper>
-            <Pagination
-              page={page}
-              onPageChange={setPage}
-              count={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
-              size="small"
-            />
-            <p>
-              Viser {(page - 1) * rowsPerPage + 1} - {(page - 1) * rowsPerPage + paginerteOppgaver.length} av{' '}
-              {filtrerteOppgaver.length} oppgaver (totalt {oppgaver.length} oppgaver)
-            </p>
-            <select
-              value={rowsPerPage}
-              onChange={(e) => {
-                setRowsPerPage(Number(e.target.value))
-              }}
-              title="Antall oppgaver som vises"
-            >
-              {[10, 20, 30, 40, 50].map((rowsPerPage) => (
-                <option key={rowsPerPage} value={rowsPerPage}>
-                  Vis {rowsPerPage} oppgaver
-                </option>
-              ))}
-            </select>
-          </PaginationWrapper>
+          <PagineringsKontroller
+            page={page}
+            setPage={setPage}
+            antallSider={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
+            raderPerSide={rowsPerPage}
+            setRaderPerSide={setRowsPerPage}
+            totalAvOppgaverTeksts={`Viser ${(page - 1) * rowsPerPage + 1} - ${
+              (page - 1) * rowsPerPage + paginerteOppgaver.length
+            } av ${filtrerteOppgaver.length} oppgaver (totalt ${oppgaver.length} oppgaver)`}
+          />
         </>
       ) : (
         <Alert variant="info">Ingen oppgaver</Alert>
@@ -65,15 +50,3 @@ export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver, h
     </>
   )
 }
-
-export const PaginationWrapper = styled.div`
-  display: flex;
-  gap: 0.5em;
-  flex-wrap: wrap;
-  margin: 0.5em 0;
-
-  > p {
-    margin: 0;
-    line-height: 32px;
-  }
-`

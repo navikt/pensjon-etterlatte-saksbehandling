@@ -1,10 +1,10 @@
 import { OppgaveDTO } from '~shared/api/oppgaver'
-import { Alert, Pagination } from '@navikt/ds-react'
+import { Alert } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
-import { PaginationWrapper } from '~components/oppgavebenk/Oppgavelista'
 import { filtrerOppgaveStatus } from '~components/oppgavebenk/Oppgavelistafiltre'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
+import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
 
 interface Props {
   oppgaver: OppgaveDTO[]
@@ -39,31 +39,16 @@ export const MinOppgaveliste = ({ oppgaver, oppdaterTildeling, hentOppgaver }: P
             hentOppgaver={hentOppgaver}
           />
 
-          <PaginationWrapper>
-            <Pagination
-              page={page}
-              onPageChange={setPage}
-              count={Math.ceil(paginerteOppgaver.length / rowsPerPage)}
-              size="small"
-            />
-            <p>
-              Viser {(page - 1) * rowsPerPage + 1} - {(page - 1) * rowsPerPage + paginerteOppgaver.length} av{' '}
-              {paginerteOppgaver.length} oppgaver
-            </p>
-            <select
-              value={rowsPerPage}
-              onChange={(e) => {
-                setRowsPerPage(Number(e.target.value))
-              }}
-              title="Antall oppgaver som vises"
-            >
-              {[10, 20, 30, 40, 50].map((rowsPerPage) => (
-                <option key={rowsPerPage} value={rowsPerPage}>
-                  Vis {rowsPerPage} oppgaver
-                </option>
-              ))}
-            </select>
-          </PaginationWrapper>
+          <PagineringsKontroller
+            page={page}
+            setPage={setPage}
+            antallSider={Math.ceil(paginerteOppgaver.length / rowsPerPage)}
+            raderPerSide={rowsPerPage}
+            setRaderPerSide={setRowsPerPage}
+            totalAvOppgaverTeksts={`Viser ${(page - 1) * rowsPerPage + 1} - ${
+              (page - 1) * rowsPerPage + paginerteOppgaver.length
+            } av ${paginerteOppgaver.length} oppgaver`}
+          />
         </>
       ) : (
         <Alert variant="info">Du har ingen oppgaver</Alert>

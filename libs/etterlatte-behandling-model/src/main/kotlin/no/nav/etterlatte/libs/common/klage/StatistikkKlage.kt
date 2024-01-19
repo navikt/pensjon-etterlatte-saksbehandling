@@ -17,4 +17,6 @@ enum class KlageHendelseType {
     KABAL_HENDELSE,
 }
 
+fun KlageHendelseType.lagEventnameForType(): String = "KLAGE:${this.name}"
+
 const val KLAGE_STATISTIKK_RIVER_KEY = "KLAGE"

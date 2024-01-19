@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.event.BehandlingRiverKey
 import no.nav.etterlatte.libs.common.klage.KLAGE_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
+import no.nav.etterlatte.libs.common.klage.lagEventnameForType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -24,8 +25,8 @@ class KlagehendelseRiver(
 
     private val klagehendelser =
         listOf(
-            "KLAGE:${KlageHendelseType.OPPRETTET.name}",
-            "KLAGE:${KlageHendelseType.FERDIGSTILT.name}",
+            KlageHendelseType.OPPRETTET.lagEventnameForType(),
+            KlageHendelseType.FERDIGSTILT.lagEventnameForType(),
         )
 
     init {

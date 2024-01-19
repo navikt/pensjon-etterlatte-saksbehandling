@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.ktor.restModule
 fun initEmbeddedServer(
     httpPort: Int,
     applicationConfig: Config,
+    withMetrics: Boolean = true,
     routes: Route.() -> Unit,
 ): CIOApplicationEngine {
     return embeddedServer(
@@ -25,7 +26,7 @@ fun initEmbeddedServer(
             applicationEngineEnvironment {
                 config = HoconApplicationConfig(applicationConfig)
                 module {
-                    restModule(sikkerlogger(), withMetrics = true) {
+                    restModule(sikkerlogger(), withMetrics = withMetrics) {
                         routes()
                     }
                 }

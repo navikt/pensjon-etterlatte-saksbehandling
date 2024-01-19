@@ -232,6 +232,11 @@ class KlageServiceImpl(
             begrunnelse = null,
         )
 
+        klageHendelser.sendKlageHendelse(
+            StatistikkKlage(opprinneligKlage.id, opprinneligKlage.sak, Tidspunkt.now()),
+            KlageHendelseType.KABAL_HENDELSE,
+        )
+
         klageDao.oppdaterKabalStatus(klageId, kabalrespons)
     }
 

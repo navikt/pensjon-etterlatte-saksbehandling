@@ -218,6 +218,16 @@ class KlageServiceImpl(
             }
         }
 
+        hendelseDao.klageHendelse(
+            klageId = opprinneligKlage.id,
+            sakId = opprinneligKlage.sak.id,
+            hendelse = KlageHendelseType.KABAL_HENDELSE,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = null,
+            kommentar = "Mottok status=${kabalrespons.kabalStatus} fra kabal, med resultat=${kabalrespons.resultat}",
+            begrunnelse = null,
+        )
+
         klageDao.oppdaterKabalStatus(klageId, kabalrespons)
     }
 

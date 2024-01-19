@@ -1,6 +1,4 @@
-package no.nav.etterlatte.config
-
-import no.nav.etterlatte.libs.database.jdbcUrl
+package no.nav.etterlatte.libs.database
 
 class ApplicationProperties(
     val jdbcUrl: String,

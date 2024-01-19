@@ -14,6 +14,7 @@ data class StatistikkKlage(
 enum class KlageHendelseType {
     OPPRETTET,
     FERDIGSTILT,
+    KABAL_HENDELSE,
 }
 
 const val STATISTIKK_RIVER_KEY = "KLAGE"

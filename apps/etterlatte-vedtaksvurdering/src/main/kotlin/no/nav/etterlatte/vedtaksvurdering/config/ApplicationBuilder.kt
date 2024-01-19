@@ -9,7 +9,6 @@ import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -52,7 +51,7 @@ class ApplicationBuilder {
 
     private val env = System.getenv()
     private val config: Config = ConfigFactory.load()
-    private val dataSource = DataSourceBuilder.createDataSource(ApplicationProperties.fromEnv(env))
+    private val dataSource = DataSourceBuilder.createDataSource(env)
 
     private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())

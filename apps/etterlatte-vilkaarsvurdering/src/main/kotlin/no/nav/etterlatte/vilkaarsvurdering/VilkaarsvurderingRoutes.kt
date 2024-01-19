@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.application.log
 import io.ktor.server.request.receive
@@ -11,21 +12,26 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.vilkaarsvurdering.VurdertVilkaarsvurderingResultatDto
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
+import vilkaarsvurdering.config.VilkaarsvurderingFeatureToggle
 import java.util.UUID
 
 fun Route.vilkaarsvurdering(
     vilkaarsvurderingService: VilkaarsvurderingService,
     behandlingKlient: BehandlingKlient,
+    featureToggleService: FeatureToggleService,
 ) {
     route("/api/vilkaarsvurdering") {
         val logger = application.log
@@ -36,7 +42,12 @@ fun Route.vilkaarsvurdering(
                 val vilkaarsvurdering = vilkaarsvurderingService.hentVilkaarsvurdering(behandlingId)
 
                 if (vilkaarsvurdering != null) {
-                    call.respond(vilkaarsvurdering.toDto())
+                    call.respond(
+                        toDto(
+                            vilkaarsvurdering,
+                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId, featureToggleService),
+                        ),
+                    )
                 } else {
                     logger.info("Fant ingen vilkårsvurdering for behandling ($behandlingId)")
                     call.respond(HttpStatusCode.NoContent)
@@ -59,7 +70,12 @@ fun Route.vilkaarsvurdering(
                             kopierVedRevurdering,
                         )
 
-                    call.respond(vilkaarsvurdering.toDto())
+                    call.respond(
+                        toDto(
+                            vilkaarsvurdering,
+                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId, featureToggleService),
+                        ),
+                    )
                 } catch (e: VirkningstidspunktIkkeSattException) {
                     logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
                     call.respond(HttpStatusCode.PreconditionFailed)
@@ -86,7 +102,12 @@ fun Route.vilkaarsvurdering(
                             brukerTokenInfo = brukerTokenInfo,
                         )
 
-                    call.respond(vilkaarsvurdering.toDto())
+                    call.respond(
+                        toDto(
+                            vilkaarsvurdering,
+                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId, featureToggleService),
+                        ),
+                    )
                 } catch (e: VirkningstidspunktIkkeSattException) {
                     logger.info("Virkningstidspunkt er ikke satt for behandling $behandlingId")
                     call.respond(HttpStatusCode.PreconditionFailed)
@@ -120,7 +141,12 @@ fun Route.vilkaarsvurdering(
                             brukerTokenInfo,
                             vurdertVilkaar,
                         )
-                    call.respond(vilkaarsvurdering.toDto())
+                    call.respond(
+                        toDto(
+                            vilkaarsvurdering,
+                            behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId, featureToggleService),
+                        ),
+                    )
                 } catch (e: BehandlingstilstandException) {
                     logger.error(
                         "Kunne ikke oppdatere vilkaarsvurdering for behandling $behandlingId. " +
@@ -139,6 +165,9 @@ fun Route.vilkaarsvurdering(
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/oppdater-status") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                if (featureToggleService.isEnabled(VilkaarsvurderingFeatureToggle.OppdaterGrunnlagsversjon, false)) {
+                    vilkaarsvurderingService.oppdaterGrunnlagsversjon(behandlingId, brukerTokenInfo)
+                }
                 val statusOppdatert =
                     vilkaarsvurderingService.sjekkGyldighetOgOppdaterBehandlingStatus(behandlingId, brukerTokenInfo)
                 call.respond(HttpStatusCode.OK, StatusOppdatertDto(statusOppdatert))
@@ -152,7 +181,12 @@ fun Route.vilkaarsvurdering(
                     try {
                         val vilkaarsvurdering =
                             vilkaarsvurderingService.slettVurderingPaaVilkaar(behandlingId, brukerTokenInfo, vilkaarId)
-                        call.respond(vilkaarsvurdering.toDto())
+                        call.respond(
+                            toDto(
+                                vilkaarsvurdering,
+                                behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId, featureToggleService),
+                            ),
+                        )
                     } catch (e: BehandlingstilstandException) {
                         logger.error(
                             "Kunne ikke slette vilkaarsvurdering for behandling $behandlingId. " +
@@ -204,7 +238,12 @@ fun Route.vilkaarsvurdering(
                                 brukerTokenInfo,
                                 vurdertResultat,
                             )
-                        call.respond(vilkaarsvurdering.toDto())
+                        call.respond(
+                            toDto(
+                                vilkaarsvurdering,
+                                behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId, featureToggleService),
+                            ),
+                        )
                     } catch (e: BehandlingstilstandException) {
                         logger.error(
                             "Kunne ikke oppdatere total-vurdering for behandling $behandlingId. " +
@@ -224,7 +263,12 @@ fun Route.vilkaarsvurdering(
                                 behandlingId,
                                 brukerTokenInfo,
                             )
-                        call.respond(vilkaarsvurdering.toDto())
+                        call.respond(
+                            toDto(
+                                vilkaarsvurdering,
+                                behandlingGrunnlagVersjon(vilkaarsvurderingService, behandlingId, featureToggleService),
+                            ),
+                        )
                     } catch (e: BehandlingstilstandException) {
                         logger.error(
                             "Kunne ikke slette vilkårsvurderingsresultat for behandling $behandlingId. " +
@@ -267,3 +311,29 @@ data class VurdertVilkaarDto(
     val unntaksvilkaar: VilkaarTypeOgUtfall? = null,
     val kommentar: String?,
 )
+
+fun toDto(
+    vilkaarsvurdering: Vilkaarsvurdering,
+    behandlingGrunnlagVersjon: Long?,
+) = VilkaarsvurderingDto(
+    behandlingId = vilkaarsvurdering.behandlingId,
+    virkningstidspunkt = vilkaarsvurdering.virkningstidspunkt,
+    vilkaar = vilkaarsvurdering.vilkaar,
+    resultat = vilkaarsvurdering.resultat,
+    grunnlagVersjon = vilkaarsvurdering.grunnlagVersjon,
+    behandlingGrunnlagVersjon = behandlingGrunnlagVersjon,
+)
+
+private suspend fun PipelineContext<Unit, ApplicationCall>.behandlingGrunnlagVersjon(
+    vilkaarsvurderingService: VilkaarsvurderingService,
+    behandlingId: UUID,
+    featureToggleService: FeatureToggleService,
+): Long? {
+    return if (featureToggleService.isEnabled(VilkaarsvurderingFeatureToggle.OppdaterGrunnlagsversjon, false)) {
+        vilkaarsvurderingService.hentBehandlingensGrunnlag(behandlingId, brukerTokenInfo)
+            .metadata
+            .versjon
+    } else {
+        null
+    }
+}

@@ -248,7 +248,7 @@ internal fun Route.behandlingRoutes(
         post("/oppdater-grunnlag") {
             kunSkrivetilgang {
                 inTransaction {
-                    behandlingService.oppdaterGrunnlagOgStatus(behandlingId)
+                    behandlingService.oppdaterGrunnlagOgStatus(behandlingId, brukerTokenInfo)
                 }
                 call.respond(HttpStatusCode.OK)
             }

@@ -50,6 +50,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -579,18 +580,26 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
         kotlin.runCatching { sleep(3000) }
         assertNotNull(behandlingOpprettet)
         val rapid = applicationContext.rapid as TestProdusent
-        assertEquals(3, rapid.publiserteMeldinger.size)
+        assertEquals(5, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
             objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue(),
         )
         assertEquals(
-            "BEHANDLING:OPPRETTET",
+            "KLAGE:${KlageHendelseType.OPPRETTET}",
             objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue(),
         )
         assertEquals(
-            "BEHANDLING:AVBRUTT",
+            "KLAGE:${KlageHendelseType.FERDIGSTILT}",
             objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue(),
+        )
+        assertEquals(
+            "BEHANDLING:OPPRETTET",
+            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue(),
+        )
+        assertEquals(
+            "BEHANDLING:AVBRUTT",
+            objectMapper.readTree(rapid.publiserteMeldinger[4].verdi)["@event_name"].textValue(),
         )
         applicationContext.dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }

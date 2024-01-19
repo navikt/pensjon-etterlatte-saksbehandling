@@ -23,7 +23,7 @@ class Server(private val context: ApplicationContext) {
                 httpPort = properties.httpPort,
                 applicationConfig = context.config,
             ) {
-                vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient)
+                vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient, featureToggleService)
                 migrering(migreringService, behandlingKlient, vilkaarsvurderingService)
             }
         }

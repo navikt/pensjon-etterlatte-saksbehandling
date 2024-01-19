@@ -233,7 +233,7 @@ class KlageServiceImpl(
         )
 
         klageHendelser.sendKlageHendelse(
-            StatistikkKlage(opprinneligKlage.id, opprinneligKlage.sak, Tidspunkt.now()),
+            StatistikkKlage(opprinneligKlage.id, opprinneligKlage.sak, Tidspunkt.now(), kabalrespons = kabalrespons),
             KlageHendelseType.KABAL_HENDELSE,
         )
 

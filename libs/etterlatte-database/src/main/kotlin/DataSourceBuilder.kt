@@ -32,7 +32,7 @@ object DataSourceBuilder {
         createDataSource(
             jdbcUrl = properties.jdbcUrl,
             username = properties.dbUsername,
-            password = properties.dbUsername,
+            password = properties.dbPassword,
         )
 
     fun createDataSource(

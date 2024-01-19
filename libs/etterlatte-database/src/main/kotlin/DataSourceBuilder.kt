@@ -26,6 +26,13 @@ object DataSourceBuilder {
         return createDataSource(jdbcUrl, username, password, maxPoolSize)
     }
 
+    fun createDataSource(properties: ApplicationProperties) =
+        createDataSource(
+            jdbcUrl = properties.jdbcUrl,
+            username = properties.dbUsername,
+            password = properties.dbUsername,
+        )
+
     fun createDataSource(
         jdbcUrl: String,
         username: String,

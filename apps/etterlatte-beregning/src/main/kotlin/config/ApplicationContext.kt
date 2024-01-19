@@ -35,12 +35,7 @@ class ApplicationContext {
     val config: Config = ConfigFactory.load()
     private val env = System.getenv()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
-    val dataSource =
-        DataSourceBuilder.createDataSource(
-            jdbcUrl = properties.jdbcUrl,
-            username = properties.dbUsername,
-            password = properties.dbPassword,
-        )
+    val dataSource = DataSourceBuilder.createDataSource(properties)
 
     val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 

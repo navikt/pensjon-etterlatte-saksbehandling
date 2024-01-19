@@ -28,4 +28,11 @@ dependencies {
     testImplementation(project(":libs:testdata"))
     testImplementation(libs.ktor2.jackson)
     testImplementation(libs.ktor2.clientcontentnegotiation)
+
+    tasks {
+        withType<Test> {
+            useJUnitPlatform()
+            maxParallelForks = Runtime.getRuntime().availableProcessors()
+        }
+    }
 }

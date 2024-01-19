@@ -49,4 +49,11 @@ dependencies {
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures(project(":libs:etterlatte-mq")))
+
+    tasks {
+        withType<Test> {
+            useJUnitPlatform()
+            maxParallelForks = Runtime.getRuntime().availableProcessors()
+        }
+    }
 }

@@ -50,4 +50,11 @@ dependencies {
     testImplementation(libs.kotlinx.coroutinescore)
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(project(":libs:testdata"))
+
+    tasks {
+        withType<Test> {
+            useJUnitPlatform()
+            maxParallelForks = Runtime.getRuntime().availableProcessors()
+        }
+    }
 }

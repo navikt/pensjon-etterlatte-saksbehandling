@@ -16,4 +16,11 @@ dependencies {
     implementation(libs.ktor2.okhttp)
 
     testImplementation(libs.test.jupiter.api)
+
+    tasks {
+        withType<Test> {
+            useJUnitPlatform()
+            maxParallelForks = Runtime.getRuntime().availableProcessors()
+        }
+    }
 }

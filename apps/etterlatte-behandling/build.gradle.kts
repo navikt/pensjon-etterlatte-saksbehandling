@@ -48,4 +48,11 @@ dependencies {
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:testdata"))
     testImplementation(project(":libs:etterlatte-funksjonsbrytere"))
+
+    tasks {
+        withType<Test> {
+            useJUnitPlatform()
+            maxParallelForks = 1
+        }
+    }
 }

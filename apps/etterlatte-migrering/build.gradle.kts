@@ -23,4 +23,11 @@ dependencies {
     implementation(libs.database.kotliquery)
     testImplementation(libs.ktor2.servertests)
     testImplementation(testFixtures((project(":libs:etterlatte-database"))))
+
+    tasks {
+        withType<Test> {
+            useJUnitPlatform()
+            maxParallelForks = Runtime.getRuntime().availableProcessors()
+        }
+    }
 }

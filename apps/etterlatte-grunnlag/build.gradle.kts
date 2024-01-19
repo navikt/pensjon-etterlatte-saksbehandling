@@ -40,4 +40,11 @@ dependencies {
     testImplementation(libs.ktor2.servertests)
     testImplementation(project(":libs:testdata"))
     testImplementation(libs.test.kotest.assertionscore)
+
+    tasks {
+        withType<Test> {
+            useJUnitPlatform()
+            maxParallelForks = Runtime.getRuntime().availableProcessors()
+        }
+    }
 }

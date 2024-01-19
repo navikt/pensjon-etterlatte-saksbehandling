@@ -20,4 +20,11 @@ dependencies {
 
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.kotlinx.coroutinescore)
+
+    tasks {
+        withType<Test> {
+            useJUnitPlatform()
+            maxParallelForks = Runtime.getRuntime().availableProcessors()
+        }
+    }
 }

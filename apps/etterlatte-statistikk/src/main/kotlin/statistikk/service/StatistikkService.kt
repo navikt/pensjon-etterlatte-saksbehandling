@@ -3,6 +3,8 @@ package no.nav.etterlatte.statistikk.service
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.KlageStatus
+import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -271,7 +273,13 @@ class StatistikkService(
         registrertTidspunkt = statistikkKlage.tidspunkt,
         type = hendelse.name,
         status = statistikkKlage.klage.status.name,
-        resultat = statistikkKlage.klage.kabalResultat?.name,
+        resultat =
+            when (statistikkKlage.klage.utfall) {
+                is KlageUtfall.Omgjoering -> "OMGJOERING"
+                is KlageUtfall.DelvisOmgjoering -> "DELVIS_OMGJOERING"
+                is KlageUtfall.StadfesteVedtak -> "STADFESTE_VEDTAK"
+                null -> null
+            },
         saksbehandler = statistikkKlage.saksbehandler,
         ansvarligEnhet = statistikkKlage.klage.sak.enhet,
         ansvarligBeslutter = statistikkKlage.klage.formkrav?.saksbehandler?.ident,
@@ -286,8 +294,11 @@ class StatistikkService(
         beregning = null,
         avkorting = null,
         kilde = Vedtaksloesning.GJENNY,
-        ferdigbehandletTidspunkt = null,
-        behandlingMetode = null,
+        ferdigbehandletTidspunkt =
+            statistikkKlage.tidspunkt.takeIf {
+                statistikkKlage.klage.status == KlageStatus.FERDIGSTILT
+            },
+        behandlingMetode = BehandlingMetode.MANUELL,
         datoFoersteUtbetaling = null,
         opprettetAv = null,
         pesysId = null,

@@ -19,7 +19,7 @@ type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 interface Options {
   url: string
   method: Method
-  body?: Record<string, unknown>
+  body?: Record<string, unknown> | FormData
   noData?: boolean
   dontLogError?: boolean
 }
@@ -43,19 +43,32 @@ export const restbodyShouldHaveData = (noDataFlag: boolean | undefined, status: 
   return !noDataFlag && (status === 200 || status === 201 || status === 207 || status === 206)
 }
 
-async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
-  const { url, method, body, dontLogError } = props
-
-  const shouldLogError = !dontLogError
+async function fetchResponse(options: Options) {
+  const { url, method, body } = options
   const trimmedUrl = url.startsWith('/') ? url.slice(1) : url
-  try {
-    const response = await fetch(`/api/${trimmedUrl}`, {
-      method: method,
+
+  if (options.body instanceof FormData) {
+    return fetch(`/api/${trimmedUrl}`, {
+      method,
+      body: body as FormData,
+    })
+  } else {
+    return fetch(`/api/${trimmedUrl}`, {
+      method,
       headers: {
         'Content-Type': 'application/json',
       },
       body: body ? JSON.stringify(body) : undefined,
     })
+  }
+}
+
+async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
+  const { url, method, dontLogError } = props
+
+  const shouldLogError = !dontLogError
+  try {
+    const response = await fetchResponse(props)
 
     if (response.ok) {
       if (restbodyShouldHaveData(props.noData, response.status)) {
@@ -119,8 +132,9 @@ async function apiFetcher<T>(props: Options): Promise<ApiResponse<T>> {
 
 export const apiClient = {
   get: <T>(url: string) => apiFetcher<T>({ url, method: 'GET' }),
-  post: <T>(url: string, body: Record<string, unknown>, noData = false, dontLogError = false) =>
-    apiFetcher<T>({ url: url, body: body, method: 'POST', noData: noData, dontLogError: dontLogError }),
+  post: <T>(url: string, body: Record<string, unknown>, noData?: boolean, dontLogError?: boolean) =>
+    apiFetcher<T>({ url, body, method: 'POST', noData, dontLogError }),
+  postFormData: <T>(url: string, body: FormData) => apiFetcher<T>({ url, body, method: 'POST' }),
   delete: <T>(url: string, noData?: boolean) => apiFetcher<T>({ url, method: 'DELETE', noData }),
   put: <T>(url: string, body: Record<string, unknown>) => apiFetcher<T>({ url, method: 'PUT', body: body }),
 } as const

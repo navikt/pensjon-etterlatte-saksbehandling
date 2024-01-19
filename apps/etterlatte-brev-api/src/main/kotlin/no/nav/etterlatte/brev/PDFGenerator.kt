@@ -61,6 +61,9 @@ class PDFGenerator(
         if (!brev.kanEndres()) {
             logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
             return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke brev med id ${brev.id}" }
+        } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
+            logger.info("Brev er en opplastet PDF – returnerer lagret innhold")
+            return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke pdf for brev med id=${brev.id}" }
         }
 
         val generellBrevData =
@@ -157,6 +160,7 @@ class PDFGenerator(
 
             BrevProsessType.AUTOMATISK -> brevDataMapper.brevData(generellBrevData, brukerTokenInfo)
             BrevProsessType.MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
+            BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException("Brevdata ikke relevant for ${BrevProsessType.OPPLASTET_PDF}")
         }
 
     private fun hentLagretInnhold(brev: Brev) =

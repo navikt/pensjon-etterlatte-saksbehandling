@@ -48,6 +48,7 @@ export enum BrevProsessType {
   AUTOMATISK = 'AUTOMATISK',
   REDIGERBAR = 'REDIGERBAR',
   MANUELL = 'MANUELL',
+  OPPLASTET_PDF = 'OPPLASTET_PDF',
 }
 
 export enum Spraak {

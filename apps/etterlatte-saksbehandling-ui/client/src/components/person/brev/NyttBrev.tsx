@@ -7,7 +7,7 @@ import { Column, GridContainer } from '~shared/styled'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { getPerson } from '~shared/api/grunnlag'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
-import { BrevStatus } from '~shared/types/Brev'
+import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import styled from 'styled-components'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
@@ -60,7 +60,7 @@ export default function NyttBrev() {
               <NyttBrevMottaker brev={brev} />
             </Column>
             <Column>
-              {brev.status === BrevStatus.DISTRIBUERT ? (
+              {brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT ? (
                 <PanelWrapper>
                   <ForhaandsvisningBrev brev={brev} />
                 </PanelWrapper>

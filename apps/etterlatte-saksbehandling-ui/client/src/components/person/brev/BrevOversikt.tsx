@@ -11,7 +11,8 @@ import BrevModal from '~components/person/brev/BrevModal'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { SakMedBehandlinger } from '~components/person/typer'
 
-import { isPending, isSuccess, mapApiResult, Result } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
+import { LastOppBrev } from '~components/person/brev/LastOppBrev'
 
 const mapAdresse = (mottaker: Mottaker) => {
   const adr = mottaker.adresse
@@ -151,6 +152,10 @@ export default function BrevOversikt({ sakStatus }: { sakStatus: Result<SakMedBe
         >
           Nytt brev
         </Button>
+
+        {mapSuccess(sakStatus, (sak) => (
+          <LastOppBrev sak={sak.sak} />
+        ))}
       </FlexRow>
     </Container>
   )

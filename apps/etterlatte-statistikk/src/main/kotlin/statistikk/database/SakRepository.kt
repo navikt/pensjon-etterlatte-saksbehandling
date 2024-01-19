@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode
-import no.nav.etterlatte.statistikk.domain.BehandlingResultat
 import no.nav.etterlatte.statistikk.domain.SakRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
@@ -64,15 +63,15 @@ class SakRepository(private val datasource: DataSource) {
     private fun ResultSet.tilSakRad(): SakRad =
         SakRad(
             id = getLong("id"),
-            behandlingId = getObject("behandling_id") as UUID,
+            referanseId = getObject("behandling_id") as UUID,
             sakId = getLong("sak_id"),
             mottattTidspunkt = getTimestamp("mottatt_tid").toTidspunkt(),
             registrertTidspunkt = getTimestamp("registrert_tid").toTidspunkt(),
             ferdigbehandletTidspunkt = getTimestamp("ferdigbehandlet_tid")?.toTidspunkt(),
             vedtakTidspunkt = getTimestamp("vedtak_tid")?.toTidspunkt(),
-            behandlingType = enumValueOf(getString("behandling_type")),
-            behandlingStatus = getString("behandling_status"),
-            behandlingResultat = getString("behandling_resultat")?.let { enumValueOf<BehandlingResultat>(it) },
+            type = getString("behandling_type"),
+            status = getString("behandling_status"),
+            resultat = getString("behandling_resultat"),
             resultatBegrunnelse = getString("resultat_begrunnelse"),
             behandlingMetode = getString("behandling_metode")?.let { enumValueOf<BehandlingMetode>(it) },
             opprettetAv = getString("opprettet_av"),
@@ -114,15 +113,15 @@ class SakRepository(private val datasource: DataSource) {
 
 private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement =
     this.apply {
-        setObject(1, sakRad.behandlingId)
+        setObject(1, sakRad.referanseId)
         setLong(2, sakRad.sakId)
         setTidspunkt(3, sakRad.mottattTidspunkt)
         setTidspunkt(4, sakRad.registrertTidspunkt)
         setTidspunkt(5, sakRad.ferdigbehandletTidspunkt)
         setTidspunkt(6, sakRad.vedtakTidspunkt)
-        setString(7, sakRad.behandlingType.name)
-        setString(8, sakRad.behandlingStatus)
-        setString(9, sakRad.behandlingResultat?.name)
+        setString(7, sakRad.type)
+        setString(8, sakRad.status)
+        setString(9, sakRad.resultat)
         setString(10, sakRad.resultatBegrunnelse)
         setString(11, sakRad.behandlingMetode?.name)
         setString(12, sakRad.opprettetAv)

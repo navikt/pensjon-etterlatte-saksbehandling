@@ -133,7 +133,7 @@ class StatistikkServiceTest {
             registrertSak.sakId shouldBe sakId
             registrertSak.sakYtelse shouldBe SakType.BARNEPENSJON.name
             registrertSak.sakUtland shouldBe SakUtland.NASJONAL
-            registrertSak.behandlingId shouldBe behandlingId
+            registrertSak.referanseId shouldBe behandlingId
             registrertSak.tekniskTid shouldBe tekniskTidForHendelse.toTidspunkt()
             registrertSak.ansvarligEnhet shouldBe "attestantEnhet"
             registrertSak.ansvarligBeslutter shouldBe "Attestant"
@@ -277,7 +277,7 @@ class StatistikkServiceTest {
         assertEquals(registrertStatistikk.sakId, sakId)
         assertEquals(registrertStatistikk.sakYtelse, "BARNEPENSJON")
         assertEquals(registrertStatistikk.sakUtland, SakUtland.NASJONAL)
-        assertEquals(registrertStatistikk.behandlingId, behandlingId)
+        assertEquals(registrertStatistikk.referanseId, behandlingId)
         assertEquals(registrertStatistikk.sakYtelsesgruppe, SakYtelsesgruppe.EN_AVDOED_FORELDER)
         assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
         assertEquals(registrertStatistikk.behandlingMetode, BehandlingMetode.MANUELL)

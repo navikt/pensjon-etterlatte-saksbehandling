@@ -27,42 +27,11 @@ export const Grunnlagopplysninger = ({
   onOppdatert: (trygdetid: ITrygdetid) => void
   redigerbar: boolean
 }) => {
-  const [oppdatertTrygdetid, oppdaterTrygdetidOpplysningsgrunnlag] = useApiCall(oppdaterOpplysningsgrunnlag)
-  const opplysningerDifferanse = redigerbar ? trygdetid.opplysningerDifferanse : null
-
-  return (
-    <>
-      {!opplysningerDifferanse && <OpplysningerTabell opplysninger={trygdetid.opplysninger} />}
-      {opplysningerDifferanse && (
-        <>
-          <WarningAlert>
-            OBS! Grunnlaget for trygdetiden har blitt oppdatert siden sist. <br />
-            Du må se over periodene og lagre på nytt med oppdatert grunnlag.
-          </WarningAlert>
-          <Heading size="small" level="4">
-            Eksisterende grunnlag
-          </Heading>
-
-          <OpplysningerTabell opplysninger={trygdetid.opplysninger} />
-
-          <Heading size="small" level="4">
-            Nytt grunnlag
-          </Heading>
-          <OpplysningerTabell opplysninger={opplysningerDifferanse.oppdaterteGrunnlagsopplysninger} />
-          <Button
-            loading={isPending(oppdatertTrygdetid)}
-            variant="primary"
-            onClick={() =>
-              oppdaterTrygdetidOpplysningsgrunnlag(trygdetid.behandlingId, (oppdatertTrygdetid) => {
-                onOppdatert(oppdatertTrygdetid)
-              })
-            }
-          >
-            Bruk nytt grunnlag
-          </Button>
-        </>
-      )}
-    </>
+  const visDifferanse = redigerbar ? trygdetid.opplysningerDifferanse?.differanse : false
+  return visDifferanse ? (
+    <DifferanseVisning trygdetid={trygdetid} onOppdatert={onOppdatert} />
+  ) : (
+    <OpplysningerTabell opplysninger={trygdetid.opplysninger} />
   )
 }
 
@@ -92,6 +61,48 @@ const Opplysningsgrunnlag = ({
     }
   />
 )
+
+const DifferanseVisning = ({
+  trygdetid,
+  onOppdatert,
+}: {
+  trygdetid: ITrygdetid
+  onOppdatert: (trygdetid: ITrygdetid) => void
+}) => {
+  const [oppdatertTrygdetid, oppdaterTrygdetidOpplysningsgrunnlag] = useApiCall(oppdaterOpplysningsgrunnlag)
+  const opplysningerDifferanse = trygdetid.opplysningerDifferanse!!
+
+  return (
+    <>
+      <WarningAlert>
+        OBS! Grunnlaget for trygdetiden har blitt oppdatert siden sist. <br />
+        Du må se over periodene og lagre på nytt med oppdatert grunnlag.
+      </WarningAlert>
+
+      <Heading size="small" level="4">
+        Eksisterende grunnlag
+      </Heading>
+      <OpplysningerTabell opplysninger={trygdetid.opplysninger} />
+
+      <Heading size="small" level="4">
+        Nytt grunnlag
+      </Heading>
+      <OpplysningerTabell opplysninger={opplysningerDifferanse.oppdaterteGrunnlagsopplysninger} />
+
+      <Button
+        loading={isPending(oppdatertTrygdetid)}
+        variant="primary"
+        onClick={() =>
+          oppdaterTrygdetidOpplysningsgrunnlag(trygdetid.behandlingId, (oppdatertTrygdetid) => {
+            onOppdatert(oppdatertTrygdetid)
+          })
+        }
+      >
+        Bruk nytt grunnlag
+      </Button>
+    </>
+  )
+}
 
 const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`
   margin: 2em 4em 0 4em;

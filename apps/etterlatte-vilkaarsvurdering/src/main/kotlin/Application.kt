@@ -35,7 +35,7 @@ class Server(private val context: ApplicationContext) {
                         config = HoconApplicationConfig(context.config)
                         module {
                             restModule(sikkerLogg, withMetrics = true) {
-                                vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient)
+                                vilkaarsvurdering(vilkaarsvurderingService, behandlingKlient, featureToggleService)
                                 migrering(migreringService, behandlingKlient, vilkaarsvurderingService)
                             }
                         }

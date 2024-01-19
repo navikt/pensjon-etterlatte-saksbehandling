@@ -164,6 +164,24 @@ class HendelseDao(private val connection: () -> Connection) {
         ),
     )
 
+    fun opppdatertGrunnlagHendelse(
+        behandlingId: UUID,
+        sakId: Long,
+        saksbehandler: String?,
+    ) = lagreHendelse(
+        UlagretHendelse(
+            hendelse = "BEHANDLING:OPPDATERT_GRUNNLAG",
+            inntruffet = Tidspunkt.now(),
+            vedtakId = null,
+            behandlingId = behandlingId,
+            sakId = sakId,
+            ident = saksbehandler,
+            identType = "SAKSBEHANDLER".takeIf { saksbehandler != null },
+            kommentar = null,
+            valgtBegrunnelse = null,
+        ),
+    )
+
     fun finnHendelserIBehandling(behandling: UUID): List<LagretHendelse> {
         val stmt =
             connection().prepareStatement(

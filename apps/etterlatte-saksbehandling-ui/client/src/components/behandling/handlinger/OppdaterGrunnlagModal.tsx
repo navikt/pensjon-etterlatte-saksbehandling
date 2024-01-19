@@ -5,11 +5,10 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGrunnlag } from '~shared/api/behandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
-import Spinner from '~shared/Spinner'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 
-import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export const FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG = 'pensjon-etterlatte.kan-bruke-oppdater-grunnlag'
@@ -34,7 +33,7 @@ export default function OppdaterGrunnlagModal({
         behandlingId: behandlingId,
       },
       () => {
-        setTimeout(() => window.location.reload(), 2000)
+        window.location.reload()
       }
     )
   }
@@ -64,14 +63,18 @@ export default function OppdaterGrunnlagModal({
           </BodyLong>
 
           <FlexRow justify="center">
-            <Button variant="secondary" onClick={() => setIsOpen(false)}>
+            <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(oppdatert)}>
               Nei, fortsett behandling
             </Button>
-            <Button variant="primary" onClick={() => lagre()} loading={isPending(oppdatert)}>
+            <Button
+              variant="primary"
+              onClick={() => lagre()}
+              loading={isPending(oppdatert)}
+              disabled={isPending(oppdatert)}
+            >
               Ja, oppdater grunnlaget
             </Button>
           </FlexRow>
-          {isSuccess(oppdatert) && <Spinner visible label="Oppdatert – laster inn på nytt ..." />}
           {isFailureHandler({ apiResult: oppdatert, errorMessage: 'Oppdatering feilet' })}
         </Modal.Body>
       </Modal>

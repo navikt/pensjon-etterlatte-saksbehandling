@@ -93,7 +93,7 @@ class JournalfoerBrevServiceTest {
         val service = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 
         runBlocking {
-            assertThrows<IllegalStateException> {
+            assertThrows<FeilStatusForJournalfoering> {
                 service.journalfoer(brev.id, bruker)
             }
         }
@@ -187,7 +187,11 @@ class JournalfoerBrevServiceTest {
             )
 
         val service = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
-        coEvery { dokarkivService.journalfoer(any()) } returns mockk()
+        coEvery { dokarkivService.journalfoer(any()) } returns
+            OpprettJournalpostResponse(
+                journalpostId = Random.nextLong().toString(),
+                journalpostferdigstilt = true,
+            )
 
         runBlocking { service.journalfoerVedtaksbrev(vedtak) }
 

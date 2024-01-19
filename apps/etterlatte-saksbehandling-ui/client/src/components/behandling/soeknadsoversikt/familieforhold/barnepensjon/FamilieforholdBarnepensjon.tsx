@@ -7,6 +7,7 @@ import { Personopplysninger } from '~shared/types/grunnlag'
 import { Familieforhold } from '~shared/types/Person'
 
 import { SamsvarPersongalleri } from '~components/behandling/soeknadsoversikt/familieforhold/SamsvarPersongalleri'
+import { RedigerFamilieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/RedigerFamilieforhold'
 
 export interface PropsFamilieforhold {
   personopplysninger: Personopplysninger | null
@@ -39,6 +40,7 @@ export const FamilieforholdBarnepensjon = ({ personopplysninger }: PropsFamilief
           ))}
         </FamilieforholdVoksne>
         <Soeskenliste familieforhold={familieforhold} soekerFnr={soeker.opplysning.foedselsnummer} />
+        <RedigerFamilieforhold familieforhold={familieforhold} />
       </FamilieforholdWrapper>
       <Border />
     </>

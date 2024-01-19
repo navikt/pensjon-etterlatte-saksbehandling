@@ -50,3 +50,8 @@ export type MismatchPersongalleri =
   | 'EKSTRA_AVDOED'
   | 'EKSTRA_SOESKEN'
   | 'HAR_PERSONER_UTEN_IDENTER'
+
+export interface RedigertFamilieforhold {
+  avdoede: string[]
+  gjenlevende: string[]
+}

@@ -16,6 +16,7 @@ import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendel
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
 import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
+import { RedigertFamilieforhold } from '~shared/types/grunnlag'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
@@ -144,6 +145,13 @@ export const hentFoersteVirk = async (args: { sakId: number }) =>
 
 export const oppdaterGrunnlag = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/oppdater-grunnlag`, {})
+}
+
+export const redigerFamilieforhold = async (args: {
+  behandlingId: string
+  redigert: RedigertFamilieforhold
+}): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/rediger-familieforhold`, {})
 }
 
 export const lagreBrevutfallApi = async (args: {

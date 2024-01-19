@@ -2,8 +2,8 @@ package no.nav.etterlatte.behandling.klage
 
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.klage.KLAGE_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
-import no.nav.etterlatte.libs.common.klage.STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
@@ -37,7 +37,7 @@ class KlageHendelserServiceImpl(
                 mapOf(
                     CORRELATION_ID_KEY to correlationId,
                     TEKNISK_TID_KEY to LocalDateTime.now(),
-                    STATISTIKK_RIVER_KEY to statistikkKlage,
+                    KLAGE_STATISTIKK_RIVER_KEY to statistikkKlage,
                 ),
             ).toJson(),
         ).also { (partition, offset) ->

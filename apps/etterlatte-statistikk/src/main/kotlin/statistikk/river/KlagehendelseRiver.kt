@@ -2,8 +2,8 @@ package no.nav.etterlatte.statistikk.river
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.event.BehandlingRiverKey
+import no.nav.etterlatte.libs.common.klage.KLAGE_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
-import no.nav.etterlatte.libs.common.klage.STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -32,7 +32,7 @@ class KlagehendelseRiver(
         initialiserRiverUtenEventName(rapidsConnection) {
             validate { it.demandAny(EVENT_NAME_KEY, klagehendelser) }
             validate { it.interestedIn(BehandlingRiverKey.behandlingObjectKey) }
-            validate { it.requireKey(STATISTIKK_RIVER_KEY) }
+            validate { it.requireKey(KLAGE_STATISTIKK_RIVER_KEY) }
         }
     }
 
@@ -41,7 +41,7 @@ class KlagehendelseRiver(
         context: MessageContext,
     ): Any {
         try {
-            val klage: StatistikkKlage = objectMapper.treeToValue(packet[STATISTIKK_RIVER_KEY])
+            val klage: StatistikkKlage = objectMapper.treeToValue(packet[KLAGE_STATISTIKK_RIVER_KEY])
             val tekniskTid = parseTekniskTid(packet, logger)
             val hendelse: KlageHendelseType = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
             return service.registrerStatistikkForKlagehendelse(klage, tekniskTid, hendelse)

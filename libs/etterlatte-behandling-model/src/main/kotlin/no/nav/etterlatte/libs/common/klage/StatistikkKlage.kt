@@ -17,4 +17,4 @@ enum class KlageHendelseType {
     KABAL_HENDELSE,
 }
 
-const val STATISTIKK_RIVER_KEY = "KLAGE"
+const val KLAGE_STATISTIKK_RIVER_KEY = "KLAGE"

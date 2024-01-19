@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 interface IKlageHendelserService {
-    fun sendKlageHendelse(
+    fun sendKlageHendelseRapids(
         statistikkKlage: StatistikkKlage,
         klageHendelseType: KlageHendelseType,
     )
@@ -24,7 +24,7 @@ class KlageHendelserServiceImpl(
 ) : IKlageHendelserService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun sendKlageHendelse(
+    override fun sendKlageHendelseRapids(
         statistikkKlage: StatistikkKlage,
         klageHendelseType: KlageHendelseType,
     ) {

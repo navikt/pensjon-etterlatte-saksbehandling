@@ -106,7 +106,7 @@ class KlageServiceImpl(
             begrunnelse = null,
         )
 
-        klageHendelser.sendKlageHendelse(StatistikkKlage(klage.id, klage.sak, Tidspunkt.now()), KlageHendelseType.OPPRETTET)
+        klageHendelser.sendKlageHendelseRapids(StatistikkKlage(klage.id, klage, Tidspunkt.now()), KlageHendelseType.OPPRETTET)
 
         return klage
     }
@@ -232,8 +232,8 @@ class KlageServiceImpl(
             begrunnelse = null,
         )
 
-        klageHendelser.sendKlageHendelse(
-            StatistikkKlage(opprinneligKlage.id, opprinneligKlage.sak, Tidspunkt.now(), kabalrespons = kabalrespons),
+        klageHendelser.sendKlageHendelseRapids(
+            StatistikkKlage(opprinneligKlage.id, opprinneligKlage, Tidspunkt.now(), kabalrespons = kabalrespons),
             KlageHendelseType.KABAL_HENDELSE,
         )
 
@@ -288,8 +288,8 @@ class KlageServiceImpl(
             begrunnelse = null,
         )
 
-        klageHendelser.sendKlageHendelse(
-            StatistikkKlage(klage.id, klage.sak, Tidspunkt.now(), saksbehandler.ident),
+        klageHendelser.sendKlageHendelseRapids(
+            StatistikkKlage(klage.id, klage, Tidspunkt.now(), saksbehandler.ident),
             KlageHendelseType.FERDIGSTILT,
         )
 

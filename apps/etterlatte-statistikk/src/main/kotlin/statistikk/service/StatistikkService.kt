@@ -285,7 +285,7 @@ class StatistikkService(
         vedtakTidspunkt = null,
         beregning = null,
         avkorting = null,
-        kilde = Vedtaksloesning.GJENNY,
+        kilde = "BRUKER".takeIf(statistikkKlage.klage.innkommendeDokument?.innsender != null) ?: VedtaksLoesning.GJENNY 
         ferdigbehandletTidspunkt = null,
         behandlingMetode = null,
         datoFoersteUtbetaling = null,

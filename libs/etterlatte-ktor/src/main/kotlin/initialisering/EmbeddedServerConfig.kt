@@ -1,6 +1,7 @@
 package initialisering
 
 import com.typesafe.config.Config
+import io.ktor.server.application.Application
 import io.ktor.server.cio.CIO
 import io.ktor.server.cio.CIOApplicationEngine
 import io.ktor.server.config.HoconApplicationConfig
@@ -19,38 +20,35 @@ fun initEmbeddedServer(
     applicationConfig: Config,
     withMetrics: Boolean = true,
     routes: Route.() -> Unit,
-): CIOApplicationEngine {
-    return embeddedServer(
-        factory = CIO,
-        environment =
-            applicationEngineEnvironment {
-                config = HoconApplicationConfig(applicationConfig)
-                module {
-                    restModule(sikkerlogger(), withMetrics = withMetrics) {
-                        routes()
-                    }
-                }
-                connector { port = httpPort }
-            },
-    )
+) = settOppEmbeddedServer(httpPort, applicationConfig) {
+    restModule(sikkerlogger(), withMetrics = withMetrics) {
+        routes()
+    }
 }
 
 fun initEmbeddedServerUtenRest(
     httpPort: Int,
     applicationConfig: Config,
-): CIOApplicationEngine {
-    return embeddedServer(
+) = settOppEmbeddedServer(httpPort, applicationConfig) {
+    routing {
+        healthApi()
+    }
+    metricsModule()
+}
+
+private fun settOppEmbeddedServer(
+    httpPort: Int,
+    applicationConfig: Config,
+    body: Application.() -> Unit,
+): CIOApplicationEngine =
+    embeddedServer(
         factory = CIO,
         environment =
             applicationEngineEnvironment {
                 config = HoconApplicationConfig(applicationConfig)
                 module {
-                    routing {
-                        healthApi()
-                    }
-                    metricsModule()
+                    body()
                 }
                 connector { port = httpPort }
             },
     )
-}

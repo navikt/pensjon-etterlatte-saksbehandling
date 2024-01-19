@@ -1,6 +1,6 @@
 import { Button, Heading, Modal, Select, TextField, ToggleGroup } from '@navikt/ds-react'
-import React, { useState } from 'react'
-import { IBrev, Mottaker } from '~shared/types/Brev'
+import React, { useEffect, useState } from 'react'
+import { AdresseType, IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import styled, { css } from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -14,6 +14,7 @@ import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { formaterFnr } from '~utils/formattering'
+import { Controller, useForm } from 'react-hook-form'
 
 enum MottakerType {
   PRIVATPERSON = 'PRIVATPERSON',
@@ -32,15 +33,30 @@ export default function RedigerMottakerModal({ brev, oppdater, vergeadresse }: P
   const [isOpen, setIsOpen] = useState(false)
   const [mottakerStatus, apiOppdaterMottaker] = useApiCall(oppdaterMottaker)
 
-  const [mottaker, setMottaker] = useState<Mottaker>(initialMottaker)
-
   const [mottakerType, setMottakerType] = useState(
-    mottaker.orgnummer ? MottakerType.BEDRIFT : MottakerType.PRIVATPERSON
+    brev.mottaker.orgnummer ? MottakerType.BEDRIFT : MottakerType.PRIVATPERSON
   )
 
+  const {
+    control,
+    formState: { errors },
+    getValues,
+    handleSubmit,
+    register,
+    reset,
+    setValue,
+    watch,
+  } = useForm<Mottaker>({
+    defaultValues: initialMottaker,
+  })
+
+  useEffect(() => {
+    if (mottakerType == MottakerType.BEDRIFT) setValue('foedselsnummer', undefined)
+    else if (mottakerType == MottakerType.PRIVATPERSON) setValue('orgnummer', undefined)
+  }, [mottakerType])
+
   const lagre = () => {
-    if (mottakerType == MottakerType.BEDRIFT) mottaker.foedselsnummer = undefined
-    else if (mottakerType == MottakerType.PRIVATPERSON) mottaker.orgnummer = undefined
+    const mottaker = getValues()
 
     apiOppdaterMottaker({ brevId, sakId, mottaker }, () => {
       oppdater(mottaker)
@@ -49,7 +65,7 @@ export default function RedigerMottakerModal({ brev, oppdater, vergeadresse }: P
   }
 
   const avbryt = () => {
-    setMottaker(initialMottaker)
+    reset(initialMottaker)
     setIsOpen(false)
   }
 
@@ -73,6 +89,8 @@ export default function RedigerMottakerModal({ brev, oppdater, vergeadresse }: P
       </>
     )
   }
+
+  const erNorskAdresse = watch('adresse.adresseType') === AdresseType.NORSKPOSTADRESSE
 
   return (
     <>
@@ -110,124 +128,137 @@ export default function RedigerMottakerModal({ brev, oppdater, vergeadresse }: P
 
             {mottakerType == MottakerType.BEDRIFT && (
               <TextField
+                {...register('orgnummer', {
+                  required: {
+                    value: true,
+                    message: 'Orgnummer må være satt når mottaker er bedrift',
+                  },
+                  pattern: {
+                    value: /[0-9]+/,
+                    message: 'Orgnummer kan kun bestå av siffer',
+                  },
+                })}
                 label="Orgnummer"
-                onChange={(e) => setMottaker({ ...mottaker, orgnummer: e.target.value })}
-                value={mottaker.orgnummer || ''}
+                error={errors?.orgnummer?.message}
               />
             )}
             {mottakerType == MottakerType.PRIVATPERSON && (
               <TextField
+                {...register('foedselsnummer.value', {
+                  required: {
+                    value: true,
+                    message: 'Fødselsnummer må være satt',
+                  },
+                  pattern: {
+                    value: /[0-9]{11}/,
+                    message: 'Fødselsnummer kan kun bestå av 11 siffer',
+                  },
+                })}
                 label="Fødselsnummer"
-                onChange={(e) => setMottaker({ ...mottaker, foedselsnummer: { value: e.target.value } })}
-                value={mottaker.foedselsnummer?.value || ''}
-                pattern="[0-9]+"
+                error={errors?.foedselsnummer?.value?.message}
               />
             )}
           </SkjemaGruppe>
 
           <SkjemaGruppe>
             <TextField
+              {...register('navn', {
+                required: {
+                  value: true,
+                  message: 'Navn må være satt',
+                },
+              })}
               label="Navn"
-              onChange={(e) => setMottaker({ ...mottaker, navn: e.target.value })}
-              value={mottaker.navn || ''}
+              error={errors?.navn?.message}
             />
           </SkjemaGruppe>
 
           <SkjemaGruppe>
-            <Select
-              label="Adressetype"
-              onChange={(e) =>
-                setMottaker({ ...mottaker, adresse: { ...mottaker.adresse, adresseType: e.target.value } })
-              }
-              value={mottaker.adresse?.adresseType || ''}
-            >
-              <option value="">Velg type</option>
-              <option value="NORSKPOSTADRESSE">Norsk postadresse</option>
-              <option value="UTENLANDSKPOSTADRESSE">Utenlandsk postadresse</option>
-            </Select>
+            <Controller
+              control={control}
+              name="adresse.adresseType"
+              rules={{
+                required: {
+                  value: true,
+                  message: 'Adressetype må være satt',
+                },
+              }}
+              render={({ field, formState: { errors } }) => (
+                <Select {...field} label="Adressetype" error={errors?.adresse?.adresseType?.message}>
+                  <option></option>
+                  <option value={AdresseType.NORSKPOSTADRESSE}>Norsk postadresse</option>
+                  <option value={AdresseType.UTENLANDSKPOSTADRESSE}>Utenlandsk postadresse</option>
+                </Select>
+              )}
+            />
           </SkjemaGruppe>
 
           <SkjemaGruppe>
             <TextField
+              {...register('adresse.adresselinje1', {
+                required: {
+                  value: true,
+                  message: 'Det må være minst én adresselinje',
+                },
+              })}
               label="Adresselinje 1"
-              onChange={(e) =>
-                setMottaker({
-                  ...mottaker,
-                  adresse: { ...mottaker.adresse, adresselinje1: e.target.value },
-                })
-              }
-              value={mottaker.adresse?.adresselinje1 || ''}
+              error={errors?.adresse?.adresselinje1?.message}
             />
-            <TextField
-              label="Adresselinje 2"
-              onChange={(e) =>
-                setMottaker({
-                  ...mottaker,
-                  adresse: { ...mottaker.adresse, adresselinje2: e.target.value },
-                })
-              }
-              value={mottaker.adresse?.adresselinje2 || ''}
-            />
-            <TextField
-              label="Adresselinje 3"
-              onChange={(e) =>
-                setMottaker({
-                  ...mottaker,
-                  adresse: { ...mottaker.adresse, adresselinje3: e.target.value },
-                })
-              }
-              value={mottaker.adresse?.adresselinje3 || ''}
-            />
+            <TextField {...register('adresse.adresselinje2')} label="Adresselinje 2" />
+            <TextField {...register('adresse.adresselinje3')} label="Adresselinje 3" />
           </SkjemaGruppe>
 
           <SkjemaGruppe inline>
             <TextField
+              {...register('adresse.postnummer', {
+                required: {
+                  value: erNorskAdresse,
+                  message: 'Postnummer må være satt på norske adresser',
+                },
+                pattern: {
+                  value: /\d+/,
+                  message: 'Postnummer kan kun bestå av siffer',
+                },
+              })}
               label="Postnummer"
-              onChange={(e) =>
-                setMottaker({
-                  ...mottaker,
-                  adresse: { ...mottaker.adresse, postnummer: e.target.value },
-                })
-              }
-              value={mottaker.adresse?.postnummer || ''}
-              maxLength={4}
-              pattern="[0-9]+"
+              error={errors?.adresse?.postnummer?.message}
             />
             <TextField
+              {...register('adresse.poststed', {
+                required: {
+                  value: erNorskAdresse,
+                  message: 'Poststed må være satt',
+                },
+              })}
               label="Poststed"
-              onChange={(e) =>
-                setMottaker({
-                  ...mottaker,
-                  adresse: { ...mottaker.adresse, poststed: e.target.value },
-                })
-              }
-              value={mottaker.adresse?.poststed || ''}
+              error={errors?.adresse?.poststed?.message}
             />
           </SkjemaGruppe>
 
           <SkjemaGruppe inline>
             <TextField
+              {...register('adresse.landkode', {
+                required: {
+                  value: true,
+                  message: 'Landkode må være satt (2 tegn)',
+                },
+                pattern: {
+                  value: /[A-Z]{2}/,
+                  message: 'Landkode skal kun bestå av 2 bokstaver (eks. NO)',
+                },
+              })}
               label="Landkode"
-              onChange={(e) =>
-                setMottaker({
-                  ...mottaker,
-                  adresse: { ...mottaker.adresse, landkode: e.target.value },
-                })
-              }
-              value={mottaker.adresse?.landkode || ''}
-              pattern="[A-Z]{2}"
-              minLength={2}
-              maxLength={2}
+              error={errors?.adresse?.landkode?.message}
             />
             <TextField
+              {...register('adresse.land', {
+                required: {
+                  value: true,
+                  message: 'Land må være satt (2 tegn)',
+                },
+              })}
               label="Land"
-              onChange={(e) =>
-                setMottaker({
-                  ...mottaker,
-                  adresse: { ...mottaker.adresse, land: e.target.value },
-                })
-              }
-              value={mottaker.adresse?.land || ''}
+              error={errors?.adresse?.land?.message}
             />
           </SkjemaGruppe>
 
@@ -240,7 +271,7 @@ export default function RedigerMottakerModal({ brev, oppdater, vergeadresse }: P
             <Button variant="secondary" disabled={isPending(mottakerStatus)} onClick={avbryt}>
               Avbryt
             </Button>
-            <Button variant="primary" loading={isPending(mottakerStatus)} onClick={lagre}>
+            <Button variant="primary" loading={isPending(mottakerStatus)} onClick={handleSubmit(lagre)}>
               Lagre
             </Button>
           </FlexRow>

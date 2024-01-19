@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -91,7 +92,9 @@ class VedtaksbrevService(
             logger.warn("Brev (id=${brev.id}) er allerede ferdigstilt. Avbryter ferdigstilling...")
             return
         } else if (!brev.kanEndres()) {
-            throw IllegalStateException("Brev med id=${brev.id} kan ikke ferdigstilles, siden det har status ${brev.status}")
+            throw UgyldigStatusKanIkkeFerdigstilles(brev.id, brev.status)
+        } else if (!brev.mottaker.erGyldig()) {
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
         }
 
         val (saksbehandlerIdent, vedtakStatus) =
@@ -168,4 +171,23 @@ data class MigreringBrevRequest(
     val brutto: Int,
     val yrkesskade: Boolean,
     val utlandstilknytningType: UtlandstilknytningType?,
+)
+
+class UgyldigStatusKanIkkeFerdigstilles(id: BrevID, status: Status) : UgyldigForespoerselException(
+    code = "UGYLDIG_STATUS_BREV",
+    detail = "Brevet kan ikke ferdigstilles når status er ${status.name.lowercase()}",
+    meta =
+        mapOf(
+            "id" to id,
+            "status" to status,
+        ),
+)
+
+class UgyldigMottakerKanIkkeFerdigstilles(id: BrevID) : UgyldigForespoerselException(
+    code = "UGYLDIG_MOTTAKER_BREV",
+    detail = "Brevet har ugyldig mottaker og kan ikke ferdigstilles",
+    meta =
+        mapOf(
+            "id" to id,
+        ),
 )

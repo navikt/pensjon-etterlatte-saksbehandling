@@ -19,7 +19,13 @@ import no.nav.etterlatte.migrering.verifisering.PersonHenter
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 
 internal class ApplicationContext {
-    val dataSource = DataSourceBuilder.createDataSource(System.getenv())
+    private val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
+    val dataSource =
+        DataSourceBuilder.createDataSource(
+            jdbcUrl = properties.jdbcUrl,
+            username = properties.dbUsername,
+            password = properties.dbPassword,
+        )
 
     private val config = ConfigFactory.load()
     val penklient = PenKlient(config, httpClient())

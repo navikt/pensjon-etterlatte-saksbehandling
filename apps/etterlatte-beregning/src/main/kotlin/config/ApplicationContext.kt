@@ -18,7 +18,6 @@ import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlientImpl
-import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.no.nav.etterlatte.grunnbeloep.GrunnbeloepService
@@ -35,7 +34,12 @@ class ApplicationContext {
     val config: Config = ConfigFactory.load()
     private val env = System.getenv()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
-    val dataSource = DataSourceBuilder.createDataSource(properties)
+    val dataSource =
+        DataSourceBuilder.createDataSource(
+            jdbcUrl = properties.jdbcUrl,
+            username = properties.dbUsername,
+            password = properties.dbPassword,
+        )
 
     val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 

@@ -51,7 +51,13 @@ class ApplicationBuilder {
 
     private val env = System.getenv()
     private val config: Config = ConfigFactory.load()
-    private val dataSource = DataSourceBuilder.createDataSource(env)
+    private val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
+    private val dataSource =
+        DataSourceBuilder.createDataSource(
+            jdbcUrl = properties.jdbcUrl,
+            username = properties.dbUsername,
+            password = properties.dbPassword,
+        )
 
     private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())

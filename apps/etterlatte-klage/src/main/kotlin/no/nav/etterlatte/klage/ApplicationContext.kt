@@ -2,11 +2,13 @@ package no.nav.etterlatte.klage
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
+import io.ktor.server.application.Application
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.libs.ktor.restModule
 
 val sikkerLogg = sikkerlogger()
 
@@ -53,4 +55,17 @@ class ApplicationContext {
             topic = env.requireEnvValue("KLAGE_TOPIC"),
             behandlingKlient = behandlingKlient,
         )
+}
+
+fun Application.module(context: ApplicationContext) {
+    with(context) {
+        restModule(
+            sikkerLogg = sikkerLogg,
+        ) {
+            kabalOvesendelseRoute(
+                kabalOversendelseService = kabalOversendelseService,
+                featureToggleService = featureToggleService,
+            )
+        }
+    }
 }

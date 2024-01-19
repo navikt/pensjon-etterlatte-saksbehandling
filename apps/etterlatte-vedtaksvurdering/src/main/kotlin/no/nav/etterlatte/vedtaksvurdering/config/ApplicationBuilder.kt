@@ -9,6 +9,7 @@ import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.database.ApplicationProperties
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection

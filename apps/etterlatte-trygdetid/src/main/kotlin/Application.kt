@@ -1,8 +1,8 @@
 package no.nav.etterlatte
 
-import initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.trygdetid.avtale.avtale
 import no.nav.etterlatte.trygdetid.config.ApplicationContext

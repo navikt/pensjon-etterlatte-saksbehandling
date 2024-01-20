@@ -1,4 +1,4 @@
-package initialisering
+package no.nav.etterlatte.libs.ktor.initialisering
 
 import com.typesafe.config.Config
 import io.ktor.server.application.Application

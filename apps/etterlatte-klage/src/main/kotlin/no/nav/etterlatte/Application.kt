@@ -1,11 +1,11 @@
 package no.nav.etterlatte
 
-import initialisering.initEmbeddedServer
 import io.ktor.server.application.Application
 import no.nav.etterlatte.kafka.startLytting
 import no.nav.etterlatte.klage.ApplicationContext
 import no.nav.etterlatte.klage.kabalOvesendelseRoute
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
+import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.setReady
 import org.slf4j.LoggerFactory
 

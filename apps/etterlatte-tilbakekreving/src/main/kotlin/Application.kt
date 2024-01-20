@@ -1,9 +1,9 @@
 package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
-import initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.tilbakekreving.config.ApplicationContext
 import no.nav.etterlatte.tilbakekreving.kravgrunnlag.testKravgrunnlagRoutes

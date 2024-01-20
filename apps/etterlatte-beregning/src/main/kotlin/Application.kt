@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import initialisering.initEmbeddedServer
 import no.nav.etterlatte.avkorting.avkorting
 import no.nav.etterlatte.beregning.beregning
 import no.nav.etterlatte.beregning.grunnlag.beregningsGrunnlag
@@ -8,6 +7,7 @@ import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.grunnbeloep.grunnbeloep
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServer
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.ytelseMedGrunnlag.ytelseMedGrunnlag
 

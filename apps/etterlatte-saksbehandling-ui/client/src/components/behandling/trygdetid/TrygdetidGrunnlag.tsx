@@ -13,7 +13,7 @@ import React from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
-import { isFailureWithCode, isFailure, isPending } from '~shared/api/apiUtils'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
 import { useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 
@@ -150,12 +150,12 @@ export const TrygdetidGrunnlag = ({
         </TrygdetidForm>
       </Innhold>
 
-      {isFailure(trygdetidgrunnlagStatus) && (
-        <ApiErrorAlert>
-          {isFailureWithCode(trygdetidgrunnlagStatus, 409)
-            ? 'Trygdetidsperioder kan ikke være overlappende'
-            : 'En feil har oppstått'}
-        </ApiErrorAlert>
+      {mapFailure(trygdetidgrunnlagStatus, (error) =>
+        error.status === 409 ? (
+          <ApiErrorAlert>Trygdetidsperioder kan ikke være overlappende</ApiErrorAlert>
+        ) : (
+          <ApiErrorAlert>{error.detail}</ApiErrorAlert>
+        )
       )}
     </TrygdetidGrunnlagWrapper>
   )

@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
@@ -23,7 +24,7 @@ internal class PdlHendelserRiver(
     private val logger = LoggerFactory.getLogger(PdlHendelserRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, "PDL:PERSONHENDELSE") {
+        initialiserRiver(rapidsConnection, PdlHendelserKeys.PERSONHENDELSE) {
             validate { it.requireKey("hendelse") }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }

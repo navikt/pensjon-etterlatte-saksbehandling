@@ -1,4 +1,3 @@
-import { Familieforhold } from '~shared/types/Person'
 import styled from 'styled-components'
 import { Alert, Button, Panel, TextField } from '@navikt/ds-react'
 import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
@@ -6,20 +5,19 @@ import React, { useState } from 'react'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerFamilieforhold } from '~shared/api/behandling'
-import { useBehandling } from '~components/behandling/useBehandling'
 import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
-import { RedigertFamilieforhold } from '~shared/types/grunnlag'
+import { Personopplysninger, RedigertFamilieforhold } from '~shared/types/grunnlag'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 type Props = {
-  familieforhold: Familieforhold
+  behandling: IDetaljertBehandling
+  personopplysninger: Personopplysninger
 }
 
-export const RedigerFamilieforhold = ({ familieforhold }: Props) => {
-  const behandlingId = useBehandling()!.id // TODO.. behandling som prop istedet
-
+export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props) => {
   const [redigerbartFamilieforhold, setFamilieforhold] = useState<RedigertFamilieforhold>({
-    gjenlevende: familieforhold.gjenlevende.map((gjenlevende) => gjenlevende.opplysning.foedselsnummer),
-    avdoede: familieforhold.avdoede.map((avdoede) => avdoede.opplysning.foedselsnummer),
+    gjenlevende: personopplysninger.gjenlevende.map((gjenlevende) => gjenlevende.opplysning.foedselsnummer),
+    avdoede: personopplysninger.avdoede.map((avdoede) => avdoede.opplysning.foedselsnummer),
   })
 
   const [status, redigerFamilieforholdRequest] = useApiCall(redigerFamilieforhold)
@@ -39,7 +37,7 @@ export const RedigerFamilieforhold = ({ familieforhold }: Props) => {
 
     if (feilmelding == null) {
       redigerFamilieforholdRequest({
-        behandlingId: behandlingId,
+        behandlingId: behandling.id,
         redigert: redigerbartFamilieforhold,
       })
     }

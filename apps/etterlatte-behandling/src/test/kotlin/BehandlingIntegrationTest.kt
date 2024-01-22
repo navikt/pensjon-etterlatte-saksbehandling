@@ -13,7 +13,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
@@ -69,7 +68,6 @@ abstract class BehandlingIntegrationTest {
     private val postgreSQLContainer = DatabaseExtension.postgreSQLContainer
     protected val server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
-    protected lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     protected fun startServer(
         norg2Klient: Norg2Klient? = null,
@@ -78,7 +76,6 @@ abstract class BehandlingIntegrationTest {
         server.start()
 
         val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
 
         applicationContext =
             ApplicationContext(
@@ -111,7 +108,7 @@ abstract class BehandlingIntegrationTest {
                     }.let { Miljoevariabler(it) },
                 config =
                     ConfigFactory.parseMap(
-                        hoconApplicationConfig.toMap() +
+                        buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID).toMap() +
                             mapOf(
                                 "pdltjenester.url" to "http://localhost",
                                 "grunnlag.resource.url" to "http://localhost",

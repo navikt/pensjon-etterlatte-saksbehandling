@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.stream.IntStream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmregningIntegrationTest : BehandlingIntegrationTest() {
@@ -108,11 +107,6 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
 
     @Test
     fun `kan opprette omregning paa sak som har iverksatt foerstegangsbehandling`() {
-        IntStream.of(1).forEach {
-            println(it)
-            val (sak, behandling) = opprettSakMedFoerstegangsbehandling(it.toString())
-            iverksettFoerstegangsbehandling(sak, behandling)
-        }
         testApplication {
             environment {
                 config = hoconApplicationConfig
@@ -125,31 +119,36 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
                 }
             application { module(applicationContext) }
 
-            val (omregning) =
-                client.post("/omregning") {
-                    addAuthToken(systemBruker)
+            for (i in 1..100) {
+                println(i)
+                val (sak, behandling) = opprettSakMedFoerstegangsbehandling(i.toString())
+                iverksettFoerstegangsbehandling(sak, behandling)
+                val (omregning) =
+                    client.post("/omregning") {
+                        addAuthToken(systemBruker)
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody(
+                            Omregningshendelse(
+                                sakId,
+                                LocalDate.now(),
+                                null,
+                                Prosesstype.AUTOMATISK,
+                            ),
+                        )
+                    }.let {
+                        Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                        it.body<OpprettOmregningResponse>()
+                    }
+
+                client.get("/behandlinger/$omregning") {
+                    addAuthToken(tokenSaksbehandler)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    setBody(
-                        Omregningshendelse(
-                            sakId,
-                            LocalDate.now(),
-                            null,
-                            Prosesstype.AUTOMATISK,
-                        ),
-                    )
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                    it.body<OpprettOmregningResponse>()
-                }
-
-            client.get("/behandlinger/$omregning") {
-                addAuthToken(tokenSaksbehandler)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            }.let {
-                Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                it.body<DetaljertBehandling>().also { behandling ->
-                    Assertions.assertEquals(omregning, behandling.id)
-                    Assertions.assertEquals(sakId, behandling.sak)
+                    it.body<DetaljertBehandling>().also { behandling ->
+                        Assertions.assertEquals(omregning, behandling.id)
+                        Assertions.assertEquals(sakId, behandling.sak)
+                    }
                 }
             }
         }

@@ -10,9 +10,7 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlin.system.exitProcess
 
-/** 1e mai 2023 */
-val REGELVERK_OMREGNING_2024: LocalDate = LocalDate.of(2024, 1, 1)
-// val GRUNNBELOEP_REGULERING_DATO: LocalDate = LocalDate.of(2023, 5, 1)
+val GRUNNBELOEP_REGULERING_DATO: LocalDate = LocalDate.of(2024, 5, 1)
 
 val logger: Logger = LoggerFactory.getLogger("StartReguleringJob")
 
@@ -26,7 +24,7 @@ fun main() {
 
     producer.publiser(
         noekkel = "StartReguleringJob-${UUID.randomUUID()}",
-        verdi = createRecord(REGELVERK_OMREGNING_2024),
+        verdi = createRecord(GRUNNBELOEP_REGULERING_DATO),
     )
     producer.close()
 

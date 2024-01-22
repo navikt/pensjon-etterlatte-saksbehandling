@@ -28,8 +28,6 @@ import { isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { FlyttJournalpost } from '~components/person/flyttjournalpost/FlyttJournalpost'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
-import { StyleSheetManager } from 'styled-components'
-import isPropValid from '@emotion/is-prop-valid'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
@@ -47,50 +45,39 @@ function App() {
 
   return (
     <>
-      <StyleSheetManager shouldForwardProp={shouldForwardProp}>
-        {isSuccess(hentConfigStatus) && innloggetbrukerHentet && (
-          <div className="app">
-            <Versioncheck />
-            <BrowserRouter basename="/">
-              <ScrollToTop />
-              <HeaderBanner />
-              <ErrorBoundary>
-                <ConfigContext.Provider value={hentConfigStatus.data}>
-                  <Routes>
-                    <Route path="/" element={<ToggleMinOppgaveliste />} />
-                    <Route path="/oppgavebenken" element={<ToggleMinOppgaveliste />} />
-                    <Route path="/flyttjournalpost" element={<FlyttJournalpost />} />
-                    <Route path="/person/:fnr" element={<Person />} />
-                    <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
-                    <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
-                    <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
-                    <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />
-                    {kanBrukeKlage ? <Route path="/klage/:klageId/*" element={<Klagebehandling />} /> : null}
-                    <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
-                    <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </ConfigContext.Provider>
-              </ErrorBoundary>
-            </BrowserRouter>
-          </div>
-        )}
-        {isFailureHandler({
-          apiResult: hentConfigStatus,
-          errorMessage: 'Kunne ikke hente konfigurasjonsverdier',
-        })}
-      </StyleSheetManager>
+      {isSuccess(hentConfigStatus) && innloggetbrukerHentet && (
+        <div className="app">
+          <Versioncheck />
+          <BrowserRouter basename="/">
+            <ScrollToTop />
+            <HeaderBanner />
+            <ErrorBoundary>
+              <ConfigContext.Provider value={hentConfigStatus.data}>
+                <Routes>
+                  <Route path="/" element={<ToggleMinOppgaveliste />} />
+                  <Route path="/oppgavebenken" element={<ToggleMinOppgaveliste />} />
+                  <Route path="/flyttjournalpost" element={<FlyttJournalpost />} />
+                  <Route path="/person/:fnr" element={<Person />} />
+                  <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />
+                  <Route path="/person/:fnr/sak/:sakId/brev/:brevId" element={<NyttBrev />} />
+                  <Route path="/behandling/:behandlingId/*" element={<Behandling />} />
+                  <Route path="/manuellbehandling/*" element={<ManuellBehandling />} />
+                  {kanBrukeKlage ? <Route path="/klage/:klageId/*" element={<Klagebehandling />} /> : null}
+                  <Route path="/tilbakekreving/:tilbakekrevingId/*" element={<Tilbakekrevingsbehandling />} />
+                  <Route path="/generellbehandling/:generellbehandlingId" element={<GenerellBehandling />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </ConfigContext.Provider>
+            </ErrorBoundary>
+          </BrowserRouter>
+        </div>
+      )}
+      {isFailureHandler({
+        apiResult: hentConfigStatus,
+        errorMessage: 'Kunne ikke hente konfigurasjonsverdier',
+      })}
     </>
   )
-}
-
-function shouldForwardProp(propName: string, target: any) {
-  if (typeof target === 'string') {
-    // For HTML elements, forward the prop if it is a valid HTML attribute
-    return isPropValid(propName)
-  }
-  // For other elements, forward all props
-  return true
 }
 
 export default App

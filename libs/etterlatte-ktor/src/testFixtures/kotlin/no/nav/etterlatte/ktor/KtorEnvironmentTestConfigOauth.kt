@@ -1,9 +1,9 @@
-package testsupport
+package no.nav.etterlatte.ktor
 
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
 
-fun buildTestApplicationConfigurationForOauth(
+internal fun buildTestApplicationConfigurationForOauth(
     port: Int,
     issuerId: String,
     clientId: String,

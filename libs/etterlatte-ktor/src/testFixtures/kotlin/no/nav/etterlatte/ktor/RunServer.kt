@@ -14,7 +14,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import testsupport.buildTestApplicationConfigurationForOauth
 
 fun ApplicationTestBuilder.runServerWithModule(
     server: MockOAuth2Server,

@@ -29,7 +29,6 @@ import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Miljoevariabler
@@ -52,14 +51,12 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.extension.ExtendWith
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
 import java.util.UUID
 
@@ -74,8 +71,6 @@ abstract class BehandlingIntegrationTest {
         featureToggleService: FeatureToggleService = DummyFeatureToggleService(),
     ) {
         server.start()
-
-        val httpServer = server.config.httpServer
 
         applicationContext =
             ApplicationContext(
@@ -108,12 +103,11 @@ abstract class BehandlingIntegrationTest {
                     }.let { Miljoevariabler(it) },
                 config =
                     ConfigFactory.parseMap(
-                        buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID).toMap() +
-                            mapOf(
-                                "pdltjenester.url" to "http://localhost",
-                                "grunnlag.resource.url" to "http://localhost",
-                                "vedtak.resource.url" to "http://localhost",
-                            ),
+                        mapOf(
+                            "pdltjenester.url" to "http://localhost",
+                            "grunnlag.resource.url" to "http://localhost",
+                            "vedtak.resource.url" to "http://localhost",
+                        ),
                     ),
                 rapid = TestProdusent(),
                 featureToggleService = featureToggleService,

@@ -67,7 +67,7 @@ import java.util.UUID
 @ExtendWith(DatabaseExtension::class)
 abstract class BehandlingIntegrationTest {
     private val postgreSQLContainer = DatabaseExtension.postgreSQLContainer
-    private val server: MockOAuth2Server = MockOAuth2Server()
+    protected val server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
     protected lateinit var hoconApplicationConfig: HoconApplicationConfig
 

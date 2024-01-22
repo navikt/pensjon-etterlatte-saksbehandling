@@ -1,5 +1,4 @@
 package no.nav.etterlatte.beregning
-
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -10,15 +9,13 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -29,8 +26,6 @@ import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -38,7 +33,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.YearMonth
 import java.util.UUID
 import java.util.UUID.randomUUID
@@ -46,7 +40,6 @@ import java.util.UUID.randomUUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BeregningRoutesTest {
     private val server = MockOAuth2Server()
-    private lateinit var applicationConfig: HoconApplicationConfig
     private val beregningRepository = mockk<BeregningRepository>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
@@ -65,8 +58,6 @@ internal class BeregningRoutesTest {
     fun before() {
         server.start()
 
-        applicationConfig =
-            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
@@ -80,8 +71,9 @@ internal class BeregningRoutesTest {
         every { beregningRepository.hent(any()) } returns null
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
+            runServer(server) {
+                beregning(beregningService, behandlingKlient)
+            }
 
             val response =
                 client.get("/api/beregning/${randomUUID()}") {
@@ -105,8 +97,9 @@ internal class BeregningRoutesTest {
         every { beregningRepository.hentOverstyrBeregning(1L) } returns null
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
+            runServer(server) {
+                beregning(beregningService, behandlingKlient)
+            }
 
             val response =
                 client.get("/api/beregning/${beregning.behandlingId}") {
@@ -128,8 +121,9 @@ internal class BeregningRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
+            runServer(server) {
+                beregning(beregningService, behandlingKlient)
+            }
 
             client.get("/api/beregning/${beregning.behandlingId}") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -153,8 +147,9 @@ internal class BeregningRoutesTest {
         every { beregningRepository.lagreEllerOppdaterBeregning(any()) } returnsArgument 0
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
+            runServer(server) {
+                beregning(beregningService, behandlingKlient)
+            }
 
             val response =
                 client.post("/api/beregning/${behandling.id}") {
@@ -184,8 +179,9 @@ internal class BeregningRoutesTest {
         every { beregningRepository.hentOverstyrBeregning(1L) } returns OverstyrBeregning(1L, "Test", Tidspunkt.now())
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
+            runServer(server) {
+                beregning(beregningService, behandlingKlient)
+            }
 
             val response =
                 client.get("/api/beregning/${randomUUID()}/overstyrt") {
@@ -193,7 +189,8 @@ internal class BeregningRoutesTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            val hentetOverstyrBeregning = objectMapper.readValue(response.bodyAsText(), OverstyrBeregningDTO::class.java)
+            val hentetOverstyrBeregning =
+                objectMapper.readValue(response.bodyAsText(), OverstyrBeregningDTO::class.java)
 
             hentetOverstyrBeregning shouldNotBe null
             hentetOverstyrBeregning.beskrivelse shouldBe "Test"
@@ -210,8 +207,9 @@ internal class BeregningRoutesTest {
         every { beregningRepository.hentOverstyrBeregning(1L) } returns null
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregning(beregningService, behandlingKlient) } }
+            runServer(server) {
+                beregning(beregningService, behandlingKlient)
+            }
 
             val response =
                 client.get("/api/beregning/${randomUUID()}/overstyrt") {

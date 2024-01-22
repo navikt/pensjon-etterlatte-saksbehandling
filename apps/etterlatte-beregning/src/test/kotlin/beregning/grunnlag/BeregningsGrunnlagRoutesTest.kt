@@ -1,8 +1,6 @@
 package no.nav.etterlatte.beregning.grunnlag
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.kotest.matchers.shouldBe
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -11,9 +9,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -25,9 +20,9 @@ import io.mockk.slot
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -41,8 +36,6 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeskenMedIBeregning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -50,14 +43,12 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BeregningsGrunnlagRoutesTest {
     private val server = MockOAuth2Server()
-    private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val repository = mockk<BeregningsGrunnlagRepository>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
@@ -66,9 +57,6 @@ internal class BeregningsGrunnlagRoutesTest {
     @BeforeAll
     fun before() {
         server.start()
-
-        applicationConfig =
-            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterAll
@@ -99,8 +87,9 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.finnBarnepensjonGrunnlagForBehandling(any()) } returns null
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
+            runServer(server) {
+                beregningsGrunnlag(service, behandlingKlient)
+            }
 
             val response =
                 client.get("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
@@ -162,8 +151,9 @@ internal class BeregningsGrunnlagRoutesTest {
             )
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
+            runServer(server) {
+                beregningsGrunnlag(service, behandlingKlient)
+            }
 
             val response =
                 client.get("/api/beregning/beregningsgrunnlag/$idRevurdering/barnepensjon") {
@@ -197,8 +187,9 @@ internal class BeregningsGrunnlagRoutesTest {
             )
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
+            runServer(server) {
+                beregningsGrunnlag(service, behandlingKlient)
+            }
 
             val response =
                 client.get("/api/beregning/beregningsgrunnlag/$id/barnepensjon") {
@@ -217,8 +208,9 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
+            runServer(server) {
+                beregningsGrunnlag(service, behandlingKlient)
+            }
 
             client.get("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -234,14 +226,9 @@ internal class BeregningsGrunnlagRoutesTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns false
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
-
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServer(server) {
+                    beregningsGrunnlag(service, behandlingKlient)
                 }
 
             client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
@@ -294,14 +281,9 @@ internal class BeregningsGrunnlagRoutesTest {
             )
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
-
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServer(server) {
+                    beregningsGrunnlag(service, behandlingKlient)
                 }
 
             client.post("/api/beregning/beregningsgrunnlag/${randomUUID()}/barnepensjon") {
@@ -354,15 +336,11 @@ internal class BeregningsGrunnlagRoutesTest {
             )
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
-
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServer(server) {
+                    beregningsGrunnlag(service, behandlingKlient)
                 }
+
             val soeskenMedIBeregning: List<GrunnlagMedPeriode<List<SoeskenMedIBeregning>>> =
                 listOf(
                     GrunnlagMedPeriode(
@@ -408,8 +386,9 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.lagre(any()) } returns true
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
+            runServer(server) {
+                beregningsGrunnlag(service, behandlingKlient)
+            }
 
             client.post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -439,8 +418,9 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.lagre(any()) } returns true
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
+            runServer(server) {
+                beregningsGrunnlag(service, behandlingKlient)
+            }
 
             client.post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -462,8 +442,9 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.lagre(any()) } returns true
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
+            runServer(server) {
+                beregningsGrunnlag(service, behandlingKlient)
+            }
 
             client.post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -500,8 +481,9 @@ internal class BeregningsGrunnlagRoutesTest {
         every { repository.lagre(any()) } returns true
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
+            runServer(server) {
+                beregningsGrunnlag(service, behandlingKlient)
+            }
 
             client.post("/api/beregning/beregningsgrunnlag/$nye/fra/$forrige") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -557,14 +539,9 @@ internal class BeregningsGrunnlagRoutesTest {
             )
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
-
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServer(server) {
+                    beregningsGrunnlag(service, behandlingKlient)
                 }
 
             client.get("/api/beregning/beregningsgrunnlag/$behandlingId/overstyr") {
@@ -659,14 +636,9 @@ internal class BeregningsGrunnlagRoutesTest {
             )
 
         testApplication {
-            environment { config = applicationConfig }
-            application { restModule(log) { beregningsGrunnlag(service, behandlingKlient) } }
-
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServer(server) {
+                    beregningsGrunnlag(service, behandlingKlient)
                 }
 
             client.post("/api/beregning/beregningsgrunnlag/$behandlingId/overstyr") {

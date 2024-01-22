@@ -1,4 +1,4 @@
-package no.nav.etterlatte.libs.common.gyldigSoeknad.gyldighetsgrunnlag
+package no.nav.etterlatte.gyldigsoeknad.gyldighetsgrunnlag
 
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 

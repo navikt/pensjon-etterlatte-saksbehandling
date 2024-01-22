@@ -495,9 +495,9 @@ class TrygdetidServiceImpl(
     private fun hentDatoerForBehandling(trygdetid: Trygdetid): DatoerForBehandling =
         DatoerForBehandling(
             toLocalDate(trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FOEDSELSDATO })
-                ?: throw Exception("Fant ikke fødselsdato for avdoed for trygdetidId=${trygdetid.id}"),
+                ?: throw IngenFoedselsdatoForAvdoedFunnet(trygdetid.id),
             toLocalDate(trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.DOEDSDATO })
-                ?: throw Exception("Fant ikke dødsdato for avdoed for trygdetidId=${trygdetid.id}"),
+                ?: throw IngenDoedsdatoForAvdoedFunnet(trygdetid.id),
         )
 
     override suspend fun slettTrygdetidGrunnlagForTrygdetid(
@@ -892,4 +892,22 @@ class IngenTrygdetidFunnetForAvdoede : UgyldigForespoerselException(
 class TrygdetidManglerBeregning : UgyldigForespoerselException(
     code = "TRYGDETID_MANGLER_BEREGNING",
     detail = "Oppgitt trygdetid er ikke gyldig fordi det mangler en beregning",
+)
+
+class IngenFoedselsdatoForAvdoedFunnet(trygdetidId: UUID) : UgyldigForespoerselException(
+    code = "FOEDSELSDATO_FOR_AVDOED_IKKE_FUNNET",
+    detail = "Fant ikke fødselsdato for avdød",
+    meta =
+        mapOf(
+            "trygdetidId" to trygdetidId,
+        ),
+)
+
+class IngenDoedsdatoForAvdoedFunnet(trygdetidId: UUID) : UgyldigForespoerselException(
+    code = "FOEDSELSDATO_FOR_AVDOED_IKKE_FUNNET",
+    detail = "Fant ikke dødsdato for avdød",
+    meta =
+        mapOf(
+            "trygdetidId" to trygdetidId,
+        ),
 )

@@ -10,6 +10,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -17,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDato
@@ -54,6 +56,8 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VilkaarsvurderingServiceTest {
+    private val featureToggleService = DummyFeatureToggleService()
+
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
@@ -64,6 +68,7 @@ internal class VilkaarsvurderingServiceTest {
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val uuid: UUID = UUID.randomUUID()
     private val brukerTokenInfo = BrukerTokenInfo.of("token", "s1", null, null, null)
+    private val grunnlagMock: Grunnlag = mockk()
 
     @BeforeAll
     fun beforeAll() {
@@ -74,6 +79,10 @@ internal class VilkaarsvurderingServiceTest {
                 postgreSQLContainer.username,
                 postgreSQLContainer.password,
             ).also { it.migrate() }
+
+        val metadataMock = mockk<Metadata>()
+        every { grunnlagMock.metadata } returns metadataMock
+        every { metadataMock.versjon } returns 1
     }
 
     @BeforeEach
@@ -97,6 +106,7 @@ internal class VilkaarsvurderingServiceTest {
                 repository,
                 behandlingKlient,
                 grunnlagKlient,
+                featureToggleService,
             )
     }
 
@@ -119,8 +129,6 @@ internal class VilkaarsvurderingServiceTest {
 
     @Test
     fun `Skal opprette vilkaarsvurdering for foerstegangsbehandling barnepensjon med grunnlagsopplysninger`() {
-        val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
         val vilkaarsvurdering =
             runBlocking {
                 service.opprettVilkaarsvurdering(uuid, brukerTokenInfo)
@@ -143,7 +151,6 @@ internal class VilkaarsvurderingServiceTest {
 
     @Test
     fun `Ny vilkaarsvurdering for BP med virk fom 1-1-2024 skal ha vilkaar etter nytt regelverk`() {
-        val grunnlag: Grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns
             mockk<DetaljertBehandling>().apply {
                 every { id } returns UUID.randomUUID()
@@ -544,7 +551,7 @@ internal class VilkaarsvurderingServiceTest {
 
         vilkaarsvurdering shouldNotBe null
         vilkaarsvurdering.behandlingId shouldBe uuid
-        vilkaarsvurdering.toDto().isYrkesskade() shouldBe false
+        toDto(vilkaarsvurdering, 0L).isYrkesskade() shouldBe false
     }
 
     @Test
@@ -576,7 +583,7 @@ internal class VilkaarsvurderingServiceTest {
 
         oppdatertVilkaarsvurdering shouldNotBe null
         oppdatertVilkaarsvurdering!!.behandlingId shouldBe uuid
-        oppdatertVilkaarsvurdering.toDto().isYrkesskade() shouldBe true
+        toDto(oppdatertVilkaarsvurdering, 0L).isYrkesskade() shouldBe true
     }
 
     @Test

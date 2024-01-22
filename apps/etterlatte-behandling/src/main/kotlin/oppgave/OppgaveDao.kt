@@ -148,8 +148,10 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
                     SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
                     FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
                     WHERE o.type = ANY(?)
-                    AND s.adressebeskyttelse is null OR 
-                    (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))
+                    AND (
+                        s.adressebeskyttelse is null OR 
+                        (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))
+                    )
                     """.trimIndent(),
                 )
             statement.setArray(1, createArrayOf("text", oppgaveTypeTyper.toTypedArray()))

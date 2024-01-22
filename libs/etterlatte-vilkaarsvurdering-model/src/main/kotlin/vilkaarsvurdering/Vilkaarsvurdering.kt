@@ -11,11 +11,17 @@ data class VilkaarsvurderingDto(
     val virkningstidspunkt: YearMonth,
     val resultat: VilkaarsvurderingResultat? = null,
     val grunnlagVersjon: Long,
+    val behandlingGrunnlagVersjon: Long?,
 ) {
     fun isYrkesskade() =
         this.vilkaar.filter {
             VilkaarType.yrkesskadeVilkaarTyper().contains(it.hovedvilkaar.type)
         }.any { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
+
+    fun isGrunnlagUtdatert(): Boolean {
+        return behandlingGrunnlagVersjon != null &&
+            grunnlagVersjon < behandlingGrunnlagVersjon
+    }
 }
 
 data class Vilkaar(

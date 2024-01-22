@@ -1,9 +1,8 @@
-package gyldigsoeknad.omstillingsstoenad
+package no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad
 
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
-import no.nav.etterlatte.gyldigsoeknad.omstillingsstoenad.InnsendtSoeknadRiver
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY

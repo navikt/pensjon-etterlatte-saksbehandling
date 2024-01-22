@@ -52,6 +52,7 @@ export interface IVilkaarsvurdering {
   resultat?: VilkaarsvurderingVurdertResultat
   virkningstidspunkt: string
   isYrkesskade: boolean
+  isGrunnlagUtdatert?: boolean | null
 }
 
 export interface Vilkaar {

@@ -443,11 +443,6 @@ data class FormkravMedBeslutter(
     val saksbehandler: Grunnlagsopplysning.Saksbehandler,
 )
 
-enum class KlageHendelseType {
-    OPPRETTET,
-    FERDIGSTILT,
-}
-
 data class KlageOversendelseDto(val klage: Klage, val ekstraData: EkstradataInnstilling)
 
 @JsonIgnoreProperties(ignoreUnknown = true)

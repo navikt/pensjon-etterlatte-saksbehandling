@@ -52,7 +52,7 @@ const Virkningstidspunkt = (props: {
       avdoede?.opplysning?.doedsdato,
       erBosattUtland ? subYears(new Date(), 20) : new Date(behandling.soeknadMottattDato)
     ),
-    toDate: addMonths(new Date(), 1),
+    toDate: addMonths(new Date(), 4),
     onMonthChange: (date: Date) => setVirkningstidspunkt(date),
     inputFormat: 'dd.MM.yyyy',
     onValidate: (val) => {

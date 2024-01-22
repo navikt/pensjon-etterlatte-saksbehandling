@@ -15,6 +15,7 @@ class BrevKodeMapper {
         BrevProsessType.AUTOMATISK -> brevKodeAutomatisk(generellBrevData, erOmregningNyRegel)
         BrevProsessType.REDIGERBAR -> brevKodeAutomatisk(generellBrevData, erOmregningNyRegel)
         BrevProsessType.MANUELL -> BrevkodePar(EtterlatteBrevKode.OMS_OPPHOER_MANUELL)
+        BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException("Brevkode ikke relevant for ${BrevProsessType.OPPLASTET_PDF}")
     }
 
     private fun brevKodeAutomatisk(

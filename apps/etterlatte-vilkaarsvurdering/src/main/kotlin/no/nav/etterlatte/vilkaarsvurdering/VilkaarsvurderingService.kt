@@ -3,6 +3,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -22,6 +23,7 @@ import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar2024
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
 import org.slf4j.LoggerFactory
+import vilkaarsvurdering.config.VilkaarsvurderingFeatureToggle
 import java.util.UUID
 
 class VirkningstidspunktIkkeSattException(behandlingId: UUID) :
@@ -31,10 +33,20 @@ class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingService::class.java)
 
-    fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? = vilkaarsvurderingRepository.hent(behandlingId)
+    fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? {
+        return vilkaarsvurderingRepository.hent(behandlingId)
+    }
+
+    suspend fun hentBehandlingensGrunnlag(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Grunnlag {
+        return hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo).second
+    }
 
     suspend fun oppdaterTotalVurdering(
         behandlingId: UUID,
@@ -42,16 +54,21 @@ class VilkaarsvurderingService(
         resultat: VilkaarsvurderingResultat,
     ): Vilkaarsvurdering =
         tilstandssjekkFoerKjoering(behandlingId, brukerTokenInfo) {
+            val (behandling, grunnlag) = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo)
             val virkningstidspunkt =
-                behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo).let {
-                    it.virkningstidspunkt?.dato?.atDay(1)
-                } ?: throw IllegalStateException("Virkningstidspunkt må være satt for å sette en vurdering")
+                behandling.virkningstidspunkt?.dato?.atDay(1)
+                    ?: throw IllegalStateException("Virkningstidspunkt må være satt for å sette en vurdering")
             val vilkaarsvurdering =
                 vilkaarsvurderingRepository.lagreVilkaarsvurderingResultat(
                     behandlingId = behandlingId,
                     virkningstidspunkt = virkningstidspunkt,
                     resultat = resultat,
                 )
+            if (featureToggleService.isEnabled(VilkaarsvurderingFeatureToggle.OppdaterGrunnlagsversjon, false) &&
+                vilkaarsvurdering.grunnlagVersjon != grunnlag.metadata.versjon
+            ) {
+                vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(behandlingId, grunnlag.metadata.versjon)
+            }
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)
             vilkaarsvurdering
         }
@@ -278,6 +295,17 @@ class VilkaarsvurderingService(
                 false
             }
         }
+
+    suspend fun oppdaterGrunnlagsversjon(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val grunnlag = hentDataForVilkaarsvurdering(behandlingId, brukerTokenInfo).second
+        vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(
+            behandlingId = behandlingId,
+            grunnlagVersjon = grunnlag.metadata.versjon,
+        )
+    }
 
     private suspend fun <T> tilstandssjekkFoerKjoering(
         behandlingId: UUID,

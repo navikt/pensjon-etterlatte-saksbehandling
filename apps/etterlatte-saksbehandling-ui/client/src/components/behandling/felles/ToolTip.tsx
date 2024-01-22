@@ -3,7 +3,7 @@ import { BodyShort, Button, Popover } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { InformationSquareIcon } from '@navikt/aksel-icons'
 
-export const OmstillingsstoenadToolTip = (props: {
+export const ToolTip = (props: {
   title: string
   children: string | React.JSX.Element | (string | React.JSX.Element)[]
 }) => {

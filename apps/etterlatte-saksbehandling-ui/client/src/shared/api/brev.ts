@@ -52,6 +52,10 @@ export const genererPdf = async (props: {
   }
 }
 
+export const opprettBrevFraPDF = async (args: { sakId: number; formData: FormData }): Promise<ApiResponse<IBrev>> => {
+  return apiClient.postFormData(`/brev/sak/${args.sakId}/pdf`, args.formData)
+}
+
 export const hentManuellPayload = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<any>> =>
   apiClient.get(`/brev/${props.brevId}/payload?sakId=${props.sakId}`)
 

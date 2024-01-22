@@ -20,12 +20,15 @@ import no.nav.etterlatte.libs.database.hent
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
+import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
 class VilkaarsvurderingRepository(private val ds: DataSource, private val delvilkaarRepository: DelvilkaarRepository) {
+    private val logger = LoggerFactory.getLogger(VilkaarsvurderingRepository::class.java)
+
     fun hent(behandlingId: UUID): Vilkaarsvurdering? =
         using(sessionOf(ds)) { session ->
             queryOf(Queries.HENT_VILKAARSVURDERING, mapOf("behandling_id" to behandlingId))
@@ -273,6 +276,27 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
             ),
     ).let { tx.run(it.asExecute) }
 
+    fun oppdaterGrunnlagsversjon(
+        behandlingId: UUID,
+        grunnlagVersjon: Long,
+    ) {
+        ds.transaction { tx ->
+            val vilkaarsvurdering = hentNonNull(behandlingId)
+            queryOf(
+                statement = Queries.OPPDATER_GRUNNLAGSVERSJON,
+                paramMap =
+                    mapOf(
+                        "id" to vilkaarsvurdering.id,
+                        "grunnlag_versjon" to grunnlagVersjon,
+                    ),
+            ).let { tx.run(it.asUpdate) }
+
+            logger.info(
+                "Grunnlagsversjon oppdatert til $grunnlagVersjon på vilkårsvurdering for behandling $behandlingId",
+            )
+        }
+    }
+
     private fun Row.toVilkaarsvurdering(vilkaar: List<Vilkaar>) =
         Vilkaarsvurdering(
             id = uuid("id"),
@@ -375,6 +399,12 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
 
         const val SLETT_VILKAARSVURDERING = """
             DELETE FROM vilkaarsvurdering
+            WHERE id = :id
+        """
+
+        const val OPPDATER_GRUNNLAGSVERSJON = """
+            UPDATE vilkaarsvurdering
+            SET grunnlag_versjon = :grunnlag_versjon 
             WHERE id = :id
         """
     }

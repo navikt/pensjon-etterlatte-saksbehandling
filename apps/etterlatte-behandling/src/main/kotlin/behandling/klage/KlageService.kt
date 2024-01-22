@@ -14,12 +14,13 @@ import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
-import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.klage.KlageHendelseType
+import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -72,6 +73,7 @@ class KlageServiceImpl(
     private val oppgaveService: OppgaveService,
     private val brevApiKlient: BrevApiKlient,
     private val klageKlient: KlageKlient,
+    private val klageHendelser: IKlageHendelserService,
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -103,6 +105,8 @@ class KlageServiceImpl(
             kommentar = null,
             begrunnelse = null,
         )
+
+        klageHendelser.sendKlageHendelseRapids(StatistikkKlage(klage.id, klage, Tidspunkt.now()), KlageHendelseType.OPPRETTET)
 
         return klage
     }
@@ -218,6 +222,16 @@ class KlageServiceImpl(
             }
         }
 
+        hendelseDao.klageHendelse(
+            klageId = opprinneligKlage.id,
+            sakId = opprinneligKlage.sak.id,
+            hendelse = KlageHendelseType.KABAL_HENDELSE,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = null,
+            kommentar = "Mottok status=${kabalrespons.kabalStatus} fra kabal, med resultat=${kabalrespons.resultat}",
+            begrunnelse = null,
+        )
+
         klageDao.oppdaterKabalStatus(klageId, kabalrespons)
     }
 
@@ -267,6 +281,11 @@ class KlageServiceImpl(
             saksbehandler = saksbehandler.ident,
             kommentar = null,
             begrunnelse = null,
+        )
+
+        klageHendelser.sendKlageHendelseRapids(
+            StatistikkKlage(klage.id, klage, Tidspunkt.now(), saksbehandler.ident),
+            KlageHendelseType.FERDIGSTILT,
         )
 
         return klageMedOppdatertResultat

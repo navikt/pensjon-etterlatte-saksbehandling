@@ -1,7 +1,6 @@
 package no.nav.etterlatte.statistikk.domain
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
@@ -34,15 +33,15 @@ enum class SakYtelsesgruppe {
 
 data class SakRad(
     val id: Long,
-    val behandlingId: UUID,
+    val referanseId: UUID,
     val sakId: Long,
     val mottattTidspunkt: Tidspunkt,
     val registrertTidspunkt: Tidspunkt,
     val ferdigbehandletTidspunkt: Tidspunkt?,
     val vedtakTidspunkt: Tidspunkt?,
-    val behandlingType: BehandlingType,
-    val behandlingStatus: String?,
-    val behandlingResultat: BehandlingResultat?,
+    val type: String,
+    val status: String?,
+    val resultat: String?,
     val resultatBegrunnelse: String?,
     val saksbehandler: String?,
     val ansvarligEnhet: String?,

@@ -42,7 +42,6 @@ class VedtakMetricsTest {
                 postgreSQLContainer.username,
                 postgreSQLContainer.password,
             ).also { it.migrate() }
-        val connection = ds.connection
 
         vedtakRepo = VedtaksvurderingRepository.using(ds)
         opprettLoependeVedtak()

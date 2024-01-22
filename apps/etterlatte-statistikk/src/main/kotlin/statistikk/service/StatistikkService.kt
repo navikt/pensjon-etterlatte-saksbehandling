@@ -3,11 +3,15 @@ package no.nav.etterlatte.statistikk.service
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.KlageStatus
+import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
+import no.nav.etterlatte.libs.common.klage.KlageHendelseType
+import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -137,15 +141,15 @@ class StatistikkService(
 
         return SakRad(
             id = -1,
-            behandlingId = vedtakInnhold.behandling.id,
+            referanseId = vedtakInnhold.behandling.id,
             sakId = vedtak.sak.id,
             mottattTidspunkt = mottattTid.toTidspunkt(),
             registrertTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
             ferdigbehandletTidspunkt = vedtak.attestasjon?.tidspunkt,
             vedtakTidspunkt = vedtak.attestasjon?.tidspunkt,
-            behandlingType = vedtakInnhold.behandling.type,
-            behandlingStatus = hendelse.name,
-            behandlingResultat = behandlingResultatFraVedtak(vedtak, hendelse, statistikkBehandling),
+            type = vedtakInnhold.behandling.type.name,
+            status = hendelse.name,
+            resultat = behandlingResultatFraVedtak(vedtak, hendelse, statistikkBehandling)?.name,
             resultatBegrunnelse = null,
             behandlingMetode =
                 hentBehandlingMetode(
@@ -232,7 +236,8 @@ class StatistikkService(
             fnrForeldre = persongalleri.avdoed,
             fnrSoesken = persongalleri.soesken,
             anvendtTrygdetid = "40",
-            nettoYtelse = vedtakInnhold.utbetalingsperioder.firstOrNull()?.beloep.toString(), // TODO  Bør utbedres?
+            // TODO  Bør utbedres?
+            nettoYtelse = vedtakInnhold.utbetalingsperioder.firstOrNull()?.beloep.toString(),
             beregningType = "FOLKETRYGD",
             anvendtSats = "",
             behandlingId = vedtakInnhold.behandling.id,
@@ -256,6 +261,53 @@ class StatistikkService(
         )
     }
 
+    private fun klageTilSakRad(
+        statistikkKlage: StatistikkKlage,
+        tekniskTid: LocalDateTime,
+        hendelse: KlageHendelseType,
+    ) = SakRad(
+        id = -1,
+        referanseId = statistikkKlage.klage.id,
+        sakId = statistikkKlage.klage.sak.id,
+        mottattTidspunkt = statistikkKlage.klage.opprettet,
+        registrertTidspunkt = statistikkKlage.tidspunkt,
+        type = hendelse.name,
+        status = statistikkKlage.klage.status.name,
+        resultat =
+            when (statistikkKlage.klage.utfall) {
+                is KlageUtfall.Omgjoering -> "OMGJOERING"
+                is KlageUtfall.DelvisOmgjoering -> "DELVIS_OMGJOERING"
+                is KlageUtfall.StadfesteVedtak -> "STADFESTE_VEDTAK"
+                null -> null
+            },
+        saksbehandler = statistikkKlage.saksbehandler,
+        ansvarligEnhet = statistikkKlage.klage.sak.enhet,
+        ansvarligBeslutter = statistikkKlage.klage.formkrav?.saksbehandler?.ident,
+        aktorId = statistikkKlage.klage.sak.ident,
+        tekniskTid = tekniskTid.toTidspunkt(),
+        sakYtelse = statistikkKlage.klage.sak.sakType.name,
+        avdoedeForeldre = null,
+        sakYtelsesgruppe = null,
+        revurderingAarsak = null,
+        vedtakLoependeFom = null,
+        vedtakTidspunkt = null,
+        beregning = null,
+        avkorting = null,
+        kilde = Vedtaksloesning.GJENNY,
+        ferdigbehandletTidspunkt =
+            statistikkKlage.tidspunkt.takeIf {
+                statistikkKlage.klage.status == KlageStatus.FERDIGSTILT
+            },
+        behandlingMetode = BehandlingMetode.MANUELL,
+        datoFoersteUtbetaling = null,
+        opprettetAv = null,
+        pesysId = null,
+        resultatBegrunnelse = null,
+        sakUtland = null,
+        soeknadFormat = null,
+        vedtakLoependeTom = null,
+    )
+
     private fun behandlingTilSakRad(
         statistikkBehandling: StatistikkBehandling,
         behandlingHendelse: BehandlingHendelse,
@@ -264,15 +316,15 @@ class StatistikkService(
         val fellesRad =
             SakRad(
                 id = -1,
-                behandlingId = statistikkBehandling.id,
+                referanseId = statistikkBehandling.id,
                 sakId = statistikkBehandling.sak.id,
                 mottattTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
                 registrertTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
                 ferdigbehandletTidspunkt = null,
                 vedtakTidspunkt = null,
-                behandlingType = statistikkBehandling.behandlingType,
-                behandlingStatus = behandlingHendelse.name,
-                behandlingResultat = null,
+                type = statistikkBehandling.behandlingType.name,
+                status = behandlingHendelse.name,
+                resultat = null,
                 resultatBegrunnelse = null,
                 behandlingMetode =
                     hentBehandlingMetode(
@@ -280,7 +332,7 @@ class StatistikkService(
                         statistikkBehandling.prosesstype,
                         statistikkBehandling.revurderingsaarsak,
                     ),
-                opprettetAv = "GJENNY",
+                opprettetAv = Vedtaksloesning.GJENNY.name,
                 ansvarligBeslutter = null,
                 aktorId = statistikkBehandling.sak.ident,
                 datoFoersteUtbetaling = null,
@@ -312,7 +364,7 @@ class StatistikkService(
         if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
             return fellesRad.copy(
                 ferdigbehandletTidspunkt = statistikkBehandling.sistEndret.toTidspunkt(),
-                behandlingResultat = BehandlingResultat.AVBRUTT,
+                resultat = BehandlingResultat.AVBRUTT.name,
             )
         }
         return fellesRad
@@ -324,6 +376,14 @@ class StatistikkService(
         tekniskTid: LocalDateTime,
     ): SakRad? {
         return sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
+    }
+
+    fun registrerStatistikkForKlagehendelse(
+        statistikkKlage: StatistikkKlage,
+        tekniskTid: LocalDateTime,
+        hendelse: KlageHendelseType,
+    ): SakRad? {
+        return sakRepository.lagreRad(klageTilSakRad(statistikkKlage, tekniskTid, hendelse))
     }
 
     fun statistikkProdusertForMaaned(maaned: YearMonth): KjoertStatus {

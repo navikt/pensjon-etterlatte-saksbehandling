@@ -27,6 +27,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.grunnlag.GrunnlagVersjonValidering.validerVersjon
@@ -344,6 +345,11 @@ class VedtakBehandlingService(
                 behandlingId = behandlingId,
             ),
         )
+    }
+
+    suspend fun samordningsinfo(behandlingId: UUID): List<Samordningsvedtak> {
+        val vedtak = hentVedtakNonNull(behandlingId)
+        return samKlient.hentSamordningsdata(vedtak)
     }
 
     suspend fun iverksattVedtak(

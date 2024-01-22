@@ -5,14 +5,19 @@ import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.request.url
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import io.ktor.http.parameters
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
@@ -29,6 +34,8 @@ interface SamKlient {
         etterbetaling: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean
+
+    suspend fun hentSamordningsdata(vedtak: Vedtak): List<Samordningsvedtak>
 }
 
 class SamKlientImpl(
@@ -59,6 +66,28 @@ class SamKlientImpl(
         } catch (e: Exception) {
             logger.error("Samordne vedtak feilet [id=${vedtak.id}]", e)
             throw SamordneVedtakGenerellException("Samordne vedtak feilet [id=${vedtak.id}]", e)
+        }
+    }
+
+    override suspend fun hentSamordningsdata(vedtak: Vedtak): List<Samordningsvedtak> {
+        try {
+            val response =
+                httpClient.get {
+                    url("$resourceUrl/api/vedtak")
+                    header("pid", vedtak.soeker.value)
+                    parameters {
+                        append("fagomrade", "EYO")
+                        append("vedtakId", "${vedtak.id}")
+                    }
+                }
+
+            if (response.status.isSuccess()) {
+                return response.body<List<Samordningsvedtak>>()
+            } else {
+                throw ResponseException(response, "Kunne ikke hente samordningsdata")
+            }
+        } catch (e: Exception) {
+            throw SamordneVedtakGenerellException("Kunne ikke hente samordningsdata", e)
         }
     }
 }

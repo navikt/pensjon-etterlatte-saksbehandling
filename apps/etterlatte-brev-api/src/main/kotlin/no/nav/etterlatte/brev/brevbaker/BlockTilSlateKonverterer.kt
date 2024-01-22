@@ -32,7 +32,7 @@ object BlockTilSlateKonverterer {
 
             // Hvis en paragraf fra brevbakeren inneholder lister, vil disse splittes ut og legges inn som en
             // Element-node i stedet for en InnerElement-node siden redigering av dette ikke støttes i slate-editoren.
-            // De øvrige InnerElementene vil bli lått sammen og lagt til som egne Element-noder.
+            // De øvrige InnerElementene vil bli slått sammen og lagt til som egne Element-noder.
             RenderedJsonLetter.Block.Type.PARAGRAPH -> {
                 val elements: MutableList<Slate.Element> = mutableListOf()
                 val innerElements: MutableList<Slate.InnerElement> = mutableListOf()
@@ -62,10 +62,7 @@ object BlockTilSlateKonverterer {
                         }
 
                         RenderedJsonLetter.ParagraphContent.Type.LITERAL, RenderedJsonLetter.ParagraphContent.Type.VARIABLE ->
-                            Slate.InnerElement(
-                                type = Slate.ElementType.PARAGRAPH,
-                                text = (it as RenderedJsonLetter.ParagraphContent.Text).text,
-                            ).let { innerElement -> innerElements.add(innerElement) }
+                            konverter(it).let { innerElement -> innerElements.add(innerElement) }
                     }
                 }
 

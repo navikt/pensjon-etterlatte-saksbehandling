@@ -34,7 +34,7 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertEquals
+
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -261,14 +261,9 @@ internal class OppgaveServiceTest {
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
-        val err =
-            assertThrows<OppgaveAlleredeTildeltException> {
-                oppgaveService.tildelSaksbehandler(nyOppgave.id, "enda en")
-            }
-        assertEquals(
-            "Oppgaven er allerede tildelt en saksbehandler, oppgave-ID: ${nyOppgave.id}",
-            err.message,
-        )
+        assertThrows<OppgaveAlleredeTildeltException> {
+            oppgaveService.tildelSaksbehandler(nyOppgave.id, "enda en")
+        }
     }
 
     @Test

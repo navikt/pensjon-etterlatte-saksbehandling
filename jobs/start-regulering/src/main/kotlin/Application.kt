@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,7 +33,10 @@ fun main() {
     exitProcess(0)
 }
 
-internal fun createRecord(dato: LocalDate) =
+private fun createRecord(dato: LocalDate) =
     JsonMessage.newMessage(
-        mapOf("@event_name" to ReguleringEvents.START_REGULERING, ReguleringEvents.DATO to dato.toString()),
+        mapOf(
+            EVENT_NAME_KEY to ReguleringEvents.START_REGULERING,
+            ReguleringEvents.DATO to dato.toString(),
+        ),
     ).toJson()

@@ -26,6 +26,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -42,7 +43,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersonRoutesTest {
@@ -71,19 +71,6 @@ internal class PersonRoutesTest {
     @AfterAll
     fun after() {
         server.shutdown()
-    }
-
-    private val systembrukerToken: String by lazy {
-        val mittsystem = UUID.randomUUID().toString()
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "sub" to mittsystem,
-                    "oid" to mittsystem,
-                ),
-        ).serialize()
     }
 
     @Test
@@ -124,7 +111,7 @@ internal class PersonRoutesTest {
                     setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $systembrukerToken")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSystembrukerToken()}")
                     }
                 }
 
@@ -151,7 +138,7 @@ internal class PersonRoutesTest {
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer $systembrukerToken")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSystembrukerToken()}")
                     }
                 }
 

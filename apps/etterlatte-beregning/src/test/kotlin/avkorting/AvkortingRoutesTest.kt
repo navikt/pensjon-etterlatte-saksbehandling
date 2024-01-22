@@ -9,7 +9,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.log
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -25,8 +24,8 @@ import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
@@ -36,14 +35,11 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.periode.Periode
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.YearMonth
 import java.util.UUID
 
@@ -68,7 +64,7 @@ class AvkortingRoutesTest {
     fun `skal returnere 204 naar avkorting ikke finnes`() {
         coEvery { avkortingService.hentAvkorting(any(), any()) } returns null
 
-        testApplication(server.config.httpServer.port()) {
+        testApplication {
             val response =
                 client.get("/api/beregning/avkorting/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -165,7 +161,7 @@ class AvkortingRoutesTest {
             )
         coEvery { avkortingService.beregnAvkortingMedNyttGrunnlag(any(), any(), any()) } returns avkorting
 
-        testApplication(server.config.httpServer.port()) {
+        testApplication {
             val response =
                 client.post("/api/beregning/avkorting/$behandlingsId") {
                     setBody(dto.avkortingGrunnlag[0].toJson())
@@ -218,16 +214,11 @@ class AvkortingRoutesTest {
         sluttenavAaret.fromDto(bruker).relevanteMaanederInnAar shouldBe 1
     }
 
-    private fun testApplication(
-        port: Int,
-        block: suspend ApplicationTestBuilder.() -> Unit,
-    ) {
+    private fun testApplication(block: suspend ApplicationTestBuilder.() -> Unit) {
         io.ktor.server.testing.testApplication {
-            environment {
-                config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, CLIENT_ID)
+            runServer(server) {
+                avkorting(avkortingService, behandlingKlient)
             }
-            application { restModule(log) { avkorting(avkortingService, behandlingKlient) } }
-
             block(this)
         }
     }

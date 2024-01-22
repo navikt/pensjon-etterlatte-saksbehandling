@@ -8,8 +8,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -19,8 +17,8 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -30,8 +28,6 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.vedtaksvurdering.AutomatiskBehandlingService
@@ -53,13 +49,11 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AutomatiskBehandlingRoutesKtTest {
     private val server = MockOAuth2Server()
-    private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val vedtakService: VedtakBehandlingService = mockk()
     private val rapidService: VedtaksvurderingRapidService = mockk()
@@ -68,9 +62,6 @@ internal class AutomatiskBehandlingRoutesKtTest {
     @BeforeAll
     fun before() {
         server.start()
-
-        applicationConfig =
-            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -131,14 +122,11 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 )
             coEvery { rapidService.sendToRapid(any()) } just runs
 
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    automatiskBehandlingRoutes(
-                        automatiskBehandlingService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                automatiskBehandlingRoutes(
+                    automatiskBehandlingService,
+                    behandlingKlient,
+                )
             }
 
             val respons =
@@ -213,14 +201,11 @@ internal class AutomatiskBehandlingRoutesKtTest {
 
                 coEvery { rapidService.sendToRapid(any()) } just runs
 
-                environment { config = applicationConfig }
-                application {
-                    restModule(log) {
-                        automatiskBehandlingRoutes(
-                            automatiskBehandlingService,
-                            behandlingKlient,
-                        )
-                    }
+                runServer(server) {
+                    automatiskBehandlingRoutes(
+                        automatiskBehandlingService,
+                        behandlingKlient,
+                    )
                 }
 
                 val respons =
@@ -274,14 +259,11 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     )
                 coEvery { runBlocking { behandlingKlient.tildelSaksbehandler(any(), any()) } } returns true
 
-                environment { config = applicationConfig }
-                application {
-                    restModule(log) {
-                        automatiskBehandlingRoutes(
-                            automatiskBehandlingService,
-                            behandlingKlient,
-                        )
-                    }
+                runServer(server) {
+                    automatiskBehandlingRoutes(
+                        automatiskBehandlingService,
+                        behandlingKlient,
+                    )
                 }
 
                 val respons =
@@ -333,14 +315,11 @@ internal class AutomatiskBehandlingRoutesKtTest {
                         ),
                     )
 
-                environment { config = applicationConfig }
-                application {
-                    restModule(log) {
-                        automatiskBehandlingRoutes(
-                            automatiskBehandlingService,
-                            behandlingKlient,
-                        )
-                    }
+                runServer(server) {
+                    automatiskBehandlingRoutes(
+                        automatiskBehandlingService,
+                        behandlingKlient,
+                    )
                 }
 
                 val respons =

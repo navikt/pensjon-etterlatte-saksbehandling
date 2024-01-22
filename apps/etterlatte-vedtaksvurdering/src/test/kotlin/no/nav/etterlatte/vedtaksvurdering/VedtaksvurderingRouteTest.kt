@@ -12,8 +12,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -23,8 +21,8 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -38,8 +36,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -48,7 +44,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
@@ -56,7 +51,6 @@ import java.util.UUID
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksvurderingRouteTest {
     private val server = MockOAuth2Server()
-    private lateinit var applicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val vedtaksvurderingService: VedtaksvurderingService = mockk()
     private val vedtakBehandlingService: VedtakBehandlingService = mockk()
@@ -65,9 +59,6 @@ internal class VedtaksvurderingRouteTest {
     @BeforeAll
     fun before() {
         server.start()
-
-        applicationConfig =
-            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -89,16 +80,13 @@ internal class VedtaksvurderingRouteTest {
     @Test
     fun `skal returnere 401 naar token mangler`() {
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             val response =
@@ -115,16 +103,13 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } throws Exception("ukjent feil")
 
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             val response =
@@ -147,16 +132,13 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns null
 
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             val response =
@@ -180,16 +162,13 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns opprettetVedtak
 
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             val vedtak =
@@ -237,16 +216,13 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns opprettetVedtak
 
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             val vedtak =
@@ -294,16 +270,13 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns opprettetVedtak
 
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             val vedtak =
@@ -345,16 +318,13 @@ internal class VedtaksvurderingRouteTest {
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns attestertVedtak
 
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             val vedtaksammendrag =
@@ -388,16 +358,13 @@ internal class VedtaksvurderingRouteTest {
         coEvery { behandlingKlient.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             val hentetLoependeYtelse =
@@ -425,16 +392,13 @@ internal class VedtaksvurderingRouteTest {
         coEvery { vedtakBehandlingService.opprettEllerOppdaterVedtak(any(), any()) } returns opprettetVedtak
 
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             val vedtak =
@@ -487,16 +451,13 @@ internal class VedtaksvurderingRouteTest {
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             val vedtak =
@@ -556,16 +517,13 @@ internal class VedtaksvurderingRouteTest {
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             val vedtakDto =
@@ -626,16 +584,13 @@ internal class VedtaksvurderingRouteTest {
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             val vedtak =
@@ -692,16 +647,13 @@ internal class VedtaksvurderingRouteTest {
         coEvery { vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(any()) } returns tilbakestiltVedtak
 
         testApplication {
-            environment { config = applicationConfig }
-            application {
-                restModule(log) {
-                    vedtaksvurderingRoute(
-                        vedtaksvurderingService,
-                        vedtakBehandlingService,
-                        rapidService,
-                        behandlingKlient,
-                    )
-                }
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
             }
 
             client.patch("/api/vedtak/${UUID.randomUUID()}/tilbakestill") {

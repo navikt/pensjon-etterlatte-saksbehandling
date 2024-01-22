@@ -9,15 +9,13 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -29,8 +27,6 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.vilkaarsvurdering.DelvilkaarRepository
@@ -50,7 +46,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -60,7 +55,6 @@ class MigreringTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private val server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val featureToggleService = DummyFeatureToggleService()
     private lateinit var ds: DataSource
@@ -71,13 +65,6 @@ class MigreringTest {
     @BeforeAll
     fun before() {
         server.start()
-        val httpServer = server.config.httpServer
-        hoconApplicationConfig =
-            buildTestApplicationConfigurationForOauth(
-                httpServer.port(),
-                AZURE_ISSUER,
-                CLIENT_ID,
-            )
         postgreSQLContainer.start()
         ds =
             DataSourceBuilder.createDataSource(
@@ -142,14 +129,9 @@ class MigreringTest {
     @Test
     fun `Skal opprette vilkaarsvurdering for migrering`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log) {
-                    vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
-                    migrering(migreringService, behandlingKlient, vilkaarsvurderingServiceImpl)
-                }
+            runServer(server) {
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                migrering(migreringService, behandlingKlient, vilkaarsvurderingServiceImpl)
             }
 
             val response =
@@ -179,14 +161,9 @@ class MigreringTest {
     @Test
     fun `Skal sette yrkesskade som oppfylt ved migrering dersom avdoede hadde yrkesskade`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log) {
-                    vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
-                    migrering(migreringService, behandlingKlient, vilkaarsvurderingServiceImpl)
-                }
+            runServer(server) {
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                migrering(migreringService, behandlingKlient, vilkaarsvurderingServiceImpl)
             }
 
             val response =

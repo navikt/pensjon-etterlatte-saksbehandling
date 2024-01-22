@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -11,9 +10,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
@@ -31,11 +27,9 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -45,22 +39,18 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.UUID
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksbrevRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val tilgangssjekker = mockk<Tilgangssjekker>()
 
     @BeforeAll
     fun before() {
         mockOAuth2Server.start()
-        val httpServer = mockOAuth2Server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -215,16 +205,11 @@ internal class VedtaksbrevRouteTest {
     @Test
     fun `Mangler auth header`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log, routePrefix = "api") {
-                    vedtaksbrevRoute(
-                        vedtaksbrevService,
-                        tilgangssjekker,
-                    )
-                }
+            runServer(mockOAuth2Server, "api") {
+                vedtaksbrevRoute(
+                    vedtaksbrevService,
+                    tilgangssjekker,
+                )
             }
 
             val response = client.post("/api/brev/behandling/${UUID.randomUUID()}/vedtak")
@@ -259,25 +244,13 @@ internal class VedtaksbrevRouteTest {
             ),
         )
 
-    private fun ApplicationTestBuilder.httpClient(): HttpClient {
-        environment {
-            config = hoconApplicationConfig
+    private fun ApplicationTestBuilder.httpClient(): HttpClient =
+        runServer(mockOAuth2Server, "api") {
+            vedtaksbrevRoute(
+                vedtaksbrevService,
+                tilgangssjekker,
+            )
         }
-        application {
-            restModule(this.log, routePrefix = "api") {
-                vedtaksbrevRoute(
-                    vedtaksbrevService,
-                    tilgangssjekker,
-                )
-            }
-        }
-
-        return createClient {
-            install(ContentNegotiation) {
-                jackson()
-            }
-        }
-    }
 
     companion object {
         private val STOR_SNERK = Foedselsnummer("11057523044")

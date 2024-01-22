@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -12,9 +11,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
@@ -34,11 +30,9 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -48,13 +42,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BrevRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val brevService = mockk<BrevService>()
     private val brevdistribuerer = mockk<Brevdistribuerer>()
     private val tilgangssjekker = mockk<Tilgangssjekker>()
@@ -62,8 +54,6 @@ internal class BrevRouteTest {
     @BeforeAll
     fun before() {
         mockOAuth2Server.start()
-        val httpServer = mockOAuth2Server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -235,30 +225,25 @@ internal class BrevRouteTest {
                     "Stor Snerk",
                     STOR_SNERK,
                     null,
-                    Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
+                    Adresse(
+                        adresseType = "NORSKPOSTADRESSE",
+                        "Testgaten 13",
+                        "1234",
+                        "OSLO",
+                        land = "Norge",
+                        landkode = "NOR",
+                    ),
                 ),
         )
 
-    private fun ApplicationTestBuilder.httpClient(): HttpClient {
-        environment {
-            config = hoconApplicationConfig
+    private fun ApplicationTestBuilder.httpClient(): HttpClient =
+        runServer(mockOAuth2Server, "api") {
+            brevRoute(
+                brevService,
+                brevdistribuerer,
+                tilgangssjekker,
+            )
         }
-        application {
-            restModule(this.log, routePrefix = "api") {
-                brevRoute(
-                    brevService,
-                    brevdistribuerer,
-                    tilgangssjekker,
-                )
-            }
-        }
-
-        return createClient {
-            install(ContentNegotiation) {
-                jackson()
-            }
-        }
-    }
 
     companion object {
         private val STOR_SNERK = Foedselsnummer("11057523044")

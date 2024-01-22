@@ -33,7 +33,7 @@
     "slate": "^0.101.5",
     "slate-history": "^0.100.0",
     "slate-react": "^0.101.5",
-    "styled-components": "^5.3.10"
+    "styled-components": "^6.1.8"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.2.0",

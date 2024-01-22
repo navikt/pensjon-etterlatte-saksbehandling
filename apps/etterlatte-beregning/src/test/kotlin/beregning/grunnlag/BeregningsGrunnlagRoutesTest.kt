@@ -25,6 +25,9 @@ import io.mockk.slot
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlient
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -748,23 +751,7 @@ internal class BeregningsGrunnlagRoutesTest {
         }
     }
 
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01"),
-        ).serialize()
-    }
+    private val token: String by lazy { server.issueSaksbehandlerToken() }
 
-    private val systemToken: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims = mapOf("oid" to "woot", "sub" to "woot"),
-        ).serialize()
-    }
-
-    private companion object {
-        const val CLIENT_ID = "azure-id for saksbehandler"
-    }
+    private val systemToken: String by lazy { server.issueSystembrukerToken() }
 }

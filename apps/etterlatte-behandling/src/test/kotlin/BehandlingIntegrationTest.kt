@@ -30,6 +30,7 @@ import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Miljoevariabler
@@ -57,7 +58,6 @@ import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.extension.ExtendWith
 import testsupport.buildTestApplicationConfigurationForOauth
@@ -360,41 +360,19 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandlerMedEgenAnsattTilgang: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "John Doe",
-                Claims.NAVident.toString() to "saksbehandlerskjermet",
-                "groups" to
-                    listOf(
-                        azureAdSaksbehandlerClaim,
-                        azureAdEgenAnsattClaim,
-                        azureAdAttestantClaim,
-                    ),
-            ),
+        server.issueSaksbehandlerToken(
+            navn = "John Doe",
+            navIdent = "saksbehandlerskjermet",
+            groups =
+                listOf(
+                    azureAdSaksbehandlerClaim,
+                    azureAdEgenAnsattClaim,
+                    azureAdAttestantClaim,
+                ),
         )
     }
 
-    protected val systemBruker: String by lazy {
-        val mittsystem = UUID.randomUUID().toString()
-        issueToken(
-            mapOf(
-                "sub" to mittsystem,
-                "oid" to mittsystem,
-                "azp_name" to mittsystem,
-            ),
-        )
-    }
-
-    private fun issueToken(claims: Map<String, Any>) =
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims = claims,
-        ).serialize()
-
-    private companion object {
-        const val CLIENT_ID = "mock-client-id"
-    }
+    protected val systemBruker: String by lazy { server.issueSystembrukerToken() }
 }
 
 class GrunnlagKlientTest : GrunnlagKlient {

@@ -28,6 +28,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
+import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
@@ -379,8 +380,4 @@ class RestModuleTest {
     }
 
     private data class TestObjektDto(val verdi1: String, val verdi2: Int)
-
-    private companion object {
-        const val CLIENT_ID = "azure-id for saksbehandler"
-    }
 }

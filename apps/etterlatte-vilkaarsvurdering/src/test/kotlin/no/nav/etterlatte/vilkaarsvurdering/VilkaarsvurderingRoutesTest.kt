@@ -18,6 +18,8 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -124,17 +126,7 @@ internal class VilkaarsvurderingRoutesTest {
         postgreSQLContainer.stop()
     }
 
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
-    }
+    private val token: String by lazy { server.issueSaksbehandlerToken() }
 
     @Test
     fun `skal hente vilkaarsvurdering`() {
@@ -876,6 +868,5 @@ internal class VilkaarsvurderingRoutesTest {
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
         val oboToken = BrukerTokenInfo.of("token", "s1", null, null, null)
-        const val CLIENT_ID = "azure-id for saksbehandler"
     }
 }

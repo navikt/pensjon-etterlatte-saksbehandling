@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
-const val CLIENT_ID = "CLIENT_ID"
+const val CLIENT_ID = "CLIENT_ID for saksbehandler"
 
 fun MockOAuth2Server.issueSaksbehandlerToken(
     navn: String = "Navn Navnesen",
@@ -31,6 +31,7 @@ fun MockOAuth2Server.issueSystembrukerToken(): String {
             mapOf(
                 "sub" to mittsystem,
                 "oid" to mittsystem,
+                "azp_name" to mittsystem,
             ),
     ).serialize()
 }

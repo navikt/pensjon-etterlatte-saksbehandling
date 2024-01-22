@@ -31,6 +31,7 @@ import io.mockk.slot
 import io.mockk.verify
 import lagGrunnlagsopplysning
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
+import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -65,10 +66,6 @@ internal class BehandlingGrunnlagRoutesKtTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
-
-    companion object {
-        private const val CLIENT_ID = "CLIENT_ID"
-    }
 
     @BeforeAll
     fun before() {

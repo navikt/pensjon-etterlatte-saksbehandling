@@ -25,6 +25,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
+import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
@@ -50,10 +51,6 @@ internal class PersonRoutesTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
-
-    companion object {
-        private const val CLIENT_ID = "CLIENT_ID"
-    }
 
     @BeforeAll
     fun before() {

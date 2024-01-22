@@ -19,6 +19,8 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -363,17 +365,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
         }
     }
 
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to SAKSBEHANDLER_1),
-        ).serialize()
-    }
-
-    private companion object {
-        const val CLIENT_ID = "azure-id for saksbehandler"
-    }
+    private val token: String by lazy { server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
 
     private fun lagOppgave(referanse: UUID) =
         OppgaveIntern(

@@ -3,16 +3,10 @@ package no.nav.etterlatte
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.application.Application
-import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.engine.applicationEngineEnvironment
-import io.ktor.server.engine.connector
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.routing.routing
 import no.nav.etterlatte.kafka.KafkaConsumerInstitusjonsopphold
 import no.nav.etterlatte.kafka.startLytting
-import no.nav.etterlatte.libs.ktor.healthApi
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
-import no.nav.etterlatte.libs.ktor.metricsModule
+import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
 import no.nav.etterlatte.libs.ktor.setReady
 import org.slf4j.LoggerFactory
 
@@ -23,19 +17,9 @@ fun main() {
 class Server {
     private val defaultConfig: Config = ConfigFactory.load()
     private val engine =
-        embeddedServer(
-            factory = io.ktor.server.cio.CIO,
-            environment =
-                applicationEngineEnvironment {
-                    config = HoconApplicationConfig(defaultConfig)
-                    module {
-                        routing {
-                            healthApi()
-                        }
-                        metricsModule()
-                    }
-                    connector { port = 8080 }
-                },
+        initEmbeddedServerUtenRest(
+            httpPort = 8080,
+            applicationConfig = defaultConfig,
         )
 
     fun run() {

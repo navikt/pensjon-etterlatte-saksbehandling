@@ -8,61 +8,95 @@ object BlockTilSlateKonverterer {
         Slate(
             it
                 .blocks
-                .map { block -> tilSlateElement(block) }
+                .flatMap { block -> tilSlateElement(block) }
                 .toList(),
         )
 
     private fun tilSlateElement(block: RenderedJsonLetter.Block) =
         when (block.type) {
             RenderedJsonLetter.Block.Type.TITLE1 ->
-                Slate.Element(
-                    type = Slate.ElementType.HEADING_TWO,
-                    children = children(block),
-                )
-            RenderedJsonLetter.Block.Type.TITLE2 ->
-                Slate.Element(
-                    type = Slate.ElementType.HEADING_THREE,
-                    children = children(block),
+                listOf(
+                    Slate.Element(
+                        type = Slate.ElementType.HEADING_TWO,
+                        children = (block as RenderedJsonLetter.Block.Title1).content.map { konverter(it) },
+                    ),
                 )
 
-            RenderedJsonLetter.Block.Type.PARAGRAPH ->
+            RenderedJsonLetter.Block.Type.TITLE2 ->
+                listOf(
+                    Slate.Element(
+                        type = Slate.ElementType.HEADING_THREE,
+                        children = (block as RenderedJsonLetter.Block.Title2).content.map { konverter(it) },
+                    ),
+                )
+
+            // Dersom det finnes lister under en paragraf, vil disse splittes ut og legges inn som Element i stedet
+            // for InnerElement da det kun er dette som støttes i Slate-editor. Omkringliggende paragrafer vil også bli
+            // slått sammen.
+            RenderedJsonLetter.Block.Type.PARAGRAPH -> {
+                val elements: MutableList<Slate.Element> = mutableListOf()
+                val innerElements: MutableList<Slate.InnerElement> = mutableListOf()
+
+                (block as RenderedJsonLetter.Block.Paragraph).content.map {
+                    when (it.type) {
+                        RenderedJsonLetter.ParagraphContent.Type.ITEM_LIST -> {
+                            addInnerElementsToElementsListAndClearList(innerElements, elements)
+
+                            Slate.Element(
+                                type = Slate.ElementType.BULLETED_LIST,
+                                children =
+                                    (it as RenderedJsonLetter.ParagraphContent.ItemList).items
+                                        .map { item ->
+                                            Slate.InnerElement(
+                                                type = Slate.ElementType.LIST_ITEM,
+                                                children =
+                                                    listOf(
+                                                        Slate.InnerElement(
+                                                            type = Slate.ElementType.PARAGRAPH,
+                                                            text = item.content.joinToString { i -> i.text },
+                                                        ),
+                                                    ),
+                                            )
+                                        },
+                            ).let { element -> elements.add(element) }
+                        }
+
+                        RenderedJsonLetter.ParagraphContent.Type.LITERAL, RenderedJsonLetter.ParagraphContent.Type.VARIABLE ->
+                            Slate.InnerElement(
+                                type = Slate.ElementType.PARAGRAPH,
+                                text = (it as RenderedJsonLetter.ParagraphContent.Text).text,
+                            ).let { innerElement -> innerElements.add(innerElement) }
+                    }
+                }
+
+                addInnerElementsToElementsListAndClearList(innerElements, elements)
+
+                elements
+            }
+        }
+
+    private fun addInnerElementsToElementsListAndClearList(
+        innerElements: MutableList<Slate.InnerElement>,
+        elements: MutableList<Slate.Element>,
+    ) {
+        if (innerElements.isNotEmpty()) {
+            elements.add(
                 Slate.Element(
                     type = Slate.ElementType.PARAGRAPH,
-                    children = children(block),
-                )
+                    children = innerElements.toList(),
+                ),
+            )
+            innerElements.clear()
         }
-
-    private fun children(block: RenderedJsonLetter.Block): List<Slate.InnerElement> =
-        when (block.type) {
-            RenderedJsonLetter.Block.Type.TITLE1 -> (block as RenderedJsonLetter.Block.Title1).content.map { konverter(it) }
-            RenderedJsonLetter.Block.Type.TITLE2 -> (block as RenderedJsonLetter.Block.Title2).content.map { konverter(it) }
-            RenderedJsonLetter.Block.Type.PARAGRAPH ->
-                (block as RenderedJsonLetter.Block.Paragraph).content.map {
-                    konverter(
-                        it,
-                    )
-                }
-        }
+    }
 
     private fun konverter(it: RenderedJsonLetter.ParagraphContent): Slate.InnerElement =
         when (it.type) {
-            RenderedJsonLetter.ParagraphContent.Type.ITEM_LIST ->
-                Slate.InnerElement(
-                    type = Slate.ElementType.BULLETED_LIST,
-                    children =
-                        (it as RenderedJsonLetter.ParagraphContent.ItemList).items
-                            .map { item ->
-                                Slate.InnerElement(
-                                    type = Slate.ElementType.LIST_ITEM,
-                                    text = item.content.joinToString { i -> i.text },
-                                )
-                            },
-                )
-
             RenderedJsonLetter.ParagraphContent.Type.LITERAL, RenderedJsonLetter.ParagraphContent.Type.VARIABLE ->
                 Slate.InnerElement(
                     type = Slate.ElementType.PARAGRAPH,
                     text = (it as RenderedJsonLetter.ParagraphContent.Text).text,
                 )
+            else -> throw Exception("Kan ikke konvertere ${it.type}")
         }
 }

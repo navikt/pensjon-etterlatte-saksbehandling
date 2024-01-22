@@ -1,0 +1,64 @@
+{
+  "title": "Utkast til vedtak - endring av barnepensjon",
+  "sakspart": {
+    "gjelderNavn": "Test bruker Testerson",
+    "gjelderFoedselsnummer": "01019878910",
+    "saksnummer": "1337123",
+    "dokumentDato": "01.01.2020"
+  },
+  "blocks": [
+    {
+      "id": 1442553538,
+      "editable": true,
+      "content": [
+        {
+          "id": 1879926608,
+          "text": "Omstillingsstønad gis på bakgrunn av at",
+          "type": "LITERAL"
+        },
+        {
+          "id": -1000597423,
+          "items": [
+            {
+              "content": [
+                {
+                  "id": -1764399143,
+                  "text": "du som gjenlevende ektefelle på dødsfallstidspunktet hadde vært gift med avdøde i minst fem år, har eller har hatt barn med avdøde, eller har omsorgen for barn under 18 år med minst halvparten av full tid",
+                  "type": "LITERAL"
+                }
+              ]
+            },
+            {
+              "content": [
+                {
+                  "id": -686223118,
+                  "text": "du er medlem i folketrygden",
+                  "type": "LITERAL"
+                }
+              ]
+            },
+            {
+              "content": [
+                {
+                  "id": -2127083316,
+                  "text": "avdøde i de siste fem årene før dødsfallet var medlem i folketrygden, eller fikk pensjon eller uføretrygd fra folketrygden.",
+                  "type": "LITERAL"
+                }
+              ]
+            }
+          ],
+          "type": "ITEM_LIST"
+        }
+      ],
+      "type": "PARAGRAPH"
+    }
+  ],
+  "signatur": {
+    "hilsenTekst": "Med vennlig hilsen",
+    "saksbehandlerRolleTekst": "Saksbehandler",
+    "saksbehandlerNavn": "Ole Saksbehandler",
+    "attesterendeSaksbehandlerNavn": "Per Attesterende",
+    "navAvsenderEnhet": "NAV Familie- og pensjonsytelser Porsgrunn"
+  }
+}
+

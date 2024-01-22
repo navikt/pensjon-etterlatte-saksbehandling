@@ -9,6 +9,7 @@ import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
@@ -108,7 +109,7 @@ internal class RapidTest {
         private val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    "@behov" to Opplysningstype.SOEKER_PDL_V1,
+                    BEHOV_NAME_KEY to Opplysningstype.SOEKER_PDL_V1,
                     OPPLYSNING_KEY to listOf(nyOpplysning),
                     FNR_KEY to fnr,
                     SAK_ID_KEY to 1,

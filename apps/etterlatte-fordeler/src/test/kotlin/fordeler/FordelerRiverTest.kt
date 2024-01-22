@@ -158,7 +158,7 @@ internal class FordelerRiverTest {
                     "$EVENT_NAME_KEY": "FORDELER:STATISTIKK",
                     "$SOEKNAD_ID_KEY": 1337,
                     "$SAK_TYPE_KEY": "BARNEPENSJON",
-                    "$GYLDIG_FOR_BEHANDLING_KEY: false,
+                    "$GYLDIG_FOR_BEHANDLING_KEY": false,
                     "$FEILENDE_KRITERIER_KEY": [
                         "BARN_ER_IKKE_BOSATT_I_NORGE"
                     ]

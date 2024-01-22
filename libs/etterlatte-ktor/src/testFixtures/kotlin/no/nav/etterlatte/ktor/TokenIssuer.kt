@@ -9,6 +9,7 @@ const val CLIENT_ID = "CLIENT_ID"
 fun MockOAuth2Server.issueSaksbehandlerToken(
     navn: String = "Navn Navnesen",
     navIdent: String = "Saksbehandler01",
+    groups: List<String> = listOf(),
 ): String =
     this.issueToken(
         issuerId = AZURE_ISSUER,
@@ -17,6 +18,7 @@ fun MockOAuth2Server.issueSaksbehandlerToken(
             mapOf(
                 "navn" to navn,
                 "NAVident" to navIdent,
+                "groups" to groups,
             ),
     ).serialize()
 

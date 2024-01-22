@@ -151,7 +151,9 @@ export const redigerFamilieforhold = async (args: {
   behandlingId: string
   redigert: RedigertFamilieforhold
 }): Promise<ApiResponse<void>> => {
-  return apiClient.post(`/behandling/${args.behandlingId}/rediger-familieforhold`, {})
+  return apiClient.post(`/behandling/${args.behandlingId}/rediger-familieforhold`, {
+    ...args.redigert,
+  })
 }
 
 export const lagreBrevutfallApi = async (args: {

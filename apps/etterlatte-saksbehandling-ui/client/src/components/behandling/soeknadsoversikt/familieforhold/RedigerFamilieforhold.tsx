@@ -7,19 +7,21 @@ import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerFamilieforhold } from '~shared/api/behandling'
 import { useBehandling } from '~components/behandling/useBehandling'
-import { RedigertFamilieforhold } from '~shared/types/grunnlag'
 import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { RedigertFamilieforhold } from '~shared/types/grunnlag'
 
 type Props = {
   familieforhold: Familieforhold
 }
 
 export const RedigerFamilieforhold = ({ familieforhold }: Props) => {
-  const behandlingId = useBehandling()!.id // TODO..
+  const behandlingId = useBehandling()!.id // TODO.. behandling som prop istedet
+
   const [redigerbartFamilieforhold, setFamilieforhold] = useState<RedigertFamilieforhold>({
     gjenlevende: familieforhold.gjenlevende.map((gjenlevende) => gjenlevende.opplysning.foedselsnummer),
     avdoede: familieforhold.avdoede.map((avdoede) => avdoede.opplysning.foedselsnummer),
   })
+
   const [status, redigerFamilieforholdRequest] = useApiCall(redigerFamilieforhold)
   const [feilmelding, setFeilmelding] = useState<string | null>(null)
 

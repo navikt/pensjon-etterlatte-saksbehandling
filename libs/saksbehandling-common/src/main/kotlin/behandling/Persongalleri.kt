@@ -27,3 +27,8 @@ data class RelatertPerson(
     val navn: Navn? = null,
     val statsborgerskap: String? = null,
 )
+
+data class RedigertFamilieforhold(
+    val avdoede: List<String> = emptyList(),
+    val gjenlevende: List<String> = emptyList(),
+)

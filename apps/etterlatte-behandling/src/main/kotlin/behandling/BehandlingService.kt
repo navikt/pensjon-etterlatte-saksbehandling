@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -30,9 +31,13 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.ktorobo.ThrowableErrorMessage
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
@@ -129,6 +134,12 @@ interface BehandlingService {
     fun oppdaterGrunnlagOgStatus(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+    )
+
+    suspend fun endrePersongalleri(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        redigertFamilieforhold: RedigertFamilieforhold,
     )
 
     fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning?
@@ -309,6 +320,42 @@ internal class BehandlingServiceImpl(
                 behandlingDao.lagreStatus(behandling)
                 hendelseDao.opppdatertGrunnlagHendelse(behandlingId, behandling.sak.id, brukerTokenInfo.ident())
             }
+    }
+
+    override suspend fun endrePersongalleri(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        redigertFamilieforhold: RedigertFamilieforhold,
+    ) {
+        val forrigePersonGalleri =
+            grunnlagKlient.hentPersongalleri(behandlingId, brukerTokenInfo)?.opplysning
+                ?: throw Exception("Mangler persongalleri..") // TODO
+        inTransaction {
+            hentBehandlingOrThrow(behandlingId)
+                .tilOpprettet()
+                .let { behandling ->
+                    val nyeOpplysinger =
+                        listOf(
+                            lagOpplysning(
+                                opplysningsType = Opplysningstype.PERSONGALLERI_V1,
+                                kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
+                                opplysning =
+                                    forrigePersonGalleri.copy(
+                                        avdoed = redigertFamilieforhold.avdoede,
+                                        gjenlevende = redigertFamilieforhold.gjenlevende,
+                                    ).toJsonNode(),
+                                periode = null,
+                            ),
+                        )
+                    grunnlagService.leggTilNyeOpplysninger(
+                        behandlingId,
+                        NyeSaksopplysninger(behandling.sak.id, nyeOpplysinger),
+                    )
+
+                    grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
+                    behandlingDao.lagreStatus(behandling)
+                }
+        }
     }
 
     override fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning? {

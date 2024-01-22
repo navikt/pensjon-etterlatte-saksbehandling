@@ -19,7 +19,7 @@ class BlockTilSlateKonvertererTest {
     }
 
     @Test
-    fun `kan lese inn json fra brevbakeren og splitte ut eventuelle lister under paragraf til topp-noder i Slate`() {
+    fun `splitt ut lister som egne slate-elementer`() {
         val originalJson = this.javaClass.getResource("/omstillingsstoenad_vedtak_med_liste.json")!!.readText()
         objectMapper.addMixIn(RenderedJsonLetter.Block::class.java, BrevbakerJSONBlockMixIn::class.java)
         objectMapper.addMixIn(RenderedJsonLetter.ParagraphContent::class.java, BrevbakerJSONParagraphMixIn::class.java)

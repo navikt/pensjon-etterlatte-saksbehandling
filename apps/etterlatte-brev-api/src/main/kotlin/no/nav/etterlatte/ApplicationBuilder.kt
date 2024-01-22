@@ -87,16 +87,6 @@ class ApplicationBuilder {
 
     private val env = getRapidEnv()
 
-    private val proxyClient: HttpClient by lazy {
-        val clientCredentialsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")
-        httpClientClientCredentials(
-            azureAppClientId = clientCredentialsConfig.getString("clientId"),
-            azureAppJwk = clientCredentialsConfig.getString("clientJwk"),
-            azureAppWellKnownUrl = clientCredentialsConfig.getString("wellKnownUrl"),
-            azureAppScope = config.getString("proxy.outbound"),
-        )
-    }
-
     private val navansattHttpKlient: HttpClient by lazy {
         val clientCredentialsConfig = config.getConfig("no.nav.etterlatte.tjenester.clientcredentials")
         httpClientClientCredentials(
@@ -113,7 +103,7 @@ class ApplicationBuilder {
             env.requireEnvValue("BREVBAKER_URL"),
         )
 
-    private val regoppslagKlient = RegoppslagKlient(proxyClient, env.requireEnvValue("ETTERLATTE_PROXY_URL"))
+    private val regoppslagKlient = RegoppslagKlient(httpClient("REGOPPSLAG_SCOPE"), env.requireEnvValue("REGOPPSLAG_URL"))
     private val navansattKlient = NavansattKlient(navansattHttpKlient, env.requireEnvValue("NAVANSATT_URL"))
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())

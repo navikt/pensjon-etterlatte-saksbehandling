@@ -13,7 +13,7 @@
       "content": [
         {
           "id": 1879926608,
-          "text": "Omstillingsstønad gis på bakgrunn av at",
+          "text": "Tekst før punktliste blir tatt ut som eget paragraf-element.",
           "type": "LITERAL"
         },
         {
@@ -23,7 +23,7 @@
               "content": [
                 {
                   "id": -1764399143,
-                  "text": "du som gjenlevende ektefelle på dødsfallstidspunktet hadde vært gift med avdøde i minst fem år, har eller har hatt barn med avdøde, eller har omsorgen for barn under 18 år med minst halvparten av full tid",
+                  "text": "Denne punktlisten blir",
                   "type": "LITERAL"
                 }
               ]
@@ -32,7 +32,7 @@
               "content": [
                 {
                   "id": -686223118,
-                  "text": "du er medlem i folketrygden",
+                  "text": "Trukket opp ett nivå",
                   "type": "LITERAL"
                 }
               ]
@@ -41,13 +41,35 @@
               "content": [
                 {
                   "id": -2127083316,
-                  "text": "avdøde i de siste fem årene før dødsfallet var medlem i folketrygden, eller fikk pensjon eller uføretrygd fra folketrygden.",
+                  "text": "Slik at den kan editeres i slate-editor",
                   "type": "LITERAL"
                 }
               ]
             }
           ],
           "type": "ITEM_LIST"
+        },
+        {
+          "id": 1879926610,
+          "text": "Tekst under punktlisten.",
+          "type": "LITERAL"
+        },
+        {
+          "id": 1879926611,
+          "text": "Blir slått sammen til ett paragraf-element så lenge det allerede befinner seg i samme paragraf-element.",
+          "type": "LITERAL"
+        }
+      ],
+      "type": "PARAGRAPH"
+    },
+    {
+      "id": 1442553539,
+      "editable": true,
+      "content": [
+        {
+          "id": 1879926609,
+          "text": "Frittstående paragraf under punktlisten vil fortsatt være frittstående.",
+          "type": "LITERAL"
         }
       ],
       "type": "PARAGRAPH"

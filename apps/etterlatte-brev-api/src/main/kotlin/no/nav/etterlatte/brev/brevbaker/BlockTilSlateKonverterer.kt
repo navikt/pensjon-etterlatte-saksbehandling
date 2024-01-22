@@ -18,7 +18,7 @@ object BlockTilSlateKonverterer {
                 listOf(
                     Slate.Element(
                         type = Slate.ElementType.HEADING_TWO,
-                        children = (block as RenderedJsonLetter.Block.Title1).content.map { konverter(it) },
+                        children = (block as RenderedJsonLetter.Block.Title1).content.map { konverterLiteralOgVariable(it) },
                     ),
                 )
 
@@ -26,7 +26,7 @@ object BlockTilSlateKonverterer {
                 listOf(
                     Slate.Element(
                         type = Slate.ElementType.HEADING_THREE,
-                        children = (block as RenderedJsonLetter.Block.Title2).content.map { konverter(it) },
+                        children = (block as RenderedJsonLetter.Block.Title2).content.map { konverterLiteralOgVariable(it) },
                     ),
                 )
 
@@ -39,40 +39,28 @@ object BlockTilSlateKonverterer {
 
                 (block as RenderedJsonLetter.Block.Paragraph).content.map {
                     when (it.type) {
+                        RenderedJsonLetter.ParagraphContent.Type.LITERAL, RenderedJsonLetter.ParagraphContent.Type.VARIABLE ->
+                            konverterLiteralOgVariable(it).let { innerElement -> innerElements.add(innerElement) }
+
                         RenderedJsonLetter.ParagraphContent.Type.ITEM_LIST -> {
-                            addInnerElementsToElementsListAndClearList(innerElements, elements)
+                            opprettElementFraInnerELementsOgNullstill(innerElements, elements)
 
                             Slate.Element(
                                 type = Slate.ElementType.BULLETED_LIST,
                                 children =
                                     (it as RenderedJsonLetter.ParagraphContent.ItemList).items
-                                        .map { item ->
-                                            Slate.InnerElement(
-                                                type = Slate.ElementType.LIST_ITEM,
-                                                children =
-                                                    listOf(
-                                                        Slate.InnerElement(
-                                                            type = Slate.ElementType.PARAGRAPH,
-                                                            text = item.content.joinToString { i -> i.text },
-                                                        ),
-                                                    ),
-                                            )
-                                        },
+                                        .map { item -> konverterListItem(item) },
                             ).let { element -> elements.add(element) }
                         }
-
-                        RenderedJsonLetter.ParagraphContent.Type.LITERAL, RenderedJsonLetter.ParagraphContent.Type.VARIABLE ->
-                            konverter(it).let { innerElement -> innerElements.add(innerElement) }
                     }
                 }
 
-                addInnerElementsToElementsListAndClearList(innerElements, elements)
-
+                opprettElementFraInnerELementsOgNullstill(innerElements, elements)
                 elements
             }
         }
 
-    private fun addInnerElementsToElementsListAndClearList(
+    private fun opprettElementFraInnerELementsOgNullstill(
         innerElements: MutableList<Slate.InnerElement>,
         elements: MutableList<Slate.Element>,
     ) {
@@ -87,13 +75,21 @@ object BlockTilSlateKonverterer {
         }
     }
 
-    private fun konverter(it: RenderedJsonLetter.ParagraphContent): Slate.InnerElement =
-        when (it.type) {
-            RenderedJsonLetter.ParagraphContent.Type.LITERAL, RenderedJsonLetter.ParagraphContent.Type.VARIABLE ->
-                Slate.InnerElement(
-                    type = Slate.ElementType.PARAGRAPH,
-                    text = (it as RenderedJsonLetter.ParagraphContent.Text).text,
-                )
-            else -> throw Exception("Kan ikke konvertere ${it.type}")
-        }
+    private fun konverterLiteralOgVariable(it: RenderedJsonLetter.ParagraphContent): Slate.InnerElement =
+        Slate.InnerElement(
+            type = Slate.ElementType.PARAGRAPH,
+            text = (it as RenderedJsonLetter.ParagraphContent.Text).text,
+        )
+
+    private fun konverterListItem(it: RenderedJsonLetter.ParagraphContent.ItemList.Item): Slate.InnerElement =
+        Slate.InnerElement(
+            type = Slate.ElementType.LIST_ITEM,
+            children =
+                listOf(
+                    Slate.InnerElement(
+                        type = Slate.ElementType.PARAGRAPH,
+                        text = it.content.joinToString { i -> i.text },
+                    ),
+                ),
+        )
 }

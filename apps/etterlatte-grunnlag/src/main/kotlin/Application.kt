@@ -16,6 +16,9 @@ import no.nav.etterlatte.grunnlag.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.grunnlag.migreringRoutes
+import no.nav.etterlatte.grunnlag.omregning.OmregningDao
+import no.nav.etterlatte.grunnlag.omregning.OmregningService
+import no.nav.etterlatte.grunnlag.omregning.omregningRoutes
 import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
@@ -89,6 +92,9 @@ class ApplicationBuilder {
     private val grunnlagService =
         RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg(), grunnlagHenter, vergeService)
 
+    private val omregningDao = OmregningDao(ds)
+    private val omregningService = OmregningService(omregningDao)
+
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
@@ -98,6 +104,7 @@ class ApplicationBuilder {
                         behandlingGrunnlagRoute(grunnlagService, behandlingKlient)
                         personRoute(grunnlagService, behandlingKlient)
                         migreringRoutes(persondataKlient, behandlingKlient)
+                        omregningRoutes(omregningService)
                     }
                 }
             }

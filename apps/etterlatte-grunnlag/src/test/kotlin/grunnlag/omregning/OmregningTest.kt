@@ -1,8 +1,7 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag.omregning
 
 import com.fasterxml.jackson.databind.node.TextNode
 import io.mockk.mockk
-import no.nav.etterlatte.grunnlag.AldersovergangDao
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
@@ -13,7 +12,7 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -25,7 +24,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AldersovergangDaoTest {
+class OmregningTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var dataSource: DataSource
@@ -57,9 +56,10 @@ class AldersovergangDaoTest {
         opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.FOEDSELSDATO, TextNode("2022-01-01"), fnrUtenfor)
         opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.SOEKER_PDL_V1, TextNode("søsken her"), fnrUtenfor)
 
-        val saker = AldersovergangDao(dataSource).hentSoekereFoedtIEnGittMaaned(YearMonth.of(2020, Month.JANUARY))
-        assertEquals(1, saker.size)
-        assertEquals(sakId.toString(), saker[0])
+        val service = OmregningService(OmregningDao(dataSource))
+        val saker = service.hentSoekereFoedtIEnGittMaaned(YearMonth.of(2020, Month.JANUARY))
+        Assertions.assertEquals(1, saker.size)
+        Assertions.assertEquals(sakId.toString(), saker[0])
     }
 
     private fun OpplysningDao.leggTilOpplysning(

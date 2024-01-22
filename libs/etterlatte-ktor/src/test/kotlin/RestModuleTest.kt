@@ -30,6 +30,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
@@ -80,14 +81,9 @@ class RestModuleTest {
     @Test
     fun `skal sette opp to endepunkter med autentisering`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log) {
-                    route1()
-                    route2()
-                }
+            runServer(server) {
+                route1()
+                route2()
             }
 
             val response1 =
@@ -112,10 +108,9 @@ class RestModuleTest {
         coEvery { personTilgangsSjekkMock.harTilgangTilPerson(any(), any(), any()) } returns true
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application { restModule(this.log) { tilgangTestRoute() } }.also { setReady() }
+            runServer(server) {
+                tilgangTestRoute()
+            }.also { setReady() }
 
             client.get("/behandling/${UUID.randomUUID()}") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -150,11 +145,8 @@ class RestModuleTest {
     @Test
     fun `skal kunne lese og skrive json payload`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log) { route1() }
+            runServer(server) {
+                route1()
             }
 
             val testObjekt = TestObjektDto("test", 1)
@@ -176,10 +168,9 @@ class RestModuleTest {
     @Test
     fun `skal returnere internal server error og logge dersom noe feiler`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
+            runServer(server) {
+                route1()
             }
-            application { restModule(this.log) { route1() } }
 
             val response =
                 client.get("/test/fails") {
@@ -193,10 +184,9 @@ class RestModuleTest {
     @Test
     fun `skal svare paa helsesjekk uten autentisering`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application { restModule(this.log) { route1() } }.also { setReady() }
+            runServer(server) {
+                route1()
+            }.also { setReady() }
 
             val response1 = client.get("/health/isalive")
             assertEquals(OK, response1.status)
@@ -235,11 +225,8 @@ class RestModuleTest {
     @Test
     fun `metrics test`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log, withMetrics = true) { route1() }
+            runServer(server, withMetrics = true) {
+                route1()
             }
 
             client.get("/metrics").also {

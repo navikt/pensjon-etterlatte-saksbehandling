@@ -15,13 +15,14 @@ import testsupport.buildTestApplicationConfigurationForOauth
 fun ApplicationTestBuilder.runServer(
     server: MockOAuth2Server,
     routePrefix: String = "",
+    withMetrics: Boolean = false,
     routes: Route.() -> Unit,
 ): HttpClient {
     environment {
         config = buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
     application {
-        restModule(this.log, routePrefix = routePrefix) {
+        restModule(this.log, routePrefix = routePrefix, withMetrics = withMetrics) {
             routes()
         }
     }

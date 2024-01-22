@@ -11,7 +11,7 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -23,7 +23,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakSamordningDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -93,17 +92,7 @@ class SamordningsvedtakRouteTest {
         }
     }
 
-    private fun token(roles: List<String>): String =
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "roles" to roles,
-                    "sub" to "pensjon-pen",
-                    "oid" to "pensjon-pen",
-                ),
-        ).serialize()
+    private fun token(roles: List<String>): String = server.issueSystembrukerToken(mittsystem = "pensjon-pen", roles = roles)
 }
 
 private fun samordningVedtak() =

@@ -18,6 +18,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.FNR_KEY
 import rapidsandrivers.GRUNNLAG_OPPDATERT
+import rapidsandrivers.NY_OPPLYSNING_KEY
 import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.migrering.ListenerMedLogging
@@ -48,7 +49,7 @@ class GrunnlagHendelserRiver(
         val eventName = packet[EVENT_NAME_KEY].asText()
         val opplysningType = packet[BEHOV_NAME_KEY].asText()
 
-        if (eventName == "OPPLYSNING:NY" || opplysningType in OPPLYSNING_TYPER) {
+        if (eventName == NY_OPPLYSNING_KEY || opplysningType in OPPLYSNING_TYPER) {
             val sakId = packet[SAK_ID_KEY].asLong()
             val behandlingId = packet[BEHANDLING_ID_KEY].let { UUID.fromString(it.asText()) }
 

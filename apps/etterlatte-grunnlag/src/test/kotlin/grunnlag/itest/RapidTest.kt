@@ -30,6 +30,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.FNR_KEY
+import rapidsandrivers.NY_OPPLYSNING_KEY
 import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.SAK_ID_KEY
 import java.util.UUID
@@ -90,7 +91,7 @@ internal class RapidTest {
         private val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to "OPPLYSNING:NY",
+                    EVENT_NAME_KEY to NY_OPPLYSNING_KEY,
                     OPPLYSNING_KEY to listOf(nyOpplysning),
                     FNR_KEY to fnr,
                     SAK_ID_KEY to 1,

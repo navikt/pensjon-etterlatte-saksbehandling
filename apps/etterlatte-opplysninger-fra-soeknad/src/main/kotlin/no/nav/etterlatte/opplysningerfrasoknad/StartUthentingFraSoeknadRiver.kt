@@ -12,6 +12,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.NY_OPPLYSNING_KEY
 import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.migrering.ListenerMedLogging
@@ -49,7 +50,7 @@ internal class StartUthentingFraSoeknadRiver(
             )
 
         JsonMessage.newMessage(
-            "OPPLYSNING:NY",
+            NY_OPPLYSNING_KEY,
             mapOf(
                 SAK_ID_KEY to packet[GyldigSoeknadVurdert.sakIdKey],
                 BEHANDLING_ID_KEY to packet[GyldigSoeknadVurdert.behandlingIdKey],

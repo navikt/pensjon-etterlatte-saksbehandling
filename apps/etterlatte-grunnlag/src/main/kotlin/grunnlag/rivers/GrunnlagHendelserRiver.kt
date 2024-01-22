@@ -1,7 +1,8 @@
-package no.nav.etterlatte.grunnlag
+package no.nav.etterlatte.grunnlag.rivers
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
@@ -10,7 +11,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
+import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -37,7 +38,7 @@ class GrunnlagHendelserRiver(
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
-            validate { it.rejectValue(EVENT_NAME_KEY, FEILA) }
+            validate { it.rejectValue(EVENT_NAME_KEY, EventNames.FEILA) }
             validate { it.rejectValue(VILKAARSVURDERT_KEY, true) }
         }
     }

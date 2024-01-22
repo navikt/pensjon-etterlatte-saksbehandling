@@ -27,3 +27,12 @@ data class StatistikkBehandling(
     val kilde: Vedtaksloesning,
     val pesysId: Long?,
 )
+
+enum class BehandlingHendelseType {
+    OPPRETTET,
+    AVBRUTT,
+}
+
+const val BEHANDLING_RIVER_KEY = "behandling"
+
+fun BehandlingHendelseType.lagEventnameForType(): String = "BEHANDLING:${this.name}"

@@ -1,27 +1,21 @@
 import { useEffect, useState } from 'react'
 import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
-import { Oppgavelista } from '~components/nyoppgavebenk/Oppgavelista'
-import { MinOppgaveliste } from '~components/nyoppgavebenk/minoppgaveliste/MinOppgaveliste'
+import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
+import { MinOppgaveliste } from '~components/oppgavebenk/minoppgaveliste/MinOppgaveliste'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGosysOppgaver, hentOppgaver, OppgaveDTO } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
-import { FilterRad } from '~components/nyoppgavebenk/FilterRad'
-import { Filter, filtrerOppgaver, initialFilter } from '~components/nyoppgavebenk/Oppgavelistafiltre'
+import { FilterRad } from '~components/oppgavebenk/FilterRad'
+import { Filter, filtrerOppgaver, initialFilter } from '~components/oppgavebenk/Oppgavelistafiltre'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
-
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { Tilgangsmelding } from '~components/nyoppgavebenk/Tilgangsmelding'
+import { Tilgangsmelding } from '~components/oppgavebenk/Tilgangsmelding'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
-
-const TabsWidth = styled(Tabs)`
-  max-width: fit-content;
-  margin-bottom: 2rem;
-`
 
 export const ToggleMinOppgaveliste = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
@@ -118,6 +112,7 @@ export const ToggleMinOppgaveliste = () => {
                 oppgaver={hentedeOppgaver}
                 filtrerteOppgaver={filtrerteOppgaver}
                 oppdaterTildeling={oppdaterTildeling}
+                hentOppgaver={hentAlleOppgaver}
               />
             </>
           )}
@@ -133,3 +128,8 @@ export const ToggleMinOppgaveliste = () => {
     </Container>
   )
 }
+
+const TabsWidth = styled(Tabs)`
+  max-width: fit-content;
+  margin-bottom: 2rem;
+`

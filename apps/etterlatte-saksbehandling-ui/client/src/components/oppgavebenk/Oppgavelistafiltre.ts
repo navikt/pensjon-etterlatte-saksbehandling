@@ -1,30 +1,6 @@
 import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaver'
 import { isBefore } from 'date-fns'
 
-export const SAKSBEHANDLERFILTER = {
-  visAlle: 'Vis alle',
-  Tildelt: 'Tildelt oppgave',
-  IkkeTildelt: 'Ikke tildelt oppgave',
-}
-
-function filtrerSaksbehandler(saksbehandlerFilter: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-  if (saksbehandlerFilter === SAKSBEHANDLERFILTER.visAlle) {
-    return oppgaver
-  } else {
-    return oppgaver.filter((o) => {
-      if (saksbehandlerFilter === SAKSBEHANDLERFILTER.Tildelt) {
-        return o.saksbehandler !== null
-      } else if (saksbehandlerFilter === SAKSBEHANDLERFILTER.IkkeTildelt) {
-        return o.saksbehandler === null
-      } else if (saksbehandlerFilter && saksbehandlerFilter !== '') {
-        return o.saksbehandler === saksbehandlerFilter
-      } else {
-        return true
-      }
-    })
-  }
-}
-
 export const ENHETFILTER = {
   visAlle: 'Vis alle',
   E4815: 'Ålesund - 4815',
@@ -63,26 +39,52 @@ function filtrerYtelse(ytelseFilter: YtelseFilterKeys, oppgaver: OppgaveDTO[]): 
   }
 }
 
-type visAlle = 'visAlle'
-export type OppgavestatusFilterKeys = Oppgavestatus | visAlle
+export const SAKSBEHANDLERFILTER = {
+  visAlle: 'Vis alle',
+  Tildelt: 'Tildelt oppgave',
+  IkkeTildelt: 'Ikke tildelt oppgave',
+}
 
+function filtrerSaksbehandler(saksbehandlerFilter: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
+  if (saksbehandlerFilter === SAKSBEHANDLERFILTER.visAlle) {
+    return oppgaver
+  } else {
+    return oppgaver.filter((o) => {
+      if (saksbehandlerFilter === SAKSBEHANDLERFILTER.Tildelt) {
+        return o.saksbehandler !== null
+      } else if (saksbehandlerFilter === SAKSBEHANDLERFILTER.IkkeTildelt) {
+        return o.saksbehandler === null
+      } else if (saksbehandlerFilter && saksbehandlerFilter !== '') {
+        return o.saksbehandler === saksbehandlerFilter
+      } else {
+        return true
+      }
+    })
+  }
+}
+
+type visAlle = 'visAlle'
+
+type OppgavestatusFilterKeys = Oppgavestatus | visAlle
 export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
   visAlle: 'Vis alle',
   NY: 'Ny',
-  UNDER_BEHANDLING: 'Under arbeid',
+  UNDER_BEHANDLING: 'Under behandling',
   FERDIGSTILT: 'Ferdigstilt',
   FEILREGISTRERT: 'Feilregistrert',
   AVBRUTT: 'Avbrutt',
 }
 
-export function filtrerOppgaveStatus(
-  oppgavestatusFilterKeys: OppgavestatusFilterKeys,
-  oppgaver: OppgaveDTO[]
-): OppgaveDTO[] {
-  if (oppgavestatusFilterKeys === 'visAlle') {
+// Gjøre som på filtrering av saksbehandler, men istedenfor å sjekke 1 string, må man sjekke en array med strings
+export function filtrerOppgaveStatus(oppgavestatusFilter: Array<string>, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
+  const konverterteFiltre: Array<OppgavestatusFilterKeys> = Object.entries(OPPGAVESTATUSFILTER)
+    .filter(([, val]) => oppgavestatusFilter.includes(val))
+    .map(([key]) => key as OppgavestatusFilterKeys)
+
+  if (oppgavestatusFilter.includes(OPPGAVESTATUSFILTER.visAlle) || oppgavestatusFilter.length === 0) {
     return oppgaver
   } else {
-    return oppgaver.filter((o) => o.status === oppgavestatusFilterKeys)
+    return oppgaver.filter((oppgave) => konverterteFiltre.includes(oppgave.status))
   }
 }
 
@@ -172,7 +174,7 @@ export function filtrerOppgaver(
   fristFilter: FristFilterKeys,
   saksbehandlerFilter: string,
   ytelseFilter: YtelseFilterKeys,
-  oppgavestatusFilter: OppgavestatusFilterKeys,
+  oppgavestatusFilter: Array<string>,
   oppgavetypeFilter: OppgavetypeFilterKeys,
   oppgaveKildeFilterKeys: OppgaveKildeFilterKeys,
   oppgaver: OppgaveDTO[],
@@ -194,7 +196,7 @@ export interface Filter {
   fristFilter: FristFilterKeys
   saksbehandlerFilter: string
   ytelseFilter: YtelseFilterKeys
-  oppgavestatusFilter: OppgavestatusFilterKeys
+  oppgavestatusFilter: Array<string>
   oppgavetypeFilter: OppgavetypeFilterKeys
   oppgavekildeFilter: OppgaveKildeFilterKeys
   fnrFilter: string
@@ -206,7 +208,7 @@ export const initialFilter = (): Filter => {
     fristFilter: 'visAlle',
     saksbehandlerFilter: SAKSBEHANDLERFILTER.IkkeTildelt,
     ytelseFilter: 'visAlle',
-    oppgavestatusFilter: 'visAlle',
+    oppgavestatusFilter: [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
     oppgavetypeFilter: 'visAlle',
     oppgavekildeFilter: 'visAlle',
     fnrFilter: '',

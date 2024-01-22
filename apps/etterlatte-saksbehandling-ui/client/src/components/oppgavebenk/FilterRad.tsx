@@ -1,5 +1,5 @@
 import { Button, Select, TextField, UNSAFE_Combobox } from '@navikt/ds-react'
-import React, { useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import {
   ENHETFILTER,
   EnhetFilterKeys,
@@ -9,35 +9,35 @@ import {
   initialFilter,
   OPPGAVEKILDEFILTER,
   OppgaveKildeFilterKeys,
-  OPPGAVESTATUSFILTER,
-  OppgavestatusFilterKeys,
   oppgavetypefilter,
   OppgavetypeFilterKeys,
   SAKSBEHANDLERFILTER,
   YTELSEFILTER,
   YtelseFilterKeys,
-} from '~components/nyoppgavebenk/Oppgavelistafiltre'
+} from '~components/oppgavebenk/Oppgavelistafiltre'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
+import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
 
-export const FilterRad = (props: {
+interface Props {
   hentOppgaver: () => void
   filter: Filter
   setFilter: (filter: Filter) => void
   alleOppgaver: OppgaveDTO[]
-}) => {
-  const { hentOppgaver, filter, setFilter, alleOppgaver } = props
+}
 
+export const FilterRad = ({ hentOppgaver, filter, setFilter, alleOppgaver }: Props): ReactNode => {
   const saksbehandlere = new Set(
     alleOppgaver.map((oppgave) => oppgave.saksbehandler).filter((s): s is Exclude<typeof s, null> => s !== null)
   )
   const [saksbehandlerFilterLokal, setSaksbehandlerFilterLokal] = useState<string>(filter.saksbehandlerFilter)
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
+
   return (
     <>
-      <FlexRow $spacing>
+      <FlexRow $spacing align="start">
         <TextField
           label="Fødselsnummer"
           value={filter.fnrFilter}
@@ -101,17 +101,11 @@ export const FilterRad = (props: {
             </option>
           ))}
         </Select>
-        <Select
-          label="Oppgavestatus"
+        <VelgOppgavestatuser
           value={filter.oppgavestatusFilter}
-          onChange={(e) => setFilter({ ...filter, oppgavestatusFilter: e.target.value as OppgavestatusFilterKeys })}
-        >
-          {Object.entries(OPPGAVESTATUSFILTER).map(([status, statusbeskrivelse]) => (
-            <option key={status} value={status}>
-              {statusbeskrivelse}
-            </option>
-          ))}
-        </Select>
+          onChange={(oppgavestatusFilter) => setFilter({ ...filter, oppgavestatusFilter })}
+        />
+
         <Select
           label="Oppgavetype"
           value={filter.oppgavetypeFilter}
@@ -126,7 +120,12 @@ export const FilterRad = (props: {
         <Select
           label="Kilde"
           value={filter.oppgavekildeFilter}
-          onChange={(e) => setFilter({ ...filter, oppgavekildeFilter: e.target.value as OppgaveKildeFilterKeys })}
+          onChange={(e) =>
+            setFilter({
+              ...filter,
+              oppgavekildeFilter: e.target.value as OppgaveKildeFilterKeys,
+            })
+          }
         >
           {Object.entries(OPPGAVEKILDEFILTER).map(([type, typebeskrivelse]) => (
             <option key={type} value={type}>

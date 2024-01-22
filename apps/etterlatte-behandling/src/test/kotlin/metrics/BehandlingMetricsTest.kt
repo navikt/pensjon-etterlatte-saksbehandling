@@ -61,7 +61,12 @@ internal class BehandlingMetricsTest {
         val metrikker = behandlingMetrics.behandlinger.collect().first().samples
         metrikker.first().labelNames shouldContainExactly
             listOf(
-                "saktype", "behandlingstype", "status", "revurdering_aarsak", "kilde", "automatiskMigrering",
+                "saktype",
+                "behandlingstype",
+                "status",
+                "revurdering_aarsak",
+                "kilde",
+                "automatiskMigrering",
             )
     }
 

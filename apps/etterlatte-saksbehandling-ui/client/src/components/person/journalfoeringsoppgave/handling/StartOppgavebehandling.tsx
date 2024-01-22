@@ -9,7 +9,7 @@ import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { FlexRow } from '~shared/styled'
 
-import { FristWrapper } from '~components/nyoppgavebenk/FristWrapper'
+import { FristWrapper } from '~components/oppgavebenk/FristWrapper'
 import { OppgaveHandling, settOppgaveHandling } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { FormWrapper } from '../BehandleJournalfoeringOppgave'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'

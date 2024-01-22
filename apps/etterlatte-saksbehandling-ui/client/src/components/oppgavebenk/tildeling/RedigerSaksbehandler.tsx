@@ -1,7 +1,7 @@
 import { Oppgavetype } from '~shared/api/oppgaver'
 import React from 'react'
 import { useAppSelector } from '~store/Store'
-import { FjernSaksbehandler } from '~components/nyoppgavebenk/tildeling/FjernSaksbehandler'
+import { FjernSaksbehandler } from '~components/oppgavebenk/tildeling/FjernSaksbehandler'
 import { ByttSaksbehandler } from './ByttSaksbehandler'
 import { TildelSaksbehandler } from './TildelSaksbehandler'
 

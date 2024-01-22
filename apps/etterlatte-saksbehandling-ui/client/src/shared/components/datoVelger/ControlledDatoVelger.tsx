@@ -9,11 +9,13 @@ export const ControlledDatoVelger = <T extends FieldValues>({
   label,
   control,
   errorVedTomInput,
+  defaultValue,
 }: {
   name: Path<T>
   label: string
   control: Control<T>
   errorVedTomInput: string
+  defaultValue?: string
 }): ReactNode => {
   const [, setDateError] = useState<DateValidationT | null>(null)
 
@@ -31,7 +33,6 @@ export const ControlledDatoVelger = <T extends FieldValues>({
         return undefined
       },
     },
-    defaultValue: undefined,
   })
 
   const { datepickerProps, inputProps } = useDatepicker({
@@ -41,6 +42,7 @@ export const ControlledDatoVelger = <T extends FieldValues>({
     locale: 'nb',
     inputFormat: 'dd.MM.yyyy',
     onValidate: setDateError,
+    defaultSelected: defaultValue ? new Date(defaultValue) : undefined,
   } as UseDatepickerOptions)
 
   return (

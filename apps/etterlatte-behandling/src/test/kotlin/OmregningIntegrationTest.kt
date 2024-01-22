@@ -30,12 +30,11 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.stream.IntStream
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OmregningIntegrationTest : BehandlingIntegrationTest() {
@@ -53,108 +52,112 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     @AfterAll
     fun shutdown() = afterAll()
 
-    @Nested
-    inner class KanOmregne {
-        private var sakId: Long = 0L
+    private var sakId: Long = 0L
 
-        fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> {
-            return inTransaction {
-                val sak =
-                    applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+    fun opprettSakMedFoerstegangsbehandling(fnr: String): Pair<Sak, Foerstegangsbehandling?> {
+        return inTransaction {
+            val sak =
+                applicationContext.sakDao.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
 
-                val behandling =
-                    applicationContext.behandlingFactory
-                        .opprettBehandling(
-                            sak.id,
-                            persongalleri(),
-                            LocalDateTime.now().toString(),
-                            Vedtaksloesning.GJENNY,
-                        )?.behandling
-                Pair(sak, behandling as Foerstegangsbehandling)
-            }
+            val behandling =
+                applicationContext.behandlingFactory
+                    .opprettBehandling(
+                        sak.id,
+                        persongalleri(),
+                        LocalDateTime.now().toString(),
+                        Vedtaksloesning.GJENNY,
+                    )?.behandling
+            Pair(sak, behandling as Foerstegangsbehandling)
+        }
+    }
+
+    private fun iverksettFoerstegangsbehandling(
+        sak: Sak,
+        behandling: Foerstegangsbehandling?,
+    ) {
+        val kommerBarnetTilgode =
+            KommerBarnetTilgode(
+                JaNei.JA,
+                "",
+                Grunnlagsopplysning.Saksbehandler.create("A0"),
+                behandling!!.id,
+            )
+        inTransaction {
+            applicationContext.kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
+                kommerBarnetTilgode,
+            )
         }
 
-        @BeforeEach
-        fun beforeEach() {
-            val (sak, behandling) = opprettSakMedFoerstegangsbehandling("234")
-            val kommerBarnetTilgode =
-                KommerBarnetTilgode(
-                    JaNei.JA,
-                    "",
-                    Grunnlagsopplysning.Saksbehandler.create("A0"),
-                    behandling!!.id,
-                )
-            inTransaction {
-                applicationContext.kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
-                    kommerBarnetTilgode,
-                )
-            }
+        sakId = sak.id
 
-            sakId = sak.id
+        val virkningstidspunkt = virkningstidspunktVurdering()
 
-            val virkningstidspunkt = virkningstidspunktVurdering()
+        val iverksattBehandling =
+            behandling.copy(kommerBarnetTilgode = kommerBarnetTilgode)
+                .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
+                .oppdaterVirkningstidspunkt(virkningstidspunkt)
+                .tilVilkaarsvurdert()
+                .tilTrygdetidOppdatert()
+                .tilBeregnet()
+                .tilFattetVedtak()
+                .tilAttestert()
+                .tilIverksatt()
 
-            val iverksattBehandling =
-                behandling.copy(kommerBarnetTilgode = kommerBarnetTilgode)
-                    .oppdaterGyldighetsproeving(gyldighetsresultatVurdering())
-                    .oppdaterVirkningstidspunkt(virkningstidspunkt)
-                    .tilVilkaarsvurdert()
-                    .tilTrygdetidOppdatert()
-                    .tilBeregnet()
-                    .tilFattetVedtak()
-                    .tilAttestert()
-                    .tilIverksatt()
+        inTransaction { applicationContext.behandlingDao.lagreStatus(iverksattBehandling) }
+    }
 
-            inTransaction { applicationContext.behandlingDao.lagreStatus(iverksattBehandling) }
+    @Test
+    fun `kan opprette omregning paa sak som har iverksatt foerstegangsbehandling`() {
+        IntStream.of(1).forEach {
+            println(it)
+            val (sak, behandling) = opprettSakMedFoerstegangsbehandling(it.toString())
+            iverksettFoerstegangsbehandling(sak, behandling)
         }
-
-        @Test
-        fun `kan opprette omregning paa sak som har iverksatt foerstegangsbehandling`() {
-            testApplication {
-                environment {
-                    config = hoconApplicationConfig
+        testApplication {
+            environment {
+                config = hoconApplicationConfig
+            }
+            val client =
+                createClient {
+                    install(ContentNegotiation) {
+                        jackson { registerModule(JavaTimeModule()) }
+                    }
                 }
-                val client =
-                    createClient {
-                        install(ContentNegotiation) {
-                            jackson { registerModule(JavaTimeModule()) }
-                        }
-                    }
-                application { module(applicationContext) }
+            application { module(applicationContext) }
 
-                val (omregning) =
-                    client.post("/omregning") {
-                        addAuthToken(systemBruker)
-                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        setBody(
-                            Omregningshendelse(
-                                sakId,
-                                LocalDate.now(),
-                                null,
-                                Prosesstype.AUTOMATISK,
-                            ),
-                        )
-                    }.let {
-                        Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                        it.body<OpprettOmregningResponse>()
-                    }
-
-                client.get("/behandlinger/$omregning") {
-                    addAuthToken(tokenSaksbehandler)
+            val (omregning) =
+                client.post("/omregning") {
+                    addAuthToken(systemBruker)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    setBody(
+                        Omregningshendelse(
+                            sakId,
+                            LocalDate.now(),
+                            null,
+                            Prosesstype.AUTOMATISK,
+                        ),
+                    )
                 }.let {
                     Assertions.assertEquals(HttpStatusCode.OK, it.status)
-                    it.body<DetaljertBehandling>().also { behandling ->
-                        Assertions.assertEquals(omregning, behandling.id)
-                        Assertions.assertEquals(sakId, behandling.sak)
-                    }
+                    it.body<OpprettOmregningResponse>()
+                }
+
+            client.get("/behandlinger/$omregning") {
+                addAuthToken(tokenSaksbehandler)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }.let {
+                Assertions.assertEquals(HttpStatusCode.OK, it.status)
+                it.body<DetaljertBehandling>().also { behandling ->
+                    Assertions.assertEquals(omregning, behandling.id)
+                    Assertions.assertEquals(sakId, behandling.sak)
                 }
             }
         }
     }
 
     @Test
-    fun `omregning feiler hvis det ikke finnes noen iverksatt behandling fra foerr`() {
+    fun `omregning feiler hvis det ikke finnes noen iverksatt behandling fra foer`() {
+        val (sak, _) = opprettSakMedFoerstegangsbehandling("234")
         testApplication {
             environment {
                 config = hoconApplicationConfig
@@ -170,7 +173,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
             client.post("/omregning") {
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(Omregningshendelse(1, LocalDate.now(), null, Prosesstype.AUTOMATISK))
+                setBody(Omregningshendelse(sak.id, LocalDate.now(), null, Prosesstype.AUTOMATISK))
             }.also {
                 Assertions.assertEquals(HttpStatusCode.InternalServerError, it.status)
             }

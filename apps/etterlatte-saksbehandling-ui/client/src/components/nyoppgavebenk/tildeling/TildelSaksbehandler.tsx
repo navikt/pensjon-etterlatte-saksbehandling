@@ -5,6 +5,7 @@ import { Alert, Button, Loader } from '@navikt/ds-react'
 import { PersonIcon } from '@navikt/aksel-icons'
 
 import { mapAllApiResult } from '~shared/api/apiUtils'
+import { ToolTip } from '~components/behandling/felles/ToolTip'
 
 export const TildelSaksbehandler = (props: {
   oppgaveId: string
@@ -37,7 +38,13 @@ export const TildelSaksbehandler = (props: {
     </Button>,
     (err) => (
       <Alert variant="error" size="small">
-        {err.code === 'OPPGAVEN_HAR_ALLEREDE_SAKSBEHANDLER' ? 'Allerede tildelt' : 'Tildeling feilet'}
+        {err.code === 'OPPGAVEN_HAR_ALLEREDE_SAKSBEHANDLER' ? (
+          <>
+            Allerede tildelt<ToolTip title="Mer info om feilen">{alleredeTildeltHjelpetekst}</ToolTip>
+          </>
+        ) : (
+          'Tildeling feilet'
+        )}
       </Alert>
     ),
     () => (
@@ -47,3 +54,8 @@ export const TildelSaksbehandler = (props: {
     )
   )
 }
+
+const alleredeTildeltHjelpetekst =
+  'Oppgaven er allerede tildelt. Hvis du ønsker å overta den, må du gå ' +
+  'i oppgavelisten og ta bort "Ikke tildelt oppgave", huke av for "Vis alle" under Saksbehandler, ' +
+  'og hente oppgaver på nytt. Klikk så på saksbehandler på aktuell oppgave og ta til deg oppgaven.'

@@ -67,6 +67,11 @@ class BehandlingKanIkkeAvbrytesException(behandlingStatus: BehandlingStatus) : U
     detail = "Behandlingen kan ikke avbrytes, status: $behandlingStatus",
 )
 
+class PersongalleriFinnesIkkeException() : IkkeFunnetException(
+    code = "FANT_IKKE_PERSONGALLERI",
+    detail = "Kunne ikke finne persongalleri",
+)
+
 interface BehandlingService {
     fun hentBehandling(behandlingId: UUID): Behandling?
 
@@ -329,7 +334,7 @@ internal class BehandlingServiceImpl(
     ) {
         val forrigePersonGalleri =
             grunnlagKlient.hentPersongalleri(behandlingId, brukerTokenInfo)?.opplysning
-                ?: throw Exception("Mangler persongalleri..") // TODO
+                ?: throw PersongalleriFinnesIkkeException()
         inTransaction {
             hentBehandlingOrThrow(behandlingId)
                 .tilOpprettet()

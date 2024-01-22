@@ -95,6 +95,10 @@ spec:
       value: prod-fss:etterlatte:etterlatte-proxy
     - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
       value: api://prod-fss.etterlatte.etterlatte-proxy/.default
+    - name: REGOPPSLAG_SCOPE
+      value: api://prod-fss.teamdokumenthandtering.regoppslag/.default
+    - name: REGOPPSLAG_URL
+      value: https://regoppslag.prod-fss-pub.nais.io
     - name: NAVANSATT_OUTBOUND_SCOPE
       value: api://prod-fss.pensjondeployer.navansatt/.default
     - name: ETTERLATTE_VEDTAK_CLIENT_ID
@@ -131,6 +135,7 @@ spec:
         - host: etterlatte-proxy.prod-fss-pub.nais.io
         - host: norg2.prod-fss-pub.nais.io
         - host: saf.prod-fss-pub.nais.io
+        - host: regoppslag.prod-fss-pub.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: dokdistfordeling.prod-fss-pub.nais.io
         - host: data.brreg.no

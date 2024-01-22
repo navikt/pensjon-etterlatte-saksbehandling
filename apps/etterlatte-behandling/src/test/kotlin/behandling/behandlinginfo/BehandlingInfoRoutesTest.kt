@@ -25,6 +25,8 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
@@ -229,19 +231,5 @@ internal class BehandlingInfoRoutesTest {
             }
         }
 
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
-    }
-
-    private companion object {
-        const val CLIENT_ID = "mock-client-id"
-    }
+    private val token: String by lazy { server.issueSaksbehandlerToken() }
 }

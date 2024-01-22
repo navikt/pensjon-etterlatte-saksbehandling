@@ -6,14 +6,17 @@ import java.util.UUID
 
 const val CLIENT_ID = "CLIENT_ID"
 
-fun MockOAuth2Server.issueSaksbehandlerToken(): String =
+fun MockOAuth2Server.issueSaksbehandlerToken(
+    navn: String = "Navn Navnesen",
+    navIdent: String = "Saksbehandler01",
+): String =
     this.issueToken(
         issuerId = AZURE_ISSUER,
         audience = CLIENT_ID,
         claims =
             mapOf(
-                "navn" to "Per Persson",
-                "NAVident" to "Saksbehandler01",
+                "navn" to navn,
+                "NAVident" to navIdent,
             ),
     ).serialize()
 

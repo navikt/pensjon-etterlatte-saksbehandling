@@ -24,6 +24,8 @@ import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -220,21 +222,10 @@ internal class BehandlingRoutesTest {
         } returns virkningstidspunkt
     }
 
-    private val token: String by lazy {
-        mockOAuth2Server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    "NAVident" to NAV_IDENT,
-                ),
-        ).serialize()
-    }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = NAV_IDENT) }
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
         const val NAV_IDENT = "Saksbehandler01"
-        const val CLIENT_ID = "mock-client-id"
     }
 }

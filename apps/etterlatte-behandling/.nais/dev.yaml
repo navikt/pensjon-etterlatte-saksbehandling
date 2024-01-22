@@ -140,7 +140,6 @@ spec:
           namespace: nom
       external:
         - host: skjermede-personer-pip.intern.dev.nav.no
-        - host: unleash.nais.io
         - host: norg2.dev-fss-pub.nais.io
         - host: navansatt.dev-fss-pub.nais.io
         - host: oppgave.dev-fss-pub.nais.io

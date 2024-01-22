@@ -148,7 +148,6 @@ spec:
         - application: etterlatte-klage
       external:
         - host: skjermede-personer-pip.intern.nav.no
-        - host: unleash.nais.io
         - host: norg2.prod-fss-pub.nais.io
         - host: navansatt.prod-fss-pub.nais.io
         - host: oppgave.prod-fss-pub.nais.io

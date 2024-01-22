@@ -10,6 +10,9 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
+import rapidsandrivers.SAK_ID_KEY
 import java.util.UUID
 
 internal class VilkaarsvurderingRiverTest {
@@ -28,9 +31,9 @@ internal class VilkaarsvurderingRiverTest {
             JsonMessage.newMessage(
                 mapOf(
                     EVENT_NAME_KEY to ReguleringEvents.VILKAARSVURDER,
-                    "sakId" to 1,
-                    "behandlingId" to behandlingId,
-                    "behandling_vi_omregner_fra" to behandlingViOmregnerFra,
+                    SAK_ID_KEY to 1,
+                    BEHANDLING_ID_KEY to behandlingId,
+                    BEHANDLING_VI_OMREGNER_FRA_KEY to behandlingViOmregnerFra,
                 ),
             ).toJson()
         testRapid.sendTestMessage(melding)

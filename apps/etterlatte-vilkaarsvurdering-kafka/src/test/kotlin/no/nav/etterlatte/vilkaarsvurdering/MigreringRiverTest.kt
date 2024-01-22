@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.SAK_ID_KEY
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
@@ -110,9 +111,8 @@ internal class MigreringRiverTest {
                 mapOf(
                     EVENT_NAME_KEY to Migreringshendelser.VILKAARSVURDER,
                     BEHOV_NAME_KEY to Opplysningstype.AVDOED_PDL_V1.name,
-                    "sakId" to 1,
+                    SAK_ID_KEY to 1,
                     BEHANDLING_ID_KEY to behandlingId,
-                    "fullstendig" to true,
                     HENDELSE_DATA_KEY to request,
                 ),
             ).toJson()

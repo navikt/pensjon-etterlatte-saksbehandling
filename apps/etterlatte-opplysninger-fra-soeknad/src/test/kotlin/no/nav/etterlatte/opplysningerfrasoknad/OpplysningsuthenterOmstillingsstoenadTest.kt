@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.SAK_ID_KEY
 import soeknad.InnsendtSoeknadTestData
 import java.time.LocalDate
 import java.time.Month
@@ -136,8 +138,8 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
             return """
                 {
                   "$EVENT_NAME_KEY": "GYLDIG_SOEKNAD:VURDERT",
-                  "behandlingId": "f525f2f7-e246-43d7-b61a-5f0757472916",
-                  "sakId": 1,
+                  "$BEHANDLING_ID_KEY": "f525f2f7-e246-43d7-b61a-5f0757472916",
+                  "$SAK_ID_KEY": 1,
                   "@skjema_info": ${soeknad.toJson()},
                   "@lagret_soeknad_id": 360,
                   "@template": "soeknad",

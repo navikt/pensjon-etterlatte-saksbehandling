@@ -15,6 +15,10 @@ import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_KRITERIER_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.GYLDIG_FOR_BEHANDLING_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.SOEKNAD_ID_KEY
 import no.nav.etterlatte.readFile
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -125,11 +129,11 @@ internal class FordelerRiverTest {
         assertJsonEquals(
             """
                {
-                    "@correlation_id": "korrelasjonsid",
+                    "$CORRELATION_ID_KEY": "korrelasjonsid",
                     "$EVENT_NAME_KEY": "FORDELER:STATISTIKK",
-                    "sak_type": "BARNEPENSJON",
-                    "soeknad_id": 1337,
-                    "gyldig_for_behandling": true
+                    "$SAK_TYPE_KEY": "BARNEPENSJON",
+                    "$SOEKNAD_ID_KEY": 1337,
+                    "$GYLDIG_FOR_BEHANDLING_KEY": true
                } 
             """,
             statistikkMeldingGyldig,
@@ -150,12 +154,12 @@ internal class FordelerRiverTest {
         assertJsonEquals(
             """
                 {
-                    "@correlation_id": "korrelasjonsid",
+                    "$CORRELATION_ID_KEY": "korrelasjonsid",
                     "$EVENT_NAME_KEY": "FORDELER:STATISTIKK",
-                    "soeknad_id": 1337,
-                    "sak_type": "BARNEPENSJON",
-                    "gyldig_for_behandling": false,
-                    "feilende_kriterier": [
+                    "$SOEKNAD_ID_KEY": 1337,
+                    "$SAK_TYPE_KEY": "BARNEPENSJON",
+                    "$GYLDIG_FOR_BEHANDLING_KEY: false,
+                    "$FEILENDE_KRITERIER_KEY": [
                         "BARN_ER_IKKE_BOSATT_I_NORGE"
                     ]
                 }

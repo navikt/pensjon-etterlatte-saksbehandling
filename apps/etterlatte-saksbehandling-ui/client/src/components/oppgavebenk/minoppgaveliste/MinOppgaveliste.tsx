@@ -1,7 +1,7 @@
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { Alert } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
-import { filtrerOppgaveStatus } from '~components/oppgavebenk/Oppgavelistafiltre'
+import { filtrerOppgaveStatus, OPPGAVESTATUSFILTER } from '~components/oppgavebenk/Oppgavelistafiltre'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
 import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
@@ -13,7 +13,9 @@ interface Props {
 }
 
 export const MinOppgaveliste = ({ oppgaver, oppdaterTildeling, hentOppgaver }: Props) => {
-  const [oppgavestatuserValgt, setOppgavestatuserValgt] = useState<Array<string>>(['UNDER_BEHANDLING'])
+  const [oppgavestatuserValgt, setOppgavestatuserValgt] = useState<Array<string>>([
+    OPPGAVESTATUSFILTER.UNDER_BEHANDLING,
+  ])
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
   const [paginerteOppgaver, setPaginerteOppgaver] = useState<Array<OppgaveDTO>>(

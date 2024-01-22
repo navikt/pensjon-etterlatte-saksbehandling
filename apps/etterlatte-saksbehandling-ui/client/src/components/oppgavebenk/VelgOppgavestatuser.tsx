@@ -19,7 +19,7 @@ export const VelgOppgavestatuser = ({ value, onChange }: Props) => {
   return (
     <UNSAFE_Combobox
       label="Oppgavestatus"
-      options={OPPGAVESTATUSFILTER}
+      options={Object.entries(OPPGAVESTATUSFILTER).map(([, beskrivelse]) => beskrivelse)}
       selectedOptions={value}
       onToggleSelected={(option, isSelected) => onOppgavestatusSelected(option, isSelected)}
       isMultiSelect

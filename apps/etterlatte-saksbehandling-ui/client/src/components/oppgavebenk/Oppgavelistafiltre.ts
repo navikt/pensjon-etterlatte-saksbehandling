@@ -1,4 +1,4 @@
-import { OppgaveDTO, OppgaveKilde, Oppgavetype } from '~shared/api/oppgaver'
+import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaver'
 import { isBefore } from 'date-fns'
 
 export const ENHETFILTER = {
@@ -65,21 +65,26 @@ function filtrerSaksbehandler(saksbehandlerFilter: string, oppgaver: OppgaveDTO[
 
 type visAlle = 'visAlle'
 
-export const OPPGAVESTATUSFILTER: Array<string> = [
-  'VIS_ALLE',
-  'NY',
-  'UNDER_BEHANDLING',
-  'FERDIGSTILT',
-  'FEILREGISTRERT',
-  'AVBRUTT',
-]
+type OppgavestatusFilterKeys = Oppgavestatus | visAlle
+export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
+  visAlle: 'Vis alle',
+  NY: 'Ny',
+  UNDER_BEHANDLING: 'Under behandling',
+  FERDIGSTILT: 'Ferdigstilt',
+  FEILREGISTRERT: 'Feilregistrert',
+  AVBRUTT: 'Avbrutt',
+}
 
 // Gjøre som på filtrering av saksbehandler, men istedenfor å sjekke 1 string, må man sjekke en array med strings
-export function filtrerOppgaveStatus(oppgavestatuser: Array<string>, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-  if (oppgavestatuser.includes('VIS_ALLE') || oppgavestatuser.length === 0) {
+export function filtrerOppgaveStatus(oppgavestatusFilter: Array<string>, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
+  const konverterteFiltre: Array<OppgavestatusFilterKeys> = Object.entries(OPPGAVESTATUSFILTER)
+    .filter(([, val]) => oppgavestatusFilter.includes(val))
+    .map(([key]) => key as OppgavestatusFilterKeys)
+
+  if (oppgavestatusFilter.includes(OPPGAVESTATUSFILTER.visAlle) || oppgavestatusFilter.length === 0) {
     return oppgaver
   } else {
-    return oppgaver.filter((oppgave) => oppgavestatuser.includes(oppgave.status))
+    return oppgaver.filter((oppgave) => konverterteFiltre.includes(oppgave.status))
   }
 }
 
@@ -203,7 +208,7 @@ export const initialFilter = (): Filter => {
     fristFilter: 'visAlle',
     saksbehandlerFilter: SAKSBEHANDLERFILTER.IkkeTildelt,
     ytelseFilter: 'visAlle',
-    oppgavestatusFilter: ['NY', 'UNDER_BEHANDLING'],
+    oppgavestatusFilter: [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
     oppgavetypeFilter: 'visAlle',
     oppgavekildeFilter: 'visAlle',
     fnrFilter: '',

@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -107,7 +108,7 @@ internal class MigreringRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    "@event_name" to Migreringshendelser.VILKAARSVURDER,
+                    EVENT_NAME_KEY to Migreringshendelser.VILKAARSVURDER,
                     BEHOV_NAME_KEY to Opplysningstype.AVDOED_PDL_V1.name,
                     "sakId" to 1,
                     BEHANDLING_ID_KEY to behandlingId,
@@ -121,7 +122,7 @@ internal class MigreringRiverTest {
             vilkaarsvurderingServiceMock.migrer(behandlingId, false)
         }
         with(testRapid.inspektør.message(0)) {
-            assertEquals(Migreringshendelser.TRYGDETID, this["@event_name"].asText())
+            assertEquals(Migreringshendelser.TRYGDETID, this[EVENT_NAME_KEY].asText())
         }
     }
 }

@@ -126,7 +126,7 @@ internal class FordelerRiverTest {
             """
                {
                     "@correlation_id": "korrelasjonsid",
-                    "@event_name": "FORDELER:STATISTIKK",
+                    "$EVENT_NAME_KEY": "FORDELER:STATISTIKK",
                     "sak_type": "BARNEPENSJON",
                     "soeknad_id": 1337,
                     "gyldig_for_behandling": true
@@ -151,7 +151,7 @@ internal class FordelerRiverTest {
             """
                 {
                     "@correlation_id": "korrelasjonsid",
-                    "@event_name": "FORDELER:STATISTIKK",
+                    "$EVENT_NAME_KEY": "FORDELER:STATISTIKK",
                     "soeknad_id": 1337,
                     "sak_type": "BARNEPENSJON",
                     "gyldig_for_behandling": false,

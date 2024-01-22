@@ -3,6 +3,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -26,7 +27,7 @@ internal class VilkaarsvurderingRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    "@event_name" to ReguleringEvents.VILKAARSVURDER,
+                    EVENT_NAME_KEY to ReguleringEvents.VILKAARSVURDER,
                     "sakId" to 1,
                     "behandlingId" to behandlingId,
                     "behandling_vi_omregner_fra" to behandlingViOmregnerFra,
@@ -41,7 +42,7 @@ internal class VilkaarsvurderingRiverTest {
             )
         }
         with(testRapid.inspektør.message(0)) {
-            Assertions.assertEquals(ReguleringEvents.BEREGN, this["@event_name"].asText())
+            Assertions.assertEquals(ReguleringEvents.BEREGN, this[EVENT_NAME_KEY].asText())
         }
     }
 }

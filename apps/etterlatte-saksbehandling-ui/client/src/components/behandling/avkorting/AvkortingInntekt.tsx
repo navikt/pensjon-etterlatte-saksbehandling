@@ -22,7 +22,7 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
 import { PencilIcon } from '@navikt/aksel-icons'
 import { TextButton } from '~components/behandling/soeknadsoversikt/familieforhold/personer/personinfo/TextButton'
-import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/OmstillingsstoenadToolTip'
+import { ToolTip } from '~components/behandling/felles/ToolTip'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -151,21 +151,21 @@ export const AvkortingInntekt = (props: {
                   <Table.Row key={index}>
                     <Table.DataCell key="Inntekt">
                       {NOK(forventetInntekt)}
-                      <OmstillingsstoenadToolTip title="Se hva forventet inntekt består av">
+                      <ToolTip title="Se hva forventet inntekt består av">
                         Forventet inntekt beregnes utfra forventet årsinntekt med fratrekk for måneder før innvilgelse.
                         <br />
                         Forventet inntekt Norge = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
                         {` ${NOK(aarsinntekt)} - ${NOK(fratrekkInnAar)} = ${NOK(forventetInntekt)}`}).
-                      </OmstillingsstoenadToolTip>
+                      </ToolTip>
                     </Table.DataCell>
                     <Table.DataCell key="InntektUtland">
                       {NOK(forventetInntektUtland)}
-                      <OmstillingsstoenadToolTip title="Se hva forventet inntekt består av">
+                      <ToolTip title="Se hva forventet inntekt består av">
                         Forventet inntekt utland beregnes utfra inntekt utland med fratrekk for måneder før innvilgelse.
                         <br />
                         Forventet inntekt utland = forventet årsinntekt - inntekt i måneder før innvilgelse måneder (
                         {` ${NOK(inntektutland)} - ${NOK(fratrekkUtland)} = ${NOK(forventetInntektUtland)}`}).
-                      </OmstillingsstoenadToolTip>
+                      </ToolTip>
                     </Table.DataCell>
                     <Table.DataCell key="InntektTotalt">
                       {NOK(forventetInntekt + forventetInntektUtland)}

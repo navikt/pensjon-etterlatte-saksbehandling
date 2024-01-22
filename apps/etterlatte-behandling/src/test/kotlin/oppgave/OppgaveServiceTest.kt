@@ -34,6 +34,8 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -259,11 +261,9 @@ internal class OppgaveServiceTest {
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
-        val err =
-            assertThrows<BadRequestException> {
-                oppgaveService.tildelSaksbehandler(nyOppgave.id, "enda en")
-            }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven har allerede en saksbehandler"))
+        assertThrows<OppgaveAlleredeTildeltException> {
+            oppgaveService.tildelSaksbehandler(nyOppgave.id, "enda en")
+        }
     }
 
     @Test
@@ -273,7 +273,7 @@ internal class OppgaveServiceTest {
             assertThrows<NotFoundException> {
                 oppgaveService.tildelSaksbehandler(UUID.randomUUID(), nysaksbehandler)
             }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
+        assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
@@ -418,7 +418,7 @@ internal class OppgaveServiceTest {
             assertThrows<NotFoundException> {
                 oppgaveService.byttSaksbehandler(UUID.randomUUID(), nysaksbehandler)
             }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
+        assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
@@ -456,7 +456,7 @@ internal class OppgaveServiceTest {
             assertThrows<BadRequestException> {
                 oppgaveService.fjernSaksbehandler(nyOppgave.id)
             }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven har ingen saksbehandler"))
+        assertTrue(err.message!!.startsWith("Oppgaven har ingen saksbehandler"))
     }
 
     @Test
@@ -518,7 +518,7 @@ internal class OppgaveServiceTest {
                 oppgaveService.redigerFrist(nyOppgave.id, nyFrist)
             }
 
-        Assertions.assertTrue(err.message!!.startsWith("Tidspunkt tilbake i tid id: "))
+        assertTrue(err.message!!.startsWith("Tidspunkt tilbake i tid id: "))
     }
 
     @Test
@@ -621,7 +621,7 @@ internal class OppgaveServiceTest {
                 )
             }
 
-        Assertions.assertTrue(
+        assertTrue(
             err.message!!.startsWith("Det må finnes en oppgave under behandling, gjelder behandling:"),
         )
     }
@@ -682,7 +682,7 @@ internal class OppgaveServiceTest {
                 )
             }
 
-        Assertions.assertTrue(
+        assertTrue(
             err.message!!.startsWith("Skal kun ha en oppgave under behandling, gjelder behandling:"),
         )
     }
@@ -693,7 +693,7 @@ internal class OppgaveServiceTest {
             assertThrows<NotFoundException> {
                 oppgaveService.fjernSaksbehandler(UUID.randomUUID())
             }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
+        assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test

@@ -115,6 +115,7 @@ internal class OppgaveServiceTest {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
         every { saksbehandler.name() } returns "ident"
+        every { saksbehandler.erSuperbruker() } returns false
 
         setNewKontekstWithMockUser(saksbehandler)
 
@@ -817,8 +818,42 @@ internal class OppgaveServiceTest {
 
         val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
         Assertions.assertEquals(1, oppgaver.size)
-        val strengtFortroligOppgave = oppgaver[0]
-        Assertions.assertEquals(attestantOppgave.id, strengtFortroligOppgave.id)
+        val attesteringsoppgave = oppgaver[0]
+        Assertions.assertEquals(attestantOppgave.id, attesteringsoppgave.id)
+        Assertions.assertEquals(attestantOppgave.sakId, attestantSak.id)
+    }
+
+    @Test
+    fun `Superbruker kan se oppgave på en annen enhet unntatt strengt fortrolig`() {
+        val randomenhet = "1111"
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
+        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null,
+        )
+
+        val attestantSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
+        val attestantOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                attestantSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.ATTESTERING,
+                null,
+            )
+
+        val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr) // må ikke endres
+        every { saksbehandler.erSuperbruker() } returns true
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
+
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        Assertions.assertEquals(1, oppgaver.size)
+        val attesteringsoppgave = oppgaver[0]
+        Assertions.assertEquals(attestantOppgave.id, attesteringsoppgave.id)
         Assertions.assertEquals(attestantOppgave.sakId, attestantSak.id)
     }
 

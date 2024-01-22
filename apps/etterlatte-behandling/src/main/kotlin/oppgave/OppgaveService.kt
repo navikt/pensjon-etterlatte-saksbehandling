@@ -54,8 +54,11 @@ class OppgaveService(
         return if (bruker.saksbehandlerMedRoller.harRolleStrengtFortrolig()) {
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
         } else {
-            val enheter = bruker.enheter()
-            oppgaveDao.hentOppgaver(aktuelleOppgavetyperForRoller, enheter).sortedByDescending { it.opprettet }
+            oppgaveDao.hentOppgaver(
+                aktuelleOppgavetyperForRoller,
+                bruker.enheter(),
+                bruker.erSuperbruker(),
+            ).sortedByDescending { it.opprettet }
         }
     }
 

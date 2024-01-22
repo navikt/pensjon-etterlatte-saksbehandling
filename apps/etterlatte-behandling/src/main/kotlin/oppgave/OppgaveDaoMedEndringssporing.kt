@@ -107,8 +107,9 @@ class OppgaveDaoMedEndringssporingImpl(
     override fun hentOppgaver(
         oppgaveTypeTyper: List<OppgaveType>,
         enheter: List<String>,
+        erSuperBruker: Boolean,
     ): List<OppgaveIntern> {
-        return oppgaveDao.hentOppgaver(oppgaveTypeTyper, enheter)
+        return oppgaveDao.hentOppgaver(oppgaveTypeTyper, enheter, erSuperBruker)
     }
 
     override fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern> {

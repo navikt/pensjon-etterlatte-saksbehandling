@@ -29,6 +29,7 @@ interface OppgaveDao {
     fun hentOppgaver(
         oppgaveTypeTyper: List<OppgaveType>,
         enheter: List<String>,
+        erSuperBruker: Boolean,
     ): List<OppgaveIntern>
 
     fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern>
@@ -144,27 +145,53 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
     override fun hentOppgaver(
         oppgaveTypeTyper: List<OppgaveType>,
         enheter: List<String>,
+        erSuperBruker: Boolean,
     ): List<OppgaveIntern> {
         if (oppgaveTypeTyper.isEmpty()) return emptyList()
 
         with(connection()) {
             val statement =
                 prepareStatement(
-                    """
-                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
-                    FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
-                    WHERE o.type = ANY(?)
-                    AND o.enhet = ANY(?)
-                    AND (
-                        s.adressebeskyttelse is null OR 
-                        (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))
-                    )
-                    """.trimIndent(),
+                    when (erSuperBruker) {
+                        true -> {
+                            """
+                            SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
+                            FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
+                            WHERE o.type = ANY(?)
+                            AND (
+                                s.adressebeskyttelse is null OR 
+                                (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))
+                            )
+                            """.trimIndent()
+                        }
+                        false -> {
+                            """
+                            SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
+                            FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
+                            WHERE o.type = ANY(?)
+                            AND o.enhet = ANY(?)
+                            AND (
+                                s.adressebeskyttelse is null OR 
+                                (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))
+                            )
+                            """.trimIndent()
+                        }
+                    },
                 )
-            statement.setArray(1, createArrayOf("text", oppgaveTypeTyper.toTypedArray()))
-            statement.setArray(2, createArrayOf("text", enheter.toTypedArray()))
-            statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
-            statement.setString(4, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
+
+            when (erSuperBruker) {
+                true -> {
+                    statement.setArray(1, createArrayOf("text", oppgaveTypeTyper.toTypedArray()))
+                    statement.setString(2, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
+                    statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
+                }
+                false -> {
+                    statement.setArray(1, createArrayOf("text", oppgaveTypeTyper.toTypedArray()))
+                    statement.setArray(2, createArrayOf("text", enheter.toTypedArray()))
+                    statement.setString(3, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
+                    statement.setString(4, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
+                }
+            }
 
             return statement.executeQuery().toList {
                 asOppgave()

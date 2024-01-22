@@ -19,12 +19,6 @@ create temporary view duplikate_grunnlagsendringshendelser AS
     where row_num > 1
 );
 
--- setter de duplikate hendelsene til forkastet
-update grunnlagsendringshendelse
-set status = 'FORKASTET'
-FROM duplikate_grunnlagsendringshendelser
-where grunnlagsendringshendelse.id = duplikate_grunnlagsendringshendelser.id;
-
 -- setter de duplikate oppgavene til avbrutt av EY med en merknad
 update oppgave
 set status='AVBRUTT',
@@ -33,3 +27,9 @@ set status='AVBRUTT',
 FROM duplikate_grunnlagsendringshendelser
 where oppgave.referanse = duplikate_grunnlagsendringshendelser.id::text
   and oppgave.kilde = 'HENDELSE';
+
+-- setter de duplikate hendelsene til forkastet
+update grunnlagsendringshendelse
+set status = 'FORKASTET'
+FROM duplikate_grunnlagsendringshendelser
+where grunnlagsendringshendelse.id = duplikate_grunnlagsendringshendelser.id;

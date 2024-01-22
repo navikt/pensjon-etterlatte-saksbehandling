@@ -25,6 +25,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
@@ -70,18 +71,6 @@ internal class PersonRoutesTest {
     @AfterAll
     fun after() {
         server.shutdown()
-    }
-
-    private val saksbehandlerToken by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "Per Persson",
-                    "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
     }
 
     private val systembrukerToken: String by lazy {
@@ -190,7 +179,7 @@ internal class PersonRoutesTest {
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -216,7 +205,7 @@ internal class PersonRoutesTest {
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 

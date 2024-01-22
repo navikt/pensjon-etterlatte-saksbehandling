@@ -23,6 +23,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -67,18 +68,6 @@ internal class SakGrunnlagRoutesKtTest {
         server.shutdown()
     }
 
-    private val token by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "Per Persson",
-                    "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
-    }
-
     @Test
     fun `returnerer 401 uten gyldig token`() {
         val sakId = Random.nextLong()
@@ -104,7 +93,7 @@ internal class SakGrunnlagRoutesKtTest {
                 createHttpClient().get("api/grunnlag/sak/$sakId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $token")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -128,7 +117,7 @@ internal class SakGrunnlagRoutesKtTest {
                 createHttpClient().get("api/grunnlag/sak/$sakId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $token")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -156,7 +145,7 @@ internal class SakGrunnlagRoutesKtTest {
                 createHttpClient().get("api/grunnlag/sak/$sakId/personer/alle") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $token")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 

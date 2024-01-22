@@ -31,6 +31,7 @@ import io.mockk.slot
 import io.mockk.verify
 import lagGrunnlagsopplysning
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -86,18 +87,6 @@ internal class BehandlingGrunnlagRoutesKtTest {
         server.shutdown()
     }
 
-    private val token by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "Per Persson",
-                    "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
-    }
-
     private val systemBruker: String by lazy {
         val mittsystem = UUID.randomUUID().toString()
         server.issueToken(
@@ -147,7 +136,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 client.get("api/grunnlag/behandling/$behandlingId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $token")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -171,7 +160,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 createHttpClient().get("api/grunnlag/behandling/$behandlingId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $token")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -205,7 +194,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 createHttpClient().get("api/grunnlag/behandling/$behandlingId/$type") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $token")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -240,7 +229,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                 ) {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $token")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -274,7 +263,7 @@ internal class BehandlingGrunnlagRoutesKtTest {
                     contentType(ContentType.Application.Json)
                     setBody(NyeSaksopplysninger(sakId, opplysninger))
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer $token")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 

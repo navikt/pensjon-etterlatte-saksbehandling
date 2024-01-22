@@ -17,7 +17,7 @@ import { KlageBrev } from '~components/klage/brev/KlageBrev'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { KlageFormkravEntry } from '~components/klage/formkrav/KlageFormkravEntry'
+import { KlageFormkrav } from '~components/klage/formkrav/KlageFormkrav'
 
 export function Klagebehandling() {
   const klage = useKlage()
@@ -65,7 +65,7 @@ export function Klagebehandling() {
             <Routes>
               <Route
                 path="formkrav"
-                element={<KlageFormkravEntry redigerbar={klageRedigerbar} kanRedigere={kanRedigere} />}
+                element={<KlageFormkrav redigerbar={klageRedigerbar} kanRedigere={kanRedigere} />}
               />
               <Route path="vurdering" element={<KlageVurdering />} />
               <Route path="brev" element={<KlageBrev />} />

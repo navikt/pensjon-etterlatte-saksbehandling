@@ -1,25 +1,43 @@
 package no.nav.etterlatte.grunnlag.omregning
 
 import com.fasterxml.jackson.databind.node.TextNode
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
+import io.ktor.client.request.headers
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.jackson.jackson
+import io.ktor.server.application.log
+import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.testing.ApplicationTestBuilder
+import io.ktor.server.testing.testApplication
 import io.mockk.mockk
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
+import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.security.mock.oauth2.MockOAuth2Server
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.Month
-import java.time.YearMonth
+import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -28,6 +46,12 @@ class OmregningTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var dataSource: DataSource
+    private val server = MockOAuth2Server()
+    private lateinit var hoconApplicationConfig: HoconApplicationConfig
+
+    companion object {
+        private const val CLIENT_ID = "CLIENT_ID"
+    }
 
     @BeforeAll
     fun beforeAll() {
@@ -41,25 +65,54 @@ class OmregningTest {
                 username = postgreSQLContainer.username,
                 password = postgreSQLContainer.password,
             ).also { it.migrate() }
+
+        server.start()
+        val httpServer = server.config.httpServer
+        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
+    }
+
+    @AfterAll
+    fun after() {
+        server.shutdown()
     }
 
     @Test
     fun hentSaker() {
-        val sakId = 1L
+        val sakId = 1000L
         val fnrInnenfor = SOEKER_FOEDSELSNUMMER
         val opplysningDao = OpplysningDao(dataSource)
         opplysningDao.leggTilOpplysning(sakId, Opplysningstype.FOEDSELSDATO, TextNode("2020-01-01"), fnrInnenfor)
         opplysningDao.leggTilOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, TextNode("hei, hallo"), fnrInnenfor)
 
-        val sakIdUtenfor = 2L
+        val sakIdUtenfor = 2000L
         val fnrUtenfor = HELSOESKEN_FOEDSELSNUMMER
         opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.FOEDSELSDATO, TextNode("2022-01-01"), fnrUtenfor)
         opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.SOEKER_PDL_V1, TextNode("søsken her"), fnrUtenfor)
 
-        val service = OmregningService(OmregningDao(dataSource))
-        val saker = service.hentSoekereFoedtIEnGittMaaned(YearMonth.of(2020, Month.JANUARY))
-        Assertions.assertEquals(1, saker.size)
-        Assertions.assertEquals(sakId.toString(), saker[0])
+        testApplication {
+            val response =
+                createHttpClient(OmregningService(OmregningDao(dataSource))).get("api/grunnlag/omregning/2020-01") {
+                    headers {
+                        append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        append(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                }
+
+            Assertions.assertEquals(HttpStatusCode.OK, response.status)
+            Assertions.assertEquals(serialize(listOf(sakId.toString())), response.body<String>())
+        }
+    }
+
+    private val token by lazy {
+        server.issueToken(
+            issuerId = AZURE_ISSUER,
+            audience = CLIENT_ID,
+            claims =
+                mapOf(
+                    "navn" to "Per Persson",
+                    "NAVident" to "Saksbehandler01",
+                ),
+        ).serialize()
     }
 
     private fun OpplysningDao.leggTilOpplysning(
@@ -79,4 +132,21 @@ class OmregningTest {
             ),
         fnr = fnr,
     )
+
+    private fun ApplicationTestBuilder.createHttpClient(service: OmregningService): HttpClient {
+        environment {
+            config = hoconApplicationConfig
+        }
+        application {
+            restModule(this.log, routePrefix = "api/grunnlag") {
+                omregningRoutes(service)
+            }
+        }
+
+        return createClient {
+            install(ContentNegotiation) {
+                jackson { registerModule(JavaTimeModule()) }
+            }
+        }
+    }
 }

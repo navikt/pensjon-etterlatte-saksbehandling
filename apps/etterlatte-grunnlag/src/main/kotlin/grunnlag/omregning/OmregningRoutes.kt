@@ -5,15 +5,13 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
-import no.nav.etterlatte.libs.common.medBody
 import java.time.YearMonth
 
 fun Route.omregningRoutes(omregningService: OmregningService) {
     route("/omregning") {
-        get {
-            medBody<YearMonth> {
-                call.respond(omregningService.hentSoekereFoedtIEnGittMaaned(it))
-            }
+        get("{yearMonth}") {
+            val yearMonth = call.parameters["yearMonth"].toString().let { YearMonth.parse(it) }
+            call.respond(omregningService.hentSoekereFoedtIEnGittMaaned(yearMonth))
         }
     }
 }

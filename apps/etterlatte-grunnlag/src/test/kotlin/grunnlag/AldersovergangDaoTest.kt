@@ -57,7 +57,7 @@ class AldersovergangDaoTest {
         opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.FOEDSELSDATO, TextNode("2022-01-01"), fnrUtenfor)
         opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.SOEKER_PDL_V1, TextNode("søsken her"), fnrUtenfor)
 
-        val saker = AldersovergangDao(dataSource).hent(YearMonth.of(2020, Month.JANUARY))
+        val saker = AldersovergangDao(dataSource).hentSoekereFoedtIEnGittMaaned(YearMonth.of(2020, Month.JANUARY))
         assertEquals(1, saker.size)
         assertEquals(sakId.toString(), saker[0])
     }

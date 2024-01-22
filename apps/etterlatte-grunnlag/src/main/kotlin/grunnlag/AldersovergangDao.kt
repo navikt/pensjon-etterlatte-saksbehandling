@@ -16,7 +16,7 @@ class AldersovergangDao(private val datasource: DataSource) : Transactions<Alder
 
     private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
 
-    fun hent(
+    fun hentSoekereFoedtIEnGittMaaned(
         maaned: YearMonth,
         tx: TransactionalSession? = null,
     ): List<String> {

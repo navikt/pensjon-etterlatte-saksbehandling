@@ -2,7 +2,6 @@ package no.nav.etterlatte.libs.ktor
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -10,15 +9,11 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.http.HttpStatusCode.Companion.NotFound
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.call
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -28,7 +23,6 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
@@ -53,7 +47,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -63,14 +56,11 @@ class RestModuleTest {
     private val personTilgangsSjekkMock = mockk<PersonTilgangsSjekk>()
 
     private val server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val token: String by lazy { server.issueSaksbehandlerToken() }
 
     @BeforeAll
     fun beforeAll() {
         server.start()
-        val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterAll
@@ -177,7 +167,7 @@ class RestModuleTest {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            assertEquals(HttpStatusCode.InternalServerError, response.status)
+            assertEquals(InternalServerError, response.status)
         }
     }
 
@@ -241,20 +231,9 @@ class RestModuleTest {
     @Test
     fun `statuspages håndterer kjente og ukjente exceptions`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log) {
-                    routesMedForskjelligeFeil()
-                }
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
-                    }
-                    install(httpClient())
+                runServer(server) {
+                    routesMedForskjelligeFeil()
                 }
 
             client.get("ikke_funnet/exception") {

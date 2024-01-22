@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from './apiClient'
-import { VedtakSammendrag } from '~components/vedtak/typer'
+import { Samordningsvedtak, VedtakSammendrag } from '~components/vedtak/typer'
 import { VedtaketKlagenGjelder } from '~shared/types/Klage'
 
 export const hentVedtakSammendrag = async (behandlingId: string): Promise<ApiResponse<VedtakSammendrag>> => {
@@ -35,4 +35,8 @@ export const underkjennVedtak = async ({
   valgtBegrunnelse: string
 }): Promise<ApiResponse<unknown>> => {
   return apiClient.post(`/vedtak/${behandlingId}/underkjenn`, { kommentar, valgtBegrunnelse })
+}
+
+export const hentSamordningsdata = async (behandlingId: string): Promise<ApiResponse<Samordningsvedtak[]>> => {
+  return apiClient.get(`vedtak/${behandlingId}/samordning`)
 }

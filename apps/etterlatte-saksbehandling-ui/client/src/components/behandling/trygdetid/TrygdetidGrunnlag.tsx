@@ -117,6 +117,8 @@ export const TrygdetidGrunnlag = ({
               {trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK && (
                 <>
                   <PoengAar legend="Poeng i inn/ut år">
+                    {/* Stoppe aksel å klage på at checkbox ikke har value, mens RHF styrer den */}
+                    {/* Hvis man setter verdien fra RHF i Aksel Checkbox vil den overridet til string */}
                     <Checkbox {...register('poengInnAar')} value="">
                       Poeng i inn år
                     </Checkbox>

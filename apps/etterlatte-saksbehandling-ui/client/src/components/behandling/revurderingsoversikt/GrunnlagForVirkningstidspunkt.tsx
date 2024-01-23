@@ -5,7 +5,7 @@ import { formaterKanskjeStringDato, formaterStringDato } from '~utils/formatteri
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { hentFoersteVirk } from '~shared/api/behandling'
 import { Label } from '@navikt/ds-react'
 import { HistorikkElement } from '~components/behandling/soeknadsoversikt/styled'

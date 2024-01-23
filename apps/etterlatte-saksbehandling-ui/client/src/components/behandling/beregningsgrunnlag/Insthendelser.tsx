@@ -4,7 +4,7 @@ import React, { useEffect } from 'react'
 import { InstitusjonsoppholdSamsvar } from '~components/person/typer'
 import { Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import Spinner from '~shared/Spinner'
 
 import { mapAllApiResult } from '~shared/api/apiUtils'

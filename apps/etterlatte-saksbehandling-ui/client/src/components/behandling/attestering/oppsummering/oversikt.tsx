@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'

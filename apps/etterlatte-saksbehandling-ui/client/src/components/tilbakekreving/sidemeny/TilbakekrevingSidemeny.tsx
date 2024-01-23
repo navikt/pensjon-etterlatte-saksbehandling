@@ -8,7 +8,7 @@ import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import Spinner from '~shared/Spinner'
 import { AttesteringEllerUnderkjenning } from '~components/behandling/attestering/attestering/attesteringEllerUnderkjenning'
 import { IBeslutning } from '~components/behandling/attestering/types'

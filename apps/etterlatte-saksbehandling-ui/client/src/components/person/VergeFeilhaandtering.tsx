@@ -1,4 +1,4 @@
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { isFailure, Result } from '~shared/api/apiUtils'
 import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { Mottaker } from '~shared/types/Brev'

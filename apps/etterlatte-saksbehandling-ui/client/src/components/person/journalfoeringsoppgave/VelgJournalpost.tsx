@@ -12,7 +12,7 @@ import styled from 'styled-components'
 import DokumentModal from '../dokumenter/dokumentModal'
 import { Journalpost } from '~shared/types/Journalpost'
 import { FlexRow } from '~shared/styled'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 
 import { isPending, isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'

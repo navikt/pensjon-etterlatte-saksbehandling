@@ -3,7 +3,7 @@ import { formaterStringDato } from '~utils/formattering'
 import DokumentModal from './dokumentModal'
 import Spinner from '~shared/Spinner'
 import { Journalpost } from '~shared/types/Journalpost'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 
 import { mapApiResult, Result } from '~shared/api/apiUtils'
 

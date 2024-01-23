@@ -14,7 +14,7 @@ import {
   resetBeregning,
 } from '~store/reducers/BehandlingReducer'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { mapListeTilDto } from '~components/behandling/beregningsgrunnlag/PeriodisertBeregningsgrunnlag'
 import React, { useEffect, useState } from 'react'
 import InstitusjonsoppholdBP from '~components/behandling/beregningsgrunnlag/InstitusjonsoppholdBP'

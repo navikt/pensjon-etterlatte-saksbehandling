@@ -36,7 +36,7 @@ import {
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { useBehandlingRoutes } from '../BehandlingRoutes'

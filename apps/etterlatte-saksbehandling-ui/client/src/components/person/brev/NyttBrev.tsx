@@ -14,7 +14,7 @@ import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerP
 import BrevStatusPanel from '~components/person/brev/BrevStatusPanel'
 import NyttBrevMottaker from '~components/person/brev/NyttBrevMottaker'
 import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 import { mapApiResult } from '~shared/api/apiUtils'

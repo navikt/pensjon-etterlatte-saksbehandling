@@ -18,7 +18,7 @@ import Spinner from '~shared/Spinner'
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 
 import { mapApiResult } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 
 type Props = {
   hendelser: Grunnlagsendringshendelse[]

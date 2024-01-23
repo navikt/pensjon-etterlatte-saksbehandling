@@ -8,7 +8,7 @@ import { DocPencilIcon, ExternalLinkIcon, TrashIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
 import { Container, FlexRow } from '~shared/styled'
 import BrevModal from '~components/person/brev/BrevModal'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { SakMedBehandlinger } from '~components/person/typer'
 
 import { isPending, isSuccess, mapApiResult, mapSuccess, Result } from '~shared/api/apiUtils'

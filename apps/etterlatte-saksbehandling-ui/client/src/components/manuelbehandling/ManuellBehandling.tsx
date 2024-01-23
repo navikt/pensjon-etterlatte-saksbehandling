@@ -15,7 +15,7 @@ import { Spraak } from '~shared/types/Brev'
 import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
 
 import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~components/person/EndreEnhet'
 

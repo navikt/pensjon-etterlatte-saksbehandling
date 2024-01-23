@@ -5,7 +5,7 @@ import { Journalpost } from '~shared/types/Journalpost'
 import { oppdaterJournalpost } from '~shared/api/dokument'
 import { FlexRow } from '~shared/styled'
 import { ISak } from '~shared/types/sak'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 
 import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 import {

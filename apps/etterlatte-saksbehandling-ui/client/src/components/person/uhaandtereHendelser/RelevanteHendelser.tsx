@@ -16,7 +16,7 @@ import { ISak } from '~shared/types/sak'
 import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
 
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 
 type Props = {
   sak: ISak

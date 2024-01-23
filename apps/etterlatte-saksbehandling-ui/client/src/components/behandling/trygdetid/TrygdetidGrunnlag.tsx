@@ -10,7 +10,7 @@ import {
   OppdaterTrygdetidGrunnlag,
 } from '~shared/api/trygdetid'
 import React from 'react'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
 import { isPending, mapFailure } from '~shared/api/apiUtils'

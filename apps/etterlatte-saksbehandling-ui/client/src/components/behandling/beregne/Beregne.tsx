@@ -22,7 +22,7 @@ import { OmstillingsstoenadSammendrag } from '~components/behandling/beregne/Oms
 import { Avkorting } from '~components/behandling/avkorting/Avkorting'
 import { SakType } from '~shared/types/sak'
 import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'

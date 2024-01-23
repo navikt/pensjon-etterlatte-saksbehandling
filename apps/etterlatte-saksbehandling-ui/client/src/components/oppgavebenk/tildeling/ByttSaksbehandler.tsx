@@ -9,7 +9,7 @@ import styled from 'styled-components'
 import { RedigerSaksbehandlerProps } from '~components/oppgavebenk/tildeling/RedigerSaksbehandler'
 
 import { isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 
 const SaksbehandlerWrapper = styled(Label)`
   padding: 12px 20px;

@@ -15,7 +15,7 @@ import { Alert, BodyLong, Button, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import {

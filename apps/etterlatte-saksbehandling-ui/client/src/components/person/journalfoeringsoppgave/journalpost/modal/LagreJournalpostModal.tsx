@@ -4,7 +4,7 @@ import { Alert, Button, Heading, Modal } from '@navikt/ds-react'
 import { Journalpost } from '~shared/types/Journalpost'
 import { oppdaterJournalpost } from '~shared/api/dokument'
 import { FlexRow } from '~shared/styled'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 
 import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'

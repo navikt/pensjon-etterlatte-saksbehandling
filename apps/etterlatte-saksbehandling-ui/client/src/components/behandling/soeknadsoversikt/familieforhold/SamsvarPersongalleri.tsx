@@ -9,7 +9,7 @@ import { useBehandling } from '~components/behandling/useBehandling'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentPersongalleriSamsvar } from '~shared/api/grunnlag'
 import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { SakType } from '~shared/types/sak'
 import { mapApiResult } from '~shared/api/apiUtils'
 

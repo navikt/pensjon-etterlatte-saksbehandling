@@ -2,8 +2,8 @@ import React, { ErrorInfo } from 'react'
 import { logger } from '~utils/logger'
 import ErrorStackParser from 'error-stack-parser'
 import styled from 'styled-components'
-import { Alert } from '@navikt/ds-react'
 import { Link } from 'react-router-dom'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 
 type Props = {
   children: React.JSX.Element
@@ -54,11 +54,6 @@ class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
 }
 
 export default ErrorBoundary
-
-export const ApiErrorAlert = styled(Alert).attrs({ variant: 'error' })`
-  margin: 2rem auto;
-  max-width: fit-content;
-`
 
 const HjemLink = styled(Link)`
   margin: 2rem auto;

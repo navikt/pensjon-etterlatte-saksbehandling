@@ -3,7 +3,7 @@ import { hentAlleDokumenterInklPensjon, hentDokumentPDF } from '~shared/api/doku
 import React, { useEffect, useState } from 'react'
 import { Button, Detail, Heading, TextField } from '@navikt/ds-react'
 import { fnrErGyldig } from '~utils/fnr'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { mapApiResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { Column, Container, FlexRow, GridContainer } from '~shared/styled'

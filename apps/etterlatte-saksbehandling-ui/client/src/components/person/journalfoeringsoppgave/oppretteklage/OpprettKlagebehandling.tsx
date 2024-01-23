@@ -8,7 +8,7 @@ import { FlexRow } from '~shared/styled'
 import { settNyKlageRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { useState } from 'react'
 import { opprettKlageErUtfylt } from '~components/person/journalfoeringsoppgave/oppretteklage/OppsummeringKlagebehandling'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 
 export default function OpprettKlagebehandling() {

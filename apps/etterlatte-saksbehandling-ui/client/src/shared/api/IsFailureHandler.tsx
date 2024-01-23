@@ -1,6 +1,6 @@
-import { isFailure, Result } from '~shared/api/apiUtils'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import React from 'react'
+import { isFailure, Result } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 
 interface Wrappercomponent {
   component: React.ComponentType

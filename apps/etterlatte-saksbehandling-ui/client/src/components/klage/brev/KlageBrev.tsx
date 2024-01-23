@@ -13,7 +13,7 @@ import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBr
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { hentBrev } from '~shared/api/brev'
 import styled from 'styled-components'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { JaNei } from '~shared/types/ISvar'
 import { Innhold } from '~components/klage/styled'
 

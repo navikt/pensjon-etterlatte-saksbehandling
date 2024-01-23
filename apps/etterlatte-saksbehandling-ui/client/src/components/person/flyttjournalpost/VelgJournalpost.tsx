@@ -1,6 +1,6 @@
 import { mapAllApiResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert } from '~shared/error/ApiErrorAlert'
 import { Alert, Button, Heading, Table } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import React from 'react'

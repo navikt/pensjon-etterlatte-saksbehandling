@@ -24,7 +24,7 @@ class PDFService(private val db: BrevRepository, private val virusScanService: V
     suspend fun lagreOpplastaPDF(
         sakId: Long,
         multiPart: List<PartData>,
-    ): Brev {
+    ): Result<Brev> {
         val request =
             multiPart
                 .first { it is PartData.FormItem }
@@ -43,9 +43,10 @@ class PDFService(private val db: BrevRepository, private val virusScanService: V
                 "Filopplastinga er avvist fordi fila potensielt kan inneholde virus {}",
                 request,
             )
+            return Result.failure(IllegalArgumentException("Virussjekken feila for ${request.innhold.tittel}"))
         }
 
-        return lagrePdf(sakId, fil, request.innhold, request.sak)
+        return Result.success(lagrePdf(sakId, fil, request.innhold, request.sak))
     }
 
     private fun lagrePdf(

@@ -167,8 +167,12 @@ fun Route.brevRoute(
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 try {
                     val brev = pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts())
-
-                    call.respond(brev)
+                    brev.onSuccess {
+                        call.respond(brev)
+                    }
+                    brev.onFailure {
+                        call.respond(HttpStatusCode.UnprocessableEntity)
+                    }
                 } catch (e: Exception) {
                     logger.error("Getting multipart error", e)
                     call.respond(HttpStatusCode.BadRequest)

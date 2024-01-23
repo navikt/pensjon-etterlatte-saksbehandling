@@ -11,10 +11,13 @@ import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class InstitusjonsoppholdKlient(val institusjonsoppholdHttpKlient: HttpClient, val proxyUrl: String) {
+class InstitusjonsoppholdKlient(
+    private val httpKlient: HttpClient,
+    private val url: String,
+) {
     fun hentDataForHendelse(oppholdId: Long) =
         runBlocking {
-            institusjonsoppholdHttpKlient.get(proxyUrl.plus("/inst2/$oppholdId?Med-Institusjonsinformasjon=true")) {
+            httpKlient.get("$url/api/v1/person/institusjonsopphold/$oppholdId?Med-Institusjonsinformasjon=true") {
                 contentType(ContentType.Application.Json)
                 header(NAV_CONSUMER_ID, "etterlatte-institusjonsopphold")
             }.body<Institusjonsopphold>()

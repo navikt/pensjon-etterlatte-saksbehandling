@@ -157,8 +157,7 @@ export const FRISTFILTER = {
 export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: OppgaveDTO[]) {
   if (fristFilterKeys === 'visAlle') return oppgaver
   else if (fristFilterKeys === 'manglerFrist') {
-    const oppgaverUtenFrist = oppgaver.filter((o) => !o.frist)
-    return oppgaverUtenFrist
+    return oppgaver.filter((o) => !o.frist)
   } else {
     const oppgaverMedFrist = oppgaver.filter((o) => o.frist)
     const sortertEtterFrist = oppgaverMedFrist.sort((a, b) => {

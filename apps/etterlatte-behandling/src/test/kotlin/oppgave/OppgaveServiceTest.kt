@@ -115,6 +115,7 @@ internal class OppgaveServiceTest {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
         every { saksbehandler.name() } returns "ident"
+        every { saksbehandler.erSuperbruker() } returns false
 
         setNewKontekstWithMockUser(saksbehandler)
 
@@ -719,8 +720,10 @@ internal class OppgaveServiceTest {
         sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandlerRoller)
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
         Assertions.assertEquals(1, oppgaver.size)
         val oppgaveUtenbeskyttelse = oppgaver[0]
         Assertions.assertEquals(nyOppgave.id, oppgaveUtenbeskyttelse.id)
@@ -739,14 +742,17 @@ internal class OppgaveServiceTest {
         )
 
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRoller)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+
+        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler)
         Assertions.assertEquals(1, oppgaverUtenEndring.size)
         Assertions.assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
 
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
             listOf(GrunnlagsendringshendelseService.SakMedEnhet(oppgaverUtenEndring[0].sakId, Enheter.STEINKJER.enhetNr)),
         )
-        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRoller)
+        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler)
 
         Assertions.assertEquals(1, oppgaverMedEndring.size)
         Assertions.assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
@@ -775,7 +781,10 @@ internal class OppgaveServiceTest {
 
         sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val saksbehandlerMedRollerStrengtFortrolig = generateSaksbehandlerMedRoller(AzureGroup.STRENGT_FORTROLIG)
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRollerStrengtFortrolig)
+        every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerStrengtFortrolig
+
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
         Assertions.assertEquals(1, oppgaver.size)
         val strengtFortroligOppgave = oppgaver[0]
         Assertions.assertEquals(adressebeskyttetOppgave.id, strengtFortroligOppgave.id)
@@ -804,10 +813,47 @@ internal class OppgaveServiceTest {
             )
 
         val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRollerAttestant)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
+
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
         Assertions.assertEquals(1, oppgaver.size)
-        val strengtFortroligOppgave = oppgaver[0]
-        Assertions.assertEquals(attestantOppgave.id, strengtFortroligOppgave.id)
+        val attesteringsoppgave = oppgaver[0]
+        Assertions.assertEquals(attestantOppgave.id, attesteringsoppgave.id)
+        Assertions.assertEquals(attestantOppgave.sakId, attestantSak.id)
+    }
+
+    @Test
+    fun `Superbruker kan se oppgave på en annen enhet unntatt strengt fortrolig`() {
+        val randomenhet = "1111"
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
+        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null,
+        )
+
+        val attestantSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
+        val attestantOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                attestantSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.ATTESTERING,
+                null,
+            )
+
+        val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr) // må ikke endres
+        every { saksbehandler.erSuperbruker() } returns true
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
+
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        Assertions.assertEquals(1, oppgaver.size)
+        val attesteringsoppgave = oppgaver[0]
+        Assertions.assertEquals(attestantOppgave.id, attesteringsoppgave.id)
         Assertions.assertEquals(attestantOppgave.sakId, attestantSak.id)
     }
 
@@ -904,7 +950,6 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Skal filtrere bort oppgaver med annen enhet`() {
-        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         Kontekst.set(
             Context(
                 saksbehandler,
@@ -947,7 +992,10 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(oppgavesteinskjer.id, saksbehandlerid)
 
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        val finnOppgaverForBruker = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRoller)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+
+        val finnOppgaverForBruker = oppgaveService.finnOppgaverForBruker(saksbehandler)
 
         Assertions.assertEquals(1, finnOppgaverForBruker.size)
         val aalesundfunnetOppgave = finnOppgaverForBruker[0]

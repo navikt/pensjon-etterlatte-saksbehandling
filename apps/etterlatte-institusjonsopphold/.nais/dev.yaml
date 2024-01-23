@@ -40,9 +40,9 @@ spec:
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: INSTITUSJON_API_URL
-      value: https://institusjon-api.intern.dev.nav.no
+      value: https://inst2-q2.dev.intern.nav.no
     - name: INSTITUSJON_API_SCOPE
-      value: api://dev-gcp.team-rocket.institusjon-api/.default
+      value: api://dev-fss.team-rocket.inst2-q2/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -51,4 +51,4 @@ spec:
         - application: etterlatte-behandling
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: institusjon-api.intern.dev.nav.no
+        - host: inst2-q2.dev.intern.nav.no

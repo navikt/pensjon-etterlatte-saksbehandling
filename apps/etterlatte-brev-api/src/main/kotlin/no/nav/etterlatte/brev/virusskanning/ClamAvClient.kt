@@ -4,33 +4,31 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
-import java.util.Base64
 
 class ClamAvClient(
     private val httpClient: HttpClient,
     private val endpointUrl: String,
 ) {
-    suspend fun virusScanVedlegg(vedleggList: List<Vedlegg>): List<ScanResult> {
+    suspend fun virusScanVedlegg(request: VirusScanRequest): List<ScanResult> {
         val httpResponse =
             httpClient.submitFormWithBinaryData(
                 url = "$endpointUrl/scan",
                 formData =
                     formData {
-                        vedleggList.forEachIndexed { index, vedlegg ->
-                            append(
-                                "file$index",
-                                Base64.getMimeDecoder().decode(vedlegg.content.content),
-                                Headers.build {
-                                    append(HttpHeaders.ContentType, vedlegg.content.contentType)
-                                    append(
-                                        HttpHeaders.ContentDisposition,
-                                        "filename=${removeNewLines(vedlegg.description)}",
-                                    )
-                                },
-                            )
-                        }
+                        append(
+                            request.filnavn(),
+                            request.fil,
+                            Headers.build {
+                                append(HttpHeaders.ContentType, ContentType.Application.Pdf.contentType)
+                                append(
+                                    HttpHeaders.ContentDisposition,
+                                    "filename=${removeNewLines(request.tittel())}",
+                                )
+                            },
+                        )
                     },
             )
         return httpResponse.body<List<ScanResult>>()
@@ -48,6 +46,6 @@ enum class Status {
     ERROR,
 }
 
-fun removeNewLines(description: String): String {
+private fun removeNewLines(description: String): String {
     return description.replace("\n", "")
 }

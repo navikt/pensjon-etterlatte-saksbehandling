@@ -85,6 +85,8 @@ spec:
       value: https://regoppslag.dev-fss-pub.nais.io
     - name: NAVANSATT_OUTBOUND_SCOPE
       value: api://dev-fss.teampensjon.navansatt/.default
+    - name: CLAMAV_ENDPOINT_URL
+      value: http://clamav.nais-system.svc.cluster.local
     - name: ETTERLATTE_VEDTAK_CLIENT_ID
       value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAK_URL

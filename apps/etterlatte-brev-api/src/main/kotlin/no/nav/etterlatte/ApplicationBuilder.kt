@@ -42,6 +42,8 @@ import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.vedtaksbrevRoute
+import no.nav.etterlatte.brev.virusskanning.ClamAvClient
+import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -173,7 +175,9 @@ class ApplicationBuilder {
             pdfGenerator,
         )
 
-    private val pdfService = PDFService(db)
+    private val clamAvClient = ClamAvClient(httpClient(), env.requireEnvValue("CLAMAV_ENDPOINT_URL"))
+    private val virusScanService = VirusScanService(clamAvClient)
+    private val pdfService = PDFService(db, virusScanService)
 
     private val journalpostService =
         SafClient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE"))

@@ -1,11 +1,12 @@
 package no.nav.etterlatte.brev.virusskanning
 
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.etterlatte.brev.BrevFraOpplastningRequest
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.util.Base64
 
 class VirusScanService(
     private val clamAvClient: ClamAvClient,
@@ -13,47 +14,27 @@ class VirusScanService(
     private val sikkerlogg = sikkerlogger()
 
     suspend fun vedleggContainsVirus(
-        vedlegg: List<Vedlegg>,
+        request: VirusScanRequest,
         loggingMeta: LoggingMeta,
     ): Boolean {
-        val vedleggOver300MegaByte =
-            vedlegg.filter {
-                fileSizeLagerThan300MegaBytes(
-                    Base64.getMimeDecoder().decode(it.content.content),
-                    loggingMeta,
-                )
-            }
+        val vedleggOver300MegaByte = fileSizeLagerThan300MegaBytes(request.fil, loggingMeta)
 
-        if (vedleggOver300MegaByte.isNotEmpty()) {
-            logVedleggOver300MegaByteMetric(vedleggOver300MegaByte, loggingMeta)
+        if (vedleggOver300MegaByte) {
+            logVedleggOver300MegaByteMetric(request.tittel(), loggingMeta)
         }
 
-        val vedleggUnder300MegaByte =
-            vedlegg.filter {
-                !fileSizeLagerThan300MegaBytes(
-                    Base64.getMimeDecoder().decode(it.content.content),
-                    loggingMeta,
-                )
-            }
+        val vedleggUnder300MegaByte = !fileSizeLagerThan300MegaBytes(request.fil, loggingMeta)
 
-        return if (vedleggUnder300MegaByte.isEmpty()) {
+        return if (vedleggUnder300MegaByte) {
             false
         } else {
-            log.info(
-                "Scanning vedlegg for virus, numbers of vedlegg: ${vedleggUnder300MegaByte.size}" +
-                    ", {}",
-                StructuredArguments.fields(loggingMeta),
-            )
+            log.info("Scanning vedlegg for virus, {}", StructuredArguments.fields(loggingMeta))
             sikkerlogg.info(
-                "Scanning vedlegg for virus: vedlegg: ${objectMapper.writeValueAsString(vedleggUnder300MegaByte)} " +
-                    ", {}",
+                "Scanning vedlegg for virus: vedlegg: ${objectMapper.writeValueAsString(request)}, {}",
                 StructuredArguments.fields(loggingMeta),
             )
 
-            val scanResultMayContainVirus =
-                clamAvClient.virusScanVedlegg(vedleggUnder300MegaByte).filter {
-                    it.Result != Status.OK
-                }
+            val scanResultMayContainVirus = clamAvClient.virusScanVedlegg(request).filter { it.Result != Status.OK }
             scanResultMayContainVirus.map {
                 log.warn(
                     "Vedlegg may contain virus, filename: ${it.Filename}, {}",
@@ -65,15 +46,10 @@ class VirusScanService(
     }
 
     private fun logVedleggOver300MegaByteMetric(
-        vedlegg: List<Vedlegg>,
+        tittel: String,
         loggingMeta: LoggingMeta,
     ) {
-        vedlegg.forEach {
-            log.info(
-                "Vedlegg is over 300 megabyte: ${it.description}, {}",
-                StructuredArguments.fields(loggingMeta),
-            )
-        }
+        log.info("Vedlegg is over 300 megabyte: $tittel, {}", StructuredArguments.fields(loggingMeta))
     }
 }
 
@@ -88,4 +64,26 @@ fun fileSizeLagerThan300MegaBytes(
     return (file.size / 1024) / 1024 > 300
 }
 
-data class LoggingMeta(val id: String)
+data class LoggingMeta(val request: BrevFraOpplastningRequest)
+
+data class VirusScanRequest(val meta: BrevFraOpplastningRequest, val fil: ByteArray) {
+    fun tittel() = meta.innhold.tittel
+
+    fun filnavn() = "${meta.sak.id}-${meta.innhold.tittel}-${Tidspunkt.now()}"
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as VirusScanRequest
+
+        if (meta != other.meta) return false
+        return fil.contentEquals(other.fil)
+    }
+
+    override fun hashCode(): Int {
+        var result = meta.hashCode()
+        result = 31 * result + fil.contentHashCode()
+        return result
+    }
+}

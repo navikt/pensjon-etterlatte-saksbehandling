@@ -1,28 +1,28 @@
 {
-  "title": "Utkast til vedtak - endring av barnepensjon",
+  "title": "Et dokument fra brevbakeren",
   "sakspart": {
-    "gjelderNavn": "Test bruker Testerson",
-    "gjelderFoedselsnummer": "01019878910",
-    "saksnummer": "1337123",
-    "dokumentDato": "01.01.2020"
+    "gjelderNavn": "Ola Nordmann",
+      "gjelderFoedselsnummer": "1",
+    "saksnummer": "1",
+    "dokumentDato": "01.01.2024"
   },
   "blocks": [
     {
-      "id": 1442553538,
+      "id": 1,
       "editable": true,
       "content": [
         {
-          "id": 1879926608,
+          "id": 2,
           "text": "Tekst før punktliste blir tatt ut som eget paragraf-element.",
           "type": "LITERAL"
         },
         {
-          "id": -1000597423,
+          "id": 3,
           "items": [
             {
               "content": [
                 {
-                  "id": -1764399143,
+                  "id": 4,
                   "text": "Denne punktlisten blir",
                   "type": "LITERAL"
                 }
@@ -31,7 +31,7 @@
             {
               "content": [
                 {
-                  "id": -686223118,
+                  "id": 5,
                   "text": "Trukket opp ett nivå",
                   "type": "LITERAL"
                 }
@@ -40,7 +40,7 @@
             {
               "content": [
                 {
-                  "id": -2127083316,
+                  "id": 6,
                   "text": "Slik at den kan editeres i slate-editor",
                   "type": "LITERAL"
                 }
@@ -50,12 +50,12 @@
           "type": "ITEM_LIST"
         },
         {
-          "id": 1879926610,
+          "id": 7,
           "text": "Tekst under punktlisten.",
           "type": "LITERAL"
         },
         {
-          "id": 1879926611,
+          "id": 8,
           "text": "Blir slått sammen til ett paragraf-element så lenge det allerede befinner seg i samme paragraf-element.",
           "type": "LITERAL"
         }
@@ -63,11 +63,11 @@
       "type": "PARAGRAPH"
     },
     {
-      "id": 1442553539,
+      "id": 9,
       "editable": true,
       "content": [
         {
-          "id": 1879926609,
+          "id": 10,
           "text": "Frittstående paragraf under punktlisten vil fortsatt være frittstående.",
           "type": "LITERAL"
         }

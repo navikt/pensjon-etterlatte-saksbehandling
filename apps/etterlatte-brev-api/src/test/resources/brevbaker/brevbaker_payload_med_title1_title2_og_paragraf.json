@@ -1,0 +1,55 @@
+{
+  "title": "Et dokument fra brevbakeren",
+  "sakspart": {
+    "gjelderNavn": "Ola Nordmann",
+    "gjelderFoedselsnummer": "1",
+    "saksnummer": "1",
+    "dokumentDato": "01.01.2024"
+  },
+  "blocks": [
+    {
+      "id": 1,
+      "editable": true,
+      "content": [
+        {
+          "id": 2,
+          "text": "Dette er title1",
+          "type": "LITERAL"
+        }
+      ],
+      "type": "TITLE1"
+    },
+    {
+      "id": 3,
+      "editable": true,
+      "content": [
+        {
+          "id": 4,
+          "text": "Dette er title2",
+          "type": "LITERAL"
+        }
+      ],
+      "type": "TITLE2"
+    },
+    {
+      "id": 5,
+      "editable": true,
+      "content": [
+        {
+          "id": 6,
+          "text": "Dette er en paragraf",
+          "type": "LITERAL"
+        }
+      ],
+      "type": "PARAGRAPH"
+    }
+  ],
+  "signatur": {
+    "hilsenTekst": "Med vennlig hilsen",
+    "saksbehandlerRolleTekst": "Saksbehandler",
+    "saksbehandlerNavn": "Ole Saksbehandler",
+    "attesterendeSaksbehandlerNavn": "Per Attesterende",
+    "navAvsenderEnhet": "NAV Familie- og pensjonsytelser Porsgrunn"
+  }
+}
+

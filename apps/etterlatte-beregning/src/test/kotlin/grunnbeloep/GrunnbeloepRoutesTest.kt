@@ -14,6 +14,8 @@ import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.grunnbeloep.grunnbeloep
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.no.nav.etterlatte.grunnbeloep.GrunnbeloepService
@@ -29,13 +31,12 @@ import testsupport.buildTestApplicationConfigurationForOauth
 internal class GrunnbeloepRoutesTest {
     private val server: MockOAuth2Server = MockOAuth2Server()
     private lateinit var applicationConfig: HoconApplicationConfig
-    private val clientId = "mock-client-id"
 
     @BeforeAll
     fun setup() {
         server.start()
         applicationConfig =
-            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, clientId)
+            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterAll
@@ -58,20 +59,12 @@ internal class GrunnbeloepRoutesTest {
 
             val response =
                 client.get("/api/beregning/grunnbeloep") {
-                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                 }
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
             val grunnbeloep = response.body<Grunnbeloep>()
             Assertions.assertNotNull(grunnbeloep)
             Assertions.assertTrue(grunnbeloep.grunnbeloep >= 118620)
         }
-    }
-
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = clientId,
-            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01"),
-        ).serialize()
     }
 }

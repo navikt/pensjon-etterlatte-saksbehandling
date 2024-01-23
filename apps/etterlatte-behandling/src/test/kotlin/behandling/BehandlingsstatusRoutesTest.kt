@@ -14,11 +14,12 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.module
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import no.nav.etterlatte.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -182,40 +183,13 @@ internal class BehandlingsstatusRoutesTest {
         }
     }
 
-    private val tokenSaksbehandler: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    Claims.NAVident.toString() to "Saksbehandler01",
-                    "groups" to
-                        listOf(
-                            azureAdSaksbehandlerClaim,
-                        ),
-                ),
-        ).serialize()
-    }
+    private val tokenSaksbehandler: String by lazy { server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerClaim)) }
 
     private val tokenAttestant: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    Claims.NAVident.toString() to "Saksbehandler02",
-                    "groups" to
-                        listOf(
-                            azureAdAttestantClaim,
-                        ),
-                ),
-        ).serialize()
+        server.issueSaksbehandlerToken(navIdent = "Saksbehandler02", groups = listOf(azureAdAttestantClaim))
     }
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
-        const val CLIENT_ID = "mock-client-id"
     }
 }

@@ -21,6 +21,8 @@ import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -240,20 +242,5 @@ internal class SakRoutesTest {
         }
     }
 
-    private val token: String by lazy {
-        mockOAuth2Server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    "NAVident" to NAV_IDENT,
-                ),
-        ).serialize()
-    }
-
-    private companion object {
-        const val NAV_IDENT = "Saksbehandler01"
-        const val CLIENT_ID = "mock-client-id"
-    }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 }

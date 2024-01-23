@@ -20,6 +20,8 @@ import no.nav.etterlatte.behandling.revurdering.OpprettRevurderingRequest
 import no.nav.etterlatte.behandling.revurdering.RevurderingRoutesFeatureToggle
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -237,19 +239,5 @@ internal class RevurderingRoutesTest {
         }
     }
 
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
-    }
-
-    private companion object {
-        const val CLIENT_ID = "mock-client-id"
-    }
+    private val token: String by lazy { server.issueSaksbehandlerToken() }
 }

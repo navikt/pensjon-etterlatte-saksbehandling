@@ -15,6 +15,8 @@ import io.mockk.confirmVerified
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -27,7 +29,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TilbakekrevingVedtakRoutesTest {
@@ -93,27 +94,12 @@ internal class TilbakekrevingVedtakRoutesTest {
     ) {
         io.ktor.server.testing.testApplication {
             environment {
-                config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, AZURE_CLIENT_ID)
+                config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, CLIENT_ID)
             }
             application { restModule(log) { tilbakekrevingVedtakRoutes(service) } }
             block(this)
         }
     }
 
-    private val token: String by lazy {
-        val system = UUID.randomUUID().toString()
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = AZURE_CLIENT_ID,
-            claims =
-                mapOf(
-                    "sub" to system,
-                    "oid" to system,
-                ),
-        ).serialize()
-    }
-
-    private companion object {
-        const val AZURE_CLIENT_ID: String = "azure-id"
-    }
+    private val token: String by lazy { server.issueSystembrukerToken() }
 }

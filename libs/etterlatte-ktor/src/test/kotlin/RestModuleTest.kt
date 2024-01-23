@@ -28,6 +28,8 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
@@ -61,17 +63,7 @@ class RestModuleTest {
 
     private val server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
-    }
+    private val token: String by lazy { server.issueSaksbehandlerToken() }
 
     @BeforeAll
     fun beforeAll() {
@@ -388,8 +380,4 @@ class RestModuleTest {
     }
 
     private data class TestObjektDto(val verdi1: String, val verdi2: Int)
-
-    private companion object {
-        const val CLIENT_ID = "azure-id for saksbehandler"
-    }
 }

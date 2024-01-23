@@ -40,4 +40,5 @@ dependencies {
     testImplementation(libs.ktor2.servertests)
     testImplementation(project(":libs:testdata"))
     testImplementation(libs.test.kotest.assertionscore)
+    testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
 }

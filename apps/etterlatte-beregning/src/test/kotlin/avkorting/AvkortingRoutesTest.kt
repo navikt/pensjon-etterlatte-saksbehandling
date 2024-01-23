@@ -25,6 +25,8 @@ import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlient
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.beregning.AvkortetYtelseDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.AvkortingGrunnlagDto
@@ -70,7 +72,7 @@ class AvkortingRoutesTest {
             val response =
                 client.get("/api/beregning/avkorting/${UUID.randomUUID()}") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                 }
 
             response.status shouldBe HttpStatusCode.NoContent
@@ -168,7 +170,7 @@ class AvkortingRoutesTest {
                 client.post("/api/beregning/avkorting/$behandlingsId") {
                     setBody(dto.avkortingGrunnlag[0].toJson())
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    header(HttpHeaders.Authorization, "Bearer $token")
+                    header(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                 }
 
             response.status shouldBe HttpStatusCode.OK
@@ -222,23 +224,11 @@ class AvkortingRoutesTest {
     ) {
         io.ktor.server.testing.testApplication {
             environment {
-                config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, AZURE_CLIENT_ID)
+                config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, CLIENT_ID)
             }
             application { restModule(log) { avkorting(avkortingService, behandlingKlient) } }
 
             block(this)
         }
-    }
-
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = AZURE_CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01"),
-        ).serialize()
-    }
-
-    private companion object {
-        const val AZURE_CLIENT_ID: String = "azure-id"
     }
 }

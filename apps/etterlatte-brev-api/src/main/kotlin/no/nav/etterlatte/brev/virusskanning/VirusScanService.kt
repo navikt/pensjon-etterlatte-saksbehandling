@@ -29,14 +29,9 @@ class VirusScanService(
             StructuredArguments.fields(loggingMeta),
         )
 
-        val scanResultMayContainVirus = clamAvClient.virusScanVedlegg(request).filter { it.Result != Status.OK }
-        scanResultMayContainVirus.forEach {
-            log.warn(
-                "Vedlegg may contain virus, filename: ${it.Filename}, {}",
-                StructuredArguments.fields(loggingMeta),
-            )
-        }
-        return scanResultMayContainVirus.isNotEmpty()
+        return clamAvClient.virusScanVedlegg(request)
+            .onEach { log.warn("Status for virussjekk for ${it.Filename}: ${it.Result} ") }
+            .any { it.Result != Status.OK }
     }
 
     private fun logVedleggOver300MegaByteMetric(

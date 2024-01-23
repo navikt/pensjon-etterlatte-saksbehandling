@@ -7,11 +7,14 @@ import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import org.slf4j.LoggerFactory
 
 class ClamAvClient(
     private val httpClient: HttpClient,
     private val endpointUrl: String,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun virusScanVedlegg(request: VirusScanRequest): List<ScanResult> {
         val httpResponse =
             httpClient.submitFormWithBinaryData(
@@ -31,6 +34,7 @@ class ClamAvClient(
                         )
                     },
             )
+        logger.info("Status fra ClamAV: ${httpResponse.status}")
         return httpResponse.body<List<ScanResult>>()
     }
 }

@@ -827,6 +827,7 @@ internal class GrunnlagServiceTest {
                         id = behandlingsid,
                         verdi =
                             Persongalleri(
+                                innsender = SOEKER_FOEDSELSNUMMER.value,
                                 soeker = SOEKER_FOEDSELSNUMMER.value,
                                 avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
                             ).toJsonNode(),
@@ -844,6 +845,87 @@ internal class GrunnlagServiceTest {
                     Folkeregisteridentifikator.of(AVDOED_FOEDSELSNUMMER.value),
                 )
             resultat.gjenlevende shouldHaveSize 0
+        }
+
+        @Test
+        fun `skal håndtere at samme person har flere roller i persongalleriet`() {
+            val behandlingsid = UUID.randomUUID()
+            every {
+                opplysningDaoMock.hentGrunnlagAvTypeForBehandling(
+                    behandlingsid,
+                    PERSONGALLERI_V1,
+                    Opplysningstype.INNSENDER_PDL_V1,
+                    Opplysningstype.SOEKER_PDL_V1,
+                    Opplysningstype.AVDOED_PDL_V1,
+                    Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+                )
+            } returns
+                listOf(
+                    lagGrunnlagHendelse(
+                        1,
+                        1,
+                        Opplysningstype.SOEKER_PDL_V1,
+                        id = behandlingsid,
+                        fnr = GJENLEVENDE_FOEDSELSNUMMER,
+                        verdi = testData.gjenlevende.toJsonNode(),
+                        kilde = kilde,
+                    ),
+                    lagGrunnlagHendelse(
+                        1,
+                        2,
+                        Opplysningstype.INNSENDER_PDL_V1,
+                        id = behandlingsid,
+                        fnr = GJENLEVENDE_FOEDSELSNUMMER,
+                        verdi = testData.gjenlevende.toJsonNode(),
+                        kilde = kilde,
+                    ),
+                    lagGrunnlagHendelse(
+                        1,
+                        3,
+                        Opplysningstype.AVDOED_PDL_V1,
+                        id = behandlingsid,
+                        fnr = AVDOED_FOEDSELSNUMMER,
+                        verdi = testData.avdoede.first().toJsonNode(),
+                        kilde = kilde,
+                    ),
+                    lagGrunnlagHendelse(
+                        1,
+                        4,
+                        Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
+                        id = behandlingsid,
+                        fnr = GJENLEVENDE_FOEDSELSNUMMER, // litt dum gjenbruk inn i annen opplysning
+                        verdi = testData.gjenlevende.toJsonNode(),
+                        kilde = kilde,
+                    ),
+                    lagGrunnlagHendelse(
+                        1,
+                        5,
+                        Opplysningstype.PERSONGALLERI_V1,
+                        id = behandlingsid,
+                        verdi =
+                            Persongalleri(
+                                innsender = GJENLEVENDE_FOEDSELSNUMMER.value,
+                                soeker = GJENLEVENDE_FOEDSELSNUMMER.value,
+                                avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
+                                gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+                            ).toJsonNode(),
+                        kilde = kilde,
+                    ),
+                )
+            val resultat = grunnlagService.hentPersonopplysninger(behandlingsid, SakType.BARNEPENSJON)
+
+            resultat.innsender?.opplysning?.foedselsnummer shouldBe GJENLEVENDE_FOEDSELSNUMMER
+            resultat.soeker?.opplysning?.foedselsnummer shouldBe GJENLEVENDE_FOEDSELSNUMMER
+            resultat.avdoede shouldHaveSize 1
+            resultat.avdoede.map { it.opplysning.foedselsnummer } shouldContainExactlyInAnyOrder
+                listOf(
+                    Folkeregisteridentifikator.of(AVDOED_FOEDSELSNUMMER.value),
+                )
+            resultat.gjenlevende shouldHaveSize 1
+            resultat.gjenlevende.map { it.opplysning.foedselsnummer } shouldContainExactlyInAnyOrder
+                listOf(
+                    GJENLEVENDE_FOEDSELSNUMMER,
+                )
         }
     }
 

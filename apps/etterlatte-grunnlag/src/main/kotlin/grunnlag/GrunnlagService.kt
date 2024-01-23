@@ -170,6 +170,7 @@ class RealGrunnlagService(
 
         // Finn siste grunnlag blant relevante typer for unike personer, som eksisterer i persongalleriet fra søknaden,
         // slik at hver person kun havner i en av kategoriene
+
         val sisteGrunnlagPerFnr =
             grunnlag
                 .filter {
@@ -177,18 +178,17 @@ class RealGrunnlagService(
                         SOEKER_PDL_V1,
                         AVDOED_PDL_V1,
                         GJENLEVENDE_FORELDER_PDL_V1,
+                        INNSENDER_PDL_V1,
                     ).contains(it.opplysning.opplysningType)
                 }
                 .filter { persongalleri.inkluderer(it.opplysning) }
-                .groupBy { it.opplysning.fnr }
+                .groupBy { it.opplysning.fnr to it.opplysning.opplysningType }
                 .map {
                     it.value.maxBy { opplysning -> opplysning.hendelseNummer }
                 }
 
         val innsender =
-            grunnlag
-                .filter { it.opplysning.opplysningType == INNSENDER_PDL_V1 }
-                .maxByOrNull { it.hendelseNummer }
+            sisteGrunnlagPerFnr.find { it.opplysning.opplysningType == INNSENDER_PDL_V1 }
         val soker = sisteGrunnlagPerFnr.find { it.opplysning.opplysningType == SOEKER_PDL_V1 }
         val avdode = sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == AVDOED_PDL_V1 }
         val gjenlevende =
@@ -210,7 +210,9 @@ class RealGrunnlagService(
         when (it.opplysningType) {
             AVDOED_PDL_V1 -> it.fnr?.let { fnr -> avdoed.contains(fnr.value) } ?: false
             GJENLEVENDE_FORELDER_PDL_V1 -> it.fnr?.let { fnr -> gjenlevende.contains(fnr.value) } ?: false
-            else -> true
+            SOEKER_PDL_V1 -> it.fnr?.let { fnr -> soeker == fnr.value } ?: false
+            INNSENDER_PDL_V1 -> it.fnr?.let { fnr -> innsender == fnr.value } ?: false
+            else -> false
         }
 
     override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {

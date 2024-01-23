@@ -1,10 +1,7 @@
 package no.nav.etterlatte.brev
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.PartData
 import io.ktor.http.content.readAllParts
-import io.ktor.http.content.streamProvider
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
@@ -25,7 +22,6 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
-import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -42,6 +38,7 @@ inline val PipelineContext<*, ApplicationCall>.brevId: Long
 
 fun Route.brevRoute(
     service: BrevService,
+    pdfService: PDFService,
     distribuerer: Brevdistribuerer,
     tilgangssjekker: Tilgangssjekker,
 ) {
@@ -169,17 +166,7 @@ fun Route.brevRoute(
         post("pdf") {
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 try {
-                    val mp = call.receiveMultipart().readAllParts()
-
-                    val request =
-                        mp.first { it is PartData.FormItem }
-                            .let { objectMapper.readValue<BrevFraOpplastningRequest>((it as PartData.FormItem).value) }
-
-                    val fil: ByteArray =
-                        mp.first { it is PartData.FileItem }
-                            .let { (it as PartData.FileItem).streamProvider().readBytes() }
-
-                    val brev = service.lagrePdf(sakId, fil, request.innhold, request.sak)
+                    val brev = pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts())
 
                     call.respond(brev)
                 } catch (e: Exception) {

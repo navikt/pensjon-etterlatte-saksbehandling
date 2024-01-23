@@ -370,6 +370,8 @@ class BrevRepository(private val ds: DataSource) {
                             land = row.string("land"),
                         ),
                 ),
+            journalpostId = row.stringOrNull("journalpost_id"),
+            bestillingsID = row.stringOrNull("bestilling_id"),
         )
     }
 
@@ -397,7 +399,7 @@ class BrevRepository(private val ds: DataSource) {
         const val HENT_BREV_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, b.opprettet, h.status_id, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel
+                h.opprettet as hendelse_opprettet, m.*, i.tittel, b.journalpost_id, b.bestilling_id
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -413,7 +415,7 @@ class BrevRepository(private val ds: DataSource) {
         const val HENT_BREV_FOR_BEHANDLING_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel
+                h.opprettet as hendelse_opprettet, m.*, i.tittel, b.journalpost_id, b.bestilling_id
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -430,7 +432,7 @@ class BrevRepository(private val ds: DataSource) {
         const val HENT_BREV_FOR_SAK_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel
+                h.opprettet as hendelse_opprettet, m.*, i.tittel, b.journalpost_id, b.bestilling_id
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id

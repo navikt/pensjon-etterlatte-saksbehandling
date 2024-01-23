@@ -99,7 +99,7 @@ export const ToggleMinOppgaveliste = () => {
           <Tabs.Tab
             value="MinOppgaveliste"
             label={`Min oppgaveliste (${innloggetSaksbehandleroppgaver.length})`}
-            icon={<PersonIcon />}
+            icon={<PersonIcon aria-hidden />}
           />
         </Tabs.List>
       </TabsWidth>
@@ -133,10 +133,12 @@ export const ToggleMinOppgaveliste = () => {
           )}
           {oppgaveListeValg === 'MinOppgaveliste' && (
             <>
-              <VelgOppgavestatuser
-                value={filter.oppgavestatusFilter}
-                onChange={(oppgavestatusFilter) => setFilter({ ...filter, oppgavestatusFilter })}
-              />
+              <ValgWrapper>
+                <VelgOppgavestatuser
+                  value={filter.oppgavestatusFilter}
+                  onChange={(oppgavestatusFilter) => setFilter({ ...filter, oppgavestatusFilter })}
+                />
+              </ValgWrapper>
               <Oppgavelista
                 filtrerteOppgaver={filtrerOppgaveStatus(filter.oppgavestatusFilter, innloggetSaksbehandleroppgaver)}
                 hentOppgaver={hentAlleOppgaver}
@@ -149,6 +151,10 @@ export const ToggleMinOppgaveliste = () => {
     </Container>
   )
 }
+
+const ValgWrapper = styled.div`
+  margin-bottom: 2rem;
+`
 
 const TabsWidth = styled(Tabs)`
   max-width: fit-content;

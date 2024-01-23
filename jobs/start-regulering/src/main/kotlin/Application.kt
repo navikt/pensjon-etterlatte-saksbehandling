@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -10,9 +11,7 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlin.system.exitProcess
 
-/** 1e mai 2023 */
-val REGELVERK_OMREGNING_2024: LocalDate = LocalDate.of(2024, 1, 1)
-// val GRUNNBELOEP_REGULERING_DATO: LocalDate = LocalDate.of(2023, 5, 1)
+val GRUNNBELOEP_REGULERING_DATO: LocalDate = LocalDate.of(2024, 5, 1)
 
 val logger: Logger = LoggerFactory.getLogger("StartReguleringJob")
 
@@ -26,7 +25,7 @@ fun main() {
 
     producer.publiser(
         noekkel = "StartReguleringJob-${UUID.randomUUID()}",
-        verdi = createRecord(REGELVERK_OMREGNING_2024),
+        verdi = createRecord(GRUNNBELOEP_REGULERING_DATO),
     )
     producer.close()
 
@@ -34,7 +33,10 @@ fun main() {
     exitProcess(0)
 }
 
-internal fun createRecord(dato: LocalDate) =
+private fun createRecord(dato: LocalDate) =
     JsonMessage.newMessage(
-        mapOf("@event_name" to ReguleringEvents.START_REGULERING, ReguleringEvents.DATO to dato.toString()),
+        mapOf(
+            EVENT_NAME_KEY to ReguleringEvents.START_REGULERING,
+            ReguleringEvents.DATO to dato.toString(),
+        ),
     ).toJson()

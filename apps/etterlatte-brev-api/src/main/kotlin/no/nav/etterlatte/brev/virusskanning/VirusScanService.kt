@@ -1,7 +1,5 @@
 package no.nav.etterlatte.brev.virusskanning
 
-import no.nav.etterlatte.brev.BrevFraOpplastningRequest
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -11,13 +9,13 @@ private val log: Logger = LoggerFactory.getLogger(VirusScanService::class.java)
 
 class VirusScanService(private val clamAvClient: ClamAvClient) {
     suspend fun filHarVirus(request: VirusScanRequest): Boolean {
-        log.info("Skanner fil for virus: ${request.tittel()}")
+        log.info("Skanner fil for virus: ${request.tittel}")
         if (filErForStor(request.fil)) {
-            log.info("Fil er for stor: ${request.tittel()}")
+            log.info("Fil er for stor: ${request.tittel}")
             return false
         }
 
-        return clamAvClient.skann(ClamAVRequest(filnavn = request.filnavn(), fil = request.fil))
+        return clamAvClient.skann(ClamAVRequest(filnavn = request.tittel, fil = request.fil))
             .onEach { log.warn("Status for virussjekk for ${it.Filename}: ${it.Result} ") }
             .any { it.Result != Status.OK }
     }
@@ -25,8 +23,4 @@ class VirusScanService(private val clamAvClient: ClamAvClient) {
 
 fun filErForStor(file: ByteArray) = file.size > (MAKS_FILSTOERRELSE).also { log.info("Fila er ${file.size} bytes") }
 
-data class VirusScanRequest(val meta: BrevFraOpplastningRequest, val fil: ByteArray) {
-    fun tittel() = meta.innhold.tittel
-
-    fun filnavn() = "${meta.sak.id}-${meta.innhold.tittel}-${Tidspunkt.now()}"
-}
+data class VirusScanRequest(val tittel: String, val fil: ByteArray)

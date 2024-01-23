@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-import { Border } from '../../styled'
 import { Person } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/Person'
 import { BarneListe } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/BarneListe'
 import { Sivilstand } from '~components/behandling/soeknadsoversikt/familieforhold/omstillingsstoenad/Sivilstand'
@@ -15,11 +14,7 @@ export interface PropsFamilieforhold {
 
 export const FamilieforholdOmstillingsstoenad = ({ personopplysninger }: PropsFamilieforhold) => {
   if (personopplysninger == null || personopplysninger.soeker == null) {
-    return (
-      <FamilieforholdWrapper>
-        <ErrorMessage>Familieforhold kan ikke hentes ut</ErrorMessage>
-      </FamilieforholdWrapper>
-    )
+    return <ErrorMessage>Familieforhold kan ikke hentes ut</ErrorMessage>
   }
 
   const soeker = personopplysninger.soeker
@@ -29,30 +24,20 @@ export const FamilieforholdOmstillingsstoenad = ({ personopplysninger }: PropsFa
 
   return (
     <>
-      <FamilieforholdWrapper>
-        <SamsvarPersongalleri />
-        <FamilieforholdVoksne>
-          {avdoede.map((avdoed) => (
-            <Person person={avdoed.opplysning} kilde={avdoed.kilde} avdoed key={avdoed.id} />
-          ))}
-          <Person person={soeker.opplysning} kilde={soeker.kilde} />
-        </FamilieforholdVoksne>
-        {avdoede.map((avd) => (
-          <Sivilstand familieforhold={familieforhold} avdoed={avd.opplysning} key={avd.id} />
+      <SamsvarPersongalleri />
+      <FamilieforholdVoksne>
+        {avdoede.map((avdoed) => (
+          <Person person={avdoed.opplysning} kilde={avdoed.kilde} avdoed key={avdoed.id} />
         ))}
-        <BarneListe familieforhold={familieforhold} />
-      </FamilieforholdWrapper>
-      <Border />
+        <Person person={soeker.opplysning} kilde={soeker.kilde} />
+      </FamilieforholdVoksne>
+      {avdoede.map((avd) => (
+        <Sivilstand familieforhold={familieforhold} avdoed={avd.opplysning} key={avd.id} />
+      ))}
+      <BarneListe familieforhold={familieforhold} />
     </>
   )
 }
-
-export const FamilieforholdWrapper = styled.div`
-  padding: 1em 4em;
-  display: grid;
-  gap: 4rem;
-  margin-bottom: 4rem;
-`
 
 const FamilieforholdVoksne = styled.div`
   display: flex;

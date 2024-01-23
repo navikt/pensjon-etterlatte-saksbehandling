@@ -23,6 +23,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -45,10 +47,6 @@ internal class SakGrunnlagRoutesKtTest {
     private val server = MockOAuth2Server()
     private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
-    companion object {
-        private const val CLIENT_ID = "CLIENT_ID"
-    }
-
     @BeforeAll
     fun before() {
         server.start()
@@ -65,18 +63,6 @@ internal class SakGrunnlagRoutesKtTest {
     @AfterAll
     fun after() {
         server.shutdown()
-    }
-
-    private val token by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "Per Persson",
-                    "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
     }
 
     @Test
@@ -104,7 +90,7 @@ internal class SakGrunnlagRoutesKtTest {
                 createHttpClient().get("api/grunnlag/sak/$sakId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $token")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -128,7 +114,7 @@ internal class SakGrunnlagRoutesKtTest {
                 createHttpClient().get("api/grunnlag/sak/$sakId") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $token")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -156,7 +142,7 @@ internal class SakGrunnlagRoutesKtTest {
                 createHttpClient().get("api/grunnlag/sak/$sakId/personer/alle") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $token")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 

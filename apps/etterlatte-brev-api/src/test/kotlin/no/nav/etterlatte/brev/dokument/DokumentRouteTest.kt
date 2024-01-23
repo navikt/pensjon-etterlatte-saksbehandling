@@ -15,6 +15,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -110,19 +112,5 @@ internal class DokumentRouteTest {
         verify { journalpostService wasNot Called }
     }
 
-    private val accessToken: String by lazy {
-        mockOAuth2Server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "Test Veiledersen",
-                    "NAVident" to "S123456",
-                ),
-        ).serialize()
-    }
-
-    companion object {
-        private const val CLIENT_ID = "mock-client-id"
-    }
+    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 }

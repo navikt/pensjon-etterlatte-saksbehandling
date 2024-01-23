@@ -16,6 +16,8 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -131,21 +133,10 @@ class MigreringTest {
         postgreSQLContainer.stop()
     }
 
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
-    }
+    private val token: String by lazy { server.issueSaksbehandlerToken() }
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
-        const val CLIENT_ID = "azure-id for saksbehandler"
     }
 
     @Test

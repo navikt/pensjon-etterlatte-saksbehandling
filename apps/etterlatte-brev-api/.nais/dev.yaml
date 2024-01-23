@@ -79,12 +79,6 @@ spec:
       value: https://navansatt.dev-fss-pub.nais.io
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
-    - name: ETTERLATTE_PROXY_URL
-      value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad
-    - name: ETTERLATTE_PROXY_AUDIENCE
-      value: dev-fss:etterlatte:etterlatte-proxy
-    - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
-      value: api://dev-fss.etterlatte.etterlatte-proxy/.default
     - name: REGOPPSLAG_SCOPE
       value: api://dev-fss.teamdokumenthandtering.regoppslag/.default
     - name: REGOPPSLAG_URL
@@ -122,7 +116,6 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
       external:
-        - host: etterlatte-proxy.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
         - host: saf-q2.dev-fss-pub.nais.io
         - host: regoppslag.dev-fss-pub.nais.io

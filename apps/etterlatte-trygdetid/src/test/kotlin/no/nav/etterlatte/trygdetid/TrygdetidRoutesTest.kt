@@ -14,6 +14,8 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.trygdetid.StatusOppdatertDto
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
@@ -93,7 +95,7 @@ internal class TrygdetidRoutesTest {
     ) {
         testApplication {
             environment {
-                config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, AZURE_CLIENT_ID)
+                config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, CLIENT_ID)
             }
             application { restModule(log) { trygdetid(trygdetidService, behandlingKlient) } }
 
@@ -101,15 +103,5 @@ internal class TrygdetidRoutesTest {
         }
     }
 
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = AZURE_CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01"),
-        ).serialize()
-    }
-
-    private companion object {
-        const val AZURE_CLIENT_ID: String = "azure-id"
-    }
+    private val token: String by lazy { server.issueSaksbehandlerToken() }
 }

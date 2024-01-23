@@ -14,6 +14,8 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
@@ -248,23 +250,12 @@ class PersonRouteTest {
         }
     }
 
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
-    }
+    private val token: String by lazy { server.issueSaksbehandlerToken() }
 
     private companion object {
         const val PERSON_ENDEPUNKT = "/person"
         const val PERSON_ENDEPUNKT_V2 = "/person/v2"
         const val PDLIDENT_ENDEPUNKT = "/pdlident"
         const val GEOGRAFISKTILKNYTNING_ENDEPUNKT = "/geografisktilknytning"
-        const val CLIENT_ID = "azure-id for saksbehandler"
     }
 }

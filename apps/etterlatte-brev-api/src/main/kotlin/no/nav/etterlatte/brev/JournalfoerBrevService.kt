@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -77,13 +78,30 @@ class JournalfoerBrevService(
     ): OpprettJournalpostResponse {
         logger.info("Skal journalføre brev ${brev.id}")
         if (brev.status != Status.FERDIGSTILT) {
-            throw IllegalStateException("Ugyldig status ${brev.status} på brev (id=${brev.id})")
+            throw FeilStatusForJournalfoering(brev.id, brev.status)
         }
 
         val response = dokarkivService.journalfoer(mappingRequest)
 
-        db.settBrevJournalfoert(brev.id, response)
+        if (response.journalpostferdigstilt) {
+            db.settBrevJournalfoert(brev.id, response)
+        } else {
+            logger.info("Kunne ikke ferdigstille journalpost. Forsøker på nytt...")
+            dokarkivService.ferdigstillJournalpost(response.journalpostId, mappingRequest.journalfoerendeEnhet)
+                .also { db.settBrevJournalfoert(brev.id, response.copy(journalpostferdigstilt = it)) }
+        }
+
         logger.info("Brev med id=${brev.id} markert som journalført")
         return response
     }
 }
+
+class FeilStatusForJournalfoering(brevID: BrevID, status: Status) : UgyldigForespoerselException(
+    code = "FEIL_STATUS_FOR_JOURNALFOERING",
+    detail = "Kan ikke journalføre brev med status ${status.name.lowercase()}",
+    meta =
+        mapOf(
+            "brevId" to brevID,
+            "status" to status,
+        ),
+)

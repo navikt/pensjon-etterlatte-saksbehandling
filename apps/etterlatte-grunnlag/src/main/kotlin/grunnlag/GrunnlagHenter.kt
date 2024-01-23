@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.G
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.BrevMottaker
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -47,7 +48,7 @@ class GrunnlagHenter(
             val soeker = hentPersonAsync(persongalleri.soeker, soekerRolle(sakType), opplysningsbehov.sakType)
             val innsender =
                 persongalleri.innsender
-                    ?.takeIf { it != Vedtaksloesning.PESYS.name }
+                    ?.takeIf { Folkeregisteridentifikator.isValid(it) }
                     ?.let { innsenderFnr ->
                         hentPersonAsync(innsenderFnr, PersonRolle.INNSENDER, sakType)
                     }
@@ -171,7 +172,12 @@ class GrunnlagHenter(
                 },
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
             meta = objectMapper.createObjectNode(),
-            opplysning = this.toJsonNode(),
+            opplysning =
+                if (Folkeregisteridentifikator.isValid(this.innsender)) {
+                    this.toJsonNode()
+                } else {
+                    this.copy(innsender = null).toJsonNode()
+                },
             attestering = null,
             fnr = null,
             periode = null,

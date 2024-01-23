@@ -34,6 +34,8 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.ktor.CLIENT_ID
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.restModule
@@ -215,17 +217,7 @@ internal class BrevRouteTest {
         }
     }
 
-    private val accessToken: String by lazy {
-        mockOAuth2Server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "Test Veiledersen",
-                    "NAVident" to "S123456",
-                ),
-        ).serialize()
-    }
+    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
     private fun opprettBrev(id: BrevID) =
         Brev(
@@ -269,7 +261,6 @@ internal class BrevRouteTest {
     }
 
     companion object {
-        private const val CLIENT_ID = "mock-client-id"
         private val STOR_SNERK = Foedselsnummer("11057523044")
         private val SAK_ID = Random.nextLong(1000)
     }

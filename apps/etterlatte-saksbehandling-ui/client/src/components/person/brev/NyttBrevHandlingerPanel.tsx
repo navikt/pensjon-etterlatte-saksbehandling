@@ -80,8 +80,8 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
             ferdigstillStatus,
             <Spinner label="Forsøker å ferdigstille brevet ..." visible />,
             null,
-            () => (
-              <Alert variant="error">Feil oppsto ved ferdigstilling av brevet</Alert>
+            (error) => (
+              <Alert variant="error">{error.detail}</Alert>
             ),
             () => (
               <Alert variant="info">Ferdigstilt ok!</Alert>
@@ -92,8 +92,8 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
             journalfoerStatus,
             <Spinner label="Journalfører brevet i dokarkiv ..." visible />,
             null,
-            () => (
-              <Alert variant="error">Feil oppsto ved journalføring av brevet</Alert>
+            (error) => (
+              <Alert variant="error">{error.detail}</Alert>
             ),
             () => (
               <Alert variant="info">Journalført ok!</Alert>
@@ -104,8 +104,8 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
             distribuerStatus,
             <Spinner label="Sender brev til distribusjon ..." visible />,
             null,
-            () => (
-              <Alert variant="error">Feil ved sending til distribusjon</Alert>
+            (error) => (
+              <Alert variant="error">{error.detail}</Alert>
             ),
             () => (
               <Alert variant="success">Brev sendt til distribusjon. Laster inn brev på nytt...</Alert>

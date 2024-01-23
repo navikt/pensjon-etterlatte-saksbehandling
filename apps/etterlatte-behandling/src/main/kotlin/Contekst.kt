@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.etterlatte.tilgangsstyring.saksbehandlereMedTilgangTilAlleEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
@@ -67,6 +68,8 @@ class SaksbehandlerMedEnheterOgRoller(
     override fun name(): String {
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
     }
+
+    fun erSuperbruker() = name() in (saksbehandlereMedTilgangTilAlleEnheter)
 
     fun enheter() =
         if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {

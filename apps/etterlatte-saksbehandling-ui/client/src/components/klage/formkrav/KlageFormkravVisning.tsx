@@ -1,16 +1,19 @@
 import { useKlage } from '~components/klage/useKlage'
-import { Content, ContentHeader } from '~shared/styled'
+import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { BodyShort, Heading } from '@navikt/ds-react'
+import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
 import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
+import { useNavigate } from 'react-router-dom'
+import { nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 
 export function KlageFormkravVisning() {
   const klage = useKlage()
 
   if (!klage) return
 
+  const navigate = useNavigate()
   const formkrav = klage.formkrav?.formkrav
   const vedtak = formkrav?.vedtaketKlagenGjelder
   const saksbehandler = klage.formkrav?.saksbehandler
@@ -58,6 +61,9 @@ export function KlageFormkravVisning() {
         </Heading>
         <BodyShort spacing>{saksbehandler?.ident}</BodyShort>
       </InnholdPadding>
+      <FlexRow justify="center">
+        <Button onClick={() => navigate(`/klage/${klage.id}/${nesteSteg(klage, 'formkrav')}`)}>Neste side</Button>
+      </FlexRow>
     </Content>
   )
 }

@@ -66,7 +66,7 @@ export function Klagebehandling() {
               <Route path="formkrav" element={<KlageFormkrav kanRedigere={kanRedigere} />} />
               <Route path="vurdering" element={<KlageVurdering kanRedigere={kanRedigere} />} />
               <Route path="brev" element={<KlageBrev />} />
-              <Route path="oppsummering" element={<KlageOppsummering />} />
+              <Route path="oppsummering" element={<KlageOppsummering kanRedigere={kanRedigere} />} />
               <Route path="*" element={<Navigate to="formkrav" replace />} />
             </Routes>
           </MainContent>

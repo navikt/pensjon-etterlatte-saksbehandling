@@ -23,7 +23,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterUtfallForKlage } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
-import { kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
+import { nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { SakType } from '~shared/types/sak'
 
 import { isPending } from '~shared/api/apiUtils'
@@ -109,21 +109,13 @@ export function KlageVurderingRedigering() {
     }
     if (!isDirty) {
       // Skjema er fylt ut men med samme innhold som starten => skip lagring og gå videre
-      if (kanSeBrev(klage)) {
-        navigate(`/klage/${klage.id}/brev`)
-      } else {
-        navigate(`/klage/${klage.id}/oppsummering`)
-      }
+      navigate(`/klage/${klage.id}/${nesteSteg(klage, 'vurdering')}`)
     }
 
     const utfall = mapFraFormdataTilKlageUtfall(skjema)
     lagreUtfall({ klageId: klage.id, utfall }, (oppdatertKlage) => {
       dispatch(addKlage(oppdatertKlage))
-      if (kanSeBrev(oppdatertKlage)) {
-        navigate(`/klage/${klage.id}/brev`)
-      } else {
-        navigate(`/klage/${klage.id}/oppsummering`)
-      }
+      navigate(`/klage/${klage.id}/${nesteSteg(klage, 'vurdering')}`)
     })
   }
 

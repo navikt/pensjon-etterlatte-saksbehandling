@@ -73,7 +73,7 @@ class SafClient(
                             ),
                         tema = if (visTemaPen) listOf("EYO", "EYB", "PEN") else listOf("EYO", "EYB"),
                         // TODO: Finn en grense eller fiks paginering
-                        foerste = 10,
+                        foerste = 20,
                     ),
             )
 

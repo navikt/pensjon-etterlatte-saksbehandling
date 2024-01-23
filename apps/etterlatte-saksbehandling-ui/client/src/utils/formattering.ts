@@ -94,6 +94,19 @@ export const formaterSpraak = (spraak: Spraak) => {
   }
 }
 
+export const formaterJournalpostType = (type: string) => {
+  switch (type) {
+    case 'I':
+      return 'Inngående'
+    case 'U':
+      return 'Utgående'
+    case 'N':
+      return 'Notat'
+    default:
+      return 'Ukjent'
+  }
+}
+
 export enum DatoFormat {
   AAR_MAANED_DAG = 'yyyy-MM-dd',
   DAG_MAANED_AAR = 'dd.MM.yyyy',

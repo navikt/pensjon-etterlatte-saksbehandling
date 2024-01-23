@@ -23,7 +23,7 @@ class OmregningDao(private val datasource: DataSource) : Transactions<OmregningD
                      inner join grunnlagshendelse g2 on g.sak_id = g2.sak_id and g.fnr = g2.fnr and g.hendelsenummer != g2.hendelsenummer
             where g.opplysning_type = 'FOEDSELSDATO'
             and g2.opplysning_type = 'SOEKER_PDL_V1'
-            and TO_DATE(g.opplysning, '\"YYYY-MM-DD\"') BETWEEN :aktuellMaaned AND :nesteMaaned
+            and TO_DATE(g.opplysning, '\"YYYY-MM-DD\"') BETWEEN :start AND :slutt
             """.trimIndent()
 
         return tx.session {
@@ -31,8 +31,8 @@ class OmregningDao(private val datasource: DataSource) : Transactions<OmregningD
                 sql,
                 {
                     mapOf(
-                        "aktuellMaaned" to maaned.atDay(1),
-                        "nesteMaaned" to maaned.plusMonths(1).atDay(1),
+                        "start" to maaned.atDay(1),
+                        "slutt" to maaned.atEndOfMonth(),
                     )
                 },
             ) {

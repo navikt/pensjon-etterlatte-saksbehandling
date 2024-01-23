@@ -13,7 +13,7 @@ import {
   filtrerOppgaveStatus,
   initialFilter,
   OPPGAVESTATUSFILTER,
-} from '~components/oppgavebenk/Oppgavelistafiltre'
+} from '~components/oppgavebenk/oppgavelistafiltre'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { isPending, isSuccess } from '~shared/api/apiUtils'

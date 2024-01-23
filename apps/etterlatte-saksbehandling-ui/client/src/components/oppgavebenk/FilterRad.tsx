@@ -14,7 +14,7 @@ import {
   SAKSBEHANDLERFILTER,
   YTELSEFILTER,
   YtelseFilterKeys,
-} from '~components/oppgavebenk/Oppgavelistafiltre'
+} from '~components/oppgavebenk/oppgavelistafiltre'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
 import { OppgaveDTO } from '~shared/api/oppgaver'

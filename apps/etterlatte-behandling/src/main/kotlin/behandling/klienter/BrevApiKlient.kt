@@ -182,5 +182,33 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     }
 }
 
+enum class BrevStatus {
+    OPPRETTET,
+    OPPDATERT,
+    FERDIGSTILT,
+    JOURNALFOERT,
+    DISTRIBUERT,
+    SLETTET,
+    ;
+
+    fun ikkeFerdigstilt(): Boolean {
+        return this in listOf(OPPRETTET, OPPDATERT, SLETTET)
+    }
+
+    fun ikkeJournalfoert(): Boolean {
+        return this in listOf(OPPRETTET, OPPDATERT, FERDIGSTILT, SLETTET)
+    }
+
+    fun ikkeDistribuert(): Boolean {
+        return this != DISTRIBUERT
+    }
+}
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class OpprettetBrevDto(val id: Long, val mottaker: Mottaker)
+data class OpprettetBrevDto(
+    val id: Long,
+    val mottaker: Mottaker,
+    val status: BrevStatus,
+    val journalpostId: String?,
+    val bestillingsID: String?,
+)

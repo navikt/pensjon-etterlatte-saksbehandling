@@ -154,6 +154,7 @@ export const ToggleMinOppgaveliste = () => {
 
 const ValgWrapper = styled.div`
   margin-bottom: 2rem;
+  width: 35rem;
 `
 
 const TabsWidth = styled(Tabs)`

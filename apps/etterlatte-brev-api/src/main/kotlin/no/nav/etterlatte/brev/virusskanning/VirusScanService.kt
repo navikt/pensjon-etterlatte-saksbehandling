@@ -23,26 +23,20 @@ class VirusScanService(
             logVedleggOver300MegaByteMetric(request.tittel(), loggingMeta)
         }
 
-        val vedleggUnder300MegaByte = !fileSizeLagerThan300MegaBytes(request.fil, loggingMeta)
+        log.info("Scanning vedlegg for virus, {}", StructuredArguments.fields(loggingMeta))
+        sikkerlogg.info(
+            "Scanning vedlegg for virus: vedlegg: ${objectMapper.writeValueAsString(request)}, {}",
+            StructuredArguments.fields(loggingMeta),
+        )
 
-        return if (vedleggUnder300MegaByte) {
-            false
-        } else {
-            log.info("Scanning vedlegg for virus, {}", StructuredArguments.fields(loggingMeta))
-            sikkerlogg.info(
-                "Scanning vedlegg for virus: vedlegg: ${objectMapper.writeValueAsString(request)}, {}",
+        val scanResultMayContainVirus = clamAvClient.virusScanVedlegg(request).filter { it.Result != Status.OK }
+        scanResultMayContainVirus.forEach {
+            log.warn(
+                "Vedlegg may contain virus, filename: ${it.Filename}, {}",
                 StructuredArguments.fields(loggingMeta),
             )
-
-            val scanResultMayContainVirus = clamAvClient.virusScanVedlegg(request).filter { it.Result != Status.OK }
-            scanResultMayContainVirus.map {
-                log.warn(
-                    "Vedlegg may contain virus, filename: ${it.Filename}, {}",
-                    StructuredArguments.fields(loggingMeta),
-                )
-            }
-            scanResultMayContainVirus.isNotEmpty()
         }
+        return scanResultMayContainVirus.isNotEmpty()
     }
 
     private fun logVedleggOver300MegaByteMetric(

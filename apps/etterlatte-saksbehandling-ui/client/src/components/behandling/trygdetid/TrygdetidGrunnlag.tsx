@@ -56,7 +56,7 @@ export const TrygdetidGrunnlag = ({
       {
         behandlingId: behandlingId,
         // Flippe verdi av prorata for å matche PESYS
-        trygdetidgrunnlag: { ...data, prorata: !data.prorata },
+        trygdetidgrunnlag: { ...data, prorata: !!data.prorata },
       },
       (respons) => {
         setTrygdetid(respons)
@@ -117,16 +117,18 @@ export const TrygdetidGrunnlag = ({
               {trygdetidGrunnlagType === ITrygdetidGrunnlagType.FAKTISK && (
                 <>
                   <PoengAar legend="Poeng i inn/ut år">
-                    <Checkbox {...register('poengInnAar')} value={getValues().poengInnAar}>
+                    {/* Stoppe aksel å klage på at checkbox ikke har value, mens RHF styrer den */}
+                    {/* Hvis man setter verdien fra RHF i Aksel Checkbox vil den overridet til string */}
+                    <Checkbox {...register('poengInnAar')} value="">
                       Poeng i inn år
                     </Checkbox>
-                    <Checkbox {...register('poengUtAar')} value={getValues().poengUtAar}>
+                    <Checkbox {...register('poengUtAar')} value="">
                       Poeng i ut år
                     </Checkbox>
                   </PoengAar>
 
                   <Prorata legend="Prorata">
-                    <Checkbox {...register('prorata')} value={getValues().prorata}>
+                    <Checkbox {...register('prorata')} value="">
                       Ikke med i prorata
                     </Checkbox>
                   </Prorata>

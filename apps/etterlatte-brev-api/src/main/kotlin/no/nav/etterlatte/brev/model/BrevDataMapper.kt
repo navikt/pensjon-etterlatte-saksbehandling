@@ -5,11 +5,11 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_ENDRING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
@@ -242,7 +242,7 @@ class BrevDataMapper(
             TOM_MAL_INFORMASJONSBREV -> {
                 ManueltBrevMedTittelData(innholdMedVedlegg.innhold(), tittel)
             }
-            BARNEPENSJON_REVURDERING_ENDRING -> {
+            BARNEPENSJON_REVURDERING -> {
                 coroutineScope {
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }
@@ -253,7 +253,7 @@ class BrevDataMapper(
                     val trygdetidHentet =
                         requireNotNull(
                             trygdetid.await(),
-                        ) { "${kode.ferdigstilling} Har ikke trygdetid, det er påbudt for ${BARNEPENSJON_INNVILGELSE_NY.name}" }
+                        ) { "${kode.ferdigstilling} Har ikke trygdetid, det er påbudt for ${BARNEPENSJON_INNVILGELSE.name}" }
                     val grunnbeloepHentet =
                         requireNotNull(grunnbeloep.await()) { "${kode.ferdigstilling} Må ha grunnbeløp" }
                     EndringHovedmalBrevData.fra(
@@ -267,7 +267,7 @@ class BrevDataMapper(
                 }
             }
 
-            BARNEPENSJON_INNVILGELSE_NY -> {
+            BARNEPENSJON_INNVILGELSE -> {
                 coroutineScope {
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }
@@ -279,7 +279,7 @@ class BrevDataMapper(
                     val trygdetidHentet =
                         requireNotNull(
                             trygdetid.await(),
-                        ) { "${kode.ferdigstilling} Har ikke trygdetid, det er påbudt for ${BARNEPENSJON_INNVILGELSE_NY.name}" }
+                        ) { "${kode.ferdigstilling} Har ikke trygdetid, det er påbudt for ${BARNEPENSJON_INNVILGELSE.name}" }
                     val grunnbeloepHentet =
                         requireNotNull(grunnbeloep.await()) { "${kode.ferdigstilling} Må ha grunnbeløp" }
 
@@ -336,7 +336,7 @@ class BrevDataMapper(
                 }
             }
 
-            OMS_REVURDERING_ENDRING -> {
+            OMSTILLINGSSTOENAD_REVURDERING -> {
                 coroutineScope {
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
@@ -354,7 +354,7 @@ class BrevDataMapper(
                 }
             }
 
-            OMS_AVSLAG -> {
+            OMSTILLINGSSTOENAD_AVSLAG -> {
                 AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, innholdMedVedlegg.innhold())
             }
 

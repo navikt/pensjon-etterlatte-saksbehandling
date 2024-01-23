@@ -13,6 +13,7 @@ export function KlageVurderingVisning() {
 
   if (!klage) return
 
+  const { utfall, sak } = klage
   return (
     <Content>
       <ContentHeader>
@@ -23,11 +24,17 @@ export function KlageVurderingVisning() {
         </HeadingWrapper>
       </ContentHeader>
       <InnholdPadding>
-        <BodyShort spacing>Utfallet av klagen er {formaterKlageutfall(klage)}.</BodyShort>
+        <BodyShort spacing>
+          Utfallet av klagen er <strong>{formaterKlageutfall(klage)}</strong>.
+        </BodyShort>
 
-        <VisInnstilling klage={klage} kanRedigere={false} />
+        {utfall?.utfall === 'DELVIS_OMGJOERING' || utfall?.utfall === 'STADFESTE_VEDTAK' ? (
+          <VisInnstilling innstilling={utfall.innstilling} sakId={sak?.id} kanRedigere={false} />
+        ) : null}
 
-        <VisOmgjoering klage={klage} kanRedigere={false} />
+        {utfall?.utfall === 'DELVIS_OMGJOERING' || utfall?.utfall === 'OMGJOERING' ? (
+          <VisOmgjoering omgjoering={utfall.omgjoering} kanRedigere={false} />
+        ) : null}
       </InnholdPadding>
       <FlexRow justify="center">
         <Button

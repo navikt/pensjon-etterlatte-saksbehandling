@@ -1,4 +1,10 @@
-import { Klage, TEKSTER_AARSAK_OMGJOERING, TEKSTER_LOVHJEMLER } from '~shared/types/Klage'
+import {
+  InnstillingTilKabal,
+  Klage,
+  Omgjoering,
+  TEKSTER_AARSAK_OMGJOERING,
+  TEKSTER_LOVHJEMLER,
+} from '~shared/types/Klage'
 import React, { useRef } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrev } from '~shared/api/brev'
@@ -10,12 +16,8 @@ import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBr
 import styled from 'styled-components'
 import { JaNei } from '~shared/types/ISvar'
 
-export function VisInnstilling(props: { klage: Klage; kanRedigere: boolean }) {
-  const { klage, kanRedigere } = props
-  const innstilling =
-    klage.utfall?.utfall === 'DELVIS_OMGJOERING' || klage.utfall?.utfall === 'STADFESTE_VEDTAK'
-      ? klage.utfall.innstilling
-      : null
+export function VisInnstilling(props: { innstilling: InnstillingTilKabal; sakId: number; kanRedigere: boolean }) {
+  const { innstilling, sakId, kanRedigere } = props
   const ref = useRef<HTMLDialogElement>(null)
   const [brev, hentBrevet] = useApiCall(hentBrev)
 
@@ -23,7 +25,7 @@ export function VisInnstilling(props: { klage: Klage; kanRedigere: boolean }) {
     if (!innstilling) return
 
     if (isInitial(brev) || isFailure(brev)) {
-      hentBrevet({ sakId: klage.sak.id, brevId: innstilling.brev.brevId })
+      hentBrevet({ sakId: sakId, brevId: innstilling.brev.brevId })
     }
     ref.current?.showModal()
   }
@@ -69,14 +71,8 @@ export function VisInnstilling(props: { klage: Klage; kanRedigere: boolean }) {
   )
 }
 
-export function VisOmgjoering(props: { klage: Klage; kanRedigere: boolean }) {
-  const { klage, kanRedigere } = props
-  const omgjoering =
-    klage.utfall?.utfall === 'DELVIS_OMGJOERING' || klage.utfall?.utfall === 'OMGJOERING'
-      ? klage.utfall.omgjoering
-      : null
-
-  if (omgjoering == null) return null
+export function VisOmgjoering(props: { omgjoering: Omgjoering; kanRedigere: boolean }) {
+  const { omgjoering, kanRedigere } = props
 
   return (
     <Maksbredde>

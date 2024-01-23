@@ -46,6 +46,7 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
     return <Spinner visible label="Henter klage" />
   }
 
+  const { utfall, sak, formkrav } = klage
   return (
     <Content>
       <ContentHeader>
@@ -60,14 +61,18 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
         <Heading size="medium" level="2">
           Utfall
         </Heading>
-        <BodyShort spacing>Utfallet av klagen er {formaterKlageutfall(klage)}.</BodyShort>
+        <BodyShort spacing>
+          Utfallet av klagen er <strong>{formaterKlageutfall(klage)}</strong>.
+        </BodyShort>
 
-        {klage.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.NEI ? <VisKlageavslag klage={klage} /> : null}
+        {formkrav?.formkrav.erFormkraveneOppfylt === JaNei.NEI ? <VisKlageavslag klage={klage} /> : null}
 
-        <VisInnstilling klage={klage} kanRedigere={kanRedigere} />
+        {utfall?.utfall === 'DELVIS_OMGJOERING' || utfall?.utfall === 'STADFESTE_VEDTAK' ? (
+          <VisInnstilling innstilling={utfall.innstilling} sakId={sak.id} kanRedigere={kanRedigere} />
+        ) : null}
 
-        {klage.utfall?.utfall === 'DELVIS_OMGJOERING' || klage.utfall?.utfall === 'OMGJOERING' ? (
-          <VisOmgjoering klage={klage} kanRedigere={kanRedigere} />
+        {utfall?.utfall === 'DELVIS_OMGJOERING' || utfall?.utfall === 'OMGJOERING' ? (
+          <VisOmgjoering omgjoering={utfall.omgjoering} kanRedigere={kanRedigere} />
         ) : null}
       </Innhold>
 

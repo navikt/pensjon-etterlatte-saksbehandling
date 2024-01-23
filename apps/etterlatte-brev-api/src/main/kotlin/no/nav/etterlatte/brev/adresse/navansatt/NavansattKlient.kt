@@ -3,10 +3,9 @@ package no.nav.etterlatte.brev.adresse.navansatt
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
-import io.ktor.http.isSuccess
 import no.nav.etterlatte.brev.adresse.AdresseException
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
@@ -31,14 +30,9 @@ class NavansattKlient(
             } else {
                 logger.info("Henter info om saksbehandler med ident $ident")
 
-                val response = client.get("$url/navansatt/$ident")
-
-                if (response.status.isSuccess()) {
-                    response.body<SaksbehandlerInfo>()
-                        .also { cache.put(ident, it) }
-                } else {
-                    throw ResponseException(response, "Ukjent feil fra navansatt api")
-                }
+                retryOgPakkUt<SaksbehandlerInfo> {
+                    client.get("$url/navansatt/$ident").body()
+                }.also { cache.put(ident, it) }
             }
         } catch (exception: Exception) {
             throw AdresseException("Feil i kall mot navansatt med ident: $ident", exception)

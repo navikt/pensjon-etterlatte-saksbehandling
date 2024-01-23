@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
+import no.nav.etterlatte.brev.distribusjon.FeilStatusForDistribusjon
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -81,7 +82,7 @@ class BrevdistribuererTest {
 
         every { db.hentBrev(any()) } returns brev
 
-        assertThrows<IllegalStateException> {
+        assertThrows<FeilStatusForDistribusjon> {
             brevdistribuerer.distribuer(brev.id)
         }
 

@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
@@ -42,8 +41,6 @@ import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.vedtaksbrevRoute
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -131,14 +128,13 @@ class ApplicationBuilder {
 
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
 
-    private val dokarkivKlient = DokarkivKlient(httpClient("DOKARKIV_SCOPE"), env.requireEnvValue("DOKARKIV_URL"))
+    private val dokarkivKlient = DokarkivKlient(httpClient("DOKARKIV_SCOPE", false), env.requireEnvValue("DOKARKIV_URL"))
     private val dokarkivService = DokarkivServiceImpl(dokarkivKlient, db)
 
     private val distribusjonKlient =
         DistribusjonKlient(httpClient("DOKDIST_SCOPE", false), env.requireEnvValue("DOKDIST_URL"))
 
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
-    private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
 
@@ -242,13 +238,6 @@ class ApplicationBuilder {
                 FIKS_BREV_MIGRERING to true,
             ),
         ).toJson()
-
-    private fun featureToggleProperties(config: Config) =
-        FeatureToggleProperties(
-            applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-            host = config.getString("funksjonsbrytere.unleash.host"),
-            apiKey = config.getString("funksjonsbrytere.unleash.token"),
-        )
 
     fun start() = setReady().also { rapidsConnection.start() }
 

@@ -3,6 +3,8 @@ package no.nav.etterlatte.brev.distribusjon
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.token.Systembruker.Companion.brev
 import org.slf4j.LoggerFactory
 
 class Brevdistribuerer(
@@ -21,9 +23,7 @@ class Brevdistribuerer(
         val brev = db.hentBrev(id)
 
         if (brev.status != Status.JOURNALFOERT) {
-            throw IllegalStateException(
-                "Forventet status ${Status.JOURNALFOERT} på brev (id=${brev.id}), men fikk ${brev.status}",
-            )
+            throw FeilStatusForDistribusjon(brev.id, brev.status)
         }
 
         val journalpostId =
@@ -46,3 +46,13 @@ class Brevdistribuerer(
         ).also { logger.info("Distribuerte brev $id") }
     }
 }
+
+class FeilStatusForDistribusjon(brevID: BrevID, status: Status) : UgyldigForespoerselException(
+    code = "FEIL_STATUS_FOR_DISTRIBUSJON",
+    detail = "Kan ikke distribuere brev med status ${status.name.lowercase()}",
+    meta =
+        mapOf(
+            "brevId" to brevID,
+            "status" to status,
+        ),
+)

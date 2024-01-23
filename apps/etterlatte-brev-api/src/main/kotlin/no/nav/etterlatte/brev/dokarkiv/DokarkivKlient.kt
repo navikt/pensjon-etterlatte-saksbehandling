@@ -1,8 +1,8 @@
 package no.nav.etterlatte.brev.dokarkiv
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.accept
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
@@ -11,6 +11,9 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import org.slf4j.LoggerFactory
 
 class DokarkivKlient(private val client: HttpClient, private val url: String) {
@@ -19,31 +22,54 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
     internal suspend fun opprettJournalpost(
         request: OpprettJournalpostRequest,
         ferdigstill: Boolean,
-    ): OpprettJournalpostResponse =
-        try {
+    ): OpprettJournalpostResponse {
+        val response =
             client.post("$url?forsoekFerdigstill=$ferdigstill") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(request)
-            }.body()
-        } catch (responseException: ResponseException) {
-            throw when (responseException.response.status.value) {
-                HttpStatusCode.Conflict.value -> DuplikatJournalpostException("Duplikat journalpost", responseException)
-                else -> JournalpostException("Feil i kall mot Dokarkiv", responseException)
             }
-        } catch (exception: Exception) {
-            logger.error("Feil i kall mot Dokarkiv: ", exception)
-            throw JournalpostException("Feil i kall mot Dokarkiv", exception)
+
+        return if (response.status.isSuccess()) {
+            response.body<OpprettJournalpostResponse>()
+                .also {
+                    logger.info(
+                        "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
+                    )
+                }
+        } else if (response.status == HttpStatusCode.Conflict) {
+            response.body<OpprettJournalpostResponse>()
+                .also { logger.warn("Konflikt ved lagring av journalpost ${it.journalpostId}") }
+        } else {
+            throw ForespoerselException(
+                status = response.status.value,
+                code = "UKJENT_FEIL_VED_JOURNALFOERING",
+                detail = "Ukjent feil oppsto ved journalføring av brev",
+            )
         }
+    }
 
     internal suspend fun ferdigstillJournalpost(
         journalpostId: String,
         journalfoerendeEnhet: String,
-    ): String =
-        client.patch("$url/$journalpostId/ferdigstill") {
-            contentType(ContentType.Application.Json)
-            setBody(FerdigstillJournalpostRequest(journalfoerendeEnhet))
-        }.body()
+    ): Boolean {
+        val response =
+            client.patch("$url/$journalpostId/ferdigstill") {
+                contentType(ContentType.Application.Json)
+                setBody(FerdigstillJournalpostRequest(journalfoerendeEnhet))
+            }
+
+        return if (response.status.isSuccess()) {
+            logger.info("Journalpost $journalpostId ferdigstilt med respons: ${response.body<String>()}")
+            true
+        } else {
+            val errorResponseJson = response.body<JsonNode>()
+            val errorMessage = errorResponseJson["message"]?.asText()
+
+            logger.error("Ukjent feil ved ferdigstillings av journalpostId=$journalpostId: $errorResponseJson")
+            throw KunneIkkeFerdigstilleJournalpost(journalpostId, errorMessage)
+        }
+    }
 
     internal suspend fun oppdaterJournalpost(
         journalpostId: String,
@@ -76,6 +102,11 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
 
 data class FerdigstillJournalpostRequest(val journalfoerendeEnhet: String)
 
-open class JournalpostException(msg: String, cause: Throwable) : Exception(msg, cause)
-
-class DuplikatJournalpostException(msg: String, cause: Throwable) : JournalpostException(msg, cause)
+class KunneIkkeFerdigstilleJournalpost(journalpostId: String, melding: String? = null) : UgyldigForespoerselException(
+    code = "KUNNE_IKKE_FERDIGSTILLE_JOURNALPOST",
+    detail = melding ?: "Kunne ikke ferdigstille journalpost med id=$journalpostId",
+    meta =
+        mapOf(
+            "journalpostId" to journalpostId,
+        ),
+)

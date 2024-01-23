@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Sak
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
@@ -19,6 +18,11 @@ interface DokarkivService {
         journalfoerendeEnhet: String?,
         request: OppdaterJournalpostRequest,
     ): OppdaterJournalpostResponse
+
+    suspend fun ferdigstillJournalpost(
+        journalpostId: String,
+        enhet: String,
+    ): Boolean
 
     suspend fun feilregistrerSakstilknytning(journalpostId: String)
 
@@ -38,11 +42,7 @@ internal class DokarkivServiceImpl(
 
     override suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse {
         logger.info("Oppretter journalpost for brev med id=${request.brevId}")
-        return client.opprettJournalpost(mapTilJournalpostRequest(request), true).also {
-            logger.info(
-                "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
-            )
-        }
+        return client.opprettJournalpost(mapTilJournalpostRequest(request), ferdigstill = true)
     }
 
     override suspend fun oppdater(
@@ -66,6 +66,11 @@ internal class DokarkivServiceImpl(
 
         return response
     }
+
+    override suspend fun ferdigstillJournalpost(
+        journalpostId: String,
+        enhet: String,
+    ) = client.ferdigstillJournalpost(journalpostId, enhet)
 
     override suspend fun feilregistrerSakstilknytning(journalpostId: String) {
         client.feilregistrerSakstilknytning(journalpostId)

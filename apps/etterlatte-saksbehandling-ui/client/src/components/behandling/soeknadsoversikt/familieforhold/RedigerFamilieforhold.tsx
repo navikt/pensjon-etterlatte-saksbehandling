@@ -55,13 +55,18 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
     if (foreldre.length != 2) {
       setFeilmelding('Mangler en eller flere forelder')
     } else {
-      redigerFamilieforholdRequest({
-        behandlingId: behandling.id,
-        redigert: {
-          gjenlevende: familieforhold.gjenlevende.map((v) => v.fnr),
-          avdoede: familieforhold.avdoede.map((v) => v.fnr),
+      redigerFamilieforholdRequest(
+        {
+          behandlingId: behandling.id,
+          redigert: {
+            gjenlevende: familieforhold.gjenlevende.map((v) => v.fnr),
+            avdoede: familieforhold.avdoede.map((v) => v.fnr),
+          },
         },
-      })
+        () => {
+          setTimeout(() => window.location.reload(), 2000)
+        }
+      )
     }
   }
 

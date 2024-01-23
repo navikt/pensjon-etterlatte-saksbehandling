@@ -7,7 +7,6 @@ query(
         brukerId: $brukerId,
         foerste: $foerste,
         tema: $tema,
-        journalposttyper: [I, U],
         journalstatuser:[]
     ) {
         journalposter {

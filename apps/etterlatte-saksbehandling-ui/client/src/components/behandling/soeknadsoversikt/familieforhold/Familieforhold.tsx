@@ -21,18 +21,19 @@ export const Familieforhold = ({ behandling, personopplysninger }: PropsFamilief
   return (
     <>
       <ContentHeader>
-        <Heading spacing size="medium" level="2">
+        <Heading spacing size="medium" level="2" as="div">
           Familieforhold
+          {featureAktiv && personopplysninger && (
+            <RedigerFamilieforhold behandling={behandling} personopplysninger={personopplysninger} />
+          )}
         </Heading>
       </ContentHeader>
+
       <FamilieforholdWrapper>
         {behandling.sakType === SakType.BARNEPENSJON ? (
           <FamilieforholdBarnepensjon personopplysninger={personopplysninger} />
         ) : (
           <FamilieforholdOmstillingsstoenad personopplysninger={personopplysninger} />
-        )}
-        {featureAktiv && personopplysninger && (
-          <RedigerFamilieforhold behandling={behandling} personopplysninger={personopplysninger} />
         )}
       </FamilieforholdWrapper>
       <Border />

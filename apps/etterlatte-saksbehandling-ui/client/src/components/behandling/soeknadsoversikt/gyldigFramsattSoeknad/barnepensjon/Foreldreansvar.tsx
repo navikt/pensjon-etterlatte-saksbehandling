@@ -38,10 +38,10 @@ export const Foreldreansvar = ({
   const foreldreansvar = (
     <>
       {levendeMedAnsvar.map((fnr) => (
-        <>
+        <span key={`ansvar-${fnr}`}>
           {gjenlevende?.foedselsnummer == fnr ? fulltNavn(gjenlevende) + ' ' : 'Ukjent '}
           <KopierbarVerdi value={fnr} />
-        </>
+        </span>
       ))}
     </>
   )

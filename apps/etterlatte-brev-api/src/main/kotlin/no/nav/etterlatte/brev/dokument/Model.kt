@@ -97,6 +97,7 @@ data class Journalpost(
     val kanal: String,
     val bruker: Bruker?,
     val sak: JournalpostSak?,
+    val utsendingsinfo: Utsendingsinfo?,
     val datoOpprettet: String,
 )
 
@@ -121,4 +122,14 @@ data class AvsenderMottaker(
     val navn: String?,
     val land: String?,
     val erLikBruker: Boolean?,
+)
+
+data class Utsendingsinfo(
+    val adresselinje1: String?,
+    val adresselinje2: String?,
+    val adresselinje3: String?,
+    val postnummer: String?,
+    val poststed: String?,
+    val landkode: String?,
+    val digitalpostkasseAdresse: String?,
 )

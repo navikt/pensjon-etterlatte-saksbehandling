@@ -1,13 +1,16 @@
-import styled from 'styled-components'
-import { Alert, Button, Panel, TextField } from '@navikt/ds-react'
+import { Alert, Button, Modal, Panel, TextField } from '@navikt/ds-react'
 import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
-import React, { useState } from 'react'
-import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
+import React, { useEffect, useState } from 'react'
+import { PencilIcon, PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerFamilieforhold } from '~shared/api/behandling'
 import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
 import { Personopplysninger, RedigertFamilieforhold } from '~shared/types/grunnlag'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { useFieldArray, useForm } from 'react-hook-form'
+import { fnrErGyldig } from '~utils/fnr'
+import { FlexRow } from '~shared/styled'
+import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 
 type Props = {
   behandling: IDetaljertBehandling
@@ -15,141 +18,138 @@ type Props = {
 }
 
 export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props) => {
-  const [redigerbartFamilieforhold, setFamilieforhold] = useState<RedigertFamilieforhold>({
-    gjenlevende: personopplysninger.gjenlevende.map((gjenlevende) => gjenlevende.opplysning.foedselsnummer),
-    avdoede: personopplysninger.avdoede.map((avdoede) => avdoede.opplysning.foedselsnummer),
-  })
+  const [isOpen, setIsOpen] = useState(false)
+  const [feilmelding, setFeilmelding] = useState<string | null>(null)
 
   const [status, redigerFamilieforholdRequest] = useApiCall(redigerFamilieforhold)
-  const [feilmelding, setFeilmelding] = useState<string | null>(null)
+
+  const {
+    control,
+    formState: { errors },
+    handleSubmit,
+    getValues,
+    register,
+  } = useForm<RedigertFamilieforhold>({
+    defaultValues: {
+      gjenlevende: personopplysninger.gjenlevende.map((gjenlevende) => ({
+        fnr: gjenlevende.opplysning.foedselsnummer,
+      })),
+      avdoede: personopplysninger.avdoede.map((avdoede) => ({ fnr: avdoede.opplysning.foedselsnummer })),
+    },
+  })
+  const gjenlevendeListe = useFieldArray({ name: 'gjenlevende', control })
+  const avdoedListe = useFieldArray({ name: 'avdoede', control })
+
+  useEffect(() => {
+    console.log(errors)
+  }, [errors])
 
   const lagre = () => {
     setFeilmelding(null)
-    const foreldre = redigerbartFamilieforhold.avdoede.concat(redigerbartFamilieforhold.gjenlevende)
+    const familieforhold = getValues()
+    const foreldre = [...familieforhold.avdoede, ...familieforhold.gjenlevende]
+
     if (foreldre.length != 2) {
       setFeilmelding('Mangler en eller flere forelder')
-    }
-    foreldre.find((fnr) => {
-      if (fnr.length !== 11) {
-        setFeilmelding('Ugyldig fødselsnummer')
-      }
-    })
-
-    if (feilmelding == null) {
+    } else {
       redigerFamilieforholdRequest({
         behandlingId: behandling.id,
-        redigert: redigerbartFamilieforhold,
+        redigert: familieforhold,
       })
     }
   }
 
-  const oppdater = (felt: 'gjenlevende' | 'avdoede', fnr: string, oppdateres: number) =>
-    setFamilieforhold({
-      gjenlevende:
-        felt === 'gjenlevende'
-          ? redigerbartFamilieforhold.gjenlevende.map((gjenlevende, index) =>
-              index === oppdateres ? fnr : gjenlevende
-            )
-          : redigerbartFamilieforhold.gjenlevende,
-      avdoede:
-        felt === 'avdoede'
-          ? redigerbartFamilieforhold.avdoede.map((avdoed, index) => (index === oppdateres ? fnr : avdoed))
-          : redigerbartFamilieforhold.avdoede,
-    })
-
-  const fjern = (felt: 'gjenlevende' | 'avdoede', fjernes: number) =>
-    setFamilieforhold({
-      gjenlevende:
-        felt === 'gjenlevende'
-          ? redigerbartFamilieforhold.gjenlevende.filter((_, index) => index !== fjernes)
-          : redigerbartFamilieforhold.gjenlevende,
-      avdoede:
-        felt === 'avdoede'
-          ? redigerbartFamilieforhold.avdoede.filter((_, index) => index !== fjernes)
-          : redigerbartFamilieforhold.avdoede,
-    })
-
-  const leggTil = (felt: 'gjenlevende' | 'avdoede') =>
-    setFamilieforhold({
-      gjenlevende:
-        felt === 'gjenlevende'
-          ? redigerbartFamilieforhold.gjenlevende.concat([''])
-          : redigerbartFamilieforhold.gjenlevende,
-      avdoede: felt === 'avdoede' ? redigerbartFamilieforhold.avdoede.concat(['']) : redigerbartFamilieforhold.avdoede,
-    })
-
-  const kanLeggeTil = (): boolean => {
-    return redigerbartFamilieforhold.gjenlevende.length + redigerbartFamilieforhold.avdoede.length < 2
+  const kanLeggeTil = () => {
+    const familie = getValues()
+    return familie.gjenlevende.length + familie.avdoede.length < 2
   }
 
   return (
-    <div>
-      <Form>
-        <FormWrapper>
-          <Panel border>
-            <InputList>
-              {redigerbartFamilieforhold.avdoede?.map((gjenlevende, index) => (
-                <InputRow key={index}>
-                  <TextField
-                    label="Avdøde forelder"
-                    value={gjenlevende}
-                    pattern="[0-9]{11}"
-                    maxLength={11}
-                    onChange={(e) => oppdater('avdoede', e.target.value, index)}
-                    description="Oppgi fødselsnummer"
-                  />
-                  <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => fjern('avdoede', index)} />
-                </InputRow>
-              ))}
-              {/* eslint-disable-next-line react/jsx-no-undef */}
-              <Button icon={<PlusIcon />} onClick={() => leggTil('avdoede')} disabled={!kanLeggeTil()}>
-                Legg til avdøde
-              </Button>
-            </InputList>
-          </Panel>
-          <Panel border>
-            <InputList>
-              {redigerbartFamilieforhold.gjenlevende?.map((gjenlevende, index) => (
-                <InputRow key={index}>
-                  <TextField
-                    label="Gjenlevende forelder"
-                    value={gjenlevende}
-                    pattern="[0-9]{11}"
-                    maxLength={11}
-                    onChange={(e) => oppdater('gjenlevende', e.target.value, index)}
-                    description="Oppgi fødselsnummer"
-                  />
-                  <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => fjern('gjenlevende', index)} />
-                </InputRow>
-              ))}
-              {/* eslint-disable-next-line react/jsx-no-undef */}
-              <Button icon={<PlusIcon />} onClick={() => leggTil('gjenlevende')} disabled={!kanLeggeTil()}>
-                Legg til gjenlevende
-              </Button>
-            </InputList>
-          </Panel>
-        </FormWrapper>
-        <Knapp>
-          <Button variant="secondary" onClick={lagre} loading={isPending(status)}>
-            Lagre
-          </Button>
-        </Knapp>
-        {isSuccess(status) && <Alert variant="success">Lagret redigert familieforhold</Alert>}
-        {isFailure(status) && <Alert variant="error">Noe gikk galt!</Alert>}
-        {feilmelding && <Alert variant="error">{feilmelding}</Alert>}
-      </Form>
-    </div>
+    <>
+      <Button
+        variant="tertiary"
+        size="small"
+        onClick={() => setIsOpen(true)}
+        icon={<PencilIcon />}
+        style={{ float: 'right' }}
+      >
+        Rediger
+      </Button>
+
+      <Modal open={isOpen}>
+        <Modal.Body>
+          <FormWrapper column={true}>
+            <Panel border>
+              <InputList>
+                {avdoedListe.fields?.map((field, index) => (
+                  <InputRow key={field.id}>
+                    <TextField
+                      {...register(`avdoede.${index}.fnr`, {
+                        validate: {
+                          fnrErGyldig: (value) => fnrErGyldig(value) || 'Ugyldig fødselsnummer',
+                        },
+                      })}
+                      label="Avdød forelder"
+                      description="Oppgi fødselsnummer"
+                      error={errors?.avdoede?.[index]?.fnr?.message}
+                    />
+                    <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => avdoedListe.remove(index)} />
+                  </InputRow>
+                ))}
+                <Button
+                  icon={<PlusIcon />}
+                  onClick={() => avdoedListe.append({ fnr: '' })}
+                  disabled={!kanLeggeTil() || isPending(status)}
+                >
+                  Legg til avdøde
+                </Button>
+              </InputList>
+            </Panel>
+
+            <Panel border>
+              <InputList>
+                {gjenlevendeListe.fields?.map((field, index) => (
+                  <InputRow key={field.id}>
+                    <TextField
+                      {...register(`gjenlevende.${index}.fnr`, {
+                        validate: {
+                          fnrErGyldig: (value) => fnrErGyldig(value) || 'Ugyldig fødselsnummer',
+                        },
+                      })}
+                      label="Gjenlevende forelder"
+                      description="Oppgi fødselsnummer"
+                      error={errors?.gjenlevende?.[index]?.fnr?.message}
+                    />
+                    <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => gjenlevendeListe.remove(index)} />
+                  </InputRow>
+                ))}
+
+                <Button
+                  icon={<PlusIcon />}
+                  onClick={() => gjenlevendeListe.append({ fnr: '' })}
+                  disabled={!kanLeggeTil() || isPending(status)}
+                >
+                  Legg til gjenlevende
+                </Button>
+              </InputList>
+            </Panel>
+          </FormWrapper>
+
+          <br />
+
+          {isSuccess(status) && <Alert variant="success">Lagret redigert familieforhold</Alert>}
+          {isFailure(status) && <Alert variant="error">Noe gikk galt!</Alert>}
+          {feilmelding && <Alert variant="error">{feilmelding}</Alert>}
+        </Modal.Body>
+
+        <Modal.Footer>
+          <FlexRow justify="right">
+            <Button variant="secondary" onClick={handleSubmit(lagre)} loading={isPending(status)}>
+              Lagre
+            </Button>
+          </FlexRow>
+        </Modal.Footer>
+      </Modal>
+    </>
   )
 }
-
-const Form = styled.div``
-
-export const FormWrapper = styled.div`
-  display: flex;
-  gap: 1rem;
-  margin-right: 1em;
-`
-
-const Knapp = styled.div`
-  margin-top: 1em;
-`

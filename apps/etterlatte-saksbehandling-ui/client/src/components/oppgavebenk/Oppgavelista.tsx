@@ -5,13 +5,18 @@ import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTab
 import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
 
 interface Props {
-  oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   filtrerteOppgaver: ReadonlyArray<OppgaveDTO>
   hentOppgaver: () => void
+  totaltAntallOppgaver?: number
 }
 
-export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver, hentOppgaver }: Props): ReactNode => {
+export const Oppgavelista = ({
+  oppdaterTildeling,
+  filtrerteOppgaver,
+  hentOppgaver,
+  totaltAntallOppgaver,
+}: Props): ReactNode => {
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
 
@@ -41,7 +46,9 @@ export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver, h
             setRaderPerSide={setRowsPerPage}
             totalAvOppgaverTeksts={`Viser ${(page - 1) * rowsPerPage + 1} - ${
               (page - 1) * rowsPerPage + paginerteOppgaver.length
-            } av ${filtrerteOppgaver.length} oppgaver (totalt ${oppgaver.length} oppgaver)`}
+            } av ${filtrerteOppgaver.length} oppgaver ${
+              totaltAntallOppgaver ? `(totalt ${totaltAntallOppgaver} oppgaver)` : ''
+            }`}
           />
         </>
       ) : (

@@ -1,11 +1,11 @@
-import { Alert, Button, Modal, Panel, TextField } from '@navikt/ds-react'
+import { Alert, Button, Heading, Modal, Panel, TextField } from '@navikt/ds-react'
 import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { PencilIcon, PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerFamilieforhold } from '~shared/api/behandling'
 import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
-import { Personopplysninger, RedigertFamilieforhold } from '~shared/types/grunnlag'
+import { Personopplysninger } from '~shared/types/grunnlag'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { fnrErGyldig } from '~utils/fnr'
@@ -15,6 +15,12 @@ import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJ
 type Props = {
   behandling: IDetaljertBehandling
   personopplysninger: Personopplysninger
+}
+
+// RHF krever at en array består av objekter
+interface RHFRedigerbarFamilie {
+  gjenlevende: Array<{ fnr: string }>
+  avdoede: Array<{ fnr: string }>
 }
 
 export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props) => {
@@ -29,7 +35,8 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
     handleSubmit,
     getValues,
     register,
-  } = useForm<RedigertFamilieforhold>({
+    reset,
+  } = useForm<RHFRedigerbarFamilie>({
     defaultValues: {
       gjenlevende: personopplysninger.gjenlevende.map((gjenlevende) => ({
         fnr: gjenlevende.opplysning.foedselsnummer,
@@ -39,10 +46,6 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
   })
   const gjenlevendeListe = useFieldArray({ name: 'gjenlevende', control })
   const avdoedListe = useFieldArray({ name: 'avdoede', control })
-
-  useEffect(() => {
-    console.log(errors)
-  }, [errors])
 
   const lagre = () => {
     setFeilmelding(null)
@@ -54,9 +57,17 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
     } else {
       redigerFamilieforholdRequest({
         behandlingId: behandling.id,
-        redigert: familieforhold,
+        redigert: {
+          gjenlevende: familieforhold.gjenlevende.map((v) => v.fnr),
+          avdoede: familieforhold.avdoede.map((v) => v.fnr),
+        },
       })
     }
+  }
+
+  const avbryt = () => {
+    reset()
+    setIsOpen(false)
   }
 
   const kanLeggeTil = () => {
@@ -76,7 +87,12 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
         Rediger
       </Button>
 
-      <Modal open={isOpen}>
+      <Modal open={isOpen} onClose={avbryt}>
+        <Modal.Header>
+          <Heading size="medium" spacing>
+            Rediger familieforhold
+          </Heading>
+        </Modal.Header>
         <Modal.Body>
           <FormWrapper column={true}>
             <Panel border>
@@ -144,7 +160,10 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
 
         <Modal.Footer>
           <FlexRow justify="right">
-            <Button variant="secondary" onClick={handleSubmit(lagre)} loading={isPending(status)}>
+            <Button variant="secondary" onClick={avbryt} disabled={isPending(status)}>
+              Avbryt
+            </Button>
+            <Button onClick={handleSubmit(lagre)} loading={isPending(status)}>
               Lagre
             </Button>
           </FlexRow>

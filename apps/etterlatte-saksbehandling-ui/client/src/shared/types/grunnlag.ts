@@ -52,6 +52,6 @@ export type MismatchPersongalleri =
   | 'HAR_PERSONER_UTEN_IDENTER'
 
 export interface RedigertFamilieforhold {
-  gjenlevende: Array<{ fnr: string }>
-  avdoede: Array<{ fnr: string }>
+  gjenlevende: string[]
+  avdoede: string[]
 }

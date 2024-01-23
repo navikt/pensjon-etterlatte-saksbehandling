@@ -271,8 +271,8 @@ class StatistikkService(
         sakId = statistikkKlage.klage.sak.id,
         mottattTidspunkt = statistikkKlage.klage.opprettet,
         registrertTidspunkt = statistikkKlage.tidspunkt,
-        type = hendelse.name,
-        status = statistikkKlage.klage.status.name,
+        type = "KLAGE",
+        status = hendelse.name,
         resultat =
             when (statistikkKlage.klage.utfall) {
                 is KlageUtfall.Omgjoering -> "OMGJOERING"

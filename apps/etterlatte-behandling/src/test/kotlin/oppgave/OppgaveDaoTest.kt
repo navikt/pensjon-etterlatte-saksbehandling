@@ -44,6 +44,30 @@ internal class OppgaveDaoTest {
     }
 
     @Test
+    fun `Vanlig bruker kan kun se oppgaver med brukers enhet AALESUND ikke andre enheter som ikke er strengt fortrolig`() {
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDao.opprettOppgave(oppgaveNy)
+        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)))
+        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)))
+
+        val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.entries, listOf(Enheter.AALESUND.enhetNr), false)
+        assertEquals(1, hentOppgaver.size)
+    }
+
+    @Test
+    fun `superbrukerbruker kan se alle oppgaver som ikke er strengt fortrolig`() {
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDao.opprettOppgave(oppgaveNy)
+        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.STEINKJER.enhetNr)))
+        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)))
+
+        val hentOppgaver = oppgaveDao.hentOppgaver(OppgaveType.entries, listOf(Enheter.AALESUND.enhetNr), true)
+        assertEquals(3, hentOppgaver.size)
+    }
+
+    @Test
     fun `legg til oppgaver og hent oppgaver`() {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
@@ -114,7 +138,7 @@ internal class OppgaveDaoTest {
     ) = OppgaveIntern(
         id = UUID.randomUUID(),
         status = Status.NY,
-        enhet = Enheter.AALESUND.enhetNr,
+        enhet = sak.enhet,
         sakId = sak.id,
         kilde = oppgaveKilde,
         referanse = "referanse",

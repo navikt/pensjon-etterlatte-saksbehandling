@@ -94,7 +94,7 @@ data class Journalpost(
     val journalstatus: String,
     val dokumenter: List<Dokumenter>,
     val avsenderMottaker: AvsenderMottaker,
-    val kanal: String,
+    val kanal: String?,
     val bruker: Bruker?,
     val sak: JournalpostSak?,
     val datoOpprettet: String,

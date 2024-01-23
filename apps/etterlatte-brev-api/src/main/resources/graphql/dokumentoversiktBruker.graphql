@@ -33,16 +33,6 @@ query(
                 navn
                 erLikBruker
             }
-            utsendingsinfo {
-                adresselinje1
-                adresselinje2
-                adresselinje3
-                postnummer
-                poststed
-                landkode
-                digitalpostkasseAdresse
-
-            }
             kanal
             datoOpprettet
         }

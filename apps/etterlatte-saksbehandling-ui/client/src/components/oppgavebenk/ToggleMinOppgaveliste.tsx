@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
-import { MinOppgaveliste } from '~components/oppgavebenk/minoppgaveliste/MinOppgaveliste'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGosysOppgaver, hentOppgaver, OppgaveDTO } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
@@ -13,12 +12,14 @@ import {
   filtrerOppgaver,
   filtrerOppgaveStatus,
   initialFilter,
+  OPPGAVESTATUSFILTER,
 } from '~components/oppgavebenk/Oppgavelistafiltre'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Tilgangsmelding } from '~components/oppgavebenk/Tilgangsmelding'
+import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -37,6 +38,10 @@ export const ToggleMinOppgaveliste = () => {
   const sorterOppgaverEtterOpprettet = (oppgaver: OppgaveDTO[]) => {
     return oppgaver.sort((a, b) => new Date(b.opprettet).getTime() - new Date(a.opprettet).getTime())
   }
+  const hentAlleOppgaver = () => {
+    hentOppgaverFetch({})
+    hentGosysOppgaverFunc({})
+  }
 
   useEffect(() => {
     if (isSuccess(oppgaver) && isSuccess(gosysOppgaver)) {
@@ -49,12 +54,17 @@ export const ToggleMinOppgaveliste = () => {
     }
   }, [oppgaver, gosysOppgaver])
 
-  const hentAlleOppgaver = () => {
-    hentOppgaverFetch({})
-    hentGosysOppgaverFunc({})
-  }
-
   useEffect(() => hentAlleOppgaver(), [])
+
+  // Dette er bare for å resette filterne når saksbehandler bytter mellom sin egen
+  // og den felles oppgavelisten. Vet egt ikke helt om dette er ønsket behaviour
+  useEffect(() => {
+    if (oppgaveListeValg === 'MinOppgaveliste') {
+      setFilter({ ...initialFilter(), oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING] })
+    } else {
+      setFilter(initialFilter())
+    }
+  }, [oppgaveListeValg])
 
   const oppdaterTildeling = (id: string, saksbehandler: string | null, versjon: number | null) => {
     setTimeout(() => {
@@ -114,21 +124,25 @@ export const ToggleMinOppgaveliste = () => {
                 alleOppgaver={hentedeOppgaver}
               />
               <Oppgavelista
-                oppgaver={hentedeOppgaver}
                 filtrerteOppgaver={filtrerteOppgaver}
                 oppdaterTildeling={oppdaterTildeling}
                 hentOppgaver={hentAlleOppgaver}
+                totaltAntallOppgaver={hentedeOppgaver.length}
               />
             </>
           )}
           {oppgaveListeValg === 'MinOppgaveliste' && (
-            <MinOppgaveliste
-              filtrerteOppgaver={filtrerOppgaveStatus(filter.oppgavestatusFilter, innloggetSaksbehandleroppgaver)}
-              hentOppgaver={hentAlleOppgaver}
-              oppdaterTildeling={(id, _saksbehandler, versjon) => oppdaterTildeling(id, null, versjon)}
-              filter={filter}
-              setFilter={setFilter}
-            />
+            <>
+              <VelgOppgavestatuser
+                value={filter.oppgavestatusFilter}
+                onChange={(oppgavestatusFilter) => setFilter({ ...filter, oppgavestatusFilter })}
+              />
+              <Oppgavelista
+                filtrerteOppgaver={filtrerOppgaveStatus(filter.oppgavestatusFilter, innloggetSaksbehandleroppgaver)}
+                hentOppgaver={hentAlleOppgaver}
+                oppdaterTildeling={(id, _saksbehandler, versjon) => oppdaterTildeling(id, null, versjon)}
+              />
+            </>
           )}
         </>
       )}

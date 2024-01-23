@@ -7,7 +7,7 @@ import SaksoversiktLenke from '~components/oppgavebenk/SaksoversiktLenke'
 import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/Tags'
 import { RedigerSaksbehandler } from '~components/oppgavebenk/tildeling/RedigerSaksbehandler'
 import { HandlingerForOppgave } from '~components/oppgavebenk/HandlingerForOppgave'
-import { FristHandlinger } from '~components/oppgavebenk/minoppgaveliste/FristHandlinger'
+import { FristHandlinger } from '~components/oppgavebenk/FristHandlinger'
 import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/Oppgavelistafiltre'
 
 interface Props {

@@ -5,12 +5,11 @@ import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
-import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.LoggerFactory
 
 interface BrukerService {
@@ -79,13 +78,14 @@ class BrukerServiceImpl(
                     Enheter.defaultEnhet.enhetNr,
                 )
 
-            geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
-                Folkeregisteridentifikator.of(fnr),
-                tema,
-            ).also {
-                logger.warn(it.message)
-            }
+            geografiskTilknytning == null -> {
+                logger.warn("Fant ikke geografisk omraade for ${fnr.maskerFnr()} og tema $tema")
 
+                ArbeidsFordelingEnhet(
+                    Enheter.defaultEnhet.navn,
+                    Enheter.defaultEnhet.enhetNr,
+                )
+            }
             else -> finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
         }
     }

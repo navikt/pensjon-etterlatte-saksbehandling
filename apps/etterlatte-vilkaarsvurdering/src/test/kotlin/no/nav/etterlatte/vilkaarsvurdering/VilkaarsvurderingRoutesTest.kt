@@ -15,7 +15,6 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -53,7 +52,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import vilkaarsvurdering.config.VilkaarsvurderingFeatureToggle
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
@@ -65,7 +63,6 @@ internal class VilkaarsvurderingRoutesTest {
     private val server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
-    private val featureToggleService = DummyFeatureToggleService()
     private val grunnlagVersjon = 12L
 
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
@@ -87,13 +84,11 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
-                featureToggleService,
             )
     }
 
     @BeforeEach
     fun beforeEach() {
-        featureToggleService.settBryter(VilkaarsvurderingFeatureToggle.OppdaterGrunnlagsversjon, true)
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns detaljertBehandling()
         coEvery { behandlingKlient.kanSetteBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery {
@@ -124,12 +119,11 @@ internal class VilkaarsvurderingRoutesTest {
     fun `skal hente vilkaarsvurdering`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
-            featureToggleService.settBryter(VilkaarsvurderingFeatureToggle.OppdaterGrunnlagsversjon, false)
             val response =
                 client.get("/api/vilkaarsvurdering/$behandlingId") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -163,7 +157,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `skal hente vilkaarsvurdering med behandlingens versjon`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -173,7 +167,6 @@ internal class VilkaarsvurderingRoutesTest {
                 grunnlagMedVersjon(
                     nyGrunnlagVersjon,
                 )
-            featureToggleService.settBryter(VilkaarsvurderingFeatureToggle.OppdaterGrunnlagsversjon, true)
             val response =
                 client.get("/api/vilkaarsvurdering/$behandlingId") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -194,7 +187,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `skal returnere no content dersom en vilkaarsvurdering ikke finnes`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             val nyBehandlingId = UUID.randomUUID()
@@ -216,7 +209,7 @@ internal class VilkaarsvurderingRoutesTest {
 
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
             val response =
                 client.get("/api/vilkaarsvurdering/$nyBehandlingId") {
@@ -235,7 +228,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `skal kaste feil dersom virkningstidspunkt ikke finnes ved opprettelse`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
             val nyBehandlingId = UUID.randomUUID()
 
@@ -258,7 +251,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `skal oppdatere en vilkaarsvurdering med et vurdert hovedvilkaar`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -304,7 +297,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `skal opprette vurdering paa hovedvilkaar og endre til vurdering paa unntaksvilkaar`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -384,7 +377,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `skal nullstille et vurdert hovedvilkaar fra vilkaarsvurdering`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -438,7 +431,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `skal sette og nullstille totalresultat for en vilkaarsvurdering`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -483,7 +476,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `skal ikke kunne endre eller slette vilkaar naar totalresultat er satt`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -526,7 +519,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `revurdering skal kopiere siste vilkaarsvurdering ved opprettele som default`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -566,7 +559,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `revurdering skal ikke kopiere siste vilkaarsvurdering naar kopierVedRevurdering er false`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -605,7 +598,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `Skal slette eksisterende vilkaarsvurdering`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -625,7 +618,7 @@ internal class VilkaarsvurderingRoutesTest {
     fun `faar 401 hvis spoerring ikke har access token`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
             val response = client.get("/api/vilkaarsvurdering/$behandlingId")
 
@@ -645,12 +638,11 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
-                featureToggleService,
             )
 
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
@@ -672,12 +664,11 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
-                featureToggleService,
             )
 
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             val response =
@@ -702,12 +693,11 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
-                featureToggleService,
             )
 
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             client.delete("/api/vilkaarsvurdering/resultat/$behandlingId") {
@@ -734,12 +724,11 @@ internal class VilkaarsvurderingRoutesTest {
                 VilkaarsvurderingRepository(ds, DelvilkaarRepository()),
                 behandlingKlient,
                 grunnlagKlient,
-                featureToggleService,
             )
 
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             val vilkaarsvurdering = opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
@@ -776,7 +765,7 @@ internal class VilkaarsvurderingRoutesTest {
 
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
             }
 
             runBlocking {

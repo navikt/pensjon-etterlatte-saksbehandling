@@ -191,12 +191,7 @@ class RealGrunnlagService(
             sisteGrunnlagPerFnr.find { it.opplysning.opplysningType == INNSENDER_PDL_V1 }
         val soker = sisteGrunnlagPerFnr.find { it.opplysning.opplysningType == SOEKER_PDL_V1 }
         val avdode = sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == AVDOED_PDL_V1 }
-        val gjenlevende =
-            if (sakstype == SakType.OMSTILLINGSSTOENAD) {
-                listOf(soker)
-            } else {
-                sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
-            }
+        val gjenlevende = sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
 
         return PersonopplysningerResponse(
             innsender = innsender?.opplysning?.asPersonopplysning(),

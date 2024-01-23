@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
+import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -106,6 +107,8 @@ data class Brev(
     val statusEndret: Tidspunkt,
     val opprettet: Tidspunkt,
     val mottaker: Mottaker,
+    val journalpostId: String? = null,
+    val bestillingsID: BestillingsID? = null,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
 

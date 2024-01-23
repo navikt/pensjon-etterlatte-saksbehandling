@@ -6,6 +6,10 @@ import { Heading } from '@navikt/ds-react'
 import { ContentHeader } from '~shared/styled'
 import React from 'react'
 import { Personopplysninger } from '~shared/types/grunnlag'
+import styled from 'styled-components'
+import { Border } from '~components/behandling/soeknadsoversikt/styled'
+import { RedigerFamilieforhold } from '~components/behandling/soeknadsoversikt/familieforhold/RedigerFamilieforhold'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 export interface PropsFamilieforhold {
   behandling: IDetaljertBehandling
@@ -13,18 +17,33 @@ export interface PropsFamilieforhold {
 }
 
 export const Familieforhold = ({ behandling, personopplysninger }: PropsFamilieforhold) => {
+  const featureAktiv = useFeatureEnabledMedDefault('pensjon-etterlatte.kan-bruke-rediger-familie', false)
   return (
     <>
       <ContentHeader>
-        <Heading spacing size="medium" level="2">
+        <Heading spacing size="medium" level="2" as="div">
           Familieforhold
+          {featureAktiv && personopplysninger && (
+            <RedigerFamilieforhold behandling={behandling} personopplysninger={personopplysninger} />
+          )}
         </Heading>
       </ContentHeader>
-      {behandling.sakType === SakType.BARNEPENSJON ? (
-        <FamilieforholdBarnepensjon personopplysninger={personopplysninger} />
-      ) : (
-        <FamilieforholdOmstillingsstoenad personopplysninger={personopplysninger} />
-      )}
+
+      <FamilieforholdWrapper>
+        {behandling.sakType === SakType.BARNEPENSJON ? (
+          <FamilieforholdBarnepensjon personopplysninger={personopplysninger} />
+        ) : (
+          <FamilieforholdOmstillingsstoenad personopplysninger={personopplysninger} />
+        )}
+      </FamilieforholdWrapper>
+      <Border />
     </>
   )
 }
+
+export const FamilieforholdWrapper = styled.div`
+  padding: 1em 4em;
+  display: grid;
+  gap: 4rem;
+  margin-bottom: 4rem;
+`

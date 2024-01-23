@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -250,6 +251,14 @@ internal fun Route.behandlingRoutes(
                 inTransaction {
                     behandlingService.oppdaterGrunnlagOgStatus(behandlingId, brukerTokenInfo)
                 }
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        post("/rediger-familieforhold") {
+            kunSkrivetilgang {
+                val redigertFamilie = call.receive<RedigertFamilieforhold>()
+                behandlingService.endrePersongalleri(behandlingId, brukerTokenInfo, redigertFamilie)
                 call.respond(HttpStatusCode.OK)
             }
         }

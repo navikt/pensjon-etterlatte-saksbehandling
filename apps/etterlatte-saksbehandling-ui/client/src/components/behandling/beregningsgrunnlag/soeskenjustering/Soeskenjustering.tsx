@@ -9,7 +9,6 @@ import { SoeskenMedIBeregning } from '~shared/types/Beregning'
 import { Barn } from '~components/behandling/soeknadsoversikt/familieforhold/personer/Barn'
 import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { ContentHeader } from '~shared/styled'
-import { FamilieforholdWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/barnepensjon/FamilieforholdBarnepensjon'
 import {
   FEIL_I_PERIODE,
   feilIKomplettePerioderOverIntervall,
@@ -21,6 +20,7 @@ import SoeskenjusteringPeriode from '~components/behandling/beregningsgrunnlag/s
 import { AGreen500 } from '@navikt/ds-tokens/dist/tokens'
 import { CheckmarkCircleIcon } from '@navikt/aksel-icons'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { FamilieforholdWrapper } from '~components/behandling/soeknadsoversikt/familieforhold/Familieforhold'
 
 type SoeskenKanskjeMedIBeregning = {
   foedselsnummer: string

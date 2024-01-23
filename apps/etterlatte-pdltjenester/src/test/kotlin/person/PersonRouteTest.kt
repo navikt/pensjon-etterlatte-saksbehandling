@@ -6,16 +6,14 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.log
-import io.ktor.server.config.ApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import no.nav.etterlatte.TRIVIELL_MIDTPUNKT
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
@@ -23,8 +21,6 @@ import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.mockFolkeregisterident
@@ -36,19 +32,15 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PersonRouteTest {
     private val server = MockOAuth2Server()
-    private lateinit var applicationConfig: ApplicationConfig
     private val personService: PersonService = mockk()
 
     @BeforeAll
     fun before() {
         server.start()
-        applicationConfig =
-            buildTestApplicationConfigurationForOauth(server.config.httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterAll
@@ -68,11 +60,8 @@ class PersonRouteTest {
         coEvery { personService.hentPerson(hentPersonRequest) } returns GrunnlagTestData().soeker
 
         testApplication {
-            environment {
-                config = applicationConfig
-            }
-            application {
-                restModule(log) { personRoute(personService) }
+            runServer(server) {
+                personRoute(personService)
             }
 
             val response =
@@ -100,11 +89,8 @@ class PersonRouteTest {
         coEvery { personService.hentOpplysningsperson(hentPersonRequest) } returns mockPerson()
 
         testApplication {
-            environment {
-                config = applicationConfig
-            }
-            application {
-                restModule(log) { personRoute(personService) }
+            runServer(server) {
+                personRoute(personService)
             }
 
             val response =
@@ -131,11 +117,8 @@ class PersonRouteTest {
             )
 
         testApplication {
-            environment {
-                config = applicationConfig
-            }
-            application {
-                restModule(log) { personRoute(personService) }
+            runServer(server) {
+                personRoute(personService)
             }
 
             val response =
@@ -164,11 +147,8 @@ class PersonRouteTest {
         } returns mockGeografiskTilknytning()
 
         testApplication {
-            environment {
-                config = applicationConfig
-            }
-            application {
-                restModule(log) { personRoute(personService) }
+            runServer(server) {
+                personRoute(personService)
             }
 
             val response =
@@ -198,11 +178,8 @@ class PersonRouteTest {
         } throws PdlForesporselFeilet("Noe feilet")
 
         testApplication {
-            environment {
-                config = applicationConfig
-            }
-            application {
-                restModule(log) { personRoute(personService) }
+            runServer(server) {
+                personRoute(personService)
             }
 
             val response =
@@ -230,11 +207,8 @@ class PersonRouteTest {
             )
 
         testApplication {
-            environment {
-                config = applicationConfig
-            }
-            application {
-                restModule(log) { personRoute(personService) }
+            runServer(server) {
+                personRoute(personService)
             }
 
             val response =

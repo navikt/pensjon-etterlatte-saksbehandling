@@ -13,7 +13,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
@@ -30,7 +29,6 @@ import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Miljoevariabler
@@ -53,32 +51,26 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.extension.ExtendWith
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
 import java.util.UUID
 
 @ExtendWith(DatabaseExtension::class)
 abstract class BehandlingIntegrationTest {
     private val postgreSQLContainer = DatabaseExtension.postgreSQLContainer
-    private val server: MockOAuth2Server = MockOAuth2Server()
+    protected val server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
-    protected lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     protected fun startServer(
         norg2Klient: Norg2Klient? = null,
         featureToggleService: FeatureToggleService = DummyFeatureToggleService(),
     ) {
         server.start()
-
-        val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
 
         applicationContext =
             ApplicationContext(
@@ -111,12 +103,11 @@ abstract class BehandlingIntegrationTest {
                     }.let { Miljoevariabler(it) },
                 config =
                     ConfigFactory.parseMap(
-                        hoconApplicationConfig.toMap() +
-                            mapOf(
-                                "pdltjenester.url" to "http://localhost",
-                                "grunnlag.resource.url" to "http://localhost",
-                                "vedtak.resource.url" to "http://localhost",
-                            ),
+                        mapOf(
+                            "pdltjenester.url" to "http://localhost",
+                            "grunnlag.resource.url" to "http://localhost",
+                            "vedtak.resource.url" to "http://localhost",
+                        ),
                     ),
                 rapid = TestProdusent(),
                 featureToggleService = featureToggleService,

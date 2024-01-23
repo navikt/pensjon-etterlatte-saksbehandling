@@ -4,7 +4,7 @@ import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
-const val CLIENT_ID = "CLIENT_ID for saksbehandler"
+internal const val CLIENT_ID = "CLIENT_ID for saksbehandler"
 
 fun MockOAuth2Server.issueSaksbehandlerToken(
     navn: String = "Navn Navnesen",
@@ -22,9 +22,11 @@ fun MockOAuth2Server.issueSaksbehandlerToken(
             ),
     ).serialize()
 
-fun MockOAuth2Server.issueSystembrukerToken(): String {
-    val mittsystem = UUID.randomUUID().toString()
-    return this.issueToken(
+fun MockOAuth2Server.issueSystembrukerToken(
+    mittsystem: String = UUID.randomUUID().toString(),
+    roles: List<String> = listOf(),
+): String =
+    this.issueToken(
         issuerId = AZURE_ISSUER,
         audience = CLIENT_ID,
         claims =
@@ -32,6 +34,6 @@ fun MockOAuth2Server.issueSystembrukerToken(): String {
                 "sub" to mittsystem,
                 "oid" to mittsystem,
                 "azp_name" to mittsystem,
+                "roles" to roles,
             ),
     ).serialize()
-}

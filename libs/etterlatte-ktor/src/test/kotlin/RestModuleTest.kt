@@ -2,7 +2,6 @@ package no.nav.etterlatte.libs.ktor
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -10,15 +9,11 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.http.HttpStatusCode.Companion.NotFound
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.call
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -28,8 +23,8 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.BehandlingTilgangsSjekk
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
@@ -52,7 +47,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -62,14 +56,11 @@ class RestModuleTest {
     private val personTilgangsSjekkMock = mockk<PersonTilgangsSjekk>()
 
     private val server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val token: String by lazy { server.issueSaksbehandlerToken() }
 
     @BeforeAll
     fun beforeAll() {
         server.start()
-        val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterAll
@@ -80,14 +71,9 @@ class RestModuleTest {
     @Test
     fun `skal sette opp to endepunkter med autentisering`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log) {
-                    route1()
-                    route2()
-                }
+            runServer(server) {
+                route1()
+                route2()
             }
 
             val response1 =
@@ -112,10 +98,9 @@ class RestModuleTest {
         coEvery { personTilgangsSjekkMock.harTilgangTilPerson(any(), any(), any()) } returns true
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application { restModule(this.log) { tilgangTestRoute() } }.also { setReady() }
+            runServer(server) {
+                tilgangTestRoute()
+            }.also { setReady() }
 
             client.get("/behandling/${UUID.randomUUID()}") {
                 header(HttpHeaders.Authorization, "Bearer $token")
@@ -150,11 +135,8 @@ class RestModuleTest {
     @Test
     fun `skal kunne lese og skrive json payload`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log) { route1() }
+            runServer(server) {
+                route1()
             }
 
             val testObjekt = TestObjektDto("test", 1)
@@ -176,27 +158,25 @@ class RestModuleTest {
     @Test
     fun `skal returnere internal server error og logge dersom noe feiler`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
+            runServer(server) {
+                route1()
             }
-            application { restModule(this.log) { route1() } }
 
             val response =
                 client.get("/test/fails") {
                     header(HttpHeaders.Authorization, "Bearer $token")
                 }
 
-            assertEquals(HttpStatusCode.InternalServerError, response.status)
+            assertEquals(InternalServerError, response.status)
         }
     }
 
     @Test
     fun `skal svare paa helsesjekk uten autentisering`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application { restModule(this.log) { route1() } }.also { setReady() }
+            runServer(server) {
+                route1()
+            }.also { setReady() }
 
             val response1 = client.get("/health/isalive")
             assertEquals(OK, response1.status)
@@ -235,11 +215,8 @@ class RestModuleTest {
     @Test
     fun `metrics test`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log, withMetrics = true) { route1() }
+            runServer(server, withMetrics = true) {
+                route1()
             }
 
             client.get("/metrics").also {
@@ -254,20 +231,9 @@ class RestModuleTest {
     @Test
     fun `statuspages håndterer kjente og ukjente exceptions`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log) {
-                    routesMedForskjelligeFeil()
-                }
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        register(ContentType.Application.Json, JacksonConverter(objectMapper))
-                    }
-                    install(httpClient())
+                runServer(server) {
+                    routesMedForskjelligeFeil()
                 }
 
             client.get("ikke_funnet/exception") {

@@ -1,8 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -11,9 +9,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
+import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -48,18 +46,10 @@ class GrunnlagsendringshendelseRouteTest : BehandlingIntegrationTest() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application {
-                module(applicationContext)
-            }
 
             val sak: Sak =
                 client.post("personer/saker/${SakType.BARNEPENSJON}") {

@@ -1,10 +1,8 @@
 package no.nav.etterlatte.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
@@ -13,9 +11,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
@@ -31,9 +26,9 @@ import io.mockk.slot
 import io.mockk.verify
 import lagGrunnlagsopplysning
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
-import no.nav.etterlatte.ktor.CLIENT_ID
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -44,8 +39,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -56,7 +49,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.UUID
 import kotlin.random.Random
 
@@ -65,13 +57,10 @@ internal class BehandlingGrunnlagRoutesKtTest {
     private val grunnlagService = mockk<GrunnlagService>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     @BeforeAll
     fun before() {
         server.start()
-        val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -106,17 +95,13 @@ internal class BehandlingGrunnlagRoutesKtTest {
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
+            runServer(server, "api/grunnlag") {
+                behandlingGrunnlagRoute(
+                    grunnlagService,
+                    behandlingKlient,
+                )
             }
-            application {
-                restModule(this.log, routePrefix = "api/grunnlag") {
-                    behandlingGrunnlagRoute(
-                        grunnlagService,
-                        behandlingKlient,
-                    )
-                }
-            }
+
             val response =
                 client.get("api/grunnlag/behandling/$behandlingId") {
                     headers {
@@ -330,20 +315,8 @@ internal class BehandlingGrunnlagRoutesKtTest {
         coVerify { behandlingKlient wasNot Called }
     }
 
-    private fun ApplicationTestBuilder.createHttpClient(): HttpClient {
-        environment {
-            config = hoconApplicationConfig
+    private fun ApplicationTestBuilder.createHttpClient(): HttpClient =
+        runServer(server, "api/grunnlag") {
+            behandlingGrunnlagRoute(grunnlagService, behandlingKlient)
         }
-        application {
-            restModule(this.log, routePrefix = "api/grunnlag") {
-                behandlingGrunnlagRoute(grunnlagService, behandlingKlient)
-            }
-        }
-
-        return createClient {
-            install(ContentNegotiation) {
-                jackson { registerModule(JavaTimeModule()) }
-            }
-        }
-    }
 }

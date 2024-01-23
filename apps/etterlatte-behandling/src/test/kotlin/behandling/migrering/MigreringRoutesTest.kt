@@ -1,18 +1,16 @@
 package behandling.migrering
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.brev.model.Spraak
+import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
@@ -44,16 +42,11 @@ class MigreringRoutesTest : BehandlingIntegrationTest() {
     @Test
     fun `migrering oppretter sak og behandling`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application { module(applicationContext) }
+
             val request =
                 MigreringRequest(
                     pesysId = PesysId(1),

@@ -1,8 +1,6 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -10,7 +8,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
@@ -18,6 +15,7 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.omregning.OpprettOmregningResponse
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.JaNei
@@ -108,16 +106,10 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `kan opprette omregning paa sak som har iverksatt foerstegangsbehandling`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
+                val client =
+                    runServerWithModule(server) {
+                        module(applicationContext)
                     }
-                }
-            application { module(applicationContext) }
 
             for (i in 1..100) {
                 println(i)
@@ -158,16 +150,10 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     fun `omregning feiler hvis det ikke finnes noen iverksatt behandling fra foer`() {
         val (sak, _) = opprettSakMedFoerstegangsbehandling("234")
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application { module(applicationContext) }
 
             client.post("/omregning") {
                 addAuthToken(systemBruker)

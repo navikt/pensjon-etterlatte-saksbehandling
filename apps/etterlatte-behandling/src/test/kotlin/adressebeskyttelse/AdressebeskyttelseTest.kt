@@ -1,8 +1,6 @@
 package no.nav.etterlatte.adressebeskyttelse
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -11,10 +9,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.tilgang.SKRIVETILGANG_CALL_QUERYPARAMETER
+import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
@@ -59,18 +57,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application {
-                module(applicationContext)
-            }
 
             val sak: Sak =
                 client.post("personer/saker/${SakType.BARNEPENSJON}") {
@@ -150,18 +140,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val httpClient =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application {
-                module(applicationContext)
-            }
 
             val sak: Sak =
                 httpClient.post("personer/saker/${SakType.BARNEPENSJON}") {
@@ -216,18 +198,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application {
-                module(applicationContext)
-            }
 
             val sak: Sak =
                 client.post("personer/saker/${SakType.BARNEPENSJON}") {
@@ -299,18 +273,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
     fun `Skal kunne hente saker på fnr før adressebeskyttelse`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val httpClient =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application {
-                module(applicationContext)
-            }
 
             httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)
@@ -347,18 +313,10 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
     fun `Skal kunne sende med gradering ved opprettelse av sak`() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val httpClient =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application {
-                module(applicationContext)
-            }
 
             val sak =
                 httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {

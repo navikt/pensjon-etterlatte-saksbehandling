@@ -1,8 +1,6 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -12,7 +10,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
@@ -27,6 +24,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
@@ -102,16 +100,10 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
         var behandlingOpprettet: UUID? = null
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application { module(applicationContext) }
 
             assertTrue(applicationContext.featureToggleService.isEnabled(FellesFeatureToggle.NoOperationToggle, false))
 

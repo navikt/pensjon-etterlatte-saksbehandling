@@ -47,7 +47,10 @@ class OppgaveService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    fun finnOppgaverForBruker(bruker: SaksbehandlerMedEnheterOgRoller): List<OppgaveIntern> {
+    fun finnOppgaverForBruker(
+        bruker: SaksbehandlerMedEnheterOgRoller,
+        oppgaveStatuser: List<String>,
+    ): List<OppgaveIntern> {
         val rollerSomBrukerHar = finnAktuelleRoller(bruker.saksbehandlerMedRoller)
         val aktuelleOppgavetyperForRoller = aktuelleOppgavetyperForRolleTilSaksbehandler(rollerSomBrukerHar)
 
@@ -58,6 +61,7 @@ class OppgaveService(
                 aktuelleOppgavetyperForRoller,
                 bruker.enheter(),
                 bruker.erSuperbruker(),
+                oppgaveStatuser,
             ).sortedByDescending { it.opprettet }
         }
     }

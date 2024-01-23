@@ -45,7 +45,7 @@ export const ToggleMinOppgaveliste = () => {
   }, [oppgaver, gosysOppgaver])
 
   const hentAlleOppgaver = () => {
-    hentOppgaverFetch({})
+    hentOppgaverFetch(filter.oppgavestatusFilter)
     hentGosysOppgaverFunc({})
   }
 
@@ -64,6 +64,7 @@ export const ToggleMinOppgaveliste = () => {
 
   const mutableOppgaver = hentedeOppgaver.concat()
   const innloggetSaksbehandleroppgaver = mutableOppgaver.filter((o) => o.saksbehandler === innloggetSaksbehandler.ident)
+
   const filtrerteOppgaver = filtrerOppgaver(
     filter.enhetsFilter,
     filter.fristFilter,
@@ -103,7 +104,8 @@ export const ToggleMinOppgaveliste = () => {
           {oppgaveListeValg === 'Oppgavelista' && (
             <>
               <FilterRad
-                hentOppgaver={hentAlleOppgaver}
+                hentAlleOppgaver={hentAlleOppgaver}
+                hentOppgaver={() => hentOppgaverFetch(filter.oppgavestatusFilter)}
                 filter={filter}
                 setFilter={setFilter}
                 alleOppgaver={hentedeOppgaver}

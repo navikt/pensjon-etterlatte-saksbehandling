@@ -22,13 +22,14 @@ import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
 
 interface Props {
+  hentAlleOppgaver: () => void
   hentOppgaver: () => void
   filter: Filter
   setFilter: (filter: Filter) => void
   alleOppgaver: OppgaveDTO[]
 }
 
-export const FilterRad = ({ hentOppgaver, filter, setFilter, alleOppgaver }: Props): ReactNode => {
+export const FilterRad = ({ hentAlleOppgaver, hentOppgaver, filter, setFilter, alleOppgaver }: Props): ReactNode => {
   const saksbehandlere = new Set(
     alleOppgaver.map((oppgave) => oppgave.saksbehandler).filter((s): s is Exclude<typeof s, null> => s !== null)
   )
@@ -103,7 +104,10 @@ export const FilterRad = ({ hentOppgaver, filter, setFilter, alleOppgaver }: Pro
         </Select>
         <VelgOppgavestatuser
           value={filter.oppgavestatusFilter}
-          onChange={(oppgavestatusFilter) => setFilter({ ...filter, oppgavestatusFilter })}
+          onChange={(oppgavestatusFilter) => {
+            setFilter({ ...filter, oppgavestatusFilter })
+            hentOppgaver()
+          }}
         />
 
         <Select
@@ -136,8 +140,14 @@ export const FilterRad = ({ hentOppgaver, filter, setFilter, alleOppgaver }: Pro
       </FlexRow>
 
       <FlexRow $spacing>
-        <Button onClick={hentOppgaver}>Hent</Button>
-        <Button variant="secondary" onClick={() => setFilter(initialFilter())}>
+        <Button onClick={hentAlleOppgaver}>Hent</Button>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setFilter(initialFilter())
+            hentAlleOppgaver()
+          }}
+        >
           Tilbakestill alle filtre
         </Button>
       </FlexRow>

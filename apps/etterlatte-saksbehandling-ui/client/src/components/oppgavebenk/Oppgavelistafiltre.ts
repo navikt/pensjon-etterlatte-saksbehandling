@@ -65,7 +65,7 @@ function filtrerSaksbehandler(saksbehandlerFilter: string, oppgaver: OppgaveDTO[
 
 type visAlle = 'visAlle'
 
-type OppgavestatusFilterKeys = Oppgavestatus | visAlle
+export type OppgavestatusFilterKeys = Oppgavestatus | visAlle
 export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
   visAlle: 'Vis alle',
   NY: 'Ny',
@@ -75,11 +75,14 @@ export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
   AVBRUTT: 'Avbrutt',
 }
 
-// Gjøre som på filtrering av saksbehandler, men istedenfor å sjekke 1 string, må man sjekke en array med strings
-export function filtrerOppgaveStatus(oppgavestatusFilter: Array<string>, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-  const konverterteFiltre: Array<OppgavestatusFilterKeys> = Object.entries(OPPGAVESTATUSFILTER)
+export const konverterFilterValuesTilKeys = (oppgavestatusFilter: Array<string>): Array<OppgavestatusFilterKeys> => {
+  return Object.entries(OPPGAVESTATUSFILTER)
     .filter(([, val]) => oppgavestatusFilter.includes(val))
     .map(([key]) => key as OppgavestatusFilterKeys)
+}
+
+export function filtrerOppgaveStatus(oppgavestatusFilter: Array<string>, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
+  const konverterteFiltre = konverterFilterValuesTilKeys(oppgavestatusFilter)
 
   if (oppgavestatusFilter.includes(OPPGAVESTATUSFILTER.visAlle) || oppgavestatusFilter.length === 0) {
     return oppgaver

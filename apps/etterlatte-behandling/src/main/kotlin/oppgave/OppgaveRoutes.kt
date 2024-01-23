@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -45,6 +46,13 @@ inline val PipelineContext<*, ApplicationCall>.referanse: String
             "Mangler referanse i requestem",
         )
 
+const val VISALLE = "VISALLE"
+
+fun filtrerGyldigeStatuser(statuser: List<String>?): List<String> {
+    return statuser?.map { i -> i.uppercase() }
+        ?.filter { i -> Status.entries.map { it.name }.contains(i) || i == VISALLE } ?: emptyList()
+}
+
 internal fun Route.oppgaveRoutes(
     service: OppgaveService,
     gosysOppgaveService: GosysOppgaveService,
@@ -52,10 +60,14 @@ internal fun Route.oppgaveRoutes(
     route("/api/oppgaver") {
         get {
             kunSaksbehandler {
+                val oppgaveStatuser = call.request.queryParameters.getAll("oppgaveStatus")
+                val filtrerteStatuser = filtrerGyldigeStatuser(oppgaveStatuser)
+
                 call.respond(
                     inTransaction {
                         service.finnOppgaverForBruker(
                             Kontekst.get().appUserAsSaksbehandler(),
+                            filtrerteStatuser,
                         )
                     },
                 )

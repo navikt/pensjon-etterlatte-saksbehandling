@@ -723,7 +723,7 @@ internal class OppgaveServiceTest {
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         Assertions.assertEquals(1, oppgaver.size)
         val oppgaveUtenbeskyttelse = oppgaver[0]
         Assertions.assertEquals(nyOppgave.id, oppgaveUtenbeskyttelse.id)
@@ -745,14 +745,14 @@ internal class OppgaveServiceTest {
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         Assertions.assertEquals(1, oppgaverUtenEndring.size)
         Assertions.assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
 
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
             listOf(GrunnlagsendringshendelseService.SakMedEnhet(oppgaverUtenEndring[0].sakId, Enheter.STEINKJER.enhetNr)),
         )
-        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
 
         Assertions.assertEquals(1, oppgaverMedEndring.size)
         Assertions.assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
@@ -784,7 +784,7 @@ internal class OppgaveServiceTest {
         every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerStrengtFortrolig
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         Assertions.assertEquals(1, oppgaver.size)
         val strengtFortroligOppgave = oppgaver[0]
         Assertions.assertEquals(adressebeskyttetOppgave.id, strengtFortroligOppgave.id)
@@ -816,7 +816,7 @@ internal class OppgaveServiceTest {
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         Assertions.assertEquals(1, oppgaver.size)
         val attesteringsoppgave = oppgaver[0]
         Assertions.assertEquals(attestantOppgave.id, attesteringsoppgave.id)
@@ -850,7 +850,7 @@ internal class OppgaveServiceTest {
         every { saksbehandler.erSuperbruker() } returns true
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         Assertions.assertEquals(1, oppgaver.size)
         val attesteringsoppgave = oppgaver[0]
         Assertions.assertEquals(attestantOppgave.id, attesteringsoppgave.id)
@@ -995,7 +995,7 @@ internal class OppgaveServiceTest {
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val finnOppgaverForBruker = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val finnOppgaverForBruker = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
 
         Assertions.assertEquals(1, finnOppgaverForBruker.size)
         val aalesundfunnetOppgave = finnOppgaverForBruker[0]

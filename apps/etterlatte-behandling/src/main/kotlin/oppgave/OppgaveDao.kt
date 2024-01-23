@@ -27,9 +27,10 @@ interface OppgaveDao {
     fun hentOppgaverForSak(sakId: Long): List<OppgaveIntern>
 
     fun hentOppgaver(
-        oppgaveTypeTyper: List<OppgaveType>,
+        oppgaveTyper: List<OppgaveType>,
         enheter: List<String>,
         erSuperBruker: Boolean,
+        oppgaveStatuser: List<String>,
     ): List<OppgaveIntern>
 
     fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern>
@@ -143,11 +144,12 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
     }
 
     override fun hentOppgaver(
-        oppgaveTypeTyper: List<OppgaveType>,
+        oppgaveTyper: List<OppgaveType>,
         enheter: List<String>,
         erSuperBruker: Boolean,
+        oppgaveStatuser: List<String>,
     ): List<OppgaveIntern> {
-        if (oppgaveTypeTyper.isEmpty()) return emptyList()
+        if (oppgaveTyper.isEmpty()) return emptyList()
 
         with(connection()) {
             val statement =
@@ -156,6 +158,7 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
                     SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
                     FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
                     WHERE o.type = ANY(?)
+                    AND (? = true OR o.status = ANY(?))
                     AND (? = true OR o.enhet = ANY(?))
                     AND (
                         s.adressebeskyttelse is null OR 
@@ -164,11 +167,13 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
                     """.trimIndent(),
                 )
 
-            statement.setArray(1, createArrayOf("text", oppgaveTypeTyper.toTypedArray()))
-            statement.setBoolean(2, erSuperBruker)
-            statement.setArray(3, createArrayOf("text", enheter.toTypedArray()))
-            statement.setString(4, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
-            statement.setString(5, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
+            statement.setArray(1, createArrayOf("text", oppgaveTyper.toTypedArray()))
+            statement.setBoolean(2, oppgaveStatuser.isEmpty() || oppgaveStatuser.contains(VISALLE))
+            statement.setArray(3, createArrayOf("text", oppgaveStatuser.toTypedArray()))
+            statement.setBoolean(4, erSuperBruker)
+            statement.setArray(5, createArrayOf("text", enheter.toTypedArray()))
+            statement.setString(6, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
+            statement.setString(7, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
 
             return statement.executeQuery().toList {
                 asOppgave()

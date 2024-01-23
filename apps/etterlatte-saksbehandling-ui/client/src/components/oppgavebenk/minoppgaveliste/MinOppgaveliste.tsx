@@ -1,36 +1,36 @@
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { Alert } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
-import { filtrerOppgaveStatus, OPPGAVESTATUSFILTER } from '~components/oppgavebenk/Oppgavelistafiltre'
+import { Filter } from '~components/oppgavebenk/Oppgavelistafiltre'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
 import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
 
 interface Props {
-  oppgaver: OppgaveDTO[]
+  filtrerteOppgaver: OppgaveDTO[]
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   hentOppgaver: () => void
+  filter: Filter
+  setFilter: (filter: Filter) => void
 }
 
-export const MinOppgaveliste = ({ oppgaver, oppdaterTildeling, hentOppgaver }: Props) => {
-  const [oppgavestatuserValgt, setOppgavestatuserValgt] = useState<Array<string>>([
-    OPPGAVESTATUSFILTER.UNDER_BEHANDLING,
-  ])
+export const MinOppgaveliste = ({ filtrerteOppgaver, oppdaterTildeling, hentOppgaver, filter, setFilter }: Props) => {
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
-  const [paginerteOppgaver, setPaginerteOppgaver] = useState<Array<OppgaveDTO>>(
-    filtrerOppgaveStatus(oppgavestatuserValgt, oppgaver)
-  )
+
+  let paginerteOppgaver = filtrerteOppgaver
+  paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
   useEffect(() => {
-    let filtrerteOppgaver = filtrerOppgaveStatus(oppgavestatuserValgt, oppgaver)
-    filtrerteOppgaver = filtrerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
-    setPaginerteOppgaver(filtrerteOppgaver)
-  }, [oppgavestatuserValgt, oppgaver])
+    if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
+  }, [paginerteOppgaver, filtrerteOppgaver])
 
   return (
     <>
-      <VelgOppgavestatuser value={oppgavestatuserValgt} onChange={setOppgavestatuserValgt} />
+      <VelgOppgavestatuser
+        value={filter.oppgavestatusFilter}
+        onChange={(oppgavestatusFilter) => setFilter({ ...filter, oppgavestatusFilter })}
+      />
 
       {paginerteOppgaver.length > 0 ? (
         <>
@@ -44,12 +44,12 @@ export const MinOppgaveliste = ({ oppgaver, oppdaterTildeling, hentOppgaver }: P
           <PagineringsKontroller
             page={page}
             setPage={setPage}
-            antallSider={Math.ceil(paginerteOppgaver.length / rowsPerPage)}
+            antallSider={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
             raderPerSide={rowsPerPage}
             setRaderPerSide={setRowsPerPage}
             totalAvOppgaverTeksts={`Viser ${(page - 1) * rowsPerPage + 1} - ${
               (page - 1) * rowsPerPage + paginerteOppgaver.length
-            } av ${paginerteOppgaver.length} oppgaver`}
+            } av ${filtrerteOppgaver.length} oppgaver`}
           />
         </>
       ) : (

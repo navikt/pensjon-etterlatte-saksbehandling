@@ -8,7 +8,12 @@ import { hentGosysOppgaver, hentOppgaver, OppgaveDTO } from '~shared/api/oppgave
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import { FilterRad } from '~components/oppgavebenk/FilterRad'
-import { Filter, filtrerOppgaver, initialFilter } from '~components/oppgavebenk/Oppgavelistafiltre'
+import {
+  Filter,
+  filtrerOppgaver,
+  filtrerOppgaveStatus,
+  initialFilter,
+} from '~components/oppgavebenk/Oppgavelistafiltre'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
@@ -118,9 +123,11 @@ export const ToggleMinOppgaveliste = () => {
           )}
           {oppgaveListeValg === 'MinOppgaveliste' && (
             <MinOppgaveliste
-              oppgaver={innloggetSaksbehandleroppgaver}
+              filtrerteOppgaver={filtrerOppgaveStatus(filter.oppgavestatusFilter, innloggetSaksbehandleroppgaver)}
               hentOppgaver={hentAlleOppgaver}
               oppdaterTildeling={(id, _saksbehandler, versjon) => oppdaterTildeling(id, null, versjon)}
+              filter={filter}
+              setFilter={setFilter}
             />
           )}
         </>

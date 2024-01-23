@@ -15,20 +15,20 @@ class ClamAvClient(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun virusScanVedlegg(request: VirusScanRequest): List<ScanResult> {
+    suspend fun skann(request: ClamAVRequest): List<ScanResult> {
         val httpResponse =
             httpClient.submitFormWithBinaryData(
                 url = "$endpointUrl/scan",
                 formData =
                     formData {
                         append(
-                            request.filnavn(),
+                            request.filnavn,
                             request.fil,
                             Headers.build {
                                 append(HttpHeaders.ContentType, ContentType.Application.Pdf.contentType)
                                 append(
                                     HttpHeaders.ContentDisposition,
-                                    "filename=${removeNewLines(request.tittel())}",
+                                    "filename=${removeNewLines(request.filnavn)}",
                                 )
                             },
                         )
@@ -38,6 +38,11 @@ class ClamAvClient(
         return httpResponse.body<List<ScanResult>>()
     }
 }
+
+data class ClamAVRequest(
+    val filnavn: String,
+    val fil: ByteArray,
+)
 
 data class ScanResult(
     val Filename: String,
@@ -50,6 +55,4 @@ enum class Status {
     ERROR,
 }
 
-private fun removeNewLines(description: String): String {
-    return description.replace("\n", "")
-}
+private fun removeNewLines(description: String): String = description.replace("\n", "")

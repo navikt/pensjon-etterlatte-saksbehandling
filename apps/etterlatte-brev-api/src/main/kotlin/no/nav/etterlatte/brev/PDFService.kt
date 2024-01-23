@@ -38,7 +38,7 @@ class PDFService(private val db: BrevRepository, private val virusScanService: V
                 .streamProvider()
                 .readBytes()
 
-        if (virusScanService.vedleggContainsVirus(VirusScanRequest(request, fil))) {
+        if (virusScanService.filHarVirus(VirusScanRequest(request, fil))) {
             logger.warn(
                 "Filopplastinga er avvist fordi fila potensielt kan inneholde virus {}",
                 request,
@@ -74,3 +74,8 @@ class PDFService(private val db: BrevRepository, private val virusScanService: V
         return brev
     }
 }
+
+data class BrevFraOpplastningRequest(
+    val innhold: BrevInnhold,
+    val sak: Sak,
+)

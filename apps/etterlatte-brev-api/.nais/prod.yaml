@@ -125,6 +125,8 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
+        - application: clamav
+          namespace: nais-system
       external:
         - host: norg2.prod-fss-pub.nais.io
         - host: saf.prod-fss-pub.nais.io

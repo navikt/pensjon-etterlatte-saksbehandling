@@ -10,7 +10,6 @@ import Spinner from '~shared/Spinner'
 import { GridContainer, MainContent } from '~shared/styled'
 import { hentKlage } from '~shared/api/klage'
 import { KlageStegmeny } from '~components/klage/stegmeny/KlageStegmeny'
-import { KlageVurdering } from '~components/klage/vurdering/KlageVurdering'
 import { KlageOppsummering } from '~components/klage/oppsummering/KlageOppsummering'
 import { KlageSidemeny } from '~components/klage/sidemeny/KlageSidemeny'
 import { KlageBrev } from '~components/klage/brev/KlageBrev'
@@ -18,6 +17,7 @@ import { KlageBrev } from '~components/klage/brev/KlageBrev'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { KlageFormkrav } from '~components/klage/formkrav/KlageFormkrav'
+import { KlageVurderingEntry } from '~components/klage/vurdering/KlageVurderingEntry'
 
 export function Klagebehandling() {
   const klage = useKlage()
@@ -67,7 +67,7 @@ export function Klagebehandling() {
                 path="formkrav"
                 element={<KlageFormkrav redigerbar={klageRedigerbar} kanRedigere={kanRedigere} />}
               />
-              <Route path="vurdering" element={<KlageVurdering />} />
+              <Route path="vurdering" element={<KlageVurderingEntry redigerbar={klageRedigerbar} />} />
               <Route path="brev" element={<KlageBrev />} />
               <Route path="oppsummering" element={<KlageOppsummering />} />
               <Route path="*" element={<Navigate to="formkrav" replace />} />

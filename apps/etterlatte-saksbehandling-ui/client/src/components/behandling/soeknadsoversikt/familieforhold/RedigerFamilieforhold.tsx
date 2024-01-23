@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { PencilIcon, PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerFamilieforhold } from '~shared/api/behandling'
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useFieldArray, useForm } from 'react-hook-form'
@@ -50,10 +50,9 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
   const lagre = () => {
     setFeilmelding(null)
     const familieforhold = getValues()
-    const foreldre = [...familieforhold.avdoede, ...familieforhold.gjenlevende]
 
-    if (foreldre.length != 2) {
-      setFeilmelding('Mangler en eller flere forelder')
+    if (familieforhold.avdoede.length === 0) {
+      setFeilmelding(`Det er ikke angitt noen avdød, men det skal være minst 1.`)
     } else {
       redigerFamilieforholdRequest(
         {
@@ -159,7 +158,9 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
           <br />
 
           {isSuccess(status) && <Alert variant="success">Lagret redigert familieforhold</Alert>}
-          {isFailure(status) && <Alert variant="error">Noe gikk galt!</Alert>}
+          {mapFailure(status, (error) => (
+            <Alert variant="error">{error.detail}</Alert>
+          ))}
           {feilmelding && <Alert variant="error">{feilmelding}</Alert>}
         </Modal.Body>
 

@@ -18,6 +18,7 @@ import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.klienter.BrevStatus
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
@@ -443,13 +444,16 @@ class BrevApiKlientTest : BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
         return OpprettetBrevDto(
-            brevId++,
+            id = brevId++,
+            status = BrevStatus.OPPRETTET,
             mottaker =
                 Mottaker(
                     navn = "Mottaker mottakersen",
                     foedselsnummer = Mottakerident("19448310410"),
                     orgnummer = null,
                 ),
+            journalpostId = null,
+            bestillingsID = null,
         )
     }
 
@@ -483,12 +487,15 @@ class BrevApiKlientTest : BrevApiKlient {
     ): OpprettetBrevDto {
         return OpprettetBrevDto(
             id = brevId,
+            status = BrevStatus.OPPRETTET,
             mottaker =
                 Mottaker(
                     navn = "Mottaker mottakersen",
                     foedselsnummer = Mottakerident("19448310410"),
                     orgnummer = null,
                 ),
+            journalpostId = null,
+            bestillingsID = null,
         )
     }
 }

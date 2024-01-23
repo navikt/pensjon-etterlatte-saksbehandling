@@ -4,11 +4,10 @@ import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
-import io.ktor.http.isSuccess
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.ping
@@ -69,14 +68,9 @@ class NavAnsattKlientImpl(
             } else {
                 logger.info("Henter enhet for saksbehandler med ident $ident")
 
-                val response = client.get("$url/navansatt/$ident/${infoType.urlSuffix}")
-
-                if (response.status.isSuccess()) {
-                    response.body<T>()
-                        .also { cache.put(ident, it) }
-                } else {
-                    throw ResponseException(response, "Ukjent feil fra navansatt api")
-                }
+                retryOgPakkUt<T> {
+                    client.get("$url/navansatt/$ident/${infoType.urlSuffix}").body()
+                }.also { cache.put(ident, it) }
             }
         } catch (exception: Exception) {
             throw RuntimeException("Feil i kall mot navansatt med ident: $ident", exception)

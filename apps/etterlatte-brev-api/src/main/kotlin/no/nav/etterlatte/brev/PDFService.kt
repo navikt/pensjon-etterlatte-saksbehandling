@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.content.PartData
 import io.ktor.http.content.streamProvider
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
@@ -11,7 +10,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.virusskanning.LoggingMeta
 import no.nav.etterlatte.brev.virusskanning.VirusScanRequest
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.objectMapper
@@ -40,10 +38,10 @@ class PDFService(private val db: BrevRepository, private val virusScanService: V
                 .streamProvider()
                 .readBytes()
 
-        if (virusScanService.vedleggContainsVirus(VirusScanRequest(request, fil), LoggingMeta(request))) {
+        if (virusScanService.vedleggContainsVirus(VirusScanRequest(request, fil))) {
             logger.warn(
                 "Filopplastinga er avvist fordi fila potensielt kan inneholde virus {}",
-                StructuredArguments.fields(request),
+                request,
             )
         }
 

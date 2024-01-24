@@ -70,33 +70,10 @@ class BrevKodeMapper {
                         }
 
                     VedtakType.OPPHOER ->
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.ADOPSJON ->
-                                BrevkodePar(
-                                    EtterlatteBrevKode.TOM_MAL,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
-                                )
-
-                            Revurderingaarsak.OMGJOERING_AV_FARSKAP ->
-                                BrevkodePar(
-                                    EtterlatteBrevKode.TOM_MAL,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
-                                )
-
-                            Revurderingaarsak.FENGSELSOPPHOLD ->
-                                BrevkodePar(
-                                    EtterlatteBrevKode.TOM_MAL,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
-                                )
-
-                            Revurderingaarsak.UT_AV_FENGSEL ->
-                                BrevkodePar(
-                                    EtterlatteBrevKode.TOM_MAL,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
-                                )
-
-                            else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
-                        }
+                        BrevkodePar(
+                            EtterlatteBrevKode.TOM_MAL,
+                            EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER,
+                        )
 
                     VedtakType.TILBAKEKREVING ->
                         BrevkodePar(

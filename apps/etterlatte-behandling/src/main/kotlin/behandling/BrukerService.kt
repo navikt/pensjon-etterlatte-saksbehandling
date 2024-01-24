@@ -7,7 +7,6 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.LoggerFactory
@@ -24,11 +23,6 @@ interface BrukerService {
         saktype: SakType,
     ): Navkontor
 }
-
-class GeografiskTilknytningMangler : IkkeFunnetException(
-    code = "BRUKER_MANGLER_GEOGRAFISKTILKNYTNING",
-    detail = "Fant ikke geografisk tilknytning for bruker",
-)
 
 class BrukerServiceImpl(
     private val pdltjenesterKlient: PdlTjenesterKlient,
@@ -48,14 +42,20 @@ class BrukerServiceImpl(
             }
 
             else -> {
-                val geografiskTilknytning = tilknytning.geografiskTilknytning() ?: throw GeografiskTilknytningMangler()
-                if (tilknytning.harBareLandTilknytning()) {
-                    if (tilknytning.land!! == "NO") {
-                        Navkontor(navn = "UKjent kontor, men har Norge som landkode", enhetNr = "ukjent enhetsnummer")
+                val geografiskTilknytning = tilknytning.geografiskTilknytning()
+                when {
+                    tilknytning.harBareLandTilknytning() -> {
+                        if (tilknytning.land!! == "NO") {
+                            Navkontor(navn = "UKjent kontor, men har Norge som landkode", enhetNr = "ukjent enhetsnummer")
+                        }
+                        Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
                     }
-                    Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
-                } else {
-                    norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)
+                    geografiskTilknytning == null -> {
+                        Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
+                    }
+                    else -> {
+                        norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)
+                    }
                 }
             }
         }
@@ -77,16 +77,32 @@ class BrukerServiceImpl(
                     Enheter.defaultEnhet.enhetNr,
                 )
 
-            else -> {
-                logger.warn("Fant ikke geografisk omraade for ${fnr.maskerFnr()} og tema $tema")
-                val geografiskTilknytning = tilknytning.geografiskTilknytning() ?: throw GeografiskTilknytningMangler()
-                if (tilknytning.harBareLandTilknytning()) {
+            tilknytning.harBareLandTilknytning() -> {
+                if (tilknytning.land!! == "NO") {
                     ArbeidsFordelingEnhet(
                         Enheter.defaultEnhet.navn,
                         Enheter.defaultEnhet.enhetNr,
                     )
                 } else {
-                    finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
+                    ArbeidsFordelingEnhet(
+                        Enheter.UTLAND.navn,
+                        Enheter.UTLAND.navn,
+                    )
+                }
+            }
+            else -> {
+                logger.warn("Fant ikke geografisk omraade for ${fnr.maskerFnr()} og tema $tema")
+                val geografiskTilknytning = tilknytning.geografiskTilknytning()
+                when (geografiskTilknytning) {
+                    null -> {
+                        ArbeidsFordelingEnhet(
+                            Enheter.UTLAND.navn,
+                            Enheter.UTLAND.enhetNr,
+                        )
+                    }
+                    else -> {
+                        finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
+                    }
                 }
             }
         }

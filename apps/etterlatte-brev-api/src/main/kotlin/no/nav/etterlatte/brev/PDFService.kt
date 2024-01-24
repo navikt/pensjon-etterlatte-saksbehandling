@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.virusskanning.VirusScanRequest
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
+import no.nav.etterlatte.brev.virusskanning.filErForStor
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -37,6 +38,11 @@ class PDFService(private val db: BrevRepository, private val virusScanService: V
                 .let { it as PartData.FileItem }
                 .streamProvider()
                 .readBytes()
+
+        if (filErForStor(fil)) {
+            logger.warn("Filopplastinga er avvist fordi fila er for stor $request")
+            return Result.failure(IllegalArgumentException("Fila ${request.innhold.tittel} er større enn hva vi takler"))
+        }
 
         if (virusScanService.filHarVirus(VirusScanRequest(request.innhold.tittel, fil))) {
             logger.warn("Filopplastinga er avvist fordi fila potensielt kan inneholde virus $request")

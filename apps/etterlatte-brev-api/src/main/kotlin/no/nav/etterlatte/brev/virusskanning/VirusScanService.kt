@@ -3,7 +3,7 @@ package no.nav.etterlatte.brev.virusskanning
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-private const val MAKS_FILSTOERRELSE = 300 * 1024 * 1024
+private const val MAKS_FILSTOERRELSE = 10 * 1024 * 1024
 
 private val log: Logger = LoggerFactory.getLogger(VirusScanService::class.java)
 
@@ -12,7 +12,7 @@ class VirusScanService(private val clamAvClient: ClamAvClient) {
         log.info("Skanner fil for virus: ${request.tittel}")
         if (filErForStor(request.fil)) {
             log.info("Fil er for stor: ${request.tittel}")
-            return false
+            return true
         }
 
         return clamAvClient.skann(ClamAVRequest(filnavn = request.tittel, fil = request.fil))

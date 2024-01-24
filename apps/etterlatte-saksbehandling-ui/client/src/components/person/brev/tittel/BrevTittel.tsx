@@ -8,9 +8,10 @@ interface Props {
   brevId: number
   sakId: number
   tittel: string
+  kanRedigeres: boolean
 }
 
-export default function BrevTittel({ brevId, sakId, tittel }: Props) {
+export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres }: Props) {
   const [nyTittel, setNyTittel] = useState(tittel)
 
   const [erModalAapen, setErModalAapen] = useState<boolean>(false)
@@ -23,7 +24,11 @@ export default function BrevTittel({ brevId, sakId, tittel }: Props) {
             Tittel
           </Heading>
           <div>
-            <Button variant="secondary" onClick={() => setErModalAapen(true)} icon={<DocPencilIcon />} size="small" />
+            {kanRedigeres ? (
+              <Button variant="secondary" onClick={() => setErModalAapen(true)} icon={<DocPencilIcon />} size="small" />
+            ) : (
+              <></>
+            )}
           </div>
         </FlexRow>
 

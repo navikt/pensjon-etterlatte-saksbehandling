@@ -55,7 +55,7 @@ export default function NyttBrev() {
           <GridContainer>
             <Column>
               <div style={{ margin: '1rem' }}>
-                <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} />
+                <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
               </div>
               <NyttBrevMottaker brev={brev} />
             </Column>

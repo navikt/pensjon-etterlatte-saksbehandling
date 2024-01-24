@@ -18,6 +18,7 @@ import { JaNei } from '~shared/types/ISvar'
 import { Innhold } from '~components/klage/styled'
 
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 function hentBrevIdForInnstilling(klage: Klage | null): number | null {
   // TODO håndter avvist klage?
@@ -69,7 +70,12 @@ export function KlageBrev() {
             <BodyShort>TODO håndter avslagsbrev her</BodyShort>
           )}
 
-          {isSuccess(hentetBrev) && <NyttBrevMottaker brev={hentetBrev.data} />}
+          {isSuccess(hentetBrev) && (
+            <>
+              <BrevTittel brevId={hentetBrev.data.id} sakId={hentetBrev.data.sakId} tittel={hentetBrev.data.tittel} />
+              <NyttBrevMottaker brev={hentetBrev.data} />
+            </>
+          )}
         </Sidebar>
 
         {mapApiResult(

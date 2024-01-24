@@ -1,26 +1,8 @@
-package no.nav.etterlatte.behandling.tilbakekreving
+package no.nav.etterlatte.libs.common.tilbakekreving
 
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
-import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekreving
-import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurderingUaktsomhet
-import no.nav.etterlatte.libs.common.tilbakekreving.tilTilbakekrevingPerioder
 import java.util.UUID
-
-fun TilbakekrevingBehandling.tilStatistikkTilbakekreving(tilbakekrevingHendelseType: TilbakekrevingHendelseType): StatistikkTilbakekreving {
-    return StatistikkTilbakekreving(
-        id = this.id,
-        sak = this.sak,
-        behandlingOpprettet = this.opprettet,
-        soeknadMottattDato = this.opprettet,
-        status = this.status.name,
-        type = tilbakekrevingHendelseType.name,
-    )
-}
 
 data class TilbakekrevingBehandling(
     val id: UUID,
@@ -77,9 +59,3 @@ enum class TilbakekrevingStatus {
     ATTESTERT,
     UNDERKJENT,
 }
-
-class TilbakekrevingHarMangelException(message: String?) : RuntimeException(message)
-
-class TilbakekrevingFinnesIkkeException(message: String?) : RuntimeException(message)
-
-class TilbakekrevingFeilTilstandException(message: String?) : RuntimeException(message)

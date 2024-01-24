@@ -38,7 +38,7 @@ class BrukerServiceImpl(
 
         return when {
             tilknytning.ukjent -> {
-                Navkontor(navn = "UKjent kontor", enhetNr = "ukjent enhetsnummer")
+                Navkontor(navn = "Ukjent kontor", enhetNr = "ukjent enhetsnummer")
             }
 
             else -> {
@@ -46,7 +46,7 @@ class BrukerServiceImpl(
                 when {
                     tilknytning.harBareLandTilknytning() -> {
                         if (tilknytning.land!! == "NO") {
-                            Navkontor(navn = "UKjent kontor, men har Norge som landkode", enhetNr = "ukjent enhetsnummer")
+                            Navkontor(navn = "Ukjent kontor, men har Norge som landkode", enhetNr = "ukjent enhetsnummer")
                         } else {
                             Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
                         }

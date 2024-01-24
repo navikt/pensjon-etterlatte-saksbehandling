@@ -82,8 +82,6 @@ private class BrevDatafetcher(
             )
         }
 
-    suspend fun hentInnvilgelsesdato() = brevdataFacade.hentInnvilgelsesdato(sak.id, brukerTokenInfo)
-
     suspend fun hentTrygdetid() = behandlingId?.let { brevdataFacade.finnTrygdetid(it, brukerTokenInfo) }
 }
 

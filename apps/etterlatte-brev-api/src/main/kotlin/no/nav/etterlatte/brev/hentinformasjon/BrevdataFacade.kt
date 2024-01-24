@@ -30,7 +30,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregningsperiode
@@ -55,13 +54,6 @@ class BrevdataFacade(
         brukerTokenInfo: BrukerTokenInfo,
     ): EtterbetalingDTO? {
         return behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo)
-    }
-
-    suspend fun hentInnvilgelsesdato(
-        sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): LocalDate? {
-        return vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo)
     }
 
     suspend fun hentGenerellBrevData(

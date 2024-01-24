@@ -16,11 +16,6 @@ import java.util.UUID
 
 val REFORM_TIDSPUNKT_BP = YearMonth.of(2024, 1)
 
-class VirkningstidspunktBPErFoerReformMenManglerSoeskenjustering : UgyldigForespoerselException(
-    code = "MANGLER_SØSKEN_FØR_REFORM_BP",
-    detail = "Man må ha søskenjustering før reform for barnepensjon",
-)
-
 class ManglerVirkningstidspunktBP : UgyldigForespoerselException(
     code = "MANGLER_VIRK_BP",
     detail = "Mangler virkningstidspunkt for barnepensjon.",
@@ -93,9 +88,18 @@ class BeregningsGrunnlagService(
                             null -> throw ManglerVirkningstidspunktBP()
                             else -> {
                                 if (virk.dato.isBefore(REFORM_TIDSPUNKT_BP)) {
-                                    throw VirkningstidspunktBPErFoerReformMenManglerSoeskenjustering()
+                                    // Her burde man egentlig ha en sjekk på om avdøde har noen barn.
+                                    // Hvis avdøde har barn og vi er før reformtidspunkt må disse barnene søskenjusteres
+                                    listOf(
+                                        GrunnlagMedPeriode(
+                                            data = emptyList(),
+                                            fom = virk.dato.atDay(1),
+                                            tom = null,
+                                        ),
+                                    )
+                                } else {
+                                    emptyList()
                                 }
-                                emptyList()
                             }
                         }
                     }

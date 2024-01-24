@@ -25,15 +25,15 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
             measureTimedValue {
                 client.post("$apiUrl/etterlatte/pdf") {
                     contentType(ContentType.Application.Json)
-                    setBody(brevRequest.toJsonNode())
+                    setBody(brevRequest)
                 }.body<BrevbakerPdfResponse>()
             }.let { (result, duration) ->
                 logger.info("Fullført brevbaker pdf OK (${duration.toString(DurationUnit.SECONDS, 2)})")
                 result
             }
         } catch (ex: Exception) {
-            sikkerlogg.error("Feila ved generer pdf-kall mot brevbakeren. Requesten var $brevRequest", ex)
-            throw BrevbakerException("Feil ved kall til brevbaker", ex)
+            sikkerlogg.error("Brevbaker pdfgen feilet. Request body: ${brevRequest.toJson()}", ex)
+            throw BrevbakerException("Feil ved kall til brevbaker (se sikkerlogg)", ex)
         }
 
     suspend fun genererHTML(brevRequest: BrevbakerRequest): BrevbakerHTMLResponse =

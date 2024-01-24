@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Alert, BodyShort, Button, Heading, Panel } from '@navikt/ds-react'
 import { DocPencilIcon } from '@navikt/aksel-icons'
 import { BrevTittelModal } from '~components/person/brev/tittel/BrevTittelModal'
+import { FlexRow } from '~shared/styled'
 
 interface Props {
   brevId: number
@@ -17,18 +18,14 @@ export default function BrevTittel({ brevId, sakId, tittel }: Props) {
   return (
     <>
       <Panel border>
-        <div>
+        <FlexRow justify="space-between">
           <Heading spacing level="2" size="medium">
             Tittel
           </Heading>
-          <Button
-            variant="secondary"
-            onClick={() => setErModalAapen(true)}
-            icon={<DocPencilIcon />}
-            style={{ float: 'right' }}
-            size="small"
-          />
-        </div>
+          <div>
+            <Button variant="secondary" onClick={() => setErModalAapen(true)} icon={<DocPencilIcon />} size="small" />
+          </div>
+        </FlexRow>
 
         {nyTittel ? (
           <>

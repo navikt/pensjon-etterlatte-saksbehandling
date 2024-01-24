@@ -7,6 +7,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.LoggerFactory
@@ -23,6 +24,8 @@ interface BrukerService {
         saktype: SakType,
     ): Navkontor
 }
+
+val sikkerLogg = sikkerlogger()
 
 class BrukerServiceImpl(
     private val pdltjenesterKlient: PdlTjenesterKlient,
@@ -92,7 +95,8 @@ class BrukerServiceImpl(
                 }
             }
             else -> {
-                logger.warn("Fant ikke geografisk omraade for ${fnr.maskerFnr()} og tema $tema")
+                logger.warn("Fant ikke geografisk omraade for ${fnr.maskerFnr()} og tema $tema med saktype: $saktype\"")
+                sikkerLogg.error("Fant ikke geografisk omraade for fnr:  $fnr og tema $tema med saktype: $saktype")
                 val geografiskTilknytning = tilknytning.geografiskTilknytning()
                 when (geografiskTilknytning) {
                     null -> {

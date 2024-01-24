@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -343,7 +344,7 @@ fun behandling(
     avdoed: List<String>? = null,
 ) = StatistikkBehandling(
     id = id,
-    sak = Sak(soeker, sakType, sakId, "4808"),
+    sak = Sak(soeker, sakType, sakId, Enheter.defaultEnhet.enhetNr),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
@@ -356,7 +357,7 @@ fun behandling(
     soeker = "soeker",
     soesken = null,
     virkningstidspunkt = Virkningstidspunkt.create(YearMonth.now(), "ident", "begrunnelse"),
-    enhet = "4808",
+    enhet = Enheter.defaultEnhet.enhetNr,
     revurderingsaarsak = null,
     revurderingInfo = null,
     prosesstype = Prosesstype.MANUELL,

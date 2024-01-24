@@ -12,8 +12,12 @@ import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
+import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -30,6 +34,7 @@ class TilbakekrevingService(
     private val oppgaveService: OppgaveService,
     private val vedtakKlient: VedtakKlient,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
+    private val tilbakekrevinghendelser: ITilbakekrevingHendelserService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -58,6 +63,14 @@ class TilbakekrevingService(
                 tilbakekrevingId = tilbakekrevingBehandling.id,
                 sakId = tilbakekrevingBehandling.sak.id,
             )
+
+            val statistikkTilbakekrevingDto =
+                StatistikkTilbakekrevingDto(
+                    tilbakekrevingBehandling.id,
+                    tilbakekrevingBehandling,
+                    Tidspunkt.now(),
+                )
+            tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.OPPRETTET)
         }
 
     fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling =
@@ -155,6 +168,14 @@ class TilbakekrevingService(
             kommentar = null,
             begrunnelse = null,
         )
+
+        val statistikkTilbakekrevingDto =
+            StatistikkTilbakekrevingDto(
+                tilbakekreving.id,
+                tilbakekreving,
+                Tidspunkt.now(),
+            )
+        tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.ATTESTERT)
 
         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
             fattetoppgaveReferanseOgSak =

@@ -19,7 +19,7 @@ class BehandlingKlient(
 ) {
     private val logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    fun haandterHendelse(record: ConsumerRecord<String, KafkaOppholdHendelse>) {
+    suspend fun haandterHendelse(record: ConsumerRecord<String, KafkaOppholdHendelse>) {
         logger.debug(
             "Behandler institusjonsopphold record med id: {}, partition {}, offset: {}",
             record.key(),
@@ -52,7 +52,7 @@ class BehandlingKlient(
         )
     }
 
-    fun postTilBehandling(oppholdHendelse: InstitusjonsoppholdHendelseBeriket) =
+    private fun postTilBehandling(oppholdHendelse: InstitusjonsoppholdHendelseBeriket) =
         runBlocking {
             behandlingHttpClient.post(
                 "$resourceUrl/grunnlagsendringshendelse/institusjonsopphold",

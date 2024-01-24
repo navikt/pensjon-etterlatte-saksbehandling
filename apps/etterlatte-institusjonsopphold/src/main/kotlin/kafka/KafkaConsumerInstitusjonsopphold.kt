@@ -1,5 +1,6 @@
 package no.nav.etterlatte.kafka
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingKlient
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdKilde
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdsType
@@ -19,7 +20,13 @@ class KafkaConsumerInstitusjonsopphold(
         pollTimeoutInSeconds = Duration.ofSeconds(10L),
     ) {
     override fun stream() {
-        stream { meldinger -> meldinger.forEach { behandlingKlient.haandterHendelse(it) } }
+        stream { meldinger ->
+            meldinger.forEach {
+                runBlocking {
+                    behandlingKlient.haandterHendelse(it)
+                }
+            }
+        }
     }
 }
 

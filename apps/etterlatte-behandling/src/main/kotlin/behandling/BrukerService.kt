@@ -47,8 +47,9 @@ class BrukerServiceImpl(
                     tilknytning.harBareLandTilknytning() -> {
                         if (tilknytning.land!! == "NO") {
                             Navkontor(navn = "UKjent kontor, men har Norge som landkode", enhetNr = "ukjent enhetsnummer")
+                        } else {
+                            Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
                         }
-                        Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
                     }
                     geografiskTilknytning == null -> {
                         Navkontor(navn = "Utlandssak - ingen geografisk område", enhetNr = Enheter.UTLAND.enhetNr)

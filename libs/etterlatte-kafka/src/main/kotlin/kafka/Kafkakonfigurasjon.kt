@@ -46,6 +46,7 @@ abstract class Kafkakonfigurasjon<T>(
             put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializerClass)
 
             put(Avrokonstanter.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO")
+            put("KAFKA_CONSUMER_GROUP_ID", env["NAIS_APP_NAME"]!!.replace("-", ""))
 
             put(
                 userInfoConfigKey,

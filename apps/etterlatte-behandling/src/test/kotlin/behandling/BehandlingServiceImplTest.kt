@@ -533,13 +533,42 @@ class BehandlingServiceImplTest {
     }
 
     @Test
-    fun `erGyldigVirkningstidspunkt hvis tidspunkt er tre aar foer mottatt soeknad`() {
+    fun `erGyldigVirkningstidspunkt er true hvis tidspunkt er akkurat tre aar foer mottatt soeknad`() {
         val bodyVirkningstidspunkt = Tidspunkt.parse("2017-01-01T00:00:00Z")
         val bodyBegrunnelse = "begrunnelse"
         val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
 
-        val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
+        val soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00.000000000")
         val doedsdato = LocalDate.parse("2016-12-30")
+
+        val service =
+            behandlingServiceMedMocks(
+                doedsdato = doedsdato,
+                soeknadMottatt = soeknadMottatt,
+                utlandstilknytning =
+                    Utlandstilknytning(
+                        UtlandstilknytningType.NASJONAL,
+                        Grunnlagsopplysning.Saksbehandler.create("ident"),
+                        "begrunnelse",
+                    ),
+            )
+
+        val gyldigVirkningstidspunkt =
+            runBlocking {
+                service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
+            }
+
+        assertTrue(gyldigVirkningstidspunkt)
+    }
+
+    @Test
+    fun `erGyldigVirkningstidspunkt er false hvis tidspunkt er over tre aar foer mottatt soeknad`() {
+        val bodyVirkningstidspunkt = Tidspunkt.parse("2016-12-01T00:00:00Z")
+        val bodyBegrunnelse = "begrunnelse"
+        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
+
+        val soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00.000000000")
+        val doedsdato = LocalDate.parse("2016-11-30")
 
         val service =
             behandlingServiceMedMocks(

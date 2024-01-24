@@ -298,16 +298,16 @@ internal class BehandlingServiceImpl(
             makstidspunktFoerSoeknad = YearMonth.from(kravdato.minusYears(3))
         }
 
-        val etterMaksTidspunktEllersMinstManedEtterDoedsfall =
+        val paaEllerEtterMaksTidspunktEllersMinstManedEtterDoedsfall =
             if (doedsdato == null) {
                 true // Mangler døsfall når avdød er ukjent
             } else if (doedsdato.isBefore(makstidspunktFoerSoeknad)) {
-                virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
+                virkningstidspunkt.isAfter(makstidspunktFoerSoeknad) || virkningstidspunkt == makstidspunktFoerSoeknad
             } else {
                 virkningstidspunkt.isAfter(doedsdato)
             }
 
-        return harGyldigFormat && etterMaksTidspunktEllersMinstManedEtterDoedsfall
+        return harGyldigFormat && paaEllerEtterMaksTidspunktEllersMinstManedEtterDoedsfall
     }
 
     override fun hentFoersteVirk(sakId: Long): YearMonth? {

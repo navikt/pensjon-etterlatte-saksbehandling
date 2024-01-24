@@ -64,6 +64,7 @@ internal class VilkaarsvurderingRoutesTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
     private val grunnlagVersjon = 12L
+    private val nyGrunnlagVersjon: Long = 4378
 
     private lateinit var vilkaarsvurderingServiceImpl: VilkaarsvurderingService
     private lateinit var ds: DataSource
@@ -136,7 +137,7 @@ internal class VilkaarsvurderingRoutesTest {
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(behandlingId, vilkaarsvurdering.behandlingId)
             assertEquals(grunnlagVersjon, vilkaarsvurdering.grunnlagVersjon)
-            assertEquals(null, vilkaarsvurdering.behandlingGrunnlagVersjon) // Feature toggle deaktivert
+            assertEquals(grunnlagVersjon, vilkaarsvurdering.behandlingGrunnlagVersjon)
             assertFalse(vilkaarsvurdering.isGrunnlagUtdatert())
 
             assertEquals(VilkaarType.BP_DOEDSFALL_FORELDER_2024, vilkaar.hovedvilkaar.type)
@@ -154,7 +155,7 @@ internal class VilkaarsvurderingRoutesTest {
     }
 
     @Test
-    fun `skal hente vilkaarsvurdering med behandlingens versjon`() {
+    fun `skal hente vilkaarsvurdering med ny versjon på behandlingens grunnlag`() {
         testApplication {
             runServer(server) {
                 vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
@@ -162,11 +163,9 @@ internal class VilkaarsvurderingRoutesTest {
 
             opprettVilkaarsvurdering(vilkaarsvurderingServiceImpl)
 
-            val nyGrunnlagVersjon: Long = 4378
             coEvery { grunnlagKlient.hentGrunnlag(any(), behandlingId, any()) } returns
-                grunnlagMedVersjon(
-                    nyGrunnlagVersjon,
-                )
+                grunnlagMedVersjon(nyGrunnlagVersjon)
+
             val response =
                 client.get("/api/vilkaarsvurdering/$behandlingId") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())

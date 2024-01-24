@@ -88,7 +88,7 @@ data class BrukerId(
 
 data class Journalpost(
     val journalpostId: String,
-    val tittel: String,
+    val tittel: String?,
     val tema: String?,
     val journalposttype: String,
     val journalstatus: String,

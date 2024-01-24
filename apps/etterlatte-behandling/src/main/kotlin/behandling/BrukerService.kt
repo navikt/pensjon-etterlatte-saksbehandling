@@ -51,7 +51,7 @@ class BrukerServiceImpl(
                         Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
                     }
                     geografiskTilknytning == null -> {
-                        Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
+                        Navkontor(navn = "Utlandssak - ingen geografisk område", enhetNr = Enheter.UTLAND.enhetNr)
                     }
                     else -> {
                         norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)

@@ -40,7 +40,7 @@ spec:
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
     - name: INSTITUSJON_API_URL
-      value: https://inst2-q2.dev.intern.nav.no
+      value: https://institusjon-opphold-proxy-q2.dev-fss-pub.nais.io
     - name: INSTITUSJON_API_SCOPE
       value: api://dev-fss.team-rocket.inst2-q2/.default
   envFrom:
@@ -51,4 +51,4 @@ spec:
         - application: etterlatte-behandling
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
-        - host: inst2-q2.dev.intern.nav.no
+        - host: institusjon-opphold-proxy-q2.dev-fss-pub.nais.io

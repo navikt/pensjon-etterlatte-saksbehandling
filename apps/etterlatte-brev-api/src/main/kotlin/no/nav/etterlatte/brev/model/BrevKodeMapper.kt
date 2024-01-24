@@ -73,14 +73,14 @@ class BrevKodeMapper {
                         when (generellBrevData.revurderingsaarsak) {
                             Revurderingaarsak.ADOPSJON ->
                                 BrevkodePar(
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER,
+                                    EtterlatteBrevKode.TOM_MAL,
+                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
                                 )
 
                             Revurderingaarsak.OMGJOERING_AV_FARSKAP ->
                                 BrevkodePar(
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER,
+                                    EtterlatteBrevKode.TOM_MAL,
+                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
                                 )
 
                             Revurderingaarsak.FENGSELSOPPHOLD ->

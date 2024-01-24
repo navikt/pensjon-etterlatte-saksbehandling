@@ -28,18 +28,6 @@ sealed class RevurderingInfo {
         val grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn,
     ) : RevurderingInfo()
 
-    @JsonTypeName("ADOPSJON")
-    data class Adopsjon(
-        val adoptertAv1: Navn,
-        val adoptertAv2: Navn? = null,
-    ) : RevurderingInfo()
-
-    @JsonTypeName("OMGJOERING_AV_FARSKAP")
-    data class OmgjoeringAvFarskap(
-        val naavaerendeFar: Navn,
-        val forrigeFar: Navn,
-    ) : RevurderingInfo()
-
     @JsonTypeName("FENGSELSOPPHOLD")
     data class Fengselsopphold(
         val fraDato: LocalDate,

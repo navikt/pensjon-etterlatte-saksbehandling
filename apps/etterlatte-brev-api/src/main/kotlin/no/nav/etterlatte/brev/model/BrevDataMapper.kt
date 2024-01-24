@@ -14,12 +14,10 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
 import no.nav.etterlatte.brev.model.bp.AvslagBrevData
 import no.nav.etterlatte.brev.model.bp.EndringHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
 import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
-import no.nav.etterlatte.brev.model.bp.OmgjoeringAvFarskapRevurderingBrevdata
 import no.nav.etterlatte.brev.model.bp.SoeskenjusteringRevurderingBrevdata
 import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
@@ -34,7 +32,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -156,25 +153,9 @@ class BrevDataMapper(
                     VedtakType.OPPHOER ->
                         when (generellBrevData.revurderingsaarsak) {
                             Revurderingaarsak.ADOPSJON ->
-                                AdopsjonRevurderingBrevdata.fra(
-                                    generellBrevData,
-                                    LocalDate.now(),
-                                ) // TODO: Denne må vi hente anten frå PDL eller brukarinput
+                                ManueltBrevData.fra(emptyList())
                             Revurderingaarsak.OMGJOERING_AV_FARSKAP -> {
-                                coroutineScope {
-                                    val innvilgelsesDato =
-                                        async {
-                                            datafetcher(brukerTokenInfo, generellBrevData).hentInnvilgelsesdato()
-                                        }
-                                    val innvilgelsesDatoHentet =
-                                        requireNotNull(
-                                            innvilgelsesDato.await(),
-                                        ) { "${generellBrevData.revurderingsaarsak} må ha en innvigelsesdato fra vedtak type: $vedtakType" }
-                                    OmgjoeringAvFarskapRevurderingBrevdata.fra(
-                                        generellBrevData,
-                                        innvilgelsesDatoHentet,
-                                    )
-                                }
+                                ManueltBrevData.fra(emptyList())
                             }
 
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")

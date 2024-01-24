@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
 import no.nav.etterlatte.libs.ktor.setReady
 import org.slf4j.LoggerFactory
-import rapidsandrivers.getRapidEnv
 
 fun main() {
     Server().run()
@@ -21,7 +20,7 @@ class Server {
     private val engine = initEmbeddedServerUtenRest(httpPort = 8080, applicationConfig = defaultConfig)
 
     fun run() {
-        val env = getRapidEnv()
+        val env = System.getenv().toMutableMap()
         startEgenAnsattLytter(env, defaultConfig)
         setReady().also { engine.start(true) }
     }

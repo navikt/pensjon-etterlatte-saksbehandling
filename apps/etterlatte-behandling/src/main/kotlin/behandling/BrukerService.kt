@@ -69,7 +69,6 @@ class BrukerServiceImpl(
         saktype: SakType,
     ): ArbeidsFordelingEnhet {
         val tilknytning = pdltjenesterKlient.hentGeografiskTilknytning(fnr, saktype)
-        val geografiskTilknytning = tilknytning.geografiskTilknytning()
 
         return when {
             tilknytning.ukjent ->
@@ -78,15 +77,18 @@ class BrukerServiceImpl(
                     Enheter.defaultEnhet.enhetNr,
                 )
 
-            geografiskTilknytning == null -> {
+            else -> {
                 logger.warn("Fant ikke geografisk omraade for ${fnr.maskerFnr()} og tema $tema")
-
-                ArbeidsFordelingEnhet(
-                    Enheter.defaultEnhet.navn,
-                    Enheter.defaultEnhet.enhetNr,
-                )
+                val geografiskTilknytning = tilknytning.geografiskTilknytning() ?: throw GeografiskTilknytningMangler()
+                if (tilknytning.harBareLandTilknytning()) {
+                    ArbeidsFordelingEnhet(
+                        Enheter.defaultEnhet.navn,
+                        Enheter.defaultEnhet.enhetNr,
+                    )
+                } else {
+                    finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
+                }
             }
-            else -> finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
         }
     }
 

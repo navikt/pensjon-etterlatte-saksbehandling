@@ -32,7 +32,7 @@ class BrevKodeMapper {
 
         return when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
-                when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
+                when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE ->
                         BrevkodePar(
                             EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_UTFALL,
@@ -71,8 +71,8 @@ class BrevKodeMapper {
 
                     VedtakType.OPPHOER ->
                         BrevkodePar(
-                            EtterlatteBrevKode.TOM_MAL,
-                            EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER,
+                            EtterlatteBrevKode.BARNEPENSJON_OPPHOER_UTFALL,
+                            EtterlatteBrevKode.BARNEPENSJON_OPPHOER,
                         )
 
                     VedtakType.TILBAKEKREVING ->

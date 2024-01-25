@@ -62,7 +62,6 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse, isOpen, setIsOp
 
     apiOppdaterMottaker({ brevId, sakId, mottaker: mottaker }, () => {
       setBrev({ ...brev, mottaker })
-      //oppdater(mottaker)
       setIsOpen(false)
     })
   }

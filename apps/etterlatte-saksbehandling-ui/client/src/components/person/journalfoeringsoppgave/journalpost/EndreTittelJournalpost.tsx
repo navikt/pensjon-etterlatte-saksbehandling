@@ -26,7 +26,7 @@ export const EndreTittelJournalpost = ({
   return (
     <>
       <Header>Journalpost tittel</Header>
-      {journalpost.tittel ? <p>{journalpost.tittel}</p> : <Alert variant="warning">Journalposten er tom</Alert>}
+      {journalpost.tittel ? <p>{journalpost.tittel}</p> : <Alert variant="warning">Journalposten tittel er tom</Alert>}
       {rediger ? (
         <>
           <TextField label="Journalpost tittel" value={nyTittel} onChange={(e) => setNyTittel(e.target.value)} />

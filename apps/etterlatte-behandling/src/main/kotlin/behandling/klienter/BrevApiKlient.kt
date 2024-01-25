@@ -83,7 +83,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
                 failure = { errorResponse -> throw errorResponse },
             )
         try {
-            settTittelForBrev(sakId, opprettetBrev.id, "Innstillingsbrev til NAV Klageinstans", brukerTokenInfo)
+            settTittelForBrev(sakId, opprettetBrev.id, "Oversendelsesbrev til NAV Klageinstans", brukerTokenInfo)
         } catch (e: Exception) {
             logger.warn(
                 "Fikk ikke satt tittel på opprettet innstillingsbrev med id=${opprettetBrev.id} " +

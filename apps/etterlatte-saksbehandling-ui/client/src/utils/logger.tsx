@@ -80,7 +80,9 @@ export const setupWindowOnError = () => {
     if (import.meta.env.MODE === 'development') {
       console.error(error.message, error.stack)
     } else {
-      logger.error({ lineno, columnno: colno, message, error: JSON.stringify(error) })
+      if (message !== 'ResizeObserver loop completed with undelivered notifications.') {
+        logger.error({ lineno, columnno: colno, message, error: JSON.stringify(error) })
+      }
 
       if (error.stack && error.stack?.indexOf('invokeGuardedCallbackDev') >= 0 && !error.alreadySeen) {
         error.alreadySeen = true

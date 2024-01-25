@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -43,7 +44,6 @@ import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.MaanedStatistikk
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
-import no.nav.etterlatte.statistikk.river.BehandlingHendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -271,7 +271,7 @@ class StatistikkServiceTest {
         val registrertStatistikk =
             service.registrerStatistikkForBehandlinghendelse(
                 statistikkBehandling = behandling(id = behandlingId, sakId = sakId, avdoed = listOf("etfnr")),
-                hendelse = BehandlingHendelse.OPPRETTET,
+                hendelse = BehandlingHendelseType.OPPRETTET,
                 tekniskTid = tekniskTidForHendelse,
             ) ?: throw NullPointerException("Fikk ikke registrert statistikk")
 

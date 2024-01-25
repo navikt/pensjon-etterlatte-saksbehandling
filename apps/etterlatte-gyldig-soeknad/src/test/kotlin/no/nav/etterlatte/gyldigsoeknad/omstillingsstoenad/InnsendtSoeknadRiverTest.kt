@@ -5,12 +5,14 @@ import io.mockk.mockk
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import rapidsandrivers.SAK_ID_KEY
 import java.io.FileNotFoundException
 import java.util.UUID
 
@@ -35,9 +37,9 @@ internal class InnsendtSoeknadRiverTest {
 
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        assertEquals(sakId.toString(), inspector.message(0).get("sakId").asText())
+        assertEquals(sakId.toString(), inspector.message(0).get(SAK_ID_KEY).asText())
 
-        assertEquals("soeknad_innsendt", inspector.message(0).get(EVENT_NAME_KEY).asText())
+        assertEquals(SoeknadInnsendt.eventNameInnsendt, inspector.message(0).get(EVENT_NAME_KEY).asText())
         assertEquals(sakId, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals(id.toString(), inspector.message(0).get(GyldigSoeknadVurdert.behandlingIdKey).asText())
 

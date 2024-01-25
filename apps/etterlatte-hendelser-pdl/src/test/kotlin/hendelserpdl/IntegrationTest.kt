@@ -24,6 +24,7 @@ import no.nav.etterlatte.lesHendelserFraLeesah
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
+import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.person.pdl.leesah.Endringstype
@@ -91,7 +92,7 @@ class IntegrationTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE,
                 hendelse = LeesahOpplysningstype.DOEDSFALL_V1,
                 hendelse_data =
                     Doedshendelse(

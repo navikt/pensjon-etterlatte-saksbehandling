@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
@@ -242,7 +243,7 @@ class PersonHendelseFordeler(
             noekkel = UUID.randomUUID().toString(),
             verdi =
                 JsonMessage.newMessage(
-                    eventName = "PDL:PERSONHENDELSE",
+                    eventName = PdlHendelserKeys.PERSONHENDELSE,
                     map =
                         mapOf(
                             "hendelse" to opplysningstype.toString(),

@@ -71,3 +71,7 @@ enum class Endringstype {
     ANNULLERT,
     OPPHOERT,
 }
+
+object PdlHendelserKeys {
+    const val PERSONHENDELSE = "PDL:PERSONHENDELSE"
+}

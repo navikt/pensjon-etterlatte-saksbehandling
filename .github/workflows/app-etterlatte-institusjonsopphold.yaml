@@ -18,6 +18,8 @@ on:
       - apps/etterlatte-institusjonsopphold/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-institusjonsopphold-model/**
+      - libs/etterlatte-kafka/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -26,6 +28,8 @@ on:
       - apps/etterlatte-institusjonsopphold/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-institusjonsopphold-model/**
+      - libs/etterlatte-kafka/**
+      - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
 
 permissions:

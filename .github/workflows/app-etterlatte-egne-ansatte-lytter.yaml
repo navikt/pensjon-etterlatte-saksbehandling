@@ -17,6 +17,7 @@ on:
     paths:
       - apps/etterlatte-egne-ansatte-lytter/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-kafka/**
       - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
   pull_request:
@@ -25,6 +26,7 @@ on:
     paths:
       - apps/etterlatte-egne-ansatte-lytter/**
       - libs/saksbehandling-common/**
+      - libs/etterlatte-kafka/**
       - libs/etterlatte-ktor/**
       - gradle/libs.versions.toml
 

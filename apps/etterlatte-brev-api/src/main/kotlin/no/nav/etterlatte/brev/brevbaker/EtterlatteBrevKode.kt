@@ -24,5 +24,4 @@ enum class EtterlatteBrevKode(val tittel: String? = null) {
     TOM_MAL_INFORMASJONSBREV,
     TOM_MAL,
     UTSATT_KLAGEFRIST("Informasjon om barnepensjon fra 1. januar 2024"),
-    OMREGNING_INFORMASJON,
 }

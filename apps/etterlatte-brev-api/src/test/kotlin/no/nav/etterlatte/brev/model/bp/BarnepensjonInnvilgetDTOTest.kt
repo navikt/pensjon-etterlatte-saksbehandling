@@ -17,14 +17,14 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 
-internal class InnvilgetHovedmalBrevDataTest {
+internal class BarnepensjonInnvilgetDTOTest {
     private val grunnbeloep = 118_620
     private val grunnbeloepPerMaaned = 9885
 
     @Test
     fun `setter skille for etterbetaling`() {
         val brevdata =
-            InnvilgetHovedmalBrevData.fra(
+            BarnepensjonInnvilgetDTO.fra(
                 utbetalingsinfo =
                     Utbetalingsinfo(
                         antallBarn = 1,

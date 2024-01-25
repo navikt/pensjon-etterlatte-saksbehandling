@@ -39,10 +39,10 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
-    - name: ETTERLATTE_PROXY_URL
-      value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad
-    - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
-      value: api://dev-fss.etterlatte.etterlatte-proxy/.default
+    - name: INSTITUSJON_API_URL
+      value: https://institusjon-opphold-proxy-q2.dev-fss-pub.nais.io
+    - name: INSTITUSJON_API_SCOPE
+      value: api://dev-fss.team-rocket.inst2-q2/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -50,5 +50,5 @@ spec:
       rules:
         - application: etterlatte-behandling
       external:
-        - host: etterlatte-proxy.dev-fss-pub.nais.io
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: institusjon-opphold-proxy-q2.dev-fss-pub.nais.io

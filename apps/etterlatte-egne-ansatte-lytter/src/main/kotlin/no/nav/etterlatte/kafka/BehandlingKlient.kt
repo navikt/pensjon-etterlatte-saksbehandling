@@ -6,6 +6,8 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -24,8 +26,14 @@ class BehandlingKlient(val behandlingHttpClient: HttpClient, val url: String) {
         )
         val skjermet = record.value().toBoolean()
         val fnr = record.key()
-        logger.info("Haandterer skjermet hendelse for fnr maskert ${fnr.maskerFnr()}")
-        postTilBehandling(fnr = fnr, skjermet = skjermet)
+
+        if (Folkeregisteridentifikator.isValid(fnr)) {
+            logger.info("Haandterer skjermet hendelse for fnr maskert ${fnr.maskerFnr()}")
+            postTilBehandling(fnr = fnr, skjermet = skjermet)
+        } else {
+            sikkerlogger().error("Ugyldig fnr. ($fnr) i skjermet hendelse")
+            logger.error("Ugyldig fnr. i skjermet hendelse. Se sikkerlogg")
+        }
     }
 
     fun postTilBehandling(

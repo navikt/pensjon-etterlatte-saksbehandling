@@ -25,7 +25,6 @@ import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDao
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
 import no.nav.etterlatte.beregning.grunnlag.REFORM_TIDSPUNKT_BP
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
-import no.nav.etterlatte.beregning.grunnlag.VirkningstidspunktBPErFoerReformMenManglerSoeskenjustering
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient
@@ -495,7 +494,8 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `skal lagre beregningsmetode BP før reform, må ha med søskenperioder`() {
-        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID(), virkningstidspunktdato = YearMonth.of(2023, 11))
+        val behandling =
+            mockBehandling(SakType.BARNEPENSJON, randomUUID(), virkningstidspunktdato = YearMonth.of(2023, 11))
         val slot = slot<BeregningsGrunnlag>()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
@@ -538,7 +538,8 @@ internal class BeregningsGrunnlagServiceTest {
 
     @Test
     fun `skal lagre beregningsmetode BP før reform uten søsken kaster feil VirkningstidsErFoerReformMenManglerSoeskenjustering`() {
-        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID(), virkningstidspunktdato = YearMonth.of(2023, 11))
+        val behandling =
+            mockBehandling(SakType.BARNEPENSJON, randomUUID(), virkningstidspunktdato = YearMonth.of(2023, 11))
         val slot = slot<BeregningsGrunnlag>()
 
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
@@ -548,21 +549,23 @@ internal class BeregningsGrunnlagServiceTest {
         val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
 
-        assertThrows<VirkningstidspunktBPErFoerReformMenManglerSoeskenjustering> {
-            runBlocking {
-                beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
-                    randomUUID(),
-                    BarnepensjonBeregningsGrunnlag(
-                        emptyList(),
-                        emptyList(),
-                        BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST),
-                    ),
-                    mockk {
-                        every { ident() } returns "Z123456"
-                    },
-                )
-            }
+        runBlocking {
+            beregningsGrunnlagService.lagreBarnepensjonBeregningsGrunnlag(
+                randomUUID(),
+                BarnepensjonBeregningsGrunnlag(
+                    emptyList(),
+                    emptyList(),
+                    BeregningsMetodeBeregningsgrunnlag(BeregningsMetode.BEST),
+                ),
+                mockk {
+                    every { ident() } returns "Z123456"
+                },
+            )
         }
+        assertEquals(
+            listOf(GrunnlagMedPeriode<List<SoeskenMedIBeregning>>(emptyList(), behandling.virkningstidspunkt?.dato?.atDay(1)!!, null)),
+            slot.captured.soeskenMedIBeregning,
+        )
     }
 
     @Test

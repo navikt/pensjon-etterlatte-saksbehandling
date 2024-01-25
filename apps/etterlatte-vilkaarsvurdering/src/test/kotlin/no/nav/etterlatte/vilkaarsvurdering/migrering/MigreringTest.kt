@@ -13,7 +13,6 @@ import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -56,7 +55,6 @@ class MigreringTest {
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private val server = MockOAuth2Server()
     private val behandlingKlient = mockk<BehandlingKlient>()
-    private val featureToggleService = DummyFeatureToggleService()
     private lateinit var ds: DataSource
     private lateinit var migreringService: MigreringService
     private lateinit var vilkaarsvurderingRepository: VilkaarsvurderingRepository
@@ -82,7 +80,6 @@ class MigreringTest {
                 vilkaarsvurderingRepository,
                 behandlingKlient,
                 grunnlagKlient,
-                featureToggleService,
             )
 
         migreringService =
@@ -130,7 +127,7 @@ class MigreringTest {
     fun `Skal opprette vilkaarsvurdering for migrering`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
                 migrering(migreringService, behandlingKlient, vilkaarsvurderingServiceImpl)
             }
 
@@ -162,7 +159,7 @@ class MigreringTest {
     fun `Skal sette yrkesskade som oppfylt ved migrering dersom avdoede hadde yrkesskade`() {
         testApplication {
             runServer(server) {
-                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient, featureToggleService)
+                vilkaarsvurdering(vilkaarsvurderingServiceImpl, behandlingKlient)
                 migrering(migreringService, behandlingKlient, vilkaarsvurderingServiceImpl)
             }
 

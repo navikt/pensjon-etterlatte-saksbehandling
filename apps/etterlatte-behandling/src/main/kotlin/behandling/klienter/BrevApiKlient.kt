@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
+import org.slf4j.LoggerFactory
 
 interface BrevApiKlient {
     suspend fun opprettKlageInnstillingsbrevISak(
@@ -59,12 +60,14 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     private val clientId = config.getString("brev-api.client.id")
     private val resourceUrl = config.getString("brev-api.resource.url")
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     override suspend fun opprettKlageInnstillingsbrevISak(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
-        try {
-            return downstreamResourceClient.post(
+        val opprettetBrev: OpprettetBrevDto =
+            downstreamResourceClient.post(
                 resource =
                     Resource(
                         clientId = clientId,
@@ -79,9 +82,17 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
                 },
                 failure = { errorResponse -> throw errorResponse },
             )
+        try {
+            settTittelForBrev(sakId, opprettetBrev.id, "Innstillingsbrev til NAV Klageinstans", brukerTokenInfo)
         } catch (e: Exception) {
-            throw e
+            logger.warn(
+                "Fikk ikke satt tittel på opprettet innstillingsbrev med id=${opprettetBrev.id} " +
+                    "for klage i sak med id=$sakId på grunn av feil. Saksbehandler kan endre i frontend som " +
+                    "workaround.",
+                e,
+            )
         }
+        return opprettetBrev
     }
 
     override suspend fun ferdigstillBrev(
@@ -89,22 +100,18 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        try {
-            downstreamResourceClient.post(
-                resource =
-                    Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/brev/$brevId/ferdigstill?sakId=$sakId",
-                    ),
-                brukerTokenInfo = brukerTokenInfo,
-                postBody = Unit,
-            ).mapBoth(
-                success = { resource -> resource },
-                failure = { errorResponse -> throw errorResponse },
-            )
-        } catch (e: Exception) {
-            throw e
-        }
+        downstreamResourceClient.post(
+            resource =
+                Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/api/brev/$brevId/ferdigstill?sakId=$sakId",
+                ),
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = Unit,
+        ).mapBoth(
+            success = { resource -> resource },
+            failure = { errorResponse -> throw errorResponse },
+        )
     }
 
     override suspend fun journalfoerBrev(
@@ -112,24 +119,20 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): JournalpostIdDto {
-        try {
-            return downstreamResourceClient.post(
-                resource =
-                    Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/brev/$brevId/journalfoer?sakId=$sakId",
-                    ),
-                brukerTokenInfo = brukerTokenInfo,
-                postBody = Unit,
-            ).mapBoth(
-                success = { resource ->
-                    objectMapper.readValue(resource.response!!.toJson())
-                },
-                failure = { errorResponse -> throw errorResponse },
-            )
-        } catch (e: Exception) {
-            throw e
-        }
+        return downstreamResourceClient.post(
+            resource =
+                Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/api/brev/$brevId/journalfoer?sakId=$sakId",
+                ),
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = Unit,
+        ).mapBoth(
+            success = { resource ->
+                objectMapper.readValue(resource.response!!.toJson())
+            },
+            failure = { errorResponse -> throw errorResponse },
+        )
     }
 
     override suspend fun distribuerBrev(
@@ -137,24 +140,20 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): BestillingsIdDto {
-        try {
-            return downstreamResourceClient.post(
-                resource =
-                    Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/brev/$brevId/distribuer?sakId=$sakId",
-                    ),
-                brukerTokenInfo = brukerTokenInfo,
-                postBody = Unit,
-            ).mapBoth(
-                success = { resource ->
-                    objectMapper.readValue(resource.response!!.toJson())
-                },
-                failure = { errorResponse -> throw errorResponse },
-            )
-        } catch (e: Exception) {
-            throw e
-        }
+        return downstreamResourceClient.post(
+            resource =
+                Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/api/brev/$brevId/distribuer?sakId=$sakId",
+                ),
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = Unit,
+        ).mapBoth(
+            success = { resource ->
+                objectMapper.readValue(resource.response!!.toJson())
+            },
+            failure = { errorResponse -> throw errorResponse },
+        )
     }
 
     override suspend fun hentBrev(
@@ -162,25 +161,42 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
-        try {
-            return downstreamResourceClient.get(
-                resource =
-                    Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/brev/$brevId?sakId=$sakId",
-                    ),
-                brukerTokenInfo = brukerTokenInfo,
-            ).mapBoth(
-                success = { resource ->
-                    objectMapper.readValue(resource.response.toString())
-                },
-                failure = { error -> throw error },
-            )
-        } catch (e: Exception) {
-            throw e
-        }
+        return downstreamResourceClient.get(
+            resource =
+                Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/api/brev/$brevId?sakId=$sakId",
+                ),
+            brukerTokenInfo = brukerTokenInfo,
+        ).mapBoth(
+            success = { resource ->
+                objectMapper.readValue(resource.response.toString())
+            },
+            failure = { error -> throw error },
+        )
+    }
+
+    private suspend fun settTittelForBrev(
+        sakId: Long,
+        brevId: Long,
+        tittel: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        downstreamResourceClient.post(
+            resource =
+                Resource(
+                    clientId = clientId,
+                    url = "$resourceUrl/api/brev/$brevId/tittel?sakId=$sakId",
+                ),
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = OppdaterTittelRequest(tittel),
+        ).mapBoth(success = {}, failure = { error -> throw error })
     }
 }
+
+data class OppdaterTittelRequest(
+    val tittel: String,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettetBrevDto(val id: Long, val mottaker: Mottaker)

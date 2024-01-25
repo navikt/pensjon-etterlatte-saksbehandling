@@ -116,6 +116,7 @@ fun opprettBehandling(
 fun foerstegangsbehandling(
     id: UUID = UUID.randomUUID(),
     sakId: Long,
+    sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
@@ -133,7 +134,7 @@ fun foerstegangsbehandling(
     sak =
         Sak(
             ident = persongalleri.soeker,
-            sakType = SakType.BARNEPENSJON,
+            sakType = sakType,
             id = sakId,
             enhet = enhet,
         ),

@@ -3,15 +3,12 @@ import { BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterGrunnlag } from '~shared/api/behandling'
-import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { ArrowsCirclepathIcon } from '@navikt/aksel-icons'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-
-export const FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG = 'pensjon-etterlatte.kan-bruke-oppdater-grunnlag'
 
 export default function OppdaterGrunnlagModal({
   behandlingId,
@@ -21,11 +18,10 @@ export default function OppdaterGrunnlagModal({
   behandlingStatus: IBehandlingStatus
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const featureAktiv = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_OPPDATER_GRUNNLAG, false)
   const behandles = behandlingErRedigerbar(behandlingStatus)
   const [oppdatert, apiOppdaterGrunnlag] = useApiCall(oppdaterGrunnlag)
 
-  if (!featureAktiv || !behandles) return
+  if (!behandles) return
 
   const lagre = () => {
     return apiOppdaterGrunnlag(

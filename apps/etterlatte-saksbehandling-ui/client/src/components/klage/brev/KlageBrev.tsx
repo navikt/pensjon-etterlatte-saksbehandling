@@ -73,7 +73,12 @@ export function KlageBrev() {
           {/* TODO lar være å bytte ut med ny brevmottaker komponent her, siden dette virker å være ganske wip */}
           {isSuccess(hentetBrev) && (
             <>
-              <BrevTittel brevId={hentetBrev.data.id} sakId={hentetBrev.data.sakId} tittel={hentetBrev.data.tittel} />
+              <BrevTittel
+                brevId={hentetBrev.data.id}
+                sakId={hentetBrev.data.sakId}
+                tittel={hentetBrev.data.tittel}
+                kanRedigeres={true}
+              />
               <NyttBrevMottaker brev={hentetBrev.data} />
             </>
           )}

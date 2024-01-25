@@ -10,7 +10,6 @@ import Spinner from '~shared/Spinner'
 import { GridContainer, MainContent } from '~shared/styled'
 import { hentKlage } from '~shared/api/klage'
 import { KlageStegmeny } from '~components/klage/stegmeny/KlageStegmeny'
-import { KlageVurdering } from '~components/klage/vurdering/KlageVurdering'
 import { KlageOppsummering } from '~components/klage/oppsummering/KlageOppsummering'
 import { KlageSidemeny } from '~components/klage/sidemeny/KlageSidemeny'
 import { KlageBrev } from '~components/klage/brev/KlageBrev'
@@ -18,10 +17,10 @@ import { KlageBrev } from '~components/klage/brev/KlageBrev'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { KlageFormkrav } from '~components/klage/formkrav/KlageFormkrav'
+import { KlageVurdering } from '~components/klage/vurdering/KlageVurdering'
 
 export function Klagebehandling() {
   const klage = useKlage()
-  const klageRedigerbar = useKlageRedigerbar()
   const match = useMatch('/klage/:klageId/*')
   const dispatch = useAppDispatch()
   const [fetchKlageStatus, fetchKlage] = useApiCall(hentKlage)
@@ -31,7 +30,8 @@ export function Klagebehandling() {
   const viHarLastetRiktigKlage = klageIdFraUrl === klage?.id
 
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const kanRedigere = innloggetSaksbehandler.skriveTilgang
+  const kanRedigere = (useKlageRedigerbar() && innloggetSaksbehandler.skriveTilgang) ?? false
+
   useEffect(() => {
     if (!klageIdFraUrl) return
 
@@ -63,13 +63,10 @@ export function Klagebehandling() {
         <GridContainer>
           <MainContent>
             <Routes>
-              <Route
-                path="formkrav"
-                element={<KlageFormkrav redigerbar={klageRedigerbar} kanRedigere={kanRedigere} />}
-              />
-              <Route path="vurdering" element={<KlageVurdering />} />
+              <Route path="formkrav" element={<KlageFormkrav kanRedigere={kanRedigere} />} />
+              <Route path="vurdering" element={<KlageVurdering kanRedigere={kanRedigere} />} />
               <Route path="brev" element={<KlageBrev />} />
-              <Route path="oppsummering" element={<KlageOppsummering />} />
+              <Route path="oppsummering" element={<KlageOppsummering kanRedigere={kanRedigere} />} />
               <Route path="*" element={<Navigate to="formkrav" replace />} />
             </Routes>
           </MainContent>

@@ -19,6 +19,7 @@ import { Innhold } from '~components/klage/styled'
 
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
+import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
 
 function hentBrevIdForInnstilling(klage: Klage | null): number | null {
   // TODO håndter avvist klage?
@@ -100,10 +101,10 @@ export function KlageBrev() {
 
       <div>
         <FlexRow justify="center" $spacing>
-          <Button className="button" variant="secondary" onClick={() => navigate(`/klage/${klage?.id}/vurdering`)}>
+          <Button className="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'brev'))}>
             Gå tilbake
           </Button>
-          <Button className="button" variant="primary" onClick={() => navigate(`/klage/${klage?.id}/oppsummering`)}>
+          <Button className="button" variant="primary" onClick={() => navigate(`/klage/${klage.id}/oppsummering`)}>
             Se oppsummering
           </Button>
         </FlexRow>

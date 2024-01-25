@@ -84,10 +84,7 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
       ) : null}
 
       <FlexRow justify="center" $spacing>
-        <Button
-          variant="secondary"
-          onClick={() => navigate(`/klage/${klage?.id}/${forrigeSteg(klage, 'oppsummering')}`)}
-        >
+        <Button variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'oppsummering'))}>
           Gå tilbake
         </Button>
         {kanRedigere && (

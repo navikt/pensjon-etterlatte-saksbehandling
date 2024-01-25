@@ -62,7 +62,7 @@ export function KlageFormkravVisning() {
         <BodyShort spacing>{saksbehandler?.ident}</BodyShort>
       </InnholdPadding>
       <FlexRow justify="center">
-        <Button onClick={() => navigate(`/klage/${klage.id}/${nesteSteg(klage, 'formkrav')}`)}>Neste side</Button>
+        <Button onClick={() => navigate(nesteSteg(klage, 'formkrav'))}>Neste side</Button>
       </FlexRow>
     </Content>
   )

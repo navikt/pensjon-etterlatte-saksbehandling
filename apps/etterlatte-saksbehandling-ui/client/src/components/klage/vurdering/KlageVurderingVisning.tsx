@@ -37,18 +37,10 @@ export function KlageVurderingVisning() {
         ) : null}
       </InnholdPadding>
       <FlexRow justify="center">
-        <Button
-          className="button"
-          variant="secondary"
-          onClick={() => navigate(`/klage/${klage.id}/${forrigeSteg(klage, 'vurdering')}`)}
-        >
+        <Button className="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
           Gå tilbake
         </Button>
-        <Button
-          className="button"
-          variant="primary"
-          onClick={() => navigate(`/klage/${klage.id}/${nesteSteg(klage, 'vurdering')}`)}
-        >
+        <Button className="button" variant="primary" onClick={() => navigate(nesteSteg(klage, 'vurdering'))}>
           Neste side
         </Button>
       </FlexRow>

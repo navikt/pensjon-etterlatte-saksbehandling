@@ -109,13 +109,13 @@ export function KlageVurderingRedigering() {
     }
     if (!isDirty) {
       // Skjema er fylt ut men med samme innhold som starten => skip lagring og gå videre
-      navigate(`/klage/${klage.id}/${nesteSteg(klage, 'vurdering')}`)
+      navigate(nesteSteg(klage, 'vurdering'))
     }
 
     const utfall = mapFraFormdataTilKlageUtfall(skjema)
     lagreUtfall({ klageId: klage.id, utfall }, (oppdatertKlage) => {
       dispatch(addKlage(oppdatertKlage))
-      navigate(`/klage/${klage.id}/${nesteSteg(klage, 'vurdering')}`)
+      navigate(nesteSteg(klage, 'vurdering'))
     })
   }
 

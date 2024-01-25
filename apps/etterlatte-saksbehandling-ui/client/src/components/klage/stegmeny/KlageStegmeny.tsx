@@ -52,38 +52,28 @@ export function KlageStegmeny() {
   )
 }
 
-export function nesteSteg(
-  klage: Klage,
-  aktivSide: 'formkrav' | 'vurdering' | 'brev' | 'oppsummering'
-): 'formkrav' | 'vurdering' | 'brev' | 'oppsummering' | undefined {
+export function nesteSteg(klage: Klage, aktivSide: 'formkrav' | 'vurdering' | 'brev' | 'oppsummering'): string {
   if (aktivSide === 'formkrav') {
-    return 'vurdering'
+    return `/klage/${klage.id}/vurdering`
   }
   if (aktivSide === 'vurdering') {
-    return kanSeBrev(klage) ? 'brev' : 'oppsummering'
+    return kanSeBrev(klage) ? `/klage/${klage.id}/brev` : `/klage/${klage.id}/oppsummering`
   }
   if (aktivSide === 'brev') {
-    return 'oppsummering'
+    return `/klage/${klage.id}/oppsummering`
   }
-  if (aktivSide === 'oppsummering') {
-    return undefined
-  }
+  return `/klage/${klage.id}`
 }
 
-export function forrigeSteg(
-  klage: Klage,
-  aktivSide: 'formkrav' | 'vurdering' | 'brev' | 'oppsummering'
-): 'formkrav' | 'vurdering' | 'brev' | 'oppsummering' | undefined {
-  if (aktivSide === 'formkrav') {
-    return undefined
-  }
+export function forrigeSteg(klage: Klage, aktivSide: 'formkrav' | 'vurdering' | 'brev' | 'oppsummering'): string {
   if (aktivSide === 'vurdering') {
-    return 'formkrav'
+    return `/klage/${klage.id}/formkrav`
   }
   if (aktivSide === 'brev') {
-    return 'vurdering'
+    return `/klage/${klage.id}/vurdering`
   }
   if (aktivSide === 'oppsummering') {
-    return kanSeBrev(klage) ? 'vurdering' : 'brev'
+    return kanSeBrev(klage) ? `/klage/${klage.id}/brev` : `/klage/${klage.id}/vurdering`
   }
+  return `/klage/${klage.id}`
 }

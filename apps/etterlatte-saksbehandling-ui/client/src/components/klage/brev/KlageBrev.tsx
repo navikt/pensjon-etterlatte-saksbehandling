@@ -73,7 +73,11 @@ export function KlageBrev() {
 
           {isSuccess(hentetBrev) && (
             <>
-              <BrevTittel brevId={hentetBrev.data.id} sakId={hentetBrev.data.sakId} tittel={hentetBrev.data.tittel} />
+              <BrevTittelMedSpacing
+                brevId={hentetBrev.data.id}
+                sakId={hentetBrev.data.sakId}
+                tittel={hentetBrev.data.tittel}
+              />
               <NyttBrevMottaker brev={hentetBrev.data} />
             </>
           )}
@@ -130,4 +134,8 @@ const Sidebar = styled.div`
   min-width: 40%;
   width: 40%;
   border-right: 1px solid #c6c2bf;
+`
+
+const BrevTittelMedSpacing = styled(BrevTittel)`
+  margin: 1rem;
 `

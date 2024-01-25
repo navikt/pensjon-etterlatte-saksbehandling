@@ -1,10 +1,10 @@
 import { Dokumentliste } from './dokumentliste'
-import styled from 'styled-components'
 import { useEffect } from 'react'
 import { hentDokumenter } from '~shared/api/dokument'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { DokumentlisteLiten } from './dokumentlisteLiten'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { Container } from '~shared/styled'
 
 export const Dokumentoversikt = (props: { fnr: string; liten?: boolean }) => {
   const [dokumenter, hentDokumenterForBruker] = useApiCall(hentDokumenter)
@@ -16,19 +16,8 @@ export const Dokumentoversikt = (props: { fnr: string; liten?: boolean }) => {
       <DokumentlisteLiten dokumenter={dokumenter} />
     </SidebarPanel>
   ) : (
-    <OversiktWrapper>
+    <Container>
       <Dokumentliste dokumenter={dokumenter} />
-    </OversiktWrapper>
+    </Container>
   )
 }
-
-export const OversiktWrapper = styled.div`
-  min-width: 40em;
-  max-width: 70%;
-
-  margin: 3em 1em;
-
-  .behandlinger {
-    margin-top: 5em;
-  }
-`

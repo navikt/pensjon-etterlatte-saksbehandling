@@ -98,6 +98,7 @@ data class Journalpost(
     val bruker: Bruker?,
     val sak: JournalpostSak?,
     val datoOpprettet: String,
+    val utsendingsinfo: Utsendingsinfo?,
 )
 
 data class Dokumenter(
@@ -122,3 +123,32 @@ data class AvsenderMottaker(
     val land: String?,
     val erLikBruker: Boolean?,
 )
+
+data class Utsendingsinfo(
+    val adresselinje1: String,
+    val adresselinje2: String,
+    val adresselinje3: String,
+    val postnummer: String,
+    val poststed: String,
+    val landkode: String,
+    val digitalpostkasseAdresse: String,
+    val fysiskpostSendt: FysiskpostSendt,
+    val digitalpostSendt: DigitalpostSendt,
+    val varselSendt: VarselSendt,
+) {
+    data class FysiskpostSendt(
+        val adressetekstKonvolutt: String,
+    )
+
+    data class DigitalpostSendt(
+        val adresse: String,
+    )
+
+    data class VarselSendt(
+        val type: String,
+        val adresse: String,
+        val tittel: String,
+        val tekst: String,
+        val tidspunkt: String,
+    )
+}

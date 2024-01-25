@@ -4,6 +4,11 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 
 data class BrevkodePar(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering) {
     companion object {
+        val OMREGNING =
+            BrevkodePar(
+                EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING,
+                EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
+            )
         val TILBAKEKREVING =
             BrevkodePar(
                 EtterlatteBrevKode.TILBAKEKREVING_INNHOLD,

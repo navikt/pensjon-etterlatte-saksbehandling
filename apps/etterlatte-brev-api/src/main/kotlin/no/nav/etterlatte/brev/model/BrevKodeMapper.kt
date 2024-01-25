@@ -1,8 +1,6 @@
 package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING_OPPHOER_MANUELL
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -25,10 +23,7 @@ class BrevKodeMapper {
     ): BrevkodePar {
         if (generellBrevData.erMigrering() || erOmregningNyRegel) {
             assert(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(generellBrevData.forenkletVedtak?.type))
-            return BrevkodePar(
-                BARNEPENSJON_VEDTAK_OMREGNING,
-                BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
-            )
+            return BrevkodePar.OMREGNING
         }
 
         return when (generellBrevData.sak.sakType) {

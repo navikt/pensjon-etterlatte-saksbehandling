@@ -15,7 +15,7 @@ export default function FerdigstillOppgave() {
 
   if (!oppgave || !journalpost) return null
 
-  const journalpostErFerdigstilt = ['FERDIGSTILT', 'JOURNALFOERT'].includes(journalpost.journalstatus)
+  const journalpostErFerdigstilt = ['FERDIGSTILT', 'JOURNALFOERT', 'FEILREGISTRERT'].includes(journalpost.journalstatus)
   const journalpostTilhoererAnnetTema = !['EYO', 'EYB'].includes(journalpost.tema)
   const kanFerdigstilleOppgaven = journalpostErFerdigstilt || journalpostTilhoererAnnetTema
 

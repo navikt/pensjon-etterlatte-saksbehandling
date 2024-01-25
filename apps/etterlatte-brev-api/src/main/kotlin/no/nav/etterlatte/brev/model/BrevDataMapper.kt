@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
@@ -18,6 +19,7 @@ import no.nav.etterlatte.brev.model.bp.AvslagBrevData
 import no.nav.etterlatte.brev.model.bp.EndringHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
 import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
+import no.nav.etterlatte.brev.model.bp.OpphoerBrevData
 import no.nav.etterlatte.brev.model.bp.SoeskenjusteringRevurderingBrevdata
 import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
@@ -283,6 +285,15 @@ class BrevDataMapper(
                 AvslagBrevData.fra(
                     innhold = innholdMedVedlegg,
                     // TODO må kunne sette brevutfall ved avslag. Det er pr nå ikke mulig da dette ligger i beregningssteget.
+                    brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
+                    utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+                )
+            }
+
+            BARNEPENSJON_OPPHOER -> {
+                OpphoerBrevData.fra(
+                    innhold = innholdMedVedlegg,
+                    // TODO må kunne sette brevutfall ved opphør. Det er pr nå ikke mulig da dette ligger i beregningssteget.
                     brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
                     utlandstilknytning = generellBrevData.utlandstilknytning?.type,
                 )

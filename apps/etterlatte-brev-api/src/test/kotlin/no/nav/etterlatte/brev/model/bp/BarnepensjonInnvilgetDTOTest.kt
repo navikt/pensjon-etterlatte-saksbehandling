@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.model.bp
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
+import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -23,8 +24,8 @@ internal class BarnepensjonInnvilgetDTOTest {
 
     @Test
     fun `setter skille for etterbetaling`() {
-        val brevdata =
-            BarnepensjonInnvilgetDTO.fra(
+        val barnepensjonInnvilgelse =
+            BarnepensjonInnvilgelseDTO.fra(
                 utbetalingsinfo =
                     Utbetalingsinfo(
                         antallBarn = 1,
@@ -40,8 +41,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                                 beregningsperiode2023OgUtover(),
                             ),
                     ),
-                avkortingsinfo = null,
-                etterbetalingDTO =
+                etterbetaling =
                     EtterbetalingDTO(
                         datoFom = LocalDate.of(2022, Month.JANUARY, 1),
                         datoTom = LocalDate.of(2022, Month.MARCH, 30),
@@ -68,18 +68,18 @@ internal class BarnepensjonInnvilgetDTOTest {
             )
 
         Assertions.assertEquals(
-            brevdata.etterbetaling!!.etterbetalingsperioder,
+            barnepensjonInnvilgelse.etterbetaling!!.etterbetalingsperioder,
             listOf(
-                beregningsperiodeJanuar2022(),
-                beregningsperiodeFebruar2022(),
-                beregningsperiodeMarsApril2022(),
+                beregningsperiodeJanuar2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiodeFebruar2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiodeMarsApril2022().toBarnepensjonBeregningsperiode(),
             ),
         )
         Assertions.assertEquals(
-            brevdata.utbetalingsinfo.beregningsperioder,
+            barnepensjonInnvilgelse.beregning.beregningsperioder,
             listOf(
-                beregningsperiodeAprilDesember2022(),
-                beregningsperiode2023OgUtover(),
+                beregningsperiodeAprilDesember2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiode2023OgUtover().toBarnepensjonBeregningsperiode(),
             ),
         )
     }
@@ -140,4 +140,13 @@ internal class BarnepensjonInnvilgetDTOTest {
                 ),
             )
         })
+
+    private fun Beregningsperiode.toBarnepensjonBeregningsperiode() =
+        BarnepensjonBeregningsperiode(
+            datoFOM = datoFOM,
+            datoTOM = datoTOM,
+            grunnbeloep = grunnbeloep,
+            antallBarn = 1,
+            utbetaltBeloep = utbetaltBeloep,
+        )
 }

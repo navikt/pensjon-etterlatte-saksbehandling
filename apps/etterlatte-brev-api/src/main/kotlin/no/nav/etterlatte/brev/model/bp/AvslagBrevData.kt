@@ -5,7 +5,7 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 
-data class BarnepensjonAvslagDTO(
+data class AvslagBrevData(
     val innhold: List<Slate.Element>,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
@@ -15,8 +15,8 @@ data class BarnepensjonAvslagDTO(
             innhold: InnholdMedVedlegg,
             brukerUnder18Aar: Boolean,
             utlandstilknytning: UtlandstilknytningType?,
-        ): BarnepensjonAvslagDTO =
-            BarnepensjonAvslagDTO(
+        ): AvslagBrevData =
+            AvslagBrevData(
                 innhold = innhold.innhold(),
                 brukerUnder18Aar = brukerUnder18Aar,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,

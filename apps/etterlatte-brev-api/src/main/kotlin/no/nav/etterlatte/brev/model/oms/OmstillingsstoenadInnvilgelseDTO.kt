@@ -4,18 +4,18 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Trygdetid
-import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
+import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
+import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
+import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.libs.common.IntBroek
-import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
-import java.time.YearMonth
 
 data class OmstillingsstoenadInnvilgelseDTO(
     val innhold: List<Slate.Element>,
@@ -30,22 +30,24 @@ data class OmstillingsstoenadInnvilgelseDTO(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
             avkortingsinfo: Avkortingsinfo,
-            etterbetalinginfo: EtterbetalingDTO?,
+            etterbetaling: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             innholdMedVedlegg: InnholdMedVedlegg,
             lavEllerIngenInntekt: Boolean,
         ): OmstillingsstoenadInnvilgelseDTO {
-            val beregningsperioder =
-                avkortingsinfo.beregningsperioder.map {
-                    OmstillingsstoenadBeregningsperiode(
-                        datoFOM = it.datoFOM,
-                        datoTOM = it.datoTOM,
-                        inntekt = it.inntekt,
-                        ytelseFoerAvkorting = it.ytelseFoerAvkorting,
-                        utbetaltBeloep = it.utbetaltBeloep,
-                        trygdetid = it.trygdetid,
-                    )
-                }
+            val (beregningsperioderUtbetaling, bereningsperioderEtterbetaling) =
+                avkortingsinfo.beregningsperioder
+                    .map {
+                        OmstillingsstoenadBeregningsperiode(
+                            datoFOM = it.datoFOM,
+                            datoTOM = it.datoTOM,
+                            inntekt = it.inntekt,
+                            ytelseFoerAvkorting = it.ytelseFoerAvkorting,
+                            utbetaltBeloep = it.utbetaltBeloep,
+                            trygdetid = it.trygdetid,
+                        )
+                    }
+                    .partition { beregningsperiode -> beregningsperiode.datoFOM > etterbetaling?.datoTom }
 
             val avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato }
 
@@ -58,10 +60,10 @@ data class OmstillingsstoenadInnvilgelseDTO(
                         virkningsdato = avkortingsinfo.virkningsdato,
                         inntekt = avkortingsinfo.inntekt,
                         grunnbeloep = avkortingsinfo.grunnbeloep,
-                        beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = beregningsperioder.maxByOrNull { it.datoFOM }!!,
+                        beregningsperioder = beregningsperioderUtbetaling,
+                        sisteBeregningsperiode = beregningsperioderUtbetaling.maxBy { it.datoFOM },
                         trygdetid =
-                            OmstillingsstoenadTrygdetid(
+                            TrygdetidMedBeregningsmetode(
                                 trygdetidsperioder = trygdetid.perioder,
                                 beregnetTrygdetidAar = trygdetid.aarTrygdetid,
                                 beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
@@ -76,7 +78,14 @@ data class OmstillingsstoenadInnvilgelseDTO(
                         .plusMonths(4)
                         .isAfter(avkortingsinfo.virkningsdato),
                 lavEllerIngenInntekt = lavEllerIngenInntekt,
-                etterbetaling = OmstillingsstoenadEtterbetaling.fra(etterbetalinginfo, beregningsperioder),
+                etterbetaling =
+                    etterbetaling?.let { dto ->
+                        OmstillingsstoenadEtterbetaling(
+                            fraDato = dto.datoFom,
+                            tilDato = dto.datoTom,
+                            etterbetalingsperioder = bereningsperioderEtterbetaling,
+                        )
+                    },
             )
         }
     }
@@ -101,55 +110,5 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO(
                 utbetalingsbeloep = avkortingsinfo.beregningsperioder.first().utbetaltBeloep,
                 etterbetaling = etterbetaling,
             )
-    }
-}
-
-data class OmstillingsstoenadBeregning(
-    val innhold: List<Slate.Element>,
-    val virkningsdato: LocalDate,
-    val inntekt: Kroner,
-    val grunnbeloep: Kroner,
-    val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
-    val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
-    val trygdetid: OmstillingsstoenadTrygdetid,
-)
-
-data class OmstillingsstoenadBeregningsperiode(
-    val datoFOM: LocalDate,
-    val datoTOM: LocalDate?,
-    val inntekt: Kroner,
-    val ytelseFoerAvkorting: Kroner,
-    val utbetaltBeloep: Kroner,
-    val trygdetid: Int,
-)
-
-data class OmstillingsstoenadTrygdetid(
-    val trygdetidsperioder: List<Trygdetidsperiode>,
-    val beregnetTrygdetidAar: Int,
-    val beregnetTrygdetidMaaneder: Int,
-    val prorataBroek: IntBroek?,
-    val beregningsMetodeAnvendt: BeregningsMetode,
-    val beregningsMetodeFraGrunnlag: BeregningsMetode,
-    val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
-)
-
-data class OmstillingsstoenadEtterbetaling(
-    val fraDato: LocalDate,
-    val tilDato: LocalDate,
-    val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
-) {
-    companion object {
-        fun fra(
-            dto: EtterbetalingDTO?,
-            perioder: List<OmstillingsstoenadBeregningsperiode>,
-        ) = if (dto == null) {
-            null
-        } else {
-            OmstillingsstoenadEtterbetaling(
-                fraDato = dto.datoFom,
-                tilDato = dto.datoTom,
-                beregningsperioder = perioder.filter { YearMonth.from(it.datoFOM) <= YearMonth.from(dto.datoTom) },
-            )
-        }
     }
 }

@@ -47,14 +47,7 @@ class BrevProsessTypeFactory {
                 BrevProsessType.REDIGERBAR
 
             VedtakType.ENDRING ->
-                when (generellBrevData.revurderingsaarsak) {
-                    Revurderingaarsak.SOESKENJUSTERING -> BrevProsessType.REDIGERBAR
-                    Revurderingaarsak.FENGSELSOPPHOLD -> BrevProsessType.REDIGERBAR
-                    Revurderingaarsak.UT_AV_FENGSEL -> BrevProsessType.REDIGERBAR
-                    Revurderingaarsak.YRKESSKADE -> BrevProsessType.REDIGERBAR
-                    Revurderingaarsak.ANNEN -> BrevProsessType.REDIGERBAR
-                    else -> BrevProsessType.MANUELL
-                }
+                BrevProsessType.REDIGERBAR
 
             VedtakType.OPPHOER ->
                 when (generellBrevData.revurderingsaarsak?.redigerbartBrev) {

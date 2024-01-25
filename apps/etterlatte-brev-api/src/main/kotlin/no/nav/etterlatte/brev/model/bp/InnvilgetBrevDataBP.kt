@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
@@ -7,64 +8,59 @@ import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
 import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.BrevDataValidator.valider
 import no.nav.etterlatte.brev.model.BrevVedleggKey
-import no.nav.etterlatte.brev.model.EndringBrevData
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
-import no.nav.etterlatte.libs.common.behandling.BarnepensjonSoeskenjusteringGrunn
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.pensjon.brevbaker.api.model.Kroner
-import java.time.YearMonth
+import java.time.LocalDate
 
-data class BarnepensjonRevurderingDTO(
+data class BarnepensjonInnvilgelseDTO(
     val innhold: List<Slate.Element>,
-    val erEndret: Boolean,
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
-    val harFlereUtbetalingsperioder: Boolean,
-) : EndringBrevData() {
+) : BrevData() {
     companion object {
+        val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
+
         fun fra(
-            innhold: InnholdMedVedlegg,
             utbetalingsinfo: Utbetalingsinfo,
-            forrigeUtbetalingsinfo: Utbetalingsinfo?,
             etterbetaling: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             grunnbeloep: Grunnbeloep,
             utlandstilknytning: UtlandstilknytningType?,
+            innhold: InnholdMedVedlegg,
             brukerUnder18Aar: Boolean,
-        ): BrevData {
-            val beregningsperioder =
-                utbetalingsinfo.beregningsperioder.map {
-                    BarnepensjonBeregningsperiode(
-                        datoFOM = it.datoFOM,
-                        datoTOM = it.datoTOM,
-                        grunnbeloep = it.grunnbeloep,
-                        utbetaltBeloep = it.utbetaltBeloep,
-                        antallBarn = it.antallBarn,
-                    )
-                }
+        ): BarnepensjonInnvilgelseDTO {
+            val (beregningsperioderUtbetaling, bereningsperioderEtterbetaling) =
+                utbetalingsinfo.beregningsperioder
+                    .map {
+                        BarnepensjonBeregningsperiode(
+                            datoFOM = it.datoFOM,
+                            datoTOM = it.datoTOM,
+                            grunnbeloep = it.grunnbeloep,
+                            utbetaltBeloep = it.utbetaltBeloep,
+                            antallBarn = it.antallBarn,
+                        )
+                    }
+                    .partition { beregningsperiode -> beregningsperiode.datoFOM > etterbetaling?.datoTom }
 
-            return BarnepensjonRevurderingDTO(
+            return BarnepensjonInnvilgelseDTO(
                 innhold = innhold.innhold(),
-                erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
                 beregning =
                     BarnepensjonBeregning(
-                        innhold = innhold.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
+                        innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
                         antallBarn = utbetalingsinfo.antallBarn,
                         virkningsdato = utbetalingsinfo.virkningsdato,
                         grunnbeloep = Kroner(grunnbeloep.grunnbeloep),
-                        beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = beregningsperioder.maxByOrNull { it.datoFOM }!!,
+                        beregningsperioder = beregningsperioderUtbetaling,
+                        sisteBeregningsperiode = beregningsperioderUtbetaling.maxByOrNull { it.datoFOM }!!,
                         trygdetid =
                             TrygdetidMedBeregningsmetode(
                                 trygdetidsperioder = trygdetid.perioder,
@@ -81,57 +77,52 @@ data class BarnepensjonRevurderingDTO(
                         BarnepensjonEtterbetaling(
                             fraDato = dto.datoFom,
                             tilDato = dto.datoTom,
-                            etterbetalingsperioder =
-                                beregningsperioder
-                                    .filter { YearMonth.from(it.datoFOM) <= YearMonth.from(dto.datoTom) },
+                            etterbetalingsperioder = bereningsperioderEtterbetaling,
                         )
                     },
                 brukerUnder18Aar = brukerUnder18Aar,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {
-                        it.datoFOM.isAfter(BarnepensjonInnvilgelseDTO.tidspunktNyttRegelverk) ||
-                            it.datoFOM.isEqual(
-                                BarnepensjonInnvilgelseDTO.tidspunktNyttRegelverk,
-                            )
+                        it.datoFOM.isAfter(tidspunktNyttRegelverk) || it.datoFOM.isEqual(tidspunktNyttRegelverk)
                     },
             )
         }
     }
 }
 
-data class BarnepensjonRevurderingRedigerbartUtfallDTO(
+data class BarnepensjonInnvilgelseRedigerbartUtfallDTO(
+    val virkningsdato: LocalDate,
+    val avdoed: Avdoed,
+    val sisteBeregningsperiodeDatoFom: LocalDate,
+    val sisteBeregningsperiodeBeloep: Kroner,
     val erEtterbetaling: Boolean,
-) : EndringBrevData() {
-    companion object {
-        fun fra(etterbetaling: EtterbetalingDTO?): BrevData {
-            return BarnepensjonRevurderingRedigerbartUtfallDTO(
-                erEtterbetaling = etterbetaling != null,
-            )
-        }
-    }
-}
-
-data class SoeskenjusteringRevurderingBrevdata(
-    val utbetalingsinfo: Utbetalingsinfo,
-    val grunnForJustering: BarnepensjonSoeskenjusteringGrunn,
-) : EndringBrevData() {
+    val harFlereUtbetalingsperioder: Boolean,
+) : BrevData() {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
-        ): SoeskenjusteringRevurderingBrevdata {
-            val revurderingsinfo =
-                valider<RevurderingInfo.Soeskenjustering>(
-                    generellBrevData.revurderingsaarsak,
-                    generellBrevData.forenkletVedtak?.revurderingInfo,
-                    Revurderingaarsak.SOESKENJUSTERING,
-                )
+            etterbetaling: EtterbetalingDTO?,
+        ): BarnepensjonInnvilgelseRedigerbartUtfallDTO {
+            val beregningsperioder =
+                utbetalingsinfo.beregningsperioder.map {
+                    BarnepensjonBeregningsperiode(
+                        datoFOM = it.datoFOM,
+                        datoTOM = it.datoTOM,
+                        grunnbeloep = it.grunnbeloep,
+                        utbetaltBeloep = it.utbetaltBeloep,
+                        antallBarn = it.antallBarn,
+                    )
+                }
 
-            return SoeskenjusteringRevurderingBrevdata(
-                utbetalingsinfo = utbetalingsinfo,
-                grunnForJustering = revurderingsinfo.grunnForSoeskenjustering,
+            return BarnepensjonInnvilgelseRedigerbartUtfallDTO(
+                virkningsdato = utbetalingsinfo.virkningsdato,
+                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
+                sisteBeregningsperiodeDatoFom = beregningsperioder.maxBy { it.datoFOM }.datoFOM,
+                sisteBeregningsperiodeBeloep = beregningsperioder.maxBy { it.datoFOM }.utbetaltBeloep,
+                erEtterbetaling = etterbetaling != null,
+                harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
             )
         }
     }

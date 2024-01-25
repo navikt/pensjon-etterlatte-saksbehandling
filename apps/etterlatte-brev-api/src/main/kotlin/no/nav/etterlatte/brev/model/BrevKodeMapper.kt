@@ -48,25 +48,11 @@ class BrevKodeMapper {
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
                             Revurderingaarsak.SOESKENJUSTERING -> BrevkodePar(EtterlatteBrevKode.BARNEPENSJON_REVURDERING_SOESKENJUSTERING)
-                            Revurderingaarsak.INSTITUSJONSOPPHOLD ->
+                            else ->
                                 BrevkodePar(
-                                    EtterlatteBrevKode.TOM_MAL,
+                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_UTFALL,
                                     EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
                                 )
-
-                            Revurderingaarsak.YRKESSKADE ->
-                                BrevkodePar(
-                                    EtterlatteBrevKode.TOM_MAL,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
-                                )
-
-                            Revurderingaarsak.ANNEN ->
-                                BrevkodePar(
-                                    EtterlatteBrevKode.TOM_MAL,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
-                                )
-
-                            else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
 
                     VedtakType.OPPHOER ->

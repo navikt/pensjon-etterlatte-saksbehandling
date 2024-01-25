@@ -22,52 +22,52 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 
-data class BrevkodePar(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering) {
+data class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: EtterlatteBrevKode = redigering) {
     companion object {
         val OMREGNING =
-            BrevkodePar(
+            Brevkoder(
                 BARNEPENSJON_VEDTAK_OMREGNING,
                 BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
             )
         val TILBAKEKREVING =
-            BrevkodePar(
+            Brevkoder(
                 TILBAKEKREVING_INNHOLD,
                 TILBAKEKREVING_FERDIG,
             )
         val TOMT_INFORMASJONSBREV =
-            BrevkodePar(
+            Brevkoder(
                 TOM_DELMAL,
                 TOM_MAL_INFORMASJONSBREV,
             )
     }
 
     object Barnepensjon {
-        val AVSLAG = BrevkodePar(BARNEPENSJON_AVSLAG_UTFALL, BARNEPENSJON_AVSLAG)
+        val AVSLAG = Brevkoder(BARNEPENSJON_AVSLAG_UTFALL, BARNEPENSJON_AVSLAG)
         val INNVILGELSE =
-            BrevkodePar(
+            Brevkoder(
                 BARNEPENSJON_INNVILGELSE_UTFALL,
                 BARNEPENSJON_INNVILGELSE,
             )
-        val OPPHOER = BrevkodePar(BARNEPENSJON_OPPHOER_UTFALL, BARNEPENSJON_OPPHOER)
-        val REVURDERING = BrevkodePar(TOM_MAL, BARNEPENSJON_REVURDERING)
+        val OPPHOER = Brevkoder(BARNEPENSJON_OPPHOER_UTFALL, BARNEPENSJON_OPPHOER)
+        val REVURDERING = Brevkoder(TOM_MAL, BARNEPENSJON_REVURDERING)
     }
 
     object Omstillingsstoenad {
         val AVSLAG =
-            BrevkodePar(
+            Brevkoder(
                 OMSTILLINGSSTOENAD_AVSLAG_UTFALL,
                 OMSTILLINGSSTOENAD_AVSLAG,
             )
         val INNVILGELSE =
-            BrevkodePar(
+            Brevkoder(
                 OMSTILLINGSSTOENAD_INNVILGELSE_UTFALL,
                 OMSTILLINGSSTOENAD_INNVILGELSE,
             )
         val OPPHOER =
-            BrevkodePar(
+            Brevkoder(
                 OMSTILLINGSSTOENAD_REVURDERING_OPPHOER_UTFALL,
                 OMSTILLINGSSTOENAD_REVURDERING_OPPHOER,
             )
-        val REVURDERING = BrevkodePar(TOM_MAL, OMSTILLINGSSTOENAD_REVURDERING)
+        val REVURDERING = Brevkoder(TOM_MAL, OMSTILLINGSSTOENAD_REVURDERING)
     }
 }

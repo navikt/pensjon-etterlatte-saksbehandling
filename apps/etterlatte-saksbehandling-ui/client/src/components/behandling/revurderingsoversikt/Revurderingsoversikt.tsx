@@ -31,9 +31,7 @@ import { SakType } from '~shared/types/sak'
 import { erOpphoer, Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import styled from 'styled-components'
 import { GrunnForSoeskenjustering } from '~components/behandling/revurderingsoversikt/GrunnForSoeskenjustering'
-import { AdoptertAv } from '~components/behandling/revurderingsoversikt/AdoptertAv'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/revurderingsoversikt/GrunnlagForVirkningstidspunkt'
-import { OmgjoeringAvFarskap } from '~components/behandling/revurderingsoversikt/OmgjoeringAvFarskap'
 import { RevurderingAnnen } from '~components/behandling/revurderingsoversikt/RevurderingAnnen'
 import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtland'
 import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
@@ -135,10 +133,6 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         )}
         {behandling.revurderingsaarsak === Revurderingaarsak.SOESKENJUSTERING && (
           <GrunnForSoeskenjustering behandling={behandling} />
-        )}
-        {behandling.revurderingsaarsak === Revurderingaarsak.ADOPSJON && <AdoptertAv behandling={behandling} />}
-        {behandling.revurderingsaarsak === Revurderingaarsak.OMGJOERING_AV_FARSKAP && (
-          <OmgjoeringAvFarskap behandling={behandling} />
         )}
         {behandling.revurderingsaarsak === Revurderingaarsak.ANNEN && <RevurderingAnnen behandling={behandling} />}
 

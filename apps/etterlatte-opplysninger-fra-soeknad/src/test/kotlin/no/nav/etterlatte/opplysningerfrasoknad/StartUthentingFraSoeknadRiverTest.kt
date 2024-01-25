@@ -11,6 +11,9 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.OPPLYSNING_KEY
+import rapidsandrivers.SAK_ID_KEY
 import java.io.FileNotFoundException
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -42,8 +45,8 @@ internal class StartUthentingFraSoeknadRiverTest {
         every { opplysningsuthenterMock.lagOpplysningsListe(soknad, SoeknadType.BARNEPENSJON) } returns opplysninger
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
-        assertEquals(1, inspector.message(0).get("sakId").intValue())
-        assertEquals("f525f2f7-e246-43d7-b61a-5f0757472916", inspector.message(0).get("behandlingId").asText())
-        assertEquals(11, inspector.message(0).get("opplysning").size())
+        assertEquals(1, inspector.message(0).get(SAK_ID_KEY).intValue())
+        assertEquals("f525f2f7-e246-43d7-b61a-5f0757472916", inspector.message(0).get(BEHANDLING_ID_KEY).asText())
+        assertEquals(11, inspector.message(0).get(OPPLYSNING_KEY).size())
     }
 }

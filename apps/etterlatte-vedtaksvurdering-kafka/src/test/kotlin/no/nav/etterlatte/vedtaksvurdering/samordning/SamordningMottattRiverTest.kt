@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
@@ -16,7 +17,7 @@ internal class SamordningMottattRiverTest {
         val melding =
             """
             {
-              "@event_name": "VEDTAK:SAMORDNING_MOTTATT",
+              "$EVENT_NAME_KEY": "VEDTAK:SAMORDNING_MOTTATT",
               "vedtakId": "67300342"
             }
             """.trimIndent()

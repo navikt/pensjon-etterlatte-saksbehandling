@@ -25,6 +25,10 @@ export const kanFerdigstilleJournalpost = (journalpost: Journalpost): [boolean, 
     feilmeldinger.push('Tema mangler')
   }
 
+  if (!journalpost.tittel) {
+    feilmeldinger.push('Journalpostens tittel mangler')
+  }
+
   if (!journalpost.dokumenter) {
     feilmeldinger.push('Journalposten er tom (ingen dokumenter)')
   } else if (journalpost.dokumenter.find((dok) => !dok.tittel)) {

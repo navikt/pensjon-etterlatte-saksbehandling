@@ -7,11 +7,14 @@ import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.ReguleringFeiletHendelse
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AARSAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import rapidsandrivers.DATO_KEY
+import rapidsandrivers.SAK_ID_KEY
 import java.time.LocalDate
 
 internal class ReguleringFeiletRiverTest {
@@ -22,8 +25,8 @@ internal class ReguleringFeiletRiverTest {
             mapOf(
                 EVENT_NAME_KEY to FEILA,
                 DATO_KEY to foersteMai2023,
-                "aarsak" to "REGULERING",
-                "sakId" to 83L,
+                AARSAK to ReguleringEvents.EVENT_NAME,
+                SAK_ID_KEY to 83L,
             ),
         )
 

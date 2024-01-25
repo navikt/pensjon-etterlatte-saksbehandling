@@ -7,13 +7,13 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import io.ktor.http.parameters
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -75,10 +75,8 @@ class SamKlientImpl(
                 httpClient.get {
                     url("$resourceUrl/api/vedtak")
                     header("pid", vedtak.soeker.value)
-                    parameters {
-                        append("fagomrade", "EYO")
-                        append("vedtakId", "${vedtak.id}")
-                    }
+                    parameter("fagomrade", "EYO")
+                    parameter("vedtakId", "${vedtak.id}")
                 }
 
             if (response.status.isSuccess()) {

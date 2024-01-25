@@ -68,7 +68,7 @@ export function KlageBrev() {
           ) : (
             <BodyShort>TODO håndter avslagsbrev her</BodyShort>
           )}
-
+          {/* TODO lar være å bytte ut med ny brevmottaker komponent her, siden dette virker å være ganske wip */}
           {isSuccess(hentetBrev) && <NyttBrevMottaker brev={hentetBrev.data} />}
         </Sidebar>
 

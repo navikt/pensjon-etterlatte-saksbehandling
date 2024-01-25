@@ -12,12 +12,12 @@ import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBr
 import styled from 'styled-components'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 import BrevStatusPanel from '~components/person/brev/BrevStatusPanel'
-import NyttBrevMottaker from '~components/person/brev/NyttBrevMottaker'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 import { mapApiResult } from '~shared/api/apiUtils'
+import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 
 export default function NyttBrev() {
   const { brevId, sakId, fnr } = useParams()
@@ -57,7 +57,7 @@ export default function NyttBrev() {
               <div style={{ margin: '1rem' }}>
                 <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
               </div>
-              <NyttBrevMottaker brev={brev} />
+              <BrevMottaker brev={brev} kanRedigeres={kanRedigeres} />
             </Column>
             <Column>
               {brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT ? (

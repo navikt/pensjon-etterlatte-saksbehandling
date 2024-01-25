@@ -24,10 +24,13 @@ export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres }: Prop
             Tittel
           </Heading>
           <div>
-            {kanRedigeres ? (
-              <Button variant="secondary" onClick={() => setErModalAapen(true)} icon={<DocPencilIcon />} size="small" />
-            ) : (
-              <></>
+            {kanRedigeres && (
+              <Button
+                variant="secondary"
+                onClick={() => setErModalAapen(true)}
+                icon={<DocPencilIcon aria-hidden />}
+                size="small"
+              />
             )}
           </div>
         </FlexRow>

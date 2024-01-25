@@ -74,8 +74,9 @@ export const logger = {
 
 export const setupWindowOnError = () => {
   addEventListener('error', (event) => {
-    const { error, lineno, colno, message } = event
+    const { error: kanskjeError, lineno, colno, message } = event
 
+    const error = kanskjeError || {}
     if (import.meta.env.MODE === 'development') {
       console.error(error.message, error.stack)
     } else {

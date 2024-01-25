@@ -20,7 +20,6 @@ import no.nav.etterlatte.brev.model.bp.EndringHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
 import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.OpphoerBrevData
-import no.nav.etterlatte.brev.model.bp.SoeskenjusteringRevurderingBrevdata
 import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseDTO
@@ -113,7 +112,7 @@ class BrevDataMapper(
     ): BrevData {
         return when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
-                when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
+                when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE ->
                         coroutineScope {
                             val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
@@ -127,40 +126,8 @@ class BrevDataMapper(
                         }
 
                     VedtakType.AVSLAG -> ManueltBrevData.fra()
-
-                    VedtakType.ENDRING ->
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.SOESKENJUSTERING -> {
-                                coroutineScope {
-                                    val utbetalingsinfo =
-                                        async {
-                                            datafetcher(brukerTokenInfo, generellBrevData).hentUtbetaling()
-                                        }
-                                    SoeskenjusteringRevurderingBrevdata.fra(generellBrevData, utbetalingsinfo.await())
-                                }
-                            }
-
-                            Revurderingaarsak.FENGSELSOPPHOLD,
-                            Revurderingaarsak.UT_AV_FENGSEL,
-                            Revurderingaarsak.INSTITUSJONSOPPHOLD,
-                            Revurderingaarsak.YRKESSKADE,
-                            Revurderingaarsak.ANNEN,
-                            -> ManueltBrevData.fra()
-
-                            else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
-                        }
-
-                    VedtakType.OPPHOER ->
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.ADOPSJON ->
-                                ManueltBrevData.fra(emptyList())
-                            Revurderingaarsak.OMGJOERING_AV_FARSKAP -> {
-                                ManueltBrevData.fra(emptyList())
-                            }
-
-                            else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
-                        }
-
+                    VedtakType.ENDRING -> ManueltBrevData.fra()
+                    VedtakType.OPPHOER -> ManueltBrevData.fra()
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
                     null -> ManueltBrevData.fra(emptyList())
                 }

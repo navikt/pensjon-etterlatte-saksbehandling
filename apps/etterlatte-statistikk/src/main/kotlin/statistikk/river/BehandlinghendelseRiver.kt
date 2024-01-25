@@ -28,15 +28,8 @@ class BehandlinghendelseRiver(
     init {
         initialiserRiverUtenEventName(rapidsConnection) {
             validate { it.demandAny(EVENT_NAME_KEY, behandlingshendelser) }
-            validate { it.interestedIn(BEHANDLING_RIVER_KEY) }
-            validate { it.requireKey("behandling.id") }
-            validate { it.requireKey("behandling.sak.id") }
-            validate { it.requireKey("behandling.sak.ident") }
-            validate { it.requireKey("behandling.behandlingOpprettet") }
-            validate { it.requireKey("behandling.sistEndret") }
-            validate { it.requireKey("behandling.status") }
-            validate { it.requireKey("behandling.type") }
-            validate { it.interestedIn(TEKNISK_TID_KEY) }
+            validate { it.requireKey(BEHANDLING_RIVER_KEY) }
+            validate { it.requireKey(TEKNISK_TID_KEY) }
         }
     }
 
@@ -46,7 +39,7 @@ class BehandlinghendelseRiver(
     ) = try {
         val behandling: StatistikkBehandling =
             objectMapper.treeToValue(packet[BEHANDLING_RIVER_KEY])
-        val hendelse: BehandlingHendelse = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
+        val hendelse: BehandlingHendelseType = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
         val tekniskTid = parseTekniskTid(packet, logger)
 
         service.registrerStatistikkForBehandlinghendelse(behandling, hendelse, tekniskTid)
@@ -70,9 +63,4 @@ class BehandlinghendelseRiver(
         logger.error("Feilet på behandlingid ${packet["behandling.id"]}")
         throw e
     }
-}
-
-enum class BehandlingHendelse {
-    OPPRETTET,
-    AVBRUTT,
 }

@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -13,7 +14,6 @@ import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.BrevkodePar
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Pdf
@@ -38,7 +38,7 @@ class PDFGenerator(
         bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
-        brevKode: (GenerellBrevData, Brev) -> BrevkodePar,
+        brevKode: (GenerellBrevData, Brev) -> Brevkoder,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         sjekkOmBrevKanEndres(id)
@@ -53,7 +53,7 @@ class PDFGenerator(
         bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
-        brevKode: (GenerellBrevData, Brev) -> BrevkodePar,
+        brevKode: (GenerellBrevData, Brev) -> Brevkoder,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
@@ -121,10 +121,10 @@ class PDFGenerator(
         automatiskMigreringRequest: MigreringBrevRequest?,
         brev: Brev,
         brukerTokenInfo: BrukerTokenInfo,
-        brevkodePar: BrevkodePar,
+        brevkoder: Brevkoder,
     ): BrevData =
         when (generellBrevData.erMigrering()) {
-            false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
+            false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkoder)
             true ->
                 OmregnetBPNyttRegelverkFerdig(
                     innhold =
@@ -146,7 +146,7 @@ class PDFGenerator(
         brev: Brev,
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
-        brevkode: BrevkodePar,
+        brevkode: Brevkoder,
     ): BrevData =
         when (brev.prosessType) {
             BrevProsessType.REDIGERBAR ->

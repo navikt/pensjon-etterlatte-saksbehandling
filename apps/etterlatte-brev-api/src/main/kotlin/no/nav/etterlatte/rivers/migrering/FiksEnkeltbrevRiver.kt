@@ -6,7 +6,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rivers.BrevEventTypes
 import no.nav.etterlatte.token.Systembruker
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -19,7 +18,7 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 internal class FiksEnkeltbrevRiver(
     rapidsConnection: RapidsConnection,
     private val vedtaksvurderingService: VedtaksvurderingService,
-) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.FIKS_ENKELTBREV.toString()) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

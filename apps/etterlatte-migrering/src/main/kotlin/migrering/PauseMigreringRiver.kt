@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class PauseMigreringRiver(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
-    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.PAUSE) {
+    ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.PAUSE) {
             validate { it.requireKey(PESYS_ID_KEY) }
         }
     }

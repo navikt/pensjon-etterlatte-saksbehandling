@@ -26,12 +26,11 @@ import java.time.LocalDate
 internal class MigreringHendelserRiver(
     rapidsConnection: RapidsConnection,
     private val beregningService: BeregningService,
-) :
-    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.BEREGN) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.BEREGN) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }

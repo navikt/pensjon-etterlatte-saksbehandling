@@ -13,11 +13,11 @@ import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class LagreKoblingRiver(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
-    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.LAGRE_KOPLING) {
+    ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.LAGRE_KOPLING) {
             validate { it.requireKey(PESYS_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
         }

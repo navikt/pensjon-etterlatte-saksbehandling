@@ -29,8 +29,7 @@ import java.util.UUID
 internal class MigreringHendelserRiver(
     rapidsConnection: RapidsConnection,
     private val trygdetidService: TrygdetidService,
-) :
-    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.TRYGDETID) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

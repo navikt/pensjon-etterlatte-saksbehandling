@@ -14,11 +14,11 @@ internal class AvbrytBehandlingHvisMigreringFeilaRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
 ) :
-    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.AVBRYT_BEHANDLING) {
+    ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.AVBRYT_BEHANDLING) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
         }
     }

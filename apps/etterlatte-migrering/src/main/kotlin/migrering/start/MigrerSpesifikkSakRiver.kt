@@ -21,7 +21,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SPESIFIKK_SAK
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rapidsandrivers.migrering.kilde
@@ -44,11 +43,11 @@ internal class MigrerSpesifikkSakRiver(
     private val featureToggleService: FeatureToggleService,
     private val verifiserer: Verifiserer,
     private val krrKlient: KrrKlient,
-) : ListenerMedLoggingOgFeilhaandtering(MIGRER_SPESIFIKK_SAK) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SPESIFIKK_SAK) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(LOPENDE_JANUAR_2024_KEY) }
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }

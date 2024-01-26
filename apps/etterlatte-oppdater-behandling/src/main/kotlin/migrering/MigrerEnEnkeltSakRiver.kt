@@ -28,12 +28,11 @@ import rapidsandrivers.sakId
 internal class MigrerEnEnkeltSakRiver(
     rapidsConnection: RapidsConnection,
     private val behandlinger: BehandlingService,
-) :
-    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.MIGRER_SAK) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SAK) {
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey(FNR_KEY) }

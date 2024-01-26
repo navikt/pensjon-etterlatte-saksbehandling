@@ -16,7 +16,6 @@ object Migreringshendelser {
     const val VEDTAK = "${PREFIX}VEDTAK"
     const val PAUSE = "${PREFIX}PAUSE"
     const val IVERKSATT = "${PREFIX}IVERKSATT"
-    const val BREV_SENDT = "${PREFIX}BREV_SENDT"
     const val AVBRYT_BEHANDLING = "${PREFIX}AVBRYT_BEHANDLING"
     const val FIKS_ENKELTBREV = "${PREFIX}FIKS_ENKELTBREV"
 }

@@ -215,7 +215,7 @@ internal class MigreringHendelserRiverTest {
         assertEquals(1, inspector.inspektør.size)
         val resultat = inspector.inspektør.message(0)
         assertEquals(EventNames.FEILA, resultat.get(EVENT_NAME_KEY).textValue())
-        assertEquals(Migreringshendelser.BEREGN, resultat.get(FEILENDE_STEG).textValue())
+        assertEquals(MigreringHendelserRiver::class.simpleName, resultat.get(FEILENDE_STEG).textValue())
         assertTrue(
             resultat.get(FEILMELDING_KEY).textValue()
                 .contains("Man skal ikke kunne komme dårligere ut på nytt regelverk."),
@@ -255,7 +255,7 @@ internal class MigreringHendelserRiverTest {
         assertEquals(1, inspector.inspektør.size)
         val resultat = inspector.inspektør.message(0)
         assertEquals(EventNames.FEILA, resultat.get(EVENT_NAME_KEY).textValue())
-        assertEquals(Migreringshendelser.BEREGN, resultat.get(FEILENDE_STEG).textValue())
+        assertEquals(MigreringHendelserRiver::class.simpleName, resultat.get(FEILENDE_STEG).textValue())
         assertTrue(
             resultat.get(FEILMELDING_KEY).textValue()
                 .contains("Beregning må være basert på samme G som i Pesys"),
@@ -295,7 +295,7 @@ internal class MigreringHendelserRiverTest {
         assertEquals(1, inspector.inspektør.size)
         val resultat = inspector.inspektør.message(0)
         assertEquals(EventNames.FEILA, resultat.get(EVENT_NAME_KEY).textValue())
-        assertEquals(Migreringshendelser.BEREGN, resultat.get(FEILENDE_STEG).textValue())
+        assertEquals(MigreringHendelserRiver::class.simpleName, resultat.get(FEILENDE_STEG).textValue())
         assertTrue(
             resultat.get(FEILMELDING_KEY).textValue()
                 .contains("Beregning må være basert på samme trygdetid som i Pesys"),
@@ -339,7 +339,7 @@ internal class MigreringHendelserRiverTest {
         assertEquals(1, inspector.inspektør.size)
         val resultat = inspector.inspektør.message(0)
         assertEquals(EventNames.FEILA, resultat.get(EVENT_NAME_KEY).textValue())
-        assertEquals(Migreringshendelser.BEREGN, resultat.get(FEILENDE_STEG).textValue())
+        assertEquals(MigreringHendelserRiver::class.simpleName, resultat.get(FEILENDE_STEG).textValue())
         assertTrue(
             resultat.get(FEILMELDING_KEY).textValue()
                 .contains("Migrerte saker skal benytte samme beregningsmetode som Pesys."),

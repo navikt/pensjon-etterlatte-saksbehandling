@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGN
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.OPPRETT_VEDTAK
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -28,11 +28,11 @@ internal class OmregningHendelserRiver(
     rapidsConnection: RapidsConnection,
     private val beregningService: BeregningService,
     private val trygdetidService: TrygdetidService,
-) : ListenerMedLoggingOgFeilhaandtering(BEREGN) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, ReguleringEvents.BEREGN) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_TYPE) }
             validate { it.rejectKey(BEREGNING_KEY) }

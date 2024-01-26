@@ -45,7 +45,7 @@ internal class VedtakMottakRiverTest {
         inspector.apply { sendTestMessage(SAMORDNET_VEDTAK_OMS) }
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
-            assertEquals(UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(), event.eventName)
+            assertEquals(UtbetalinghendelseType.OPPDATERT.lagEventnameForType(), event.eventName)
             assertEquals(UtbetalingStatusDto.valueOf(UtbetalingStatus.GODKJENT.name), event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
         }
@@ -65,7 +65,7 @@ internal class VedtakMottakRiverTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
-            assertEquals(UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(), event.eventName)
+            assertEquals(UtbetalinghendelseType.OPPDATERT.lagEventnameForType(), event.eventName)
             assertEquals(UtbetalingStatusDto.valueOf(utbetaling.status().name), event.utbetalingResponse.status)
             assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
             assertEquals(utbetaling.behandlingId.value, event.utbetalingResponse.behandlingId)
@@ -87,7 +87,7 @@ internal class VedtakMottakRiverTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
-            assertEquals(UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(), event.eventName)
+            assertEquals(UtbetalinghendelseType.OPPDATERT.lagEventnameForType(), event.eventName)
             assertEquals(UtbetalingStatusDto.FEILET, event.utbetalingResponse.status)
             assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
             assertTrue(
@@ -114,7 +114,7 @@ internal class VedtakMottakRiverTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
-            assertEquals(UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(), event.eventName)
+            assertEquals(UtbetalinghendelseType.OPPDATERT.lagEventnameForType(), event.eventName)
             assertEquals(UtbetalingStatusDto.FEILET, event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
             assertEquals(
@@ -131,7 +131,7 @@ internal class VedtakMottakRiverTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
-            assertEquals(UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(), event.eventName)
+            assertEquals(UtbetalinghendelseType.OPPDATERT.lagEventnameForType(), event.eventName)
             assertEquals(UtbetalingStatusDto.FEILET, event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
             assertEquals(

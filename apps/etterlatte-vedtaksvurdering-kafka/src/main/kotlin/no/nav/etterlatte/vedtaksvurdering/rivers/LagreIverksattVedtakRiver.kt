@@ -18,7 +18,7 @@ internal class LagreIverksattVedtakRiver(
     private val vedtaksvurderingService: VedtakService,
 ) : ListenerMedLogging() {
     init {
-        initialiserRiver(rapidsConnection, UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT) {
+        initialiserRiver(rapidsConnection, UtbetalinghendelseType.OPPDATERT) {
             validate { it.requireKey(UTBETALING_RESPONSE) }
         }
     }

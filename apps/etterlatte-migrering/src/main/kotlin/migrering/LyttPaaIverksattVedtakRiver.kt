@@ -26,7 +26,7 @@ internal class LyttPaaIverksattVedtakRiver(
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT) {
+        initialiserRiver(rapidsConnection, UtbetalinghendelseType.OPPDATERT) {
             validate { it.requireKey(UTBETALING_RESPONSE) }
         }
     }

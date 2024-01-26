@@ -70,7 +70,7 @@ class LyttPaaIverksattVedtakRiverTest {
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
-                            EVENT_NAME_KEY to UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(),
+                            EVENT_NAME_KEY to UtbetalinghendelseType.OPPDATERT.lagEventnameForType(),
                             UTBETALING_RESPONSE to
                                 UtbetalingResponseDto(
                                     status = UtbetalingStatusDto.GODKJENT,
@@ -111,7 +111,7 @@ class LyttPaaIverksattVedtakRiverTest {
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
-                            EVENT_NAME_KEY to UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(),
+                            EVENT_NAME_KEY to UtbetalinghendelseType.OPPDATERT.lagEventnameForType(),
                             UTBETALING_RESPONSE to
                                 UtbetalingResponseDto(
                                     status = UtbetalingStatusDto.AVVIST,

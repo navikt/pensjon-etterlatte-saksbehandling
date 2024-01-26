@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
-import java.time.YearMonth
 
 data class OmstillingsstoenadInnvilgelseDTO(
     val innhold: List<Slate.Element>,
@@ -145,10 +144,27 @@ data class OmstillingsstoenadEtterbetaling(
         ) = if (dto == null) {
             null
         } else {
+            // Midlertidig fiks siden denne utleder etterbetaling på en annen måte enn barnepensjon
             OmstillingsstoenadEtterbetaling(
                 fraDato = dto.datoFom,
                 tilDato = dto.datoTom,
-                beregningsperioder = perioder.filter { YearMonth.from(it.datoFOM) <= YearMonth.from(dto.datoTom) },
+                beregningsperioder =
+                    perioder
+                        .filter { it.datoFOM.isBefore(dto.datoTom) && dto.datoFom.isBefore(it.datoTOM ?: LocalDate.MAX) }
+                        .sortedByDescending { it.datoFOM }
+                        .let { list ->
+                            val oppdatertListe = list.toMutableList()
+
+                            // Setter tilDato på nyeste periode innenfor hva som er satt i etterbetaling
+                            oppdatertListe.firstOrNull()?.copy(datoTOM = dto.datoTom)
+                                ?.let { oppdatertListe[0] = it }
+
+                            // Setter fraDato på eldste periode innenfor hva som er satt i etterbetaling
+                            oppdatertListe.lastOrNull()?.copy(datoFOM = dto.datoFom)
+                                ?.let { oppdatertListe[list.lastIndex] = it }
+
+                            oppdatertListe.toList()
+                        },
             )
         }
     }

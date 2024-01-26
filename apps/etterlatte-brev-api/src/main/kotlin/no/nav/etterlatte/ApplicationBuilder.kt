@@ -240,7 +240,7 @@ class ApplicationBuilder {
     private fun lagMelding(behandlingId: String) =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
+                EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV.lagEventnameForType(),
                 BEHANDLING_ID_KEY to behandlingId,
                 FIKS_BREV_MIGRERING to true,
             ),

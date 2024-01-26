@@ -2,6 +2,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
+import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.VILKAARSVURDER
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
@@ -21,7 +22,7 @@ internal class MigreringVilkaarsvurderingRiver(
     private val logger = LoggerFactory.getLogger(MigreringVilkaarsvurderingRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.VILKAARSVURDER) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.VILKAARSVURDER.lagEventnameForType()) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.rejectKey(VILKAARSVURDERT_KEY) }
@@ -37,7 +38,7 @@ internal class MigreringVilkaarsvurderingRiver(
         logger.info("Mottatt vilkårs-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
         vilkaarsvurderingService.migrer(behandlingId, yrkesskadeFordel)
         packet[VILKAARSVURDERT_KEY] = true
-        packet.eventName = Migreringshendelser.TRYGDETID
+        packet.eventName = Migreringshendelser.TRYGDETID.lagEventnameForType()
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert migreringshendelse fra vilkårsvurdering for behandling $behandlingId")
     }

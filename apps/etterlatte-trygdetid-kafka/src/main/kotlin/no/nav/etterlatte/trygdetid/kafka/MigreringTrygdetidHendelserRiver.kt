@@ -33,7 +33,7 @@ internal class MigreringTrygdetidHendelserRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.TRYGDETID) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.TRYGDETID.lagEventnameForType()) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(VILKAARSVURDERT_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
@@ -138,7 +138,7 @@ internal class MigreringTrygdetidHendelserRiver(
         behandlingId: UUID,
     ) {
         packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
-        packet.eventName = Migreringshendelser.BEREGN
+        packet.eventName = Migreringshendelser.BEREGN.lagEventnameForType()
         context.publish(packet.toJson())
         logger.info(
             "Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId",

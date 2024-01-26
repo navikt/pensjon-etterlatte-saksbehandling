@@ -42,7 +42,10 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
             validate {
                 it.rejectValues(
                     FEILENDE_STEG,
-                    listOf(Migreringshendelser.VERIFISER, Migreringshendelser.AVBRYT_BEHANDLING),
+                    listOf(
+                        Migreringshendelser.VERIFISER.lagEventnameForType(),
+                        Migreringshendelser.AVBRYT_BEHANDLING.lagEventnameForType(),
+                    ),
                 )
             }
         }
@@ -68,7 +71,7 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
             pesysId = pesyskopling.first!!,
         )
         repository.oppdaterStatus(pesyskopling.first!!, Migreringsstatus.MIGRERING_FEILA)
-        packet.eventName = Migreringshendelser.AVBRYT_BEHANDLING
+        packet.eventName = Migreringshendelser.AVBRYT_BEHANDLING.lagEventnameForType()
         pesyskopling.second?.let {
             packet.behandlingId = it
             context.publish(packet.toJson())

@@ -109,7 +109,7 @@ internal class MigreringVilkaarsvurderingRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to Migreringshendelser.VILKAARSVURDER,
+                    EVENT_NAME_KEY to Migreringshendelser.VILKAARSVURDER.lagEventnameForType(),
                     BEHOV_NAME_KEY to Opplysningstype.AVDOED_PDL_V1.name,
                     SAK_ID_KEY to 1,
                     BEHANDLING_ID_KEY to behandlingId,

@@ -30,7 +30,7 @@ internal class MigreringBeregningHendelserRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.BEREGN) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.BEREGN.lagEventnameForType()) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }
@@ -52,7 +52,7 @@ internal class MigreringBeregningHendelserRiver(
 
         verifiserNyBeregning(beregning, packet.hendelseData)
 
-        packet.eventName = Migreringshendelser.VEDTAK
+        packet.eventName = Migreringshendelser.VEDTAK.lagEventnameForType()
         packet[BEREGNING_KEY] = beregning
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert migreringshendelse fra beregning for behandling $behandlingId")

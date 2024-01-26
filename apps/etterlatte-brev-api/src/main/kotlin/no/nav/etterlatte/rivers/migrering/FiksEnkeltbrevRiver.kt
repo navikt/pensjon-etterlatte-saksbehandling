@@ -22,7 +22,7 @@ internal class FiksEnkeltbrevRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.FIKS_ENKELTBREV) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.FIKS_ENKELTBREV.lagEventnameForType()) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
         }
     }

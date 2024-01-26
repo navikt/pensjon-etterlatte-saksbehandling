@@ -137,7 +137,7 @@ internal class MigreringTrygdetidHendelserRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.TRYGDETID,
+                Migreringshendelser.TRYGDETID.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     VILKAARSVURDERT_KEY to "vilkaarsvurdert",
@@ -223,7 +223,7 @@ internal class MigreringTrygdetidHendelserRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.TRYGDETID,
+                Migreringshendelser.TRYGDETID.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     VILKAARSVURDERT_KEY to "vilkaarsvurdert",
@@ -342,7 +342,7 @@ internal class MigreringTrygdetidHendelserRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.TRYGDETID,
+                Migreringshendelser.TRYGDETID.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     VILKAARSVURDERT_KEY to "vilkaarsvurdert",
@@ -465,7 +465,7 @@ internal class MigreringTrygdetidHendelserRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.TRYGDETID,
+                Migreringshendelser.TRYGDETID.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     VILKAARSVURDERT_KEY to "vilkaarsvurdert",
@@ -544,7 +544,7 @@ internal class MigreringTrygdetidHendelserRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.TRYGDETID,
+                Migreringshendelser.TRYGDETID.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     VILKAARSVURDERT_KEY to "vilkaarsvurdert",

@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
@@ -113,9 +114,7 @@ class BrevDataMapper(
     ): BrevData {
         return when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
-                when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.AVSLAG -> ManueltBrevData.fra()
-
+                when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE ->
                         coroutineScope {
                             val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
@@ -128,24 +127,15 @@ class BrevDataMapper(
                             )
                         }
 
+                    VedtakType.AVSLAG -> ManueltBrevData.fra()
+
                     VedtakType.ENDRING ->
                         coroutineScope {
                             val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                             val etterbetaling = async { fetcher.hentEtterbetaling() }
                             BarnepensjonRevurderingRedigerbartUtfallDTO.fra(etterbetaling.await())
                         }
-
-                    VedtakType.OPPHOER ->
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.ADOPSJON ->
-                                ManueltBrevData.fra(emptyList())
-                            Revurderingaarsak.OMGJOERING_AV_FARSKAP -> {
-                                ManueltBrevData.fra(emptyList())
-                            }
-
-                            else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
-                        }
-
+                    VedtakType.OPPHOER -> ManueltBrevData.fra()
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
                     null -> ManueltBrevData.fra(emptyList())
                 }
@@ -201,7 +191,7 @@ class BrevDataMapper(
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
         innholdMedVedlegg: InnholdMedVedlegg,
-        kode: BrevkodePar,
+        kode: Brevkoder,
         tittel: String? = null,
     ): BrevData {
         return when (kode.ferdigstilling) {

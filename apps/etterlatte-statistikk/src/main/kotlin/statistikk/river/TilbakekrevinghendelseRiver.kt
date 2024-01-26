@@ -1,14 +1,14 @@
 package no.nav.etterlatte.statistikk.river
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
-import no.nav.etterlatte.libs.common.klage.KLAGE_STATISTIKK_RIVER_KEY
-import no.nav.etterlatte.libs.common.klage.KlageHendelseType
-import no.nav.etterlatte.libs.common.klage.StatistikkKlage
-import no.nav.etterlatte.libs.common.klage.lagEventnameForType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
+import no.nav.etterlatte.libs.common.tilbakekreving.TILBAKEKREVING_STATISTIKK_RIVER_KEY
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
+import no.nav.etterlatte.libs.common.tilbakekreving.lagEventnameForType
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -17,18 +17,18 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.migrering.ListenerMedLogging
 
-class KlagehendelseRiver(
+class TilbakekrevinghendelseRiver(
     rapidsConnection: RapidsConnection,
     private val service: StatistikkService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private val klagehendelser = KlageHendelseType.entries.map { it.lagEventnameForType() }
+    private val tilbakekrevinghendelser = TilbakekrevingHendelseType.entries.map { it.lagEventnameForType() }
 
     init {
         initialiserRiverUtenEventName(rapidsConnection) {
-            validate { it.demandAny(EVENT_NAME_KEY, klagehendelser) }
-            validate { it.requireKey(KLAGE_STATISTIKK_RIVER_KEY) }
+            validate { it.demandAny(EVENT_NAME_KEY, tilbakekrevinghendelser) }
+            validate { it.requireKey(TILBAKEKREVING_STATISTIKK_RIVER_KEY) }
             validate { it.requireKey(TEKNISK_TID_KEY) }
         }
     }
@@ -38,10 +38,10 @@ class KlagehendelseRiver(
         context: MessageContext,
     ): Any {
         try {
-            val klage: StatistikkKlage = objectMapper.treeToValue(packet[KLAGE_STATISTIKK_RIVER_KEY])
+            val tilbakekreving: StatistikkTilbakekrevingDto = objectMapper.treeToValue(packet[TILBAKEKREVING_STATISTIKK_RIVER_KEY])
             val tekniskTid = parseTekniskTid(packet, logger)
-            val hendelse: KlageHendelseType = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
-            return service.registrerStatistikkForKlagehendelse(klage, tekniskTid, hendelse)
+            val hendelse: TilbakekrevingHendelseType = enumValueOf(packet[EVENT_NAME_KEY].textValue().split(":")[1])
+            return service.registrerStatistikkFortilbakkrevinghendelse(tilbakekreving, tekniskTid, hendelse)
                 ?.also {
                     context.publish(
                         mapOf(
@@ -53,13 +53,13 @@ class KlagehendelseRiver(
         } catch (e: Exception) {
             logger.error(
                 """
-                Kunne ikke mappe ut statistikk for klagen i pakken med korrelasjonsid ${packet.correlationId}. 
+                Kunne ikke mappe ut statistikk for tilbakkrevingen i pakken med korrelasjonsid ${packet.correlationId}. 
                 Dette betyr at vi ikke får oppdatert saksstatistikk for denne saken, og stopper videre 
                 prosessering av statistikk. Må sees på snarest!
                 """.trimIndent(),
                 e,
             )
-            logger.error("Feilet på klage av hendelse ${packet[EVENT_NAME_KEY]}")
+            logger.error("Feilet på tilbakekreving av hendelse ${packet[EVENT_NAME_KEY]}")
             throw e
         }
     }

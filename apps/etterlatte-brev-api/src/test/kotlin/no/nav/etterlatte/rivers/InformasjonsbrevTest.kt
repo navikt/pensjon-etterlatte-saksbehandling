@@ -70,7 +70,7 @@ class InformasjonsbrevTest {
 
     @Test
     fun `starter generering av informasjonsbrev, og verifiserer at brevet faktisk blir oppretta og distribuert`() {
-        val brevkode = EtterlatteBrevKode.OMREGNING_INFORMASJON
+        val brevkode = EtterlatteBrevKode.UTSATT_KLAGEFRIST
         val saktype = SakType.BARNEPENSJON
         lagreBrevTilGenereringIDatabasen(brevkode, saktype)
         val testRapid =

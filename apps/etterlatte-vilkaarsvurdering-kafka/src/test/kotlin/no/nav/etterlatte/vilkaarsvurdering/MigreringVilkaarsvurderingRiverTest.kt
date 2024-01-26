@@ -122,7 +122,7 @@ internal class MigreringVilkaarsvurderingRiverTest {
             vilkaarsvurderingServiceMock.migrer(behandlingId, false)
         }
         with(testRapid.inspektør.message(0)) {
-            assertEquals(Migreringshendelser.TRYGDETID, this[EVENT_NAME_KEY].asText())
+            assertEquals(Migreringshendelser.TRYGDETID.lagEventnameForType(), this[EVENT_NAME_KEY].asText())
         }
     }
 }

@@ -77,7 +77,7 @@ internal class JournalfoerVedtaksbrevRiver(
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
-        packet[EVENT_NAME_KEY] = BrevEventTypes.JOURNALFOERT.toString()
+        packet[EVENT_NAME_KEY] = BrevEventTypes.JOURNALFOERT.toEventname()
         packet["brevId"] = brevId
         packet["journalpostId"] = journalpostId
         packet["distribusjonType"] = DistribusjonsType.VEDTAK.toString()

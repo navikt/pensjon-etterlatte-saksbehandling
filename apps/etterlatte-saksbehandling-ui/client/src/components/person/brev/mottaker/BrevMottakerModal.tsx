@@ -211,8 +211,8 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse, isOpen, setIsOp
                     message: 'Postnummer må være satt på norske adresser',
                   },
                   pattern: {
-                    value: /\d+/,
-                    message: 'Postnummer kan kun bestå av siffer',
+                    value: /\d{4}/,
+                    message: 'Postnummer skal være fire siffer',
                   },
                 })}
                 label="Postnummer"

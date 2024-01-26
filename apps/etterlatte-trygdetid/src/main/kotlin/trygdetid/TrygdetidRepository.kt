@@ -141,6 +141,22 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             }
         }.let { hentTrygdetidMedIdNotNull(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.id) }
 
+    fun slettTrygdetid(trygdetidId: UUID) =
+        dataSource.transaction { tx ->
+            queryOf(
+                statement =
+                    """
+                    DELETE FROM trygdetid CASCADE WHERE id = :id
+                    """.trimIndent(),
+                paramMap =
+                    mapOf(
+                        "id" to trygdetidId,
+                    ),
+            ).let { query ->
+                tx.update(query)
+            }
+        }
+
     private fun opprettTrygdetid(
         trygdetid: Trygdetid,
         tx: TransactionalSession,

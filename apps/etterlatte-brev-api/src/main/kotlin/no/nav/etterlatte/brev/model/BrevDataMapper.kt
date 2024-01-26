@@ -22,7 +22,7 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfallD
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingDTO
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingRedigerbartUtfallDTO
 import no.nav.etterlatte.brev.model.bp.OpphoerBrevData
-import no.nav.etterlatte.brev.model.oms.AvslagBrevdataOMS
+import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseDTO
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO
@@ -163,7 +163,7 @@ class BrevDataMapper(
                     }
 
                     VedtakType.AVSLAG ->
-                        AvslagBrevdataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, emptyList())
+                        AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, emptyList())
 
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
@@ -325,7 +325,7 @@ class BrevDataMapper(
             }
 
             OMSTILLINGSSTOENAD_AVSLAG -> {
-                AvslagBrevdataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, innholdMedVedlegg.innhold())
+                AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, innholdMedVedlegg.innhold())
             }
 
             TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)

@@ -102,6 +102,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
+                    // What? må være feil
                     EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.name,
                     "vedtak" to vedtak,
                 ),
@@ -119,6 +120,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
+                    // What? må være feil
                     EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.name,
                     "vedtak" to vedtak,
                     SKAL_SENDE_BREV to false,

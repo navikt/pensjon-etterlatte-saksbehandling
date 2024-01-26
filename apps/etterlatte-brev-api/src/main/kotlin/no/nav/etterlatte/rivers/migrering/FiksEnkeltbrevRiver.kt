@@ -19,7 +19,7 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 internal class FiksEnkeltbrevRiver(
     rapidsConnection: RapidsConnection,
     private val vedtaksvurderingService: VedtaksvurderingService,
-) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.FIKS_ENKELTBREV.toString()) {
+) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.FIKS_ENKELTBREV.toEventname()) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

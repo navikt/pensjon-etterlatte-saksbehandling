@@ -8,7 +8,5 @@ enum class BrevEventTypes {
     DISTRIBUERT,
     ;
 
-    override fun toString(): String {
-        return "BREV:$name"
-    }
+    fun toEventname() = "BREV:${this.name}"
 }

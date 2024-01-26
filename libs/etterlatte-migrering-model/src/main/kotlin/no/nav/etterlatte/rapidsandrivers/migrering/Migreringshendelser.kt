@@ -1,22 +1,23 @@
 package no.nav.etterlatte.rapidsandrivers.migrering
 
-// TODO: fix, er dette hendelsestyper eller ikke?
-object Migreringshendelser {
-    private const val PREFIX = "MIGRERING:"
+import no.nav.etterlatte.libs.common.rapidsandrivers.EventnameHendelseType
 
-    const val START_MIGRERING = "${PREFIX}START_MIGRERING"
-    const val MIGRER_SPESIFIKK_SAK = "${PREFIX}MIGRER_SPESIFIKK_SAK"
+enum class Migreringshendelser : EventnameHendelseType {
+    START_MIGRERING,
+    MIGRER_SPESIFIKK_SAK,
+    MIGRER_SAK,
+    VERIFISER,
+    LAGRE_KOPLING,
+    LAGRE_GRUNNLAG,
+    VILKAARSVURDER,
+    BEREGN,
+    TRYGDETID,
+    VEDTAK,
+    PAUSE,
+    IVERKSATT,
+    AVBRYT_BEHANDLING,
+    FIKS_ENKELTBREV,
+    ;
 
-    const val MIGRER_SAK = "${PREFIX}MIGRER_SAK"
-    const val VERIFISER = "${PREFIX}VERIFISERING"
-    const val LAGRE_KOPLING = "${PREFIX}LAGRE_KOPLING"
-    const val LAGRE_GRUNNLAG = "${PREFIX}LAGRE_GRUNNLAG"
-    const val VILKAARSVURDER = "${PREFIX}VILKAARSVURDER"
-    const val BEREGN = "${PREFIX}BEREGN"
-    const val TRYGDETID = "${PREFIX}TRYGDETID"
-    const val VEDTAK = "${PREFIX}VEDTAK"
-    const val PAUSE = "${PREFIX}PAUSE"
-    const val IVERKSATT = "${PREFIX}IVERKSATT"
-    const val AVBRYT_BEHANDLING = "${PREFIX}AVBRYT_BEHANDLING"
-    const val FIKS_ENKELTBREV = "${PREFIX}FIKS_ENKELTBREV"
+    override fun lagEventnameForType(): String = "MIGRERING:${this.name}"
 }

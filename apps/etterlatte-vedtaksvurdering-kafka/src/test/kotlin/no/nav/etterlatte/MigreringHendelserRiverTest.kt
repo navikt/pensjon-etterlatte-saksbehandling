@@ -38,7 +38,7 @@ class MigreringHendelserRiverTest {
     fun `hvis opprett vedtak feila, legg meldinga rett paa feila-koea`() {
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.VEDTAK,
+                Migreringshendelser.VEDTAK.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     SAK_ID_KEY to "1",
@@ -60,7 +60,7 @@ class MigreringHendelserRiverTest {
     fun `oppretter vedtak, fatter vedtak og attesterer`() {
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.VEDTAK,
+                Migreringshendelser.VEDTAK.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to behandlingId,
                     SAK_ID_KEY to "1",
@@ -83,7 +83,7 @@ class MigreringHendelserRiverTest {
     fun `Sender hendelse om pause om kjoeringsvariant er pause`() {
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.VEDTAK,
+                Migreringshendelser.VEDTAK.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     SAK_ID_KEY to "1",
@@ -99,7 +99,7 @@ class MigreringHendelserRiverTest {
 
         assertEquals(2, inspector.inspektør.size)
         val resultat = inspector.inspektør.message(0)
-        assertEquals(PAUSE, resultat.get(EVENT_NAME_KEY).asText())
+        assertEquals(PAUSE.lagEventnameForType(), resultat.get(EVENT_NAME_KEY).asText())
     }
 
     companion object {

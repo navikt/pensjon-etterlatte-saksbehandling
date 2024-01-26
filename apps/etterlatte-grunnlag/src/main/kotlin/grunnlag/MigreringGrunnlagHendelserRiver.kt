@@ -32,7 +32,7 @@ class MigreringGrunnlagHendelserRiver(
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.LAGRE_GRUNNLAG) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.LAGRE_GRUNNLAG.lagEventnameForType()) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(MIGRERING_GRUNNLAG_KEY) }
@@ -80,7 +80,7 @@ class MigreringGrunnlagHendelserRiver(
             ),
         )
 
-        packet.eventName = Migreringshendelser.VILKAARSVURDER
+        packet.eventName = Migreringshendelser.VILKAARSVURDER.lagEventnameForType()
         context.publish(packet.toJson())
 
         logger.info("Behandla grunnlagshendelser for migrering for sak $sakId")

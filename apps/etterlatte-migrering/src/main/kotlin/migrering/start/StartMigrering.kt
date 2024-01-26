@@ -52,7 +52,7 @@ class StartMigrering(
     private fun lagMelding(sakTilMigrering: SakTilMigrering) =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
+                EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(),
                 SAK_ID_KEY to sakTilMigrering.sakId,
                 LOPENDE_JANUAR_2024_KEY to sakTilMigrering.lopendeJanuar2024,
                 MIGRERING_KJORING_VARIANT to sakTilMigrering.kjoringVariant,

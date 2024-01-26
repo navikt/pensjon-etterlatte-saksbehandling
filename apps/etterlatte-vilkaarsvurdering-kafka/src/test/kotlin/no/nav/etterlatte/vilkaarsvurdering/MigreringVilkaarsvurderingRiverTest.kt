@@ -109,7 +109,7 @@ internal class MigreringVilkaarsvurderingRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to Migreringshendelser.VILKAARSVURDER,
+                    EVENT_NAME_KEY to Migreringshendelser.VILKAARSVURDER.lagEventnameForType(),
                     BEHOV_NAME_KEY to Opplysningstype.AVDOED_PDL_V1.name,
                     SAK_ID_KEY to 1,
                     BEHANDLING_ID_KEY to behandlingId,
@@ -122,7 +122,7 @@ internal class MigreringVilkaarsvurderingRiverTest {
             vilkaarsvurderingServiceMock.migrer(behandlingId, false)
         }
         with(testRapid.inspektør.message(0)) {
-            assertEquals(Migreringshendelser.TRYGDETID, this[EVENT_NAME_KEY].asText())
+            assertEquals(Migreringshendelser.TRYGDETID.lagEventnameForType(), this[EVENT_NAME_KEY].asText())
         }
     }
 }

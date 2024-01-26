@@ -96,7 +96,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                             PESYS_ID_KEY to pesysid,
                             HENDELSE_DATA_KEY to pesyssak.tilMigreringsrequest(),
                             FEILMELDING_KEY to IllegalStateException("her feiler det"),
-                            FEILENDE_STEG to Migreringshendelser.TRYGDETID,
+                            FEILENDE_STEG to Migreringshendelser.TRYGDETID.lagEventnameForType(),
                         ),
                     ).toJson(),
                 )

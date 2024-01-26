@@ -17,7 +17,7 @@ internal class LagreKoblingRiver(rapidsConnection: RapidsConnection, private val
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.LAGRE_KOPLING) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.LAGRE_KOPLING.lagEventnameForType()) {
             validate { it.requireKey(PESYS_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
         }
@@ -29,7 +29,7 @@ internal class LagreKoblingRiver(rapidsConnection: RapidsConnection, private val
     ) {
         logger.info("Lagrer kopling fra pesyssak ${packet.pesysId} til behandling ${packet.behandlingId}")
         pesysRepository.lagreKoplingTilBehandling(packet.behandlingId, packet.pesysId)
-        packet.eventName = Migreringshendelser.LAGRE_GRUNNLAG
+        packet.eventName = Migreringshendelser.LAGRE_GRUNNLAG.lagEventnameForType()
         context.publish(packet.toJson())
         logger.info(
             "Publiserte oppdatert migreringshendelse for ${packet.behandlingId} " +

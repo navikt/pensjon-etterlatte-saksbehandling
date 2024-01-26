@@ -78,7 +78,7 @@ internal class Verifiserer(
         )
         repository.lagreFeilkjoering(
             request.toJson(),
-            feilendeSteg = Migreringshendelser.VERIFISER,
+            feilendeSteg = Migreringshendelser.VERIFISER.lagEventnameForType(),
             feil = feil.map { it.message }.toJson(),
             pesysId = request.pesysId,
         )

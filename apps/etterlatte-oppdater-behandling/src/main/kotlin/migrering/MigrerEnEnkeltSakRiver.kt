@@ -32,7 +32,7 @@ internal class MigrerEnEnkeltSakRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SAK) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SAK.lagEventnameForType()) {
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey(FNR_KEY) }
@@ -59,7 +59,7 @@ internal class MigrerEnEnkeltSakRiver(
                 soeker = hendelse.soeker.value,
             )
         packet[PERSONGALLERI_KEY] = hendelse.opprettPersongalleri()
-        packet.eventName = Migreringshendelser.LAGRE_KOPLING
+        packet.eventName = Migreringshendelser.LAGRE_KOPLING.lagEventnameForType()
 
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert migreringshendelse")

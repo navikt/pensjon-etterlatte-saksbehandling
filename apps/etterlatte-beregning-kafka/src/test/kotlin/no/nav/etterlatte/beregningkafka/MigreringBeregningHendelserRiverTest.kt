@@ -115,7 +115,7 @@ internal class MigreringBeregningHendelserRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.BEREGN,
+                Migreringshendelser.BEREGN.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     HENDELSE_DATA_KEY to request,
@@ -157,7 +157,7 @@ internal class MigreringBeregningHendelserRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.BEREGN,
+                Migreringshendelser.BEREGN.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     HENDELSE_DATA_KEY to
@@ -202,7 +202,7 @@ internal class MigreringBeregningHendelserRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.BEREGN,
+                Migreringshendelser.BEREGN.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     HENDELSE_DATA_KEY to request,
@@ -242,7 +242,7 @@ internal class MigreringBeregningHendelserRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.BEREGN,
+                Migreringshendelser.BEREGN.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     HENDELSE_DATA_KEY to request,
@@ -276,7 +276,7 @@ internal class MigreringBeregningHendelserRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.BEREGN,
+                Migreringshendelser.BEREGN.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     HENDELSE_DATA_KEY to
@@ -316,7 +316,7 @@ internal class MigreringBeregningHendelserRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.BEREGN,
+                Migreringshendelser.BEREGN.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     HENDELSE_DATA_KEY to

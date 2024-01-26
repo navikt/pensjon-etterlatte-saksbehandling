@@ -47,7 +47,7 @@ internal class MigrerSpesifikkSakRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SPESIFIKK_SAK) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType()) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(LOPENDE_JANUAR_2024_KEY) }
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }
@@ -92,7 +92,7 @@ internal class MigrerSpesifikkSakRiver(
             hentSak(sakId, lopendeJanuar2024)
                 .tilVaarModell { runBlocking { krrKlient.hentDigitalKontaktinformasjon(it) } }
                 .also { pesysRepository.lagrePesyssak(pesyssak = it) }
-        packet.eventName = Migreringshendelser.MIGRER_SAK
+        packet.eventName = Migreringshendelser.MIGRER_SAK.lagEventnameForType()
         val verifisertRequest = verifiserer.verifiserRequest(pesyssak.tilMigreringsrequest())
         packet.hendelseData = verifisertRequest
 
@@ -146,7 +146,7 @@ internal class MigrerSpesifikkSakRiver(
                 ?: throw IllegalStateException("Mangler kobling mellom behandling i Gjenny og pesys sak for pesysId=$sakId")
 
         packet[BEHANDLING_ID_KEY] = behandlingId
-        packet.eventName = Migreringshendelser.VEDTAK
+        packet.eventName = Migreringshendelser.VEDTAK.lagEventnameForType()
         context.publish(packet.toJson())
         logger.info("Fortsetter migrering for sak $sakId.")
     }

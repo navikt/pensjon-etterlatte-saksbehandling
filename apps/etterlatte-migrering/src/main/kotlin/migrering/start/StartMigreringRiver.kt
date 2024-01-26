@@ -5,7 +5,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.LOPENDE_JANUAR_2024_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SPESIFIKK_SAK
 import no.nav.etterlatte.rapidsandrivers.migrering.loependeJanuer2024
 import no.nav.etterlatte.rapidsandrivers.migrering.migreringKjoringVariant
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -22,7 +21,7 @@ internal class StartMigreringRiver(rapidsConnection: RapidsConnection) :
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.START_MIGRERING) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.START_MIGRERING.lagEventnameForType()) {
             validate { it.requireKey(SAK_ID_FLERE_KEY) }
             validate { it.requireKey(LOPENDE_JANUAR_2024_KEY) }
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }
@@ -39,7 +38,7 @@ internal class StartMigreringRiver(rapidsConnection: RapidsConnection) :
             val melding =
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to MIGRER_SPESIFIKK_SAK,
+                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(),
                         SAK_ID_KEY to it,
                         LOPENDE_JANUAR_2024_KEY to packet.loependeJanuer2024,
                         MIGRERING_KJORING_VARIANT to packet.migreringKjoringVariant.name,

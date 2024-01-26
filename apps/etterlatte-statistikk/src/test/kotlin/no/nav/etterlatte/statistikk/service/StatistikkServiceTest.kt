@@ -28,7 +28,7 @@ import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
@@ -125,7 +125,7 @@ class StatistikkServiceTest {
                         attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
                         virk = virkningstidspunkt,
                     ),
-                vedtakKafkaHendelseType = VedtakKafkaHendelseType.IVERKSATT,
+                vedtakKafkaHendelseType = VedtakKafkaHendelseHendelseType.IVERKSATT,
                 tekniskTid = tekniskTidForHendelse,
             )
 
@@ -242,7 +242,7 @@ class StatistikkServiceTest {
                         attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
                         virk = virkningstidspunkt,
                     ),
-                vedtakKafkaHendelseType = VedtakKafkaHendelseType.IVERKSATT,
+                vedtakKafkaHendelseType = VedtakKafkaHendelseHendelseType.IVERKSATT,
                 tekniskTid = LocalDateTime.of(2023, 2, 1, 8, 30),
             )
 

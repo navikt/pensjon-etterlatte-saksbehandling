@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
@@ -114,7 +114,7 @@ class SakRepositoryTest {
                     ferdigbehandletTidspunkt = null,
                     vedtakTidspunkt = null,
                     type = BehandlingType.FØRSTEGANGSBEHANDLING.name,
-                    status = VedtakKafkaHendelseType.IVERKSATT.name,
+                    status = VedtakKafkaHendelseHendelseType.IVERKSATT.name,
                     resultat = null,
                     resultatBegrunnelse = "for en begrunnelse",
                     behandlingMetode = BehandlingMetode.MANUELL,
@@ -162,7 +162,7 @@ class SakRepositoryTest {
                     ferdigbehandletTidspunkt = null,
                     vedtakTidspunkt = null,
                     type = BehandlingType.FØRSTEGANGSBEHANDLING.name,
-                    status = VedtakKafkaHendelseType.IVERKSATT.name,
+                    status = VedtakKafkaHendelseHendelseType.IVERKSATT.name,
                     resultat = null,
                     resultatBegrunnelse = "for en begrunnelse",
                     behandlingMetode = BehandlingMetode.MANUELL,

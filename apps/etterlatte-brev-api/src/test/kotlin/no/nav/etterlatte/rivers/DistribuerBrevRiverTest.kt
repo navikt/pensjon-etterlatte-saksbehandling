@@ -54,7 +54,7 @@ internal class DistribuerBrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventTypes.JOURNALFOERT.toEventname(),
+                    EVENT_NAME_KEY to BrevHendelseHendelseType.JOURNALFOERT.lagEventnameForType(),
                     CORRELATION_ID_KEY to UUID.randomUUID().toString(),
                     "brevId" to brevId,
                     "journalpostId" to journalpostId,

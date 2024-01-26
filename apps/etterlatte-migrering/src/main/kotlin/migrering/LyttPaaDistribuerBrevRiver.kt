@@ -15,7 +15,7 @@ internal class LyttPaaDistribuerBrevRiver(
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, "BREV:DISTRIBUERT") {
+        initialiserRiver(rapidsConnection, "BREV:DISTRIBUERT") { // TODO: fiks denne til variabel
             validate { it.requireKey("bestillingsId") }
             validate { it.requireKey("vedtak.behandlingId") }
         }

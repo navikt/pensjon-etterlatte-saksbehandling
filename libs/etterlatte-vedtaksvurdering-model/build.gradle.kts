@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    id("etterlatte.libs")
 }
 
 repositories {
@@ -8,4 +9,5 @@ repositories {
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
+    implementation(project(":libs:rapidsandrivers-extras"))
 }

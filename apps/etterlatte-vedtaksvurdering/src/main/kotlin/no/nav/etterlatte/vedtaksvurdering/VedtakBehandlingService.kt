@@ -22,7 +22,7 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -138,7 +138,7 @@ class VedtakBehandlingService(
         return VedtakOgRapid(
             fattetVedtak.toDto(),
             RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.FATTET,
+                vedtakhendelse = VedtakKafkaHendelseHendelseType.FATTET,
                 vedtak = fattetVedtak.toDto(),
                 tekniskTid = fattetVedtak.vedtakFattet!!.tidspunkt,
                 behandlingId = behandlingId,
@@ -210,7 +210,7 @@ class VedtakBehandlingService(
         return VedtakOgRapid(
             attestertVedtak.toDto(),
             RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
+                vedtakhendelse = VedtakKafkaHendelseHendelseType.ATTESTERT,
                 vedtak = attestertVedtak.toDto(),
                 tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
                 behandlingId = behandlingId,
@@ -268,7 +268,7 @@ class VedtakBehandlingService(
         return VedtakOgRapid(
             repository.hentVedtak(behandlingId)!!.toDto(),
             RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
+                vedtakhendelse = VedtakKafkaHendelseHendelseType.UNDERKJENT,
                 vedtak = underkjentVedtak.toDto(),
                 tekniskTid = underkjentTid,
                 behandlingId = behandlingId,
@@ -297,7 +297,7 @@ class VedtakBehandlingService(
 
         val tilSamordning =
             RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.TIL_SAMORDNING,
+                vedtakhendelse = VedtakKafkaHendelseHendelseType.TIL_SAMORDNING,
                 vedtak = tilSamordningVedtakLocal.toDto(),
                 tekniskTid = Tidspunkt.now(),
                 behandlingId = behandlingId,
@@ -339,7 +339,7 @@ class VedtakBehandlingService(
         return VedtakOgRapid(
             samordnetVedtakLocal.toDto(),
             RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.SAMORDNET,
+                vedtakhendelse = VedtakKafkaHendelseHendelseType.SAMORDNET,
                 vedtak = samordnetVedtakLocal.toDto(),
                 tekniskTid = Tidspunkt.now(),
                 behandlingId = behandlingId,
@@ -374,7 +374,7 @@ class VedtakBehandlingService(
         return VedtakOgRapid(
             iverksattVedtak.toDto(),
             RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
+                vedtakhendelse = VedtakKafkaHendelseHendelseType.IVERKSATT,
                 vedtak = iverksattVedtak.toDto(),
                 tekniskTid = Tidspunkt.now(),
                 behandlingId = behandlingId,

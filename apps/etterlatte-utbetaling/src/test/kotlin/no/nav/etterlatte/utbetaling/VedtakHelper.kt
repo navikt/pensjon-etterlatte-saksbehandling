@@ -14,7 +14,7 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import java.math.BigDecimal
@@ -233,10 +233,10 @@ fun genererEtterfolgendeUtbetalingsperioder(
     }
 }
 
-fun vedtakEvent(vedtakDto: VedtakDto) =
+fun attestertvedtakEvent(vedtakDto: VedtakDto) =
     """
     {
-      "$EVENT_NAME_KEY": "${VedtakKafkaHendelseType.ATTESTERT}",
+      "$EVENT_NAME_KEY": "${VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType()}",
       "vedtak": ${vedtakDto.toJson()}
     }
 """
@@ -256,7 +256,7 @@ fun main() {
             ident = "16018222837",
             sakId = 15,
         )
-    val vedtakEvent = vedtakEvent(vedtak)
+    val vedtakEvent = attestertvedtakEvent(vedtak)
 
     val vedtakInnhold = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
     val revurderingsvedtak =
@@ -271,9 +271,9 @@ fun main() {
                     startBelop = vedtakInnhold.utbetalingsperioder.last().beloep!!,
                 ),
         )
-    val revurderingsvedtakEvent = vedtakEvent(revurderingsvedtak)
+    val revurderingsvedtakEvent = attestertvedtakEvent(revurderingsvedtak)
 
-    val opphoersVedtak = vedtakEvent(opphoersVedtak(revurderingsvedtak))
+    val opphoersVedtak = attestertvedtakEvent(opphoersVedtak(revurderingsvedtak))
 
     // printer et vedtakevent og et revurderingsevent
     println("FORSTEGANGSBEHANDLING: ")

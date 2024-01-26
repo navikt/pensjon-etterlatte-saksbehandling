@@ -1,5 +1,6 @@
 package no.nav.etterlatte.rapidsandrivers.migrering
 
+// TODO: fix, er dette hendelsestyper eller ikke?
 object Migreringshendelser {
     private const val PREFIX = "MIGRERING:"
 

@@ -11,7 +11,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -75,7 +75,7 @@ class MigreringHendelserRiverTest {
 
         assertEquals(1, inspector.inspektør.size)
         val sendtTilRapid = inspector.inspektør.message(0)
-        assertEquals(VedtakKafkaHendelseType.ATTESTERT.toString(), sendtTilRapid.get(EVENT_NAME_KEY).textValue())
+        assertEquals(VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(), sendtTilRapid.get(EVENT_NAME_KEY).textValue())
         assertEquals(sendtTilRapid.get(BEHANDLING_ID_KEY).textValue(), behandlingId)
     }
 
@@ -124,7 +124,7 @@ class MigreringHendelserRiverTest {
             VedtakOgRapid(
                 vedtakDto,
                 RapidInfo(
-                    vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
+                    vedtakhendelse = VedtakKafkaHendelseHendelseType.ATTESTERT,
                     vedtak =
                         VedtakDto(
                             123,

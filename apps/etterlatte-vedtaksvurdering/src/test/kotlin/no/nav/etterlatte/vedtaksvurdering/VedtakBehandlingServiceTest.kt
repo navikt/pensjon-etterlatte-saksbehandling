@@ -37,7 +37,7 @@ import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -651,7 +651,7 @@ internal class VedtakBehandlingServiceTest {
 
         val hendelse = attestering.rapidInfo1
 
-        Assertions.assertEquals(hendelse.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
+        Assertions.assertEquals(hendelse.vedtakhendelse, VedtakKafkaHendelseHendelseType.ATTESTERT)
         Assertions.assertEquals(false, hendelse.extraParams[SKAL_SENDE_BREV])
     }
 
@@ -785,7 +785,7 @@ internal class VedtakBehandlingServiceTest {
         iverksattVedtak shouldNotBe null
         iverksattVedtak.vedtak.status shouldBe VedtakStatus.IVERKSATT
 
-        Assertions.assertEquals(VedtakKafkaHendelseType.IVERKSATT, iverksattVedtak.rapidInfo1.vedtakhendelse)
+        Assertions.assertEquals(VedtakKafkaHendelseHendelseType.IVERKSATT, iverksattVedtak.rapidInfo1.vedtakhendelse)
     }
 
     @Test
@@ -937,7 +937,7 @@ internal class VedtakBehandlingServiceTest {
         underkjentVedtak shouldNotBe null
         underkjentVedtak.vedtak.status shouldBe VedtakStatus.RETURNERT
 
-        Assertions.assertEquals(VedtakKafkaHendelseType.UNDERKJENT, underkjentVedtak.rapidInfo1.vedtakhendelse)
+        Assertions.assertEquals(VedtakKafkaHendelseHendelseType.UNDERKJENT, underkjentVedtak.rapidInfo1.vedtakhendelse)
     }
 
     @Test

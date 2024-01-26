@@ -8,7 +8,8 @@ import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
-import no.nav.etterlatte.libs.common.event.BrevEventKeys
+import no.nav.etterlatte.libs.common.event.BREVMAL_RIVER_KEY
+import no.nav.etterlatte.libs.common.event.BrevHendelseHendelseType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Fagsaksystem
@@ -31,9 +32,9 @@ class OpprettJournalfoerOgDistribuerRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER) {
+        initialiserRiver(rapidsConnection, BrevHendelseHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagEventnameForType()) {
             validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireKey(BrevEventKeys.BREVMAL_KEY) }
+            validate { it.requireKey(BREVMAL_RIVER_KEY) }
         }
     }
 
@@ -41,7 +42,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) = runBlocking {
-        val brevkode = packet[BrevEventKeys.BREVMAL_KEY].asText().let { EtterlatteBrevKode.valueOf(it) }
+        val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { EtterlatteBrevKode.valueOf(it) }
         opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.brev)
     }
 

@@ -35,15 +35,16 @@ fun startInstitusjonsoppholdLytter(
 ) {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
-    val proxyHttpKlient =
+    val institusjonHttpClient =
         httpClientClientCredentials(
             azureAppClientId = config.getString("azure.app.client.id"),
             azureAppJwk = config.getString("azure.app.jwk"),
             azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-            azureAppScope = config.getString("azure.proxy.outbound.scope"),
+            azureAppScope = config.getString("institusjon.api.scope"),
         )
 
-    val institusjonsoppholdKlient = InstitusjonsoppholdKlient(proxyHttpKlient, config.getString("proxy.url"))
+    val institusjonsoppholdKlient =
+        InstitusjonsoppholdKlient(institusjonHttpClient, config.getString("institusjon.api.url"))
 
     val behandlingHttpClient =
         httpClientClientCredentials(

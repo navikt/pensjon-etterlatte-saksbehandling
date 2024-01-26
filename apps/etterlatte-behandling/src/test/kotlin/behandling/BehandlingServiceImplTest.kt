@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -27,6 +28,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -47,6 +49,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -400,165 +404,160 @@ class BehandlingServiceImplTest {
         assertEquals(Saksrolle.UKJENT, resUkjentRolle)
     }
 
-    @Test
-    fun `Virkningstidspunkt krever fastsetting av utlandstilknytning`() {
-        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
-        val bodyBegrunnelse = "begrunnelse"
-        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
-
-        val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
-        val doedsdato = LocalDate.parse("2016-12-30")
-
-        val service = behandlingServiceMedMocks(doedsdato, soeknadMottatt)
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal feile dersom virkningstidspunkt ikke har satt utlandstilknytning`(sakType: SakType) {
         assertThrows<VirkningstidspunktMaaHaUtenlandstilknytning> {
-            runBlocking {
-                service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
-            }
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                utlandstilknytningType = null,
+                virkningstidspunkt = Tidspunkt.parse("2015-02-01T00:00:00Z"),
+                soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00"),
+                doedsdato = LocalDate.parse("2014-01-01"),
+            )
         }
     }
 
-    @Test
-    fun `Ved utlandstilknytning bosatt utland må kravdato være med`() {
-        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
-        val bodyBegrunnelse = "begrunnelse"
-        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
-
-        val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
-        val doedsdato = LocalDate.parse("2016-12-30")
-
-        val service =
-            behandlingServiceMedMocks(
-                doedsdato = doedsdato,
-                soeknadMottatt = soeknadMottatt,
-                utlandstilknytning =
-                    Utlandstilknytning(
-                        UtlandstilknytningType.BOSATT_UTLAND,
-                        Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        "begrunnelse",
-                    ),
-            )
-
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal feile dersom kravdato ikke er med ved bosatt utland`(sakType: SakType) {
         assertThrows<KravdatoMaaFinnesHvisBosattutland> {
-            runBlocking {
-                service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
-            }
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                utlandstilknytningType = UtlandstilknytningType.BOSATT_UTLAND,
+                virkningstidspunkt = Tidspunkt.parse("2015-02-01T00:00:00Z"),
+                soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00"),
+                doedsdato = LocalDate.parse("2014-01-01"),
+            )
         }
     }
 
-    @Test
-    fun `Ved utlandstilknytning bosatt utland med kravdato skal kravdato brukes ikke soeknadmottatt`() {
-        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
-        val bodyBegrunnelse = "begrunnelse"
-        val bodyKravdato = Tidspunkt.parse("2019-02-01T00:00:00Z")
-        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse, bodyKravdato.toLocalDate())
-        val doedsdato = LocalDate.parse("2014-01-01")
-
-        val soeknadMottatt = LocalDateTime.parse("2009-01-01T00:00:00.000000000")
-
-        val service =
-            behandlingServiceMedMocks(
-                doedsdato = doedsdato,
-                soeknadMottatt = soeknadMottatt,
-                utlandstilknytning =
-                    Utlandstilknytning(
-                        UtlandstilknytningType.BOSATT_UTLAND,
-                        Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        "begrunnelse",
-                    ),
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal legge til grunn kravdato i stedet for soeknadMottattDato ved bosatt utland`(sakType: SakType) {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                utlandstilknytningType = UtlandstilknytningType.BOSATT_UTLAND,
+                virkningstidspunkt = Tidspunkt.parse("2015-02-01T00:00:00Z"),
+                kravdato = Tidspunkt.parse("2017-02-01T00:00:00Z"),
+                // brukes denne vil ikke virk være innenfor 3 år
+                soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00"),
+                doedsdato = LocalDate.parse("2014-01-01"),
             )
 
-        val svar =
-            runBlocking {
-                service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
-            }
-        assertTrue(svar)
+        gyldigVirkningstidspunkt shouldBe true
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal gi gyldig virkningstidspunkt hvis tidspunkt er en maaned etter doedsfall`(sakType: SakType) {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                virkningstidspunkt = Tidspunkt.parse("2020-02-01T00:00:00Z"),
+                soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00"),
+                doedsdato = LocalDate.parse("2020-01-01"),
+            )
+
+        gyldigVirkningstidspunkt shouldBe true
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal gi ugyldig virkningstidspunkt hvis tidspunkt er foer en maaned etter doedsfall`(sakType: SakType) {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                virkningstidspunkt = Tidspunkt.parse("2020-01-01T00:00:00Z"),
+                soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00"),
+                doedsdato = LocalDate.parse("2020-01-01"),
+            )
+
+        gyldigVirkningstidspunkt shouldBe false
     }
 
     @Test
-    fun `erGyldigVirkningstidspunkt hvis tidspunkt er maaned etter doedsfall og maks tre aar foer mottatt soeknad`() {
-        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z")
-        val bodyBegrunnelse = "begrunnelse"
-        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
-
-        val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
-        val doedsdato = LocalDate.parse("2016-12-30")
-
-        val service =
-            behandlingServiceMedMocks(
-                doedsdato = doedsdato,
-                soeknadMottatt = soeknadMottatt,
-                utlandstilknytning =
-                    Utlandstilknytning(
-                        UtlandstilknytningType.NASJONAL,
-                        Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        "begrunnelse",
-                    ),
+    fun `skal gi gyldig virkningstidspunkt hvis tidspunkt er inntil tre aar foer mottatt soeknad for barnepensjon`() {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = SakType.BARNEPENSJON,
+                virkningstidspunkt = Tidspunkt.parse("2017-01-01T00:00:00Z"),
+                soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
+                doedsdato = LocalDate.parse("2016-11-30"),
             )
 
-        val gyldigVirkningstidspunkt =
-            runBlocking {
-                service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
-            }
-
-        assertTrue(gyldigVirkningstidspunkt)
+        gyldigVirkningstidspunkt shouldBe true
     }
 
     @Test
-    fun `erGyldigVirkningstidspunkt er false hvis tidspunkt er foer en maaned etter doedsfall`() {
-        val bodyVirkningstidspunkt = Tidspunkt.parse("2020-01-01T00:00:00Z")
-        val bodyBegrunnelse = "begrunnelse"
-        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
-
-        val soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00.000000000")
-        val doedsdato = LocalDate.parse("2020-01-01")
-
-        val service =
-            behandlingServiceMedMocks(
-                doedsdato = doedsdato,
-                soeknadMottatt = soeknadMottatt,
-                utlandstilknytning =
-                    Utlandstilknytning(
-                        UtlandstilknytningType.NASJONAL,
-                        Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        "begrunnelse",
-                    ),
+    fun `skal gi gyldig virkningstidspunkt hvis tidspunkt er under tre aar foer mottatt soeknad for omstillingsstoenad`() {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                virkningstidspunkt = Tidspunkt.parse("2017-02-01T00:00:00Z"),
+                soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
+                doedsdato = LocalDate.parse("2016-11-30"),
             )
 
-        val gyldigVirkningstidspunkt =
-            runBlocking {
-                service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
-            }
-
-        assertFalse(gyldigVirkningstidspunkt)
+        gyldigVirkningstidspunkt shouldBe true
     }
 
     @Test
-    fun `erGyldigVirkningstidspunkt hvis tidspunkt er tre aar foer mottatt soeknad`() {
-        val bodyVirkningstidspunkt = Tidspunkt.parse("2017-01-01T00:00:00Z")
-        val bodyBegrunnelse = "begrunnelse"
-        val request = VirkningstidspunktRequest(bodyVirkningstidspunkt.toString(), bodyBegrunnelse)
+    fun `skal gi ugyldig virkningstidspunkt hvis tidspunkt er over tre aar foer mottatt soeknad for barnepensjon`() {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = SakType.BARNEPENSJON,
+                virkningstidspunkt = Tidspunkt.parse("2016-12-01T00:00:00Z"),
+                soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
+                doedsdato = LocalDate.parse("2016-11-30"),
+            )
 
-        val soeknadMottatt = LocalDateTime.parse("2020-01-01T00:00:00.000000000")
-        val doedsdato = LocalDate.parse("2016-12-30")
+        gyldigVirkningstidspunkt shouldBe false
+    }
 
+    @Test
+    fun `skal gi ugyldig virkningstidspunkt hvis tidspunkt er tre aar foer mottatt soeknad for omstillingsstoenad`() {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                virkningstidspunkt = Tidspunkt.parse("2016-01-01T00:00:00Z"),
+                soeknadMottatt = LocalDateTime.parse("2020-01-15T00:00:00"),
+                doedsdato = LocalDate.parse("2016-11-30"),
+            )
+
+        gyldigVirkningstidspunkt shouldBe false
+    }
+
+    private fun sjekkOmVirkningstidspunktErGyldig(
+        sakType: SakType,
+        utlandstilknytningType: UtlandstilknytningType? = UtlandstilknytningType.NASJONAL,
+        virkningstidspunkt: Tidspunkt = Tidspunkt.parse("2016-01-01T00:00:00Z"),
+        begrunnelse: String = "en begrunnelse",
+        soeknadMottatt: LocalDateTime = LocalDateTime.parse("2020-01-15T00:00:00"),
+        doedsdato: LocalDate = LocalDate.parse("2016-11-30"),
+        kravdato: Tidspunkt? = null,
+    ): Boolean {
         val service =
             behandlingServiceMedMocks(
+                sakType = sakType,
                 doedsdato = doedsdato,
                 soeknadMottatt = soeknadMottatt,
                 utlandstilknytning =
-                    Utlandstilknytning(
-                        UtlandstilknytningType.NASJONAL,
-                        Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        "begrunnelse",
-                    ),
+                    utlandstilknytningType?.let {
+                        Utlandstilknytning(
+                            utlandstilknytningType,
+                            Grunnlagsopplysning.Saksbehandler.create("ident"),
+                            "begrunnelse",
+                        )
+                    },
             )
 
-        val gyldigVirkningstidspunkt =
-            runBlocking {
-                service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
-            }
+        val request = VirkningstidspunktRequest(virkningstidspunkt.toString(), begrunnelse, kravdato?.toLocalDate())
 
-        assertFalse(gyldigVirkningstidspunkt)
+        return runBlocking {
+            service.erGyldigVirkningstidspunkt(BEHANDLINGS_ID, TOKEN, request)
+        }
     }
 
     @Test
@@ -720,6 +719,7 @@ class BehandlingServiceImplTest {
     }
 
     private fun behandlingServiceMedMocks(
+        sakType: SakType = SakType.BARNEPENSJON,
         doedsdato: LocalDate?,
         soeknadMottatt: LocalDateTime,
         utlandstilknytning: Utlandstilknytning? = null,
@@ -728,6 +728,7 @@ class BehandlingServiceImplTest {
             foerstegangsbehandling(
                 id = BEHANDLINGS_ID,
                 sakId = SAK_ID,
+                sakType = sakType,
                 soeknadMottattDato = soeknadMottatt,
                 utlandstilknytning = utlandstilknytning,
             )

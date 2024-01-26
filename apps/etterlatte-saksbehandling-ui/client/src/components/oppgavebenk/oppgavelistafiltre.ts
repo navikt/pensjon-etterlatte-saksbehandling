@@ -77,13 +77,12 @@ export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
 
 // Gjøre som på filtrering av saksbehandler, men istedenfor å sjekke 1 string, må man sjekke en array med strings
 export function filtrerOppgaveStatus(oppgavestatusFilter: Array<string>, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-  const konverterteFiltre: Array<OppgavestatusFilterKeys> = Object.entries(OPPGAVESTATUSFILTER)
-    .filter(([, val]) => oppgavestatusFilter.includes(val))
-    .map(([key]) => key as OppgavestatusFilterKeys)
-
   if (oppgavestatusFilter.includes(OPPGAVESTATUSFILTER.visAlle) || oppgavestatusFilter.length === 0) {
     return oppgaver
   } else {
+    const konverterteFiltre: Array<OppgavestatusFilterKeys> = Object.entries(OPPGAVESTATUSFILTER)
+      .filter(([, val]) => oppgavestatusFilter.includes(val))
+      .map(([key]) => key as OppgavestatusFilterKeys)
     return oppgaver.filter((oppgave) => konverterteFiltre.includes(oppgave.status))
   }
 }
@@ -158,8 +157,7 @@ export const FRISTFILTER = {
 export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: OppgaveDTO[]) {
   if (fristFilterKeys === 'visAlle') return oppgaver
   else if (fristFilterKeys === 'manglerFrist') {
-    const oppgaverUtenFrist = oppgaver.filter((o) => !o.frist)
-    return oppgaverUtenFrist
+    return oppgaver.filter((o) => !o.frist)
   } else {
     const oppgaverMedFrist = oppgaver.filter((o) => o.frist)
     const sortertEtterFrist = oppgaverMedFrist.sort((a, b) => {

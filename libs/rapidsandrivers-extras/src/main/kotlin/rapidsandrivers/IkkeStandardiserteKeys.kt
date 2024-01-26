@@ -19,6 +19,7 @@ const val TILBAKESTILTE_BEHANDLINGER_KEY = "tilbakestilte_behandlinger"
 const val GRUNNLAG_OPPDATERT = "grunnlag_oppdatert"
 const val OPPLYSNING_KEY = "opplysning"
 const val FNR_KEY = "fnr"
+const val NY_OPPLYSNING_KEY = "OPPLYSNING:NY"
 
 var JsonMessage.sakId: Long
     get() = this[SAK_ID_KEY].asLong()

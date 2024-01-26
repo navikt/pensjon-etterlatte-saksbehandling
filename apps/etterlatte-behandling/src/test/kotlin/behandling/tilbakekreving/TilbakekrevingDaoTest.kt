@@ -17,7 +17,9 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Periode
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAktsomhet
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurderingUaktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30

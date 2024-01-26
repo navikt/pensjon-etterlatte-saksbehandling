@@ -604,14 +604,6 @@ class VedtakBehandlingService(
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
 
-    fun hentNyesteBehandlingMedResultat(
-        sakId: Long,
-        resultat: VedtakType,
-    ) = repository.hentVedtakForSak(sakId)
-        .filter { it.status == VedtakStatus.IVERKSATT }
-        .filter { it.type == resultat }
-        .maxByOrNull { it.id }
-
     fun hentIverksatteVedtakISak(sakId: Long): List<Vedtak> {
         return repository.hentVedtakForSak(sakId)
             .filter { it.status == VedtakStatus.IVERKSATT }

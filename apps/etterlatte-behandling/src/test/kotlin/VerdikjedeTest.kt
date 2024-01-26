@@ -59,6 +59,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -575,23 +576,23 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
         assertEquals(5, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue(),
+            objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)[EVENT_NAME_KEY].textValue(),
         )
         assertEquals(
             "KLAGE:${KlageHendelseType.OPPRETTET}",
-            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue(),
+            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)[EVENT_NAME_KEY].textValue(),
         )
         assertEquals(
             "KLAGE:${KlageHendelseType.FERDIGSTILT}",
-            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue(),
+            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)[EVENT_NAME_KEY].textValue(),
         )
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)["@event_name"].textValue(),
+            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)[EVENT_NAME_KEY].textValue(),
         )
         assertEquals(
             "BEHANDLING:AVBRUTT",
-            objectMapper.readTree(rapid.publiserteMeldinger[4].verdi)["@event_name"].textValue(),
+            objectMapper.readTree(rapid.publiserteMeldinger[4].verdi)[EVENT_NAME_KEY].textValue(),
         )
         applicationContext.dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }

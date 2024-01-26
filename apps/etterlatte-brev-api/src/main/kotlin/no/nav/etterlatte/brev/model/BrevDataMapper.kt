@@ -5,21 +5,21 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_AVSLAG
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMS_REVURDERING_ENDRING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.model.bp.AdopsjonRevurderingBrevdata
 import no.nav.etterlatte.brev.model.bp.AvslagBrevData
 import no.nav.etterlatte.brev.model.bp.EndringHovedmalBrevData
 import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
 import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
-import no.nav.etterlatte.brev.model.bp.OmgjoeringAvFarskapRevurderingBrevdata
+import no.nav.etterlatte.brev.model.bp.OpphoerBrevData
 import no.nav.etterlatte.brev.model.bp.SoeskenjusteringRevurderingBrevdata
 import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
@@ -34,7 +34,6 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
@@ -84,8 +83,6 @@ private class BrevDatafetcher(
                 brukerTokenInfo,
             )
         }
-
-    suspend fun hentInnvilgelsesdato() = brevdataFacade.hentInnvilgelsesdato(sak.id, brukerTokenInfo)
 
     suspend fun hentTrygdetid() = behandlingId?.let { brevdataFacade.finnTrygdetid(it, brukerTokenInfo) }
 }
@@ -156,25 +153,9 @@ class BrevDataMapper(
                     VedtakType.OPPHOER ->
                         when (generellBrevData.revurderingsaarsak) {
                             Revurderingaarsak.ADOPSJON ->
-                                AdopsjonRevurderingBrevdata.fra(
-                                    generellBrevData,
-                                    LocalDate.now(),
-                                ) // TODO: Denne må vi hente anten frå PDL eller brukarinput
+                                ManueltBrevData.fra(emptyList())
                             Revurderingaarsak.OMGJOERING_AV_FARSKAP -> {
-                                coroutineScope {
-                                    val innvilgelsesDato =
-                                        async {
-                                            datafetcher(brukerTokenInfo, generellBrevData).hentInnvilgelsesdato()
-                                        }
-                                    val innvilgelsesDatoHentet =
-                                        requireNotNull(
-                                            innvilgelsesDato.await(),
-                                        ) { "${generellBrevData.revurderingsaarsak} må ha en innvigelsesdato fra vedtak type: $vedtakType" }
-                                    OmgjoeringAvFarskapRevurderingBrevdata.fra(
-                                        generellBrevData,
-                                        innvilgelsesDatoHentet,
-                                    )
-                                }
+                                ManueltBrevData.fra(emptyList())
                             }
 
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
@@ -242,7 +223,7 @@ class BrevDataMapper(
             TOM_MAL_INFORMASJONSBREV -> {
                 ManueltBrevMedTittelData(innholdMedVedlegg.innhold(), tittel)
             }
-            BARNEPENSJON_REVURDERING_ENDRING -> {
+            BARNEPENSJON_REVURDERING -> {
                 coroutineScope {
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }
@@ -253,7 +234,7 @@ class BrevDataMapper(
                     val trygdetidHentet =
                         requireNotNull(
                             trygdetid.await(),
-                        ) { "${kode.ferdigstilling} Har ikke trygdetid, det er påbudt for ${BARNEPENSJON_INNVILGELSE_NY.name}" }
+                        ) { "${kode.ferdigstilling} Har ikke trygdetid, det er påbudt for ${BARNEPENSJON_INNVILGELSE.name}" }
                     val grunnbeloepHentet =
                         requireNotNull(grunnbeloep.await()) { "${kode.ferdigstilling} Må ha grunnbeløp" }
                     EndringHovedmalBrevData.fra(
@@ -267,7 +248,7 @@ class BrevDataMapper(
                 }
             }
 
-            BARNEPENSJON_INNVILGELSE_NY -> {
+            BARNEPENSJON_INNVILGELSE -> {
                 coroutineScope {
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }
@@ -279,7 +260,7 @@ class BrevDataMapper(
                     val trygdetidHentet =
                         requireNotNull(
                             trygdetid.await(),
-                        ) { "${kode.ferdigstilling} Har ikke trygdetid, det er påbudt for ${BARNEPENSJON_INNVILGELSE_NY.name}" }
+                        ) { "${kode.ferdigstilling} Har ikke trygdetid, det er påbudt for ${BARNEPENSJON_INNVILGELSE.name}" }
                     val grunnbeloepHentet =
                         requireNotNull(grunnbeloep.await()) { "${kode.ferdigstilling} Må ha grunnbeløp" }
 
@@ -304,6 +285,15 @@ class BrevDataMapper(
                 AvslagBrevData.fra(
                     innhold = innholdMedVedlegg,
                     // TODO må kunne sette brevutfall ved avslag. Det er pr nå ikke mulig da dette ligger i beregningssteget.
+                    brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
+                    utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+                )
+            }
+
+            BARNEPENSJON_OPPHOER -> {
+                OpphoerBrevData.fra(
+                    innhold = innholdMedVedlegg,
+                    // TODO må kunne sette brevutfall ved opphør. Det er pr nå ikke mulig da dette ligger i beregningssteget.
                     brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
                     utlandstilknytning = generellBrevData.utlandstilknytning?.type,
                 )
@@ -336,7 +326,7 @@ class BrevDataMapper(
                 }
             }
 
-            OMS_REVURDERING_ENDRING -> {
+            OMSTILLINGSSTOENAD_REVURDERING -> {
                 coroutineScope {
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
@@ -354,7 +344,7 @@ class BrevDataMapper(
                 }
             }
 
-            OMS_AVSLAG -> {
+            OMSTILLINGSSTOENAD_AVSLAG -> {
                 AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, innholdMedVedlegg.innhold())
             }
 

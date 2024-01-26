@@ -1,73 +1,25 @@
 package no.nav.etterlatte.brev.model.bp
 
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.model.BrevDataValidator.valider
-import no.nav.etterlatte.brev.model.OpphoerBrevData
-import no.nav.etterlatte.libs.common.behandling.Navn
-import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import java.time.LocalDate
+import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
+import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 
-data class AdopsjonRevurderingBrevdata(
-    val virkningsdato: LocalDate,
-    val adopsjonsdato: LocalDate,
-    val adoptertAv1: Navn,
-    val adoptertAv2: Navn? = null,
-) :
-    OpphoerBrevData() {
+data class OpphoerBrevData(
+    val innhold: List<Slate.Element>,
+    val brukerUnder18Aar: Boolean,
+    val bosattUtland: Boolean,
+) : BrevData() {
     companion object {
         fun fra(
-            generellBrevData: GenerellBrevData,
-            adopsjonsdato: LocalDate,
-        ): AdopsjonRevurderingBrevdata {
-            val revurderingInfo =
-                valider<RevurderingInfo.Adopsjon>(
-                    generellBrevData.revurderingsaarsak,
-                    generellBrevData.forenkletVedtak?.revurderingInfo,
-                    Revurderingaarsak.ADOPSJON,
-                )
-
-            val virkningstidspunkt =
-                requireNotNull(generellBrevData.forenkletVedtak?.virkningstidspunkt) {
-                    "brev for behandling=${generellBrevData.behandlingId} må ha virkningstidspunkt"
-                }
-            return AdopsjonRevurderingBrevdata(
-                virkningsdato = virkningstidspunkt.atDay(1),
-                adopsjonsdato = adopsjonsdato,
-                adoptertAv1 = revurderingInfo.adoptertAv1,
-                adoptertAv2 = revurderingInfo.adoptertAv2,
+            innhold: InnholdMedVedlegg,
+            brukerUnder18Aar: Boolean,
+            utlandstilknytning: UtlandstilknytningType?,
+        ): OpphoerBrevData =
+            OpphoerBrevData(
+                innhold = innhold.innhold(),
+                brukerUnder18Aar = brukerUnder18Aar,
+                bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
             )
-        }
-    }
-}
-
-data class OmgjoeringAvFarskapRevurderingBrevdata(
-    val virkningsdato: LocalDate,
-    val naavaerendeFar: Navn,
-    var forrigeFar: Navn,
-    val opprinneligInnvilgelsesdato: LocalDate,
-) : OpphoerBrevData() {
-    companion object {
-        fun fra(
-            generellBrevData: GenerellBrevData,
-            opprinneligInnvilgelsesdato: LocalDate,
-        ): OmgjoeringAvFarskapRevurderingBrevdata {
-            val revurderingInfo =
-                valider<RevurderingInfo.OmgjoeringAvFarskap>(
-                    generellBrevData.revurderingsaarsak,
-                    generellBrevData.forenkletVedtak?.revurderingInfo,
-                    Revurderingaarsak.OMGJOERING_AV_FARSKAP,
-                )
-            val virkningstidspunkt =
-                requireNotNull(generellBrevData.forenkletVedtak?.virkningstidspunkt) {
-                    "Mangler virkningstidspunkt ${generellBrevData.behandlingId}"
-                }
-            return OmgjoeringAvFarskapRevurderingBrevdata(
-                virkningsdato = virkningstidspunkt.atDay(1),
-                naavaerendeFar = revurderingInfo.naavaerendeFar,
-                forrigeFar = revurderingInfo.forrigeFar,
-                opprinneligInnvilgelsesdato = opprinneligInnvilgelsesdato,
-            )
-        }
     }
 }

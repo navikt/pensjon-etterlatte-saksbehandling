@@ -23,11 +23,7 @@ class KlagehendelseRiver(
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private val klagehendelser =
-        listOf(
-            KlageHendelseType.OPPRETTET.lagEventnameForType(),
-            KlageHendelseType.FERDIGSTILT.lagEventnameForType(),
-        )
+    private val klagehendelser = KlageHendelseType.entries.map { it.lagEventnameForType() }
 
     init {
         initialiserRiverUtenEventName(rapidsConnection) {
@@ -49,7 +45,7 @@ class KlagehendelseRiver(
                 ?.also {
                     context.publish(
                         mapOf(
-                            "@event_name" to "STATISTIKK:REGISTRERT",
+                            EVENT_NAME_KEY to "STATISTIKK:REGISTRERT",
                             "sak_rad" to objectMapper.writeValueAsString(it),
                         ).toJson(),
                     )

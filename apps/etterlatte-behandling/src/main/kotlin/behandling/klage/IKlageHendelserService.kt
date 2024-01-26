@@ -43,7 +43,7 @@ class KlageHendelserServiceImpl(
             ).toJson(),
         ).also { (partition, offset) ->
             logger.info(
-                "Posted event KLAGE:${klageHendelseType.name} for KLAGE ${statistikkKlage.id}" +
+                "Posted event ${klageHendelseType.lagEventnameForType()} for KLAGE ${statistikkKlage.id}" +
                     " to partiton $partition, offset $offset correlationid: $correlationId",
             )
         }

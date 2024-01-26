@@ -14,6 +14,11 @@ spec:
   readiness:
     initialDelay: 5
     path: /health/isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  secureLogs:
+    enabled: true
   strategy:
     type: Recreate
   kafka:

@@ -3,7 +3,6 @@ package no.nav.etterlatte.vilkaarsvurdering
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -23,7 +22,6 @@ import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar1967
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar2024
 import no.nav.etterlatte.vilkaarsvurdering.vilkaar.OmstillingstoenadVilkaar
 import org.slf4j.LoggerFactory
-import vilkaarsvurdering.config.VilkaarsvurderingFeatureToggle
 import java.util.UUID
 
 class VirkningstidspunktIkkeSattException(behandlingId: UUID) :
@@ -33,7 +31,6 @@ class VilkaarsvurderingService(
     private val vilkaarsvurderingRepository: VilkaarsvurderingRepository,
     private val behandlingKlient: BehandlingKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingService::class.java)
 
@@ -64,9 +61,7 @@ class VilkaarsvurderingService(
                     virkningstidspunkt = virkningstidspunkt,
                     resultat = resultat,
                 )
-            if (featureToggleService.isEnabled(VilkaarsvurderingFeatureToggle.OppdaterGrunnlagsversjon, false) &&
-                vilkaarsvurdering.grunnlagVersjon != grunnlag.metadata.versjon
-            ) {
+            if (vilkaarsvurdering.grunnlagVersjon != grunnlag.metadata.versjon) {
                 vilkaarsvurderingRepository.oppdaterGrunnlagsversjon(behandlingId, grunnlag.metadata.versjon)
             }
             behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo)

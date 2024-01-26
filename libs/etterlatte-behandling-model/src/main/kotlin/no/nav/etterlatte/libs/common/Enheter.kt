@@ -1,7 +1,5 @@
 package no.nav.etterlatte.common
 
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-
 enum class Enheter(
     val enhetNr: String,
     val navn: String,
@@ -37,8 +35,4 @@ open class EnhetException(override val message: String) : Exception(message)
 
 class IngenEnhetFunnetException(val omraade: String, val tema: String) : EnhetException(
     message = "Ingen enheter funnet for tema $tema og omraade $omraade",
-)
-
-class IngenGeografiskOmraadeFunnetForEnhet(val person: Folkeregisteridentifikator, val tema: String) : EnhetException(
-    message = "Fant ikke geografisk omraade for $person og tema $tema",
 )

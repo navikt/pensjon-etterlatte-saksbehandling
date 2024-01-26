@@ -2,6 +2,7 @@ package no.nav.etterlatte.statistikk.service
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
@@ -13,6 +14,9 @@ import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
@@ -34,7 +38,6 @@ import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
 import no.nav.etterlatte.statistikk.domain.SoeknadFormat
 import no.nav.etterlatte.statistikk.domain.StoenadRad
-import no.nav.etterlatte.statistikk.river.BehandlingHendelse
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -261,6 +264,47 @@ class StatistikkService(
         )
     }
 
+    private fun tilbakekrevingTilSakRad(
+        statistikkTilbakekreving: StatistikkTilbakekrevingDto,
+        tekniskTid: LocalDateTime,
+        hendelse: TilbakekrevingHendelseType,
+    ) = SakRad(
+        id = -1,
+        referanseId = statistikkTilbakekreving.id,
+        sakId = statistikkTilbakekreving.tilbakekreving.sak.id,
+        mottattTidspunkt = statistikkTilbakekreving.tilbakekreving.opprettet,
+        registrertTidspunkt = statistikkTilbakekreving.tilbakekreving.opprettet,
+        type = "TILBAKEKREVING",
+        status = hendelse.name,
+        ansvarligEnhet = statistikkTilbakekreving.tilbakekreving.sak.enhet,
+        resultat = statistikkTilbakekreving.tilbakekreving.tilbakekreving.vurdering.konklusjon,
+        tekniskTid = tekniskTid.toTidspunkt(),
+        sakYtelse = statistikkTilbakekreving.tilbakekreving.sak.sakType.name,
+        behandlingMetode = BehandlingMetode.MANUELL,
+        avdoedeForeldre = null,
+        sakYtelsesgruppe = null,
+        revurderingAarsak = null,
+        vedtakLoependeFom = null,
+        vedtakTidspunkt = null,
+        beregning = null,
+        avkorting = null,
+        datoFoersteUtbetaling = null,
+        opprettetAv = null,
+        pesysId = null,
+        resultatBegrunnelse = null,
+        sakUtland = null,
+        soeknadFormat = null,
+        vedtakLoependeTom = null,
+        aktorId = statistikkTilbakekreving.tilbakekreving.sak.ident,
+        kilde = Vedtaksloesning.GJENNY,
+        ansvarligBeslutter = statistikkTilbakekreving.tilbakekreving.tilbakekreving.kravgrunnlag.saksbehandler.value,
+        ferdigbehandletTidspunkt =
+            statistikkTilbakekreving.tidspunkt.takeIf {
+                statistikkTilbakekreving.tilbakekreving.status == TilbakekrevingStatus.ATTESTERT
+            },
+        saksbehandler = statistikkTilbakekreving.tilbakekreving.tilbakekreving.kravgrunnlag.saksbehandler.value,
+    )
+
     private fun klageTilSakRad(
         statistikkKlage: StatistikkKlage,
         tekniskTid: LocalDateTime,
@@ -310,7 +354,7 @@ class StatistikkService(
 
     private fun behandlingTilSakRad(
         statistikkBehandling: StatistikkBehandling,
-        behandlingHendelse: BehandlingHendelse,
+        behandlingHendelse: BehandlingHendelseType,
         tekniskTid: LocalDateTime,
     ): SakRad {
         val fellesRad =
@@ -361,7 +405,7 @@ class StatistikkService(
                 kilde = statistikkBehandling.kilde,
                 pesysId = statistikkBehandling.pesysId,
             )
-        if (behandlingHendelse == BehandlingHendelse.AVBRUTT) {
+        if (behandlingHendelse == BehandlingHendelseType.AVBRUTT) {
             return fellesRad.copy(
                 ferdigbehandletTidspunkt = statistikkBehandling.sistEndret.toTidspunkt(),
                 resultat = BehandlingResultat.AVBRUTT.name,
@@ -372,7 +416,7 @@ class StatistikkService(
 
     fun registrerStatistikkForBehandlinghendelse(
         statistikkBehandling: StatistikkBehandling,
-        hendelse: BehandlingHendelse,
+        hendelse: BehandlingHendelseType,
         tekniskTid: LocalDateTime,
     ): SakRad? {
         return sakRepository.lagreRad(behandlingTilSakRad(statistikkBehandling, hendelse, tekniskTid))
@@ -384,6 +428,14 @@ class StatistikkService(
         hendelse: KlageHendelseType,
     ): SakRad? {
         return sakRepository.lagreRad(klageTilSakRad(statistikkKlage, tekniskTid, hendelse))
+    }
+
+    fun registrerStatistikkFortilbakkrevinghendelse(
+        statistikkTilbakekreving: StatistikkTilbakekrevingDto,
+        tekniskTid: LocalDateTime,
+        hendelse: TilbakekrevingHendelseType,
+    ): SakRad? {
+        return sakRepository.lagreRad(tilbakekrevingTilSakRad(statistikkTilbakekreving, tekniskTid, hendelse))
     }
 
     fun statistikkProdusertForMaaned(maaned: YearMonth): KjoertStatus {

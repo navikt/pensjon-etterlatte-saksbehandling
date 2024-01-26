@@ -1,12 +1,7 @@
-package no.nav.etterlatte.behandling.tilbakekreving
+package no.nav.etterlatte.libs.common.tilbakekreving
 
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
-import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
-import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurderingUaktsomhet
-import no.nav.etterlatte.libs.common.tilbakekreving.tilTilbakekrevingPerioder
 import java.util.UUID
 
 data class TilbakekrevingBehandling(
@@ -64,9 +59,3 @@ enum class TilbakekrevingStatus {
     ATTESTERT,
     UNDERKJENT,
 }
-
-class TilbakekrevingHarMangelException(message: String?) : RuntimeException(message)
-
-class TilbakekrevingFinnesIkkeException(message: String?) : RuntimeException(message)
-
-class TilbakekrevingFeilTilstandException(message: String?) : RuntimeException(message)

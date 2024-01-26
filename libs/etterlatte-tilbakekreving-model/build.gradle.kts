@@ -7,4 +7,5 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":libs:saksbehandling-common"))
 }

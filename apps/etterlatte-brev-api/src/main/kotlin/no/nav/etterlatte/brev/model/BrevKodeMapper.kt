@@ -14,7 +14,7 @@ class BrevKodeMapper {
     ) = when (brevProsessType) {
         BrevProsessType.AUTOMATISK -> brevKodeAutomatisk(generellBrevData, erOmregningNyRegel)
         BrevProsessType.REDIGERBAR -> brevKodeAutomatisk(generellBrevData, erOmregningNyRegel)
-        BrevProsessType.MANUELL -> BrevkodePar(EtterlatteBrevKode.OMS_OPPHOER_MANUELL)
+        BrevProsessType.MANUELL -> BrevkodePar(EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING_OPPHOER_MANUELL)
         BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException("Brevkode ikke relevant for ${BrevProsessType.OPPLASTET_PDF}")
     }
 
@@ -32,16 +32,16 @@ class BrevKodeMapper {
 
         return when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
-                when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
+                when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE ->
                         BrevkodePar(
-                            EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_ENKEL,
-                            EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_NY,
+                            EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_UTFALL,
+                            EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE,
                         )
 
                     VedtakType.AVSLAG ->
                         BrevkodePar(
-                            EtterlatteBrevKode.BARNEPENSJON_AVSLAG_ENKEL,
+                            EtterlatteBrevKode.BARNEPENSJON_AVSLAG_UTFALL,
                             EtterlatteBrevKode.BARNEPENSJON_AVSLAG,
                         )
 
@@ -51,52 +51,29 @@ class BrevKodeMapper {
                             Revurderingaarsak.INSTITUSJONSOPPHOLD ->
                                 BrevkodePar(
                                     EtterlatteBrevKode.TOM_MAL,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING,
+                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
                                 )
 
                             Revurderingaarsak.YRKESSKADE ->
                                 BrevkodePar(
                                     EtterlatteBrevKode.TOM_MAL,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING,
+                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
                                 )
 
                             Revurderingaarsak.ANNEN ->
                                 BrevkodePar(
                                     EtterlatteBrevKode.TOM_MAL,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING,
+                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING,
                                 )
 
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
 
                     VedtakType.OPPHOER ->
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.ADOPSJON ->
-                                BrevkodePar(
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ADOPSJON,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER,
-                                )
-
-                            Revurderingaarsak.OMGJOERING_AV_FARSKAP ->
-                                BrevkodePar(
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_OPPHOER,
-                                )
-
-                            Revurderingaarsak.FENGSELSOPPHOLD ->
-                                BrevkodePar(
-                                    EtterlatteBrevKode.TOM_MAL,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING,
-                                )
-
-                            Revurderingaarsak.UT_AV_FENGSEL ->
-                                BrevkodePar(
-                                    EtterlatteBrevKode.TOM_MAL,
-                                    EtterlatteBrevKode.BARNEPENSJON_REVURDERING_ENDRING,
-                                )
-
-                            else -> TODO("Vedtakstype er ikke støttet: $vedtakType")
-                        }
+                        BrevkodePar(
+                            EtterlatteBrevKode.BARNEPENSJON_OPPHOER_UTFALL,
+                            EtterlatteBrevKode.BARNEPENSJON_OPPHOER,
+                        )
 
                     VedtakType.TILBAKEKREVING ->
                         BrevkodePar(
@@ -121,8 +98,8 @@ class BrevKodeMapper {
 
                     VedtakType.AVSLAG ->
                         BrevkodePar(
-                            EtterlatteBrevKode.OMS_AVSLAG_BEGRUNNELSE,
-                            EtterlatteBrevKode.OMS_AVSLAG,
+                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG_UTFALL,
+                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG,
                         )
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
@@ -131,7 +108,7 @@ class BrevKodeMapper {
                             ->
                                 BrevkodePar(
                                     EtterlatteBrevKode.TOM_MAL,
-                                    EtterlatteBrevKode.OMS_REVURDERING_ENDRING,
+                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING,
                                 )
 
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
@@ -141,8 +118,8 @@ class BrevKodeMapper {
                         when (generellBrevData.revurderingsaarsak) {
                             Revurderingaarsak.SIVILSTAND ->
                                 BrevkodePar(
-                                    EtterlatteBrevKode.OMS_REVURDERING_OPPHOER_GENERELL,
-                                    EtterlatteBrevKode.OMS_REVURDERING_OPPHOER,
+                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING_OPPHOER_UTFALL,
+                                    EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING_OPPHOER,
                                 )
 
                             else -> TODO("Vedtakstype er ikke støttet: $vedtakType")

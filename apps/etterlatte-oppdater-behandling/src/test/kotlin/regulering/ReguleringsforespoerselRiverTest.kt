@@ -143,7 +143,7 @@ internal class ReguleringsforespoerselRiverTest {
         inspector.sendTestMessage(melding.toJson())
 
         val melding1 = inspector.inspektør.message(0)
-        Assertions.assertEquals(FEILA, melding1.get(EVENT_NAME_KEY).textValue())
+        Assertions.assertEquals(FEILA.lagEventnameForType(), melding1.get(EVENT_NAME_KEY).textValue())
         Assertions.assertEquals(ReguleringsforespoerselRiver::class.simpleName, melding1.get(FEILENDE_STEG).textValue())
     }
 }

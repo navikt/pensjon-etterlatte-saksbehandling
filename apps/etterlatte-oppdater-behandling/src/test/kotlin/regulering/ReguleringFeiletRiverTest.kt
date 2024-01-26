@@ -23,7 +23,7 @@ internal class ReguleringFeiletRiverTest {
     private fun genererReguleringMelding() =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to FEILA,
+                EVENT_NAME_KEY to FEILA.lagEventnameForType(),
                 DATO_KEY to foersteMai2023,
                 AARSAK to ReguleringEvents.EVENT_NAME,
                 SAK_ID_KEY to 83L,

@@ -53,7 +53,7 @@ class MigreringHendelserRiverTest {
 
         assertEquals(1, inspector.inspektør.size)
         val sendtMelding = inspector.inspektør.message(0)
-        assertEquals(sendtMelding.get(EVENT_NAME_KEY).asText(), EventNames.FEILA)
+        assertEquals(sendtMelding.get(EVENT_NAME_KEY).asText(), EventNames.FEILA.lagEventnameForType())
     }
 
     @Test

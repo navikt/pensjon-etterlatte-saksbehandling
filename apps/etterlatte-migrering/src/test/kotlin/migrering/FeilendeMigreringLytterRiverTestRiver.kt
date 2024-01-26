@@ -91,7 +91,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
-                            EVENT_NAME_KEY to EventNames.FEILA,
+                            EVENT_NAME_KEY to EventNames.FEILA.lagEventnameForType(),
                             KILDE_KEY to Vedtaksloesning.PESYS,
                             PESYS_ID_KEY to pesysid,
                             HENDELSE_DATA_KEY to pesyssak.tilMigreringsrequest(),

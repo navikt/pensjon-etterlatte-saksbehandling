@@ -472,7 +472,7 @@ internal class StartMigreringRiverIntegrationTest {
                 ).toJson(),
             )
             with(inspector.inspektør.message(0)) {
-                assertEquals(EventNames.FEILA, get(EVENT_NAME_KEY).textValue())
+                assertEquals(EventNames.FEILA.lagEventnameForType(), get(EVENT_NAME_KEY).textValue())
             }
             assertEquals(Migreringsstatus.VERIFISERING_FEILA, repository.hentStatus(pesysid))
         }
@@ -542,7 +542,7 @@ internal class StartMigreringRiverIntegrationTest {
                 ).toJson(),
             )
             with(inspector.inspektør.message(0)) {
-                assertEquals(EventNames.FEILA, get(EVENT_NAME_KEY).textValue())
+                assertEquals(EventNames.FEILA.lagEventnameForType(), get(EVENT_NAME_KEY).textValue())
             }
             assertEquals(Migreringsstatus.VERIFISERING_FEILA, repository.hentStatus(pesysid))
         }

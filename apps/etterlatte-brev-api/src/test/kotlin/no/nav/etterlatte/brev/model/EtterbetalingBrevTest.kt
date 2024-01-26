@@ -103,6 +103,34 @@ internal class EtterbetalingBrevTest {
         etterbetalingBrev?.etterbetalingsperioder shouldBe emptyList()
     }
 
+    @Test
+    fun `skal returnere en lukket periode hvis beregning kun inneholder en loepende periode`() {
+        val etterbetalingDto =
+            EtterbetalingDTO(
+                datoFom = LocalDate.of(2024, 1, 1),
+                datoTom = LocalDate.of(2024, 1, 31),
+            )
+
+        val perioder =
+            listOf(
+                beregningsperiode(
+                    datoFOM = LocalDate.of(2024, 1, 1),
+                    datoTOM = null,
+                ),
+            )
+
+        val etterbetalingBrev = EtterbetalingBrev.fra(etterbetalingDto, perioder)
+
+        etterbetalingBrev shouldNotBe null
+        etterbetalingBrev?.fraDato shouldBe etterbetalingDto.datoFom
+        etterbetalingBrev?.tilDato shouldBe etterbetalingDto.datoTom
+        with(etterbetalingBrev!!.etterbetalingsperioder) {
+            size shouldBe 1
+            get(0).datoFOM shouldBe LocalDate.of(2024, 1, 1)
+            get(0).datoTOM shouldBe LocalDate.of(2024, 1, 31)
+        }
+    }
+
     private fun beregningsperiode(
         datoFOM: LocalDate,
         datoTOM: LocalDate?,

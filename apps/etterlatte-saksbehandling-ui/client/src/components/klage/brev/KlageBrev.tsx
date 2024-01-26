@@ -135,7 +135,3 @@ const Sidebar = styled.div`
   width: 40%;
   border-right: 1px solid #c6c2bf;
 `
-
-const BrevTittelMedSpacing = styled(BrevTittel)`
-  margin: 1rem;
-`

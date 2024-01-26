@@ -44,7 +44,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   const redigerbar = behandlingErRedigerbar(props.behandling.status) && innloggetSaksbehandler.skriveTilgang
 
-  const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
+  const [vedtaksbrev, setVedtaksbrev] = useState<IBrev>()
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)

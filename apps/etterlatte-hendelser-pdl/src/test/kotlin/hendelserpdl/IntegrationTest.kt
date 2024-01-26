@@ -92,7 +92,7 @@ class IntegrationTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = PdlHendelserKeys.PERSONHENDELSE,
+                eventName = PdlHendelserKeys.PERSONHENDELSE.lagEventnameForType(),
                 hendelse = LeesahOpplysningstype.DOEDSFALL_V1,
                 hendelse_data =
                     Doedshendelse(

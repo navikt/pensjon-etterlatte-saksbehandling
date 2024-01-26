@@ -38,7 +38,7 @@ class GrunnlagHendelserRiver(
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
-            validate { it.rejectValue(EVENT_NAME_KEY, EventNames.FEILA) }
+            validate { it.rejectValue(EVENT_NAME_KEY, EventNames.FEILA.lagEventnameForType()) }
             validate { it.rejectValue(VILKAARSVURDERT_KEY, true) }
         }
     }

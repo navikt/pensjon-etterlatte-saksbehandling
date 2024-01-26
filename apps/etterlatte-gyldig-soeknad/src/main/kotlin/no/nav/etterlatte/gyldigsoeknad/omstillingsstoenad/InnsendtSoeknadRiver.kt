@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat.KAN_IKKE_VURDERE_PGA_MANGLENDE_OPPLYSNING
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
@@ -27,7 +28,7 @@ internal class InnsendtSoeknadRiver(
     private val logger = LoggerFactory.getLogger(InnsendtSoeknadRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, SoeknadInnsendt.eventNameInnsendt) {
+        initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENTNAMEINNSENDT) {
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.OMSTILLINGSSTOENAD.name) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "1") }

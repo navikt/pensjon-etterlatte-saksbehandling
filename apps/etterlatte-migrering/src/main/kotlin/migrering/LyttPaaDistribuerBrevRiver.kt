@@ -1,5 +1,6 @@
 package no.nav.etterlatte.migrering
 
+import no.nav.etterlatte.libs.common.brev.BrevHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -15,7 +16,7 @@ internal class LyttPaaDistribuerBrevRiver(
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, "BREV:DISTRIBUERT") { // TODO: fiks denne til variabel
+        initialiserRiver(rapidsConnection, BrevHendelseType.DISTRIBUERT) {
             validate { it.requireKey("bestillingsId") }
             validate { it.requireKey("vedtak.behandlingId") }
         }

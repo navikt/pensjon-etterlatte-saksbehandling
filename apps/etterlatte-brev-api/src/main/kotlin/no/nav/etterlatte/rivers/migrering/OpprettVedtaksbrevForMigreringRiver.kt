@@ -24,7 +24,7 @@ internal class OpprettVedtaksbrevForMigreringRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.FATTET) {
             validate { it.requireKey("vedtak.behandlingId") }
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.requireKey(HENDELSE_DATA_KEY) }

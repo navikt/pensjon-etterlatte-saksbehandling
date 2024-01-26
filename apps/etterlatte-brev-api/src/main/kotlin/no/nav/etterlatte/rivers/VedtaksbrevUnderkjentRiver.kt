@@ -17,7 +17,7 @@ internal class VedtaksbrevUnderkjentRiver(
     private val logger = LoggerFactory.getLogger(VedtaksbrevUnderkjentRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.UNDERKJENT.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.UNDERKJENT) {
             validate { it.requireKey("vedtak") }
             validate { it.requireKey("vedtak.id") }
             validate { it.requireKey("vedtak.behandlingId") }

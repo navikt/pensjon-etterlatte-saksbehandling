@@ -30,7 +30,7 @@ internal class MigreringBeregningHendelserRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.BEREGN.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.BEREGN) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }

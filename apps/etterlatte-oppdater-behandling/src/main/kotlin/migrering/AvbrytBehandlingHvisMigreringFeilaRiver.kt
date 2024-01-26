@@ -18,7 +18,7 @@ internal class AvbrytBehandlingHvisMigreringFeilaRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.AVBRYT_BEHANDLING.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.AVBRYT_BEHANDLING) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
         }
     }

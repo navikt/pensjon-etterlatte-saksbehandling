@@ -1,6 +1,6 @@
 package no.nav.etterlatte.testdata.features.soeknad
 
-import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.ArbeidOgUtdanningOMS
 import no.nav.etterlatte.libs.common.innsendtsoeknad.ForholdTilAvdoedeOMS
 import no.nav.etterlatte.libs.common.innsendtsoeknad.ForholdTilAvdoedeType
@@ -43,7 +43,7 @@ object SoeknadMapper {
             SoeknadType.OMSTILLINGSSTOENAD ->
                 JsonMessage.newMessage(
                     mutableMapOf(
-                        "@event_name" to SoeknadInnsendt.eventNameInnsendt,
+                        "@event_name" to SoeknadInnsendtHendelseType.EVENTNAMEINNSENDT.lagEventnameForType(),
                         "@skjema_info" to
                             opprettOmstillingsstoenadSoeknad(
                                 soekerFnr = gjenlevendeFnr,
@@ -61,7 +61,7 @@ object SoeknadMapper {
             SoeknadType.BARNEPENSJON ->
                 JsonMessage.newMessage(
                     mutableMapOf(
-                        "@event_name" to SoeknadInnsendt.eventNameBehandlingBehov,
+                        "@event_name" to SoeknadInnsendtHendelseType.EVENTNAMEBEHANDLINGBEHOV.lagEventnameForType(),
                         "@skjema_info" to
                             opprettBarnepensjonSoeknad(
                                 gjenlevendeFnr = gjenlevendeFnr,

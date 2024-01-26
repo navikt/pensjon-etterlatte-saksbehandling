@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.brev.BrevHendelseType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -54,7 +55,7 @@ internal class DistribuerBrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevHendelseHendelseType.JOURNALFOERT.lagEventnameForType(),
+                    EVENT_NAME_KEY to BrevHendelseType.JOURNALFOERT.lagEventnameForType(),
                     CORRELATION_ID_KEY to UUID.randomUUID().toString(),
                     "brevId" to brevId,
                     "journalpostId" to journalpostId,

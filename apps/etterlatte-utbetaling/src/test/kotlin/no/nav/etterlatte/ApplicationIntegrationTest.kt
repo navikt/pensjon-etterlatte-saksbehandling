@@ -13,9 +13,9 @@ import no.nav.etterlatte.mq.DummyJmsConnectionFactory
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.TestContainers
 import no.nav.etterlatte.utbetaling.attestertvedtakEvent
-import no.nav.etterlatte.utbetaling.common.EVENT_NAME_UTBETALING_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
+import no.nav.etterlatte.utbetaling.common.UtbetalinghendelseType
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.etterlatte.utbetaling.config.ApplicationProperties
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
@@ -94,7 +94,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
-                        this.event == EVENT_NAME_UTBETALING_OPPDATERT &&
+                        this.eventName == UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType() &&
                             this.utbetalingResponse.vedtakId == 1L &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.SENDT &&
                             this.utbetalingResponse.behandlingId == behandlingId
@@ -112,7 +112,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
-                        this.event == EVENT_NAME_UTBETALING_OPPDATERT &&
+                        this.eventName == UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType() &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
                                 ?.contains(
@@ -156,7 +156,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
-                        this.event == EVENT_NAME_UTBETALING_OPPDATERT &&
+                        this.eventName == UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType() &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
                                 ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false &&
@@ -196,7 +196,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
-                        this.event == EVENT_NAME_UTBETALING_OPPDATERT &&
+                        this.eventName == UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType() &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
                                 ?.contains(
@@ -231,7 +231,7 @@ class ApplicationIntegrationTest {
                 match {
                     val (eventName, utbetalingResponse) = it.toResponse()
 
-                    return@match eventName == EVENT_NAME_UTBETALING_OPPDATERT &&
+                    return@match eventName == UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType() &&
                         utbetalingResponse.vedtakId == 1L &&
                         utbetalingResponse.status == UtbetalingStatusDto.GODKJENT &&
                         utbetalingResponse.behandlingId == behandlingId
@@ -250,7 +250,7 @@ class ApplicationIntegrationTest {
                 match {
                     val (eventName, utbetalingResponse) = it.toResponse()
 
-                    return@match eventName == EVENT_NAME_UTBETALING_OPPDATERT &&
+                    return@match eventName == UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType() &&
                         utbetalingResponse.vedtakId == 1L &&
                         utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                         utbetalingResponse.behandlingId == null
@@ -282,7 +282,7 @@ class ApplicationIntegrationTest {
                 match {
                     val (eventName, utbetalingResponse) = it.toResponse()
 
-                    return@match eventName == EVENT_NAME_UTBETALING_OPPDATERT &&
+                    return@match eventName == UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType() &&
                         utbetalingResponse.vedtakId == 1L &&
                         utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                         utbetalingResponse.feilmelding ==
@@ -315,7 +315,7 @@ class ApplicationIntegrationTest {
                 match {
                     val (eventName, utbetalingResponse) = it.toResponse()
 
-                    return@match eventName == EVENT_NAME_UTBETALING_OPPDATERT &&
+                    return@match eventName == UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType() &&
                         utbetalingResponse.vedtakId == 1L &&
                         utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                         utbetalingResponse.feilmelding == "KodeMelding Beskrivelse" &&

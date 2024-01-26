@@ -33,7 +33,7 @@ class VedtakMottakRiver(
 ) : ListenerMedLogging() {
     init {
         // Barnepensjon
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
             validate { it.requireKey("vedtak") }
             validate { it.requireValue("vedtak.sak.sakType", SakType.BARNEPENSJON.name) }
             validate {
@@ -46,7 +46,7 @@ class VedtakMottakRiver(
         }
 
         // Omstillingsstønad
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.SAMORDNET.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.SAMORDNET) {
             validate { it.requireKey("vedtak") }
             validate { it.requireValue("vedtak.sak.sakType", SakType.OMSTILLINGSSTOENAD.name) }
             validate {

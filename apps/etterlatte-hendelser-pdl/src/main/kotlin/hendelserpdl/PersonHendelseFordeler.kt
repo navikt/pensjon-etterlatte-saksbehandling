@@ -243,7 +243,7 @@ class PersonHendelseFordeler(
             noekkel = UUID.randomUUID().toString(),
             verdi =
                 JsonMessage.newMessage(
-                    eventName = PdlHendelserKeys.PERSONHENDELSE,
+                    eventName = PdlHendelserKeys.PERSONHENDELSE.lagEventnameForType(),
                     map =
                         mapOf(
                             "hendelse" to opplysningstype.toString(),

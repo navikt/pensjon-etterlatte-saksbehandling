@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
@@ -42,7 +43,7 @@ internal class FordelerRiver(
     private val logger = LoggerFactory.getLogger(FordelerRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, SoeknadInnsendt.eventNameInnsendt) {
+        initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENTNAMEINNSENDT) {
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, "BARNEPENSJON") }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "2") }
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }

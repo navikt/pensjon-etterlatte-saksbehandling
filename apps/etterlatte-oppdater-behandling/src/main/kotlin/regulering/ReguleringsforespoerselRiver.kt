@@ -4,8 +4,7 @@ import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.FINN_LOEPENDE_YTELSER
+import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -24,7 +23,7 @@ internal class ReguleringsforespoerselRiver(
     private val logger = LoggerFactory.getLogger(ReguleringsforespoerselRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringEvents.START_REGULERING) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.START_REGULERING) {
             validate { it.requireKey(DATO_KEY) }
         }
     }
@@ -52,7 +51,7 @@ internal class ReguleringsforespoerselRiver(
                 }
 
         sakerTilOmregning.saker.forEach {
-            packet.eventName = FINN_LOEPENDE_YTELSER
+            packet.eventName = ReguleringHendelseType.FINN_LOEPENDE_YTELSER.lagEventnameForType()
             packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
             packet.sakId = it.id
             context.publish(packet.toJson())

@@ -8,8 +8,7 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.OPPRETT_VEDTAK
+import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -32,7 +31,7 @@ internal class OmregningHendelserRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringEvents.BEREGN) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.BEREGN) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_TYPE) }
             validate { it.rejectKey(BEREGNING_KEY) }
@@ -63,7 +62,7 @@ internal class OmregningHendelserRiver(
                         .body<AvkortingDto>()
                 packet[AVKORTING_KEY] = avkorting
             }
-            packet[EVENT_NAME_KEY] = OPPRETT_VEDTAK
+            packet[EVENT_NAME_KEY] = ReguleringHendelseType.OPPRETT_VEDTAK.lagEventnameForType()
             context.publish(packet.toJson())
         }
         logger.info("Publiserte oppdatert omregningshendelse")

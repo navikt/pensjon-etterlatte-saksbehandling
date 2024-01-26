@@ -5,8 +5,8 @@ import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
-import no.nav.etterlatte.utbetaling.common.EVENT_NAME_UTBETALING_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
+import no.nav.etterlatte.utbetaling.common.UtbetalinghendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -18,7 +18,7 @@ internal class LagreIverksattVedtakRiver(
     private val vedtaksvurderingService: VedtakService,
 ) : ListenerMedLogging() {
     init {
-        initialiserRiver(rapidsConnection, EVENT_NAME_UTBETALING_OPPDATERT) {
+        initialiserRiver(rapidsConnection, UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT) {
             validate { it.requireKey(UTBETALING_RESPONSE) }
         }
     }

@@ -32,7 +32,7 @@ internal class MigrerEnEnkeltSakRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SAK.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SAK) {
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey(FNR_KEY) }

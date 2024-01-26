@@ -1,5 +1,6 @@
 package rapidsandrivers.migrering
 
+import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
@@ -40,12 +41,12 @@ abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
 
     protected fun initialiserRiver(
         rapidsConnection: RapidsConnection,
-        hendelsestype: String,
+        hendelsestype: EventnameHendelseType,
         block: River.() -> Unit = {},
     ) {
         logger.info("Initialiserer river for ${this.javaClass.simpleName}")
         River(rapidsConnection).apply {
-            eventName(hendelsestype)
+            eventName(hendelsestype.lagEventnameForType())
             correlationId()
             block()
         }.register(this)

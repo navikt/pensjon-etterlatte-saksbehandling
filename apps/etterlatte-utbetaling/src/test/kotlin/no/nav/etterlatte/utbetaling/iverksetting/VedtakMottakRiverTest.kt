@@ -5,8 +5,8 @@ import io.mockk.mockk
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
-import no.nav.etterlatte.utbetaling.common.EVENT_NAME_UTBETALING_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
+import no.nav.etterlatte.utbetaling.common.UtbetalinghendelseType
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.IverksettResultat
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.Saktype
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
@@ -45,7 +45,7 @@ internal class VedtakMottakRiverTest {
         inspector.apply { sendTestMessage(SAMORDNET_VEDTAK_OMS) }
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
-            assertEquals(EVENT_NAME_UTBETALING_OPPDATERT, event.event)
+            assertEquals(UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(), event.eventName)
             assertEquals(UtbetalingStatusDto.valueOf(UtbetalingStatus.GODKJENT.name), event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
         }
@@ -65,7 +65,7 @@ internal class VedtakMottakRiverTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
-            assertEquals(EVENT_NAME_UTBETALING_OPPDATERT, event.event)
+            assertEquals(UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(), event.eventName)
             assertEquals(UtbetalingStatusDto.valueOf(utbetaling.status().name), event.utbetalingResponse.status)
             assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
             assertEquals(utbetaling.behandlingId.value, event.utbetalingResponse.behandlingId)
@@ -87,7 +87,7 @@ internal class VedtakMottakRiverTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
-            assertEquals(EVENT_NAME_UTBETALING_OPPDATERT, event.event)
+            assertEquals(UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(), event.eventName)
             assertEquals(UtbetalingStatusDto.FEILET, event.utbetalingResponse.status)
             assertEquals(utbetaling.vedtakId.value, event.utbetalingResponse.vedtakId)
             assertTrue(
@@ -114,7 +114,7 @@ internal class VedtakMottakRiverTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
-            assertEquals(EVENT_NAME_UTBETALING_OPPDATERT, event.event)
+            assertEquals(UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(), event.eventName)
             assertEquals(UtbetalingStatusDto.FEILET, event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
             assertEquals(
@@ -131,7 +131,7 @@ internal class VedtakMottakRiverTest {
 
         inspector.inspektør.message(0).run {
             val event = objectMapper.readValue(this.toJson(), UtbetalingEventDto::class.java)
-            assertEquals(EVENT_NAME_UTBETALING_OPPDATERT, event.event)
+            assertEquals(UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(), event.eventName)
             assertEquals(UtbetalingStatusDto.FEILET, event.utbetalingResponse.status)
             assertEquals(1, event.utbetalingResponse.vedtakId)
             assertEquals(

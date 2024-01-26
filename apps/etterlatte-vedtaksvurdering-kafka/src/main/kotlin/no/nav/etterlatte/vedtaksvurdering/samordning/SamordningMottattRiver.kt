@@ -1,6 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering.samordning
 
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -12,7 +13,7 @@ internal class SamordningMottattRiver(
     private val vedtaksvurderingService: VedtakService,
 ) : ListenerMedLogging() {
     init {
-        initialiserRiver(rapidsConnection, "VEDTAK:SAMORDNING_MOTTATT") {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.SAMORDNING_MOTTATT) {
             validate { it.requireKey("vedtakId") }
         }
     }

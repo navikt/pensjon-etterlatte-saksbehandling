@@ -5,6 +5,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 
 data class UtbetalingEventDto(
-    @JsonProperty(EVENT_NAME_KEY) val event: String = EVENT_NAME_UTBETALING_OPPDATERT,
+    @JsonProperty(EVENT_NAME_KEY) val eventName: String = UtbetalinghendelseType.EVENT_NAME_UTBETALING_OPPDATERT.lagEventnameForType(),
     @JsonProperty(UTBETALING_RESPONSE) val utbetalingResponse: UtbetalingResponseDto,
 )

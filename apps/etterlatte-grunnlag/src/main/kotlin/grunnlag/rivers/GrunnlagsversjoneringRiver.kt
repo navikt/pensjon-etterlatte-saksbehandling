@@ -60,7 +60,7 @@ class GrunnlagsversjoneringRiver(
     private val logger: Logger = LoggerFactory.getLogger(GrunnlagsversjoneringRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
             validate { it.requireKey("vedtak.behandlingId") }
         }
     }

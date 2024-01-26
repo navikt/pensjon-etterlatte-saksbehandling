@@ -19,7 +19,7 @@ internal class AttestertVedtakRiver(
     private val vedtaksvurderingService: VedtakService,
 ) : ListenerMedLogging() {
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
             validate { it.requireKey("vedtak") }
             validate { it.requireValue("vedtak.sak.sakType", SakType.OMSTILLINGSSTOENAD.name) }
             validate {

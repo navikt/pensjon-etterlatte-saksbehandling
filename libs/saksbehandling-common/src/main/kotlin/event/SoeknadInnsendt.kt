@@ -10,8 +10,14 @@ interface ISoeknadInnsendt {
     val adressebeskyttelseKey get() = "@adressebeskyttelse"
     val fnrSoekerKey get() = "@fnr_soeker"
     val dokarkivReturKey get() = "@dokarkivRetur"
-    val eventNameInnsendt get() = "soeknad_innsendt"
-    val eventNameBehandlingBehov get() = "trenger_behandling"
 }
 
 object SoeknadInnsendt : ISoeknadInnsendt
+
+enum class SoeknadInnsendtHendelseType(val eventname: String) : EventnameHendelseType {
+    EVENTNAMEINNSENDT("soeknad_innsendt"),
+    EVENTNAMEBEHANDLINGBEHOV("trenger_behandling"),
+    ;
+
+    override fun lagEventnameForType(): String = this.eventname
+}

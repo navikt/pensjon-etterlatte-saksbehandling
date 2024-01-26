@@ -33,7 +33,7 @@ internal class MigreringTrygdetidHendelserRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.TRYGDETID.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.TRYGDETID) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(VILKAARSVURDERT_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }

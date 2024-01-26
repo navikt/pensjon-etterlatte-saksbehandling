@@ -47,7 +47,7 @@ internal class MigrerSpesifikkSakRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SPESIFIKK_SAK) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(LOPENDE_JANUAR_2024_KEY) }
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }

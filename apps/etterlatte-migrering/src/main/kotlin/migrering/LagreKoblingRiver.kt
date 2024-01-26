@@ -17,7 +17,7 @@ internal class LagreKoblingRiver(rapidsConnection: RapidsConnection, private val
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.LAGRE_KOPLING.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.LAGRE_KOPLING) {
             validate { it.requireKey(PESYS_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
         }

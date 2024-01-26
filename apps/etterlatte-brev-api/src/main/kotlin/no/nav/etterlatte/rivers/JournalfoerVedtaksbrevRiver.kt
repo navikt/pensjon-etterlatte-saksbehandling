@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.brev.BrevHendelseType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
@@ -26,7 +27,7 @@ internal class JournalfoerVedtaksbrevRiver(
     private val logger = LoggerFactory.getLogger(JournalfoerVedtaksbrevRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
             validate { it.requireKey("vedtak") }
             validate { it.requireKey("vedtak.id") }
             validate { it.requireKey("vedtak.behandlingId") }
@@ -77,7 +78,7 @@ internal class JournalfoerVedtaksbrevRiver(
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
-        packet[EVENT_NAME_KEY] = BrevHendelseHendelseType.JOURNALFOERT.lagEventnameForType()
+        packet[EVENT_NAME_KEY] = BrevHendelseType.JOURNALFOERT.lagEventnameForType()
         packet["brevId"] = brevId
         packet["journalpostId"] = journalpostId
         packet["distribusjonType"] = DistribusjonsType.VEDTAK.toString()

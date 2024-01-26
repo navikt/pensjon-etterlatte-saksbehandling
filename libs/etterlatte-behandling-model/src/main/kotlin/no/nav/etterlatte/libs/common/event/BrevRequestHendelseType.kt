@@ -1,10 +1,8 @@
 package no.nav.etterlatte.libs.common.event
 
-import no.nav.etterlatte.libs.common.rapidsandrivers.EventnameHendelseType
-
 const val BREVMAL_RIVER_KEY = "brevmal"
 
-enum class BrevHendelseHendelseType : EventnameHendelseType {
+enum class BrevRequestHendelseType : EventnameHendelseType {
     OPPRETT_BREV,
     OPPRETT_JOURNALFOER_OG_DISTRIBUER,
     ;

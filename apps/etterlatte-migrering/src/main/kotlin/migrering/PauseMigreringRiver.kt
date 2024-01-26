@@ -14,7 +14,7 @@ internal class PauseMigreringRiver(rapidsConnection: RapidsConnection, private v
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.PAUSE.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.PAUSE) {
             validate { it.requireKey(PESYS_ID_KEY) }
         }
     }

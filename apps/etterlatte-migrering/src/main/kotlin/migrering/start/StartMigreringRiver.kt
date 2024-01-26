@@ -21,7 +21,7 @@ internal class StartMigreringRiver(rapidsConnection: RapidsConnection) :
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.START_MIGRERING.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.START_MIGRERING) {
             validate { it.requireKey(SAK_ID_FLERE_KEY) }
             validate { it.requireKey(LOPENDE_JANUAR_2024_KEY) }
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }

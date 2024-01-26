@@ -21,7 +21,7 @@ fun <T> withFeilhaandtering(
     } catch (e: Exception) {
         feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
         try {
-            packet.eventName = EventNames.FEILA
+            packet.eventName = EventNames.FEILA.lagEventnameForType()
             packet.feilendeSteg = feilendeSteg
             packet.feilmelding = e.stackTraceToString()
             context.publish(packet.toJson())

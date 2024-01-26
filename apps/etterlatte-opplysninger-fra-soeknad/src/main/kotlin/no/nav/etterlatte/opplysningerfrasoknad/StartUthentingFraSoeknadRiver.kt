@@ -1,7 +1,7 @@
 package no.nav.etterlatte.opplysningerfrasoknad
 
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
-import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -29,7 +29,7 @@ internal class StartUthentingFraSoeknadRiver(
             validate {
                 it.demandAny(
                     EVENT_NAME_KEY,
-                    listOf(SoeknadInnsendt.eventNameInnsendt, SoeknadInnsendt.eventNameBehandlingBehov),
+                    SoeknadInnsendtHendelseType.entries.map { it.lagEventnameForType() },
                 )
             }
             validate { it.requireKey(GyldigSoeknadVurdert.skjemaInfoKey) }

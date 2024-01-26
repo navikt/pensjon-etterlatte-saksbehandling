@@ -259,7 +259,7 @@ internal class BehandlingServiceImpl(
 
         val behandling =
             requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
-        val doedsdato = hentDoedsdato(behandlingId, brukerTokenInfo).let { YearMonth.from(it) }
+        val doedsdato = hentDoedsdato(behandlingId, brukerTokenInfo)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
         // For BP er makstidspunkt 3 år - dette gjelder også unntaksvis for OMS

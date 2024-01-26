@@ -1,5 +1,5 @@
 import { Content, ContentHeader } from '~shared/styled'
-import { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { Alert, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
@@ -157,7 +157,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             {vedtaksbrev && isSuccessOrNotFound(vergeadresse) && (
               <MottakerPanel
                 vedtaksbrev={vedtaksbrev}
-                oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
+                // Her finnes vedtaksbrev, dermed kan man caste for å stoppe type error fra setVedtaksbrev
+                setVedtaksbrev={setVedtaksbrev as Dispatch<SetStateAction<IBrev>>}
                 vergeadresse={getData(vergeadresse)}
                 redigerbar={redigerbar}
               />

@@ -1,23 +1,24 @@
-import { Alert, Heading, Panel } from '@navikt/ds-react'
+import { Alert, Button, Heading, Panel } from '@navikt/ds-react'
 import { IBrev, Mottaker } from '~shared/types/Brev'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import React from 'react'
-import RedigerMottakerModal from '~components/person/brev/RedigerMottakerModal'
+import React, { Dispatch, SetStateAction, useState } from 'react'
 import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { KildePersondata } from '~shared/types/kilde'
+import { BrevMottakerModal } from '~components/person/brev/mottaker/BrevMottakerModal'
+import { FlexRow } from '~shared/styled'
+import { DocPencilIcon } from '@navikt/aksel-icons'
 
-export default function MottakerPanel({
-  vedtaksbrev,
-  oppdater,
-  redigerbar,
-  vergeadresse,
-}: {
+interface Props {
   vedtaksbrev: IBrev
-  oppdater: (mottaker: Mottaker) => void
+  setVedtaksbrev: Dispatch<SetStateAction<IBrev>>
   redigerbar: Boolean
   vergeadresse: Grunnlagsopplysning<Mottaker, KildePersondata> | undefined
-}) {
+}
+
+export default function MottakerPanel({ vedtaksbrev, setVedtaksbrev, redigerbar, vergeadresse }: Props) {
+  const [erModalAapen, setErModalAapen] = useState<boolean>(false)
+
   const soekerFnr = vedtaksbrev.soekerFnr
 
   const mottaker = vedtaksbrev.mottaker
@@ -28,10 +29,21 @@ export default function MottakerPanel({
   return (
     <>
       <Panel border>
-        <Heading spacing level="2" size="medium">
-          Mottaker
-          {redigerbar && <RedigerMottakerModal brev={vedtaksbrev} oppdater={oppdater} vergeadresse={vergeadresse} />}
-        </Heading>
+        <FlexRow justify="space-between">
+          <Heading spacing level="2" size="medium">
+            Mottaker
+          </Heading>
+          <div>
+            {redigerbar && (
+              <Button
+                variant="secondary"
+                onClick={() => setErModalAapen(true)}
+                icon={<DocPencilIcon aria-hidden />}
+                size="small"
+              />
+            )}
+          </div>
+        </FlexRow>
 
         {soekerErIkkeMottaker && (
           <Alert variant="info" size="small" inline>
@@ -123,6 +135,13 @@ export default function MottakerPanel({
           />
         </InfoWrapper>
       </Panel>
+      <BrevMottakerModal
+        brev={vedtaksbrev}
+        setBrev={setVedtaksbrev}
+        vergeadresse={vergeadresse}
+        isOpen={erModalAapen}
+        setIsOpen={setErModalAapen}
+      />
     </>
   )
 }

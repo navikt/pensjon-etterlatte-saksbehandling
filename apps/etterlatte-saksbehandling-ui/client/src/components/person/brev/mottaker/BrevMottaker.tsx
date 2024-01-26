@@ -13,7 +13,7 @@ import { FlexRow } from '~shared/styled'
 import { BrevMottakerModal } from '~components/person/brev/mottaker/BrevMottakerModal'
 
 export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres: boolean }) {
-  const [brevState, setBrevState] = useState(brev)
+  const [brevState, setBrevState] = useState<IBrev>(brev)
   const [erModalAapen, setErModalAapen] = useState<boolean>(false)
 
   const mottaker = brevState.mottaker

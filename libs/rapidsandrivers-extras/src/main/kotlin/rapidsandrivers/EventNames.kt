@@ -2,11 +2,11 @@ package no.nav.etterlatte.rapidsandrivers
 
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 
-enum class EventNames : EventnameHendelseType {
-    GRUNNLAGSVERSJONERING_EVENT_NAME,
-    FEILA,
-    FORDELER_STATISTIKK, // FORDELER:STATISTIKK TODO: fiks denne
+enum class EventNames(val eventname: String) : EventnameHendelseType {
+    GRUNNLAGSVERSJONERING_EVENT_NAME("GRUNNLAGSVERSJONERING_EVENT_NAME"),
+    FEILA("FEILA"),
+    FORDELER_STATISTIKK("FORDELER:STATISTIKK"),
     ;
 
-    override fun lagEventnameForType(): String = this.name
+    override fun lagEventnameForType(): String = this.eventname
 }

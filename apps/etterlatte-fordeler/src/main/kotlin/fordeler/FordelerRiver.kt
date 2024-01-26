@@ -150,7 +150,7 @@ internal class FordelerRiver(
         val meldingsinnhold: MutableMap<String, Any?> =
             mutableMapOf(
                 CORRELATION_ID_KEY to packet.correlationId,
-                EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
+                EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK.lagEventnameForType(),
                 SAK_TYPE_KEY to sakType,
                 SOEKNAD_ID_KEY to packet.soeknadId(),
                 GYLDIG_FOR_BEHANDLING_KEY to resultat,

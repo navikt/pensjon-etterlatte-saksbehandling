@@ -23,7 +23,7 @@ fun main() {
         noekkel = "StartGrunnlagsversjoneringJobb-${UUID.randomUUID()}",
         verdi =
             JsonMessage.newMessage(
-                mapOf("@event_name" to EventNames.GRUNNLAGSVERSJONERING_EVENT_NAME),
+                mapOf("@event_name" to EventNames.GRUNNLAGSVERSJONERING_EVENT_NAME.lagEventnameForType()),
             ).toJson(),
     )
     producer.close()

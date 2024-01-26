@@ -48,7 +48,7 @@ internal class SoeknadStatistikkRiverTest {
         val message =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
+                    EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK.lagEventnameForType(),
                     CORRELATION_ID_KEY to UUID.randomUUID(),
                     SOEKNAD_ID_KEY to soeknadId,
                     SAK_TYPE_KEY to sakType,
@@ -89,7 +89,7 @@ internal class SoeknadStatistikkRiverTest {
         val message =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
+                    EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK.lagEventnameForType(),
                     CORRELATION_ID_KEY to UUID.randomUUID(),
                     SOEKNAD_ID_KEY to soeknadId,
                     SAK_TYPE_KEY to sakType,

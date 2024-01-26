@@ -13,7 +13,6 @@ import org.apache.pdfbox.Loader
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import java.io.ByteArrayOutputStream
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 
 typealias BrevID = Long
@@ -214,7 +213,23 @@ data class EtterbetalingBrev(
             EtterbetalingBrev(
                 fraDato = dto.datoFom,
                 tilDato = dto.datoTom,
-                etterbetalingsperioder = perioder.filter { YearMonth.from(it.datoFOM) <= YearMonth.from(dto.datoTom) },
+                etterbetalingsperioder =
+                    perioder
+                        .filter { it.datoFOM.isBefore(dto.datoTom) && dto.datoFom.isBefore(it.datoTOM ?: LocalDate.MAX) }
+                        .sortedByDescending { it.datoFOM }
+                        .let { list ->
+                            val oppdatertListe = list.toMutableList()
+
+                            // Setter tilDato på nyeste periode innenfor hva som er satt i etterbetaling
+                            oppdatertListe.firstOrNull()?.copy(datoTOM = dto.datoTom)
+                                ?.let { oppdatertListe[0] = it }
+
+                            // Setter fraDato på eldste periode innenfor hva som er satt i etterbetaling
+                            oppdatertListe.lastOrNull()?.copy(datoFOM = dto.datoFom)
+                                ?.let { oppdatertListe[list.lastIndex] = it }
+
+                            oppdatertListe.toList()
+                        },
             )
         }
     }

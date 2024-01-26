@@ -44,7 +44,7 @@ internal class InnvilgetHovedmalBrevDataTest {
                 etterbetalingDTO =
                     EtterbetalingDTO(
                         datoFom = LocalDate.of(2022, Month.JANUARY, 1),
-                        datoTom = LocalDate.of(2022, Month.MARCH, 30),
+                        datoTom = LocalDate.of(2022, Month.MARCH, 31),
                     ),
                 trygdetid =
                     Trygdetid(
@@ -68,19 +68,19 @@ internal class InnvilgetHovedmalBrevDataTest {
             )
 
         Assertions.assertEquals(
-            brevdata.etterbetaling!!.etterbetalingsperioder,
             listOf(
-                beregningsperiodeJanuar2022(),
+                beregningsperiodeMars2022(),
                 beregningsperiodeFebruar2022(),
-                beregningsperiodeMarsApril2022(),
+                beregningsperiodeJanuar2022(),
             ),
+            brevdata.etterbetaling!!.etterbetalingsperioder,
         )
         Assertions.assertEquals(
-            brevdata.utbetalingsinfo.beregningsperioder,
             listOf(
                 beregningsperiodeAprilDesember2022(),
                 beregningsperiode2023OgUtover(),
             ),
+            brevdata.utbetalingsinfo.beregningsperioder,
         )
     }
 
@@ -100,6 +100,12 @@ internal class InnvilgetHovedmalBrevDataTest {
         beregningsperiode(
             LocalDate.of(2022, Month.MARCH, 1),
             LocalDate.of(2022, Month.APRIL, 30),
+        )
+
+    private fun beregningsperiodeMars2022() =
+        beregningsperiode(
+            LocalDate.of(2022, Month.MARCH, 1),
+            LocalDate.of(2022, Month.MARCH, 31),
         )
 
     private fun beregningsperiodeAprilDesember2022() =

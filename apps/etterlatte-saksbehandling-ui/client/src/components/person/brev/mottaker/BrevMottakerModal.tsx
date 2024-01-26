@@ -129,8 +129,8 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse, isOpen, setIsOp
                       message: 'Orgnummer må være satt når mottaker er bedrift',
                     },
                     pattern: {
-                      value: /[0-9]+/,
-                      message: 'Orgnummer kan kun bestå av siffer',
+                      value: /[0-9]{9}/,
+                      message: 'Et gyldig orgnummer har kun ni siffer',
                     },
                   })}
                   label="Orgnummer"

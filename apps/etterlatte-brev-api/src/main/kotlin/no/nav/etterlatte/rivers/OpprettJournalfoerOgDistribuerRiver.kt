@@ -5,9 +5,9 @@ import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
-import no.nav.etterlatte.brev.model.BrevkodePar
 import no.nav.etterlatte.libs.common.event.BrevEventKeys
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -75,7 +75,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                     )
                 },
                 brevKode = { _, _ ->
-                    BrevkodePar(
+                    Brevkoder(
                         brevKode,
                         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
                     )

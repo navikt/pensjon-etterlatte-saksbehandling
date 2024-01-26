@@ -18,6 +18,8 @@ import no.nav.etterlatte.libs.common.behandling.KlageResultat
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
@@ -106,7 +108,10 @@ class KlageServiceImpl(
             begrunnelse = null,
         )
 
-        klageHendelser.sendKlageHendelseRapids(StatistikkKlage(klage.id, klage, Tidspunkt.now()), KlageHendelseType.OPPRETTET)
+        klageHendelser.sendKlageHendelseRapids(
+            StatistikkKlage(klage.id, klage, Tidspunkt.now()),
+            KlageHendelseType.OPPRETTET,
+        )
 
         return klage
     }
@@ -146,7 +151,7 @@ class KlageServiceImpl(
         utfall: KlageUtfallUtenBrev,
         saksbehandler: Saksbehandler,
     ): Klage {
-        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Fant ikke klage med id=$klageId")
+        val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
 
         val utfallMedBrev =
             when (utfall) {
@@ -239,17 +244,23 @@ class KlageServiceImpl(
         klageId: UUID,
         saksbehandler: Saksbehandler,
     ): Klage {
-        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Kunne ikke finne klage med id=$klageId")
+        val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
 
         if (!klage.kanFerdigstille()) {
-            throw IllegalStateException("Klagen med id=$klageId kan ikke ferdigstilles siden den har feil status / tilstand")
+            throw UgyldigForespoerselException(
+                code = "KLAGE_KAN_IKKE_FERDIGSTILLES",
+                detail = "Klagen med id=$klageId kan ikke ferdigstilles siden den har feil status / tilstand",
+            )
         }
 
-        val saksbehandlerForKlageOppgave = oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(klageId.toString())
+        val saksbehandlerForKlageOppgave =
+            oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(klageId.toString())
         if (saksbehandlerForKlageOppgave != saksbehandler.ident) {
-            throw IllegalArgumentException(
-                "Saksbehandler er ikke ansvarlig på oppgaven til klagen med id=$klageId, " +
-                    "og kan derfor ikke ferdigstille behandlingen",
+            throw UgyldigForespoerselException(
+                code = "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
+                detail =
+                    "Saksbehandler er ikke ansvarlig på oppgaven til klagen med id=$klageId, " +
+                        "og kan derfor ikke ferdigstille behandlingen",
             )
         }
 
@@ -361,18 +372,49 @@ class KlageServiceImpl(
         brevId: Long,
         saksbehandler: Saksbehandler,
     ): Pair<Tidspunkt, String> {
-        // TODO: Her bør vi ha noe error recovery: Hent status på brevet, og forsøk en resume fra der.
-        brevApiKlient.ferdigstillBrev(sakId, brevId, saksbehandler)
-        val journalpostIdJournalfoering = brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler).journalpostId
+        val eksisterendeInnstillingsbrev = brevApiKlient.hentBrev(sakId, brevId, saksbehandler)
+        if (eksisterendeInnstillingsbrev.status.ikkeFerdigstilt()) {
+            brevApiKlient.ferdigstillBrev(sakId, brevId, saksbehandler)
+        } else {
+            logger.info("Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede ferdigstilt")
+        }
+
+        val journalpostIdJournalfoering =
+            if (eksisterendeInnstillingsbrev.status.ikkeJournalfoert()) {
+                brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler).journalpostId
+            } else {
+                logger.info(
+                    "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
+                        "journalført på journalpostId=${eksisterendeInnstillingsbrev.journalpostId}",
+                )
+                requireNotNull(eksisterendeInnstillingsbrev.journalpostId) {
+                    "Har et brev med id=$brevId med status=${eksisterendeInnstillingsbrev.status} som mangler journalpostId"
+                }
+            }
         val tidspunktJournalfoert = Tidspunkt.now()
-        val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId
-        logger.info(
-            "Distribusjon av innstillingsbrevet med id=$brevId bestilt til klagen i sak med sakId=$sakId, " +
-                "med bestillingsId $bestillingsIdDistribuering",
-        )
+
+        if (eksisterendeInnstillingsbrev.status.ikkeDistribuert()) {
+            val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId
+            logger.info(
+                "Distribusjon av innstillingsbrevet med id=$brevId bestilt til klagen i sak med sakId=$sakId, " +
+                    "med bestillingsId $bestillingsIdDistribuering",
+            )
+        } else {
+            logger.info(
+                "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
+                    "distribuert med bestillingsid=${eksisterendeInnstillingsbrev.bestillingsID}",
+            )
+        }
+
         return tidspunktJournalfoert to journalpostIdJournalfoering
     }
 }
 
 class OmgjoeringMaaGjeldeEtVedtakException(klage: Klage) :
-    Exception("Klagen med id=${klage.id} skal resultere i en omgjøring, men mangler et vedtak som klagen gjelder")
+    UgyldigForespoerselException(
+        code = "OMGJOERING_MAA_GJELDE_ET_VEDTAK",
+        detail = "Klagen med id=${klage.id} skal resultere i en omgjøring, men mangler et vedtak som klagen gjelder",
+    )
+
+class KlageIkkeFunnetException(klageId: UUID) :
+    IkkeFunnetException(code = "KLAGE_IKKE_FUNNET", detail = "Kunne ikke finne klage med id=$klageId")

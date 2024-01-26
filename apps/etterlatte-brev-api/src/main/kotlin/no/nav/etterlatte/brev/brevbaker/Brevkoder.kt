@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG
@@ -49,7 +50,7 @@ data class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: Ett
                 BARNEPENSJON_INNVILGELSE,
             )
         val OPPHOER = Brevkoder(BARNEPENSJON_OPPHOER_UTFALL, BARNEPENSJON_OPPHOER)
-        val REVURDERING = Brevkoder(TOM_MAL, BARNEPENSJON_REVURDERING)
+        val REVURDERING = Brevkoder(BARNEPENSJON_REVURDERING_UTFALL, BARNEPENSJON_REVURDERING)
     }
 
     object Omstillingsstoenad {

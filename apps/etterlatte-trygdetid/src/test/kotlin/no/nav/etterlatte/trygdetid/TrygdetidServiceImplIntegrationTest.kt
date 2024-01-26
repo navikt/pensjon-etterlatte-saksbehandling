@@ -194,6 +194,7 @@ internal class TrygdetidServiceImplIntegrationTest {
                 behandlingId = behandlingId,
                 sakId = SecureRandom().nextLong(100_000),
                 ident = "123",
+                opplysninger = opplysningsgrunnlag(grunnlagTestData),
             ),
         )
 

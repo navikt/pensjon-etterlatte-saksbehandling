@@ -146,7 +146,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
             queryOf(
                 statement =
                     """
-                    DELETE FROM trygdetid WHERE id = :id
+                    DELETE FROM trygdetid CASCADE WHERE id = :id
                     """.trimIndent(),
                 paramMap =
                     mapOf(

@@ -15,7 +15,6 @@ enum class Migreringshendelser : EventnameHendelseType {
     VEDTAK,
     PAUSE,
     IVERKSATT,
-    BREV_SENDT,
     AVBRYT_BEHANDLING,
     FIKS_ENKELTBREV,
     ;

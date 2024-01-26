@@ -23,7 +23,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterUtfallForKlage } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
-import { nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
+import { kanSeBrev, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { SakType } from '~shared/types/sak'
 
 import { isPending } from '~shared/api/apiUtils'
@@ -170,7 +170,7 @@ export function KlageVurderingRedigering() {
             Gå tilbake
           </Button>
           <Button loading={isPending(lagreUtfallStatus)} type="submit" variant="primary">
-            Send inn vurdering av klagen
+            {kanSeBrev(klage) ? 'Gå til brev' : 'Gå til oppsummering'}
           </Button>
         </FlexRow>
       </form>

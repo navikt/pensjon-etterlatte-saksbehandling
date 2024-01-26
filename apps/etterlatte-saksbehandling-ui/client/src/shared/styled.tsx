@@ -65,7 +65,7 @@ export const ContentHeader = styled.div`
 `
 
 export const FlexRow = styled.div<{
-  justify?: 'left' | 'center' | 'right'
+  justify?: 'left' | 'center' | 'right' | 'space-between'
   align?: 'start' | 'center' | 'end'
   $spacing?: boolean
 }>`

@@ -44,7 +44,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                 etterbetaling =
                     EtterbetalingDTO(
                         datoFom = LocalDate.of(2022, Month.JANUARY, 1),
-                        datoTom = LocalDate.of(2022, Month.MARCH, 30),
+                        datoTom = LocalDate.of(2022, Month.MARCH, 31),
                     ),
                 trygdetid =
                     Trygdetid(
@@ -68,19 +68,19 @@ internal class BarnepensjonInnvilgetDTOTest {
             )
 
         Assertions.assertEquals(
-            barnepensjonInnvilgelse.etterbetaling!!.etterbetalingsperioder,
             listOf(
-                beregningsperiodeJanuar2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiodeMars2022().toBarnepensjonBeregningsperiode(),
                 beregningsperiodeFebruar2022().toBarnepensjonBeregningsperiode(),
-                beregningsperiodeMarsApril2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiodeJanuar2022().toBarnepensjonBeregningsperiode(),
             ),
+            barnepensjonInnvilgelse.etterbetaling!!.etterbetalingsperioder,
         )
         Assertions.assertEquals(
-            barnepensjonInnvilgelse.beregning.beregningsperioder,
             listOf(
                 beregningsperiodeAprilDesember2022().toBarnepensjonBeregningsperiode(),
                 beregningsperiode2023OgUtover().toBarnepensjonBeregningsperiode(),
             ),
+            barnepensjonInnvilgelse.beregning.beregningsperioder,
         )
     }
 
@@ -100,6 +100,12 @@ internal class BarnepensjonInnvilgetDTOTest {
         beregningsperiode(
             LocalDate.of(2022, Month.MARCH, 1),
             LocalDate.of(2022, Month.APRIL, 30),
+        )
+
+    private fun beregningsperiodeMars2022() =
+        beregningsperiode(
+            LocalDate.of(2022, Month.MARCH, 1),
+            LocalDate.of(2022, Month.MARCH, 31),
         )
 
     private fun beregningsperiodeAprilDesember2022() =

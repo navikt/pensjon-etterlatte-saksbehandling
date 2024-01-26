@@ -88,10 +88,7 @@ export function VisOmgjoering(props: { omgjoering: Omgjoering; kanRedigere: bool
       <BodyShort spacing>{omgjoering.begrunnelse}</BodyShort>
 
       {kanRedigere && (
-        <Alert variant="info">
-          Når klagen ferdigstilles vil det opprettes en revurdering for saken, med revurderingsårsak omgjøring etter
-          klage.
-        </Alert>
+        <Alert variant="info">Når klagen ferdigstilles vil det opprettes en oppgave for omgjøring av vedtaket.</Alert>
       )}
     </Maksbredde>
   )

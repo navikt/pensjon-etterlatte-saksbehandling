@@ -95,10 +95,10 @@ interface TrygdetidService {
         brukerTokenInfo: BrukerTokenInfo,
     )
 
-    suspend fun finnOpplysningerDifferanse(
+    suspend fun sjekkTrygdetidMotGrunnlag(
         trygdetid: Trygdetid,
         brukerTokenInfo: BrukerTokenInfo,
-    ): OpplysningerDifferanse
+    ): Trygdetid?
 }
 
 interface GammelTrygdetidServiceMedNy : NyTrygdetidService, TrygdetidService {
@@ -274,11 +274,7 @@ class TrygdetidServiceImpl(
     ): List<Trygdetid> {
         return trygdetidRepository.hentTrygdetiderForBehandling(behandlingId)
             .map { trygdetid -> sjekkYrkesskadeForEndring(behandlingId, brukerTokenInfo, trygdetid) }
-            .map { trygdetid ->
-                trygdetid.copy(
-                    opplysningerDifferanse = finnOpplysningerDifferanse(trygdetid, brukerTokenInfo),
-                )
-            }
+            .mapNotNull { trygdetid -> sjekkTrygdetidMotGrunnlag(trygdetid, brukerTokenInfo) }
     }
 
     override suspend fun hentTrygdetidIBehandlingMedId(
@@ -288,11 +284,7 @@ class TrygdetidServiceImpl(
     ): Trygdetid? {
         return trygdetidRepository.hentTrygdetidMedId(behandlingId, trygdetidId)
             ?.let { trygdetid -> sjekkYrkesskadeForEndring(behandlingId, brukerTokenInfo, trygdetid) }
-            ?.let { trygdetid ->
-                trygdetid.copy(
-                    opplysningerDifferanse = finnOpplysningerDifferanse(trygdetid, brukerTokenInfo),
-                )
-            }
+            ?.let { trygdetid -> sjekkTrygdetidMotGrunnlag(trygdetid, brukerTokenInfo) }
     }
 
     override suspend fun opprettTrygdetiderForBehandling(
@@ -771,9 +763,31 @@ class TrygdetidServiceImpl(
             }
         }
 
-    override suspend fun finnOpplysningerDifferanse(
+    override suspend fun sjekkTrygdetidMotGrunnlag(
         trygdetid: Trygdetid,
         brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid? {
+        if (trygdetid.ident == UKJENT_AVDOED) {
+            return trygdetid
+        }
+        val nyAvdoedGrunnlag = grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).hentAvdoede()
+        val avdoedeFnr = nyAvdoedGrunnlag.mapNotNull { it.hentFoedselsnummer()?.verdi?.value }
+        if (!avdoedeFnr.contains(trygdetid.ident)) {
+            trygdetidRepository.slettTrygdetid(trygdetid.id)
+            return null
+        }
+        return trygdetid.copy(
+            opplysningerDifferanse =
+                nyfinnOpplysningerDifferanse(
+                    trygdetid,
+                    nyAvdoedGrunnlag.firstOrNull { it.hentFoedselsnummer()?.verdi?.value == trygdetid.ident },
+                ),
+        )
+    }
+
+    private fun nyfinnOpplysningerDifferanse(
+        trygdetid: Trygdetid,
+        nyAvdoedGrunnlag: Grunnlagsdata<JsonNode>?,
     ): OpplysningerDifferanse {
         if (
             trygdetid.beregnetTrygdetid?.resultat?.overstyrt.let { it != null && it }
@@ -783,10 +797,6 @@ class TrygdetidServiceImpl(
                 GrunnlagOpplysningerDto.tomt(),
             )
         }
-
-        val nyAvdoedGrunnlag =
-            grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).hentAvdoede()
-                .firstOrNull { it.hentFoedselsnummer()?.verdi?.value == trygdetid.ident }
 
         val nyeOpplysninger =
             if (nyAvdoedGrunnlag != null) hentOpplysninger(nyAvdoedGrunnlag, trygdetid.behandlingId) else emptyList()

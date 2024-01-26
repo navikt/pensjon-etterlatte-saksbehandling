@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.trygdetid.OpplysningsgrunnlagDto
+import no.nav.etterlatte.libs.common.trygdetid.UKJENT_AVDOED
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
@@ -162,26 +163,44 @@ internal class TrygdetidServiceImplIntegrationTest {
                 sak = standardOpplysningsgrunnlag.sak,
                 metadata = standardOpplysningsgrunnlag.metadata,
             )
-
         repository.opprettTrygdetid(
             trygdetid(
                 behandlingId = behandlingId,
                 sakId = SecureRandom().nextLong(100_000),
+                ident = UKJENT_AVDOED,
                 opplysninger = emptyList(),
             ),
         )
 
         val trygdetid = runBlocking { trygdetidService.hentTrygdetid(behandlingId, saksbehandler) }
 
-        with(trygdetid?.opplysningerDifferanse!!) {
-            differanse shouldBe false
-            with(oppdaterteGrunnlagsopplysninger) {
-                avdoedFoedselsdato shouldBe null
-                avdoedDoedsdato shouldBe null
-                avdoedFylteSeksten shouldBe null
-                avdoedFyllerSeksti shouldBe null
-            }
+        with(trygdetid!!) {
+            trygdetid.ident shouldBe UKJENT_AVDOED
+            opplysningerDifferanse shouldBe null
         }
+    }
+
+    @Test
+    fun `skal slette trygdetid hvis ident ikke lenger finnes i familie`() {
+        val behandlingId = UUID.randomUUID()
+        val grunnlagTestData = GrunnlagTestData()
+
+        coEvery {
+            grunnlagKlient.hentGrunnlag(any(), any())
+        } returns grunnlagTestData.hentOpplysningsgrunnlag()
+
+        repository.opprettTrygdetid(
+            trygdetid(
+                behandlingId = behandlingId,
+                sakId = SecureRandom().nextLong(100_000),
+                ident = "123",
+                opplysninger = opplysningsgrunnlag(grunnlagTestData),
+            ),
+        )
+
+        val trygdetid = runBlocking { trygdetidService.hentTrygdetid(behandlingId, saksbehandler) }
+
+        trygdetid shouldBe null
     }
 
     private fun opplysningsgrunnlag(grunnlagTestData: GrunnlagTestData): List<Opplysningsgrunnlag> {

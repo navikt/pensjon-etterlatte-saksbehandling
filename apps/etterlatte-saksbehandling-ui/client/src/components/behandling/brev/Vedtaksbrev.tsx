@@ -44,7 +44,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   const redigerbar = behandlingErRedigerbar(props.behandling.status) && innloggetSaksbehandler.skriveTilgang
 
-  const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
+  const [vedtaksbrev, setVedtaksbrev] = useState<IBrev>()
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
@@ -157,7 +157,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             {vedtaksbrev && isSuccessOrNotFound(vergeadresse) && (
               <MottakerPanel
                 vedtaksbrev={vedtaksbrev}
-                oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
+                setVedtaksbrev={setVedtaksbrev}
                 vergeadresse={getData(vergeadresse)}
                 redigerbar={redigerbar}
               />

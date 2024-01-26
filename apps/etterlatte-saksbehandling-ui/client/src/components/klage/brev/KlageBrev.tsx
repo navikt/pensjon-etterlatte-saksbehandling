@@ -7,7 +7,6 @@ import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { Klage } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import NyttBrevMottaker from '~components/person/brev/NyttBrevMottaker'
 import { BrevStatus, kanBrevRedigeres } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
@@ -16,10 +15,10 @@ import styled from 'styled-components'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { JaNei } from '~shared/types/ISvar'
 import { Innhold } from '~components/klage/styled'
-
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
+import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 
 function hentBrevIdForInnstilling(klage: Klage | null): number | null {
   // TODO håndter avvist klage?
@@ -65,16 +64,21 @@ export function KlageBrev() {
           </ContentHeader>
           {klage.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.JA ? (
             <Innhold>
-              <BodyShort>Skriv innstillingsbrevet til KA, som også sendes til mottakeren</BodyShort>
+              <BodyShort>Skriv oversendelsesbrevet til KA, som også sendes til mottakeren</BodyShort>
             </Innhold>
           ) : (
             <BodyShort>TODO håndter avslagsbrev her</BodyShort>
           )}
-
+          {/* TODO lar være å bytte ut med ny brevmottaker komponent her, siden dette virker å være ganske wip */}
           {isSuccess(hentetBrev) && (
             <>
-              <BrevTittel brevId={hentetBrev.data.id} sakId={hentetBrev.data.sakId} tittel={hentetBrev.data.tittel} />
-              <NyttBrevMottaker brev={hentetBrev.data} />
+              <BrevTittel
+                brevId={hentetBrev.data.id}
+                sakId={hentetBrev.data.sakId}
+                tittel={hentetBrev.data.tittel}
+                kanRedigeres={true}
+              />
+              <BrevMottaker brev={hentetBrev.data} kanRedigeres={true} />
             </>
           )}
         </Sidebar>

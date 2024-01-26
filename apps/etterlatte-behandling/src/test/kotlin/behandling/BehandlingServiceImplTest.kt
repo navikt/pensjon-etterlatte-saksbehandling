@@ -465,6 +465,20 @@ class BehandlingServiceImplTest {
 
     @ParameterizedTest
     @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal gi gyldig virkningstidspunkt dersom doedsdato mangler`(sakType: SakType) {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                virkningstidspunkt = Tidspunkt.parse("2020-02-01T00:00:00Z"),
+                soeknadMottatt = LocalDateTime.parse("2020-02-01T00:00:00"),
+                doedsdato = null,
+            )
+
+        gyldigVirkningstidspunkt shouldBe true
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
     fun `skal gi ugyldig virkningstidspunkt hvis tidspunkt er foer en maaned etter doedsfall`(sakType: SakType) {
         val gyldigVirkningstidspunkt =
             sjekkOmVirkningstidspunktErGyldig(
@@ -535,7 +549,7 @@ class BehandlingServiceImplTest {
         virkningstidspunkt: Tidspunkt = Tidspunkt.parse("2016-01-01T00:00:00Z"),
         begrunnelse: String = "en begrunnelse",
         soeknadMottatt: LocalDateTime = LocalDateTime.parse("2020-01-15T00:00:00"),
-        doedsdato: LocalDate = LocalDate.parse("2016-11-30"),
+        doedsdato: LocalDate? = LocalDate.parse("2016-11-30"),
         kravdato: Tidspunkt? = null,
     ): Boolean {
         val service =

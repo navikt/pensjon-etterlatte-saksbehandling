@@ -21,7 +21,7 @@ import java.util.UUID
 internal class OpprettVedtaksbrevForMigreringRiver(
     rapidsConnection: RapidsConnection,
     private val service: VedtaksbrevService,
-) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.OPPRETTET.toString()) {
+) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.OPPRETTET.toEventname()) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

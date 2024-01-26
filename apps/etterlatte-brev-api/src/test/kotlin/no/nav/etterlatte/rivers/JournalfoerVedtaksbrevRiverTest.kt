@@ -89,7 +89,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         assertEquals(vedtak.attestasjon!!.attesterendeEnhet, vedtakActual.ansvarligEnhet)
 
         val actualMessage = inspektoer.message(0)
-        assertEquals(BrevEventTypes.JOURNALFOERT.toString(), actualMessage.get(EVENT_NAME_KEY).asText())
+        assertEquals(BrevEventTypes.JOURNALFOERT.toEventname(), actualMessage.get(EVENT_NAME_KEY).asText())
         assertEquals(brev.id, actualMessage.get("brevId").asLong())
         assertEquals(response.journalpostId, actualMessage.get("journalpostId").asText())
         assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asText())
@@ -102,7 +102,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.name,
+                    EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
                     "vedtak" to vedtak,
                 ),
             )
@@ -119,7 +119,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.name,
+                    EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
                     "vedtak" to vedtak,
                     SKAL_SENDE_BREV to false,
                 ),

@@ -17,7 +17,7 @@ internal class DistribuerBrevRiver(
     private val logger = LoggerFactory.getLogger(DistribuerBrevRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, BrevEventTypes.JOURNALFOERT.toString()) {
+        initialiserRiver(rapidsConnection, BrevEventTypes.JOURNALFOERT.toEventname()) {
             validate { it.requireKey("brevId", "journalpostId", "distribusjonType") }
             validate { it.rejectKey("bestillingsId") }
         }
@@ -50,7 +50,7 @@ internal class DistribuerBrevRiver(
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
-        packet[EVENT_NAME_KEY] = BrevEventTypes.DISTRIBUERT.toString()
+        packet[EVENT_NAME_KEY] = BrevEventTypes.DISTRIBUERT.toEventname()
         packet["bestillingsId"] = bestillingsId
 
         publish(packet.toJson())

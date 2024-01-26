@@ -62,7 +62,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const opprettEllerOppdaterVedtak = () => {
     const erBarnepensjon = behandling.sakType === SakType.BARNEPENSJON
     const skalSendeBrev = behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
-    if (skalSendeBrev && !brevutfallOgEtterbetaling?.brevutfall) {
+    if (skalSendeBrev && !erOpphoer && !brevutfallOgEtterbetaling?.brevutfall) {
       setManglerbrevutfall(true)
       return
     }

@@ -27,7 +27,7 @@ export const getOboToken = async (bearerToken: string, scope: string): Promise<s
   }
 
   try {
-    const body: any = {
+    const body: Record<string, string> = {
       client_id: AdConfig.clientId,
       client_secret: AdConfig.clientSecret,
       scope,

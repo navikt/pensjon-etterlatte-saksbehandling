@@ -13,10 +13,11 @@ export default function FerdigstillOppgave() {
 
   const tilbake = () => navigate('../', { relative: 'path' })
 
-  if (!oppgave) return null
+  if (!oppgave || !journalpost) return null
 
-  const kanFerdigstilleOppgaven =
-    !!journalpost?.journalstatus && ['FERDIGSTILT', 'JOURNALFOERT'].includes(journalpost.journalstatus)
+  const journalpostErFerdigstilt = ['FERDIGSTILT', 'JOURNALFOERT', 'FEILREGISTRERT'].includes(journalpost.journalstatus)
+  const journalpostTilhoererAnnetTema = !['EYO', 'EYB'].includes(journalpost.tema)
+  const kanFerdigstilleOppgaven = journalpostErFerdigstilt || journalpostTilhoererAnnetTema
 
   return (
     <FormWrapper column>

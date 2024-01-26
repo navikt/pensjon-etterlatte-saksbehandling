@@ -1,17 +1,18 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentBrevForSak, opprettBrevForSak } from '~shared/api/brev'
-import { useEffect } from 'react'
+import { hentBrevForSak, opprettBrevForSak, slettBrev } from '~shared/api/brev'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Table, Tag } from '@navikt/ds-react'
+import { BodyShort, Button, Modal, Table, Tag } from '@navikt/ds-react'
 import { BrevStatus, IBrev, Mottaker } from '~shared/types/Brev'
-import { DocPencilIcon, ExternalLinkIcon } from '@navikt/aksel-icons'
+import { DocPencilIcon, ExternalLinkIcon, TrashIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
 import { Container, FlexRow } from '~shared/styled'
 import BrevModal from '~components/person/brev/BrevModal'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { SakMedBehandlinger } from '~components/person/typer'
 
-import { isPending, isSuccess, mapApiResult, Result } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
+import { LastOppBrev } from '~components/person/brev/LastOppBrev'
 
 const mapAdresse = (mottaker: Mottaker) => {
   const adr = mottaker.adresse
@@ -39,6 +40,8 @@ const tagColors = (status: BrevStatus) => {
 }
 
 const brevKanEndres = (status: BrevStatus) => [BrevStatus.OPPRETTET, BrevStatus.OPPDATERT].includes(status)
+
+const kanSletteBrev = (brev: IBrev) => brevKanEndres(brev.status) && !brev.behandlingId
 
 const handlingKnapp = (brev: IBrev) => {
   if (brev.behandlingId && brevKanEndres(brev.status)) {
@@ -124,7 +127,12 @@ export default function BrevOversikt({ sakStatus }: { sakStatus: Result<SakMedBe
                   <Table.DataCell>{b.behandlingId ? 'Vedtaksbrev' : 'Annet'}</Table.DataCell>
                   <Table.DataCell>{b.mottaker.navn}</Table.DataCell>
                   <Table.DataCell>{mapAdresse(b.mottaker)}</Table.DataCell>
-                  <Table.DataCell>{handlingKnapp(b)}</Table.DataCell>
+                  <Table.DataCell>
+                    <FlexRow>
+                      {handlingKnapp(b)}
+                      {kanSletteBrev(b) && <SlettBrev brevId={b.id} sakId={b.sakId} />}
+                    </FlexRow>
+                  </Table.DataCell>
                 </Table.Row>
               ))}
             </Table.Body>
@@ -144,7 +152,43 @@ export default function BrevOversikt({ sakStatus }: { sakStatus: Result<SakMedBe
         >
           Nytt brev
         </Button>
+
+        {mapSuccess(sakStatus, (sak) => (
+          <LastOppBrev sak={sak.sak} />
+        ))}
       </FlexRow>
     </Container>
+  )
+}
+
+const SlettBrev = ({ brevId, sakId }: { brevId: number; sakId: number }) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [slettBrevStatus, apiSlettBrev] = useApiCall(slettBrev)
+
+  const slett = () => {
+    apiSlettBrev({ brevId, sakId }, () => {
+      window.location.reload()
+    })
+  }
+
+  return (
+    <>
+      <Button variant="danger" icon={<TrashIcon />} onClick={() => setIsOpen(true)} />
+
+      <Modal open={isOpen}>
+        <Modal.Body>
+          <BodyShort spacing>Er du sikker på at du vil slette brevet? Handlingen kan ikke angres.</BodyShort>
+
+          <FlexRow justify="center">
+            <Button variant="secondary" onClick={() => setIsOpen(false)} disabled={isPending(slettBrevStatus)}>
+              Nei, avbryt
+            </Button>
+            <Button variant="danger" onClick={slett} loading={isPending(slettBrevStatus)}>
+              Ja, slett
+            </Button>
+          </FlexRow>
+        </Modal.Body>
+      </Modal>
+    </>
   )
 }

@@ -2,7 +2,8 @@ package no.nav.etterlatte.brev.adresse.navansatt
 
 data class SaksbehandlerInfo(
     val ident: String,
-    val navn: String, // active directory displayname
+    // active directory displayname
+    val navn: String,
     val fornavn: String,
     val etternavn: String,
     val epost: String,

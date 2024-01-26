@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -77,6 +78,13 @@ data class KlageResultat(
     val sendtInnstillingsbrev: SendtInnstillingsbrev?,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class InnkommendeKlage(
+    val mottattDato: LocalDate,
+    val journalpostId: String,
+    val innsender: String?,
+)
+
 data class Klage(
     val id: UUID,
     val sak: Sak,
@@ -87,6 +95,7 @@ data class Klage(
     val utfall: KlageUtfall?,
     val resultat: KlageResultat?,
     val kabalResultat: BehandlingResultat?,
+    val innkommendeDokument: InnkommendeKlage?,
 ) {
     fun oppdaterFormkrav(
         formkrav: Formkrav,
@@ -180,7 +189,10 @@ data class Klage(
     }
 
     companion object {
-        fun ny(sak: Sak): Klage {
+        fun ny(
+            sak: Sak,
+            innkommendeDokument: InnkommendeKlage?,
+        ): Klage {
             return Klage(
                 id = UUID.randomUUID(),
                 sak = sak,
@@ -191,6 +203,7 @@ data class Klage(
                 utfall = null,
                 resultat = null,
                 kabalResultat = null,
+                innkommendeDokument = innkommendeDokument,
             )
         }
     }
@@ -231,23 +244,23 @@ sealed class GyldigForYtelse {
         }
     }
 
-    object OmsOgBp : GyldigForYtelse() {
+    data object OmsOgBp : GyldigForYtelse() {
         override val gyldigForBarnepensjon = true
         override val gyldigForOmstillingsstoenad = true
     }
 
-    object KunOms : GyldigForYtelse() {
+    data object KunOms : GyldigForYtelse() {
         override val gyldigForBarnepensjon = false
         override val gyldigForOmstillingsstoenad = true
     }
 
-    object KunBp : GyldigForYtelse() {
+    data object KunBp : GyldigForYtelse() {
         override val gyldigForBarnepensjon = true
         override val gyldigForOmstillingsstoenad = false
     }
 }
 
-enum class KabalHjemmel(val gyldigForYtelse: GyldigForYtelse) {
+enum class KabalHjemmel(private val gyldigForYtelse: GyldigForYtelse) {
     FTRL_1_3(GyldigForYtelse.OmsOgBp),
     FTRL_1_3_A(GyldigForYtelse.OmsOgBp),
     FTRL_1_3_B(GyldigForYtelse.OmsOgBp),
@@ -429,11 +442,6 @@ data class FormkravMedBeslutter(
     val formkrav: Formkrav,
     val saksbehandler: Grunnlagsopplysning.Saksbehandler,
 )
-
-enum class KlageHendelseType {
-    OPPRETTET,
-    FERDIGSTILT,
-}
 
 data class KlageOversendelseDto(val klage: Klage, val ekstraData: EkstradataInnstilling)
 

@@ -1,9 +1,7 @@
 package no.nav.etterlatte.grunnlag
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -11,9 +9,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
@@ -25,13 +20,14 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.issueSystembrukerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.serialize
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -40,25 +36,16 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersonRoutesTest {
     private val grunnlagService = mockk<GrunnlagService>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
-
-    companion object {
-        private const val CLIENT_ID = "CLIENT_ID"
-    }
 
     @BeforeAll
     fun before() {
         server.start()
-        val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -72,40 +59,13 @@ internal class PersonRoutesTest {
         server.shutdown()
     }
 
-    private val saksbehandlerToken by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "Per Persson",
-                    "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
-    }
-
-    private val systembrukerToken: String by lazy {
-        val mittsystem = UUID.randomUUID().toString()
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "sub" to mittsystem,
-                    "oid" to mittsystem,
-                ),
-        ).serialize()
-    }
-
     @Test
     fun `returnerer 401 uten gyldig token`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
+            runServer(server, "api/grunnlag") {
+                personRoute(grunnlagService, behandlingKlient)
             }
-            application {
-                restModule(this.log, routePrefix = "api/grunnlag") { personRoute(grunnlagService, behandlingKlient) }
-            }
+
             val response = client.post("api/grunnlag/person/saker")
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
@@ -126,16 +86,13 @@ internal class PersonRoutesTest {
         every { grunnlagService.hentSakerOgRoller(any()) } returns response
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val httpClient = createHttpClient()
             val actualResponse =
                 httpClient.post("api/grunnlag/person/roller") {
                     setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                        append(HttpHeaders.Authorization, "Bearer $systembrukerToken")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSystembrukerToken()}")
                     }
                 }
 
@@ -153,16 +110,13 @@ internal class PersonRoutesTest {
         every { grunnlagService.hentAlleSakerForFnr(any()) } returns response
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val httpClient = createHttpClient()
             val actualResponse =
                 httpClient.post("api/grunnlag/person/saker") {
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer $systembrukerToken")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSystembrukerToken()}")
                     }
                 }
 
@@ -181,16 +135,13 @@ internal class PersonRoutesTest {
         coEvery { behandlingKlient.harTilgangTilPerson(any(), any(), any()) } returns true
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val httpClient = createHttpClient()
             val actualResponse =
                 httpClient.post("api/grunnlag/person/navn") {
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -207,16 +158,13 @@ internal class PersonRoutesTest {
         coEvery { behandlingKlient.harTilgangTilPerson(any(), any(), any()) } returns false
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val httpClient = createHttpClient()
             val actualResponse =
                 httpClient.post("api/grunnlag/person/navn") {
                     contentType(ContentType.Application.Json)
                     setBody(FoedselsnummerDTO(SOEKER_FOEDSELSNUMMER.value))
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer $saksbehandlerToken")
+                        append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
                     }
                 }
 
@@ -226,15 +174,8 @@ internal class PersonRoutesTest {
         coVerify { behandlingKlient.harTilgangTilPerson(SOEKER_FOEDSELSNUMMER, any(), any()) }
     }
 
-    private fun ApplicationTestBuilder.createHttpClient(): HttpClient {
-        application {
-            restModule(this.log, routePrefix = "api/grunnlag") { personRoute(grunnlagService, behandlingKlient) }
+    private fun ApplicationTestBuilder.createHttpClient(): HttpClient =
+        runServer(server, "api/grunnlag") {
+            personRoute(grunnlagService, behandlingKlient)
         }
-
-        return createClient {
-            install(ContentNegotiation) {
-                jackson { registerModule(JavaTimeModule()) }
-            }
-        }
-    }
 }

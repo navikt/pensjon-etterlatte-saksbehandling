@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
+import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
@@ -13,6 +14,8 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -22,13 +25,26 @@ import java.util.UUID
 data class GenerellBrevData(
     val sak: Sak,
     val personerISak: PersonerISak,
-    val behandlingId: UUID,
-    val forenkletVedtak: ForenkletVedtak,
+    val behandlingId: UUID?,
+    val forenkletVedtak: ForenkletVedtak?,
     val spraak: Spraak,
     val systemkilde: Vedtaksloesning,
     val utlandstilknytning: Utlandstilknytning? = null,
     val revurderingsaarsak: Revurderingaarsak? = null,
-)
+) {
+    fun avsenderRequest(bruker: BrukerTokenInfo) =
+        forenkletVedtak?.let {
+            AvsenderRequest(
+                saksbehandlerIdent = it.saksbehandlerIdent,
+                sakenhet = it.sakenhet,
+                attestantIdent = it.attestantIdent,
+            )
+        } ?: AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = sak.enhet)
+
+    fun erMigrering() =
+        systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null &&
+            forenkletVedtak?.saksbehandlerIdent == Fagsaksystem.EY.navn
+}
 
 data class Trygdetid(
     val aarTrygdetid: Int,
@@ -36,6 +52,7 @@ data class Trygdetid(
     val maanederTrygdetid: Int,
     val perioder: List<Trygdetidsperiode>,
     val overstyrt: Boolean,
+    val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
 )
 
 data class Trygdetidsperiode(

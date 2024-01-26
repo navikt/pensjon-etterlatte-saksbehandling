@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.User
@@ -12,16 +11,17 @@ import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.hendelse.registrerVedtakHendelseFelles
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
-import no.nav.etterlatte.behandling.klienter.GrunnlagKlientException
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -30,10 +30,13 @@ import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
+import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.ktorobo.ThrowableErrorMessage
+import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -60,6 +63,11 @@ class BehandlingNotFoundException(behandlingId: UUID) :
 class BehandlingKanIkkeAvbrytesException(behandlingStatus: BehandlingStatus) : UgyldigForespoerselException(
     code = "BEHANDLING_KAN_IKKE_AVBRYTES",
     detail = "Behandlingen kan ikke avbrytes, status: $behandlingStatus",
+)
+
+class PersongalleriFinnesIkkeException() : IkkeFunnetException(
+    code = "FANT_IKKE_PERSONGALLERI",
+    detail = "Kunne ikke finne persongalleri",
 )
 
 interface BehandlingService {
@@ -126,7 +134,16 @@ interface BehandlingService {
 
     fun hentFoersteVirk(sakId: Long): YearMonth?
 
-    fun oppdaterGrunnlagOgStatus(behandlingId: UUID)
+    fun oppdaterGrunnlagOgStatus(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
+
+    suspend fun endrePersongalleri(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        redigertFamilieforhold: RedigertFamilieforhold,
+    )
 
     fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning?
 }
@@ -238,32 +255,14 @@ internal class BehandlingServiceImpl(
         request: VirkningstidspunktRequest,
     ): Boolean {
         val virkningstidspunkt = request.dato
-        val begrunnelse = request.begrunnelse
-        val harGyldigFormat = virkningstidspunkt.year in (0..9999) && begrunnelse != null
+        val harGyldigFormat = virkningstidspunkt.year in (0..9999) && request.begrunnelse != null
 
         val behandling =
             requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
-        val personopplysning =
-            try {
-                grunnlagKlient.finnPersonOpplysning(behandlingId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
-            } catch (e: GrunnlagKlientException) {
-                when (e.cause) {
-                    is ThrowableErrorMessage -> {
-                        if (e.cause.response?.status == HttpStatusCode.NotFound) {
-                            null
-                        } else {
-                            throw e
-                        }
-                    }
+        val doedsdato = hentDoedsdato(behandlingId, brukerTokenInfo).let { YearMonth.from(it) }
+        val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
-                    else -> throw e
-                }
-            }.also {
-                it?.fnr?.let { behandlingRequestLogger.loggRequest(brukerTokenInfo, it, "behandling") }
-            }
-
-        val doedsdato = personopplysning?.opplysning?.doedsdato?.let { YearMonth.from(it) }
-        val soeknadMottatt = YearMonth.from(behandling.mottattDato())
+        // For BP er makstidspunkt 3 år - dette gjelder også unntaksvis for OMS
         var makstidspunktFoerSoeknad = soeknadMottatt.minusYears(3)
 
         if (behandling.utlandstilknytning == null) {
@@ -278,16 +277,32 @@ internal class BehandlingServiceImpl(
             makstidspunktFoerSoeknad = YearMonth.from(kravdato.minusYears(3))
         }
 
-        val etterMaksTidspunktEllersMinstManedEtterDoedsfall =
-            if (doedsdato == null) {
-                true // Mangler døsfall når avdød er ukjent
-            } else if (doedsdato.isBefore(makstidspunktFoerSoeknad)) {
-                virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
-            } else {
-                virkningstidspunkt.isAfter(doedsdato)
+        val datoForVirkningstidspunktErGydligInnenforMaksBegrensninger =
+            when {
+                doedsdato == null -> true // Mangler dødsfall når avdød er ukjent
+                doedsdato.isBefore(makstidspunktFoerSoeknad) -> {
+                    when (behandling.sak.sakType) {
+                        SakType.OMSTILLINGSSTOENAD ->
+                            // For omstillingsstønad vil virkningstidspunktet tidligst være mnd etter makstidspunkt
+                            virkningstidspunkt.isAfter(makstidspunktFoerSoeknad)
+                        SakType.BARNEPENSJON ->
+                            // For barnepensjon vil virkningstidspunktet tidligst være samme mnd som makstidspunkt
+                            virkningstidspunkt.isAfter(makstidspunktFoerSoeknad) || virkningstidspunkt == makstidspunktFoerSoeknad
+                    }
+                }
+                else -> virkningstidspunkt.isAfter(doedsdato)
             }
 
-        return harGyldigFormat && etterMaksTidspunktEllersMinstManedEtterDoedsfall
+        return harGyldigFormat && datoForVirkningstidspunktErGydligInnenforMaksBegrensninger
+    }
+
+    private suspend fun hentDoedsdato(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): LocalDate? {
+        return grunnlagKlient.finnPersonOpplysning(behandlingId, Opplysningstype.AVDOED_PDL_V1, brukerTokenInfo)
+            .also { it?.fnr?.let { fnr -> behandlingRequestLogger.loggRequest(brukerTokenInfo, fnr, "behandling") } }
+            ?.let { it.opplysning.doedsdato }
     }
 
     override fun hentFoersteVirk(sakId: Long): YearMonth? {
@@ -295,14 +310,53 @@ internal class BehandlingServiceImpl(
         return behandlinger.tidligsteIverksatteVirkningstidspunkt()?.dato
     }
 
-    override fun oppdaterGrunnlagOgStatus(behandlingId: UUID) {
+    override fun oppdaterGrunnlagOgStatus(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
         hentBehandlingOrThrow(behandlingId)
             .tilOpprettet()
             .let { behandling ->
                 grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
-
                 behandlingDao.lagreStatus(behandling)
+                hendelseDao.opppdatertGrunnlagHendelse(behandlingId, behandling.sak.id, brukerTokenInfo.ident())
             }
+    }
+
+    override suspend fun endrePersongalleri(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        redigertFamilieforhold: RedigertFamilieforhold,
+    ) {
+        val forrigePersonGalleri =
+            grunnlagKlient.hentPersongalleri(behandlingId, brukerTokenInfo)?.opplysning
+                ?: throw PersongalleriFinnesIkkeException()
+        inTransaction {
+            hentBehandlingOrThrow(behandlingId)
+                .tilOpprettet()
+                .let { behandling ->
+                    val nyeOpplysinger =
+                        listOf(
+                            lagOpplysning(
+                                opplysningsType = Opplysningstype.PERSONGALLERI_V1,
+                                kilde = Grunnlagsopplysning.Saksbehandler.create(brukerTokenInfo.ident()),
+                                opplysning =
+                                    forrigePersonGalleri.copy(
+                                        avdoed = redigertFamilieforhold.avdoede,
+                                        gjenlevende = redigertFamilieforhold.gjenlevende,
+                                    ).toJsonNode(),
+                                periode = null,
+                            ),
+                        )
+                    grunnlagService.leggTilNyeOpplysninger(
+                        behandlingId,
+                        NyeSaksopplysninger(behandling.sak.id, nyeOpplysinger),
+                    )
+
+                    grunnlagService.oppdaterGrunnlag(behandling.id, behandling.sak.id, behandling.sak.sakType)
+                    behandlingDao.lagreStatus(behandling)
+                }
+        }
     }
 
     override fun hentUtlandstilknytningForSak(sakId: Long): Utlandstilknytning? {

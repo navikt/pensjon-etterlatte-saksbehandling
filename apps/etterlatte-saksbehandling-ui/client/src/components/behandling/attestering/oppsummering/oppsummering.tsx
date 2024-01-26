@@ -15,6 +15,7 @@ export const Behandlingsoppsummering = ({ behandlingsInfo, beslutning }: Props) 
     behandlingsInfo.status === IBehandlingStatus.ATTESTERT ||
     behandlingsInfo.status === IBehandlingStatus.TIL_SAMORDNING ||
     behandlingsInfo.status === IBehandlingStatus.SAMORDNET ||
+    behandlingsInfo.status === IBehandlingStatus.AVSLAG ||
     beslutning === IBeslutning.godkjenn
   ) {
     return <Innvilget behandlingsInfo={behandlingsInfo} />

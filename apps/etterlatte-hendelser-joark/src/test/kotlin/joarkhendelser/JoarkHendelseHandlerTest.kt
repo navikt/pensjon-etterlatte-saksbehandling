@@ -8,7 +8,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import joarkhendelser.behandling.BehandlingKlient
 import joarkhendelser.joark.SafKlient
-import joarkhendelser.pdl.PdlKlient
+import joarkhendelser.pdl.PdlTjenesterKlient
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.joarkhendelser.JoarkHendelseHandler
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
@@ -45,10 +45,10 @@ import kotlin.random.Random
 internal class JoarkHendelseHandlerTest {
     private val behandlingKlientMock = mockk<BehandlingKlient>(relaxed = true)
     private val safKlientMock = mockk<SafKlient>()
-    private val pdlKlientMock = mockk<PdlKlient>()
+    private val pdlTjenesterKlientMock = mockk<PdlTjenesterKlient>()
 
     private val sut =
-        JoarkHendelseHandler(BehandlingService(behandlingKlientMock, pdlKlientMock), safKlientMock, pdlKlientMock)
+        JoarkHendelseHandler(BehandlingService(behandlingKlientMock, pdlTjenesterKlientMock), safKlientMock, pdlTjenesterKlientMock)
 
     @BeforeEach
     fun beforeEach() {
@@ -57,7 +57,7 @@ internal class JoarkHendelseHandlerTest {
 
     @AfterEach
     fun afterEach() {
-        confirmVerified(behandlingKlientMock, safKlientMock, pdlKlientMock)
+        confirmVerified(behandlingKlientMock, safKlientMock, pdlTjenesterKlientMock)
     }
 
     @Nested
@@ -72,11 +72,11 @@ internal class JoarkHendelseHandlerTest {
                 opprettJournalpost(journalpostId, sakType = sakType, bruker = Bruker(ident, BrukerIdType.FNR))
 
             coEvery { safKlientMock.hentJournalpost(any()) } returns HentJournalpostResult(journalpost)
-            coEvery { pdlKlientMock.hentPdlIdentifikator(any()) } returns
+            coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
-            coEvery { pdlKlientMock.hentAdressebeskyttelse(any()) } returns AdressebeskyttelseGradering.UGRADERT
+            coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelse(any(), any()) } returns AdressebeskyttelseGradering.UGRADERT
 
             val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.JOURNALPOST_MOTTATT)
 
@@ -86,8 +86,8 @@ internal class JoarkHendelseHandlerTest {
 
             coVerify(exactly = 1) {
                 safKlientMock.hentJournalpost(journalpostId)
-                pdlKlientMock.hentPdlIdentifikator(ident)
-                pdlKlientMock.hentAdressebeskyttelse(ident)
+                pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
+                pdlTjenesterKlientMock.hentAdressebeskyttelse(ident, sakType)
                 behandlingKlientMock.hentEllerOpprettSak(ident, sakType, AdressebeskyttelseGradering.UGRADERT)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }
@@ -102,11 +102,11 @@ internal class JoarkHendelseHandlerTest {
                 opprettJournalpost(journalpostId, sakType = sakType, bruker = Bruker(ident, BrukerIdType.FNR))
 
             coEvery { safKlientMock.hentJournalpost(any()) } returns HentJournalpostResult(journalpost)
-            coEvery { pdlKlientMock.hentPdlIdentifikator(any()) } returns
+            coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
-            coEvery { pdlKlientMock.hentAdressebeskyttelse(any()) } returns AdressebeskyttelseGradering.UGRADERT
+            coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelse(any(), any()) } returns AdressebeskyttelseGradering.UGRADERT
 
             val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.TEMA_ENDRET)
 
@@ -116,8 +116,8 @@ internal class JoarkHendelseHandlerTest {
 
             coVerify(exactly = 1) {
                 safKlientMock.hentJournalpost(journalpostId)
-                pdlKlientMock.hentPdlIdentifikator(ident)
-                pdlKlientMock.hentAdressebeskyttelse(ident)
+                pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
+                pdlTjenesterKlientMock.hentAdressebeskyttelse(ident, sakType)
                 behandlingKlientMock.hentEllerOpprettSak(ident, sakType, AdressebeskyttelseGradering.UGRADERT)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }
@@ -132,11 +132,11 @@ internal class JoarkHendelseHandlerTest {
                 opprettJournalpost(journalpostId, sakType = sakType, bruker = Bruker(ident, BrukerIdType.FNR))
 
             coEvery { safKlientMock.hentJournalpost(any()) } returns HentJournalpostResult(journalpost)
-            coEvery { pdlKlientMock.hentPdlIdentifikator(any()) } returns
+            coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
-            coEvery { pdlKlientMock.hentAdressebeskyttelse(any()) } returns AdressebeskyttelseGradering.UGRADERT
+            coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelse(any(), any()) } returns AdressebeskyttelseGradering.UGRADERT
             coEvery { behandlingKlientMock.hentSak(any(), any()) } returns null
 
             val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.ENDELIG_JOURNALFOERT)
@@ -147,9 +147,9 @@ internal class JoarkHendelseHandlerTest {
 
             coVerify(exactly = 1) {
                 safKlientMock.hentJournalpost(journalpostId)
-                pdlKlientMock.hentPdlIdentifikator(ident)
+                pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
                 behandlingKlientMock.hentSak(ident, sakType)
-                pdlKlientMock.hentAdressebeskyttelse(ident)
+                pdlTjenesterKlientMock.hentAdressebeskyttelse(ident, sakType)
                 behandlingKlientMock.hentEllerOpprettSak(ident, sakType, AdressebeskyttelseGradering.UGRADERT)
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }
@@ -176,7 +176,7 @@ internal class JoarkHendelseHandlerTest {
             coVerify(exactly = 1) { safKlientMock.hentJournalpost(journalpostId) }
             coVerify {
                 behandlingKlientMock wasNot Called
-                pdlKlientMock wasNot Called
+                pdlTjenesterKlientMock wasNot Called
             }
         }
 
@@ -199,7 +199,7 @@ internal class JoarkHendelseHandlerTest {
             coVerify(exactly = 1) { safKlientMock.hentJournalpost(journalpostId) }
             coVerify {
                 behandlingKlientMock wasNot Called
-                pdlKlientMock wasNot Called
+                pdlTjenesterKlientMock wasNot Called
             }
         }
 
@@ -224,7 +224,7 @@ internal class JoarkHendelseHandlerTest {
             coVerify(exactly = 1) { safKlientMock.hentJournalpost(journalpostId) }
             coVerify {
                 behandlingKlientMock wasNot Called
-                pdlKlientMock wasNot Called
+                pdlTjenesterKlientMock wasNot Called
             }
         }
 
@@ -256,7 +256,7 @@ internal class JoarkHendelseHandlerTest {
             coVerify(exactly = 1) { safKlientMock.hentJournalpost(journalpostId) }
             coVerify {
                 behandlingKlientMock wasNot Called
-                pdlKlientMock wasNot Called
+                pdlTjenesterKlientMock wasNot Called
             }
         }
 
@@ -270,7 +270,7 @@ internal class JoarkHendelseHandlerTest {
                     journalpost,
                     null,
                 )
-            coEvery { pdlKlientMock.hentPdlIdentifikator(any()) } returns
+            coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.Npid(
                     NavPersonIdent("01309000000"),
                 )
@@ -285,7 +285,7 @@ internal class JoarkHendelseHandlerTest {
 
             coVerify(exactly = 1) {
                 safKlientMock.hentJournalpost(journalpostId)
-                pdlKlientMock.hentPdlIdentifikator(journalpost.bruker!!.id)
+                pdlTjenesterKlientMock.hentPdlIdentifikator(journalpost.bruker!!.id)
             }
             coVerify {
                 behandlingKlientMock wasNot Called
@@ -302,7 +302,7 @@ internal class JoarkHendelseHandlerTest {
                     journalpost,
                     null,
                 )
-            coEvery { pdlKlientMock.hentPdlIdentifikator(any()) } returns null
+            coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns null
             val hendelse = opprettHendelse(journalpostId, SakType.OMSTILLINGSSTOENAD.tema)
 
             runBlocking {
@@ -313,7 +313,7 @@ internal class JoarkHendelseHandlerTest {
 
             coVerify(exactly = 1) {
                 safKlientMock.hentJournalpost(journalpostId)
-                pdlKlientMock.hentPdlIdentifikator(journalpost.bruker!!.id)
+                pdlTjenesterKlientMock.hentPdlIdentifikator(journalpost.bruker!!.id)
             }
             coVerify {
                 behandlingKlientMock wasNot Called
@@ -330,7 +330,7 @@ internal class JoarkHendelseHandlerTest {
                     journalpost,
                     null,
                 )
-            coEvery { pdlKlientMock.hentPdlIdentifikator(any()) } returns
+            coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of("09498230323"),
                 )
@@ -345,7 +345,7 @@ internal class JoarkHendelseHandlerTest {
 
             coVerify(exactly = 1) {
                 safKlientMock.hentJournalpost(journalpostId)
-                pdlKlientMock.hentPdlIdentifikator(journalpost.bruker!!.id)
+                pdlTjenesterKlientMock.hentPdlIdentifikator(journalpost.bruker!!.id)
             }
             coVerify {
                 behandlingKlientMock wasNot Called
@@ -361,7 +361,7 @@ internal class JoarkHendelseHandlerTest {
                 opprettJournalpost(journalpostId, sakType = sakType, bruker = Bruker(ident, BrukerIdType.FNR))
 
             coEvery { safKlientMock.hentJournalpost(any()) } returns HentJournalpostResult(journalpost)
-            coEvery { pdlKlientMock.hentPdlIdentifikator(any()) } returns
+            coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
@@ -375,7 +375,7 @@ internal class JoarkHendelseHandlerTest {
 
             coVerify(exactly = 1) {
                 safKlientMock.hentJournalpost(journalpostId)
-                pdlKlientMock.hentPdlIdentifikator(ident)
+                pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
                 behandlingKlientMock.hentSak(ident, sakType)
             }
         }

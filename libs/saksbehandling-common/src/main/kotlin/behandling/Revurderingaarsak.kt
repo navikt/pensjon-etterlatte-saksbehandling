@@ -17,17 +17,17 @@ private sealed class KanBrukesIMiljoe {
     abstract val prod: Boolean
     abstract val dev: Boolean
 
-    object KunIDev : KanBrukesIMiljoe() {
+    data object KunIDev : KanBrukesIMiljoe() {
         override val prod = false
         override val dev = true
     }
 
-    object DevOgProd : KanBrukesIMiljoe() {
+    data object DevOgProd : KanBrukesIMiljoe() {
         override val prod = true
         override val dev = true
     }
 
-    object IngenMiljoe : KanBrukesIMiljoe() {
+    data object IngenMiljoe : KanBrukesIMiljoe() {
         override val prod = false
         override val dev = false
     }
@@ -37,22 +37,22 @@ sealed class Utfall {
     abstract val girOpphoer: Boolean
     abstract val skalSendeBrev: Boolean
 
-    object OpphoerUtenBrev : Utfall() {
+    data object OpphoerUtenBrev : Utfall() {
         override val girOpphoer = true
         override val skalSendeBrev = false
     }
 
-    object OpphoerMedBrev : Utfall() {
+    data object OpphoerMedBrev : Utfall() {
         override val girOpphoer = true
         override val skalSendeBrev = true
     }
 
-    object IkkeOpphoerSkalSendeBrev : Utfall() {
+    data object IkkeOpphoerSkalSendeBrev : Utfall() {
         override val girOpphoer = false
         override val skalSendeBrev = true
     }
 
-    object IkkeOpphoerSkalIkkeSendeBrev : Utfall() {
+    data object IkkeOpphoerSkalIkkeSendeBrev : Utfall() {
         override val girOpphoer = false
         override val skalSendeBrev = false
     }
@@ -85,13 +85,14 @@ enum class Revurderingaarsak(
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
+    ALDERSOVERGANG(SAKTYPE_BP, DevOgProd, OpphoerUtenBrev),
     ;
 
     fun kanBrukesIMiljo(): Boolean =
         when (clusternavn()) {
             null -> true
-            GcpEnv.PROD.name -> miljoe.prod
-            GcpEnv.DEV.name -> miljoe.dev
+            GcpEnv.PROD.env -> miljoe.prod
+            GcpEnv.DEV.env -> miljoe.dev
             else -> miljoe.dev
         }
 

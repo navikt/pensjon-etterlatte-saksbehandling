@@ -75,6 +75,8 @@ internal class MigrerSpesifikkSakRiver(
         if (migreringStatus in
             setOf(
                 Migreringsstatus.UNDER_MIGRERING,
+                Migreringsstatus.UTBETALING_OK,
+                Migreringsstatus.BREVUTSENDING_OK,
                 Migreringsstatus.FERDIG,
                 Migreringsstatus.PAUSE,
                 Migreringsstatus.MANUELL,
@@ -99,6 +101,7 @@ internal class MigrerSpesifikkSakRiver(
             sendSakTilMigrering(packet, verifisertRequest, context, pesyssak)
         } else {
             logger.info("Migrering er skrudd av. Sender ikke pesys-sak ${pesyssak.id} videre.")
+            pesysRepository.lagreGyldigDryRun(verifisertRequest)
         }
     }
 
@@ -153,7 +156,6 @@ internal class MigrerSpesifikkSakRiver(
 enum class MigreringFeatureToggle(private val key: String) : FeatureToggle {
     SendSakTilMigrering("pensjon-etterlatte.bp-send-sak-til-migrering"),
     OpphoerSakIPesys("opphoer-sak-i-pesys"),
-    VerifiserFoerMigrering("verifiser-foer-migrering"),
     MigrerNaarSoekerHarVerge("migrer-naar-soeker-har-verge"),
     ;
 

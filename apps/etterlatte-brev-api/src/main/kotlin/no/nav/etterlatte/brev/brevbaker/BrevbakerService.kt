@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
@@ -16,6 +17,7 @@ class BrevbakerService(
     private val brevbakerKlient: BrevbakerKlient,
     private val adresseService: AdresseService,
     private val brevDataMapper: BrevDataMapper,
+    private val brevKodeMapper: BrevKodeMapper,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -32,16 +34,19 @@ class BrevbakerService(
 
     suspend fun hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest: RedigerbarTekstRequest): Slate {
         val request =
-            BrevbakerRequest.fra(
-                brevDataMapper.brevKode(
-                    redigerbarTekstRequest.generellBrevData,
-                    BrevProsessType.REDIGERBAR,
-                    erOmregningNyRegel = redigerbarTekstRequest.migrering?.erOmregningGjenny ?: false,
-                ).redigering,
-                brevDataMapper.brevData(redigerbarTekstRequest),
-                redigerbarTekstRequest.generellBrevData,
-                adresseService.hentAvsender(redigerbarTekstRequest.generellBrevData.forenkletVedtak),
-            )
+            with(redigerbarTekstRequest) {
+                BrevbakerRequest.fra(
+                    brevkode(brevKodeMapper, generellBrevData),
+                    brevDataMapper.brevData(this),
+                    adresseService.hentAvsender(
+                        generellBrevData.avsenderRequest(brukerTokenInfo),
+                    ),
+                    generellBrevData.personerISak.soekerOgEventuellVerge(),
+                    generellBrevData.sak.id,
+                    generellBrevData.spraak,
+                    generellBrevData.sak.sakType,
+                )
+            }
         val brevbakerResponse = brevbakerKlient.genererJSON(request)
         return BlockTilSlateKonverterer.konverter(brevbakerResponse)
     }
@@ -51,7 +56,8 @@ data class RedigerbarTekstRequest(
     val generellBrevData: GenerellBrevData,
     val brukerTokenInfo: BrukerTokenInfo,
     val prosessType: BrevProsessType,
+    val brevkode: (mapper: BrevKodeMapper, g: GenerellBrevData) -> EtterlatteBrevKode,
     val migrering: MigreringBrevRequest? = null,
 ) {
-    fun vedtakstype() = generellBrevData.forenkletVedtak.type.name.lowercase()
+    fun vedtakstype() = generellBrevData.forenkletVedtak?.type?.name?.lowercase()
 }

@@ -30,7 +30,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregningsperiode
@@ -57,25 +56,18 @@ class BrevdataFacade(
         return behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo)
     }
 
-    suspend fun hentInnvilgelsesdato(
-        sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): LocalDate? {
-        return vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo)
-    }
-
     suspend fun hentGenerellBrevData(
         sakId: Long,
-        behandlingId: UUID,
+        behandlingId: UUID?,
         brukerTokenInfo: BrukerTokenInfo,
     ): GenerellBrevData {
         return coroutineScope {
             val sakDeferred = async { sakService.hentSak(sakId, brukerTokenInfo) }
-            val vedtakDeferred = async { vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo) }
-            val brevutfallDeferred = async { hentBrevutfall(behandlingId, brukerTokenInfo) }
+            val vedtakDeferred = behandlingId?.let { async { vedtaksvurderingKlient.hentVedtak(it, brukerTokenInfo) } }
+            val brevutfallDeferred = behandlingId?.let { async { hentBrevutfall(it, brukerTokenInfo) } }
 
             val grunnlag =
-                when (vedtakDeferred.await().type) {
+                when (vedtakDeferred?.await()?.type) {
                     VedtakType.TILBAKEKREVING ->
                         async {
                             grunnlagKlient.hentGrunnlagForSak(
@@ -84,10 +76,11 @@ class BrevdataFacade(
                             )
                         }.await()
 
+                    null -> async { grunnlagKlient.hentGrunnlagForSak(sakId, brukerTokenInfo) }.await()
                     else -> async { grunnlagKlient.hentGrunnlag(behandlingId, brukerTokenInfo) }.await()
                 }
             val sak = sakDeferred.await()
-            val brevutfallDto = brevutfallDeferred.await()
+            val brevutfallDto = brevutfallDeferred?.await()
             val personerISak =
                 PersonerISak(
                     innsender = grunnlag.mapInnsender(),
@@ -95,21 +88,21 @@ class BrevdataFacade(
                     avdoede = grunnlag.mapAvdoede(),
                     verge = grunnlag.mapVerge(sak.sakType, behandlingId, brevutfallDto),
                 )
-            val vedtak = vedtakDeferred.await()
+            val vedtak = vedtakDeferred?.await()
             val innloggetSaksbehandlerIdent = brukerTokenInfo.ident()
-            val saksbehandlerIdent = vedtak.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
+            val saksbehandlerIdent = vedtak?.vedtakFattet?.ansvarligSaksbehandler ?: innloggetSaksbehandlerIdent
             val attestantIdent =
-                vedtak.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
+                vedtak?.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
             val behandling =
-                if (vedtak.type in listOf(VedtakType.INNVILGELSE, VedtakType.AVSLAG)) {
+                if (behandlingId != null && vedtak?.type in listOf(VedtakType.INNVILGELSE, VedtakType.AVSLAG)) {
                     behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 } else {
                     null
                 }
             val systemkilde = behandling?.kilde ?: Vedtaksloesning.GJENNY // Dette kan være en pesys-sak
 
-            when (vedtak.type) {
+            when (vedtak?.type) {
                 VedtakType.INNVILGELSE,
                 VedtakType.OPPHOER,
                 VedtakType.AVSLAG,
@@ -160,6 +153,17 @@ class BrevdataFacade(
                             ),
                         spraak = grunnlag.mapSpraak(),
                         systemkilde = systemkilde,
+                    )
+
+                null ->
+                    GenerellBrevData(
+                        sak = sak,
+                        personerISak = personerISak,
+                        behandlingId = behandlingId,
+                        forenkletVedtak = null,
+                        spraak = grunnlag.mapSpraak(),
+                        systemkilde = systemkilde,
+                        utlandstilknytning = behandling?.utlandstilknytning,
                     )
             }
         }
@@ -275,6 +279,11 @@ class BrevdataFacade(
 
         return trygdetidService.finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
     }
+
+    suspend fun hentBehandling(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 }
 
 fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> {

@@ -495,9 +495,9 @@ class TrygdetidServiceImpl(
     private fun hentDatoerForBehandling(trygdetid: Trygdetid): DatoerForBehandling =
         DatoerForBehandling(
             toLocalDate(trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.FOEDSELSDATO })
-                ?: throw Exception("Fant ikke fødselsdato for avdoed for trygdetidId=${trygdetid.id}"),
+                ?: throw IngenFoedselsdatoForAvdoedFunnet(trygdetid.id),
             toLocalDate(trygdetid.opplysninger.firstOrNull { it.type == TrygdetidOpplysningType.DOEDSDATO })
-                ?: throw Exception("Fant ikke dødsdato for avdoed for trygdetidId=${trygdetid.id}"),
+                ?: throw IngenDoedsdatoForAvdoedFunnet(trygdetid.id),
         )
 
     override suspend fun slettTrygdetidGrunnlagForTrygdetid(
@@ -525,45 +525,6 @@ class TrygdetidServiceImpl(
         logger.info("Kopierer trygdetid for behandling ${behandling.id} fra behandling $forrigeBehandlingId")
 
         val forrigeTrygdetid = hentTrygdetiderIBehandling(forrigeBehandlingId, brukerTokenInfo)
-
-        // TODO EY-3232 Skal fjernes
-        if (forrigeTrygdetid.isEmpty()) {
-            val avdoed = grunnlagKlient.hentGrunnlag(behandling.id, brukerTokenInfo).hentAvdoede().firstOrNull()
-            val trygdetid =
-                Trygdetid(
-                    sakId = behandling.sak,
-                    behandlingId = behandlingId,
-                    opplysninger = avdoed?.let { hentOpplysninger(it, behandlingId) } ?: emptyList(),
-                    ident =
-                        requireNotNull(avdoed?.hentFoedselsnummer()?.verdi?.value) {
-                            "Kunne ikke hente identifikator for avdød til trygdetid i " +
-                                "behandlingen med id=$behandlingId"
-                        },
-                    trygdetidGrunnlag = emptyList(),
-                    beregnetTrygdetid =
-                        DetaljertBeregnetTrygdetid(
-                            resultat =
-                                DetaljertBeregnetTrygdetidResultat(
-                                    faktiskTrygdetidNorge = null,
-                                    faktiskTrygdetidTeoretisk = null,
-                                    fremtidigTrygdetidNorge = null,
-                                    fremtidigTrygdetidTeoretisk = null,
-                                    samletTrygdetidNorge = 40,
-                                    samletTrygdetidTeoretisk = null,
-                                    prorataBroek = null,
-                                    overstyrt = true,
-                                ),
-                            tidspunkt = Tidspunkt.now(),
-                            regelResultat = "MVP hardkodet trygdetid".toJsonNode(),
-                        ),
-                )
-            val opprettet = trygdetidRepository.opprettTrygdetid(trygdetid)
-            trygdetidRepository.oppdaterTrygdetid(
-                opprettet,
-                overstyrt = true,
-            ) // Holder ikke å sette overstyrt på detaljertBeregnetTrygdetid
-            return listOf(trygdetid)
-        }
 
         return kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetid)
     }
@@ -814,6 +775,15 @@ class TrygdetidServiceImpl(
         trygdetid: Trygdetid,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpplysningerDifferanse {
+        if (
+            trygdetid.beregnetTrygdetid?.resultat?.overstyrt.let { it != null && it }
+        ) {
+            return OpplysningerDifferanse(
+                differanse = false,
+                GrunnlagOpplysningerDto.tomt(),
+            )
+        }
+
         val nyAvdoedGrunnlag =
             grunnlagKlient.hentGrunnlag(trygdetid.behandlingId, brukerTokenInfo).hentAvdoede()
                 .firstOrNull { it.hentFoedselsnummer()?.verdi?.value == trygdetid.ident }
@@ -922,4 +892,22 @@ class IngenTrygdetidFunnetForAvdoede : UgyldigForespoerselException(
 class TrygdetidManglerBeregning : UgyldigForespoerselException(
     code = "TRYGDETID_MANGLER_BEREGNING",
     detail = "Oppgitt trygdetid er ikke gyldig fordi det mangler en beregning",
+)
+
+class IngenFoedselsdatoForAvdoedFunnet(trygdetidId: UUID) : UgyldigForespoerselException(
+    code = "FOEDSELSDATO_FOR_AVDOED_IKKE_FUNNET",
+    detail = "Fant ikke fødselsdato for avdød",
+    meta =
+        mapOf(
+            "trygdetidId" to trygdetidId,
+        ),
+)
+
+class IngenDoedsdatoForAvdoedFunnet(trygdetidId: UUID) : UgyldigForespoerselException(
+    code = "FOEDSELSDATO_FOR_AVDOED_IKKE_FUNNET",
+    detail = "Fant ikke dødsdato for avdød",
+    meta =
+        mapOf(
+            "trygdetidId" to trygdetidId,
+        ),
 )

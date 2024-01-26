@@ -1,11 +1,14 @@
 package no.nav.etterlatte.brev
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.readAllParts
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
+import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -33,6 +36,7 @@ inline val PipelineContext<*, ApplicationCall>.brevId: Long
 
 fun Route.brevRoute(
     service: BrevService,
+    pdfService: PDFService,
     distribuerer: Brevdistribuerer,
     tilgangssjekker: Tilgangssjekker,
 ) {
@@ -122,6 +126,12 @@ fun Route.brevRoute(
                 call.respond(BestillingsIdDto(bestillingsId))
             }
         }
+
+        delete {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
+                call.respond(service.slett(brevId, brukerTokenInfo))
+            }
+        }
     }
 
     route("brev/sak/{$SAKID_CALL_PARAMETER}") {
@@ -147,6 +157,23 @@ fun Route.brevRoute(
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(HttpStatusCode.Created, brev)
+                }
+            }
+        }
+
+        post("pdf") {
+            withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
+                try {
+                    val brev = pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts())
+                    brev.onSuccess {
+                        call.respond(brev)
+                    }
+                    brev.onFailure {
+                        call.respond(HttpStatusCode.UnprocessableEntity)
+                    }
+                } catch (e: Exception) {
+                    logger.error("Getting multipart error", e)
+                    call.respond(HttpStatusCode.BadRequest)
                 }
             }
         }

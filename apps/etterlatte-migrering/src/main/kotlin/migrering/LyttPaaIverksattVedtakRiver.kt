@@ -56,7 +56,7 @@ internal class LyttPaaIverksattVedtakRiver(
 
         when (respons.status) {
             UtbetalingStatusDto.GODKJENT, UtbetalingStatusDto.GODKJENT_MED_FEIL -> {
-                pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.FERDIG)
+                pesysRepository.oppdaterStatus(behandling.pesysId, Migreringsstatus.UTBETALING_OK)
                 if (featureToggleService.isEnabled(MigreringFeatureToggle.OpphoerSakIPesys, false)) {
                     runBlocking { penKlient.opphoerSak(behandling.pesysId) }
                 } else {

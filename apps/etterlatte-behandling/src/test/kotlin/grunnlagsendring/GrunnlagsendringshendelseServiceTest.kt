@@ -22,7 +22,7 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlKlientImpl
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.hentDoedsdato
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
@@ -75,7 +75,7 @@ import kotlin.random.Random
 internal class GrunnlagsendringshendelseServiceTest {
     private val behandlingService = mockk<BehandlingService>()
     private val grunnlagshendelsesDao = mockk<GrunnlagsendringshendelseDao>(relaxUnitFun = true)
-    private val pdlService = mockk<PdlKlientImpl>()
+    private val pdlService = mockk<PdlTjenesterKlientImpl>()
     private val grunnlagClient = mockk<GrunnlagKlient>(relaxed = true, relaxUnitFun = true)
     private val sakService = mockk<SakService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>()
@@ -121,6 +121,51 @@ internal class GrunnlagsendringshendelseServiceTest {
     @AfterEach
     fun afterEach() {
         clearAllMocks()
+    }
+
+    @Test
+    fun `Skal opprette hendelser for hendelse`() {
+        val sakId = 1L
+        val fnr = "Soeker"
+
+        every {
+            sakService.finnSak(sakId)
+        } returns Sak(fnr, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+        } returns emptyList()
+        coEvery { grunnlagClient.hentPersonSakOgRolle(any()) }
+            .returns(
+                PersonMedSakerOgRoller(
+                    fnr,
+                    listOf(
+                        SakOgRolle(1L, Saksrolle.GJENLEVENDE),
+                        SakOgRolle(1L, Saksrolle.GJENLEVENDE),
+                        SakOgRolle(1L, Saksrolle.GJENLEVENDE),
+                        SakOgRolle(1L, Saksrolle.SOESKEN),
+                        SakOgRolle(2L, Saksrolle.AVDOED),
+                        SakOgRolle(2L, Saksrolle.GJENLEVENDE),
+                        SakOgRolle(2L, Saksrolle.SOEKER),
+                        SakOgRolle(3L, Saksrolle.SOESKEN),
+                    ),
+                ),
+            )
+
+        val grunnlagsendringshendelse =
+            grunnlagsendringshendelseMedSamsvar(
+                id = randomUUID(),
+                sakId = sakId,
+                fnr = fnr,
+                samsvarMellomKildeOgGrunnlag = null,
+            )
+
+        val opprettGrunnlagsendringshendelse = slot<Grunnlagsendringshendelse>()
+        every {
+            grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(opprettGrunnlagsendringshendelse))
+        } returns grunnlagsendringshendelse
+
+        val opprettedeHendelser = grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(fnr, GrunnlagsendringsType.DOEDSFALL)
+        assertEquals(6, opprettedeHendelser.size)
     }
 
     @Test

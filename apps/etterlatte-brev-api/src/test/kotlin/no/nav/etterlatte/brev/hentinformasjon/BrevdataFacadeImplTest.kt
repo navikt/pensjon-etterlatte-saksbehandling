@@ -35,9 +35,9 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Tilbakekreving
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
@@ -110,11 +110,11 @@ internal class BrevdataFacadeImplTest {
             Assertions.assertEquals("Barn", etternavn)
         }
         Assertions.assertEquals("Død Mellom Far", generellBrevData.personerISak.avdoede.first().navn)
-        Assertions.assertEquals(VedtakType.INNVILGELSE, generellBrevData.forenkletVedtak.type)
-        Assertions.assertEquals(123L, generellBrevData.forenkletVedtak.id)
-        Assertions.assertEquals(ENHET, generellBrevData.forenkletVedtak.sakenhet)
-        Assertions.assertEquals(SAKSBEHANDLER_IDENT, generellBrevData.forenkletVedtak.saksbehandlerIdent)
-        Assertions.assertEquals(ATTESTANT_IDENT, generellBrevData.forenkletVedtak.attestantIdent)
+        Assertions.assertEquals(VedtakType.INNVILGELSE, generellBrevData.forenkletVedtak?.type)
+        Assertions.assertEquals(123L, generellBrevData.forenkletVedtak?.id)
+        Assertions.assertEquals(ENHET, generellBrevData.forenkletVedtak?.sakenhet)
+        Assertions.assertEquals(SAKSBEHANDLER_IDENT, generellBrevData.forenkletVedtak?.saksbehandlerIdent)
+        Assertions.assertEquals(ATTESTANT_IDENT, generellBrevData.forenkletVedtak?.attestantIdent)
 
         coVerify(exactly = 1) {
             grunnlagKlient.hentGrunnlag(BEHANDLING_ID, any())
@@ -144,7 +144,7 @@ internal class BrevdataFacadeImplTest {
             mellomnavn shouldBe "Mellom"
             etternavn shouldBe "Barn"
         }
-        with(generellBrevData.forenkletVedtak) {
+        with(generellBrevData.forenkletVedtak!!) {
             type shouldBe VedtakType.TILBAKEKREVING
             sakenhet shouldBe ENHET
             id shouldBe 123L
@@ -254,7 +254,7 @@ internal class BrevdataFacadeImplTest {
         }
 
     private fun opprettBehandlingVedtak() =
-        mockk<VedtakNyDto> {
+        mockk<VedtakDto> {
             every { type } returns VedtakType.INNVILGELSE
             every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
             every { id } returns 123L
@@ -272,7 +272,7 @@ internal class BrevdataFacadeImplTest {
         }
 
     private fun opprettTilbakekrevingVedtak(vedtakInnhold: Tilbakekreving = tilbakekreving()) =
-        mockk<VedtakNyDto> {
+        mockk<VedtakDto> {
             every { type } returns VedtakType.TILBAKEKREVING
             every { sak } returns VedtakSak("ident", SakType.BARNEPENSJON, SAK_ID)
             every { id } returns 123L

@@ -7,7 +7,7 @@ jackson-version = "2.16.1"
 jupiter-version = "5.10.1"
 kotlinx-version = "1.7.3"
 ktor2-version = "2.3.7"
-navfelles-token-version = "3.2.0"
+navfelles-token-version = "4.1.0"
 prometheus-version = "0.16.0"
 testcontainer-version = "1.19.3"
 
@@ -70,7 +70,7 @@ ktor2-mustache = { module = "io.ktor:ktor-server-mustache", version.ref = "ktor2
 ktor2-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor2-version" }
 ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
 
-etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.01.05-09.38.6f5ada710f9f"}
+etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.01.17-13.26.695db1c36957"}
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.10" }
@@ -85,7 +85,7 @@ messaginghub-pooled-jms = { module ="org.messaginghub:pooled-jms", version = "3.
 
 mq-jakarta-client = { module ="com.ibm.mq:com.ibm.mq.jakarta.client", version = "9.3.4.1" }
 
-navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2023120410321701682379.55cc1a24d803" }
+navfelles-rapidandriversktor2 = { module = "com.github.navikt:rapids-and-rivers", version = "2024010209171704183456.6d035b91ffb4" }
 navfelles-tjenestespesifikasjoner-avstemming = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:avstemming-v1-tjenestespesifikasjon", version = "1.78ffd1e" }
 navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:nav-virksomhet-oppdragsbehandling-v1-meldingsdefinisjon", version = "1.78ffd1e" }
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version = "1.78ffd1e" }
@@ -98,7 +98,7 @@ test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", versi
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-jupiter-root = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jupiter-version" }
 test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.8.0" }
-test-mockk = { module = "io.mockk:mockk", version = "1.13.8" }
+test-mockk = { module = "io.mockk:mockk", version = "1.13.9" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-wiremock = { module = "org.wiremock:wiremock", version = "3.3.1" }

@@ -37,7 +37,7 @@ data class TilbakekrevingInnholdBrevData(
     companion object {
         fun fra(generellBrevData: GenerellBrevData): TilbakekrevingInnholdBrevData {
             val tilbakekreving =
-                generellBrevData.forenkletVedtak.tilbakekreving
+                generellBrevData.forenkletVedtak?.tilbakekreving
                     ?: throw BrevDataTilbakerevingHarManglerException("Vedtak mangler tilbakekreving")
             return TilbakekrevingInnholdBrevData(
                 sakType = generellBrevData.sak.sakType,

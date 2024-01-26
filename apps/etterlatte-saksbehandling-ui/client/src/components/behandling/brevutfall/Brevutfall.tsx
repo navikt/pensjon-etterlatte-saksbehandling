@@ -20,11 +20,18 @@ export interface BrevutfallOgEtterbetaling {
 
 export interface Brevutfall {
   aldersgruppe?: Aldersgruppe | null
+  lavEllerIngenInntekt?: LavEllerIngenInntekt | null
 }
 
 export enum Aldersgruppe {
   OVER_18 = 'OVER_18',
   UNDER_18 = 'UNDER_18',
+  IKKE_VALGT = 'IKKE_VALGT',
+}
+
+export enum LavEllerIngenInntekt {
+  JA = 'JA',
+  NEI = 'NEI',
   IKKE_VALGT = 'IKKE_VALGT',
 }
 
@@ -43,7 +50,9 @@ const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {
       }
     case SakType.OMSTILLINGSSTOENAD:
       return {
-        brevutfall: {},
+        brevutfall: {
+          lavEllerIngenInntekt: LavEllerIngenInntekt.IKKE_VALGT,
+        },
       }
   }
 }
@@ -99,6 +108,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling; resetBrevu
               brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
               setBrevutfallOgEtterbetaling={setBrevutfallOgEtterbetaling}
               setVisSkjema={setVisSkjema}
+              onAvbryt={hentBrevutfall}
             />
           ) : (
             <BrevutfallVisning

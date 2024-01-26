@@ -15,21 +15,18 @@ class MigreringBrevDataService(private val brevdataFacade: BrevdataFacade) {
         migrering: MigreringBrevRequest?,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevData {
-        if (
-            generellBrevData.systemkilde != Vedtaksloesning.PESYS &&
-            !(migrering?.erOmregningGjenny ?: false)
-        ) {
+        if (generellBrevData.systemkilde != Vedtaksloesning.PESYS) {
             throw InternfeilException("Kan ikke opprette et migreringsbrev fra pesys hvis kilde ikke er pesys")
         }
         return coroutineScope {
             val virkningstidspunkt =
-                requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt) {
+                requireNotNull(generellBrevData.forenkletVedtak!!.virkningstidspunkt) {
                     "Migreringsvedtaket må ha et virkningstidspunkt"
                 }
 
             val utbetalingsinfo =
                 brevdataFacade.finnUtbetalingsinfo(
-                    generellBrevData.behandlingId,
+                    generellBrevData.behandlingId!!,
                     virkningstidspunkt,
                     brukerTokenInfo,
                     generellBrevData.sak.sakType,

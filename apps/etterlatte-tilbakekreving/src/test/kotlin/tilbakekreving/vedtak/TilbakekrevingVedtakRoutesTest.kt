@@ -7,7 +7,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.log
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -15,9 +14,9 @@ import io.mockk.confirmVerified
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import no.nav.etterlatte.ktor.issueSystembrukerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.tilbakekreving.tilbakekrevingsvedtak
 import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingVedtakService
 import no.nav.etterlatte.tilbakekreving.vedtak.tilbakekrevingVedtakRoutes
@@ -26,8 +25,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
-import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class TilbakekrevingVedtakRoutesTest {
@@ -50,7 +47,7 @@ internal class TilbakekrevingVedtakRoutesTest {
         val vedtak = tilbakekrevingsvedtak(1)
         coEvery { service.sendTilbakekrevingsvedtak(vedtak) } just runs
 
-        testApplication(server.config.httpServer.port()) {
+        testApplication {
             val response =
                 client.post("/api/tilbakekreving/tilbakekrevingsvedtak") {
                     setBody(vedtak.toJson())
@@ -71,7 +68,7 @@ internal class TilbakekrevingVedtakRoutesTest {
         val vedtak = tilbakekrevingsvedtak(2)
         coEvery { service.sendTilbakekrevingsvedtak(vedtak) } throws Exception("Noe feilet")
 
-        testApplication(server.config.httpServer.port()) {
+        testApplication {
             val response =
                 client.post("/api/tilbakekreving/tilbakekrevingsvedtak") {
                     setBody(vedtak.toJson())
@@ -87,33 +84,14 @@ internal class TilbakekrevingVedtakRoutesTest {
         }
     }
 
-    private fun testApplication(
-        port: Int,
-        block: suspend ApplicationTestBuilder.() -> Unit,
-    ) {
+    private fun testApplication(block: suspend ApplicationTestBuilder.() -> Unit) {
         io.ktor.server.testing.testApplication {
-            environment {
-                config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, AZURE_CLIENT_ID)
+            runServer(server) {
+                tilbakekrevingVedtakRoutes(service)
             }
-            application { restModule(log) { tilbakekrevingVedtakRoutes(service) } }
             block(this)
         }
     }
 
-    private val token: String by lazy {
-        val system = UUID.randomUUID().toString()
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = AZURE_CLIENT_ID,
-            claims =
-                mapOf(
-                    "sub" to system,
-                    "oid" to system,
-                ),
-        ).serialize()
-    }
-
-    private companion object {
-        const val AZURE_CLIENT_ID: String = "azure-id"
-    }
+    private val token: String by lazy { server.issueSystembrukerToken() }
 }

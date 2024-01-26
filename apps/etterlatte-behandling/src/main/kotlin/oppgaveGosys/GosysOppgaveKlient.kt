@@ -2,9 +2,10 @@ package no.nav.etterlatte.oppgaveGosys
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
-import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.http.HttpStatusCode
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -52,14 +53,14 @@ interface GosysOppgaveKlient {
         oppgaveVersjon: Long,
         tildeles: String,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): GosysApiOppgave
 
     suspend fun endreFrist(
         oppgaveId: String,
         oppgaveVersjon: Long,
         nyFrist: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): GosysApiOppgave
 
     suspend fun hentOppgave(
         id: Long,
@@ -137,15 +138,17 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         oppgaveVersjon: Long,
         tildeles: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): GosysApiOppgave {
         try {
             logger.info("Tilordner oppgave $oppgaveId til saksbehandler $tildeles")
 
-            patchOppgave(
+            return patchOppgave(
                 oppgaveId,
                 brukerTokenInfo,
                 body = GosysEndreSaksbehandlerRequest(oppgaveVersjon, tildeles),
             )
+        } catch (e: GosysKonfliktException) {
+            throw e
         } catch (e: Exception) {
             logger.error("Noe feilet mot Gosys, ident=${brukerTokenInfo.ident()}]", e)
             throw e
@@ -157,15 +160,17 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         oppgaveVersjon: Long,
         nyFrist: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): GosysApiOppgave {
         try {
             logger.info("Endrer frist på oppgave $oppgaveId til $nyFrist")
 
-            patchOppgave(
+            return patchOppgave(
                 oppgaveId,
                 brukerTokenInfo,
                 body = GosysEndreFristRequest(oppgaveVersjon, nyFrist),
             )
+        } catch (e: GosysKonfliktException) {
+            throw e
         } catch (e: Exception) {
             logger.error("Noe feilet mot Gosys, ident=${brukerTokenInfo.ident()}]", e)
             throw e
@@ -176,8 +181,8 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         oppgaveId: String,
         brukerTokenInfo: BrukerTokenInfo,
         body: Any,
-    ) {
-        downstreamResourceClient
+    ): GosysApiOppgave {
+        return downstreamResourceClient
             .patch(
                 resource =
                     Resource(
@@ -187,6 +192,21 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                 brukerTokenInfo = brukerTokenInfo,
                 patchBody = objectMapper.writeValueAsString(body),
             )
-            .mapError { errorResponse -> throw errorResponse }
+            .mapBoth(
+                success = { resource -> resource.response.let { objectMapper.readValue<GosysApiOppgave>(it.toString()) } },
+                failure = { errorResponse ->
+                    if (errorResponse.response?.status == HttpStatusCode.Conflict) {
+                        throw GosysKonfliktException(errorResponse.detail)
+                    } else {
+                        throw errorResponse
+                    }
+                },
+            )
     }
 }
+
+class GosysKonfliktException(detail: String) : ForespoerselException(
+    status = 409,
+    code = "GOSYS_OPTIMISTISK_LAAS",
+    detail = detail,
+)

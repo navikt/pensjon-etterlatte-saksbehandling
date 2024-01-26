@@ -1,62 +1,27 @@
 package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
-import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
-import no.nav.etterlatte.brev.brevbaker.BrevbakerService
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
-import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
-import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.BrevInnhold
-import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
-import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.BrevProsessType.AUTOMATISK
-import no.nav.etterlatte.brev.model.BrevProsessType.MANUELL
-import no.nav.etterlatte.brev.model.BrevProsessType.REDIGERBAR
-import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
-import no.nav.etterlatte.brev.model.InnholdMedVedlegg
-import no.nav.etterlatte.brev.model.ManueltBrevData
-import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
-import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.person.Vergemaal
-import no.nav.etterlatte.libs.common.retryOgPakkUt
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class VedtaksbrevService(
     private val db: BrevRepository,
-    private val brevdataFacade: BrevdataFacade,
     private val vedtaksvurderingService: VedtaksvurderingService,
-    private val adresseService: AdresseService,
-    private val dokarkivService: DokarkivServiceImpl,
-    private val brevbaker: BrevbakerService,
-    private val brevDataMapper: BrevDataMapper,
-    private val brevProsessTypeFactory: BrevProsessTypeFactory,
-    private val migreringBrevDataService: MigreringBrevDataService,
+    private val brevKodeMapper: BrevKodeMapper,
+    private val brevoppretter: Brevoppretter,
+    private val pdfGenerator: PDFGenerator,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -79,130 +44,39 @@ class VedtaksbrevService(
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         // TODO EY-3232 - Fjerne migreringstilpasning
     ): Brev {
-        require(hentVedtaksbrev(behandlingId) == null) {
-            "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
-        }
-
-        val generellBrevData =
-            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo) }
-
-        val mottaker =
-            with(generellBrevData.personerISak) {
-                when (verge) {
-                    is Vergemaal ->
-                        verge.toMottaker()
-                    else -> {
-                        val mottakerFnr =
-                            innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name } ?: soeker.fnr.value
-                        adresseService.hentMottakerAdresse(mottakerFnr)
-                    }
-                }
-            }
-
-        val prosessType =
-            brevProsessTypeFactory.fra(
-                generellBrevData,
-                erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
-            )
-
-        val nyttBrev =
-            OpprettNyttBrev(
-                sakId = sakId,
-                behandlingId = behandlingId,
-                prosessType = prosessType,
-                soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
-                mottaker = mottaker,
-                opprettet = Tidspunkt.now(),
-                innhold =
-                    opprettInnhold(
-                        RedigerbarTekstRequest(
-                            generellBrevData,
-                            brukerTokenInfo,
-                            prosessType,
-                            automatiskMigreringRequest,
-                        ),
-                    ),
-                innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType),
-            )
-
-        return db.opprettBrev(nyttBrev)
+        return brevoppretter.opprettVedtaksbrev(
+            sakId = sakId,
+            behandlingId = behandlingId,
+            brukerTokenInfo = brukerTokenInfo,
+            automatiskMigreringRequest = automatiskMigreringRequest,
+        )
     }
 
     suspend fun genererPdf(
         id: BrevID,
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
-    ): Pdf {
-        val brev = hentBrev(id)
-
-        if (!brev.kanEndres()) {
-            logger.info("Brev har status ${brev.status} - returnerer lagret innhold")
-            return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke brev med id ${brev.id}" }
-        }
-
-        val generellBrevData =
-            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, brukerTokenInfo) }
-        val avsender = adresseService.hentAvsender(generellBrevData.forenkletVedtak)
-
-        val brevkodePar =
-            brevDataMapper.brevKode(
-                generellBrevData,
-                brev.prosessType,
-                erOmregningNyRegel = automatiskMigreringRequest?.erOmregningGjenny ?: false,
-            )
-
-        val brevData =
-            when (
-                generellBrevData.systemkilde == Vedtaksloesning.PESYS ||
-                    automatiskMigreringRequest?.erOmregningGjenny ?: false
-            ) {
-                false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkodePar)
-                true ->
-                    OmregnetBPNyttRegelverkFerdig(
-                        innhold = InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }).innhold(),
-                        data = (
-                            migreringBrevDataService.opprettMigreringBrevdata(
-                                generellBrevData,
-                                automatiskMigreringRequest,
-                                brukerTokenInfo,
-                            ) as OmregnetBPNyttRegelverk
-                        ),
-                    )
-            }
-
-        val brevRequest = BrevbakerRequest.fra(brevkodePar.ferdigstilling, brevData, generellBrevData, avsender)
-
-        return brevbaker.genererPdf(brev.id, brevRequest)
-            .let {
-                when (brevData) {
-                    is OmregnetBPNyttRegelverkFerdig ->
-                        {
-                            val forhaandsvarsel =
-                                brevbaker.genererPdf(
-                                    brev.id,
-                                    BrevbakerRequest.fra(
-                                        EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                                        brevData.data,
-                                        generellBrevData,
-                                        avsender,
-                                    ),
-                                )
-                            forhaandsvarsel.medPdfAppended(it)
-                        }
-
-                    else -> it
-                }
-            }
-            .also { pdf ->
-                lagrePdfHvisVedtakFattet(
-                    brev.id,
-                    generellBrevData.forenkletVedtak,
-                    pdf,
-                    brukerTokenInfo,
-                    automatiskMigreringRequest != null,
+    ): Pdf =
+        pdfGenerator.genererPdf(
+            id = id,
+            bruker = bruker,
+            automatiskMigreringRequest = automatiskMigreringRequest,
+            avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
+            brevKode = { generellBrevData, brev ->
+                brevKodeMapper.brevKode(
+                    generellBrevData,
+                    brev.prosessType,
                 )
-            }
-    }
+            },
+        ) { generellBrevData, brev, pdf ->
+            lagrePdfHvisVedtakFattet(
+                brev.id,
+                generellBrevData.forenkletVedtak!!,
+                pdf,
+                bruker,
+                automatiskMigreringRequest != null,
+            )
+        }
 
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
@@ -218,7 +92,9 @@ class VedtaksbrevService(
             logger.warn("Brev (id=${brev.id}) er allerede ferdigstilt. Avbryter ferdigstilling...")
             return
         } else if (!brev.kanEndres()) {
-            throw IllegalStateException("Brev med id=${brev.id} kan ikke ferdigstilles, siden det har status ${brev.status}")
+            throw UgyldigStatusKanIkkeFerdigstilles(brev.id, brev.status)
+        } else if (!brev.mottaker.erGyldig()) {
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
         }
 
         val (saksbehandlerIdent, vedtakStatus) =
@@ -254,77 +130,7 @@ class VedtaksbrevService(
         brevId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BrevService.BrevPayload {
-        val generellBrevData = retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, brukerTokenInfo) }
-        val prosessType = brevProsessTypeFactory.fra(generellBrevData)
-        val innhold = opprettInnhold(RedigerbarTekstRequest(generellBrevData, brukerTokenInfo, prosessType))
-        val innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType)
-
-        if (innhold.payload != null) {
-            db.oppdaterPayload(brevId, innhold.payload)
-        }
-
-        if (innholdVedlegg != null) {
-            db.oppdaterPayloadVedlegg(brevId, innholdVedlegg)
-        }
-
-        return BrevService.BrevPayload(
-            innhold.payload ?: db.hentBrevPayload(brevId),
-            innholdVedlegg ?: db.hentBrevPayloadVedlegg(brevId),
-        )
-    }
-
-    private suspend fun opprettBrevData(
-        brev: Brev,
-        generellBrevData: GenerellBrevData,
-        brukerTokenInfo: BrukerTokenInfo,
-        brevkode: BrevDataMapper.BrevkodePar,
-    ): BrevData =
-        when (brev.prosessType) {
-            REDIGERBAR ->
-                brevDataMapper.brevDataFerdigstilling(
-                    generellBrevData,
-                    brukerTokenInfo,
-                    InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
-                    brevkode,
-                )
-
-            AUTOMATISK -> brevDataMapper.brevData(generellBrevData, brukerTokenInfo)
-            MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
-        }
-
-    private fun hentLagretInnhold(brev: Brev) =
-        requireNotNull(
-            db.hentBrevPayload(brev.id),
-        ) { "Fant ikke payload for brev ${brev.id}" }.elements
-
-    private fun hentLagretInnholdVedlegg(brev: Brev) =
-        requireNotNull(db.hentBrevPayloadVedlegg(brev.id)) {
-            "Fant ikke payloadvedlegg for brev ${brev.id}"
-        }
-
-    private suspend fun opprettInnhold(redigerbarTekstRequest: RedigerbarTekstRequest): BrevInnhold {
-        val tittel = "Vedtak om ${redigerbarTekstRequest.vedtakstype()}"
-
-        val payload =
-            when (redigerbarTekstRequest.prosessType) {
-                REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest)
-                AUTOMATISK -> null
-                MANUELL -> SlateHelper.hentInitiellPayload(redigerbarTekstRequest.generellBrevData)
-            }
-
-        return BrevInnhold(tittel, redigerbarTekstRequest.generellBrevData.spraak, payload)
-    }
-
-    private fun opprettInnholdVedlegg(
-        generellBrevData: GenerellBrevData,
-        prosessType: BrevProsessType,
-    ): List<BrevInnholdVedlegg>? =
-        when (prosessType) {
-            REDIGERBAR -> SlateHelper.hentInitiellPayloadVedlegg(generellBrevData)
-            AUTOMATISK -> null
-            MANUELL -> null
-        }
+    ): BrevService.BrevPayload = brevoppretter.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo)
 
     private fun lagrePdfHvisVedtakFattet(
         brevId: BrevID,
@@ -350,21 +156,6 @@ class VedtaksbrevService(
         }
     }
 
-    fun journalfoerVedtaksbrev(
-        vedtaksbrev: Brev,
-        vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostResponse {
-        if (vedtaksbrev.status != Status.FERDIGSTILT) {
-            throw IllegalArgumentException("Ugyldig status ${vedtaksbrev.status} på vedtaksbrev (id=${vedtaksbrev.id})")
-        }
-
-        val journalfoeringResponse = runBlocking { dokarkivService.journalfoer(vedtaksbrev.id, vedtak) }
-
-        db.settBrevJournalfoert(vedtaksbrev.id, journalfoeringResponse)
-        logger.info("Brev med id=${vedtaksbrev.id} markert som journalført")
-        return journalfoeringResponse
-    }
-
     fun fjernFerdigstiltStatusUnderkjentVedtak(
         id: BrevID,
         vedtak: JsonNode,
@@ -380,17 +171,23 @@ data class MigreringBrevRequest(
     val brutto: Int,
     val yrkesskade: Boolean,
     val utlandstilknytningType: UtlandstilknytningType?,
-    val erOmregningGjenny: Boolean = false,
 )
 
-fun Vergemaal.toMottaker(): Mottaker {
-    return Mottaker(
-        navn = mottaker.navn!!,
-        foedselsnummer = mottaker.foedselsnummer?.let { Foedselsnummer(it.value) },
-        orgnummer = null,
-        adresse =
-            with(mottaker.adresse) {
-                Adresse(adresseType, adresselinje1, adresselinje2, adresselinje3, postnummer, poststed, landkode, land)
-            },
-    )
-}
+class UgyldigStatusKanIkkeFerdigstilles(id: BrevID, status: Status) : UgyldigForespoerselException(
+    code = "UGYLDIG_STATUS_BREV",
+    detail = "Brevet kan ikke ferdigstilles når status er ${status.name.lowercase()}",
+    meta =
+        mapOf(
+            "id" to id,
+            "status" to status,
+        ),
+)
+
+class UgyldigMottakerKanIkkeFerdigstilles(id: BrevID) : UgyldigForespoerselException(
+    code = "UGYLDIG_MOTTAKER_BREV",
+    detail = "Brevet har ugyldig mottaker og kan ikke ferdigstilles",
+    meta =
+        mapOf(
+            "id" to id,
+        ),
+)

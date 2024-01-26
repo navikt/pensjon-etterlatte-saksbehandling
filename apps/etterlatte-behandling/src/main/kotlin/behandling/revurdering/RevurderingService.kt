@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling.revurdering
 import io.ktor.server.plugins.BadRequestException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.BehandlingHendelseType
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GrunnlagService
@@ -16,10 +15,9 @@ import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
@@ -41,13 +39,6 @@ import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
-
-enum class RevurderingServiceFeatureToggle(private val key: String) : FeatureToggle {
-    OpprettManuellRevurdering("pensjon-etterlatte.opprett-manuell-revurdering"),
-    ;
-
-    override fun key() = key
-}
 
 class MaksEnBehandlingsOppgaveUnderbehandlingException(message: String) : Exception(message)
 
@@ -79,7 +70,6 @@ class RevurderingService(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagService,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
-    private val featureToggleService: FeatureToggleService,
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
@@ -197,51 +187,43 @@ class RevurderingService(
         saksbehandler: Saksbehandler,
     ): Revurdering? =
         forrigeBehandling.sjekkEnhet()?.let {
-            return if (featureToggleService.isEnabled(
-                    RevurderingServiceFeatureToggle.OpprettManuellRevurdering,
-                    false,
-                )
-            ) {
-                val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
+            val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
 
-                opprettRevurdering(
-                    sakId = sakId,
-                    persongalleri = persongalleri,
-                    forrigeBehandling = forrigeBehandling.id,
-                    mottattDato = Tidspunkt.now().toLocalDatetimeUTC().toString(),
-                    prosessType = Prosesstype.MANUELL,
-                    kilde = Vedtaksloesning.GJENNY,
-                    revurderingAarsak = revurderingAarsak,
-                    virkningstidspunkt = null,
-                    utlandstilknytning = forrigeBehandling.utlandstilknytning,
-                    boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-                    begrunnelse = begrunnelse,
-                    fritekstAarsak = fritekstAarsak,
-                    saksbehandlerIdent = saksbehandler.ident,
-                ).oppdater()
-                    .also { revurdering ->
-                        if (paaGrunnAvHendelse != null) {
-                            grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
-                                paaGrunnAvHendelse,
-                                revurdering.id,
+            opprettRevurdering(
+                sakId = sakId,
+                persongalleri = persongalleri,
+                forrigeBehandling = forrigeBehandling.id,
+                mottattDato = Tidspunkt.now().toLocalDatetimeUTC().toString(),
+                prosessType = Prosesstype.MANUELL,
+                kilde = Vedtaksloesning.GJENNY,
+                revurderingAarsak = revurderingAarsak,
+                virkningstidspunkt = null,
+                utlandstilknytning = forrigeBehandling.utlandstilknytning,
+                boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
+                begrunnelse = begrunnelse,
+                fritekstAarsak = fritekstAarsak,
+                saksbehandlerIdent = saksbehandler.ident,
+            ).oppdater()
+                .also { revurdering ->
+                    if (paaGrunnAvHendelse != null) {
+                        grunnlagsendringshendelseDao.settBehandlingIdForTattMedIRevurdering(
+                            paaGrunnAvHendelse,
+                            revurdering.id,
+                        )
+                        try {
+                            oppgaveService.ferdigStillOppgaveUnderBehandling(
+                                paaGrunnAvHendelse.toString(),
+                                saksbehandler,
                             )
-                            try {
-                                oppgaveService.ferdigStillOppgaveUnderBehandling(
-                                    paaGrunnAvHendelse.toString(),
-                                    saksbehandler,
-                                )
-                            } catch (e: Exception) {
-                                logger.error(
-                                    "Kunne ikke ferdigstille oppgaven til hendelsen på grunn av feil, " +
-                                        "men oppgave er ikke i bruk i miljø så feilen svelges.",
-                                    e,
-                                )
-                            }
+                        } catch (e: Exception) {
+                            logger.error(
+                                "Kunne ikke ferdigstille oppgaven til hendelsen på grunn av feil, " +
+                                    "men oppgave er ikke i bruk i miljø så feilen svelges.",
+                                e,
+                            )
                         }
                     }
-            } else {
-                null
-            }
+                }
         }
 
     private fun behandlingErAvTypenRevurderingOgKanEndres(behandlingId: UUID) {

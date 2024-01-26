@@ -15,6 +15,7 @@ import no.nav.etterlatte.statistikk.database.SoeknadStatistikkRepository
 import no.nav.etterlatte.statistikk.database.StoenadRepository
 import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
 import no.nav.etterlatte.statistikk.river.BehandlinghendelseRiver
+import no.nav.etterlatte.statistikk.river.KlagehendelseRiver
 import no.nav.etterlatte.statistikk.river.SoeknadStatistikkRiver
 import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
 import no.nav.etterlatte.statistikk.service.SoeknadStatistikkService
@@ -70,6 +71,10 @@ class ApplicationContext {
 
     val soeknadStatistikkRiver: SoeknadStatistikkRiver by lazy {
         SoeknadStatistikkRiver(rapidsConnection, soeknadStatistikkService)
+    }
+
+    val klageHendelseRiver: KlagehendelseRiver by lazy {
+        KlagehendelseRiver(rapidsConnection, statistikkService)
     }
 
     val maanedligStatistikkJob: MaanedligStatistikkJob by lazy {

@@ -42,14 +42,14 @@ object SlateHelper {
     fun hentInitiellPayload(generellBrevData: GenerellBrevData): Slate =
         when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
-                when (generellBrevData.forenkletVedtak.type) {
+                when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> getSlate("/maler/oms-nasjonal-innvilget.json")
                     else -> getSlate("/maler/tom-brevmal.json")
                 }
             }
 
             SakType.BARNEPENSJON -> {
-                when (generellBrevData.forenkletVedtak.type) {
+                when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.AVSLAG -> getSlate("/maler/bp-avslag.json")
                     else -> getSlate("/maler/tom-brevmal.json")
                 }
@@ -59,7 +59,7 @@ object SlateHelper {
     fun hentInitiellPayloadVedlegg(generellBrevData: GenerellBrevData): List<BrevInnholdVedlegg>? {
         return when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
-                when (generellBrevData.forenkletVedtak.type) {
+                when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> VedleggOMS.innvilgelseOMS()
                     VedtakType.ENDRING -> {
                         when (generellBrevData.revurderingsaarsak) {
@@ -74,15 +74,13 @@ object SlateHelper {
             }
 
             SakType.BARNEPENSJON -> {
-                when (generellBrevData.forenkletVedtak.type) {
+                when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> VedleggBP.innvilgelse()
                     else -> null
                 }
             }
         }
     }
-
-    fun opprettTomBrevmal() = getSlate("/maler/tom-brevmal.json")
 
     private fun getJsonFile(url: String) = javaClass.getResource(url)!!.readText()
 

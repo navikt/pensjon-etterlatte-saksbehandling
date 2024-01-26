@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
+import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -15,6 +16,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.BrevMottaker
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.MottakerAdresse
 import no.nav.etterlatte.libs.common.person.MottakerFoedselsnummer
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -23,6 +25,7 @@ import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -156,7 +159,8 @@ internal class BehandlingTest {
                             ),
                         Opplysningstype.FOEDSELSDATO to
                             opprettOpplysning(
-                                LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
+                                // 11 år gammel
+                                LocalDate.now().minusYears(11).toJsonNode(),
                             ),
                         Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT to
                             opprettOpplysning(
@@ -177,7 +181,8 @@ internal class BehandlingTest {
                                 BrevMottaker(
                                     forventetVergeNavn,
                                     MottakerFoedselsnummer(""),
-                                    MottakerAdresse("", "", "", "", "", "", "", ""), "",
+                                    MottakerAdresse("", "", "", "", "", "", "", ""),
+                                    "",
                                 ).toJsonNode(),
                             ),
                     ),
@@ -205,7 +210,8 @@ internal class BehandlingTest {
                             ),
                         Opplysningstype.FOEDSELSDATO to
                             opprettOpplysning(
-                                LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
+                                // 11 år gammel
+                                LocalDate.now().minusYears(11).toJsonNode(),
                             ),
                         Opplysningstype.FAMILIERELASJON to
                             opprettOpplysning(
@@ -225,7 +231,20 @@ internal class BehandlingTest {
                             Opplysningstype.FOEDSELSNUMMER to opprettOpplysning(GJENLEVENDE_FOEDSELSNUMMER.toJsonNode()),
                         ),
                     ),
-                sak = emptyMap(),
+                sak =
+                    mapOf(
+                        Opplysningstype.PERSONGALLERI_V1 to
+                            opprettOpplysning(
+                                Persongalleri(
+                                    soeker = SOEKER_FOEDSELSNUMMER.value,
+                                    innsender = GJENLEVENDE_FOEDSELSNUMMER.value,
+                                    soesken = listOf(),
+                                    avdoed = listOf(AVDOED_FOEDSELSNUMMER.value),
+                                    gjenlevende = listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
+                                    personerUtenIdent = listOf(),
+                                ).toJsonNode(),
+                            ),
+                    ),
                 metadata = mockk(),
             )
 
@@ -250,7 +269,8 @@ internal class BehandlingTest {
                             ),
                         Opplysningstype.FOEDSELSDATO to
                             opprettOpplysning(
-                                LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
+                                // 11 år gammel
+                                LocalDate.now().minusYears(11).toJsonNode(),
                             ),
                         Opplysningstype.FAMILIERELASJON to
                             opprettOpplysning(
@@ -295,7 +315,8 @@ internal class BehandlingTest {
                             ),
                         Opplysningstype.FOEDSELSDATO to
                             opprettOpplysning(
-                                LocalDate.now().minusYears(11).toJsonNode(), // 11 år gammel
+                                // 11 år gammel
+                                LocalDate.now().minusYears(11).toJsonNode(),
                             ),
                         Opplysningstype.FAMILIERELASJON to
                             opprettOpplysning(
@@ -323,6 +344,7 @@ internal class BehandlingTest {
             BrevutfallDto(
                 UUID.randomUUID(),
                 Aldersgruppe.OVER_18,
+                LavEllerIngenInntekt.NEI,
                 Grunnlagsopplysning.Saksbehandler("Casey", Tidspunkt.now()),
             )
         val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID(), brevutfallDto)
@@ -346,7 +368,8 @@ internal class BehandlingTest {
                             ),
                         Opplysningstype.FOEDSELSDATO to
                             opprettOpplysning(
-                                LocalDate.now().minusYears(19).toJsonNode(), // 19 år gammel
+                                // 19 år gammel
+                                LocalDate.now().minusYears(19).toJsonNode(),
                             ),
                     ),
                 familie =
@@ -412,10 +435,6 @@ internal class BehandlingTest {
         opplysningsmapSakOverrides =
             mapOf(
                 Opplysningstype.SPRAAK to opprettOpplysning(Spraak.NB.toJsonNode()),
-                Opplysningstype.PERSONGALLERI_V1 to
-                    opprettOpplysning(
-                        Persongalleri("", innsender = "11057523044").toJsonNode(),
-                    ),
             ),
         opplysningsmapSoekerOverrides =
             mapOf(
@@ -424,6 +443,13 @@ internal class BehandlingTest {
         opplysningsmapAvdoedOverrides =
             mapOf(
                 Opplysningstype.NAVN to opprettOpplysning(avdoedNavn.toJsonNode()),
+            ),
+        opplysningsmapGjenlevendeOverrides =
+            mapOf(
+                Opplysningstype.FOEDSELSNUMMER to
+                    opprettOpplysning(
+                        Folkeregisteridentifikator.of("11057523044").toJsonNode(),
+                    ),
             ),
     ).hentOpplysningsgrunnlag()
 

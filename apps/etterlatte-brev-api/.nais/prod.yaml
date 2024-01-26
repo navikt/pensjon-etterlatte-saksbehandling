@@ -59,7 +59,7 @@ spec:
       memory: 640Mi
     requests:
       cpu: 20m
-      memory: 320Mi
+      memory: 384Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -89,14 +89,14 @@ spec:
       value: https://navansatt.prod-fss-pub.nais.io
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
-    - name: ETTERLATTE_PROXY_URL
-      value: https://etterlatte-proxy.prod-fss-pub.nais.io/aad
-    - name: ETTERLATTE_PROXY_AUDIENCE
-      value: prod-fss:etterlatte:etterlatte-proxy
-    - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
-      value: api://prod-fss.etterlatte.etterlatte-proxy/.default
+    - name: REGOPPSLAG_SCOPE
+      value: api://prod-fss.teamdokumenthandtering.regoppslag/.default
+    - name: REGOPPSLAG_URL
+      value: https://regoppslag.prod-fss-pub.nais.io
     - name: NAVANSATT_OUTBOUND_SCOPE
       value: api://prod-fss.pensjondeployer.navansatt/.default
+    - name: CLAMAV_ENDPOINT_URL
+      value: http://clamav.nais-system.svc.cluster.local
     - name: ETTERLATTE_VEDTAK_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-vedtaksvurdering
     - name: ETTERLATTE_VEDTAK_URL
@@ -127,10 +127,12 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
+        - application: clamav
+          namespace: nais-system
       external:
-        - host: etterlatte-proxy.prod-fss-pub.nais.io
         - host: norg2.prod-fss-pub.nais.io
         - host: saf.prod-fss-pub.nais.io
+        - host: regoppslag.prod-fss-pub.nais.io
         - host: dokarkiv.prod-fss-pub.nais.io
         - host: dokdistfordeling.prod-fss-pub.nais.io
         - host: data.brreg.no

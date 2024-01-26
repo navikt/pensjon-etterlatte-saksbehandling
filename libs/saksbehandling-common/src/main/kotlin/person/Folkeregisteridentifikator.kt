@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.person
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -28,6 +29,7 @@ class Folkeregisteridentifikator private constructor(
                 if (FolkeregisteridentifikatorValidator.isValid(fnrMedGyldigeTall)) {
                     return Folkeregisteridentifikator(fnrMedGyldigeTall)
                 } else {
+                    sikkerlogger().error("Ugyldig fødselsnummer: $fnr")
                     throw InvalidFoedselsnummerException("Fødselsnummeret er ugyldig")
                 }
             }

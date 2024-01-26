@@ -1,7 +1,9 @@
 import express, { Request, Response } from 'express'
 import NodeCache from 'node-cache'
 import { logger } from '../monitoring/logger'
+import { requireEnvValue } from '../config/config'
 
+const NORG2_URL = requireEnvValue('NORG2_URL')
 const TEMA_CACHE_KEY = 'TEMA'
 const cache = new NodeCache({ stdTTL: 60 * 15 }) // Cache varer i 15 min
 
@@ -19,9 +21,7 @@ norg2Router.get('/kodeverk/tema', async (_: Request, res: Response) => {
       return res.json(temaCache)
     }
 
-    const data: Tema[] = await fetch('https://norg2.dev-fss-pub.nais.io/norg2/api/v1/kodeverk/Tema').then((response) =>
-      response.json()
-    )
+    const data: Tema[] = await fetch(`${NORG2_URL}/norg2/api/v1/kodeverk/Tema`).then((response) => response.json())
 
     if (data.length) cache.set(TEMA_CACHE_KEY, data)
 

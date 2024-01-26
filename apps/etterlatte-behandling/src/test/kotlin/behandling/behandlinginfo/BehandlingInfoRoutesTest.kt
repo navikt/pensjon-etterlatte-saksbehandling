@@ -3,7 +3,6 @@ package no.nav.etterlatte.behandling.behandlinginfo
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -12,9 +11,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.config.HoconApplicationConfig
-import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.every
@@ -25,24 +21,24 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
+import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.module
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -55,13 +51,10 @@ internal class BehandlingInfoRoutesTest {
     private val behandlingsstatusService: BehandlingStatusService = mockk()
 
     private val server: MockOAuth2Server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     @BeforeAll
     fun before() {
         server.start()
-        val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
 
         behandlingInfoDao = mockk()
         every { applicationContext.tilgangService } returns
@@ -84,6 +77,7 @@ internal class BehandlingInfoRoutesTest {
 
     @AfterAll
     fun after() {
+        applicationContext.close()
         server.shutdown()
     }
 
@@ -98,10 +92,10 @@ internal class BehandlingInfoRoutesTest {
         every { behandlingsstatusService.settBeregnet(any(), any(), any()) } returns Unit
 
         testApplication {
-            environment { config = hoconApplicationConfig }
-            application { module(applicationContext) }
-
-            val client = createClient()
+            val client =
+                runServerWithModule(server) {
+                    module(applicationContext)
+                }
 
             val response =
                 client.post("/api/behandling/${UUID.randomUUID()}/info/brevutfall") {
@@ -114,6 +108,7 @@ internal class BehandlingInfoRoutesTest {
             response.status shouldBe HttpStatusCode.OK
 
             opprettetBrevutfallOgEtterbetaling.brevutfall?.aldersgruppe shouldBe dto.brevutfall?.aldersgruppe
+            opprettetBrevutfallOgEtterbetaling.brevutfall?.lavEllerIngenInntekt shouldBe dto.brevutfall?.lavEllerIngenInntekt
             opprettetBrevutfallOgEtterbetaling.brevutfall?.kilde shouldNotBe null
 
             opprettetBrevutfallOgEtterbetaling.etterbetaling?.datoFom shouldBe dto.etterbetaling?.datoFom
@@ -132,10 +127,10 @@ internal class BehandlingInfoRoutesTest {
         every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling(behandlingId)
 
         testApplication {
-            environment { config = hoconApplicationConfig }
-            application { module(applicationContext) }
-
-            val client = createClient()
+            val client =
+                runServerWithModule(server) {
+                    module(applicationContext)
+                }
 
             val response =
                 client.get("/api/behandling/${UUID.randomUUID()}/info/brevutfallogetterbetaling") {
@@ -147,6 +142,7 @@ internal class BehandlingInfoRoutesTest {
             response.status shouldBe HttpStatusCode.OK
 
             hentetBrevutfall.brevutfall?.aldersgruppe shouldBe dto.brevutfall?.aldersgruppe
+            hentetBrevutfall.brevutfall?.lavEllerIngenInntekt shouldBe dto.brevutfall?.lavEllerIngenInntekt
         }
     }
 
@@ -159,10 +155,10 @@ internal class BehandlingInfoRoutesTest {
         every { behandlingInfoDao.hentEtterbetaling(any()) } returns etterbetaling(behandlingId)
 
         testApplication {
-            environment { config = hoconApplicationConfig }
-            application { module(applicationContext) }
-
-            val client = createClient()
+            val client =
+                runServerWithModule(server) {
+                    module(applicationContext)
+                }
 
             val response =
                 client.get("/api/behandling/${UUID.randomUUID()}/info/etterbetaling") {
@@ -193,6 +189,7 @@ internal class BehandlingInfoRoutesTest {
         Brevutfall(
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
+            lavEllerIngenInntekt = LavEllerIngenInntekt.JA,
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
 
@@ -207,7 +204,7 @@ internal class BehandlingInfoRoutesTest {
     private fun brevutfallOgEtterbetalingDto(behandlingId: UUID = UUID.randomUUID()) =
         BrevutfallOgEtterbetalingDto(
             behandlingId = UUID.randomUUID(),
-            brevutfall = BrevutfallDto(behandlingId, Aldersgruppe.UNDER_18, null),
+            brevutfall = BrevutfallDto(behandlingId, Aldersgruppe.UNDER_18, LavEllerIngenInntekt.JA, null),
             etterbetaling =
                 EtterbetalingDto(
                     behandlingId = behandlingId,
@@ -217,26 +214,5 @@ internal class BehandlingInfoRoutesTest {
                 ),
         )
 
-    private fun ApplicationTestBuilder.createClient() =
-        createClient {
-            install(ContentNegotiation) {
-                register(ContentType.Application.Json, JacksonConverter(objectMapper))
-            }
-        }
-
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    "NAVident" to "Saksbehandler01",
-                ),
-        ).serialize()
-    }
-
-    private companion object {
-        const val CLIENT_ID = "mock-client-id"
-    }
+    private val token: String by lazy { server.issueSaksbehandlerToken() }
 }

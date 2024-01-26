@@ -3,8 +3,8 @@ package no.nav.etterlatte.behandling.hendelse
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandlingHendelseType
+import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
@@ -161,6 +161,24 @@ class HendelseDao(private val connection: () -> Connection) {
             "SAKSBEHANDLER".takeIf { saksbehandler != null },
             kommentar,
             begrunnelse,
+        ),
+    )
+
+    fun opppdatertGrunnlagHendelse(
+        behandlingId: UUID,
+        sakId: Long,
+        saksbehandler: String?,
+    ) = lagreHendelse(
+        UlagretHendelse(
+            hendelse = "BEHANDLING:OPPDATERT_GRUNNLAG",
+            inntruffet = Tidspunkt.now(),
+            vedtakId = null,
+            behandlingId = behandlingId,
+            sakId = sakId,
+            ident = saksbehandler,
+            identType = "SAKSBEHANDLER".takeIf { saksbehandler != null },
+            kommentar = null,
+            valgtBegrunnelse = null,
         ),
     )
 

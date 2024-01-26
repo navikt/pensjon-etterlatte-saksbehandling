@@ -9,7 +9,7 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.hentAnsvarligeForeldre
 import no.nav.etterlatte.common.klienter.hentBarn
 import no.nav.etterlatte.common.klienter.hentBostedsadresse
@@ -57,7 +57,7 @@ class GrunnlagsendringshendelseService(
     private val oppgaveService: OppgaveService,
     private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
     private val behandlingService: BehandlingService,
-    private val pdlKlient: PdlKlient,
+    private val pdltjenesterKlient: PdlTjenesterKlient,
     private val grunnlagKlient: GrunnlagKlient,
     private val sakService: SakService,
     private val brukerService: BrukerService,
@@ -244,7 +244,9 @@ class GrunnlagsendringshendelseService(
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
 
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
-        val sakerForSoeker = sakerOgRoller.filter { Saksrolle.SOEKER == it.rolle }
+        val sakerOgRollerGruppert = sakerOgRoller.distinct()
+
+        val sakerForSoeker = sakerOgRollerGruppert.filter { Saksrolle.SOEKER == it.rolle }
 
         return sakerForSoeker.let {
             inTransaction {
@@ -279,7 +281,7 @@ class GrunnlagsendringshendelseService(
         }
     }
 
-    private fun opprettHendelseAvTypeForPerson(
+    fun opprettHendelseAvTypeForPerson(
         fnr: String,
         grunnlagendringType: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
@@ -287,7 +289,9 @@ class GrunnlagsendringshendelseService(
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
         val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
 
-        return sakerOgRoller
+        val sakerOgRollerGruppert = sakerOgRoller.distinct()
+
+        return sakerOgRollerGruppert
             .filter { rolleOgSak -> sakService.finnSak(rolleOgSak.sakId) != null }
             .filter { rolleOgSak ->
                 !hendelseEksistererFraFoer(
@@ -365,7 +369,7 @@ class GrunnlagsendringshendelseService(
     private fun verifiserOgHaandterHendelse(hendelse: Grunnlagsendringshendelse) {
         val sak = sakService.finnSak(hendelse.sakId)!!
         val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
-        val pdlData = pdlKlient.hentPdlModell(hendelse.gjelderPerson, personRolle, sak.sakType)
+        val pdlData = pdltjenesterKlient.hentPdlModell(hendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag =
             runBlocking {
                 grunnlagKlient.hentGrunnlag(hendelse.sakId)

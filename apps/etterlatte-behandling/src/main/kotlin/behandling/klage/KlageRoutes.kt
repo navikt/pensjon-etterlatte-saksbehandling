@@ -15,6 +15,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.Formkrav
+import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.hvisEnabled
@@ -27,6 +28,7 @@ import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
     KanBrukeKlageToggle("pensjon-etterlatte.kan-bruke-klage"),
+    KanFerdigstilleKlageToggle("pensjons-etterlatte.kan-ferdigstille-klage"),
     ;
 
     override fun key(): String = key
@@ -40,12 +42,14 @@ internal fun Route.klageRoutes(
         post("opprett/{$SAKID_CALL_PARAMETER}") {
             kunSkrivetilgang {
                 hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
-                    val sakId = sakId
-                    val klage =
-                        inTransaction {
-                            klageService.opprettKlage(sakId)
-                        }
-                    call.respond(klage)
+                    medBody<InnkommendeKlage> { innkommendeKlage ->
+                        val sakId = sakId
+                        val klage =
+                            inTransaction {
+                                klageService.opprettKlage(sakId, innkommendeKlage)
+                            }
+                        call.respond(klage)
+                    }
                 }
             }
         }
@@ -93,7 +97,7 @@ internal fun Route.klageRoutes(
             }
 
             post("ferdigstill") {
-                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
+                hvisEnabled(featureToggleService, KlageFeatureToggle.KanFerdigstilleKlageToggle) {
                     kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                         val ferdigstiltKlage =
                             inTransaction {

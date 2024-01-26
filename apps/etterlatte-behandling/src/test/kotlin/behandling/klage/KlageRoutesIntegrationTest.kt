@@ -2,21 +2,21 @@ package no.nav.etterlatte.behandling.klage
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
+import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
@@ -42,7 +43,9 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                 mockk {
                     every { isEnabled(KlageFeatureToggle.KanBrukeKlageToggle, any()) } returns true
                 },
-        )
+        ).also {
+            DatabaseExtension.resetDb()
+        }
 
     @AfterEach
     fun afterEach() {
@@ -65,6 +68,14 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             val klage: Klage =
                 client.post("/api/klage/opprett/${sak.id}") {
                     addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        InnkommendeKlage(
+                            mottattDato = LocalDate.now(),
+                            journalpostId = "",
+                            innsender = "En klager",
+                        ),
+                    )
                 }.body()
             val response =
                 client.get("/api/klage/${klage.id}") {
@@ -112,6 +123,14 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             val klage: Klage =
                 client.post("/api/klage/opprett/${sak.id}") {
                     addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        InnkommendeKlage(
+                            mottattDato = LocalDate.now(),
+                            journalpostId = "",
+                            innsender = "En klager",
+                        ),
+                    )
                 }.body()
             val response =
                 client.get("/api/klage/${klage.id}") {
@@ -154,19 +173,10 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                module(applicationContext)
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        register(ContentType.Application.Json, JacksonConverter(objectMapper = objectMapper))
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-
             block(client)
         }
     }

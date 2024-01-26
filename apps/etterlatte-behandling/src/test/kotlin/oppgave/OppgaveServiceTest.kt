@@ -6,6 +6,7 @@ import io.ktor.server.plugins.NotFoundException
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
@@ -24,9 +25,6 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
@@ -34,23 +32,22 @@ import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.sql.Connection
 import java.util.UUID
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(DatabaseExtension::class)
 internal class OppgaveServiceTest {
-    private lateinit var dataSource: DataSource
+    private val dataSource = DatabaseExtension.dataSource
     private lateinit var sakDao: SakDao
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var oppgaveService: OppgaveService
@@ -62,22 +59,8 @@ internal class OppgaveServiceTest {
     private val attestantRolleDev = "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
         val connection = dataSource.connection
         featureToggleService = DummyFeatureToggleService()
         sakDao = SakDao { connection }
@@ -132,6 +115,7 @@ internal class OppgaveServiceTest {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
         every { saksbehandler.name() } returns "ident"
+        every { saksbehandler.erSuperbruker() } returns false
 
         setNewKontekstWithMockUser(saksbehandler)
 
@@ -143,11 +127,6 @@ internal class OppgaveServiceTest {
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE oppgave CASCADE;").execute()
         }
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Test
@@ -282,11 +261,9 @@ internal class OppgaveServiceTest {
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
-        val err =
-            assertThrows<BadRequestException> {
-                oppgaveService.tildelSaksbehandler(nyOppgave.id, "enda en")
-            }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven har allerede en saksbehandler"))
+        assertThrows<OppgaveAlleredeTildeltException> {
+            oppgaveService.tildelSaksbehandler(nyOppgave.id, "enda en")
+        }
     }
 
     @Test
@@ -296,7 +273,7 @@ internal class OppgaveServiceTest {
             assertThrows<NotFoundException> {
                 oppgaveService.tildelSaksbehandler(UUID.randomUUID(), nysaksbehandler)
             }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
+        assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
@@ -441,7 +418,7 @@ internal class OppgaveServiceTest {
             assertThrows<NotFoundException> {
                 oppgaveService.byttSaksbehandler(UUID.randomUUID(), nysaksbehandler)
             }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
+        assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
@@ -479,7 +456,7 @@ internal class OppgaveServiceTest {
             assertThrows<BadRequestException> {
                 oppgaveService.fjernSaksbehandler(nyOppgave.id)
             }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven har ingen saksbehandler"))
+        assertTrue(err.message!!.startsWith("Oppgaven har ingen saksbehandler"))
     }
 
     @Test
@@ -541,7 +518,7 @@ internal class OppgaveServiceTest {
                 oppgaveService.redigerFrist(nyOppgave.id, nyFrist)
             }
 
-        Assertions.assertTrue(err.message!!.startsWith("Tidspunkt tilbake i tid id: "))
+        assertTrue(err.message!!.startsWith("Tidspunkt tilbake i tid id: "))
     }
 
     @Test
@@ -644,7 +621,7 @@ internal class OppgaveServiceTest {
                 )
             }
 
-        Assertions.assertTrue(
+        assertTrue(
             err.message!!.startsWith("Det må finnes en oppgave under behandling, gjelder behandling:"),
         )
     }
@@ -705,7 +682,7 @@ internal class OppgaveServiceTest {
                 )
             }
 
-        Assertions.assertTrue(
+        assertTrue(
             err.message!!.startsWith("Skal kun ha en oppgave under behandling, gjelder behandling:"),
         )
     }
@@ -716,7 +693,7 @@ internal class OppgaveServiceTest {
             assertThrows<NotFoundException> {
                 oppgaveService.fjernSaksbehandler(UUID.randomUUID())
             }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
+        assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
@@ -743,8 +720,10 @@ internal class OppgaveServiceTest {
         sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandlerRoller)
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
         Assertions.assertEquals(1, oppgaver.size)
         val oppgaveUtenbeskyttelse = oppgaver[0]
         Assertions.assertEquals(nyOppgave.id, oppgaveUtenbeskyttelse.id)
@@ -763,14 +742,17 @@ internal class OppgaveServiceTest {
         )
 
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRoller)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+
+        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler)
         Assertions.assertEquals(1, oppgaverUtenEndring.size)
         Assertions.assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
 
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
             listOf(GrunnlagsendringshendelseService.SakMedEnhet(oppgaverUtenEndring[0].sakId, Enheter.STEINKJER.enhetNr)),
         )
-        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRoller)
+        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler)
 
         Assertions.assertEquals(1, oppgaverMedEndring.size)
         Assertions.assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
@@ -799,7 +781,10 @@ internal class OppgaveServiceTest {
 
         sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val saksbehandlerMedRollerStrengtFortrolig = generateSaksbehandlerMedRoller(AzureGroup.STRENGT_FORTROLIG)
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRollerStrengtFortrolig)
+        every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerStrengtFortrolig
+
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
         Assertions.assertEquals(1, oppgaver.size)
         val strengtFortroligOppgave = oppgaver[0]
         Assertions.assertEquals(adressebeskyttetOppgave.id, strengtFortroligOppgave.id)
@@ -828,10 +813,47 @@ internal class OppgaveServiceTest {
             )
 
         val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRollerAttestant)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
+
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
         Assertions.assertEquals(1, oppgaver.size)
-        val strengtFortroligOppgave = oppgaver[0]
-        Assertions.assertEquals(attestantOppgave.id, strengtFortroligOppgave.id)
+        val attesteringsoppgave = oppgaver[0]
+        Assertions.assertEquals(attestantOppgave.id, attesteringsoppgave.id)
+        Assertions.assertEquals(attestantOppgave.sakId, attestantSak.id)
+    }
+
+    @Test
+    fun `Superbruker kan se oppgave på en annen enhet unntatt strengt fortrolig`() {
+        val randomenhet = "1111"
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
+        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null,
+        )
+
+        val attestantSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
+        val attestantOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                attestantSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.ATTESTERING,
+                null,
+            )
+
+        val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr) // må ikke endres
+        every { saksbehandler.erSuperbruker() } returns true
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
+
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        Assertions.assertEquals(1, oppgaver.size)
+        val attesteringsoppgave = oppgaver[0]
+        Assertions.assertEquals(attestantOppgave.id, attesteringsoppgave.id)
         Assertions.assertEquals(attestantOppgave.sakId, attestantSak.id)
     }
 
@@ -928,7 +950,6 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Skal filtrere bort oppgaver med annen enhet`() {
-        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         Kontekst.set(
             Context(
                 saksbehandler,
@@ -971,7 +992,10 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(oppgavesteinskjer.id, saksbehandlerid)
 
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        val finnOppgaverForBruker = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRoller)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+
+        val finnOppgaverForBruker = oppgaveService.finnOppgaverForBruker(saksbehandler)
 
         Assertions.assertEquals(1, finnOppgaverForBruker.size)
         val aalesundfunnetOppgave = finnOppgaverForBruker[0]

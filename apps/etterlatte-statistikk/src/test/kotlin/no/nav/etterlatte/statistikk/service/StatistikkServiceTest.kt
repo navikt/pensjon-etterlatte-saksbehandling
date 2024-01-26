@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -23,10 +24,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
@@ -133,7 +134,7 @@ class StatistikkServiceTest {
             registrertSak.sakId shouldBe sakId
             registrertSak.sakYtelse shouldBe SakType.BARNEPENSJON.name
             registrertSak.sakUtland shouldBe SakUtland.NASJONAL
-            registrertSak.behandlingId shouldBe behandlingId
+            registrertSak.referanseId shouldBe behandlingId
             registrertSak.tekniskTid shouldBe tekniskTidForHendelse.toTidspunkt()
             registrertSak.ansvarligEnhet shouldBe "attestantEnhet"
             registrertSak.ansvarligBeslutter shouldBe "Attestant"
@@ -277,7 +278,7 @@ class StatistikkServiceTest {
         assertEquals(registrertStatistikk.sakId, sakId)
         assertEquals(registrertStatistikk.sakYtelse, "BARNEPENSJON")
         assertEquals(registrertStatistikk.sakUtland, SakUtland.NASJONAL)
-        assertEquals(registrertStatistikk.behandlingId, behandlingId)
+        assertEquals(registrertStatistikk.referanseId, behandlingId)
         assertEquals(registrertStatistikk.sakYtelsesgruppe, SakYtelsesgruppe.EN_AVDOED_FORELDER)
         assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
         assertEquals(registrertStatistikk.behandlingMetode, BehandlingMetode.MANUELL)
@@ -315,7 +316,7 @@ fun vedtak(
     pensjonTilUtbetaling: List<Utbetalingsperiode>? = null,
     vedtakFattet: VedtakFattet? = null,
     attestasjon: Attestasjon? = null,
-) = VedtakNyDto(
+) = VedtakDto(
     id = vedtakId,
     behandlingId = behandlingId,
     status = VedtakStatus.ATTESTERT,
@@ -343,7 +344,7 @@ fun behandling(
     avdoed: List<String>? = null,
 ) = StatistikkBehandling(
     id = id,
-    sak = Sak(soeker, sakType, sakId, "4808"),
+    sak = Sak(soeker, sakType, sakId, Enheter.defaultEnhet.enhetNr),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
@@ -356,7 +357,7 @@ fun behandling(
     soeker = "soeker",
     soesken = null,
     virkningstidspunkt = Virkningstidspunkt.create(YearMonth.now(), "ident", "begrunnelse"),
-    enhet = "4808",
+    enhet = Enheter.defaultEnhet.enhetNr,
     revurderingsaarsak = null,
     revurderingInfo = null,
     prosesstype = Prosesstype.MANUELL,

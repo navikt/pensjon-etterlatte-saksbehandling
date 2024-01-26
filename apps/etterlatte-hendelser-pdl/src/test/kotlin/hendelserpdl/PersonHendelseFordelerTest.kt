@@ -6,13 +6,14 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
+import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
@@ -40,19 +41,19 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class PersonHendelseFordelerTest {
-    private val pdlKlient: PdlKlient = mockk()
+    private val pdlTjenesterKlient: PdlTjenesterKlient = mockk()
     private val kafkaProduser: KafkaProdusent<String, JsonMessage> = mockk()
     private lateinit var personHendelseFordeler: PersonHendelseFordeler
 
     @BeforeEach
     fun setup() {
-        coEvery { pdlKlient.hentPdlIdentifikator(any()) } returns
+        coEvery { pdlTjenesterKlient.hentPdlIdentifikator(any()) } returns
             PdlIdentifikator.FolkeregisterIdent(
                 SOEKER_FOEDSELSNUMMER,
             )
         coEvery { kafkaProduser.publiser(any(), any()) } returns mockk(relaxed = true)
 
-        personHendelseFordeler = PersonHendelseFordeler(kafkaProduser, pdlKlient)
+        personHendelseFordeler = PersonHendelseFordeler(kafkaProduser, pdlTjenesterKlient)
     }
 
     @Test
@@ -67,17 +68,17 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify(exactly = 0) { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
+        coVerify(exactly = 0) { pdlTjenesterKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify(exactly = 0) { kafkaProduser.publiser(any(), any()) }
 
-        confirmVerified(pdlKlient, kafkaProduser)
+        confirmVerified(pdlTjenesterKlient, kafkaProduser)
     }
 
     @Test
     fun `skal ignorere hendelse som har ident av type NPID`() {
         val npid = NavPersonIdent("09706511617")
         coEvery {
-            pdlKlient.hentPdlIdentifikator(any())
+            pdlTjenesterKlient.hentPdlIdentifikator(any())
         } returns PdlIdentifikator.Npid(npid)
 
         val personHendelse: Personhendelse =
@@ -90,10 +91,10 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify(exactly = 1) { pdlKlient.hentPdlIdentifikator(npid.ident) }
+        coVerify(exactly = 1) { pdlTjenesterKlient.hentPdlIdentifikator(npid.ident) }
         coVerify(exactly = 0) { kafkaProduser.publiser(any(), any()) }
 
-        confirmVerified(pdlKlient, kafkaProduser)
+        confirmVerified(pdlTjenesterKlient, kafkaProduser)
     }
 
     @Test
@@ -112,10 +113,10 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
+        coVerify { pdlTjenesterKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify(exactly = 0) { kafkaProduser.publiser(any(), any()) }
 
-        confirmVerified(pdlKlient, kafkaProduser)
+        confirmVerified(pdlTjenesterKlient, kafkaProduser)
     }
 
     @Test
@@ -134,10 +135,10 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
+        coVerify { pdlTjenesterKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify(exactly = 0) { kafkaProduser.publiser(any(), any()) }
 
-        confirmVerified(pdlKlient, kafkaProduser)
+        confirmVerified(pdlTjenesterKlient, kafkaProduser)
     }
 
     @Test
@@ -156,7 +157,7 @@ internal class PersonHendelseFordelerTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE,
                 hendelse = LeesahOpplysningstype.DOEDSFALL_V1,
                 hendelse_data =
                     Doedshendelse(
@@ -169,7 +170,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
+        coVerify { pdlTjenesterKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify {
             kafkaProduser.publiser(
                 any(),
@@ -180,7 +181,7 @@ internal class PersonHendelseFordelerTest {
             )
         }
 
-        confirmVerified(pdlKlient, kafkaProduser)
+        confirmVerified(pdlTjenesterKlient, kafkaProduser)
     }
 
     @Test
@@ -202,7 +203,7 @@ internal class PersonHendelseFordelerTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE,
                 hendelse = LeesahOpplysningstype.SIVILSTAND_V1,
                 hendelse_data =
                     SivilstandHendelse(
@@ -218,7 +219,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
+        coVerify { pdlTjenesterKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify {
             kafkaProduser.publiser(
                 any(),
@@ -229,7 +230,7 @@ internal class PersonHendelseFordelerTest {
             )
         }
 
-        confirmVerified(pdlKlient, kafkaProduser)
+        confirmVerified(pdlTjenesterKlient, kafkaProduser)
     }
 
     @Test
@@ -250,7 +251,7 @@ internal class PersonHendelseFordelerTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE,
                 hendelse = LeesahOpplysningstype.UTFLYTTING_FRA_NORGE,
                 hendelse_data =
                     UtflyttingsHendelse(
@@ -265,7 +266,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
+        coVerify { pdlTjenesterKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify {
             kafkaProduser.publiser(
                 any(),
@@ -276,7 +277,7 @@ internal class PersonHendelseFordelerTest {
             )
         }
 
-        confirmVerified(pdlKlient, kafkaProduser)
+        confirmVerified(pdlTjenesterKlient, kafkaProduser)
     }
 
     @Test
@@ -299,7 +300,7 @@ internal class PersonHendelseFordelerTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE,
                 hendelse = LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1,
                 hendelse_data =
                     VergeMaalEllerFremtidsfullmakt(
@@ -312,7 +313,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
+        coVerify { pdlTjenesterKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify {
             kafkaProduser.publiser(
                 any(),
@@ -324,7 +325,7 @@ internal class PersonHendelseFordelerTest {
             )
         }
 
-        confirmVerified(pdlKlient, kafkaProduser)
+        confirmVerified(pdlTjenesterKlient, kafkaProduser)
     }
 
     @Test
@@ -343,7 +344,7 @@ internal class PersonHendelseFordelerTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE,
                 hendelse = LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1,
                 hendelse_data =
                     no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse(
@@ -356,7 +357,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
+        coVerify { pdlTjenesterKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify {
             kafkaProduser.publiser(
                 any(),
@@ -368,7 +369,7 @@ internal class PersonHendelseFordelerTest {
             )
         }
 
-        confirmVerified(pdlKlient, kafkaProduser)
+        confirmVerified(pdlTjenesterKlient, kafkaProduser)
     }
 
     @Test
@@ -397,7 +398,7 @@ internal class PersonHendelseFordelerTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE,
                 hendelse = LeesahOpplysningstype.FORELDERBARNRELASJON_V1,
                 hendelse_data =
                     ForelderBarnRelasjonHendelse(
@@ -414,7 +415,7 @@ internal class PersonHendelseFordelerTest {
 
         runBlocking { personHendelseFordeler.haandterHendelse(personHendelse) }
 
-        coVerify { pdlKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
+        coVerify { pdlTjenesterKlient.hentPdlIdentifikator(SOEKER_FOEDSELSNUMMER.value) }
         coVerify {
             kafkaProduser.publiser(
                 any(),
@@ -426,6 +427,6 @@ internal class PersonHendelseFordelerTest {
             )
         }
 
-        confirmVerified(pdlKlient, kafkaProduser)
+        confirmVerified(pdlTjenesterKlient, kafkaProduser)
     }
 }

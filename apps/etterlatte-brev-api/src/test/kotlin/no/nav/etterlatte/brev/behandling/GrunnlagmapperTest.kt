@@ -1,8 +1,11 @@
 package no.nav.etterlatte.brev.behandling
 
 import com.fasterxml.jackson.databind.JsonNode
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
+import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.toMottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
@@ -60,19 +63,60 @@ class GrunnlagmapperTest {
         val verge = opplysningsgrunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID(), null)!! as Vergemaal
 
         verge.navn() shouldBe "ADVOKAT VERA V VERGE"
-        verge.mottaker.foedselsnummer shouldBe MottakerFoedselsnummer(vergesAdresseFnr)
-        verge.mottaker.navn shouldBe "ADVOKAT VERA V VERGE"
-        verge.mottaker.adresse shouldBe
-            MottakerAdresse(
-                adresseType = "NORSKPOSTADRESSE",
-                adresselinje1 = "c/o ADVOKAT VERA",
-                adresselinje2 = "POSTBOKS 1064",
-                adresselinje3 = "1510 MOSS",
-                postnummer = "1510",
-                poststed = "MOSS",
-                landkode = "NO",
-                land = "NORGE",
-            )
+        with(verge.mottaker) {
+            foedselsnummer shouldBe MottakerFoedselsnummer(vergesAdresseFnr)
+            navn shouldBe "ADVOKAT VERA V VERGE"
+            adresse shouldBe
+                MottakerAdresse(
+                    adresseType = "NORSKPOSTADRESSE",
+                    adresselinje1 = "c/o ADVOKAT VERA",
+                    adresselinje2 = "POSTBOKS 1064",
+                    adresselinje3 = "1510 MOSS",
+                    postnummer = "1510",
+                    poststed = "MOSS",
+                    landkode = "NO",
+                    land = "NORGE",
+                )
+        }
+    }
+
+    @Test
+    fun `mapVerge henter vergemaal uten adresse hvis adresse mangler i grunnlag for sak og søker`() {
+        val opplysningsgrunnlag =
+            GrunnlagTestData(
+                opplysningsmapSoekerOverrides =
+                    mapOf(
+                        Opplysningstype.VERGEMAALELLERFREMTIDSFULLMAKT to
+                            opprettOpplysning(
+                                listOf(
+                                    vergemaal(
+                                        pdlVergeOekonomiskFnr,
+                                        "Vera Verge",
+                                        "personligeOgOekonomiskeInteresser",
+                                    ),
+                                    vergemaal(
+                                        pdlVergePersonligFnr,
+                                        "Petter Personlig",
+                                        "personligeInteresser",
+                                    ),
+                                ).toJsonNode(),
+                            ),
+                    ),
+            ).hentOpplysningsgrunnlag()
+
+        val verge = opplysningsgrunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID(), null)!! as Vergemaal
+
+        verge.navn() shouldBe "Vera Verge"
+        with(verge.mottaker) {
+            foedselsnummer shouldBe MottakerFoedselsnummer(pdlVergeOekonomiskFnr)
+            navn shouldBe "Vera Verge"
+            adresse shouldBe null
+        }
+
+        verge.navn() shouldBe "Vera Verge"
+        verge.toMottaker() shouldBeEqual
+            Mottaker.tom(Folkeregisteridentifikator.of(pdlVergeOekonomiskFnr))
+                .copy(navn = "Vera Verge")
     }
 
     private fun vergemaal(

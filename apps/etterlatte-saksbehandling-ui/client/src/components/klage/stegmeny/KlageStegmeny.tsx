@@ -51,3 +51,29 @@ export function KlageStegmeny() {
     </StegMenyWrapper>
   )
 }
+
+export function nesteSteg(klage: Klage, aktivSide: 'formkrav' | 'vurdering' | 'brev' | 'oppsummering'): string {
+  if (aktivSide === 'formkrav') {
+    return `/klage/${klage.id}/vurdering`
+  }
+  if (aktivSide === 'vurdering') {
+    return kanSeBrev(klage) ? `/klage/${klage.id}/brev` : `/klage/${klage.id}/oppsummering`
+  }
+  if (aktivSide === 'brev') {
+    return `/klage/${klage.id}/oppsummering`
+  }
+  return `/klage/${klage.id}`
+}
+
+export function forrigeSteg(klage: Klage, aktivSide: 'formkrav' | 'vurdering' | 'brev' | 'oppsummering'): string {
+  if (aktivSide === 'vurdering') {
+    return `/klage/${klage.id}/formkrav`
+  }
+  if (aktivSide === 'brev') {
+    return `/klage/${klage.id}/vurdering`
+  }
+  if (aktivSide === 'oppsummering') {
+    return kanSeBrev(klage) ? `/klage/${klage.id}/brev` : `/klage/${klage.id}/vurdering`
+  }
+  return `/klage/${klage.id}`
+}

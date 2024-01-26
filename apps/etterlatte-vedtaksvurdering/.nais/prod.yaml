@@ -35,6 +35,7 @@ spec:
   readiness:
     initialDelay: 5
     path: /isready
+  leaderElection: true
   prometheus:
     enabled: true
     path: /metrics
@@ -60,7 +61,7 @@ spec:
       memory: 640Mi
     requests:
       cpu: 20m
-      memory: 320Mi
+      memory: 384Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1

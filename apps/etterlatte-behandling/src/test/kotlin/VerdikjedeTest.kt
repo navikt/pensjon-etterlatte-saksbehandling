@@ -1,8 +1,6 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -12,7 +10,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
@@ -27,12 +24,14 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
+import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabalUtenBrev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
@@ -49,6 +48,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -59,6 +59,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -100,16 +101,10 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
         var behandlingOpprettet: UUID? = null
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application { module(applicationContext) }
 
             assertTrue(applicationContext.featureToggleService.isEnabled(FellesFeatureToggle.NoOperationToggle, false))
 
@@ -318,6 +313,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                 referanse = behandlingId.toString(),
                             ),
                         vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "Saksbehandler01", null),
+                        vedtakType = VedtakType.INNVILGELSE,
                     ),
                 )
             }.also {
@@ -361,6 +357,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                 referanse = behandlingId.toString(),
                             ),
                         vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), saksbehandler02, null, null),
+                        vedtakType = VedtakType.INNVILGELSE,
                     ),
                 )
             }.also {
@@ -406,6 +403,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             val klage: Klage =
                 client.post("/api/klage/opprett/${sak.id}") {
                     addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(InnkommendeKlage(mottattDato = LocalDate.now(), journalpostId = "123546", innsender = "en innsender"))
                 }.body()
             val medOppdatertFormkrav: Klage =
                 client.put("/api/klage/${klage.id}/formkrav") {
@@ -574,18 +573,26 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
         kotlin.runCatching { sleep(3000) }
         assertNotNull(behandlingOpprettet)
         val rapid = applicationContext.rapid as TestProdusent
-        assertEquals(3, rapid.publiserteMeldinger.size)
+        assertEquals(5, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue(),
+            objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)[EVENT_NAME_KEY].textValue(),
+        )
+        assertEquals(
+            "KLAGE:${KlageHendelseType.OPPRETTET}",
+            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)[EVENT_NAME_KEY].textValue(),
+        )
+        assertEquals(
+            "KLAGE:${KlageHendelseType.FERDIGSTILT}",
+            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)[EVENT_NAME_KEY].textValue(),
         )
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue(),
+            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)[EVENT_NAME_KEY].textValue(),
         )
         assertEquals(
             "BEHANDLING:AVBRUTT",
-            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue(),
+            objectMapper.readTree(rapid.publiserteMeldinger[4].verdi)[EVENT_NAME_KEY].textValue(),
         )
         applicationContext.dataSource.connection.use {
             HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }

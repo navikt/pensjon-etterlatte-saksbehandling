@@ -23,6 +23,10 @@ spec:
   azure:
     application:
       enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 256Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -42,10 +46,6 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
     - name: ETTERLATTE_BEHANDLING_URL
       value: http://etterlatte-behandling
-    - name: ETTERLATTE_PROXY_URL
-      value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad
-    - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
-      value: api://dev-fss.etterlatte.etterlatte-proxy/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -57,7 +57,6 @@ spec:
           cluster: dev-gcp
 
       external:
-        - host: etterlatte-proxy.dev-fss-pub.nais.io
         - host: etterlatte-unleash-api.nav.cloud.nais.io
 
     inbound:

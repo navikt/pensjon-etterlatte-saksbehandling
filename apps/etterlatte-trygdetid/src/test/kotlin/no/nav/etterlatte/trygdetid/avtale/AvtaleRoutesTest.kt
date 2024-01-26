@@ -1,10 +1,8 @@
 package no.nav.etterlatte.trygdetid.avtale
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.kotest.matchers.shouldBe
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -12,8 +10,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.log
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -23,11 +19,11 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.trygdetid.avtale.Trygdeavtale
 import no.nav.etterlatte.libs.common.trygdetid.avtale.TrygdetidAvtale
 import no.nav.etterlatte.libs.common.trygdetid.avtale.TrygdetidAvtaleKriteria
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.trygdetid.klienter.BehandlingKlient
 import no.nav.etterlatte.trygdetid.trygdeavtale
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -37,7 +33,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.LocalDate
 import java.time.Month
 import java.util.UUID.randomUUID
@@ -74,7 +69,7 @@ internal class AvtaleRoutesTest {
 
     @Test
     fun `skal levere informasjon om avtaler`() {
-        testApplication(server.config.httpServer.port()) { client ->
+        testApplication { client ->
             val response =
                 client.get("/api/trygdetid/avtaler") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -106,7 +101,7 @@ internal class AvtaleRoutesTest {
 
     @Test
     fun `skal levere informasjon om avtale kriterier`() {
-        testApplication(server.config.httpServer.port()) { client ->
+        testApplication { client ->
             val response =
                 client.get("/api/trygdetid/avtaler/kriteria") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -127,7 +122,7 @@ internal class AvtaleRoutesTest {
 
     @Test
     fun `skal levere avtaler for behandlinger`() {
-        testApplication(server.config.httpServer.port()) { client ->
+        testApplication { client ->
             val behandlingId = randomUUID()
 
             every { repository.hentAvtale(behandlingId) } returns trygdeavtale(behandlingId, avtaleKode = "TEST")
@@ -151,7 +146,7 @@ internal class AvtaleRoutesTest {
 
     @Test
     fun `skal opprette avtaler for behandlinger`() {
-        testApplication(server.config.httpServer.port()) { client ->
+        testApplication { client ->
             val behandlingId = randomUUID()
 
             every { repository.opprettAvtale(any()) } just runs
@@ -194,7 +189,7 @@ internal class AvtaleRoutesTest {
 
     @Test
     fun `skal oppdatere avtaler for behandlinger`() {
-        testApplication(server.config.httpServer.port()) { client ->
+        testApplication { client ->
             val behandlingId = randomUUID()
             val id = randomUUID()
 
@@ -236,36 +231,16 @@ internal class AvtaleRoutesTest {
         }
     }
 
-    private fun testApplication(
-        port: Int,
-        block: suspend (client: HttpClient) -> Unit,
-    ) {
+    private fun testApplication(block: suspend (client: HttpClient) -> Unit) {
         io.ktor.server.testing.testApplication {
-            environment {
-                config = buildTestApplicationConfigurationForOauth(port, AZURE_ISSUER, AZURE_CLIENT_ID)
-            }
-            application { restModule(log) { avtale(service, behandlingKlient) } }
-
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServer(server) {
+                    avtale(service, behandlingKlient)
                 }
 
             block(client)
         }
     }
 
-    private val token: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = AZURE_CLIENT_ID,
-            claims = mapOf("navn" to "John Doe", "NAVident" to "Saksbehandler01"),
-        ).serialize()
-    }
-
-    private companion object {
-        const val AZURE_CLIENT_ID: String = "azure-id"
-    }
+    private val token: String by lazy { server.issueSaksbehandlerToken() }
 }

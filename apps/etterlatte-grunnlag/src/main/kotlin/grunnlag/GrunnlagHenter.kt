@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.G
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.BrevMottaker
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -47,7 +48,7 @@ class GrunnlagHenter(
             val soeker = hentPersonAsync(persongalleri.soeker, soekerRolle(sakType), opplysningsbehov.sakType)
             val innsender =
                 persongalleri.innsender
-                    ?.takeIf { it != Vedtaksloesning.PESYS.name }
+                    ?.takeIf { Folkeregisteridentifikator.isValid(it) }
                     ?.let { innsenderFnr ->
                         hentPersonAsync(innsenderFnr, PersonRolle.INNSENDER, sakType)
                     }
@@ -160,14 +161,23 @@ class GrunnlagHenter(
         return Grunnlagsopplysning(
             id = UUID.randomUUID(),
             kilde =
-                if (this.innsender == Vedtaksloesning.PESYS.name) {
+                if (this.innsender == null) {
+                    Grunnlagsopplysning.UkjentInnsender(Tidspunkt.now())
+                } else if (this.innsender == Vedtaksloesning.PESYS.name) {
                     Grunnlagsopplysning.Pesys.create()
+                } else if (this.innsender!!.matches(Regex("[A-Z][0-9]+"))) {
+                    Grunnlagsopplysning.Saksbehandler(this.innsender!!, Tidspunkt.now())
                 } else {
                     Grunnlagsopplysning.Privatperson(this.innsender!!, Tidspunkt.now())
                 },
             opplysningType = Opplysningstype.PERSONGALLERI_V1,
             meta = objectMapper.createObjectNode(),
-            opplysning = this.toJsonNode(),
+            opplysning =
+                if (Folkeregisteridentifikator.isValid(this.innsender)) {
+                    this.toJsonNode()
+                } else {
+                    this.copy(innsender = null).toJsonNode()
+                },
             attestering = null,
             fnr = null,
             periode = null,

@@ -15,8 +15,6 @@ export const formaterEnumTilLesbarString = (string: string): string => {
   return storForbokstav.replace('_', ' ')
 }
 
-export const formaterDatoTilYearMonth = (dato: Date | null) => (dato ? format(dato, 'yyyy-MM').toString() : '')
-
 export const formaterDato = (dato: Date) => format(dato, 'dd.MM.yyyy').toString()
 
 export const formaterStringDato = (dato: string) => format(new Date(dato), 'dd.MM.yyyy').toString()
@@ -93,6 +91,19 @@ export const formaterSpraak = (spraak: Spraak) => {
       return 'Nynorsk'
     case Spraak.EN:
       return 'Engelsk'
+  }
+}
+
+export const formaterJournalpostType = (type: string) => {
+  switch (type) {
+    case 'I':
+      return 'Inngående'
+    case 'U':
+      return 'Utgående'
+    case 'N':
+      return 'Notat'
+    default:
+      return 'Ukjent'
   }
 }
 

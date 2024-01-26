@@ -2,6 +2,8 @@ import Transport from 'winston-transport'
 import { Counter } from 'prom-client'
 import prometheus from './prometheus'
 
+/* eslint @typescript-eslint/no-explicit-any: 0 */ // --> OFF
+
 // noinspection JSAnnotator
 export class PrometheusTransport extends Transport {
   private readonly register: any = null

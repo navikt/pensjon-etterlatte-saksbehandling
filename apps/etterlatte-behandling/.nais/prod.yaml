@@ -59,7 +59,7 @@ spec:
   resources:
     requests:
       cpu: 50m
-      memory: 384Mi
+      memory: 448Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 4
@@ -145,9 +145,9 @@ spec:
         - application: etterlatte-migrering
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-tilbakekreving
+        - application: etterlatte-klage
       external:
         - host: skjermede-personer-pip.intern.nav.no
-        - host: unleash.nais.io
         - host: norg2.prod-fss-pub.nais.io
         - host: navansatt.prod-fss-pub.nais.io
         - host: oppgave.prod-fss-pub.nais.io
@@ -173,3 +173,4 @@ spec:
         - application: etterlatte-fordeler
         - application: etterlatte-institusjonsopphold
         - application: etterlatte-tilbakekreving
+        - application: etterlatte-klage

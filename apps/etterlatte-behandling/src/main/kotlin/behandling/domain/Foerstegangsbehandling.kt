@@ -111,7 +111,8 @@ data class Foerstegangsbehandling(
 
         return hvisTilstandEr(
             listOf(
-                BehandlingStatus.VILKAARSVURDERT, // TODO EY-2927
+                // TODO EY-2927
+                BehandlingStatus.VILKAARSVURDERT,
                 BehandlingStatus.BEREGNET,
                 BehandlingStatus.AVKORTET,
                 BehandlingStatus.RETURNERT,
@@ -124,6 +125,11 @@ data class Foerstegangsbehandling(
     override fun tilAttestert() =
         hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
             endreTilStatus(BehandlingStatus.ATTESTERT)
+        }
+
+    override fun tilAvslag() =
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
+            endreTilStatus(BehandlingStatus.AVSLAG)
         }
 
     override fun tilReturnert() =

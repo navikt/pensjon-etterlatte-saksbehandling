@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
+import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -45,9 +46,19 @@ data class Mottaker(
     val orgnummer: String? = null,
     val adresse: Adresse,
 ) {
-    init {
-        require(navn.isNotBlank()) {
-            "Navn på mottaker må være satt"
+    fun erGyldig(): Boolean {
+        return if (navn.isBlank()) {
+            false
+        } else if ((foedselsnummer == null || foedselsnummer.value.isBlank()) && orgnummer.isNullOrBlank()) {
+            false
+        } else if (adresse.landkode.isBlank() || adresse.land.isBlank()) {
+            false
+        } else if (adresse.adresseType == "NORSKPOSTADRESSE") {
+            !(adresse.postnummer.isNullOrBlank() || adresse.poststed.isNullOrBlank())
+        } else if (adresse.adresseType == "UTENLANDSKPOSTADRESSE") {
+            !adresse.adresselinje1.isNullOrBlank()
+        } else {
+            true
         }
     }
 
@@ -73,7 +84,7 @@ data class Mottaker(
 
         fun tom(fnr: Folkeregisteridentifikator) =
             Mottaker(
-                navn = "",
+                navn = "N/A",
                 foedselsnummer = Foedselsnummer(fnr.value),
                 adresse =
                     Adresse(
@@ -96,6 +107,8 @@ data class Brev(
     val statusEndret: Tidspunkt,
     val opprettet: Tidspunkt,
     val mottaker: Mottaker,
+    val journalpostId: String? = null,
+    val bestillingsID: BestillingsID? = null,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
 
@@ -164,6 +177,7 @@ enum class BrevProsessType {
     MANUELL,
     REDIGERBAR,
     AUTOMATISK,
+    OPPLASTET_PDF,
 }
 
 data class EtterbetalingDTO(

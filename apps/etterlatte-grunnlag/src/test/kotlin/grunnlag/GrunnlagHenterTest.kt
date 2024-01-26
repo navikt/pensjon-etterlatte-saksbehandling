@@ -60,8 +60,7 @@ class GrunnlagHenterTest {
             listOf(
                 grunnlagTestData.soeker,
                 grunnlagTestData.gjenlevende,
-                grunnlagTestData.avdoed,
-            )
+            ) + grunnlagTestData.avdoede
         listOf.forEach { person ->
             every { pdltjenesterKlient.hentOpplysningsperson(person.foedselsnummer.value, any(), sakType) } returns
                 mockPerson().copy(foedselsnummer = OpplysningDTO(person.foedselsnummer, null))
@@ -98,7 +97,7 @@ class GrunnlagHenterTest {
                             soekerFnr.value,
                             grunnlagTestData.gjenlevende.foedselsnummer.value,
                             emptyList(),
-                            listOf(grunnlagTestData.avdoed.foedselsnummer.value),
+                            grunnlagTestData.avdoede.map { it.foedselsnummer.value },
                             listOf(grunnlagTestData.gjenlevende.foedselsnummer.value),
                         ),
                     ),

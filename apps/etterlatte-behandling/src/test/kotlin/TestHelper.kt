@@ -1,15 +1,8 @@
 package no.nav.etterlatte
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.http.ContentType
-import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.ApplicationCallPipeline
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.routing.Route
-import io.ktor.server.testing.testApplication
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
@@ -21,7 +14,6 @@ import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
-import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
@@ -59,7 +51,6 @@ import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import java.sql.Connection
 import java.time.Instant
@@ -67,32 +58,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-
-// Fin å bruke der servicer er mocket, ellers kan man bruke application { module(applicationContext) }
-fun withTestApplicationBuilder(
-    block: suspend (client: HttpClient) -> Unit,
-    hoconApplicationConfig: HoconApplicationConfig,
-    routes: Route.() -> Unit,
-) {
-    testApplication {
-        environment {
-            config = hoconApplicationConfig
-        }
-        application {
-            restModule(this.log) {
-                routes()
-            }
-        }
-        val client =
-            createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper = objectMapper))
-                }
-            }
-
-        block(client)
-    }
-}
 
 private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
@@ -151,6 +116,7 @@ fun opprettBehandling(
 fun foerstegangsbehandling(
     id: UUID = UUID.randomUUID(),
     sakId: Long,
+    sakType: SakType = SakType.BARNEPENSJON,
     behandlingOpprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     sistEndret: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
     status: BehandlingStatus = BehandlingStatus.OPPRETTET,
@@ -168,7 +134,7 @@ fun foerstegangsbehandling(
     sak =
         Sak(
             ident = persongalleri.soeker,
-            sakType = SakType.BARNEPENSJON,
+            sakType = sakType,
             id = sakId,
             enhet = enhet,
         ),

@@ -25,11 +25,14 @@ import no.nav.etterlatte.libs.common.person.Person
 
 fun personTestData(opplysningsmap: Map<Opplysningstype, Opplysning<JsonNode>>): Person =
     Person(
-        fornavn = opplysningsmap.hentNavn()!!.verdi.fornavn,
-        etternavn = opplysningsmap.hentNavn()!!.verdi.etternavn,
-        foedselsnummer = opplysningsmap.hentFoedselsnummer()!!.verdi,
-        foedselsdato = opplysningsmap.hentFoedselsdato()!!.verdi,
-        foedselsaar = opplysningsmap.hentFoedselsaar()!!.verdi,
+        fornavn = opplysningsmap.hentNavn()?.verdi?.fornavn ?: "TEST",
+        etternavn = opplysningsmap.hentNavn()?.verdi?.etternavn ?: "PERSON",
+        foedselsnummer =
+            requireNotNull(opplysningsmap.hentFoedselsnummer()) {
+                "Mangler opplysning fødselsnummer for en testperson"
+            }.verdi,
+        foedselsdato = opplysningsmap.hentFoedselsdato()?.verdi,
+        foedselsaar = opplysningsmap.hentFoedselsaar()?.verdi ?: opplysningsmap.hentFoedselsdato()?.verdi?.year ?: 1970,
         foedeland = opplysningsmap.hentFoedeland()?.verdi,
         doedsdato = opplysningsmap.hentDoedsdato()?.verdi,
         adressebeskyttelse = opplysningsmap.hentAdressebeskyttelse()?.verdi,

@@ -21,6 +21,7 @@ export enum Revurderingaarsak {
   OMGJOERING_ETTER_KLAGE = 'OMGJOERING_ETTER_KLAGE',
   SLUTTBEHANDLING_UTLAND = 'SLUTTBEHANDLING_UTLAND',
   OPPHOER_UTEN_BREV = 'OPPHOER_UTEN_BREV',
+  ALDERSOVERGANG = 'ALDERSOVERGANG',
 }
 
 export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
@@ -44,6 +45,7 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   OMGJOERING_ETTER_KLAGE: 'Omgjøring etter klage',
   SLUTTBEHANDLING_UTLAND: 'Sluttbehandling utland',
   OPPHOER_UTEN_BREV: 'Opphør uten å sende brev',
+  ALDERSOVERGANG: 'Aldersovergang',
 } as const
 
 export const erOpphoer = (revurderingsaarsak: Revurderingaarsak) =>
@@ -53,4 +55,5 @@ export const erOpphoer = (revurderingsaarsak: Revurderingaarsak) =>
     Revurderingaarsak.OMGJOERING_AV_FARSKAP,
     Revurderingaarsak.SIVILSTAND,
     Revurderingaarsak.OPPHOER_UTEN_BREV,
+    Revurderingaarsak.ALDERSOVERGANG,
   ].includes(revurderingsaarsak)

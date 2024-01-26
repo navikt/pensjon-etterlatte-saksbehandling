@@ -6,7 +6,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.just
@@ -14,25 +13,23 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.config.ApplicationContext
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.module
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import no.nav.etterlatte.token.Claims
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingsstatusRoutesTest {
     private val applicationContext: ApplicationContext = mockk(relaxed = true)
     private val server: MockOAuth2Server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     private val azureAdAttestantClaim: String by lazy {
         "0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e"
@@ -45,8 +42,6 @@ internal class BehandlingsstatusRoutesTest {
     @BeforeAll
     fun before() {
         server.start()
-        val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
 
         val azureAdGroupIds =
             mapOf(
@@ -64,6 +59,7 @@ internal class BehandlingsstatusRoutesTest {
 
     @AfterAll
     fun after() {
+        applicationContext.close()
         server.shutdown()
     }
 
@@ -75,10 +71,7 @@ internal class BehandlingsstatusRoutesTest {
             }
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
+            runServerWithModule(server) {
                 module(applicationContext)
             }
 
@@ -104,10 +97,7 @@ internal class BehandlingsstatusRoutesTest {
             }
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
+            runServerWithModule(server) {
                 module(applicationContext)
             }
 
@@ -133,10 +123,7 @@ internal class BehandlingsstatusRoutesTest {
             }
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
+            runServerWithModule(server) {
                 module(applicationContext)
             }
 
@@ -164,10 +151,7 @@ internal class BehandlingsstatusRoutesTest {
             }
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
+            runServerWithModule(server) {
                 module(applicationContext)
             }
 
@@ -181,40 +165,13 @@ internal class BehandlingsstatusRoutesTest {
         }
     }
 
-    private val tokenSaksbehandler: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    Claims.NAVident.toString() to "Saksbehandler01",
-                    "groups" to
-                        listOf(
-                            azureAdSaksbehandlerClaim,
-                        ),
-                ),
-        ).serialize()
-    }
+    private val tokenSaksbehandler: String by lazy { server.issueSaksbehandlerToken(groups = listOf(azureAdSaksbehandlerClaim)) }
 
     private val tokenAttestant: String by lazy {
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    Claims.NAVident.toString() to "Saksbehandler02",
-                    "groups" to
-                        listOf(
-                            azureAdAttestantClaim,
-                        ),
-                ),
-        ).serialize()
+        server.issueSaksbehandlerToken(navIdent = "Saksbehandler02", groups = listOf(azureAdAttestantClaim))
     }
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
-        const val CLIENT_ID = "mock-client-id"
     }
 }

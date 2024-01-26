@@ -35,6 +35,7 @@ export interface NyBehandlingRequest {
   pesysId?: number
   enhet?: String
   foreldreloes?: boolean
+  gradering?: string
 }
 
 export enum IBehandlingsType {
@@ -56,6 +57,7 @@ export enum IBehandlingStatus {
   SAMORDNET = 'SAMORDNET',
   IVERKSATT = 'IVERKSATT',
   AVBRUTT = 'AVBRUTT',
+  AVSLAG = 'AVSLAG',
 }
 
 export enum UtlandstilknytningType {

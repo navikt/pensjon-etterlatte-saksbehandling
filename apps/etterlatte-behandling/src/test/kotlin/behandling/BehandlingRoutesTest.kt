@@ -7,7 +7,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import io.ktor.server.config.HoconApplicationConfig
+import io.ktor.server.testing.testApplication
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
@@ -24,14 +24,14 @@ import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
-import no.nav.etterlatte.withTestApplicationBuilder
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -39,14 +39,12 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BehandlingRoutesTest {
     private val mockOAuth2Server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val behandlingService = mockk<BehandlingService>(relaxUnitFun = true)
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>()
     private val kommerBarnetTilGodeService = mockk<KommerBarnetTilGodeService>()
@@ -56,8 +54,6 @@ internal class BehandlingRoutesTest {
     @BeforeAll
     fun before() {
         mockOAuth2Server.start()
-        val httpServer = mockOAuth2Server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -182,15 +178,19 @@ internal class BehandlingRoutesTest {
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
         every { user.harSkrivetilgang() } returns true
-        withTestApplicationBuilder(block, hoconApplicationConfig) {
-            attachMockContext(user)
-            behandlingRoutes(
-                behandlingService,
-                gyldighetsproevingService,
-                kommerBarnetTilGodeService,
-                aktivitetspliktService,
-                behandlingFactory,
-            )
+        testApplication {
+            val client =
+                runServer(mockOAuth2Server) {
+                    attachMockContext(user)
+                    behandlingRoutes(
+                        behandlingService,
+                        gyldighetsproevingService,
+                        kommerBarnetTilGodeService,
+                        aktivitetspliktService,
+                        behandlingFactory,
+                    )
+                }
+            block(client)
         }
     }
 
@@ -220,21 +220,10 @@ internal class BehandlingRoutesTest {
         } returns virkningstidspunkt
     }
 
-    private val token: String by lazy {
-        mockOAuth2Server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "John Doe",
-                    "NAVident" to NAV_IDENT,
-                ),
-        ).serialize()
-    }
+    private val token: String by lazy { mockOAuth2Server.issueSaksbehandlerToken(navIdent = NAV_IDENT) }
 
     private companion object {
         val behandlingId: UUID = UUID.randomUUID()
         const val NAV_IDENT = "Saksbehandler01"
-        const val CLIENT_ID = "mock-client-id"
     }
 }

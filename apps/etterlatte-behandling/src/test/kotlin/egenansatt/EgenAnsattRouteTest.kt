@@ -1,8 +1,6 @@
 package no.nav.etterlatte.egenansatt
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -11,7 +9,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -19,6 +16,7 @@ import no.nav.etterlatte.BehandlingIntegrationTest
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -44,7 +42,9 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
     private val norg2Klient = mockk<Norg2Klient>()
 
     @BeforeEach
-    fun start() = startServer(norg2Klient = norg2Klient)
+    fun start() =
+        startServer(norg2Klient = norg2Klient)
+            .also { resetDatabase() }
 
     @AfterEach
     fun afterEach() {
@@ -56,18 +56,10 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application {
-                module(applicationContext)
-            }
             coEvery {
                 norg2Klient.hentEnheterForOmraade(any(), any())
             } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))
@@ -150,18 +142,11 @@ class EgenAnsattRouteTest : BehandlingIntegrationTest() {
         val fnr = AVDOED_FOEDSELSNUMMER.value
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application {
-                module(applicationContext)
-            }
+
             coEvery {
                 norg2Klient.hentEnheterForOmraade(any(), any())
             } returns listOf(ArbeidsFordelingEnhet(Enheter.PORSGRUNN.navn, Enheter.PORSGRUNN.enhetNr))

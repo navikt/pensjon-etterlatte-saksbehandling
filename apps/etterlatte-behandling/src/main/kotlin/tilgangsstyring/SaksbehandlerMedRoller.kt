@@ -8,10 +8,9 @@ data class SaksbehandlerMedRoller(
 ) {
     fun harRolle(rolle: AzureGroup): Boolean {
         val claims = saksbehandler.getClaims()
-        if (saksbehandlerGroupIdsByKey[rolle] !== null) {
-            return claims?.containsClaim("groups", saksbehandlerGroupIdsByKey[rolle]) ?: false
-        }
-        return false
+        return saksbehandlerGroupIdsByKey[rolle]
+            ?.let { return claims?.containsClaim("groups", it) ?: false }
+            ?: false
     }
 
     fun harRolleSaksbehandler() = harRolle(AzureGroup.SAKSBEHANDLER)

@@ -13,7 +13,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
@@ -24,12 +23,13 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.Mottakerident
@@ -47,43 +47,30 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Claims
-import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
-import testsupport.buildTestApplicationConfigurationForOauth
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.util.UUID
 
+@ExtendWith(DatabaseExtension::class)
 abstract class BehandlingIntegrationTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-    private val server: MockOAuth2Server = MockOAuth2Server()
+    private val postgreSQLContainer = DatabaseExtension.postgreSQLContainer
+    protected val server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
-    protected lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     protected fun startServer(
         norg2Klient: Norg2Klient? = null,
         featureToggleService: FeatureToggleService = DummyFeatureToggleService(),
     ) {
         server.start()
-
-        val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
         applicationContext =
             ApplicationContext(
@@ -116,12 +103,11 @@ abstract class BehandlingIntegrationTest {
                     }.let { Miljoevariabler(it) },
                 config =
                     ConfigFactory.parseMap(
-                        hoconApplicationConfig.toMap() +
-                            mapOf(
-                                "pdltjenester.url" to "http://localhost",
-                                "grunnlag.resource.url" to "http://localhost",
-                                "vedtak.resource.url" to "http://localhost",
-                            ),
+                        mapOf(
+                            "pdltjenester.url" to "http://localhost",
+                            "grunnlag.resource.url" to "http://localhost",
+                            "vedtak.resource.url" to "http://localhost",
+                        ),
                     ),
                 rapid = TestProdusent(),
                 featureToggleService = featureToggleService,
@@ -138,9 +124,7 @@ abstract class BehandlingIntegrationTest {
                 klageHttpClient = klageHttpClientTest(),
                 tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
                 migreringHttpClient = migreringHttpClientTest(),
-            ).also {
-                it.dataSource.migrate()
-            }
+            )
     }
 
     fun skjermingHttpClient(): HttpClient =
@@ -307,25 +291,12 @@ abstract class BehandlingIntegrationTest {
         }
 
     fun resetDatabase() {
-        applicationContext.dataSource.connection.use {
-            it.prepareStatement(
-                """
-                TRUNCATE behandling CASCADE;
-                TRUNCATE behandlinghendelse CASCADE;
-                TRUNCATE grunnlagsendringshendelse CASCADE;
-                TRUNCATE sak CASCADE;
-                TRUNCATE oppgave CASCADE;
-                
-                ALTER SEQUENCE behandlinghendelse_id_seq RESTART WITH 1;
-                ALTER SEQUENCE sak_id_seq RESTART WITH 1;
-                """.trimIndent(),
-            ).execute()
-        }
+        DatabaseExtension.resetDb()
     }
 
     protected fun afterAll() {
+        applicationContext.close()
         server.shutdown()
-        postgreSQLContainer.stop()
     }
 
     private val azureAdStrengtFortroligClaim: String by lazy {
@@ -349,100 +320,50 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandler: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "John Doe",
-                Claims.NAVident.toString() to "Saksbehandler01",
-                "groups" to listOf(azureAdSaksbehandlerClaim),
-            ),
-        )
+        server.issueSaksbehandlerToken(navn = "John Doe", navIdent = "Saksbehandler01", groups = listOf(azureAdSaksbehandlerClaim))
     }
 
     protected val tokenSaksbehandler2: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "Jane Doe",
-                Claims.NAVident.toString() to "Saksbehandler02",
-                "groups" to listOf(azureAdSaksbehandlerClaim),
-            ),
-        )
+        server.issueSaksbehandlerToken(navn = "Jane Doe", navIdent = "Saksbehandler02", groups = listOf(azureAdSaksbehandlerClaim))
     }
 
-    protected val fagsystemTokenEY: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "fagsystem",
-                Claims.NAVident.toString() to Fagsaksystem.EY.navn,
-                "groups" to listOf(azureAdSaksbehandlerClaim, azureAdAttestantClaim),
-            ),
-        )
-    }
+    protected val fagsystemTokenEY: String by lazy { server.issueSystembrukerToken() }
 
     protected val tokenAttestant: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "John Doe",
-                Claims.NAVident.toString() to "Saksbehandler02",
-                "groups" to
-                    listOf(
-                        azureAdAttestantClaim,
-                        azureAdSaksbehandlerClaim,
-                    ),
-            ),
+        server.issueSaksbehandlerToken(
+            navn = "John Doe",
+            navIdent = "Saksbehandler02",
+            groups = listOf(azureAdAttestantClaim, azureAdSaksbehandlerClaim),
         )
     }
 
     protected val tokenSaksbehandlerMedStrengtFortrolig: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "John Doe",
-                Claims.NAVident.toString() to "saksebehandlerstrengtfortrolig",
-                "groups" to
-                    listOf(
-                        azureAdAttestantClaim,
-                        azureAdSaksbehandlerClaim,
-                        azureAdStrengtFortroligClaim,
-                    ),
-            ),
+        server.issueSaksbehandlerToken(
+            navn = "John Doe",
+            navIdent = "saksebehandlerstrengtfortrolig",
+            groups =
+                listOf(
+                    azureAdAttestantClaim,
+                    azureAdSaksbehandlerClaim,
+                    azureAdStrengtFortroligClaim,
+                ),
         )
     }
 
     protected val tokenSaksbehandlerMedEgenAnsattTilgang: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "John Doe",
-                Claims.NAVident.toString() to "saksbehandlerskjermet",
-                "groups" to
-                    listOf(
-                        azureAdSaksbehandlerClaim,
-                        azureAdEgenAnsattClaim,
-                        azureAdAttestantClaim,
-                    ),
-            ),
+        server.issueSaksbehandlerToken(
+            navn = "John Doe",
+            navIdent = "saksbehandlerskjermet",
+            groups =
+                listOf(
+                    azureAdSaksbehandlerClaim,
+                    azureAdEgenAnsattClaim,
+                    azureAdAttestantClaim,
+                ),
         )
     }
 
-    protected val systemBruker: String by lazy {
-        val mittsystem = UUID.randomUUID().toString()
-        issueToken(
-            mapOf(
-                "sub" to mittsystem,
-                "oid" to mittsystem,
-                "azp_name" to mittsystem,
-            ),
-        )
-    }
-
-    private fun issueToken(claims: Map<String, Any>) =
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims = claims,
-        ).serialize()
-
-    private companion object {
-        const val CLIENT_ID = "mock-client-id"
-    }
+    protected val systemBruker: String by lazy { server.issueSystembrukerToken() }
 }
 
 class GrunnlagKlientTest : GrunnlagKlient {
@@ -584,6 +505,10 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave {
+        return gosysApiOppgave()
+    }
+
+    private fun gosysApiOppgave(): GosysApiOppgave {
         return GosysApiOppgave(
             1,
             2,
@@ -605,8 +530,8 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         oppgaveVersjon: Long,
         tildeles: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        // NO-OP
+    ): GosysApiOppgave {
+        return gosysApiOppgave()
     }
 
     override suspend fun endreFrist(
@@ -614,8 +539,8 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         oppgaveVersjon: Long,
         nyFrist: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        // NO-OP
+    ): GosysApiOppgave {
+        return gosysApiOppgave()
     }
 }
 

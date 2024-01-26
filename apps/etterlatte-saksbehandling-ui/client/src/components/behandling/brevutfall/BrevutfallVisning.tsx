@@ -1,6 +1,10 @@
 import { BodyShort, Button, HStack, Label, VStack } from '@navikt/ds-react'
 import React from 'react'
-import { Aldersgruppe, BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
+import {
+  Aldersgruppe,
+  BrevutfallOgEtterbetaling,
+  LavEllerIngenInntekt,
+} from '~components/behandling/brevutfall/Brevutfall'
 import { format, parseISO } from 'date-fns'
 import nb from 'date-fns/locale/nb'
 import { SakType } from '~shared/types/sak'
@@ -12,6 +16,17 @@ function aldersgruppeToString(aldersgruppe?: Aldersgruppe | null) {
       return 'Over 18 år'
     case Aldersgruppe.UNDER_18:
       return 'Under 18 år'
+    default:
+      return 'Ikke satt'
+  }
+}
+
+function lavEllerIngenInntektToString(lavEllerIngenInntekt?: LavEllerIngenInntekt | null) {
+  switch (lavEllerIngenInntekt) {
+    case LavEllerIngenInntekt.JA:
+      return 'Ja'
+    case LavEllerIngenInntekt.NEI:
+      return 'Nei'
     default:
       return 'Ikke satt'
   }
@@ -53,6 +68,14 @@ export const BrevutfallVisning = (props: {
         <VStack gap="2">
           <Label>Gjelder brevet under eller over 18 år?</Label>
           <BodyShort>{aldersgruppeToString(brevutfallOgEtterbetaling.brevutfall.aldersgruppe)}</BodyShort>
+        </VStack>
+      )}
+      {sakType == SakType.OMSTILLINGSSTOENAD && (
+        <VStack gap="2">
+          <Label>Gi omstillingsstønad til 67 år etter unntaksregel for bruker født tom 1963?</Label>
+          <BodyShort>
+            {lavEllerIngenInntektToString(brevutfallOgEtterbetaling.brevutfall.lavEllerIngenInntekt)}
+          </BodyShort>
         </VStack>
       )}
       {redigerbar && (

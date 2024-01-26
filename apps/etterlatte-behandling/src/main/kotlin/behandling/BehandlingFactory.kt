@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling
 
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
@@ -10,15 +11,18 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
@@ -28,6 +32,11 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
+import no.nav.etterlatte.libs.common.person.PersonIdent
+import no.nav.etterlatte.libs.common.person.finnHoyestGradering
+import no.nav.etterlatte.libs.common.person.finnHoyesteGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -35,6 +44,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
@@ -48,16 +59,75 @@ class BehandlingFactory(
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val migreringKlient: MigreringKlient,
+    private val pdltjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    private suspend fun finnHoyesteGraderingForPersongalleri(
+        persongalleri: Persongalleri,
+        sakType: SakType,
+    ): AdressebeskyttelseGradering {
+        val graderinger =
+            coroutineScope {
+                val soeker =
+                    async {
+                        pdltjenesterKlient.hentAdressebeskyttelseForPerson(
+                            HentAdressebeskyttelseRequest(
+                                PersonIdent(persongalleri.soeker),
+                                sakType,
+                            ),
+                        )
+                    }
+                val avdoed =
+                    async {
+                        persongalleri.avdoed.map {
+                            pdltjenesterKlient.hentAdressebeskyttelseForPerson(
+                                HentAdressebeskyttelseRequest(
+                                    PersonIdent(it),
+                                    sakType,
+                                ),
+                            )
+                        }
+                    }
+
+                val gjenlevende =
+                    async {
+                        persongalleri.gjenlevende.map {
+                            pdltjenesterKlient.hentAdressebeskyttelseForPerson(
+                                HentAdressebeskyttelseRequest(
+                                    PersonIdent(persongalleri.soeker),
+                                    sakType,
+                                ),
+                            )
+                        }
+                    }
+
+                listOf(soeker.await()).plus(avdoed.await()).plus(gjenlevende.await())
+            }
+
+        return finnHoyestGradering(graderinger)
+    }
 
     /*
      * Brukes av frontend for å kunne opprette sak og behandling for en Gosys-oppgave.
      */
-    suspend fun opprettSakOgBehandlingForOppgave(request: NyBehandlingRequest): Behandling {
-        val soeker = request.persongalleri.soeker
+    suspend fun opprettSakOgBehandlingForOppgave(
+        request: NyBehandlingRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Behandling {
+        sikkerLogg.info("Oppretter sak og behandling for: $request")
 
-        val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType) }
+        val soeker = request.persongalleri.soeker
+        val hoyesteGradering = finnHoyesteGraderingForPersongalleri(request.persongalleri, request.sakType)
+
+        val gradering: AdressebeskyttelseGradering =
+            if (request.gradering != null) {
+                finnHoyesteGradering(request.gradering!!, hoyesteGradering)
+            } else {
+                hoyesteGradering
+            }
+
+        val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType, gradering = gradering) }
 
         if (
             sak.enhet != request.enhet &&
@@ -79,17 +149,23 @@ class BehandlingFactory(
         }
 
         val persongalleri =
-            when (request.kilde) {
-                Vedtaksloesning.PESYS ->
-                    request.persongalleri.copy(
-                        innsender = Vedtaksloesning.PESYS.name,
-                    )
-                else -> request.persongalleri
+            with(request) {
+                if (kilde == Vedtaksloesning.PESYS) {
+                    persongalleri.copy(innsender = kilde!!.name)
+                } else if (persongalleri.innsender == null) {
+                    persongalleri.copy(innsender = brukerTokenInfo.ident())
+                } else {
+                    persongalleri
+                }
             }
+
         val behandling =
             inTransaction {
                 opprettBehandling(
-                    sak.id, persongalleri, request.mottattDato, request.kilde ?: Vedtaksloesning.GJENNY,
+                    sak.id,
+                    persongalleri,
+                    request.mottattDato,
+                    request.kilde ?: Vedtaksloesning.GJENNY,
                 ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
             }.behandling
 

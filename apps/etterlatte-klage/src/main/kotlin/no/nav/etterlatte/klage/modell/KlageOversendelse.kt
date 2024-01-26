@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.klage.kodeverk.Fagsystem
 import no.nav.klage.kodeverk.Ytelse
 import no.nav.klage.kodeverk.hjemmel.Hjemmel
@@ -93,6 +92,9 @@ data class KabalOversendelse(
 
             val erKlagerIkkeBruker = ekstraData.mottakerInnstilling.foedselsnummer?.value != klage.sak.ident
 
+            /*
+             * Se på mappingen av klager / sakenGjelder opp mot data vi får med fra den innkommende klagen
+             */
             return KabalOversendelse(
                 type = KabalSakType.KLAGE,
                 klager =
@@ -130,6 +132,8 @@ data class KabalOversendelse(
                                 type = KabalJournalpostType.BRUKERS_KLAGE,
                                 journalpostId = it,
                             )
+                        } ?: klage.innkommendeDokument?.journalpostId?.let {
+                            KabalJournalpostref(type = KabalJournalpostType.BRUKERS_KLAGE, journalpostId = it)
                         },
                         ekstraData.journalpostSoeknad?.let {
                             KabalJournalpostref(
@@ -144,8 +148,8 @@ data class KabalOversendelse(
                             )
                         },
                     ),
-                brukersHenvendelseMottattNavDato = Tidspunkt.now().toLocalDate(),
-                innsendtTilNav = Tidspunkt.now().toLocalDate(),
+                brukersHenvendelseMottattNavDato = klage.opprettet.toLocalDate(),
+                innsendtTilNav = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
                 kilde = fagsystem,
                 ytelse = klage.sak.sakType.tilYtelse(),
                 kommentar = innstilling.tekst, // TODO rename her og i basen
@@ -169,7 +173,10 @@ fun Mottaker.tilKlagerPart(): KabalKlagerPart {
             verdi = orgnr,
         )
     }
-    throw IllegalArgumentException("Kan ikke mappe en mottaker som ikke har foedselsnummer og orgnummer!")
+    throw IllegalArgumentException(
+        "Kan ikke mappe en mottaker som ikke har foedselsnummer og " +
+            "orgnummer. Fikk navn på mottaker=<$navn>",
+    )
 }
 
 enum class KabalJournalpostType {

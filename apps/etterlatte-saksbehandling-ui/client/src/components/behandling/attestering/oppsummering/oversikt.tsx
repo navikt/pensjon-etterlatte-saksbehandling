@@ -47,6 +47,8 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         return 'Samordnet'
       case IBehandlingStatus.IVERKSATT:
         return 'Iverksatt'
+      case IBehandlingStatus.AVSLAG:
+        return 'Avslag'
       case IBehandlingStatus.AVBRUTT:
         return 'Avbrutt'
       case IBehandlingStatus.OPPRETTET:

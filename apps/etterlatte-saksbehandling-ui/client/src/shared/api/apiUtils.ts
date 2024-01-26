@@ -72,3 +72,10 @@ export const mapSuccess = <T, R>(result: Result<T>, mapSuccess: (success: T) => 
   }
   return null
 }
+
+export const mapFailure = <T, R>(result: Result<T>, mapFailure: (error: ApiError) => R): R | null => {
+  if (isFailure(result)) {
+    return mapFailure(result.error)
+  }
+  return null
+}

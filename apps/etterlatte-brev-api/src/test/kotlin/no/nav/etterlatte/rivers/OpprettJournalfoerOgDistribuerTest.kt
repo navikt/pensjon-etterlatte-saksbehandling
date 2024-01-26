@@ -1,10 +1,8 @@
 package no.nav.etterlatte.rivers
 
 import io.mockk.coEvery
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
-import no.nav.etterlatte.brev.VedtaksbrevService
+import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
@@ -23,10 +21,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
@@ -43,15 +41,16 @@ internal class OpprettJournalfoerOgDistribuer {
     fun `melding om attestert vedtak gjoer at vi potensielt oppretter vedtaksbrev, og saa journalfoerer og distribuerer brevet `() {
         val behandlingId = UUID.randomUUID()
         val brev = lagBrev(behandlingId)
-        val vedtaksbrevService =
-            mockk<VedtaksbrevService>().also {
-                coEvery { it.hentVedtaksbrev(any()) } returns brev
-                coEvery { it.journalfoerVedtaksbrev(any(), any()) } returns
-                    OpprettJournalpostResponse(
-                        journalpostId = "123",
-                        journalpostferdigstilt = true,
+        val journalfoerBrevService =
+            mockk<JournalfoerBrevService>().also {
+                coEvery { it.journalfoerVedtaksbrev(any()) } returns
+                    Pair(
+                        OpprettJournalpostResponse(
+                            journalpostId = "123",
+                            journalpostferdigstilt = true,
+                        ),
+                        brev.id,
                     )
-                coEvery { it.hentBrev(any()) } returns brev
             }
         val distribusjonService =
             mockk<Brevdistribuerer>().also {
@@ -59,7 +58,7 @@ internal class OpprettJournalfoerOgDistribuer {
             }
         val testRapid =
             TestRapid().apply {
-                JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
+                JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 DistribuerBrevRiver(this, distribusjonService)
             }
 
@@ -86,18 +85,16 @@ internal class OpprettJournalfoerOgDistribuer {
     fun `melding om attestert vedtak for migrering gjoer at vi oppretter, journalfoerer og distribuerer brevet `() {
         val behandlingId = UUID.randomUUID()
         val brev = lagBrev(behandlingId)
-        val vedtaksbrevService =
-            mockk<VedtaksbrevService>().also {
-                coEvery { it.hentVedtaksbrev(any()) } returns brev
-                coEvery { it.journalfoerVedtaksbrev(any(), any()) } returns
-                    OpprettJournalpostResponse(
-                        journalpostId = "123",
-                        journalpostferdigstilt = true,
+        val journalfoerBrevService =
+            mockk<JournalfoerBrevService>().also {
+                coEvery { it.journalfoerVedtaksbrev(any()) } returns
+                    Pair(
+                        OpprettJournalpostResponse(
+                            journalpostId = "123",
+                            journalpostferdigstilt = true,
+                        ),
+                        brev.id,
                     )
-                coEvery { it.hentBrev(any()) } returns brev
-                coEvery { it.opprettVedtaksbrev(any(), any(), any()) } returns brev
-                coEvery { it.genererPdf(brev.id, any(), any()) } returns mockk()
-                coEvery { it.ferdigstillVedtaksbrev(behandlingId, any(), true) } just runs
             }
         val distribusjonService =
             mockk<Brevdistribuerer>().also {
@@ -105,7 +102,7 @@ internal class OpprettJournalfoerOgDistribuer {
             }
         val testRapid =
             TestRapid().apply {
-                JournalfoerVedtaksbrevRiver(this, vedtaksbrevService)
+                JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 DistribuerBrevRiver(this, distribusjonService)
             }
 
@@ -150,7 +147,7 @@ internal class OpprettJournalfoerOgDistribuer {
         )
 
     private fun lagVedtakDto(behandlingId: UUID) =
-        VedtakNyDto(
+        VedtakDto(
             id = 1L,
             status = VedtakStatus.IVERKSATT,
             sak =

@@ -4,6 +4,7 @@ import sourceMap, { NullableMappedPosition } from 'source-map'
 import * as fs from 'fs'
 import { parseJwt } from '../utils/parsejwt'
 import { sanitize, sanitizeUrl } from '../utils/sanitize'
+/* eslint @typescript-eslint/no-explicit-any: 0 */ // --> OFF
 
 export const loggerRouter = express.Router()
 

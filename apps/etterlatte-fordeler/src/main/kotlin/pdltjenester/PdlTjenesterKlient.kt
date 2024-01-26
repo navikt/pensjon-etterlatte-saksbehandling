@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.pdl.PdlInternalServerError
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.retry
 import org.slf4j.LoggerFactory
 
@@ -24,7 +25,7 @@ class PdlTjenesterKlient(private val client: HttpClient, private val apiUrl: Str
     private val logger = LoggerFactory.getLogger(PdlTjenesterKlient::class.java)
 
     suspend fun hentPerson(hentPersonRequest: HentPersonRequest): Person? {
-        logger.info("Henter person med ${hentPersonRequest.foedselsnummer} fra pdltjenester")
+        logger.info("Henter person med ${hentPersonRequest.foedselsnummer.value.maskerFnr()} fra pdltjenester")
         return retry<Person> {
             client.post(apiUrl) {
                 accept(Json)

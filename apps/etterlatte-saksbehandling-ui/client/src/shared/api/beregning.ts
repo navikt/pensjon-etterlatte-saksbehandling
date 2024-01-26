@@ -17,10 +17,6 @@ export const opprettEllerEndreBeregning = async (behandlingId: string): Promise<
   return apiClient.post(`/beregning/${behandlingId}`, {})
 }
 
-export const opprettBeregningForOpphoer = async (behandlingId: string): Promise<ApiResponse<Beregning>> => {
-  return apiClient.post(`/beregning/opprettForOpphoer/${behandlingId}`, {})
-}
-
 export const lagreBeregningsGrunnlag = async (args: {
   behandlingId: string
   grunnlag: BeregningsGrunnlagPostDto

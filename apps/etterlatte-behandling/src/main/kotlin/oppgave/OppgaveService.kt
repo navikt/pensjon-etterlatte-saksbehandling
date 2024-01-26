@@ -7,7 +7,6 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
-import no.nav.etterlatte.User
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -22,7 +21,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -49,18 +47,20 @@ class OppgaveService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveIntern> {
-        val rollerSomBrukerHar = finnAktuelleRoller(bruker)
+    fun finnOppgaverForBruker(bruker: SaksbehandlerMedEnheterOgRoller): List<OppgaveIntern> {
+        val rollerSomBrukerHar = finnAktuelleRoller(bruker.saksbehandlerMedRoller)
         val aktuelleOppgavetyperForRoller = aktuelleOppgavetyperForRolleTilSaksbehandler(rollerSomBrukerHar)
 
-        return if (bruker.harRolleStrengtFortrolig()) {
+        return if (bruker.saksbehandlerMedRoller.harRolleStrengtFortrolig()) {
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
         } else {
-            oppgaveDao.hentOppgaver(aktuelleOppgavetyperForRoller).sortedByDescending { it.opprettet }
-        }.filterForEnheter(Kontekst.get().appUserAsSaksbehandler())
+            oppgaveDao.hentOppgaver(
+                aktuelleOppgavetyperForRoller,
+                bruker.enheter(),
+                bruker.erSuperbruker(),
+            ).sortedByDescending { it.opprettet }
+        }
     }
-
-    private fun List<OppgaveIntern>.filterForEnheter(bruker: User) = this.filterOppgaverForEnheter(bruker)
 
     private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) =
         roller.flatMap {
@@ -114,9 +114,7 @@ class OppgaveService(
         if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
             oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
         } else {
-            throw BadRequestException(
-                "Oppgaven har allerede en saksbehandler, id: $oppgaveId",
-            )
+            throw OppgaveAlleredeTildeltException(oppgaveId)
         }
     }
 
@@ -379,16 +377,6 @@ class OppgaveService(
         )
     }
 
-    fun hentFerdigstiltAttesteringsOppgave(referanse: String): String? {
-        val oppgaverForBehandlingUtenAttesterting =
-            oppgaveDao.hentOppgaverForReferanse(referanse)
-                .filter {
-                    it.type === OppgaveType.ATTESTERING &&
-                        it.erFerdigstilt()
-                }
-        return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
-    }
-
     fun hentSisteSaksbehandlerIkkeAttestertOppgave(referanse: String): String? {
         val oppgaverForBehandlingUtenAttesterting =
             oppgaveDao.hentOppgaverForReferanse(referanse)
@@ -456,13 +444,6 @@ class OppgaveService(
 }
 
 class FantIkkeSakException(msg: String) : Exception(msg)
-
-fun List<OppgaveIntern>.filterOppgaverForEnheter(user: User) =
-    this.filterForEnheter(
-        user,
-    ) { item, enheter ->
-        enheter.contains(item.enhet)
-    }
 
 enum class Rolle {
     SAKSBEHANDLER,

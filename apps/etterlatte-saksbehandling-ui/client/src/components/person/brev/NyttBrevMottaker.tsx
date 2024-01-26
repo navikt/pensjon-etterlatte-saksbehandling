@@ -76,12 +76,7 @@ export default function NyttBrevMottaker({ brev }: { brev: IBrev }) {
                   ) : (
                     [adresse?.adresselinje1, adresse?.adresselinje2, adresse?.adresselinje3]
                       .filter((linje) => !!linje)
-                      .map((linje) => (
-                        <>
-                          {linje}
-                          <br />
-                        </>
-                      ))
+                      .map((linje, i) => <div key={`adresselinje-${i}`}>{linje}</div>)
                   )}
                 </>
               }

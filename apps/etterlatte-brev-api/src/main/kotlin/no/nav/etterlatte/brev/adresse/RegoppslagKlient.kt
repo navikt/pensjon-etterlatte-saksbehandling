@@ -5,8 +5,11 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
-import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -32,7 +35,10 @@ class RegoppslagKlient(
             } else {
                 logger.info("Ingen cachet mottakeradresse funnet. Henter fra regoppslag")
 
-                client.get("$url/regoppslag/$ident")
+                client.post("$url/rest/postadresse") {
+                    contentType(ContentType.Application.Json)
+                    setBody(RegoppslagRequest(ident))
+                }
                     .body<RegoppslagResponseDTO>()
                     .also {
                         sikkerLogg.info("Respons fra regoppslag: $it")
@@ -49,6 +55,12 @@ class RegoppslagKlient(
             throw AdresseException("Feil i kall mot Regoppslag", exception)
         }
 }
+
+data class RegoppslagRequest(
+    val ident: String,
+    // Todo: mulig bytte tema til et av de nye
+    val tema: String = "PEN",
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class RegoppslagResponseDTO(

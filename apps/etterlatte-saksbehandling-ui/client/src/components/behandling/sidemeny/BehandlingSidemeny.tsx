@@ -88,7 +88,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
     hentSaksbehandlerForOppgave(
       { referanse: behandling.id, sakId: behandling.sakId },
       (saksbehandler) => dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler)),
-      () => dispatch(resetSaksbehandlerGjeldendeOppgave)
+      () => dispatch(resetSaksbehandlerGjeldendeOppgave())
     )
   }, [behandling.id])
 

@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.OpprettAktivitetspliktOppfolging
+import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -48,7 +49,7 @@ internal fun Route.behandlingRoutes(
     post("/api/behandling") {
         kunSaksbehandlerMedSkrivetilgang {
             val request = call.receive<NyBehandlingRequest>()
-            val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request)
+            val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request, brukerTokenInfo)
             call.respondText(behandling.id.toString())
         }
     }
@@ -248,8 +249,16 @@ internal fun Route.behandlingRoutes(
         post("/oppdater-grunnlag") {
             kunSkrivetilgang {
                 inTransaction {
-                    behandlingService.oppdaterGrunnlagOgStatus(behandlingId)
+                    behandlingService.oppdaterGrunnlagOgStatus(behandlingId, brukerTokenInfo)
                 }
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        post("/rediger-familieforhold") {
+            kunSkrivetilgang {
+                val redigertFamilie = call.receive<RedigertFamilieforhold>()
+                behandlingService.endrePersongalleri(behandlingId, brukerTokenInfo, redigertFamilie)
                 call.respond(HttpStatusCode.OK)
             }
         }

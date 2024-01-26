@@ -6,7 +6,6 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.routing.route
-import no.nav.etterlatte.grunnlag.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.GrunnlagHenter
 import no.nav.etterlatte.grunnlag.MigreringHendelserRiver
 import no.nav.etterlatte.grunnlag.OpplysningDao
@@ -18,6 +17,7 @@ import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.grunnlag.migreringRoutes
 import no.nav.etterlatte.grunnlag.personRoute
+import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
 import no.nav.etterlatte.grunnlag.rivers.InitBehandlingVersjonRiver
 import no.nav.etterlatte.grunnlag.sakGrunnlagRoute
@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger
+import rapidsandrivers.getRapidEnv
 
 val sikkerLogg: Logger = sikkerlogger()
 
@@ -45,10 +46,7 @@ class ApplicationBuilder {
         sikkerLoggOppstartOgAvslutning("etterlatte-grunnlag")
     }
 
-    private val env =
-        System.getenv().toMutableMap().apply {
-            put("KAFKA_CONSUMER_GROUP_ID", requireNotNull(get("NAIS_APP_NAME")).replace("-", ""))
-        }
+    private val env = getRapidEnv()
     private val ds = DataSourceBuilder.createDataSource(env).also { it.migrate() }
     private val config: Config = ConfigFactory.load()
     private val pdlTjenester: HttpClient by lazy {

@@ -3,8 +3,6 @@ package no.nav.etterlatte.beregning
 import beregning.regler.finnAnvendtGrunnbeloep
 import beregning.regler.finnAnvendtTrygdetid
 import com.fasterxml.jackson.databind.JsonNode
-import io.ktor.http.HttpStatusCode
-import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
@@ -15,20 +13,16 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjon
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidBruktRegel
 import no.nav.etterlatte.beregning.regler.toSamlet
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
-import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
@@ -53,20 +47,12 @@ import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 
-enum class BeregnBarnepensjonServiceFeatureToggle(private val key: String) : FeatureToggle {
-    BrukNyttRegelverkIBeregning("pensjon-etterlatte.bp-bruk-nytt-regelverk-i-beregning"),
-    ;
-
-    override fun key() = key
-}
-
 class BeregnBarnepensjonService(
     private val grunnlagKlient: GrunnlagKlient,
     private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
     private val grunnbeloepRepository: GrunnbeloepRepository = GrunnbeloepRepository,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
     private val trygdetidKlient: TrygdetidKlient,
-    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnBarnepensjonService::class.java)
 
@@ -79,9 +65,8 @@ class BeregnBarnepensjonService(
         val virkningstidspunkt = behandling.virkningstidspunkt().dato
 
         val beregningsGrunnlag =
-            requireNotNull(
-                beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, brukerTokenInfo),
-            ) { "Behandling ${behandling.id} mangler beregningsgrunnlag" }
+            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandling.id, brukerTokenInfo)
+                ?: throw BeregningsgrunnlagMangler(behandling.id)
 
         val trygdetid =
             try {
@@ -93,12 +78,6 @@ class BeregnBarnepensjonService(
                 )
                 null
             }
-
-        val nyttRegelverkAktivert = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false)
-        val erMigrering = behandling.kilde == Vedtaksloesning.PESYS
-        val erOmregning = behandling.revurderingsaarsak?.name == Revurderingaarsak.REGULERING.name
-        // Midlertidig åpne opp nytt regelverk for migrering og omregning: EY-3232
-        val brukNyttRegelverk = nyttRegelverkAktivert || erMigrering || erOmregning
 
         val barnepensjonGrunnlag =
             opprettBeregningsgrunnlag(
@@ -118,7 +97,6 @@ class BeregnBarnepensjonService(
                     grunnlag,
                     barnepensjonGrunnlag,
                     virkningstidspunkt,
-                    !brukNyttRegelverk,
                 )
 
             BehandlingType.REVURDERING -> {
@@ -133,7 +111,6 @@ class BeregnBarnepensjonService(
                             grunnlag,
                             barnepensjonGrunnlag,
                             virkningstidspunkt,
-                            !brukNyttRegelverk,
                         )
 
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> opphoer(behandling.id, grunnlag, virkningstidspunkt)
@@ -181,14 +158,12 @@ class BeregnBarnepensjonService(
                             )
 
                             val grunnbeloep =
-                                requireNotNull(periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)) {
-                                    "Anvendt grunnbeløp ikke funnet for perioden"
-                                }
+                                periodisertResultat.resultat.finnAnvendtGrunnbeloep(grunnbeloep)
+                                    ?: throw AnvendtGrunnbeloepIkkeFunnet()
 
                             val trygdetid =
-                                requireNotNull(periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)) {
-                                    "Anvendt trygdetid ikke funnet for perioden"
-                                }
+                                periodisertResultat.resultat.finnAnvendtTrygdetid(trygdetidBruktRegel)
+                                    ?: throw AnvendtTrygdetidIkkeFunnet()
 
                             val trygdetidGrunnlagForPeriode =
                                 beregningsgrunnlag.avdoedesTrygdetid.finnGrunnlagForPeriode(
@@ -292,17 +267,21 @@ class BeregnBarnepensjonService(
         grunnlag: Grunnlag,
     ) = PeriodisertBarnepensjonGrunnlag(
         soeskenKull =
-            PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
-                beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
-                    FaktumNode(
-                        verdi = soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
-                        kilde = beregningsGrunnlag.kilde,
-                        beskrivelse = "Søsken i kullet",
-                    )
-                },
-                fom,
-                tom,
-            ),
+            if (beregningsGrunnlag.soeskenMedIBeregning.isNotEmpty()) {
+                PeriodisertBeregningGrunnlag.lagKomplettPeriodisertGrunnlag(
+                    beregningsGrunnlag.soeskenMedIBeregning.mapVerdier { soeskenMedIBeregning ->
+                        FaktumNode(
+                            verdi = soeskenMedIBeregning.filter { it.skalBrukes }.map { it.foedselsnummer },
+                            kilde = beregningsGrunnlag.kilde,
+                            beskrivelse = "Søsken i kullet",
+                        )
+                    },
+                    fom,
+                    tom,
+                )
+            } else {
+                KonstantGrunnlag(FaktumNode(emptyList(), beregningsGrunnlag.kilde, "Ingen søsken i kullet"))
+            },
         avdoedesTrygdetid =
             trygdetid?.toSamlet(beregningsGrunnlag.beregningsMetode.beregningsMetode)?.let {
                 KonstantGrunnlag(
@@ -312,8 +291,7 @@ class BeregnBarnepensjonService(
                         beskrivelse = "Trygdetid avdød forelder",
                     ),
                 )
-            } ?: throw ForespoerselException(
-                HttpStatusCode.BadRequest.value,
+            } ?: throw UgyldigForespoerselException(
                 code = "MÅ_FASTSETTE_TRYGDETID",
                 detail = "Mangler trygdetid, gå tilbake til trygdetidsiden for å opprette dette",
             ),
@@ -361,7 +339,6 @@ class BeregnBarnepensjonService(
                     }
                 }
             },
-        brukNyttRegelverk = featureToggleService.isEnabled(BrukNyttRegelverkIBeregning, false),
     )
 
     private fun List<Grunnlagsdata<JsonNode>>.toPeriodisertAvdoedeGrunnlag(): List<GrunnlagMedPeriode<List<Folkeregisteridentifikator>>> {

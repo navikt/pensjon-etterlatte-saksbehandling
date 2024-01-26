@@ -16,7 +16,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
-import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
+import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
@@ -24,6 +24,7 @@ import no.nav.etterlatte.lesHendelserFraLeesah
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
+import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.person.pdl.leesah.Endringstype
@@ -44,7 +45,7 @@ import java.util.Properties
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class IntegrationTest {
-    private lateinit var pdlKlient: PdlKlient
+    private lateinit var pdlTjenesterKlient: PdlTjenesterKlient
 
     @BeforeEach
     fun setup() {
@@ -67,7 +68,7 @@ class IntegrationTest {
                 LocalKafkaConfig(kafkaEnv.brokersURL).rapidsAndRiversProducer("etterlatte.dodsmelding"),
             )
 
-        val personHendelseFordeler = PersonHendelseFordeler(rapidsKafkaProducer, pdlKlient)
+        val personHendelseFordeler = PersonHendelseFordeler(rapidsKafkaProducer, pdlTjenesterKlient)
         val personhendelseKonsument =
             PersonhendelseKonsument(
                 LEESAH_TOPIC_PERSON,
@@ -91,7 +92,7 @@ class IntegrationTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE,
                 hendelse = LeesahOpplysningstype.DOEDSFALL_V1,
                 hendelse_data =
                     Doedshendelse(
@@ -171,7 +172,7 @@ class IntegrationTest {
                 install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
             }
 
-        pdlKlient = PdlKlient(httpClient, "http://etterlatte-pdltjenester")
+        pdlTjenesterKlient = PdlTjenesterKlient(httpClient, "http://etterlatte-pdltjenester")
     }
 
     companion object {

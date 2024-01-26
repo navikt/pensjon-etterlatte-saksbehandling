@@ -12,7 +12,7 @@ services:
       NODE_ENV: production
       GOSYS_URL: https://gosys-q2.dev.intern.nav.no/gosys
       RINA_URL: https://rina-ss3-q.adeo.no
-      NORG2_URL: https://norg2.intern.dev.nav.no/norg2/api/v1
+      NORG2_URL: https://norg2.dev-fss-pub.nais.io
       APP_VERSION: 1
       # Lokale URL-er skal kommenteres ut når de ikke er i bruk
 #      BREV_API_URL: http://host.docker.internal:8084

@@ -15,8 +15,8 @@ interface ISoeknadInnsendt {
 object SoeknadInnsendt : ISoeknadInnsendt
 
 enum class SoeknadInnsendtHendelseType(val eventname: String) : EventnameHendelseType {
-    EVENTNAMEINNSENDT("soeknad_innsendt"),
-    EVENTNAMEBEHANDLINGBEHOV("trenger_behandling"),
+    EVENT_NAME_INNSENDT("soeknad_innsendt"),
+    EVENT_NAME_BEHANDLINGBEHOV("trenger_behandling"),
     ;
 
     override fun lagEventnameForType(): String = this.eventname

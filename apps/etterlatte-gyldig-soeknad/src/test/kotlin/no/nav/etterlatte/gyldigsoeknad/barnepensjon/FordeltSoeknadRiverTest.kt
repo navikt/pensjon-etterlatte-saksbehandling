@@ -53,7 +53,7 @@ internal class FordeltSoeknadRiverTest {
         val inspector = inspector.apply { sendTestMessage(melding) }.inspektør
 
         assertEquals(
-            SoeknadInnsendtHendelseType.EVENTNAMEBEHANDLINGBEHOV.lagEventnameForType(),
+            SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagEventnameForType(),
             inspector.message(0).get(EVENT_NAME_KEY).asText(),
         )
         assertEquals(sakId, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).longValue())

@@ -39,7 +39,10 @@ internal class InnsendtSoeknadRiverTest {
 
         assertEquals(sakId.toString(), inspector.message(0).get(SAK_ID_KEY).asText())
 
-        assertEquals(SoeknadInnsendtHendelseType.EVENTNAMEINNSENDT.lagEventnameForType(), inspector.message(0).get(EVENT_NAME_KEY).asText())
+        assertEquals(
+            SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
+            inspector.message(0).get(EVENT_NAME_KEY).asText(),
+        )
         assertEquals(sakId, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals(id.toString(), inspector.message(0).get(GyldigSoeknadVurdert.behandlingIdKey).asText())
 

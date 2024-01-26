@@ -43,7 +43,7 @@ internal class FordelerRiver(
     private val logger = LoggerFactory.getLogger(FordelerRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENTNAMEINNSENDT) {
+        initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT) {
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, "BARNEPENSJON") }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "2") }
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }

@@ -28,7 +28,7 @@ internal class InnsendtSoeknadRiver(
     private val logger = LoggerFactory.getLogger(InnsendtSoeknadRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENTNAMEINNSENDT) {
+        initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT) {
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.OMSTILLINGSSTOENAD.name) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "1") }

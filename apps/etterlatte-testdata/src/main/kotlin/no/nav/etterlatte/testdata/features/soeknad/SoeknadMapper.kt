@@ -43,7 +43,7 @@ object SoeknadMapper {
             SoeknadType.OMSTILLINGSSTOENAD ->
                 JsonMessage.newMessage(
                     mutableMapOf(
-                        "@event_name" to SoeknadInnsendtHendelseType.EVENTNAMEINNSENDT.lagEventnameForType(),
+                        "@event_name" to SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
                         "@skjema_info" to
                             opprettOmstillingsstoenadSoeknad(
                                 soekerFnr = gjenlevendeFnr,
@@ -61,7 +61,7 @@ object SoeknadMapper {
             SoeknadType.BARNEPENSJON ->
                 JsonMessage.newMessage(
                     mutableMapOf(
-                        "@event_name" to SoeknadInnsendtHendelseType.EVENTNAMEBEHANDLINGBEHOV.lagEventnameForType(),
+                        "@event_name" to SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagEventnameForType(),
                         "@skjema_info" to
                             opprettBarnepensjonSoeknad(
                                 gjenlevendeFnr = gjenlevendeFnr,

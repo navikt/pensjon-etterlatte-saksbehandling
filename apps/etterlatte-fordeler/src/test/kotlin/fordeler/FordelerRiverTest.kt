@@ -40,7 +40,10 @@ internal class FordelerRiverTest {
         every { fordelerMetricLogger.logMetricFordelt() } just runs
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
-        assertEquals(SoeknadInnsendtHendelseType.EVENTNAMEINNSENDT.lagEventnameForType(), inspector.message(0).get(EVENT_NAME_KEY).asText())
+        assertEquals(
+            SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
+            inspector.message(0).get(EVENT_NAME_KEY).asText(),
+        )
         assertEquals(1337L, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asText())
 

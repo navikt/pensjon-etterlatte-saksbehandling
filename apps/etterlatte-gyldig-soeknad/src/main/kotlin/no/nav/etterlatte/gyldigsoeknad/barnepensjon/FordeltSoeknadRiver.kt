@@ -28,7 +28,7 @@ internal class FordeltSoeknadRiver(
     private val logger = LoggerFactory.getLogger(FordeltSoeknadRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENTNAMEBEHANDLINGBEHOV) {
+        initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV) {
             validate { it.requireKey(FordelerFordelt.skjemaInfoKey) }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, SoeknadType.BARNEPENSJON.name) }
             validate { it.rejectKey(GyldigSoeknadVurdert.behandlingIdKey) }

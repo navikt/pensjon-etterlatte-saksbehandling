@@ -221,12 +221,12 @@ data class EtterbetalingBrev(
                             val oppdatertListe = list.toMutableList()
 
                             // Setter tilDato på nyeste periode innenfor hva som er satt i etterbetaling
-                            val nyestePeriodeMedOppdatertDatoTom = list.first().copy(datoTOM = dto.datoTom)
-                            oppdatertListe[0] = nyestePeriodeMedOppdatertDatoTom
+                            list.firstOrNull()?.copy(datoTOM = dto.datoTom)
+                                ?.let { oppdatertListe[0] = it }
 
                             // Setter fraDato på eldste periode innenfor hva som er satt i etterbetaling
-                            val eldstePeriodeMedOppdatertDatoFom = list.last().copy(datoFOM = dto.datoFom)
-                            oppdatertListe[list.lastIndex] = eldstePeriodeMedOppdatertDatoFom
+                            list.lastOrNull()?.copy(datoFOM = dto.datoFom)
+                                ?.let { oppdatertListe[list.lastIndex] = it }
 
                             oppdatertListe.toList()
                         },

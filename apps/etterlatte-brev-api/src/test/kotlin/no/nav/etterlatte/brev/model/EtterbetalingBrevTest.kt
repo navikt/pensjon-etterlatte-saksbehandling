@@ -85,6 +85,24 @@ internal class EtterbetalingBrevTest {
         }
     }
 
+    @Test
+    fun `skal ikke gi etterbetalingsperioder hvis beregning ikke inneholder perioder`() {
+        val etterbetalingDto =
+            EtterbetalingDTO(
+                datoFom = LocalDate.of(2023, 1, 1),
+                datoTom = LocalDate.of(2023, 1, 31),
+            )
+
+        val perioder: List<Beregningsperiode> = emptyList()
+
+        val etterbetalingBrev = EtterbetalingBrev.fra(etterbetalingDto, perioder)
+
+        etterbetalingBrev shouldNotBe null
+        etterbetalingBrev?.fraDato shouldBe etterbetalingDto.datoFom
+        etterbetalingBrev?.tilDato shouldBe etterbetalingDto.datoTom
+        etterbetalingBrev?.etterbetalingsperioder shouldBe emptyList()
+    }
+
     private fun beregningsperiode(
         datoFOM: LocalDate,
         datoTOM: LocalDate?,

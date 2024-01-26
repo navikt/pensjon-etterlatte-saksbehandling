@@ -80,7 +80,7 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
             {vedtaksbrev && isSuccessOrNotFound(vergeadresse) && (
               <MottakerPanel
                 vedtaksbrev={vedtaksbrev}
-                oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
+                setVedtaksbrev={setVedtaksbrev}
                 redigerbar={redigerbar}
                 vergeadresse={getData(vergeadresse)}
               />

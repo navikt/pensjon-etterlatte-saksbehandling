@@ -7,7 +7,6 @@ import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { Klage } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import NyttBrevMottaker from '~components/person/brev/NyttBrevMottaker'
 import { BrevStatus, kanBrevRedigeres } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
@@ -16,10 +15,10 @@ import styled from 'styled-components'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { JaNei } from '~shared/types/ISvar'
 import { Innhold } from '~components/klage/styled'
-
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
+import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 
 function hentBrevIdForInnstilling(klage: Klage | null): number | null {
   // TODO håndter avvist klage?
@@ -70,15 +69,16 @@ export function KlageBrev() {
           ) : (
             <BodyShort>TODO håndter avslagsbrev her</BodyShort>
           )}
-
+          {/* TODO lar være å bytte ut med ny brevmottaker komponent her, siden dette virker å være ganske wip */}
           {isSuccess(hentetBrev) && (
             <>
-              <BrevTittelMedSpacing
+              <BrevTittel
                 brevId={hentetBrev.data.id}
                 sakId={hentetBrev.data.sakId}
                 tittel={hentetBrev.data.tittel}
+                kanRedigeres={true}
               />
-              <NyttBrevMottaker brev={hentetBrev.data} />
+              <BrevMottaker brev={hentetBrev.data} kanRedigeres={true} />
             </>
           )}
         </Sidebar>
@@ -134,8 +134,4 @@ const Sidebar = styled.div`
   min-width: 40%;
   width: 40%;
   border-right: 1px solid #c6c2bf;
-`
-
-const BrevTittelMedSpacing = styled(BrevTittel)`
-  margin: 1rem;
 `

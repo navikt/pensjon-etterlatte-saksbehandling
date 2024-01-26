@@ -116,7 +116,7 @@ class BehandlingFactory(
         brukerTokenInfo: BrukerTokenInfo,
     ): Behandling {
         sikkerLogg.info("Oppretter sak og behandling for: $request")
-
+        logger.info("Oppretter sak og behandling for persongalleri: ${request.persongalleri}, saktype ${request.sakType}")
         val soeker = request.persongalleri.soeker
         val hoyesteGradering = finnHoyesteGraderingForPersongalleri(request.persongalleri, request.sakType)
 

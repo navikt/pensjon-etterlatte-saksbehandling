@@ -74,7 +74,7 @@ enum class Revurderingaarsak(
     DOEDSFALL(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
     INNTEKTSENDRING(SAKTYPE_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
     OMGJOERING_AV_FARSKAP(SAKTYPE_BP, KunIDev, OpphoerMedBrev, redigerbartBrev = true),
-    ADOPSJON(SAKTYPE_BP, KunIDev, OpphoerMedBrev, redigerbartBrev = true),
+    ADOPSJON(SAKTYPE_BP, DevOgProd, OpphoerMedBrev, redigerbartBrev = true),
     SIVILSTAND(SAKTYPE_OMS, KunIDev, OpphoerMedBrev, redigerbartBrev = true),
     FENGSELSOPPHOLD(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),
     UT_AV_FENGSEL(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev, redigerbartBrev = true),

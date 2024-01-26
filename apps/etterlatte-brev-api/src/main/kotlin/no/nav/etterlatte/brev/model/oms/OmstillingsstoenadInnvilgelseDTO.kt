@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevVedleggKey
+import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
@@ -35,19 +36,17 @@ data class OmstillingsstoenadInnvilgelseDTO(
             innholdMedVedlegg: InnholdMedVedlegg,
             lavEllerIngenInntekt: Boolean,
         ): OmstillingsstoenadInnvilgelseDTO {
-            val (beregningsperioderUtbetaling, bereningsperioderEtterbetaling) =
-                avkortingsinfo.beregningsperioder
-                    .map {
-                        OmstillingsstoenadBeregningsperiode(
-                            datoFOM = it.datoFOM,
-                            datoTOM = it.datoTOM,
-                            inntekt = it.inntekt,
-                            ytelseFoerAvkorting = it.ytelseFoerAvkorting,
-                            utbetaltBeloep = it.utbetaltBeloep,
-                            trygdetid = it.trygdetid,
-                        )
-                    }
-                    .partition { beregningsperiode -> beregningsperiode.datoFOM > etterbetaling?.datoTom }
+            val beregningsperioder =
+                avkortingsinfo.beregningsperioder.map {
+                    OmstillingsstoenadBeregningsperiode(
+                        datoFOM = it.datoFOM,
+                        datoTOM = it.datoTOM,
+                        inntekt = it.inntekt,
+                        ytelseFoerAvkorting = it.ytelseFoerAvkorting,
+                        utbetaltBeloep = it.utbetaltBeloep,
+                        trygdetid = it.trygdetid,
+                    )
+                }
 
             val avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato }
 
@@ -60,8 +59,8 @@ data class OmstillingsstoenadInnvilgelseDTO(
                         virkningsdato = avkortingsinfo.virkningsdato,
                         inntekt = avkortingsinfo.inntekt,
                         grunnbeloep = avkortingsinfo.grunnbeloep,
-                        beregningsperioder = beregningsperioderUtbetaling,
-                        sisteBeregningsperiode = beregningsperioderUtbetaling.maxBy { it.datoFOM },
+                        beregningsperioder = beregningsperioder,
+                        sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM },
                         trygdetid =
                             TrygdetidMedBeregningsmetode(
                                 trygdetidsperioder = trygdetid.perioder,
@@ -79,13 +78,8 @@ data class OmstillingsstoenadInnvilgelseDTO(
                         .isAfter(avkortingsinfo.virkningsdato),
                 lavEllerIngenInntekt = lavEllerIngenInntekt,
                 etterbetaling =
-                    etterbetaling?.let { dto ->
-                        OmstillingsstoenadEtterbetaling(
-                            fraDato = dto.datoFom,
-                            tilDato = dto.datoTom,
-                            etterbetalingsperioder = bereningsperioderEtterbetaling,
-                        )
-                    },
+                    etterbetaling
+                        ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
             )
         }
     }

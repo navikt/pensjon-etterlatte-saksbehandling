@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevVedleggKey
+import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
@@ -38,18 +39,16 @@ data class BarnepensjonInnvilgelseDTO(
             innhold: InnholdMedVedlegg,
             brukerUnder18Aar: Boolean,
         ): BarnepensjonInnvilgelseDTO {
-            val (beregningsperioderUtbetaling, bereningsperioderEtterbetaling) =
-                utbetalingsinfo.beregningsperioder
-                    .map {
-                        BarnepensjonBeregningsperiode(
-                            datoFOM = it.datoFOM,
-                            datoTOM = it.datoTOM,
-                            grunnbeloep = it.grunnbeloep,
-                            utbetaltBeloep = it.utbetaltBeloep,
-                            antallBarn = it.antallBarn,
-                        )
-                    }
-                    .partition { beregningsperiode -> beregningsperiode.datoFOM > etterbetaling?.datoTom }
+            val beregningsperioder =
+                utbetalingsinfo.beregningsperioder.map {
+                    BarnepensjonBeregningsperiode(
+                        datoFOM = it.datoFOM,
+                        datoTOM = it.datoTOM,
+                        grunnbeloep = it.grunnbeloep,
+                        utbetaltBeloep = it.utbetaltBeloep,
+                        antallBarn = it.antallBarn,
+                    )
+                }
 
             return BarnepensjonInnvilgelseDTO(
                 innhold = innhold.innhold(),
@@ -59,8 +58,8 @@ data class BarnepensjonInnvilgelseDTO(
                         antallBarn = utbetalingsinfo.antallBarn,
                         virkningsdato = utbetalingsinfo.virkningsdato,
                         grunnbeloep = Kroner(grunnbeloep.grunnbeloep),
-                        beregningsperioder = beregningsperioderUtbetaling,
-                        sisteBeregningsperiode = beregningsperioderUtbetaling.maxByOrNull { it.datoFOM }!!,
+                        beregningsperioder = beregningsperioder,
+                        sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM },
                         trygdetid =
                             TrygdetidMedBeregningsmetode(
                                 trygdetidsperioder = trygdetid.perioder,
@@ -73,13 +72,8 @@ data class BarnepensjonInnvilgelseDTO(
                             ),
                     ),
                 etterbetaling =
-                    etterbetaling?.let { dto ->
-                        BarnepensjonEtterbetaling(
-                            fraDato = dto.datoFom,
-                            tilDato = dto.datoTom,
-                            etterbetalingsperioder = bereningsperioderEtterbetaling,
-                        )
-                    },
+                    etterbetaling
+                        ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
                 brukerUnder18Aar = brukerUnder18Aar,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 kunNyttRegelverk =

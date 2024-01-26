@@ -9,46 +9,14 @@ import java.time.LocalDate
 data class BarnepensjonEtterbetaling(
     val fraDato: LocalDate,
     val tilDato: LocalDate,
-    val etterbetalingsperioder: List<BarnepensjonBeregningsperiode> = listOf(),
+    val etterbetalingsperioder: List<BarnepensjonBeregningsperiode>,
 )
 
 data class OmstillingsstoenadEtterbetaling(
     val fraDato: LocalDate,
     val tilDato: LocalDate,
-    val etterbetalingsperioder: List<OmstillingsstoenadBeregningsperiode> = listOf(),
-) {
-    companion object {
-        fun fra(
-            dto: EtterbetalingDTO?,
-            perioder: List<OmstillingsstoenadBeregningsperiode>,
-        ) = if (dto == null) {
-            null
-        } else {
-            // Midlertidig fiks siden denne utleder etterbetaling på en annen måte enn barnepensjon
-            OmstillingsstoenadEtterbetaling(
-                fraDato = dto.datoFom,
-                tilDato = dto.datoTom,
-                etterbetalingsperioder =
-                    perioder
-                        .filter { it.datoFOM.isBefore(dto.datoTom) && dto.datoFom.isBefore(it.datoTOM ?: LocalDate.MAX) }
-                        .sortedByDescending { it.datoFOM }
-                        .let { list ->
-                            val oppdatertListe = list.toMutableList()
-
-                            // Setter tilDato på nyeste periode innenfor hva som er satt i etterbetaling
-                            oppdatertListe.firstOrNull()?.copy(datoTOM = dto.datoTom)
-                                ?.let { oppdatertListe[0] = it }
-
-                            // Setter fraDato på eldste periode innenfor hva som er satt i etterbetaling
-                            oppdatertListe.lastOrNull()?.copy(datoFOM = dto.datoFom)
-                                ?.let { oppdatertListe[list.lastIndex] = it }
-
-                            oppdatertListe.toList()
-                        },
-            )
-        }
-    }
-}
+    val etterbetalingsperioder: List<OmstillingsstoenadBeregningsperiode>,
+)
 
 data class BarnepensjonBeregning(
     override val innhold: List<Slate.Element>,

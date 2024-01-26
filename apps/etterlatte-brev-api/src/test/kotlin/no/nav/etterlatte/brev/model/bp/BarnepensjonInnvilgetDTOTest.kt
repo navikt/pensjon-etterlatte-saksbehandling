@@ -77,6 +77,9 @@ internal class BarnepensjonInnvilgetDTOTest {
         )
         Assertions.assertEquals(
             listOf(
+                beregningsperiodeJanuar2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiodeFebruar2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiodeMarsApril2022().toBarnepensjonBeregningsperiode(),
                 beregningsperiodeAprilDesember2022().toBarnepensjonBeregningsperiode(),
                 beregningsperiode2023OgUtover().toBarnepensjonBeregningsperiode(),
             ),

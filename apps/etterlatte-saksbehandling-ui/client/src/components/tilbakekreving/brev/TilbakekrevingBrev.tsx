@@ -4,7 +4,7 @@ import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
 import { TilbakekrevingBehandling, TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
 import { fattVedtak, opprettVedtak } from '~shared/api/tilbakekreving'
-import React, { useEffect, useState } from 'react'
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { IBrev } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getData, hentVedtaksbrev, isSuccessOrNotFound, opprettVedtaksbrev } from '~shared/api/brev'
@@ -80,7 +80,8 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
             {vedtaksbrev && isSuccessOrNotFound(vergeadresse) && (
               <MottakerPanel
                 vedtaksbrev={vedtaksbrev}
-                oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
+                // Her finnes vedtaksbrev, dermed kan man caste for å stoppe type error fra setVedtaksbrev
+                setVedtaksbrev={setVedtaksbrev as Dispatch<SetStateAction<IBrev>>}
                 redigerbar={redigerbar}
                 vergeadresse={getData(vergeadresse)}
               />

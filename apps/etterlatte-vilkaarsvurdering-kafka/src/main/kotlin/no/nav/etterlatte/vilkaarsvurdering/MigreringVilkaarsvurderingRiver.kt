@@ -14,11 +14,11 @@ import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
-internal class MigreringRiver(
+internal class MigreringVilkaarsvurderingRiver(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) : ListenerMedLoggingOgFeilhaandtering() {
-    private val logger = LoggerFactory.getLogger(MigreringRiver::class.java)
+    private val logger = LoggerFactory.getLogger(MigreringVilkaarsvurderingRiver::class.java)
 
     init {
         initialiserRiver(rapidsConnection, Migreringshendelser.VILKAARSVURDER) {

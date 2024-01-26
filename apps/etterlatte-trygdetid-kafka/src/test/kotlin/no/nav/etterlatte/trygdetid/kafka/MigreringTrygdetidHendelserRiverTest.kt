@@ -38,9 +38,9 @@ import java.time.LocalTime
 import java.time.YearMonth
 import java.util.UUID
 
-internal class MigreringHendelserRiverTest {
+internal class MigreringTrygdetidHendelserRiverTest {
     private val trygdetidService = mockk<TrygdetidService>()
-    private val inspector = TestRapid().apply { MigreringHendelserRiver(this, trygdetidService) }
+    private val inspector = TestRapid().apply { MigreringTrygdetidHendelserRiver(this, trygdetidService) }
 
     @Test
     fun `skal oppdatere og beregne trygdetid og returnere siste beregning`() {

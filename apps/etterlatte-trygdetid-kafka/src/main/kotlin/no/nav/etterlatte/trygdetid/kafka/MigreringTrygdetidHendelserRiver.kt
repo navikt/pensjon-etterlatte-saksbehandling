@@ -26,7 +26,7 @@ import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import java.util.UUID
 
-internal class MigreringHendelserRiver(
+internal class MigreringTrygdetidHendelserRiver(
     rapidsConnection: RapidsConnection,
     private val trygdetidService: TrygdetidService,
 ) : ListenerMedLoggingOgFeilhaandtering() {

@@ -14,8 +14,8 @@ import no.nav.etterlatte.migrering.LyttPaaDistribuerBrevRiver
 import no.nav.etterlatte.migrering.LyttPaaIverksattVedtakRiver
 import no.nav.etterlatte.migrering.PauseMigreringRiver
 import no.nav.etterlatte.migrering.start.MigrerSpesifikkSakRiver
-import no.nav.etterlatte.migrering.start.MigreringRiver
 import no.nav.etterlatte.migrering.start.StartMigrering
+import no.nav.etterlatte.migrering.start.StartMigreringRiver
 import no.nav.etterlatte.migrering.verge.SjekkVergeadresserJobb
 import no.nav.helse.rapids_rivers.RapidApplication
 import rapidsandrivers.getRapidEnv
@@ -43,7 +43,7 @@ internal class Server(private val context: ApplicationContext) {
                 }
                 .build()
                 .also { rapidsConnection ->
-                    MigreringRiver(rapidsConnection)
+                    StartMigreringRiver(rapidsConnection)
                     MigrerSpesifikkSakRiver(
                         rapidsConnection,
                         penklient,

@@ -25,7 +25,7 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
 import java.util.UUID
 
-class MigreringHendelserRiver(
+class MigreringGrunnlagHendelserRiver(
     rapidsConnection: RapidsConnection,
     private val grunnlagService: GrunnlagService,
 ) : ListenerMedLoggingOgFeilhaandtering() {

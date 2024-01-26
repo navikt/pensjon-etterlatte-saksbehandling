@@ -31,14 +31,14 @@ import java.time.LocalTime
 import java.time.YearMonth
 import java.util.UUID
 
-internal class MigreringRiverTest {
+internal class MigreringVilkaarsvurderingRiverTest {
     private val vilkaarsvurderingServiceMock =
         mockk<VilkaarsvurderingService> {
             coEvery { migrer(any(), any()) } returns mockk()
         }
     private val testRapid =
         TestRapid()
-            .apply { MigreringRiver(this, vilkaarsvurderingServiceMock) }
+            .apply { MigreringVilkaarsvurderingRiver(this, vilkaarsvurderingServiceMock) }
 
     @Test
     fun `tar opp migrer vilkaarsvurdering-event, kopierer vilkaarsvurdering og poster ny BEREGN-melding`() {

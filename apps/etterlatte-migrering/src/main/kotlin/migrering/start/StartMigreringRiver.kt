@@ -17,7 +17,7 @@ import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakIdFlere
 
-internal class MigreringRiver(rapidsConnection: RapidsConnection) :
+internal class StartMigreringRiver(rapidsConnection: RapidsConnection) :
     ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

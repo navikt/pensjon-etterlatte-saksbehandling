@@ -23,7 +23,7 @@ import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import java.time.LocalDate
 
-internal class MigreringHendelserRiver(
+internal class MigreringBeregningHendelserRiver(
     rapidsConnection: RapidsConnection,
     private val beregningService: BeregningService,
 ) : ListenerMedLoggingOgFeilhaandtering() {

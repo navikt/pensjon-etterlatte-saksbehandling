@@ -31,7 +31,7 @@ import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.start.MigrerSpesifikkSakRiver
 import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
-import no.nav.etterlatte.migrering.start.MigreringRiver
+import no.nav.etterlatte.migrering.start.StartMigreringRiver
 import no.nav.etterlatte.migrering.verifisering.GjenlevendeForelderPatcher
 import no.nav.etterlatte.migrering.verifisering.PdlTjenesterKlient
 import no.nav.etterlatte.migrering.verifisering.PersonHenter
@@ -65,7 +65,7 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-internal class MigreringRiverIntegrationTest {
+internal class StartMigreringRiverIntegrationTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
 
@@ -554,7 +554,7 @@ internal class MigreringRiverIntegrationTest {
             val inspector =
                 TestRapid()
                     .apply {
-                        MigreringRiver(rapidsConnection = this)
+                        StartMigreringRiver(rapidsConnection = this)
                     }
             inspector.sendTestMessage(
                 JsonMessage.newMessage(

@@ -11,7 +11,7 @@ import { DocPencilIcon } from '@navikt/aksel-icons'
 
 interface Props {
   vedtaksbrev: IBrev
-  setVedtaksbrev: Dispatch<SetStateAction<IBrev>>
+  setVedtaksbrev: Dispatch<SetStateAction<IBrev | undefined>>
   redigerbar: Boolean
   vergeadresse: Grunnlagsopplysning<Mottaker, KildePersondata> | undefined
 }

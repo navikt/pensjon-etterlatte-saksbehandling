@@ -22,7 +22,7 @@ enum MottakerType {
 
 interface Props {
   brev: IBrev
-  setBrev: Dispatch<SetStateAction<IBrev>>
+  setBrev: Dispatch<SetStateAction<IBrev | undefined>>
   vergeadresse: Grunnlagsopplysning<Mottaker, KildePersondata> | undefined
   isOpen: boolean
   setIsOpen: Dispatch<SetStateAction<boolean>>

@@ -150,7 +150,7 @@ export function KlageFormkravRedigering() {
       <ContentHeader>
         <HeadingWrapper>
           <Heading level="1" size="large">
-            Vurder formkrav
+            Vurder formkrav og klagefrist
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
@@ -220,7 +220,7 @@ export function KlageFormkravRedigering() {
         {isFailureHandler({
           apiResult: lagreFormkravStatus,
           errorMessage:
-            'Kunne ikke lagre vurderingen av formkrav på grunn av en feil. Last siden på nytt og prøv igjen. Meld sak\n' +
+            'Kunne ikke lagre vurderingen av formkrav og klagefrist på grunn av en feil. Last siden på nytt og prøv igjen. Meld sak\n' +
             '            hvis problemet vedvarer.',
         })}
       </form>

@@ -22,7 +22,7 @@ export function KlageFormkravVisning() {
       <ContentHeader>
         <HeadingWrapper>
           <Heading level="1" size="large">
-            Formkrav
+            Formkrav og klagefrist
           </Heading>
         </HeadingWrapper>
       </ContentHeader>

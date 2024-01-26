@@ -65,7 +65,7 @@ export function KlageBrev() {
           </ContentHeader>
           {klage.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.JA ? (
             <Innhold>
-              <BodyShort>Skriv innstillingsbrevet til KA, som også sendes til mottakeren</BodyShort>
+              <BodyShort>Skriv oversendelsesbrevet til KA, som også sendes til mottakeren</BodyShort>
             </Innhold>
           ) : (
             <BodyShort>TODO håndter avslagsbrev her</BodyShort>
@@ -73,7 +73,11 @@ export function KlageBrev() {
 
           {isSuccess(hentetBrev) && (
             <>
-              <BrevTittel brevId={hentetBrev.data.id} sakId={hentetBrev.data.sakId} tittel={hentetBrev.data.tittel} />
+              <BrevTittelMedSpacing
+                brevId={hentetBrev.data.id}
+                sakId={hentetBrev.data.sakId}
+                tittel={hentetBrev.data.tittel}
+              />
               <NyttBrevMottaker brev={hentetBrev.data} />
             </>
           )}
@@ -130,4 +134,8 @@ const Sidebar = styled.div`
   min-width: 40%;
   width: 40%;
   border-right: 1px solid #c6c2bf;
+`
+
+const BrevTittelMedSpacing = styled(BrevTittel)`
+  margin: 1rem;
 `

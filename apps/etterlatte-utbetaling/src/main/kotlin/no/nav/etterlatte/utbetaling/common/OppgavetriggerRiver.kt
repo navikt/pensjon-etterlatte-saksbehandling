@@ -11,7 +11,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.ListenerMedLogging
 
 enum class OekonomiHendelserType : EventnameHendelseType {
     OKONOMI_VEDTAK_OPPGAVE,

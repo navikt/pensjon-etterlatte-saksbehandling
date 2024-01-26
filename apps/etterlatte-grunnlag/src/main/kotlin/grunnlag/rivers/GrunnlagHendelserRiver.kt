@@ -19,10 +19,10 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.FNR_KEY
 import rapidsandrivers.GRUNNLAG_OPPDATERT
+import rapidsandrivers.ListenerMedLogging
 import rapidsandrivers.NY_OPPLYSNING_KEY
 import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.migrering.ListenerMedLogging
 import java.util.UUID
 
 class GrunnlagHendelserRiver(

@@ -1,4 +1,4 @@
-package rapidsandrivers.migrering
+package rapidsandrivers
 
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.logging.sikkerlogger

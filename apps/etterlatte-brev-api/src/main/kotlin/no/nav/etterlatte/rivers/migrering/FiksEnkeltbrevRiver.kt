@@ -12,8 +12,8 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class FiksEnkeltbrevRiver(
     rapidsConnection: RapidsConnection,

@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import java.time.LocalDate
 
 internal class MigreringBeregningHendelserRiver(

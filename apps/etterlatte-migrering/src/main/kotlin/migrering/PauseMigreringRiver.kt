@@ -7,7 +7,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 
 internal class PauseMigreringRiver(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
     ListenerMedLoggingOgFeilhaandtering() {

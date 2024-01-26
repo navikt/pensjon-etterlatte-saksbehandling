@@ -19,9 +19,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
 import java.util.UUID
 

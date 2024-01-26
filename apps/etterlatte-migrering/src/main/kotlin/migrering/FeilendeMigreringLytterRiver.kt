@@ -21,8 +21,8 @@ import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.ListenerMedLogging
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLogging
 import java.util.UUID
 
 internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, private val repository: PesysRepository) :

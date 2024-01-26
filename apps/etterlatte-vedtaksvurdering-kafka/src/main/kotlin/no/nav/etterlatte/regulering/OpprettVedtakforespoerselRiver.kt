@@ -9,9 +9,9 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.DATO_KEY
+import rapidsandrivers.ListenerMedLogging
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLogging
 import rapidsandrivers.sakId
 import rapidsandrivers.withFeilhaandtering
 

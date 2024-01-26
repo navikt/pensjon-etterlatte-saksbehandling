@@ -11,9 +11,9 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.SAK_ID_FLERE_KEY
 import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakIdFlere
 
 internal class StartMigreringRiver(rapidsConnection: RapidsConnection) :

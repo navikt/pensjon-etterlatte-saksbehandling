@@ -15,7 +15,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 
 internal class LyttPaaIverksattVedtakRiver(
     rapidsConnection: RapidsConnection,

@@ -14,7 +14,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.HENDELSE_DATA_KEY
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import java.util.UUID
 
 internal class OpprettVedtaksbrevForMigreringRiver(

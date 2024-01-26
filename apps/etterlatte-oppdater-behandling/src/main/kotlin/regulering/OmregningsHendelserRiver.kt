@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.SAK_TYPE
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class OmregningsHendelserRiver(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
     ListenerMedLoggingOgFeilhaandtering() {

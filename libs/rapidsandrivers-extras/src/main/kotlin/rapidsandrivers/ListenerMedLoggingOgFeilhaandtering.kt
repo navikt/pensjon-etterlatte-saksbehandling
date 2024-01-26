@@ -1,4 +1,4 @@
-package rapidsandrivers.migrering
+package rapidsandrivers
 
 import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -11,7 +11,6 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
-import rapidsandrivers.withFeilhaandtering
 
 abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
     private val logger = LoggerFactory.getLogger(this::class.java)

@@ -11,10 +11,10 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import rapidsandrivers.dato
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
 import rapidsandrivers.tilbakestilteBehandlinger
 

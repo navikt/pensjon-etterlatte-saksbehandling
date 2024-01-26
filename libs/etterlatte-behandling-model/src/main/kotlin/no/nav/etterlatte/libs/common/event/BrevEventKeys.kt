@@ -1,10 +1,13 @@
 package no.nav.etterlatte.libs.common.event
 
-object BrevEventKeys {
-    private const val PREFIX = "BREV:"
+import no.nav.etterlatte.libs.common.rapidsandrivers.EventnameHendelseType
 
-    const val OPPRETT_BREV = "${PREFIX}OPPRETT_BREV"
-    const val OPPRETT_JOURNALFOER_OG_DISTRIBUER = "${PREFIX}OPPRETT_JOURNALFOER_OG_DISTRIBUER"
+const val BREVMAL_RIVER_KEY = "brevmal"
 
-    const val BREVMAL_KEY = "brevmal"
+enum class BrevHendelseHendelseType : EventnameHendelseType {
+    OPPRETT_BREV,
+    OPPRETT_JOURNALFOER_OG_DISTRIBUER,
+    ;
+
+    override fun lagEventnameForType(): String = "BREV:${this.name}"
 }

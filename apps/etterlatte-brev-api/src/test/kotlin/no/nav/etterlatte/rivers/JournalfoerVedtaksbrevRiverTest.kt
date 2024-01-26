@@ -28,7 +28,7 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -89,7 +89,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         assertEquals(vedtak.attestasjon!!.attesterendeEnhet, vedtakActual.ansvarligEnhet)
 
         val actualMessage = inspektoer.message(0)
-        assertEquals(BrevEventTypes.JOURNALFOERT.toEventname(), actualMessage.get(EVENT_NAME_KEY).asText())
+        assertEquals(BrevHendelseHendelseType.JOURNALFOERT.lagEventnameForType(), actualMessage.get(EVENT_NAME_KEY).asText())
         assertEquals(brev.id, actualMessage.get("brevId").asLong())
         assertEquals(response.journalpostId, actualMessage.get("journalpostId").asText())
         assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asText())
@@ -102,7 +102,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
+                    EVENT_NAME_KEY to VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(),
                     "vedtak" to vedtak,
                 ),
             )
@@ -119,7 +119,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
+                    EVENT_NAME_KEY to VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(),
                     "vedtak" to vedtak,
                     SKAL_SENDE_BREV to false,
                 ),
@@ -134,7 +134,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         return JsonMessage.newMessage(
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
+                EVENT_NAME_KEY to VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(),
                 "vedtak" to vedtak,
             ),
         )

@@ -17,7 +17,7 @@ import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
-import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
+import no.nav.etterlatte.utbetaling.common.EVENT_NAME_UTBETALING_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -70,7 +70,7 @@ class LyttPaaIverksattVedtakRiverTest {
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
-                            EVENT_NAME_KEY to EVENT_NAME_OPPDATERT,
+                            EVENT_NAME_KEY to EVENT_NAME_UTBETALING_OPPDATERT,
                             UTBETALING_RESPONSE to
                                 UtbetalingResponseDto(
                                     status = UtbetalingStatusDto.GODKJENT,
@@ -111,7 +111,7 @@ class LyttPaaIverksattVedtakRiverTest {
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
-                            EVENT_NAME_KEY to EVENT_NAME_OPPDATERT,
+                            EVENT_NAME_KEY to EVENT_NAME_UTBETALING_OPPDATERT,
                             UTBETALING_RESPONSE to
                                 UtbetalingResponseDto(
                                     status = UtbetalingStatusDto.AVVIST,

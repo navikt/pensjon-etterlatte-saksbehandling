@@ -21,7 +21,7 @@ import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
@@ -53,11 +53,11 @@ class StatistikkService(
 
     fun registrerStatistikkForVedtak(
         vedtak: VedtakDto,
-        vedtakKafkaHendelseType: VedtakKafkaHendelseType,
+        vedtakKafkaHendelseType: VedtakKafkaHendelseHendelseType,
         tekniskTid: LocalDateTime,
     ): Pair<SakRad?, StoenadRad?> {
         val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakKafkaHendelseType, tekniskTid) ?: throw Exception("")
-        if (vedtakKafkaHendelseType == VedtakKafkaHendelseType.IVERKSATT) {
+        if (vedtakKafkaHendelseType == VedtakKafkaHendelseHendelseType.IVERKSATT) {
             val stoenadRad =
                 when (vedtak.type) {
                     VedtakType.INNVILGELSE,
@@ -88,7 +88,7 @@ class StatistikkService(
 
     private fun registrerSakStatistikkForVedtak(
         vedtak: VedtakDto,
-        hendelse: VedtakKafkaHendelseType,
+        hendelse: VedtakKafkaHendelseHendelseType,
         tekniskTid: LocalDateTime,
     ): SakRad? {
         return vedtakshendelseTilSakRad(vedtak, hendelse, tekniskTid).let { sakRad ->
@@ -113,7 +113,7 @@ class StatistikkService(
 
     private fun vedtakshendelseTilSakRad(
         vedtak: VedtakDto,
-        hendelse: VedtakKafkaHendelseType,
+        hendelse: VedtakKafkaHendelseHendelseType,
         tekniskTid: LocalDateTime,
     ): SakRad {
         val vedtakInnhold = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
@@ -121,9 +121,9 @@ class StatistikkService(
         val mottattTid = statistikkBehandling.soeknadMottattDato ?: statistikkBehandling.behandlingOpprettet
         val (beregning, avkorting) =
             when (hendelse) {
-                VedtakKafkaHendelseType.FATTET,
-                VedtakKafkaHendelseType.ATTESTERT,
-                VedtakKafkaHendelseType.IVERKSATT,
+                VedtakKafkaHendelseHendelseType.FATTET,
+                VedtakKafkaHendelseHendelseType.ATTESTERT,
+                VedtakKafkaHendelseHendelseType.IVERKSATT,
                 ->
                     Pair(
                         hentBeregningForBehandling(statistikkBehandling.id),
@@ -188,13 +188,13 @@ class StatistikkService(
 
     private fun behandlingResultatFraVedtak(
         vedtak: VedtakDto,
-        vedtakKafkaHendelseType: VedtakKafkaHendelseType,
+        vedtakKafkaHendelseType: VedtakKafkaHendelseHendelseType,
         statistikkBehandling: StatistikkBehandling,
     ): BehandlingResultat? {
         if (statistikkBehandling.status == BehandlingStatus.AVBRUTT) {
             return BehandlingResultat.AVBRUTT
         }
-        if (vedtakKafkaHendelseType !in listOf(VedtakKafkaHendelseType.ATTESTERT, VedtakKafkaHendelseType.IVERKSATT)) {
+        if (vedtakKafkaHendelseType !in listOf(VedtakKafkaHendelseHendelseType.ATTESTERT, VedtakKafkaHendelseHendelseType.IVERKSATT)) {
             return null
         }
         return when (

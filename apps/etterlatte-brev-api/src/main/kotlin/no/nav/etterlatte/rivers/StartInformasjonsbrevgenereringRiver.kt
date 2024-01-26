@@ -3,7 +3,8 @@ package no.nav.etterlatte.rivers
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.event.BrevEventKeys
+import no.nav.etterlatte.libs.common.event.BREVMAL_RIVER_KEY
+import no.nav.etterlatte.libs.common.event.BrevHendelseHendelseType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.database.Transactions
@@ -52,10 +53,10 @@ class StartInformasjonsbrevgenereringRiver(
     private fun lagMelding(brevgenereringRequest: BrevgenereringRequest) =
         JsonMessage.newMessage(
             listOf(
-                EVENT_NAME_KEY to BrevEventKeys.OPPRETT_BREV,
+                EVENT_NAME_KEY to BrevHendelseHendelseType.OPPRETT_BREV.lagEventnameForType(),
                 FNR_KEY to (brevgenereringRequest.fnr),
                 BEHANDLING_ID_KEY to (brevgenereringRequest.behandlingId?.toString()),
-                BrevEventKeys.BREVMAL_KEY to brevgenereringRequest.brevmal.name,
+                BREVMAL_RIVER_KEY to brevgenereringRequest.brevmal.name,
                 SAK_TYPE_KEY to brevgenereringRequest.sakType.name,
             )
                 .filter { it.second != null }

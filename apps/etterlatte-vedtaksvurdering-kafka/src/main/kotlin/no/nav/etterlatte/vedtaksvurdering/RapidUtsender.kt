@@ -26,7 +26,7 @@ private fun RapidInfo.sendUt(
     logger: Logger,
 ) {
     logger.info("Sender ut på rapid for hendelse $vedtakhendelse")
-    packet.eventName = vedtakhendelse.toString()
+    packet.eventName = vedtakhendelse.lagEventnameForType()
     packet[TEKNISK_TID_KEY] = tekniskTid
     packet["vedtak"] = vedtak
     extraParams.forEach { (k, v) -> packet[k] = v }

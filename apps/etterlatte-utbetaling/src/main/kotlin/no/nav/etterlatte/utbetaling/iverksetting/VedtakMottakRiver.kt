@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.sikkerLogg
@@ -33,7 +33,7 @@ class VedtakMottakRiver(
 ) : ListenerMedLogging() {
     init {
         // Barnepensjon
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType()) {
             validate { it.requireKey("vedtak") }
             validate { it.requireValue("vedtak.sak.sakType", SakType.BARNEPENSJON.name) }
             validate {
@@ -46,7 +46,7 @@ class VedtakMottakRiver(
         }
 
         // Omstillingsstønad
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.SAMORDNET.toString()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.SAMORDNET.lagEventnameForType()) {
             validate { it.requireKey("vedtak") }
             validate { it.requireValue("vedtak.sak.sakType", SakType.OMSTILLINGSSTOENAD.name) }
             validate {

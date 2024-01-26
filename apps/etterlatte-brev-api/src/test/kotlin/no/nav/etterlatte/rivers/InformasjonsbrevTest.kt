@@ -13,7 +13,8 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.event.BrevEventKeys
+import no.nav.etterlatte.libs.common.event.BREVMAL_RIVER_KEY
+import no.nav.etterlatte.libs.common.event.BrevHendelseHendelseType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.database.DataSourceBuilder
@@ -124,13 +125,13 @@ class InformasjonsbrevTest {
         assertEquals(2, testRapid.inspektør.size)
         with(testRapid.inspektør.message(0)) {
             val fnr = get(FNR_KEY).also { assertEquals(SOEKER_FOEDSELSNUMMER.value, it.asText()) }
-            val brevmal = get(BrevEventKeys.BREVMAL_KEY).also { assertEquals(brevkode.name, it.asText()) }
+            val brevmal = get(BREVMAL_RIVER_KEY).also { assertEquals(brevkode.name, it.asText()) }
             val sakstype = get(SAK_TYPE_KEY).also { assertEquals(saktype.name, it.asText()) }
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER,
+                    EVENT_NAME_KEY to BrevHendelseHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagEventnameForType(),
                     FNR_KEY to fnr,
-                    BrevEventKeys.BREVMAL_KEY to brevmal,
+                    BREVMAL_RIVER_KEY to brevmal,
                     SAK_TYPE_KEY to sakstype,
                     SAK_ID_KEY to saksnr,
                 ),
@@ -138,13 +139,13 @@ class InformasjonsbrevTest {
         }
         with(testRapid.inspektør.message(1)) {
             val behandling = get(BEHANDLING_ID_KEY).also { assertEquals(behandlingId.toString(), it.asText()) }
-            val brevmal = get(BrevEventKeys.BREVMAL_KEY).also { assertEquals(brevkode.name, it.asText()) }
+            val brevmal = get(BREVMAL_RIVER_KEY).also { assertEquals(brevkode.name, it.asText()) }
             val sakstype = get(SAK_TYPE_KEY).also { assertEquals(saktype.name, it.asText()) }
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER,
+                    EVENT_NAME_KEY to BrevHendelseHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagEventnameForType(),
                     BEHANDLING_ID_KEY to behandling,
-                    BrevEventKeys.BREVMAL_KEY to brevmal,
+                    BREVMAL_RIVER_KEY to brevmal,
                     SAK_TYPE_KEY to sakstype,
                     SAK_ID_KEY to saksnr,
                 ),

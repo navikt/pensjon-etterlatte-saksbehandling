@@ -5,7 +5,6 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.klage.KLAGE_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
-import no.nav.etterlatte.libs.common.klage.lagEventnameForType
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY

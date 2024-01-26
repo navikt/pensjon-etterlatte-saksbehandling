@@ -25,7 +25,7 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -64,7 +64,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
     fun `oppretter for migrering nytt brev, genererer pdf og sender videre`() {
         val vedtak = opprettVedtak()
         val migreringRequest = migreringRequest()
-        val melding = opprettMelding(vedtak, migreringRequest, VedtakKafkaHendelseType.FATTET)
+        val melding = opprettMelding(vedtak, migreringRequest, VedtakKafkaHendelseHendelseType.FATTET)
         val brev = opprettBrev()
 
         coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), any()) } returns brev
@@ -78,7 +78,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) }
 
         val meldingSendt = inspektoer.message(0)
-        assertEquals(VedtakKafkaHendelseType.FATTET.toString(), meldingSendt.get(EVENT_NAME_KEY).asText())
+        assertEquals(VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType(), meldingSendt.get(EVENT_NAME_KEY).asText())
     }
 
     @Test
@@ -109,7 +109,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
     private fun opprettMelding(
         vedtak: VedtakDto,
         migreringRequest: MigreringRequest?,
-        hendelse: VedtakKafkaHendelseType = VedtakKafkaHendelseType.FATTET,
+        hendelse: VedtakKafkaHendelseHendelseType = VedtakKafkaHendelseHendelseType.FATTET,
     ): JsonMessage {
         val kilde =
             when (migreringRequest) {
@@ -119,7 +119,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         val messageKeys =
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                EVENT_NAME_KEY to hendelse.toString(),
+                EVENT_NAME_KEY to hendelse.lagEventnameForType(),
                 "vedtak" to vedtak,
                 KILDE_KEY to kilde,
             )

@@ -24,7 +24,7 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
@@ -66,7 +66,7 @@ internal class OpprettJournalfoerOgDistribuer {
             JsonMessage.newMessage(
                 mapOf(
                     CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                    EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
+                    EVENT_NAME_KEY to VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(),
                     "vedtak" to lagVedtakDto(behandlingId),
                     KILDE_KEY to Vedtaksloesning.GJENNY.name,
                 ),
@@ -74,11 +74,11 @@ internal class OpprettJournalfoerOgDistribuer {
         )
 
         val distribuermelding = testRapid.hentMelding(0)
-        Assertions.assertEquals(BrevEventTypes.JOURNALFOERT.toEventname(), distribuermelding.somMap()[EVENT_NAME_KEY])
+        Assertions.assertEquals(BrevHendelseHendelseType.JOURNALFOERT.lagEventnameForType(), distribuermelding.somMap()[EVENT_NAME_KEY])
         testRapid.sendTestMessage(distribuermelding)
 
         val distribuert = testRapid.hentMelding(1).somMap()
-        Assertions.assertEquals(BrevEventTypes.DISTRIBUERT.toEventname(), distribuert[EVENT_NAME_KEY])
+        Assertions.assertEquals(BrevHendelseHendelseType.DISTRIBUERT.lagEventnameForType(), distribuert[EVENT_NAME_KEY])
     }
 
     @Test
@@ -110,7 +110,7 @@ internal class OpprettJournalfoerOgDistribuer {
             JsonMessage.newMessage(
                 mapOf(
                     CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                    EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
+                    EVENT_NAME_KEY to VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(),
                     "vedtak" to lagVedtakDto(behandlingId),
                     KILDE_KEY to Vedtaksloesning.PESYS.name,
                     HENDELSE_DATA_KEY to migreringRequest(),
@@ -119,11 +119,11 @@ internal class OpprettJournalfoerOgDistribuer {
         )
 
         val distribuermelding = testRapid.hentMelding(0)
-        Assertions.assertEquals(BrevEventTypes.JOURNALFOERT.toEventname(), distribuermelding.somMap()[EVENT_NAME_KEY])
+        Assertions.assertEquals(BrevHendelseHendelseType.JOURNALFOERT.lagEventnameForType(), distribuermelding.somMap()[EVENT_NAME_KEY])
         testRapid.sendTestMessage(distribuermelding)
 
         val distribuert = testRapid.hentMelding(1).somMap()
-        Assertions.assertEquals(BrevEventTypes.DISTRIBUERT.toEventname(), distribuert[EVENT_NAME_KEY])
+        Assertions.assertEquals(BrevHendelseHendelseType.DISTRIBUERT.lagEventnameForType(), distribuert[EVENT_NAME_KEY])
     }
 
     private fun lagBrev(behandlingId: UUID?) =

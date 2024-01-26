@@ -5,7 +5,7 @@ import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.token.Systembruker
@@ -24,7 +24,7 @@ internal class OpprettVedtaksbrevForMigreringRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.FATTET.toString()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType()) {
             validate { it.requireKey("vedtak.behandlingId") }
             validate { it.requireKey("vedtak.sak.id") }
             validate { it.requireKey(HENDELSE_DATA_KEY) }

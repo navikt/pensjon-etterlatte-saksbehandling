@@ -21,6 +21,10 @@ fun River.eventName(eventName: String) {
     validate { it.demandValue(EVENT_NAME_KEY, eventName) }
 }
 
+interface EventnameHendelseType {
+    fun lagEventnameForType(): String
+}
+
 var JsonMessage.eventName: String
     get() = this[EVENT_NAME_KEY].textValue()
     set(name) {

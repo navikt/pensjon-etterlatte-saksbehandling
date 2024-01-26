@@ -59,7 +59,7 @@ class VedtakhendelserRiver(
                 }
                 context.publish(
                     listOfNotNull(
-                        EVENT_NAME_KEY to "STATISTIKK:REGISTRERT",
+                        EVENT_NAME_KEY to StatistikkhendelseType.REGISTRERT.lagEventnameForType(),
                         sakRad?.let { "sak_rad" to it },
                         stoenadRad?.let { "stoenad_rad" to it },
                     ).toMap()

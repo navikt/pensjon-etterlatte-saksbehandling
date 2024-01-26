@@ -46,7 +46,7 @@ class BehandlinghendelseRiver(
             ?.also {
                 context.publish(
                     mapOf(
-                        EVENT_NAME_KEY to "STATISTIKK:REGISTRERT",
+                        EVENT_NAME_KEY to StatistikkhendelseType.REGISTRERT.lagEventnameForType(),
                         "sak_rad" to objectMapper.writeValueAsString(it),
                     ).toJson(),
                 )

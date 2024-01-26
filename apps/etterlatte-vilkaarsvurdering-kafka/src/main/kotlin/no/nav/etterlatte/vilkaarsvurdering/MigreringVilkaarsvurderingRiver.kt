@@ -2,7 +2,6 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.VILKAARSVURDER
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
@@ -15,14 +14,14 @@ import rapidsandrivers.HENDELSE_DATA_KEY
 import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
-internal class MigreringRiver(
+internal class MigreringVilkaarsvurderingRiver(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
-) : ListenerMedLoggingOgFeilhaandtering(VILKAARSVURDER) {
-    private val logger = LoggerFactory.getLogger(MigreringRiver::class.java)
+) : ListenerMedLoggingOgFeilhaandtering() {
+    private val logger = LoggerFactory.getLogger(MigreringVilkaarsvurderingRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.VILKAARSVURDER) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.rejectKey(VILKAARSVURDERT_KEY) }

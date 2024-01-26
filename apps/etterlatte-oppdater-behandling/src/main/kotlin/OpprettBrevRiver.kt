@@ -21,7 +21,7 @@ internal class OpprettBrevRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
-) : ListenerMedLoggingOgFeilhaandtering(BrevEventKeys.OPPRETT_BREV) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

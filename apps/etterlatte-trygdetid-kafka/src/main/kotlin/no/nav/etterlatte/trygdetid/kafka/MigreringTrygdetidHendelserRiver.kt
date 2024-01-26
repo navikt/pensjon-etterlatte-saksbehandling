@@ -26,11 +26,10 @@ import rapidsandrivers.behandlingId
 import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import java.util.UUID
 
-internal class MigreringHendelserRiver(
+internal class MigreringTrygdetidHendelserRiver(
     rapidsConnection: RapidsConnection,
     private val trygdetidService: TrygdetidService,
-) :
-    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.TRYGDETID) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.LAGRE_GRUNNLAG
 import no.nav.etterlatte.rapidsandrivers.migrering.PERSONGALLERI_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rapidsandrivers.migrering.persongalleri
@@ -26,14 +25,14 @@ import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
 import java.util.UUID
 
-class MigreringHendelserRiver(
+class MigreringGrunnlagHendelserRiver(
     rapidsConnection: RapidsConnection,
     private val grunnlagService: GrunnlagService,
-) : ListenerMedLoggingOgFeilhaandtering(LAGRE_GRUNNLAG) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.LAGRE_GRUNNLAG) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(MIGRERING_GRUNNLAG_KEY) }

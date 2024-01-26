@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -23,8 +22,7 @@ internal class LyttPaaIverksattVedtakRiver(
     private val pesysRepository: PesysRepository,
     private val penKlient: PenKlient,
     private val featureToggleService: FeatureToggleService,
-) :
-    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.IVERKSATT) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {

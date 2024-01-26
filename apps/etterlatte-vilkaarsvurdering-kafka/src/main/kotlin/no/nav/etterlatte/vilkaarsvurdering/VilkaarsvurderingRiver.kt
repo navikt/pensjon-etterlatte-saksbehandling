@@ -2,7 +2,6 @@ package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VILKAARSVURDER
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -19,11 +18,11 @@ internal class VilkaarsvurderingRiver(
     rapidsConnection: RapidsConnection,
     private val vilkaarsvurderingService: VilkaarsvurderingService,
 ) :
-    ListenerMedLoggingOgFeilhaandtering(VILKAARSVURDER) {
+    ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, ReguleringEvents.VILKAARSVURDER) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }

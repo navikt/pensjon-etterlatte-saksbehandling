@@ -12,7 +12,7 @@ import no.nav.helse.rapids_rivers.River
 import org.slf4j.LoggerFactory
 import rapidsandrivers.withFeilhaandtering
 
-abstract class ListenerMedLoggingOgFeilhaandtering(protected val hendelsestype: String) : River.PacketListener {
+abstract class ListenerMedLoggingOgFeilhaandtering : River.PacketListener {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = sikkerlogger()
 
@@ -25,7 +25,7 @@ abstract class ListenerMedLoggingOgFeilhaandtering(protected val hendelsestype: 
         packet: JsonMessage,
         context: MessageContext,
     ) = withLogContext(packet.correlationId) {
-        withFeilhaandtering(packet, context, hendelsestype) {
+        withFeilhaandtering(packet, context, this.name()) {
             haandterPakke(packet, context)
         }
     }

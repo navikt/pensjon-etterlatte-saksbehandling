@@ -20,11 +20,11 @@ internal class ReguleringsforespoerselRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
-) : ListenerMedLoggingOgFeilhaandtering(ReguleringEvents.START_REGULERING) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(ReguleringsforespoerselRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, ReguleringEvents.START_REGULERING) {
             validate { it.requireKey(DATO_KEY) }
         }
     }

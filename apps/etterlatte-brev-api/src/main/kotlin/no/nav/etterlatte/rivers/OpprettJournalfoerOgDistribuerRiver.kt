@@ -27,7 +27,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     private val pdfGenerator: PDFGenerator,
     private val journalfoerBrevService: JournalfoerBrevService,
     private val brevdistribuerer: Brevdistribuerer,
-) : ListenerMedLoggingOgFeilhaandtering(BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {

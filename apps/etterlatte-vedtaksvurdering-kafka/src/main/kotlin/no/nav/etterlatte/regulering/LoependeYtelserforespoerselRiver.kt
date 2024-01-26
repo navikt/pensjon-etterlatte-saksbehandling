@@ -4,7 +4,7 @@ import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.FINN_LOEPENDE_YTELSER
+import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.OMREGNINGSHENDELSE
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -22,11 +22,11 @@ import rapidsandrivers.tilbakestilteBehandlinger
 internal class LoependeYtelserforespoerselRiver(
     rapidsConnection: RapidsConnection,
     private val vedtak: VedtakService,
-) : ListenerMedLoggingOgFeilhaandtering(FINN_LOEPENDE_YTELSER) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(LoependeYtelserforespoerselRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, ReguleringEvents.FINN_LOEPENDE_YTELSER) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(TILBAKESTILTE_BEHANDLINGER_KEY) }

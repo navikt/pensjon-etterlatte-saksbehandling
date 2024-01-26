@@ -1,6 +1,5 @@
 package no.nav.etterlatte.migrering
 
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -12,8 +11,7 @@ import java.util.UUID
 internal class LyttPaaDistribuerBrevRiver(
     rapidsConnection: RapidsConnection,
     private val pesysRepository: PesysRepository,
-) :
-    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.BREV_SENDT) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {

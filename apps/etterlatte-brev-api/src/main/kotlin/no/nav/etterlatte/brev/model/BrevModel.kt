@@ -214,7 +214,17 @@ data class EtterbetalingBrev(
             EtterbetalingBrev(
                 fraDato = dto.datoFom,
                 tilDato = dto.datoTom,
-                etterbetalingsperioder = perioder.filter { YearMonth.from(it.datoFOM) <= YearMonth.from(dto.datoTom) },
+                etterbetalingsperioder =
+                    perioder
+                        .filter { YearMonth.from(it.datoFOM) <= YearMonth.from(dto.datoTom) }
+                        .sortedByDescending { it.datoFOM }
+                        .let { list ->
+                            // Setter tilDato på nyeste periode innenfor hva som er satt i etterbetaling
+                            val nyestePeriodeMedDatoTom = list.first().copy(datoTOM = dto.datoTom)
+                            val oppdatertListe = list.toMutableList()
+                            oppdatertListe[0] = nyestePeriodeMedDatoTom
+                            oppdatertListe.toList()
+                        },
             )
         }
     }

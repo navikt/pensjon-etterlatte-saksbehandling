@@ -76,6 +76,7 @@ object SlateHelper {
             SakType.BARNEPENSJON -> {
                 when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> VedleggBP.innvilgelse()
+                    VedtakType.ENDRING -> VedleggBP.endring()
                     else -> null
                 }
             }

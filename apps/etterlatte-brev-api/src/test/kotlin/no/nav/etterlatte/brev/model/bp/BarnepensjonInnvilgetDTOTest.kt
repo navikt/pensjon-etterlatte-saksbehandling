@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.model.bp
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
+import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -17,14 +18,14 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 
-internal class InnvilgetHovedmalBrevDataTest {
+internal class BarnepensjonInnvilgetDTOTest {
     private val grunnbeloep = 118_620
     private val grunnbeloepPerMaaned = 9885
 
     @Test
     fun `setter skille for etterbetaling`() {
-        val brevdata =
-            InnvilgetHovedmalBrevData.fra(
+        val barnepensjonInnvilgelse =
+            BarnepensjonInnvilgelseDTO.fra(
                 utbetalingsinfo =
                     Utbetalingsinfo(
                         antallBarn = 1,
@@ -40,8 +41,7 @@ internal class InnvilgetHovedmalBrevDataTest {
                                 beregningsperiode2023OgUtover(),
                             ),
                     ),
-                avkortingsinfo = null,
-                etterbetalingDTO =
+                etterbetaling =
                     EtterbetalingDTO(
                         datoFom = LocalDate.of(2022, Month.JANUARY, 1),
                         datoTom = LocalDate.of(2022, Month.MARCH, 31),
@@ -69,18 +69,21 @@ internal class InnvilgetHovedmalBrevDataTest {
 
         Assertions.assertEquals(
             listOf(
-                beregningsperiodeMars2022(),
-                beregningsperiodeFebruar2022(),
-                beregningsperiodeJanuar2022(),
+                beregningsperiodeMars2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiodeFebruar2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiodeJanuar2022().toBarnepensjonBeregningsperiode(),
             ),
-            brevdata.etterbetaling!!.etterbetalingsperioder,
+            barnepensjonInnvilgelse.etterbetaling!!.etterbetalingsperioder,
         )
         Assertions.assertEquals(
             listOf(
-                beregningsperiodeAprilDesember2022(),
-                beregningsperiode2023OgUtover(),
+                beregningsperiodeJanuar2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiodeFebruar2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiodeMarsApril2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiodeAprilDesember2022().toBarnepensjonBeregningsperiode(),
+                beregningsperiode2023OgUtover().toBarnepensjonBeregningsperiode(),
             ),
-            brevdata.utbetalingsinfo.beregningsperioder,
+            barnepensjonInnvilgelse.beregning.beregningsperioder,
         )
     }
 
@@ -146,4 +149,13 @@ internal class InnvilgetHovedmalBrevDataTest {
                 ),
             )
         })
+
+    private fun Beregningsperiode.toBarnepensjonBeregningsperiode() =
+        BarnepensjonBeregningsperiode(
+            datoFOM = datoFOM,
+            datoTOM = datoTOM,
+            grunnbeloep = grunnbeloep,
+            antallBarn = 1,
+            utbetaltBeloep = utbetaltBeloep,
+        )
 }

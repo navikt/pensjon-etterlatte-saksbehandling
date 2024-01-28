@@ -4,15 +4,17 @@ import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Trygdetid
-import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevVedleggKey
+import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
+import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregning
+import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
+import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.libs.common.IntBroek
-import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -29,7 +31,7 @@ data class OmstillingsstoenadInnvilgelseDTO(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
             avkortingsinfo: Avkortingsinfo,
-            etterbetalinginfo: EtterbetalingDTO?,
+            etterbetaling: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             innholdMedVedlegg: InnholdMedVedlegg,
             lavEllerIngenInntekt: Boolean,
@@ -58,9 +60,9 @@ data class OmstillingsstoenadInnvilgelseDTO(
                         inntekt = avkortingsinfo.inntekt,
                         grunnbeloep = avkortingsinfo.grunnbeloep,
                         beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = beregningsperioder.maxByOrNull { it.datoFOM }!!,
+                        sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM },
                         trygdetid =
-                            OmstillingsstoenadTrygdetid(
+                            TrygdetidMedBeregningsmetode(
                                 trygdetidsperioder = trygdetid.perioder,
                                 beregnetTrygdetidAar = trygdetid.aarTrygdetid,
                                 beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
@@ -75,7 +77,9 @@ data class OmstillingsstoenadInnvilgelseDTO(
                         .plusMonths(4)
                         .isAfter(avkortingsinfo.virkningsdato),
                 lavEllerIngenInntekt = lavEllerIngenInntekt,
-                etterbetaling = OmstillingsstoenadEtterbetaling.fra(etterbetalinginfo, beregningsperioder),
+                etterbetaling =
+                    etterbetaling
+                        ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
             )
         }
     }
@@ -100,72 +104,5 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO(
                 utbetalingsbeloep = avkortingsinfo.beregningsperioder.first().utbetaltBeloep,
                 etterbetaling = etterbetaling,
             )
-    }
-}
-
-data class OmstillingsstoenadBeregning(
-    val innhold: List<Slate.Element>,
-    val virkningsdato: LocalDate,
-    val inntekt: Kroner,
-    val grunnbeloep: Kroner,
-    val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
-    val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
-    val trygdetid: OmstillingsstoenadTrygdetid,
-)
-
-data class OmstillingsstoenadBeregningsperiode(
-    val datoFOM: LocalDate,
-    val datoTOM: LocalDate?,
-    val inntekt: Kroner,
-    val ytelseFoerAvkorting: Kroner,
-    val utbetaltBeloep: Kroner,
-    val trygdetid: Int,
-)
-
-data class OmstillingsstoenadTrygdetid(
-    val trygdetidsperioder: List<Trygdetidsperiode>,
-    val beregnetTrygdetidAar: Int,
-    val beregnetTrygdetidMaaneder: Int,
-    val prorataBroek: IntBroek?,
-    val beregningsMetodeAnvendt: BeregningsMetode,
-    val beregningsMetodeFraGrunnlag: BeregningsMetode,
-    val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
-)
-
-data class OmstillingsstoenadEtterbetaling(
-    val fraDato: LocalDate,
-    val tilDato: LocalDate,
-    val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
-) {
-    companion object {
-        fun fra(
-            dto: EtterbetalingDTO?,
-            perioder: List<OmstillingsstoenadBeregningsperiode>,
-        ) = if (dto == null) {
-            null
-        } else {
-            // Midlertidig fiks siden denne utleder etterbetaling på en annen måte enn barnepensjon
-            OmstillingsstoenadEtterbetaling(
-                fraDato = dto.datoFom,
-                tilDato = dto.datoTom,
-                beregningsperioder =
-                    perioder
-                        .filter { it.datoFOM.isBefore(dto.datoTom) && dto.datoFom.isBefore(it.datoTOM ?: LocalDate.MAX) }
-                        .sortedByDescending { it.datoFOM }
-                        .let { list ->
-                            val oppdatertListe = list.toMutableList()
-
-                            // Setter tilDato på nyeste periode innenfor hva som er satt i etterbetaling
-                            oppdatertListe.firstOrNull()?.copy(datoTOM = dto.datoTom)
-                                ?.let { oppdatertListe[0] = it }
-
-                            // Setter fraDato på eldste periode innenfor hva som er satt i etterbetaling
-                            oppdatertListe.lastOrNull()?.copy(datoFOM = dto.datoFom)
-                                ?.let { oppdatertListe[list.lastIndex] = it }
-
-                            oppdatertListe.toList()
-                        },
-            )
-        }
     }
 }

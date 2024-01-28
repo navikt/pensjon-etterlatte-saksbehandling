@@ -184,6 +184,7 @@ data class EtterbetalingDTO(
     val datoTom: LocalDate,
 )
 
+@Deprecated("Denne utgår når vi oppdaterer revurdering for omstillingsstønad")
 data class Beregningsinfo(
     val innhold: List<Slate.Element>,
     val grunnbeloep: Kroner,
@@ -191,6 +192,7 @@ data class Beregningsinfo(
     val trygdetidsperioder: List<Trygdetidsperiode>,
 )
 
+@Deprecated("Denne utgår når vi oppdaterer revurdering for omstillingsstønad")
 data class NyBeregningsperiode(
     val inntekt: Kroner,
     val trygdetid: Int,
@@ -198,6 +200,7 @@ data class NyBeregningsperiode(
     var utbetaltBeloep: Kroner,
 )
 
+@Deprecated("Denne utgår når vi oppdaterer revurdering for omstillingsstønad")
 data class EtterbetalingBrev(
     val fraDato: LocalDate,
     val tilDato: LocalDate,

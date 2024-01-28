@@ -182,7 +182,6 @@ internal class VedtaksbrevServiceTest {
                 "OMSTILLINGSSTOENAD,OPPHOER,MANUELL",
                 "OMSTILLINGSSTOENAD,ENDRING,MANUELL",
                 "BARNEPENSJON,OPPHOER,MANUELL",
-                "BARNEPENSJON,ENDRING,MANUELL",
             ],
         )
         fun `Vedtaksbrev finnes ikke - skal opprettes nytt`(
@@ -201,6 +200,7 @@ internal class VedtaksbrevServiceTest {
                 mockk<DetaljertBehandling>().apply {
                     every { status } returns BehandlingStatus.BEREGNET
                 }
+            coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns mockk()
 
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(
@@ -236,6 +236,7 @@ internal class VedtaksbrevServiceTest {
         @CsvSource(
             value = [
                 "BARNEPENSJON,YRKESSKADE,REDIGERBAR,ENDRING",
+                "BARNEPENSJON,,REDIGERBAR,ENDRING",
                 "BARNEPENSJON,,REDIGERBAR,INNVILGELSE",
             ],
         )

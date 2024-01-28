@@ -17,9 +17,10 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSB
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.AvslagBrevData
-import no.nav.etterlatte.brev.model.bp.EndringHovedmalBrevData
-import no.nav.etterlatte.brev.model.bp.InnvilgetBrevDataEnkel
-import no.nav.etterlatte.brev.model.bp.InnvilgetHovedmalBrevData
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseDTO
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfallDTO
+import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingDTO
+import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingRedigerbartUtfallDTO
 import no.nav.etterlatte.brev.model.bp.OpphoerBrevData
 import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
@@ -119,7 +120,7 @@ class BrevDataMapper(
                             val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                             val utbetaling = async { fetcher.hentUtbetaling() }
                             val etterbetaling = async { fetcher.hentEtterbetaling() }
-                            InnvilgetBrevDataEnkel.fra(
+                            BarnepensjonInnvilgelseRedigerbartUtfallDTO.fra(
                                 generellBrevData,
                                 utbetaling.await(),
                                 etterbetaling.await(),
@@ -127,7 +128,13 @@ class BrevDataMapper(
                         }
 
                     VedtakType.AVSLAG -> ManueltBrevData.fra()
-                    VedtakType.ENDRING -> ManueltBrevData.fra()
+
+                    VedtakType.ENDRING ->
+                        coroutineScope {
+                            val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                            val etterbetaling = async { fetcher.hentEtterbetaling() }
+                            BarnepensjonRevurderingRedigerbartUtfallDTO.fra(etterbetaling.await())
+                        }
                     VedtakType.OPPHOER -> ManueltBrevData.fra()
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
                     null -> ManueltBrevData.fra(emptyList())
@@ -199,19 +206,26 @@ class BrevDataMapper(
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
                     val grunnbeloep = async { fetcher.hentGrunnbeloep() }
+                    val brevutfall = async { fetcher.hentBrevutfall() }
                     val trygdetidHentet =
                         requireNotNull(
                             trygdetid.await(),
                         ) { "${kode.ferdigstilling} Har ikke trygdetid, det er påbudt for ${BARNEPENSJON_INNVILGELSE.name}" }
                     val grunnbeloepHentet =
                         requireNotNull(grunnbeloep.await()) { "${kode.ferdigstilling} Må ha grunnbeløp" }
-                    EndringHovedmalBrevData.fra(
+                    val brevutfallHentet =
+                        requireNotNull(brevutfall.await()) {
+                            "${kode.ferdigstilling} Må ha brevutfall for å avgjøre over eller under 18 år"
+                        }
+                    BarnepensjonRevurderingDTO.fra(
+                        innholdMedVedlegg,
                         utbetaling.await(),
-                        forrigeUtbetalingsinfo = forrigeUtbetaling.await(),
+                        forrigeUtbetaling.await(),
                         etterbetaling.await(),
                         trygdetidHentet,
                         grunnbeloepHentet,
-                        innholdMedVedlegg,
+                        generellBrevData.utlandstilknytning?.type,
+                        brevutfallHentet.aldersgruppe == Aldersgruppe.UNDER_18,
                     )
                 }
             }
@@ -221,7 +235,6 @@ class BrevDataMapper(
                     val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
-                    val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
                     val grunnbeloep = async { fetcher.hentGrunnbeloep() }
                     val brevutfall = async { fetcher.hentBrevutfall() }
@@ -236,9 +249,8 @@ class BrevDataMapper(
                         requireNotNull(brevutfall.await()) {
                             "${kode.ferdigstilling} Må ha brevutfall for å avgjøre over eller under 18 år"
                         }
-                    InnvilgetHovedmalBrevData.fra(
+                    BarnepensjonInnvilgelseDTO.fra(
                         utbetaling.await(),
-                        avkortingsinfo.await(),
                         etterbetaling.await(),
                         trygdetidHentet,
                         grunnbeloepHentet,

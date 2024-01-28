@@ -4,21 +4,35 @@ import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import java.time.LocalDate
 
-data class AvslagBrevDataOMS(
+data class OpphoerBrevDataOMS(
     val innhold: List<Slate.Element>,
-    val avdoedNavn: String,
     val bosattUtland: Boolean,
 ) : BrevData() {
     companion object {
         fun fra(
-            avdoedNavn: String,
             utlandstilknytning: Utlandstilknytning?,
             innhold: List<Slate.Element>,
-        ): AvslagBrevDataOMS =
-            AvslagBrevDataOMS(
-                avdoedNavn = avdoedNavn,
+        ): OpphoerBrevDataOMS =
+            OpphoerBrevDataOMS(
                 bosattUtland = utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                innhold = innhold,
+            )
+    }
+}
+
+data class OpphoerBrevDataUtfallOMS(
+    val innhold: List<Slate.Element>,
+    val virkningsdato: LocalDate,
+) : BrevData() {
+    companion object {
+        fun fra(
+            virkningsdato: LocalDate,
+            innhold: List<Slate.Element>,
+        ): OpphoerBrevDataUtfallOMS =
+            OpphoerBrevDataUtfallOMS(
+                virkningsdato = virkningsdato,
                 innhold = innhold,
             )
     }

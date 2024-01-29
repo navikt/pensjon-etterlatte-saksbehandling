@@ -8,6 +8,8 @@ class VedleggBP {
     companion object {
         fun innvilgelse() = listOf(beregningAvBarnepensjonTrygdetid())
 
+        fun endring() = listOf(beregningAvBarnepensjonTrygdetid())
+
         private fun beregningAvBarnepensjonTrygdetid() =
             BrevInnholdVedlegg(
                 tittel = "Trygdetid i vedlegg beregning av barnepensjon",

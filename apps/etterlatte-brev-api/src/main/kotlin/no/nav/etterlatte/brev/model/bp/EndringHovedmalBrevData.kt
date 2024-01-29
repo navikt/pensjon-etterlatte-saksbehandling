@@ -54,7 +54,7 @@ data class BarnepensjonRevurderingDTO(
                 erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
                 beregning =
                     BarnepensjonBeregning(
-                        innhold = innhold.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
+                        innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
                         antallBarn = utbetalingsinfo.antallBarn,
                         virkningsdato = utbetalingsinfo.virkningsdato,
                         grunnbeloep = Kroner(grunnbeloep.grunnbeloep),

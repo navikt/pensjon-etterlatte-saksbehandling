@@ -91,7 +91,7 @@ class BrukerServiceImpl(
                 } else {
                     ArbeidsFordelingEnhet(
                         Enheter.UTLAND.navn,
-                        Enheter.UTLAND.navn,
+                        Enheter.UTLAND.enhetNr,
                     )
                 }
             }

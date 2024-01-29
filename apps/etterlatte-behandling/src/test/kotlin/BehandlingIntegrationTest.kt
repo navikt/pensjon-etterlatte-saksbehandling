@@ -158,6 +158,10 @@ abstract class BehandlingIntegrationTest {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         val json = emptyMap<String, String>().toJson()
                         respond(json, headers = headers)
+                    } else if (request.url.fullPath.contains("person/v2")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        val json = mockPerson().toJson()
+                        respond(json, headers = headers)
                     } else if (request.url.fullPath.startsWith("/")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         val json = javaClass.getResource("")!!.readText() // TODO: endre name
@@ -212,6 +216,12 @@ abstract class BehandlingIntegrationTest {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(
                             setOf(1).toJson(),
+                            headers = headers,
+                        )
+                    } else if (request.url.fullPath.contains("/grunnlag/sak")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        respond(
+                            Grunnlag.empty().toJson(),
                             headers = headers,
                         )
                     } else if (request.url.fullPath.endsWith("/oppdater-grunnlag")) {

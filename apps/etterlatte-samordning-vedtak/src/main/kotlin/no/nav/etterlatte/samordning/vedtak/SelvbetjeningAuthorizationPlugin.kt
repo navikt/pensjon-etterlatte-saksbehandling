@@ -24,10 +24,10 @@ val SelvbetjeningAuthorizationPlugin =
                 // If no principal, probably not passed authentication (expired token etc)
                 val principal = call.principal<TokenValidationContextPrincipal>() ?: return@on
 
-                if (principal.context.issuers?.contains(issuer) == true) {
-                    val subject = principal.context.getClaims(pluginConfig.issuer)?.subject
+                if (principal.context.issuers.contains(issuer)) {
+                    val subject = principal.context.getClaims(pluginConfig.issuer).subject
 
-                    if (!validator.invoke(call, Folkeregisteridentifikator.of(subject!!))) {
+                    if (!validator.invoke(call, Folkeregisteridentifikator.of(subject))) {
                         application.log.info("Request avslått pga mismatch mellom subject og etterspurt fnr")
                         throw IkkeTillattException(
                             code = "GE-VALIDATE-ACCESS-FNR",

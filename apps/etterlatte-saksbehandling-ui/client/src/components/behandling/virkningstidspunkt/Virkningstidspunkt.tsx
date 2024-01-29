@@ -1,5 +1,5 @@
-import { BodyShort, DateValidationT, Heading, HelpText, MonthValidationT, VStack } from '@navikt/ds-react'
-import React, { useState } from 'react'
+import { BodyShort, DateValidationT, Heading, HelpText, MonthValidationT, TextField, VStack } from '@navikt/ds-react'
+import React, { useEffect, useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { formaterStringDato } from '~utils/formattering'
 import { fastsettVirkningstidspunkt } from '~shared/api/behandling'
@@ -57,6 +57,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBo
   const [apiError, setApiError] = useState<string>('')
 
   const {
+    handleSubmit,
     control,
     register,
     formState: { errors },
@@ -67,7 +68,9 @@ const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBo
       kravdato: behandling.virkningstidspunkt?.kravdato ? new Date(behandling.virkningstidspunkt.kravdato) : null,
     },
   })
-
+  useEffect(() => {
+    console.log(errors)
+  }, [errors])
   const validerKravdato = (dato: DateValidationT): string | undefined => {
     if (!dato) return 'Kravdato kreves på bosatt utland saker'
     return undefined
@@ -81,15 +84,14 @@ const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBo
     }
   }
 
-  const fastsett = (onSuccess?: () => void) => {
-    return
-
+  const fastsett = (data: VirkningstidspunktSkjema, onSuccess?: () => void) => {
+    console.log(data)
     return fastsettVirkningstidspunktRequest(
       {
         id: behandling.id,
-        dato: virkningstidspunkt!,
-        begrunnelse: begrunnelse,
-        kravdato: kravdato,
+        dato: data.virkningstidspunkt!,
+        begrunnelse: data.begrunnelse,
+        kravdato: data.kravdato ?? null,
       },
       (res) => {
         dispatch(oppdaterVirkningstidspunkt(res))
@@ -172,7 +174,12 @@ const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBo
                   : undefined
               }
               redigerbar={redigerbar}
-              lagreklikk={fastsett}
+              lagreklikk={() =>
+                handleSubmit(
+                  (data) => console.log(data),
+                  (errors) => console.log(errors)
+                )
+              }
               avbrytklikk={reset}
               kommentar={behandling.virkningstidspunkt?.begrunnelse}
               defaultRediger={behandling.virkningstidspunkt === null}
@@ -213,14 +220,15 @@ const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBo
                   }}
                 />
 
-                <SoeknadsoversiktTextArea
+                <TextField
                   {...register('begrunnelse', {
                     required: {
                       value: true,
                       message: 'Begrunnelsen må fylles ut',
                     },
                   })}
-                  error={errors.begrunnelse?.message}
+                  label="Begrunnelse"
+                  error={errors?.begrunnelse?.message}
                 />
 
                 {apiError && <ApiErrorAlert>{apiError}</ApiErrorAlert>}

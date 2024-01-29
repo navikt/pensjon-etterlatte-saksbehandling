@@ -23,6 +23,7 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseDTO
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfallDTO
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingDTO
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingRedigerbartUtfallDTO
+import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
 import no.nav.etterlatte.brev.model.bp.OpphoerBrevData
 import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
@@ -207,12 +208,32 @@ class BrevDataMapper(
         tittel: String? = null,
     ): BrevData {
         if (generellBrevData.erMigrering()) {
-            return migreringBrevDataService.opprettMigreringBrevdataFerdigstill(
-                generellBrevData,
-                automatiskMigreringRequest,
-                innholdMedVedlegg,
-                brukerTokenInfo,
-            )
+            return coroutineScope {
+                val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                val utbetaling = async { fetcher.hentUtbetaling() }
+                val etterbetaling = async { fetcher.hentEtterbetaling() }
+                val trygdetid = async { fetcher.hentTrygdetid() }
+                val grunnbeloep = async { fetcher.hentGrunnbeloep() }
+
+                val erUnder18Aar =
+                    requireNotNull(generellBrevData.personerISak.soeker.under18) {
+                        "Klarte ikke å bestemme om alder på søker er under eller over 18 år. Kan dermed ikke velge riktig brev"
+                    }
+                OmregnetBPNyttRegelverkFerdig.fra(
+                    innhold = innholdMedVedlegg,
+                    erUnder18Aar = erUnder18Aar,
+                    utbetalingsinfo = utbetaling.await(),
+                    etterbetaling = etterbetaling.await(),
+                    trygdetid = requireNotNull(trygdetid.await()),
+                    grunnbeloep = grunnbeloep.await(),
+                    data =
+                        migreringBrevDataService.opprettMigreringBrevdata(
+                            generellBrevData,
+                            automatiskMigreringRequest,
+                            brukerTokenInfo,
+                        ),
+                )
+            }
         }
 
         return when (kode.ferdigstilling) {

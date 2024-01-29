@@ -3,7 +3,7 @@ package rapidsandrivers
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
+import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
@@ -14,7 +14,7 @@ internal class FeilhaandteringKtTest {
     fun `feilhaandtering kaster ikke feilen videre, men publiserer på feilkø`() {
         val packet = JsonMessage("{}", MessageProblems(""))
         val context = mockk<MessageContext>().also { every { it.publish(any()) } returns Unit }
-        withFeilhaandtering(packet, context, ReguleringEvents.OPPRETT_VEDTAK) {
+        withFeilhaandtering(packet, context, ReguleringHendelseType.OPPRETT_VEDTAK.lagEventnameForType()) {
             throw RuntimeException()
         }
         verify { context.publish(any()) }
@@ -24,7 +24,7 @@ internal class FeilhaandteringKtTest {
     fun `feilhaandtering gjoer ingenting hvis ingenting feiler`() {
         val packet = JsonMessage("{}", MessageProblems(""))
         val context = mockk<MessageContext>().also { every { it.publish(any()) } returns Unit }
-        withFeilhaandtering(packet, context, ReguleringEvents.OPPRETT_VEDTAK) {
+        withFeilhaandtering(packet, context, ReguleringHendelseType.OPPRETT_VEDTAK.lagEventnameForType()) {
         }
         verify(exactly = 0) { context.publish(any()) }
     }

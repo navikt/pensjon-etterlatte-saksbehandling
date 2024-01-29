@@ -2,6 +2,7 @@ package no.nav.etterlatte.samordning
 
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -27,7 +28,7 @@ class SamordningHendelseHandler(
                     noekkel = UUID.randomUUID().toString(),
                     verdi =
                         JsonMessage.newMessage(
-                            eventName = "VEDTAK:SAMORDNING_MOTTATT",
+                            eventName = VedtakKafkaHendelseHendelseType.SAMORDNING_MOTTATT.lagEventnameForType(),
                             map =
                                 mapOf(
                                     "vedtakId" to it,

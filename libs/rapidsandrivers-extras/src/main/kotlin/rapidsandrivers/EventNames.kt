@@ -1,7 +1,12 @@
 package no.nav.etterlatte.rapidsandrivers
 
-object EventNames {
-    const val GRUNNLAGSVERSJONERING_EVENT_NAME = "GRUNNLAGSVERSJONERING"
-    const val FEILA = "FEILA"
-    const val FORDELER_STATISTIKK = "FORDELER:STATISTIKK"
+import no.nav.etterlatte.libs.common.event.EventnameHendelseType
+
+enum class EventNames(val eventname: String) : EventnameHendelseType {
+    GRUNNLAGSVERSJONERING_EVENT_NAME("GRUNNLAGSVERSJONERING_EVENT_NAME"),
+    FEILA("FEILA"),
+    FORDELER_STATISTIKK("FORDELER:STATISTIKK"),
+    ;
+
+    override fun lagEventnameForType(): String = this.eventname
 }

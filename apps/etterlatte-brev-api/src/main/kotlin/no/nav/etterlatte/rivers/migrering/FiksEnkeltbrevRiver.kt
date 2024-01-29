@@ -2,7 +2,7 @@ package no.nav.etterlatte.rivers.migrering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -12,8 +12,8 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class FiksEnkeltbrevRiver(
     rapidsConnection: RapidsConnection,
@@ -22,7 +22,7 @@ internal class FiksEnkeltbrevRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.FIKS_ENKELTBREV.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.FIKS_ENKELTBREV) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
         }
     }
@@ -35,7 +35,7 @@ internal class FiksEnkeltbrevRiver(
         logger.info("Fikser vedtaksbrev for behandling $behandlingId")
 
         runBlocking {
-            packet.eventName = VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType()
+            packet.setEventNameForHendelseType(VedtakKafkaHendelseHendelseType.ATTESTERT)
             val vedtak = retryOgPakkUt { vedtaksvurderingService.hentVedtak(behandlingId, Systembruker.migrering) }
             packet["vedtak"] = vedtak
         }

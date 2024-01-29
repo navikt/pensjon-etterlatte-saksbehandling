@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.etterlatte.gyldigsoeknad.client.BehandlingClient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
-import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -39,7 +39,10 @@ internal class InnsendtSoeknadRiverTest {
 
         assertEquals(sakId.toString(), inspector.message(0).get(SAK_ID_KEY).asText())
 
-        assertEquals(SoeknadInnsendt.eventNameInnsendt, inspector.message(0).get(EVENT_NAME_KEY).asText())
+        assertEquals(
+            SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
+            inspector.message(0).get(EVENT_NAME_KEY).asText(),
+        )
         assertEquals(sakId, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals(id.toString(), inspector.message(0).get(GyldigSoeknadVurdert.behandlingIdKey).asText())
 

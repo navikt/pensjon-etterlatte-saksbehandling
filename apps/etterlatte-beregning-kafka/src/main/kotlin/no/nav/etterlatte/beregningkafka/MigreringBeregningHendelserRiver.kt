@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetodeBeregningsgrunnlag
 import no.nav.etterlatte.libs.common.periode.Periode
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEREGNING_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import java.time.LocalDate
 
 internal class MigreringBeregningHendelserRiver(
@@ -30,7 +30,7 @@ internal class MigreringBeregningHendelserRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.BEREGN.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.BEREGN) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }
@@ -52,7 +52,7 @@ internal class MigreringBeregningHendelserRiver(
 
         verifiserNyBeregning(beregning, packet.hendelseData)
 
-        packet.eventName = Migreringshendelser.VEDTAK.lagEventnameForType()
+        packet.setEventNameForHendelseType(Migreringshendelser.VEDTAK)
         packet[BEREGNING_KEY] = beregning
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert migreringshendelse fra beregning for behandling $behandlingId")

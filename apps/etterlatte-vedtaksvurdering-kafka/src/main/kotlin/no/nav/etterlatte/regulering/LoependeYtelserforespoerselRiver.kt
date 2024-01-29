@@ -3,19 +3,18 @@ package no.nav.etterlatte.regulering
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.OMREGNINGSHENDELSE
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import rapidsandrivers.dato
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
 import rapidsandrivers.tilbakestilteBehandlinger
 
@@ -26,7 +25,7 @@ internal class LoependeYtelserforespoerselRiver(
     private val logger = LoggerFactory.getLogger(LoependeYtelserforespoerselRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringEvents.FINN_LOEPENDE_YTELSER) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.FINN_LOEPENDE_YTELSER) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(TILBAKESTILTE_BEHANDLINGER_KEY) }
@@ -54,7 +53,7 @@ internal class LoependeYtelserforespoerselRiver(
 
         val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
         respons.takeIf { it.erLoepende }?.let {
-            packet.eventName = OMREGNINGSHENDELSE
+            packet.setEventNameForHendelseType(ReguleringHendelseType.OMREGNINGSHENDELSE)
             packet[HENDELSE_DATA_KEY] =
                 Omregningshendelse(
                     sakId = sakId,

@@ -9,6 +9,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import no.nav.etterlatte.TestDataFeature
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.logger
 import no.nav.etterlatte.navIdentFraToken
 import no.nav.etterlatte.producer
@@ -48,7 +49,7 @@ object SamordningMottattFeature : TestDataFeature {
                                 JsonMessage(
                                     """
                                     {
-                                        "@event_name": "VEDTAK:SAMORDNING_MOTTATT",
+                                        "@event_name": "${VedtakKafkaHendelseHendelseType.SAMORDNING_MOTTATT.lagEventnameForType()}",
                                         "vedtakId": "$vedtakID"
                                     }
                                     """.trimIndent(),

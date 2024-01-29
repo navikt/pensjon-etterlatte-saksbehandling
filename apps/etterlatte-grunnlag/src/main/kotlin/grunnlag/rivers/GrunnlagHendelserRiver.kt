@@ -19,10 +19,10 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.FNR_KEY
 import rapidsandrivers.GRUNNLAG_OPPDATERT
+import rapidsandrivers.ListenerMedLogging
 import rapidsandrivers.NY_OPPLYSNING_KEY
 import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.migrering.ListenerMedLogging
 import java.util.UUID
 
 class GrunnlagHendelserRiver(
@@ -38,7 +38,7 @@ class GrunnlagHendelserRiver(
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.rejectValue(EVENT_NAME_KEY, GRUNNLAG_OPPDATERT) }
-            validate { it.rejectValue(EVENT_NAME_KEY, EventNames.FEILA) }
+            validate { it.rejectValue(EVENT_NAME_KEY, EventNames.FEILA.lagEventnameForType()) }
             validate { it.rejectValue(VILKAARSVURDERT_KEY, true) }
         }
     }

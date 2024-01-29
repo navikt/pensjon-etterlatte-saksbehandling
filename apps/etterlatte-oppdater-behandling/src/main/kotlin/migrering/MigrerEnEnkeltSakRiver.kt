@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -20,9 +20,9 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.OPPLYSNING_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.sakId
 
 internal class MigrerEnEnkeltSakRiver(
@@ -32,7 +32,7 @@ internal class MigrerEnEnkeltSakRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SAK.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SAK) {
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
             validate { it.requireKey(FNR_KEY) }
@@ -59,7 +59,7 @@ internal class MigrerEnEnkeltSakRiver(
                 soeker = hendelse.soeker.value,
             )
         packet[PERSONGALLERI_KEY] = hendelse.opprettPersongalleri()
-        packet.eventName = Migreringshendelser.LAGRE_KOPLING.lagEventnameForType()
+        packet.setEventNameForHendelseType(Migreringshendelser.LAGRE_KOPLING)
 
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert migreringshendelse")

@@ -6,8 +6,8 @@ import io.mockk.verify
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
@@ -27,7 +27,6 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
-import no.nav.etterlatte.libs.common.tilbakekreving.lagEventnameForType
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -109,7 +108,7 @@ internal class TilbakekrevingHendelseRiverTest {
         val message =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to TilbakekrevingHendelseType.OPPRETTET.lagEventnameForType(),
+                    TilbakekrevingHendelseType.OPPRETTET.lagParMedEventNameKey(),
                     CORRELATION_ID_KEY to UUID.randomUUID(),
                     TEKNISK_TID_KEY to LocalDateTime.now(),
                     TILBAKEKREVING_STATISTIKK_RIVER_KEY to

@@ -1,7 +1,7 @@
 package no.nav.etterlatte.trygdetid.kafka
 
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -22,8 +22,8 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 import java.util.UUID
 
 internal class MigreringTrygdetidHendelserRiver(
@@ -33,7 +33,7 @@ internal class MigreringTrygdetidHendelserRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.TRYGDETID.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.TRYGDETID) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(VILKAARSVURDERT_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
@@ -138,7 +138,7 @@ internal class MigreringTrygdetidHendelserRiver(
         behandlingId: UUID,
     ) {
         packet[TRYGDETID_KEY] = beregnetTrygdetid.toJson()
-        packet.eventName = Migreringshendelser.BEREGN.lagEventnameForType()
+        packet.setEventNameForHendelseType(Migreringshendelser.BEREGN)
         context.publish(packet.toJson())
         logger.info(
             "Publiserte oppdatert migreringshendelse fra trygdetid for behandling $behandlingId",

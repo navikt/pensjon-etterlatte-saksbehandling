@@ -1,14 +1,15 @@
 package no.nav.etterlatte.rivers
 
+import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.ListenerMedLogging
 
 internal class DistribuerBrevRiver(
     private val rapidsConnection: RapidsConnection,
@@ -17,7 +18,7 @@ internal class DistribuerBrevRiver(
     private val logger = LoggerFactory.getLogger(DistribuerBrevRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, BrevHendelseHendelseType.JOURNALFOERT.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, BrevHendelseType.JOURNALFOERT) {
             validate { it.requireKey("brevId", "journalpostId", "distribusjonType") }
             validate { it.rejectKey("bestillingsId") }
         }
@@ -49,7 +50,7 @@ internal class DistribuerBrevRiver(
         bestillingsId: BestillingsID,
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
-        packet[EVENT_NAME_KEY] = BrevHendelseHendelseType.DISTRIBUERT.lagEventnameForType()
+        packet.setEventNameForHendelseType(BrevHendelseType.DISTRIBUERT)
         packet["bestillingsId"] = bestillingsId
 
         publish(packet.toJson())

@@ -9,13 +9,13 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.FINN_LOEPENDE_YTELSER
+import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
@@ -32,7 +32,7 @@ internal class ReguleringsforespoerselRiverTest {
     private fun genererReguleringMelding(dato: LocalDate) =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to ReguleringEvents.START_REGULERING,
+                ReguleringHendelseType.START_REGULERING.lagParMedEventNameKey(),
                 DATO_KEY to dato,
             ),
         )
@@ -71,7 +71,10 @@ internal class ReguleringsforespoerselRiverTest {
         Assertions.assertEquals(3, sendteMeldinger)
 
         for (i in 0 until inspector.inspektør.size) {
-            Assertions.assertEquals(FINN_LOEPENDE_YTELSER, inspector.inspektør.message(i).get(EVENT_NAME_KEY).asText())
+            Assertions.assertEquals(
+                ReguleringHendelseType.FINN_LOEPENDE_YTELSER.lagEventnameForType(),
+                inspector.inspektør.message(i).get(EVENT_NAME_KEY).asText(),
+            )
             Assertions.assertEquals(foersteMai2023.toString(), inspector.inspektør.message(i).get(DATO_KEY).asText())
         }
     }
@@ -141,7 +144,7 @@ internal class ReguleringsforespoerselRiverTest {
         inspector.sendTestMessage(melding.toJson())
 
         val melding1 = inspector.inspektør.message(0)
-        Assertions.assertEquals(FEILA, melding1.get(EVENT_NAME_KEY).textValue())
+        Assertions.assertEquals(FEILA.lagEventnameForType(), melding1.get(EVENT_NAME_KEY).textValue())
         Assertions.assertEquals(ReguleringsforespoerselRiver::class.simpleName, melding1.get(FEILENDE_STEG).textValue())
     }
 }

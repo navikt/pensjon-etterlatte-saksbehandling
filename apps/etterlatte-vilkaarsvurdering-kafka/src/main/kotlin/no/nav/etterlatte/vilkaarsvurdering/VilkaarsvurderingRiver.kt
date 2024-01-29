@@ -1,7 +1,7 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -10,9 +10,9 @@ import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import rapidsandrivers.SAK_ID_KEY
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class VilkaarsvurderingRiver(
     rapidsConnection: RapidsConnection,
@@ -22,7 +22,7 @@ internal class VilkaarsvurderingRiver(
     private val logger = LoggerFactory.getLogger(VilkaarsvurderingRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, ReguleringEvents.VILKAARSVURDER) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.VILKAARSVURDER) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(BEHANDLING_VI_OMREGNER_FRA_KEY) }
@@ -37,7 +37,7 @@ internal class VilkaarsvurderingRiver(
         val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
 
         vilkaarsvurderingService.kopierForrigeVilkaarsvurdering(behandlingId, behandlingViOmregnerFra)
-        packet.eventName = ReguleringEvents.BEREGN
+        packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGN)
         context.publish(packet.toJson())
         logger.info(
             "Vilkaarsvurdert ferdig for behandling $behandlingId og melding beregningsmelding ble sendt.",

@@ -7,14 +7,14 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
+import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 
 internal class PauseMigreringRiver(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
     ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.PAUSE.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.PAUSE) {
             validate { it.requireKey(PESYS_ID_KEY) }
         }
     }

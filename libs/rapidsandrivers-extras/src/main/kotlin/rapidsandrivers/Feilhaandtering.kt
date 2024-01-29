@@ -1,8 +1,8 @@
 package rapidsandrivers
 
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilendeSteg
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilmelding
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -21,7 +21,7 @@ fun <T> withFeilhaandtering(
     } catch (e: Exception) {
         feilhaandteringLogger.warn("Håndtering av melding ${packet.id} feila på steg $feilendeSteg.", e)
         try {
-            packet.eventName = EventNames.FEILA
+            packet.setEventNameForHendelseType(EventNames.FEILA)
             packet.feilendeSteg = feilendeSteg
             packet.feilmelding = e.stackTraceToString()
             context.publish(packet.toJson())

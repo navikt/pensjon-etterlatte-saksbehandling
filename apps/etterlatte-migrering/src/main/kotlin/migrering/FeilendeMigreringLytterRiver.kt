@@ -3,9 +3,9 @@ package no.nav.etterlatte.migrering
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilendeSteg
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilmelding
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
@@ -21,8 +21,8 @@ import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 import rapidsandrivers.BEHANDLING_ID_KEY
 import rapidsandrivers.HENDELSE_DATA_KEY
+import rapidsandrivers.ListenerMedLogging
 import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLogging
 import java.util.UUID
 
 internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, private val repository: PesysRepository) :
@@ -71,7 +71,7 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
             pesysId = pesyskopling.first!!,
         )
         repository.oppdaterStatus(pesyskopling.first!!, Migreringsstatus.MIGRERING_FEILA)
-        packet.eventName = Migreringshendelser.AVBRYT_BEHANDLING.lagEventnameForType()
+        packet.setEventNameForHendelseType(Migreringshendelser.AVBRYT_BEHANDLING)
         pesyskopling.second?.let {
             packet.behandlingId = it
             context.publish(packet.toJson())

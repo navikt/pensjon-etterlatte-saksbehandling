@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.ReguleringFeiletHendelse
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.AARSAK
@@ -23,7 +23,7 @@ internal class ReguleringFeiletRiverTest {
     private fun genererReguleringMelding() =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to FEILA,
+                FEILA.lagParMedEventNameKey(),
                 DATO_KEY to foersteMai2023,
                 AARSAK to ReguleringEvents.EVENT_NAME,
                 SAK_ID_KEY to 83L,

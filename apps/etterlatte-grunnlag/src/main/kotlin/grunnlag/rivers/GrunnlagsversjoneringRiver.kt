@@ -11,7 +11,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import rapidsandrivers.migrering.ListenerMedLogging
+import rapidsandrivers.ListenerMedLogging
 import java.util.UUID
 
 // TODO: Fjerne når grunnlag er versjonert (EY-2567)
@@ -60,7 +60,7 @@ class GrunnlagsversjoneringRiver(
     private val logger: Logger = LoggerFactory.getLogger(GrunnlagsversjoneringRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
             validate { it.requireKey("vedtak.behandlingId") }
         }
     }

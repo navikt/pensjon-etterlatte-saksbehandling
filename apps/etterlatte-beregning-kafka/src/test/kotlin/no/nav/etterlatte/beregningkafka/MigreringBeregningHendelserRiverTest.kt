@@ -214,7 +214,7 @@ internal class MigreringBeregningHendelserRiverTest {
         assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
         assertEquals(1, inspector.inspektør.size)
         val resultat = inspector.inspektør.message(0)
-        assertEquals(EventNames.FEILA, resultat.get(EVENT_NAME_KEY).textValue())
+        assertEquals(EventNames.FEILA.lagEventnameForType(), resultat.get(EVENT_NAME_KEY).textValue())
         assertEquals(MigreringBeregningHendelserRiver::class.simpleName, resultat.get(FEILENDE_STEG).textValue())
         assertTrue(
             resultat.get(FEILMELDING_KEY).textValue()
@@ -254,7 +254,7 @@ internal class MigreringBeregningHendelserRiverTest {
         assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
         assertEquals(1, inspector.inspektør.size)
         val resultat = inspector.inspektør.message(0)
-        assertEquals(EventNames.FEILA, resultat.get(EVENT_NAME_KEY).textValue())
+        assertEquals(EventNames.FEILA.lagEventnameForType(), resultat.get(EVENT_NAME_KEY).textValue())
         assertEquals(MigreringBeregningHendelserRiver::class.simpleName, resultat.get(FEILENDE_STEG).textValue())
         assertTrue(
             resultat.get(FEILMELDING_KEY).textValue()
@@ -294,7 +294,7 @@ internal class MigreringBeregningHendelserRiverTest {
         assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
         assertEquals(1, inspector.inspektør.size)
         val resultat = inspector.inspektør.message(0)
-        assertEquals(EventNames.FEILA, resultat.get(EVENT_NAME_KEY).textValue())
+        assertEquals(EventNames.FEILA.lagEventnameForType(), resultat.get(EVENT_NAME_KEY).textValue())
         assertEquals(MigreringBeregningHendelserRiver::class.simpleName, resultat.get(FEILENDE_STEG).textValue())
         assertTrue(
             resultat.get(FEILMELDING_KEY).textValue()
@@ -338,7 +338,7 @@ internal class MigreringBeregningHendelserRiverTest {
         assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
         assertEquals(1, inspector.inspektør.size)
         val resultat = inspector.inspektør.message(0)
-        assertEquals(EventNames.FEILA, resultat.get(EVENT_NAME_KEY).textValue())
+        assertEquals(EventNames.FEILA.lagEventnameForType(), resultat.get(EVENT_NAME_KEY).textValue())
         assertEquals(MigreringBeregningHendelserRiver::class.simpleName, resultat.get(FEILENDE_STEG).textValue())
         assertTrue(
             resultat.get(FEILMELDING_KEY).textValue()

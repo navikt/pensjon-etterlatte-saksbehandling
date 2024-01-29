@@ -46,7 +46,7 @@ import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -240,7 +240,7 @@ class ApplicationBuilder {
     private fun lagMelding(behandlingId: String) =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV.lagEventnameForType(),
+                Migreringshendelser.FIKS_ENKELTBREV.lagParMedEventNameKey(),
                 BEHANDLING_ID_KEY to behandlingId,
                 FIKS_BREV_MIGRERING to true,
             ),

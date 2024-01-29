@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.common.klage
 
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.rapidsandrivers.EventnameHendelseType
+import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.util.UUID
 

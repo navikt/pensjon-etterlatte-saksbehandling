@@ -57,7 +57,6 @@ import no.nav.etterlatte.databaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
@@ -356,17 +355,6 @@ internal class ApplicationContext(
             vedtakKlient = vedtakKlient,
             tilbakekrevingKlient = tilbakekrevingKlient,
             tilbakekrevinghendelser = tilbakekreving,
-        )
-
-    // Job
-    val grunnlagsendringshendelseJob =
-        GrunnlagsendringshendelseJob(
-            datasource = dataSource,
-            grunnlagsendringshendelseService = grunnlagsendringshendelseService,
-            leaderElection = leaderElectionKlient,
-            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES),
-            minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong(),
         )
 
     val metrikkerJob: MetrikkerJob by lazy {

@@ -6,10 +6,10 @@ import org.slf4j.LoggerFactory
 
 data class PersonMedSakerOgRoller(
     val fnr: String,
-    val sakerOgRoller: List<SakOgRolle>,
+    val sakiderOgRoller: List<SakidOgRolle>,
 )
 
-data class SakOgRolle(
+data class SakidOgRolle(
     val sakId: Long,
     val rolle: Saksrolle,
 )

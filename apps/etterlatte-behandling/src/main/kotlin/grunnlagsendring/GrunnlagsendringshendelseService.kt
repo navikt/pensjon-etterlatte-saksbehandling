@@ -23,6 +23,7 @@ import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
@@ -38,6 +39,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -171,10 +173,12 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettEndretGrunnbeloepHendelse(sakId: Long): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForSak(
-            sakId,
-            GrunnlagsendringsType.GRUNNBELOEP,
-        )
+        return inTransaction {
+            opprettHendelseAvTypeForSak(
+                sakId,
+                GrunnlagsendringsType.GRUNNBELOEP,
+            )
+        }
     }
 
     suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
@@ -243,7 +247,7 @@ class GrunnlagsendringshendelseService(
         val grunnlagendringType: GrunnlagsendringsType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
 
-        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
+        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakiderOgRoller }
         val sakerOgRollerGruppert = sakerOgRoller.distinct()
 
         val sakerForSoeker = sakerOgRollerGruppert.filter { Saksrolle.SOEKER == it.rolle }
@@ -281,108 +285,104 @@ class GrunnlagsendringshendelseService(
         }
     }
 
+    data class SakOgRolle(
+        val sak: Sak,
+        val sakiderOgRolle: SakidOgRolle,
+    )
+
     fun opprettHendelseAvTypeForPerson(
         fnr: String,
         grunnlagendringType: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
         val grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
-        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
+        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakiderOgRoller }
 
         val sakerOgRollerGruppert = sakerOgRoller.distinct()
 
         return sakerOgRollerGruppert
-            .filter { rolleOgSak -> sakService.finnSak(rolleOgSak.sakId) != null }
+            .map { sakiderOgRoller -> Pair(sakService.finnSak(sakiderOgRoller.sakId), sakiderOgRoller) }
+            .filter { rollerogSak -> rollerogSak.first != null }
+            .map { SakOgRolle(it.first!!, it.second) }
             .filter { rolleOgSak ->
                 !hendelseEksistererFraFoer(
-                    rolleOgSak.sakId,
+                    rolleOgSak.sak.id,
                     fnr,
                     grunnlagendringType,
                 )
             }
             .map { rolleOgSak ->
-                val hendelseId = UUID.randomUUID()
-                logger.info(
-                    "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
-                        "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}",
-                )
                 val hendelse =
                     Grunnlagsendringshendelse(
-                        id = hendelseId,
-                        sakId = rolleOgSak.sakId,
+                        id = UUID.randomUUID(),
+                        sakId = rolleOgSak.sak.id,
                         status = grunnlagsEndringsStatus,
                         type = grunnlagendringType,
                         opprettet = tidspunktForMottakAvHendelse,
-                        hendelseGjelderRolle = rolleOgSak.rolle,
+                        hendelseGjelderRolle = rolleOgSak.sakiderOgRolle.rolle,
                         gjelderPerson = fnr,
                     )
-                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
-            }
+                logger.info(
+                    "Oppretter grunnlagsendringshendelse med id=${hendelse.id} for hendelse av " +
+                        "type $grunnlagendringType på sak med id=${rolleOgSak.sak.id}",
+                )
+                Pair(grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse), rolleOgSak)
+            }.onEach {
+                verifiserOgHaandterHendelse(it.first, it.second.sak)
+            }.map { it.first }
     }
 
     private fun opprettHendelseAvTypeForSak(
         sakId: Long,
         grunnlagendringType: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
-        return inTransaction {
-            if (hendelseEksistererFraFoer(sakId, null, grunnlagendringType)) {
-                emptyList()
-            } else {
-                val hendelseId = UUID.randomUUID()
-                logger.info(
-                    "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
-                        "type $grunnlagendringType på sak med id=$sakId",
+        return if (hendelseEksistererFraFoer(sakId, null, grunnlagendringType)) {
+            emptyList()
+        } else {
+            val hendelseId = UUID.randomUUID()
+            logger.info(
+                "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
+                    "type $grunnlagendringType på sak med id=$sakId",
+            )
+            val hendelse =
+                Grunnlagsendringshendelse(
+                    id = hendelseId,
+                    sakId = sakId,
+                    status = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+                    type = grunnlagendringType,
+                    opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                    hendelseGjelderRolle = Saksrolle.SOEKER,
+                    gjelderPerson = sakService.finnSak(sakId)?.ident!!,
                 )
-                val hendelse =
-                    Grunnlagsendringshendelse(
-                        id = hendelseId,
-                        sakId = sakId,
-                        status = GrunnlagsendringStatus.VENTER_PAA_JOBB,
-                        type = grunnlagendringType,
-                        opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                        hendelseGjelderRolle = Saksrolle.SOEKER,
-                        gjelderPerson = sakService.finnSak(sakId)?.ident!!,
-                    )
-                listOf(
-                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse),
-                )
-            }
-        }
+            listOf(
+                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse),
+            )
+        }.map {
+            Pair(it, sakService.finnSak(it.sakId)!!)
+        }.onEach {
+            verifiserOgHaandterHendelse(it.first, it.second)
+        }.map { it.first }
     }
 
-    fun sjekkKlareGrunnlagsendringshendelser(minutterGamle: Long) =
-        inTransaction {
-            grunnlagsendringshendelseDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(minutterGamle)
-                .forEach { hendelse ->
-                    try {
-                        verifiserOgHaandterHendelse(hendelse)
-                    } catch (e: Exception) {
-                        logger.error(
-                            "Kunne ikke sjekke opp for hendelsen med id=${hendelse.id} på sak ${hendelse.sakId} " +
-                                "på grunn av feil",
-                            e,
-                        )
-                    }
-                }
-        }
-
-    private fun verifiserOgHaandterHendelse(hendelse: Grunnlagsendringshendelse) {
-        val sak = sakService.finnSak(hendelse.sakId)!!
-        val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
-        val pdlData = pdltjenesterKlient.hentPdlModell(hendelse.gjelderPerson, personRolle, sak.sakType)
+    fun verifiserOgHaandterHendelse(
+        grunnlagsendringshendelse: Grunnlagsendringshendelse,
+        sak: Sak,
+    ) {
+        val personRolle = grunnlagsendringshendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
+        val pdlData = pdltjenesterKlient.hentPdlModell(grunnlagsendringshendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag =
             runBlocking {
-                grunnlagKlient.hentGrunnlag(hendelse.sakId)
+                grunnlagKlient.hentGrunnlag(sak.id)
             }
         try {
-            val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle, sak.sakType)
+            val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
             if (!samsvarMellomPdlOgGrunnlag.samsvar) {
-                oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag)
+                oppdaterHendelseSjekket(grunnlagsendringshendelse, samsvarMellomPdlOgGrunnlag)
             } else {
-                forkastHendelse(hendelse.id, samsvarMellomPdlOgGrunnlag)
+                forkastHendelse(grunnlagsendringshendelse.id, samsvarMellomPdlOgGrunnlag)
             }
         } catch (e: GrunnlagRolleException) {
-            forkastHendelse(hendelse.id, SamsvarMellomKildeOgGrunnlag.FeilRolle(pdlData, grunnlag, false))
+            forkastHendelse(grunnlagsendringshendelse.id, SamsvarMellomKildeOgGrunnlag.FeilRolle(pdlData, grunnlag, false))
         }
     }
 

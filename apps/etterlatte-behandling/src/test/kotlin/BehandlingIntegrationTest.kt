@@ -36,8 +36,8 @@ import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -90,8 +90,6 @@ abstract class BehandlingIntegrationTest {
                         put("AZUREAD_FORTROLIG_GROUPID", "ea930b6b-9397-44d9-b9e6-f4cf527a632a")
                         put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", "753805ea-65a7-4855-bdc3-e6130348df9f")
                         put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", "ea7411eb-8b48-41a0-bc56-7b521fbf0c25")
-                        put("HENDELSE_JOB_FREKVENS", "1")
-                        put("HENDELSE_MINUTTER_GAMLE_HENDELSER", "1")
                         put("NORG2_URL", "http://localhost")
                         put("ELECTOR_PATH", "http://localhost")
                         put("NAVANSATT_URL", "http://localhost")
@@ -207,7 +205,7 @@ abstract class BehandlingIntegrationTest {
                     } else if (request.url.fullPath.endsWith("/roller")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(
-                            PersonMedSakerOgRoller("08071272487", listOf(SakOgRolle(1, Saksrolle.SOEKER))).toJson(),
+                            PersonMedSakerOgRoller("08071272487", listOf(SakidOgRolle(1, Saksrolle.SOEKER))).toJson(),
                             headers = headers,
                         )
                     } else if (request.url.fullPath.endsWith("/saker")) {

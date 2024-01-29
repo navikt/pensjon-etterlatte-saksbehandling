@@ -26,7 +26,6 @@ import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
-import java.util.UUID
 
 enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
     KanBrukeKlageToggle("pensjon-etterlatte.kan-bruke-klage"),
@@ -129,7 +128,7 @@ internal fun Route.klageRoutes(
                         medBody<AvbrytKlageDto> { avbrytKlageDto ->
                             inTransaction {
                                 klageService.avbrytKlage(
-                                    avbrytKlageDto.klageId,
+                                    klageId,
                                     avbrytKlageDto.aarsakTilAvbrytelse,
                                     avbrytKlageDto.kommentar,
                                     saksbehandler,
@@ -158,4 +157,4 @@ data class VurdereFormkravDto(val formkrav: Formkrav)
 
 data class VurdertUtfallDto(val utfall: KlageUtfallUtenBrev)
 
-data class AvbrytKlageDto(val klageId: UUID, val aarsakTilAvbrytelse: AarsakTilAvbrytelse, val kommentar: String)
+data class AvbrytKlageDto(val aarsakTilAvbrytelse: AarsakTilAvbrytelse, val kommentar: String)

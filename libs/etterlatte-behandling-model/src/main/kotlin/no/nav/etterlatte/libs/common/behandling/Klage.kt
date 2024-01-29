@@ -170,6 +170,19 @@ data class Klage(
         )
     }
 
+    fun avbryt(aarsak: AarsakTilAvbrytelse): Klage {
+        if (!this.kanAvbryte()) {
+            throw IllegalStateException(
+                "Kan ikke avbryte klagen med id=${this.id} " +
+                    "på grunn av status til klagen (${this.status})",
+            )
+        }
+        return this.copy(
+            status = KlageStatus.AVBRUTT,
+            aarsakTilAvbrytelse = aarsak,
+        )
+    }
+
     fun kanOppdatereFormkrav(): Boolean {
         return KlageStatus.kanOppdatereFormkrav(this.status)
     }
@@ -191,6 +204,10 @@ data class Klage(
 
             else -> false
         }
+    }
+
+    fun kanAvbryte(): Boolean {
+        return KlageStatus.kanAvbryte(this.status)
     }
 
     fun tilKabalForsendelse() {

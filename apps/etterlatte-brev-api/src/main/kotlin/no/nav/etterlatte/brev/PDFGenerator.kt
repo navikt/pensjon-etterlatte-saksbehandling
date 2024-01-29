@@ -124,13 +124,18 @@ class PDFGenerator(
     ): BrevData =
         when (generellBrevData.erMigrering()) {
             false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkoder)
-            true ->
+            true -> {
+                val erUnder18Aar =
+                    requireNotNull(generellBrevData.personerISak.soeker.under18) {
+                        "Klarte ikke å bestemme om alder på søker er under eller over 18 år. Kan dermed ikke velge riktig brev"
+                    }
                 OmregnetBPNyttRegelverkFerdig.fra(
                     innhold =
                         InnholdMedVedlegg(
                             { hentLagretInnhold(brev) },
                             { hentLagretInnholdVedlegg(brev) },
                         ),
+                    erUnder18Aar = erUnder18Aar,
                     data =
                         migreringBrevDataService.opprettMigreringBrevdata(
                             generellBrevData,
@@ -138,6 +143,7 @@ class PDFGenerator(
                             brukerTokenInfo,
                         ),
                 )
+            }
         }
 
     private suspend fun opprettBrevData(

@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.token.Fagsaksystem
@@ -15,13 +14,8 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 data class OmregnetBPNyttRegelverk(
     val utbetaltFoerReform: Kroner,
     val utbetaltEtterReform: Kroner,
-    val anvendtTrygdetid: Int,
-    val prorataBroek: IntBroek?,
-    val grunnbeloep: Kroner,
     val erBosattUtlandet: Boolean,
-    val erYrkesskade: Boolean,
     val erForeldreloes: Boolean,
-    val erUnder18Aar: Boolean,
 ) : BrevData() {
     companion object {
         fun fra(
@@ -29,43 +23,24 @@ data class OmregnetBPNyttRegelverk(
             utbetalingsinfo: Utbetalingsinfo,
             migreringRequest: MigreringBrevRequest?,
         ): OmregnetBPNyttRegelverk {
-            val foersteBeregningsperiode = utbetalingsinfo.beregningsperioder.first()
-            val erUnder18Aar =
-                requireNotNull(generellBrevData.personerISak.soeker.under18) {
-                    "Klarte ikke å bestemme om alder på søker er under eller over 18 år. Kan dermed ikke velge riktig brev"
-                }
             val defaultBrevdataOmregning =
                 OmregnetBPNyttRegelverk(
                     utbetaltFoerReform = Kroner(0),
                     utbetaltEtterReform = Kroner(utbetalingsinfo.beloep.value),
-                    anvendtTrygdetid = foersteBeregningsperiode.trygdetid,
-                    prorataBroek = foersteBeregningsperiode.prorataBroek,
-                    grunnbeloep = Kroner(foersteBeregningsperiode.grunnbeloep.value),
                     erBosattUtlandet = false,
-                    erYrkesskade = false,
                     erForeldreloes =
                         generellBrevData.personerISak.soeker.foreldreloes ||
                             (
                                 generellBrevData.personerISak.avdoede.size > 1 &&
                                     generellBrevData.personerISak.verge !is ForelderVerge
                             ),
-                    erUnder18Aar = erUnder18Aar,
                 )
             if (generellBrevData.erMigrering()) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
-                val (pesysUtenlandstilknytning, yrkesskade) =
-                    when (migreringRequest) {
-                        null -> {
-                            val utlandstilknytning =
-                                requireNotNull(generellBrevData.utlandstilknytning) {
-                                    "Mangler utlandstilknytning for behandling=${generellBrevData.behandlingId}"
-                                }
-                            val yrkesskade = false // Må redigere brev manuelt hvis yrkesskade
-                            Pair(utlandstilknytning.type, yrkesskade)
-                        }
-
-                        else -> Pair(migreringRequest.utlandstilknytningType, migreringRequest.yrkesskade)
-                    }
+                val pesysUtenlandstilknytning =
+                    migreringRequest?.utlandstilknytningType ?: requireNotNull(generellBrevData.utlandstilknytning) {
+                        "Mangler utlandstilknytning for behandling=${generellBrevData.behandlingId}"
+                    }.type
 
                 if (generellBrevData.forenkletVedtak?.saksbehandlerIdent == Fagsaksystem.EY.navn &&
                     defaultBrevdataOmregning.erForeldreloes
@@ -78,7 +53,6 @@ data class OmregnetBPNyttRegelverk(
                 return defaultBrevdataOmregning.copy(
                     utbetaltFoerReform = Kroner(pesysUtbetaltFoerReform),
                     erBosattUtlandet = pesysUtenlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                    erYrkesskade = yrkesskade,
                 )
             }
 
@@ -89,14 +63,17 @@ data class OmregnetBPNyttRegelverk(
 
 data class OmregnetBPNyttRegelverkFerdig(
     val innhold: List<Slate.Element>,
+    val erUnder18Aar: Boolean,
     val data: OmregnetBPNyttRegelverk,
 ) : BrevData() {
     companion object {
         fun fra(
             innhold: InnholdMedVedlegg,
+            erUnder18Aar: Boolean,
             data: OmregnetBPNyttRegelverk,
         ) = OmregnetBPNyttRegelverkFerdig(
             innhold = innhold.innhold(),
+            erUnder18Aar = erUnder18Aar,
             data = data,
         )
     }

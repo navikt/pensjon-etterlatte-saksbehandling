@@ -10,7 +10,7 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.BrevDataMapper
+import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory
 class PDFGenerator(
     private val db: BrevRepository,
     private val brevDataFacade: BrevdataFacade,
-    private val brevDataMapper: BrevDataMapper,
+    private val brevDataMapper: BrevDataMapperFerdigstilling,
     private val adresseService: AdresseService,
     private val brevbakerService: BrevbakerService,
     private val migreringBrevDataService: MigreringBrevDataService,

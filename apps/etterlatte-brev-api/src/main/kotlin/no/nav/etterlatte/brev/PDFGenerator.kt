@@ -73,11 +73,11 @@ class PDFGenerator(
 
         val sak = generellBrevData.sak
         val letterData =
-            brevData(
-                generellBrevData,
-                automatiskMigreringRequest,
+            opprettBrevData(
                 brev,
+                generellBrevData,
                 bruker,
+                automatiskMigreringRequest,
                 brevkodePar,
             )
         val brevRequest =
@@ -114,28 +114,6 @@ class PDFGenerator(
             }
         }.also { lagrePdfHvisVedtakFattet(generellBrevData, brev, it) }
     }
-
-    private suspend fun brevData(
-        generellBrevData: GenerellBrevData,
-        automatiskMigreringRequest: MigreringBrevRequest?,
-        brev: Brev,
-        brukerTokenInfo: BrukerTokenInfo,
-        brevkoder: Brevkoder,
-    ): BrevData =
-        when (generellBrevData.erMigrering()) {
-            false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, automatiskMigreringRequest, brevkoder)
-            true -> {
-                migreringBrevDataService.opprettMigreringBrevdataFerdigstill(
-                    generellBrevData,
-                    automatiskMigreringRequest,
-                    InnholdMedVedlegg(
-                        { hentLagretInnhold(brev) },
-                        { hentLagretInnholdVedlegg(brev) },
-                    ),
-                    brukerTokenInfo,
-                )
-            }
-        }
 
     private suspend fun opprettBrevData(
         brev: Brev,

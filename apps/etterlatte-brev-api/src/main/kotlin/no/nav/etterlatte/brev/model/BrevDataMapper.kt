@@ -206,6 +206,15 @@ class BrevDataMapper(
         automatiskMigreringRequest: MigreringBrevRequest?,
         tittel: String? = null,
     ): BrevData {
+        if (generellBrevData.erMigrering()) {
+            return migreringBrevDataService.opprettMigreringBrevdataFerdigstill(
+                generellBrevData,
+                automatiskMigreringRequest,
+                innholdMedVedlegg,
+                brukerTokenInfo,
+            )
+        }
+
         return when (kode.ferdigstilling) {
             TOM_MAL_INFORMASJONSBREV -> {
                 ManueltBrevMedTittelData(innholdMedVedlegg.innhold(), tittel)

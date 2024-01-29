@@ -5,8 +5,8 @@ import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
@@ -53,7 +53,7 @@ class StartInformasjonsbrevgenereringRiver(
     private fun lagMelding(brevgenereringRequest: BrevgenereringRequest) =
         JsonMessage.newMessage(
             listOf(
-                EVENT_NAME_KEY to BrevRequestHendelseType.OPPRETT_BREV.lagEventnameForType(),
+                BrevRequestHendelseType.OPPRETT_BREV.lagParMedEventNameKey(),
                 FNR_KEY to (brevgenereringRequest.fnr),
                 BEHANDLING_ID_KEY to (brevgenereringRequest.behandlingId?.toString()),
                 BREVMAL_RIVER_KEY to brevgenereringRequest.brevmal.name,

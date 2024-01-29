@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
@@ -59,7 +60,7 @@ class VedtakhendelserRiver(
                 }
                 context.publish(
                     listOfNotNull(
-                        EVENT_NAME_KEY to StatistikkhendelseType.REGISTRERT.lagEventnameForType(),
+                        StatistikkhendelseType.REGISTRERT.lagParMedEventNameKey(),
                         sakRad?.let { "sak_rad" to it },
                         stoenadRad?.let { "stoenad_rad" to it },
                     ).toMap()

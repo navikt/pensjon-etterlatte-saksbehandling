@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -30,7 +31,7 @@ internal class VilkaarsvurderingRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to ReguleringHendelseType.VILKAARSVURDER.lagEventnameForType(),
+                    ReguleringHendelseType.VILKAARSVURDER.lagParMedEventNameKey(),
                     SAK_ID_KEY to 1,
                     BEHANDLING_ID_KEY to behandlingId,
                     BEHANDLING_VI_OMREGNER_FRA_KEY to behandlingViOmregnerFra,

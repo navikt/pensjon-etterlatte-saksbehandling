@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -30,7 +31,7 @@ internal class LoependeYtelserforespoerselRiverTest {
     private fun genererReguleringMelding(dato: LocalDate) =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to ReguleringHendelseType.FINN_LOEPENDE_YTELSER.lagEventnameForType(),
+                ReguleringHendelseType.FINN_LOEPENDE_YTELSER.lagParMedEventNameKey(),
                 SAK_ID_KEY to 1,
                 DATO_KEY to dato,
                 TILBAKESTILTE_BEHANDLINGER_KEY to "",
@@ -91,7 +92,7 @@ internal class LoependeYtelserforespoerselRiverTest {
         val behandlinger = listOf(UUID.randomUUID(), UUID.randomUUID())
         val melding =
             mapOf(
-                EVENT_NAME_KEY to ReguleringHendelseType.FINN_LOEPENDE_YTELSER.lagEventnameForType(),
+                ReguleringHendelseType.FINN_LOEPENDE_YTELSER.lagParMedEventNameKey(),
                 SAK_ID_KEY to 1,
                 DATO_KEY to foersteMai2023,
                 TILBAKESTILTE_BEHANDLINGER_KEY to "${behandlinger[0]};${behandlinger[1]}",

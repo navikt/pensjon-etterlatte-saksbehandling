@@ -9,7 +9,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
@@ -70,7 +70,7 @@ class LyttPaaIverksattVedtakRiverTest {
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
-                            EVENT_NAME_KEY to UtbetalinghendelseType.OPPDATERT.lagEventnameForType(),
+                            UtbetalinghendelseType.OPPDATERT.lagParMedEventNameKey(),
                             UTBETALING_RESPONSE to
                                 UtbetalingResponseDto(
                                     status = UtbetalingStatusDto.GODKJENT,
@@ -111,7 +111,7 @@ class LyttPaaIverksattVedtakRiverTest {
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
-                            EVENT_NAME_KEY to UtbetalinghendelseType.OPPDATERT.lagEventnameForType(),
+                            UtbetalinghendelseType.OPPDATERT.lagParMedEventNameKey(),
                             UTBETALING_RESPONSE to
                                 UtbetalingResponseDto(
                                     status = UtbetalingStatusDto.AVVIST,

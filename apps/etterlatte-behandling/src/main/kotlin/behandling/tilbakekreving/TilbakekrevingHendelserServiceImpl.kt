@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
 import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
 import no.nav.etterlatte.libs.common.tilbakekreving.TILBAKEKREVING_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
-import no.nav.etterlatte.libs.common.tilbakekreving.lagEventnameForType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime

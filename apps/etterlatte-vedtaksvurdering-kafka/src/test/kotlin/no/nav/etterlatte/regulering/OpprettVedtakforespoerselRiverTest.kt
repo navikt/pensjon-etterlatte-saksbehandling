@@ -3,7 +3,7 @@ package no.nav.etterlatte.regulering
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -21,7 +21,7 @@ internal class OpprettVedtakforespoerselRiverTest {
     private fun genererOpprettVedtakforespoersel(behandlingId: UUID) =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to ReguleringHendelseType.OPPRETT_VEDTAK.lagEventnameForType(),
+                ReguleringHendelseType.OPPRETT_VEDTAK.lagParMedEventNameKey(),
                 SAK_ID_KEY to sakId,
                 DATO_KEY to foersteMai2023,
                 BEHANDLING_ID_KEY to behandlingId,

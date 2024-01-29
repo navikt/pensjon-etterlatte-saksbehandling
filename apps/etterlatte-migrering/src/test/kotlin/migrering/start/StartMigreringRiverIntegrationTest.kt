@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
@@ -149,7 +150,7 @@ internal class StartMigreringRiverIntegrationTest {
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(),
+                        Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagParMedEventNameKey(),
                         SAK_ID_KEY to "22974139",
                         LOPENDE_JANUAR_2024_KEY to true,
                         MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
@@ -233,7 +234,7 @@ internal class StartMigreringRiverIntegrationTest {
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(),
+                        Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagParMedEventNameKey(),
                         SAK_ID_KEY to pesysId.id,
                         LOPENDE_JANUAR_2024_KEY to true,
                         MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
@@ -250,7 +251,7 @@ internal class StartMigreringRiverIntegrationTest {
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to Migreringshendelser.LAGRE_KOPLING.lagEventnameForType(),
+                        Migreringshendelser.LAGRE_KOPLING.lagParMedEventNameKey(),
                         BEHANDLING_ID_KEY to behandlingId,
                         PESYS_ID_KEY to pesysId,
                     ),
@@ -261,7 +262,7 @@ internal class StartMigreringRiverIntegrationTest {
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to UtbetalinghendelseType.OPPDATERT.lagEventnameForType(),
+                        UtbetalinghendelseType.OPPDATERT.lagParMedEventNameKey(),
                         UTBETALING_RESPONSE to
                             UtbetalingResponseDto(
                                 status = UtbetalingStatusDto.GODKJENT,
@@ -278,7 +279,7 @@ internal class StartMigreringRiverIntegrationTest {
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to BrevHendelseType.DISTRIBUERT.lagEventnameForType(),
+                        BrevHendelseType.DISTRIBUERT.lagParMedEventNameKey(),
                         "bestillingsId" to UUID.randomUUID().toString(),
                         "vedtak" to VedtakMock(behandlingId = behandlingId),
                     ),
@@ -351,7 +352,7 @@ internal class StartMigreringRiverIntegrationTest {
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(),
+                        Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagParMedEventNameKey(),
                         SAK_ID_KEY to pesysId.id,
                         LOPENDE_JANUAR_2024_KEY to true,
                         MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.MED_PAUSE,
@@ -370,7 +371,7 @@ internal class StartMigreringRiverIntegrationTest {
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to Migreringshendelser.LAGRE_KOPLING.lagEventnameForType(),
+                        Migreringshendelser.LAGRE_KOPLING.lagParMedEventNameKey(),
                         BEHANDLING_ID_KEY to behandlingId,
                         PESYS_ID_KEY to pesysId,
                     ),
@@ -380,7 +381,7 @@ internal class StartMigreringRiverIntegrationTest {
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to Migreringshendelser.PAUSE.lagEventnameForType(),
+                        Migreringshendelser.PAUSE.lagParMedEventNameKey(),
                         PESYS_ID_KEY to pesysId,
                     ),
                 ).toJson(),
@@ -396,7 +397,7 @@ internal class StartMigreringRiverIntegrationTest {
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(),
+                        Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagParMedEventNameKey(),
                         SAK_ID_KEY to pesysId.id,
                         LOPENDE_JANUAR_2024_KEY to true,
                         MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FORTSETT_ETTER_PAUSE,
@@ -465,7 +466,7 @@ internal class StartMigreringRiverIntegrationTest {
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(),
+                        Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagParMedEventNameKey(),
                         SAK_ID_KEY to pesysid,
                         LOPENDE_JANUAR_2024_KEY to true,
                         MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
@@ -535,7 +536,7 @@ internal class StartMigreringRiverIntegrationTest {
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagEventnameForType(),
+                        Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagParMedEventNameKey(),
                         SAK_ID_KEY to pesysid,
                         LOPENDE_JANUAR_2024_KEY to true,
                         MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
@@ -560,7 +561,7 @@ internal class StartMigreringRiverIntegrationTest {
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
-                        EVENT_NAME_KEY to Migreringshendelser.START_MIGRERING.lagEventnameForType(),
+                        Migreringshendelser.START_MIGRERING.lagParMedEventNameKey(),
                         SAK_ID_FLERE_KEY to listOf("111", "222", "333"),
                         LOPENDE_JANUAR_2024_KEY to false,
                         MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,

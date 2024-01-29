@@ -5,11 +5,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_KRITERIER_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.GYLDIG_FOR_BEHANDLING_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SOEKNAD_ID_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.statistikk.domain.SoeknadStatistikk
 import no.nav.etterlatte.statistikk.service.SoeknadStatistikkService
@@ -48,7 +48,7 @@ internal class SoeknadStatistikkRiverTest {
         val message =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK.lagEventnameForType(),
+                    EventNames.FORDELER_STATISTIKK.lagParMedEventNameKey(),
                     CORRELATION_ID_KEY to UUID.randomUUID(),
                     SOEKNAD_ID_KEY to soeknadId,
                     SAK_TYPE_KEY to sakType,
@@ -89,7 +89,7 @@ internal class SoeknadStatistikkRiverTest {
         val message =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK.lagEventnameForType(),
+                    EventNames.FORDELER_STATISTIKK.lagParMedEventNameKey(),
                     CORRELATION_ID_KEY to UUID.randomUUID(),
                     SOEKNAD_ID_KEY to soeknadId,
                     SAK_TYPE_KEY to sakType,

@@ -5,9 +5,9 @@ import io.mockk.every
 import io.mockk.spyk
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -91,7 +91,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
-                            EVENT_NAME_KEY to EventNames.FEILA.lagEventnameForType(),
+                            EventNames.FEILA.lagParMedEventNameKey(),
                             KILDE_KEY to Vedtaksloesning.PESYS,
                             PESYS_ID_KEY to pesysid,
                             HENDELSE_DATA_KEY to pesyssak.tilMigreringsrequest(),

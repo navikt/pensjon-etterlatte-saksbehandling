@@ -9,6 +9,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
@@ -31,7 +32,7 @@ internal class ReguleringsforespoerselRiverTest {
     private fun genererReguleringMelding(dato: LocalDate) =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to ReguleringHendelseType.START_REGULERING.lagEventnameForType(),
+                ReguleringHendelseType.START_REGULERING.lagParMedEventNameKey(),
                 DATO_KEY to dato,
             ),
         )

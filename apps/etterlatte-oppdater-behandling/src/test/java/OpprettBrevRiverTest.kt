@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -31,7 +32,7 @@ class OpprettBrevRiverTest {
         testRapid.sendTestMessage(
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevRequestHendelseType.OPPRETT_BREV.lagEventnameForType(),
+                    BrevRequestHendelseType.OPPRETT_BREV.lagParMedEventNameKey(),
                     FNR_KEY to "123",
                     SAK_TYPE_KEY to SakType.BARNEPENSJON.name,
                 ),
@@ -55,7 +56,7 @@ class OpprettBrevRiverTest {
         testRapid.sendTestMessage(
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevRequestHendelseType.OPPRETT_BREV.lagEventnameForType(),
+                    BrevRequestHendelseType.OPPRETT_BREV.lagParMedEventNameKey(),
                     BEHANDLING_ID_KEY to behandlingId,
                     SAK_TYPE_KEY to SakType.BARNEPENSJON.name,
                 ),

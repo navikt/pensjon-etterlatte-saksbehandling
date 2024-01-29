@@ -13,12 +13,12 @@ import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_KRITERIER_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.GYLDIG_FOR_BEHANDLING_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SOEKNAD_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.sikkerLogg
@@ -150,7 +150,7 @@ internal class FordelerRiver(
         val meldingsinnhold: MutableMap<String, Any?> =
             mutableMapOf(
                 CORRELATION_ID_KEY to packet.correlationId,
-                EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK.lagEventnameForType(),
+                EventNames.FORDELER_STATISTIKK.lagParMedEventNameKey(),
                 SAK_TYPE_KEY to sakType,
                 SOEKNAD_ID_KEY to packet.soeknadId(),
                 GYLDIG_FOR_BEHANDLING_KEY to resultat,

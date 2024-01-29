@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -67,7 +68,7 @@ internal class OpprettJournalfoerOgDistribuer {
             JsonMessage.newMessage(
                 mapOf(
                     CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                    EVENT_NAME_KEY to VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(),
+                    VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                     "vedtak" to lagVedtakDto(behandlingId),
                     KILDE_KEY to Vedtaksloesning.GJENNY.name,
                 ),
@@ -111,7 +112,7 @@ internal class OpprettJournalfoerOgDistribuer {
             JsonMessage.newMessage(
                 mapOf(
                     CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                    EVENT_NAME_KEY to VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(),
+                    VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                     "vedtak" to lagVedtakDto(behandlingId),
                     KILDE_KEY to Vedtaksloesning.PESYS.name,
                     HENDELSE_DATA_KEY to migreringRequest(),

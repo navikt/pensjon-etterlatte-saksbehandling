@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -103,7 +104,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(),
+                    VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                     "vedtak" to vedtak,
                 ),
             )
@@ -120,7 +121,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(),
+                    VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                     "vedtak" to vedtak,
                     SKAL_SENDE_BREV to false,
                 ),
@@ -135,7 +136,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         return JsonMessage.newMessage(
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                EVENT_NAME_KEY to VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(),
+                VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                 "vedtak" to vedtak,
             ),
         )

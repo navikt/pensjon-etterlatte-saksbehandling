@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -109,7 +110,7 @@ internal class MigreringVilkaarsvurderingRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to Migreringshendelser.VILKAARSVURDER.lagEventnameForType(),
+                    Migreringshendelser.VILKAARSVURDER.lagParMedEventNameKey(),
                     BEHOV_NAME_KEY to Opplysningstype.AVDOED_PDL_V1.name,
                     SAK_ID_KEY to 1,
                     BEHANDLING_ID_KEY to behandlingId,

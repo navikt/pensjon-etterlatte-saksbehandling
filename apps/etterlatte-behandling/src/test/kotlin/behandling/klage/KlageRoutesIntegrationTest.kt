@@ -220,13 +220,15 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                 }
             assertEquals(HttpStatusCode.OK, response.status)
 
-            val avbruttKlage =
+            val avbruttKlageResponse =
                 client.get("/api/klage/${klage.id}") {
                     addAuthToken(tokenSaksbehandler)
-                }
-            assertEquals(HttpStatusCode.OK, avbruttKlage.status)
-            assertEquals(klage.id, avbruttKlage.body<Klage>().id)
-            assertEquals(KlageStatus.AVBRUTT, avbruttKlage.body<Klage>().status)
+                }.also { assertEquals(HttpStatusCode.OK, it.status) }
+
+            val avbruttKlage = avbruttKlageResponse.body<Klage>()
+            assertEquals(klage.id, avbruttKlage.id)
+            assertEquals(KlageStatus.AVBRUTT, avbruttKlage.status)
+            assertEquals(AarsakTilAvbrytelse.ANNET, avbruttKlage.aarsakTilAvbrytelse)
         }
     }
 

@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -35,13 +36,14 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
             val statement =
                 prepareStatement(
                     """
-                    INSERT INTO klage(id, sak_id, opprettet, status, kabalstatus, formkrav, utfall, resultat,  innkommende_klage)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO klage(id, sak_id, opprettet, status, kabalstatus, formkrav, utfall, resultat,  innkommende_klage, aarsak_til_avbrytelse)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT (id) DO UPDATE SET status = excluded.status, 
                             formkrav = excluded.formkrav, 
                             kabalstatus = excluded.kabalstatus, 
                             utfall = excluded.utfall,
-                            resultat = excluded.resultat
+                            resultat = excluded.resultat,
+                            aarsak_til_avbrytelse = excluded.aarsak_til_avbrytelse
                     """.trimIndent(),
                 )
             statement.setObject(1, klage.id)
@@ -53,6 +55,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
             statement.setJsonb(7, klage.utfall)
             statement.setJsonb(8, klage.resultat)
             statement.setJsonb(9, klage.innkommendeDokument)
+            statement.setString(10, klage.aarsakTilAvbrytelse?.name)
             statement.executeUpdate()
         }
     }
@@ -63,7 +66,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
                 prepareStatement(
                     """
                     SELECT k.id, k.sak_id, saktype, fnr, enhet, opprettet, status, 
-                        kabalstatus, formkrav, utfall, resultat, kabalresultat, innkommende_klage
+                        kabalstatus, formkrav, utfall, resultat, kabalresultat, innkommende_klage, aarsak_til_avbrytelse
                     FROM klage k INNER JOIN sak s on k.sak_id = s.id
                     WHERE k.id = ?
                     """.trimIndent(),
@@ -81,7 +84,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
                 prepareStatement(
                     """
                     SELECT k.id, k.sak_id, saktype, fnr, enhet, opprettet, status, 
-                        kabalstatus, formkrav, utfall, resultat, kabalresultat, innkommende_klage
+                        kabalstatus, formkrav, utfall, resultat, kabalresultat, innkommende_klage, aarsak_til_avbrytelse
                     FROM klage k INNER JOIN sak s on k.sak_id = s.id
                     WHERE s.id = ?
                     """.trimIndent(),
@@ -131,7 +134,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
             resultat = getString("resultat")?.let { objectMapper.readValue(it) },
             kabalResultat = getString("kabalresultat")?.let { enumValueOf<BehandlingResultat>(it) },
             innkommendeDokument = getString("innkommende_klage")?.let { objectMapper.readValue(it) },
-            aarsakTilAvbrytelse = null,
+            aarsakTilAvbrytelse = getString("aarsak_til_avbrytelse")?.let { enumValueOf<AarsakTilAvbrytelse>(it) },
         )
     }
 }

@@ -1,0 +1,1 @@
+alter table klage ADD COLUMN aarsak_til_avbrytelse text;

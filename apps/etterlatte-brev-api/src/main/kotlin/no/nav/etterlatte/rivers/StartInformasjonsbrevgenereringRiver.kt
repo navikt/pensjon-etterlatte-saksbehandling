@@ -1,10 +1,10 @@
 package no.nav.etterlatte.rivers
 
 import kotliquery.TransactionalSession
+import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
+import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.event.BREVMAL_RIVER_KEY
-import no.nav.etterlatte.libs.common.event.BrevRequestHendelseType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.database.Transactions

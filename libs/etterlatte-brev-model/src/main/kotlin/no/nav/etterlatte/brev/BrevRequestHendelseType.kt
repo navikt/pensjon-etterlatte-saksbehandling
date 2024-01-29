@@ -1,6 +1,6 @@
-package no.nav.etterlatte.libs.common.event
+package no.nav.etterlatte.brev
 
-const val BREVMAL_RIVER_KEY = "brevmal"
+import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 
 enum class BrevRequestHendelseType : EventnameHendelseType {
     OPPRETT_BREV,
@@ -9,3 +9,5 @@ enum class BrevRequestHendelseType : EventnameHendelseType {
 
     override fun lagEventnameForType(): String = "BREV:${this.name}"
 }
+
+const val BREVMAL_RIVER_KEY = "brevmal"

@@ -1,6 +1,8 @@
 package no.nav.etterlatte.rivers
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
+import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.PDFGenerator
@@ -8,8 +10,6 @@ import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
-import no.nav.etterlatte.libs.common.event.BREVMAL_RIVER_KEY
-import no.nav.etterlatte.libs.common.event.BrevRequestHendelseType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Fagsaksystem

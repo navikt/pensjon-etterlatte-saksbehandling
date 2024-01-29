@@ -1,4 +1,4 @@
-import { BodyShort, ErrorMessage, Heading, HelpText, MonthPicker, useMonthpicker, VStack } from '@navikt/ds-react'
+import { BodyShort, ErrorMessage, Heading, HelpText, MonthValidationT, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { formaterStringDato } from '~utils/formattering'
@@ -13,25 +13,33 @@ import { LeggTilVurderingButton } from '~components/behandling/soeknadsoversikt/
 import { VurderingsboksWrapper } from '~components/vurderingsboks/VurderingsboksWrapper'
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { hentMinimumsVirkningstidspunkt } from '~components/behandling/virkningstidspunkt/utils'
-import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
-import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import styled from 'styled-components'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { useForm } from 'react-hook-form'
+import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
+import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 
 export interface Hjemmel {
   lenke: string
   tittel: string
 }
 
-const Virkningstidspunkt = (props: {
+interface VirkningstidspunktSkjema {
+  virkningstidspunkt: Date | null
+  begrunnelse: string
+  kravdato?: Date | null
+}
+
+interface Props {
   behandling: IDetaljertBehandling
   redigerbar: boolean
   hjemler: Hjemmel[]
   beskrivelse: string
   children?: { info: React.ReactNode }
   erBosattUtland: boolean
-}) => {
-  const { behandling, erBosattUtland } = props
+}
+
+const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBosattUtland, children }: Props) => {
   const avdoede = usePersonopplysninger()?.avdoede.find((po) => po)
   const dispatch = useAppDispatch()
   const [, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
@@ -47,20 +55,25 @@ const Virkningstidspunkt = (props: {
 
   const [errorTekst, setErrorTekst] = useState<string>('')
 
-  const { monthpickerProps, inputProps } = useMonthpicker({
-    fromDate: hentMinimumsVirkningstidspunkt(
-      avdoede?.opplysning?.doedsdato,
-      erBosattUtland ? subYears(new Date(), 20) : new Date(behandling.soeknadMottattDato)
-    ),
-    toDate: addMonths(new Date(), 4),
-    onMonthChange: (date: Date) => setVirkningstidspunkt(date),
-    inputFormat: 'dd.MM.yyyy',
-    onValidate: (val) => {
-      if (val.isBefore || val.isAfter) setErrorTekst('Virkningstidspunkt er ikke gyldig')
-      else setErrorTekst('')
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = useForm<VirkningstidspunktSkjema>({
+    defaultValues: {
+      virkningstidspunkt: behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null,
+      begrunnelse: behandling.virkningstidspunkt?.begrunnelse ?? '',
+      kravdato: behandling.virkningstidspunkt?.kravdato ? new Date(behandling.virkningstidspunkt.kravdato) : null,
     },
-    defaultSelected: virkningstidspunkt ?? undefined,
-  } as UseMonthPickerOptions)
+  })
+
+  const validerVirkningstidspunkt = (maaned: MonthValidationT): string | undefined => {
+    if (!maaned) {
+      return 'Du må velge virkningstidspunkt'
+    } else if (maaned.isBefore || maaned.isAfter) {
+      return 'Virkningstidspunkt er ikke gyldig'
+    }
+  }
 
   const fastsett = (onSuccess?: () => void) => {
     setErrorTekst('')
@@ -109,13 +122,13 @@ const Virkningstidspunkt = (props: {
     <>
       <LovtekstMedLenke
         tittel="Virkningstidspunkt"
-        hjemler={props.hjemler}
+        hjemler={hjemler}
         status={Boolean(behandling.virkningstidspunkt) ? 'success' : 'warning'}
       >
         <div>
-          <Beskrivelse>{props.beskrivelse}</Beskrivelse>
+          <Beskrivelse>{beskrivelse}</Beskrivelse>
           <InfobokserWrapper>
-            <InfoWrapper>{props.children?.info}</InfoWrapper>
+            <InfoWrapper>{children?.info}</InfoWrapper>
           </InfobokserWrapper>
         </div>
 
@@ -162,7 +175,7 @@ const Virkningstidspunkt = (props: {
                     }
                   : undefined
               }
-              redigerbar={props.redigerbar}
+              redigerbar={redigerbar}
               lagreklikk={fastsett}
               avbrytklikk={reset}
               kommentar={behandling.virkningstidspunkt?.begrunnelse}
@@ -172,7 +185,8 @@ const Virkningstidspunkt = (props: {
                 <VurderingsTitle title="Hva er virkningstidspunkt for behandlingen?" />
 
                 {erBosattUtland && (
-                  <DatoVelger
+                  <ControlledDatoVelger
+                    name="kravdato"
                     label={
                       <HelpTextWrapper>
                         Kravdato utland
@@ -181,17 +195,37 @@ const Virkningstidspunkt = (props: {
                         </HelpText>
                       </HelpTextWrapper>
                     }
-                    onChange={(date) => setKravdato(date ?? null)}
-                    value={kravdato ?? undefined}
                     fromDate={subYears(new Date(), 18)}
                     toDate={addYears(new Date(), 2)}
+                    control={control}
+                    errorVedTomInput="Kravdato kreves på bosatt utland saker"
                   />
                 )}
-                <MonthPicker {...monthpickerProps}>
-                  <MonthPicker.Input label="Virkningstidspunkt" {...inputProps} />
-                </MonthPicker>
 
-                <SoeknadsoversiktTextArea value={begrunnelse} onChange={(e) => setBegrunnelse(e.target.value)} />
+                <ControlledMaanedVelger
+                  name="virkningstidspunkt"
+                  label="Virkningstidspunkt"
+                  fromDate={hentMinimumsVirkningstidspunkt(
+                    avdoede?.opplysning?.doedsdato,
+                    erBosattUtland ? subYears(new Date(), 20) : new Date(behandling.soeknadMottattDato)
+                  )}
+                  toDate={addMonths(new Date(), 4)}
+                  inputFormat="dd.MM.yyyy"
+                  control={control}
+                  validate={(maaned) => {
+                    return validerVirkningstidspunkt(maaned as MonthValidationT)
+                  }}
+                />
+
+                <SoeknadsoversiktTextArea
+                  {...register('begrunnelse', {
+                    required: {
+                      value: true,
+                      message: 'Begrunnelsen må fylles ut',
+                    },
+                  })}
+                  error={errors.begrunnelse?.message}
+                />
 
                 {errorTekst !== '' ? <ErrorMessage>{errorTekst}</ErrorMessage> : null}
               </VStack>

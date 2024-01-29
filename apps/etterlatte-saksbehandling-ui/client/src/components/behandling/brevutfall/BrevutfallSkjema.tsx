@@ -162,7 +162,9 @@ export const BrevutfallSkjema = ({
                 name="datoFom"
                 label="Fra og med"
                 control={control}
-                validate={validerFom}
+                validate={(maaned) => {
+                  return validerFom(maaned as Date)
+                }}
               />
 
               <ControlledMaanedVelger
@@ -171,7 +173,9 @@ export const BrevutfallSkjema = ({
                 fromDate={new Date(behandling.virkningstidspunkt?.dato ?? new Date())}
                 toDate={add(new Date(), { months: 1 })}
                 control={control}
-                validate={validerTom}
+                validate={(maaned) => {
+                  return validerTom(maaned as Date)
+                }}
               />
             </HStack>
           )}

@@ -98,7 +98,6 @@ export const TrygdetidGrunnlag = ({
                   label="Fra dato"
                   control={control}
                   errorVedTomInput="Obligatorisk"
-                  defaultValue={getValues().periodeFra}
                 />
               </DatoSection>
               <DatoSection>
@@ -107,7 +106,6 @@ export const TrygdetidGrunnlag = ({
                   label="Til dato"
                   control={control}
                   errorVedTomInput="Obligatorisk"
-                  defaultValue={getValues().periodeTil}
                 />
               </DatoSection>
             </FormWrapper>

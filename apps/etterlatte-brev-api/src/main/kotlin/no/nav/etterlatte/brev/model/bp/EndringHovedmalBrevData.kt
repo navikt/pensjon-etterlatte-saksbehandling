@@ -6,16 +6,13 @@ import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
 import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.EndringBrevData
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.pensjon.brevbaker.api.model.Kroner
 
 data class BarnepensjonRevurderingDTO(
     val innhold: List<Slate.Element>,
@@ -52,25 +49,7 @@ data class BarnepensjonRevurderingDTO(
             return BarnepensjonRevurderingDTO(
                 innhold = innhold.innhold(),
                 erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
-                beregning =
-                    BarnepensjonBeregning(
-                        innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
-                        antallBarn = utbetalingsinfo.antallBarn,
-                        virkningsdato = utbetalingsinfo.virkningsdato,
-                        grunnbeloep = Kroner(grunnbeloep.grunnbeloep),
-                        beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM },
-                        trygdetid =
-                            TrygdetidMedBeregningsmetode(
-                                trygdetidsperioder = trygdetid.perioder,
-                                beregnetTrygdetidAar = trygdetid.aarTrygdetid,
-                                beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
-                                prorataBroek = trygdetid.prorataBroek,
-                                mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
-                                beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
-                            ),
-                    ),
+                beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },

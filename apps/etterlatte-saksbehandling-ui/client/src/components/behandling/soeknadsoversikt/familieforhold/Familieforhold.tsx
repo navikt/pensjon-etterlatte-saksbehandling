@@ -24,11 +24,7 @@ export const Familieforhold = ({ behandling, personopplysninger }: PropsFamilief
         <Heading spacing size="medium" level="2" as="div">
           Familieforhold
           {featureAktiv && personopplysninger && (
-            <RedigerFamilieforhold
-              behandling={behandling}
-              personopplysninger={personopplysninger}
-              sakType={behandling.sakType}
-            />
+            <RedigerFamilieforhold behandling={behandling} personopplysninger={personopplysninger} />
           )}
         </Heading>
       </ContentHeader>

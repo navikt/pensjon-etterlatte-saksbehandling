@@ -16,7 +16,6 @@ import { SakType } from '~shared/types/sak'
 type Props = {
   behandling: IDetaljertBehandling
   personopplysninger: Personopplysninger
-  sakType: SakType
 }
 
 // RHF krever at en array består av objekter
@@ -25,7 +24,7 @@ interface RHFRedigerbarFamilie {
   avdoede: Array<{ fnr: string }>
 }
 
-export const RedigerFamilieforhold = ({ behandling, personopplysninger, sakType }: Props) => {
+export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props) => {
   const [isOpen, setIsOpen] = useState(false)
   const [feilmelding, setFeilmelding] = useState<string | null>(null)
 
@@ -111,7 +110,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger, sakType 
                           fnrErGyldig: (value) => fnrErGyldig(value) || 'Ugyldig fødselsnummer',
                         },
                       })}
-                      label={sakType === SakType.BARNEPENSJON ? 'Avdød forelder' : 'Avdød'}
+                      label={behandling.sakType === SakType.BARNEPENSJON ? 'Avdød forelder' : 'Avdød'}
                       description="Oppgi fødselsnummer"
                       error={errors?.avdoede?.[index]?.fnr?.message}
                     />

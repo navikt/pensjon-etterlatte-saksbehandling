@@ -34,6 +34,7 @@ include(
     "libs:saksbehandling-common",
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-behandling-model",
+    "libs:etterlatte-brev-model",
     "libs:etterlatte-oppgave-model",
     "libs:etterlatte-beregning-model",
     "libs:etterlatte-database",

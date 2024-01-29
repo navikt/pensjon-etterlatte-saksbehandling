@@ -17,6 +17,8 @@ dependencies {
     implementation(project(":libs:etterlatte-migrering-model"))
     implementation(project(":libs:etterlatte-pdl-model"))
     implementation(project(":libs:etterlatte-utbetaling-model"))
+    implementation(project(":libs:etterlatte-brev-model"))
+
     testImplementation(project(":libs:testdata"))
 
     implementation(libs.ktor2.servercio)

@@ -23,6 +23,7 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-utbetaling-model/**
+      - libs/etterlatte-brev-model/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -36,6 +37,7 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-utbetaling-model/**
+      - libs/etterlatte-brev-model/**
       - gradle/libs.versions.toml
 
 permissions:

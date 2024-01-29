@@ -1,9 +1,9 @@
 package no.nav.etterlatte.rivers
 
+import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
-import no.nav.etterlatte.libs.common.brev.BrevHendelseType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext

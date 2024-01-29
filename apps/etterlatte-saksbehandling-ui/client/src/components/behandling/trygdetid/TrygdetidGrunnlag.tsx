@@ -1,4 +1,4 @@
-import { Button, Checkbox, CheckboxGroup, Select, Textarea } from '@navikt/ds-react'
+import { Button, Checkbox, CheckboxGroup, DateValidationT, Select, Textarea } from '@navikt/ds-react'
 import { FormKnapper, FormWrapper, Innhold } from '~components/behandling/trygdetid/styled'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
@@ -50,6 +50,11 @@ export const TrygdetidGrunnlag = ({
 
   const [trygdetidgrunnlagStatus, requestLagreTrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)
 
+  const validerDatoInput = (dato: DateValidationT): string | undefined => {
+    if (!dato) return 'Obligatorisk'
+    return undefined
+  }
+
   const onSubmit = (data: OppdaterTrygdetidGrunnlag) => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     requestLagreTrygdetidgrunnlag(
@@ -97,7 +102,7 @@ export const TrygdetidGrunnlag = ({
                   name="periodeFra"
                   label="Fra dato"
                   control={control}
-                  errorVedTomInput="Obligatorisk"
+                  validate={validerDatoInput}
                 />
               </DatoSection>
               <DatoSection>
@@ -105,7 +110,7 @@ export const TrygdetidGrunnlag = ({
                   name="periodeTil"
                   label="Til dato"
                   control={control}
-                  errorVedTomInput="Obligatorisk"
+                  validate={validerDatoInput}
                 />
               </DatoSection>
             </FormWrapper>

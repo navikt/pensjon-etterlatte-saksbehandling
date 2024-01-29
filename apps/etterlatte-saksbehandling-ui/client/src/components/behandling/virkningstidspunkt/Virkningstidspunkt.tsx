@@ -1,4 +1,4 @@
-import { BodyShort, ErrorMessage, Heading, HelpText, MonthValidationT, VStack } from '@navikt/ds-react'
+import { BodyShort, DateValidationT, Heading, HelpText, MonthValidationT, VStack } from '@navikt/ds-react'
 import React, { useState } from 'react'
 import { oppdaterBehandlingsstatus, oppdaterVirkningstidspunkt } from '~store/reducers/BehandlingReducer'
 import { formaterStringDato } from '~utils/formattering'
@@ -18,6 +18,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useForm } from 'react-hook-form'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export interface Hjemmel {
   lenke: string
@@ -53,7 +54,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBo
     behandling.virkningstidspunkt?.kravdato ? new Date(behandling.virkningstidspunkt.kravdato) : null
   )
 
-  const [errorTekst, setErrorTekst] = useState<string>('')
+  const [apiError, setApiError] = useState<string>('')
 
   const {
     control,
@@ -67,6 +68,11 @@ const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBo
     },
   })
 
+  const validerKravdato = (dato: DateValidationT): string | undefined => {
+    if (!dato) return 'Kravdato kreves på bosatt utland saker'
+    return undefined
+  }
+
   const validerVirkningstidspunkt = (maaned: MonthValidationT): string | undefined => {
     if (!maaned) {
       return 'Du må velge virkningstidspunkt'
@@ -76,21 +82,12 @@ const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBo
   }
 
   const fastsett = (onSuccess?: () => void) => {
-    setErrorTekst('')
-    if (!virkningstidspunkt) {
-      return setErrorTekst('Du må velge virkningstidspunkt')
-    }
-    if (begrunnelse.trim().length === 0) {
-      return setErrorTekst('Begrunnelsen må fylles ut')
-    }
-    if (erBosattUtland && !kravdato) {
-      return setErrorTekst('Kravdato kreves på bosatt utland saker')
-    }
+    return
 
     return fastsettVirkningstidspunktRequest(
       {
         id: behandling.id,
-        dato: virkningstidspunkt,
+        dato: virkningstidspunkt!,
         begrunnelse: begrunnelse,
         kravdato: kravdato,
       },
@@ -100,7 +97,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBo
         onSuccess?.()
       },
       (error) =>
-        setErrorTekst(
+        setApiError(
           `Kunne ikke sette virkningstidspunkt. ${
             error.detail ? error.detail : 'Last siden på nytt og prøv igjen, meld sak hvis problemet vedvarer'
           }`
@@ -113,7 +110,6 @@ const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBo
     setVirkningstidspunkt(behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null)
     setKravdato(behandling.virkningstidspunkt?.kravdato ? new Date(behandling.virkningstidspunkt.kravdato) : null)
     setBegrunnelse(behandling.virkningstidspunkt?.begrunnelse ?? '')
-    setErrorTekst('')
     setVurdert(behandling.virkningstidspunkt !== null)
     onSuccess?.()
   }
@@ -198,7 +194,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBo
                     fromDate={subYears(new Date(), 18)}
                     toDate={addYears(new Date(), 2)}
                     control={control}
-                    errorVedTomInput="Kravdato kreves på bosatt utland saker"
+                    validate={validerKravdato}
                   />
                 )}
 
@@ -227,7 +223,7 @@ const Virkningstidspunkt = ({ behandling, redigerbar, hjemler, beskrivelse, erBo
                   error={errors.begrunnelse?.message}
                 />
 
-                {errorTekst !== '' ? <ErrorMessage>{errorTekst}</ErrorMessage> : null}
+                {apiError && <ApiErrorAlert>{apiError}</ApiErrorAlert>}
               </VStack>
             </VurderingsboksWrapper>
           )}

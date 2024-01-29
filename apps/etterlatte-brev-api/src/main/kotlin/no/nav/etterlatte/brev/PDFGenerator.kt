@@ -123,25 +123,16 @@ class PDFGenerator(
         brevkoder: Brevkoder,
     ): BrevData =
         when (generellBrevData.erMigrering()) {
-            false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkoder)
+            false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, automatiskMigreringRequest, brevkoder)
             true -> {
-                val erUnder18Aar =
-                    requireNotNull(generellBrevData.personerISak.soeker.under18) {
-                        "Klarte ikke å bestemme om alder på søker er under eller over 18 år. Kan dermed ikke velge riktig brev"
-                    }
-                OmregnetBPNyttRegelverkFerdig.fra(
-                    innhold =
-                        InnholdMedVedlegg(
-                            { hentLagretInnhold(brev) },
-                            { hentLagretInnholdVedlegg(brev) },
-                        ),
-                    erUnder18Aar = erUnder18Aar,
-                    data =
-                        migreringBrevDataService.opprettMigreringBrevdata(
-                            generellBrevData,
-                            automatiskMigreringRequest,
-                            brukerTokenInfo,
-                        ),
+                migreringBrevDataService.opprettMigreringBrevdataFerdigstill(
+                    generellBrevData,
+                    automatiskMigreringRequest,
+                    InnholdMedVedlegg(
+                        { hentLagretInnhold(brev) },
+                        { hentLagretInnholdVedlegg(brev) },
+                    ),
+                    brukerTokenInfo,
                 )
             }
         }
@@ -150,6 +141,7 @@ class PDFGenerator(
         brev: Brev,
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest?,
         brevkode: Brevkoder,
     ): BrevData =
         when (brev.prosessType) {
@@ -159,6 +151,7 @@ class PDFGenerator(
                     brukerTokenInfo,
                     InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
                     brevkode,
+                    automatiskMigreringRequest,
                     brev.tittel,
                 )
 

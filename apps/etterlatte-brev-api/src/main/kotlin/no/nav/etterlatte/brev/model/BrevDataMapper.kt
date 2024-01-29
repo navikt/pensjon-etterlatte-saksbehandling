@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.model
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.MigreringBrevDataService
+import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
@@ -202,6 +203,7 @@ class BrevDataMapper(
         brukerTokenInfo: BrukerTokenInfo,
         innholdMedVedlegg: InnholdMedVedlegg,
         kode: Brevkoder,
+        automatiskMigreringRequest: MigreringBrevRequest?,
         tittel: String? = null,
     ): BrevData {
         return when (kode.ferdigstilling) {

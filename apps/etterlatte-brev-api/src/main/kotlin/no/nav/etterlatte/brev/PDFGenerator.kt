@@ -17,7 +17,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -126,19 +125,18 @@ class PDFGenerator(
         when (generellBrevData.erMigrering()) {
             false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkoder)
             true ->
-                OmregnetBPNyttRegelverkFerdig(
+                OmregnetBPNyttRegelverkFerdig.fra(
                     innhold =
                         InnholdMedVedlegg(
                             { hentLagretInnhold(brev) },
                             { hentLagretInnholdVedlegg(brev) },
-                        ).innhold(),
-                    data = (
+                        ),
+                    data =
                         migreringBrevDataService.opprettMigreringBrevdata(
                             generellBrevData,
                             automatiskMigreringRequest,
                             brukerTokenInfo,
-                        ) as OmregnetBPNyttRegelverk
-                    ),
+                        ),
                 )
         }
 

@@ -4,6 +4,7 @@ import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -89,4 +90,14 @@ data class OmregnetBPNyttRegelverk(
 data class OmregnetBPNyttRegelverkFerdig(
     val innhold: List<Slate.Element>,
     val data: OmregnetBPNyttRegelverk,
-) : BrevData()
+) : BrevData() {
+    companion object {
+        fun fra(
+            innhold: InnholdMedVedlegg,
+            data: OmregnetBPNyttRegelverk,
+        ) = OmregnetBPNyttRegelverkFerdig(
+            innhold = innhold.innhold(),
+            data = data,
+        )
+    }
+}

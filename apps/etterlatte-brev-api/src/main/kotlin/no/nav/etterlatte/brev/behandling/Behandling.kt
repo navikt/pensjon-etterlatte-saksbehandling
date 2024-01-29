@@ -15,7 +15,6 @@ import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -41,9 +40,7 @@ data class GenerellBrevData(
             )
         } ?: AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = sak.enhet)
 
-    fun erMigrering() =
-        systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null &&
-            forenkletVedtak?.saksbehandlerIdent == Fagsaksystem.EY.navn
+    fun erMigrering() = systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null
 }
 
 data class Trygdetid(

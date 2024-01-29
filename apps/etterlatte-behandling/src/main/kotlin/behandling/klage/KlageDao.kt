@@ -131,6 +131,7 @@ class KlageDaoImpl(private val connection: () -> Connection) : KlageDao {
             resultat = getString("resultat")?.let { objectMapper.readValue(it) },
             kabalResultat = getString("kabalresultat")?.let { enumValueOf<BehandlingResultat>(it) },
             innkommendeDokument = getString("innkommende_klage")?.let { objectMapper.readValue(it) },
+            aarsakTilAvbrytelse = null,
         )
     }
 }

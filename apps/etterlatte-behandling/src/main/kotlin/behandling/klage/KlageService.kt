@@ -15,12 +15,15 @@ import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
+import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -66,6 +69,13 @@ interface KlageService {
         klageId: UUID,
         saksbehandler: Saksbehandler,
     ): Klage
+
+    fun avbrytKlage(
+        klageId: UUID,
+        aarsak: AarsakTilAvbrytelse,
+        kommentar: String,
+        saksbehandler: Saksbehandler,
+    )
 }
 
 class KlageServiceImpl(
@@ -300,6 +310,45 @@ class KlageServiceImpl(
         )
 
         return klageMedOppdatertResultat
+    }
+
+    override fun avbrytKlage(
+        klageId: UUID,
+        aarsak: AarsakTilAvbrytelse,
+        kommentar: String,
+        saksbehandler: Saksbehandler,
+    ) {
+        val klage =
+            hentKlage(klageId)
+                ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+        if (!KlageStatus.kanAvbryte(klage.status)) {
+            throw IkkeTillattException("KLAGE_KAN_IKKE_AVBRYTES", "Klage med id=$klageId kan ikke avbrytes")
+        }
+
+        val avbruttKlage =
+            klage.copy(
+                status = KlageStatus.AVBRUTT,
+                aarsakTilAvbrytelse = aarsak,
+            )
+
+        klageDao.lagreKlage(avbruttKlage).also {
+            oppgaveService.avbrytOppgaveUnderBehandling(klageId.toString(), saksbehandler)
+
+            hendelseDao.klageHendelse(
+                klageId = avbruttKlage.id,
+                sakId = avbruttKlage.sak.id,
+                hendelse = KlageHendelseType.AVBRUTT,
+                inntruffet = Tidspunkt.now(),
+                saksbehandler = saksbehandler.ident(),
+                kommentar = kommentar,
+                begrunnelse = aarsak.name,
+            )
+        }
+
+        klageHendelser.sendKlageHendelseRapids(
+            StatistikkKlage(avbruttKlage.id, avbruttKlage, Tidspunkt.now(), saksbehandler.ident),
+            KlageHendelseType.AVBRUTT,
+        )
     }
 
     private fun ferdigstillInnstilling(

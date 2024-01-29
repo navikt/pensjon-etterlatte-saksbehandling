@@ -58,6 +58,7 @@ internal class KlagehendelseRiverTest {
                                 innkommendeDokument = null,
                                 resultat = null,
                                 utfall = null,
+                                aarsakTilAvbrytelse = null,
                             ),
                             Tidspunkt.now(),
                         ),

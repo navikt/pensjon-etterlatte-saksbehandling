@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -33,6 +34,8 @@ enum class KlageStatus {
     // potensielt en status for å markere oversendingen til Kabal
     FERDIGSTILT, // klagen er ferdig fra gjenny sin side
 
+    AVBRUTT,
+
     ;
 
     companion object {
@@ -42,6 +45,10 @@ enum class KlageStatus {
 
         fun kanOppdatereUtfall(status: KlageStatus): Boolean {
             return status === FORMKRAV_OPPFYLT || status === UTFALL_VURDERT
+        }
+
+        fun kanAvbryte(status: KlageStatus): Boolean {
+            return status !in listOf(FERDIGSTILT, AVBRUTT)
         }
     }
 }
@@ -96,6 +103,7 @@ data class Klage(
     val resultat: KlageResultat?,
     val kabalResultat: BehandlingResultat?,
     val innkommendeDokument: InnkommendeKlage?,
+    val aarsakTilAvbrytelse: AarsakTilAvbrytelse?,
 ) {
     fun oppdaterFormkrav(
         formkrav: Formkrav,
@@ -204,6 +212,7 @@ data class Klage(
                 resultat = null,
                 kabalResultat = null,
                 innkommendeDokument = innkommendeDokument,
+                aarsakTilAvbrytelse = null,
             )
         }
     }

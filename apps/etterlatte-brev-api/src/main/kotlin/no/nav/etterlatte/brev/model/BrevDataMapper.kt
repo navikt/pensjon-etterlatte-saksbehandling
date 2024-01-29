@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
@@ -26,6 +27,8 @@ import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
 import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseDTO
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO
+import no.nav.etterlatte.brev.model.oms.OpphoerBrevDataOMS
+import no.nav.etterlatte.brev.model.oms.OpphoerBrevDataUtfallOMS
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
@@ -162,8 +165,13 @@ class BrevDataMapper(
                         }
                     }
 
-                    VedtakType.AVSLAG ->
-                        AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, emptyList())
+                    VedtakType.AVSLAG -> {
+                        AvslagBrevDataOMS.fra(
+                            generellBrevData.personerISak.avdoede.first().navn,
+                            generellBrevData.utlandstilknytning,
+                            emptyList(),
+                        )
+                    }
 
                     VedtakType.ENDRING ->
                         when (generellBrevData.revurderingsaarsak) {
@@ -174,11 +182,13 @@ class BrevDataMapper(
                             else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
                         }
 
-                    VedtakType.OPPHOER ->
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.SIVILSTAND -> ManueltBrevData(emptyList())
-                            else -> TODO("Revurderingsbrev for ${generellBrevData.revurderingsaarsak} er ikke støttet")
-                        }
+                    VedtakType.OPPHOER -> {
+                        val virkningstidspunkt = requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt?.atDay(1))
+                        OpphoerBrevDataUtfallOMS.fra(
+                            virkningstidspunkt,
+                            emptyList(),
+                        )
+                    }
 
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
                     null -> ManueltBrevData.fra(emptyList())
@@ -325,7 +335,18 @@ class BrevDataMapper(
             }
 
             OMSTILLINGSSTOENAD_AVSLAG -> {
-                AvslagBrevDataOMS.fra(generellBrevData.personerISak.avdoede.first().navn, innholdMedVedlegg.innhold())
+                AvslagBrevDataOMS.fra(
+                    generellBrevData.personerISak.avdoede.first().navn,
+                    generellBrevData.utlandstilknytning,
+                    innholdMedVedlegg.innhold(),
+                )
+            }
+
+            OMSTILLINGSSTOENAD_REVURDERING_OPPHOER -> {
+                OpphoerBrevDataOMS.fra(
+                    generellBrevData.utlandstilknytning,
+                    innholdMedVedlegg.innhold(),
+                )
             }
 
             TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)

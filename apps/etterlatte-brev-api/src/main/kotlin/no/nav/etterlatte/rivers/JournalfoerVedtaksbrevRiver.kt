@@ -8,8 +8,8 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
@@ -77,8 +77,7 @@ internal class JournalfoerVedtaksbrevRiver(
         journalpostId: String,
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
-
-        packet[EVENT_NAME_KEY] = BrevHendelseType.JOURNALFOERT.lagEventnameForType()
+        packet.setEventNameForHendelseType(BrevHendelseType.JOURNALFOERT)
         packet["brevId"] = brevId
         packet["journalpostId"] = journalpostId
         packet["distribusjonType"] = DistribusjonsType.VEDTAK.toString()

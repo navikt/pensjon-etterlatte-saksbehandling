@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -39,7 +39,7 @@ internal class OmregningsHendelserRiver(rapidsConnection: RapidsConnection, priv
         packet.behandlingId = behandlingId
         packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = behandlingViOmregnerFra
         packet[SAK_TYPE] = sakType
-        packet.eventName = ReguleringHendelseType.VILKAARSVURDER.lagEventnameForType()
+        packet.setEventNameForHendelseType(ReguleringHendelseType.VILKAARSVURDER)
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert omregningshendelse")
     }

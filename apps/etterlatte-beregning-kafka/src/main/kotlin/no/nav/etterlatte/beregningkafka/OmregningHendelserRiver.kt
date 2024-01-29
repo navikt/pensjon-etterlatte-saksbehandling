@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -62,7 +62,7 @@ internal class OmregningHendelserRiver(
                         .body<AvkortingDto>()
                 packet[AVKORTING_KEY] = avkorting
             }
-            packet[EVENT_NAME_KEY] = ReguleringHendelseType.OPPRETT_VEDTAK.lagEventnameForType()
+            packet.setEventNameForHendelseType(ReguleringHendelseType.OPPRETT_VEDTAK)
             context.publish(packet.toJson())
         }
         logger.info("Publiserte oppdatert omregningshendelse")

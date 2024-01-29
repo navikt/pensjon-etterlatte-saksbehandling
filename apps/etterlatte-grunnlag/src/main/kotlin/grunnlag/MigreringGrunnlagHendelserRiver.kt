@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -80,7 +80,7 @@ class MigreringGrunnlagHendelserRiver(
             ),
         )
 
-        packet.eventName = Migreringshendelser.VILKAARSVURDER.lagEventnameForType()
+        packet.setEventNameForHendelseType(Migreringshendelser.VILKAARSVURDER)
         context.publish(packet.toJson())
 
         logger.info("Behandla grunnlagshendelser for migrering for sak $sakId")

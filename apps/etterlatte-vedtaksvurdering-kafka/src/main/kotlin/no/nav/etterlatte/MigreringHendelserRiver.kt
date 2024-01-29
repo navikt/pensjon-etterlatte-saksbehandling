@@ -1,6 +1,6 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -42,7 +42,7 @@ internal class MigreringHendelserRiver(
         withFeilhaandtering(packet, context, Migreringshendelser.VEDTAK.lagEventnameForType()) {
             val respons = vedtakService.opprettVedtakFattOgAttester(packet.sakId, behandlingId, kjoringVariant)
             if (kjoringVariant == MigreringKjoringVariant.MED_PAUSE) {
-                packet.eventName = Migreringshendelser.PAUSE.lagEventnameForType()
+                packet.setEventNameForHendelseType(Migreringshendelser.PAUSE)
                 context.publish(packet.toJson())
             }
             logger.info("Opprettet vedtak ${respons.vedtak.id} for migrert behandling: $behandlingId")

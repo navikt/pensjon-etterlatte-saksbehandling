@@ -3,7 +3,7 @@ package no.nav.etterlatte.regulering
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -51,7 +51,7 @@ internal class ReguleringsforespoerselRiver(
                 }
 
         sakerTilOmregning.saker.forEach {
-            packet.eventName = ReguleringHendelseType.FINN_LOEPENDE_YTELSER.lagEventnameForType()
+            packet.setEventNameForHendelseType(ReguleringHendelseType.FINN_LOEPENDE_YTELSER)
             packet.tilbakestilteBehandlinger = tilbakemigrerte.behandlingerForSak(it.id)
             packet.sakId = it.id
             context.publish(packet.toJson())

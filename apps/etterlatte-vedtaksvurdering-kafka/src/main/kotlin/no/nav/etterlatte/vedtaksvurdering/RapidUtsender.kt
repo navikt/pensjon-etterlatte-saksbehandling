@@ -1,7 +1,7 @@
 package no.nav.etterlatte.vedtaksvurdering
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.Logger
@@ -26,7 +26,7 @@ private fun RapidInfo.sendUt(
     logger: Logger,
 ) {
     logger.info("Sender ut på rapid for hendelse $vedtakhendelse")
-    packet.eventName = vedtakhendelse.lagEventnameForType()
+    packet.setEventNameForHendelseType(vedtakhendelse)
     packet[TEKNISK_TID_KEY] = tekniskTid
     packet["vedtak"] = vedtak
     extraParams.forEach { (k, v) -> packet[k] = v }

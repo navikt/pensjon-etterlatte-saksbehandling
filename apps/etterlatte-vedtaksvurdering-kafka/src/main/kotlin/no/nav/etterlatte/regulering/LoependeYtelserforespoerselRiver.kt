@@ -3,7 +3,7 @@ package no.nav.etterlatte.regulering
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -53,7 +53,7 @@ internal class LoependeYtelserforespoerselRiver(
 
         val respons = vedtak.harLoependeYtelserFra(sakId, reguleringsdato)
         respons.takeIf { it.erLoepende }?.let {
-            packet.eventName = ReguleringHendelseType.OMREGNINGSHENDELSE.lagEventnameForType()
+            packet.setEventNameForHendelseType(ReguleringHendelseType.OMREGNINGSHENDELSE)
             packet[HENDELSE_DATA_KEY] =
                 Omregningshendelse(
                     sakId = sakId,

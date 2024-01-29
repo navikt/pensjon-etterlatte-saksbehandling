@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_GRUNNLAG_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
@@ -59,7 +59,7 @@ internal class MigrerEnEnkeltSakRiver(
                 soeker = hendelse.soeker.value,
             )
         packet[PERSONGALLERI_KEY] = hendelse.opprettPersongalleri()
-        packet.eventName = Migreringshendelser.LAGRE_KOPLING.lagEventnameForType()
+        packet.setEventNameForHendelseType(Migreringshendelser.LAGRE_KOPLING)
 
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert migreringshendelse")

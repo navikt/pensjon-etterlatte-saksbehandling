@@ -1,6 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.etterlatte.vilkaarsvurdering.services.VilkaarsvurderingService
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -37,7 +37,7 @@ internal class VilkaarsvurderingRiver(
         val behandlingViOmregnerFra = packet[BEHANDLING_VI_OMREGNER_FRA_KEY].asText().toUUID()
 
         vilkaarsvurderingService.kopierForrigeVilkaarsvurdering(behandlingId, behandlingViOmregnerFra)
-        packet.eventName = ReguleringHendelseType.BEREGN.lagEventnameForType()
+        packet.setEventNameForHendelseType(ReguleringHendelseType.BEREGN)
         context.publish(packet.toJson())
         logger.info(
             "Vilkaarsvurdert ferdig for behandling $behandlingId og melding beregningsmelding ble sendt.",

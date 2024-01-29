@@ -6,7 +6,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.Pesyssak
@@ -92,7 +92,7 @@ internal class MigrerSpesifikkSakRiver(
             hentSak(sakId, lopendeJanuar2024)
                 .tilVaarModell { runBlocking { krrKlient.hentDigitalKontaktinformasjon(it) } }
                 .also { pesysRepository.lagrePesyssak(pesyssak = it) }
-        packet.eventName = Migreringshendelser.MIGRER_SAK.lagEventnameForType()
+        packet.setEventNameForHendelseType(Migreringshendelser.MIGRER_SAK)
         val verifisertRequest = verifiserer.verifiserRequest(pesyssak.tilMigreringsrequest())
         packet.hendelseData = verifisertRequest
 
@@ -146,7 +146,7 @@ internal class MigrerSpesifikkSakRiver(
                 ?: throw IllegalStateException("Mangler kobling mellom behandling i Gjenny og pesys sak for pesysId=$sakId")
 
         packet[BEHANDLING_ID_KEY] = behandlingId
-        packet.eventName = Migreringshendelser.VEDTAK.lagEventnameForType()
+        packet.setEventNameForHendelseType(Migreringshendelser.VEDTAK)
         context.publish(packet.toJson())
         logger.info("Fortsetter migrering for sak $sakId.")
     }

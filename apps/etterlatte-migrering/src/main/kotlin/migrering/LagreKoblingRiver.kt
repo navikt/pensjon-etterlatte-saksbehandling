@@ -1,6 +1,6 @@
 package no.nav.etterlatte.migrering
 
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
@@ -29,7 +29,7 @@ internal class LagreKoblingRiver(rapidsConnection: RapidsConnection, private val
     ) {
         logger.info("Lagrer kopling fra pesyssak ${packet.pesysId} til behandling ${packet.behandlingId}")
         pesysRepository.lagreKoplingTilBehandling(packet.behandlingId, packet.pesysId)
-        packet.eventName = Migreringshendelser.LAGRE_GRUNNLAG.lagEventnameForType()
+        packet.setEventNameForHendelseType(Migreringshendelser.LAGRE_GRUNNLAG)
         context.publish(packet.toJson())
         logger.info(
             "Publiserte oppdatert migreringshendelse for ${packet.behandlingId} " +

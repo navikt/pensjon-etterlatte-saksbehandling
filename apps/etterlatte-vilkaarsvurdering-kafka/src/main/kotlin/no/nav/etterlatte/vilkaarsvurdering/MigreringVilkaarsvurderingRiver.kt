@@ -1,6 +1,6 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
@@ -37,7 +37,7 @@ internal class MigreringVilkaarsvurderingRiver(
         logger.info("Mottatt vilkårs-migreringshendelse for $BEHANDLING_ID_KEY $behandlingId")
         vilkaarsvurderingService.migrer(behandlingId, yrkesskadeFordel)
         packet[VILKAARSVURDERT_KEY] = true
-        packet.eventName = Migreringshendelser.TRYGDETID.lagEventnameForType()
+        packet.setEventNameForHendelseType(Migreringshendelser.TRYGDETID)
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert migreringshendelse fra vilkårsvurdering for behandling $behandlingId")
     }

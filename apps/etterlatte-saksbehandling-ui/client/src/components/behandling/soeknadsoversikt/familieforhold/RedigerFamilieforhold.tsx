@@ -11,6 +11,7 @@ import { useFieldArray, useForm } from 'react-hook-form'
 import { fnrErGyldig } from '~utils/fnr'
 import { FlexRow } from '~shared/styled'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
+import { SakType } from '~shared/types/sak'
 
 type Props = {
   behandling: IDetaljertBehandling
@@ -109,7 +110,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                           fnrErGyldig: (value) => fnrErGyldig(value) || 'Ugyldig fødselsnummer',
                         },
                       })}
-                      label="Avdød forelder"
+                      label={behandling.sakType === SakType.BARNEPENSJON ? 'Avdød forelder' : 'Avdød'}
                       description="Oppgi fødselsnummer"
                       error={errors?.avdoede?.[index]?.fnr?.message}
                     />

@@ -32,7 +32,8 @@ export interface Samordningsvedtak {
 export interface Samordningsmelding {
   samId: number
   meldingstatusKode: string
-  tssEksternId: string
+  tpNr: string
+  tpNavn: string
   sendtDato: string
   svartDato?: string
   purretDato?: string

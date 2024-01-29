@@ -82,12 +82,12 @@ export const SamordningModal = ({ behandlingId }: { behandlingId: string }) => {
                   <Table.Header>
                     <Table.Row>
                       <Table.HeaderCell>ID</Table.HeaderCell>
+                      <Table.HeaderCell>Tjenestepensjon</Table.HeaderCell>
                       <Table.HeaderCell>Status</Table.HeaderCell>
                       <Table.HeaderCell>Sendt dato</Table.HeaderCell>
                       <Table.HeaderCell>Mottatt dato</Table.HeaderCell>
                       <Table.HeaderCell>Purret dato</Table.HeaderCell>
                       <Table.HeaderCell>Refusjonskrav</Table.HeaderCell>
-                      <Table.HeaderCell>TSS</Table.HeaderCell>
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
@@ -99,12 +99,14 @@ export const SamordningModal = ({ behandlingId }: { behandlingId: string }) => {
                     {vedtak.samordningsmeldinger.map((mld) => (
                       <Table.Row key={mld.samId}>
                         <Table.DataCell>{mld.samId}</Table.DataCell>
+                        <Table.DataCell>
+                          {mld.tpNr} {mld.tpNavn}
+                        </Table.DataCell>
                         <Table.DataCell>{mld.meldingstatusKode}</Table.DataCell>
                         <Table.DataCell>{mld.sendtDato}</Table.DataCell>
                         <Table.DataCell>{mld.svartDato && formaterStringDato(mld.svartDato)}</Table.DataCell>
                         <Table.DataCell>{mld.purretDato && formaterStringDato(mld.purretDato)}</Table.DataCell>
                         <Table.DataCell>{mld.refusjonskrav}</Table.DataCell>
-                        <Table.DataCell>{mld.tssEksternId}</Table.DataCell>
                       </Table.Row>
                     ))}
                   </Table.Body>

@@ -40,15 +40,7 @@ data class BarnepensjonInnvilgelseDTO(
             brukerUnder18Aar: Boolean,
         ): BarnepensjonInnvilgelseDTO {
             val beregningsperioder =
-                utbetalingsinfo.beregningsperioder.map {
-                    BarnepensjonBeregningsperiode(
-                        datoFOM = it.datoFOM,
-                        datoTOM = it.datoTOM,
-                        grunnbeloep = it.grunnbeloep,
-                        utbetaltBeloep = it.utbetaltBeloep,
-                        antallBarn = it.antallBarn,
-                    )
-                }
+                barnepensjonBeregningsperiodes(utbetalingsinfo)
 
             return BarnepensjonInnvilgelseDTO(
                 innhold = innhold.innhold(),
@@ -128,3 +120,14 @@ internal fun barnepensjonBeregning(
             beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
         ),
 )
+
+internal fun barnepensjonBeregningsperiodes(utbetalingsinfo: Utbetalingsinfo) =
+    utbetalingsinfo.beregningsperioder.map {
+        BarnepensjonBeregningsperiode(
+            datoFOM = it.datoFOM,
+            datoTOM = it.datoTOM,
+            grunnbeloep = it.grunnbeloep,
+            utbetaltBeloep = it.utbetaltBeloep,
+            antallBarn = it.antallBarn,
+        )
+    }

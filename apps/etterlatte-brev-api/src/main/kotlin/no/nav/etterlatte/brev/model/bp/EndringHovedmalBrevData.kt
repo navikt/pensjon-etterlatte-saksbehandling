@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.model.bp
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
-import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.EndringBrevData
@@ -35,16 +34,7 @@ data class BarnepensjonRevurderingDTO(
             utlandstilknytning: UtlandstilknytningType?,
             brukerUnder18Aar: Boolean,
         ): BrevData {
-            val beregningsperioder =
-                utbetalingsinfo.beregningsperioder.map {
-                    BarnepensjonBeregningsperiode(
-                        datoFOM = it.datoFOM,
-                        datoTOM = it.datoTOM,
-                        grunnbeloep = it.grunnbeloep,
-                        utbetaltBeloep = it.utbetaltBeloep,
-                        antallBarn = it.antallBarn,
-                    )
-                }
+            val beregningsperioder = barnepensjonBeregningsperiodes(utbetalingsinfo)
 
             return BarnepensjonRevurderingDTO(
                 innhold = innhold.innhold(),

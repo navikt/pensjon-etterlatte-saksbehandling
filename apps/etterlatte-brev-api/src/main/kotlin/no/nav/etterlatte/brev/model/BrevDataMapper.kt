@@ -37,61 +37,8 @@ import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
-import java.time.YearMonth
-import java.util.UUID
-
-private class BrevDatafetcher(
-    private val brevdataFacade: BrevdataFacade,
-    private val brukerTokenInfo: BrukerTokenInfo,
-    private val behandlingId: UUID?,
-    private val vedtakVirkningstidspunkt: YearMonth,
-    private val type: VedtakType?,
-    private val sak: Sak,
-) {
-    suspend fun hentBrevutfall() = behandlingId?.let { brevdataFacade.hentBrevutfall(it, brukerTokenInfo) }
-
-    suspend fun hentUtbetaling() =
-        brevdataFacade.finnUtbetalingsinfo(
-            behandlingId!!,
-            vedtakVirkningstidspunkt,
-            brukerTokenInfo,
-            sak.sakType,
-        )
-
-    suspend fun hentForrigeUtbetaling() =
-        brevdataFacade.finnForrigeUtbetalingsinfo(
-            sak.id,
-            vedtakVirkningstidspunkt,
-            brukerTokenInfo,
-            sak.sakType,
-        )
-
-    suspend fun hentGrunnbeloep() = brevdataFacade.hentGrunnbeloep(brukerTokenInfo)
-
-    suspend fun hentEtterbetaling() =
-        behandlingId?.let {
-            brevdataFacade.hentEtterbetaling(
-                it,
-                brukerTokenInfo,
-            )
-        }
-
-    suspend fun hentAvkortinginfo() =
-        behandlingId?.let {
-            brevdataFacade.finnAvkortingsinfo(
-                it,
-                sak.sakType,
-                vedtakVirkningstidspunkt,
-                type!!,
-                brukerTokenInfo,
-            )
-        }
-
-    suspend fun hentTrygdetid() = behandlingId?.let { brevdataFacade.finnTrygdetid(it, brukerTokenInfo) }
-}
 
 class BrevDataMapper(
     private val brevdataFacade: BrevdataFacade,
@@ -122,7 +69,7 @@ class BrevDataMapper(
                 when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE ->
                         coroutineScope {
-                            val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                            val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                             val utbetaling = async { fetcher.hentUtbetaling() }
                             val etterbetaling = async { fetcher.hentEtterbetaling() }
                             BarnepensjonInnvilgelseRedigerbartUtfallDTO.fra(
@@ -136,10 +83,11 @@ class BrevDataMapper(
 
                     VedtakType.ENDRING ->
                         coroutineScope {
-                            val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                            val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                             val etterbetaling = async { fetcher.hentEtterbetaling() }
                             BarnepensjonRevurderingRedigerbartUtfallDTO.fra(etterbetaling.await())
                         }
+
                     VedtakType.OPPHOER -> ManueltBrevData.fra()
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
                     null -> ManueltBrevData.fra(emptyList())
@@ -150,7 +98,7 @@ class BrevDataMapper(
                 when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> {
                         coroutineScope {
-                            val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                            val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                             val utbetaling = async { fetcher.hentUtbetaling() }
                             val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
                             val etterbetaling = async { fetcher.hentEtterbetaling() }
@@ -185,7 +133,8 @@ class BrevDataMapper(
                         }
 
                     VedtakType.OPPHOER -> {
-                        val virkningstidspunkt = requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt?.atDay(1))
+                        val virkningstidspunkt =
+                            requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt?.atDay(1))
                         OpphoerBrevDataUtfallOMS.fra(
                             virkningstidspunkt,
                             emptyList(),
@@ -209,7 +158,7 @@ class BrevDataMapper(
     ): BrevData {
         if (generellBrevData.erMigrering()) {
             return coroutineScope {
-                val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                 val utbetaling = async { fetcher.hentUtbetaling() }
                 val etterbetaling = async { fetcher.hentEtterbetaling() }
                 val trygdetid = async { fetcher.hentTrygdetid() }
@@ -236,9 +185,10 @@ class BrevDataMapper(
             TOM_MAL_INFORMASJONSBREV -> {
                 ManueltBrevMedTittelData(innholdMedVedlegg.innhold(), tittel)
             }
+
             BARNEPENSJON_REVURDERING -> {
                 coroutineScope {
-                    val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                    val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }
                     val forrigeUtbetaling = async { fetcher.hentForrigeUtbetaling() }
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
@@ -270,7 +220,7 @@ class BrevDataMapper(
 
             BARNEPENSJON_INNVILGELSE -> {
                 coroutineScope {
-                    val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                    val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
@@ -319,7 +269,7 @@ class BrevDataMapper(
 
             OMSTILLINGSSTOENAD_INNVILGELSE -> {
                 coroutineScope {
-                    val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                    val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                     val utbetaling = async { fetcher.hentUtbetaling() }
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
                     val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
@@ -346,7 +296,7 @@ class BrevDataMapper(
 
             OMSTILLINGSSTOENAD_REVURDERING -> {
                 coroutineScope {
-                    val fetcher = datafetcher(brukerTokenInfo, generellBrevData)
+                    val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
                     val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
@@ -386,18 +336,4 @@ class BrevDataMapper(
                 }
         }
     }
-
-    private fun datafetcher(
-        brukerTokenInfo: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-    ) = BrevDatafetcher(
-        brevdataFacade,
-        brukerTokenInfo,
-        generellBrevData.behandlingId,
-        requireNotNull(generellBrevData.forenkletVedtak?.virkningstidspunkt) {
-            "brev for behandling=${generellBrevData.behandlingId} må ha virkningstidspunkt"
-        },
-        generellBrevData.forenkletVedtak?.type,
-        generellBrevData.sak,
-    )
 }

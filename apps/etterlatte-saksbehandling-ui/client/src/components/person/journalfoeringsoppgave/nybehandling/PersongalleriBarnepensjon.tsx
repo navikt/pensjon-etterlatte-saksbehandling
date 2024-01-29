@@ -1,4 +1,4 @@
-import { Button, Heading, Panel, TextField } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Panel, TextField } from '@navikt/ds-react'
 import { Persongalleri } from '~shared/types/Person'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import React from 'react'
@@ -63,7 +63,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
       <InputRow>
         <TextField
           label="Innsender"
-          description="Oppgi innsenderen sitt fødselsnummer dersom det er tilgjengelig"
+          description="Oppgi innsenderen sitt fødselsnummer (dersom det er tilgjengelig)"
           value={persongalleri?.innsender || ''}
           pattern="[0-9]{11}"
           maxLength={11}
@@ -74,6 +74,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
       <Panel border>
         <Heading size="small" spacing>
           Gjenlevende forelder
+          <BodyShort textColor="subtle">Legg til gjenlevende hvis tilgjengelig</BodyShort>
         </Heading>
 
         <InputList>
@@ -99,6 +100,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
       <Panel border>
         <Heading size="small" spacing>
           Avdød forelder
+          <BodyShort textColor="subtle">Legg til avdød hvis tilgjengelig</BodyShort>
         </Heading>
 
         <InputList>
@@ -124,6 +126,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
       <Panel border>
         <Heading size="small" spacing>
           Søsken
+          <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>
         </Heading>
 
         <InputList>

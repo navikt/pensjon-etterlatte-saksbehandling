@@ -11,10 +11,12 @@ import { useFieldArray, useForm } from 'react-hook-form'
 import { fnrErGyldig } from '~utils/fnr'
 import { FlexRow } from '~shared/styled'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
+import { SakType } from '~shared/types/sak'
 
 type Props = {
   behandling: IDetaljertBehandling
   personopplysninger: Personopplysninger
+  sakType: SakType
 }
 
 // RHF krever at en array består av objekter
@@ -23,7 +25,7 @@ interface RHFRedigerbarFamilie {
   avdoede: Array<{ fnr: string }>
 }
 
-export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props) => {
+export const RedigerFamilieforhold = ({ behandling, personopplysninger, sakType }: Props) => {
   const [isOpen, setIsOpen] = useState(false)
   const [feilmelding, setFeilmelding] = useState<string | null>(null)
 
@@ -109,7 +111,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                           fnrErGyldig: (value) => fnrErGyldig(value) || 'Ugyldig fødselsnummer',
                         },
                       })}
-                      label="Avdød forelder"
+                      label={sakType === SakType.BARNEPENSJON ? 'Avdød forelder' : 'Avdød'}
                       description="Oppgi fødselsnummer"
                       error={errors?.avdoede?.[index]?.fnr?.message}
                     />

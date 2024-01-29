@@ -326,7 +326,7 @@ class GrunnlagsendringshendelseService(
                     "Oppretter grunnlagsendringshendelse med id=${hendelse.id} for hendelse av " +
                         "type $grunnlagendringType på sak med id=${rolleOgSak.sak.id}",
                 )
-                Pair(grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse), rolleOgSak)
+                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse) to rolleOgSak
             }.onEach {
                 verifiserOgHaandterHendelse(it.first, it.second.sak)
             }.map { it.first }

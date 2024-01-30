@@ -8,15 +8,15 @@ import { FlexRow } from '~shared/styled'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { avbrytKlage } from '~shared/api/klage'
+import { annullerKlage } from '~shared/api/klage'
 import { useKlage, useKlageRedigerbar } from '~components/klage/useKlage'
 import { Controller, useForm } from 'react-hook-form'
-import { AarsakTilAvbrytelse, AvbrytKlageRequest, teksterAarsakTilAvbrytelse } from '~shared/types/Klage'
+import { AarsakTilAnnullering, AnnullerKlageRequest, teksterAarsakTilAnnullering } from '~shared/types/Klage'
 
 export default function AnnullerKlage() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
-  const [avbrytKlageStatus, avbrytKlagen] = useApiCall(avbrytKlage)
+  const [annullerKlageStatus, annullerKlagen] = useApiCall(annullerKlage)
 
   const klage = useKlage()
   const klageRedigerbar = useKlageRedigerbar()
@@ -30,12 +30,12 @@ export default function AnnullerKlage() {
     handleSubmit,
     trigger,
     formState: { errors },
-  } = useForm<AvbrytKlageRequest>({
-    defaultValues: { klageId: klage.id, aarsakTilAvbrytelse: AarsakTilAvbrytelse.ANNET, kommentar: '' },
+  } = useForm<AnnullerKlageRequest>({
+    defaultValues: { klageId: klage.id, aarsakTilAnnullering: AarsakTilAnnullering.ANNET, kommentar: '' },
   })
 
-  const avbryt = (request: AvbrytKlageRequest) => {
-    avbrytKlagen(request, () => {
+  const annuller = (request: AnnullerKlageRequest) => {
+    annullerKlagen(request, () => {
       setIsOpen(false)
       navigate(`/person/${klage?.sak?.ident}`)
     })
@@ -55,10 +55,10 @@ export default function AnnullerKlage() {
         </ExpansionCard.Header>
 
         <ExpansionCard.Content>
-          <AnnullerForm id="annuller-klage-form" onSubmit={handleSubmit(avbryt)}>
+          <AnnullerForm id="annuller-klage-form" onSubmit={handleSubmit(annuller)}>
             <FlexRow>
               <Controller
-                name="aarsakTilAvbrytelse"
+                name="aarsakTilAnnullering"
                 rules={{
                   required: { value: true, message: 'Du må velge en årsak for omgjøringen.' },
                   minLength: 1,
@@ -69,9 +69,9 @@ export default function AnnullerKlage() {
                   return (
                     <>
                       <Select label="Årsak til annullering" value={value ?? ''} {...rest}>
-                        {Object.entries(AarsakTilAvbrytelse).map(([key, value]) => (
+                        {Object.entries(AarsakTilAnnullering).map(([key, value]) => (
                           <option key={key} value={key}>
-                            {teksterAarsakTilAvbrytelse[value]}
+                            {teksterAarsakTilAnnullering[value]}
                           </option>
                         ))}
                       </Select>
@@ -84,7 +84,7 @@ export default function AnnullerKlage() {
               name="kommentar"
               rules={{
                 validate: (value, formValues) => {
-                  return formValues.aarsakTilAvbrytelse == 'ANNET' && value.length == 0
+                  return formValues.aarsakTilAnnullering == 'ANNET' && value.length == 0
                     ? 'Du må skrive en kommentar'
                     : true
                 },
@@ -131,16 +131,16 @@ export default function AnnullerKlage() {
 
         <Modal.Footer>
           <FlexRow justify="center">
-            <Button variant="tertiary" onClick={() => setIsOpen(false)} loading={isPending(avbrytKlageStatus)}>
+            <Button variant="tertiary" onClick={() => setIsOpen(false)} loading={isPending(annullerKlageStatus)}>
               Avbryt annullering
             </Button>
-            <Button type="submit" form="annuller-klage-form" variant="danger" loading={isPending(avbrytKlageStatus)}>
+            <Button type="submit" form="annuller-klage-form" variant="danger" loading={isPending(annullerKlageStatus)}>
               Annuller klage
             </Button>
           </FlexRow>
           {isFailureHandler({
-            apiResult: avbrytKlageStatus,
-            errorMessage: 'Det oppsto en feil ved avbryting av klagen.',
+            apiResult: annullerKlageStatus,
+            errorMessage: 'Det oppsto en feil ved annullering av klagen.',
           })}
         </Modal.Footer>
       </Modal>

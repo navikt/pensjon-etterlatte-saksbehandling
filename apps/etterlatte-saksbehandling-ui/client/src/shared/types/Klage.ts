@@ -29,9 +29,9 @@ export interface NyKlageRequest extends NyKlageRequestUtfylling {
   innsender?: string
 }
 
-export interface AvbrytKlageRequest {
+export interface AnnullerKlageRequest {
   klageId: string
-  aarsakTilAvbrytelse: AarsakTilAvbrytelse
+  aarsakTilAnnullering: AarsakTilAnnullering
   kommentar: string
 }
 
@@ -161,14 +161,14 @@ export type KlageUtfallUtenBrev =
       innstilling: InnstillingTilKabalUtenBrev
     }
 
-export enum AarsakTilAvbrytelse {
+export enum AarsakTilAnnullering {
   BRUKER_HAR_TRUKKET_KLAGEN = 'BRUKER_HAR_TRUKKET_KLAGEN',
   FEILREGISTRERT = 'FEILREGISTRERT',
   ALLEREDE_LOEST = 'ALLEREDE_LOEST',
   ANNET = 'ANNET',
 }
 
-export const teksterAarsakTilAvbrytelse: Record<AarsakTilAvbrytelse, string> = {
+export const teksterAarsakTilAnnullering: Record<AarsakTilAnnullering, string> = {
   BRUKER_HAR_TRUKKET_KLAGEN: 'Klagen er blitt trukket av søker',
   FEILREGISTRERT: 'Opprettet ved en feil',
   ALLEREDE_LOEST: 'Saken er allerede blitt løst',

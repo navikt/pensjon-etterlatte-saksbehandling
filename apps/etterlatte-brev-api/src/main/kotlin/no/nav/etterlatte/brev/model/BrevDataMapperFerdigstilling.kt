@@ -187,12 +187,16 @@ class BrevDataMapperFerdigstilling(
                     val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                     val etterbetaling = async { fetcher.hentEtterbetaling() }
                     val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
+                    val utbetaling = async { fetcher.hentUtbetaling() }
+                    val forrigeUtbetaling = async { fetcher.hentForrigeUtbetaling() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
                     val avkortingsinfoHentet =
                         requireNotNull(avkortingsinfo.await()) { "${kode.ferdigstilling} Må ha avkortingsinfo" }
                     val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
                     InntektsendringRevurderingOMS.fra(
                         avkortingsinfoHentet,
+                        utbetaling.await(),
+                        forrigeUtbetaling.await(),
                         etterbetaling.await(),
                         trygdetidHentet,
                         innholdMedVedlegg,

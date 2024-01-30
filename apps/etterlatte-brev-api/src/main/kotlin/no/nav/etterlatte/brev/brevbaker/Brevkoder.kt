@@ -14,9 +14,9 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AV
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE_UTFALL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING_OPPHOER
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING_OPPHOER_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_INNHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
@@ -66,8 +66,8 @@ data class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: Ett
             )
         val OPPHOER =
             Brevkoder(
-                OMSTILLINGSSTOENAD_REVURDERING_OPPHOER_UTFALL,
-                OMSTILLINGSSTOENAD_REVURDERING_OPPHOER,
+                OMSTILLINGSSTOENAD_OPPHOER_UTFALL,
+                OMSTILLINGSSTOENAD_OPPHOER,
             )
         val REVURDERING = Brevkoder(TOM_MAL, OMSTILLINGSSTOENAD_REVURDERING)
     }

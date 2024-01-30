@@ -76,7 +76,7 @@ spec:
     - name: ETTERLATTE_VILKAARSVURDERING_CLIENT_ID
       value: prod-gcp.etterlatte.etterlatte-vilkaarsvurdering
     - name: KODEVERK_URL
-      value: "https://kodeverk.prod-fss-pub.nais.io/api/v1/kodeverk"
+      value: "https://kodeverk-api.nav.no/api/v1/kodeverk"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -94,5 +94,5 @@ spec:
         - application: etterlatte-grunnlag
         - application: etterlatte-vilkaarsvurdering
       external:
-        - host: kodeverk.prod-fss-pub.nais.io
+        - host: kodeverk-api.nav.no
         - host: etterlatte-unleash-api.nav.cloud.nais.io

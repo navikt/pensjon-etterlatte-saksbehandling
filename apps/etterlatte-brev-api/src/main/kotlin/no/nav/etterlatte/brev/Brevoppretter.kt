@@ -174,7 +174,7 @@ class Brevoppretter(
             when (redigerbarTekstRequest.prosessType) {
                 BrevProsessType.REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest)
                 BrevProsessType.AUTOMATISK -> null
-                BrevProsessType.MANUELL -> SlateHelper.hentInitiellPayload(redigerbarTekstRequest.generellBrevData)
+                BrevProsessType.MANUELL -> SlateHelper.hentInitiellPayload()
                 BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException("Payload ikke relevant for ${BrevProsessType.OPPLASTET_PDF}")
             }
 

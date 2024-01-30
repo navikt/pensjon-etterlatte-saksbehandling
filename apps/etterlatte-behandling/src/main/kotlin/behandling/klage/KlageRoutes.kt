@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.hvisEnabled
+import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.klageId
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.medBody
@@ -120,6 +121,24 @@ internal fun Route.klageRoutes(
                     }
                 }
             }
+
+            post("avbryt") {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
+                        medBody<AvbrytKlageDto> { avbrytKlageDto ->
+                            inTransaction {
+                                klageService.avbrytKlage(
+                                    klageId,
+                                    avbrytKlageDto.aarsakTilAvbrytelse,
+                                    avbrytKlageDto.kommentar,
+                                    saksbehandler,
+                                )
+                            }
+                        }
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
+            }
         }
 
         get("sak/{$SAKID_CALL_PARAMETER}") {
@@ -137,3 +156,5 @@ internal fun Route.klageRoutes(
 data class VurdereFormkravDto(val formkrav: Formkrav)
 
 data class VurdertUtfallDto(val utfall: KlageUtfallUtenBrev)
+
+data class AvbrytKlageDto(val aarsakTilAvbrytelse: AarsakTilAvbrytelse, val kommentar: String)

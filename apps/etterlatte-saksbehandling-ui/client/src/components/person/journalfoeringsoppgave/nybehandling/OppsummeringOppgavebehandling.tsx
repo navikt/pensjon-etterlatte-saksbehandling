@@ -1,4 +1,4 @@
-import { Button, Detail, Heading, Tag } from '@navikt/ds-react'
+import { Alert, Button, Detail, Heading, Tag } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { useNavigate } from 'react-router-dom'
@@ -10,6 +10,7 @@ import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJ
 import FullfoerOppgaveModal from '~components/person/journalfoeringsoppgave/nybehandling/FullfoerOppgaveModal'
 import { FlexRow } from '~shared/styled'
 import { gyldigBehandlingRequest } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
+import React from 'react'
 
 export default function OppsummeringOppgavebehandling() {
   const { journalpost, nyBehandlingRequest, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -74,6 +75,13 @@ export default function OppsummeringOppgavebehandling() {
           />
         )) || <Info label="Innsender" tekst={<Detail>Ikke oppgitt</Detail>} />}
       </InfoList>
+
+      {!persongalleri.avdoed?.length && (
+        <Alert variant="warning" size="small">
+          Avdød er påkrevd ved innvilgelse. Det anbefales derfor å legge til (hvis mulig) for å slippe oppdatering av
+          persongalleriet på et senere tidspunkt.
+        </Alert>
+      )}
 
       <div>
         <FlexRow justify="center" $spacing>

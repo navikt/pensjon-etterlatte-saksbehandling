@@ -11,8 +11,8 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
@@ -342,7 +342,7 @@ class BrevDataMapper(
                 )
             }
 
-            OMSTILLINGSSTOENAD_REVURDERING_OPPHOER -> {
+            OMSTILLINGSSTOENAD_OPPHOER -> {
                 OpphoerBrevDataOMS.fra(
                     generellBrevData.utlandstilknytning,
                     innholdMedVedlegg.innhold(),

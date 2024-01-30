@@ -44,7 +44,8 @@ internal class BrevServiceTest {
     private val brevDataFacade = mockk<BrevdataFacade>()
     private val pdfGenerator = mockk<PDFGenerator>()
     private val brevbakerService = mockk<BrevbakerService>()
-    private val brevoppretter = Brevoppretter(adresseService, db, brevDataFacade, brevbakerService)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
+    private val brevoppretter = Brevoppretter(adresseService, db, brevDataFacade, brevbakerService, redigerbartVedleggHenter)
 
     private val brevService =
         BrevService(

@@ -2,13 +2,6 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.model.bp.VedleggBP
-import no.nav.etterlatte.brev.model.oms.VedleggOMS
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
 data class Slate(
     @JsonValue val elements: List<Element> = emptyList(),
@@ -36,37 +29,4 @@ data class Slate(
         BULLETED_LIST("bulleted-list"),
         LIST_ITEM("list-item"),
     }
-}
-
-object SlateHelper {
-    fun hentInitiellPayloadVedlegg(generellBrevData: GenerellBrevData): List<BrevInnholdVedlegg>? {
-        return when (generellBrevData.sak.sakType) {
-            SakType.OMSTILLINGSSTOENAD -> {
-                when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> VedleggOMS.innvilgelseOMS()
-                    VedtakType.ENDRING -> {
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.INNTEKTSENDRING,
-                            Revurderingaarsak.ANNEN,
-                            -> VedleggOMS.inntektsendringOMS()
-                            else -> null
-                        }
-                    }
-                    else -> null
-                }
-            }
-
-            SakType.BARNEPENSJON -> {
-                when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> VedleggBP.innvilgelse()
-                    VedtakType.ENDRING -> VedleggBP.endring()
-                    else -> null
-                }
-            }
-        }
-    }
-
-    private fun getJsonFile(url: String) = javaClass.getResource(url)!!.readText()
-
-    fun getSlate(url: String) = getJsonFile(url).let { deserialize<Slate>(it) }
 }

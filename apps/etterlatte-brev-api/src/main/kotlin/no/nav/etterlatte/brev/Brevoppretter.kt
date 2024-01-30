@@ -16,7 +16,6 @@ import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
-import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
@@ -33,6 +32,7 @@ class Brevoppretter(
     private val db: BrevRepository,
     private val brevdataFacade: BrevdataFacade,
     private val brevbaker: BrevbakerService,
+    private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -141,7 +141,7 @@ class Brevoppretter(
                 brevKode?.tittel,
             )
 
-        val innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType)
+        val innholdVedlegg = opprettInnholdVedlegg(bruker, generellBrevData, prosessType)
         return OpprettBrevRequest(generellBrevData, prosessType, innhold, innholdVedlegg)
     }
 
@@ -181,12 +181,13 @@ class Brevoppretter(
         return BrevInnhold(tittel, redigerbarTekstRequest.generellBrevData.spraak, payload)
     }
 
-    private fun opprettInnholdVedlegg(
+    private suspend fun opprettInnholdVedlegg(
+        bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
         prosessType: BrevProsessType,
     ): List<BrevInnholdVedlegg>? =
         when (prosessType) {
-            BrevProsessType.REDIGERBAR -> SlateHelper.hentInitiellPayloadVedlegg(generellBrevData)
+            BrevProsessType.REDIGERBAR -> redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData)
             BrevProsessType.AUTOMATISK -> null
             BrevProsessType.MANUELL -> null
             BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException(

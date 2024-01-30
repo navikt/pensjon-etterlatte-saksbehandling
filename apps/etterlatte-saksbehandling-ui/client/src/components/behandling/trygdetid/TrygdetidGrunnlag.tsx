@@ -57,7 +57,7 @@ export const TrygdetidGrunnlag = ({
     requestLagreTrygdetidgrunnlag(
       {
         behandlingId: behandlingId,
-        // Flippe verdi av prorata for å matche PESYS
+        // Flippe verdi av prorata for å matche backend
         trygdetidgrunnlag: { ...data, prorata: !data.prorata },
       },
       (respons) => {

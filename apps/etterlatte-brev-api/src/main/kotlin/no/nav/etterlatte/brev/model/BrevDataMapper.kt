@@ -226,12 +226,8 @@ class BrevDataMapper(
                     etterbetaling = etterbetaling.await(),
                     trygdetid = requireNotNull(trygdetid.await()),
                     grunnbeloep = grunnbeloep.await(),
-                    data =
-                        migreringBrevDataService.opprettMigreringBrevdata(
-                            generellBrevData,
-                            automatiskMigreringRequest,
-                            brukerTokenInfo,
-                        ),
+                    migreringRequest = automatiskMigreringRequest,
+                    utlandstilknytning = generellBrevData.utlandstilknytning?.type,
                 )
             }
         }

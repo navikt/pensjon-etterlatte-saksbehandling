@@ -72,7 +72,7 @@ data class OmregnetBPNyttRegelverkFerdig(
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
     val erUnder18Aar: Boolean,
-    val data: OmregnetBPNyttRegelverk,
+    val erBosattUtlandet: Boolean,
 ) : BrevData() {
     companion object {
         fun fra(
@@ -82,7 +82,8 @@ data class OmregnetBPNyttRegelverkFerdig(
             trygdetid: Trygdetid,
             grunnbeloep: Grunnbeloep,
             etterbetaling: EtterbetalingDTO?,
-            data: OmregnetBPNyttRegelverk,
+            migreringRequest: MigreringBrevRequest?,
+            utlandstilknytning: UtlandstilknytningType?,
         ): OmregnetBPNyttRegelverkFerdig {
             val beregningsperioder = barnepensjonBeregningsperiodes(utbetalingsinfo)
 
@@ -93,7 +94,11 @@ data class OmregnetBPNyttRegelverkFerdig(
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
-                data = data,
+                erBosattUtlandet =
+                    (
+                        migreringRequest?.utlandstilknytningType
+                            ?: requireNotNull(utlandstilknytning)
+                    ) == UtlandstilknytningType.BOSATT_UTLAND,
             )
         }
     }

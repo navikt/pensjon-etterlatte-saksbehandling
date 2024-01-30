@@ -45,7 +45,9 @@ export const TrygdetidGrunnlag = ({
     control,
     getValues,
   } = useForm<OppdaterTrygdetidGrunnlag>({
-    defaultValues: eksisterendeGrunnlag ? eksisterendeGrunnlag : initialState(trygdetidGrunnlagType),
+    defaultValues: eksisterendeGrunnlag
+      ? { ...eksisterendeGrunnlag, prorata: !eksisterendeGrunnlag.prorata }
+      : initialState(trygdetidGrunnlagType),
   })
 
   const [trygdetidgrunnlagStatus, requestLagreTrygdetidgrunnlag] = useApiCall(lagreTrygdetidgrunnlag)
@@ -56,7 +58,7 @@ export const TrygdetidGrunnlag = ({
       {
         behandlingId: behandlingId,
         // Flippe verdi av prorata for å matche PESYS
-        trygdetidgrunnlag: { ...data, prorata: !!data.prorata },
+        trygdetidgrunnlag: { ...data, prorata: !data.prorata },
       },
       (respons) => {
         setTrygdetid(respons)

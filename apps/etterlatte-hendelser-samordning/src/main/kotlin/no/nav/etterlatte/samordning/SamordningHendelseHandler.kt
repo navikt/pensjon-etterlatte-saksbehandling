@@ -23,6 +23,10 @@ class SamordningHendelseHandler(
         }
 
         if (hendelse.artTypeKode == SAKSTYPE_OMS) {
+            if (hendelse.vedtakId == 11547L) {
+                return
+            }
+
             hendelse.vedtakId?.let {
                 kafkaProduser.publiser(
                     noekkel = UUID.randomUUID().toString(),

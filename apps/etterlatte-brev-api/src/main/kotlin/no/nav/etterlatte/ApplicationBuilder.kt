@@ -41,7 +41,6 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
 import no.nav.etterlatte.brev.model.BrevKodeMapper
-import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
@@ -150,13 +149,11 @@ class ApplicationBuilder {
 
     private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper, brevKodeMapper)
 
-    private val brevProsessTypeFactory = BrevProsessTypeFactory()
-
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
-    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevProsessTypeFactory, brevbakerService)
+    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevbakerService)
 
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, brevDataMapperFerdigstilling, adresseService, brevbakerService, migreringBrevDataService)

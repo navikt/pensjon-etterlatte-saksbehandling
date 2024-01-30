@@ -14,7 +14,6 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.SlateHelper
@@ -33,7 +32,6 @@ class Brevoppretter(
     private val adresseService: AdresseService,
     private val db: BrevRepository,
     private val brevdataFacade: BrevdataFacade,
-    private val brevProsessTypeFactory: BrevProsessTypeFactory,
     private val brevbaker: BrevbakerService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -120,8 +118,7 @@ class Brevoppretter(
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
 
-        val prosessType =
-            brevProsessTypeFactory.fra(generellBrevData)
+        val prosessType = BrevProsessType.REDIGERBAR
 
         val brevkode: (mapper: BrevKodeMapper, g: GenerellBrevData) -> EtterlatteBrevKode =
             if (brevKode != null) {

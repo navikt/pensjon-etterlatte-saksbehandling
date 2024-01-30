@@ -39,8 +39,6 @@ data class Slate(
 }
 
 object SlateHelper {
-    fun hentInitiellPayload(): Slate = getSlate("/maler/tom-brevmal.json")
-
     fun hentInitiellPayloadVedlegg(generellBrevData: GenerellBrevData): List<BrevInnholdVedlegg>? {
         return when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {

@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
@@ -17,7 +16,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -91,28 +89,8 @@ class PDFGenerator(
                 sakType = sak.sakType,
             )
 
-        return brevbakerService.genererPdf(brev.id, brevRequest).let {
-            when (letterData) {
-                is OmregnetBPNyttRegelverkFerdig -> {
-                    val forhaandsvarsel =
-                        brevbakerService.genererPdf(
-                            brev.id,
-                            BrevbakerRequest.fra(
-                                EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                                letterData,
-                                avsender,
-                                generellBrevData.personerISak.soekerOgEventuellVerge(),
-                                sak.id,
-                                generellBrevData.spraak,
-                                sak.sakType,
-                            ),
-                        )
-                    forhaandsvarsel.medPdfAppended(it)
-                }
-
-                else -> it
-            }
-        }.also { lagrePdfHvisVedtakFattet(generellBrevData, brev, it) }
+        return brevbakerService.genererPdf(brev.id, brevRequest)
+            .also { lagrePdfHvisVedtakFattet(generellBrevData, brev, it) }
     }
 
     private suspend fun opprettBrevData(

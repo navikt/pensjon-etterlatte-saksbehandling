@@ -1,16 +1,17 @@
 import React, { ReactNode } from 'react'
 import { Table } from '@navikt/ds-react'
 import styled from 'styled-components'
+import { SortKeys } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 
 export const OppgaverTableHeader = (): ReactNode => {
   return (
     <Table.Header>
       <Table.Row>
         <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
-        <Table.ColumnHeader scope="col" sortKey="frist" sortable>
+        <Table.ColumnHeader scope="col" sortKey={SortKeys.FRIST} sortable>
           Frist
         </Table.ColumnHeader>
-        <Table.ColumnHeader scope="col" sortKey="fnr" sortable>
+        <Table.ColumnHeader scope="col" sortKey={SortKeys.FNR} sortable>
           Fødselsnummer
         </Table.ColumnHeader>
         <Table.HeaderCell scope="col">Oppgavetype</Table.HeaderCell>

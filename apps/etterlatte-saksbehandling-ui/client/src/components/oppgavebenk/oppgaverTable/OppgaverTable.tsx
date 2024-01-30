@@ -1,21 +1,35 @@
-import React, { ReactNode, useState } from 'react'
+import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { SortState, Table } from '@navikt/ds-react'
 import { OppgaverTableHeader } from '~components/oppgavebenk/oppgaverTable/OppgaverTableHeader'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { OppgaverTableRow } from '~components/oppgavebenk/oppgaverTable/OppgaverTableRow'
+import { Filter } from '~components/oppgavebenk/oppgavelistafiltre'
 
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveliste: boolean
   hentOppgaver: () => void
+  filter: Filter
+  setFilter: Dispatch<SetStateAction<Filter>>
 }
 
-export const OppgaverTable = ({ oppgaver, oppdaterTildeling, erMinOppgaveliste, hentOppgaver }: Props): ReactNode => {
+export enum SortKeys {
+  FRIST = 'frist',
+  FNR = 'fnr',
+}
+
+export const OppgaverTable = ({
+  oppgaver,
+  oppdaterTildeling,
+  erMinOppgaveliste,
+  hentOppgaver,
+  filter,
+  setFilter,
+}: Props): ReactNode => {
   const [sort, setSort] = useState<SortState>()
 
   const handleSort = (sortKey: string) => {
-    // TODO: sette filtrering utifra sortkey her, kanskje en switch case?
     setSort(
       sort && sortKey === sort.orderBy && sort.direction === 'descending'
         ? undefined
@@ -25,6 +39,17 @@ export const OppgaverTable = ({ oppgaver, oppdaterTildeling, erMinOppgaveliste, 
           }
     )
   }
+
+  useEffect(() => {
+    // TODO: sette filtrering utifra sortkey her, kanskje en switch case?
+    switch (sort?.orderBy) {
+      case SortKeys.FRIST:
+        setFilter({ ...filter, fristSortering: sort?.direction ? sort.direction : 'ingen' })
+        break
+      case SortKeys.FNR:
+      // TODO: filtrer på fnr
+    }
+  }, [sort])
 
   return (
     <Table sort={sort} onSortChange={(sortKey) => handleSort(sortKey!)}>

@@ -1,13 +1,16 @@
 import { Alert } from '@navikt/ds-react'
 import { OppgaveDTO } from '~shared/api/oppgaver'
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
+import { Filter } from '~components/oppgavebenk/oppgavelistafiltre'
 
 interface Props {
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   filtrerteOppgaver: ReadonlyArray<OppgaveDTO>
   hentOppgaver: () => void
+  filter: Filter
+  setFilter: Dispatch<SetStateAction<Filter>>
   totaltAntallOppgaver?: number
 }
 
@@ -15,6 +18,8 @@ export const Oppgavelista = ({
   oppdaterTildeling,
   filtrerteOppgaver,
   hentOppgaver,
+  filter,
+  setFilter,
   totaltAntallOppgaver,
 }: Props): ReactNode => {
   const [page, setPage] = useState<number>(1)
@@ -36,6 +41,8 @@ export const Oppgavelista = ({
             oppdaterTildeling={oppdaterTildeling}
             erMinOppgaveliste={false}
             hentOppgaver={hentOppgaver}
+            filter={filter}
+            setFilter={setFilter}
           />
 
           <PagineringsKontroller

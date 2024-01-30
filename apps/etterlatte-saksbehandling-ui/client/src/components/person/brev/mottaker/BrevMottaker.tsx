@@ -1,5 +1,5 @@
 import { IBrev } from '~shared/types/Brev'
-import { Alert, Button, Heading, Panel } from '@navikt/ds-react'
+import { Alert, Heading, Panel } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getVergeadresseForPerson, getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
@@ -8,13 +8,11 @@ import { VergeFeilhaandtering } from '~components/person/VergeFeilhaandtering'
 import { isSuccess } from '~shared/api/apiUtils'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { DocPencilIcon } from '@navikt/aksel-icons'
 import { FlexRow } from '~shared/styled'
 import { BrevMottakerModal } from '~components/person/brev/mottaker/BrevMottakerModal'
 
 export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres: boolean }) {
   const [brevState, setBrevState] = useState<IBrev | undefined>(brev)
-  const [erModalAapen, setErModalAapen] = useState<boolean>(false)
 
   const mottaker = brevState!.mottaker
   const adresse = mottaker?.adresse
@@ -32,29 +30,25 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
   }, [brev])
 
   return (
-    <div style={{ margin: '1rem' }}>
+    <Panel border>
       {isSuccess(vergeadresse) && (
         <Alert variant="info" size="small" inline>
           Søker har verge
         </Alert>
       )}
       {isSuccessOrNotFound(vergeadresse) && (
-        <Panel border>
+        <>
           <FlexRow justify="space-between">
             <Heading spacing level="2" size="medium">
               Mottaker
             </Heading>
             <div>
               {kanRedigeres && (
-                <Button
-                  variant="secondary"
-                  onClick={() => setErModalAapen(true)}
-                  icon={<DocPencilIcon aria-hidden />}
-                  size="small"
-                />
+                <BrevMottakerModal brev={brevState!} setBrev={setBrevState} vergeadresse={getData(vergeadresse)} />
               )}
             </div>
           </FlexRow>
+
           <InfoWrapper>
             <Info
               wide
@@ -127,16 +121,9 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
               }
             />
           </InfoWrapper>
-        </Panel>
+        </>
       )}
       {VergeFeilhaandtering(vergeadresse)}
-      <BrevMottakerModal
-        brev={brevState!}
-        setBrev={setBrevState}
-        vergeadresse={getData(vergeadresse)}
-        isOpen={erModalAapen}
-        setIsOpen={setErModalAapen}
-      />
-    </div>
+    </Panel>
   )
 }

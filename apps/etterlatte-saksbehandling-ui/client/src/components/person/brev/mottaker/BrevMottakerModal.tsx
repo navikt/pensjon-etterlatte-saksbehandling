@@ -14,6 +14,7 @@ import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { formaterFnr } from '~utils/formattering'
 import { Controller, useForm } from 'react-hook-form'
+import { DocPencilIcon } from '@navikt/aksel-icons'
 
 enum MottakerType {
   PRIVATPERSON = 'PRIVATPERSON',
@@ -24,15 +25,14 @@ interface Props {
   brev: IBrev
   setBrev: Dispatch<SetStateAction<IBrev | undefined>>
   vergeadresse: Grunnlagsopplysning<Mottaker, KildePersondata> | undefined
-  isOpen: boolean
-  setIsOpen: Dispatch<SetStateAction<boolean>>
 }
 
-export function BrevMottakerModal({ brev, setBrev, vergeadresse, isOpen, setIsOpen }: Props) {
+export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
   const { id: brevId, sakId, mottaker: initialMottaker } = brev
 
   const [mottakerStatus, apiOppdaterMottaker] = useApiCall(oppdaterMottaker)
 
+  const [isOpen, setIsOpen] = useState(false)
   const [mottakerType, setMottakerType] = useState(
     brev.mottaker.orgnummer ? MottakerType.BEDRIFT : MottakerType.PRIVATPERSON
   )
@@ -96,8 +96,10 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse, isOpen, setIsOp
 
   return (
     <>
+      <Button variant="secondary" onClick={() => setIsOpen(true)} icon={<DocPencilIcon aria-hidden />} size="small" />
+
       <form onSubmit={handleSubmit((data) => lagre(data))}>
-        <MottakerModal open={isOpen} onClose={avbryt}>
+        <Modal open={isOpen} onClose={avbryt} width="medium">
           <Modal.Body>
             <Heading size="large" spacing>
               Endre mottaker
@@ -263,7 +265,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse, isOpen, setIsOp
             })}
 
             <FlexRow justify="right">
-              <Button variant="secondary" disabled={isPending(mottakerStatus)} onClick={avbryt}>
+              <Button variant="secondary" type="button" disabled={isPending(mottakerStatus)} onClick={avbryt}>
                 Avbryt
               </Button>
               <Button variant="primary" type="submit" loading={isPending(mottakerStatus)}>
@@ -271,16 +273,11 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse, isOpen, setIsOp
               </Button>
             </FlexRow>
           </Modal.Body>
-        </MottakerModal>
+        </Modal>
       </form>
     </>
   )
 }
-
-const MottakerModal = styled(Modal)`
-  width: 40rem;
-  padding: 3rem;
-`
 
 const SkjemaGruppe = styled.div<{ inline?: boolean }>`
   & > * {

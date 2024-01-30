@@ -1,23 +1,22 @@
-import React, { Dispatch, ReactNode, SetStateAction } from 'react'
+import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Button, Heading, Modal, TextField } from '@navikt/ds-react'
-import styled from 'styled-components'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { FlexRow } from '~shared/styled'
 import { isPending } from '~shared/api/apiUtils'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterTittel } from '~shared/api/brev'
 import { useForm } from 'react-hook-form'
+import { DocPencilIcon } from '@navikt/aksel-icons'
 
 interface Props {
-  isOpen: boolean
-  setIsOpen: Dispatch<SetStateAction<boolean>>
   nyTittel: string
   setNyTittel: Dispatch<SetStateAction<string>>
   brevId: number
   sakId: number
 }
 
-export const BrevTittelModal = ({ isOpen, setIsOpen, nyTittel, setNyTittel, brevId, sakId }: Props): ReactNode => {
+export const BrevTittelModal = ({ nyTittel, setNyTittel, brevId, sakId }: Props): ReactNode => {
+  const [isOpen, setIsOpen] = useState(false)
   const [status, apiOppdaterTittel] = useApiCall(oppdaterTittel)
 
   const {
@@ -47,45 +46,44 @@ export const BrevTittelModal = ({ isOpen, setIsOpen, nyTittel, setNyTittel, brev
   }
 
   return (
-    <form onSubmit={handleSubmit((data) => lagre(data))}>
-      <TittelModal open={isOpen} onClose={avbryt}>
-        <Modal.Body>
-          <Heading size="large" spacing>
-            Endre tittel
-          </Heading>
+    <div>
+      <Button variant="secondary" onClick={() => setIsOpen(true)} icon={<DocPencilIcon aria-hidden />} size="small" />
 
-          <TextField
-            {...register('tittel', {
-              required: {
-                value: true,
-                message: 'Du må velge en tittel',
-              },
+      <Modal open={isOpen} onClose={avbryt} width="medium">
+        <form onSubmit={handleSubmit((data) => lagre(data))}>
+          <Modal.Body>
+            <Heading size="large" spacing>
+              Endre tittel
+            </Heading>
+
+            <TextField
+              {...register('tittel', {
+                required: {
+                  value: true,
+                  message: 'Du må sette en tittel',
+                },
+              })}
+              label="Ny tittel"
+              error={errors.tittel?.message}
+            />
+            {isFailureHandler({
+              apiResult: status,
+              errorMessage: 'Kunne ikke oppdatere tittel',
             })}
-            label="Ny tittel"
-            error={errors.tittel?.message}
-          />
-          {isFailureHandler({
-            apiResult: status,
-            errorMessage: 'Kunne ikke oppdatere tittel',
-          })}
-        </Modal.Body>
+          </Modal.Body>
 
-        <Modal.Footer>
-          <FlexRow justify="right">
-            <Button variant="secondary" disabled={isPending(status)} onClick={avbryt}>
-              Avbryt
-            </Button>
-            <Button variant="primary" type="submit" loading={isPending(status)}>
-              Lagre
-            </Button>
-          </FlexRow>
-        </Modal.Footer>
-      </TittelModal>
-    </form>
+          <Modal.Footer>
+            <FlexRow justify="right">
+              <Button variant="secondary" type="button" disabled={isPending(status)} onClick={avbryt}>
+                Avbryt
+              </Button>
+              <Button variant="primary" type="submit" loading={isPending(status)}>
+                Lagre
+              </Button>
+            </FlexRow>
+          </Modal.Footer>
+        </form>
+      </Modal>
+    </div>
   )
 }
-
-const TittelModal = styled(Modal)`
-  width: 40rem;
-  padding: 3rem;
-`

@@ -2,13 +2,10 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
-import no.nav.etterlatte.brev.behandling.Beregningsperiode
-import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import java.io.ByteArrayOutputStream
@@ -183,57 +180,3 @@ data class EtterbetalingDTO(
     val datoFom: LocalDate,
     val datoTom: LocalDate,
 )
-
-@Deprecated("Denne utgår når vi oppdaterer revurdering for omstillingsstønad")
-data class Beregningsinfo(
-    val innhold: List<Slate.Element>,
-    val grunnbeloep: Kroner,
-    val beregningsperioder: List<NyBeregningsperiode>,
-    val trygdetidsperioder: List<Trygdetidsperiode>,
-)
-
-@Deprecated("Denne utgår når vi oppdaterer revurdering for omstillingsstønad")
-data class NyBeregningsperiode(
-    val inntekt: Kroner,
-    val trygdetid: Int,
-    val stoenadFoerReduksjon: Kroner,
-    var utbetaltBeloep: Kroner,
-)
-
-@Deprecated("Denne utgår når vi oppdaterer revurdering for omstillingsstønad")
-data class EtterbetalingBrev(
-    val fraDato: LocalDate,
-    val tilDato: LocalDate,
-    val etterbetalingsperioder: List<Beregningsperiode>,
-) {
-    companion object {
-        fun fra(
-            dto: EtterbetalingDTO?,
-            perioder: List<Beregningsperiode>,
-        ) = if (dto == null) {
-            null
-        } else {
-            EtterbetalingBrev(
-                fraDato = dto.datoFom,
-                tilDato = dto.datoTom,
-                etterbetalingsperioder =
-                    perioder
-                        .filter { it.datoFOM.isBefore(dto.datoTom) && dto.datoFom.isBefore(it.datoTOM ?: LocalDate.MAX) }
-                        .sortedByDescending { it.datoFOM }
-                        .let { list ->
-                            val oppdatertListe = list.toMutableList()
-
-                            // Setter tilDato på nyeste periode innenfor hva som er satt i etterbetaling
-                            oppdatertListe.firstOrNull()?.copy(datoTOM = dto.datoTom)
-                                ?.let { oppdatertListe[0] = it }
-
-                            // Setter fraDato på eldste periode innenfor hva som er satt i etterbetaling
-                            oppdatertListe.lastOrNull()?.copy(datoFOM = dto.datoFom)
-                                ?.let { oppdatertListe[list.lastIndex] = it }
-
-                            oppdatertListe.toList()
-                        },
-            )
-        }
-    }
-}

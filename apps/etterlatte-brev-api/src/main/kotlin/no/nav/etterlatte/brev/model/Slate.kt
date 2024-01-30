@@ -39,23 +39,6 @@ data class Slate(
 }
 
 object SlateHelper {
-    fun hentInitiellPayload(generellBrevData: GenerellBrevData): Slate =
-        when (generellBrevData.sak.sakType) {
-            SakType.OMSTILLINGSSTOENAD -> {
-                when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> getSlate("/maler/oms-nasjonal-innvilget.json")
-                    else -> getSlate("/maler/tom-brevmal.json")
-                }
-            }
-
-            SakType.BARNEPENSJON -> {
-                when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.AVSLAG -> getSlate("/maler/bp-avslag.json")
-                    else -> getSlate("/maler/tom-brevmal.json")
-                }
-            }
-        }
-
     fun hentInitiellPayloadVedlegg(generellBrevData: GenerellBrevData): List<BrevInnholdVedlegg>? {
         return when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {

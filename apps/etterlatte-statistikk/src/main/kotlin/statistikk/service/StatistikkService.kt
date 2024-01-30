@@ -183,6 +183,7 @@ class StatistikkService(
             revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
             kilde = statistikkBehandling.kilde,
             pesysId = statistikkBehandling.pesysId,
+            relatertTil = null, // TODO: Hvis dette er en revurdering pga klage så skal klage-id'en sendes med her
         )
     }
 
@@ -303,6 +304,7 @@ class StatistikkService(
                 statistikkTilbakekreving.tilbakekreving.status == TilbakekrevingStatus.ATTESTERT
             },
         saksbehandler = statistikkTilbakekreving.tilbakekreving.tilbakekreving.kravgrunnlag.saksbehandler.value,
+        relatertTil = null,
     )
 
     private fun klageTilSakRad(
@@ -350,6 +352,7 @@ class StatistikkService(
         sakUtland = null,
         soeknadFormat = null,
         vedtakLoependeTom = null,
+        relatertTil = statistikkKlage.klage.formkrav?.formkrav?.vedtaketKlagenGjelder?.behandlingId,
     )
 
     private fun behandlingTilSakRad(
@@ -404,6 +407,7 @@ class StatistikkService(
                 revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
                 kilde = statistikkBehandling.kilde,
                 pesysId = statistikkBehandling.pesysId,
+                relatertTil = null,
             )
         if (behandlingHendelse == BehandlingHendelseType.AVBRUTT) {
             return fellesRad.copy(

@@ -1,10 +1,11 @@
-import { Button, Heading, Panel, TextField } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Panel, TextField } from '@navikt/ds-react'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { Persongalleri } from '~shared/types/Person'
 import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { useAppDispatch } from '~store/Store'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
+import React from 'react'
 
 export default function PersongalleriOmstillingsstoenad() {
   const { nyBehandlingRequest } = useJournalfoeringOppgave()
@@ -54,7 +55,7 @@ export default function PersongalleriOmstillingsstoenad() {
       <InputRow>
         <TextField
           label="Innsender"
-          description="Oppgi innsenderen sitt fødselsnummer dersom det er tilgjengelig"
+          description="Oppgi innsenderen sitt fødselsnummer (dersom det er tilgjengelig)"
           value={persongalleri?.innsender || ''}
           pattern="[0-9]{11}"
           maxLength={11}
@@ -65,7 +66,7 @@ export default function PersongalleriOmstillingsstoenad() {
       <InputRow>
         <TextField
           label="Avdød"
-          description="Oppgi fødselsnummer"
+          description="Oppgi fødselsnummer (dersom det er tilgjengelig)"
           value={persongalleri?.avdoed ? persongalleri?.avdoed[0] : ''}
           pattern="[0-9]{11}"
           maxLength={11}
@@ -76,6 +77,7 @@ export default function PersongalleriOmstillingsstoenad() {
       <Panel border>
         <Heading size="small" spacing>
           Barn
+          <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>
         </Heading>
 
         <InputList>

@@ -14,9 +14,7 @@ const gyldigPersongalleri = (request: NyBehandlingRequest) => {
     return false
   }
 
-  const avdoede = persongalleri.avdoed?.filter((fnr) => fnrErGyldig(fnr)) || []
-
-  const gyldigAvdoed = avdoede.length >= 1
+  const gyldigAvdoed = !persongalleri.avdoed?.length || persongalleri.avdoed.every((fnr) => fnrErGyldig(fnr))
 
   const gyldigInnsender = !persongalleri.innsender || fnrErGyldig(persongalleri.innsender)
 

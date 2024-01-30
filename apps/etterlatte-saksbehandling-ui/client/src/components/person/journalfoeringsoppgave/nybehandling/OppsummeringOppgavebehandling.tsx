@@ -50,25 +50,29 @@ export default function OppsummeringOppgavebehandling() {
         <Info label="Mottatt dato" tekst={formaterStringDato(mottattDato)} />
 
         <Info label="Søker" tekst={persongalleri.soeker} />
-        <Info label="Innsender" tekst={persongalleri.innsender || <i>Ikke oppgitt</i>} />
+        <Info label="Innsender" tekst={persongalleri.innsender || <Detail>Ikke oppgitt</Detail>} />
 
-        {oppgave.sakType === SakType.BARNEPENSJON &&
+        {oppgave.sakType === SakType.BARNEPENSJON && persongalleri.gjenlevende?.length ? (
           persongalleri.gjenlevende?.map((gjenlevende) => (
             <Info key={gjenlevende} label="Gjenlevende" tekst={gjenlevende || ''} />
-          ))}
-
-        {persongalleri.avdoed!!.map((avdoed) => (
-          <Info key={avdoed} label="Avdød" tekst={avdoed} />
-        ))}
-
-        {!persongalleri.soesken?.length && <Detail>Ingen barn/søsken oppgitt</Detail>}
-        {persongalleri.soesken?.map((soeskenEllerBarn) =>
-          oppgave!!.sakType === SakType.BARNEPENSJON ? (
-            <Info key={soeskenEllerBarn} label="Søsken" tekst={soeskenEllerBarn || ''} />
-          ) : (
-            <Info key={soeskenEllerBarn} label="Barn" tekst={soeskenEllerBarn || ''} />
-          )
+          ))
+        ) : (
+          <Info label="Gjenlevende" tekst={<Detail>Ikke oppgitt</Detail>} />
         )}
+
+        {persongalleri.avdoed?.length ? (
+          persongalleri.avdoed?.map((avdoed) => <Info key={avdoed} label="Avdød" tekst={avdoed} />)
+        ) : (
+          <Info label="Avdød" tekst={<Detail>Ikke oppgitt</Detail>} />
+        )}
+
+        {persongalleri.soesken?.map((soeskenEllerBarn) => (
+          <Info
+            key={soeskenEllerBarn}
+            label={oppgave?.sakType === SakType.BARNEPENSJON ? 'Søsken' : 'Barn'}
+            tekst={soeskenEllerBarn || ''}
+          />
+        )) || <Info label="Innsender" tekst={<Detail>Ikke oppgitt</Detail>} />}
       </InfoList>
 
       <div>

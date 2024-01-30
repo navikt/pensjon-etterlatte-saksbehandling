@@ -57,7 +57,9 @@ export default function NyttBrev() {
               <div style={{ margin: '1rem' }}>
                 <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
               </div>
-              <BrevMottaker brev={brev} kanRedigeres={kanRedigeres} />
+              <div style={{ margin: '1rem' }}>
+                <BrevMottaker brev={brev} kanRedigeres={kanRedigeres} />
+              </div>
             </Column>
             <Column>
               {brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT ? (

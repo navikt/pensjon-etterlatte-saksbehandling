@@ -10,7 +10,7 @@ enum class EtterlatteBrevKode(val tittel: String? = null) {
     BARNEPENSJON_REVURDERING,
     BARNEPENSJON_REVURDERING_UTFALL,
     BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-    BARNEPENSJON_VEDTAK_OMREGNING("Informasjon om omregning av barnepensjon"),
+    BARNEPENSJON_VEDTAK_OMREGNING("Vedtak - endring av barnepensjon"),
     BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
     OMSTILLINGSSTOENAD_AVSLAG("Vedtak om avslått omstillingsstønad"),
     OMSTILLINGSSTOENAD_AVSLAG_UTFALL,

@@ -103,6 +103,8 @@ class SakRepositoryTest {
     @Test
     fun testSakRepo() {
         val repo = SakRepository.using(dataSource)
+        val relatertId = UUID.randomUUID().toString()
+
         val lagretRad =
             repo.lagreRad(
                 SakRad(
@@ -137,6 +139,7 @@ class SakRepositoryTest {
                     revurderingAarsak = "MIGRERING",
                     kilde = Vedtaksloesning.GJENNY,
                     pesysId = 123L,
+                    relatertTil = relatertId,
                 ),
             )
 
@@ -145,6 +148,7 @@ class SakRepositoryTest {
             rad shouldBe repo.hentRader()[0]
             rad.beregning shouldBe mockBeregning
             rad.avkorting shouldBe mockAvkorting
+            rad.relatertTil shouldBe relatertId
         }
     }
 
@@ -185,17 +189,20 @@ class SakRepositoryTest {
                     revurderingAarsak = "MIGRERING",
                     kilde = Vedtaksloesning.GJENNY,
                     pesysId = 123L,
+                    relatertTil = null,
                 ),
             )
         lagretRad shouldNotBe null
         lagretRad?.asClue { rad ->
             rad.beregning shouldBe null
             rad.avkorting shouldBe null
+            rad.relatertTil shouldBe null
         }
         repo.hentRader().asClue { rader ->
             rader[0] shouldNotBe null
             rader[0].beregning shouldBe null
             rader[0].avkorting shouldBe null
+            rader[0].relatertTil shouldBe null
         }
     }
 }

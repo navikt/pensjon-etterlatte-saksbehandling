@@ -63,4 +63,5 @@ data class SakRad(
     val avkorting: Avkorting?,
     val kilde: Vedtaksloesning,
     val pesysId: Long?,
+    val relatertTil: String?,
 )

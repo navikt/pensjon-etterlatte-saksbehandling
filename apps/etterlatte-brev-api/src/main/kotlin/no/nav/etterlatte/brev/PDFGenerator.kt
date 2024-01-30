@@ -99,7 +99,7 @@ class PDFGenerator(
                             brev.id,
                             BrevbakerRequest.fra(
                                 EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                                letterData.data,
+                                letterData,
                                 avsender,
                                 generellBrevData.personerISak.soekerOgEventuellVerge(),
                                 sak.id,

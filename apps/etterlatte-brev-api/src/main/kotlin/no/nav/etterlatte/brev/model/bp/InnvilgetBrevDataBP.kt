@@ -40,37 +40,11 @@ data class BarnepensjonInnvilgelseDTO(
             brukerUnder18Aar: Boolean,
         ): BarnepensjonInnvilgelseDTO {
             val beregningsperioder =
-                utbetalingsinfo.beregningsperioder.map {
-                    BarnepensjonBeregningsperiode(
-                        datoFOM = it.datoFOM,
-                        datoTOM = it.datoTOM,
-                        grunnbeloep = it.grunnbeloep,
-                        utbetaltBeloep = it.utbetaltBeloep,
-                        antallBarn = it.antallBarn,
-                    )
-                }
+                barnepensjonBeregningsperiodes(utbetalingsinfo)
 
             return BarnepensjonInnvilgelseDTO(
                 innhold = innhold.innhold(),
-                beregning =
-                    BarnepensjonBeregning(
-                        innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
-                        antallBarn = utbetalingsinfo.antallBarn,
-                        virkningsdato = utbetalingsinfo.virkningsdato,
-                        grunnbeloep = Kroner(grunnbeloep.grunnbeloep),
-                        beregningsperioder = beregningsperioder,
-                        sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM },
-                        trygdetid =
-                            TrygdetidMedBeregningsmetode(
-                                trygdetidsperioder = trygdetid.perioder,
-                                beregnetTrygdetidAar = trygdetid.aarTrygdetid,
-                                beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
-                                prorataBroek = trygdetid.prorataBroek,
-                                mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
-                                beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
-                            ),
-                    ),
+                beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
@@ -121,3 +95,39 @@ data class BarnepensjonInnvilgelseRedigerbartUtfallDTO(
         }
     }
 }
+
+internal fun barnepensjonBeregning(
+    innhold: InnholdMedVedlegg,
+    utbetalingsinfo: Utbetalingsinfo,
+    grunnbeloep: Grunnbeloep,
+    beregningsperioder: List<BarnepensjonBeregningsperiode>,
+    trygdetid: Trygdetid,
+) = BarnepensjonBeregning(
+    innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
+    antallBarn = utbetalingsinfo.antallBarn,
+    virkningsdato = utbetalingsinfo.virkningsdato,
+    grunnbeloep = Kroner(grunnbeloep.grunnbeloep),
+    beregningsperioder = beregningsperioder,
+    sisteBeregningsperiode = beregningsperioder.maxBy { it.datoFOM },
+    trygdetid =
+        TrygdetidMedBeregningsmetode(
+            trygdetidsperioder = trygdetid.perioder,
+            beregnetTrygdetidAar = trygdetid.aarTrygdetid,
+            beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
+            prorataBroek = trygdetid.prorataBroek,
+            mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
+            beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
+            beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
+        ),
+)
+
+internal fun barnepensjonBeregningsperiodes(utbetalingsinfo: Utbetalingsinfo) =
+    utbetalingsinfo.beregningsperioder.map {
+        BarnepensjonBeregningsperiode(
+            datoFOM = it.datoFOM,
+            datoTOM = it.datoTOM,
+            grunnbeloep = it.grunnbeloep,
+            utbetaltBeloep = it.utbetaltBeloep,
+            antallBarn = it.antallBarn,
+        )
+    }

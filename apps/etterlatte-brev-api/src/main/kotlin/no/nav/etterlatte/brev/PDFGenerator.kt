@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerRequest
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
@@ -17,8 +16,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverk
-import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -74,11 +71,11 @@ class PDFGenerator(
 
         val sak = generellBrevData.sak
         val letterData =
-            brevData(
-                generellBrevData,
-                automatiskMigreringRequest,
+            opprettBrevData(
                 brev,
+                generellBrevData,
                 bruker,
+                automatiskMigreringRequest,
                 brevkodePar,
             )
         val brevRequest =
@@ -92,60 +89,15 @@ class PDFGenerator(
                 sakType = sak.sakType,
             )
 
-        return brevbakerService.genererPdf(brev.id, brevRequest).let {
-            when (letterData) {
-                is OmregnetBPNyttRegelverkFerdig -> {
-                    val forhaandsvarsel =
-                        brevbakerService.genererPdf(
-                            brev.id,
-                            BrevbakerRequest.fra(
-                                EtterlatteBrevKode.BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-                                letterData.data,
-                                avsender,
-                                generellBrevData.personerISak.soekerOgEventuellVerge(),
-                                sak.id,
-                                generellBrevData.spraak,
-                                sak.sakType,
-                            ),
-                        )
-                    forhaandsvarsel.medPdfAppended(it)
-                }
-
-                else -> it
-            }
-        }.also { lagrePdfHvisVedtakFattet(generellBrevData, brev, it) }
+        return brevbakerService.genererPdf(brev.id, brevRequest)
+            .also { lagrePdfHvisVedtakFattet(generellBrevData, brev, it) }
     }
-
-    private suspend fun brevData(
-        generellBrevData: GenerellBrevData,
-        automatiskMigreringRequest: MigreringBrevRequest?,
-        brev: Brev,
-        brukerTokenInfo: BrukerTokenInfo,
-        brevkoder: Brevkoder,
-    ): BrevData =
-        when (generellBrevData.erMigrering()) {
-            false -> opprettBrevData(brev, generellBrevData, brukerTokenInfo, brevkoder)
-            true ->
-                OmregnetBPNyttRegelverkFerdig(
-                    innhold =
-                        InnholdMedVedlegg(
-                            { hentLagretInnhold(brev) },
-                            { hentLagretInnholdVedlegg(brev) },
-                        ).innhold(),
-                    data = (
-                        migreringBrevDataService.opprettMigreringBrevdata(
-                            generellBrevData,
-                            automatiskMigreringRequest,
-                            brukerTokenInfo,
-                        ) as OmregnetBPNyttRegelverk
-                    ),
-                )
-        }
 
     private suspend fun opprettBrevData(
         brev: Brev,
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest?,
         brevkode: Brevkoder,
     ): BrevData =
         when (brev.prosessType) {
@@ -155,6 +107,7 @@ class PDFGenerator(
                     brukerTokenInfo,
                     InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
                     brevkode,
+                    automatiskMigreringRequest,
                     brev.tittel,
                 )
 

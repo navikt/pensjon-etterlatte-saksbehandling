@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -64,9 +65,9 @@ internal class PdlHendelserRiver(
                 }
 
                 "BOSTEDSADRESSE_V1" -> {
-                    logger.info("Bostedsadresse mottatt")
                     val bostedsadresse: Bostedsadresse =
                         objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
+                    logger.info("Bostedsadresse mottatt for ${bostedsadresse.fnr.maskerFnr()}")
                     behandlinger.sendAdresseHendelse(bostedsadresse)
                 }
 

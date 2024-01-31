@@ -22,6 +22,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
@@ -41,7 +42,7 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/utflyttingshendelse") {
             kunSkrivetilgang {
                 val utflyttingsHendelse = call.receive<UtflyttingsHendelse>()
-                logger.info("Mottar en utflyttingshendelse fra PDL")
+                logger.info("Mottar en utflyttingshendelse fra PDL for ${utflyttingsHendelse.fnr.maskerFnr()}")
                 grunnlagsendringshendelseService.opprettUtflyttingshendelse(utflyttingsHendelse)
                 call.respond(HttpStatusCode.OK)
             }
@@ -50,7 +51,7 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/forelderbarnrelasjonhendelse") {
             kunSkrivetilgang {
                 val forelderBarnRelasjonHendelse = call.receive<ForelderBarnRelasjonHendelse>()
-                logger.info("Mottar en forelder-barn-relasjon-hendelse fra PDL")
+                logger.info("Mottar en forelder-barn-relasjon-hendelse fra PDL for ${forelderBarnRelasjonHendelse.fnr.maskerFnr()}")
                 grunnlagsendringshendelseService.opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse)
                 call.respond(HttpStatusCode.OK)
             }
@@ -68,7 +69,7 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/bostedsadresse") {
             kunSkrivetilgang {
                 val bostedsadresse = call.receive<Bostedsadresse>()
-                logger.info("Mottar en adresse-hendelse fra PDL")
+                logger.info("Mottar en adresse-hendelse fra PDL for ${bostedsadresse.fnr.maskerFnr()}")
                 grunnlagsendringshendelseService.oppdaterAdresseHendelse(bostedsadresse)
                 call.respond(HttpStatusCode.OK)
             }
@@ -77,7 +78,9 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/vergemaalellerfremtidsfullmakt") {
             kunSkrivetilgang {
                 val vergeMaalEllerFremtidsfullmakt = call.receive<VergeMaalEllerFremtidsfullmakt>()
-                logger.info("Mottar en vergeMaalEllerFremtidsfullmakt-hendelse fra PDL")
+                logger.info(
+                    "Mottar en vergeMaalEllerFremtidsfullmakt-hendelse fra PDL for ${vergeMaalEllerFremtidsfullmakt.fnr.maskerFnr()}",
+                )
                 grunnlagsendringshendelseService.opprettVergemaalEllerFremtidsfullmakt(vergeMaalEllerFremtidsfullmakt)
                 call.respond(HttpStatusCode.OK)
             }
@@ -86,7 +89,7 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
         post("/sivilstandhendelse") {
             kunSkrivetilgang {
                 val sivilstandHendelse = call.receive<SivilstandHendelse>()
-                logger.info("Mottar en sivilstand-hendelse fra PDL")
+                logger.info("Mottar en sivilstand-hendelse fra PDL for ${sivilstandHendelse.fnr.maskerFnr()}")
                 grunnlagsendringshendelseService.opprettSivilstandHendelse(sivilstandHendelse)
                 call.respond(HttpStatusCode.OK)
             }

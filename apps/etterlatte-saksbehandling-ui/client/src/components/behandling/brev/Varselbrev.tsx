@@ -23,6 +23,8 @@ import { useSjekkliste } from '~components/behandling/sjekkliste/useSjekkliste'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
+export const FEATURE_TOGGLE_LAG_VARSELBREV = 'lag-varselbrev'
+
 export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()

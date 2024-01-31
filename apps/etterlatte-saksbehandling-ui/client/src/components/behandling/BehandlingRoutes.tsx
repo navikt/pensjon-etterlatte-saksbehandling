@@ -16,7 +16,8 @@ import { SakType } from '~shared/types/sak'
 import TrygdetidVisning from '~components/behandling/trygdetid/TrygdetidVisning'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erOpphoer, Revurderingaarsak } from '~shared/types/Revurderingaarsak'
-import { Varselbrev } from '~components/behandling/brev/Varselbrev'
+import { FEATURE_TOGGLE_LAG_VARSELBREV, Varselbrev } from '~components/behandling/brev/Varselbrev'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -129,7 +130,9 @@ function useRouteNavigation() {
 export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()
-  const aktuelleRoutes = hentAktuelleRoutes(behandling)
+
+  const lagVarselbrev = useFeatureEnabledMedDefault(FEATURE_TOGGLE_LAG_VARSELBREV, false)
+  const aktuelleRoutes = hentAktuelleRoutes(behandling, lagVarselbrev)
 
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0
   const lastPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === aktuelleRoutes.length - 1
@@ -150,7 +153,7 @@ export const useBehandlingRoutes = () => {
   return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
 }
 
-const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
+const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, lagVarselbrev: boolean) => {
   if (!behandling) return []
 
   switch (behandling.behandlingType) {
@@ -160,20 +163,20 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null) => {
       )
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return behandlingRoutes(behandling).filter((route) =>
-        soeknadRoutes(behandling)
+        soeknadRoutes(behandling, lagVarselbrev)
           .map((pathinfo) => pathinfo.path)
           .includes(route.path)
       )
     case IBehandlingsType.REVURDERING:
       return behandlingRoutes(behandling).filter((route) =>
-        revurderingRoutes(behandling)
+        revurderingRoutes(behandling, lagVarselbrev)
           .map((pathinfo) => pathinfo.path)
           .includes(route.path)
       )
   }
 }
 
-export function soeknadRoutes(behandling: IBehandlingReducer): Array<BehandlingRouteTypes> {
+export function soeknadRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteTypes> {
   const avslag = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   const defaultRoutes: Array<BehandlingRouteTypes> = avslag
@@ -185,15 +188,18 @@ export function soeknadRoutes(behandling: IBehandlingReducer): Array<BehandlingR
         routeTypes.trygdetid,
         routeTypes.beregningsgrunnlag,
         routeTypes.beregning,
-        routeTypes.varselbrev,
       ]
+
+  if (lagVarselbrev) {
+    defaultRoutes.push(routeTypes.varselbrev)
+  }
 
   return leggTilBrevHvisKrevesAvBehandling(defaultRoutes, behandling).filter(
     routesAktuelleForSakstype(behandling.sakType)
   )
 }
 
-export function revurderingRoutes(behandling: IBehandlingReducer): Array<BehandlingRouteTypes> {
+export function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteTypes> {
   const opphoer =
     erOpphoer(behandling.revurderingsaarsak!!) ||
     (behandling.revurderingsaarsak == Revurderingaarsak.ANNEN &&
@@ -208,6 +214,10 @@ export function revurderingRoutes(behandling: IBehandlingReducer): Array<Behandl
         routeTypes.beregningsgrunnlag,
         routeTypes.beregning,
       ]
+
+  if (lagVarselbrev) {
+    defaultRoutes.push(routeTypes.varselbrev)
+  }
 
   return leggTilBrevHvisKrevesAvBehandling(defaultRoutes, behandling).filter(
     routesAktuelleForSakstype(behandling.sakType)

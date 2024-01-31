@@ -88,7 +88,7 @@ private class Server(private val context: ApplicationContext) {
 
 @OptIn(DelicateCoroutinesApi::class)
 private fun populerSaksbendlereMedNavn(context: ApplicationContext) {
-    if (context.leaderElectionKlient.isLeader() || true) {
+    if (context.leaderElectionKlient.isLeader()) {
         GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
             val logger = LoggerFactory.getLogger("saksbehandlernavnjob")
             logger.info("Starter job for å legge inn saksbehandlere med navn")

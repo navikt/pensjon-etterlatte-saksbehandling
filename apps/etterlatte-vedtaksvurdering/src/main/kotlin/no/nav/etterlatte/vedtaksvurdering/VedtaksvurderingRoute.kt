@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
@@ -146,10 +145,11 @@ fun Route.vedtaksvurderingRoute(
         post("/{$BEHANDLINGID_CALL_PARAMETER}/samordnet") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Vedtak ferdig samordning for behandling $behandlingId")
+
                 vedtakBehandlingService.samordnetVedtak(behandlingId, brukerTokenInfo)?.let { vedtak ->
                     rapidService.sendToRapid(vedtak)
                     call.respond(HttpStatusCode.OK, vedtak.rapidInfo1.vedtak)
-                } ?: call.respond(HttpStatusCode.BadRequest)
+                } ?: call.respond(HttpStatusCode.OK)
             }
         }
 
@@ -201,7 +201,7 @@ fun Route.vedtaksvurderingRoute(
                 vedtakBehandlingService.samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)?.let { samordnetVedtak ->
                     rapidService.sendToRapid(samordnetVedtak)
                     call.respond(HttpStatusCode.OK, samordnetVedtak.rapidInfo1.vedtak)
-                } ?: call.respond(HttpStatusCode.BadRequest)
+                } ?: call.respond(HttpStatusCode.OK)
             }
         }
     }

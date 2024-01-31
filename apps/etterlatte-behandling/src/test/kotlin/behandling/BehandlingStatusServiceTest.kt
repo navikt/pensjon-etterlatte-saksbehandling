@@ -13,7 +13,6 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.foerstegangsbehandling
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -66,10 +65,6 @@ internal class BehandlingStatusServiceTest {
                 every { hentBehandling(behandlingId) } returns behandling
             }
         val grlService = mockk<GrunnlagsendringshendelseService>()
-        val featureToggleService =
-            mockk<FeatureToggleService> {
-                every { isEnabled(any(), any()) } returns true
-            }
         val generellBehandlingService = mockk<GenerellBehandlingService>()
 
         val sut =
@@ -130,11 +125,6 @@ internal class BehandlingStatusServiceTest {
         val generellBehandlingService =
             mockk<GenerellBehandlingService> {
                 every { opprettBehandling(any(), any()) } returns generellBehandlingUtland
-            }
-
-        val featureToggleService =
-            mockk<FeatureToggleService> {
-                every { isEnabled(any(), any()) } returns true
             }
 
         val sut =

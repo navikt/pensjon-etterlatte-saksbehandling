@@ -72,7 +72,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 id = uuid,
                 sakId = sakid,
                 type = GrunnlagsendringsType.DOEDSFALL,
-                fnr = grunnlagsinformasjon.fnr,
+                gjelderPerson = grunnlagsinformasjon.fnr,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 samsvarMellomKildeOgGrunnlag =
                     samsvarDoedsdatoer(
@@ -110,7 +110,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 id = uuidDoed,
                 sakId = sakid,
                 type = GrunnlagsendringsType.DOEDSFALL,
-                fnr = grunnlagsinfoDoed.fnr,
+                gjelderPerson = grunnlagsinfoDoed.fnr,
                 samsvarMellomKildeOgGrunnlag = samsvarDoed,
             )
         val utflyttingsHendelse =
@@ -118,7 +118,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 id = uuidUtflytting,
                 sakId = sakid,
                 type = GrunnlagsendringsType.UTFLYTTING,
-                fnr = grunnlagsinfoUtflytting.fnr,
+                gjelderPerson = grunnlagsinfoUtflytting.fnr,
                 samsvarMellomKildeOgGrunnlag = samsvarUtflytting,
             )
         val barnForeldreRelasjonHendelse =
@@ -126,7 +126,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 id = uuidForelderBarn,
                 sakId = sakid,
                 type = GrunnlagsendringsType.FORELDER_BARN_RELASJON,
-                fnr = grunnlagsinfoForelderBarn.fnr,
+                gjelderPerson = grunnlagsinfoForelderBarn.fnr,
                 samsvarMellomKildeOgGrunnlag = samsvarForelderBarn,
             )
         grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(doedshendelse)
@@ -160,7 +160,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             grunnlagsendringshendelseMedSamsvar(
                 id = hendelseId,
                 sakId = sak1,
-                fnr = grunnlagsinformasjonDoedshendelse().fnr,
+                gjelderPerson = grunnlagsinformasjonDoedshendelse().fnr,
                 type = grunnlagsendringstype,
                 status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
                 samsvarMellomKildeOgGrunnlag = null,
@@ -183,31 +183,34 @@ internal class GrunnlagsendringshendelseDaoTest {
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                fnr = grunnlagsinformasjonDoedshendelse().fnr,
+                gjelderPerson = grunnlagsinformasjonDoedshendelse().fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusMinutes(30),
-                fnr = grunnlagsinformasjonDoedshendelse().fnr,
+                gjelderPerson = grunnlagsinformasjonDoedshendelse().fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
-                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusHours(1), // eldre enn en time
-                fnr = grunnlagsinformasjonDoedshendelse().fnr,
+                // eldre enn en time
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusHours(1),
+                gjelderPerson = grunnlagsinformasjonDoedshendelse().fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
-                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusDays(4), // eldre enn en time
-                fnr = grunnlagsinformasjonDoedshendelse().fnr,
+                // eldre enn en time
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusDays(4),
+                gjelderPerson = grunnlagsinformasjonDoedshendelse().fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 sakId = sakid,
-                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1), // eldre enn en time
-                fnr = grunnlagsinformasjonDoedshendelse().fnr,
+                // eldre enn en time
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
+                gjelderPerson = grunnlagsinformasjonDoedshendelse().fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             ),
         ).forEach {
@@ -238,7 +241,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                    fnr = this.fnr,
+                    gjelderPerson = this.fnr,
                     samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato),
                 )
             }.copy(status = GrunnlagsendringStatus.FORKASTET),
@@ -246,7 +249,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusMinutes(30),
-                    fnr = this.fnr,
+                    gjelderPerson = this.fnr,
                     samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato),
                 )
             }.copy(
@@ -258,7 +261,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusDays(4),
-                    fnr = this.fnr,
+                    gjelderPerson = this.fnr,
                     samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato),
                 )
             }.copy(
@@ -270,7 +273,7 @@ internal class GrunnlagsendringshendelseDaoTest {
                 grunnlagsendringshendelseMedSamsvar(
                     sakId = sakid,
                     opprettet = Tidspunkt.now().toLocalDatetimeUTC().minusYears(1),
-                    fnr = this.fnr,
+                    gjelderPerson = this.fnr,
                     samsvarMellomKildeOgGrunnlag = samsvarDoedsdatoer(this.doedsdato, this.doedsdato),
                 )
             }.copy(
@@ -312,7 +315,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             id = id1,
             type = GrunnlagsendringsType.DOEDSFALL,
             sakId = sak1,
-            fnr = grunnlagsinformasjonDoedshendelse(doedsdato = doedsdato).fnr,
+            gjelderPerson = grunnlagsinformasjonDoedshendelse(doedsdato = doedsdato).fnr,
             samsvarMellomKildeOgGrunnlag = null,
         ).also {
             grunnlagsendringshendelsesRepo.opprettGrunnlagsendringshendelse(it)
@@ -353,7 +356,7 @@ internal class GrunnlagsendringshendelseDaoTest {
             grunnlagsendringshendelseMedSamsvar(
                 id = hendelseId,
                 sakId = sak1,
-                fnr = grunnlagsinformasjonDoedshendelse().fnr,
+                gjelderPerson = grunnlagsinformasjonDoedshendelse().fnr,
                 type = grunnlagsendringstype,
                 status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
                 samsvarMellomKildeOgGrunnlag = null,
@@ -403,21 +406,21 @@ internal class GrunnlagsendringshendelseDaoTest {
             grunnlagsendringshendelseMedSamsvar(
                 id = id1,
                 sakId = sak1,
-                fnr = fnrDoedshendelse,
+                gjelderPerson = fnrDoedshendelse,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
                 status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 id = id2,
                 sakId = sak1,
-                fnr = fnrDoedshendelse,
+                gjelderPerson = fnrDoedshendelse,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
                 status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 id = id3,
                 sakId = sak2,
-                fnr = fnrDoedshendelse,
+                gjelderPerson = fnrDoedshendelse,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
                 status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
             ),
@@ -457,19 +460,19 @@ internal class GrunnlagsendringshendelseDaoTest {
             grunnlagsendringshendelseMedSamsvar(
                 id = id1,
                 sakId = sak1,
-                fnr = fnrDoedshendelse,
+                gjelderPerson = fnrDoedshendelse,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 id = id2,
                 sakId = sak2,
-                fnr = fnrDoedshendelse,
+                gjelderPerson = fnrDoedshendelse,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
             ),
             grunnlagsendringshendelseMedSamsvar(
                 id = id3,
                 sakId = sak2,
-                fnr = fnrDoedshendelse,
+                gjelderPerson = fnrDoedshendelse,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomPdlOgGrunnlag,
             ),
         ).forEach {

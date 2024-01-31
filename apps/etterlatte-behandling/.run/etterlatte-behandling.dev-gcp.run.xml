@@ -32,8 +32,6 @@
       <env name="ETTERLATTE_VEDTAK_CLIENT_ID" value="069b1b2c-0a06-4cc9-8418-f100b8ff71be" />
       <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
       <env name="GRUNNLAG_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-grunnlag/.default" />
-      <env name="HENDELSE_JOB_FREKVENS" value="1" />
-      <env name="HENDELSE_MINUTTER_GAMLE_HENDELSER" value="1" />
       <env name="HTTP_PORT" value="8090" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="NAIS_APP_NAME" value="etterlatte-behandling" />

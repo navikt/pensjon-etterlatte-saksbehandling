@@ -61,14 +61,7 @@ class OppgaveService(
                     bruker.erSuperbruker(),
                 )
             val oppgaverMedSaksbehandlerNavn = populerOppgaverMedNavn(oppgaverForBruker)
-            val sorterteo = oppgaverMedSaksbehandlerNavn.sortedByDescending { it.opprettet }
-            println(
-                "ANTALL med navn" +
-                    sorterteo.filter {
-                        it.saksbehandlerNavn != null
-                    }.size + " mangler: " + sorterteo.filter { it.saksbehandler != null && it.saksbehandlerNavn == null },
-            )
-            sorterteo
+            oppgaverMedSaksbehandlerNavn.sortedByDescending { it.opprettet }
         }
     }
 

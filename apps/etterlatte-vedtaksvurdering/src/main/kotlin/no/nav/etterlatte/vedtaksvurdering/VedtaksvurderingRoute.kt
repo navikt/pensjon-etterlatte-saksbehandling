@@ -146,9 +146,10 @@ fun Route.vedtaksvurderingRoute(
         post("/{$BEHANDLINGID_CALL_PARAMETER}/samordnet") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Vedtak ferdig samordning for behandling $behandlingId")
-                val vedtak = vedtakBehandlingService.samordnetVedtak(behandlingId, brukerTokenInfo)
-                rapidService.sendToRapid(vedtak)
-                call.respond(HttpStatusCode.OK, vedtak.rapidInfo1.vedtak)
+                vedtakBehandlingService.samordnetVedtak(behandlingId, brukerTokenInfo)?.let { vedtak ->
+                    rapidService.sendToRapid(vedtak)
+                    call.respond(HttpStatusCode.OK, vedtak.rapidInfo1.vedtak)
+                } ?: call.respond(HttpStatusCode.BadRequest)
             }
         }
 
@@ -197,9 +198,10 @@ fun Route.vedtaksvurderingRoute(
                     call.respond(HttpStatusCode.NotFound)
                 }
 
-                val samordnetVedtak = vedtakBehandlingService.samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)
-                rapidService.sendToRapid(samordnetVedtak)
-                call.respond(HttpStatusCode.OK, samordnetVedtak.rapidInfo1.vedtak)
+                vedtakBehandlingService.samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)?.let { samordnetVedtak ->
+                    rapidService.sendToRapid(samordnetVedtak)
+                    call.respond(HttpStatusCode.OK, samordnetVedtak.rapidInfo1.vedtak)
+                } ?: call.respond(HttpStatusCode.BadRequest)
             }
         }
     }

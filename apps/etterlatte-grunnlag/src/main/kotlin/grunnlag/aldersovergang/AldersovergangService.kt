@@ -1,7 +1,7 @@
-package no.nav.etterlatte.grunnlag.omregning
+package no.nav.etterlatte.grunnlag.aldersovergang
 
 import java.time.YearMonth
 
-class OmregningService(private val dao: OmregningDao) {
+class AldersovergangService(private val dao: AldersovergangDao) {
     fun hentSoekereFoedtIEnGittMaaned(maaned: YearMonth) = dao.hentSoekereFoedtIEnGittMaaned(maaned)
 }

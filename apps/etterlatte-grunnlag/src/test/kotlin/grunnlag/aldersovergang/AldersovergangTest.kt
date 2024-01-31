@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grunnlag.omregning
+package grunnlag.aldersovergang
 
 import com.fasterxml.jackson.databind.node.TextNode
 import io.ktor.client.HttpClient
@@ -12,6 +12,9 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.mockk
 import no.nav.etterlatte.grunnlag.OpplysningDao
+import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
+import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
+import no.nav.etterlatte.grunnlag.aldersovergang.aldersovergangRoutes
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -36,7 +39,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OmregningTest {
+class AldersovergangTest {
     @Container
     private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
     private lateinit var dataSource: DataSource
@@ -78,7 +81,7 @@ class OmregningTest {
 
         testApplication {
             val response =
-                createHttpClient(OmregningService(OmregningDao(dataSource))).get("api/grunnlag/omregning/2020-01") {
+                createHttpClient(AldersovergangService(AldersovergangDao(dataSource))).get("api/grunnlag/aldersovergang/2020-01") {
                     headers {
                         append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                         append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
@@ -108,8 +111,8 @@ class OmregningTest {
         fnr = fnr,
     )
 
-    private fun ApplicationTestBuilder.createHttpClient(service: OmregningService): HttpClient =
+    private fun ApplicationTestBuilder.createHttpClient(service: AldersovergangService): HttpClient =
         runServer(server, "api/grunnlag") {
-            omregningRoutes(service)
+            aldersovergangRoutes(service)
         }
 }

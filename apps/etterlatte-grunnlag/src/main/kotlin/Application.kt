@@ -11,14 +11,14 @@ import no.nav.etterlatte.grunnlag.MigreringGrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.VergeService
+import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
+import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
+import no.nav.etterlatte.grunnlag.aldersovergang.aldersovergangRoutes
 import no.nav.etterlatte.grunnlag.behandlingGrunnlagRoute
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient
 import no.nav.etterlatte.grunnlag.migreringRoutes
-import no.nav.etterlatte.grunnlag.omregning.OmregningDao
-import no.nav.etterlatte.grunnlag.omregning.OmregningService
-import no.nav.etterlatte.grunnlag.omregning.omregningRoutes
 import no.nav.etterlatte.grunnlag.personRoute
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.grunnlag.rivers.GrunnlagsversjoneringRiver
@@ -92,8 +92,8 @@ class ApplicationBuilder {
     private val grunnlagService =
         RealGrunnlagService(pdltjenesterKlient, opplysningDao, Sporingslogg(), grunnlagHenter, vergeService)
 
-    private val omregningDao = OmregningDao(ds)
-    private val omregningService = OmregningService(omregningDao)
+    private val aldersovergangDao = AldersovergangDao(ds)
+    private val aldersovergangService = AldersovergangService(aldersovergangDao)
 
     private val rapidsConnection =
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
@@ -104,7 +104,7 @@ class ApplicationBuilder {
                         behandlingGrunnlagRoute(grunnlagService, behandlingKlient)
                         personRoute(grunnlagService, behandlingKlient)
                         migreringRoutes(persondataKlient, behandlingKlient)
-                        omregningRoutes(omregningService)
+                        aldersovergangRoutes(aldersovergangService)
                     }
                 }
             }

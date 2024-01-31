@@ -1,4 +1,4 @@
-package no.nav.etterlatte.grunnlag.omregning
+package no.nav.etterlatte.grunnlag.aldersovergang
 
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.libs.database.Transactions
@@ -7,8 +7,8 @@ import no.nav.etterlatte.libs.database.transaction
 import java.time.YearMonth
 import javax.sql.DataSource
 
-class OmregningDao(private val datasource: DataSource) : Transactions<OmregningDao> {
-    override fun <R> inTransaction(block: OmregningDao.(TransactionalSession) -> R): R =
+class AldersovergangDao(private val datasource: DataSource) : Transactions<AldersovergangDao> {
+    override fun <R> inTransaction(block: AldersovergangDao.(TransactionalSession) -> R): R =
         datasource.transaction {
             this.block(it)
         }

@@ -35,6 +35,7 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-1",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-1",
                         ),
                 ),
         )
@@ -53,6 +54,7 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-1",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-1",
                         ),
                 ),
         )
@@ -118,6 +120,7 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-12",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-12",
                         ),
                 ),
         )
@@ -145,6 +148,7 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-2",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-2",
                         ),
                 ),
             unntaksvilkaar =
@@ -192,7 +196,8 @@ object OmstillingstoenadVilkaar {
                 """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-2", // TODO
+                    paragraf = "§ 17-2",
+                    ledd = 6,
                 ),
         )
 
@@ -205,7 +210,8 @@ object OmstillingstoenadVilkaar {
                 """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-2", // TODO
+                    paragraf = "§ 17-2",
+                    ledd = 5,
                 ),
         )
 
@@ -218,7 +224,9 @@ object OmstillingstoenadVilkaar {
                 """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-2", // TODO
+                    paragraf = "§ 17-2",
+                    ledd = 3,
+                    bokstav = "b",
                 ),
         )
 
@@ -228,7 +236,9 @@ object OmstillingstoenadVilkaar {
             tittel = "Ja, avdøde var medlem av trygden ved dødsfallet og ikke fylt 26 år",
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-2", // TODO
+                    paragraf = "§ 17-2",
+                    ledd = 3,
+                    bokstav = "a",
                 ),
         )
 
@@ -238,7 +248,9 @@ object OmstillingstoenadVilkaar {
             tittel = "Ja, dødsfallet skyldes en godkjent yrkes-skade/sykdom",
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-2", // TODO
+                    paragraf = "§ 17-12",
+                    ledd = 1,
+                    bokstav = "a",
                 ),
         )
 
@@ -258,6 +270,7 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-3",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-3",
                         ),
                 ),
             unntaksvilkaar =
@@ -277,7 +290,8 @@ object OmstillingstoenadVilkaar {
                 """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-3", // TODO
+                    paragraf = "§ 17-3",
+                    ledd = 2,
                 ),
         )
 
@@ -287,7 +301,8 @@ object OmstillingstoenadVilkaar {
             tittel = "Ja, den avdøde eller den gjenlevende har minst 20 års samlet botid",
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-3", // TODO
+                    paragraf = "§ 17-3",
+                    ledd = 2,
                 ),
         )
 
@@ -297,7 +312,9 @@ object OmstillingstoenadVilkaar {
             tittel = "Ja, dødsfallet skyldes en godkjent yrkes-skade/sykdom",
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-2", // TODO
+                    paragraf = "§ 17-12",
+                    ledd = 1,
+                    bokstav = "b",
                 ),
         )
 
@@ -321,6 +338,7 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-4",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-4",
                         ),
                 ),
         )
@@ -346,6 +364,7 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-7",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-7",
                         ),
                 ),
             unntaksvilkaar =
@@ -379,6 +398,7 @@ object OmstillingstoenadVilkaar {
                         Lovreferanse(
                             paragraf = "§ 17-3",
                             ledd = 2,
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-3",
                         ),
                 ),
         )
@@ -390,6 +410,7 @@ object OmstillingstoenadVilkaar {
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-7",
+                    lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-7",
                 ),
         )
 
@@ -400,6 +421,7 @@ object OmstillingstoenadVilkaar {
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-7",
+                    lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-7",
                 ),
         )
 }

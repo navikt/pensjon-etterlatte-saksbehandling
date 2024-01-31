@@ -88,6 +88,8 @@ export const ToggleMinOppgaveliste = () => {
     filter.oppgavetypeFilter,
     filter.oppgavekildeFilter,
     mutableOppgaver,
+    filter.fristSortering,
+    filter.fnrSortering,
     filter.fnrFilter
   )
 
@@ -127,6 +129,8 @@ export const ToggleMinOppgaveliste = () => {
                 filtrerteOppgaver={filtrerteOppgaver}
                 oppdaterTildeling={oppdaterTildeling}
                 hentOppgaver={hentAlleOppgaver}
+                filter={filter}
+                setFilter={setFilter}
                 totaltAntallOppgaver={hentedeOppgaver.length}
               />
             </>
@@ -142,6 +146,8 @@ export const ToggleMinOppgaveliste = () => {
               <Oppgavelista
                 filtrerteOppgaver={filtrerOppgaveStatus(filter.oppgavestatusFilter, innloggetSaksbehandleroppgaver)}
                 hentOppgaver={hentAlleOppgaver}
+                filter={filter}
+                setFilter={setFilter}
                 oppdaterTildeling={(id, _saksbehandler, versjon) => oppdaterTildeling(id, null, versjon)}
               />
             </>

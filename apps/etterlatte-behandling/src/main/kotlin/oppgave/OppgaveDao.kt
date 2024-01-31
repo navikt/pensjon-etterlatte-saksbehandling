@@ -18,6 +18,8 @@ import java.sql.ResultSet
 import java.util.UUID
 
 interface OppgaveDao {
+    fun hentAlleIdenter(): List<String>
+
     fun opprettOppgave(oppgaveIntern: OppgaveIntern)
 
     fun hentOppgave(oppgaveId: UUID): OppgaveIntern?
@@ -59,6 +61,10 @@ interface OppgaveDao {
 
 class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    override fun hentAlleIdenter(): List<String> {
+        TODO("Not yet implemented") lag en distinct p saksbehandler spørrign
+    }
 
     override fun opprettOppgave(oppgaveIntern: OppgaveIntern) {
         with(connection()) {

@@ -7,14 +7,12 @@ import { oppdaterMottaker } from '~shared/api/brev'
 import { FlexRow } from '~shared/styled'
 import { Grunnlagsopplysning } from '~shared/types/grunnlag'
 import { KildePersondata } from '~shared/types/kilde'
-import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, Result } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { formaterFnr } from '~utils/formattering'
 import { Controller, useForm } from 'react-hook-form'
 import { DocPencilIcon } from '@navikt/aksel-icons'
+import { VergeadressePanel } from '~components/person/brev/mottaker/VergeadressePanel'
 
 enum MottakerType {
   PRIVATPERSON = 'PRIVATPERSON',
@@ -23,8 +21,8 @@ enum MottakerType {
 
 interface Props {
   brev: IBrev
-  setBrev: Dispatch<SetStateAction<IBrev | undefined>>
-  vergeadresse: Grunnlagsopplysning<Mottaker, KildePersondata> | undefined
+  setBrev: Dispatch<SetStateAction<IBrev>>
+  vergeadresse: Result<Grunnlagsopplysning<Mottaker, KildePersondata>>
 }
 
 export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
@@ -71,27 +69,6 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
     setIsOpen(false)
   }
 
-  function formaterAdresse(vergeadresse: Mottaker) {
-    return (
-      <>
-        {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && `Fødselsnummer/orgnummer: Ikke registrert.`}
-        {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && <br />}
-        {vergeadresse.foedselsnummer && `Fødselsnummer: ${formaterFnr(vergeadresse.foedselsnummer.value)}`}
-        {vergeadresse.foedselsnummer && <br />}
-        {vergeadresse.navn}
-        {vergeadresse.navn && <br />}
-        {vergeadresse.adresse.adresselinje1}
-        {vergeadresse.adresse.adresselinje1 && <br />}
-        {vergeadresse.adresse.adresselinje2}
-        {vergeadresse.adresse.adresselinje2 && <br />}
-        {vergeadresse.adresse.adresselinje3}
-        {vergeadresse.adresse.adresselinje3 && <br />}
-        {vergeadresse.adresse.postnummer} {vergeadresse.adresse.poststed} {vergeadresse.adresse.land} (
-        {vergeadresse.adresse.landkode})
-      </>
-    )
-  }
-
   const erNorskAdresse = watch('adresse.adresseType') === AdresseType.NORSKPOSTADRESSE
 
   return (
@@ -105,12 +82,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
               Endre mottaker
             </Heading>
 
-            {vergeadresse && (
-              <InfoWrapper>
-                <Info wide label="Verges adresse" tekst={formaterAdresse(vergeadresse.opplysning)} />
-                <br />
-              </InfoWrapper>
-            )}
+            <VergeadressePanel vergeadresseResult={vergeadresse} />
 
             <SkjemaGruppe>
               <ToggleGroup

@@ -1,8 +1,6 @@
 import { apiClient, ApiResponse } from './apiClient'
 import { IBrev, Mottaker } from '~shared/types/Brev'
 
-import { isFailureWithCode, isSuccess, Result } from '~shared/api/apiUtils'
-
 export const hentBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<IBrev>> =>
   apiClient.get(`/brev/${props.brevId}?sakId=${props.sakId}`)
 
@@ -89,10 +87,3 @@ export const journalfoerBrev = async (props: { brevId: number; sakId: number }):
 
 export const distribuerBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<any>> =>
   apiClient.post(`/brev/${props.brevId}/distribuer?sakId=${props.sakId}`, {})
-
-export const isSuccessOrNotFound = (result: Result<any>) => {
-  return isSuccess(result) || isFailureWithCode(result, 404)
-}
-export const getData = <T>(result: Result<T>) => {
-  return isSuccess(result) ? result.data : undefined
-}

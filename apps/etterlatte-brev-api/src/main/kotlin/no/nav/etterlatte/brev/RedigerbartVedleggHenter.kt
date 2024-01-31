@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevVedleggKey
-import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -21,16 +20,7 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> innvilgelseOMS(bruker, generellBrevData)
-                    VedtakType.ENDRING -> {
-                        when (generellBrevData.revurderingsaarsak) {
-                            Revurderingaarsak.INNTEKTSENDRING,
-                            Revurderingaarsak.ANNEN,
-                            -> endringOMS(bruker, generellBrevData)
-
-                            else -> null
-                        }
-                    }
-
+                    VedtakType.ENDRING -> endringOMS(bruker, generellBrevData)
                     else -> null
                 }
             }

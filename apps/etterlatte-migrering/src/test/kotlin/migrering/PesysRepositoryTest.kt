@@ -96,6 +96,18 @@ class PesysRepositoryTest {
     }
 
     @Test
+    fun `skal oppdatere pesyssak med gjenopprettes_automatisk`() {
+        val psak = pesysSak(123L)
+        repository.lagrePesyssak(psak)
+
+        val request =
+            psak.tilMigreringsrequest().copy(
+                kanAutomatiskGjenopprettes = true,
+            )
+        repository.oppdaterKanGjenopprettesAutomatisk(request)
+    }
+
+    @Test
     fun `lagre manuell migrering`() {
         val pesysId = 123L
 

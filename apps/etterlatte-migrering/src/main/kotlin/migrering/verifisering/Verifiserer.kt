@@ -2,6 +2,7 @@ package no.nav.etterlatte.migrering.verifisering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -28,37 +29,49 @@ internal class Verifiserer(
 
     fun verifiserRequest(request: MigreringRequest): MigreringRequest {
         val patchedRequest = gjenlevendeForelderPatcher.patchGjenlevendeHvisIkkeOppgitt(request)
-        val feil = mutableListOf<Exception>()
+
+        val feilSomMedfoererMistetRett = mutableListOf<Exception>()
+        val feilSomMedfoererManuell = mutableListOf<Exception>()
+
         patchedRequest.onFailure { feilen ->
-            feil.add(PDLException(feilen).also { it.addSuppressed(feilen) })
+            feilSomMedfoererManuell.add(PDLException(feilen).also { it.addSuppressed(feilen) })
         }
         patchedRequest.onSuccess {
             if (request.enhet.nr == "2103") {
-                feil.add(StrengtFortroligPesys)
+                feilSomMedfoererManuell.add(StrengtFortroligPesys) // TODO Strengt fortrolig
             }
-            feil.addAll(sjekkAtPersonerFinsIPDL(it))
+            val finnesfinnesIPdlFeil = sjekkAtPersonerFinsIPDL(it)
+            if (finnesfinnesIPdlFeil.any { finnes -> finnes is SoekerErDoed }) {
+                feilSomMedfoererMistetRett.addAll(finnesfinnesIPdlFeil)
+            } else {
+                feilSomMedfoererManuell.addAll(finnesfinnesIPdlFeil)
+            }
             val soeker = personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()
 
             if (soeker != null) {
                 if (soeker.adressebeskyttelse?.verdi?.erStrengtFortrolig() == true) {
-                    feil.add(StrengtFortroligPDL)
+                    feilSomMedfoererManuell.add(StrengtFortroligPDL) // TODO Strengt fortrolig
                 }
-                feil.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
+                feilSomMedfoererManuell.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
                 if (!request.erUnder18) {
-                    feil.addAll(sjekkOmSoekerHaddeFlyktningerfordel(request))
-                    feil.addAll(sjekkAdresseOgUtlandsopphold(request.pesysId.id, soeker, request))
-                    feil.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(request))
-                    feil.addAll(sjekkOmForandringIForeldreforhold(request, soeker))
+                    feilSomMedfoererManuell.addAll(sjekkOmSoekerHaddeFlyktningerfordel(request))
+                    feilSomMedfoererManuell.addAll(sjekkAdresseOgUtlandsopphold(request.pesysId.id, soeker, request))
+                    feilSomMedfoererManuell.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(request))
+                    feilSomMedfoererManuell.addAll(sjekkOmForandringIForeldreforhold(request, soeker))
                 }
             }
         }
 
-        if (feil.isNotEmpty()) {
-            haandterFeil(request, feil)
+        val alleFeil = feilSomMedfoererMistetRett + feilSomMedfoererManuell
+        if (alleFeil.isNotEmpty()) {
+            lagreFeil(request, alleFeil)
+            if (feilSomMedfoererMistetRett.isNotEmpty()) {
+                throw samleExceptions(feilSomMedfoererMistetRett)
+            }
         }
         return patchedRequest.getOrThrow().copy(
             utlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request),
-            kanAutomatiskGjenopprettes = feil.isEmpty(),
+            kanAutomatiskGjenopprettes = feilSomMedfoererManuell.isEmpty(),
         )
     }
 
@@ -68,9 +81,9 @@ internal class Verifiserer(
             false -> emptyList()
         }
 
-    private fun haandterFeil(
+    private fun lagreFeil(
         request: MigreringRequest,
-        feil: MutableList<Exception>,
+        feil: List<Exception>,
     ) {
         logger.warn(
             "Sak ${request.pesysId} har ufullstendige data i PDL, eller feiler verifisering av andre grunner. " +

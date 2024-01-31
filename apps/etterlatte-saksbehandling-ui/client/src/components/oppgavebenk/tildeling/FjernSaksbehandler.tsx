@@ -17,7 +17,7 @@ const SaksbehandlerWrapper = styled(Label)`
 
 export const FjernSaksbehandler = (props: RedigerSaksbehandlerProps) => {
   const [modalIsOpen, setModalIsOpen] = useState(false)
-  const { saksbehandler, oppgaveId, sakId, oppdaterTildeling, erRedigerbar, versjon, type } = props
+  const { saksbehandler, saksbehandlerNavn, oppgaveId, sakId, oppdaterTildeling, erRedigerbar, versjon, type } = props
   const [fjernSaksbehandlerSvar, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
 
   useEffect(() => {
@@ -40,10 +40,10 @@ export const FjernSaksbehandler = (props: RedigerSaksbehandlerProps) => {
               size="small"
               onClick={() => setModalIsOpen(true)}
             >
-              {saksbehandler}
+              {saksbehandlerNavn ? saksbehandlerNavn : saksbehandler}
             </Button>
           ) : (
-            <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
+            <SaksbehandlerWrapper>{saksbehandlerNavn ? saksbehandlerNavn : saksbehandler}</SaksbehandlerWrapper>
           )}
 
           <GeneriskModal

@@ -54,12 +54,40 @@ class OppgaveService(
         return if (bruker.saksbehandlerMedRoller.harRolleStrengtFortrolig()) {
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
         } else {
-            oppgaveDao.hentOppgaver(
-                aktuelleOppgavetyperForRoller,
-                bruker.enheter(),
-                bruker.erSuperbruker(),
-            ).sortedByDescending { it.opprettet }
+            val oppgaverForBruker =
+                oppgaveDao.hentOppgaver(
+                    aktuelleOppgavetyperForRoller,
+                    bruker.enheter(),
+                    bruker.erSuperbruker(),
+                )
+            val oppgaverMedSaksbehandlerNavn = populerOppgaverMedNavn(oppgaverForBruker)
+            val sorterteo = oppgaverMedSaksbehandlerNavn.sortedByDescending { it.opprettet }
+            println(
+                "ANTALL med navn" +
+                    sorterteo.filter {
+                        it.saksbehandlerNavn != null
+                    }.size + " mangler: " + sorterteo.filter { it.saksbehandler != null && it.saksbehandlerNavn == null },
+            )
+            sorterteo
         }
+    }
+
+    // TODO: test for denne
+    fun populerOppgaverMedNavn(oppgaver: List<OppgaveIntern>): List<OppgaveIntern> {
+        val oppgaverMedSaksbehandler = oppgaver.mapNotNull { it.saksbehandler }.distinct()
+        val saksbehandlerereMedNavn =
+            oppgaveDao.hentSaksbehandlerNavnForidenter(oppgaverMedSaksbehandler)
+                .associate { it.ident to it.navn }
+        oppgaver.forEach {
+            if (it.harSaksbehandler()) {
+                val navn = saksbehandlerereMedNavn[it.saksbehandler]
+                if (navn != null) {
+                    println("bytter navn for ${it.saksbehandler} til $navn")
+                    it.saksbehandlerNavn = navn
+                }
+            }
+        }
+        return oppgaver
     }
 
     private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) =

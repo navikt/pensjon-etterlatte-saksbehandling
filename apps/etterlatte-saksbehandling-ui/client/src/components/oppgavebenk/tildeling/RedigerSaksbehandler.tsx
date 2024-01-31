@@ -7,6 +7,7 @@ import { TildelSaksbehandler } from './TildelSaksbehandler'
 
 export interface RedigerSaksbehandlerProps {
   saksbehandler: string | null
+  saksbehandlerNavn: string | null
   oppgaveId: string
   sakId: number
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void

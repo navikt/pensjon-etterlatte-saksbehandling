@@ -1,6 +1,7 @@
 package no.nav.etterlatte.oppgave
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -77,6 +78,11 @@ class OppgaveDaoMedEndringssporingImpl(
             }
         }
     }
+
+    override fun hentSaksbehandlerNavnForidenter(identer: List<String>): List<SaksbehandlerInfo> =
+        oppgaveDao.hentSaksbehandlerNavnForidenter(
+            identer,
+        )
 
     private fun ResultSet.asOppgaveEndring(): OppgaveEndring {
         return OppgaveEndring(

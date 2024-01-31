@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.toList
 import javax.sql.DataSource
 
-class SaksbehandlerDao(private val dataSource: DataSource) {
+class SaksbehandlerInfoDao(private val dataSource: DataSource) {
     fun hentalleSaksbehandlere(): List<String?> {
         dataSource.connection.use {
             val statement =
@@ -48,11 +48,7 @@ class SaksbehandlerDao(private val dataSource: DataSource) {
             statement.setString(1, ident)
             return statement.executeQuery().single {
                 val trueOrFalsePostgresFormat = getString("exists")
-                if (trueOrFalsePostgresFormat == "t") {
-                    return@single true
-                } else {
-                    return@single false
-                }
+                return@single trueOrFalsePostgresFormat == "t"
             }
         }
     }

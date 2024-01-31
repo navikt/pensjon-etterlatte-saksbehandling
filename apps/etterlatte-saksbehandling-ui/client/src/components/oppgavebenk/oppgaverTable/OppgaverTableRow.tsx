@@ -47,6 +47,7 @@ export const OppgaverTableRow = ({ oppgave, oppdaterTildeling, erMinOppgaveListe
       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
       <Table.DataCell>
         <RedigerSaksbehandler
+          saksbehandlerNavn={oppgave.saksbehandlerNavn}
           saksbehandler={oppgave.saksbehandler}
           oppgaveId={oppgave.id}
           sakId={oppgave.sakId}

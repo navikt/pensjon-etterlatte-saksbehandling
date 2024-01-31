@@ -18,7 +18,7 @@ const SaksbehandlerWrapper = styled(Label)`
 
 export const ByttSaksbehandler = (props: RedigerSaksbehandlerProps) => {
   const [modalIsOpen, setModalIsOpen] = useState(false)
-  const { saksbehandler, oppgaveId, oppdaterTildeling, erRedigerbar, versjon, type } = props
+  const { saksbehandler, saksbehandlerNavn, oppgaveId, oppdaterTildeling, erRedigerbar, versjon, type } = props
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const [byttSaksbehandlerSvar, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
 
@@ -42,15 +42,15 @@ export const ByttSaksbehandler = (props: RedigerSaksbehandlerProps) => {
               size="small"
               onClick={() => setModalIsOpen(true)}
             >
-              {saksbehandler}
+              {saksbehandlerNavn ? saksbehandlerNavn : saksbehandler}
             </Button>
           ) : (
-            <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
+            <SaksbehandlerWrapper>{saksbehandlerNavn ? saksbehandlerNavn : saksbehandler}</SaksbehandlerWrapper>
           )}
 
           <GeneriskModal
             tittel="Endre saksbehandler"
-            beskrivelse={`Vil du overta oppgaven til ${saksbehandler}?`}
+            beskrivelse={`Vil du overta oppgaven til ${saksbehandlerNavn ? saksbehandlerNavn : saksbehandler}?`}
             tekstKnappJa="Ja, overta oppgaven"
             tekstKnappNei="Nei"
             onYesClick={() =>

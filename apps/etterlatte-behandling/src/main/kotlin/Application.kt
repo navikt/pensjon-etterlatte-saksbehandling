@@ -81,14 +81,14 @@ private class Server(private val context: ApplicationContext) {
     fun run() =
         with(context) {
             dataSource.migrate()
-            lagSaksbendlereMedNavn(context)
+            populerSaksbendlereMedNavn(context)
             setReady().also { engine.start(true) }
         }
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-private fun lagSaksbendlereMedNavn(context: ApplicationContext) {
-    if (context.leaderElectionKlient.isLeader()) {
+private fun populerSaksbendlereMedNavn(context: ApplicationContext) {
+    if (context.leaderElectionKlient.isLeader() || true) {
         GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
             val logger = LoggerFactory.getLogger("saksbehandlernavnjob")
             logger.info("Starter job for å legge inn saksbehandlere med navn")

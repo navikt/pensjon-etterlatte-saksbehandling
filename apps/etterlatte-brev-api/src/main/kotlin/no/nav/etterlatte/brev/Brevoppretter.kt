@@ -1,5 +1,7 @@
 package no.nav.etterlatte.brev
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
@@ -129,20 +131,24 @@ class Brevoppretter(
                 }
             }
 
-        val innhold =
-            opprettInnhold(
-                RedigerbarTekstRequest(
-                    generellBrevData,
-                    bruker,
-                    prosessType,
-                    brevkode,
-                    automatiskMigreringRequest,
-                ),
-                brevKode?.tittel,
-            )
+        return coroutineScope {
+            val innhold =
+                async {
+                    opprettInnhold(
+                        RedigerbarTekstRequest(
+                            generellBrevData,
+                            bruker,
+                            prosessType,
+                            brevkode,
+                            automatiskMigreringRequest,
+                        ),
+                        brevKode?.tittel,
+                    )
+                }
 
-        val innholdVedlegg = opprettInnholdVedlegg(bruker, generellBrevData, prosessType)
-        return OpprettBrevRequest(generellBrevData, prosessType, innhold, innholdVedlegg)
+            val innholdVedlegg = async { opprettInnholdVedlegg(bruker, generellBrevData, prosessType) }
+            OpprettBrevRequest(generellBrevData, prosessType, innhold.await(), innholdVedlegg.await())
+        }
     }
 
     private suspend fun finnMottaker(personerISak: PersonerISak): Mottaker =

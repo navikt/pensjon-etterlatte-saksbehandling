@@ -99,7 +99,7 @@ internal class MigrerSpesifikkSakRiver(
 
         val verifisertRequest =
             verifiserer.verifiserRequest(pesyssak.tilMigreringsrequest()).also {
-                pesysRepository.oppdaterKanGjennopprettesAutomatisk(it)
+                pesysRepository.oppdaterKanGjenopprettesAutomatisk(it)
             }
         packet.hendelseData = verifisertRequest
 

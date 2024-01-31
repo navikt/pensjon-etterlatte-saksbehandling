@@ -54,12 +54,12 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         )
     }
 
-    fun oppdaterKanGjennopprettesAutomatisk(
+    fun oppdaterKanGjenopprettesAutomatisk(
         migreringRequest: MigreringRequest,
         tx: TransactionalSession? = null,
     ) = tx.session {
         oppdater(
-            "UPDATE pesyssak SET gjennopprettes_automatisk = :automatisk " +
+            "UPDATE pesyssak SET gjenopprettes_automatisk = :automatisk " +
                 "WHERE id = :pesyssak",
             mapOf("id" to migreringRequest.pesysId, "automatisk" to migreringRequest.kanAutomatiskGjenopprettes),
             "Oppdaterer pesyssak med kan gjenopprettes automatisk",

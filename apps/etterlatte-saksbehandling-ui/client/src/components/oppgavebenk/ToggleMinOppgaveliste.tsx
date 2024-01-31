@@ -89,6 +89,7 @@ export const ToggleMinOppgaveliste = () => {
     filter.oppgavekildeFilter,
     mutableOppgaver,
     filter.fristSortering,
+    filter.fnrSortering,
     filter.fnrFilter
   )
 

@@ -41,13 +41,13 @@ export const OppgaverTable = ({
   }
 
   useEffect(() => {
-    // TODO: sette filtrering utifra sortkey her, kanskje en switch case?
     switch (sort?.orderBy) {
       case SortKeys.FRIST:
         setFilter({ ...filter, fristSortering: sort?.direction ? sort.direction : 'ingen' })
         break
       case SortKeys.FNR:
-      // TODO: filtrer på fnr
+        setFilter({ ...filter, fnrSortering: sort?.direction ? sort.direction : 'ingen' })
+        break
     }
   }, [sort])
 

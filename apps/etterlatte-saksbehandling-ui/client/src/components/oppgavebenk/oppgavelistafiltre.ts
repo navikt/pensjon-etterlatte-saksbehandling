@@ -169,16 +169,35 @@ export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: Oppgave
 
 type Retning = 'descending' | 'ascending' | 'ingen'
 
-export function sortrerFrist(retning: Retning, oppgaver: OppgaveDTO[]) {
+export function sorterFrist(retning: Retning, oppgaver: OppgaveDTO[]) {
   switch (retning) {
     case 'ascending':
       return oppgaver.sort((a: OppgaveDTO, b: OppgaveDTO) => {
         return new Date(a.frist).valueOf() - new Date(b.frist).valueOf()
       })
     case 'descending':
+      return oppgaver
+        .sort((a: OppgaveDTO, b: OppgaveDTO) => {
+          return new Date(a.frist).valueOf() - new Date(b.frist).valueOf()
+        })
+        .reverse()
+    case 'ingen':
+      return oppgaver
+  }
+}
+
+export function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
+  switch (retning) {
+    case 'ascending':
       return oppgaver.sort((a: OppgaveDTO, b: OppgaveDTO) => {
-        return new Date(a.frist).valueOf() + new Date(b.frist).valueOf()
+        return Number(a.fnr.slice(0, 5)) - Number(b.fnr.slice(0, 5))
       })
+    case 'descending':
+      return oppgaver
+        .sort((a: OppgaveDTO, b: OppgaveDTO) => {
+          return Number(a.fnr.slice(0, 5)) - Number(b.fnr.slice(0, 5))
+        })
+        .reverse()
     case 'ingen':
       return oppgaver
   }
@@ -194,6 +213,7 @@ export function filtrerOppgaver(
   oppgaveKildeFilterKeys: OppgaveKildeFilterKeys,
   oppgaver: OppgaveDTO[],
   fristRetning: Retning,
+  fnrRetning: Retning,
   fnr: string
 ): OppgaveDTO[] {
   const enhetFiltrert = filtrerEnhet(enhetsFilter, oppgaver)
@@ -203,9 +223,10 @@ export function filtrerOppgaver(
   const oppgaveTypeFiltrert = filtrerOppgaveType(oppgavetypeFilter, oppgaveFiltrert)
   const oppgaveKildeFiltrert = filtrerOppgavekilde(oppgaveKildeFilterKeys, oppgaveTypeFiltrert)
   const fristFiltrert = filtrerFrist(fristFilter, oppgaveKildeFiltrert)
-  const fristSortrert = sortrerFrist(fristRetning, fristFiltrert)
+  const fristSortert = sorterFrist(fristRetning, fristFiltrert)
+  const fnrSortert = sorterFnr(fnrRetning, fristSortert)
 
-  return finnFnrIOppgaver(fnr, fristSortrert)
+  return finnFnrIOppgaver(fnr, fnrSortert)
 }
 
 export interface Filter {
@@ -218,6 +239,7 @@ export interface Filter {
   oppgavekildeFilter: OppgaveKildeFilterKeys
   fnrFilter: string
   fristSortering: Retning
+  fnrSortering: Retning
 }
 
 export const initialFilter = (): Filter => {
@@ -231,5 +253,6 @@ export const initialFilter = (): Filter => {
     oppgavekildeFilter: 'visAlle',
     fnrFilter: '',
     fristSortering: 'ingen',
+    fnrSortering: 'ingen',
   }
 }

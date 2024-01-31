@@ -19,8 +19,10 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.foerstegangsbehandling
@@ -40,6 +42,8 @@ import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.person.Adresse
+import no.nav.etterlatte.libs.common.person.AdresseType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
@@ -50,6 +54,8 @@ import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -114,6 +120,62 @@ internal class GrunnlagsendringshendelseServiceTest {
     }
 
     @Test
+    fun `Skal ignorere duplikate hendelser`() {
+        val sakId = 1L
+
+        val adresse =
+            Adresse(type = AdresseType.VEGADRESSE, aktiv = true, kilde = "FREG", postnr = "2040", adresseLinje1 = "Furukollveien 189")
+        val samsvarBostedAdresse =
+            SamsvarMellomKildeOgGrunnlag.Adresse(
+                samsvar = false,
+                fraPdl = listOf(adresse),
+                fraGrunnlag = null,
+            )
+        every {
+            grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+        } returns
+            listOf(
+                grunnlagsendringshendelseMedSamsvar(
+                    gjelderPerson = KONTANT_FOT.value,
+                    samsvarMellomKildeOgGrunnlag = samsvarBostedAdresse,
+                ).copy(
+                    status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                    type = GrunnlagsendringsType.BOSTED,
+                    hendelseGjelderRolle = Saksrolle.SOESKEN,
+                ),
+            )
+
+        val erDuplikat =
+            grunnlagsendringshendelseService.erDuplikatHendelse(
+                sakId,
+                KONTANT_FOT.value,
+                GrunnlagsendringsType.BOSTED,
+                samsvarBostedAdresse,
+            )
+        assertTrue(erDuplikat)
+
+        val erIkkeDuplikat =
+            grunnlagsendringshendelseService.erDuplikatHendelse(
+                sakId,
+                KONTANT_FOT.value,
+                GrunnlagsendringsType.BOSTED,
+                samsvarBostedAdresse.copy(
+                    fraPdl =
+                        listOf(
+                            Adresse(
+                                type = AdresseType.VEGADRESSE,
+                                aktiv = true,
+                                kilde = "FREG",
+                                postnr = "1359",
+                                adresseLinje1 = "Trøgstadbåsta 612",
+                            ),
+                        ),
+                ),
+            )
+        assertFalse(erIkkeDuplikat)
+    }
+
+    @Test
     fun `Skal opprette hendelser for hendelse`() {
         val sakId = 1L
         val fnr = KONTANT_FOT.value
@@ -153,7 +215,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagsendringshendelseMedSamsvar(
                 id = randomUUID(),
                 sakId = sakId,
-                fnr = fnr,
+                gjelderPerson = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             )
 
@@ -180,7 +242,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagsendringshendelseMedSamsvar(
                 id = randomUUID(),
                 sakId = sakId,
-                fnr = fnr,
+                gjelderPerson = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             )
 
@@ -238,7 +300,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 type = GrunnlagsendringsType.DOEDSFALL,
                 id = randomUUID(),
                 sakId = sakId,
-                fnr = fnr,
+                gjelderPerson = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             )
 
@@ -314,7 +376,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 type = GrunnlagsendringsType.DOEDSFALL,
                 id = randomUUID(),
                 sakId = sakId,
-                fnr = fnr,
+                gjelderPerson = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             )
 
@@ -392,7 +454,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 type = GrunnlagsendringsType.DOEDSFALL,
                 id = randomUUID(),
                 sakId = sakId,
-                fnr = fnr,
+                gjelderPerson = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             )
 
@@ -445,7 +507,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 type = GrunnlagsendringsType.DOEDSFALL,
                 id = randomUUID(),
                 sakId = sakId,
-                fnr = fnr,
+                gjelderPerson = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             )
 
@@ -454,7 +516,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 type = GrunnlagsendringsType.UTFLYTTING,
                 id = randomUUID(),
                 sakId = sakId,
-                fnr = fnr,
+                gjelderPerson = fnr,
                 samsvarMellomKildeOgGrunnlag = null,
             )
 
@@ -597,7 +659,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                 type = GrunnlagsendringsType.GRUNNBELOEP,
                 id = randomUUID(),
                 sakId = sakId,
-                fnr = KONTANT_FOT.value,
+                gjelderPerson = KONTANT_FOT.value,
                 samsvarMellomKildeOgGrunnlag = null,
             )
 

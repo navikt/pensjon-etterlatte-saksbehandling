@@ -3,7 +3,6 @@ package no.nav.etterlatte.grunnlagsendring
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BrukerService
-import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
@@ -353,11 +352,11 @@ class GrunnlagsendringshendelseService(
             }
         try {
             val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
-            val hendelsefinnesFraFoer =
-                hendelseEksistererFraFoer(sak.id, sak.ident, grunnlagsendringshendelse.type, samsvarMellomPdlOgGrunnlag)
+            val erDuplikat =
+                erDuplikatHendelse(sak.id, sak.ident, grunnlagsendringshendelse.type, samsvarMellomPdlOgGrunnlag)
 
             if (!samsvarMellomPdlOgGrunnlag.samsvar) {
-                if (hendelsefinnesFraFoer) {
+                if (erDuplikat) {
                     forkastHendelse(grunnlagsendringshendelse.id, samsvarMellomPdlOgGrunnlag)
                 } else {
                     oppdaterHendelseSjekket(grunnlagsendringshendelse, samsvarMellomPdlOgGrunnlag)
@@ -375,7 +374,7 @@ class GrunnlagsendringshendelseService(
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ) {
         val bleIkkeForkastet =
-            forkastHendelseHvisKunAvbrytteBehandlingerEllerEtManueltOpphoer(hendelse.sakId, samsvarMellomKildeOgGrunnlag, hendelse.id)
+            forkastHendelseHvisKunAvbrytteBehandlinger(hendelse.sakId, samsvarMellomKildeOgGrunnlag, hendelse.id)
         if (bleIkkeForkastet) {
             logger.info(
                 "Grunnlagsendringshendelse for ${hendelse.type} med id ${hendelse.id} er naa sjekket " +
@@ -413,17 +412,12 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    private fun List<Behandling>.sisteGyldigeBehandling() =
-        this.sortedByDescending { it.behandlingOpprettet }
-            .firstOrNull { it.status in BehandlingStatus.ikkeAvbrutt() }
-
-    private fun forkastHendelseHvisKunAvbrytteBehandlingerEllerEtManueltOpphoer(
+    private fun forkastHendelseHvisKunAvbrytteBehandlinger(
         sakId: Long,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
         hendelseId: UUID,
     ): Boolean {
         val behandlingerISak = behandlingService.hentBehandlingerForSak(sakId)
-        val sisteGyldigeBehandling = behandlingerISak.sisteGyldigeBehandling()
 
         val kunAvbrutteBehandlinger = behandlingerISak.all { it.status == BehandlingStatus.AVBRUTT }
         if (kunAvbrutteBehandlinger) {
@@ -438,23 +432,20 @@ class GrunnlagsendringshendelseService(
         }
     }
 
-    private fun hendelseEksistererFraFoer(
+    internal fun erDuplikatHendelse(
         sakId: Long,
         fnr: String?,
         hendelsesType: GrunnlagsendringsType,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ): Boolean {
-        val harHendelse =
+        val relevanteHendelser =
             grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
                 sakId,
                 listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB),
-            ).any {
+            ).filter {
                 (fnr == null) || it.gjelderPerson == fnr && it.type == hendelsesType
             }
-        return if (harHendelse) {
-            samsvarMellomKildeOgGrunnlag.samsvar
-        } else {
-            false
-        }
+
+        return relevanteHendelser.any { it.samsvarMellomKildeOgGrunnlag == samsvarMellomKildeOgGrunnlag }
     }
 }

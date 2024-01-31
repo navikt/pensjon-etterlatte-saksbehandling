@@ -213,7 +213,7 @@ fun grunnlagsendringshendelseMedSamsvar(
     sakId: Long = 1,
     type: GrunnlagsendringsType = GrunnlagsendringsType.DOEDSFALL,
     opprettet: LocalDateTime = Tidspunkt.now().toLocalDatetimeUTC(),
-    fnr: String,
+    gjelderPerson: String,
     status: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
     behandlingId: UUID? = null,
     hendelseGjelderRolle: Saksrolle = Saksrolle.SOEKER,
@@ -227,7 +227,7 @@ fun grunnlagsendringshendelseMedSamsvar(
     behandlingId = behandlingId,
     hendelseGjelderRolle = hendelseGjelderRolle,
     samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
-    gjelderPerson = fnr,
+    gjelderPerson = gjelderPerson,
 )
 
 fun grunnlagsinformasjonDoedshendelse(

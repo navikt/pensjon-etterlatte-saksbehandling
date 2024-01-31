@@ -22,12 +22,12 @@ data class OmstillingsstoenadRevurdering(
 ) : BrevData() {
     companion object {
         fun fra(
+            innholdMedVedlegg: InnholdMedVedlegg,
             avkortingsinfo: Avkortingsinfo,
             utbetalingsinfo: Utbetalingsinfo,
             forrigeUtbetalingsinfo: Utbetalingsinfo?,
             etterbetalingDTO: EtterbetalingDTO?,
             trygdetid: Trygdetid,
-            innholdMedVedlegg: InnholdMedVedlegg,
         ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {

@@ -15,6 +15,8 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -31,16 +33,16 @@ data class BarnepensjonInnvilgelse(
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
 
         fun fra(
+            innhold: InnholdMedVedlegg,
             utbetalingsinfo: Utbetalingsinfo,
             etterbetaling: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             grunnbeloep: Grunnbeloep,
             utlandstilknytning: UtlandstilknytningType?,
-            innhold: InnholdMedVedlegg,
-            brukerUnder18Aar: Boolean,
+            brevutfall: BrevutfallDto,
         ): BarnepensjonInnvilgelse {
             val beregningsperioder =
-                barnepensjonBeregningsperiodes(utbetalingsinfo)
+                barnepensjonBeregningsperioder(utbetalingsinfo)
 
             return BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
@@ -48,7 +50,7 @@ data class BarnepensjonInnvilgelse(
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
-                brukerUnder18Aar = brukerUnder18Aar,
+                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {
@@ -121,7 +123,7 @@ internal fun barnepensjonBeregning(
         ),
 )
 
-internal fun barnepensjonBeregningsperiodes(utbetalingsinfo: Utbetalingsinfo) =
+internal fun barnepensjonBeregningsperioder(utbetalingsinfo: Utbetalingsinfo) =
     utbetalingsinfo.beregningsperioder.map {
         BarnepensjonBeregningsperiode(
             datoFOM = it.datoFOM,

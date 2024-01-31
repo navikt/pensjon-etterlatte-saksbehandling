@@ -77,7 +77,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
     companion object {
         fun fra(
             innhold: InnholdMedVedlegg,
-            erUnder18Aar: Boolean,
+            erUnder18Aar: Boolean?,
             utbetalingsinfo: Utbetalingsinfo,
             trygdetid: Trygdetid,
             grunnbeloep: Grunnbeloep,
@@ -85,11 +85,16 @@ data class BarnepensjonOmregnetNyttRegelverk(
             migreringRequest: MigreringBrevRequest?,
             utlandstilknytning: UtlandstilknytningType?,
         ): BarnepensjonOmregnetNyttRegelverk {
-            val beregningsperioder = barnepensjonBeregningsperiodes(utbetalingsinfo)
+            val erUnder18AarNonNull =
+                requireNotNull(erUnder18Aar) {
+                    "Klarte ikke å bestemme om alder på søker er under eller over 18 år. Kan dermed ikke velge riktig brev"
+                }
+
+            val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
 
             return BarnepensjonOmregnetNyttRegelverk(
                 innhold = innhold.innhold(),
-                erUnder18Aar = erUnder18Aar,
+                erUnder18Aar = erUnder18AarNonNull,
                 beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
                 etterbetaling =
                     etterbetaling

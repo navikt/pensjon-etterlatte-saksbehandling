@@ -11,6 +11,8 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 
 data class BarnepensjonRevurdering(
@@ -32,9 +34,9 @@ data class BarnepensjonRevurdering(
             trygdetid: Trygdetid,
             grunnbeloep: Grunnbeloep,
             utlandstilknytning: UtlandstilknytningType?,
-            brukerUnder18Aar: Boolean,
+            brevutfall: BrevutfallDto,
         ): BrevData {
-            val beregningsperioder = barnepensjonBeregningsperiodes(utbetalingsinfo)
+            val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
 
             return BarnepensjonRevurdering(
                 innhold = innhold.innhold(),
@@ -43,7 +45,7 @@ data class BarnepensjonRevurdering(
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
-                brukerUnder18Aar = brukerUnder18Aar,
+                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
                 kunNyttRegelverk =

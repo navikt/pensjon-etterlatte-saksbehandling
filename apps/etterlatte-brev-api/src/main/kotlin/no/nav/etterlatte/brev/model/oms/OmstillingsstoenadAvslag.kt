@@ -1,8 +1,8 @@
 package no.nav.etterlatte.brev.model.oms
 
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 
 data class OmstillingsstoenadAvslag(
@@ -12,13 +12,12 @@ data class OmstillingsstoenadAvslag(
 ) : BrevData() {
     companion object {
         fun fra(
-            avdoedNavn: String,
-            utlandstilknytning: Utlandstilknytning?,
+            generellBrevData: GenerellBrevData,
             innhold: List<Slate.Element>,
         ): OmstillingsstoenadAvslag =
             OmstillingsstoenadAvslag(
-                avdoedNavn = avdoedNavn,
-                bosattUtland = utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                avdoedNavn = generellBrevData.personerISak.avdoede.first().navn,
+                bosattUtland = generellBrevData.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
                 innhold = innhold,
             )
     }

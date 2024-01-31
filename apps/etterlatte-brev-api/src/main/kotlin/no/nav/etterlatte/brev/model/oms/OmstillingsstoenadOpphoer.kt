@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model.oms
 
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -28,11 +29,11 @@ data class OmstillingsstoenadOpphoerRedigerbartUtfall(
 ) : BrevData() {
     companion object {
         fun fra(
-            virkningsdato: LocalDate,
+            generellBrevData: GenerellBrevData,
             innhold: List<Slate.Element>,
         ): OmstillingsstoenadOpphoerRedigerbartUtfall =
             OmstillingsstoenadOpphoerRedigerbartUtfall(
-                virkningsdato = virkningsdato,
+                virkningsdato = requireNotNull(generellBrevData.forenkletVedtak?.virkningstidspunkt?.atDay(1)),
                 innhold = innhold,
             )
     }

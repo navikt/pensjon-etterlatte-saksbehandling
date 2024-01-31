@@ -46,72 +46,54 @@ class BrevDataMapper(
                     VedtakType.INNVILGELSE ->
                         coroutineScope {
                             val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
-                            val utbetaling = async { fetcher.hentUtbetaling() }
+                            val utbetalingsinfo = async { fetcher.hentUtbetaling() }
                             val etterbetaling = async { fetcher.hentEtterbetaling() }
+
                             BarnepensjonInnvilgelseRedigerbartUtfall.fra(
                                 generellBrevData,
-                                utbetaling.await(),
+                                utbetalingsinfo.await(),
                                 etterbetaling.await(),
                             )
                         }
-
-                    VedtakType.AVSLAG -> ManueltBrevData.fra()
 
                     VedtakType.ENDRING ->
                         coroutineScope {
                             val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                             val etterbetaling = async { fetcher.hentEtterbetaling() }
+
                             BarnepensjonRevurderingRedigerbartUtfall.fra(etterbetaling.await())
                         }
 
-                    VedtakType.OPPHOER -> ManueltBrevData.fra()
+                    VedtakType.AVSLAG -> ManueltBrevData()
+                    VedtakType.OPPHOER -> ManueltBrevData()
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
-                    null -> ManueltBrevData.fra(emptyList())
+                    null -> ManueltBrevData()
                 }
             }
 
             SakType.OMSTILLINGSSTOENAD -> {
-                when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
+                when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> {
                         coroutineScope {
                             val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
-                            val utbetaling = async { fetcher.hentUtbetaling() }
+                            val utbetalingsinfo = async { fetcher.hentUtbetaling() }
                             val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
                             val etterbetaling = async { fetcher.hentEtterbetaling() }
-                            val avkortingHentet =
-                                requireNotNull(
-                                    avkortingsinfo.await(),
-                                ) { "$vedtakType, ${generellBrevData.sak.sakType} må ha avkortingsinfo " }
+
                             OmstillingsstoenadInnvilgelseRedigerbartUtfall.fra(
                                 generellBrevData,
-                                utbetaling.await(),
-                                avkortingHentet,
-                                etterbetaling.await() != null,
+                                utbetalingsinfo.await(),
+                                requireNotNull(avkortingsinfo.await()),
+                                etterbetaling.await(),
                             )
                         }
                     }
 
-                    VedtakType.AVSLAG -> {
-                        OmstillingsstoenadAvslag.fra(
-                            generellBrevData.personerISak.avdoede.first().navn,
-                            generellBrevData.utlandstilknytning,
-                            emptyList(),
-                        )
-                    }
-
-                    VedtakType.ENDRING -> ManueltBrevData(emptyList())
-
-                    VedtakType.OPPHOER -> {
-                        val virkningstidspunkt =
-                            requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt?.atDay(1))
-                        OmstillingsstoenadOpphoerRedigerbartUtfall.fra(
-                            virkningstidspunkt,
-                            emptyList(),
-                        )
-                    }
-
+                    VedtakType.ENDRING -> ManueltBrevData()
+                    VedtakType.AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, emptyList())
+                    VedtakType.OPPHOER -> OmstillingsstoenadOpphoerRedigerbartUtfall.fra(generellBrevData, emptyList())
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
-                    null -> ManueltBrevData.fra(emptyList())
+                    null -> ManueltBrevData()
                 }
             }
         }

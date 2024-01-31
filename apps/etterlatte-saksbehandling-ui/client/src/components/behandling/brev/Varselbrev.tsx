@@ -13,18 +13,17 @@ import Spinner from '~shared/Spinner'
 import { IBrev } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { SjekklisteValideringErrorSummary } from '~components/behandling/sjekkliste/SjekklisteValideringErrorSummary'
 import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
 import { hentBehandling } from '~shared/api/behandling'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { useSjekkliste } from '~components/behandling/sjekkliste/useSjekkliste'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
+import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 
 export const FEATURE_TOGGLE_LAG_VARSELBREV = 'lag-varselbrev'
 
@@ -34,7 +33,9 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { sakId, soeknadMottattDato } = props.behandling
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const redigerbar = behandlingErRedigerbar(props.behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const [redigerbar, setKanRedigeres] = useState(
+    behandlingErRedigerbar(props.behandling.status) && innloggetSaksbehandler.skriveTilgang
+  )
 
   const [varselbrev, setVarselbrev] = useState<IBrev>()
   const { next } = useBehandlingRoutes()
@@ -42,7 +43,6 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVarselbrev] = useApiCall(opprettVedtaksbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
-  useSjekkliste()
 
   const onSubmit = () => {
     next()
@@ -121,8 +121,6 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
 
       <Border />
 
-      <SjekklisteValideringErrorSummary />
-
       {redigerbar ? (
         <BehandlingHandlingKnapper>
           <Button
@@ -132,6 +130,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
           >
             {handlinger.NESTE.navn}
           </Button>
+          {varselbrev && <NyttBrevHandlingerPanel brev={varselbrev} setKanRedigeres={setKanRedigeres} />}
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />

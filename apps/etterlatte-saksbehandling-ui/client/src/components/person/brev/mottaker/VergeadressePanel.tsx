@@ -15,8 +15,9 @@ export const VergeadressePanel = ({ vergeadresseResult }: Props) =>
   mapSuccess(vergeadresseResult, (grunnlagsopplysning) => {
     const vergeadresse = grunnlagsopplysning?.opplysning
 
-    if (!vergeadresse) return null
-    else
+    if (!vergeadresse) {
+      return null
+    }
       return (
         <InfoWrapper>
           <Info

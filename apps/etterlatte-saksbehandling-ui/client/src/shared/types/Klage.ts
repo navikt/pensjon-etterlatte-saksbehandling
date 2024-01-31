@@ -181,7 +181,7 @@ interface KlageBrevInnstilling {
 
 export interface InnstillingTilKabal {
   lovhjemmel: LovhjemmelFelles
-  tekst: string
+  internKommentar: string
   brev: KlageBrevInnstilling
 }
 

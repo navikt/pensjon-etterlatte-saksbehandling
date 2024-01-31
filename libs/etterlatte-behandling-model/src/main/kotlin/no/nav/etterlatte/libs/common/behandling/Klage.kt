@@ -405,9 +405,17 @@ enum class GrunnForOmgjoering {
 
 data class KlageOmgjoering(val grunnForOmgjoering: GrunnForOmgjoering, val begrunnelse: String)
 
-class InnstillingTilKabal(val lovhjemmel: KabalHjemmel, val tekst: String, val brev: KlageBrevInnstilling)
+class InnstillingTilKabal(
+    val lovhjemmel: KabalHjemmel,
+    internKommentar: String? = null,
+    val brev: KlageBrevInnstilling,
+    // TODO Fjern "tekst" etter deploy, når vi vet at alle JSONB-clobs er riktige
+    tekst: String? = null,
+) {
+    val internKommentar: String = requireNotNull(internKommentar ?: tekst)
+}
 
-data class InnstillingTilKabalUtenBrev(val lovhjemmel: String, val tekst: String)
+data class InnstillingTilKabalUtenBrev(val lovhjemmel: String, val internKommentar: String)
 
 data class KlageBrevInnstilling(val brevId: Long)
 

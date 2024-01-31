@@ -152,7 +152,7 @@ data class KabalOversendelse(
                 innsendtTilNav = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
                 kilde = fagsystem,
                 ytelse = klage.sak.sakType.tilYtelse(),
-                kommentar = innstilling.tekst, // TODO rename her og i basen
+                kommentar = innstilling.internKommentar,
             )
         }
     }

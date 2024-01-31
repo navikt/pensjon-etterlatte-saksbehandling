@@ -50,7 +50,7 @@ function erSkjemaUtfylt(skjema: FormdataVurdering): skjema is FilledFormDataVurd
   }
   if (skjema.utfall === Utfall.STADFESTE_VEDTAK || skjema.utfall === Utfall.DELVIS_OMGJOERING) {
     const { innstilling } = skjema
-    if (!innstilling || !innstilling.lovhjemmel || !innstilling.tekst) {
+    if (!innstilling || !innstilling.lovhjemmel || !innstilling.internKommentar) {
       return false
     }
   }
@@ -298,14 +298,14 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
         />
       </VurderingWrapper>
 
-      <BodyShort spacing>Skriv innstilling til klagen, som blir med i brev til KA og bruker</BodyShort>
+      <BodyShort spacing>Skriv innstilling til klagen, som sendes til KA</BodyShort>
       <VurderingWrapper>
         <Controller
           rules={{
             required: true,
             minLength: 1,
           }}
-          name="innstilling.tekst"
+          name="innstilling.internKommentar"
           control={control}
           render={({ field, fieldState }) => {
             const { value, ...rest } = field

@@ -71,11 +71,13 @@ class AldersovergangTest {
         val sakId = 1000L
         val fnrInnenfor = SOEKER_FOEDSELSNUMMER
         val opplysningDao = OpplysningDao(dataSource)
+        opplysningDao.leggTilOpplysning(sakId, Opplysningstype.FOEDSELSDATO, TextNode("2018-01-01"), fnrInnenfor)
         opplysningDao.leggTilOpplysning(sakId, Opplysningstype.FOEDSELSDATO, TextNode("2020-01-01"), fnrInnenfor)
         opplysningDao.leggTilOpplysning(sakId, Opplysningstype.SOEKER_PDL_V1, TextNode("hei, hallo"), fnrInnenfor)
 
         val sakIdUtenfor = 2000L
         val fnrUtenfor = HELSOESKEN_FOEDSELSNUMMER
+        opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.FOEDSELSDATO, TextNode("2020-01-01"), fnrUtenfor)
         opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.FOEDSELSDATO, TextNode("2022-01-01"), fnrUtenfor)
         opplysningDao.leggTilOpplysning(sakIdUtenfor, Opplysningstype.SOEKER_PDL_V1, TextNode("søsken her"), fnrUtenfor)
 

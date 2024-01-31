@@ -21,6 +21,9 @@ class AldersovergangDao(private val datasource: DataSource) : Transactions<Alder
             """
             select g.sak_id as sak_id from grunnlagshendelse g
                      inner join grunnlagshendelse g2 on g.sak_id = g2.sak_id and g.fnr = g2.fnr and g.hendelsenummer != g2.hendelsenummer
+                     and g.hendelsenummer = (select hendelsenummer from grunnlagshendelse where sak_id = g.sak_id
+                     and opplysning_type = 'FOEDSELSDATO' 
+                      order by hendelsenummer desc limit 1 )
             where g.opplysning_type = 'FOEDSELSDATO'
             and g2.opplysning_type = 'SOEKER_PDL_V1'
             and TO_DATE(g.opplysning, '\"YYYY-MM-DD\"') BETWEEN :start AND :slutt

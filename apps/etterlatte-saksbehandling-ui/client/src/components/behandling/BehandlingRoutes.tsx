@@ -16,6 +16,7 @@ import { SakType } from '~shared/types/sak'
 import TrygdetidVisning from '~components/behandling/trygdetid/TrygdetidVisning'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
 import { erOpphoer, Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { Varselbrev } from '~components/behandling/brev/Varselbrev'
 
 type behandlingRouteTypes =
   | 'soeknadsoversikt'
@@ -26,6 +27,7 @@ type behandlingRouteTypes =
   | 'trygdetid'
   | 'beregningsgrunnlag'
   | 'beregne'
+  | 'varselbrev'
   | 'brev'
 
 export interface BehandlingRouteTypes {
@@ -46,6 +48,7 @@ const behandlingRoutes = (
   { path: 'trygdetid', element: <TrygdetidVisning behandling={behandling} /> },
   { path: 'beregningsgrunnlag', element: <Beregningsgrunnlag behandling={behandling} /> },
   { path: 'beregne', element: <Beregne behandling={behandling} /> },
+  { path: 'varselbrev', element: <Varselbrev behandling={behandling} /> },
   { path: 'brev', element: <Vedtaksbrev behandling={behandling} /> },
 ]
 
@@ -87,6 +90,11 @@ const routeTypes = {
   beregning: {
     path: 'beregne',
     description: 'Beregning',
+    kreverBehandlingsstatus: () => IBehandlingStatus.BEREGNET,
+  },
+  varselbrev: {
+    path: 'varselbrev',
+    description: 'Varselbrev',
     kreverBehandlingsstatus: () => IBehandlingStatus.BEREGNET,
   },
   brevBp: {
@@ -177,6 +185,7 @@ export function soeknadRoutes(behandling: IBehandlingReducer): Array<BehandlingR
         routeTypes.trygdetid,
         routeTypes.beregningsgrunnlag,
         routeTypes.beregning,
+        routeTypes.varselbrev,
       ]
 
   return leggTilBrevHvisKrevesAvBehandling(defaultRoutes, behandling).filter(

@@ -10,6 +10,8 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
+import java.util.UUID
 
 internal class BarnepensjonInnvilgetDTOTest {
     private val grunnbeloep = 118_620
@@ -25,7 +28,7 @@ internal class BarnepensjonInnvilgetDTOTest {
     @Test
     fun `setter skille for etterbetaling`() {
         val barnepensjonInnvilgelse =
-            BarnepensjonInnvilgelseDTO.fra(
+            BarnepensjonInnvilgelse.fra(
                 utbetalingsinfo =
                     Utbetalingsinfo(
                         antallBarn = 1,
@@ -64,7 +67,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                     ),
                 innhold = lagInnholdMedVedlegg(),
                 utlandstilknytning = null,
-                brukerUnder18Aar = true,
+                brevutfall = BrevutfallDto(UUID.randomUUID(), Aldersgruppe.UNDER_18, null, null),
             )
 
         Assertions.assertEquals(

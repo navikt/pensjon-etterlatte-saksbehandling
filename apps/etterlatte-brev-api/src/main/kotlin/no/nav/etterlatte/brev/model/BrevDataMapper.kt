@@ -6,11 +6,11 @@ import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfallDTO
-import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingRedigerbartUtfallDTO
-import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
-import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO
-import no.nav.etterlatte.brev.model.oms.OpphoerBrevDataUtfallOMS
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfall
+import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingRedigerbartUtfall
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslag
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbartUtfall
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoerRedigerbartUtfall
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -46,72 +46,54 @@ class BrevDataMapper(
                     VedtakType.INNVILGELSE ->
                         coroutineScope {
                             val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
-                            val utbetaling = async { fetcher.hentUtbetaling() }
+                            val utbetalingsinfo = async { fetcher.hentUtbetaling() }
                             val etterbetaling = async { fetcher.hentEtterbetaling() }
-                            BarnepensjonInnvilgelseRedigerbartUtfallDTO.fra(
+
+                            BarnepensjonInnvilgelseRedigerbartUtfall.fra(
                                 generellBrevData,
-                                utbetaling.await(),
+                                utbetalingsinfo.await(),
                                 etterbetaling.await(),
                             )
                         }
-
-                    VedtakType.AVSLAG -> ManueltBrevData.fra()
 
                     VedtakType.ENDRING ->
                         coroutineScope {
                             val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                             val etterbetaling = async { fetcher.hentEtterbetaling() }
-                            BarnepensjonRevurderingRedigerbartUtfallDTO.fra(etterbetaling.await())
+
+                            BarnepensjonRevurderingRedigerbartUtfall.fra(etterbetaling.await())
                         }
 
-                    VedtakType.OPPHOER -> ManueltBrevData.fra()
+                    VedtakType.AVSLAG -> ManueltBrevData()
+                    VedtakType.OPPHOER -> ManueltBrevData()
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
-                    null -> ManueltBrevData.fra(emptyList())
+                    null -> ManueltBrevData()
                 }
             }
 
             SakType.OMSTILLINGSSTOENAD -> {
-                when (val vedtakType = generellBrevData.forenkletVedtak?.type) {
+                when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> {
                         coroutineScope {
                             val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
-                            val utbetaling = async { fetcher.hentUtbetaling() }
+                            val utbetalingsinfo = async { fetcher.hentUtbetaling() }
                             val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
                             val etterbetaling = async { fetcher.hentEtterbetaling() }
-                            val avkortingHentet =
-                                requireNotNull(
-                                    avkortingsinfo.await(),
-                                ) { "$vedtakType, ${generellBrevData.sak.sakType} må ha avkortingsinfo " }
-                            OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO.fra(
+
+                            OmstillingsstoenadInnvilgelseRedigerbartUtfall.fra(
                                 generellBrevData,
-                                utbetaling.await(),
-                                avkortingHentet,
-                                etterbetaling.await() != null,
+                                utbetalingsinfo.await(),
+                                requireNotNull(avkortingsinfo.await()),
+                                etterbetaling.await(),
                             )
                         }
                     }
 
-                    VedtakType.AVSLAG -> {
-                        AvslagBrevDataOMS.fra(
-                            generellBrevData.personerISak.avdoede.first().navn,
-                            generellBrevData.utlandstilknytning,
-                            emptyList(),
-                        )
-                    }
-
-                    VedtakType.ENDRING -> ManueltBrevData(emptyList())
-
-                    VedtakType.OPPHOER -> {
-                        val virkningstidspunkt =
-                            requireNotNull(generellBrevData.forenkletVedtak.virkningstidspunkt?.atDay(1))
-                        OpphoerBrevDataUtfallOMS.fra(
-                            virkningstidspunkt,
-                            emptyList(),
-                        )
-                    }
-
+                    VedtakType.ENDRING -> ManueltBrevData()
+                    VedtakType.AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, emptyList())
+                    VedtakType.OPPHOER -> OmstillingsstoenadOpphoerRedigerbartUtfall.fra(generellBrevData, emptyList())
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
-                    null -> ManueltBrevData.fra(emptyList())
+                    null -> ManueltBrevData()
                 }
             }
         }

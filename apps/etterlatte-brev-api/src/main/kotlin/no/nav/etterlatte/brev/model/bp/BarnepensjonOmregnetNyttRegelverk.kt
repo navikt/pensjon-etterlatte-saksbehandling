@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
-data class OmregnetBPNyttRegelverk(
+data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
     val utbetaltFoerReform: Kroner,
     val utbetaltEtterReform: Kroner,
     val erForeldreloes: Boolean,
@@ -28,9 +28,9 @@ data class OmregnetBPNyttRegelverk(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
             migreringRequest: MigreringBrevRequest?,
-        ): OmregnetBPNyttRegelverk {
+        ): BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall {
             val defaultBrevdataOmregning =
-                OmregnetBPNyttRegelverk(
+                BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
                     utbetaltFoerReform = Kroner(0),
                     utbetaltEtterReform = Kroner(utbetalingsinfo.beloep.value),
                     erBosattUtlandet = false,
@@ -67,7 +67,7 @@ data class OmregnetBPNyttRegelverk(
     }
 }
 
-data class OmregnetBPNyttRegelverkFerdig(
+data class BarnepensjonOmregnetNyttRegelverk(
     val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
@@ -77,19 +77,24 @@ data class OmregnetBPNyttRegelverkFerdig(
     companion object {
         fun fra(
             innhold: InnholdMedVedlegg,
-            erUnder18Aar: Boolean,
+            erUnder18Aar: Boolean?,
             utbetalingsinfo: Utbetalingsinfo,
             trygdetid: Trygdetid,
             grunnbeloep: Grunnbeloep,
             etterbetaling: EtterbetalingDTO?,
             migreringRequest: MigreringBrevRequest?,
             utlandstilknytning: UtlandstilknytningType?,
-        ): OmregnetBPNyttRegelverkFerdig {
-            val beregningsperioder = barnepensjonBeregningsperiodes(utbetalingsinfo)
+        ): BarnepensjonOmregnetNyttRegelverk {
+            val erUnder18AarNonNull =
+                requireNotNull(erUnder18Aar) {
+                    "Klarte ikke å bestemme om alder på søker er under eller over 18 år. Kan dermed ikke velge riktig brev"
+                }
 
-            return OmregnetBPNyttRegelverkFerdig(
+            val beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo)
+
+            return BarnepensjonOmregnetNyttRegelverk(
                 innhold = innhold.innhold(),
-                erUnder18Aar = erUnder18Aar,
+                erUnder18Aar = erUnder18AarNonNull,
                 beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
                 etterbetaling =
                     etterbetaling

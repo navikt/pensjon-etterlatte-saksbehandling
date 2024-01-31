@@ -15,11 +15,13 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
-data class BarnepensjonInnvilgelseDTO(
+data class BarnepensjonInnvilgelse(
     val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
@@ -31,24 +33,24 @@ data class BarnepensjonInnvilgelseDTO(
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
 
         fun fra(
+            innhold: InnholdMedVedlegg,
             utbetalingsinfo: Utbetalingsinfo,
             etterbetaling: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             grunnbeloep: Grunnbeloep,
             utlandstilknytning: UtlandstilknytningType?,
-            innhold: InnholdMedVedlegg,
-            brukerUnder18Aar: Boolean,
-        ): BarnepensjonInnvilgelseDTO {
+            brevutfall: BrevutfallDto,
+        ): BarnepensjonInnvilgelse {
             val beregningsperioder =
-                barnepensjonBeregningsperiodes(utbetalingsinfo)
+                barnepensjonBeregningsperioder(utbetalingsinfo)
 
-            return BarnepensjonInnvilgelseDTO(
+            return BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
                 beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
-                brukerUnder18Aar = brukerUnder18Aar,
+                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {
@@ -59,7 +61,7 @@ data class BarnepensjonInnvilgelseDTO(
     }
 }
 
-data class BarnepensjonInnvilgelseRedigerbartUtfallDTO(
+data class BarnepensjonInnvilgelseRedigerbartUtfall(
     val virkningsdato: LocalDate,
     val avdoed: Avdoed,
     val sisteBeregningsperiodeDatoFom: LocalDate,
@@ -72,7 +74,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfallDTO(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
             etterbetaling: EtterbetalingDTO?,
-        ): BarnepensjonInnvilgelseRedigerbartUtfallDTO {
+        ): BarnepensjonInnvilgelseRedigerbartUtfall {
             val beregningsperioder =
                 utbetalingsinfo.beregningsperioder.map {
                     BarnepensjonBeregningsperiode(
@@ -84,7 +86,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfallDTO(
                     )
                 }
 
-            return BarnepensjonInnvilgelseRedigerbartUtfallDTO(
+            return BarnepensjonInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
                 avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
                 sisteBeregningsperiodeDatoFom = beregningsperioder.maxBy { it.datoFOM }.datoFOM,
@@ -121,7 +123,7 @@ internal fun barnepensjonBeregning(
         ),
 )
 
-internal fun barnepensjonBeregningsperiodes(utbetalingsinfo: Utbetalingsinfo) =
+internal fun barnepensjonBeregningsperioder(utbetalingsinfo: Utbetalingsinfo) =
     utbetalingsinfo.beregningsperioder.map {
         BarnepensjonBeregningsperiode(
             datoFOM = it.datoFOM,

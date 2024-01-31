@@ -1,5 +1,7 @@
 package no.nav.etterlatte.brev
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
@@ -16,7 +18,6 @@ import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
-import no.nav.etterlatte.brev.model.SlateHelper
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
@@ -33,6 +34,7 @@ class Brevoppretter(
     private val db: BrevRepository,
     private val brevdataFacade: BrevdataFacade,
     private val brevbaker: BrevbakerService,
+    private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -129,20 +131,24 @@ class Brevoppretter(
                 }
             }
 
-        val innhold =
-            opprettInnhold(
-                RedigerbarTekstRequest(
-                    generellBrevData,
-                    bruker,
-                    prosessType,
-                    brevkode,
-                    automatiskMigreringRequest,
-                ),
-                brevKode?.tittel,
-            )
+        return coroutineScope {
+            val innhold =
+                async {
+                    opprettInnhold(
+                        RedigerbarTekstRequest(
+                            generellBrevData,
+                            bruker,
+                            prosessType,
+                            brevkode,
+                            automatiskMigreringRequest,
+                        ),
+                        brevKode?.tittel,
+                    )
+                }
 
-        val innholdVedlegg = opprettInnholdVedlegg(generellBrevData, prosessType)
-        return OpprettBrevRequest(generellBrevData, prosessType, innhold, innholdVedlegg)
+            val innholdVedlegg = async { opprettInnholdVedlegg(bruker, generellBrevData, prosessType) }
+            OpprettBrevRequest(generellBrevData, prosessType, innhold.await(), innholdVedlegg.await())
+        }
     }
 
     private suspend fun finnMottaker(personerISak: PersonerISak): Mottaker =
@@ -181,12 +187,13 @@ class Brevoppretter(
         return BrevInnhold(tittel, redigerbarTekstRequest.generellBrevData.spraak, payload)
     }
 
-    private fun opprettInnholdVedlegg(
+    private suspend fun opprettInnholdVedlegg(
+        bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
         prosessType: BrevProsessType,
     ): List<BrevInnholdVedlegg>? =
         when (prosessType) {
-            BrevProsessType.REDIGERBAR -> SlateHelper.hentInitiellPayloadVedlegg(generellBrevData)
+            BrevProsessType.REDIGERBAR -> redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData)
             BrevProsessType.AUTOMATISK -> null
             BrevProsessType.MANUELL -> null
             BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException(

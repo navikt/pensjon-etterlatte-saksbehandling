@@ -87,7 +87,8 @@ internal class VedtaksbrevServiceTest {
     private val brevbakerService = mockk<BrevbakerService>()
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, brevDataMapperFerdigstilling, adresseService, brevbakerService, migreringBrevDataService)
-    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevbakerService)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
+    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
 
     private val vedtaksbrevService =
         VedtaksbrevService(

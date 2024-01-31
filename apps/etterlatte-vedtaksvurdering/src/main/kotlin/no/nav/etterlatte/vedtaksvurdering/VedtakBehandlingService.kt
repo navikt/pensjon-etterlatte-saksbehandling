@@ -308,7 +308,7 @@ class VedtakBehandlingService(
         if (!samKlient.samordneVedtak(tilSamordningVedtakLocal, isEtterbetaling, brukerTokenInfo)) {
             logger.info("Svar fra samordning: ikke nødvendig å vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
 
-            val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)
+            val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)!!
             return VedtakOgRapid(vedtakEtterSvar.vedtak, tilSamordning, vedtakEtterSvar.rapidInfo1)
         } else {
             logger.info("Svar fra samordning: må vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
@@ -321,30 +321,43 @@ class VedtakBehandlingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakTilSamordning: Vedtak? = null,
-    ): VedtakOgRapid {
+    ): VedtakOgRapid? {
         logger.info("Setter vedtak til samordnet for behandling med behandlingId=$behandlingId")
         val vedtak = vedtakTilSamordning ?: hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.TIL_SAMORDNING))
-        val samordnetVedtakLocal =
-            repository.inTransaction { tx ->
-                repository.samordnetVedtak(behandlingId, tx = tx)
-                    .also {
-                        runBlocking {
-                            behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
-                        }
+        when (vedtak.status) {
+            VedtakStatus.TIL_SAMORDNING -> {
+                val samordnetVedtakLocal =
+                    repository.inTransaction { tx ->
+                        repository.samordnetVedtak(behandlingId, tx = tx)
+                            .also {
+                                runBlocking {
+                                    behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
+                                }
+                            }
                     }
-            }
 
-        return VedtakOgRapid(
-            samordnetVedtakLocal.toDto(),
-            RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseHendelseType.SAMORDNET,
-                vedtak = samordnetVedtakLocal.toDto(),
-                tekniskTid = Tidspunkt.now(),
-                behandlingId = behandlingId,
-            ),
-        )
+                return VedtakOgRapid(
+                    samordnetVedtakLocal.toDto(),
+                    RapidInfo(
+                        vedtakhendelse = VedtakKafkaHendelseHendelseType.SAMORDNET,
+                        vedtak = samordnetVedtakLocal.toDto(),
+                        tekniskTid = Tidspunkt.now(),
+                        behandlingId = behandlingId,
+                    ),
+                )
+            }
+            VedtakStatus.IVERKSATT -> {
+                logger.warn(
+                    "Behandlet svar på samording for vedtak ${vedtak.id}, " +
+                        "men vedtaket er allerede iverksatt [behandling=$behandlingId. Skipper",
+                )
+            }
+            else -> {
+                verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.TIL_SAMORDNING))
+            }
+        }
+        return null
     }
 
     suspend fun samordningsinfo(behandlingId: UUID): List<Samordningsvedtak> {

@@ -14,7 +14,7 @@ interface Props {
   setFilter: Dispatch<SetStateAction<Filter>>
 }
 
-export enum SortKeys {
+export enum SortKey {
   FRIST = 'frist',
   FNR = 'fnr',
 }
@@ -42,10 +42,10 @@ export const OppgaverTable = ({
 
   useEffect(() => {
     switch (sort?.orderBy) {
-      case SortKeys.FRIST:
+      case SortKey.FRIST:
         setFilter({ ...filter, fristSortering: sort?.direction ? sort.direction : 'ingen' })
         break
-      case SortKeys.FNR:
+      case SortKey.FNR:
         setFilter({ ...filter, fnrSortering: sort?.direction ? sort.direction : 'ingen' })
         break
     }

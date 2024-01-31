@@ -23,11 +23,12 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterUtfallForKlage } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
-import { kanSeBrev, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { SakType } from '~shared/types/sak'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
+import Spinner from '~shared/Spinner'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -88,6 +89,10 @@ export function KlageVurderingRedigering() {
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)
   const dispatch = useAppDispatch()
 
+  if (!klage) {
+    return <Spinner visible label="Henter klage" />
+  }
+
   const {
     control,
     handleSubmit,
@@ -109,13 +114,13 @@ export function KlageVurderingRedigering() {
     }
     if (!isDirty) {
       // Skjema er fylt ut men med samme innhold som starten => skip lagring og gå videre
-      navigate(nesteSteg(klage, 'vurdering'))
+      navigate(nesteSteg(skjema.utfall, klage.id))
     }
 
     const utfall = mapFraFormdataTilKlageUtfall(skjema)
     lagreUtfall({ klageId: klage.id, utfall }, (oppdatertKlage) => {
       dispatch(addKlage(oppdatertKlage))
-      navigate(nesteSteg(klage, 'vurdering'))
+      navigate(nesteSteg(valgtUtfall, klage.id))
     })
   }
 
@@ -166,16 +171,29 @@ export function KlageVurderingRedigering() {
         })}
 
         <FlexRow justify="center">
-          <Button type="button" variant="secondary" onClick={() => navigate(`/klage/${klage?.id}/formkrav`)}>
+          <Button type="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
             Gå tilbake
           </Button>
           <Button loading={isPending(lagreUtfallStatus)} type="submit" variant="primary">
-            {kanSeBrev(klage) ? 'Gå til brev' : 'Gå til oppsummering'}
+            {kanSeBrev(valgtUtfall) ? 'Gå til brev' : 'Gå til oppsummering'}
           </Button>
         </FlexRow>
       </form>
     </Content>
   )
+}
+
+function kanSeBrev(valgtUtfall: Utfall | null) {
+  switch (valgtUtfall) {
+    case 'DELVIS_OMGJOERING':
+    case 'STADFESTE_VEDTAK':
+      return true
+  }
+  return false
+}
+
+function nesteSteg(valgtUtfall: Utfall | null, klageId: string) {
+  return kanSeBrev(valgtUtfall) ? `/klage/${klageId}/brev` : `/klage/${klageId}/oppsummering`
 }
 
 function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) {

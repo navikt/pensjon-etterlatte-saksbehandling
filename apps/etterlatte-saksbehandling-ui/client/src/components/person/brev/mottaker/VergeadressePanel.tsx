@@ -18,31 +18,32 @@ export const VergeadressePanel = ({ vergeadresseResult }: Props) =>
     if (!vergeadresse) {
       return null
     }
-      return (
-        <InfoWrapper>
-          <Info
-            wide
-            label="Verges adresse"
-            tekst={
-              <>
-                {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && `Fødselsnummer/orgnummer: Ikke registrert.`}
-                {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && <br />}
-                {vergeadresse.foedselsnummer && `Fødselsnummer: ${formaterFnr(vergeadresse.foedselsnummer.value)}`}
-                {vergeadresse.foedselsnummer && <br />}
-                {vergeadresse.navn}
-                {vergeadresse.navn && <br />}
-                {vergeadresse.adresse.adresselinje1}
-                {vergeadresse.adresse.adresselinje1 && <br />}
-                {vergeadresse.adresse.adresselinje2}
-                {vergeadresse.adresse.adresselinje2 && <br />}
-                {vergeadresse.adresse.adresselinje3}
-                {vergeadresse.adresse.adresselinje3 && <br />}
-                {vergeadresse.adresse.postnummer} {vergeadresse.adresse.poststed} {vergeadresse.adresse.land} (
-                {vergeadresse.adresse.landkode})
-              </>
-            }
-          />
-          <br />
-        </InfoWrapper>
-      )
+
+    return (
+      <InfoWrapper>
+        <Info
+          wide
+          label="Verges adresse"
+          tekst={
+            <>
+              {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && `Fødselsnummer/orgnummer: Ikke registrert.`}
+              {!vergeadresse.foedselsnummer && !vergeadresse.orgnummer && <br />}
+              {vergeadresse.foedselsnummer && `Fødselsnummer: ${formaterFnr(vergeadresse.foedselsnummer.value)}`}
+              {vergeadresse.foedselsnummer && <br />}
+              {vergeadresse.navn}
+              {vergeadresse.navn && <br />}
+              {vergeadresse.adresse.adresselinje1}
+              {vergeadresse.adresse.adresselinje1 && <br />}
+              {vergeadresse.adresse.adresselinje2}
+              {vergeadresse.adresse.adresselinje2 && <br />}
+              {vergeadresse.adresse.adresselinje3}
+              {vergeadresse.adresse.adresselinje3 && <br />}
+              {vergeadresse.adresse.postnummer} {vergeadresse.adresse.poststed} {vergeadresse.adresse.land} (
+              {vergeadresse.adresse.landkode})
+            </>
+          }
+        />
+        <br />
+      </InfoWrapper>
+    )
   })

@@ -1,6 +1,6 @@
 import { Content, ContentHeader } from '~shared/styled'
-import { useEffect, useState } from 'react'
-import { Alert, Heading } from '@navikt/ds-react'
+import React, { useEffect, useState } from 'react'
+import { Alert, Button, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
@@ -22,6 +22,9 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useSjekkliste } from '~components/behandling/sjekkliste/useSjekkliste'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
+import { handlinger } from '~components/behandling/handlinger/typer'
+import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
+import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 
 export const FEATURE_TOGGLE_LAG_VARSELBREV = 'lag-varselbrev'
 
@@ -34,11 +37,16 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const redigerbar = behandlingErRedigerbar(props.behandling.status) && innloggetSaksbehandler.skriveTilgang
 
   const [varselbrev, setVarselbrev] = useState<IBrev>()
+  const { next } = useBehandlingRoutes()
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVarselbrev] = useApiCall(opprettVedtaksbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
   useSjekkliste()
+
+  const onSubmit = () => {
+    next()
+  }
 
   // Opppdaterer behandling for å sikre at siste hendelser er på plass
   useEffect(() => {
@@ -115,7 +123,19 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
 
       <SjekklisteValideringErrorSummary />
 
-      <BehandlingHandlingKnapper>{redigerbar}</BehandlingHandlingKnapper>
+      {redigerbar ? (
+        <BehandlingHandlingKnapper>
+          <Button
+            variant="primary"
+            onClick={onSubmit}
+            loading={isPending(hentBrevStatus) || isPending(opprettBrevStatus)}
+          >
+            {handlinger.NESTE.navn}
+          </Button>
+        </BehandlingHandlingKnapper>
+      ) : (
+        <NesteOgTilbake />
+      )}
     </Content>
   )
 }

@@ -29,7 +29,7 @@ export const OppgaverTable = ({
 }: Props): ReactNode => {
   const [sort, setSort] = useState<SortState>()
 
-  const handleSort = (sortKey: string) => {
+  const handleSort = (sortKey: SortKey) => {
     setSort(
       sort && sortKey === sort.orderBy && sort.direction === 'descending'
         ? undefined
@@ -52,7 +52,7 @@ export const OppgaverTable = ({
   }, [sort])
 
   return (
-    <Table sort={sort} onSortChange={(sortKey) => handleSort(sortKey!)}>
+    <Table sort={sort} onSortChange={(sortKey) => handleSort(sortKey as SortKey)}>
       <OppgaverTableHeader />
       <Table.Body>
         {oppgaver &&

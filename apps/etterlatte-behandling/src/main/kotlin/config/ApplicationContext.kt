@@ -91,6 +91,7 @@ import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
@@ -235,20 +236,25 @@ internal class ApplicationContext(
     @OptIn(DelicateCoroutinesApi::class)
     val oppgaveService =
         OppgaveService(oppgaveDaoEndringer, sakDao).also {
-            GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
-                val sbidenter = it.hentAllesaksbehandlerIdenter()
-                val mappedMedNavn =
-                    sbidenter.map {
-                        it to navAnsattKlient.hentSaksbehanderNavn(it)
+            if (leaderElectionKlient.isLeader()) {
+                GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
+                    val logger = LoggerFactory.getLogger("saksbehandlernavnjob")
+                    logger.info("Starter job for å legge inn saksbehandlere med navn")
+                    val sbidenter = it.hentAllesaksbehandlerIdenter()
+                    logger.info("Antall identer ${sbidenter.size}")
+                    val mappedMedNavn =
+                        sbidenter.map {
+                            it to navAnsattKlient.hentSaksbehanderNavn(it)
+                        }
+                    mappedMedNavn.forEach {
+                        SaksbehandlerInfo(it.first, it.first)
+                        if (it.second == null) {
+                            saksbehandlerInfoDao.upsertSaksbehandler(SaksbehandlerInfo(it.first, it.first))
+                        } else {
+                            saksbehandlerInfoDao.upsertSaksbehandler(it.second!!)
+                        }
                     }
-
-                mappedMedNavn.forEach {
-                    SaksbehandlerInfo(it.first, it.first)
-                    if (it.second == null) {
-                        saksbehandlerInfoDao.upsertSaksbehandler(SaksbehandlerInfo(it.first, it.first))
-                    } else {
-                        saksbehandlerInfoDao.upsertSaksbehandler(it.second!!)
-                    }
+                    logger.info("Ferdig")
                 }
             }
         }

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.migrering.verifisering
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -37,14 +38,14 @@ internal class Verifiserer(
             feilSomMedfoererManuell.add(PDLException(feilen).also { it.addSuppressed(feilen) })
         }
         patchedRequest.onSuccess {
-            if (request.enhet.nr == "2103") {
+            if (request.enhet.nr == Enheter.STRENGT_FORTROLIG.enhetNr) {
                 feilSomMedfoererManuell.add(StrengtFortroligPesys) // TODO Strengt fortrolig
             }
-            val finnesfinnesIPdlFeil = sjekkAtPersonerFinsIPDL(it)
-            if (finnesfinnesIPdlFeil.any { finnes -> finnes is SoekerErDoed }) {
-                feilSomMedfoererMistetRett.addAll(finnesfinnesIPdlFeil)
+            val finnesIPdlFeil = sjekkAtPersonerFinsIPDL(it)
+            if (finnesIPdlFeil.any { finnes -> finnes is SoekerErDoed }) {
+                feilSomMedfoererMistetRett.addAll(finnesIPdlFeil)
             } else {
-                feilSomMedfoererManuell.addAll(finnesfinnesIPdlFeil)
+                feilSomMedfoererManuell.addAll(finnesIPdlFeil)
             }
             val soeker = personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()
 

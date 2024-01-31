@@ -14,7 +14,6 @@ import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
@@ -371,35 +370,37 @@ class GrunnlagsendringshendelseService(
         }
     }
 
-    private fun oppdaterHendelseSjekket(
+    internal fun oppdaterHendelseSjekket(
         hendelse: Grunnlagsendringshendelse,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ) {
-        sisteIkkeAvbrutteBehandlingUtenManueltOpphoer(hendelse.sakId, samsvarMellomKildeOgGrunnlag, hendelse.id)
-            ?: return
-        logger.info(
-            "Grunnlagsendringshendelse for ${hendelse.type} med id ${hendelse.id} er naa sjekket av jobb " +
-                "naa sjekket av jobb, og informasjonen i pdl og grunnlag samsvarer ikke. " +
-                "Hendelsen forkastes derfor ikke.",
-        )
-        grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
-            hendelseId = hendelse.id,
-            foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
-            etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-            samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
-        )
-        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            referanse = hendelse.id.toString(),
-            sakId = hendelse.sakId,
-            oppgaveKilde = OppgaveKilde.HENDELSE,
-            oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-            merknad = hendelse.beskrivelse(),
-        ).also {
-            logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
+        val bleIkkeForkastet =
+            forkastHendelseHvisKunAvbrytteBehandlingerEllerEtManueltOpphoer(hendelse.sakId, samsvarMellomKildeOgGrunnlag, hendelse.id)
+        if (bleIkkeForkastet) {
+            logger.info(
+                "Grunnlagsendringshendelse for ${hendelse.type} med id ${hendelse.id} er naa sjekket " +
+                    "og informasjonen i pdl og grunnlag samsvarer ikke. " +
+                    "Hendelsen vises derfor til saksbehandler.",
+            )
+            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
+                hendelseId = hendelse.id,
+                foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+                etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
+            )
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = hendelse.id.toString(),
+                sakId = hendelse.sakId,
+                oppgaveKilde = OppgaveKilde.HENDELSE,
+                oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                merknad = hendelse.beskrivelse(),
+            ).also {
+                logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
+            }
         }
     }
 
-    private fun forkastHendelse(
+    internal fun forkastHendelse(
         hendelseId: UUID,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ) {
@@ -412,31 +413,28 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    private fun sisteIkkeAvbrutteBehandlingUtenManueltOpphoer(
+    private fun List<Behandling>.sisteGyldigeBehandling() =
+        this.sortedByDescending { it.behandlingOpprettet }
+            .firstOrNull { it.status in BehandlingStatus.ikkeAvbrutt() }
+
+    private fun forkastHendelseHvisKunAvbrytteBehandlingerEllerEtManueltOpphoer(
         sakId: Long,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
         hendelseId: UUID,
-    ): Behandling? {
+    ): Boolean {
         val behandlingerISak = behandlingService.hentBehandlingerForSak(sakId)
-        // Har vi en eksisterende behandling som ikke er avbrutt?
-        val sisteBehandling =
-            behandlingerISak
-                .sisteIkkeAvbrutteBehandling()
-                ?: run {
-                    logger.info(
-                        "Forkaster hendelse med id=$hendelseId fordi vi " +
-                            "ikke har noen behandlinger som ikke er avbrutt",
-                    )
-                    forkastHendelse(hendelseId, samsvarMellomKildeOgGrunnlag)
-                    return null
-                }
-        val harAlleredeEtManueltOpphoer = behandlingerISak.any { it.type == BehandlingType.MANUELT_OPPHOER }
-        return if (harAlleredeEtManueltOpphoer) {
-            logger.info("Forkaster hendelse med id=$hendelseId fordi vi har et manuelt opphør i saken")
+        val sisteGyldigeBehandling = behandlingerISak.sisteGyldigeBehandling()
+
+        val kunAvbrutteBehandlinger = behandlingerISak.all { it.status == BehandlingStatus.AVBRUTT }
+        if (kunAvbrutteBehandlinger) {
+            logger.info(
+                "Forkaster hendelse med id=$hendelseId fordi vi " +
+                    "ikke har noen behandlinger som ikke er avbrutt",
+            )
             forkastHendelse(hendelseId, samsvarMellomKildeOgGrunnlag)
-            null
+            return false
         } else {
-            sisteBehandling
+            return true
         }
     }
 
@@ -454,13 +452,9 @@ class GrunnlagsendringshendelseService(
                 (fnr == null) || it.gjelderPerson == fnr && it.type == hendelsesType
             }
         return if (harHendelse) {
-            !samsvarMellomKildeOgGrunnlag.samsvar
+            samsvarMellomKildeOgGrunnlag.samsvar
         } else {
             false
         }
     }
-
-    private fun List<Behandling>.sisteIkkeAvbrutteBehandling() =
-        this.sortedByDescending { it.behandlingOpprettet }
-            .firstOrNull { it.status in BehandlingStatus.ikkeAvbrutt() }
 }

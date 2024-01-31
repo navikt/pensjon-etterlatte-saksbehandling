@@ -78,8 +78,6 @@ class OppgaveDaoMedEndringssporingImpl(
         }
     }
 
-    override fun hentAlleIdenter(): List<String> = oppgaveDao.hentAlleIdenter()
-
     private fun ResultSet.asOppgaveEndring(): OppgaveEndring {
         return OppgaveEndring(
             id = getObject("id") as UUID,

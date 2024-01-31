@@ -11,8 +11,13 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.Route
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingVedtakRoute
@@ -21,6 +26,7 @@ import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
 import no.nav.etterlatte.behandling.klage.klageRoutes
+import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
@@ -47,6 +53,7 @@ import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
 val sikkerLogg: Logger = sikkerlogger()
@@ -74,8 +81,34 @@ private class Server(private val context: ApplicationContext) {
     fun run() =
         with(context) {
             dataSource.migrate()
+            lagSaksbendlereMedNavn(context)
             setReady().also { engine.start(true) }
         }
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+private fun lagSaksbendlereMedNavn(context: ApplicationContext) {
+    if (context.leaderElectionKlient.isLeader()) {
+        GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
+            val logger = LoggerFactory.getLogger("saksbehandlernavnjob")
+            logger.info("Starter job for å legge inn saksbehandlere med navn")
+            val sbidenter = context.saksbehandlerInfoDao.hentalleSaksbehandlere()
+            logger.info("Antall identer ${sbidenter.size}")
+            val mappedMedNavn =
+                sbidenter.map {
+                    it to runBlocking { context.navAnsattKlient.hentSaksbehanderNavn(it) }
+                }
+            mappedMedNavn.forEach {
+                SaksbehandlerInfo(it.first, it.first)
+                if (it.second == null) {
+                    context.saksbehandlerInfoDao.upsertSaksbehandler(SaksbehandlerInfo(it.first, it.first))
+                } else {
+                    context.saksbehandlerInfoDao.upsertSaksbehandler(it.second!!)
+                }
+            }
+            logger.info("Ferdig")
+        }
+    }
 }
 
 internal fun Application.module(context: ApplicationContext) {

@@ -4,10 +4,6 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.HttpClient
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerDao
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -41,7 +37,6 @@ import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.Norg2KlientImpl
-import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.TilbakekrevingKlientImpl
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlientImpl
@@ -91,7 +86,6 @@ import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
-import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
@@ -233,31 +227,8 @@ internal class ApplicationContext(
     val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue("ETTERLATTE_MIGRERING_URL"))
 
     // Service
-    @OptIn(DelicateCoroutinesApi::class)
     val oppgaveService =
-        OppgaveService(oppgaveDaoEndringer, sakDao).also {
-            if (leaderElectionKlient.isLeader()) {
-                GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
-                    val logger = LoggerFactory.getLogger("saksbehandlernavnjob")
-                    logger.info("Starter job for å legge inn saksbehandlere med navn")
-                    val sbidenter = it.hentAllesaksbehandlerIdenter()
-                    logger.info("Antall identer ${sbidenter.size}")
-                    val mappedMedNavn =
-                        sbidenter.map {
-                            it to navAnsattKlient.hentSaksbehanderNavn(it)
-                        }
-                    mappedMedNavn.forEach {
-                        SaksbehandlerInfo(it.first, it.first)
-                        if (it.second == null) {
-                            saksbehandlerInfoDao.upsertSaksbehandler(SaksbehandlerInfo(it.first, it.first))
-                        } else {
-                            saksbehandlerInfoDao.upsertSaksbehandler(it.second!!)
-                        }
-                    }
-                    logger.info("Ferdig")
-                }
-            }
-        }
+        OppgaveService(oppgaveDaoEndringer, sakDao)
 
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient)
     val grunnlagsService = GrunnlagService(grunnlagKlient)

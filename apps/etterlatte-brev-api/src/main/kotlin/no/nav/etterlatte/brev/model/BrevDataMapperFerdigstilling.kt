@@ -42,10 +42,9 @@ class BrevDataMapperFerdigstilling(
         automatiskMigreringRequest: MigreringBrevRequest?,
         tittel: String? = null,
     ): BrevData {
-        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
-
         if (generellBrevData.erMigrering()) {
             return coroutineScope {
+                val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                 val utbetalingsinfo = async { fetcher.hentUtbetaling() }
                 val trygdetid = async { fetcher.hentTrygdetid() }
                 val grunnbeloep = async { fetcher.hentGrunnbeloep() }
@@ -71,6 +70,7 @@ class BrevDataMapperFerdigstilling(
 
             BARNEPENSJON_REVURDERING -> {
                 coroutineScope {
+                    val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                     val utbetalingsinfo = async { fetcher.hentUtbetaling() }
                     val forrigeUtbetalingsinfo = async { fetcher.hentForrigeUtbetaling() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
@@ -93,6 +93,7 @@ class BrevDataMapperFerdigstilling(
 
             BARNEPENSJON_INNVILGELSE -> {
                 coroutineScope {
+                    val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                     val utbetalingsinfo = async { fetcher.hentUtbetaling() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
                     val grunnbeloep = async { fetcher.hentGrunnbeloep() }
@@ -133,6 +134,7 @@ class BrevDataMapperFerdigstilling(
 
             OMSTILLINGSSTOENAD_INNVILGELSE -> {
                 coroutineScope {
+                    val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                     val utbetalingsinfo = async { fetcher.hentUtbetaling() }
                     val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
                     val trygdetid = async { fetcher.hentTrygdetid() }
@@ -153,6 +155,7 @@ class BrevDataMapperFerdigstilling(
 
             OMSTILLINGSSTOENAD_REVURDERING -> {
                 coroutineScope {
+                    val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
                     val utbetalingsinfo = async { fetcher.hentUtbetaling() }
                     val forrigeUtbetalingsinfo = async { fetcher.hentForrigeUtbetaling() }
                     val avkortingsinfo = async { fetcher.hentAvkortinginfo() }

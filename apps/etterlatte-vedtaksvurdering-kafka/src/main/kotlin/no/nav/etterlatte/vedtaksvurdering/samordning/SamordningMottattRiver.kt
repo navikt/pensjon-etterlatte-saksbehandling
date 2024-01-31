@@ -28,8 +28,11 @@ internal class SamordningMottattRiver(
         logger.info("Behandle mottatt samordning for vedtak [vedtakId=$vedtakId]")
 
         try {
-            val samordnetVedtak = vedtaksvurderingService.samordnetVedtak(vedtakId)
-            logger.info("Behandlet samordning ferdig for vedtak [behandlingId=${samordnetVedtak.behandlingId}]")
+            vedtaksvurderingService.samordnetVedtak(vedtakId)?.let {
+                logger.info("Behandlet samordning ferdig for vedtak [behandlingId=${it.behandlingId}]")
+            } ?: {
+                logger.info("Samordning skippet for vedtak [vedtakId=$vedtakId]")
+            }
         } catch (e: Exception) {
             logger.error("Feil ved oppdatering av vedtak til SAMORDNET [vedtakId=$vedtakId]")
             throw e

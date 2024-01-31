@@ -17,7 +17,7 @@ import no.nav.etterlatte.libs.common.person.ForelderVerge
 import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Kroner
 
-data class OmregnetBPNyttRegelverk(
+data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
     val utbetaltFoerReform: Kroner,
     val utbetaltEtterReform: Kroner,
     val erForeldreloes: Boolean,
@@ -28,9 +28,9 @@ data class OmregnetBPNyttRegelverk(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
             migreringRequest: MigreringBrevRequest?,
-        ): OmregnetBPNyttRegelverk {
+        ): BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall {
             val defaultBrevdataOmregning =
-                OmregnetBPNyttRegelverk(
+                BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
                     utbetaltFoerReform = Kroner(0),
                     utbetaltEtterReform = Kroner(utbetalingsinfo.beloep.value),
                     erBosattUtlandet = false,
@@ -67,7 +67,7 @@ data class OmregnetBPNyttRegelverk(
     }
 }
 
-data class OmregnetBPNyttRegelverkFerdig(
+data class BarnepensjonOmregnetNyttRegelverk(
     val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
@@ -84,10 +84,10 @@ data class OmregnetBPNyttRegelverkFerdig(
             etterbetaling: EtterbetalingDTO?,
             migreringRequest: MigreringBrevRequest?,
             utlandstilknytning: UtlandstilknytningType?,
-        ): OmregnetBPNyttRegelverkFerdig {
+        ): BarnepensjonOmregnetNyttRegelverk {
             val beregningsperioder = barnepensjonBeregningsperiodes(utbetalingsinfo)
 
-            return OmregnetBPNyttRegelverkFerdig(
+            return BarnepensjonOmregnetNyttRegelverk(
                 innhold = innhold.innhold(),
                 erUnder18Aar = erUnder18Aar,
                 beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),

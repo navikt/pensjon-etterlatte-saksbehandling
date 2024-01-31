@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import java.time.LocalDate
 
-data class OpphoerBrevDataOMS(
+data class OmstillingsstoenadOpphoer(
     val innhold: List<Slate.Element>,
     val bosattUtland: Boolean,
 ) : BrevData() {
@@ -14,15 +14,15 @@ data class OpphoerBrevDataOMS(
         fun fra(
             utlandstilknytning: Utlandstilknytning?,
             innhold: List<Slate.Element>,
-        ): OpphoerBrevDataOMS =
-            OpphoerBrevDataOMS(
+        ): OmstillingsstoenadOpphoer =
+            OmstillingsstoenadOpphoer(
                 bosattUtland = utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
                 innhold = innhold,
             )
     }
 }
 
-data class OpphoerBrevDataUtfallOMS(
+data class OmstillingsstoenadOpphoerRedigerbartUtfall(
     val innhold: List<Slate.Element>,
     val virkningsdato: LocalDate,
 ) : BrevData() {
@@ -30,8 +30,8 @@ data class OpphoerBrevDataUtfallOMS(
         fun fra(
             virkningsdato: LocalDate,
             innhold: List<Slate.Element>,
-        ): OpphoerBrevDataUtfallOMS =
-            OpphoerBrevDataUtfallOMS(
+        ): OmstillingsstoenadOpphoerRedigerbartUtfall =
+            OmstillingsstoenadOpphoerRedigerbartUtfall(
                 virkningsdato = virkningsdato,
                 innhold = innhold,
             )

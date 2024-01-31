@@ -5,7 +5,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 
-data class AvslagBrevDataOMS(
+data class OmstillingsstoenadAvslag(
     val innhold: List<Slate.Element>,
     val avdoedNavn: String,
     val bosattUtland: Boolean,
@@ -15,8 +15,8 @@ data class AvslagBrevDataOMS(
             avdoedNavn: String,
             utlandstilknytning: Utlandstilknytning?,
             innhold: List<Slate.Element>,
-        ): AvslagBrevDataOMS =
-            AvslagBrevDataOMS(
+        ): OmstillingsstoenadAvslag =
+            OmstillingsstoenadAvslag(
                 avdoedNavn = avdoedNavn,
                 bosattUtland = utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
                 innhold = innhold,

@@ -19,7 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
-data class BarnepensjonInnvilgelseDTO(
+data class BarnepensjonInnvilgelse(
     val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
@@ -38,11 +38,11 @@ data class BarnepensjonInnvilgelseDTO(
             utlandstilknytning: UtlandstilknytningType?,
             innhold: InnholdMedVedlegg,
             brukerUnder18Aar: Boolean,
-        ): BarnepensjonInnvilgelseDTO {
+        ): BarnepensjonInnvilgelse {
             val beregningsperioder =
                 barnepensjonBeregningsperiodes(utbetalingsinfo)
 
-            return BarnepensjonInnvilgelseDTO(
+            return BarnepensjonInnvilgelse(
                 innhold = innhold.innhold(),
                 beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
                 etterbetaling =
@@ -59,7 +59,7 @@ data class BarnepensjonInnvilgelseDTO(
     }
 }
 
-data class BarnepensjonInnvilgelseRedigerbartUtfallDTO(
+data class BarnepensjonInnvilgelseRedigerbartUtfall(
     val virkningsdato: LocalDate,
     val avdoed: Avdoed,
     val sisteBeregningsperiodeDatoFom: LocalDate,
@@ -72,7 +72,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfallDTO(
             generellBrevData: GenerellBrevData,
             utbetalingsinfo: Utbetalingsinfo,
             etterbetaling: EtterbetalingDTO?,
-        ): BarnepensjonInnvilgelseRedigerbartUtfallDTO {
+        ): BarnepensjonInnvilgelseRedigerbartUtfall {
             val beregningsperioder =
                 utbetalingsinfo.beregningsperioder.map {
                     BarnepensjonBeregningsperiode(
@@ -84,7 +84,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfallDTO(
                     )
                 }
 
-            return BarnepensjonInnvilgelseRedigerbartUtfallDTO(
+            return BarnepensjonInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
                 avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
                 sisteBeregningsperiodeDatoFom = beregningsperioder.maxBy { it.datoFOM }.datoFOM,

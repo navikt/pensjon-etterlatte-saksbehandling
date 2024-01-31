@@ -25,7 +25,7 @@ internal class BarnepensjonInnvilgetDTOTest {
     @Test
     fun `setter skille for etterbetaling`() {
         val barnepensjonInnvilgelse =
-            BarnepensjonInnvilgelseDTO.fra(
+            BarnepensjonInnvilgelse.fra(
                 utbetalingsinfo =
                     Utbetalingsinfo(
                         antallBarn = 1,

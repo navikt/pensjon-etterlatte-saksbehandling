@@ -17,15 +17,15 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_RE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.model.bp.AvslagBrevData
-import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseDTO
-import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingDTO
-import no.nav.etterlatte.brev.model.bp.OmregnetBPNyttRegelverkFerdig
-import no.nav.etterlatte.brev.model.bp.OpphoerBrevData
-import no.nav.etterlatte.brev.model.oms.AvslagBrevDataOMS
-import no.nav.etterlatte.brev.model.oms.InntektsendringRevurderingOMS
-import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseDTO
-import no.nav.etterlatte.brev.model.oms.OpphoerBrevDataOMS
+import no.nav.etterlatte.brev.model.bp.BarnepensjonAvslag
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelse
+import no.nav.etterlatte.brev.model.bp.BarnepensjonOmregnetNyttRegelverk
+import no.nav.etterlatte.brev.model.bp.BarnepensjonOpphoer
+import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurdering
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslag
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelse
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoer
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurdering
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
@@ -56,7 +56,7 @@ class BrevDataMapperFerdigstilling(
                     requireNotNull(generellBrevData.personerISak.soeker.under18) {
                         "Klarte ikke å bestemme om alder på søker er under eller over 18 år. Kan dermed ikke velge riktig brev"
                     }
-                OmregnetBPNyttRegelverkFerdig.fra(
+                BarnepensjonOmregnetNyttRegelverk.fra(
                     innhold = innholdMedVedlegg,
                     erUnder18Aar = erUnder18Aar,
                     utbetalingsinfo = utbetaling.await(),
@@ -93,7 +93,7 @@ class BrevDataMapperFerdigstilling(
                         requireNotNull(brevutfall.await()) {
                             "${kode.ferdigstilling} Må ha brevutfall for å avgjøre over eller under 18 år"
                         }
-                    BarnepensjonRevurderingDTO.fra(
+                    BarnepensjonRevurdering.fra(
                         innholdMedVedlegg,
                         utbetaling.await(),
                         forrigeUtbetaling.await(),
@@ -125,7 +125,7 @@ class BrevDataMapperFerdigstilling(
                         requireNotNull(brevutfall.await()) {
                             "${kode.ferdigstilling} Må ha brevutfall for å avgjøre over eller under 18 år"
                         }
-                    BarnepensjonInnvilgelseDTO.fra(
+                    BarnepensjonInnvilgelse.fra(
                         utbetaling.await(),
                         etterbetaling.await(),
                         trygdetidHentet,
@@ -138,7 +138,7 @@ class BrevDataMapperFerdigstilling(
             }
 
             BARNEPENSJON_AVSLAG -> {
-                AvslagBrevData.fra(
+                BarnepensjonAvslag.fra(
                     innhold = innholdMedVedlegg,
                     // TODO må kunne sette brevutfall ved avslag. Det er pr nå ikke mulig da dette ligger i beregningssteget.
                     brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
@@ -147,7 +147,7 @@ class BrevDataMapperFerdigstilling(
             }
 
             BARNEPENSJON_OPPHOER -> {
-                OpphoerBrevData.fra(
+                BarnepensjonOpphoer.fra(
                     innhold = innholdMedVedlegg,
                     // TODO må kunne sette brevutfall ved opphør. Det er pr nå ikke mulig da dette ligger i beregningssteget.
                     brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
@@ -170,7 +170,7 @@ class BrevDataMapperFerdigstilling(
                         requireNotNull(brevutfall.await()) {
                             "${kode.ferdigstilling} Må ha brevutfall for å avgjøre lav eller ingen inntekt"
                         }
-                    OmstillingsstoenadInnvilgelseDTO.fra(
+                    OmstillingsstoenadInnvilgelse.fra(
                         generellBrevData,
                         utbetaling.await(),
                         avkortingsinfoHentet,
@@ -193,7 +193,7 @@ class BrevDataMapperFerdigstilling(
                     val avkortingsinfoHentet =
                         requireNotNull(avkortingsinfo.await()) { "${kode.ferdigstilling} Må ha avkortingsinfo" }
                     val trygdetidHentet = requireNotNull(trygdetid.await()) { "${kode.ferdigstilling} Må ha trygdetid" }
-                    InntektsendringRevurderingOMS.fra(
+                    OmstillingsstoenadRevurdering.fra(
                         avkortingsinfoHentet,
                         utbetaling.await(),
                         forrigeUtbetaling.await(),
@@ -205,7 +205,7 @@ class BrevDataMapperFerdigstilling(
             }
 
             OMSTILLINGSSTOENAD_AVSLAG -> {
-                AvslagBrevDataOMS.fra(
+                OmstillingsstoenadAvslag.fra(
                     generellBrevData.personerISak.avdoede.first().navn,
                     generellBrevData.utlandstilknytning,
                     innholdMedVedlegg.innhold(),
@@ -213,7 +213,7 @@ class BrevDataMapperFerdigstilling(
             }
 
             OMSTILLINGSSTOENAD_OPPHOER -> {
-                OpphoerBrevDataOMS.fra(
+                OmstillingsstoenadOpphoer.fra(
                     generellBrevData.utlandstilknytning,
                     innholdMedVedlegg.innhold(),
                 )

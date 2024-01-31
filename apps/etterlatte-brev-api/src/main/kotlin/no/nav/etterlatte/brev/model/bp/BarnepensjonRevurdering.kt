@@ -13,7 +13,7 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 
-data class BarnepensjonRevurderingDTO(
+data class BarnepensjonRevurdering(
     val innhold: List<Slate.Element>,
     val erEndret: Boolean,
     val beregning: BarnepensjonBeregning,
@@ -36,7 +36,7 @@ data class BarnepensjonRevurderingDTO(
         ): BrevData {
             val beregningsperioder = barnepensjonBeregningsperiodes(utbetalingsinfo)
 
-            return BarnepensjonRevurderingDTO(
+            return BarnepensjonRevurdering(
                 innhold = innhold.innhold(),
                 erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
                 beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
@@ -48,9 +48,9 @@ data class BarnepensjonRevurderingDTO(
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
                 kunNyttRegelverk =
                     utbetalingsinfo.beregningsperioder.all {
-                        it.datoFOM.isAfter(BarnepensjonInnvilgelseDTO.tidspunktNyttRegelverk) ||
+                        it.datoFOM.isAfter(BarnepensjonInnvilgelse.tidspunktNyttRegelverk) ||
                             it.datoFOM.isEqual(
-                                BarnepensjonInnvilgelseDTO.tidspunktNyttRegelverk,
+                                BarnepensjonInnvilgelse.tidspunktNyttRegelverk,
                             )
                     },
             )
@@ -58,12 +58,12 @@ data class BarnepensjonRevurderingDTO(
     }
 }
 
-data class BarnepensjonRevurderingRedigerbartUtfallDTO(
+data class BarnepensjonRevurderingRedigerbartUtfall(
     val erEtterbetaling: Boolean,
 ) : EndringBrevData() {
     companion object {
         fun fra(etterbetaling: EtterbetalingDTO?): BrevData {
-            return BarnepensjonRevurderingRedigerbartUtfallDTO(
+            return BarnepensjonRevurderingRedigerbartUtfall(
                 erEtterbetaling = etterbetaling != null,
             )
         }

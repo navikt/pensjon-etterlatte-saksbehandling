@@ -1,8 +1,6 @@
 package no.nav.etterlatte.brev.model.oms
 
-import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevData
@@ -15,27 +13,22 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
-import no.nav.pensjon.brevbaker.api.model.Kroner
-import java.time.LocalDate
 
-data class OmstillingsstoenadInnvilgelseDTO(
+data class OmstillingsstoenadRevurdering(
     val innhold: List<Slate.Element>,
-    val avdoed: Avdoed,
     val beregning: OmstillingsstoenadBeregning,
-    val innvilgetMindreEnnFireMndEtterDoedsfall: Boolean,
-    val lavEllerIngenInntekt: Boolean,
     val etterbetaling: OmstillingsstoenadEtterbetaling?,
+    val erEndret: Boolean,
 ) : BrevData() {
     companion object {
         fun fra(
-            generellBrevData: GenerellBrevData,
-            utbetalingsinfo: Utbetalingsinfo,
             avkortingsinfo: Avkortingsinfo,
-            etterbetaling: EtterbetalingDTO?,
+            utbetalingsinfo: Utbetalingsinfo,
+            forrigeUtbetalingsinfo: Utbetalingsinfo?,
+            etterbetalingDTO: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             innholdMedVedlegg: InnholdMedVedlegg,
-            lavEllerIngenInntekt: Boolean,
-        ): OmstillingsstoenadInnvilgelseDTO {
+        ): OmstillingsstoenadRevurdering {
             val beregningsperioder =
                 avkortingsinfo.beregningsperioder.map {
                     OmstillingsstoenadBeregningsperiode(
@@ -48,11 +41,9 @@ data class OmstillingsstoenadInnvilgelseDTO(
                     )
                 }
 
-            val avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato }
-
-            return OmstillingsstoenadInnvilgelseDTO(
+            return OmstillingsstoenadRevurdering(
                 innhold = innholdMedVedlegg.innhold(),
-                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
+                erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
                 beregning =
                     OmstillingsstoenadBeregning(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
@@ -72,37 +63,14 @@ data class OmstillingsstoenadInnvilgelseDTO(
                                 beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
                             ),
                     ),
-                innvilgetMindreEnnFireMndEtterDoedsfall =
-                    avdoed.doedsdato
-                        .plusMonths(4)
-                        .isAfter(avkortingsinfo.virkningsdato),
-                lavEllerIngenInntekt = lavEllerIngenInntekt,
                 etterbetaling =
-                    etterbetaling
-                        ?.let { dto -> Etterbetaling.fraOmstillingsstoenadBeregningsperioder(dto, beregningsperioder) },
+                    etterbetalingDTO?.let {
+                        Etterbetaling.fraOmstillingsstoenadBeregningsperioder(
+                            etterbetalingDTO,
+                            beregningsperioder,
+                        )
+                    },
             )
         }
-    }
-}
-
-data class OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO(
-    val virkningsdato: LocalDate,
-    val avdoed: Avdoed,
-    val utbetalingsbeloep: Kroner,
-    val etterbetaling: Boolean,
-) : BrevData() {
-    companion object {
-        fun fra(
-            generellBrevData: GenerellBrevData,
-            utbetalingsinfo: Utbetalingsinfo,
-            avkortingsinfo: Avkortingsinfo,
-            etterbetaling: Boolean,
-        ): OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO =
-            OmstillingsstoenadInnvilgelseRedigerbartUtfallDTO(
-                virkningsdato = utbetalingsinfo.virkningsdato,
-                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
-                utbetalingsbeloep = avkortingsinfo.beregningsperioder.first().utbetaltBeloep,
-                etterbetaling = etterbetaling,
-            )
     }
 }

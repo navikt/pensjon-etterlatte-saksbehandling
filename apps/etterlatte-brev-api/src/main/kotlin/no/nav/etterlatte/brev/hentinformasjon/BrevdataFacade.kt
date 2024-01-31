@@ -24,6 +24,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
@@ -288,13 +289,35 @@ class BrevdataFacade(
 
 fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> {
     return when (beregningsperiode.beregningsMetode) {
-        BeregningsMetode.NASJONAL -> beregningsperiode.samletNorskTrygdetid!! to null
-        BeregningsMetode.PRORATA -> beregningsperiode.samletTeoretiskTrygdetid!! to beregningsperiode.broek!!
-        BeregningsMetode.BEST -> throw IllegalArgumentException(
-            "Kan ikke ha brukt beregningsmetode 'BEST' i en faktisk beregning, " +
-                "siden best velger mellom nasjonal eller prorata når det beregnes.",
-        )
-
+        BeregningsMetode.NASJONAL ->
+            Pair(
+                beregningsperiode.samletNorskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
+                null,
+            )
+        BeregningsMetode.PRORATA -> {
+            Pair(
+                beregningsperiode.samletTeoretiskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
+                beregningsperiode.broek ?: throw BeregningsperiodeBroekMangler(),
+            )
+        }
+        BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
         null -> beregningsperiode.trygdetid to null
     }
 }
+
+class UgyldigBeregningsMetode : UgyldigForespoerselException(
+    code = "UGYLDIG_BEREGNINGS_METODE",
+    detail =
+        "Kan ikke ha brukt beregningsmetode 'BEST' i en faktisk beregning, " +
+            "siden best velger mellom nasjonal eller prorata når det beregnes.",
+)
+
+class SamletTeoretiskTrygdetidMangler : UgyldigForespoerselException(
+    code = "SAMLET_TEORETISK_TRYGDETID_MANGLER",
+    detail = "Samlet teoretisk trygdetid mangler i beregningen",
+)
+
+class BeregningsperiodeBroekMangler : UgyldigForespoerselException(
+    code = "BEREGNINGSPERIODE_BROEK_MANGLER",
+    detail = "Beregningsperioden mangler brøk",
+)

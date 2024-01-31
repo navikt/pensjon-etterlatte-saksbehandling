@@ -47,8 +47,6 @@ class OppgaveService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    fun hentAllesaksbehandlerIdenter() = oppgaveDao.hentAlleIdenter()
-
     fun finnOppgaverForBruker(bruker: SaksbehandlerMedEnheterOgRoller): List<OppgaveIntern> {
         val rollerSomBrukerHar = finnAktuelleRoller(bruker.saksbehandlerMedRoller)
         val aktuelleOppgavetyperForRoller = aktuelleOppgavetyperForRolleTilSaksbehandler(rollerSomBrukerHar)

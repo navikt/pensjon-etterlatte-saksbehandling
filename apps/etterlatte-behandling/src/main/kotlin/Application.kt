@@ -92,12 +92,20 @@ private fun lagSaksbendlereMedNavn(context: ApplicationContext) {
         GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
             val logger = LoggerFactory.getLogger("saksbehandlernavnjob")
             logger.info("Starter job for å legge inn saksbehandlere med navn")
-            val sbidenter = context.saksbehandlerInfoDao.hentalleSaksbehandlere()
+            val sbidenter = context.saksbehandlerInfoDao.hentalleSaksbehandlere().mapNotNull { it }
             logger.info("Antall identer ${sbidenter.size}")
+
+            val filtrerteIdenter = sbidenter.filter { !context.saksbehandlerInfoDao.saksbehandlerFinnes(it) }
             val mappedMedNavn =
-                sbidenter.map {
-                    it to runBlocking { context.navAnsattKlient.hentSaksbehanderNavn(it) }
+                filtrerteIdenter.map {
+                    if (listOf("PESYS", "EY").contains(it)) {
+                        it to SaksbehandlerInfo(it, it)
+                    } else {
+                        it to runBlocking { context.navAnsattKlient.hentSaksbehanderNavn(it) }
+                    }
                 }
+            logger.info("mappedMedNavn antall: ${mappedMedNavn.size}")
+
             mappedMedNavn.forEach {
                 SaksbehandlerInfo(it.first, it.first)
                 if (it.second == null) {

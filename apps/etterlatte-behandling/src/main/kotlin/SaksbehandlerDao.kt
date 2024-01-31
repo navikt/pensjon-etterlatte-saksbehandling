@@ -1,11 +1,12 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
+import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.toList
 import javax.sql.DataSource
 
 class SaksbehandlerDao(private val dataSource: DataSource) {
-    fun hentalleSaksbehandlere(): List<String> {
+    fun hentalleSaksbehandlere(): List<String?> {
         dataSource.connection.use {
             val statement =
                 it.prepareStatement(
@@ -33,6 +34,26 @@ class SaksbehandlerDao(private val dataSource: DataSource) {
             statement.setString(1, saksbehandler.ident)
             statement.setString(2, saksbehandler.navn)
             statement.executeUpdate()
+        }
+    }
+
+    fun saksbehandlerFinnes(ident: String): Boolean {
+        dataSource.connection.use {
+            val statement =
+                it.prepareStatement(
+                    """
+                    SELECT EXISTS(SELECT 1 FROM saksbehandlerInfo where id = ?);
+                    """.trimIndent(),
+                )
+            statement.setString(1, ident)
+            return statement.executeQuery().single {
+                val trueOrFalsePostgresFormat = getString("exists")
+                if (trueOrFalsePostgresFormat == "t") {
+                    return@single true
+                } else {
+                    return@single false
+                }
+            }
         }
     }
 }

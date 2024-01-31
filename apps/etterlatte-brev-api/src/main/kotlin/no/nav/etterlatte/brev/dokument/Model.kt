@@ -124,31 +124,27 @@ data class AvsenderMottaker(
     val erLikBruker: Boolean?,
 )
 
+// https://confluence.adeo.no/display/BOA/Type%3A+Utsendingsinfo
 data class Utsendingsinfo(
-    val adresselinje1: String,
-    val adresselinje2: String,
-    val adresselinje3: String,
-    val postnummer: String,
-    val poststed: String,
-    val landkode: String,
-    val digitalpostkasseAdresse: String,
-    val fysiskpostSendt: FysiskpostSendt,
-    val digitalpostSendt: DigitalpostSendt,
-    val varselSendt: VarselSendt,
+    val fysiskpostSendt: FysiskpostSendt?,
+    val digitalpostSendt: DigitalpostSendt?,
+    val varselSendt: VarselSendt?,
 ) {
+    // Mappes hvis Journalpost.utsendingskanal er S (sentral utskrift)
     data class FysiskpostSendt(
-        val adressetekstKonvolutt: String,
+        val adressetekstKonvolutt: String?,
     )
 
+    // Mappes hvis Journalpost.utsendingskanal er SDP (sikker digital postkasse)
     data class DigitalpostSendt(
-        val adresse: String,
+        val adresse: String?,
     )
 
     data class VarselSendt(
-        val type: String,
-        val adresse: String,
-        val tittel: String,
-        val tekst: String,
-        val tidspunkt: String,
+        val type: String?,
+        val adresse: String?,
+        val tittel: String?,
+        val tekst: String?,
+        val tidspunkt: String?,
     )
 }

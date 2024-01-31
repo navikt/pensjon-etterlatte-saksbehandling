@@ -29,9 +29,9 @@ export interface NyKlageRequest extends NyKlageRequestUtfylling {
   innsender?: string
 }
 
-export interface AnnullerKlageRequest {
+export interface AvsluttKlageRequest {
   klageId: string
-  aarsakTilAnnullering: AarsakTilAnnullering
+  aarsakTilAvbrytelse: AarsakTilAvslutting
   kommentar: string
 }
 
@@ -68,15 +68,15 @@ export const teksterKlagestatus: Record<KlageStatus, string> = {
   FORMKRAV_IKKE_OPPFYLT: 'Formkrav vurdert ikke oppfylt',
   UTFALL_VURDERT: 'Utfall av klagen vurdert',
   FERDIGSTILT: 'Klagen ferdigstilt i Gjenny',
-  AVBRUTT: 'Klagen avbrutt',
+  AVBRUTT: 'Klagen avsluttet',
 }
 
 export const erKlageRedigerbar = (klage: Klage) => {
   const redigerbareStatuser = [
     KlageStatus.OPPRETTET,
     KlageStatus.FORMKRAV_IKKE_OPPFYLT,
+    KlageStatus.FORMKRAV_OPPFYLT,
     KlageStatus.UTFALL_VURDERT,
-    KlageStatus.FORMKRAV_IKKE_OPPFYLT,
   ]
   return redigerbareStatuser.includes(klage.status)
 }
@@ -161,14 +161,14 @@ export type KlageUtfallUtenBrev =
       innstilling: InnstillingTilKabalUtenBrev
     }
 
-export enum AarsakTilAnnullering {
+export enum AarsakTilAvslutting {
   BRUKER_HAR_TRUKKET_KLAGEN = 'BRUKER_HAR_TRUKKET_KLAGEN',
   FEILREGISTRERT = 'FEILREGISTRERT',
   ALLEREDE_LOEST = 'ALLEREDE_LOEST',
   ANNET = 'ANNET',
 }
 
-export const teksterAarsakTilAnnullering: Record<AarsakTilAnnullering, string> = {
+export const teksterAarsakTilAvslutting: Record<AarsakTilAvslutting, string> = {
   BRUKER_HAR_TRUKKET_KLAGEN: 'Klagen er blitt trukket av søker',
   FEILREGISTRERT: 'Opprettet ved en feil',
   ALLEREDE_LOEST: 'Saken er allerede blitt løst',

@@ -6,7 +6,7 @@ import { teksterKabalstatus, teksterKlagestatus } from '~shared/types/Klage'
 import { tagColors, TagList } from '~shared/Tags'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { Info, Tekst } from '~components/behandling/attestering/styled'
-import AnnullerKlage from '~components/klage/AnnullerKlage'
+import AvsluttKlage from '~components/klage/AvsluttKlage'
 
 export function KlageSidemeny() {
   const klage = useKlage()
@@ -56,7 +56,7 @@ export function KlageSidemeny() {
         </div>
       </SidebarPanel>
       <Dokumentoversikt fnr={klage.sak.ident} liten />
-      <AnnullerKlage />
+      <AvsluttKlage />
     </Sidebar>
   )
 }

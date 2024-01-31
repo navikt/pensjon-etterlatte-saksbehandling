@@ -8,15 +8,15 @@ import { FlexRow } from '~shared/styled'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { annullerKlage } from '~shared/api/klage'
+import { avsluttKlage } from '~shared/api/klage'
 import { useKlage, useKlageRedigerbar } from '~components/klage/useKlage'
 import { Controller, useForm } from 'react-hook-form'
-import { AarsakTilAnnullering, AnnullerKlageRequest, teksterAarsakTilAnnullering } from '~shared/types/Klage'
+import { AarsakTilAvslutting, AvsluttKlageRequest, teksterAarsakTilAvslutting } from '~shared/types/Klage'
 
-export default function AnnullerKlage() {
+export default function AvsluttKlage() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
-  const [annullerKlageStatus, annullerKlagen] = useApiCall(annullerKlage)
+  const [avsluttKlageStatus, avsluttKlagen] = useApiCall(avsluttKlage)
 
   const klage = useKlage()
   const klageRedigerbar = useKlageRedigerbar()
@@ -30,12 +30,12 @@ export default function AnnullerKlage() {
     handleSubmit,
     trigger,
     formState: { errors },
-  } = useForm<AnnullerKlageRequest>({
-    defaultValues: { klageId: klage.id, aarsakTilAnnullering: AarsakTilAnnullering.ANNET, kommentar: '' },
+  } = useForm<AvsluttKlageRequest>({
+    defaultValues: { klageId: klage.id, aarsakTilAvbrytelse: AarsakTilAvslutting.ANNET, kommentar: '' },
   })
 
-  const annuller = (request: AnnullerKlageRequest) => {
-    annullerKlagen(request, () => {
+  const avslutt = (request: AvsluttKlageRequest) => {
+    avsluttKlagen(request, () => {
       setIsOpen(false)
       navigate(`/person/${klage?.sak?.ident}`)
     })
@@ -48,17 +48,17 @@ export default function AnnullerKlage() {
           <div className="with-icon">
             <div>
               <Button variant="secondary" icon={<TrashIcon />}>
-                Annuller klage
+                Avslutt sak
               </Button>
             </div>
           </div>
         </ExpansionCard.Header>
 
         <ExpansionCard.Content>
-          <AnnullerForm id="annuller-klage-form" onSubmit={handleSubmit(annuller)}>
+          <AvsluttForm id="avslutt-klage-form" onSubmit={handleSubmit(avslutt)}>
             <FlexRow>
               <Controller
-                name="aarsakTilAnnullering"
+                name="aarsakTilAvbrytelse"
                 rules={{
                   required: { value: true, message: 'Du må velge en årsak for omgjøringen.' },
                   minLength: 1,
@@ -68,10 +68,10 @@ export default function AnnullerKlage() {
                   const { value, ...rest } = field
                   return (
                     <>
-                      <Select label="Årsak til annullering" value={value ?? ''} {...rest}>
-                        {Object.entries(AarsakTilAnnullering).map(([key, value]) => (
+                      <Select label="Årsak til avslutting" value={value ?? ''} {...rest}>
+                        {Object.entries(AarsakTilAvslutting).map(([key, value]) => (
                           <option key={key} value={key}>
-                            {teksterAarsakTilAnnullering[value]}
+                            {teksterAarsakTilAvslutting[value]}
                           </option>
                         ))}
                       </Select>
@@ -84,7 +84,7 @@ export default function AnnullerKlage() {
               name="kommentar"
               rules={{
                 validate: (value, formValues) => {
-                  return formValues.aarsakTilAnnullering == 'ANNET' && value.length == 0
+                  return formValues.aarsakTilAvbrytelse == 'ANNET' && value.length == 0
                     ? 'Du må skrive en kommentar'
                     : true
                 },
@@ -96,7 +96,7 @@ export default function AnnullerKlage() {
                   <>
                     <Textarea
                       label="Begrunnelse"
-                      description="Utdyp hvorfor klagebehandlingen annulleres"
+                      description="Utdyp hvorfor klagebehandlingen avsluttes"
                       value={value ?? ''}
                       {...rest}
                       size="medium"
@@ -113,10 +113,10 @@ export default function AnnullerKlage() {
                 variant="danger"
                 onClick={() => trigger().then((success) => success && setIsOpen(true))}
               >
-                Annuller klage
+                Avslutt sak
               </Button>
             </FlexRow>
-          </AnnullerForm>
+          </AvsluttForm>
         </ExpansionCard.Content>
       </ExpansionCardSpaced>
 
@@ -124,23 +124,23 @@ export default function AnnullerKlage() {
         <Modal.Header>
           <Heading level="1" spacing size="medium" id="modal-heading">
             <TrashIcon />
-            Annuller klage
+            Avslutt sak
           </Heading>
         </Modal.Header>
-        <Modal.Body>Er du sikker på at du vil annullere klagen? Klagen vil få status annullert.</Modal.Body>
+        <Modal.Body>Er du sikker på at du vil avslutte klagen? Klagen vil få status avsluttet.</Modal.Body>
 
         <Modal.Footer>
           <FlexRow justify="center">
-            <Button variant="tertiary" onClick={() => setIsOpen(false)} loading={isPending(annullerKlageStatus)}>
-              Avbryt annullering
+            <Button variant="tertiary" onClick={() => setIsOpen(false)} loading={isPending(avsluttKlageStatus)}>
+              Nei, fortsett behandlingen
             </Button>
-            <Button type="submit" form="annuller-klage-form" variant="danger" loading={isPending(annullerKlageStatus)}>
-              Annuller klage
+            <Button type="submit" form="avslutt-klage-form" variant="danger" loading={isPending(avsluttKlageStatus)}>
+              Ja, avslutt sak
             </Button>
           </FlexRow>
           {isFailureHandler({
-            apiResult: annullerKlageStatus,
-            errorMessage: 'Det oppsto en feil ved annullering av klagen.',
+            apiResult: avsluttKlageStatus,
+            errorMessage: 'Det oppsto en feil ved avslutting av saken.',
           })}
         </Modal.Footer>
       </Modal>
@@ -174,7 +174,7 @@ const ExpansionCardSpaced = styled(ExpansionCard)`
   }
 `
 
-const AnnullerForm = styled.form`
+const AvsluttForm = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1rem;

@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { AnnullerKlageRequest, Formkrav, Klage, KlageUtfallUtenBrev, NyKlageRequest } from '~shared/types/Klage'
+import { AvsluttKlageRequest, Formkrav, Klage, KlageUtfallUtenBrev, NyKlageRequest } from '~shared/types/Klage'
 
 export function opprettNyKlage(nyKlageRequest: NyKlageRequest): Promise<ApiResponse<Klage>> {
   return apiClient.post(`/klage/opprett/${nyKlageRequest.sakId}`, { ...nyKlageRequest })
@@ -30,6 +30,6 @@ export function ferdigstillKlagebehandling(klageId: string): Promise<ApiResponse
   return apiClient.post(`/klage/${klageId}/ferdigstill`, {})
 }
 
-export function annullerKlage(avbrytKlageRequest: AnnullerKlageRequest): Promise<ApiResponse<void>> {
-  return apiClient.post(`/klage/${avbrytKlageRequest.klageId}/avbryt`, { ...avbrytKlageRequest })
+export function avsluttKlage(avsluttKlageRequest: AvsluttKlageRequest): Promise<ApiResponse<void>> {
+  return apiClient.post(`/klage/${avsluttKlageRequest.klageId}/avbryt`, { ...avsluttKlageRequest })
 }

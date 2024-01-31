@@ -58,7 +58,7 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService) {
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = hentInnholdFraBrevbakeren(
-        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_UTFALL_BEREGNING,
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
         BrevVedleggKey.BEREGNING_INNHOLD,
         generellBrevData,
         bruker,
@@ -68,7 +68,7 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService) {
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = hentInnholdFraBrevbakeren(
-        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID,
+        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL,
         BrevVedleggKey.BP_BEREGNING_TRYGDETID,
         generellBrevData,
         bruker,

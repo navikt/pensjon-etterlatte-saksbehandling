@@ -39,28 +39,28 @@ internal class PdlHendelserRiver(
         try {
             when (packet["hendelse"].asText()) {
                 "DOEDSFALL_V1" -> {
-                    logger.info("Doedshendelse mottatt")
                     val doedshendelse: Doedshendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
+                    logger.info("Doedshendelse mottatt for ${doedshendelse.fnr.maskerFnr()}")
                     behandlinger.sendDoedshendelse(doedshendelse)
                 }
 
                 "UTFLYTTING_FRA_NORGE" -> {
-                    logger.info("Utflyttingshendelse mottatt")
                     val utflyttingsHendelse: UtflyttingsHendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
+                    logger.info("Utflyttingshendelse mottatt for ${utflyttingsHendelse.fnr.maskerFnr()}")
                     behandlinger.sendUtflyttingshendelse(utflyttingsHendelse)
                 }
 
                 "FORELDERBARNRELASJON_V1" -> {
-                    logger.info("Forelder-barn-relasjon mottatt")
                     val forelderBarnRelasjon: ForelderBarnRelasjonHendelse =
                         objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
+                    logger.info("Forelder-barn-relasjon mottatt for ${forelderBarnRelasjon.fnr.maskerFnr()}")
                     behandlinger.sendForelderBarnRelasjonHendelse(forelderBarnRelasjon)
                 }
 
                 "ADRESSEBESKYTTELSE_V1" -> {
-                    logger.info("Adressebeskyttelse mottatt")
                     val adressebeskyttelse: Adressebeskyttelse =
                         objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
+                    logger.info("Adressebeskyttelse mottatt")
                     behandlinger.sendAdressebeskyttelseHendelse(adressebeskyttelse)
                 }
 

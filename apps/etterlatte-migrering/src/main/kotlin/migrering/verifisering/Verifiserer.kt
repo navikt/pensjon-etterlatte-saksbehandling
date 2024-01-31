@@ -2,7 +2,6 @@ package no.nav.etterlatte.migrering.verifisering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -59,6 +58,7 @@ internal class Verifiserer(
         }
         return patchedRequest.getOrThrow().copy(
             utlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request),
+            kanAutomatiskGjenopprettes = feil.isEmpty(),
         )
     }
 
@@ -83,7 +83,6 @@ internal class Verifiserer(
             pesysId = request.pesysId,
         )
         repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
-        throw samleExceptions(feil)
     }
 
     private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {

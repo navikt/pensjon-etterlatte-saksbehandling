@@ -149,7 +149,7 @@ fun Route.vedtaksvurderingRoute(
                 vedtakBehandlingService.samordnetVedtak(behandlingId, brukerTokenInfo)?.let { vedtak ->
                     rapidService.sendToRapid(vedtak)
                     call.respond(HttpStatusCode.OK, vedtak.rapidInfo1.vedtak)
-                } ?: call.respond(HttpStatusCode.OK)
+                } ?: call.respond(HttpStatusCode.NoContent)
             }
         }
 
@@ -201,7 +201,7 @@ fun Route.vedtaksvurderingRoute(
                 vedtakBehandlingService.samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)?.let { samordnetVedtak ->
                     rapidService.sendToRapid(samordnetVedtak)
                     call.respond(HttpStatusCode.OK, samordnetVedtak.rapidInfo1.vedtak)
-                } ?: call.respond(HttpStatusCode.OK)
+                } ?: call.respond(HttpStatusCode.NoContent)
             }
         }
     }

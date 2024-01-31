@@ -35,7 +35,9 @@ class Folkeregisteridentifikator private constructor(
             }
         }
 
-        fun isValid(fnr: String?): Boolean = FolkeregisteridentifikatorValidator.isValid(fnr!!.replace(Regex("[^0-9]"), ""))
+        fun isValid(fnr: String?): Boolean =
+            fnr != null &&
+                FolkeregisteridentifikatorValidator.isValid(fnr.replace(Regex("[^0-9]"), ""))
     }
 
     /**

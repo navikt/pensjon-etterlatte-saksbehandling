@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.person.VergemaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -53,6 +54,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
@@ -418,7 +420,7 @@ internal class StartMigreringRiverIntegrationTest {
     }
 
     @Test
-    fun `feiler hvis en person ikke fins i PDL`() {
+    fun `hvis en person ikke fins i PDL skal skal gjenopprettes manuelt`() {
         testApplication {
             val pesysid = 22974139L
             val repository = PesysRepository(datasource)
@@ -474,14 +476,18 @@ internal class StartMigreringRiverIntegrationTest {
                 ).toJson(),
             )
             with(inspector.inspektør.message(0)) {
-                assertEquals(EventNames.FEILA.lagEventnameForType(), get(EVENT_NAME_KEY).textValue())
+                val kanAutomatiskGjenopprettes =
+                    objectMapper.treeToValue(
+                        this[HENDELSE_DATA_KEY],
+                        MigreringRequest::class.java,
+                    ).kanAutomatiskGjenopprettes
+                assertFalse(kanAutomatiskGjenopprettes)
             }
-            assertEquals(Migreringsstatus.VERIFISERING_FEILA, repository.hentStatus(pesysid))
         }
     }
 
     @Test
-    fun `Feiler med barn som har komplisert vergemaal i PDL`() {
+    fun `Barn som har komplisert vergemaal i PDL skal gjenopprettes manuelt`() {
         testApplication {
             val pesysid = 22974139L
             val repository = PesysRepository(datasource)
@@ -511,6 +517,78 @@ internal class StartMigreringRiverIntegrationTest {
                                         every { it.foedselsdato } returns OpplysningDTO(LocalDate.of(2010, Month.JANUARY, 1), "")
                                         every { it.doedsdato } returns null
                                         every { it.adressebeskyttelse } returns null
+                                    }
+                            }
+                        val personHenter = PersonHenter(pdlTjenesterKlient)
+                        MigrerSpesifikkSakRiver(
+                            rapidsConnection = this,
+                            penKlient =
+                                mockk<PenKlient>()
+                                    .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN },
+                            pesysRepository = repository,
+                            featureToggleService = featureToggleService,
+                            verifiserer =
+                                Verifiserer(
+                                    repository,
+                                    GjenlevendeForelderPatcher(pdlTjenesterKlient, personHenter),
+                                    mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
+                                    personHenter,
+                                    featureToggleService,
+                                    grunnlagKlient = mockk(),
+                                ),
+                            krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
+                        )
+                    }
+            inspector.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagParMedEventNameKey(),
+                        SAK_ID_KEY to pesysid,
+                        LOPENDE_JANUAR_2024_KEY to true,
+                        MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
+                    ),
+                ).toJson(),
+            )
+            with(inspector.inspektør.message(0)) {
+                val kanAutomatiskGjenopprettes =
+                    objectMapper.treeToValue(
+                        this[HENDELSE_DATA_KEY],
+                        MigreringRequest::class.java,
+                    ).kanAutomatiskGjenopprettes
+                assertFalse(kanAutomatiskGjenopprettes)
+            }
+        }
+    }
+
+    @Test
+    fun `feiler hvis soeker er doed i PDL`() {
+        testApplication {
+            val pesysid = 22974139L
+            val repository = PesysRepository(datasource)
+            val featureToggleService =
+                DummyFeatureToggleService().also {
+                    it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
+                }
+            val responsFraPEN =
+                objectMapper.readValue<BarnepensjonGrunnlagResponse>(
+                    this::class.java.getResource("/penrespons.json")!!.readText(),
+                )
+
+            val inspector =
+                TestRapid()
+                    .apply {
+                        val pdlTjenesterKlient =
+                            mockk<PdlTjenesterKlient>().also {
+                                every {
+                                    it.hentPerson(
+                                        PersonRolle.BARN,
+                                        any(),
+                                    )
+                                } returns
+                                    mockk {
+                                        every { doedsdato } returns OpplysningDTO(LocalDate.of(2020, 1, 1), "")
+                                        every { adressebeskyttelse } returns null
+                                        every { vergemaalEllerFremtidsfullmakt } returns null
                                     }
                             }
                         val personHenter = PersonHenter(pdlTjenesterKlient)

@@ -53,6 +53,8 @@ interface BehandlingService {
 
     fun migrer(hendelse: MigreringRequest): BehandlingOgSak
 
+    fun opprettOppgaveManuellGjenoppretting(hendelse: MigreringRequest)
+
     fun avbryt(behandlingId: UUID): HttpResponse
 
     fun finnEllerOpprettSak(
@@ -166,6 +168,15 @@ class BehandlingServiceImpl(
                 setBody(hendelse)
             }.body()
         }
+
+    override fun opprettOppgaveManuellGjenoppretting(hendelse: MigreringRequest) {
+        runBlocking {
+            behandlingKlient.post("$url/migrering/manuell-gjenoppretting") {
+                contentType(ContentType.Application.Json)
+                setBody(hendelse)
+            }
+        }
+    }
 
     override fun hentAlleSaker(): Saker =
         runBlocking {

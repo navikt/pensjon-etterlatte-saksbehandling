@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
@@ -60,6 +61,9 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
     override fun harLesetilgang(): Boolean = true
 }
 
+class HentEnhetException(override val detail: String, override val cause: Throwable?) :
+    InternfeilException(detail, cause)
+
 class SaksbehandlerMedEnheterOgRoller(
     identifiedBy: TokenValidationContext,
     private val navAnsattKlient: NavAnsattKlient,
@@ -75,8 +79,12 @@ class SaksbehandlerMedEnheterOgRoller(
         if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
             Enheter.nasjonalTilgangEnheter()
         } else {
-            runBlocking {
-                navAnsattKlient.hentEnhetForSaksbehandler(name()).map { it.id }
+            try {
+                runBlocking {
+                    navAnsattKlient.hentEnhetForSaksbehandler(name()).map { it.id }
+                }
+            } catch (e: Exception) {
+                throw HentEnhetException("Henting av enheter feilet. Sjekk on-prem status(fss)", e)
             }
         }
 

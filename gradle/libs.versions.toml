@@ -1,6 +1,6 @@
 [plugins]
 avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.9.1" }
-cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
+cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.2" }
 
 [versions]
 jackson-version = "2.16.1"

@@ -165,6 +165,7 @@ data class OpprettNyttBrev(
     val opprettet: Tidspunkt,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
+    val brevtype: Brevtype,
 ) {
     val status: Status = Status.OPPRETTET
 }
@@ -185,5 +186,7 @@ enum class Brevtype {
     VEDTAK,
     VARSEL,
     INFORMASJON,
-    UKJENT,
+    OPPLASTET_PDF,
+    MANUELT,
+    VEDLEGG,
 }

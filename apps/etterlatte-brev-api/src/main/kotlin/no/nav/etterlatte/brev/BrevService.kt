@@ -34,12 +34,15 @@ class BrevService(
     suspend fun opprettBrev(
         sakId: Long,
         bruker: BrukerTokenInfo,
+        brevkoder: Brevkoder,
     ): Brev =
         brevoppretter.opprettBrev(
             sakId = sakId,
             behandlingId = null,
             bruker = bruker,
             automatiskMigreringRequest = null,
+            brevKode = brevkoder.redigering,
+            brevtype = brevkoder.redigering.brevtype,
         ).first
 
     data class BrevPayload(

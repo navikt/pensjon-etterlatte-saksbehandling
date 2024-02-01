@@ -59,6 +59,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                     behandlingId = null,
                     bruker = brukerTokenInfo,
                     brevKode = brevKode,
+                    brevtype = brevKode.brevtype,
                 )
             }
         logger.info("Ferdigstiller $brevKode-brev i sak $sakId")

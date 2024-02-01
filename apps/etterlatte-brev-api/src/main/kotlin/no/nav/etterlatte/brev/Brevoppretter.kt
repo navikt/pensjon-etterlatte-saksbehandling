@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -62,15 +63,19 @@ class Brevoppretter(
             behandlingId = behandlingId,
             bruker = brukerTokenInfo,
             automatiskMigreringRequest = automatiskMigreringRequest,
+            brevKode = null,
+            brevtype = Brevtype.VEDTAK,
         ).first
     }
 
+    // TODO: Trur denne heller enn EtterlatteBrevKode bør ta inn Brevkoder
     suspend fun opprettBrev(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKode: EtterlatteBrevKode? = null,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
+        brevtype: Brevtype,
     ): Pair<Brev, GenerellBrevData> =
         with(hentInnData(sakId, behandlingId, bruker, brevKode, automatiskMigreringRequest)) {
             val nyttBrev =
@@ -83,6 +88,7 @@ class Brevoppretter(
                     opprettet = Tidspunkt.now(),
                     innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
+                    brevtype = brevtype,
                 )
             return Pair(db.opprettBrev(nyttBrev), generellBrevData)
         }

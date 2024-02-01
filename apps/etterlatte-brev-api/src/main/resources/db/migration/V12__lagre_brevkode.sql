@@ -1,5 +1,5 @@
 ALTER TABLE brev
-    ADD COLUMN brevtype;
+    ADD COLUMN brevtype varchar;
 
 UPDATE brev
 SET brevtype = 'INFORMASJON' -- Utsatt klagefrist-breva
@@ -255,10 +255,17 @@ SET brevtype = 'VEDTAK'
 where behandling_id is not null -- Per no er det kun vedtaksbreva vi knyttar til behandling
   and brevtype is null;
 
+UPDATE brev
+SET brevtype = 'OPPLASTET_PDF'
+where behandling_id is null
+  and prosess_type = 'OPPLASTET_PDF'
+  and brevtype is null;
 
 UPDATE brev
-SET brevtype = 'UKJENT' -- manuelle brev utan mal, innhaldet her veit vi ikkje
+SET brevtype = 'MANUELT' -- manuelle brev utan mal, innhaldet her veit vi ikkje
 where behandling_id is null
   and brevtype is null;
 
 
+
+ALTER TABLE brev ALTER COLUMN brevtype SET NOT NULL;

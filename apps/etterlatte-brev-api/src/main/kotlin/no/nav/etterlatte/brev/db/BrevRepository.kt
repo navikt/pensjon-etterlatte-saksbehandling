@@ -226,6 +226,7 @@ class BrevRepository(private val ds: DataSource) {
                             "prosess_type" to ulagretBrev.prosessType.name,
                             "soeker_fnr" to ulagretBrev.soekerFnr,
                             "opprettet" to ulagretBrev.opprettet.toTimestamp(),
+                            "brevtype" to ulagretBrev.brevtype.name,
                         ),
                     ).asUpdateAndReturnGeneratedKey,
                 )
@@ -447,8 +448,8 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val OPPRETT_BREV_QUERY = """
-            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet) 
-            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet) 
+            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet, brevtype) 
+            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet, :brevtype) 
             ON CONFLICT DO NOTHING;
         """
 

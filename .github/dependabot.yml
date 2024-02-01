@@ -113,6 +113,7 @@ updates:
           - "prom-client"
           - "unleash-klient"
           - "@types/node"
+          - "jsdom"
       react:
         patterns:
           - "react"

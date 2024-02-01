@@ -13,7 +13,7 @@ data class MaanedStoenadRad(
     val fnrForeldre: List<String>,
     val fnrSoesken: List<String>,
     val anvendtTrygdetid: String,
-    val nettoYtelse: String,
+    val nettoYtelse: String?,
     val avkortingsbeloep: String,
     val aarsinntekt: String,
     val beregningType: String,
@@ -53,7 +53,8 @@ class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
                     }
                 val nettoYtelse =
                     aktuellBeregnetYtelse?.utbetaltBeloep
-                        ?: sisteVedtak.nettoYtelse.toInt() // TODO nettoYtelse til skal utbedres?
+                        ?: sisteVedtak.nettoYtelse?.toInt() // TODO nettoYtelse til skal utbedres?
+                        ?: 0
 
                 val (avkortingsbeloep, aarsinntekt) =
                     sisteVedtak.avkorting?.let { avkorting ->

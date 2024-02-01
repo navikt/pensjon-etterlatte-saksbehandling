@@ -241,7 +241,7 @@ class StatistikkService(
             fnrSoesken = persongalleri.soesken,
             anvendtTrygdetid = "40",
             // TODO  Bør utbedres?
-            nettoYtelse = vedtakInnhold.utbetalingsperioder.firstOrNull()?.beloep.toString(),
+            nettoYtelse = vedtakInnhold.utbetalingsperioder.firstOrNull()?.beloep?.toString(),
             beregningType = "FOLKETRYGD",
             anvendtSats = "",
             behandlingId = vedtakInnhold.behandling.id,

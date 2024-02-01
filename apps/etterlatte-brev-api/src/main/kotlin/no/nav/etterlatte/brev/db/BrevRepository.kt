@@ -74,9 +74,9 @@ class BrevRepository(private val ds: DataSource) {
     fun hentBrevForBehandling(
         behandlingId: UUID,
         type: Brevtype,
-    ): Brev? =
+    ): List<Brev> =
         using(sessionOf(ds)) {
-            it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId, type.name).map(tilBrev).asSingle)
+            it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId, type.name).map(tilBrev).asList)
         }
 
     fun hentBrevForSak(sakId: Long): List<Brev> =

@@ -108,7 +108,7 @@ internal class BrevRepositoryIntegrationTest {
 
         val nyttBrev = db.opprettBrev(ulagretBrev(behandlingId = behandlingId))
 
-        val brevTilBehandling = db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK)!!
+        val brevTilBehandling = db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).first()
         assertEquals(nyttBrev.status, brevTilBehandling.status)
 
         val hentetBrev = db.hentBrev(nyttBrev.id)

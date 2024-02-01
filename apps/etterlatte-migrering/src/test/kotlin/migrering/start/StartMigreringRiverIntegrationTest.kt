@@ -250,11 +250,13 @@ internal class StartMigreringRiverIntegrationTest {
                 assertEquals(repository.hentStatus(pesysId.id), Migreringsstatus.UNDER_MIGRERING)
             }
             val behandlingId = UUID.randomUUID()
+            val gjennySakId = 321L
             inspector.sendTestMessage(
                 JsonMessage.newMessage(
                     mapOf(
                         Migreringshendelser.LAGRE_KOPLING.lagParMedEventNameKey(),
                         BEHANDLING_ID_KEY to behandlingId,
+                        SAK_ID_KEY to gjennySakId,
                         PESYS_ID_KEY to pesysId,
                     ),
                 ).toJson(),
@@ -376,6 +378,7 @@ internal class StartMigreringRiverIntegrationTest {
                         Migreringshendelser.LAGRE_KOPLING.lagParMedEventNameKey(),
                         BEHANDLING_ID_KEY to behandlingId,
                         PESYS_ID_KEY to pesysId,
+                        SAK_ID_KEY to 321L,
                     ),
                 ).toJson(),
             )

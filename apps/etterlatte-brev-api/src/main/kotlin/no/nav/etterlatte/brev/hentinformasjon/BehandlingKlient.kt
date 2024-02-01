@@ -57,7 +57,7 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
         return retry<SisteIverksatteBehandling> {
             val url =
                 "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte".let {
-                    // Ønsker ikke å hente ut behandlingen som håndteres da denne allerede kan ha fått status IVERKSATT
+                    // Unngå å hente gjeldende behandling da denne allerede har status ATTESTERT eller IVERKSATT
                     if (ekskluderBehandlingId != null) {
                         "$it?ekskluderBehandlingId=$ekskluderBehandlingId"
                     } else {

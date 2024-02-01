@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
+import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
@@ -582,5 +583,9 @@ class NavAnsattKlientTest : NavAnsattKlient {
 
     override suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema> {
         return listOf(SaksbehandlerTema(SakType.BARNEPENSJON.name), SaksbehandlerTema(SakType.OMSTILLINGSSTOENAD.name))
+    }
+
+    override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? {
+        return SaksbehandlerInfo("ident", "Max Manus")
     }
 }

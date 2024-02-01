@@ -51,15 +51,26 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
 
     internal suspend fun hentSisteIverksatteBehandling(
         sakId: Long,
+        ekskluderBehandlingId: UUID?,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling {
         return retry<SisteIverksatteBehandling> {
+            val url =
+                "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte".let {
+                    // Ønsker ikke å hente ut behandlingen som håndteres da denne allerede kan ha fått status IVERKSATT
+                    if (ekskluderBehandlingId != null) {
+                        "$it?ekskluderBehandlingId=$ekskluderBehandlingId"
+                    } else {
+                        it
+                    }
+                }
+
             downstreamResourceClient
                 .get(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte",
+                            url = url,
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                 )

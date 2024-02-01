@@ -75,7 +75,10 @@ interface BehandlingService {
 
     fun hentBehandlingerForSak(sakId: Long): List<Behandling>
 
-    fun hentSisteIverksatte(sakId: Long): Behandling?
+    fun hentSisteIverksatte(
+        sakId: Long,
+        ekskludertBehandlingId: UUID? = null,
+    ): Behandling?
 
     fun avbrytBehandling(
         behandlingId: UUID,
@@ -176,9 +179,18 @@ internal class BehandlingServiceImpl(
         return hentBehandlingerForSakId(sakId)
     }
 
-    override fun hentSisteIverksatte(sakId: Long): Behandling? {
+    override fun hentSisteIverksatte(
+        sakId: Long,
+        ekskludertBehandlingId: UUID?,
+    ): Behandling? {
         return hentBehandlingerForSakId(sakId)
             .filter { BehandlingStatus.iverksattEllerAttestert().contains(it.status) }
+            .filter { behandling ->
+                if (behandling.id == ekskludertBehandlingId) {
+                    logger.info("Behandling med id=${behandling.id} og status=${behandling.status} er ekskludert")
+                }
+                behandling.id != ekskludertBehandlingId
+            }
             .maxByOrNull { it.behandlingOpprettet }
     }
 

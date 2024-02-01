@@ -39,6 +39,7 @@ import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import java.util.UUID
 
 internal fun Route.sakSystemRoutes(
     tilgangService: TilgangService,
@@ -77,10 +78,10 @@ internal fun Route.sakSystemRoutes(
 
             get("/behandlinger/sisteIverksatte") {
                 logger.info("Henter siste iverksatte behandling for $sakId")
-
+                val ekskludertBehandlingId = call.parameters["ekskludertBehandlingId"]?.let { UUID.fromString(it) }
                 val sisteIverksatteBehandling =
                     inTransaction {
-                        behandlingService.hentSisteIverksatte(sakId)
+                        behandlingService.hentSisteIverksatte(sakId, ekskludertBehandlingId)
                             ?.let { SisteIverksatteBehandling(it.id) }
                     }
 

@@ -172,12 +172,13 @@ class BrevdataFacade(
 
     suspend fun finnForrigeUtbetalingsinfo(
         sakId: Long,
+        ekskluderBehandlingId: UUID?,
         virkningstidspunkt: YearMonth,
         brukerTokenInfo: BrukerTokenInfo,
         sakType: SakType,
     ): Utbetalingsinfo? =
         finnUtbetalingsinfoNullable(
-            behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, ekskluderBehandlingId, brukerTokenInfo).id,
             virkningstidspunkt,
             brukerTokenInfo,
             sakType,

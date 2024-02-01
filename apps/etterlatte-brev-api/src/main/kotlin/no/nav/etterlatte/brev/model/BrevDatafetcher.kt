@@ -41,6 +41,7 @@ internal class BrevDatafetcher(
     suspend fun hentForrigeUtbetaling() =
         brevdataFacade.finnForrigeUtbetalingsinfo(
             sak.id,
+            behandlingId,
             vedtakVirkningstidspunkt,
             brukerTokenInfo,
             sak.sakType,

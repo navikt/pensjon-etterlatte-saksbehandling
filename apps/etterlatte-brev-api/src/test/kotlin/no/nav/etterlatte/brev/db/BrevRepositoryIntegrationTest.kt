@@ -11,6 +11,7 @@ import kotliquery.using
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -32,7 +33,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
@@ -104,7 +104,7 @@ internal class BrevRepositoryIntegrationTest {
     fun `Hent brev med behandling ID`() {
         val behandlingId = UUID.randomUUID()
 
-        assertNull(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK))
+        assertEquals(emptyList<Brev>(), db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK))
 
         val nyttBrev = db.opprettBrev(ulagretBrev(behandlingId = behandlingId))
 

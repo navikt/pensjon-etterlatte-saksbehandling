@@ -78,6 +78,7 @@ updates:
           - "eslint"
           - "husky"
           - "lint-staged"
+          - "@typescript-eslint/*"
 
   # ===============
   # FRONTEND CLIENT

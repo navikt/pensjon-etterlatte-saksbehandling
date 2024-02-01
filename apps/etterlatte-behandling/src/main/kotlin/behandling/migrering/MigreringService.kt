@@ -4,7 +4,6 @@ import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GyldighetsproevingService
-import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.inTransaction
@@ -51,7 +50,9 @@ class MigreringService(
             inTransaction {
                 val behandlinger =
                     behandlingService.hentBehandlingerForSak(sak.id).filter { it.status != BehandlingStatus.AVBRUTT }
-                if (behandlinger.isNotEmpty() && behandlinger.any { !it.erAutomatiskGjenoppretting() }) {
+                if (behandlinger.any { it.status == BehandlingStatus.IVERKSATT } ||
+                    behandlinger.any { it.kilde != Vedtaksloesning.GJENOPPRETTA }
+                ) {
                     throw FinnesLoependeEllerIverksattBehandlingForFnr()
                 }
 
@@ -175,6 +176,3 @@ class MigreringService(
 }
 
 class FinnesLoependeEllerIverksattBehandlingForFnr : Exception()
-
-// TODO Er det en bedre måte å gjøre dette på?
-fun Behandling.erAutomatiskGjenoppretting() = kommerBarnetTilgode?.kilde?.type == Grunnlagsopplysning.Gjenny.create().type

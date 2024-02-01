@@ -603,7 +603,6 @@ private fun Grunnlagsopplysning.Kilde.tilGenerellKilde() =
             )
 
         is Grunnlagsopplysning.Pesys -> GenerellKilde(type = this.type, tidspunkt = this.tidspunkt)
-        is Grunnlagsopplysning.Gjenny -> GenerellKilde(type = this.type, tidspunkt = this.tidspunkt)
         is Grunnlagsopplysning.Privatperson ->
             GenerellKilde(
                 type = this.type,

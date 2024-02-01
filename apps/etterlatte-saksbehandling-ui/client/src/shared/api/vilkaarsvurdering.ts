@@ -82,7 +82,7 @@ export interface Delvilkaar {
   tittel: string
   beskrivelse: string
   spoersmaal?: string
-  lovreferanse: Paragraf
+  lovreferanse: Lovreferanse
   resultat?: VurderingsResultat | null
 }
 
@@ -92,8 +92,10 @@ export interface VurdertResultat {
   saksbehandler: string
 }
 
-export interface Paragraf {
+export interface Lovreferanse {
   paragraf: string
+  ledd: number
+  bokstav: string
   lenke: string
 }
 

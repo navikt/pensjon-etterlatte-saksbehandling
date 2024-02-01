@@ -51,14 +51,12 @@ updates:
           - "ch.qos.logback*"
           - "net.logstash*"
           - "com.github.navikt:rapids-and-rivers"
+          - "io.ktor*"
+          - "org.jetbrains.kotlinx*"
       jms-mq:
         patterns:
           - "org.messaginghub:pooled-jms"
           - "com.ibm.mq:com.ibm.mq.jakarta.client"
-      ktor-og-kotlinx:
-        patterns:
-          - "io.ktor*"
-          - "org.jetbrains.kotlinx*"
 
 
   # =============

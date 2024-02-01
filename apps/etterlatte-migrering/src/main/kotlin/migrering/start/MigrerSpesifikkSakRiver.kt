@@ -94,9 +94,6 @@ internal class MigrerSpesifikkSakRiver(
                 .also { pesysRepository.lagrePesyssak(pesyssak = it) }
         packet.setEventNameForHendelseType(Migreringshendelser.MIGRER_SAK)
 
-        // TODO Sjekke om finnes sak på fnr?
-        // TODO Hvis iverksatt eller under behandling avbryt og .. ?
-
         val verifisertRequest =
             verifiserer.verifiserRequest(pesyssak.tilMigreringsrequest()).also {
                 pesysRepository.oppdaterKanGjenopprettesAutomatisk(it)

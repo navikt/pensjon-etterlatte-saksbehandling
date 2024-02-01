@@ -4,11 +4,13 @@ import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GyldighetsproevingService
+import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Flyktning
@@ -47,6 +49,12 @@ class MigreringService(
                     finnEllerOpprettSak(request)
                 }
             inTransaction {
+                val behandlinger =
+                    behandlingService.hentBehandlingerForSak(sak.id).filter { it.status != BehandlingStatus.AVBRUTT }
+                if (behandlinger.isNotEmpty() && behandlinger.any { !it.erAutomatiskGjenoppretting() }) {
+                    throw FinnesLoependeEllerIverksattBehandlingForFnr()
+                }
+
                 opprettSakOgBehandling(request, sak)?.let { behandlingOgOppgave ->
                     val behandling = behandlingOgOppgave.behandling
                     if (behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
@@ -165,3 +173,8 @@ class MigreringService(
         behandlingService.avbrytBehandling(behandlingId, brukerTokenInfo)
     }
 }
+
+class FinnesLoependeEllerIverksattBehandlingForFnr : Exception()
+
+// TODO Er det en bedre måte å gjøre dette på?
+fun Behandling.erAutomatiskGjenoppretting() = kommerBarnetTilgode?.kilde?.type == Grunnlagsopplysning.Gjenny.create().type

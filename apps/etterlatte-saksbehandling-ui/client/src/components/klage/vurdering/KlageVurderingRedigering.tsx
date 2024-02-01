@@ -304,18 +304,13 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
 
       <VurderingWrapper>
         <Controller
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
           name="innstilling.internKommentar"
           control={control}
-          render={({ field, fieldState }) => {
+          render={({ field }) => {
             const { value, ...rest } = field
             return (
               <>
                 <Textarea label="Intern kommentar til KA" value={value ?? ''} {...rest} />
-                {fieldState.error && <Feilmelding>Du må skrive en kommentar til innstillingen.</Feilmelding>}
               </>
             )
           }}

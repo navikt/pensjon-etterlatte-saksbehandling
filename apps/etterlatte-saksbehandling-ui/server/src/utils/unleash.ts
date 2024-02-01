@@ -2,6 +2,7 @@ import { destroy, getFeatureToggleDefinitions, initialize } from 'unleash-client
 import { FeatureToggleConfig } from '../config/config'
 import GradualRolloutRandomStrategy from 'unleash-client/lib/strategy/gradual-rollout-random'
 import { logger } from '../monitoring/logger'
+import GradualRolloutUserIdStrategy from 'unleash-client/lib/strategy/gradual-rollout-user-id'
 
 export const unleash =
   FeatureToggleConfig.host !== ''
@@ -12,7 +13,7 @@ export const unleash =
         },
         appName: FeatureToggleConfig.applicationName,
 
-        strategies: [new GradualRolloutRandomStrategy()],
+        strategies: [new GradualRolloutRandomStrategy(), new GradualRolloutUserIdStrategy()],
       })
     : null
 

@@ -60,27 +60,23 @@ class OppgaveService(
                     bruker.enheter(),
                     bruker.erSuperbruker(),
                 )
-            val oppgaverMedSaksbehandlerNavn = populerOppgaverMedNavn(oppgaverForBruker)
-            oppgaverMedSaksbehandlerNavn.sortedByDescending { it.opprettet }
+            populerOppgaverMedNavn(oppgaverForBruker).sortedByDescending { it.opprettet }
         }
     }
 
-    // TODO: test for denne
-    fun populerOppgaverMedNavn(oppgaver: List<OppgaveIntern>): List<OppgaveIntern> {
+    internal fun populerOppgaverMedNavn(oppgaver: List<OppgaveIntern>): List<OppgaveIntern> {
         val oppgaverMedSaksbehandler = oppgaver.mapNotNull { it.saksbehandler }.distinct()
         val saksbehandlerereMedNavn =
             oppgaveDao.hentSaksbehandlerNavnForidenter(oppgaverMedSaksbehandler)
                 .associate { it.ident to it.navn }
-        oppgaver.forEach {
+        return oppgaver.map {
             if (it.harSaksbehandler()) {
-                val navn = saksbehandlerereMedNavn[it.saksbehandler]
-                if (navn != null) {
-                    println("bytter navn for ${it.saksbehandler} til $navn")
-                    it.saksbehandlerNavn = navn
-                }
+                val navn = saksbehandlerereMedNavn[it.saksbehandler] ?: it.saksbehandler
+                it.copy(saksbehandlerNavn = navn)
+            } else {
+                it
             }
         }
-        return oppgaver
     }
 
     private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) =

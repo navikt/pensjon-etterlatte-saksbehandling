@@ -55,6 +55,7 @@ import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
+import kotlin.time.measureTime
 
 val sikkerLogg: Logger = sikkerlogger()
 
@@ -91,30 +92,33 @@ private fun populerSaksbendlereMedNavn(context: ApplicationContext) {
     if (context.leaderElectionKlient.isLeader()) {
         GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
             val logger = LoggerFactory.getLogger("saksbehandlernavnjob")
-            logger.info("Starter job for å legge inn saksbehandlere med navn")
-            val sbidenter = context.saksbehandlerInfoDao.hentalleSaksbehandlere().mapNotNull { it }
-            logger.info("Antall identer ${sbidenter.size}")
+            val tidbrukt =
+                measureTime {
+                    logger.info("Starter job for å legge inn saksbehandlere med navn")
+                    val sbidenter = context.saksbehandlerInfoDao.hentalleSaksbehandlere().mapNotNull { it }
+                    logger.info("Antall identer ${sbidenter.size}")
 
-            val filtrerteIdenter = sbidenter.filter { !context.saksbehandlerInfoDao.saksbehandlerFinnes(it) }
-            val mappedMedNavn =
-                filtrerteIdenter.map {
-                    if (listOf("PESYS", "EY").contains(it)) {
-                        it to SaksbehandlerInfo(it, it)
-                    } else {
-                        it to runBlocking { context.navAnsattKlient.hentSaksbehanderNavn(it) }
+                    val filtrerteIdenter = sbidenter.filter { !context.saksbehandlerInfoDao.saksbehandlerFinnes(it) }
+                    val mappedMedNavn =
+                        filtrerteIdenter.map {
+                            if (listOf("PESYS", "EY").contains(it)) {
+                                it to SaksbehandlerInfo(it, it)
+                            } else {
+                                it to runBlocking { context.navAnsattKlient.hentSaksbehanderNavn(it) }
+                            }
+                        }
+                    logger.info("mappedMedNavn antall: ${mappedMedNavn.size}")
+
+                    mappedMedNavn.forEach {
+                        SaksbehandlerInfo(it.first, it.first)
+                        if (it.second == null) {
+                            context.saksbehandlerInfoDao.upsertSaksbehandler(SaksbehandlerInfo(it.first, it.first))
+                        } else {
+                            context.saksbehandlerInfoDao.upsertSaksbehandler(it.second!!)
+                        }
                     }
                 }
-            logger.info("mappedMedNavn antall: ${mappedMedNavn.size}")
-
-            mappedMedNavn.forEach {
-                SaksbehandlerInfo(it.first, it.first)
-                if (it.second == null) {
-                    context.saksbehandlerInfoDao.upsertSaksbehandler(SaksbehandlerInfo(it.first, it.first))
-                } else {
-                    context.saksbehandlerInfoDao.upsertSaksbehandler(it.second!!)
-                }
-            }
-            logger.info("Ferdig")
+            logger.info("Ferdig, tid brukt $tidbrukt")
         }
     }
 }

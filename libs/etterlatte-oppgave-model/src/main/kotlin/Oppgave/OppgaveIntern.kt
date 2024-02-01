@@ -26,7 +26,7 @@ data class OppgaveIntern(
     val kilde: OppgaveKilde? = null,
     override val type: OppgaveType,
     override val saksbehandler: String? = null,
-    var saksbehandlerNavn: String? = null,
+    val saksbehandlerNavn: String? = null,
     val referanse: String,
     val merknad: String? = null,
     override val opprettet: Tidspunkt,

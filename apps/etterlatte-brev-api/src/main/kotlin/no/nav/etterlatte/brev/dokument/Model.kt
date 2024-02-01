@@ -98,7 +98,6 @@ data class Journalpost(
     val bruker: Bruker?,
     val sak: JournalpostSak?,
     val datoOpprettet: String,
-    val utsendingsinfo: Utsendingsinfo?,
 )
 
 data class Dokumenter(

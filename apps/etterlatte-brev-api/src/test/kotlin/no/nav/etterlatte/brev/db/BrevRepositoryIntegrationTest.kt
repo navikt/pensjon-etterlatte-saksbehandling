@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevVedleggKey
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -103,11 +104,11 @@ internal class BrevRepositoryIntegrationTest {
     fun `Hent brev med behandling ID`() {
         val behandlingId = UUID.randomUUID()
 
-        assertNull(db.hentBrevForBehandling(behandlingId))
+        assertNull(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK))
 
         val nyttBrev = db.opprettBrev(ulagretBrev(behandlingId = behandlingId))
 
-        val brevTilBehandling = db.hentBrevForBehandling(behandlingId)!!
+        val brevTilBehandling = db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK)!!
         assertEquals(nyttBrev.status, brevTilBehandling.status)
 
         val hentetBrev = db.hentBrev(nyttBrev.id)
@@ -466,7 +467,8 @@ internal class BrevRepositoryIntegrationTest {
         mottaker = opprettMottaker(),
         opprettet = Tidspunkt.now(),
         innhold = innhold ?: BrevInnhold("tittel", Spraak.NB),
-        innholdVedlegg = innhold_vedlegg ?: null,
+        innholdVedlegg = innhold_vedlegg,
+        brevtype = Brevtype.VEDTAK,
     )
 
     private fun opprettMottaker() =

@@ -174,7 +174,7 @@ class Brevoppretter(
     fun hentVedtaksbrev(behandlingId: UUID): Brev? {
         logger.info("Henter vedtaksbrev for behandling (id=$behandlingId)")
 
-        return db.hentBrevForBehandling(behandlingId)
+        return db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK)
     }
 
     private suspend fun opprettInnhold(

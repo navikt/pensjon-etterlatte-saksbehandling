@@ -2,7 +2,7 @@ import { IBrev } from '~shared/types/Brev'
 import { Alert, Heading, Panel } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { getVergeadresseForPerson, getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
+import { getVergeadresseForPerson } from '~shared/api/grunnlag'
 import { VergeFeilhaandtering } from '~components/person/VergeFeilhaandtering'
 import { isSuccess } from '~shared/api/apiUtils'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
@@ -16,16 +16,10 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
   const mottaker = brevState!.mottaker
   const adresse = mottaker?.adresse
 
-  const [vergeadresse, getVergeadresse] = brev.behandlingId
-    ? useApiCall(getVergeadresseFraGrunnlag)
-    : useApiCall(getVergeadresseForPerson)
+  const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseForPerson)
 
   useEffect(() => {
-    if (brev.behandlingId) {
-      getVergeadresse(brev.behandlingId)
-    } else {
-      getVergeadresse(brev.soekerFnr)
-    }
+    getVergeadresse(brev.soekerFnr)
   }, [brev])
 
   return (

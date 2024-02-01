@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeServi
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Flyktning
@@ -47,6 +48,14 @@ class MigreringService(
                     finnEllerOpprettSak(request)
                 }
             inTransaction {
+                val behandlinger =
+                    behandlingService.hentBehandlingerForSak(sak.id).filter { it.status != BehandlingStatus.AVBRUTT }
+                if (behandlinger.any { it.status == BehandlingStatus.IVERKSATT } ||
+                    behandlinger.any { it.kilde != Vedtaksloesning.GJENOPPRETTA }
+                ) {
+                    throw FinnesLoependeEllerIverksattBehandlingForFnr()
+                }
+
                 opprettSakOgBehandling(request, sak)?.let { behandlingOgOppgave ->
                     val behandling = behandlingOgOppgave.behandling
                     if (behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
@@ -165,3 +174,5 @@ class MigreringService(
         behandlingService.avbrytBehandling(behandlingId, brukerTokenInfo)
     }
 }
+
+class FinnesLoependeEllerIverksattBehandlingForFnr : Exception()

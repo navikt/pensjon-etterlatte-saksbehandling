@@ -94,9 +94,6 @@ internal class MigrerSpesifikkSakRiver(
                 .also { pesysRepository.lagrePesyssak(pesyssak = it) }
         packet.setEventNameForHendelseType(Migreringshendelser.MIGRER_SAK)
 
-        // TODO Sjekke om finnes sak på fnr?
-        // TODO Hvis iverksatt eller under behandling avbryt og .. ?
-
         val verifisertRequest =
             verifiserer.verifiserRequest(pesyssak.tilMigreringsrequest()).also {
                 pesysRepository.oppdaterKanGjenopprettesAutomatisk(it)
@@ -130,9 +127,7 @@ internal class MigrerSpesifikkSakRiver(
         packet[FNR_KEY] = request.soeker.value
         packet[BEHOV_NAME_KEY] = Opplysningstype.AVDOED_PDL_V1
         packet.pesysId = PesysId(sak.id)
-        // TODO Vi vil ikke ha PESYS på behandling og vedtak men er muligens avhengig av denne på melding
-        //  for div logikk fremover?
-        packet.kilde = Vedtaksloesning.PESYS
+        packet.kilde = Vedtaksloesning.GJENOPPRETTA
         context.publish(packet.toJson())
         logger.info(
             "Migrering starta for pesys-sak ${sak.id} og melding om behandling ble sendt.",

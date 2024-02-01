@@ -35,7 +35,7 @@ jobs:
           cache: gradle
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
 
       - name: Assemble
         run: ./gradlew assemble --no-build-cache --no-configuration-cache

@@ -1,4 +1,4 @@
-import { BodyShort, Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
+import { Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import React from 'react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
@@ -50,7 +50,7 @@ function erSkjemaUtfylt(skjema: FormdataVurdering): skjema is FilledFormDataVurd
   }
   if (skjema.utfall === Utfall.STADFESTE_VEDTAK || skjema.utfall === Utfall.DELVIS_OMGJOERING) {
     const { innstilling } = skjema
-    if (!innstilling || !innstilling.lovhjemmel || !innstilling.tekst) {
+    if (!innstilling || !innstilling.lovhjemmel || !innstilling.internKommentar) {
       return false
     }
   }
@@ -264,11 +264,10 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
 
   return (
     <>
-      <Heading level="2" size="medium">
+      <Heading level="2" size="medium" spacing>
         Innstilling til KA
       </Heading>
 
-      <BodyShort spacing>Angi hvilken hjemmel klagen hovedsakelig knytter seg til</BodyShort>
       <VurderingWrapper>
         <Controller
           rules={{
@@ -281,7 +280,12 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
             const { value, ...rest } = field
             return (
               <>
-                <Select label="Hjemmel" value={value ?? ''} {...rest}>
+                <Select
+                  label="Hjemmel"
+                  value={value ?? ''}
+                  {...rest}
+                  description="Angi hvilken hjemmel klagen hovedsakelig knytter seg til"
+                >
                   <option value="">Velg hjemmel</option>
                   {aktuelleHjemler.map((hjemmel) => (
                     <option key={hjemmel} value={hjemmel}>
@@ -298,21 +302,15 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
         />
       </VurderingWrapper>
 
-      <BodyShort spacing>Skriv innstilling til klagen, som blir med i brev til KA og bruker</BodyShort>
       <VurderingWrapper>
         <Controller
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
-          name="innstilling.tekst"
+          name="innstilling.internKommentar"
           control={control}
-          render={({ field, fieldState }) => {
+          render={({ field }) => {
             const { value, ...rest } = field
             return (
               <>
-                <Textarea label="Innstilling til KA" value={value ?? ''} {...rest} />
-                {fieldState.error ? <Feilmelding>Du må skrive en innstillingstekst.</Feilmelding> : null}
+                <Textarea label="Intern kommentar til KA" value={value ?? ''} {...rest} />
               </>
             )
           }}

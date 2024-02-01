@@ -94,8 +94,8 @@ export interface VurdertResultat {
 
 export interface Lovreferanse {
   paragraf: string
-  ledd: number
-  bokstav: string
+  ledd?: number
+  bokstav?: string
   lenke: string
 }
 

@@ -58,6 +58,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                         Pesyskopling(
                             behandlingId = behandlingId,
                             pesysId = pesysid,
+                            sakId = 321L,
                         )
                 }
             val pesyssak =
@@ -83,7 +84,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                     spraak = Spraak.NN,
                 )
             repository.lagrePesyssak(pesyssak)
-            repository.lagreKoplingTilBehandling(behandlingId, pesysid)
+            repository.lagreKoplingTilBehandling(behandlingId, pesysid, 123L)
 
             TestRapid()
                 .apply {
@@ -117,6 +118,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                         Pesyskopling(
                             behandlingId = behandlingId,
                             pesysId = pesysid,
+                            sakId = 321L,
                         )
                 }
             val pesyssak =
@@ -142,7 +144,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                     spraak = Spraak.NN,
                 )
             repository.lagrePesyssak(pesyssak)
-            repository.lagreKoplingTilBehandling(behandlingId, pesysid)
+            repository.lagreKoplingTilBehandling(behandlingId, pesysid, 123L)
 
             TestRapid().apply {
                 FeilendeMigreringLytterRiver(rapidsConnection = this, repository = repository)

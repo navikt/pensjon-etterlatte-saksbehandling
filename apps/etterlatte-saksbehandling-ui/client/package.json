@@ -13,10 +13,10 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@navikt/aksel-icons": "^5.12.2",
-    "@navikt/ds-css": "~5.12.2",
-    "@navikt/ds-react": "~5.12.2",
-    "@navikt/ds-tokens": "~5.12.2",
+    "@navikt/aksel-icons": "^5.17.0",
+    "@navikt/ds-css": "~5.17.0",
+    "@navikt/ds-react": "~5.17.0",
+    "@navikt/ds-tokens": "~5.17.0",
     "@navikt/navspa": "^6.0.1",
     "@reduxjs/toolkit": "^2.0.1",
     "lodash": "~4.17.21",

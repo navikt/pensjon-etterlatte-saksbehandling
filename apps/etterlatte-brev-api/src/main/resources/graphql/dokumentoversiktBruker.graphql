@@ -34,21 +34,6 @@ query(
             }
             kanal
             datoOpprettet
-            utsendingsinfo {
-                fysiskpostSendt {
-                    adressetekstKonvolutt
-                }
-                digitalpostSendt {
-                    adresse
-                }
-                varselSendt {
-                    type
-                    adresse
-                    tittel
-                    tekst
-                    tidspunkt
-                }
-            }
         }
     }
 }

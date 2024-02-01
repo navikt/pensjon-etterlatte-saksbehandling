@@ -51,6 +51,7 @@ updates:
           - "ch.qos.logback*"
           - "net.logstash*"
           - "com.github.navikt:rapids-and-rivers"
+          - "ca.cutterslade.analyze"
           - "io.ktor*"
           - "org.jetbrains.kotlinx*"
       jms-mq:

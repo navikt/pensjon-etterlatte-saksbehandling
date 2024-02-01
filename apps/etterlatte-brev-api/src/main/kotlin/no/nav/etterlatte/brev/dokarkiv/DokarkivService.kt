@@ -123,24 +123,17 @@ data class JournalfoeringsMappingRequest(
     val sakType: SakType,
     val journalfoerendeEnhet: String,
 ) {
-    fun avsenderMottaker() = brev.avsenderMottaker()
-
-    private fun Brev.avsenderMottaker(): AvsenderMottaker =
-        AvsenderMottaker(
-            id = this.mottaker.foedselsnummer?.value ?: this.mottaker.orgnummer,
-            idType =
-                if (this.mottaker.foedselsnummer != null) {
-                    "FNR"
-                } else if (this.mottaker.orgnummer != null) {
-                    "ORGNR"
-                } else {
-                    null
-                },
-            navn =
-                if (this.mottaker.foedselsnummer?.value != null || this.mottaker.orgnummer != null) {
-                    null
-                } else {
-                    this.mottaker.navn
-                },
-        )
+    fun avsenderMottaker() =
+        with(brev.mottaker) {
+            AvsenderMottaker(
+                id = foedselsnummer?.value ?: orgnummer,
+                idType =
+                    when {
+                        foedselsnummer != null -> "FNR"
+                        orgnummer != null -> "ORGNR"
+                        else -> "UKJENT"
+                    },
+                navn = navn,
+            )
+        }
 }

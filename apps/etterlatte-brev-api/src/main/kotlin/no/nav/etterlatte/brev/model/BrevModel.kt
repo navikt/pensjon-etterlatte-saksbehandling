@@ -180,3 +180,10 @@ data class EtterbetalingDTO(
     val datoFom: LocalDate,
     val datoTom: LocalDate,
 )
+
+enum class Brevtype {
+    VEDTAK,
+    VARSEL,
+    INFORMASJON,
+    UKJENT,
+}

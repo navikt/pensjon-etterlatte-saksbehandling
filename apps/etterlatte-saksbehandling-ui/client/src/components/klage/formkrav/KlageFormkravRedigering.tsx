@@ -58,7 +58,7 @@ const klageFormkravTilDefaultFormValues = (klage: Klage | null): FormDataFormkra
     const { vedtaketKlagenGjelder, ...skjemafelter } = klage.formkrav.formkrav
     return {
       ...skjemafelter,
-      vedtaketKlagenGjelderId: vedtaketKlagenGjelder?.id ?? null,
+      vedtaketKlagenGjelderId: vedtaketKlagenGjelder?.id ?? '-1',
     }
   }
 }

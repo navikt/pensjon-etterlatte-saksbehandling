@@ -32,37 +32,12 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
         logger.info("Sjekk om det finnes tjenestepensjonsforhold pr $fomDato for ordning '$tpnr'")
 
         val tp: SamhandlerPersonDto =
-            try {
+            handleFeil(fnr, tpnr, fomDato) {
                 httpClient.get {
                     url("$tjenestepensjonUrl/finnForholdForBruker?datoFom=$fomDato")
                     header("fnr", fnr)
                     header("tpnr", tpnr.value)
                 }.body()
-            } catch (e: ClientRequestException) {
-                when (e.response.status) {
-                    HttpStatusCode.Unauthorized -> {
-                        logger.error("Feil ved tilgang til TP-registeret", e)
-                        throw TjenestepensjonInternFeil("TP: Ikke tilgang")
-                    }
-                    HttpStatusCode.BadRequest -> {
-                        logger.error("Feil ved input til TP-registeret", e)
-                        throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel")
-                    }
-                    HttpStatusCode.NotFound -> {
-                        val tpError = e.toTjenestepensjonFeil()
-                        if (tpError.message.contains("Person ikke funnet")) {
-                            sikkerLogg.warn("Sjekk av tjenestepensjonsforhold feilet for [fnr=$fnr, fomDato=$fomDato, tpNr=$tpnr]")
-                            throw TjenestepensjonIkkeFunnetException("TP: Person ikke funnet")
-                        } else {
-                            logger.error("Fant ikke forespurt ressurs i TP-registeret", e)
-                            throw TjenestepensjonInternFeil("TP: Ressurs ikke funnet")
-                        }
-                    }
-                    else -> {
-                        logger.error("Feil i kontroll mot TP-registeret", e)
-                        throw e
-                    }
-                }
             }
 
         return tp.forhold.isNotEmpty()
@@ -76,41 +51,53 @@ class TjenestepensjonKlient(config: Config, private val httpClient: HttpClient) 
         logger.info("Sjekk om det finnes tjenestepensjonsytelse pr $fomDato for ordning '$tpnr'")
 
         val tpNumre: TpNumre =
-            try {
+            handleFeil(fnr, tpnr, fomDato) {
                 httpClient.get {
                     url("$tjenestepensjonUrl/tpNrWithYtelse?fomDate=$fomDato")
                     header("fnr", fnr)
                 }.let { deserialize<TpNumre>(it.body()) }
-            } catch (e: ClientRequestException) {
-                sikkerLogg.error("Feil ved sjekk av tjenestepensjonsytelse for [fnr=$fnr, fomDato=$fomDato, tpNr=$tpnr]", e)
-                logger.error("Feil i kontroll mot TP-registeret", e)
-                when (e.response.status) {
-                    HttpStatusCode.Unauthorized -> {
-                        logger.error("Feil ved tilgang til TP-registeret", e)
-                        throw TjenestepensjonInternFeil("TP: Ikke tilgang")
-                    }
-                    HttpStatusCode.BadRequest -> {
-                        logger.error("Feil ved input til TP-registeret", e)
-                        throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel")
-                    }
-                    HttpStatusCode.NotFound -> {
-                        val tpError = e.toTjenestepensjonFeil()
-                        if (tpError.message.contains("Person ikke funnet")) {
-                            sikkerLogg.warn("Sjekk av tjenestepensjonsytelse feilet for [fnr=$fnr, fomDato=$fomDato, tpNr=$tpnr]")
-                            throw TjenestepensjonIkkeFunnetException("TP: Person ikke funnet")
-                        } else {
-                            logger.error("Fant ikke forespurt ressurs i TP-registeret", e)
-                            throw TjenestepensjonInternFeil("TP: Ressurs ikke funnet")
-                        }
-                    }
-                    else -> {
-                        logger.error("Feil i kontroll mot TP-registeret", e)
-                        throw e
-                    }
-                }
             }
 
         return tpNumre.tpNr.contains(tpnr.value)
+    }
+
+    private suspend inline fun <T> handleFeil(
+        fnr: String,
+        tpnr: Tjenestepensjonnummer,
+        fomDato: LocalDate,
+        block: () -> T,
+    ): T {
+        try {
+            return block.invoke()
+        } catch (e: ClientRequestException) {
+            when (e.response.status) {
+                HttpStatusCode.Unauthorized -> {
+                    logger.error("Feil ved tilgang til TP-registeret", e)
+                    throw TjenestepensjonInternFeil("TP: Ikke tilgang")
+                }
+
+                HttpStatusCode.BadRequest -> {
+                    logger.error("Feil ved input til TP-registeret", e)
+                    throw TjenestepensjonUgyldigForesporselException("TP: Ugyldig forespørsel")
+                }
+
+                HttpStatusCode.NotFound -> {
+                    val tpError = e.toTjenestepensjonFeil()
+                    if (tpError.message.contains("Person ikke funnet")) {
+                        sikkerLogg.warn("Sjekk av TP feilet for [fnr=$fnr, fomDato=$fomDato, tpNr=$tpnr]")
+                        throw TjenestepensjonIkkeFunnetException("TP: Person ikke funnet")
+                    } else {
+                        logger.error("Fant ikke forespurt ressurs i TP-registeret", e)
+                        throw TjenestepensjonInternFeil("TP: Ressurs ikke funnet")
+                    }
+                }
+
+                else -> {
+                    logger.error("Feil i kontroll mot TP-registeret", e)
+                    throw e
+                }
+            }
+        }
     }
 }
 

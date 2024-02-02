@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
-import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -88,7 +87,6 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService) {
                     RedigerbarTekstRequest(
                         generellBrevData = generellBrevData,
                         brukerTokenInfo = bruker,
-                        prosessType = BrevProsessType.REDIGERBAR,
                         brevkode = { _, _ -> kode },
                     ),
                 ),

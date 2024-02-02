@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevKodeMapper
-import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -55,7 +54,6 @@ class BrevbakerService(
 data class RedigerbarTekstRequest(
     val generellBrevData: GenerellBrevData,
     val brukerTokenInfo: BrukerTokenInfo,
-    val prosessType: BrevProsessType,
     val brevkode: (mapper: BrevKodeMapper, g: GenerellBrevData) -> EtterlatteBrevKode,
     val migrering: MigreringBrevRequest? = null,
 ) {

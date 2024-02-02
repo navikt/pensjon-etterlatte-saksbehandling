@@ -82,7 +82,7 @@ class Brevoppretter(
                 OpprettNyttBrev(
                     sakId = sakId,
                     behandlingId = behandlingId,
-                    prosessType = prosessType,
+                    prosessType = BrevProsessType.REDIGERBAR,
                     soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
                     mottaker = finnMottaker(generellBrevData.personerISak),
                     opprettet = Tidspunkt.now(),
@@ -126,8 +126,6 @@ class Brevoppretter(
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
 
-        val prosessType = BrevProsessType.REDIGERBAR
-
         val brevkode: (mapper: BrevKodeMapper, g: GenerellBrevData) -> EtterlatteBrevKode =
             if (brevKode != null) {
                 { _, _ -> brevKode }
@@ -144,7 +142,6 @@ class Brevoppretter(
                         RedigerbarTekstRequest(
                             generellBrevData,
                             bruker,
-                            prosessType,
                             brevkode,
                             automatiskMigreringRequest,
                         ),
@@ -152,8 +149,8 @@ class Brevoppretter(
                     )
                 }
 
-            val innholdVedlegg = async { opprettInnholdVedlegg(bruker, generellBrevData, prosessType) }
-            OpprettBrevRequest(generellBrevData, prosessType, innhold.await(), innholdVedlegg.await())
+            val innholdVedlegg = async { redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData) }
+            OpprettBrevRequest(generellBrevData, innhold.await(), innholdVedlegg.await())
         }
     }
 
@@ -182,31 +179,13 @@ class Brevoppretter(
         muligTittel: String?,
     ): BrevInnhold {
         val tittel = muligTittel ?: (redigerbarTekstRequest.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
-        val payload =
-            when (redigerbarTekstRequest.prosessType) {
-                BrevProsessType.REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest)
-                else -> throw IllegalStateException(
-                    "Vi skal kun opprette innhold for brev med prosesstype redigerbar, ikke ${redigerbarTekstRequest.prosessType}",
-                )
-            }
-
+        val payload = brevbaker.hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest)
         return BrevInnhold(tittel, redigerbarTekstRequest.generellBrevData.spraak, payload)
     }
-
-    private suspend fun opprettInnholdVedlegg(
-        bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-        prosessType: BrevProsessType,
-    ): List<BrevInnholdVedlegg>? =
-        when (prosessType) {
-            BrevProsessType.REDIGERBAR -> redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData)
-            else -> throw IllegalStateException("Vi skal kun opprette innhold for brev med prosesstype redigerbar, ikke $prosessType")
-        }
 }
 
 private data class OpprettBrevRequest(
     val generellBrevData: GenerellBrevData,
-    val prosessType: BrevProsessType,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
 )

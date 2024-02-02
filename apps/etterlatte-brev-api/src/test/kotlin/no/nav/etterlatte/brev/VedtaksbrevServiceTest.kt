@@ -83,7 +83,7 @@ internal class VedtaksbrevServiceTest {
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
     private val brevDataMapper = BrevDataMapper(brevdataFacade, migreringBrevDataService)
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade, migreringBrevDataService, brevDataMapper)
+    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade, brevDataMapper)
     private val brevKodeMapper = BrevKodeMapper()
     private val brevbakerService = mockk<BrevbakerService>()
     private val pdfGenerator =

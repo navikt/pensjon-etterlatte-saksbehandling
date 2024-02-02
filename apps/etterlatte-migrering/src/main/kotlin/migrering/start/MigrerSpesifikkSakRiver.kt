@@ -54,6 +54,7 @@ internal class MigrerSpesifikkSakRiver(
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(LOPENDE_JANUAR_2024_KEY) }
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }
+            validate { it.requireKey("stub") }
         }
     }
 
@@ -92,9 +93,12 @@ internal class MigrerSpesifikkSakRiver(
         val lopendeJanuar2024 = packet.loependeJanuer2024
 
         val pesyssak =
+        /*
             hentSak(sakId, lopendeJanuar2024)
                 .tilVaarModell { runBlocking { krrKlient.hentDigitalKontaktinformasjon(it) } }
                 .also { pesysRepository.lagrePesyssak(pesyssak = it) }
+         */
+            objectMapper.readValue(packet["stub"].asText(), Pesyssak::class.java).also { pesysRepository.lagrePesyssak(pesyssak = it) }
         packet.setEventNameForHendelseType(Migreringshendelser.MIGRER_SAK)
 
         val verifisertRequest =

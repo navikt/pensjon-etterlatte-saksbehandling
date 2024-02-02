@@ -173,7 +173,7 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
                 prepareStatement(
                     """
                     SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
-                    FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                    FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                     WHERE o.type = ANY(?)
                     AND (? = true OR o.enhet = ANY(?))
                     AND (

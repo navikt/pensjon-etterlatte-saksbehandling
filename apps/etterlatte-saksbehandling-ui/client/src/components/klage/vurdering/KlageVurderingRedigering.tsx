@@ -50,7 +50,7 @@ function erSkjemaUtfylt(skjema: FormdataVurdering): skjema is FilledFormDataVurd
   }
   if (skjema.utfall === Utfall.STADFESTE_VEDTAK || skjema.utfall === Utfall.DELVIS_OMGJOERING) {
     const { innstilling } = skjema
-    if (!innstilling || !innstilling.lovhjemmel || !innstilling.internKommentar) {
+    if (!innstilling || !innstilling.lovhjemmel) {
       return false
     }
   }

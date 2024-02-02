@@ -12,7 +12,7 @@ class BrevKodeMapper {
         brevProsessType: BrevProsessType,
         erOmregningNyRegel: Boolean = false,
     ) = when (brevProsessType) {
-        BrevProsessType.AUTOMATISK -> brevKodeAutomatisk(generellBrevData, erOmregningNyRegel)
+        BrevProsessType.AUTOMATISK -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype automatisk")
         BrevProsessType.REDIGERBAR -> brevKodeAutomatisk(generellBrevData, erOmregningNyRegel)
         BrevProsessType.MANUELL -> Brevkoder(OMSTILLINGSSTOENAD_REVURDERING_OPPHOER_MANUELL)
         BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException("Brevkode ikke relevant for ${BrevProsessType.OPPLASTET_PDF}")

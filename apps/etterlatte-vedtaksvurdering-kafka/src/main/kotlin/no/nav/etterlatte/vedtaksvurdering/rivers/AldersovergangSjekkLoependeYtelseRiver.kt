@@ -1,12 +1,15 @@
 package no.nav.etterlatte.vedtaksvurdering.rivers
 
 import no.nav.etterlatte.VedtakService
-import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangEvents
+import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents
+import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import rapidsandrivers.ALDERSOVERGANG_ID_KEY
+import rapidsandrivers.ALDERSOVERGANG_STEP_KEY
+import rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
 import rapidsandrivers.DATO_KEY
 import rapidsandrivers.ListenerMedLogging
 import rapidsandrivers.SAK_ID_KEY
@@ -20,7 +23,10 @@ class AldersovergangSjekkLoependeYtelseRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakAldersovergangEvents.SJEKK_LOEPENDE_YTELSE) {
+        initialiserRiver(rapidsConnection, EventNames.ALDERSOVERANG) {
+            validate { it.requireValue(ALDERSOVERGANG_STEP_KEY, VedtakAldersovergangStepEvents.SJEKK_LOEPENDE_YTELSE.name) }
+            validate { it.requireKey(ALDERSOVERGANG_TYPE_KEY) }
+            validate { it.requireKey(ALDERSOVERGANG_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(DATO_KEY) }
         }
@@ -37,7 +43,7 @@ class AldersovergangSjekkLoependeYtelseRiver(
         val loependeYtelse = vedtakService.harLoependeYtelserFra(sakId, datoFoersteIAktuellBehandlingsmaaned)
         logger.info("Sak $sakId, dato=$datoFoersteIAktuellBehandlingsmaaned har løpende ytelse: ${loependeYtelse.erLoepende}")
 
-        packet.setEventNameForHendelseType(VedtakAldersovergangEvents.SJEKK_LOEPENDE_YTELSE_RESULTAT)
+        packet["ao_step"] = VedtakAldersovergangStepEvents.LOEPENDE_YTELSE_RESULTAT.name
         packet["loependeYtelse"] = loependeYtelse.erLoepende
         context.publish(packet.toJson())
     }

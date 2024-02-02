@@ -84,6 +84,7 @@ export function KlageFormkravRedigering() {
     control,
     handleSubmit,
     formState: { isDirty },
+    register,
   } = useForm<FormDataFormkrav>({
     defaultValues: klageFormkravTilDefaultFormValues(klage),
   })
@@ -213,14 +214,7 @@ export function KlageFormkravRedigering() {
           <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
 
           <VurderingWrapper>
-            <Controller
-              name="begrunnelse"
-              control={control}
-              render={({ field }) => {
-                const { value, ...rest } = field
-                return <Textarea label="Begrunnelse (valgfritt)" value={value ?? ''} {...rest} />
-              }}
-            />
+            <Textarea {...register('begrunnelse')} label="Begrunnelse (valgfritt)" />
           </VurderingWrapper>
         </InnholdPadding>
         <FlexRow justify="center">

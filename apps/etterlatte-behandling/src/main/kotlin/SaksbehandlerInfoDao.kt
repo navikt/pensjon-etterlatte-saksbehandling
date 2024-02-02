@@ -6,7 +6,7 @@ import no.nav.etterlatte.libs.database.toList
 import javax.sql.DataSource
 
 class SaksbehandlerInfoDao(private val dataSource: DataSource) {
-    fun hentalleSaksbehandlere(): List<String?> {
+    fun hentalleSaksbehandlere(): List<String> {
         dataSource.connection.use {
             val statement =
                 it.prepareStatement(
@@ -16,7 +16,7 @@ class SaksbehandlerInfoDao(private val dataSource: DataSource) {
                 )
             return statement.executeQuery().toList {
                 getString("saksbehandler")
-            }
+            }.filterNotNull()
         }
     }
 
@@ -25,7 +25,7 @@ class SaksbehandlerInfoDao(private val dataSource: DataSource) {
             val statement =
                 it.prepareStatement(
                     """
-                    INSERT INTO saksbehandlerInfo(id, navn) 
+                    INSERT INTO saksbehandler_info(id, navn) 
                     VALUES(?,?)
                     ON CONFLICT (id)
                     DO UPDATE SET navn = excluded.navn
@@ -42,7 +42,7 @@ class SaksbehandlerInfoDao(private val dataSource: DataSource) {
             val statement =
                 it.prepareStatement(
                     """
-                    SELECT EXISTS(SELECT 1 FROM saksbehandlerInfo where id = ?);
+                    SELECT EXISTS(SELECT 1 FROM saksbehandler_info where id = ?);
                     """.trimIndent(),
                 )
             statement.setString(1, ident)

@@ -12,13 +12,13 @@ import kotlin.time.measureTime
 
 @OptIn(DelicateCoroutinesApi::class)
 internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
-    if (context.leaderElectionKlient.isLeader()) {
+    if (context.leaderElectionKlient.isLeader() || true) {
         GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
             val logger = LoggerFactory.getLogger("saksbehandlernavnjob")
             val tidbrukt =
                 measureTime {
                     logger.info("Starter job for å legge inn saksbehandlere med navn")
-                    val sbidenter = context.saksbehandlerInfoDao.hentalleSaksbehandlere().mapNotNull { it }
+                    val sbidenter = context.saksbehandlerInfoDao.hentalleSaksbehandlere()
                     logger.info("Antall identer ${sbidenter.size}")
 
                     val filtrerteIdenter = sbidenter.filter { !context.saksbehandlerInfoDao.saksbehandlerFinnes(it) }

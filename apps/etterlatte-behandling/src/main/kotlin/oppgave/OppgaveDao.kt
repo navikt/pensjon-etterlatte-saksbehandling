@@ -150,7 +150,7 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
             val statement =
                 prepareStatement(
                     """
-                    SELECT * FROM saksbehandlerInfo
+                    SELECT * FROM saksbehandler_info
                     WHERE id = ANY(?)
                     """.trimIndent(),
                 )

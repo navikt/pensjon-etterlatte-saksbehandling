@@ -11,6 +11,7 @@ export function kanVurdereUtfall(klage: Klage | null): boolean {
   switch (klageStatus) {
     case KlageStatus.UTFALL_VURDERT:
     case KlageStatus.FORMKRAV_OPPFYLT:
+    case KlageStatus.FORMKRAV_IKKE_OPPFYLT:
       return true
     case KlageStatus.FERDIGSTILT:
       return klage?.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.JA
@@ -45,11 +46,15 @@ export function KlageStegmeny() {
   return (
     <StegMenyWrapper>
       <KlageNavLenke path="formkrav" description="Vurder formkrav" enabled={true} />
-      <KlageNavLenke path="vurdering" description="Vurder klagen" enabled={kanVurdereUtfall(klage)} />
+      <KlageNavLenke path="vurdering" description={tittelVurderingSteg()} enabled={kanVurdereUtfall(klage)} />
       <KlageNavLenke path="brev" description="Brev" enabled={kanSeBrev(klage)} />
       <KlageNavLenke path="oppsummering" description="Oppsummering" enabled={kanSeOppsummering(klage)} />
     </StegMenyWrapper>
   )
+
+  function tittelVurderingSteg() {
+    return klage?.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.JA ? 'Vurder klagen' : 'Innhent informasjon'
+  }
 }
 
 export function nesteSteg(klage: Klage, aktivSide: 'formkrav' | 'vurdering' | 'brev' | 'oppsummering'): string {

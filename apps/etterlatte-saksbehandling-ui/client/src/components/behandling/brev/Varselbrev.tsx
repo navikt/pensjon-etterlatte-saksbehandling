@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Alert, Button, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { hentVarselbrev, opprettVedtaksbrev } from '~shared/api/brev'
+import { hentVarselbrev, opprettVarselbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/Soeknadsdato'
 import styled from 'styled-components'
@@ -41,7 +41,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { next } = useBehandlingRoutes()
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVarselbrev)
-  const [opprettBrevStatus, opprettNyttVarselbrev] = useApiCall(opprettVedtaksbrev)
+  const [opprettBrevStatus, opprettNyttVarselbrev] = useApiCall(opprettVarselbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
 
   const onSubmit = () => {

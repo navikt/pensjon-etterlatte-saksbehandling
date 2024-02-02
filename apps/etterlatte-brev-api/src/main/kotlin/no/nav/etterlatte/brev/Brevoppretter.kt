@@ -19,7 +19,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -163,7 +162,7 @@ class Brevoppretter(
 
                 else -> {
                     val mottakerFnr =
-                        innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name }
+                        innsender?.fnr?.value?.takeIf { Folkeregisteridentifikator.isValid(it) }
                             ?: soeker.fnr.value
                     adresseService.hentMottakerAdresse(mottakerFnr)
                 }

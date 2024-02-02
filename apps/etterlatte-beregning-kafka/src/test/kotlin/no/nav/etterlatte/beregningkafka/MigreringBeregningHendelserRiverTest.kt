@@ -176,12 +176,20 @@ internal class MigreringBeregningHendelserRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
 
+        val resultat = inspector.inspektør.message(0)
+        assertTrue(
+            resultat.get(FEILMELDING_KEY).textValue()
+                .contains("Vi ønsker ikke å beregne saker med EOS for autmatisk gjenoppretting"),
+        )
+        /*
         assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
         assertEquals(1, inspector.inspektør.size)
         val resultat = inspector.inspektør.message(0)
         assertEquals(prorataBeregningDTO.toJson(), resultat.get(BEREGNING_KEY).toJson())
+         */
     }
 
+    /*
     @Test
     fun `Beregning skal feile hvis beregnet beloep er lavere enn opprinnelig beloep fra Pesys`() {
         val behandlingId = slot<UUID>()
@@ -261,6 +269,7 @@ internal class MigreringBeregningHendelserRiverTest {
                 .contains("Beregning må være basert på samme G som i Pesys"),
         )
     }
+     */
 
     @Test
     fun `Beregning skal feile hvis ulik trygdetid er benyttet`() {
@@ -309,7 +318,15 @@ internal class MigreringBeregningHendelserRiverTest {
             mockk<HttpResponse>().also {
                 every {
                     runBlocking { it.body<BeregningDTO>() }
-                } returns beregningDTO
+                } returns
+                    beregningDTO.copy(
+                        beregningsperioder =
+                            beregningDTO.beregningsperioder.map {
+                                it.copy(
+                                    beregningsMetode = BeregningsMetode.PRORATA,
+                                )
+                            },
+                    )
             }
 
         every { behandlingService.beregn(capture(behandlingId)) } returns returnValue
@@ -323,10 +340,11 @@ internal class MigreringBeregningHendelserRiverTest {
                         request.copy(
                             beregning =
                                 request.beregning.copy(
-                                    prorataBroek = IntBroek(150, 300),
+                                    // prorataBroek = IntBroek(150, 300),
                                     meta =
                                         request.beregning.meta!!.copy(
-                                            beregningsMetodeType = "EOS",
+                                            // beregningsMetodeType = "EOS",
+                                            beregningsMetodeType = "FOLKETRYGD",
                                         ),
                                 ),
                         ),

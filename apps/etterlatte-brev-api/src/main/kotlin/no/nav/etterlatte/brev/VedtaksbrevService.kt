@@ -44,14 +44,13 @@ class VedtaksbrevService(
         brukerTokenInfo: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         // TODO EY-3232 - Fjerne migreringstilpasning
-    ): Brev {
-        return brevoppretter.opprettVedtaksbrev(
+    ): Brev =
+        brevoppretter.opprettVedtaksbrev(
             sakId = sakId,
             behandlingId = behandlingId,
             brukerTokenInfo = brukerTokenInfo,
             automatiskMigreringRequest = automatiskMigreringRequest,
         )
-    }
 
     suspend fun genererPdf(
         id: BrevID,
@@ -63,12 +62,7 @@ class VedtaksbrevService(
             bruker = bruker,
             automatiskMigreringRequest = automatiskMigreringRequest,
             avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
-            brevKode = { generellBrevData, brev ->
-                brevKodeMapper.brevKode(
-                    generellBrevData,
-                    brev.prosessType,
-                )
-            },
+            brevKode = { brevKodeMapper.brevKode(it) },
         ) { generellBrevData, brev, pdf ->
             lagrePdfHvisVedtakFattet(
                 brev.id,

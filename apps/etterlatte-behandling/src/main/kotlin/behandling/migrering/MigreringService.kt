@@ -67,27 +67,27 @@ class MigreringService(
                             "Finnes allerede behandling for sak=${behandling.sak.id}. Stopper migrering for pesysId=${request.pesysId}",
                         )
                     }
-                    val pesys = Vedtaksloesning.PESYS.name
+                    val gjenoppretta = Vedtaksloesning.GJENOPPRETTA.name
                     kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
                         KommerBarnetTilgode(
                             JaNei.JA,
-                            "Automatisk importert fra Pesys",
+                            "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
                             Grunnlagsopplysning.Pesys.create(),
                             behandlingId = behandling.id,
                         ),
                     )
                     gyldighetsproevingService.lagreGyldighetsproeving(
                         behandling.id,
-                        pesys,
-                        JaNeiMedBegrunnelse(JaNei.JA, "Automatisk importert fra Pesys"),
+                        gjenoppretta,
+                        JaNeiMedBegrunnelse(JaNei.JA, "Automatisk gjenoppretta basert på opphørt sak fra Pesys"),
                     )
 
                     val virkningstidspunktForMigrering = YearMonth.of(2024, 1)
                     behandlingService.oppdaterVirkningstidspunkt(
                         behandling.id,
                         virkningstidspunktForMigrering,
-                        pesys,
-                        "Automatisk importert fra Pesys",
+                        gjenoppretta,
+                        "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
                     )
 
                     sakService.oppdaterFlyktning(
@@ -96,7 +96,7 @@ class MigreringService(
                             Flyktning(
                                 erFlyktning = request.flyktningStatus,
                                 virkningstidspunkt = request.foersteVirkningstidspunkt.atDay(1),
-                                begrunnelse = "Automatisk migrert fra Pesys",
+                                begrunnelse = "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
                                 kilde = Grunnlagsopplysning.Pesys.create(),
                             ),
                     )
@@ -108,7 +108,7 @@ class MigreringService(
                                 Utlandstilknytning(
                                     type = utlandstilknytning,
                                     kilde = Grunnlagsopplysning.Pesys.create(),
-                                    begrunnelse = "Automatisk migrert fra Pesys",
+                                    begrunnelse = "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
                                 ),
                         )
                     }
@@ -122,16 +122,16 @@ class MigreringService(
                                     boddArbeidetEosNordiskKonvensjon = request.erEoesBeregnet().takeIf { it },
                                     kilde = Grunnlagsopplysning.Pesys.create(),
                                     begrunnelse =
-                                        "Automatisk vurdert ved migrering fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
+                                        "Automatisk vurdert ved gjenoppretting fra Pesys. Vurdering av utlandsopphold kan være mangelfull.",
                                 ),
                         )
                     }
 
                     val nyopprettaOppgave =
                         requireNotNull(behandlingOgOppgave.oppgave) {
-                            "Mangler oppgave for behandling=${behandling.id}. Stopper migrering for pesysId=${request.pesysId}"
+                            "Mangler oppgave for behandling=${behandling.id}. Stopper gjenoppretting for pesysId=${request.pesysId}"
                         }
-                    oppgaveService.tildelSaksbehandler(nyopprettaOppgave.id, pesys)
+                    oppgaveService.tildelSaksbehandler(nyopprettaOppgave.id, gjenoppretta)
 
                     behandlingsHendelser.sendMeldingForHendelseMedDetaljertBehandling(
                         behandling.toStatistikkBehandling(request.opprettPersongalleri(), pesysId = request.pesysId.id),
@@ -148,7 +148,7 @@ class MigreringService(
             referanse = request.pesysId.toString(),
             sakId = sak.id,
             oppgaveKilde = OppgaveKilde.BEHANDLING,
-            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING, // TODO lage egen type?
+            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
             merknad = "Oppgave for manuell gjenoppretting av opphørt sak i Pesys",
             frist = Tidspunkt.now().plus(5, ChronoUnit.DAYS),
         )
@@ -166,7 +166,7 @@ class MigreringService(
         sakId = sak.id,
         persongalleri = request.opprettPersongalleri(),
         mottattDato = null,
-        kilde = Vedtaksloesning.PESYS,
+        kilde = Vedtaksloesning.GJENOPPRETTA,
         prosessType = Prosesstype.AUTOMATISK,
     )
 

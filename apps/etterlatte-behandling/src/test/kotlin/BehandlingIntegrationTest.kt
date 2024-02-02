@@ -92,7 +92,6 @@ abstract class BehandlingIntegrationTest {
                         put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", "753805ea-65a7-4855-bdc3-e6130348df9f")
                         put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", "ea7411eb-8b48-41a0-bc56-7b521fbf0c25")
                         put("NORG2_URL", "http://localhost")
-                        put("ELECTOR_PATH", "http://localhost")
                         put("NAVANSATT_URL", "http://localhost")
                         put("SKJERMING_URL", "http://localhost")
                         put("OPPGAVE_URL", "http://localhost")

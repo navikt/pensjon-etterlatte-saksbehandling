@@ -217,7 +217,8 @@ internal class ApplicationContext(
     val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
-    val leaderElectionKlient = LeaderElection("localhost:9094", leaderElectionHttpClient)
+    val leaderElectionKlient = LeaderElection(env.maybeEnvValue("ELECTOR_PATH"), leaderElectionHttpClient)
+
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
     val klageHendelser = KlageHendelserServiceImpl(rapid)
     val tilbakekreving = TilbakekrevingHendelserServiceImpl(rapid)
@@ -227,8 +228,7 @@ internal class ApplicationContext(
     val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue("ETTERLATTE_MIGRERING_URL"))
 
     // Service
-    val oppgaveService =
-        OppgaveService(oppgaveDaoEndringer, sakDao)
+    val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao)
 
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient)
     val grunnlagsService = GrunnlagService(grunnlagKlient)

@@ -19,7 +19,6 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -27,7 +26,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class Brevoppretter(
@@ -37,8 +35,6 @@ class Brevoppretter(
     private val brevbaker: BrevbakerService,
     private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     suspend fun opprettVedtaksbrev(
         sakId: Long,
         behandlingId: UUID,
@@ -46,7 +42,7 @@ class Brevoppretter(
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         // TODO EY-3232 - Fjerne migreringstilpasning
     ): Brev {
-        require(hentVedtaksbrev(behandlingId) == null) {
+        require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
         }
 
@@ -82,7 +78,7 @@ class Brevoppretter(
                 OpprettNyttBrev(
                     sakId = sakId,
                     behandlingId = behandlingId,
-                    prosessType = prosessType,
+                    prosessType = BrevProsessType.REDIGERBAR,
                     soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
                     mottaker = finnMottaker(generellBrevData.personerISak),
                     opprettet = Tidspunkt.now(),
@@ -126,34 +122,36 @@ class Brevoppretter(
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
 
-        val prosessType = BrevProsessType.REDIGERBAR
-
         val brevkode: (mapper: BrevKodeMapper, g: GenerellBrevData) -> EtterlatteBrevKode =
             if (brevKode != null) {
                 { _, _ -> brevKode }
             } else {
                 { mapper, data ->
-                    mapper.brevKode(data, BrevProsessType.REDIGERBAR).redigering
+                    mapper.brevKode(data).redigering
                 }
             }
 
+        val tittel =
+            brevKode?.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
         return coroutineScope {
             val innhold =
                 async {
-                    opprettInnhold(
+                    brevbaker.hentRedigerbarTekstFraBrevbakeren(
                         RedigerbarTekstRequest(
                             generellBrevData,
                             bruker,
-                            prosessType,
                             brevkode,
                             automatiskMigreringRequest,
                         ),
-                        brevKode?.tittel,
                     )
                 }
 
-            val innholdVedlegg = async { opprettInnholdVedlegg(bruker, generellBrevData, prosessType) }
-            OpprettBrevRequest(generellBrevData, prosessType, innhold.await(), innholdVedlegg.await())
+            val innholdVedlegg = async { redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData) }
+            OpprettBrevRequest(
+                generellBrevData,
+                BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),
+                innholdVedlegg.await(),
+            )
         }
     }
 
@@ -164,53 +162,16 @@ class Brevoppretter(
 
                 else -> {
                     val mottakerFnr =
-                        innsender?.fnr?.value?.takeUnless { it == Vedtaksloesning.PESYS.name }
+                        innsender?.fnr?.value?.takeIf { Folkeregisteridentifikator.isValid(it) }
                             ?: soeker.fnr.value
                     adresseService.hentMottakerAdresse(mottakerFnr)
                 }
             }
         }
-
-    fun hentVedtaksbrev(behandlingId: UUID): Brev? {
-        logger.info("Henter vedtaksbrev for behandling (id=$behandlingId)")
-
-        return db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull()
-    }
-
-    private suspend fun opprettInnhold(
-        redigerbarTekstRequest: RedigerbarTekstRequest,
-        muligTittel: String?,
-    ): BrevInnhold {
-        val tittel = muligTittel ?: (redigerbarTekstRequest.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
-        val payload =
-            when (redigerbarTekstRequest.prosessType) {
-                BrevProsessType.REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest)
-                BrevProsessType.AUTOMATISK -> null
-                BrevProsessType.MANUELL -> throw IllegalStateException("Brevdata ikke relevant for ${BrevProsessType.MANUELL}")
-                BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException("Payload ikke relevant for ${BrevProsessType.OPPLASTET_PDF}")
-            }
-
-        return BrevInnhold(tittel, redigerbarTekstRequest.generellBrevData.spraak, payload)
-    }
-
-    private suspend fun opprettInnholdVedlegg(
-        bruker: BrukerTokenInfo,
-        generellBrevData: GenerellBrevData,
-        prosessType: BrevProsessType,
-    ): List<BrevInnholdVedlegg>? =
-        when (prosessType) {
-            BrevProsessType.REDIGERBAR -> redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData)
-            BrevProsessType.AUTOMATISK -> null
-            BrevProsessType.MANUELL -> null
-            BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException(
-                "Vedlegg payload ikke relevant for ${BrevProsessType.OPPLASTET_PDF}",
-            )
-        }
 }
 
 private data class OpprettBrevRequest(
     val generellBrevData: GenerellBrevData,
-    val prosessType: BrevProsessType,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
 )

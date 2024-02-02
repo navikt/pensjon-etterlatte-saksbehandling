@@ -92,7 +92,7 @@ class ApplicationBuilder {
             behandlingKlient,
         )
 
-    val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), httpClient())
+    val leaderElectionKlient = LeaderElection(env["ELECTOR_PATH"], httpClient())
     private val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
             VedtakMetrics(VedtakMetrikkerDao.using(dataSource)),

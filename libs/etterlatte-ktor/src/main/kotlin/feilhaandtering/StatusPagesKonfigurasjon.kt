@@ -7,7 +7,6 @@ import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.plugins.statuspages.StatusPagesConfig
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
-import isProd
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -15,6 +14,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilLoggerException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
 import org.slf4j.Logger
 

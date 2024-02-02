@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import kotlin.time.measureTime
 
 @OptIn(DelicateCoroutinesApi::class)
-internal fun populerSaksbendlereMedNavn(context: ApplicationContext) {
+internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
     if (context.leaderElectionKlient.isLeader()) {
         GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
             val logger = LoggerFactory.getLogger("saksbehandlernavnjob")

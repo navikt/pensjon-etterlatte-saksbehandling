@@ -20,7 +20,7 @@ import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
-import no.nav.etterlatte.behandling.job.populerSaksbendlereMedNavn
+import no.nav.etterlatte.behandling.job.populerSaksbehandlereMedNavn
 import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
@@ -75,7 +75,7 @@ private class Server(private val context: ApplicationContext) {
     fun run() =
         with(context) {
             dataSource.migrate()
-            populerSaksbendlereMedNavn(context)
+            populerSaksbehandlereMedNavn(context)
             setReady().also { engine.start(true) }
         }
 }

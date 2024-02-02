@@ -126,6 +126,12 @@ spec:
           permissions:
             roles:
               - les-oms-vedtak
+        - application: alderspensjon-endringssoknad-backend-q2
+          namespace: pensjonselvbetjening
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
         - application: ida
           namespace: traktor
           cluster: prod-fss

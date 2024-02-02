@@ -13,13 +13,18 @@ import {
   filtrerOppgaveStatus,
   initialFilter,
   OPPGAVESTATUSFILTER,
-} from '~components/oppgavebenk/oppgavelistafiltre'
+} from '~components/oppgavebenk/filter/oppgavelistafiltre'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Tilgangsmelding } from '~components/oppgavebenk/Tilgangsmelding'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
+import {
+  eksistererFilterILocalStorage,
+  hentFilterFraLocalStorage,
+  leggFilterILocalStorage,
+} from '~components/oppgavebenk/filter/filterLocalStorage'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -30,7 +35,7 @@ export const ToggleMinOppgaveliste = () => {
   }
 
   const [filter, setFilter] = useState<Filter>(
-    !!localStorage['filter'] ? JSON.parse(localStorage['filter']) : initialFilter()
+    eksistererFilterILocalStorage() ? hentFilterFraLocalStorage() : initialFilter()
   )
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
   const [oppgaver, hentOppgaverFetch] = useApiCall(hentOppgaver)
@@ -63,16 +68,16 @@ export const ToggleMinOppgaveliste = () => {
   // og den felles oppgavelisten. Vet egt ikke helt om dette er ønsket behaviour
   useEffect(() => {
     if (oppgaveListeValg === 'MinOppgaveliste') {
-      !!localStorage['filter']
+      eksistererFilterILocalStorage()
         ? setFilter({
-            ...JSON.parse(localStorage['filter']),
+            ...hentFilterFraLocalStorage(),
             oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
           })
         : setFilter({ ...initialFilter(), oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING] })
     } else {
-      !!localStorage['filter']
+      eksistererFilterILocalStorage()
         ? setFilter({
-            ...JSON.parse(localStorage['filter']),
+            ...hentFilterFraLocalStorage(),
             oppgavestatusFilter: [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
           })
         : setFilter(initialFilter())
@@ -80,7 +85,7 @@ export const ToggleMinOppgaveliste = () => {
   }, [oppgaveListeValg])
 
   useEffect(() => {
-    localStorage.setItem('filter', JSON.stringify(filter))
+    leggFilterILocalStorage(filter)
   }, [filter])
 
   const oppdaterTildeling = (id: string, saksbehandler: string | null, versjon: number | null) => {

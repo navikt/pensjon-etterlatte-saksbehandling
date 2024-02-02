@@ -10,6 +10,9 @@ export const hentBrevForSak = async (sakId: number): Promise<ApiResponse<IBrev[]
 export const opprettBrevForSak = async (sakId: number): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/sak/${sakId}`, {})
 
+export const hentVarselbrev = async (behandlingId: string): Promise<ApiResponse<IBrev>> =>
+  apiClient.get(`/brev/behandling/${behandlingId}/varsel`)
+
 export const hentVedtaksbrev = async (behandlingId: string): Promise<ApiResponse<IBrev>> =>
   apiClient.get(`/brev/behandling/${behandlingId}/vedtak`)
 

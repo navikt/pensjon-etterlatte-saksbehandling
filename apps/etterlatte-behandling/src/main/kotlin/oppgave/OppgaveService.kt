@@ -60,22 +60,7 @@ class OppgaveService(
                     bruker.enheter(),
                     bruker.erSuperbruker(),
                 )
-            populerOppgaverMedNavn(oppgaverForBruker).sortedByDescending { it.opprettet }
-        }
-    }
-
-    internal fun populerOppgaverMedNavn(oppgaver: List<OppgaveIntern>): List<OppgaveIntern> {
-        val oppgaverMedSaksbehandler = oppgaver.mapNotNull { it.saksbehandler }.distinct()
-        val saksbehandlerereMedNavn =
-            oppgaveDao.hentSaksbehandlerNavnForidenter(oppgaverMedSaksbehandler)
-                .associate { it.ident to it.navn }
-        return oppgaver.map {
-            if (it.harSaksbehandler()) {
-                val navn = saksbehandlerereMedNavn[it.saksbehandler] ?: it.saksbehandler
-                it.copy(saksbehandlerNavn = navn)
-            } else {
-                it
-            }
+            oppgaverForBruker.sortedByDescending { it.opprettet }
         }
     }
 

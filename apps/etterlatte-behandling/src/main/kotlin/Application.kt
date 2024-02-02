@@ -11,13 +11,8 @@ import io.ktor.server.engine.applicationEngineEnvironment
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.Route
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asContextElement
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingVedtakRoute
@@ -25,8 +20,8 @@ import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
+import no.nav.etterlatte.behandling.job.populerSaksbendlereMedNavn
 import no.nav.etterlatte.behandling.klage.klageRoutes
-import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
 import no.nav.etterlatte.behandling.revurdering.revurderingRoutes
@@ -53,9 +48,7 @@ import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import javax.sql.DataSource
-import kotlin.time.measureTime
 
 val sikkerLogg: Logger = sikkerlogger()
 
@@ -85,42 +78,6 @@ private class Server(private val context: ApplicationContext) {
             populerSaksbendlereMedNavn(context)
             setReady().also { engine.start(true) }
         }
-}
-
-@OptIn(DelicateCoroutinesApi::class)
-private fun populerSaksbendlereMedNavn(context: ApplicationContext) {
-    if (context.leaderElectionKlient.isLeader()) {
-        GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
-            val logger = LoggerFactory.getLogger("saksbehandlernavnjob")
-            val tidbrukt =
-                measureTime {
-                    logger.info("Starter job for å legge inn saksbehandlere med navn")
-                    val sbidenter = context.saksbehandlerInfoDao.hentalleSaksbehandlere().mapNotNull { it }
-                    logger.info("Antall identer ${sbidenter.size}")
-
-                    val filtrerteIdenter = sbidenter.filter { !context.saksbehandlerInfoDao.saksbehandlerFinnes(it) }
-                    val mappedMedNavn =
-                        filtrerteIdenter.map {
-                            if (listOf("PESYS", "EY").contains(it)) {
-                                it to SaksbehandlerInfo(it, it)
-                            } else {
-                                it to runBlocking { context.navAnsattKlient.hentSaksbehanderNavn(it) }
-                            }
-                        }
-                    logger.info("mappedMedNavn antall: ${mappedMedNavn.size}")
-
-                    mappedMedNavn.forEach {
-                        SaksbehandlerInfo(it.first, it.first)
-                        if (it.second == null) {
-                            context.saksbehandlerInfoDao.upsertSaksbehandler(SaksbehandlerInfo(it.first, it.first))
-                        } else {
-                            context.saksbehandlerInfoDao.upsertSaksbehandler(it.second!!)
-                        }
-                    }
-                }
-            logger.info("Ferdig, tid brukt $tidbrukt")
-        }
-    }
 }
 
 internal fun Application.module(context: ApplicationContext) {

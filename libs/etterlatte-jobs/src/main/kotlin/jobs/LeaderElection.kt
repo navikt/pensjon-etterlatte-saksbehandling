@@ -30,8 +30,9 @@ open class LeaderElection(
         } else {
             if (appIsInGCP()) {
                 throw RuntimeException("Kan ikke bruke leaderElection i GCP uten å sette leaderElection: true i yaml fil")
+            } else {
+                return true // local machine has no knowledge of leader concept(non-k8s run)
             }
-            return true // local machine has no knowledge of leader concept(non-k8s run)
         }
     }
 }

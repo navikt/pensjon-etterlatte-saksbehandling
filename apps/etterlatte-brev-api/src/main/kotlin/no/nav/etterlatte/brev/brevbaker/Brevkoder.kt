@@ -8,6 +8,8 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_UTFALL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VARSEL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VARSEL_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG
@@ -17,6 +19,8 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_IN
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_INNHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
@@ -51,6 +55,7 @@ data class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: Ett
             )
         val OPPHOER = Brevkoder(BARNEPENSJON_OPPHOER_UTFALL, BARNEPENSJON_OPPHOER)
         val REVURDERING = Brevkoder(BARNEPENSJON_REVURDERING_UTFALL, BARNEPENSJON_REVURDERING)
+        val VARSEL = Brevkoder(BARNEPENSJON_VARSEL_UTFALL, BARNEPENSJON_VARSEL)
     }
 
     object Omstillingsstoenad {
@@ -70,5 +75,6 @@ data class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: Ett
                 OMSTILLINGSSTOENAD_OPPHOER,
             )
         val REVURDERING = Brevkoder(TOM_MAL, OMSTILLINGSSTOENAD_REVURDERING)
+        val VARSEL = Brevkoder(OMSTILLINGSSTOENAD_VARSEL_UTFALL, OMSTILLINGSSTOENAD_VARSEL)
     }
 }

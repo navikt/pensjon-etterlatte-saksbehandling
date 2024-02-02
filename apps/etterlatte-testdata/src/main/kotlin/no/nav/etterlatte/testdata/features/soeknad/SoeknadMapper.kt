@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Opplysning
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.omstillingsstoenad.Omstillingsstoenad
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.testdata.JsonMessage
 import java.time.LocalDate
@@ -43,7 +44,7 @@ object SoeknadMapper {
             SoeknadType.OMSTILLINGSSTOENAD ->
                 JsonMessage.newMessage(
                     mutableMapOf(
-                        "@event_name" to SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
+                        SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagParMedEventNameKey(),
                         "@skjema_info" to
                             opprettOmstillingsstoenadSoeknad(
                                 soekerFnr = gjenlevendeFnr,
@@ -61,7 +62,7 @@ object SoeknadMapper {
             SoeknadType.BARNEPENSJON ->
                 JsonMessage.newMessage(
                     mutableMapOf(
-                        "@event_name" to SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagEventnameForType(),
+                        SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagParMedEventNameKey(),
                         "@skjema_info" to
                             opprettBarnepensjonSoeknad(
                                 gjenlevendeFnr = gjenlevendeFnr,

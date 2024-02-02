@@ -5,7 +5,6 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.behandling.BEHANDLING_RIVER_KEY
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
-import no.nav.etterlatte.libs.common.behandling.lagEventnameForType
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY

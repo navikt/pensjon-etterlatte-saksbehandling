@@ -29,7 +29,7 @@ open class LeaderElection(
             return isLeader
         } else {
             if (appIsInGCP()) {
-                throw RuntimeException("Kan ikke bruke leaderElecetion i GCP uten å sette   leaderElection: true i yaml fil")
+                throw RuntimeException("Kan ikke bruke leaderElection i GCP uten å sette leaderElection: true i yaml fil")
             }
             return true // local machine has no knowledge of leader concept(non-k8s run)
         }

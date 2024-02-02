@@ -34,10 +34,10 @@ fun Route.migrering(
         post("/{$BEHANDLINGID_CALL_PARAMETER}") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 val request = call.receive<VilkaarsvurderingMigreringRequest>()
-                logger.info("Oppretter vilkårsvurdering for migrering for $behandlingId")
+                logger.info("Oppretter vilkårsvurdering for gjenoppretting for $behandlingId")
                 val vilkaarsvurdering = vilkaarsvurderingService.opprettVilkaarsvurdering(behandlingId, brukerTokenInfo)
 
-                logger.info("Oppdaterer vilkårene med korrekt utfall for migrering $behandlingId")
+                logger.info("Oppdaterer vilkårene med korrekt utfall for gjenoppretting $behandlingId")
                 migreringService.settUtfallForAlleVilkaar(vilkaarsvurdering, request.yrkesskadeFordel)
 
                 settVilkaarsvurderingaSomHelhetSomOppfylt(vilkaarsvurderingService, behandlingId)
@@ -55,7 +55,7 @@ private suspend fun PipelineContext<Unit, ApplicationCall>.settVilkaarsvurdering
     brukerTokenInfo,
     VilkaarsvurderingResultat(
         utfall = VilkaarsvurderingUtfall.OPPFYLT,
-        kommentar = "Automatisk overført fra Pesys. Enkeltvilkår ikke vurdert, totalvurdering satt til oppfylt.",
+        kommentar = "Automatisk gjenopprettet basert på opphørt sak fra Pesys. Enkeltvilkår ikke vurdert, totalvurdering satt til oppfylt.",
         tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
         saksbehandler = brukerTokenInfo.ident(),
     ),

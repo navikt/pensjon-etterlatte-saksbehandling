@@ -63,6 +63,10 @@ internal class Verifiserer(
             }
         }
 
+        if (request.beregning.meta?.beregningsMetodeType != "FOLKETRYGD") {
+            feilSomMedfoererManuell.add(BeregningsmetodeIkkeNasjonal)
+        }
+
         val alleFeil = feilSomMedfoererMistetRett + feilSomMedfoererManuell
         if (alleFeil.isNotEmpty()) {
             lagreFeil(request, alleFeil)
@@ -304,4 +308,9 @@ data object ForeldreForholdHarEndretSeg : Verifiseringsfeil() {
 data object BrukerManglerAdresse : Verifiseringsfeil() {
     override val message: String
         get() = "Bruker mangler adresse i PDL"
+}
+
+data object BeregningsmetodeIkkeNasjonal : Verifiseringsfeil() {
+    override val message: String
+        get() = "Sak har brukt annen beregningsmetode enn Nasjonal"
 }

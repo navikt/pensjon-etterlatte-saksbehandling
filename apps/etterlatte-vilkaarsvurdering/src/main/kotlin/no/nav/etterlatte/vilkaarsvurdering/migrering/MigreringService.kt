@@ -39,9 +39,9 @@ class MigreringService(
                 hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, yrkesskadeUtfall),
                 vurdering =
                     VilkaarVurderingData(
-                        kommentar = "Automatisk migrert fra Pesys",
+                        kommentar = "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
                         tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-                        saksbehandler = "Pesys",
+                        saksbehandler = "Gjenoppretta",
                     ),
             ),
     )

@@ -2,11 +2,13 @@ import {
   GrunnlagendringshendelseSamsvarType,
   Grunnlagsendringshendelse,
   GrunnlagsendringsType,
+  Saksrolle,
 } from '~components/person/typer'
 import { formaterKanskjeStringDatoMedFallback } from '~utils/formattering'
 import React from 'react'
 import { PersonMedNavn } from '~shared/types/grunnlag'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { SakType } from '~shared/types/sak'
 
 export const grunnlagsendringsTittel: Record<GrunnlagendringshendelseSamsvarType, string> = {
   GRUNNBELOEP: 'Regulering feilet',
@@ -71,14 +73,23 @@ export const stoetterRevurderingAvHendelse = (
   )
 }
 
-export const rolletekst: Record<Grunnlagsendringshendelse['hendelseGjelderRolle'], string> = {
-  AVDOED: 'Avdød forelder',
-  GJENLEVENDE: 'Gjenlevende forelder',
-  INNSENDER: 'Innsender av søknaden',
-  SOEKER: 'Søker',
-  SOESKEN: 'Søsken til søker',
-  UKJENT: 'Ukjent person i saken',
+export const formaterRolle = (sakType: SakType, rolle: Saksrolle) => {
+  switch (rolle) {
+    case 'AVDOED':
+      return `Avdød ${sakType === SakType.BARNEPENSJON ? 'forelder' : 'ektefelle/partner/samboer'}`
+    case 'GJENLEVENDE':
+      return `Gjenlevende ${sakType === SakType.BARNEPENSJON ? 'forelder' : 'ektefelle/partner/samboer'}`
+    case 'INNSENDER':
+      return 'Innsender av søknaden'
+    case 'SOEKER':
+      return 'Søker'
+    case 'SOESKEN':
+      return `${sakType === SakType.BARNEPENSJON ? 'Søsken' : 'barn'} til søker`
+    case 'UKJENT':
+      return 'Ukjent person i saken'
+  }
 }
+
 export const formaterLandList = (
   landliste: { tilflyttingsland?: string; dato?: string; fraflyttingsland?: string }[]
 ): string => {

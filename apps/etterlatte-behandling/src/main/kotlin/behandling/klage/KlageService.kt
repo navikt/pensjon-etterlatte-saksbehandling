@@ -177,7 +177,7 @@ class KlageServiceImpl(
                         innstilling =
                             InnstillingTilKabal(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
-                                tekst = utfall.innstilling.tekst,
+                                internKommentar = utfall.innstilling.internKommentar,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
@@ -188,7 +188,7 @@ class KlageServiceImpl(
                         innstilling =
                             InnstillingTilKabal(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
-                                tekst = utfall.innstilling.tekst,
+                                internKommentar = utfall.innstilling.internKommentar,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),

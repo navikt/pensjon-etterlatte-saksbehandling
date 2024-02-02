@@ -54,6 +54,7 @@ class LyttPaaIverksattVedtakRiverTest {
                         Pesyskopling(
                             behandlingId = behandlingId,
                             pesysId = pesysid,
+                            sakId = 321L,
                         )
                 }
 
@@ -95,6 +96,7 @@ class LyttPaaIverksattVedtakRiverTest {
                         Pesyskopling(
                             behandlingId = behandlingId,
                             pesysId = pesysid,
+                            sakId = 321L,
                         )
                 }
 

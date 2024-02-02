@@ -2,7 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { Grunnlagsopplysning, PersongalleriSamsvar, PersonMedNavn, Personopplysninger } from '~shared/types/grunnlag'
 import { IPersonResult } from '~components/person/typer'
 import { Foreldreansvar } from '~shared/types/Foreldreansvar'
-import { KildePdl, KildePersondata } from '~shared/types/kilde'
+import { KildePdl } from '~shared/types/kilde'
 import { IPdlPerson, Persongalleri } from '~shared/types/Person'
 import { Mottaker } from '~shared/types/Brev'
 import { SakType } from '~shared/types/sak'
@@ -29,15 +29,7 @@ export const getGrunnlagsAvOpplysningstype = async (args: {
   return apiClient.get(`/grunnlag/behandling/${args.behandlingId}/${args.opplysningstype}`)
 }
 
-export const getVergeadresseFraGrunnlag = async (
-  behandlingId: string
-): Promise<ApiResponse<Grunnlagsopplysning<Mottaker, KildePersondata>>> => {
-  return apiClient.get(`/grunnlag/behandling/${behandlingId}/VERGES_ADRESSE`)
-}
-
-export const getVergeadresseForPerson = async (
-  foedselsnummer: string
-): Promise<ApiResponse<Grunnlagsopplysning<Mottaker, KildePersondata>>> => {
+export const getVergeadresseForPerson = async (foedselsnummer: string): Promise<ApiResponse<Mottaker>> => {
   return apiClient.post(`/grunnlag/person/vergeadresse`, {
     foedselsnummer: foedselsnummer,
   })

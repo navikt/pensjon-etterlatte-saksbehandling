@@ -165,6 +165,7 @@ data class OpprettNyttBrev(
     val opprettet: Tidspunkt,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
+    val brevtype: Brevtype,
 ) {
     val status: Status = Status.OPPRETTET
 }
@@ -180,3 +181,12 @@ data class EtterbetalingDTO(
     val datoFom: LocalDate,
     val datoTom: LocalDate,
 )
+
+enum class Brevtype {
+    VEDTAK,
+    VARSEL,
+    INFORMASJON,
+    OPPLASTET_PDF,
+    MANUELT,
+    VEDLEGG,
+}

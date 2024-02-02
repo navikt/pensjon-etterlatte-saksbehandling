@@ -35,6 +35,7 @@ import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
 import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -156,13 +157,13 @@ internal class VedtaksbrevServiceTest {
         @Test
         fun `Hent vedtaksbrev med behandling id`() {
             val forventetBrev = opprettBrev(mockk(), mockk())
-            every { db.hentBrevForBehandling(any()) } returns forventetBrev
+            every { db.hentBrevForBehandling(any(), any()) } returns listOf(forventetBrev)
 
             val brev = vedtaksbrevService.hentVedtaksbrev(BEHANDLING_ID)
 
             brev shouldBe forventetBrev
 
-            verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID) }
+            verify(exactly = 1) { db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK) }
         }
 
         @Test
@@ -197,7 +198,7 @@ internal class VedtaksbrevServiceTest {
             val behandling = opprettGenerellBrevdata(sakType, vedtakType)
             val mottaker = opprettMottaker()
 
-            every { db.hentBrevForBehandling(behandling.behandlingId!!) } returns null
+            every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
@@ -219,7 +220,7 @@ internal class VedtaksbrevServiceTest {
             val brevSlot = slot<OpprettNyttBrev>()
 
             coVerify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
+                db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
                 brevdataFacade.hentGenerellBrevData(sakId, BEHANDLING_ID, any())
                 adresseService.hentMottakerAdresse(behandling.personerISak.innsender!!.fnr.value)
             }
@@ -257,7 +258,7 @@ internal class VedtaksbrevServiceTest {
             val mottaker = opprettMottaker()
 
             coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns opprettRenderedJsonLetter()
-            every { db.hentBrevForBehandling(behandling.behandlingId!!) } returns null
+            every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
             coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
@@ -278,7 +279,7 @@ internal class VedtaksbrevServiceTest {
             val brevSlot = slot<OpprettNyttBrev>()
 
             coVerify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
+                db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
                 brevdataFacade.hentGenerellBrevData(sakId, BEHANDLING_ID, any())
                 adresseService.hentMottakerAdresse(behandling.personerISak.innsender!!.fnr.value)
                 brevbakerService.hentRedigerbarTekstFraBrevbakeren(any())
@@ -299,7 +300,7 @@ internal class VedtaksbrevServiceTest {
 
         @Test
         fun `Vedtaksbrev finnes allerede - skal kaste feil`() {
-            every { db.hentBrevForBehandling(any()) } returns opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
+            every { db.hentBrevForBehandling(any(), any()) } returns listOf(opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK))
 
             assertThrows<IllegalArgumentException> {
                 runBlocking {
@@ -312,11 +313,11 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
+                db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
             }
 
             verify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
+                db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
 
                 brevbakerService wasNot Called
                 adresseService wasNot Called
@@ -331,7 +332,7 @@ internal class VedtaksbrevServiceTest {
             val behandling = opprettGenerellBrevdata(SakType.BARNEPENSJON, VedtakType.INNVILGELSE)
             val mottaker = opprettMottaker()
 
-            every { db.hentBrevForBehandling(behandling.behandlingId!!) } returns null
+            every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns listOf()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
 
@@ -351,7 +352,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             coVerify {
-                db.hentBrevForBehandling(BEHANDLING_ID)
+                db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
                 brevdataFacade.hentBehandling(BEHANDLING_ID, SAKSBEHANDLER)
                 brevbaker wasNot Called
                 adresseService wasNot Called
@@ -459,7 +460,7 @@ internal class VedtaksbrevServiceTest {
         fun `Ferdigstille vedtaksbrev som ATTESTANT - status vedtak fattet - ferdigstilles OK`() {
             val brev = opprettBrev(Status.OPPRETTET, mockk())
 
-            every { db.hentBrevForBehandling(any()) } returns brev
+            every { db.hentBrevForBehandling(any(), any()) } returns listOf(brev)
             every { db.hentPdf(any()) } returns Pdf("".toByteArray())
             coEvery { vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
                 Pair(
@@ -472,7 +473,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify {
-                db.hentBrevForBehandling(brev.behandlingId!!)
+                db.hentBrevForBehandling(brev.behandlingId!!, Brevtype.VEDTAK)
                 db.settBrevFerdigstilt(brev.id)
                 db.hentPdf(brev.id)
             }
@@ -486,7 +487,7 @@ internal class VedtaksbrevServiceTest {
         fun `Ferdigstille vedtaksbrev som ATTESTANT - status vedtak fattet, men PDF mangler`() {
             val brev = opprettBrev(Status.OPPRETTET, mockk())
 
-            every { db.hentBrevForBehandling(any()) } returns brev
+            every { db.hentBrevForBehandling(any(), any()) } returns listOf(brev)
             every { db.hentPdf(any()) } returns null
             coEvery { vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
                 Pair(
@@ -501,7 +502,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify {
-                db.hentBrevForBehandling(brev.behandlingId!!)
+                db.hentBrevForBehandling(brev.behandlingId!!, Brevtype.VEDTAK)
                 db.hentPdf(brev.id)
             }
             verify(exactly = 0) { db.settBrevFerdigstilt(any()) }
@@ -515,7 +516,7 @@ internal class VedtaksbrevServiceTest {
         fun `Ferdigstille vedtaksbrev som SAKSBEHANDLER - vedtak fattet - skal kaste feil`() {
             val brev = opprettBrev(Status.OPPRETTET, mockk())
 
-            every { db.hentBrevForBehandling(any()) } returns brev
+            every { db.hentBrevForBehandling(any(), any()) } returns listOf(brev)
             coEvery { vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
                 Pair(
                     SAKSBEHANDLER.ident(),
@@ -529,7 +530,7 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify {
-                db.hentBrevForBehandling(brev.behandlingId!!)
+                db.hentBrevForBehandling(brev.behandlingId!!, Brevtype.VEDTAK)
             }
 
             coVerify {
@@ -541,13 +542,13 @@ internal class VedtaksbrevServiceTest {
         fun `Ferdigstille allerede ferdigstilt brev`() {
             val brev = opprettBrev(Status.FERDIGSTILT, mockk())
 
-            every { db.hentBrevForBehandling(any()) } returns brev
+            every { db.hentBrevForBehandling(any(), any()) } returns listOf(brev)
 
             runBlocking {
                 vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, brukerTokenInfo = SAKSBEHANDLER)
             }
 
-            verify { db.hentBrevForBehandling(brev.behandlingId!!) }
+            verify { db.hentBrevForBehandling(brev.behandlingId!!, Brevtype.VEDTAK) }
         }
 
         @Test

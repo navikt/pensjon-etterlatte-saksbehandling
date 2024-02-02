@@ -11,10 +11,12 @@ import kotliquery.using
 import no.nav.etterlatte.brev.distribusjon.DistribuerJournalpostResponse
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
+import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevVedleggKey
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -31,7 +33,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
@@ -103,11 +104,11 @@ internal class BrevRepositoryIntegrationTest {
     fun `Hent brev med behandling ID`() {
         val behandlingId = UUID.randomUUID()
 
-        assertNull(db.hentBrevForBehandling(behandlingId))
+        assertEquals(emptyList<Brev>(), db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK))
 
         val nyttBrev = db.opprettBrev(ulagretBrev(behandlingId = behandlingId))
 
-        val brevTilBehandling = db.hentBrevForBehandling(behandlingId)!!
+        val brevTilBehandling = db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).first()
         assertEquals(nyttBrev.status, brevTilBehandling.status)
 
         val hentetBrev = db.hentBrev(nyttBrev.id)
@@ -466,7 +467,8 @@ internal class BrevRepositoryIntegrationTest {
         mottaker = opprettMottaker(),
         opprettet = Tidspunkt.now(),
         innhold = innhold ?: BrevInnhold("tittel", Spraak.NB),
-        innholdVedlegg = innhold_vedlegg ?: null,
+        innholdVedlegg = innhold_vedlegg,
+        brevtype = Brevtype.VEDTAK,
     )
 
     private fun opprettMottaker() =

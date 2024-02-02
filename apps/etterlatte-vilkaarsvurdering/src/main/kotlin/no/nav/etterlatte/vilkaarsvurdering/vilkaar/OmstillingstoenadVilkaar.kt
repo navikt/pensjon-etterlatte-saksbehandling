@@ -18,6 +18,7 @@ object OmstillingstoenadVilkaar {
             avdoedesMedlemskapEoes(),
             gjenlevendesMedlemskap(),
             vurderingAvEksport(),
+            rettTilStoenadUtenTidsbegrensning(),
             aktivitetEtter6Maaneder(),
         )
 
@@ -59,7 +60,6 @@ object OmstillingstoenadVilkaar {
                 ),
         )
 
-    // TODO: Obs skal egentlig kun være på revurdering men kan sette ikke vurdert på førstegangsbehandling
     private fun overlappendeYtelser() =
         Vilkaar(
             hovedvilkaar =
@@ -347,7 +347,7 @@ object OmstillingstoenadVilkaar {
         Vilkaar(
             hovedvilkaar =
                 Delvilkaar(
-                    type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND,
+                    type = VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
                     tittel = "Krav til aktivitet etter 6 måneder",
                     beskrivelse =
                         """
@@ -371,6 +371,26 @@ object OmstillingstoenadVilkaar {
                 listOf(
                     aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt(),
                     aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar(),
+                ),
+        )
+
+    private fun rettTilStoenadUtenTidsbegrensning() =
+        Vilkaar(
+            hovedvilkaar =
+                Delvilkaar(
+                    type = VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
+                    tittel = "Rett til stønad uten tidsbegrensning?",
+                    beskrivelse =
+                        """
+                        Er etterlatte født i 1963 eller tidligere, kan hen få stønad frem til fylte 67 år hvis hen de siste fem årene før dødsfallet ikke har hatt en gjennomsnittlig årlig arbeidsinntekt som overstiger 2G det enkelte år. Den årlige arbeidsinntekten må i tillegg ikke ha oversteget 3G hvert av de siste to årene før dødsfallet. Er dette oppfylt er man også unntatt fra aktivitetsplikten.
+                        """.trimIndent(),
+                    spoersmaal = "Er vilkåret oppfylt?",
+                    lovreferanse =
+                        Lovreferanse(
+                            paragraf = "§ 17-5",
+                            ledd = 3,
+                            lenke = "https://lovdata.no/pro/lov/1997-02-28-19/§17-5",
+                        ),
                 ),
         )
 

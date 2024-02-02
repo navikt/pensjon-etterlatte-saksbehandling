@@ -28,7 +28,7 @@ async function sourceMapMapper(numbers: IStackLineNoColumnNo): Promise<NullableM
   return Promise.resolve(smc.originalPositionFor({ line: numbers.lineno, column: numbers.columnno }))
 }
 
-function getNAVident(authorizationHeader: string | undefined): string | undefined {
+export function getNAVident(authorizationHeader: string | undefined): string | undefined {
   if (!authorizationHeader) return
   const bearerToken = authorizationHeader.split(' ')[1]
   const parsedToken = parseJwt(bearerToken)

@@ -20,14 +20,18 @@ import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class MigreringService(
@@ -137,6 +141,18 @@ class MigreringService(
                 }
             }
         }
+
+    fun opprettOppgaveManuellGjenoppretting(request: MigreringRequest) {
+        val sak = finnEllerOpprettSak(request)
+        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            referanse = request.pesysId.toString(),
+            sakId = sak.id,
+            oppgaveKilde = OppgaveKilde.BEHANDLING,
+            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING, // TODO lage egen type?
+            merknad = "Oppgave for manuell gjenoppretting av opphørt sak i Pesys",
+            frist = Tidspunkt.now().plus(5, ChronoUnit.DAYS),
+        )
+    }
 
     private suspend fun <T> retryMedPause(
         times: Int = 2,

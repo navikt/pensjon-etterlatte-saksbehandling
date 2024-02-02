@@ -118,7 +118,7 @@ internal class DokarkivServiceTest {
             tema shouldBe vedtak.sak.sakType.tema
             kanal shouldBe "S"
             journalfoerendeEnhet shouldBe vedtak.ansvarligEnhet
-            avsenderMottaker shouldBe AvsenderMottaker(forventetBrevMottakerFnr)
+            avsenderMottaker shouldBe AvsenderMottaker(forventetBrevMottakerFnr, navn = "Stor Snerk")
             bruker shouldBe Bruker(vedtak.sak.ident)
             sak shouldBe JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString())
             eksternReferanseId shouldBe "${vedtak.behandlingId}.$brevId"

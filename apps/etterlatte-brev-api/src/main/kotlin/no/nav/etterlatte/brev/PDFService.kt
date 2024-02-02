@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -69,6 +70,7 @@ class PDFService(private val db: BrevRepository, private val virusScanService: V
                     opprettet = Tidspunkt.now(),
                     innhold = innhold,
                     innholdVedlegg = null,
+                    brevtype = Brevtype.OPPLASTET_PDF,
                 ),
             )
 

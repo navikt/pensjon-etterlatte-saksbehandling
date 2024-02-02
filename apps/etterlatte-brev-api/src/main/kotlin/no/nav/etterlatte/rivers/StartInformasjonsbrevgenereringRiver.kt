@@ -35,10 +35,10 @@ class StartInformasjonsbrevgenereringRiver(
         logger.info("Starter å generere informasjonsbrev for mottakerne som ligger i databasetabellen")
         val brevAaOpprette =
             repository.hentTilBrevgenerering().distinct().also { logger.info("Genererer ${it.size} brev") }
-        repository.settBrevPaastarta(brevAaOpprette)
         if (brevAaOpprette.isEmpty()) {
             return
         }
+        repository.settBrevPaastarta(brevAaOpprette)
         iTraad {
             sleep(Duration.ofMinutes(1))
             logger.info("Starter informasjonsbrev-genereringa")

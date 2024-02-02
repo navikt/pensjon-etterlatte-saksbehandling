@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevKodeMapper
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -34,7 +35,7 @@ class VedtaksbrevService(
     fun hentVedtaksbrev(behandlingId: UUID): Brev? {
         logger.info("Henter vedtaksbrev for behandling (id=$behandlingId)")
 
-        return db.hentBrevForBehandling(behandlingId)
+        return db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull()
     }
 
     suspend fun opprettVedtaksbrev(

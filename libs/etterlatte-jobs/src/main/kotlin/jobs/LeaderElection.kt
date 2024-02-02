@@ -5,6 +5,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.appIsInGCP
 import org.slf4j.LoggerFactory
 import java.net.InetAddress
 
@@ -27,6 +28,9 @@ open class LeaderElection(
             logger.info("Current pod: ${hostName()?.sanitize()}. Leader: ${leader.sanitize()}. Current pod is leader: $isLeader")
             return isLeader
         } else {
+            if (appIsInGCP()) {
+                throw RuntimeException("Kan ikke bruke leaderElecetion i GCP uten å sette   leaderElection: true i yaml fil")
+            }
             return true // local machine has no knowledge of leader concept(non-k8s run)
         }
     }

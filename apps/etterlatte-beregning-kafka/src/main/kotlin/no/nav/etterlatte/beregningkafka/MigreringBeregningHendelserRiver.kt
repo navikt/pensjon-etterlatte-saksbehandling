@@ -74,6 +74,12 @@ private fun verifiserNyBeregning(
                 "Kun folketrygd (nasjonal)"
         }
 
+        check(utbetaltBeloep >= migreringRequest.beregning.brutto) {
+            "Man skal ikke kunne komme dårligere ut på nytt regelverk. " +
+                "Beregnet beløp i Gjenny ($utbetaltBeloep) er lavere enn dagens beløp i Pesys " +
+                "(${migreringRequest.beregning.brutto})."
+        }
+
         when (migreringRequest.finnBeregningsmetode()) {
             BeregningsMetode.NASJONAL -> {
                 check(trygdetid == migreringRequest.beregning.anvendtTrygdetid) {

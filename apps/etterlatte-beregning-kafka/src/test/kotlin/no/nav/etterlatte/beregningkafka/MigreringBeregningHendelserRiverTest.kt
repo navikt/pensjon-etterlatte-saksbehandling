@@ -184,6 +184,46 @@ internal class MigreringBeregningHendelserRiverTest {
     }
 
     @Test
+    fun `Beregning skal feile hvis beregnet beloep er lavere enn opprinnelig beloep fra Pesys`() {
+        val behandlingId = slot<UUID>()
+        val returnValue =
+            mockk<HttpResponse>().also {
+                every {
+                    runBlocking { it.body<BeregningDTO>() }
+                } returns
+                    beregningDTO.copy(
+                        beregningsperioder =
+                            listOf(
+                                beregningDTO.beregningsperioder.first().copy(utbetaltBeloep = 500),
+                            ),
+                    )
+            }
+
+        every { behandlingService.beregn(capture(behandlingId)) } returns returnValue
+
+        val melding =
+            JsonMessage.newMessage(
+                Migreringshendelser.BEREGN.lagEventnameForType(),
+                mapOf(
+                    BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
+                    HENDELSE_DATA_KEY to request,
+                ),
+            )
+
+        inspector.sendTestMessage(melding.toJson())
+
+        assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
+        assertEquals(1, inspector.inspektør.size)
+        val resultat = inspector.inspektør.message(0)
+        assertEquals(EventNames.FEILA.lagEventnameForType(), resultat.get(EVENT_NAME_KEY).textValue())
+        assertEquals(MigreringBeregningHendelserRiver::class.simpleName, resultat.get(FEILENDE_STEG).textValue())
+        assertTrue(
+            resultat.get(FEILMELDING_KEY).textValue()
+                .contains("Man skal ikke kunne komme dårligere ut på nytt regelverk."),
+        )
+    }
+
+    @Test
     fun `Beregning skal feile hvis ulik trygdetid er benyttet`() {
         val behandlingId = slot<UUID>()
         val returnValue =
@@ -252,10 +292,8 @@ internal class MigreringBeregningHendelserRiverTest {
                         request.copy(
                             beregning =
                                 request.beregning.copy(
-                                    // prorataBroek = IntBroek(150, 300),
                                     meta =
                                         request.beregning.meta!!.copy(
-                                            // beregningsMetodeType = "EOS",
                                             beregningsMetodeType = "FOLKETRYGD",
                                         ),
                                 ),

@@ -9,6 +9,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import no.nav.etterlatte.TestDataFeature
 import no.nav.etterlatte.kafka.KafkaProdusent
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.logger
@@ -62,7 +63,7 @@ private fun createRecord(input: String): Pair<String, String> {
     val message =
         JsonMessage.newMessage(
             mapOf(
-                "@event_name" to "trenger_behandling",
+                "@event_name" to SoeknadInnsendtHendelseType.EVENT_NAME_BEHANDLINGBEHOV.lagEventnameForType(),
                 "@skjema_info" to objectMapper.readValue<ObjectNode>(input),
                 "@lagret_soeknad_id" to "TEST-${UUID.randomUUID()}",
                 "@template" to "soeknad",

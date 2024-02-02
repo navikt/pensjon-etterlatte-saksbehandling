@@ -201,7 +201,7 @@ class Brevoppretter(
         when (prosessType) {
             BrevProsessType.REDIGERBAR -> redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData)
             BrevProsessType.AUTOMATISK -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype automatisk")
-            BrevProsessType.MANUELL -> null
+            BrevProsessType.MANUELL -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype manuell")
             BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException(
                 "Vedlegg payload ikke relevant for ${BrevProsessType.OPPLASTET_PDF}",
             )

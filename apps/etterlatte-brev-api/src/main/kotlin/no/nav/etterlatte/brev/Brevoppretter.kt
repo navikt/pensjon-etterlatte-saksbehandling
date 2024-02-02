@@ -185,9 +185,9 @@ class Brevoppretter(
         val payload =
             when (redigerbarTekstRequest.prosessType) {
                 BrevProsessType.REDIGERBAR -> brevbaker.hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest)
-                BrevProsessType.AUTOMATISK -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype automatisk")
-                BrevProsessType.MANUELL -> throw IllegalStateException("Brevdata ikke relevant for ${BrevProsessType.MANUELL}")
-                BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException("Payload ikke relevant for ${BrevProsessType.OPPLASTET_PDF}")
+                else -> throw IllegalStateException(
+                    "Vi skal kun opprette innhold for brev med prosesstype redigerbar, ikke ${redigerbarTekstRequest.prosessType}",
+                )
             }
 
         return BrevInnhold(tittel, redigerbarTekstRequest.generellBrevData.spraak, payload)
@@ -200,11 +200,7 @@ class Brevoppretter(
     ): List<BrevInnholdVedlegg>? =
         when (prosessType) {
             BrevProsessType.REDIGERBAR -> redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData)
-            BrevProsessType.AUTOMATISK -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype automatisk")
-            BrevProsessType.MANUELL -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype manuell")
-            BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException(
-                "Vedlegg payload ikke relevant for ${BrevProsessType.OPPLASTET_PDF}",
-            )
+            else -> throw IllegalStateException("Vi skal kun opprette innhold for brev med prosesstype redigerbar, ikke $prosessType")
         }
 }
 

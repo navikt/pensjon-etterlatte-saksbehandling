@@ -35,7 +35,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: andstor/file-existence-action@v2
+      - uses: andstor/file-existence-action@v3
         id: check_files
         with:
           files: "jobs/${{ github.workflow }}/deploy/prod.yml"

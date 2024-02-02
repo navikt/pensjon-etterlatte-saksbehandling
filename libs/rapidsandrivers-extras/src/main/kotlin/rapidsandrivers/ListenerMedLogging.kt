@@ -41,7 +41,6 @@ abstract class ListenerMedLogging : River.PacketListener {
         hendelsestype: EventnameHendelseType,
         block: River.() -> Unit = {},
     ) {
-        logger.info("Initialiserer river for ${this.javaClass.simpleName}")
         initialiserRiverUtenEventName(rapidsConnection, block = {
             correlationId()
             eventName(hendelsestype.lagEventnameForType())

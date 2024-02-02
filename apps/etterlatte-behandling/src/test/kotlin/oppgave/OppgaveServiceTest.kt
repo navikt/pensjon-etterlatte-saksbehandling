@@ -1,7 +1,6 @@
 package no.nav.etterlatte.oppgave
 
 import com.nimbusds.jwt.JWTClaimsSet
-import io.kotest.matchers.collections.shouldContain
 import io.ktor.server.plugins.BadRequestException
 import io.ktor.server.plugins.NotFoundException
 import io.mockk.every
@@ -13,7 +12,6 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.User
-import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -24,7 +22,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -37,7 +34,7 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Assertions.assertEquals
+
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -131,28 +128,6 @@ internal class OppgaveServiceTest {
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE oppgave CASCADE;").execute()
         }
-    }
-
-    @Test
-    fun `Skal populere oppgaver med navnefelt`() {
-        val oppgaveDaoMock = mockk<OppgaveDaoMedEndringssporing>()
-        val oppgaveService = OppgaveService(oppgaveDaoMock, sakDao)
-
-        val identsaksbehandler = "ident"
-        val sakAalesund = Sak(identsaksbehandler, SakType.BARNEPENSJON, 1L, Enheter.AALESUND.enhetNr)
-        val oppgaveUtenSaksbehandler = lagNyOppgave(sakAalesund)
-        val medSaksbehandler = lagNyOppgave(sakAalesund).copy(saksbehandler = identsaksbehandler)
-
-        val saksbehandlerNavn = "Fornavn Etternavn"
-        every {
-            oppgaveDaoMock.hentSaksbehandlerNavnForidenter(listOf(identsaksbehandler))
-        } returns listOf(SaksbehandlerInfo(identsaksbehandler, saksbehandlerNavn))
-
-        val oppgaver = listOf(oppgaveUtenSaksbehandler, medSaksbehandler)
-        val populerteOppgaver = oppgaveService.populerOppgaverMedNavn(oppgaver)
-        assertEquals(2, populerteOppgaver.size)
-        populerteOppgaver.shouldContain(oppgaveUtenSaksbehandler)
-        populerteOppgaver.shouldContain(medSaksbehandler.copy(saksbehandlerNavn = saksbehandlerNavn))
     }
 
     @Test

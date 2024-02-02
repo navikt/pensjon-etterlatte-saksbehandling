@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.model
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
@@ -31,8 +30,8 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 
 class BrevDataMapperFerdigstilling(
     private val brevdataFacade: BrevdataFacade,
-    private val migreringBrevDataService: MigreringBrevDataService,
-    private val brevDataMapper: BrevDataMapper, // TODO: Håper vi kan få bort denne koplinga snart
+    private val brevDataMapper: BrevDataMapper,
+    // TODO: Håper vi kan få bort denne koplinga snart
 ) {
     suspend fun brevDataFerdigstilling(
         generellBrevData: GenerellBrevData,

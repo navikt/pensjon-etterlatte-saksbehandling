@@ -441,6 +441,7 @@ data class Formkrav(
     val gjelderKlagenNoeKonkretIVedtaket: JaNei,
     val erKlagenFramsattInnenFrist: JaNei,
     val erFormkraveneOppfylt: JaNei,
+    val begrunnelse: String? = null,
 ) {
     companion object {
         fun erFormkravKonsistente(formkrav: Formkrav): Boolean {

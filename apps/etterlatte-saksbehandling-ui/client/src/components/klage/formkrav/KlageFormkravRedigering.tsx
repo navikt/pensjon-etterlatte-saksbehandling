@@ -1,4 +1,4 @@
-import { Button, Heading, Radio, RadioGroup, Select } from '@navikt/ds-react'
+import { Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
@@ -53,6 +53,7 @@ const klageFormkravTilDefaultFormValues = (klage: Klage | null): FormDataFormkra
       erKlagenSignert: null,
       erKlagerPartISaken: null,
       gjelderKlagenNoeKonkretIVedtaket: null,
+      begrunnelse: null,
     }
   } else {
     const { vedtaketKlagenGjelder, ...skjemafelter } = klage.formkrav.formkrav
@@ -210,6 +211,17 @@ export function KlageFormkravRedigering() {
           />
 
           <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
+
+          <VurderingWrapper>
+            <Controller
+              name="begrunnelse"
+              control={control}
+              render={({ field }) => {
+                const { value, ...rest } = field
+                return <Textarea label="Begrunnelse (valgfritt)" value={value ?? ''} {...rest} />
+              }}
+            />
+          </VurderingWrapper>
         </InnholdPadding>
         <FlexRow justify="center">
           <Button type="submit" loading={isPending(lagreFormkravStatus)}>

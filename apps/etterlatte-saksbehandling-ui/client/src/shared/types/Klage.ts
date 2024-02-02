@@ -109,6 +109,7 @@ export interface Formkrav {
   gjelderKlagenNoeKonkretIVedtaket: JaNei
   erKlagenFramsattInnenFrist: JaNei
   erFormkraveneOppfylt: JaNei
+  begrunnelse: string | null
 }
 
 export interface FormkravMedSaksbehandler {

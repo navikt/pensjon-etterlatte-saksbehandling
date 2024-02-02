@@ -56,15 +56,11 @@ internal class MigreringTrygdetidHendelserRiver(
                 logger.info("Avdød hadde yrkesskade i Pesys, oppretter yrkesskadegrunnlag for behandling $behandlingId")
                 trygdetidService.opprettGrunnlagVedYrkesskade(behandlingId)
             } else if (request.anvendtFlyktningerfordel()) {
-                // logger.info("Avdød hadde flyktningerfordel i Pesys, overstyrer med samme trygdetid $behandlingId")
-                // overstyrBeregnetTrygdetid(request, behandlingId)
                 throw TrygdetidIkkeGyldigForAutomatiskGjenoppretting("Avdød hadde flyktningerfordel i Pesys")
             } else if (request.trygdetid.perioder.isNotEmpty()) {
                 logger.info("Mottok trygdetidsperioder for behandling $behandlingId")
                 leggTilPerioder(request, behandlingId)
             } else {
-                // logger.info("Vi mottok ingen trygdetidsperioder fra Pesys for behandling $behandlingId")
-                // overstyrBeregnetTrygdetid(request, behandlingId)
                 throw TrygdetidIkkeGyldigForAutomatiskGjenoppretting(
                     "Vi mottok ingen trygdetidsperioder fra Pesys for behandling $behandlingId",
                 )
@@ -86,24 +82,12 @@ internal class MigreringTrygdetidHendelserRiver(
                 trygdetidService.beregnTrygdetidGrunnlag(behandlingId, grunnlag)
             }.last()
 
-        /*
-            val trygdetid =
-                if (!trygdetidIGjennyStemmerMedTrygdetidIPesys(trygdetidMedFremtidig, request.beregning)) {
-                    trygdetidService.reberegnUtenFremtidigTrygdetid(behandlingId)
-                } else {
-                    trygdetidMedFremtidig
-                }
-         */
-
         check(trygdetidIGjennyStemmerMedTrygdetidIPesys(trygdetidMedFremtidig, request.beregning)) {
             "Beregnet trygdetid i Gjenny basert på perioder fra Pesys stemmer ikke med anvendt trygdetid i Pesys"
         }
 
         trygdetidMedFremtidig
-        // trygdetid
     } catch (e: Exception) {
-        // logger.warn("Klarte ikke legge til perioder fra Pesys for behandling $behandlingId", e)
-        // overstyrBeregnetTrygdetid(request, behandlingId)
         throw TrygdetidIkkeGyldigForAutomatiskGjenoppretting(
             e.message ?: "Klarte ikke legge til perioder fra Pesys for behandling $behandlingId",
         )

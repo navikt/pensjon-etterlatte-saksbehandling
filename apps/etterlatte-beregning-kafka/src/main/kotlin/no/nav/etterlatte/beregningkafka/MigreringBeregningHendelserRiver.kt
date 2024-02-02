@@ -69,21 +69,9 @@ private fun verifiserNyBeregning(
     }
 
     with(beregning.beregningsperioder.first()) {
-        /*
-        check(grunnbelop == migreringRequest.beregning.g) {
-            "Beregning må være basert på samme G som i Pesys. Er $grunnbelop i Gjenny, " +
-                "var ${migreringRequest.beregning.g} i Pesys."
-        }
-        check(utbetaltBeloep >= migreringRequest.beregning.brutto) {
-            "Man skal ikke kunne komme dårligere ut på nytt regelverk. " +
-                "Beregnet beløp i Gjenny ($utbetaltBeloep) er lavere enn dagens beløp i Pesys " +
-                "(${migreringRequest.beregning.brutto})."
-        }
-         */
         check(beregningsMetode == migreringRequest.finnBeregningsmetode()) {
             "Migrerte saker skal benytte samme beregningsmetode som Pesys. " +
                 "Kun folketrygd (nasjonal)"
-            // "Kun folketrygd (nasjonal) og EOS (prorata) er støttet."
         }
 
         when (migreringRequest.finnBeregningsmetode()) {
@@ -97,26 +85,7 @@ private fun verifiserNyBeregning(
                         "nasjonal beregning."
                 }
             }
-            BeregningsMetode.PRORATA -> {
-                throw IllegalStateException("Gjenoppretting støtter ikke beregningsMetode.PRORATA")
-                /*
-                check(broek != null && broek == migreringRequest.beregning.prorataBroek) {
-                    "Det er brukt ulik proratabrøk i Pesys (${migreringRequest.beregning.prorataBroek}) og Gjenny " +
-                        "($broek), beregningen er trolig feil."
-                }
-                val anvendtTTBroek =
-                    migreringRequest.beregning.anvendtTrygdetid *
-                        migreringRequest.beregning.prorataBroek!!.teller /
-                        migreringRequest.beregning.prorataBroek!!.nevner
-                check(trygdetid == anvendtTTBroek) {
-                    "Trygdetid har blitt regnet ulikt i beregning mellom Pesys og Gjenny"
-                }
-                check(samletTeoretiskTrygdetid == migreringRequest.beregning.anvendtTrygdetid) {
-                    "Anvendt trygdetid i Pesys (${migreringRequest.beregning.anvendtTrygdetid}) stemmer ikke overens " +
-                        "med samletTeoretiskTrygdetid $samletTeoretiskTrygdetid som er brukt i Gjenny"
-                }
-                 */
-            }
+            BeregningsMetode.PRORATA -> throw IllegalStateException("Gjenoppretting støtter ikke beregningsMetode.PRORATA")
             BeregningsMetode.BEST -> throw IllegalStateException("Gjenoppretting støtter ikke beregningsMetode.BEST")
         }
     }
@@ -144,7 +113,6 @@ private fun MigreringRequest.finnBeregningsmetode(): BeregningsMetode =
     when (val beregningsMetode = this.beregning.meta?.beregningsMetodeType) {
         "FOLKETRYGD" -> BeregningsMetode.NASJONAL
         "EOS" -> throw IllegalStateException("Vi ønsker ikke å beregne saker med EOS for autmatisk gjenoppretting")
-        // "EOS" -> BeregningsMetode.PRORATA
         "USA" -> throw IllegalStateException("Vi klarer ikke beregne saker etter beregningsmetode USA")
         "NORDISK" -> throw IllegalStateException("Vi klarer ikke beregne etter beregningsmetode NORDISK")
         null -> throw IllegalStateException("Vi kan ikke beregne saker som har vært overstyrt i Pesys")

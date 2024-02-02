@@ -8,6 +8,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -94,6 +95,7 @@ class OppgaveService(
                     )
                 }
             }
+
             is ExternalUser -> throw IllegalArgumentException("ExternalUser er ikke støttet for å tildele oppgave")
             else -> throw IllegalArgumentException(
                 "Ukjent brukertype ${appUser.name()} støtter ikke tildeling av oppgave",
@@ -160,11 +162,19 @@ class OppgaveService(
         frist: Tidspunkt,
     ) {
         if (frist.isBefore(Tidspunkt.now())) {
-            throw BadRequestException("Tidspunkt tilbake i tid id: $oppgaveId")
+            throw UgyldigForespoerselException(
+                code = "FRIST_TILBAKE_I_TID",
+                detail = "Frist kan ikke settes tilbake i tid",
+                meta = mapOf("oppgaveId" to oppgaveId),
+            )
         }
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+                ?: throw IkkeFunnetException(
+                    code = "OPPGAVE_IKKE_FUNNET",
+                    detail = "Oppgaven finnes ikke",
+                    meta = mapOf("oppgaveId" to oppgaveId),
+                )
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         if (hentetOppgave.saksbehandler != null) {
             oppgaveDao.redigerFrist(oppgaveId, frist)
@@ -267,14 +277,13 @@ class OppgaveService(
         saksbehandler: BrukerTokenInfo,
     ) {
         if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandler)) {
-            throw FeilSaksbehandlerPaaOppgaveException(
-                "Kan ikke lukke oppgave for en annen saksbehandler oppgave:" +
-                    " ${oppgaveUnderBehandling.id}",
+            throw UgyldigForespoerselException(
+                code = "FEIL_SAKSBEHANDLER_PAA_OPPGAVE",
+                detail = "Kan ikke lukke oppgave som tilhører en annen saksbehandler",
+                meta = mapOf("oppgaveId" to oppgaveUnderBehandling.id),
             )
         }
     }
-
-    class FeilSaksbehandlerPaaOppgaveException(message: String) : Exception(message)
 
     fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
         sakerMedNyEnhet.forEach {

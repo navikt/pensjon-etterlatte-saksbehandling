@@ -87,8 +87,8 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
           {mapApiResult(
             dokument,
             <Spinner label="Klargjør forhåndsvisning av PDF" visible />,
-            () => (
-              <ApiErrorAlert>Feil ved henting av PDF</ApiErrorAlert>
+            (error) => (
+              <ApiErrorAlert>{error.detail || 'Feil ved henting av PDF'}</ApiErrorAlert>
             ),
             () => (!!fileURL ? <PdfViewer src={fileURL} /> : <></>)
           )}

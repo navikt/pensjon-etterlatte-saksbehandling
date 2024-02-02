@@ -33,7 +33,6 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
                     logger.info("mappedMedNavn antall: ${mappedMedNavn.size}")
 
                     mappedMedNavn.forEach {
-                        SaksbehandlerInfo(it.first, it.first)
                         if (it.second == null) {
                             context.saksbehandlerInfoDao.upsertSaksbehandler(SaksbehandlerInfo(it.first, it.first))
                         } else {

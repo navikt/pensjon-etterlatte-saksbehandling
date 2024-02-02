@@ -37,7 +37,7 @@ Så langt er det ikke definert om simulering er noe vi skal støtte.
 
 1. Start Kafka lokalt ved å kjøre `docker-compose up -d`
 2. Sett følgende miljøvariabler ved oppstart av applikasjon:
-   `KAFKA_RAPID_TOPIC=etterlatte;KAFKA_BOOTSTRAP_SERVERS=0.0.0.0:9092;NAIS_APP_NAME=etterlatte-utbetaling;DB_DATABASE=postgres;DB_HOST=localhost;DB_PORT=5432;DB_USERNAME=postgres;DB_PASSWORD=postgres;OPPDRAG_MQ_HOSTNAME=localhost;OPPDRAG_MQ_PORT=1414;OPPDRAG_MQ_MANAGER=QM1;OPPDRAG_MQ_CHANNEL=DEV.ADMIN.SVRCONN;OPPDRAG_SEND_MQ_NAME=DEV.QUEUE.1;OPPDRAG_KVITTERING_MQ_NAME=DEV.QUEUE.2;OPPDRAG_AVSTEMMING_MQ_NAME=DEV.QUEUE.1;srvuser=admin;srvpwd=passw0rd;ELECTOR_PATH=localhost:1080`
+   `KAFKA_RAPID_TOPIC=etterlatte;KAFKA_BOOTSTRAP_SERVERS=0.0.0.0:9092;NAIS_APP_NAME=etterlatte-utbetaling;DB_DATABASE=postgres;DB_HOST=localhost;DB_PORT=5432;DB_USERNAME=postgres;DB_PASSWORD=postgres;OPPDRAG_MQ_HOSTNAME=localhost;OPPDRAG_MQ_PORT=1414;OPPDRAG_MQ_MANAGER=QM1;OPPDRAG_MQ_CHANNEL=DEV.ADMIN.SVRCONN;OPPDRAG_SEND_MQ_NAME=DEV.QUEUE.1;OPPDRAG_KVITTERING_MQ_NAME=DEV.QUEUE.2;OPPDRAG_AVSTEMMING_MQ_NAME=DEV.QUEUE.1;srvuser=admin;srvpwd=passw0rd`
 3. Dersom man ønsker å sjekke avstemmingsjobb må `hostname` settes under feltet "name" i `api-mock/elector-response.json`
 
 #### Teste mot rapid

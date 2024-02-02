@@ -17,7 +17,6 @@
       <env name="DB_PORT" value="5439" />
       <env name="DB_USERNAME" value="postgres" />
       <env name="DEV" value="true" />
-      <env name="ELECTOR_PATH" value="localhost:9094" />
       <env name="ETTERLATTE_BREV_API_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-brev-api" />
       <env name="ETTERLATTE_BREV_API_URL" value="https://etterlatte-brev-api.intern.dev.no" />
       <env name="ETTERLATTE_GRUNNLAG_CLIENT_ID" value="ce96a301-13db-4409-b277-5b27f464d08b" />

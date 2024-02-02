@@ -1,6 +1,5 @@
 package no.nav.etterlatte.joarkhendelser
 
-import isDev
 import joarkhendelser.joark.SafKlient
 import joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
@@ -12,6 +11,7 @@ import no.nav.etterlatte.joarkhendelser.joark.erTemaEtterlatte
 import no.nav.etterlatte.joarkhendelser.joark.lagMerknadFraStatus
 import no.nav.etterlatte.joarkhendelser.joark.temaTilSakType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord

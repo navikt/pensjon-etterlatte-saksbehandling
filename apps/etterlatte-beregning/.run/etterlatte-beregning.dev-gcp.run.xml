@@ -16,7 +16,6 @@
       <env name="ETTERLATTE_VILKAARSVURDERING_URL" value="http://etterlatte-vilkaarsvurdering.intern.dev.nav.no" />
       <env name="NAIS_APP_NAME" value="etterlatte-beregning" />
       <env name="NAIS_CLUSTER_NAME" value="dev-gcp" />
-      <env name="ELECTOR_PATH" value="localhost" />
       <env name="GRUNNLAG_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-grunnlag/.default" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />

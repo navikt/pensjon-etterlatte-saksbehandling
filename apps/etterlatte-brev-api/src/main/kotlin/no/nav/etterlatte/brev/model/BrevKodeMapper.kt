@@ -2,23 +2,11 @@ package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING_OPPHOER_MANUELL
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
 class BrevKodeMapper {
     fun brevKode(
-        generellBrevData: GenerellBrevData,
-        brevProsessType: BrevProsessType,
-        erOmregningNyRegel: Boolean = false,
-    ) = when (brevProsessType) {
-        BrevProsessType.AUTOMATISK -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype automatisk")
-        BrevProsessType.REDIGERBAR -> brevKodeAutomatisk(generellBrevData, erOmregningNyRegel)
-        BrevProsessType.MANUELL -> Brevkoder(OMSTILLINGSSTOENAD_REVURDERING_OPPHOER_MANUELL)
-        BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException("Brevkode ikke relevant for ${BrevProsessType.OPPLASTET_PDF}")
-    }
-
-    private fun brevKodeAutomatisk(
         generellBrevData: GenerellBrevData,
         erOmregningNyRegel: Boolean = false,
     ): Brevkoder {

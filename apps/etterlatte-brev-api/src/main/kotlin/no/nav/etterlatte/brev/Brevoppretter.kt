@@ -131,7 +131,7 @@ class Brevoppretter(
                 { _, _ -> brevKode }
             } else {
                 { mapper, data ->
-                    mapper.brevKode(data, BrevProsessType.REDIGERBAR).redigering
+                    mapper.brevKode(data).redigering
                 }
             }
 

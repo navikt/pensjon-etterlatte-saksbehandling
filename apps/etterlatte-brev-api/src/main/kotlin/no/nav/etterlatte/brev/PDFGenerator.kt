@@ -35,7 +35,7 @@ class PDFGenerator(
         bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
-        brevKode: (GenerellBrevData, Brev) -> Brevkoder,
+        brevKode: (GenerellBrevData) -> Brevkoder,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         sjekkOmBrevKanEndres(id)
@@ -50,7 +50,7 @@ class PDFGenerator(
         bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
-        brevKode: (GenerellBrevData, Brev) -> Brevkoder,
+        brevKode: (GenerellBrevData) -> Brevkoder,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
@@ -67,7 +67,7 @@ class PDFGenerator(
             retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId, bruker) }
         val avsender = adresseService.hentAvsender(avsenderRequest(bruker, generellBrevData))
 
-        val brevkodePar = brevKode(generellBrevData, brev)
+        val brevkodePar = brevKode(generellBrevData)
 
         val sak = generellBrevData.sak
         val letterData =

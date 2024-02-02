@@ -109,6 +109,7 @@ export interface Formkrav {
   gjelderKlagenNoeKonkretIVedtaket: JaNei
   erKlagenFramsattInnenFrist: JaNei
   erFormkraveneOppfylt: JaNei
+  begrunnelse: string | null
 }
 
 export interface FormkravMedSaksbehandler {
@@ -181,7 +182,7 @@ interface KlageBrevInnstilling {
 
 export interface InnstillingTilKabal {
   lovhjemmel: LovhjemmelFelles
-  internKommentar: string
+  internKommentar: string | null
   brev: KlageBrevInnstilling
 }
 

@@ -111,7 +111,7 @@ class PDFGenerator(
                     brev.tittel,
                 )
 
-            BrevProsessType.AUTOMATISK -> brevDataMapper.brevData(generellBrevData, brukerTokenInfo)
+            BrevProsessType.AUTOMATISK -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype automatisk")
             BrevProsessType.MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
             BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException("Brevdata ikke relevant for ${BrevProsessType.OPPLASTET_PDF}")
         }

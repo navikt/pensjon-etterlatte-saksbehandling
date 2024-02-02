@@ -28,7 +28,10 @@ export const ToggleMinOppgaveliste = () => {
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
   }
-  const [filter, setFilter] = useState<Filter>(initialFilter())
+
+  const [filter, setFilter] = useState<Filter>(
+    !!localStorage['filter'] ? JSON.parse(localStorage['filter']) : initialFilter()
+  )
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
   const [oppgaver, hentOppgaverFetch] = useApiCall(hentOppgaver)
   const [gosysOppgaver, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
@@ -60,11 +63,25 @@ export const ToggleMinOppgaveliste = () => {
   // og den felles oppgavelisten. Vet egt ikke helt om dette er ønsket behaviour
   useEffect(() => {
     if (oppgaveListeValg === 'MinOppgaveliste') {
-      setFilter({ ...initialFilter(), oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING] })
+      !!localStorage['filter']
+        ? setFilter({
+            ...JSON.parse(localStorage['filter']),
+            oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
+          })
+        : setFilter({ ...initialFilter(), oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING] })
     } else {
-      setFilter(initialFilter())
+      !!localStorage['filter']
+        ? setFilter({
+            ...JSON.parse(localStorage['filter']),
+            oppgavestatusFilter: [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
+          })
+        : setFilter(initialFilter())
     }
   }, [oppgaveListeValg])
+
+  useEffect(() => {
+    localStorage.setItem('filter', JSON.stringify(filter))
+  }, [filter])
 
   const oppdaterTildeling = (id: string, saksbehandler: string | null, versjon: number | null) => {
     setTimeout(() => {

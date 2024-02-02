@@ -74,6 +74,7 @@ private class Server(private val context: ApplicationContext) {
     fun run() =
         with(context) {
             dataSource.migrate()
+            println("***************************** isleader: ${context.leaderElectionKlient.isLeader()}")
             setReady().also { engine.start(true) }
         }
 }

@@ -20,7 +20,6 @@
       <env name="OPPDRAG_AVSTEMMING_MQ_NAME" value="DEV.QUEUE.1" />
       <env name="srvuser" value="admin" />
       <env name="srvpwd" value="passw0rd" />
-      <env name="ELECTOR_PATH" value="localhost:1080" />
       <env name="GRENSESNITTAVSTEMMING_ENABLED" value="true" />
       <env name="GRENSESNITTAVSTEMMING_OMS_ENABLED" value="true" />
       <env name="KONSISTENSAVSTEMMING_ENABLED" value="true" />

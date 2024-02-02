@@ -215,7 +215,8 @@ internal class ApplicationContext(
     val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
-    val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
+    val leaderElectionKlient = LeaderElection(env.maybeEnvValue("ELECTOR_PATH"), leaderElectionHttpClient)
+
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
     val klageHendelser = KlageHendelserServiceImpl(rapid)
     val tilbakekreving = TilbakekrevingHendelserServiceImpl(rapid)

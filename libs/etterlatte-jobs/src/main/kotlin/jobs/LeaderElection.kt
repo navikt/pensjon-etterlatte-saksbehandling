@@ -19,7 +19,6 @@ open class LeaderElection(
     open fun hostName(): String? = InetAddress.getLocalHost().hostName
 
     open fun isLeader(): Boolean {
-        logger.info("App is running in GCP: ${appIsInGCP()}")
         if (electorPath != null) {
             val leader =
                 runBlocking {

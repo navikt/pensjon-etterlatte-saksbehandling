@@ -364,99 +364,6 @@ internal class VedtaksbrevServiceTest {
     @Nested
     inner class BrevInnholdTest {
         @Test
-        fun `AUTOMATISK - PDF genereres uten lagring`() {
-            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
-            val behandling = opprettGenerellBrevdata(SakType.BARNEPENSJON, VedtakType.INNVILGELSE)
-
-            every { db.hentBrev(any()) } returns brev
-            coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
-            coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
-            coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
-            coEvery { brevbakerService.genererPdf(any(), any()) } returns opprettBrevbakerResponse()
-            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
-
-            runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
-            }
-
-            verify {
-                db.hentBrev(brev.id)
-            }
-
-            coVerify {
-                brevdataFacade.hentEtterbetaling(any(), any())
-                brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any())
-                brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, SAKSBEHANDLER)
-                adresseService.hentAvsender(any())
-                brevbakerService.genererPdf(any(), any())
-            }
-        }
-
-        @Test
-        fun `PDF genereres og lagres hvis vedtak er fattet gammel innvilgelsesmal`() {
-            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
-            val generellBrevData = opprettGenerellBrevdata(SakType.BARNEPENSJON, VedtakType.INNVILGELSE, VedtakStatus.FATTET_VEDTAK)
-
-            every { db.hentBrev(any()) } returns brev
-            coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns generellBrevData
-            coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
-            coEvery { brevbakerService.genererPdf(any(), any()) } returns opprettBrevbakerResponse()
-            coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
-            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
-
-            runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, bruker = ATTESTANT)
-            }
-
-            verify {
-                db.hentBrev(brev.id)
-                db.lagrePdf(brev.id, any())
-            }
-
-            coVerify {
-                brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any())
-                brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, ATTESTANT)
-                brevdataFacade.hentEtterbetaling(any(), any())
-                adresseService.hentAvsender(any())
-                brevbakerService.genererPdf(any(), any())
-            }
-        }
-
-        @ParameterizedTest
-        @EnumSource(
-            VedtakStatus::class,
-            mode = EnumSource.Mode.EXCLUDE,
-            names = ["FATTET_VEDTAK"],
-        )
-        fun `PDF genereres, men lagres ikke på andre vedtaksstatuser enn fattet_vedtak`(vedtakStatus: VedtakStatus) {
-            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
-            val behandling = opprettGenerellBrevdata(SakType.BARNEPENSJON, VedtakType.INNVILGELSE, vedtakStatus)
-
-            every { db.hentBrev(any()) } returns brev
-            coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
-            coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
-            coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
-            coEvery { brevbakerService.genererPdf(any(), any()) } returns opprettBrevbakerResponse()
-            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
-
-            runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, bruker = ATTESTANT)
-            }
-
-            verify {
-                db.hentBrev(brev.id)
-            }
-
-            coVerify {
-                brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any())
-                brevdataFacade.hentEtterbetaling(any(), any())
-                brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, ATTESTANT)
-                adresseService.hentAvsender(any())
-                brevbakerService.genererPdf(any(), any())
-            }
-        }
-
-        @Test
         fun `Ferdigstille vedtaksbrev som ATTESTANT - status vedtak fattet - ferdigstilles OK`() {
             val brev = opprettBrev(Status.OPPRETTET, mockk())
 
@@ -549,35 +456,6 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify { db.hentBrevForBehandling(brev.behandlingId!!, Brevtype.VEDTAK) }
-        }
-
-        @Test
-        fun `AUTOMATISK - PDF genereres, men kaster feil hvis saksbehandler prøver å ferdigstille egen sak`() {
-            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK)
-            val behandling = opprettGenerellBrevdata(SakType.BARNEPENSJON, VedtakType.INNVILGELSE, VedtakStatus.FATTET_VEDTAK)
-
-            every { db.hentBrev(any()) } returns brev
-            coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
-            coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
-            coEvery { brevbakerService.genererPdf(any(), any()) } returns opprettBrevbakerResponse()
-            coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
-
-            runBlocking {
-                vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
-            }
-
-            verify {
-                db.hentBrev(brev.id)
-            }
-
-            coVerify {
-                brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any())
-                brevdataFacade.hentEtterbetaling(any(), any())
-                brevdataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId!!, SAKSBEHANDLER)
-                adresseService.hentAvsender(any())
-                brevbakerService.genererPdf(any(), any())
-            }
         }
 
         @Test

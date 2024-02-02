@@ -56,6 +56,4 @@ data class RedigerbarTekstRequest(
     val brukerTokenInfo: BrukerTokenInfo,
     val brevkode: (mapper: BrevKodeMapper, g: GenerellBrevData) -> EtterlatteBrevKode,
     val migrering: MigreringBrevRequest? = null,
-) {
-    fun vedtakstype() = generellBrevData.forenkletVedtak?.type?.name?.lowercase()
-}
+)

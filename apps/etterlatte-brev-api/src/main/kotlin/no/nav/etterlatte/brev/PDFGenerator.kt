@@ -26,7 +26,6 @@ class PDFGenerator(
     private val brevDataMapper: BrevDataMapperFerdigstilling,
     private val adresseService: AdresseService,
     private val brevbakerService: BrevbakerService,
-    private val migreringBrevDataService: MigreringBrevDataService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

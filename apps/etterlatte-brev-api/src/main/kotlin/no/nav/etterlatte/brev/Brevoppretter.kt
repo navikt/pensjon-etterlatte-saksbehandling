@@ -27,7 +27,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class Brevoppretter(
@@ -37,8 +36,6 @@ class Brevoppretter(
     private val brevbaker: BrevbakerService,
     private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
 ) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     suspend fun opprettVedtaksbrev(
         sakId: Long,
         behandlingId: UUID,
@@ -46,7 +43,7 @@ class Brevoppretter(
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         // TODO EY-3232 - Fjerne migreringstilpasning
     ): Brev {
-        require(hentVedtaksbrev(behandlingId) == null) {
+        require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
         }
 
@@ -135,22 +132,27 @@ class Brevoppretter(
                 }
             }
 
+        val tittel =
+            brevKode?.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
         return coroutineScope {
             val innhold =
                 async {
-                    opprettInnhold(
+                    brevbaker.hentRedigerbarTekstFraBrevbakeren(
                         RedigerbarTekstRequest(
                             generellBrevData,
                             bruker,
                             brevkode,
                             automatiskMigreringRequest,
                         ),
-                        brevKode?.tittel,
                     )
                 }
 
             val innholdVedlegg = async { redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData) }
-            OpprettBrevRequest(generellBrevData, innhold.await(), innholdVedlegg.await())
+            OpprettBrevRequest(
+                generellBrevData,
+                BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),
+                innholdVedlegg.await(),
+            )
         }
     }
 
@@ -167,21 +169,6 @@ class Brevoppretter(
                 }
             }
         }
-
-    fun hentVedtaksbrev(behandlingId: UUID): Brev? {
-        logger.info("Henter vedtaksbrev for behandling (id=$behandlingId)")
-
-        return db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull()
-    }
-
-    private suspend fun opprettInnhold(
-        redigerbarTekstRequest: RedigerbarTekstRequest,
-        muligTittel: String?,
-    ): BrevInnhold {
-        val tittel = muligTittel ?: (redigerbarTekstRequest.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
-        val payload = brevbaker.hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest)
-        return BrevInnhold(tittel, redigerbarTekstRequest.generellBrevData.spraak, payload)
-    }
 }
 
 private data class OpprettBrevRequest(

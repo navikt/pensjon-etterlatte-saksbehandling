@@ -83,10 +83,10 @@ class BrevDataMapperRedigerbartUtfall(
     }
 
     private suspend fun omstillingsstoenadInnvilgelse(
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val fetcher = BrevDatafetcher(brevdataFacade, bruker, generellBrevData)
         val utbetalingsinfo = async { fetcher.hentUtbetaling() }
         val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }

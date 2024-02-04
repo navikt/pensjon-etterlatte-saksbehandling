@@ -31,7 +31,7 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
     suspend fun brevDataFerdigstilling(
         generellBrevData: GenerellBrevData,
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         innholdMedVedlegg: InnholdMedVedlegg,
         kode: Brevkoder,
         automatiskMigreringRequest: MigreringBrevRequest?,
@@ -39,7 +39,7 @@ class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
     ): BrevData {
         if (generellBrevData.erMigrering()) {
             return coroutineScope {
-                val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+                val fetcher = BrevDatafetcher(brevdataFacade, bruker, generellBrevData)
                 val utbetalingsinfo = async { fetcher.hentUtbetaling() }
                 val trygdetid = async { fetcher.hentTrygdetid() }
                 val grunnbeloep = async { fetcher.hentGrunnbeloep() }
@@ -60,30 +60,16 @@ class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
 
         return when (kode.ferdigstilling) {
             TOM_MAL_INFORMASJONSBREV -> ManueltBrevMedTittelData(innholdMedVedlegg.innhold(), tittel)
-            BARNEPENSJON_REVURDERING -> barnepensjonRevurdering(brukerTokenInfo, generellBrevData, innholdMedVedlegg)
-            BARNEPENSJON_INNVILGELSE -> barnepensjonInnvilgelse(brukerTokenInfo, generellBrevData, innholdMedVedlegg)
+            BARNEPENSJON_REVURDERING -> barnepensjonRevurdering(bruker, generellBrevData, innholdMedVedlegg)
+            BARNEPENSJON_INNVILGELSE -> barnepensjonInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
             BARNEPENSJON_AVSLAG -> barnepensjonAvslag(innholdMedVedlegg, generellBrevData)
             BARNEPENSJON_OPPHOER -> barnepensjonOpphoer(innholdMedVedlegg, generellBrevData)
 
-            OMSTILLINGSSTOENAD_INNVILGELSE ->
-                omstillingsstoenadInnvilgelse(
-                    brukerTokenInfo,
-                    generellBrevData,
-                    innholdMedVedlegg,
-                )
-            OMSTILLINGSSTOENAD_REVURDERING ->
-                omstillingsstoenadRevurdering(
-                    brukerTokenInfo,
-                    generellBrevData,
-                    innholdMedVedlegg,
-                )
+            OMSTILLINGSSTOENAD_INNVILGELSE -> omstillingsstoenadInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
+            OMSTILLINGSSTOENAD_REVURDERING -> omstillingsstoenadRevurdering(bruker, generellBrevData, innholdMedVedlegg)
             OMSTILLINGSSTOENAD_AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, innholdMedVedlegg.innhold())
-            OMSTILLINGSSTOENAD_OPPHOER -> {
-                OmstillingsstoenadOpphoer.fra(
-                    generellBrevData.utlandstilknytning,
-                    innholdMedVedlegg.innhold(),
-                )
-            }
+            OMSTILLINGSSTOENAD_OPPHOER ->
+                OmstillingsstoenadOpphoer.fra(generellBrevData.utlandstilknytning, innholdMedVedlegg.innhold())
 
             TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
             else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")

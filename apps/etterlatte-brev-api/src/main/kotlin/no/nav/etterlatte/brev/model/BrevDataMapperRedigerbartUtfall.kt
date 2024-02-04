@@ -21,19 +21,12 @@ class BrevDataMapperRedigerbartUtfall(
     private val migreringBrevDataService: MigreringBrevDataService,
 ) {
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
-        when (redigerbarTekstRequest.generellBrevData.erMigrering()) {
-            false ->
-                brevData(
-                    redigerbarTekstRequest.generellBrevData,
-                    redigerbarTekstRequest.brukerTokenInfo,
-                )
-
-            true ->
-                migreringBrevDataService.opprettMigreringBrevdata(
-                    redigerbarTekstRequest.generellBrevData,
-                    redigerbarTekstRequest.migrering,
-                    redigerbarTekstRequest.brukerTokenInfo,
-                )
+        with(redigerbarTekstRequest) {
+            if (generellBrevData.erMigrering()) {
+                migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, migrering, brukerTokenInfo)
+            } else {
+                brevData(generellBrevData, brukerTokenInfo)
+            }
         }
 
     private suspend fun brevData(

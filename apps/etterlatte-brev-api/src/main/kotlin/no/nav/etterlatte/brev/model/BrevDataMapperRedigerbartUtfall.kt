@@ -36,34 +36,15 @@ class BrevDataMapperRedigerbartUtfall(
                 )
         }
 
-    suspend fun brevData(
+    private suspend fun brevData(
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BrevData {
-        return when (generellBrevData.sak.sakType) {
+    ): BrevData =
+        when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
                 when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE ->
-                        coroutineScope {
-                            val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
-                            val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-                            val etterbetaling = async { fetcher.hentEtterbetaling() }
-
-                            BarnepensjonInnvilgelseRedigerbartUtfall.fra(
-                                generellBrevData,
-                                utbetalingsinfo.await(),
-                                etterbetaling.await(),
-                            )
-                        }
-
-                    VedtakType.ENDRING ->
-                        coroutineScope {
-                            val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
-                            val etterbetaling = async { fetcher.hentEtterbetaling() }
-
-                            BarnepensjonRevurderingRedigerbartUtfall.fra(etterbetaling.await())
-                        }
-
+                    VedtakType.INNVILGELSE -> barnepensjonInnvilgelse(brukerTokenInfo, generellBrevData)
+                    VedtakType.ENDRING -> barnepensjonEndring(brukerTokenInfo, generellBrevData)
                     VedtakType.AVSLAG -> ManueltBrevData()
                     VedtakType.OPPHOER -> ManueltBrevData()
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
@@ -73,22 +54,7 @@ class BrevDataMapperRedigerbartUtfall(
 
             SakType.OMSTILLINGSSTOENAD -> {
                 when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> {
-                        coroutineScope {
-                            val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
-                            val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-                            val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
-                            val etterbetaling = async { fetcher.hentEtterbetaling() }
-
-                            OmstillingsstoenadInnvilgelseRedigerbartUtfall.fra(
-                                generellBrevData,
-                                utbetalingsinfo.await(),
-                                requireNotNull(avkortingsinfo.await()),
-                                etterbetaling.await(),
-                            )
-                        }
-                    }
-
+                    VedtakType.INNVILGELSE -> omstillingsstoenadInnvilgelse(brukerTokenInfo, generellBrevData)
                     VedtakType.ENDRING -> ManueltBrevData()
                     VedtakType.AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, emptyList())
                     VedtakType.OPPHOER -> OmstillingsstoenadOpphoerRedigerbartUtfall.fra(generellBrevData, emptyList())
@@ -97,5 +63,46 @@ class BrevDataMapperRedigerbartUtfall(
                 }
             }
         }
+
+    private suspend fun barnepensjonInnvilgelse(
+        brukerTokenInfo: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+    ) = coroutineScope {
+        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
+        val etterbetaling = async { fetcher.hentEtterbetaling() }
+
+        BarnepensjonInnvilgelseRedigerbartUtfall.fra(
+            generellBrevData,
+            utbetalingsinfo.await(),
+            etterbetaling.await(),
+        )
+    }
+
+    private suspend fun barnepensjonEndring(
+        brukerTokenInfo: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+    ) = coroutineScope {
+        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val etterbetaling = async { fetcher.hentEtterbetaling() }
+
+        BarnepensjonRevurderingRedigerbartUtfall.fra(etterbetaling.await())
+    }
+
+    private suspend fun omstillingsstoenadInnvilgelse(
+        brukerTokenInfo: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+    ) = coroutineScope {
+        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
+        val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
+        val etterbetaling = async { fetcher.hentEtterbetaling() }
+
+        OmstillingsstoenadInnvilgelseRedigerbartUtfall.fra(
+            generellBrevData,
+            utbetalingsinfo.await(),
+            requireNotNull(avkortingsinfo.await()),
+            etterbetaling.await(),
+        )
     }
 }

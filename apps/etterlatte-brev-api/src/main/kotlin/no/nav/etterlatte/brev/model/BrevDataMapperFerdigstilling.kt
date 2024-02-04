@@ -28,11 +28,7 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurdering
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
 import no.nav.etterlatte.token.BrukerTokenInfo
 
-class BrevDataMapperFerdigstilling(
-    private val brevdataFacade: BrevdataFacade,
-    private val brevDataMapper: BrevDataMapper,
-    // TODO: Håper vi kan få bort denne koplinga snart
-) {
+class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
     suspend fun brevDataFerdigstilling(
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
@@ -182,16 +178,7 @@ class BrevDataMapperFerdigstilling(
 
             TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
 
-            else ->
-                when (generellBrevData.revurderingsaarsak?.redigerbartBrev) {
-                    true -> ManueltBrevData(innholdMedVedlegg.innhold())
-                    else -> brevData(generellBrevData, brukerTokenInfo)
-                }
+            else -> ManueltBrevData(innholdMedVedlegg.innhold())
         }
     }
-
-    suspend fun brevData(
-        generellBrevData: GenerellBrevData,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = brevDataMapper.brevData(generellBrevData, brukerTokenInfo)
 }

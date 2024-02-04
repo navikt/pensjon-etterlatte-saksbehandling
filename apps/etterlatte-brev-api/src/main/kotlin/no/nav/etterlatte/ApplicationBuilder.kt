@@ -144,7 +144,7 @@ class ApplicationBuilder {
 
     private val brevDataMapper = BrevDataMapper(brevdataFacade, migreringBrevDataService)
 
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade, brevDataMapper)
+    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade)
 
     private val brevKodeMapper = BrevKodeMapper()
 

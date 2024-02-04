@@ -6,11 +6,8 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
 class BrevKodeMapper {
-    fun brevKode(
-        generellBrevData: GenerellBrevData,
-        erOmregningNyRegel: Boolean = false,
-    ): Brevkoder {
-        if (generellBrevData.erMigrering() || erOmregningNyRegel) {
+    fun brevKode(generellBrevData: GenerellBrevData): Brevkoder {
+        if (generellBrevData.erMigrering()) {
             assert(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(generellBrevData.forenkletVedtak?.type))
             return Brevkoder.OMREGNING
         }

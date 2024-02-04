@@ -2602,10 +2602,10 @@ unique-slug@^3.0.0:
   dependencies:
     imurmurhash "^0.1.4"
 
-unleash-client@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/unleash-client/-/unleash-client-5.0.0.tgz#b6725723b38f5572b4b1c5261c1bb2254148ec58"
-  integrity sha512-9x3SOpHTnMDY0CosKwy/0Hi9gIjw65+i2fsC76bvYaUIVTlqDoPdCfosBokNIZ/IjCF0TjEgSZefSWNGY5SC9A==
+unleash-client@^5.4.0:
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/unleash-client/-/unleash-client-5.4.0.tgz#66d9684bdfeaabd618a65734ec7345767ec1b7e2"
+  integrity sha512-1MOAy/uTTv7y5upt7plZ5inAqzNo1MN+nIaM9WDZzAeQt+0xTPrxzwzYdzqPWnPkEUu3WbHKyyRgeOOKdB6r3w==
   dependencies:
     ip "^1.1.8"
     make-fetch-happen "^10.2.1"

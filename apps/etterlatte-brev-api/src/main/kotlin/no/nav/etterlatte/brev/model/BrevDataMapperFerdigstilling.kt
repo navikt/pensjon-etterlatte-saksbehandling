@@ -178,7 +178,7 @@ class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
 
             TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
 
-            else -> ManueltBrevData(innholdMedVedlegg.innhold())
+            else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
         }
     }
 }

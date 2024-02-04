@@ -27,8 +27,8 @@ unleash?.on('synchronized', () => {
       logger.info(`Toggle ${definition.name} is enabled: ${definition.enabled}`)
       logger.info('Strategies:')
 
-      definition.strategies.map((strat) => {
-        logger.info(strat.name, { ...strat.parameters })
+      definition.strategies?.map((strategi) => {
+        logger.info(strategi.name, { ...strategi.parameters })
       })
     }
   })

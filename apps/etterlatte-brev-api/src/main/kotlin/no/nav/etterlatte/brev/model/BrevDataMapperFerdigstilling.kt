@@ -59,115 +59,24 @@ class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
         }
 
         return when (kode.ferdigstilling) {
-            TOM_MAL_INFORMASJONSBREV -> {
-                ManueltBrevMedTittelData(innholdMedVedlegg.innhold(), tittel)
-            }
+            TOM_MAL_INFORMASJONSBREV -> ManueltBrevMedTittelData(innholdMedVedlegg.innhold(), tittel)
+            BARNEPENSJON_REVURDERING -> barnepensjonRevurdering(brukerTokenInfo, generellBrevData, innholdMedVedlegg)
+            BARNEPENSJON_INNVILGELSE -> barnepensjonInnvilgelse(brukerTokenInfo, generellBrevData, innholdMedVedlegg)
+            BARNEPENSJON_AVSLAG -> barnepensjonAvslag(innholdMedVedlegg, generellBrevData)
+            BARNEPENSJON_OPPHOER -> barnepensjonOpphoer(innholdMedVedlegg, generellBrevData)
 
-            BARNEPENSJON_REVURDERING -> {
-                coroutineScope {
-                    val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
-                    val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-                    val forrigeUtbetalingsinfo = async { fetcher.hentForrigeUtbetaling() }
-                    val trygdetid = async { fetcher.hentTrygdetid() }
-                    val grunnbeloep = async { fetcher.hentGrunnbeloep() }
-                    val etterbetaling = async { fetcher.hentEtterbetaling() }
-                    val brevutfall = async { fetcher.hentBrevutfall() }
-
-                    BarnepensjonRevurdering.fra(
-                        innholdMedVedlegg,
-                        utbetalingsinfo.await(),
-                        forrigeUtbetalingsinfo.await(),
-                        etterbetaling.await(),
-                        requireNotNull(trygdetid.await()),
-                        requireNotNull(grunnbeloep.await()),
-                        generellBrevData.utlandstilknytning?.type,
-                        requireNotNull(brevutfall.await()),
-                    )
-                }
-            }
-
-            BARNEPENSJON_INNVILGELSE -> {
-                coroutineScope {
-                    val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
-                    val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-                    val trygdetid = async { fetcher.hentTrygdetid() }
-                    val grunnbeloep = async { fetcher.hentGrunnbeloep() }
-                    val etterbetaling = async { fetcher.hentEtterbetaling() }
-                    val brevutfall = async { fetcher.hentBrevutfall() }
-
-                    BarnepensjonInnvilgelse.fra(
-                        innholdMedVedlegg,
-                        utbetalingsinfo.await(),
-                        etterbetaling.await(),
-                        requireNotNull(trygdetid.await()),
-                        requireNotNull(grunnbeloep.await()),
-                        generellBrevData.utlandstilknytning?.type,
-                        requireNotNull(brevutfall.await()),
-                    )
-                }
-            }
-
-            BARNEPENSJON_AVSLAG -> {
-                BarnepensjonAvslag.fra(
-                    innhold = innholdMedVedlegg,
-                    // TODO må kunne sette brevutfall ved avslag.
-                    //  Det er pr nå ikke mulig da dette ligger i beregningssteget.
-                    brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
-                    utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+            OMSTILLINGSSTOENAD_INNVILGELSE ->
+                omstillingsstoenadInnvilgelse(
+                    brukerTokenInfo,
+                    generellBrevData,
+                    innholdMedVedlegg,
                 )
-            }
-
-            BARNEPENSJON_OPPHOER -> {
-                BarnepensjonOpphoer.fra(
-                    innhold = innholdMedVedlegg,
-                    // TODO må kunne sette brevutfall ved opphør.
-                    //  Det er pr nå ikke mulig da dette ligger i beregningssteget.
-                    brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
-                    utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+            OMSTILLINGSSTOENAD_REVURDERING ->
+                omstillingsstoenadRevurdering(
+                    brukerTokenInfo,
+                    generellBrevData,
+                    innholdMedVedlegg,
                 )
-            }
-
-            OMSTILLINGSSTOENAD_INNVILGELSE -> {
-                coroutineScope {
-                    val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
-                    val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-                    val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
-                    val trygdetid = async { fetcher.hentTrygdetid() }
-                    val etterbetaling = async { fetcher.hentEtterbetaling() }
-                    val brevutfall = async { fetcher.hentBrevutfall() }
-
-                    OmstillingsstoenadInnvilgelse.fra(
-                        innholdMedVedlegg,
-                        generellBrevData,
-                        utbetalingsinfo.await(),
-                        requireNotNull(avkortingsinfo.await()),
-                        etterbetaling.await(),
-                        requireNotNull(trygdetid.await()),
-                        requireNotNull(brevutfall.await()),
-                    )
-                }
-            }
-
-            OMSTILLINGSSTOENAD_REVURDERING -> {
-                coroutineScope {
-                    val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
-                    val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-                    val forrigeUtbetalingsinfo = async { fetcher.hentForrigeUtbetaling() }
-                    val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
-                    val trygdetid = async { fetcher.hentTrygdetid() }
-                    val etterbetaling = async { fetcher.hentEtterbetaling() }
-
-                    OmstillingsstoenadRevurdering.fra(
-                        innholdMedVedlegg,
-                        requireNotNull(avkortingsinfo.await()),
-                        utbetalingsinfo.await(),
-                        forrigeUtbetalingsinfo.await(),
-                        etterbetaling.await(),
-                        requireNotNull(trygdetid.await()),
-                    )
-                }
-            }
-
             OMSTILLINGSSTOENAD_AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, innholdMedVedlegg.innhold())
             OMSTILLINGSSTOENAD_OPPHOER -> {
                 OmstillingsstoenadOpphoer.fra(
@@ -177,8 +86,122 @@ class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
             }
 
             TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
-
             else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
         }
+    }
+
+    private suspend fun barnepensjonRevurdering(
+        brukerTokenInfo: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+        innholdMedVedlegg: InnholdMedVedlegg,
+    ) = coroutineScope {
+        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
+        val forrigeUtbetalingsinfo = async { fetcher.hentForrigeUtbetaling() }
+        val trygdetid = async { fetcher.hentTrygdetid() }
+        val grunnbeloep = async { fetcher.hentGrunnbeloep() }
+        val etterbetaling = async { fetcher.hentEtterbetaling() }
+        val brevutfall = async { fetcher.hentBrevutfall() }
+
+        BarnepensjonRevurdering.fra(
+            innholdMedVedlegg,
+            utbetalingsinfo.await(),
+            forrigeUtbetalingsinfo.await(),
+            etterbetaling.await(),
+            requireNotNull(trygdetid.await()),
+            requireNotNull(grunnbeloep.await()),
+            generellBrevData.utlandstilknytning?.type,
+            requireNotNull(brevutfall.await()),
+        )
+    }
+
+    private suspend fun barnepensjonInnvilgelse(
+        brukerTokenInfo: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+        innholdMedVedlegg: InnholdMedVedlegg,
+    ) = coroutineScope {
+        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
+        val trygdetid = async { fetcher.hentTrygdetid() }
+        val grunnbeloep = async { fetcher.hentGrunnbeloep() }
+        val etterbetaling = async { fetcher.hentEtterbetaling() }
+        val brevutfall = async { fetcher.hentBrevutfall() }
+
+        BarnepensjonInnvilgelse.fra(
+            innholdMedVedlegg,
+            utbetalingsinfo.await(),
+            etterbetaling.await(),
+            requireNotNull(trygdetid.await()),
+            requireNotNull(grunnbeloep.await()),
+            generellBrevData.utlandstilknytning?.type,
+            requireNotNull(brevutfall.await()),
+        )
+    }
+
+    private fun barnepensjonAvslag(
+        innholdMedVedlegg: InnholdMedVedlegg,
+        generellBrevData: GenerellBrevData,
+    ) = BarnepensjonAvslag.fra(
+        innhold = innholdMedVedlegg,
+        // TODO må kunne sette brevutfall ved avslag.
+        //  Det er pr nå ikke mulig da dette ligger i beregningssteget.
+        brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
+        utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+    )
+
+    private fun barnepensjonOpphoer(
+        innholdMedVedlegg: InnholdMedVedlegg,
+        generellBrevData: GenerellBrevData,
+    ) = BarnepensjonOpphoer.fra(
+        innhold = innholdMedVedlegg,
+        // TODO må kunne sette brevutfall ved opphør.
+        //  Det er pr nå ikke mulig da dette ligger i beregningssteget.
+        brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
+        utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+    )
+
+    private suspend fun omstillingsstoenadInnvilgelse(
+        brukerTokenInfo: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+        innholdMedVedlegg: InnholdMedVedlegg,
+    ) = coroutineScope {
+        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
+        val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
+        val trygdetid = async { fetcher.hentTrygdetid() }
+        val etterbetaling = async { fetcher.hentEtterbetaling() }
+        val brevutfall = async { fetcher.hentBrevutfall() }
+
+        OmstillingsstoenadInnvilgelse.fra(
+            innholdMedVedlegg,
+            generellBrevData,
+            utbetalingsinfo.await(),
+            requireNotNull(avkortingsinfo.await()),
+            etterbetaling.await(),
+            requireNotNull(trygdetid.await()),
+            requireNotNull(brevutfall.await()),
+        )
+    }
+
+    private suspend fun omstillingsstoenadRevurdering(
+        brukerTokenInfo: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+        innholdMedVedlegg: InnholdMedVedlegg,
+    ) = coroutineScope {
+        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
+        val forrigeUtbetalingsinfo = async { fetcher.hentForrigeUtbetaling() }
+        val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
+        val trygdetid = async { fetcher.hentTrygdetid() }
+        val etterbetaling = async { fetcher.hentEtterbetaling() }
+
+        OmstillingsstoenadRevurdering.fra(
+            innholdMedVedlegg,
+            requireNotNull(avkortingsinfo.await()),
+            utbetalingsinfo.await(),
+            forrigeUtbetalingsinfo.await(),
+            etterbetaling.await(),
+            requireNotNull(trygdetid.await()),
+        )
     }
 }

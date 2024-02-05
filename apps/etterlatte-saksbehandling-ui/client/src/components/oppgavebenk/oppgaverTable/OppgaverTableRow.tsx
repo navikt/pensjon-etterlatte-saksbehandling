@@ -9,6 +9,7 @@ import { RedigerSaksbehandler } from '~components/oppgavebenk/tildeling/RedigerS
 import { HandlingerForOppgave } from '~components/oppgavebenk/HandlingerForOppgave'
 import { FristHandlinger } from '~components/oppgavebenk/FristHandlinger'
 import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/oppgavelistafiltre'
+import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 
 interface Props {
   oppgave: OppgaveDTO
@@ -46,15 +47,16 @@ export const OppgaverTableRow = ({ oppgave, oppdaterTildeling, erMinOppgaveListe
       <Table.DataCell>{oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] : 'Ukjent'}</Table.DataCell>
       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
       <Table.DataCell>
-        <RedigerSaksbehandler
-          saksbehandler={oppgave.saksbehandler}
-          oppgaveId={oppgave.id}
-          sakId={oppgave.sakId}
-          oppdaterTildeling={oppdaterTildeling}
-          erRedigerbar={erOppgaveRedigerbar(oppgave.status)}
-          versjon={oppgave.versjon}
-          type={oppgave.type}
-        />
+        {/*<RedigerSaksbehandler*/}
+        {/*  saksbehandler={oppgave.saksbehandler}*/}
+        {/*  oppgaveId={oppgave.id}*/}
+        {/*  sakId={oppgave.sakId}*/}
+        {/*  oppdaterTildeling={oppdaterTildeling}*/}
+        {/*  erRedigerbar={erOppgaveRedigerbar(oppgave.status)}*/}
+        {/*  versjon={oppgave.versjon}*/}
+        {/*  type={oppgave.type}*/}
+        {/*/>*/}
+        <VelgSaksbehandler />
       </Table.DataCell>
       <Table.DataCell>
         <HandlingerForOppgave oppgave={oppgave} />

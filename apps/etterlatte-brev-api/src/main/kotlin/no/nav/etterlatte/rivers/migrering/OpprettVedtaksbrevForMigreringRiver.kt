@@ -47,7 +47,7 @@ internal class OpprettVedtaksbrevForMigreringRiver(
                     brukerTokenInfo,
                 )
             service.genererPdf(vedtaksbrev.id, brukerTokenInfo)
-            service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)
+            service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo)
         }
         logger.info("Har oppretta vedtaksbrev i sak $sakId")
         packet[PDF_GENERERT] = true

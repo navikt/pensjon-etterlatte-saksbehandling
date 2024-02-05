@@ -69,7 +69,6 @@ class VedtaksbrevService(
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        migrering: Boolean = false,
     ) {
         val brev =
             requireNotNull(hentVedtaksbrev(behandlingId)) {
@@ -91,7 +90,7 @@ class VedtaksbrevService(
                 brukerTokenInfo,
             )
 
-        if (vedtakStatus != VedtakStatus.FATTET_VEDTAK && !migrering) {
+        if (vedtakStatus != VedtakStatus.FATTET_VEDTAK) {
             throw IllegalStateException(
                 "Vedtak status er $vedtakStatus. Avventer ferdigstilling av brev (id=${brev.id})",
             )

@@ -12,6 +12,7 @@ interface Props {
   filter: Filter
   setFilter: Dispatch<SetStateAction<Filter>>
   totaltAntallOppgaver?: number
+  erMinOppgaveliste: boolean
 }
 
 export const Oppgavelista = ({
@@ -21,6 +22,7 @@ export const Oppgavelista = ({
   filter,
   setFilter,
   totaltAntallOppgaver,
+  erMinOppgaveliste,
 }: Props): ReactNode => {
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
@@ -39,7 +41,7 @@ export const Oppgavelista = ({
           <OppgaverTable
             oppgaver={paginerteOppgaver}
             oppdaterTildeling={oppdaterTildeling}
-            erMinOppgaveliste={false}
+            erMinOppgaveliste={erMinOppgaveliste}
             hentOppgaver={hentOppgaver}
             filter={filter}
             setFilter={setFilter}

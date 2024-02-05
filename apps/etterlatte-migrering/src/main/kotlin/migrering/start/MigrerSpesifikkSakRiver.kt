@@ -5,6 +5,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.migrering.Migreringsstatus
@@ -94,11 +95,14 @@ internal class MigrerSpesifikkSakRiver(
                 .also { pesysRepository.lagrePesyssak(pesyssak = it) }
         packet.setEventNameForHendelseType(Migreringshendelser.MIGRER_SAK)
 
+        val erUfoere = hentErUfoere(pesyssak.soeker.value) // TODO Avgjør om skal lede til manuelt eller til automatisk
+
         val verifisertRequest =
             verifiserer.verifiserRequest(pesyssak.tilMigreringsrequest()).also {
                 pesysRepository.oppdaterKanGjenopprettesAutomatisk(it)
             }
         packet.hendelseData = verifisertRequest
+        // TODO Her hvis trygd fortsatt skal tas automatisk
 
         if (featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)) {
             sendSakTilMigrering(packet, verifisertRequest, context, pesyssak)
@@ -116,6 +120,14 @@ internal class MigrerSpesifikkSakRiver(
         val sakFraPEN = runBlocking { penKlient.hentSak(sakId, lopendeJanuar2024) }
         logger.info("Henta sak $sakId fra PEN")
         return sakFraPEN
+    }
+
+    private fun hentErUfoere(fnr: String): Boolean {
+        logger.info("Prøver å hente sak med uføre for ${fnr.maskerFnr()} fra PEN")
+        val sakFraPEN = runBlocking { penKlient.sakMedUfoere(fnr) }
+        logger.info("Henta sak med uføre for ${fnr.maskerFnr()} fra PEN")
+        // TODO skille mellom løpende og under behandling/har søknad?
+        return sakFraPEN.sakStatus == "LOPENDE" && sakFraPEN.sakType == "UFOREP"
     }
 
     private fun sendSakTilMigrering(

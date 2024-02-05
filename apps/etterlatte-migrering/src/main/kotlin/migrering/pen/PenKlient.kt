@@ -58,4 +58,29 @@ class PenKlient(config: Config, pen: HttpClient) {
                 failure = { errorResponse -> throw errorResponse },
             )
     }
+
+    suspend fun sakMedUfoere(fnr: String): SakMedUfoere {
+        /*
+        TODO implementere request til /pen/springapi/sak/sammendrag
+        eksempel respons
+           {
+                "sakId": 123456,
+                "sakType": "UFOREP",
+                "sakStatus": "LOPENDE",
+                "fomDato": "2021-05-01T00:00:00+0200",
+                "tomDato": null,
+                "enhetId": "4410",
+                "arkivtema": "UFO"
+            }
+         */
+        return SakMedUfoere(
+            sakType = "UFOREP",
+            sakStatus = "LOPENDE",
+        )
+    }
 }
+
+data class SakMedUfoere(
+    val sakType: String,
+    val sakStatus: String,
+)

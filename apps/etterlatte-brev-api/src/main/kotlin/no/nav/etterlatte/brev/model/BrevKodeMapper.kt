@@ -20,6 +20,7 @@ class BrevKodeMapper {
                     VedtakType.ENDRING -> Brevkoder.BP_REVURDERING
                     VedtakType.OPPHOER -> Brevkoder.BP_OPPHOER
                     VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
+                    VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE
                     null -> Brevkoder.TOMT_INFORMASJONSBREV
                 }
             }
@@ -31,6 +32,7 @@ class BrevKodeMapper {
                     VedtakType.ENDRING -> Brevkoder.OMS_REVURDERING
                     VedtakType.OPPHOER -> Brevkoder.OMS_OPPHOER
                     VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
+                    VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE
                     null -> Brevkoder.TOMT_INFORMASJONSBREV
                 }
             }

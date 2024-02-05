@@ -47,7 +47,7 @@ class VedtakTilbakekrevingServiceTest {
                     it.sakId shouldBe dto.sakId
                     it.sakType shouldBe dto.sakType
                     it.type shouldBe VedtakType.TILBAKEKREVING
-                    (it.innhold as VedtakTilbakekrevingInnhold).tilbakekreving shouldBe dto.tilbakekreving
+                    (it.innhold as VedtakInnhold.Tilbakekreving).tilbakekreving shouldBe dto.tilbakekreving
                 },
             )
         }
@@ -76,7 +76,7 @@ class VedtakTilbakekrevingServiceTest {
             repo.oppdaterVedtak(
                 withArg {
                     it.shouldBeEqualToIgnoringFields(eksisterende, Vedtak::innhold)
-                    (it.innhold as VedtakTilbakekrevingInnhold).tilbakekreving shouldBe dto.tilbakekreving
+                    (it.innhold as VedtakInnhold.Tilbakekreving).tilbakekreving shouldBe dto.tilbakekreving
                 },
             )
         }

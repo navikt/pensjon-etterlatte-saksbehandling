@@ -8,7 +8,6 @@ import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -42,13 +41,13 @@ class OpprettJournalfoerOgDistribuerRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) = runBlocking {
-        val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { EtterlatteBrevKode.valueOf(it) }
+        val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
         opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.brev)
     }
 
     private suspend fun opprettJournalfoerOgDistribuer(
         sakId: Long,
-        brevKode: EtterlatteBrevKode,
+        brevKode: Brevkoder,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
@@ -58,8 +57,8 @@ class OpprettJournalfoerOgDistribuerRiver(
                     sakId = sakId,
                     behandlingId = null,
                     bruker = brukerTokenInfo,
-                    brevKode = brevKode,
-                    brevtype = brevKode.brevtype,
+                    brevKode = brevKode.redigering,
+                    brevtype = brevKode.redigering.brevtype,
                 )
             }
         logger.info("Ferdigstiller $brevKode-brev i sak $sakId")
@@ -76,7 +75,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                         attestantIdent = Fagsaksystem.EY.navn,
                     )
                 },
-                brevKode = { _ -> Brevkoder(brevKode, EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV) },
+                brevKode = { _ -> brevKode },
             )
         }
         logger.info("Journalfører $brevKode-brev i sak $sakId")

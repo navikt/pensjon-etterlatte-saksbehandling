@@ -27,10 +27,7 @@ class VentDao(private val connection: () -> Connection) {
                     """.trimIndent(),
                 )
             statement.setTidspunkt(1, dato)
-            statement.executeQuery().toList {
-                println(getBoolean(HAANDTERT))
-                asVentDao()
-            }
+            statement.executeQuery().toList { asVentDao() }
         }
 
     private fun ResultSet.asVentDao() =

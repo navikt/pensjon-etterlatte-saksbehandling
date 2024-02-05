@@ -1,11 +1,11 @@
 package no.nav.etterlatte.samordning
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.ktor.server.application.Application
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.common.KafkaEnvironment
+import no.nav.etterlatte.kafka.Avrokonstanter
 import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
@@ -98,7 +98,7 @@ class SamordningHendelseIntegrationTest {
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaEnv.brokersURL,
                 ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.canonicalName,
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to SamJsonSerializer::class.java.canonicalName,
-                KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG to kafkaEnv.schemaRegistry?.url,
+                Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG to kafkaEnv.schemaRegistry?.url,
                 ProducerConfig.ACKS_CONFIG to "all",
             ),
         )
@@ -112,13 +112,13 @@ class SamordningHendelseIntegrationTest {
                     put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, kafkaEnv.brokersURL)
                     put(ConsumerConfig.GROUP_ID_CONFIG, env["KAFKA_GROUP_ID"])
                     put(ConsumerConfig.CLIENT_ID_CONFIG, "etterlatte-test-v1")
-                    put(KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, kafkaEnv.schemaRegistry?.url!!)
+                    put(Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG, kafkaEnv.schemaRegistry?.url!!)
                     put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
                     put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer::class.java)
                     put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
                     put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
                     put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, tiSekunder)
-                    put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true)
+                    put(Avrokonstanter.SPECIFIC_AVRO_READER_CONFIG, true)
                 }
             return properties
         }

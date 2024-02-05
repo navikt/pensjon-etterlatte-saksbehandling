@@ -101,8 +101,8 @@ class PDFGenerator(
                     generellBrevData,
                     brukerTokenInfo,
                     InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
-                    brevkode,
                     brev.tittel,
+                    brevkode.ferdigstilling,
                 )
 
             BrevProsessType.AUTOMATISK -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype automatisk")

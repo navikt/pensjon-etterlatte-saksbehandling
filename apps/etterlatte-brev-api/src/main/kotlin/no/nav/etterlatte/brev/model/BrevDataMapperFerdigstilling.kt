@@ -3,7 +3,7 @@ package no.nav.etterlatte.brev.model
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.brevbaker.Brevkoder
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
@@ -33,10 +33,10 @@ class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
         generellBrevData: GenerellBrevData,
         bruker: BrukerTokenInfo,
         innholdMedVedlegg: InnholdMedVedlegg,
-        kode: Brevkoder,
         tittel: String? = null,
+        brevkode: EtterlatteBrevKode,
     ): BrevData =
-        when (kode.ferdigstilling) {
+        when (brevkode) {
             TOM_MAL_INFORMASJONSBREV -> ManueltBrevMedTittelData(innholdMedVedlegg.innhold(), tittel)
             BARNEPENSJON_REVURDERING -> barnepensjonRevurdering(bruker, generellBrevData, innholdMedVedlegg)
             BARNEPENSJON_INNVILGELSE -> barnepensjonInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
@@ -52,7 +52,7 @@ class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
             OMSTILLINGSSTOENAD_VARSEL -> ManueltBrevData()
 
             TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
-            else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
+            else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $brevkode for ferdigstilling.")
         }
 
     private suspend fun barnepensjonRevurdering(

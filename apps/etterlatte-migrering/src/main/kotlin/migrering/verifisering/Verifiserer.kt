@@ -31,7 +31,7 @@ internal class Verifiserer(
     fun verifiserRequest(request: MigreringRequest): MigreringRequest {
         val patchedRequest = gjenlevendeForelderPatcher.patchGjenlevendeHvisIkkeOppgitt(request)
 
-        val feilSomMedfoererMistetRett = mutableListOf<Exception>()
+        val feilSomAvbryter = mutableListOf<Exception>()
         val feilSomMedfoererManuell = mutableListOf<Exception>()
 
         patchedRequest.onFailure { feilen ->
@@ -39,11 +39,12 @@ internal class Verifiserer(
         }
         patchedRequest.onSuccess {
             if (request.enhet.nr == Enheter.STRENGT_FORTROLIG.enhetNr) {
-                feilSomMedfoererManuell.add(StrengtFortroligPesys) // TODO Strengt fortrolig
+                // Vi kjører strengt fortrolig til sist.
+                feilSomAvbryter.add(StrengtFortroligPesys)
             }
             val finnesIPdlFeil = sjekkAtPersonerFinsIPDL(it)
             if (finnesIPdlFeil.any { finnes -> finnes is SoekerErDoed }) {
-                feilSomMedfoererMistetRett.addAll(finnesIPdlFeil)
+                feilSomAvbryter.addAll(finnesIPdlFeil)
             } else {
                 feilSomMedfoererManuell.addAll(finnesIPdlFeil)
             }
@@ -51,7 +52,8 @@ internal class Verifiserer(
 
             if (soeker != null) {
                 if (soeker.adressebeskyttelse?.verdi?.erStrengtFortrolig() == true) {
-                    feilSomMedfoererManuell.add(StrengtFortroligPDL) // TODO Strengt fortrolig
+                    // Vi kjører strengt fortrolig til sist. Hvis saker har blitt strengt fortrolig etter opphør avbryter vi.
+                    feilSomAvbryter.add(StrengtFortroligPDL)
                 }
                 feilSomMedfoererManuell.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
                 if (!request.erUnder18) {
@@ -67,11 +69,11 @@ internal class Verifiserer(
             feilSomMedfoererManuell.add(BeregningsmetodeIkkeNasjonal)
         }
 
-        val alleFeil = feilSomMedfoererMistetRett + feilSomMedfoererManuell
+        val alleFeil = feilSomAvbryter + feilSomMedfoererManuell
         if (alleFeil.isNotEmpty()) {
             lagreFeil(request, alleFeil)
-            if (feilSomMedfoererMistetRett.isNotEmpty()) {
-                throw samleExceptions(feilSomMedfoererMistetRett)
+            if (feilSomAvbryter.isNotEmpty()) {
+                throw samleExceptions(feilSomAvbryter)
             }
         }
         return patchedRequest.getOrThrow().copy(

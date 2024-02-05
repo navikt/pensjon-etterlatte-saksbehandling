@@ -8,6 +8,8 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING_UTFALL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VARSEL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VARSEL_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG
@@ -17,6 +19,8 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_IN
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_INNHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
@@ -47,6 +51,7 @@ enum class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: Ett
     ),
     BP_OPPHOER(BARNEPENSJON_OPPHOER_UTFALL, BARNEPENSJON_OPPHOER),
     BP_REVURDERING(BARNEPENSJON_REVURDERING_UTFALL, BARNEPENSJON_REVURDERING),
+    BP_VARSEL(BARNEPENSJON_VARSEL_UTFALL, BARNEPENSJON_VARSEL),
     OMS_AVSLAG(
         OMSTILLINGSSTOENAD_AVSLAG_UTFALL,
         OMSTILLINGSSTOENAD_AVSLAG,
@@ -60,6 +65,7 @@ enum class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: Ett
         OMSTILLINGSSTOENAD_OPPHOER,
     ),
     OMS_REVURDERING(TOM_MAL, OMSTILLINGSSTOENAD_REVURDERING),
+    OMS_VARSEL(OMSTILLINGSSTOENAD_VARSEL_UTFALL, OMSTILLINGSSTOENAD_VARSEL),
 
     UTSATT_KLAGEFRIST_INFORMASJONSBREV(UTSATT_KLAGEFRIST, TOM_MAL_INFORMASJONSBREV),
 }

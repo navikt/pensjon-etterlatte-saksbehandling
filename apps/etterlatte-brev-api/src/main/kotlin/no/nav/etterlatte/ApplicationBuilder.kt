@@ -42,6 +42,8 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
 import no.nav.etterlatte.brev.model.BrevKodeMapper
+import no.nav.etterlatte.brev.varselbrev.VarselbrevService
+import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
@@ -169,6 +171,9 @@ class ApplicationBuilder {
             brevoppretter,
             pdfGenerator,
         )
+
+    private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient)
+
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 
     private val brevService =
@@ -195,6 +200,7 @@ class ApplicationBuilder {
                     brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(journalpostService, dokarkivService, tilgangssjekker)
+                    varselbrevRoute(varselbrevService, tilgangssjekker)
                 }
             }
             .build()

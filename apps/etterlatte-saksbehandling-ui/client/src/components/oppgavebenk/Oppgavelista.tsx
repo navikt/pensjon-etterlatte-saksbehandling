@@ -3,7 +3,7 @@ import { OppgaveDTO } from '~shared/api/oppgaver'
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
-import { Filter } from '~components/oppgavebenk/oppgavelistafiltre'
+import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 interface Props {
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void

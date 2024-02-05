@@ -32,10 +32,9 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-          cache: gradle
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Assemble
         run: ./gradlew assemble --no-build-cache --no-configuration-cache

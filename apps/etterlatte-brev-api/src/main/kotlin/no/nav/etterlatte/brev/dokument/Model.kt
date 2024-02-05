@@ -92,7 +92,7 @@ data class Journalpost(
     val tema: String?,
     val journalposttype: String,
     val journalstatus: String,
-    val dokumenter: List<Dokumenter>,
+    val dokumenter: List<DokumentInfo>,
     val avsenderMottaker: AvsenderMottaker,
     val kanal: String?,
     val bruker: Bruker?,
@@ -100,15 +100,25 @@ data class Journalpost(
     val datoOpprettet: String,
 )
 
-data class Dokumenter(
+data class DokumentInfo(
     val dokumentInfoId: String,
     val tittel: String?,
-    val dokumentvarianter: List<Dokumentvarianter>,
+    val dokumentvarianter: List<Dokumentvariant>,
 )
 
-data class Dokumentvarianter(
+data class Dokumentvariant(
+    val variantformat: Variantformat?,
     val saksbehandlerHarTilgang: Boolean,
 )
+
+enum class Variantformat {
+    ARKIV,
+    ORIGINAL,
+    SLADDET,
+    FULLVERSJON,
+    PRODUKSJON,
+    PRODUKSJON_DLF,
+}
 
 data class Bruker(
     val id: String,

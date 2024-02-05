@@ -28,7 +28,6 @@ import { SakType } from '~shared/types/sak'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
-import Spinner from '~shared/Spinner'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -83,15 +82,12 @@ function mapKlageTilFormdata(klage: Klage | null): FormdataVurdering {
   }
 }
 
-export function KlageVurderingRedigering() {
+export function KlageVurderingRedigering(props: { klage: Klage }) {
+  const klage = props.klage
+
   const navigate = useNavigate()
-  const klage = useKlage()
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)
   const dispatch = useAppDispatch()
-
-  if (!klage) {
-    return <Spinner visible label="Henter klage" />
-  }
 
   const {
     control,

@@ -15,6 +15,7 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandling.Formkrav
+import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
@@ -76,6 +77,20 @@ internal fun Route.klageRoutes(
                             val oppdatertKlage =
                                 inTransaction {
                                     klageService.lagreFormkravIKlage(klageId, formkravDto.formkrav, saksbehandler)
+                                }
+                            call.respond(oppdatertKlage)
+                        }
+                    }
+                }
+            }
+
+            put("initieltutfall") {
+                hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
+                    kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                        medBody<InitieltUtfallMedBegrunnelseDto> { utfallMedBegrunnelse ->
+                            val oppdatertKlage =
+                                inTransaction {
+                                    klageService.lagreInitieltUtfallMedBegrunnelseAvKlage(klageId, utfallMedBegrunnelse, saksbehandler)
                                 }
                             call.respond(oppdatertKlage)
                         }

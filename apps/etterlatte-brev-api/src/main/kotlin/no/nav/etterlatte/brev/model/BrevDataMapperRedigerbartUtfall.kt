@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.model
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -16,43 +15,35 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 
-class BrevDataMapperRedigerbartUtfall(
-    private val brevdataFacade: BrevdataFacade,
-    private val migreringBrevDataService: MigreringBrevDataService,
-) {
+class BrevDataMapperRedigerbartUtfall(private val brevdataFacade: BrevdataFacade) {
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
         with(redigerbarTekstRequest) {
-            if (generellBrevData.erMigrering()) {
-                migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, null, brukerTokenInfo)
-            } else {
-                brevData(generellBrevData, brukerTokenInfo)
-            }
-        }
-
-    private suspend fun brevData(
-        generellBrevData: GenerellBrevData,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): BrevData =
-        when (generellBrevData.sak.sakType) {
-            SakType.BARNEPENSJON -> {
-                when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> barnepensjonInnvilgelse(brukerTokenInfo, generellBrevData)
-                    VedtakType.ENDRING -> barnepensjonEndring(brukerTokenInfo, generellBrevData)
-                    VedtakType.AVSLAG -> ManueltBrevData()
-                    VedtakType.OPPHOER -> ManueltBrevData()
-                    VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
-                    null -> ManueltBrevData()
+            when (generellBrevData.sak.sakType) {
+                SakType.BARNEPENSJON -> {
+                    when (generellBrevData.forenkletVedtak?.type) {
+                        VedtakType.INNVILGELSE -> barnepensjonInnvilgelse(brukerTokenInfo, generellBrevData)
+                        VedtakType.ENDRING -> barnepensjonEndring(brukerTokenInfo, generellBrevData)
+                        VedtakType.AVSLAG -> ManueltBrevData()
+                        VedtakType.OPPHOER -> ManueltBrevData()
+                        VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
+                        null -> ManueltBrevData()
+                    }
                 }
-            }
 
-            SakType.OMSTILLINGSSTOENAD -> {
-                when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> omstillingsstoenadInnvilgelse(brukerTokenInfo, generellBrevData)
-                    VedtakType.ENDRING -> ManueltBrevData()
-                    VedtakType.AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, emptyList())
-                    VedtakType.OPPHOER -> OmstillingsstoenadOpphoerRedigerbartUtfall.fra(generellBrevData, emptyList())
-                    VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
-                    null -> ManueltBrevData()
+                SakType.OMSTILLINGSSTOENAD -> {
+                    when (generellBrevData.forenkletVedtak?.type) {
+                        VedtakType.INNVILGELSE -> omstillingsstoenadInnvilgelse(brukerTokenInfo, generellBrevData)
+                        VedtakType.ENDRING -> ManueltBrevData()
+                        VedtakType.AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, emptyList())
+                        VedtakType.OPPHOER ->
+                            OmstillingsstoenadOpphoerRedigerbartUtfall.fra(
+                                generellBrevData,
+                                emptyList(),
+                            )
+
+                        VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
+                        null -> ManueltBrevData()
+                    }
                 }
             }
         }

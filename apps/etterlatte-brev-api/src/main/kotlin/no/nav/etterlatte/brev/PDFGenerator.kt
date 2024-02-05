@@ -32,7 +32,6 @@ class PDFGenerator(
     suspend fun ferdigstillOgGenererPDF(
         id: BrevID,
         bruker: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (GenerellBrevData) -> Brevkoder,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },

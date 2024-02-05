@@ -67,9 +67,8 @@ internal class OpprettVedtaksbrevForMigreringRiver(
                     sakId,
                     behandlingId,
                     brukerTokenInfo,
-                    migreringBrevRequest,
                 )
-            service.genererPdf(vedtaksbrev.id, brukerTokenInfo, migreringBrevRequest)
+            service.genererPdf(vedtaksbrev.id, brukerTokenInfo)
             service.ferdigstillVedtaksbrev(behandlingId, brukerTokenInfo, true)
         }
         logger.info("Har oppretta vedtaksbrev i sak $sakId")

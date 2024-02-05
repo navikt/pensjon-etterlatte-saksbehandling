@@ -52,7 +52,6 @@ class VedtaksbrevService(
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): Pdf =
         pdfGenerator.genererPdf(
             id = id,
@@ -65,7 +64,6 @@ class VedtaksbrevService(
                 generellBrevData.forenkletVedtak!!,
                 pdf,
                 bruker,
-                automatiskMigreringRequest != null,
             )
         }
 
@@ -128,9 +126,8 @@ class VedtaksbrevService(
         vedtak: ForenkletVedtak,
         pdf: Pdf,
         brukerTokenInfo: BrukerTokenInfo,
-        migrering: Boolean = false,
     ) {
-        if (vedtak.status != VedtakStatus.FATTET_VEDTAK && !migrering) {
+        if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
             logger.info("Vedtak status er ${vedtak.status}. Avventer ferdigstilling av brev (id=$brevId)")
             return
         }

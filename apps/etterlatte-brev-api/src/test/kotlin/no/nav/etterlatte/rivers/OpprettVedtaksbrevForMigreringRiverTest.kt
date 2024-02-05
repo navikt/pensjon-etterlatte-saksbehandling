@@ -69,13 +69,13 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         val brev = opprettBrev()
 
         coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), any()) } returns brev
-        coEvery { vedtaksbrevService.genererPdf(brev.id, any(), any()) } returns mockk<Pdf>()
+        coEvery { vedtaksbrevService.genererPdf(brev.id, any()) } returns mockk<Pdf>()
         coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) } just runs
 
         val inspektoer = opprettBrevRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), any()) }
-        coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any(), any()) }
+        coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any()) }
         coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) }
 
         val meldingSendt = inspektoer.message(0)

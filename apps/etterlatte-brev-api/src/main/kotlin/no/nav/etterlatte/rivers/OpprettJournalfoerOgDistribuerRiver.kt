@@ -67,7 +67,6 @@ class OpprettJournalfoerOgDistribuerRiver(
             pdfGenerator.ferdigstillOgGenererPDF(
                 id = brevId,
                 bruker = brukerTokenInfo,
-                automatiskMigreringRequest = null,
                 avsenderRequest = { _, _ ->
                     AvsenderRequest(
                         saksbehandlerIdent = Fagsaksystem.EY.navn,

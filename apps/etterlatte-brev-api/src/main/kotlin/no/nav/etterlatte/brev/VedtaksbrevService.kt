@@ -42,14 +42,11 @@ class VedtaksbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
-        // TODO EY-3232 - Fjerne migreringstilpasning
     ): Brev =
         brevoppretter.opprettVedtaksbrev(
             sakId = sakId,
             behandlingId = behandlingId,
             brukerTokenInfo = brukerTokenInfo,
-            automatiskMigreringRequest = automatiskMigreringRequest,
         )
 
     suspend fun genererPdf(
@@ -60,7 +57,6 @@ class VedtaksbrevService(
         pdfGenerator.genererPdf(
             id = id,
             bruker = bruker,
-            automatiskMigreringRequest = automatiskMigreringRequest,
             avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
             brevKode = { brevKodeMapper.brevKode(it) },
         ) { generellBrevData, brev, pdf ->

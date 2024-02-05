@@ -11,7 +11,7 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 class MigreringBrevDataService(private val brevdataFacade: BrevdataFacade) {
     suspend fun opprettMigreringBrevdata(
         generellBrevData: GenerellBrevData,
-        migrering: MigreringBrevRequest?,
+        migrering: MigreringBrevRequest? = null,
         brukerTokenInfo: BrukerTokenInfo,
     ): BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall {
         if (generellBrevData.systemkilde != Vedtaksloesning.PESYS) {

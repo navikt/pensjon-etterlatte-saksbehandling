@@ -23,7 +23,7 @@ class BrevDataMapperRedigerbartUtfall(
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
         with(redigerbarTekstRequest) {
             if (generellBrevData.erMigrering()) {
-                migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, migrering, brukerTokenInfo)
+                migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, null, brukerTokenInfo)
             } else {
                 brevData(generellBrevData, brukerTokenInfo)
             }

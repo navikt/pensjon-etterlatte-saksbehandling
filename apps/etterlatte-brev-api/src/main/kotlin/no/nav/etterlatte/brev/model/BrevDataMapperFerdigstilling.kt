@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.model
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
@@ -36,7 +35,6 @@ class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
         bruker: BrukerTokenInfo,
         innholdMedVedlegg: InnholdMedVedlegg,
         kode: Brevkoder,
-        automatiskMigreringRequest: MigreringBrevRequest?,
         tittel: String? = null,
     ): BrevData {
         if (generellBrevData.erMigrering()) {
@@ -54,7 +52,7 @@ class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
                     etterbetaling = etterbetaling.await(),
                     trygdetid = requireNotNull(trygdetid.await()),
                     grunnbeloep = grunnbeloep.await(),
-                    migreringRequest = automatiskMigreringRequest,
+                    migreringRequest = null,
                     utlandstilknytning = generellBrevData.utlandstilknytning?.type,
                 )
             }

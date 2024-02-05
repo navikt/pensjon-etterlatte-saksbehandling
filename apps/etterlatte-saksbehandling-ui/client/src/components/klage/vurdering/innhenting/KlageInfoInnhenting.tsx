@@ -21,16 +21,13 @@ export function KlageInfoInnhenting(props: { klage: Klage }) {
         <BodyLong spacing={true}>
           Hent inn mer informasjon fra søker for å avklare om formkravene kan innfris.
           <br />
-          Du kan lage nytt brev til søker fra brevsiden, og oppgaven kan settes på vent ved å utvide fristen fra
-          oppgavelista.
+          Du kan lage nytt brev til søker fra brevsiden, og oppgaven kan inntil videre settes på vent ved å utvide
+          fristen.
         </BodyLong>
 
         <FlexRow justify="left">
           <Button type="button" variant="tertiary" onClick={() => navigate(`/person/${klage.sak.ident}?fane=BREV`)}>
             Brev til bruker
-          </Button>
-          <Button type="button" variant="tertiary" onClick={() => navigate('/')}>
-            Oppgaveliste
           </Button>
         </FlexRow>
 

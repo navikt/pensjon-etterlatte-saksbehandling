@@ -1,6 +1,6 @@
 import React from 'react'
 import { UNSAFE_Combobox } from '@navikt/ds-react'
-import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/oppgavelistafiltre'
+import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 interface Props {
   value: Array<string>

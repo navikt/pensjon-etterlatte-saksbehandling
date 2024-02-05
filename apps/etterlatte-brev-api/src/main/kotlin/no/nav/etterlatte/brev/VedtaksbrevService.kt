@@ -10,7 +10,6 @@ import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -153,13 +152,6 @@ class VedtaksbrevService(
         return db.fjernFerdigstiltStatusUnderkjentVedtak(id, vedtak)
     }
 }
-
-// TODO EY-3232 - Fjerne
-data class MigreringBrevRequest(
-    val brutto: Int,
-    val yrkesskade: Boolean,
-    val utlandstilknytningType: UtlandstilknytningType?,
-)
 
 class UgyldigStatusKanIkkeFerdigstilles(id: BrevID, status: Status) : UgyldigForespoerselException(
     code = "UGYLDIG_STATUS_BREV",

@@ -12,8 +12,8 @@ class GrunnlagKlient(
     private val grunnlagHttpClient: HttpClient,
     private val grunnlagUrl: String,
 ) {
-    suspend fun hentSakerForBrukereFoedtIMaaned(maaned: YearMonth): List<Long> {
-        return grunnlagHttpClient.get("$grunnlagUrl/grunnlag/aldersovergang/$maaned") {
+    suspend fun hentSaker(foedselsmaaned: YearMonth): List<Long> {
+        return grunnlagHttpClient.get("$grunnlagUrl/grunnlag/aldersovergang/$foedselsmaaned") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
         }.body()

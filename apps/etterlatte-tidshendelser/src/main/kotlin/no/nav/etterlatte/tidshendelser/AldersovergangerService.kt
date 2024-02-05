@@ -15,7 +15,7 @@ class AldersovergangerService(
         if (jobb.type == JobbType.AO_BP20) {
             val foedselsmaaned = jobb.behandlingsmaaned.minusYears(20)
 
-            val saker = grunnlagKlient.hentSakerForBrukereFoedtIMaaned(foedselsmaaned)
+            val saker = grunnlagKlient.hentSaker(foedselsmaaned = foedselsmaaned)
             logger.info("Hentet ${saker.size} saker for brukere født i $foedselsmaaned")
 
             hendelseDao.opprettHendelserForSaker(jobb.id, saker)

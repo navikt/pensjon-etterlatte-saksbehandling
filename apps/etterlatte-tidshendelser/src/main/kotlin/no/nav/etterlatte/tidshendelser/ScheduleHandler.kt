@@ -15,6 +15,7 @@ class ScheduleHandler(
     private val initialDelaySeconds: Long,
     private val periode: Duration,
     private val clock: Clock,
+    private val jobbRunner: JobbRunner,
 ) {
     private val logger = LoggerFactory.getLogger(ScheduleHandler::class.java)
 
@@ -28,7 +29,7 @@ class ScheduleHandler(
             loggerInfo = LoggerInfo(logger = logger, sikkerLogg = sikkerlogger(), loggTilSikkerLogg = true),
         ) {
             if (leaderElection.isLeader()) {
-                JobbRunner().run()
+                jobbRunner.run()
             }
         }
     }

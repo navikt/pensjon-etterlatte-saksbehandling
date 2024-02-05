@@ -57,7 +57,7 @@ class AldersovergangerTest {
         val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
         val jobb = opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
 
-        coEvery { grunnlagKlient.hentSakerForBrukereFoedtIMaaned(behandlingsmaaned.minusYears(20)) } returns listOf(1, 2, 3)
+        coEvery { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(20)) } returns listOf(1, 2, 3)
 
         runBlocking { aldersovergangerService.execute(jobb) }
 
@@ -66,7 +66,7 @@ class AldersovergangerTest {
         hendelser shouldHaveSize 3
         hendelser.map { it.sakId } shouldContainExactlyInAnyOrder listOf(2, 1, 3)
         hendelser.map { it.jobbId } shouldContainOnly setOf(jobb.id)
-        hendelser.map { it.status } shouldContainOnly setOf("OPPRETTET")
+        hendelser.map { it.status } shouldContainOnly setOf("NY")
     }
 
     private fun opprettJobb(

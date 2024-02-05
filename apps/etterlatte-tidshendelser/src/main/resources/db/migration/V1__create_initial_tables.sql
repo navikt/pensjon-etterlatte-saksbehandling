@@ -10,7 +10,7 @@ CREATE TABLE jobb
     kjoeredato        DATE                     NOT NULL,
     behandlingsmaaned TEXT                     NOT NULL,
     dryrun            BOOLEAN                  NOT NULL DEFAULT FALSE,
-    status            TEXT                     NOT NULL DEFAULT 'PENDING'
+    status            TEXT                     NOT NULL DEFAULT 'NY'
 );
 
 CREATE INDEX ON jobb (type);
@@ -24,7 +24,7 @@ CREATE TABLE hendelse
     opprettet   TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'UTC') NOT NULL,
     endret      TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'UTC') NOT NULL,
     versjon     INTEGER NOT NULL DEFAULT 1,
-    status      TEXT NOT NULL DEFAULT 'OPPRETTET',
+    status      TEXT NOT NULL DEFAULT 'NY',
     utfall      TEXT,
     info        JSONB,
     FOREIGN KEY (jobb_id) REFERENCES jobb (id)

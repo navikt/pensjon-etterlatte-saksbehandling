@@ -150,7 +150,12 @@ class VilkaarsvurderingService(
                         behandlingId = behandlingId,
                         grunnlagVersjon = grunnlag.metadata.versjon,
                         virkningstidspunkt = virkningstidspunkt.dato,
-                        vilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
+                        vilkaar =
+                            oppdaterVilkaar(
+                                kopierteVilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
+                                behandling = behandling,
+                                virkningstidspunkt = virkningstidspunkt,
+                            ),
                         resultat = tidligereVilkaarsvurdering.resultat,
                     ),
                 kopiertFraId = tidligereVilkaarsvurdering.id,
@@ -158,6 +163,25 @@ class VilkaarsvurderingService(
                 runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo) }
             }
         }
+    }
+
+    private fun oppdaterVilkaar(
+        kopierteVilkaar: List<Vilkaar>,
+        behandling: DetaljertBehandling,
+        virkningstidspunkt: Virkningstidspunkt,
+    ): List<Vilkaar> {
+        val gjeldendeVilkaar =
+            finnVilkaarForNyVilkaarsvurdering(
+                virkningstidspunkt,
+                behandling.behandlingType,
+                behandling.sakType,
+            )
+
+        val gjeldendeHovedvilkaarTyper = gjeldendeVilkaar.map { it.hovedvilkaar.type }
+        val hovedvilkaarTyperPaaKopiertVilkaarsvurdering = kopierteVilkaar.map { it.hovedvilkaar.type }
+        val manglendeHovedvilkaarTyper = gjeldendeHovedvilkaarTyper.subtract(hovedvilkaarTyperPaaKopiertVilkaarsvurdering.toSet())
+        val manglendeVilkaar = gjeldendeVilkaar.filter { it.hovedvilkaar.type in manglendeHovedvilkaarTyper }
+        return kopierteVilkaar.toMutableList().apply { addAll(manglendeVilkaar) }
     }
 
     suspend fun opprettVilkaarsvurdering(

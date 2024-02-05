@@ -41,11 +41,14 @@ class AppContext(env: Miljoevariabler) {
             grunnlagKlient,
         )
 
+    private val jobbRunner = JobbRunner(hendelseDao, aldersovergangerService)
+
     val scheduleHandler =
         ScheduleHandler(
             leaderElection = leaderElection,
             initialDelaySeconds = env.maybeEnvValue("SCHEDULE_INITIAL_DELAY")?.toLong() ?: 60L,
             periode = Duration.ofMinutes(5),
             clock = clock,
+            jobbRunner = jobbRunner,
         )
 }

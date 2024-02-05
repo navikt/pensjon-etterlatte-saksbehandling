@@ -26,6 +26,13 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
         }
     }
 
+    fun hentJobber(status: String): List<HendelserJobb> {
+        return datasource.transaction { tx ->
+            queryOf("SELECT * FROM jobb WHERE status = :status", mapOf("status" to status))
+                .let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
+        }
+    }
+
     fun opprettHendelserForSaker(
         jobbId: Int,
         saksIDer: List<Long>,

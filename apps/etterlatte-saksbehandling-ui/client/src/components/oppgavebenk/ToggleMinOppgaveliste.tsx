@@ -137,6 +137,7 @@ export const ToggleMinOppgaveliste = () => {
                 filter={filter}
                 setFilter={setFilter}
                 totaltAntallOppgaver={hentedeOppgaver.length}
+                erMinOppgaveliste={false}
               />
             </>
           )}
@@ -154,6 +155,7 @@ export const ToggleMinOppgaveliste = () => {
                 filter={filter}
                 setFilter={setFilter}
                 oppdaterTildeling={(id, _saksbehandler, versjon) => oppdaterTildeling(id, null, versjon)}
+                erMinOppgaveliste={true}
               />
             </>
           )}

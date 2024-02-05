@@ -88,7 +88,7 @@ val BESTLLING_TEMPLATE_END = """,
           "kilde": "Dolly",
           "master": "PDL",
           "folkeregistermetadata": null,
-          "doedsdato": "${LocalDateTime.now().minusWeeks(1)}"
+          "doedsdato": "${LocalDateTime.now().minusMonths(2).minusWeeks(1)}"
         }
       ],
       "foreldreansvar": [

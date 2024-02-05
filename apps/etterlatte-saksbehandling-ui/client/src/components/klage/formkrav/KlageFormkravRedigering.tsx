@@ -1,4 +1,4 @@
-import { Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
+import { Button, Heading, HelpText, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
@@ -20,7 +20,6 @@ import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
 import { kanVurdereUtfall, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { isFailure, isPending, isPendingOrInitial, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { ToolTip } from '~components/behandling/felles/ToolTip'
 
 // Vi bruker kun id'en til vedtaket i skjemadata, og transformerer fram / tilbake før sending / lasting
 type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }
@@ -206,10 +205,10 @@ export function KlageFormkravRedigering() {
               control={control}
             />
             {erKlagenFramsattInnenFrist == JaNei.NEI && (
-              <ToolTip title="Avvisning ved utløpt klagefrist">
+              <HelpText strategy="fixed" title="Avvisning ved utløpt klagefrist">
                 Hvis klagefristen ikke er overholdt og dette sannsynligvis vil resultere i en avvisning av klagen bør du
                 vurdere å direkte gå til vedtak om avvisning (velg formkrav oppfylt)
-              </ToolTip>
+              </HelpText>
             )}
           </FlexRow>
 

@@ -1,0 +1,93 @@
+package no.nav.etterlatte.tidshendelser
+
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldContainOnly
+import io.kotest.matchers.collections.shouldHaveSize
+import io.mockk.clearAllMocks
+import io.mockk.coEvery
+import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
+import kotliquery.queryOf
+import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.database.POSTGRES_VERSION
+import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
+import java.time.LocalDate
+import java.time.Month
+import java.time.YearMonth
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class AldersovergangerTest {
+    @Container
+    private val postgreSQLContainer =
+        PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
+            .also { it.start() }
+
+    private val dataSource =
+        DataSourceBuilder.createDataSource(
+            postgreSQLContainer.jdbcUrl,
+            postgreSQLContainer.username,
+            postgreSQLContainer.password,
+        ).also { it.migrate() }
+
+    private val grunnlagKlient: GrunnlagKlient = mockk<GrunnlagKlient>()
+
+    private val hendelseDao = HendelseDao(dataSource)
+    private val aldersovergangerService = AldersovergangerService(hendelseDao, grunnlagKlient)
+
+    @AfterEach
+    fun beforeAll() {
+        clearAllMocks()
+    }
+
+    @AfterAll
+    fun afterAll() {
+        postgreSQLContainer.stop()
+    }
+
+    @Test
+    fun runJob() {
+        val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
+        val jobb = opprettJobb(JobType.AO_BP20, behandlingsmaaned)
+
+        coEvery { grunnlagKlient.hentSakerForBrukereFoedtIMaaned(behandlingsmaaned.minusYears(20)) } returns listOf(1, 2, 3)
+
+        runBlocking { aldersovergangerService.runJob(jobb) }
+
+        val hendelser = hendelseDao.hentHendelserForJobb(jobb.id)
+
+        hendelser shouldHaveSize 3
+        hendelser.map { it.sakId } shouldContainExactlyInAnyOrder listOf(2, 1, 3)
+        hendelser.map { it.jobbId } shouldContainOnly setOf(jobb.id)
+        hendelser.map { it.status } shouldContainOnly setOf("OPPRETTET")
+    }
+
+    private fun opprettJobb(
+        type: JobType,
+        behandlingsmaaned: YearMonth,
+    ): HendelserJobb {
+        val id =
+            dataSource.transaction(true) {
+                it.run(
+                    queryOf(
+                        """
+                        INSERT INTO jobb (type, kjoeredato, behandlingsmaaned)
+                        VALUES (?, ?, ?)
+                        """.trimIndent(),
+                        type.name,
+                        LocalDate.now(),
+                        behandlingsmaaned.toString(),
+                    ).asUpdateAndReturnGeneratedKey,
+                )
+            }
+
+        return hendelseDao.hentJobb(id!!)!!
+    }
+}

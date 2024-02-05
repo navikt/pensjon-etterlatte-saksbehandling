@@ -53,13 +53,13 @@ class AldersovergangerTest {
     }
 
     @Test
-    fun runJob() {
+    fun `skal hente saker som skal vurderes og lagre hendelser for hver enkelt`() {
         val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
-        val jobb = opprettJobb(JobType.AO_BP20, behandlingsmaaned)
+        val jobb = opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
 
         coEvery { grunnlagKlient.hentSakerForBrukereFoedtIMaaned(behandlingsmaaned.minusYears(20)) } returns listOf(1, 2, 3)
 
-        runBlocking { aldersovergangerService.runJob(jobb) }
+        runBlocking { aldersovergangerService.execute(jobb) }
 
         val hendelser = hendelseDao.hentHendelserForJobb(jobb.id)
 
@@ -70,7 +70,7 @@ class AldersovergangerTest {
     }
 
     private fun opprettJobb(
-        type: JobType,
+        type: JobbType,
         behandlingsmaaned: YearMonth,
     ): HendelserJobb {
         val id =

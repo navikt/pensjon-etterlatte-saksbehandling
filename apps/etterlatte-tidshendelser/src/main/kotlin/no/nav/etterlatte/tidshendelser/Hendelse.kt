@@ -12,7 +12,7 @@ data class HendelserJobb(
     val opprettet: LocalDateTime,
     val endret: LocalDateTime,
     val versjon: Int,
-    val type: JobType,
+    val type: JobbType,
     val kjoeredato: LocalDate,
     val behandlingsmaaned: YearMonth,
     val dryrun: Boolean,

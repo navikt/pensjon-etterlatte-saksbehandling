@@ -4,12 +4,17 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
+import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
+import java.time.Duration
 
-class AppBuilder(env: Miljoevariabler) {
+class AppContext(env: Miljoevariabler) {
     private val config: Config = ConfigFactory.load()
+    private val clock = utcKlokke()
+    private val leaderElection = LeaderElection(electorPath = env.requireEnvValue("ELECTOR_PATH"))
 
     val dataSource = DataSourceBuilder.createDataSource(env.props)
 
@@ -22,7 +27,7 @@ class AppBuilder(env: Miljoevariabler) {
         )
     }
 
-    val grunnlagKlient =
+    private val grunnlagKlient =
         GrunnlagKlient(
             grunnlagHttpClient,
             config.getString("etterlatte.grunnlag.url"),
@@ -34,5 +39,13 @@ class AppBuilder(env: Miljoevariabler) {
         AldersovergangerService(
             hendelseDao,
             grunnlagKlient,
+        )
+
+    val scheduleHandler =
+        ScheduleHandler(
+            leaderElection = leaderElection,
+            initialDelaySeconds = env.maybeEnvValue("SCHEDULE_INITIAL_DELAY")?.toLong() ?: 60L,
+            periode = Duration.ofMinutes(5),
+            clock = clock,
         )
 }

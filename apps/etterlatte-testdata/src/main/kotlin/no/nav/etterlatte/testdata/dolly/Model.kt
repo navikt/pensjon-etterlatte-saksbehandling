@@ -66,6 +66,7 @@ data class ForenkletFamilieModell(
 )
 
 data class BestillingRequest(
+    val erOver18: Boolean = false,
     val helsoesken: Int,
     val halvsoeskenAvdoed: Int,
     val halvsoeskenGjenlevende: Int,

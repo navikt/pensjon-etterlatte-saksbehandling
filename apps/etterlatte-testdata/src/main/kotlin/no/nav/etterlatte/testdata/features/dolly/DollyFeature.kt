@@ -80,6 +80,7 @@ class DollyFeature(private val dollyService: DollyService) : TestDataFeature {
                         val accessToken = getDollyAccessToken()
                         val req =
                             BestillingRequest(
+                                it["barnOver18"]!!.toBoolean(),
                                 it["helsoesken"]!!.toInt(),
                                 it["halvsoeskenAvdoed"]!!.toInt(),
                                 it["halvsoeskenGjenlevende"]!!.toInt(),

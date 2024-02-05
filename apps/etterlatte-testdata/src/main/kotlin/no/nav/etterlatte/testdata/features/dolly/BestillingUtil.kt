@@ -4,7 +4,7 @@ import no.nav.etterlatte.testdata.dolly.BestillingRequest
 import java.time.LocalDateTime
 
 fun generererBestilling(bestilling: BestillingRequest): String {
-    val soeker = soeskenTemplate(true)
+    val soeker = soeskenTemplate(helsoesken = true, erOver18 = bestilling.erOver18)
     val helsoesken = List(bestilling.helsoesken) { soeskenTemplate(true) }
     val halvsoeskenAvdoed = List(bestilling.halvsoeskenAvdoed) { soeskenTemplate(false) }
 
@@ -115,8 +115,10 @@ val BESTLLING_TEMPLATE_END = """,
 }
 """
 
-private fun soeskenTemplate(helsoesken: Boolean) =
-    """
+private fun soeskenTemplate(
+    helsoesken: Boolean,
+    erOver18: Boolean = false,
+) = """
 {
   "id": null,
   "kilde": "Dolly",
@@ -132,7 +134,12 @@ private fun soeskenTemplate(helsoesken: Boolean) =
     "kjoenn": "MANN",
     "foedtEtter": null,
     "foedtFoer": null,
-    "alder": 10,
+    "alder": ${
+    when (erOver18) {
+        true -> "18"
+        false -> "10"
+    }
+},
     "syntetisk": false,
     "nyttNavn": {
       "hasMellomnavn": false

@@ -14,7 +14,6 @@ import java.time.Duration
 class AppContext(env: Miljoevariabler) {
     private val config: Config = ConfigFactory.load()
     private val clock = utcKlokke()
-    private val leaderElection = LeaderElection(electorPath = env.requireEnvValue("ELECTOR_PATH"))
 
     val dataSource = DataSourceBuilder.createDataSource(env.props)
 
@@ -23,7 +22,7 @@ class AppContext(env: Miljoevariabler) {
             azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
             azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
             azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
-            azureAppScope = env.requireEnvValue("ETTERLATTE_GRUNNLAG_AZURE_SCOPE"),
+            azureAppScope = env.requireEnvValue("ETTERLATTE_GRUNNLAG_SCOPE"),
         )
     }
 
@@ -45,9 +44,9 @@ class AppContext(env: Miljoevariabler) {
 
     val scheduleHandler =
         ScheduleHandler(
-            leaderElection = leaderElection,
+            leaderElection = LeaderElection(electorPath = env.maybeEnvValue("ELECTOR_PATH")),
             initialDelaySeconds = env.maybeEnvValue("SCHEDULE_INITIAL_DELAY")?.toLong() ?: 60L,
-            periode = Duration.ofMinutes(5),
+            periode = env.maybeEnvValue("SCHEDULE_INTERVAL")?.let { Duration.parse(it) } ?: Duration.ofMinutes(5),
             clock = clock,
             jobbRunner = jobbRunner,
         )

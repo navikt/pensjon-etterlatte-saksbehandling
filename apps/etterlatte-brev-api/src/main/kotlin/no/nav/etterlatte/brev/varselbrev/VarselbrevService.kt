@@ -24,9 +24,9 @@ internal class VarselbrevService(
     ): Brev {
         val brevkode =
             if (behandlingKlient.hentSak(sakId, brukerTokenInfo).sakType == SakType.BARNEPENSJON) {
-                Brevkoder.Barnepensjon.VARSEL
+                Brevkoder.BP_VARSEL
             } else {
-                Brevkoder.Omstillingsstoenad.VARSEL
+                Brevkoder.OMS_VARSEL
             }
 
         return brevoppretter.opprettBrev(

@@ -1,4 +1,4 @@
-import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
+import { Filter, initialFilter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 export const FILTER_KEY = 'filter'
 
@@ -7,7 +7,7 @@ export const leggFilterILocalStorage = (filter: Filter) => {
 }
 
 export const hentFilterFraLocalStorage = (): Filter => {
-  return JSON.parse(localStorage[FILTER_KEY])
+  const filter = localStorage[FILTER_KEY]
+  if (!!filter) return JSON.parse(filter)
+  else return initialFilter()
 }
-
-export const eksistererFilterILocalStorage = (): boolean => !!localStorage[FILTER_KEY]

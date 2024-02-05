@@ -229,47 +229,46 @@ export const BrevutfallSkjema = ({
           </VStack>
         )}
 
-        {behandling.sakType == SakType.OMSTILLINGSSTOENAD &&
-          IBehandlingsType.REVURDERING == behandling.behandlingType && (
-            <>
-              <VStack gap="4">
-                <ControlledRadioGruppe
-                  name="feilutbetalingValg"
-                  control={control}
-                  errorVedTomInput="Du må velge om det er feilutbetaling eller ikke"
-                  legend={<FeilutbetalingHjelpeTekst />}
-                  radios={
-                    <>
-                      {Object.keys(FeilutbetalingValg).map((option) => (
-                        <Radio key={option} size="small" value={option}>
-                          {feilutbetalingToString(option as FeilutbetalingValg)}
-                        </Radio>
-                      ))}
-                    </>
-                  }
-                />
-              </VStack>
+        {IBehandlingsType.REVURDERING == behandling.behandlingType && (
+          <>
+            <VStack gap="4">
+              <ControlledRadioGruppe
+                name="feilutbetalingValg"
+                control={control}
+                errorVedTomInput="Du må velge om det er feilutbetaling eller ikke"
+                legend={<FeilutbetalingHjelpeTekst />}
+                radios={
+                  <>
+                    {Object.keys(FeilutbetalingValg).map((option) => (
+                      <Radio key={option} size="small" value={option}>
+                        {feilutbetalingToString(option as FeilutbetalingValg)}
+                      </Radio>
+                    ))}
+                  </>
+                }
+              />
+            </VStack>
 
-              {watch().feilutbetalingValg && (
-                <HStack gap="4">
-                  <Label>Kommentar</Label>
-                  <Controller
-                    name="feilutbetalingKommentar"
-                    render={(props) => (
-                      <textarea
-                        style={{ width: '100%' }}
-                        {...props}
-                        onChange={(e) => {
-                          props.field.onChange(e.target.value)
-                        }}
-                      />
-                    )}
-                    control={control}
-                  />
-                </HStack>
-              )}
-            </>
-          )}
+            {watch().feilutbetalingValg && (
+              <HStack gap="4">
+                <Label>Kommentar</Label>
+                <Controller
+                  name="feilutbetalingKommentar"
+                  render={(props) => (
+                    <textarea
+                      style={{ width: '100%' }}
+                      {...props}
+                      onChange={(e) => {
+                        props.field.onChange(e.target.value)
+                      }}
+                    />
+                  )}
+                  control={control}
+                />
+              </HStack>
+            )}
+          </>
+        )}
 
         <HStack gap="4">
           <Button size="small" type="submit" loading={isPending(lagreBrevutfallResultat)}>

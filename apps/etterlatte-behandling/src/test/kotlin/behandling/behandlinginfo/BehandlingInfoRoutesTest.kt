@@ -25,6 +25,7 @@ import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
@@ -177,6 +178,7 @@ internal class BehandlingInfoRoutesTest {
 
     private fun behandling(behandlingId: UUID): Behandling =
         mockk {
+            every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
             every { id } returns behandlingId
             every { sak } returns
                 mockk {

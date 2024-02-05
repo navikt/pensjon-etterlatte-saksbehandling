@@ -129,8 +129,7 @@ class BehandlingInfoService(
         behandling: Behandling,
         brevutfall: Brevutfall,
     ) {
-        if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD &&
-            behandling.type == BehandlingType.REVURDERING &&
+        if (behandling.type == BehandlingType.REVURDERING &&
             brevutfall.feilutbetaling == null
         ) {
             throw BrevutfallException.FeilutbetalingIkkeSatt()

@@ -20,6 +20,7 @@ import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
 import { kanVurdereUtfall, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { isFailure, isPending, isPendingOrInitial, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { ToolTip } from '~components/behandling/felles/ToolTip'
 
 // Vi bruker kun id'en til vedtaket i skjemadata, og transformerer fram / tilbake før sending / lasting
 type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }
@@ -85,11 +86,13 @@ export function KlageFormkravRedigering() {
     handleSubmit,
     formState: { isDirty },
     register,
+    watch,
   } = useForm<FormDataFormkrav>({
     defaultValues: klageFormkravTilDefaultFormValues(klage),
   })
 
   const navigate = useNavigate()
+  const erKlagenFramsattInnenFrist = watch('erKlagenFramsattInnenFrist')
 
   useEffect(() => {
     if (!klage?.sak.id) {
@@ -196,11 +199,19 @@ export function KlageFormkravRedigering() {
             control={control}
           />
 
-          <JaNeiRadiogruppe
-            name="erKlagenFramsattInnenFrist"
-            legend="Er klagen framsatt innenfor klagefristen?"
-            control={control}
-          />
+          <FlexRow>
+            <JaNeiRadiogruppe
+              name="erKlagenFramsattInnenFrist"
+              legend="Er klagen framsatt innenfor klagefristen?"
+              control={control}
+            />
+            {erKlagenFramsattInnenFrist == JaNei.NEI && (
+              <ToolTip title="Avvisning ved utløpt klagefrist">
+                Hvis klagefristen ikke er overholdt og dette sannsynligvis vil resultere i en avvisning av klagen bør du
+                vurdere å direkte gå til vedtak om avvisning (velg formkrav oppfylt)
+              </ToolTip>
+            )}
+          </FlexRow>
 
           <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
 

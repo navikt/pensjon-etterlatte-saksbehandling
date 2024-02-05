@@ -82,7 +82,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
             opprettet = tidspunkt("opprettet").toLocalDatetimeUTC(),
             endret = tidspunkt("endret").toLocalDatetimeUTC(),
             versjon = int("versjon"),
-            type = JobType.valueOf(string("type")),
+            type = JobbType.valueOf(string("type")),
             kjoeredato = localDate("kjoeredato"),
             behandlingsmaaned = YearMonth.parse(string("behandlingsmaaned")),
             dryrun = boolean("dryrun"),

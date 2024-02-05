@@ -9,8 +9,10 @@ class AldersovergangerService(
 ) {
     private val logger = LoggerFactory.getLogger(AldersovergangerService::class.java)
 
-    suspend fun runJob(jobb: HendelserJobb) {
-        if (jobb.type == JobType.AO_BP20) {
+    suspend fun execute(jobb: HendelserJobb) {
+        logger.info("Handling jobb ${jobb.id} med type ${jobb.type} (${jobb.type.beskrivelse})")
+
+        if (jobb.type == JobbType.AO_BP20) {
             val foedselsmaaned = jobb.behandlingsmaaned.minusYears(20)
 
             val saker = grunnlagKlient.hentSakerForBrukereFoedtIMaaned(foedselsmaaned)

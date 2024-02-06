@@ -19,7 +19,7 @@ fun main() {
                 object : RapidsConnection.StatusListener {
                     override fun onStartup(rapidsConnection: RapidsConnection) {
                         appContext.dataSource.migrate()
-                        appContext.scheduleHandler.start()
+                        appContext.jobbPoller.start()
                     }
                 },
             )

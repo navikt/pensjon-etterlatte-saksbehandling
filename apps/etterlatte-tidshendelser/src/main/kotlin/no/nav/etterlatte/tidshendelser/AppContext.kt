@@ -42,11 +42,11 @@ class AppContext(env: Miljoevariabler) {
 
     private val jobbRunner = JobbRunner(hendelseDao, aldersovergangerService)
 
-    val scheduleHandler =
-        ScheduleHandler(
+    val jobbPoller =
+        JobbPoller(
             leaderElection = LeaderElection(electorPath = env.maybeEnvValue("ELECTOR_PATH")),
-            initialDelaySeconds = env.maybeEnvValue("SCHEDULE_INITIAL_DELAY")?.toLong() ?: 60L,
-            periode = env.maybeEnvValue("SCHEDULE_INTERVAL")?.let { Duration.parse(it) } ?: Duration.ofMinutes(5),
+            initialDelaySeconds = env.maybeEnvValue("JOBB_POLLER_INITIAL_DELAY")?.toLong() ?: 60L,
+            periode = env.maybeEnvValue("JOBB_POLLER_INTERVAL")?.let { Duration.parse(it) } ?: Duration.ofMinutes(5),
             clock = clock,
             jobbRunner = jobbRunner,
         )

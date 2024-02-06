@@ -48,5 +48,7 @@ internal class VarselbrevService(
         bruker = bruker,
         avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
         brevKode = { _ -> Brevkoder.BP_VARSEL },
+        // TODO: Brevkode her kan også vera OMS_VARSEL i OMS-saker. Generelt kjens brevkodemappinga ut som noko som
+        // fortener litt opprydding snart.
     )
 }

@@ -150,7 +150,7 @@ class BehandlingFactory(
 
         val persongalleri =
             with(request) {
-                if (kilde == Vedtaksloesning.PESYS) {
+                if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
                     persongalleri.copy(innsender = kilde!!.name)
                 } else if (persongalleri.innsender == null) {
                     persongalleri.copy(innsender = brukerTokenInfo.ident())
@@ -168,6 +168,12 @@ class BehandlingFactory(
                     request.kilde ?: Vedtaksloesning.GJENNY,
                 ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
             }.behandling
+
+        if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
+            oppgaveService.hentOppgaverForSak(sak.id).find { it.referanse == "TOM" }?.let {
+                oppgaveService.hentOgFerdigstillOppgaveById(it.id, brukerTokenInfo)
+            }
+        }
 
         val gyldighetsvurdering =
             GyldighetsResultat(
@@ -190,18 +196,13 @@ class BehandlingFactory(
                     SoeknadMottattDato(mottattDato).toJsonNode(),
                 ),
             )
-        if (request.kilde == Vedtaksloesning.PESYS) {
+        if (request.kilde == Vedtaksloesning.PESYS || request.kilde == Vedtaksloesning.GJENOPPRETTA) {
+            // TODO Fortsatt relevant? Sjekk varselbrev
             opplysninger.add(lagOpplysning(Opplysningstype.FORELDRELOES, kilde, request.foreldreloes.toJsonNode()))
+            // TODO Legge til uføre her?
         }
 
         grunnlagService.leggTilNyeOpplysninger(behandling.id, NyeSaksopplysninger(sak.id, opplysninger))
-
-        if (request.kilde == Vedtaksloesning.PESYS) {
-            coroutineScope {
-                val pesysId = requireNotNull(request.pesysId) { "Manuell migrering må ha pesysid til sak som migreres" }
-                migreringKlient.opprettManuellMigrering(behandlingId = behandling.id, pesysId = pesysId, sakId = sak.id)
-            }
-        }
 
         return behandling
     }
@@ -225,7 +226,7 @@ class BehandlingFactory(
             }
 
         return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
-            if (kilde == Vedtaksloesning.PESYS) {
+            if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
                 throw ManuellMigreringHarEksisterendeIverksattBehandling()
             }
             val forrigeBehandling = harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }
@@ -250,6 +251,11 @@ class BehandlingFactory(
                 oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                     referanse = behandling.id.toString(),
                     sakId = sak.id,
+                    merknad =
+                        when (kilde) {
+                            Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
+                            else -> null
+                        },
                 )
             behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
                 behandling.toStatistikkBehandling(persongalleri),

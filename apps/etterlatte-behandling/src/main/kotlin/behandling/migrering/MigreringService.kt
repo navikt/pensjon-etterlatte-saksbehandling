@@ -146,11 +146,11 @@ class MigreringService(
         inTransaction {
             val sak = finnEllerOpprettSak(request)
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = request.pesysId.toString(),
+                referanse = "MANGLER",
                 sakId = sak.id,
                 oppgaveKilde = OppgaveKilde.BEHANDLING,
                 oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-                merknad = "Oppgave for manuell gjenoppretting av opphørt sak i Pesys",
+                merknad = "Oppgave for opprettelse av manuell beandling for gjenoppretting av opphørt sak i Pesys",
                 frist = Tidspunkt.now().plus(5, ChronoUnit.DAYS),
             )
         }

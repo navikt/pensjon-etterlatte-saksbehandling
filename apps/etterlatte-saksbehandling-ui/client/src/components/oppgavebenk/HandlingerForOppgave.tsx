@@ -71,8 +71,12 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
       return (
         <>
           {erInnloggetSaksbehandlerOppgave && (
-            <Button size="small" as="a" href={`/behandling/${referanse}`}>
-              Gå til behandling
+            <Button
+              size="small"
+              as="a"
+              href={referanse === 'MANGLER' ? '/manuellbehandling' : `/behandling/${referanse}`}
+            >
+              {referanse === 'MANGLER' ? 'Gå til manuell opprettelse' : 'Gå til behandling'}
             </Button>
           )}
         </>

@@ -6,7 +6,7 @@ enum class EventNames(val eventname: String) : EventnameHendelseType {
     GRUNNLAGSVERSJONERING_EVENT_NAME("GRUNNLAGSVERSJONERING_EVENT_NAME"),
     FEILA("FEILA"),
     FORDELER_STATISTIKK("FORDELER:STATISTIKK"),
-    ALDERSOVERANG("ALDERSOVERANG"),
+    ALDERSOVERGANG("ALDERSOVERGANG"),
     ;
 
     override fun lagEventnameForType(): String = this.eventname

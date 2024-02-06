@@ -4,7 +4,7 @@ import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Feilmelding, Innhold, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
-import { Klage, Utfall } from '~shared/types/Klage'
+import { Klage, KlageUtfallUtenBrev, Utfall } from '~shared/types/Klage'
 import { Controller, useForm } from 'react-hook-form'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterUtfallForKlage } from '~shared/api/klage'
@@ -16,11 +16,10 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import {
   erSkjemaUtfylt,
+  FilledFormDataVurdering,
   FormdataVurdering,
   KlageInnstilling,
   KlageOmgjoering,
-  mapFraFormdataTilKlageUtfall,
-  mapKlageTilFormdata,
 } from '~components/klage/vurdering/KlageVurderingForms'
 
 export function KlageVurderingRedigering(props: { klage: Klage }) {
@@ -130,4 +129,34 @@ function kanSeBrev(valgtUtfall: Utfall | null) {
 
 function nesteSteg(valgtUtfall: Utfall | null, klageId: string) {
   return kanSeBrev(valgtUtfall) ? `/klage/${klageId}/brev` : `/klage/${klageId}/oppsummering`
+}
+
+function mapFraFormdataTilKlageUtfall(skjema: FilledFormDataVurdering): KlageUtfallUtenBrev {
+  switch (skjema.utfall) {
+    case Utfall.DELVIS_OMGJOERING:
+      return { utfall: 'DELVIS_OMGJOERING', omgjoering: skjema.omgjoering!!, innstilling: skjema.innstilling!! }
+    case Utfall.OMGJOERING:
+      return { utfall: 'OMGJOERING', omgjoering: skjema.omgjoering!! }
+    case Utfall.STADFESTE_VEDTAK:
+      return { utfall: 'STADFESTE_VEDTAK', innstilling: skjema.innstilling!! }
+    default:
+      throw new Error('Valgt utfall er ikke gyldig')
+  }
+}
+
+function mapKlageTilFormdata(klage: Klage | null): FormdataVurdering {
+  if (!klage || !klage.utfall) {
+    return { utfall: null, omgjoering: null, innstilling: null }
+  }
+  const utfall = klage.utfall
+  switch (utfall.utfall) {
+    case 'DELVIS_OMGJOERING':
+      return { utfall: Utfall.DELVIS_OMGJOERING, omgjoering: utfall.omgjoering, innstilling: utfall.innstilling }
+    case 'OMGJOERING':
+      return { utfall: Utfall.OMGJOERING, omgjoering: utfall.omgjoering }
+    case 'STADFESTE_VEDTAK':
+      return { utfall: Utfall.STADFESTE_VEDTAK, innstilling: utfall.innstilling }
+    default:
+      return { utfall: null }
+  }
 }

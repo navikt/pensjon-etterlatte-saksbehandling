@@ -1,8 +1,6 @@
 import {
   AARSAKER_OMGJOERING,
   InnstillingTilKabalUtenBrev,
-  Klage,
-  KlageUtfallUtenBrev,
   LOVHJEMLER_BP,
   LOVHJEMLER_OMS,
   Omgjoering,
@@ -25,40 +23,6 @@ export type FilledFormDataVurdering = {
 }
 
 export type FormdataVurdering = FieldOrNull<FilledFormDataVurdering>
-
-export function mapFraFormdataTilKlageUtfall(skjema: FilledFormDataVurdering): KlageUtfallUtenBrev {
-  switch (skjema.utfall) {
-    case Utfall.DELVIS_OMGJOERING:
-      return { utfall: 'DELVIS_OMGJOERING', omgjoering: skjema.omgjoering!!, innstilling: skjema.innstilling!! }
-    case Utfall.OMGJOERING:
-      return { utfall: 'OMGJOERING', omgjoering: skjema.omgjoering!! }
-    case Utfall.STADFESTE_VEDTAK:
-      return { utfall: 'STADFESTE_VEDTAK', innstilling: skjema.innstilling!! }
-    case Utfall.AVVIST_MED_OMGJOERING:
-      return { utfall: 'AVVIST_MED_OMGJOERING', omgjoering: skjema.omgjoering!! }
-    case Utfall.AVVIST_MED_VEDTAKSBREV:
-      return { utfall: 'AVVIST_MED_VEDTAKSBREV' }
-  }
-}
-
-export function mapKlageTilFormdata(klage: Klage | null): FormdataVurdering {
-  if (!klage || !klage.utfall) {
-    return { utfall: null, omgjoering: null, innstilling: null }
-  }
-  const utfall = klage.utfall
-  switch (utfall.utfall) {
-    case 'DELVIS_OMGJOERING':
-      return { utfall: Utfall.DELVIS_OMGJOERING, omgjoering: utfall.omgjoering, innstilling: utfall.innstilling }
-    case 'OMGJOERING':
-      return { utfall: Utfall.OMGJOERING, omgjoering: utfall.omgjoering }
-    case 'STADFESTE_VEDTAK':
-      return { utfall: Utfall.STADFESTE_VEDTAK, innstilling: utfall.innstilling }
-    case 'AVVIST_MED_OMGJOERING':
-      return { utfall: Utfall.AVVIST_MED_OMGJOERING, omgjoering: utfall.omgjoering }
-    case 'AVVIST_MED_VEDTAKSBREV':
-      return { utfall: Utfall.AVVIST_MED_VEDTAKSBREV }
-  }
-}
 
 export function erSkjemaUtfylt(skjema: FormdataVurdering): skjema is FilledFormDataVurdering {
   if (skjema.utfall === null) {

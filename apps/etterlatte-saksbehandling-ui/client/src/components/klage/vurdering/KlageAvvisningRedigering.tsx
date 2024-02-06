@@ -4,7 +4,7 @@ import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Feilmelding, Innhold, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
-import { InnstillingTilKabalUtenBrev, Klage, Omgjoering, Utfall } from '~shared/types/Klage'
+import { InnstillingTilKabalUtenBrev, Klage, KlageUtfallUtenBrev, Omgjoering, Utfall } from '~shared/types/Klage'
 import { Controller, useForm } from 'react-hook-form'
 import { FieldOrNull } from '~shared/types/util'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -15,12 +15,7 @@ import { addKlage } from '~store/reducers/KlageReducer'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
-import {
-  erSkjemaUtfylt,
-  KlageOmgjoering,
-  mapFraFormdataTilKlageUtfall,
-  mapKlageTilFormdata,
-} from '~components/klage/vurdering/KlageVurderingForms'
+import { erSkjemaUtfylt, KlageOmgjoering } from '~components/klage/vurdering/KlageVurderingForms'
 import styled from 'styled-components'
 
 type FilledFormDataVurdering = {
@@ -147,3 +142,29 @@ const InfoAlert = styled(Alert).attrs({ variant: 'info' })`
   margin-top: 2rem;
   margin-bottom: 2rem;
 `
+
+function mapFraFormdataTilKlageUtfall(skjema: FilledFormDataVurdering): KlageUtfallUtenBrev {
+  switch (skjema.utfall) {
+    case Utfall.AVVIST_MED_OMGJOERING:
+      return { utfall: 'AVVIST_MED_OMGJOERING', omgjoering: skjema.omgjoering!! }
+    case Utfall.AVVIST_MED_VEDTAKSBREV:
+      return { utfall: 'AVVIST_MED_VEDTAKSBREV' }
+    default:
+      throw new Error('Valgt utfall er ikke gyldig')
+  }
+}
+
+function mapKlageTilFormdata(klage: Klage | null): FormdataVurdering {
+  if (!klage || !klage.utfall) {
+    return { utfall: null, omgjoering: null, innstilling: null }
+  }
+  const utfall = klage.utfall
+  switch (utfall.utfall) {
+    case 'AVVIST_MED_OMGJOERING':
+      return { utfall: Utfall.AVVIST_MED_OMGJOERING, omgjoering: utfall.omgjoering }
+    case 'AVVIST_MED_VEDTAKSBREV':
+      return { utfall: Utfall.AVVIST_MED_VEDTAKSBREV }
+    default:
+      return { utfall: null }
+  }
+}

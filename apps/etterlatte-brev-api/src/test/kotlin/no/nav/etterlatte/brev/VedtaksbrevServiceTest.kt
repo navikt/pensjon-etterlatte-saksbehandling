@@ -31,8 +31,8 @@ import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
-import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
+import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
@@ -82,7 +82,7 @@ internal class VedtaksbrevServiceTest {
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade)
+    private val brevDataMapperFerdigstillingVedtak = BrevDataMapperFerdigstillingVedtak(brevdataFacade)
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
     private val brevbakerService = mockk<BrevbakerService>()
     private val pdfGenerator =
@@ -104,8 +104,8 @@ internal class VedtaksbrevServiceTest {
             brevKodeMapperVedtak,
             brevoppretter,
             pdfGenerator,
-            BrevDataMapperRedigerbartUtfall(brevdataFacade, migreringBrevDataService),
-            BrevDataMapperFerdigstilling(brevdataFacade),
+            BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService),
+            BrevDataMapperFerdigstillingVedtak(brevdataFacade),
         )
 
     @BeforeEach

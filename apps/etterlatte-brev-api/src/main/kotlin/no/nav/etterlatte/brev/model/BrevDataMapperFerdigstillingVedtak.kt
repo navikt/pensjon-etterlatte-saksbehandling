@@ -37,7 +37,7 @@ data class BrevDataFerdigstillingRequest(
     val prosessType: BrevProsessType,
 )
 
-class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
+class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFacade) {
     suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevData {
         with(request) {
             if (generellBrevData.erMigrering()) {

@@ -6,14 +6,13 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
-import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -38,12 +37,7 @@ class SjekklisteIntegrationTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun setup() {
-        Kontekst.set(
-            Context(
-                user,
-                DatabaseContextTest(dataSource),
-            ),
-        )
+        nyKontekstMedBrukerOgDatabaseContext(user, DatabaseContextTest(dataSource))
         sjekklisteDao = SjekklisteDao(ConnectionAutoclosingTest(dataSource))
         sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 

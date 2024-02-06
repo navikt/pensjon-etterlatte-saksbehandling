@@ -13,10 +13,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.KONTANT_FOT
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.behandling.BrukerServiceImpl
@@ -32,6 +29,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.Saksbehandler
@@ -42,7 +40,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.sql.Connection
 import kotlin.random.Random
 
 internal class SakServiceTest {
@@ -85,25 +82,14 @@ internal class SakServiceTest {
 
         val groups = AzureGroup.entries.associateWith { it.name }
 
-        Kontekst.set(
-            Context(
-                SaksbehandlerMedEnheterOgRoller(
-                    tokenValidationContext,
-                    navansattKlient,
-                    SaksbehandlerMedRoller(
-                        Saksbehandler("", "Z123456", claims),
-                        groups,
-                    ),
+        nyKontekstMedBruker(
+            SaksbehandlerMedEnheterOgRoller(
+                tokenValidationContext,
+                navansattKlient,
+                SaksbehandlerMedRoller(
+                    Saksbehandler("", "Z123456", claims),
+                    groups,
                 ),
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
             ),
         )
     }
@@ -125,19 +111,8 @@ internal class SakServiceTest {
 
         every { tokenValidationContext.getJwtToken(any()) } returns token
 
-        Kontekst.set(
-            Context(
-                SystemUser(tokenValidationContext),
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            ),
+        nyKontekstMedBruker(
+            SystemUser(tokenValidationContext),
         )
     }
 

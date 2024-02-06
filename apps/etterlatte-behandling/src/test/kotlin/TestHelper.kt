@@ -15,6 +15,7 @@ import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
+import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.samsvarDoedsdatoer
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -58,8 +59,40 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import javax.sql.DataSource
 
 private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+
+fun nyKontekstMedBrukerOgDatabaseContext(
+    testUser: User,
+    databaseContext: DatabaseKontekst,
+) {
+    Kontekst.set(
+        Context(
+            testUser,
+            databaseContext,
+        ),
+    )
+}
+
+fun nyKontekstMedBrukerOgDatabase(
+    testUser: User,
+    dataSource: DataSource,
+) = nyKontekstMedBrukerOgDatabaseContext(testUser, DatabaseContext(dataSource))
+
+fun nyKontekstMedBruker(testUser: User) =
+    nyKontekstMedBrukerOgDatabaseContext(
+        testUser,
+        object : DatabaseKontekst {
+            override fun activeTx(): Connection {
+                throw IllegalArgumentException()
+            }
+
+            override fun <T> inTransaction(block: () -> T): T {
+                return block()
+            }
+        },
+    )
 
 fun Route.attachMockContext(saksbehandlerMedEnheterOgRoller: SaksbehandlerMedEnheterOgRoller? = null) {
     intercept(ApplicationCallPipeline.Call) {

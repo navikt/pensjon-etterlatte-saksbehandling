@@ -13,7 +13,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.omregning.OpprettOmregningResponse
-import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -43,7 +42,7 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
         user = mockk<SaksbehandlerMedEnheterOgRoller>()
         every { user.name() } returns "User"
         every { user.enheter() } returns listOf(Enheter.defaultEnhet.enhetNr)
-        Kontekst.set(Context(user, DatabaseContext(applicationContext.dataSource)))
+        nyKontekstMedBrukerOgDatabase(user, applicationContext.dataSource)
     }
 
     @AfterAll
@@ -106,10 +105,10 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `kan opprette omregning paa sak som har iverksatt foerstegangsbehandling`() {
         testApplication {
-                val client =
-                    runServerWithModule(server) {
-                        module(applicationContext)
-                    }
+            val client =
+                runServerWithModule(server) {
+                    module(applicationContext)
+                }
 
             for (i in 1..100) {
                 println(i)

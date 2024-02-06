@@ -6,14 +6,11 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.nyKontekstMedBruker
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -22,7 +19,6 @@ import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.sql.Connection
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -34,23 +30,6 @@ class GosysOppgaveServiceImplTest {
 
     private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdltjenesterKlient)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
-
-    private fun setNewKontekstWithMockUser(userMock: User) {
-        Kontekst.set(
-            Context(
-                userMock,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            ),
-        )
-    }
 
     private val saksbehandlerRolleDev = "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
     private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
@@ -77,7 +56,7 @@ class GosysOppgaveServiceImplTest {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
         every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
 
-        setNewKontekstWithMockUser(saksbehandler)
+        nyKontekstMedBruker(saksbehandler)
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
     }
@@ -88,7 +67,7 @@ class GosysOppgaveServiceImplTest {
         every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
         every { saksbehandler.name() } returns "ident"
 
-        setNewKontekstWithMockUser(saksbehandler)
+        nyKontekstMedBruker(saksbehandler)
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
@@ -171,7 +150,7 @@ class GosysOppgaveServiceImplTest {
         every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
         every { saksbehandler.name() } returns "ident"
 
-        setNewKontekstWithMockUser(saksbehandler)
+        nyKontekstMedBruker(saksbehandler)
 
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 

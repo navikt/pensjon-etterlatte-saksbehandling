@@ -9,10 +9,8 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.GrunnlagKlientTest
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -34,6 +32,8 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.nyKontekstMedBruker
+import no.nav.etterlatte.nyKontekstMedBrukerOgDatabaseContext
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.revurdering
@@ -63,20 +63,7 @@ class BehandlingServiceImplTest {
 
     @BeforeEach
     fun before() {
-        Kontekst.set(
-            Context(
-                user,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            ),
-        )
+        nyKontekstMedBruker(user)
     }
 
     @Test
@@ -225,25 +212,24 @@ class BehandlingServiceImplTest {
     @Test
     fun `avbrytBehandling ruller tilbake alt ved exception i intransaction`() {
         var didRollback = false
-        Kontekst.set(
-            Context(
-                user,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
+        nyKontekstMedBrukerOgDatabaseContext(
+            user,
+            object : DatabaseKontekst {
+                override fun activeTx(): Connection {
+                    throw IllegalArgumentException()
+                }
 
-                    override fun <T> inTransaction(block: () -> T): T {
-                        try {
-                            return block()
-                        } catch (ex: Throwable) {
-                            didRollback = true
-                            throw ex
-                        }
+                override fun <T> inTransaction(block: () -> T): T {
+                    try {
+                        return block()
+                    } catch (ex: Throwable) {
+                        didRollback = true
+                        throw ex
                     }
-                },
-            ),
+                }
+            },
         )
+
         val sakId = 1L
         val nyFoerstegangsbehandling = foerstegangsbehandling(sakId = sakId)
 

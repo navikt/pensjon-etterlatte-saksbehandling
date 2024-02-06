@@ -75,18 +75,39 @@ class SaksbehandlerMedEnheterOgRoller(
 
     fun erSuperbruker() = name() in (saksbehandlereMedTilgangTilAlleEnheter)
 
-    fun enheter() =
-        if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
-            Enheter.nasjonalTilgangEnheter()
-        } else {
-            try {
-                runBlocking {
-                    navAnsattKlient.hentEnheterForSaksbehandler(name()).map { it.id }
-                }
-            } catch (e: Exception) {
-                throw HentEnhetException("Henting av enheter feilet. Sjekk on-prem status(fss)", e)
+    fun enheterMedSkrivetilgang() =
+        try {
+            runBlocking {
+                navAnsattKlient.hentEnheterForSaksbehandler(name())
+                    .map { it.id }
+                    .filter { Enheter.enheterMedSkrivetilgang().contains(it) }
+            }
+        } catch (e: Exception) {
+            throw HentEnhetException("Henting av enheter feilet. Sjekk on-prem status(fss)", e)
+        }
+
+    // TODO - EY-3441 - lesetilgang for forvaltningsutviklere
+    fun enheterMedLesetilgang() =
+        enheterMedSkrivetilgang().let { egenSkriveEnheter ->
+            when (egenSkriveEnheter.size) {
+                0 -> Enheter.nasjonalTilgangEnheter()
+                else ->
+                    if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
+                        Enheter.nasjonalTilgangEnheter() - egenSkriveEnheter.toSet()
+                    } else {
+                        emptyList()
+                    }
             }
         }
+
+    fun enheter() = (enheterMedSkrivetilgang() + enheterMedLesetilgang()).distinct()
+
+    // TODO - EY-3441 - lesetilgang for forvaltningsutviklere
+    fun kanSeOppgaveliste(): Boolean {
+        val enheter = enheterMedSkrivetilgang()
+
+        return enheter.isNotEmpty()
+    }
 
     override fun harSkrivetilgang(): Boolean {
         val enheter = enheter()

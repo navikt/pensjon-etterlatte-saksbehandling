@@ -364,7 +364,8 @@ internal class ApplicationContext(
             revurderingService = automatiskRevurderingService,
         )
 
-    val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
+    val sakTilgangDao = SakTilgangDao(dataSource)
+    val tilgangService = TilgangServiceImpl(sakTilgangDao)
     val enhetService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     val sakService =
         SakServiceImpl(
@@ -476,6 +477,7 @@ internal class ApplicationContext(
             0L,
             interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
             dataSource = dataSource,
+            sakTilgangDao = sakTilgangDao,
         )
     }
 

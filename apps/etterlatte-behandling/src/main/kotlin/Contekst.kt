@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
+import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerService
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -19,6 +20,7 @@ object Kontekst : ThreadLocal<Context>()
 class Context(
     val AppUser: User,
     val databasecontxt: DatabaseKontekst,
+    val sakTilgangDao: SakTilgangDao,
 ) {
     fun appUserAsSaksbehandler(): SaksbehandlerMedEnheterOgRoller {
         return this.AppUser as SaksbehandlerMedEnheterOgRoller
@@ -29,10 +31,6 @@ interface User {
     fun name(): String
 
     fun kanSetteKilde(): Boolean = false
-
-    fun harSkrivetilgang(): Boolean = false
-
-    fun harLesetilgang(): Boolean = false
 }
 
 abstract class ExternalUser(val identifiedBy: TokenValidationContext) : User
@@ -53,10 +51,6 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
     override fun kanSetteKilde(): Boolean {
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.containsClaim("roles", "kan-sette-kilde")
     }
-
-    override fun harSkrivetilgang(): Boolean = true
-
-    override fun harLesetilgang(): Boolean = true
 }
 
 class SaksbehandlerMedEnheterOgRoller(
@@ -96,18 +90,6 @@ class SaksbehandlerMedEnheterOgRoller(
         val enheter = enheterMedSkrivetilgang()
 
         return enheter.isNotEmpty()
-    }
-
-    override fun harSkrivetilgang(): Boolean {
-        val enheter = enheter()
-        val skrivetilgangEnhetsnummere = Enheter.enheterMedSkrivetilgang()
-        return enheter.any { skrivetilgangEnhetsnummere.contains(it) }
-    }
-
-    override fun harLesetilgang(): Boolean {
-        val enheter = enheter()
-        val lesetilgangEnheter = Enheter.enheterMedLesetilgang()
-        return enheter.any { lesetilgangEnheter.contains(it) }
     }
 }
 

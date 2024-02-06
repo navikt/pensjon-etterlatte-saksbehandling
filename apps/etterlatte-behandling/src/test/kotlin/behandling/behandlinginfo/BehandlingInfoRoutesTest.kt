@@ -34,6 +34,7 @@ import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.mockedSakTilgangDao
 import no.nav.etterlatte.module
 import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -70,6 +71,7 @@ internal class BehandlingInfoRoutesTest {
                 behandlingService,
                 behandlingsstatusService,
             )
+        every { applicationContext.sakTilgangDao } returns mockedSakTilgangDao()
 
         every { applicationContext.saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
             listOf(

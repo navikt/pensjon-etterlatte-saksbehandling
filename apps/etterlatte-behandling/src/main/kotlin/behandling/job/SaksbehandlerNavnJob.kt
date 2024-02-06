@@ -21,10 +21,10 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
     val logger = LoggerFactory.getLogger("Saksbehandlerdatanavn")
     Thread.sleep(Duration.ofMinutes(3L).toMillis())
     if (context.leaderElectionKlient.isLeader()) {
-        logger.info("Henting av saksbehandlernavn jobb leader is true, starter jobb")
+        logger.info("Henting av Saksbehandlerdatanavn jobb leader is true, starter jobb")
         val subCoroutineExceptionHandler =
             CoroutineExceptionHandler { _, exception ->
-                logger.error("saksbehandlernavnjob feilet se exception $exception")
+                logger.error("Saksbehandlerdatanavn feilet se exception $exception")
             }
 
         GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
@@ -40,7 +40,7 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
             }
         }
     } else {
-        logger.info("Ikke leader, kjører ikke saksbehandlerjob")
+        logger.info("Ikke leader, kjører ikke Saksbehandlerdatanavn")
     }
 }
 

@@ -35,7 +35,7 @@ internal class VarselbrevService(
             sakId = sakId,
             behandlingId = behandlingId,
             bruker = brukerTokenInfo,
-            brevKode = brevkode.redigering,
+            brevKode = { brevkode.redigering },
             brevtype = Brevtype.VARSEL,
         ).first
     }

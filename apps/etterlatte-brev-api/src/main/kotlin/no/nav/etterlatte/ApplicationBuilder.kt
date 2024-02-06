@@ -41,7 +41,7 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
-import no.nav.etterlatte.brev.model.BrevKodeMapper
+import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
@@ -148,9 +148,9 @@ class ApplicationBuilder {
 
     private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade)
 
-    private val brevKodeMapper = BrevKodeMapper()
+    private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapperRedigerbartUtfall, brevKodeMapper)
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapperRedigerbartUtfall)
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
@@ -158,7 +158,8 @@ class ApplicationBuilder {
 
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
 
-    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
+    private val brevoppretter =
+        Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
 
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, brevDataMapperFerdigstilling, adresseService, brevbakerService)
@@ -167,7 +168,7 @@ class ApplicationBuilder {
         VedtaksbrevService(
             db,
             vedtaksvurderingService,
-            brevKodeMapper,
+            brevKodeMapperVedtak,
             brevoppretter,
             pdfGenerator,
         )

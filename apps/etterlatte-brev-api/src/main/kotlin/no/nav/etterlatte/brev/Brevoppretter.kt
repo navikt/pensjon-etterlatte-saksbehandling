@@ -35,6 +35,7 @@ class Brevoppretter(
     private val brevdataFacade: BrevdataFacade,
     private val brevbaker: BrevbakerService,
     private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
+    private val brevKodeMapperVedtak: BrevKodeMapperVedtak,
 ) {
     suspend fun opprettVedtaksbrev(
         sakId: Long,
@@ -125,12 +126,6 @@ class Brevoppretter(
 
         val brevkodeRequest =
             BrevkodeRequest(generellBrevData.erMigrering(), generellBrevData.sak.sakType, generellBrevData.forenkletVedtak?.type)
-        val brevkode: (mapper: BrevKodeMapperVedtak) -> EtterlatteBrevKode =
-            if (brevKode != null) {
-                { _ -> brevKode }
-            } else {
-                { it.brevKode(brevkodeRequest).redigering }
-            }
 
         val tittel =
             brevKode?.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
@@ -141,7 +136,7 @@ class Brevoppretter(
                         RedigerbarTekstRequest(
                             generellBrevData,
                             bruker,
-                            brevkode,
+                            brevKode ?: brevKodeMapperVedtak.brevKode(brevkodeRequest).redigering,
                             automatiskMigreringRequest,
                         ),
                     )

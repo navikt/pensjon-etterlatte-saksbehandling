@@ -150,7 +150,7 @@ class ApplicationBuilder {
 
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapperRedigerbartUtfall, brevKodeMapperVedtak)
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapperRedigerbartUtfall)
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 

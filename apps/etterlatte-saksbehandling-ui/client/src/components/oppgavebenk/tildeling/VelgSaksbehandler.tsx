@@ -134,10 +134,9 @@ export const VelgSaksbehandler = ({
 }
 
 const MenyWrapper = styled.div`
-  //display: flex;
-  //flex-direction: column;
-  //justify-content: space-between;
-  min-height: 16rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 `
 
 const ValgButton = styled(Button)`

@@ -104,7 +104,7 @@ class GenerellBehandlingService(
                     behandlingId = generellBehandling.tilknyttetBehandling!!,
                 )
             if (kanskjeOppgaveMedSaksbehandler != null) {
-                val saksbehandler = kanskjeOppgaveMedSaksbehandler.saksbehandler
+                val saksbehandler = kanskjeOppgaveMedSaksbehandler.saksbehandlerIdent
                 if (saksbehandler != null) {
                     oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler)
                     logger.info(

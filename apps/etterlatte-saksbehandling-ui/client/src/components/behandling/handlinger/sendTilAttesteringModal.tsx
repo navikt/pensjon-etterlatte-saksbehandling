@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
 import { ApiResponse } from '~shared/api/apiClient'
-import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
+import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -25,7 +25,7 @@ export const SendTilAttesteringModal = ({
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [fattVedtakStatus, fattVedtak] = useApiCall(fattVedtakApi)
-  const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<string | null>(null)
+  const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<OppgaveSaksbehandler | null>(null)
   const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(
     hentOppgaveForBehandlingUnderBehandlingIkkeattestert
   )
@@ -33,10 +33,8 @@ export const SendTilAttesteringModal = ({
   const soeker = usePersonopplysninger()?.soeker?.opplysning
 
   useEffect(() => {
-    requesthentOppgaveForBehandling({ referanse: behandlingId, sakId: sakId }, (saksbehandler, statusCode) => {
-      if (statusCode === 200) {
-        setSaksbehandlerPaaOppgave(saksbehandler)
-      }
+    requesthentOppgaveForBehandling({ referanse: behandlingId, sakId: sakId }, (saksbehandler) => {
+      setSaksbehandlerPaaOppgave(saksbehandler)
     })
   }, [])
 
@@ -61,7 +59,7 @@ export const SendTilAttesteringModal = ({
     <>
       {isSuccess(oppgaveForBehandlingStatus) && (
         <>
-          {saksbehandlerPaaOppgave ? (
+          {!saksbehandlerPaaOppgave?.saksbehandlerIdent ? (
             <>
               <Button variant="primary" onClick={klikkAttester}>
                 {handlinger.SEND_TIL_ATTESTERING.navn}

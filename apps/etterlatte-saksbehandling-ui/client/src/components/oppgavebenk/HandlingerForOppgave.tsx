@@ -7,8 +7,10 @@ import { GosysOppgaveModal } from '~components/oppgavebenk/oppgavemodal/GosysOpp
 export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const innloggetsaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const { type, kilde, fnr, saksbehandler, referanse } = oppgave
-  const erInnloggetSaksbehandlerOppgave = saksbehandler ? saksbehandler === innloggetsaksbehandler.ident : false
+  const { type, kilde, fnr, saksbehandlerIdent, referanse } = oppgave
+  const erInnloggetSaksbehandlerOppgave = saksbehandlerIdent
+    ? saksbehandlerIdent === innloggetsaksbehandler.ident
+    : false
   if (kilde === 'GENERELL_BEHANDLING') {
     switch (type) {
       case 'UNDERKJENT':

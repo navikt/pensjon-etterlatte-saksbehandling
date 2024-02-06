@@ -16,6 +16,7 @@ import no.nav.etterlatte.behandling.sjekkliste.OppdatertSjekkliste
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteDao
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -48,7 +49,9 @@ class SjekklisteIntegrationTest {
         settOppKontekst(user)
 
         every { user.name() } returns "Sak B. Handlersen"
-        every { oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(any()) } returns user.name()
+        every {
+            oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(any())
+        } returns OppgaveSaksbehandler(user.name(), "Sak B. Handlersen")
     }
 
     @AfterAll

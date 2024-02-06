@@ -123,7 +123,7 @@ class GosysOppgaveServiceImpl(
                 fnr = fnrByAktoerId[this.aktoerId]!!,
                 gjelder = temaTilSakType[this.tema]!!.name,
                 enhet = this.tildeltEnhetsnr,
-                saksbehandler = this.tilordnetRessurs,
+                saksbehandlerIdent = this.tilordnetRessurs,
                 beskrivelse = this.beskrivelse,
                 sakType = temaTilSakType[this.tema]!!,
             )

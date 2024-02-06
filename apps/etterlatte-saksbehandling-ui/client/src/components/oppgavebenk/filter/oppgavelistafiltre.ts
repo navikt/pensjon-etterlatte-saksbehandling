@@ -51,11 +51,11 @@ function filtrerSaksbehandler(saksbehandlerFilter: string, oppgaver: OppgaveDTO[
   } else {
     return oppgaver.filter((o) => {
       if (saksbehandlerFilter === SAKSBEHANDLERFILTER.Tildelt) {
-        return o.saksbehandler !== null
+        return o.saksbehandlerIdent !== null
       } else if (saksbehandlerFilter === SAKSBEHANDLERFILTER.IkkeTildelt) {
-        return o.saksbehandler === null
+        return o.saksbehandlerIdent === null
       } else if (saksbehandlerFilter && saksbehandlerFilter !== '') {
-        return o.saksbehandler === saksbehandlerFilter
+        return o.saksbehandlerIdent === saksbehandlerFilter
       } else {
         return true
       }

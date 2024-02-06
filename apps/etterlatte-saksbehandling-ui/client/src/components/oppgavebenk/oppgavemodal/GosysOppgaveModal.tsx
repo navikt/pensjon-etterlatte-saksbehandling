@@ -31,7 +31,7 @@ const BeskrivelseWrapper = styled.div`
 
 export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const [open, setOpen] = useState(false)
-  const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType } = oppgave
+  const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandlerIdent, beskrivelse, sakType } = oppgave
 
   const configContext = useContext(ConfigContext)
 
@@ -78,7 +78,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
             </div>
             <div>
               <Label>Saksbehandler</Label>
-              <BodyShort>{hyphenIfNull(saksbehandler)}</BodyShort>
+              <BodyShort>{hyphenIfNull(saksbehandlerIdent)}</BodyShort>
             </div>
           </InfoGrid>
           <BeskrivelseWrapper>

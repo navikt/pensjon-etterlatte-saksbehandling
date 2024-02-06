@@ -75,7 +75,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                         attestantIdent = Fagsaksystem.EY.navn,
                     )
                 },
-                brevKode = { _ -> brevKode },
+                brevKode = { brevKode },
             )
         }
         logger.info("Journalfører $brevKode-brev i sak $sakId")

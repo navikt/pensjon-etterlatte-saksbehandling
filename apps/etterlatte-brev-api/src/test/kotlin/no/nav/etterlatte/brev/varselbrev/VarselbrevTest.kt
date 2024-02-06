@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Spraak
@@ -64,6 +65,9 @@ class VarselbrevTest {
                     mockk<GenerellBrevData>().also {
                         every { it.vedtakstype() } returns ""
                         every { it.spraak } returns Spraak.NN
+                        every { it.erMigrering() } returns false
+                        every { it.sak } returns Sak("", SakType.BARNEPENSJON, 1L, "")
+                        every { it.forenkletVedtak } returns null
                         every { it.personerISak } returns
                             PersonerISak(
                                 null,
@@ -96,6 +100,7 @@ class VarselbrevTest {
                 brevdataFacade,
                 brevbaker,
                 redigerbartVedleggHenter,
+                BrevKodeMapperVedtak(),
             )
         val behandlingKlient = mockk<BehandlingKlient>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
         service = VarselbrevService(brevRepository, brevoppretter, behandlingKlient)

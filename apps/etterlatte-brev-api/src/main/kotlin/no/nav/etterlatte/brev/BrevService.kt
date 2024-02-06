@@ -105,7 +105,7 @@ class BrevService(
             bruker,
             null,
             avsenderRequest = { b, g -> g.avsenderRequest(b) },
-            brevKode = { _ -> Brevkoder.TOMT_INFORMASJONSBREV },
+            brevKode = { Brevkoder.TOMT_INFORMASJONSBREV },
         )
 
     suspend fun ferdigstill(

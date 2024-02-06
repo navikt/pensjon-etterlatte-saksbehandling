@@ -8,6 +8,7 @@ import joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.joarkhendelser.JoarkHendelseHandler
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.common.JoarkhendelseKonsument
+import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
@@ -32,10 +33,17 @@ class ApplicationContext(env: Map<String, String> = System.getenv()) {
             config.getString("pdl.base.url"),
         )
 
+    private val oppgaveKlient =
+        OppgaveKlient(
+            httpClientCredentials(config.getString("oppgave.base.url")),
+            config.getString("oppgave.azure.scope"),
+        )
+
     private val joarkHendelseHandler =
         JoarkHendelseHandler(
             BehandlingService(behandlingKlient, pdlTjenesterKlient),
             safKlient,
+            oppgaveKlient,
             pdlTjenesterKlient,
         )
 

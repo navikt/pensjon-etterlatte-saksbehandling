@@ -2,9 +2,10 @@ package no.nav.etterlatte.behandling.job
 
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.config.ApplicationContext
 import org.slf4j.LoggerFactory
@@ -22,17 +23,23 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
                     logger.info("Antall identer ${sbidenter.size}")
 
                     val filtrerteIdenter = sbidenter.filter { !context.saksbehandlerInfoDao.saksbehandlerFinnes(it) }
-                    val mappedMedNavn =
-                        filtrerteIdenter.map {
-                            if (listOf("PESYS", "EY").contains(it)) {
-                                it to SaksbehandlerInfo(it, it)
-                            } else {
-                                it to runBlocking { context.navAnsattKlient.hentSaksbehanderNavn(it) }
-                            }
-                        }
-                    logger.info("mappedMedNavn antall: ${mappedMedNavn.size}")
 
-                    mappedMedNavn.forEach {
+                    val egneIdenter =
+                        filtrerteIdenter.filter { listOf("PESYS", "EY").contains(it) }
+                            .map { it to SaksbehandlerInfo(it, it) }
+
+                    val hentedeIdenter =
+                        coroutineScope {
+                            filtrerteIdenter.filter { !listOf("PESYS", "EY").contains(it) }
+                                .map { it to async { context.navAnsattKlient.hentSaksbehanderNavn(it) } }
+                                .map { it.first to it.second.await() }
+                        }
+
+                    val alleIdenterMedNavn = hentedeIdenter + egneIdenter
+
+                    logger.info("mappedMedNavn antall: ${alleIdenterMedNavn.size}")
+
+                    alleIdenterMedNavn.forEach {
                         if (it.second == null) {
                             context.saksbehandlerInfoDao.upsertSaksbehandler(SaksbehandlerInfo(it.first, it.first))
                         } else {

@@ -39,7 +39,7 @@ class BrevService(
             behandlingId = null,
             bruker = bruker,
             automatiskMigreringRequest = null,
-            brevKode = brevkoder.redigering,
+            brevKode = { brevkoder.redigering },
             brevtype = brevkoder.redigering.brevtype,
         ).first
 

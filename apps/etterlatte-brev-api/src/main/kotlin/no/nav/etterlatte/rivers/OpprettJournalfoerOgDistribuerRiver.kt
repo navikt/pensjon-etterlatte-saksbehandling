@@ -57,7 +57,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                     sakId = sakId,
                     behandlingId = null,
                     bruker = brukerTokenInfo,
-                    brevKode = brevKode.redigering,
+                    brevKode = { brevKode.redigering },
                     brevtype = brevKode.redigering.brevtype,
                 )
             }

@@ -13,7 +13,7 @@ fun main() {
     val miljoevariabler = Miljoevariabler(rapidEnv)
 
     RapidApplication.create(rapidEnv).also { rapidsConnection ->
-        val appContext = AppContext(miljoevariabler)
+        val appContext = AppContext(miljoevariabler) { key, message -> rapidsConnection.publish(key.toString(), message) }
 
         rapidsConnection.apply {
             val timers = mutableListOf<Timer>()

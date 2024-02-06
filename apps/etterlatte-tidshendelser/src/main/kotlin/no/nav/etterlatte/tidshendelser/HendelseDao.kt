@@ -40,6 +40,18 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
         }
     }
 
+    fun hentJobber(jobbIDs: List<Int>): List<HendelserJobb> {
+        return datasource.transaction { tx ->
+            queryOf(
+                """
+                SELECT * FROM jobb WHERE id = ANY(?)
+                """.trimIndent(),
+                jobbIDs.toTypedArray(),
+            )
+                .let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
+        }
+    }
+
     fun oppdaterJobbstatusStartet(hendelserJobb: HendelserJobb) {
         oppdaterJobbstatus(hendelserJobb, "STARTET")
     }

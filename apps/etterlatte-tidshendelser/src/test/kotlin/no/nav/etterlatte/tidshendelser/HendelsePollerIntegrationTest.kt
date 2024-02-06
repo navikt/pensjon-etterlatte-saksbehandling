@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.slf4j.LoggerFactory
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import java.time.Month
@@ -16,6 +17,8 @@ import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HendelsePollerIntegrationTest {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     @Container
     private val postgreSQLContainer =
         PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
@@ -30,7 +33,11 @@ class HendelsePollerIntegrationTest {
 
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
-    private val hendelsePoller = HendelsePoller(hendelseDao)
+    private val hendelsePoller =
+        HendelsePoller(
+            hendelseDao,
+            HendelsePublisher { key, _ -> logger.info("Publiserer melding [key=$key]") },
+        )
 
     @AfterEach
     fun beforeAll() {
@@ -54,7 +61,7 @@ class HendelsePollerIntegrationTest {
 
         hendelserEtterPoll.forEach {
             when {
-                it.sakId <= 12 -> it.status shouldBe "VURDER_LOEPENDE_YTELSE"
+                it.sakId <= 12 -> it.status shouldBe HENDELSE_STATUS_SENDT
                 else -> it.status shouldBe HENDELSE_STATUS_OPPRETTET
             }
         }

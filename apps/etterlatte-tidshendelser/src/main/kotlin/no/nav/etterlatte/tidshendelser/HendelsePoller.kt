@@ -40,6 +40,7 @@ class HendelsePollerTask(
 
 class HendelsePoller(
     private val hendelseDao: HendelseDao,
+    private val hendelsePublisher: HendelsePublisher,
 ) {
     private val logger = LoggerFactory.getLogger(HendelsePoller::class.java)
 
@@ -50,6 +51,10 @@ class HendelsePoller(
         if (hendelser.isEmpty()) {
             logger.info("Fant ingen hendelser å behandle")
         } else {
+            val jobsById =
+                hendelseDao.hentJobber(hendelser.map { it.jobbId }.distinct())
+                    .associateBy { it.id }
+
             hendelser.forEach {
                 withLogContext(
                     correlationId = getCorrelationId(),
@@ -57,13 +62,14 @@ class HendelsePoller(
                         "jobbId" to it.jobbId.toString(),
                         "hendelseId" to it.id.toString(),
                         "sakId" to it.sakId.toString(),
+                        "type" to jobsById[it.jobbId]!!.type.toString(),
                     ),
                 ) {
-                    logger.info("Behandler hendelse: $it")
+                    logger.info("Behandler hendelse: [id=${it.id}, sakId=${it.sakId}]")
 
-                    // her må man da sende ut hendelsen på kafka...
+                    hendelsePublisher.publish(hendelse = it, jobbType = jobsById[it.jobbId]!!.type)
 
-                    hendelseDao.oppdaterHendelseStatus(it, "VURDER_LOEPENDE_YTELSE")
+                    hendelseDao.oppdaterHendelseStatus(it, "SENDT")
                 }
             }
         }

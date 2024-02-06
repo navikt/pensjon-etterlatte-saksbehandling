@@ -9,14 +9,11 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VARSEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.BarnepensjonAvslag
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelse
@@ -65,12 +62,10 @@ class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
             }
 
             return when (kode.ferdigstilling) {
-                TOM_MAL_INFORMASJONSBREV -> ManueltBrevMedTittelData(innholdMedVedlegg.innhold(), tittel)
                 BARNEPENSJON_REVURDERING -> barnepensjonRevurdering(bruker, generellBrevData, innholdMedVedlegg)
                 BARNEPENSJON_INNVILGELSE -> barnepensjonInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
                 BARNEPENSJON_AVSLAG -> barnepensjonAvslag(innholdMedVedlegg, generellBrevData)
                 BARNEPENSJON_OPPHOER -> barnepensjonOpphoer(innholdMedVedlegg, generellBrevData)
-                BARNEPENSJON_VARSEL -> ManueltBrevData(innholdMedVedlegg.innhold())
 
                 OMSTILLINGSSTOENAD_INNVILGELSE ->
                     omstillingsstoenadInnvilgelse(
@@ -89,8 +84,6 @@ class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
                 OMSTILLINGSSTOENAD_AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, innholdMedVedlegg.innhold())
                 OMSTILLINGSSTOENAD_OPPHOER ->
                     OmstillingsstoenadOpphoer.fra(generellBrevData.utlandstilknytning, innholdMedVedlegg.innhold())
-
-                OMSTILLINGSSTOENAD_VARSEL -> ManueltBrevData(innholdMedVedlegg.innhold())
 
                 TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
                 else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")

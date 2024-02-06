@@ -84,7 +84,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
           <BeskrivelseWrapper>
             <div>
               <Label>Beskrivelse</Label>
-              <BodyShort>{beskrivelse}</BodyShort>
+              <BodyShort>{beskrivelse ? beskrivelse : 'Ingen beskrivelse'}</BodyShort>
             </div>
           </BeskrivelseWrapper>
           <FlexRow justify="right">

@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
@@ -127,7 +128,7 @@ class Brevoppretter(
                 { _, _ -> brevKode }
             } else {
                 { mapper, data ->
-                    mapper.brevKode(data).redigering
+                    mapper.brevKode(BrevkodeRequest(data.erMigrering(), data.sak.sakType, data.forenkletVedtak?.type)).redigering
                 }
             }
 

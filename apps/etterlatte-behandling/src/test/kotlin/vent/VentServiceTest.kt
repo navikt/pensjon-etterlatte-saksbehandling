@@ -1,4 +1,4 @@
-package vent
+package no.nav.etterlatte.vent
 
 import io.mockk.mockk
 import no.nav.etterlatte.DatabaseExtension
@@ -16,9 +16,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.vent.VentDao
-import no.nav.etterlatte.vent.VentService
-import no.nav.etterlatte.vent.Ventetype
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance

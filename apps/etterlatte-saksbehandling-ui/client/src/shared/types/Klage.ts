@@ -121,7 +121,7 @@ export enum Utfall {
   OMGJOERING = 'OMGJOERING',
   DELVIS_OMGJOERING = 'DELVIS_OMGJOERING',
   STADFESTE_VEDTAK = 'STADFESTE_VEDTAK',
-  AVVIST_MED_VEDTAKSBREV = 'AVVIST_MED_VEDTAKSBREV',
+  AVVIST = 'AVVIST',
   AVVIST_MED_OMGJOERING = 'AVVIST_MED_OMGJOERING',
 }
 
@@ -129,7 +129,7 @@ export const teksterKlageutfall: Record<Utfall, string> = {
   OMGJOERING: 'Omgjøring',
   DELVIS_OMGJOERING: 'Delvis omgjøring',
   STADFESTE_VEDTAK: 'Stadfeste vedtak',
-  AVVIST_MED_VEDTAKSBREV: 'Avvise klage med brev',
+  AVVIST: 'Avvise klage med brev',
   AVVIST_MED_OMGJOERING: 'Avvise klage',
 } as const
 
@@ -151,7 +151,7 @@ export type KlageUtfall =
       saksbehandler: KildeSaksbehandler
     }
   | {
-      utfall: 'AVVIST_MED_VEDTAKSBREV'
+      utfall: 'AVVIST'
       saksbehandler: KildeSaksbehandler
     }
   | {
@@ -175,7 +175,7 @@ export type KlageUtfallUtenBrev =
       innstilling: InnstillingTilKabalUtenBrev
     }
   | {
-      utfall: 'AVVIST_MED_VEDTAKSBREV'
+      utfall: 'AVVIST'
     }
   | {
       utfall: 'AVVIST_MED_OMGJOERING'

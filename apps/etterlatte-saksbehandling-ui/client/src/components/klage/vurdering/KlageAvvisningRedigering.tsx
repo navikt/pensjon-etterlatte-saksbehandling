@@ -88,7 +88,7 @@ export function KlageAvvisningRedigering(props: { klage: Klage }) {
               render={({ field, fieldState }) => (
                 <>
                   <RadioGroup legend="Velg utfall" {...field}>
-                    <Radio value={Utfall.AVVIST_MED_VEDTAKSBREV}>Vedtak om avvisning</Radio>
+                    <Radio value={Utfall.AVVIST}>Vedtak om avvisning</Radio>
                     <Radio value={Utfall.AVVIST_MED_OMGJOERING}>Avvist med omgjøring</Radio>
                   </RadioGroup>
                   {fieldState.error ? <Feilmelding>Du må velge et utfall for klagen.</Feilmelding> : null}
@@ -98,7 +98,7 @@ export function KlageAvvisningRedigering(props: { klage: Klage }) {
           </VurderingWrapper>
 
           {valgtUtfall === Utfall.AVVIST_MED_OMGJOERING ? <KlageOmgjoering control={control} /> : null}
-          {valgtUtfall === Utfall.AVVIST_MED_VEDTAKSBREV ? (
+          {valgtUtfall === Utfall.AVVIST ? (
             <InfoAlert variant="info" inline>
               Det skal fattes et vedtak om avvisning. Gjenny støtter ikke dette ennå, men det kommer snart.
             </InfoAlert>
@@ -147,8 +147,8 @@ function mapFraFormdataTilKlageUtfall(skjema: FilledFormDataVurdering): KlageUtf
   switch (skjema.utfall) {
     case Utfall.AVVIST_MED_OMGJOERING:
       return { utfall: 'AVVIST_MED_OMGJOERING', omgjoering: skjema.omgjoering!! }
-    case Utfall.AVVIST_MED_VEDTAKSBREV:
-      return { utfall: 'AVVIST_MED_VEDTAKSBREV' }
+    case Utfall.AVVIST:
+      return { utfall: 'AVVIST' }
     default:
       throw new Error('Valgt utfall er ikke gyldig')
   }
@@ -162,8 +162,8 @@ function mapKlageTilFormdata(klage: Klage | null): FormdataVurdering {
   switch (utfall.utfall) {
     case 'AVVIST_MED_OMGJOERING':
       return { utfall: Utfall.AVVIST_MED_OMGJOERING, omgjoering: utfall.omgjoering }
-    case 'AVVIST_MED_VEDTAKSBREV':
-      return { utfall: Utfall.AVVIST_MED_VEDTAKSBREV }
+    case 'AVVIST':
+      return { utfall: Utfall.AVVIST }
     default:
       return { utfall: null }
   }

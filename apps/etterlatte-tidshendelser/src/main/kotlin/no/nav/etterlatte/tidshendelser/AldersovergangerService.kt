@@ -18,9 +18,7 @@ class AldersovergangerService(
             val saker = grunnlagKlient.hentSaker(foedselsmaaned = foedselsmaaned)
             logger.info("Hentet ${saker.size} saker for brukere født i $foedselsmaaned")
 
-            hendelseDao.opprettHendelserForSaker(jobb.id, saker)
-
-            // Do something with saker
+            hendelseDao.opprettHendelserForSaker(jobb.id, saker, Steg.IDENTIFISERT_SAK)
         }
     }
 }

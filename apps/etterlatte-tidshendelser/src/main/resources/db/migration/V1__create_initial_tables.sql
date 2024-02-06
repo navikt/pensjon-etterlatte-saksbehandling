@@ -25,7 +25,7 @@ CREATE TABLE hendelse
     endret      TIMESTAMP WITH TIME ZONE DEFAULT (now() AT TIME ZONE 'UTC') NOT NULL,
     versjon     INTEGER NOT NULL DEFAULT 1,
     status      TEXT NOT NULL DEFAULT 'NY',
-    utfall      TEXT,
+    steg        TEXT NOT NULL,
     info        JSONB,
     FOREIGN KEY (jobb_id) REFERENCES jobb (id)
 );

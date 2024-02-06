@@ -28,7 +28,13 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
 
     fun hentJobber(status: String): List<HendelserJobb> {
         return datasource.transaction { tx ->
-            queryOf("SELECT * FROM jobb WHERE status = :status", mapOf("status" to status))
+            queryOf(
+                """
+                SELECT * FROM jobb WHERE status = :status
+                LIMIT 1
+                """.trimIndent(),
+                mapOf("status" to status),
+            )
                 .let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
         }
     }
@@ -36,12 +42,14 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
     fun opprettHendelserForSaker(
         jobbId: Int,
         saksIDer: List<Long>,
+        steg: Steg,
     ) {
         val values =
             saksIDer.map { sakId ->
                 mapOf(
                     "jobbId" to jobbId,
                     "sakId" to sakId,
+                    "steg" to steg.name,
                 )
             }
 
@@ -49,8 +57,8 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
             val result =
                 tx.batchPreparedNamedStatement(
                     """
-                    INSERT INTO hendelse (jobb_id, sak_id)
-                    VALUES (:jobbId, :sakId)
+                    INSERT INTO hendelse (jobb_id, sak_id, steg)
+                    VALUES (:jobbId, :sakId, :steg)
                     """.trimIndent(),
                     values,
                 )
@@ -114,7 +122,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
             endret = tidspunkt("endret").toLocalDatetimeUTC(),
             versjon = int("versjon"),
             status = string("status"),
-            utfall = stringOrNull("utfall"),
+            steg = string("steg"),
             info = anyOrNull("info"),
         )
 

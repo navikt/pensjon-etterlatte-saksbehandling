@@ -50,4 +50,14 @@ class AppContext(env: Miljoevariabler) {
             clock = clock,
             jobbRunner = jobbRunner,
         )
+
+    val hendelsePoller =
+        HendelsePollerTask(
+            leaderElection = LeaderElection(electorPath = env.maybeEnvValue("ELECTOR_PATH")),
+            initialDelaySeconds = env.maybeEnvValue("HENDELSE_POLLER_INITIAL_DELAY")?.toLong() ?: 60L,
+            periode =
+                env.maybeEnvValue("HENDELSE_POLLER_INTERVAL")?.let { Duration.parse(it) }
+                    ?: Duration.ofMinutes(5),
+            clock = clock,
+        )
 }

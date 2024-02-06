@@ -32,6 +32,7 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
@@ -88,7 +89,14 @@ internal class VedtaksbrevServiceTest {
         PDFGenerator(db, brevdataFacade, brevDataMapperFerdigstilling, adresseService, brevbakerService)
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
     private val brevoppretter =
-        Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
+        Brevoppretter(
+            adresseService,
+            db,
+            brevdataFacade,
+            brevbakerService,
+            redigerbartVedleggHenter,
+            BrevDataMapperRedigerbartUtfall(brevdataFacade, migreringBrevDataService),
+        )
 
     private val vedtaksbrevService =
         VedtaksbrevService(

@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -34,6 +35,7 @@ class Brevoppretter(
     private val brevdataFacade: BrevdataFacade,
     private val brevbaker: BrevbakerService,
     private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
+    private val brevDataMapperRedigerbartUtfall: BrevDataMapperRedigerbartUtfall,
 ) {
     suspend fun opprettVedtaksbrev(
         sakId: Long,
@@ -138,7 +140,7 @@ class Brevoppretter(
                             bruker,
                             kode,
                             automatiskMigreringRequest,
-                        ),
+                        ) { brevDataMapperRedigerbartUtfall.brevData(it) },
                     )
                 }
 

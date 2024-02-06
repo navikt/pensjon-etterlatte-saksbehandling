@@ -100,6 +100,7 @@ class VarselbrevTest {
                 brevdataFacade,
                 brevbaker,
                 redigerbartVedleggHenter,
+                mockk(),
             )
         val behandlingKlient = mockk<BehandlingKlient>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
         val pdfGenerator = mockk<PDFGenerator>()

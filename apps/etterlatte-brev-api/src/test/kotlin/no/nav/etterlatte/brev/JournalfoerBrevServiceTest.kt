@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
@@ -131,6 +132,7 @@ class JournalfoerBrevServiceTest {
                 Tidspunkt.now(),
                 Tidspunkt.now(),
                 mottaker = mockk(),
+                brevtype = Brevtype.MANUELT,
             )
 
         every { vedtaksbrevService.hentVedtaksbrev(any()) } returns brev
@@ -173,6 +175,7 @@ class JournalfoerBrevServiceTest {
                             landkode = "NOR",
                         ),
                     ),
+                brevtype = Brevtype.INFORMASJON,
             )
 
         coEvery { vedtaksbrevService.hentVedtaksbrev(any()) } returns forventetBrev
@@ -241,6 +244,7 @@ class JournalfoerBrevServiceTest {
                             landkode = "NOR",
                         ),
                     ),
+                brevtype = Brevtype.MANUELT,
             )
 
         every { db.hentBrev(any()) } returns forventetBrev
@@ -291,6 +295,7 @@ class JournalfoerBrevServiceTest {
         statusEndret = Tidspunkt.now(),
         opprettet = Tidspunkt.now(),
         mottaker = opprettMottaker(),
+        brevtype = Brevtype.INFORMASJON,
     )
 
     private fun opprettMottaker() =

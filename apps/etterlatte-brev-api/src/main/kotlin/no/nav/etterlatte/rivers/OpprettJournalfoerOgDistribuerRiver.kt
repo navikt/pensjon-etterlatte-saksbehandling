@@ -57,7 +57,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                     sakId = sakId,
                     behandlingId = null,
                     bruker = brukerTokenInfo,
-                    brevKode = brevKode.redigering,
+                    brevKode = { brevKode.redigering },
                     brevtype = brevKode.redigering.brevtype,
                 )
             }
@@ -75,7 +75,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                         attestantIdent = Fagsaksystem.EY.navn,
                     )
                 },
-                brevKode = { _ -> brevKode },
+                brevKode = { brevKode },
             )
         }
         logger.info("Journalfører $brevKode-brev i sak $sakId")

@@ -53,5 +53,20 @@ internal fun Route.varselbrevRoute(
                 }
             }
         }
+
+        get("/pdf") {
+            withBehandlingId(tilgangssjekker) {
+                val brevId = requireNotNull(call.parameters["brevId"]).toLong()
+
+                logger.info("Genererer PDF for varselbrev (id=$brevId)")
+
+                measureTimedValue {
+                    service.genererPdf(brevId, brukerTokenInfo).bytes
+                }.let { (pdf, varighet) ->
+                    logger.info("Generering av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    call.respond(pdf)
+                }
+            }
+        }
     }
 }

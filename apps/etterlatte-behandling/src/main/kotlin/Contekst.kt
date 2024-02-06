@@ -70,12 +70,33 @@ class SaksbehandlerMedEnheterOgRoller(
 
     fun erSuperbruker() = name() in (saksbehandlereMedTilgangTilAlleEnheter)
 
-    fun enheter() =
-        if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
-            Enheter.nasjonalTilgangEnheter()
-        } else {
-            saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }
+    fun enheterMedSkrivetilgang() =
+        saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map {
+            it.enhetsNummer
+        }.filter { Enheter.enheterMedSkrivetilgang().contains(it) }
+
+    // TODO - EY-3441 - lesetilgang for forvaltningsutviklere
+    fun enheterMedLesetilgang() =
+        enheterMedSkrivetilgang().let { egenSkriveEnheter ->
+            when (egenSkriveEnheter.size) {
+                0 -> Enheter.nasjonalTilgangEnheter()
+                else ->
+                    if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
+                        Enheter.nasjonalTilgangEnheter() - egenSkriveEnheter.toSet()
+                    } else {
+                        emptyList()
+                    }
+            }
         }
+
+    fun enheter() = (enheterMedSkrivetilgang() + enheterMedLesetilgang()).distinct()
+
+    // TODO - EY-3441 - lesetilgang for forvaltningsutviklere
+    fun kanSeOppgaveliste(): Boolean {
+        val enheter = enheterMedSkrivetilgang()
+
+        return enheter.isNotEmpty()
+    }
 
     override fun harSkrivetilgang(): Boolean {
         val enheter = enheter()

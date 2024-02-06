@@ -10,8 +10,12 @@ import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import java.time.Duration
+import java.util.UUID
 
-class AppContext(env: Miljoevariabler) {
+class AppContext(
+    env: Miljoevariabler,
+    publisher: (UUID, String) -> Unit,
+) {
     private val config: Config = ConfigFactory.load()
     private val clock = utcKlokke()
 
@@ -59,7 +63,11 @@ class AppContext(env: Miljoevariabler) {
                 env.maybeEnvValue("HENDELSE_POLLER_INTERVAL")?.let { Duration.parse(it) }
                     ?: Duration.ofMinutes(5),
             clock = clock,
-            hendelsePoller = HendelsePoller(hendelseDao),
+            hendelsePoller =
+                HendelsePoller(
+                    hendelseDao = hendelseDao,
+                    hendelsePublisher = HendelsePublisher(publisher),
+                ),
             maxAntallHendelsePerPoll = env.maybeEnvValue("HENDELSE_POLLER_MAX_ANTALL")?.toInt() ?: 5,
         )
 }

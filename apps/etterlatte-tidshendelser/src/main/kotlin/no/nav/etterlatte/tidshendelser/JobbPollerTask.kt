@@ -23,7 +23,7 @@ class JobbPollerTask(
         logger.info("Starter polling av jobber pr $periode")
 
         return fixedRateCancellableTimer(
-            name = "JOBB_POLLER",
+            name = "JOBB_POLLER_TASK",
             startAt = Date(clock.millis() + (initialDelaySeconds * 1000)),
             period = periode.toMillis(),
             loggerInfo = LoggerInfo(logger = logger, sikkerLogg = sikkerlogger(), loggTilSikkerLogg = true),

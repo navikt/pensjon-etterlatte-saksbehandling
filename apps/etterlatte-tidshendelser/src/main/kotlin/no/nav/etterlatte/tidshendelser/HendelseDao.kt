@@ -60,14 +60,49 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
 
     fun hentHendelserForJobb(jobbId: Int): List<Hendelse> {
         return datasource.transaction {
-            queryOf("SELECT * FROM hendelse WHERE jobb_id = :jobbId", mapOf("jobbId" to jobbId))
+            queryOf(
+                """
+                SELECT * FROM hendelse WHERE jobb_id = :jobbId
+                """.trimIndent(),
+                mapOf("jobbId" to jobbId),
+            )
                 .let { query -> it.run(query.map { row -> row.toHendelse() }.asList) }
                 .sortedBy { it.sakId }
         }
     }
 
-    fun oppdaterHendelse(hendelse: Hendelse) {
-        // Oppdater i db
+    fun oppdaterHendelseStatus(
+        hendelse: Hendelse,
+        status: String,
+    ) {
+        datasource.transaction {
+            queryOf(
+                """
+                UPDATE hendelse 
+                SET status = :status, 
+                    endret = now(),
+                    versjon = versjon + 1
+                WHERE id = :id
+                """.trimIndent(),
+                mapOf("status" to status, "id" to hendelse.id),
+            )
+                .let { query -> it.run(query.asUpdate) }
+        }
+    }
+
+    fun pollHendelser(limit: Int = 5): List<Hendelse> {
+        return datasource.transaction {
+            queryOf(
+                """
+                SELECT * FROM hendelse 
+                WHERE status = :status 
+                ORDER BY opprettet asc
+                LIMIT $limit
+                """.trimIndent(),
+                mapOf("status" to "NY"),
+            )
+                .let { query -> it.run(query.map { row -> row.toHendelse() }.asList) }
+        }
     }
 
     private fun Row.toHendelse() =

@@ -7,11 +7,9 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import kotliquery.queryOf
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -19,12 +17,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AldersovergangerTest {
+class AldersovergangerIntegrationTest {
     @Container
     private val postgreSQLContainer =
         PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
@@ -38,8 +35,8 @@ class AldersovergangerTest {
         ).also { it.migrate() }
 
     private val grunnlagKlient: GrunnlagKlient = mockk<GrunnlagKlient>()
-
     private val hendelseDao = HendelseDao(dataSource)
+    private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
     private val aldersovergangerService = AldersovergangerService(hendelseDao, grunnlagKlient)
 
     @AfterEach
@@ -55,7 +52,7 @@ class AldersovergangerTest {
     @Test
     fun `skal hente saker som skal vurderes og lagre hendelser for hver enkelt`() {
         val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
-        val jobb = opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
+        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
 
         coEvery { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(20)) } returns listOf(1, 2, 3)
 
@@ -67,27 +64,5 @@ class AldersovergangerTest {
         hendelser.map { it.sakId } shouldContainExactlyInAnyOrder listOf(2, 1, 3)
         hendelser.map { it.jobbId } shouldContainOnly setOf(jobb.id)
         hendelser.map { it.status } shouldContainOnly setOf("NY")
-    }
-
-    private fun opprettJobb(
-        type: JobbType,
-        behandlingsmaaned: YearMonth,
-    ): HendelserJobb {
-        val id =
-            dataSource.transaction(true) {
-                it.run(
-                    queryOf(
-                        """
-                        INSERT INTO jobb (type, kjoeredato, behandlingsmaaned)
-                        VALUES (?, ?, ?)
-                        """.trimIndent(),
-                        type.name,
-                        LocalDate.now(),
-                        behandlingsmaaned.toString(),
-                    ).asUpdateAndReturnGeneratedKey,
-                )
-            }
-
-        return hendelseDao.hentJobb(id!!)!!
     }
 }

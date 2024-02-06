@@ -25,12 +25,7 @@ internal class VarselbrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
-        val brevkode =
-            if (behandlingKlient.hentSak(sakId, brukerTokenInfo).sakType == SakType.BARNEPENSJON) {
-                Brevkoder.BP_VARSEL
-            } else {
-                Brevkoder.OMS_VARSEL
-            }
+        val brevkode = hentBrevkode(behandlingKlient.hentSak(sakId, brukerTokenInfo).sakType)
 
         return brevoppretter.opprettBrev(
             sakId = sakId,
@@ -41,6 +36,13 @@ internal class VarselbrevService(
         ) { ManueltBrevData() }.first
     }
 
+    private fun hentBrevkode(sakType: SakType) =
+        if (sakType == SakType.BARNEPENSJON) {
+            Brevkoder.BP_VARSEL
+        } else {
+            Brevkoder.OMS_VARSEL
+        }
+
     suspend fun genererPdf(
         brevId: Long,
         bruker: BrukerTokenInfo,
@@ -49,8 +51,6 @@ internal class VarselbrevService(
         bruker = bruker,
         automatiskMigreringRequest = null,
         avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
-        brevKode = { _ -> Brevkoder.BP_VARSEL },
-        // TODO: Brevkode her kan også vera OMS_VARSEL i OMS-saker. Generelt kjens brevkodemappinga ut som noko som
-        // fortener litt opprydding snart.
+        brevKode = { hentBrevkode(it.sakType) },
     )
 }

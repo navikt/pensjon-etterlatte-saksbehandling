@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Brevtype
+import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.UUID
@@ -37,7 +38,7 @@ internal class VarselbrevService(
             bruker = brukerTokenInfo,
             brevKode = { brevkode.redigering },
             brevtype = Brevtype.VARSEL,
-        ).first
+        ) { ManueltBrevData() }.first
     }
 
     suspend fun genererPdf(

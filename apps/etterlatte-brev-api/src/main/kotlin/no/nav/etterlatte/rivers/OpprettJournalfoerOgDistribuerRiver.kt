@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
+import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Fagsaksystem
@@ -59,7 +60,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                     bruker = brukerTokenInfo,
                     brevKode = { brevKode.redigering },
                     brevtype = brevKode.redigering.brevtype,
-                )
+                ) { ManueltBrevData() }
             }
         logger.info("Ferdigstiller $brevKode-brev i sak $sakId")
         val brevId = brevOgData.first.id

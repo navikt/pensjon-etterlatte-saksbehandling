@@ -95,7 +95,6 @@ internal class VedtaksbrevServiceTest {
             brevdataFacade,
             brevbakerService,
             redigerbartVedleggHenter,
-            BrevDataMapperRedigerbartUtfall(brevdataFacade, migreringBrevDataService),
         )
 
     private val vedtaksbrevService =
@@ -105,6 +104,7 @@ internal class VedtaksbrevServiceTest {
             brevKodeMapperVedtak,
             brevoppretter,
             pdfGenerator,
+            BrevDataMapperRedigerbartUtfall(brevdataFacade, migreringBrevDataService),
         )
 
     @BeforeEach

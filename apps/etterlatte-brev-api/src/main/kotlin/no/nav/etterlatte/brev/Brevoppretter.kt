@@ -73,8 +73,8 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        automatiskMigreringRequest: MigreringBrevRequest? = null,
         brevtype: Brevtype,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
     ): Pair<Brev, GenerellBrevData> =

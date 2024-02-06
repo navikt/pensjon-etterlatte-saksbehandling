@@ -11,7 +11,7 @@ import no.nav.pensjon.brevbaker.api.model.Felles
 
 data class BrevbakerRequest private constructor(
     val kode: EtterlatteBrevKode,
-    val letterData: BrevData,
+    val brevData: BrevData,
     val felles: Felles,
     val language: LanguageCode,
 ) {
@@ -27,7 +27,7 @@ data class BrevbakerRequest private constructor(
         ): BrevbakerRequest =
             BrevbakerRequest(
                 kode = brevKode,
-                letterData = brevData,
+                brevData = brevData,
                 felles =
                     mapFelles(
                         sakId = sakId,

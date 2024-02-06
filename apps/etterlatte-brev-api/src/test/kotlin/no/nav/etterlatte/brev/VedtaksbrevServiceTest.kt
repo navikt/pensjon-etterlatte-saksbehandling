@@ -31,7 +31,6 @@ import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
 import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -81,9 +80,7 @@ internal class VedtaksbrevServiceTest {
     private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
-    private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
-    private val brevDataMapper = BrevDataMapper(brevdataFacade, migreringBrevDataService)
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade, brevDataMapper)
+    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade)
     private val brevKodeMapper = BrevKodeMapper()
     private val brevbakerService = mockk<BrevbakerService>()
     private val pdfGenerator =

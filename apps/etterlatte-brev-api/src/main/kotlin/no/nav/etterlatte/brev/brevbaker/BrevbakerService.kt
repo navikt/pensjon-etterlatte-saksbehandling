@@ -1,9 +1,8 @@
 package no.nav.etterlatte.brev.brevbaker
 
-import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.model.BrevDataMapper
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.Pdf
@@ -15,7 +14,7 @@ import java.util.Base64
 class BrevbakerService(
     private val brevbakerKlient: BrevbakerKlient,
     private val adresseService: AdresseService,
-    private val brevDataMapper: BrevDataMapper,
+    private val brevDataMapperRedigerbartUtfall: BrevDataMapperRedigerbartUtfall,
     private val brevKodeMapper: BrevKodeMapper,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -36,7 +35,7 @@ class BrevbakerService(
             with(redigerbarTekstRequest) {
                 BrevbakerRequest.fra(
                     brevkode(brevKodeMapper, generellBrevData),
-                    brevDataMapper.brevData(this),
+                    brevDataMapperRedigerbartUtfall.brevData(this),
                     adresseService.hentAvsender(
                         generellBrevData.avsenderRequest(brukerTokenInfo),
                     ),
@@ -55,5 +54,4 @@ data class RedigerbarTekstRequest(
     val generellBrevData: GenerellBrevData,
     val brukerTokenInfo: BrukerTokenInfo,
     val brevkode: (mapper: BrevKodeMapper, g: GenerellBrevData) -> EtterlatteBrevKode,
-    val migrering: MigreringBrevRequest? = null,
 )

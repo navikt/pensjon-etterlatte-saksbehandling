@@ -8,7 +8,7 @@ import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/Tags'
 import { RedigerSaksbehandler } from '~components/oppgavebenk/tildeling/RedigerSaksbehandler'
 import { HandlingerForOppgave } from '~components/oppgavebenk/HandlingerForOppgave'
 import { FristHandlinger } from '~components/oppgavebenk/FristHandlinger'
-import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/oppgavelistafiltre'
+import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 interface Props {
   oppgave: OppgaveDTO

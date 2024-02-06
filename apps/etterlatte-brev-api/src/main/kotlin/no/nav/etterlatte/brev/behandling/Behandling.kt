@@ -40,8 +40,6 @@ data class GenerellBrevData(
             )
         } ?: AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = sak.enhet)
 
-    fun erMigrering() = systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null
-
     fun vedtakstype() = forenkletVedtak?.type?.name?.lowercase()
 }
 

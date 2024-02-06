@@ -1,8 +1,6 @@
 package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -40,7 +38,6 @@ class BrevService(
             sakId = sakId,
             behandlingId = null,
             bruker = bruker,
-            automatiskMigreringRequest = null,
             brevKode = brevkoder.redigering,
             brevtype = brevkoder.redigering.brevtype,
         ).first
@@ -105,9 +102,8 @@ class BrevService(
         pdfGenerator.genererPdf(
             id,
             bruker,
-            null,
             avsenderRequest = { b, g -> g.avsenderRequest(b) },
-            brevKode = { _ -> Brevkoder(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV) },
+            brevKode = { _ -> Brevkoder.TOMT_INFORMASJONSBREV },
         )
 
     suspend fun ferdigstill(

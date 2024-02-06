@@ -7,7 +7,6 @@ import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
-import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.PDFService
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
@@ -39,9 +38,11 @@ import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
-import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
 import no.nav.etterlatte.brev.model.BrevKodeMapper
+import no.nav.etterlatte.brev.varselbrev.VarselbrevService
+import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
@@ -140,15 +141,13 @@ class ApplicationBuilder {
 
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
-    private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
+    private val brevDataMapperRedigerbartUtfall = BrevDataMapperRedigerbartUtfall(brevdataFacade)
 
-    private val brevDataMapper = BrevDataMapper(brevdataFacade, migreringBrevDataService)
-
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade, brevDataMapper)
+    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade)
 
     private val brevKodeMapper = BrevKodeMapper()
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper, brevKodeMapper)
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapperRedigerbartUtfall, brevKodeMapper)
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
@@ -169,6 +168,9 @@ class ApplicationBuilder {
             brevoppretter,
             pdfGenerator,
         )
+
+    private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient)
+
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 
     private val brevService =
@@ -195,6 +197,7 @@ class ApplicationBuilder {
                     brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(journalpostService, dokarkivService, tilgangssjekker)
+                    varselbrevRoute(varselbrevService, tilgangssjekker)
                 }
             }
             .build()

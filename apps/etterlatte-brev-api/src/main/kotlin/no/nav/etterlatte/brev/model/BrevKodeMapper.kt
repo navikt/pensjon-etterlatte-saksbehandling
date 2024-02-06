@@ -6,22 +6,14 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
 class BrevKodeMapper {
-    fun brevKode(
-        generellBrevData: GenerellBrevData,
-        erOmregningNyRegel: Boolean = false,
-    ): Brevkoder {
-        if (generellBrevData.erMigrering() || erOmregningNyRegel) {
-            assert(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(generellBrevData.forenkletVedtak?.type))
-            return Brevkoder.OMREGNING
-        }
-
-        return when (generellBrevData.sak.sakType) {
+    fun brevKode(generellBrevData: GenerellBrevData): Brevkoder =
+        when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
                 when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> Brevkoder.Barnepensjon.INNVILGELSE
-                    VedtakType.AVSLAG -> Brevkoder.Barnepensjon.AVSLAG
-                    VedtakType.ENDRING -> Brevkoder.Barnepensjon.REVURDERING
-                    VedtakType.OPPHOER -> Brevkoder.Barnepensjon.OPPHOER
+                    VedtakType.INNVILGELSE -> Brevkoder.BP_INNVILGELSE
+                    VedtakType.AVSLAG -> Brevkoder.BP_AVSLAG
+                    VedtakType.ENDRING -> Brevkoder.BP_REVURDERING
+                    VedtakType.OPPHOER -> Brevkoder.BP_OPPHOER
                     VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
                     null -> Brevkoder.TOMT_INFORMASJONSBREV
                 }
@@ -29,14 +21,13 @@ class BrevKodeMapper {
 
             SakType.OMSTILLINGSSTOENAD -> {
                 when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> Brevkoder.Omstillingsstoenad.INNVILGELSE
-                    VedtakType.AVSLAG -> Brevkoder.Omstillingsstoenad.AVSLAG
-                    VedtakType.ENDRING -> Brevkoder.Omstillingsstoenad.REVURDERING
-                    VedtakType.OPPHOER -> Brevkoder.Omstillingsstoenad.OPPHOER
+                    VedtakType.INNVILGELSE -> Brevkoder.OMS_INNVILGELSE
+                    VedtakType.AVSLAG -> Brevkoder.OMS_AVSLAG
+                    VedtakType.ENDRING -> Brevkoder.OMS_REVURDERING
+                    VedtakType.OPPHOER -> Brevkoder.OMS_OPPHOER
                     VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
                     null -> Brevkoder.TOMT_INFORMASJONSBREV
                 }
             }
         }
-    }
 }

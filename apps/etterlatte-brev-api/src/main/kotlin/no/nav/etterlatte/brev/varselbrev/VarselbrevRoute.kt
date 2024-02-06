@@ -26,7 +26,16 @@ internal fun Route.varselbrevRoute(
     route("brev/behandling/{$BEHANDLINGID_CALL_PARAMETER}/varsel") {
         get {
             withBehandlingId(tilgangssjekker) {
-                service.hentVarselbrev(behandlingId)
+                measureTimedValue {
+                    service.hentVarselbrev(behandlingId)
+                }.let { (brev, varighet) ->
+                    logger.info("Henting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    if (brev.isNotEmpty()) {
+                        call.respond(brev.maxBy { it.opprettet })
+                    } else {
+                        call.respond(HttpStatusCode.NoContent)
+                    }
+                }
             }
         }
 

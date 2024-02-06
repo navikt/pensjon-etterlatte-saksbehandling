@@ -39,8 +39,6 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
-        // TODO EY-3232 - Fjerne migreringstilpasning
     ): Brev {
         require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -58,7 +56,6 @@ class Brevoppretter(
             sakId = sakId,
             behandlingId = behandlingId,
             bruker = brukerTokenInfo,
-            automatiskMigreringRequest = automatiskMigreringRequest,
             brevKode = null,
             brevtype = Brevtype.VEDTAK,
         ).first
@@ -70,10 +67,9 @@ class Brevoppretter(
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKode: EtterlatteBrevKode? = null,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
         brevtype: Brevtype,
     ): Pair<Brev, GenerellBrevData> =
-        with(hentInnData(sakId, behandlingId, bruker, brevKode, automatiskMigreringRequest)) {
+        with(hentInnData(sakId, behandlingId, bruker, brevKode)) {
             val nyttBrev =
                 OpprettNyttBrev(
                     sakId = sakId,
@@ -95,9 +91,8 @@ class Brevoppretter(
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKode: EtterlatteBrevKode? = null,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): BrevService.BrevPayload =
-        with(hentInnData(sakId, behandlingId, bruker, brevKode, automatiskMigreringRequest)) {
+        with(hentInnData(sakId, behandlingId, bruker, brevKode)) {
             if (innhold.payload != null) {
                 db.oppdaterPayload(brevId, innhold.payload)
             }
@@ -117,7 +112,6 @@ class Brevoppretter(
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
         brevKode: EtterlatteBrevKode?,
-        automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): OpprettBrevRequest {
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
@@ -141,7 +135,6 @@ class Brevoppretter(
                             generellBrevData,
                             bruker,
                             brevkode,
-                            automatiskMigreringRequest,
                         ),
                     )
                 }

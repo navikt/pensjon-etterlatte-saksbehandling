@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.brevbaker
 
-import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
@@ -55,5 +54,4 @@ data class RedigerbarTekstRequest(
     val generellBrevData: GenerellBrevData,
     val brukerTokenInfo: BrukerTokenInfo,
     val brevkode: (mapper: BrevKodeMapper, g: GenerellBrevData) -> EtterlatteBrevKode,
-    val migrering: MigreringBrevRequest? = null,
 )

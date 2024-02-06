@@ -198,12 +198,18 @@ class BehandlingFactory(
                 ),
             )
         if (request.kilde == Vedtaksloesning.PESYS || request.kilde == Vedtaksloesning.GJENOPPRETTA) {
-            // TODO Fortsatt relevant? Sjekk varselbrev
             opplysninger.add(lagOpplysning(Opplysningstype.FORELDRELOES, kilde, request.foreldreloes.toJsonNode()))
             // TODO Legge til uføre her?
         }
 
         grunnlagService.leggTilNyeOpplysninger(behandling.id, NyeSaksopplysninger(sak.id, opplysninger))
+
+        if (request.kilde == Vedtaksloesning.PESYS) {
+            coroutineScope {
+                val pesysId = requireNotNull(request.pesysId) { "Manuell migrering må ha pesysid til sak som migreres" }
+                migreringKlient.opprettManuellMigrering(behandlingId = behandling.id, pesysId = pesysId, sakId = sak.id)
+            }
+        }
 
         return behandling
     }

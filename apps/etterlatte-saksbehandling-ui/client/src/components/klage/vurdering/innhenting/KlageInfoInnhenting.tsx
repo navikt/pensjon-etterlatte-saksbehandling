@@ -26,7 +26,7 @@ export function KlageInfoInnhenting(props: { klage: Klage }) {
         </BodyLong>
 
         <FlexRow justify="left">
-          <Button type="button" variant="tertiary" onClick={() => navigate(`/person/${klage.sak.ident}?fane=BREV`)}>
+          <Button as="a" variant="tertiary" href={`/person/${klage.sak.ident}?fane=BREV`}>
             Brev til bruker
           </Button>
         </FlexRow>

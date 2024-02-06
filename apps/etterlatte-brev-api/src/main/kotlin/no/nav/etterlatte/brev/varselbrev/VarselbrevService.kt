@@ -52,5 +52,6 @@ internal class VarselbrevService(
         automatiskMigreringRequest = null,
         avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
         brevKode = { hentBrevkode(it.sakType) },
+        brevDataReq = { ManueltBrevData(it.innholdMedVedlegg.innhold()) },
     )
 }

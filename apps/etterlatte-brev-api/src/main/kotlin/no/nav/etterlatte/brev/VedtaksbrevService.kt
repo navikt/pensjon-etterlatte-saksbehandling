@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
@@ -25,6 +26,7 @@ class VedtaksbrevService(
     private val brevoppretter: Brevoppretter,
     private val pdfGenerator: PDFGenerator,
     private val brevDataMapperRedigerbartUtfall: BrevDataMapperRedigerbartUtfall,
+    private val brevDataMapperFerdigstilling: BrevDataMapperFerdigstilling,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -66,6 +68,7 @@ class VedtaksbrevService(
             automatiskMigreringRequest = automatiskMigreringRequest,
             avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
             brevKode = { brevKodeMapperVedtak.brevKode(it) },
+            brevDataReq = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
         ) { generellBrevData, brev, pdf ->
             lagrePdfHvisVedtakFattet(
                 brev.id,

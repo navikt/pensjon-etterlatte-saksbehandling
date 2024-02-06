@@ -40,7 +40,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
         } returns tokenClaims
 
         coEvery {
-            navAnsattKlient.hentEnhetForSaksbehandler(any())
+            navAnsattKlient.hentEnheterForSaksbehandler(any())
         } returns enheterForSaksbehandler
 
         every {

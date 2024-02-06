@@ -111,7 +111,7 @@ class BrevService(
             null,
             avsenderRequest = { b, g -> g.avsenderRequest(b) },
             brevKode = { Brevkoder.TOMT_INFORMASJONSBREV },
-            brevDataReq = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+            brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )
 
     suspend fun ferdigstill(

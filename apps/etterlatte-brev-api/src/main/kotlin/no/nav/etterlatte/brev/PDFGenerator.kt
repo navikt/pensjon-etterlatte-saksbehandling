@@ -34,7 +34,7 @@ class PDFGenerator(
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (BrevkodeRequest) -> Brevkoder,
-        brevDataReq: (BrevDataFerdigstillingRequest) -> BrevData,
+        brevData: (BrevDataFerdigstillingRequest) -> BrevData,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         sjekkOmBrevKanEndres(id)
@@ -45,7 +45,7 @@ class PDFGenerator(
                 automatiskMigreringRequest,
                 avsenderRequest,
                 brevKode,
-                brevDataReq,
+                brevData,
                 lagrePdfHvisVedtakFattet,
             )
         db.lagrePdfOgFerdigstillBrev(id, pdf)
@@ -58,7 +58,7 @@ class PDFGenerator(
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (BrevkodeRequest) -> Brevkoder,
-        brevDataReq: suspend (BrevDataFerdigstillingRequest) -> BrevData,
+        brevData: suspend (BrevDataFerdigstillingRequest) -> BrevData,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
@@ -89,7 +89,7 @@ class PDFGenerator(
             BrevbakerRequest.fra(
                 brevKode = brevkodePar.ferdigstilling,
                 brevData =
-                    brevDataReq(
+                    brevData(
                         BrevDataFerdigstillingRequest(
                             generellBrevData,
                             bruker,

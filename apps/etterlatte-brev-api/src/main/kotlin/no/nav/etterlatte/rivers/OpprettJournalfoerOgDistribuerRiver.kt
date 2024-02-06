@@ -78,7 +78,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                     )
                 },
                 brevKode = { brevKode },
-                brevDataReq = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
+                brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
             )
         }
         logger.info("Journalfører $brevKode-brev i sak $sakId")

@@ -61,7 +61,7 @@ data class MigreringRequest(
     }
 }
 
-const val GJENNOPPRETTELSE_OPPGAVE = "GJENNOPPRETTELSE_OPPGAVE"
+const val GJENOPPRETTELSE_OPPGAVE = "GJENOPPRETTELSE_OPPGAVE"
 
 data class AvdoedForelder(
     val ident: Folkeregisteridentifikator,

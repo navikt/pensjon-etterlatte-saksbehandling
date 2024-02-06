@@ -34,7 +34,6 @@ data class BrevDataFerdigstillingRequest(
     val kode: Brevkoder,
     val automatiskMigreringRequest: MigreringBrevRequest?,
     val tittel: String? = null,
-    val prosessType: BrevProsessType,
 )
 
 class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFacade) {

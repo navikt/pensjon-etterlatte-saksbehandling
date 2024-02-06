@@ -1,8 +1,10 @@
 package no.nav.etterlatte.behandling.job
 
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -16,7 +18,7 @@ import kotlin.time.measureTime
 
 @OptIn(DelicateCoroutinesApi::class)
 internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
-    val logger = LoggerFactory.getLogger("saksbehandlernavnjob")
+    val logger = LoggerFactory.getLogger("Saksbehandlerdatanavn")
     Thread.sleep(Duration.ofMinutes(3L).toMillis())
     if (context.leaderElectionKlient.isLeader()) {
         logger.info("Henting av saksbehandlernavn jobb leader is true, starter jobb")
@@ -34,13 +36,15 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
             try {
                 hentEnheterForSaksbehandlereJob(logger, context, subCoroutineExceptionHandler)
             } catch (e: Exception) {
-                logger.error("Kunne ikke hente navn for saksbehandlere", e)
+                logger.error("Kunne ikke hente enheter for saksbehandlere", e)
             }
         }
     } else {
         logger.info("Ikke leader, kjører ikke saksbehandlerjob")
     }
 }
+
+val SAKSBEHANDLERPATTERN = Regex("[a-zA-Z]\\d{6}")
 
 internal suspend fun hentEnheterForSaksbehandlereJob(
     logger: Logger,
@@ -50,30 +54,34 @@ internal suspend fun hentEnheterForSaksbehandlereJob(
     val tidbrukt =
         measureTime {
             val sbidenter = context.saksbehandlerInfoDao.hentalleSaksbehandlere()
-            logger.info("Antall saksbehandlingsidenter ${sbidenter.size}")
+            logger.info("Antall saksbehandlingsidenter vi henter identer for ${sbidenter.size}")
 
-            logger.info("Antall saksbehandlingsidenter uten navn i databasen ${sbidenter.size}")
-
-            logger.info("Mappet egne ${sbidenter.size}")
-
-            val pattern = Regex("[a-zA-Z]\\d{6}")
+            // SupervisorJob så noen kall kan feile uten å cancle parent job
+            val scope = CoroutineScope(SupervisorJob())
             val alleIdenterMedEnheter =
-                coroutineScope {
-                    sbidenter.filter {
-                        !listOf(
-                            "PESYS",
-                            "EY",
-                            "GJENOPPRETTA",
-                        ).contains(it) && it.length == 7 && pattern.containsMatchIn(it)
-                    }
-                        .map {
-                            it to
-                                async(
-                                    subCoroutineExceptionHandler,
-                                ) { context.navAnsattKlient.hentEnhetForSaksbehandler(it) }
-                        }
-                        .map { it.first to it.second.await() }
+                sbidenter.filter {
+                    !listOf(
+                        "PESYS",
+                        "EY",
+                        "GJENOPPRETTA",
+                    ).contains(it) && it.length == 7 && SAKSBEHANDLERPATTERN.containsMatchIn(it)
                 }
+                    .map {
+                        it to
+                            scope.async(
+                                subCoroutineExceptionHandler,
+                            ) { context.navAnsattKlient.hentEnhetForSaksbehandler(it) }
+                    }
+                    .map {
+                        try {
+                            val enheter = it.second.await()
+                            it.first to enheter.map { enhet -> enhet.id }
+                        } catch (e: Exception) {
+                            logger.error("Kunne ikke hente enheter for saksbehandlerident ${it.first}")
+                            null
+                        }
+                    }
+                    .filterNotNull()
 
             logger.info("Hentet enheter for saksbehandlere antall: ${alleIdenterMedEnheter.size}")
 
@@ -103,7 +111,6 @@ internal suspend fun saksbehandlereNavnJob(
 
             logger.info("Mappet egne ${sbidenter.size}")
 
-            val pattern = Regex("[a-zA-Z]\\d{6}")
             val hentedeIdenter =
                 coroutineScope {
                     filtrerteIdenter.filter {
@@ -111,7 +118,7 @@ internal suspend fun saksbehandlereNavnJob(
                             "PESYS",
                             "EY",
                             "GJENOPPRETTA",
-                        ).contains(it) && it.length == 7 && pattern.containsMatchIn(it)
+                        ).contains(it) && it.length == 7 && SAKSBEHANDLERPATTERN.containsMatchIn(it)
                     }
                         .map { it to async(subCoroutineExceptionHandler) { context.navAnsattKlient.hentSaksbehanderNavn(it) } }
                         .map { it.first to it.second.await() }

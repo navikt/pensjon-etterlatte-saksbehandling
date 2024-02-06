@@ -1,6 +1,5 @@
 package no.nav.etterlatte
 
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.single
@@ -39,19 +38,18 @@ class SaksbehandlerInfoDao(private val dataSource: DataSource) {
         }
     }
 
-    fun upsertSaksbehandlerEnheter(saksbehandlerMedEnheter: Pair<String, List<SaksbehandlerEnhet>>) {
+    fun upsertSaksbehandlerEnheter(saksbehandlerMedEnheter: Pair<String, List<String>>) {
         dataSource.connection.use {
             val statement =
                 it.prepareStatement(
                     """
-                    INSERT INTO saksbehandler_info(id, enheter) 
-                    VALUES(?,?)
-                    ON CONFLICT (id)
-                    DO UPDATE SET enheter = excluded.enheter
+                    UPDATE saksbehandler_info
+                    SET enheter = ?
+                    WHERE id = ?
                     """.trimIndent(),
                 )
-            statement.setString(1, saksbehandlerMedEnheter.first)
-            statement.setJsonb(2, saksbehandlerMedEnheter.second)
+            statement.setJsonb(1, saksbehandlerMedEnheter.second)
+            statement.setString(2, saksbehandlerMedEnheter.first)
             statement.executeUpdate()
         }
     }

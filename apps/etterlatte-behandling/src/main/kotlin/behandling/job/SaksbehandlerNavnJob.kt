@@ -9,16 +9,18 @@ import kotlinx.coroutines.newSingleThreadContext
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.config.ApplicationContext
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import kotlin.time.measureTime
 
 @OptIn(DelicateCoroutinesApi::class)
 internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
+    val logger = LoggerFactory.getLogger("saksbehandlernavnjob")
+    Thread.sleep(Duration.ofMinutes(3L).toMillis())
     if (context.leaderElectionKlient.isLeader()) {
+        logger.info("Henting av saksbehandlernavn jobb leader is true, starter jobb")
         GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
-            val logger = LoggerFactory.getLogger("saksbehandlernavnjob")
             val tidbrukt =
                 measureTime {
-                    logger.info("Starter job for å legge inn saksbehandlere med navn")
                     val sbidenter = context.saksbehandlerInfoDao.hentalleSaksbehandlere()
                     logger.info("Antall identer ${sbidenter.size}")
 
@@ -49,5 +51,7 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
                 }
             logger.info("Ferdig, tid brukt $tidbrukt")
         }
+    } else {
+        logger.info("Ikke leader, kjører ikke saksbehandlernavnjob")
     }
 }

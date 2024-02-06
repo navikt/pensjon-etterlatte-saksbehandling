@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.ServerReady
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.principal
@@ -68,6 +69,7 @@ private class Server(private val context: ApplicationContext) {
                 applicationEngineEnvironment {
                     config = HoconApplicationConfig(context.config)
                     module { module(context) }
+                    module { moduleOnServerReady(context) }
                     connector { port = context.httpPort }
                 },
         )
@@ -75,9 +77,15 @@ private class Server(private val context: ApplicationContext) {
     fun run() =
         with(context) {
             dataSource.migrate()
-            populerSaksbehandlereMedNavn(context)
             setReady().also { engine.start(true) }
         }
+}
+
+internal fun Application.moduleOnServerReady(context: ApplicationContext) {
+    environment.monitor.subscribe(ServerReady) {
+        environment.log.info("Server is started")
+        populerSaksbehandlereMedNavn(context)
+    }
 }
 
 internal fun Application.module(context: ApplicationContext) {

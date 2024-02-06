@@ -142,17 +142,18 @@ class MigreringService(
             }
         }
 
-    fun opprettOppgaveManuellGjenoppretting(request: MigreringRequest) {
-        val sak = finnEllerOpprettSak(request)
-        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            referanse = request.pesysId.toString(),
-            sakId = sak.id,
-            oppgaveKilde = OppgaveKilde.BEHANDLING,
-            oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING, // TODO lage egen type?
-            merknad = "Oppgave for manuell gjenoppretting av opphørt sak i Pesys",
-            frist = Tidspunkt.now().plus(5, ChronoUnit.DAYS),
-        )
-    }
+    fun opprettOppgaveManuellGjenoppretting(request: MigreringRequest) =
+        inTransaction {
+            val sak = finnEllerOpprettSak(request)
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = request.pesysId.toString(),
+                sakId = sak.id,
+                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+                merknad = "Oppgave for manuell gjenoppretting av opphørt sak i Pesys",
+                frist = Tidspunkt.now().plus(5, ChronoUnit.DAYS),
+            )
+        }
 
     private suspend fun <T> retryMedPause(
         times: Int = 2,

@@ -3,7 +3,7 @@ package no.nav.etterlatte.rivers
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevRequestHendelseType
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
@@ -84,7 +84,7 @@ class StartBrevgenereringRepository(private val dataSource: DataSource) : Transa
             ) {
                 BrevgenereringRequest(
                     fnr = it.stringOrNull(Databasetabell.FNR),
-                    brevmal = EtterlatteBrevKode.valueOf(it.string(Databasetabell.BREVMAL)),
+                    brevmal = Brevkoder.valueOf(it.string(Databasetabell.BREVMAL)),
                     sakType = SakType.valueOf(it.string(Databasetabell.SAKTYPE)),
                     behandlingId = it.uuidOrNull(Databasetabell.BEHANDLING_ID),
                 )
@@ -121,7 +121,7 @@ class StartBrevgenereringRepository(private val dataSource: DataSource) : Transa
 data class BrevgenereringRequest(
     val fnr: String?,
     val behandlingId: UUID?,
-    val brevmal: EtterlatteBrevKode,
+    val brevmal: Brevkoder,
     val sakType: SakType,
 ) {
     init {

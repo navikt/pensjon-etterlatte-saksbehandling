@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.brevbaker
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Brevtype.INFORMASJON
 import no.nav.etterlatte.brev.model.Brevtype.MANUELT
+import no.nav.etterlatte.brev.model.Brevtype.VARSEL
 import no.nav.etterlatte.brev.model.Brevtype.VEDLEGG
 import no.nav.etterlatte.brev.model.Brevtype.VEDTAK
 
@@ -16,6 +17,8 @@ enum class EtterlatteBrevKode(val brevtype: Brevtype, val tittel: String? = null
     BARNEPENSJON_REVURDERING(VEDTAK),
     BARNEPENSJON_REVURDERING_UTFALL(VEDTAK),
     BARNEPENSJON_FORHAANDSVARSEL_OMREGNING(VEDTAK),
+    BARNEPENSJON_VARSEL(VARSEL),
+    BARNEPENSJON_VARSEL_UTFALL(VARSEL),
     BARNEPENSJON_VEDTAK_OMREGNING(VEDTAK, "Vedtak - endring av barnepensjon"),
     BARNEPENSJON_VEDTAK_OMREGNING_FERDIG(VEDTAK),
     BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL(VEDLEGG, "Trygdetid i vedlegg beregning av barnepensjon"),
@@ -27,6 +30,8 @@ enum class EtterlatteBrevKode(val brevtype: Brevtype, val tittel: String? = null
     OMSTILLINGSSTOENAD_OPPHOER_UTFALL(VEDTAK),
     OMSTILLINGSSTOENAD_REVURDERING(VEDTAK),
     OMSTILLINGSSTOENAD_REVURDERING_OPPHOER_MANUELL(VEDTAK), // Denne bør fjernes,
+    OMSTILLINGSSTOENAD_VARSEL(VARSEL),
+    OMSTILLINGSSTOENAD_VARSEL_UTFALL(VARSEL),
     OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL(VEDTAK, "Utfall ved beregning av omstillingsstønad"),
     TILBAKEKREVING_INNHOLD(VEDTAK),
     TILBAKEKREVING_FERDIG(VEDTAK),

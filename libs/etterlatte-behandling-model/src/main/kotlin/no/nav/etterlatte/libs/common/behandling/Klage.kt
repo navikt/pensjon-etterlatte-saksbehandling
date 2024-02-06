@@ -126,6 +126,11 @@ data class Klage(
                     JaNei.JA -> KlageStatus.FORMKRAV_OPPFYLT
                     JaNei.NEI -> KlageStatus.FORMKRAV_IKKE_OPPFYLT
                 },
+            utfall =
+                when (formkrav.erFormkraveneOppfylt) {
+                    JaNei.JA -> this.utfall
+                    JaNei.NEI -> null
+                },
         )
     }
 

@@ -7,6 +7,7 @@ data class Brevutfall(
     val behandlingId: UUID,
     val aldersgruppe: Aldersgruppe?,
     val lavEllerIngenInntekt: LavEllerIngenInntekt?,
+    val feilutbetaling: Feilutbetaling?,
     val kilde: Grunnlagsopplysning.Kilde,
 )
 
@@ -18,4 +19,15 @@ enum class Aldersgruppe {
 enum class LavEllerIngenInntekt {
     JA,
     NEI,
+}
+
+data class Feilutbetaling(
+    val valg: FeilutbetalingValg,
+    val kommentar: String?,
+)
+
+enum class FeilutbetalingValg {
+    NEI,
+    JA_VARSEL,
+    JA_INGEN_TK,
 }

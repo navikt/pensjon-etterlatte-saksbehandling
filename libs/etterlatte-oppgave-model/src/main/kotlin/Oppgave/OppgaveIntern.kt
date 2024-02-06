@@ -66,7 +66,7 @@ data class GosysOppgave(
     override val opprettet: Tidspunkt,
     override val frist: Tidspunkt?,
     override val sakType: SakType,
-    override val fnr: String,
+    override val fnr: String? = null,
     val gjelder: String,
     val beskrivelse: String?,
 ) : Oppgave() {

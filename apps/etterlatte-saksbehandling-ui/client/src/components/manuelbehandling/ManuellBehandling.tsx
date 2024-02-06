@@ -43,7 +43,7 @@ export default function ManuellBehandling() {
   useEffect(() => {
     if (oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
-        setFnr(oppgave.fnr)
+        setFnr(oppgave.fnr!!)
         if (oppgave.merknad) {
           const pesysid = oppgave.merknad.split('=')[1]
           setPesysId(Number(pesysid))

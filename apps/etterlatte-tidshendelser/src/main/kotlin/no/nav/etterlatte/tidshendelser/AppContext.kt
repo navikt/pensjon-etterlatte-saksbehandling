@@ -51,7 +51,7 @@ class AppContext(env: Miljoevariabler) {
             jobbRunner = jobbRunner,
         )
 
-    val hendelsePoller =
+    val hendelsePollerTask =
         HendelsePollerTask(
             leaderElection = LeaderElection(electorPath = env.maybeEnvValue("ELECTOR_PATH")),
             initialDelaySeconds = env.maybeEnvValue("HENDELSE_POLLER_INITIAL_DELAY")?.toLong() ?: 60L,
@@ -59,5 +59,7 @@ class AppContext(env: Miljoevariabler) {
                 env.maybeEnvValue("HENDELSE_POLLER_INTERVAL")?.let { Duration.parse(it) }
                     ?: Duration.ofMinutes(5),
             clock = clock,
+            hendelsePoller = HendelsePoller(hendelseDao),
+            maxAntallHendelsePerPoll = env.maybeEnvValue("HENDELSE_POLLER_MAX_ANTALL")?.toInt() ?: 5,
         )
 }

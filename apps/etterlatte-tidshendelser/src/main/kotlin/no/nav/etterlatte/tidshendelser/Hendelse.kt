@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-const val HENDELSE_STATUS_OPPRETTET = "OPPRETTET"
+const val HENDELSE_STATUS_OPPRETTET = "NY"
 
 data class HendelserJobb(
     val id: Int,

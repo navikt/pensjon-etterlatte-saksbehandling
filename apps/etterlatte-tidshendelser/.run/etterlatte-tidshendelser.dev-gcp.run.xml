@@ -5,6 +5,7 @@
       <env name="JOBB_POLLER_INTERVAL" value="PT10S" />
       <env name="HENDELSE_POLLER_INITIAL_DELAY" value="10" />
       <env name="HENDELSE_POLLER_INTERVAL" value="PT10S" />
+      <env name="HENDELSE_POLLER_MAX_ANTALL" value="5" />
       <env name="ETTERLATTE_GRUNNLAG_URL" value="https://etterlatte-grunnlag.intern.dev.nav.no" />
       <env name="ETTERLATTE_GRUNNLAG_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-grunnlag/.default" />
       <env name="NAIS_APP_NAME" value="etterlatte-tidshendelser" />

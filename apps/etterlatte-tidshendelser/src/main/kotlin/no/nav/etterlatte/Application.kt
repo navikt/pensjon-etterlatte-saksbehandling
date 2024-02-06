@@ -23,7 +23,7 @@ fun main() {
                     override fun onStartup(rapidsConnection: RapidsConnection) {
                         appContext.dataSource.migrate()
                         timers.add(appContext.jobbPollerTask.start())
-                        timers.add(appContext.hendelsePoller.start())
+                        timers.add(appContext.hendelsePollerTask.start())
                     }
 
                     override fun onShutdownSignal(rapidsConnection: RapidsConnection) {

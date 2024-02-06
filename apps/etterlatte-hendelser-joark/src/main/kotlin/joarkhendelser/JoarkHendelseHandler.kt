@@ -14,6 +14,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -70,6 +71,7 @@ class JoarkHendelseHandler(
                     logger.error("Journalpost med id=$journalpostId mangler bruker!")
                     return // Ignorer hvis miljø er dev. Skal i teorien ikke være et problem i produksjon.
                 } else {
+                    sikkerlogger().error("Journalpost mangler bruker: \n${journalpost.toJson()}")
                     throw IllegalStateException("Journalpost med id=$journalpostId mangler bruker!")
                 }
             } else if (journalpost.bruker.type == BrukerIdType.ORGNR) {

@@ -7,7 +7,7 @@ import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents
-import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents.LOEPENDE_YTELSE_RESULTAT
+import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents.VURDERT_LOEPENDE_YTELSE
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEP_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
@@ -34,9 +34,9 @@ class AldersovergangSjekkLoependeYtelseRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                EventNames.ALDERSOVERANG.name,
+                EventNames.ALDERSOVERGANG.name,
                 mapOf(
-                    ALDERSOVERGANG_STEP_KEY to VedtakAldersovergangStepEvents.SJEKK_LOEPENDE_YTELSE.name,
+                    ALDERSOVERGANG_STEP_KEY to VedtakAldersovergangStepEvents.SAK_IDENTIFISERT.name,
                     ALDERSOVERGANG_TYPE_KEY to "BP20",
                     ALDERSOVERGANG_ID_KEY to "123",
                     SAK_ID_KEY to sakId,
@@ -46,8 +46,8 @@ class AldersovergangSjekkLoependeYtelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERANG.name
-            field(0, ALDERSOVERGANG_STEP_KEY).asText() shouldBe LOEPENDE_YTELSE_RESULTAT.name
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, ALDERSOVERGANG_STEP_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "123"
             field(0, "loependeYtelse").asBoolean() shouldBe true
@@ -60,9 +60,9 @@ class AldersovergangSjekkLoependeYtelseRiverTest {
 
         val melding =
             JsonMessage.newMessage(
-                EventNames.ALDERSOVERANG.name,
+                EventNames.ALDERSOVERGANG.name,
                 mapOf(
-                    ALDERSOVERGANG_STEP_KEY to VedtakAldersovergangStepEvents.SJEKK_LOEPENDE_YTELSE.name,
+                    ALDERSOVERGANG_STEP_KEY to VedtakAldersovergangStepEvents.SAK_IDENTIFISERT.name,
                     ALDERSOVERGANG_TYPE_KEY to "BP20",
                     ALDERSOVERGANG_ID_KEY to "432",
                     SAK_ID_KEY to sakId,
@@ -72,8 +72,8 @@ class AldersovergangSjekkLoependeYtelseRiverTest {
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
-            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERANG.name
-            field(0, ALDERSOVERGANG_STEP_KEY).asText() shouldBe LOEPENDE_YTELSE_RESULTAT.name
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, ALDERSOVERGANG_STEP_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "432"
             field(0, "loependeYtelse").asBoolean() shouldBe false

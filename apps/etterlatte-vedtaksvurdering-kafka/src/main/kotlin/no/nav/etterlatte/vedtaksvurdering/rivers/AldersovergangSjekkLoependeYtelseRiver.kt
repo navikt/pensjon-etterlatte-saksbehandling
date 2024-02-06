@@ -23,8 +23,8 @@ class AldersovergangSjekkLoependeYtelseRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, EventNames.ALDERSOVERANG) {
-            validate { it.requireValue(ALDERSOVERGANG_STEP_KEY, VedtakAldersovergangStepEvents.SJEKK_LOEPENDE_YTELSE.name) }
+        initialiserRiver(rapidsConnection, EventNames.ALDERSOVERGANG) {
+            validate { it.requireValue(ALDERSOVERGANG_STEP_KEY, VedtakAldersovergangStepEvents.SAK_IDENTIFISERT.name) }
             validate { it.requireKey(ALDERSOVERGANG_TYPE_KEY) }
             validate { it.requireKey(ALDERSOVERGANG_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
@@ -43,7 +43,7 @@ class AldersovergangSjekkLoependeYtelseRiver(
         val loependeYtelse = vedtakService.harLoependeYtelserFra(sakId, datoFoersteIAktuellBehandlingsmaaned)
         logger.info("Sak $sakId, dato=$datoFoersteIAktuellBehandlingsmaaned har løpende ytelse: ${loependeYtelse.erLoepende}")
 
-        packet["ao_step"] = VedtakAldersovergangStepEvents.LOEPENDE_YTELSE_RESULTAT.name
+        packet["ao_step"] = VedtakAldersovergangStepEvents.VURDERT_LOEPENDE_YTELSE.name
         packet["loependeYtelse"] = loependeYtelse.erLoepende
         context.publish(packet.toJson())
     }

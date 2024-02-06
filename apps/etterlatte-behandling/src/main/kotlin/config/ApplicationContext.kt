@@ -328,7 +328,8 @@ internal class ApplicationContext(
             revurderingService = automatiskRevurderingService,
         )
 
-    val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
+    val sakTilgangDao = SakTilgangDao(dataSource)
+    val tilgangService = TilgangServiceImpl(sakTilgangDao)
     val enhetService = BrukerServiceImpl(pdlKlient, norg2Klient)
     val sakService =
         SakServiceImpl(

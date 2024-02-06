@@ -20,6 +20,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
@@ -210,7 +211,9 @@ internal class SakRoutesTest {
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-        every { user.harSkrivetilgang() } returns true
+
+        every { user.enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+
         testApplication {
             val client =
                 runServer(mockOAuth2Server) {

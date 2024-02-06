@@ -16,8 +16,8 @@ import java.util.UUID
 fun Route.omregningRoutes(omregningService: OmregningService) {
     route("/omregning") {
         post {
-            kunSkrivetilgang {
-                val request = call.receive<Omregningshendelse>()
+            val request = call.receive<Omregningshendelse>()
+            kunSkrivetilgang(sak = request.sakId) {
                 val forrigeBehandling = inTransaction { omregningService.hentForrigeBehandling(request.sakId) }
                 val persongalleri = omregningService.hentPersongalleri(forrigeBehandling.id)
                 val revurderingOgOppfoelging =

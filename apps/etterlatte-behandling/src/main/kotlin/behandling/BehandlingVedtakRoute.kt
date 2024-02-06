@@ -32,8 +32,9 @@ internal fun Route.behandlingVedtakRoute(
 
     route("/fattvedtak") {
         post {
-            kunSkrivetilgang {
-                val fattVedtak = call.receive<VedtakEndringDTO>()
+            val fattVedtak = call.receive<VedtakEndringDTO>()
+
+            kunSkrivetilgang(sak = fattVedtak.sakIdOgReferanse.sakId) {
                 val behandling =
                     inTransaction {
                         behandlingService.hentBehandling(
@@ -73,8 +74,9 @@ internal fun Route.behandlingVedtakRoute(
     }
     route("/underkjennvedtak") {
         post {
-            kunSkrivetilgang {
-                val underkjennVedtakOppgave = call.receive<VedtakEndringDTO>()
+            val underkjennVedtakOppgave = call.receive<VedtakEndringDTO>()
+
+            kunSkrivetilgang(sak = underkjennVedtakOppgave.sakIdOgReferanse.sakId) {
                 val behandling =
                     inTransaction {
                         behandlingService.hentBehandling(
@@ -125,8 +127,9 @@ internal fun Route.behandlingVedtakRoute(
     }
     route("/attestervedtak") {
         post {
-            kunSkrivetilgang {
-                val attesterVedtakOppgave = call.receive<VedtakEndringDTO>()
+            val attesterVedtakOppgave = call.receive<VedtakEndringDTO>()
+
+            kunSkrivetilgang(sak = attesterVedtakOppgave.sakIdOgReferanse.sakId) {
                 val behandling =
                     inTransaction {
                         behandlingService.hentBehandling(

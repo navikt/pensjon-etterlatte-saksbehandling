@@ -34,7 +34,6 @@ import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.UtlandstilknytningRequest
-import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 internal fun Route.behandlingRoutes(
@@ -47,11 +46,9 @@ internal fun Route.behandlingRoutes(
     val logger = application.log
 
     post("/api/behandling") {
-        kunSaksbehandlerMedSkrivetilgang {
-            val request = call.receive<NyBehandlingRequest>()
-            val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request, brukerTokenInfo)
-            call.respondText(behandling.id.toString())
-        }
+        val request = call.receive<NyBehandlingRequest>()
+        val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request, brukerTokenInfo)
+        call.respondText(behandling.id.toString())
     }
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/") {
@@ -285,9 +282,9 @@ internal fun Route.behandlingRoutes(
 
         route("/opprettbehandling") {
             post {
-                kunSkrivetilgang {
-                    val behandlingsBehov = call.receive<BehandlingsBehov>()
+                val behandlingsBehov = call.receive<BehandlingsBehov>()
 
+                kunSkrivetilgang(sak = behandlingsBehov.sakId) {
                     when (
                         val behandling =
                             inTransaction {

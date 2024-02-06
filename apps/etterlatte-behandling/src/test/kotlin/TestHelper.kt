@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.server.application.ApplicationCallPipeline
 import io.ktor.server.routing.Route
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asContextElement
@@ -53,6 +54,8 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.sak.SakMedGraderingOgSkjermet
+import no.nav.etterlatte.sak.SakTilgangDao
 import java.sql.Connection
 import java.time.Instant
 import java.time.LocalDate
@@ -61,28 +64,38 @@ import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
 
-private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+private val user =
+    mockk<SaksbehandlerMedEnheterOgRoller> {
+        every { enheterMedSkrivetilgang() } returns listOf(Enheter.defaultEnhet.enhetNr)
+    }
 
-fun nyKontekstMedBrukerOgDatabaseContext(
+fun mockedSakTilgangDao(): SakTilgangDao =
+    mockk {
+        every {
+            hentSakMedGraderingOgSkjerming(
+                any(),
+            )
+        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        every {
+            hentSakMedGraderingOgSkjermingPaaBehandling(
+                any(),
+            )
+        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        every {
+            hentSakMedGraderingOgSkjermingPaaOppgave(
+                any(),
+            )
+        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+        every {
+            hentSakMedGraderingOgSkjermingPaaKlage(
+                any(),
+            )
+        } returns SakMedGraderingOgSkjermet(1, null, null, Enheter.defaultEnhet.enhetNr)
+    }
+
+fun lagContext(
     testUser: User,
-    databaseContext: DatabaseKontekst,
-) {
-    Kontekst.set(
-        Context(
-            testUser,
-            databaseContext,
-        ),
-    )
-}
-
-fun nyKontekstMedBrukerOgDatabase(
-    testUser: User,
-    dataSource: DataSource,
-) = nyKontekstMedBrukerOgDatabaseContext(testUser, DatabaseContext(dataSource))
-
-fun nyKontekstMedBruker(testUser: User) =
-    nyKontekstMedBrukerOgDatabaseContext(
-        testUser,
+    databaseContext: DatabaseKontekst =
         object : DatabaseKontekst {
             override fun activeTx(): Connection {
                 throw IllegalArgumentException()
@@ -92,23 +105,35 @@ fun nyKontekstMedBruker(testUser: User) =
                 return block()
             }
         },
+    sakTilgangDao: SakTilgangDao = mockedSakTilgangDao(),
+) = Context(
+    testUser,
+    databaseContext,
+    sakTilgangDao,
+)
+
+fun nyKontekstMedBrukerOgDatabaseContext(
+    testUser: User,
+    databaseContext: DatabaseKontekst,
+) {
+    Kontekst.set(
+        lagContext(
+            testUser,
+            databaseContext,
+        ),
     )
+}
+
+fun nyKontekstMedBrukerOgDatabase(
+    testUser: User,
+    dataSource: DataSource,
+) = Kontekst.set(lagContext(testUser, DatabaseContext(dataSource)))
+
+fun nyKontekstMedBruker(testUser: User) = Kontekst.set(lagContext(testUser))
 
 fun Route.attachMockContext(saksbehandlerMedEnheterOgRoller: SaksbehandlerMedEnheterOgRoller? = null) {
     intercept(ApplicationCallPipeline.Call) {
-        val context1 =
-            Context(
-                saksbehandlerMedEnheterOgRoller ?: user,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            )
+        val context1 = lagContext(saksbehandlerMedEnheterOgRoller ?: user)
 
         withContext(
             Dispatchers.Default +

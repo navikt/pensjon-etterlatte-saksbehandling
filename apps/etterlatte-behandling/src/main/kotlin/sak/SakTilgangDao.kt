@@ -11,13 +11,14 @@ import javax.sql.DataSource
 class SakTilgangDao(private val datasource: DataSource) {
     fun finnSakerMedGraderingOgSkjerming(fnr: String): List<SakMedGraderingOgSkjermet> {
         datasource.connection.use { connection ->
-            val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where fnr = ?")
+            val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where fnr = ?")
             statement.setString(1, fnr)
             return statement.executeQuery().toList {
                 SakMedGraderingOgSkjermet(
                     id = getLong(1),
                     adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
                     erSkjermet = getBoolean(3),
+                    enhetNr = getString(4),
                 )
             }
         }
@@ -25,13 +26,14 @@ class SakTilgangDao(private val datasource: DataSource) {
 
     fun hentSakMedGraderingOgSkjerming(id: Long): SakMedGraderingOgSkjermet? {
         datasource.connection.use { connection ->
-            val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet from sak where id = ?")
+            val statement = connection.prepareStatement("SELECT id, adressebeskyttelse, erSkjermet, enhet from sak where id = ?")
             statement.setLong(1, id)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
                     id = getLong(1),
                     adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
                     erSkjermet = getBoolean(3),
+                    enhetNr = getString(4),
                 )
             }
         }
@@ -41,7 +43,7 @@ class SakTilgangDao(private val datasource: DataSource) {
         datasource.connection.use { connection ->
             val statement =
                 connection.prepareStatement(
-                    "select id, adressebeskyttelse, erSkjermet from sak where id =" +
+                    "select id, adressebeskyttelse, erSkjermet, enhet from sak where id =" +
                         " (select sak_id from behandling where id = ?::uuid" +
                         " union select sak_id from tilbakekreving where id = ?::uuid" +
                         " union select sak_id from klage where id = ?::uuid)",
@@ -54,6 +56,7 @@ class SakTilgangDao(private val datasource: DataSource) {
                     id = getLong(1),
                     adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
                     erSkjermet = getBoolean(3),
+                    enhetNr = getString(4),
                 )
             }
         }
@@ -64,7 +67,7 @@ class SakTilgangDao(private val datasource: DataSource) {
             val statement =
                 connection.prepareStatement(
                     """
-                    SELECT s.id as sak_id, adressebeskyttelse, erskjermet 
+                    SELECT s.id as sak_id, adressebeskyttelse, erskjermet, s.enhet 
                     FROM oppgave o
                     INNER JOIN sak s on o.sak_id = s.id
                     WHERE o.id = ?::uuid
@@ -79,6 +82,7 @@ class SakTilgangDao(private val datasource: DataSource) {
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
+                    enhetNr = getString(4),
                 )
             }
         }
@@ -89,7 +93,7 @@ class SakTilgangDao(private val datasource: DataSource) {
             val statement =
                 connection.prepareStatement(
                     """
-                    SELECT s.id as sak_id, adressebeskyttelse, erskjermet 
+                    SELECT s.id as sak_id, adressebeskyttelse, erskjermet, enhet 
                     FROM klage k
                     INNER JOIN sak s on k.sak_id = s.id
                     WHERE k.id = ?::uuid
@@ -104,6 +108,7 @@ class SakTilgangDao(private val datasource: DataSource) {
                             AdressebeskyttelseGradering.valueOf(it)
                         },
                     erSkjermet = getBoolean("erskjermet"),
+                    enhetNr = getString(4),
                 )
             }
         }

@@ -218,7 +218,7 @@ internal fun Route.oppgaveRoutes(
                 }
 
                 post("tildel-saksbehandler") {
-                    kunSaksbehandlerMedSkrivetilgang {
+                    kunSaksbehandler {
                         val saksbehandlerEndringDto = call.receive<SaksbehandlerEndringGosysDto>()
                         val oppdatertVersjon =
                             gosysOppgaveService.tildelOppgaveTilSaksbehandler(
@@ -232,7 +232,7 @@ internal fun Route.oppgaveRoutes(
                 }
 
                 post("endre-frist") {
-                    kunSaksbehandlerMedSkrivetilgang {
+                    kunSaksbehandler {
                         val redigerFristRequest = call.receive<RedigerFristGosysRequest>()
                         val oppdatertVersjon =
                             gosysOppgaveService.endreFrist(

@@ -18,9 +18,15 @@ import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~components/person/EndreEnhet'
+import { useParams } from 'react-router-dom'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
+
+  const { '*': params } = useParams()
+  const fnrFraOppgave = params && params.split('/')[0]
+  const pesysFraOppgave = params && params.split('/')[1]
+
   const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const [status, opprettNyBehandling] = useApiCall(opprettBehandling)
   const [nyBehandlingId, setNyId] = useState('')
@@ -32,7 +38,7 @@ export default function ManuellBehandling() {
   const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
   const [overstyrTrygdetid, setOverstyrTrygdetid] = useState<boolean>(false)
 
-  const [pesysId, setPesysId] = useState<number | undefined>(undefined)
+  const [pesysId, setPesysId] = useState<number | undefined>(pesysFraOppgave ? Number(pesysFraOppgave) : undefined)
 
   const [enhet, setEnhet] = useState<EnhetFilterKeys>('VELGENHET')
 
@@ -175,7 +181,7 @@ export default function ManuellBehandling() {
       <Checkbox checked={erForeldreloes} onChange={() => setErForeldreloes(!erForeldreloes)}>
         Er foreldreløs
       </Checkbox>
-      <PersongalleriBarnepensjon erManuellMigrering={true} />
+      <PersongalleriBarnepensjon erManuellMigrering={true} fnrFraOppgave={fnrFraOppgave} />
 
       <Knapp>
         <Button

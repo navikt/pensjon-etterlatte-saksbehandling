@@ -9,7 +9,13 @@ import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveRe
 
 type PersonArray = keyof Omit<Persongalleri, 'soeker' | 'innsender'>
 
-export default function PersongalleriBarnepensjon({ erManuellMigrering = false }: { erManuellMigrering?: boolean }) {
+export default function PersongalleriBarnepensjon({
+  erManuellMigrering = false,
+  fnrFraOppgave = undefined,
+}: {
+  erManuellMigrering?: boolean
+  fnrFraOppgave?: string | undefined
+}) {
   const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
@@ -49,7 +55,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
       <InputRow>
         <TextField
           label="Søker (barnet)"
-          value={persongalleri?.soeker || ''}
+          value={fnrFraOppgave || persongalleri?.soeker || ''}
           pattern="[0-9]{11}"
           maxLength={11}
           onChange={(e) => oppdaterPersongalleri({ ...persongalleri, soeker: e.target.value })}

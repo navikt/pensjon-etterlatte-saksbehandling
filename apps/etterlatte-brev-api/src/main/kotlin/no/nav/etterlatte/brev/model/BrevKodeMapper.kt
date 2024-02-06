@@ -6,8 +6,13 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
 class BrevKodeMapper {
-    fun brevKode(generellBrevData: GenerellBrevData): Brevkoder =
-        when (generellBrevData.sak.sakType) {
+    fun brevKode(generellBrevData: GenerellBrevData): Brevkoder {
+        if (generellBrevData.erMigrering()) {
+            assert(listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING).contains(generellBrevData.forenkletVedtak?.type))
+            return Brevkoder.OMREGNING
+        }
+
+        return when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
                 when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> Brevkoder.BP_INNVILGELSE
@@ -30,4 +35,5 @@ class BrevKodeMapper {
                 }
             }
         }
+    }
 }

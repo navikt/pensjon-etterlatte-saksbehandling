@@ -32,13 +32,14 @@ class PDFGenerator(
     suspend fun ferdigstillOgGenererPDF(
         id: BrevID,
         bruker: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (GenerellBrevData) -> Brevkoder,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         sjekkOmBrevKanEndres(id)
         val pdf =
-            genererPdf(id, bruker, avsenderRequest, brevKode, lagrePdfHvisVedtakFattet)
+            genererPdf(id, bruker, automatiskMigreringRequest, avsenderRequest, brevKode, lagrePdfHvisVedtakFattet)
         db.lagrePdfOgFerdigstillBrev(id, pdf)
         return pdf
     }
@@ -46,6 +47,7 @@ class PDFGenerator(
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (GenerellBrevData) -> Brevkoder,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
@@ -72,6 +74,7 @@ class PDFGenerator(
                 brev,
                 generellBrevData,
                 bruker,
+                automatiskMigreringRequest,
                 brevkodePar,
             )
         val brevRequest =
@@ -93,6 +96,7 @@ class PDFGenerator(
         brev: Brev,
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest?,
         brevkode: Brevkoder,
     ): BrevData =
         when (brev.prosessType) {
@@ -101,8 +105,9 @@ class PDFGenerator(
                     generellBrevData,
                     brukerTokenInfo,
                     InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
+                    brevkode,
+                    automatiskMigreringRequest,
                     brev.tittel,
-                    brevkode.ferdigstilling,
                 )
 
             BrevProsessType.AUTOMATISK -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype automatisk")

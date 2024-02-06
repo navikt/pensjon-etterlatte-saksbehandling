@@ -121,12 +121,16 @@ export enum Utfall {
   OMGJOERING = 'OMGJOERING',
   DELVIS_OMGJOERING = 'DELVIS_OMGJOERING',
   STADFESTE_VEDTAK = 'STADFESTE_VEDTAK',
+  AVVIST_MED_VEDTAKSBREV = 'AVVIST_MED_VEDTAKSBREV',
+  AVVIST_MED_OMGJOERING = 'AVVIST_MED_OMGJOERING',
 }
 
 export const teksterKlageutfall: Record<Utfall, string> = {
   OMGJOERING: 'Omgjøring',
   DELVIS_OMGJOERING: 'Delvis omgjøring',
   STADFESTE_VEDTAK: 'Stadfeste vedtak',
+  AVVIST_MED_VEDTAKSBREV: 'Avvise klage med brev',
+  AVVIST_MED_OMGJOERING: 'Avvise klage',
 } as const
 
 export type KlageUtfall =
@@ -146,6 +150,15 @@ export type KlageUtfall =
       innstilling: InnstillingTilKabal
       saksbehandler: KildeSaksbehandler
     }
+  | {
+      utfall: 'AVVIST_MED_VEDTAKSBREV'
+      saksbehandler: KildeSaksbehandler
+    }
+  | {
+      utfall: 'AVVIST_MED_OMGJOERING'
+      omgjoering: Omgjoering
+      saksbehandler: KildeSaksbehandler
+    }
 
 export type KlageUtfallUtenBrev =
   | {
@@ -160,6 +173,13 @@ export type KlageUtfallUtenBrev =
   | {
       utfall: 'STADFESTE_VEDTAK'
       innstilling: InnstillingTilKabalUtenBrev
+    }
+  | {
+      utfall: 'AVVIST_MED_VEDTAKSBREV'
+    }
+  | {
+      utfall: 'AVVIST_MED_OMGJOERING'
+      omgjoering: Omgjoering
     }
 
 export enum AarsakTilAvslutting {

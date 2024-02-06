@@ -107,10 +107,12 @@ class BrevDataMapperRedigerbartUtfall(
         val fetcher = BrevDatafetcher(brevdataFacade, bruker, generellBrevData)
         val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
+        val brevutfall = async { fetcher.hentBrevutfall() }
 
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
             requireNotNull(avkortingsinfo.await()),
             etterbetaling.await(),
+            requireNotNull(brevutfall.await()),
         )
     }
 }

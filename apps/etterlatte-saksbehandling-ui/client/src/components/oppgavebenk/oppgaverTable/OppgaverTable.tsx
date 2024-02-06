@@ -3,7 +3,7 @@ import { SortState, Table } from '@navikt/ds-react'
 import { OppgaverTableHeader } from '~components/oppgavebenk/oppgaverTable/OppgaverTableHeader'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { OppgaverTableRow } from '~components/oppgavebenk/oppgaverTable/OppgaverTableRow'
-import { Filter } from '~components/oppgavebenk/oppgavelistafiltre'
+import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>

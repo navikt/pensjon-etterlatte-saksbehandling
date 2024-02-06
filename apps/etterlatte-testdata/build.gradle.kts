@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
+    implementation(project(":libs:rapidsandrivers-extras"))
 
     implementation(libs.ktor2.servercore)
     implementation(libs.ktor2.servercio)

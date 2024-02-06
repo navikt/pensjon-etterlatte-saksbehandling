@@ -28,14 +28,5 @@ services:
       - KAFKA_CFG_NODE_ID=1
       - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@127.0.0.1:9093
       - ALLOW_PLAINTEXT_LISTENER=yes
-  api-mock:
-    image: 'mockserver/mockserver'
-    ports:
-      - "1080:1080"
-    environment:
-      - MOCKSERVER_INITIALIZATION_JSON_PATH=/api-mock/elector-response.json
-      - MOCKSERVER_WATCH_INITIALIZATION_JSON='true'
-    volumes:
-      - ./api-mock/:/api-mock
 
 

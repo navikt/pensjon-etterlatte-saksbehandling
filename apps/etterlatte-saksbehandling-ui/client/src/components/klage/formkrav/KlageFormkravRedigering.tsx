@@ -1,4 +1,4 @@
-import { Button, Heading, Radio, RadioGroup, Select } from '@navikt/ds-react'
+import { Button, Heading, HelpText, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
@@ -8,7 +8,7 @@ import { oppdaterFormkravIKlage } from '~shared/api/klage'
 import { JaNei } from '~shared/types/ISvar'
 import React, { useEffect } from 'react'
 import { Control, Controller, Path, useForm } from 'react-hook-form'
-import { Formkrav, Klage, KlageStatus, VedtaketKlagenGjelder } from '~shared/types/Klage'
+import { Formkrav, Klage, VedtaketKlagenGjelder } from '~shared/types/Klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
 import { hentIverksatteVedtakISak } from '~shared/api/vedtaksvurdering'
@@ -17,7 +17,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
 import { FieldOrNull } from '~shared/types/util'
 import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
-import { kanVurdereUtfall } from '~components/klage/stegmeny/KlageStegmeny'
+import { kanVurdereUtfall, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { isFailure, isPending, isPendingOrInitial, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
@@ -53,12 +53,13 @@ const klageFormkravTilDefaultFormValues = (klage: Klage | null): FormDataFormkra
       erKlagenSignert: null,
       erKlagerPartISaken: null,
       gjelderKlagenNoeKonkretIVedtaket: null,
+      begrunnelse: null,
     }
   } else {
     const { vedtaketKlagenGjelder, ...skjemafelter } = klage.formkrav.formkrav
     return {
       ...skjemafelter,
-      vedtaketKlagenGjelderId: vedtaketKlagenGjelder?.id ?? null,
+      vedtaketKlagenGjelderId: vedtaketKlagenGjelder?.id ?? '-1',
     }
   }
 }
@@ -83,11 +84,14 @@ export function KlageFormkravRedigering() {
     control,
     handleSubmit,
     formState: { isDirty },
+    register,
+    watch,
   } = useForm<FormDataFormkrav>({
     defaultValues: klageFormkravTilDefaultFormValues(klage),
   })
 
   const navigate = useNavigate()
+  const erKlagenFramsattInnenFrist = watch('erKlagenFramsattInnenFrist')
 
   useEffect(() => {
     if (!klage?.sak.id) {
@@ -119,16 +123,7 @@ export function KlageFormkravRedigering() {
 
     lagreFormkrav({ klageId: klage.id, formkrav }, (oppdatertKlage) => {
       dispatch(addKlage(oppdatertKlage))
-      if (oppdatertKlage.status === KlageStatus.FORMKRAV_OPPFYLT) {
-        navigate(`/klage/${klage.id}/vurdering`)
-      } else if (oppdatertKlage.status === KlageStatus.FORMKRAV_IKKE_OPPFYLT) {
-        navigate(`/klage/${klage.id}/oppsummering`)
-      } else {
-        // Noe rart har skjedd, tvinger en refresh
-        window.location.reload()
-      }
-
-      // Feil i kallet fanges opp med visning av feilmelding i render
+      navigate(nesteSteg(klage, 'formkrav'))
     })
   }
 
@@ -203,13 +198,25 @@ export function KlageFormkravRedigering() {
             control={control}
           />
 
-          <JaNeiRadiogruppe
-            name="erKlagenFramsattInnenFrist"
-            legend="Er klagen framsatt innenfor klagefristen?"
-            control={control}
-          />
+          <FlexRow>
+            <JaNeiRadiogruppe
+              name="erKlagenFramsattInnenFrist"
+              legend="Er klagen framsatt innenfor klagefristen?"
+              control={control}
+            />
+            {erKlagenFramsattInnenFrist == JaNei.NEI && (
+              <HelpText strategy="fixed" title="Avvisning ved utløpt klagefrist">
+                Hvis klagefristen ikke er overholdt og dette sannsynligvis vil resultere i en avvisning av klagen bør du
+                vurdere å direkte gå til vedtak om avvisning (velg formkrav oppfylt)
+              </HelpText>
+            )}
+          </FlexRow>
 
           <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
+
+          <VurderingWrapper>
+            <Textarea {...register('begrunnelse')} label="Begrunnelse (valgfritt)" />
+          </VurderingWrapper>
         </InnholdPadding>
         <FlexRow justify="center">
           <Button type="submit" loading={isPending(lagreFormkravStatus)}>

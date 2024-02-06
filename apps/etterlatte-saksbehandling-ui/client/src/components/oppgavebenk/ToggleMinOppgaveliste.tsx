@@ -11,15 +11,15 @@ import {
   Filter,
   filtrerOppgaver,
   filtrerOppgaveStatus,
-  initialFilter,
   OPPGAVESTATUSFILTER,
-} from '~components/oppgavebenk/oppgavelistafiltre'
+} from '~components/oppgavebenk/filter/oppgavelistafiltre'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Tilgangsmelding } from '~components/oppgavebenk/Tilgangsmelding'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
+import { hentFilterFraLocalStorage, leggFilterILocalStorage } from '~components/oppgavebenk/filter/filterLocalStorage'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -28,7 +28,8 @@ export const ToggleMinOppgaveliste = () => {
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
   }
-  const [filter, setFilter] = useState<Filter>(initialFilter())
+
+  const [filter, setFilter] = useState<Filter>(hentFilterFraLocalStorage())
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
   const [oppgaver, hentOppgaverFetch] = useApiCall(hentOppgaver)
   const [gosysOppgaver, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
@@ -56,15 +57,19 @@ export const ToggleMinOppgaveliste = () => {
 
   useEffect(() => hentAlleOppgaver(), [])
 
-  // Dette er bare for å resette filterne når saksbehandler bytter mellom sin egen
-  // og den felles oppgavelisten. Vet egt ikke helt om dette er ønsket behaviour
   useEffect(() => {
-    if (oppgaveListeValg === 'MinOppgaveliste') {
-      setFilter({ ...initialFilter(), oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING] })
-    } else {
-      setFilter(initialFilter())
-    }
+    setFilter({
+      ...hentFilterFraLocalStorage(),
+      oppgavestatusFilter:
+        oppgaveListeValg === 'MinOppgaveliste'
+          ? [OPPGAVESTATUSFILTER.UNDER_BEHANDLING]
+          : [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
+    })
   }, [oppgaveListeValg])
+
+  useEffect(() => {
+    leggFilterILocalStorage(filter)
+  }, [filter])
 
   const oppdaterTildeling = (id: string, saksbehandler: string | null, versjon: number | null) => {
     setTimeout(() => {
@@ -133,6 +138,7 @@ export const ToggleMinOppgaveliste = () => {
                 filter={filter}
                 setFilter={setFilter}
                 totaltAntallOppgaver={hentedeOppgaver.length}
+                erMinOppgaveliste={false}
               />
             </>
           )}
@@ -151,6 +157,7 @@ export const ToggleMinOppgaveliste = () => {
                 filter={filter}
                 setFilter={setFilter}
                 oppdaterTildeling={(id, _saksbehandler, versjon) => oppdaterTildeling(id, null, versjon)}
+                erMinOppgaveliste={true}
               />
             </>
           )}

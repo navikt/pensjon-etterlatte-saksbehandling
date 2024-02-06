@@ -6,6 +6,7 @@ import io.ktor.server.application.Application
 import no.nav.etterlatte.kafka.BehandlingKlient
 import no.nav.etterlatte.kafka.KafkaConsumerEgneAnsatte
 import no.nav.etterlatte.kafka.startLytting
+import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.initialisering.initEmbeddedServerUtenRest
 import no.nav.etterlatte.libs.ktor.setReady
@@ -18,6 +19,10 @@ fun main() {
 class Server {
     private val defaultConfig: Config = ConfigFactory.load()
     private val engine = initEmbeddedServerUtenRest(httpPort = 8080, applicationConfig = defaultConfig)
+
+    init {
+        sikkerLoggOppstartOgAvslutning("etterlatte-egne-ansatte-lytter")
+    }
 
     fun run() {
         val env = System.getenv().toMutableMap()

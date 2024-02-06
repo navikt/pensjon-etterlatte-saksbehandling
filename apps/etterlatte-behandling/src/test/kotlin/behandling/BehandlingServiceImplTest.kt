@@ -20,7 +20,6 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.foerstegangsbehandling
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsOpplysningMedPersonopplysning
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
@@ -774,7 +773,6 @@ class BehandlingServiceImplTest {
         grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao = mockk(),
         grunnlagKlient: GrunnlagKlient? = null,
         oppgaveService: OppgaveService = mockk(),
-        featureToggleService: FeatureToggleService = mockk<FeatureToggleService>(),
     ): BehandlingServiceImpl =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao ?: mockk(),

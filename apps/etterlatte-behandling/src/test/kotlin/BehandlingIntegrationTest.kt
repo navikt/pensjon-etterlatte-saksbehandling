@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
+import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
@@ -91,7 +92,6 @@ abstract class BehandlingIntegrationTest {
                         put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", "753805ea-65a7-4855-bdc3-e6130348df9f")
                         put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", "ea7411eb-8b48-41a0-bc56-7b521fbf0c25")
                         put("NORG2_URL", "http://localhost")
-                        put("ELECTOR_PATH", "http://localhost")
                         put("NAVANSATT_URL", "http://localhost")
                         put("SKJERMING_URL", "http://localhost")
                         put("OPPGAVE_URL", "http://localhost")
@@ -582,5 +582,9 @@ class NavAnsattKlientTest : NavAnsattKlient {
 
     override suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema> {
         return listOf(SaksbehandlerTema(SakType.BARNEPENSJON.name), SaksbehandlerTema(SakType.OMSTILLINGSSTOENAD.name))
+    }
+
+    override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? {
+        return SaksbehandlerInfo("ident", "Max Manus")
     }
 }

@@ -3,7 +3,7 @@ import { OppgaveDTO } from '~shared/api/oppgaver'
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
-import { Filter } from '~components/oppgavebenk/oppgavelistafiltre'
+import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 interface Props {
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
@@ -13,6 +13,7 @@ interface Props {
   filter: Filter
   setFilter: Dispatch<SetStateAction<Filter>>
   totaltAntallOppgaver?: number
+  erMinOppgaveliste: boolean
 }
 
 export const Oppgavelista = ({
@@ -23,6 +24,7 @@ export const Oppgavelista = ({
   filter,
   setFilter,
   totaltAntallOppgaver,
+  erMinOppgaveliste,
 }: Props): ReactNode => {
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
@@ -42,7 +44,7 @@ export const Oppgavelista = ({
             oppgaver={paginerteOppgaver}
             alleOppgaver={alleOppgaver}
             oppdaterTildeling={oppdaterTildeling}
-            erMinOppgaveliste={false}
+            erMinOppgaveliste={erMinOppgaveliste}
             hentOppgaver={hentOppgaver}
             filter={filter}
             setFilter={setFilter}

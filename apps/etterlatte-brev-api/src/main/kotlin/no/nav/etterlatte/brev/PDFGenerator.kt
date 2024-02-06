@@ -26,7 +26,6 @@ class PDFGenerator(
     private val brevDataMapper: BrevDataMapperFerdigstilling,
     private val adresseService: AdresseService,
     private val brevbakerService: BrevbakerService,
-    private val migreringBrevDataService: MigreringBrevDataService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -35,7 +34,7 @@ class PDFGenerator(
         bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
-        brevKode: (GenerellBrevData, Brev) -> Brevkoder,
+        brevKode: (GenerellBrevData) -> Brevkoder,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         sjekkOmBrevKanEndres(id)
@@ -50,7 +49,7 @@ class PDFGenerator(
         bruker: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
-        brevKode: (GenerellBrevData, Brev) -> Brevkoder,
+        brevKode: (GenerellBrevData) -> Brevkoder,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
@@ -67,7 +66,7 @@ class PDFGenerator(
             retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId, bruker) }
         val avsender = adresseService.hentAvsender(avsenderRequest(bruker, generellBrevData))
 
-        val brevkodePar = brevKode(generellBrevData, brev)
+        val brevkodePar = brevKode(generellBrevData)
 
         val sak = generellBrevData.sak
         val letterData =
@@ -111,7 +110,7 @@ class PDFGenerator(
                     brev.tittel,
                 )
 
-            BrevProsessType.AUTOMATISK -> brevDataMapper.brevData(generellBrevData, brukerTokenInfo)
+            BrevProsessType.AUTOMATISK -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype automatisk")
             BrevProsessType.MANUELL -> ManueltBrevData(hentLagretInnhold(brev))
             BrevProsessType.OPPLASTET_PDF -> throw IllegalStateException("Brevdata ikke relevant for ${BrevProsessType.OPPLASTET_PDF}")
         }

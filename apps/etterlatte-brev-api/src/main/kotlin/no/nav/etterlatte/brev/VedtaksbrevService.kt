@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevKodeMapper
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -34,7 +35,7 @@ class VedtaksbrevService(
     fun hentVedtaksbrev(behandlingId: UUID): Brev? {
         logger.info("Henter vedtaksbrev for behandling (id=$behandlingId)")
 
-        return db.hentBrevForBehandling(behandlingId)
+        return db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull()
     }
 
     suspend fun opprettVedtaksbrev(
@@ -43,14 +44,13 @@ class VedtaksbrevService(
         brukerTokenInfo: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         // TODO EY-3232 - Fjerne migreringstilpasning
-    ): Brev {
-        return brevoppretter.opprettVedtaksbrev(
+    ): Brev =
+        brevoppretter.opprettVedtaksbrev(
             sakId = sakId,
             behandlingId = behandlingId,
             brukerTokenInfo = brukerTokenInfo,
             automatiskMigreringRequest = automatiskMigreringRequest,
         )
-    }
 
     suspend fun genererPdf(
         id: BrevID,
@@ -62,12 +62,7 @@ class VedtaksbrevService(
             bruker = bruker,
             automatiskMigreringRequest = automatiskMigreringRequest,
             avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
-            brevKode = { generellBrevData, brev ->
-                brevKodeMapper.brevKode(
-                    generellBrevData,
-                    brev.prosessType,
-                )
-            },
+            brevKode = { brevKodeMapper.brevKode(it) },
         ) { generellBrevData, brev, pdf ->
             lagrePdfHvisVedtakFattet(
                 brev.id,

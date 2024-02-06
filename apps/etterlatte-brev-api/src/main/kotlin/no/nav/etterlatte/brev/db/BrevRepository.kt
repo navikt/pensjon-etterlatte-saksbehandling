@@ -27,6 +27,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -70,9 +71,12 @@ class BrevRepository(private val ds: DataSource) {
             it.run(queryOf("SELECT payload_vedlegg FROM innhold WHERE brev_id = ?", id).map(tilPayloadVedlegg).asSingle)
         }
 
-    fun hentBrevForBehandling(behandlingId: UUID): Brev? =
+    fun hentBrevForBehandling(
+        behandlingId: UUID,
+        type: Brevtype,
+    ): List<Brev> =
         using(sessionOf(ds)) {
-            it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId).map(tilBrev).asSingle)
+            it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId, type.name).map(tilBrev).asList)
         }
 
     fun hentBrevForSak(sakId: Long): List<Brev> =
@@ -226,6 +230,7 @@ class BrevRepository(private val ds: DataSource) {
                             "prosess_type" to ulagretBrev.prosessType.name,
                             "soeker_fnr" to ulagretBrev.soekerFnr,
                             "opprettet" to ulagretBrev.opprettet.toTimestamp(),
+                            "brevtype" to ulagretBrev.brevtype.name,
                         ),
                     ).asUpdateAndReturnGeneratedKey,
                 )
@@ -421,6 +426,7 @@ class BrevRepository(private val ds: DataSource) {
             INNER JOIN hendelse h on b.id = h.brev_id
             INNER JOIN innhold i on b.id = i.brev_id
             WHERE b.behandling_id = ?
+            AND b.brevtype = ?
             AND h.status_id != 'SLETTET'
             AND h.id IN (
                 SELECT DISTINCT ON (brev_id) id
@@ -447,8 +453,8 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val OPPRETT_BREV_QUERY = """
-            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet) 
-            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet) 
+            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet, brevtype) 
+            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet, :brevtype) 
             ON CONFLICT DO NOTHING;
         """
 

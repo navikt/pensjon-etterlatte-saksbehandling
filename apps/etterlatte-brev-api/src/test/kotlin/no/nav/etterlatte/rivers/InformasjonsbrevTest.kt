@@ -10,7 +10,7 @@ import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.PDFGenerator
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.Brev
@@ -71,7 +71,7 @@ class InformasjonsbrevTest {
 
     @Test
     fun `starter generering av informasjonsbrev, og verifiserer at brevet faktisk blir oppretta og distribuert`() {
-        val brevkode = EtterlatteBrevKode.UTSATT_KLAGEFRIST
+        val brevkode = Brevkoder.UTSATT_KLAGEFRIST_INFORMASJONSBREV
         val saktype = SakType.BARNEPENSJON
         lagreBrevTilGenereringIDatabasen(brevkode, saktype)
         val testRapid =
@@ -90,6 +90,8 @@ class InformasjonsbrevTest {
                 coEvery {
                     it.opprettBrev(
                         saksnr,
+                        any(),
+                        any(),
                         any(),
                         any(),
                         any(),
@@ -155,7 +157,7 @@ class InformasjonsbrevTest {
     }
 
     private fun lagreBrevTilGenereringIDatabasen(
-        brevkode: EtterlatteBrevKode,
+        brevkode: Brevkoder,
         saktype: SakType,
     ) {
         dataSource.transaction { tx ->

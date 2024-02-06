@@ -7,8 +7,8 @@ import SaksoversiktLenke from '~components/oppgavebenk/SaksoversiktLenke'
 import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/Tags'
 import { HandlingerForOppgave } from '~components/oppgavebenk/HandlingerForOppgave'
 import { FristHandlinger } from '~components/oppgavebenk/FristHandlinger'
-import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/oppgavelistafiltre'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
+import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 interface Props {
   oppgave: OppgaveDTO
@@ -64,7 +64,7 @@ export const OppgaverTableRow = ({
       <Table.DataCell>
         <VelgSaksbehandler
           saksbehandlere={saksbehandlere}
-          saksbehandler={oppgave.saksbehandler}
+          saksbehandler={oppgave.saksbehandlerNavn}
           oppgaveId={oppgave.id}
           sakId={oppgave.sakId}
           oppdaterTildeling={oppdaterTildeling}

@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -232,21 +233,11 @@ internal class MigreringTrygdetidHendelserRiverTest {
             )
 
         inspector.sendTestMessage(melding.toJson())
-
-        assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
-        assertEquals(1, inspector.inspektør.size)
-        val trygdetidKafka: TrygdetidDto =
-            objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText())
-        assertTrue(beregnetTrygdetid.captured.overstyrt)
-        assertTrue(trygdetidKafka.beregnetTrygdetid!!.resultat.overstyrt)
-        coVerify(exactly = 1) { trygdetidService.beregnTrygdetid(behandlingId.captured) }
-        coVerify(exactly = 0) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }
-        coVerify(exactly = 1) {
-            trygdetidService.overstyrBeregnetTrygdetid(
-                behandlingId.captured,
-                beregnetTrygdetid.captured,
-            )
-        }
+        val resultat = inspector.inspektør.message(0)
+        assertTrue(
+            resultat.get(FEILMELDING_KEY).textValue()
+                .contains("TrygdetidIkkeGyldigForAutomatiskGjenoppretting: Vi mottok ingen trygdetidsperioder fra Pesys for behandling"),
+        )
     }
 
     @Test
@@ -351,21 +342,11 @@ internal class MigreringTrygdetidHendelserRiverTest {
             )
 
         inspector.sendTestMessage(melding.toJson())
-
-        assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
-        assertEquals(1, inspector.inspektør.size)
-        val trygdetidKafka: TrygdetidDto =
-            objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText())
-        assertTrue(beregnetTrygdetid.captured.overstyrt)
-        assertTrue(trygdetidKafka.beregnetTrygdetid!!.resultat.overstyrt)
-        coVerify(exactly = 1) { trygdetidService.beregnTrygdetid(behandlingId.captured) }
-        coVerify(exactly = 1) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }
-        coVerify(exactly = 1) {
-            trygdetidService.overstyrBeregnetTrygdetid(
-                behandlingId.captured,
-                beregnetTrygdetid.captured,
-            )
-        }
+        val resultat = inspector.inspektør.message(0)
+        assertTrue(
+            resultat.get(FEILMELDING_KEY).textValue()
+                .contains("TrygdetidIkkeGyldigForAutomatiskGjenoppretting: Noe feil skjedde ved opprettelse av periode"),
+        )
     }
 
     @Test
@@ -474,23 +455,14 @@ internal class MigreringTrygdetidHendelserRiverTest {
             )
 
         inspector.sendTestMessage(melding.toJson())
-
-        assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
-        assertEquals(1, inspector.inspektør.size)
-        val trygdetidKafka: TrygdetidDto =
-            objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText())
-        assertTrue(beregnetTrygdetid.captured.overstyrt)
-        assertTrue(trygdetidKafka.beregnetTrygdetid!!.resultat.overstyrt)
-        assertEquals(request.beregning.anvendtTrygdetid, beregnetTrygdetid.captured.samletTrygdetidNorge)
-        coVerify(exactly = 1) { trygdetidService.beregnTrygdetid(behandlingId.captured) }
-        coVerify(exactly = 1) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }
-        coVerify(exactly = 1) { trygdetidService.reberegnUtenFremtidigTrygdetid(behandlingId.captured) }
-        coVerify(exactly = 1) {
-            trygdetidService.overstyrBeregnetTrygdetid(
-                behandlingId.captured,
-                beregnetTrygdetid.captured,
-            )
-        }
+        val resultat = inspector.inspektør.message(0)
+        assertTrue(
+            resultat.get(FEILMELDING_KEY).textValue()
+                .contains(
+                    "TrygdetidIkkeGyldigForAutomatiskGjenoppretting: Beregnet trygdetid i Gjenny basert på" +
+                        " perioder fra Pesys stemmer ikke med anvendt trygdetid i Pesys",
+                ),
+        )
     }
 
     @Test

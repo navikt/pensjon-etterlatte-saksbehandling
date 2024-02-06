@@ -126,6 +126,11 @@ data class Klage(
                     JaNei.JA -> KlageStatus.FORMKRAV_OPPFYLT
                     JaNei.NEI -> KlageStatus.FORMKRAV_IKKE_OPPFYLT
                 },
+            utfall =
+                when (formkrav.erFormkraveneOppfylt) {
+                    JaNei.JA -> this.utfall
+                    JaNei.NEI -> null
+                },
         )
     }
 
@@ -407,11 +412,14 @@ data class KlageOmgjoering(val grunnForOmgjoering: GrunnForOmgjoering, val begru
 
 class InnstillingTilKabal(
     val lovhjemmel: KabalHjemmel,
-    val internKommentar: String,
+    val internKommentar: String?,
     val brev: KlageBrevInnstilling,
 )
 
-data class InnstillingTilKabalUtenBrev(val lovhjemmel: String, val internKommentar: String)
+class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: String?) {
+    val internKommentar: String? = internKommentar
+        get() = if (field.isNullOrBlank()) null else field
+}
 
 data class KlageBrevInnstilling(val brevId: Long)
 
@@ -441,6 +449,7 @@ data class Formkrav(
     val gjelderKlagenNoeKonkretIVedtaket: JaNei,
     val erKlagenFramsattInnenFrist: JaNei,
     val erFormkraveneOppfylt: JaNei,
+    val begrunnelse: String? = null,
 ) {
     companion object {
         fun erFormkravKonsistente(formkrav: Formkrav): Boolean {

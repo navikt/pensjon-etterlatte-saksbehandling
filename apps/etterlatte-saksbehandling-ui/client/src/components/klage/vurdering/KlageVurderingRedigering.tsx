@@ -28,7 +28,6 @@ import { SakType } from '~shared/types/sak'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
-import Spinner from '~shared/Spinner'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -50,7 +49,7 @@ function erSkjemaUtfylt(skjema: FormdataVurdering): skjema is FilledFormDataVurd
   }
   if (skjema.utfall === Utfall.STADFESTE_VEDTAK || skjema.utfall === Utfall.DELVIS_OMGJOERING) {
     const { innstilling } = skjema
-    if (!innstilling || !innstilling.lovhjemmel || !innstilling.internKommentar) {
+    if (!innstilling || !innstilling.lovhjemmel) {
       return false
     }
   }
@@ -83,15 +82,11 @@ function mapKlageTilFormdata(klage: Klage | null): FormdataVurdering {
   }
 }
 
-export function KlageVurderingRedigering() {
+export function KlageVurderingRedigering(props: { klage: Klage }) {
   const navigate = useNavigate()
-  const klage = useKlage()
+  const { klage } = props
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)
   const dispatch = useAppDispatch()
-
-  if (!klage) {
-    return <Spinner visible label="Henter klage" />
-  }
 
   const {
     control,

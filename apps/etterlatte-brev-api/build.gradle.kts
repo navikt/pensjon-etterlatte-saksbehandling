@@ -52,4 +52,5 @@ dependencies {
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
+    testImplementation(testFixtures((project(":libs:etterlatte-database"))))
 }

@@ -48,8 +48,10 @@ export const genererPdf = async (props: {
   behandlingId?: string
   brevtype: Brevtype
 }): Promise<ApiResponse<ArrayBuffer>> => {
-  if (props.behandlingId) {
+  if (props.brevtype === Brevtype.VEDTAK) {
     return apiClient.get(`/brev/behandling/${props.behandlingId}/vedtak/pdf?brevId=${props.brevId}`)
+  } else if (props.brevtype === Brevtype.VARSEL) {
+    return apiClient.get(`/brev/behandling/${props.behandlingId}/varsel/pdf?brevId=${props.brevId}`)
   } else if (props.sakId && !props.behandlingId) {
     return apiClient.get(`/brev/${props.brevId}/pdf?sakId=${props.sakId}`)
   } else {

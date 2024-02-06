@@ -123,13 +123,13 @@ class Brevoppretter(
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
 
-        val brevkode: (mapper: BrevKodeMapperVedtak, g: GenerellBrevData) -> EtterlatteBrevKode =
+        val brevkodeRequest =
+            BrevkodeRequest(generellBrevData.erMigrering(), generellBrevData.sak.sakType, generellBrevData.forenkletVedtak?.type)
+        val brevkode: (mapper: BrevKodeMapperVedtak) -> EtterlatteBrevKode =
             if (brevKode != null) {
-                { _, _ -> brevKode }
+                { _ -> brevKode }
             } else {
-                { mapper, data ->
-                    mapper.brevKode(BrevkodeRequest(data.erMigrering(), data.sak.sakType, data.forenkletVedtak?.type)).redigering
-                }
+                { it.brevKode(brevkodeRequest).redigering }
             }
 
         val tittel =

@@ -87,7 +87,7 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService) {
                     RedigerbarTekstRequest(
                         generellBrevData = generellBrevData,
                         brukerTokenInfo = bruker,
-                        brevkode = { _, _ -> kode },
+                        brevkode = { _ -> kode },
                     ),
                 ),
         )

@@ -35,7 +35,7 @@ class BrevbakerService(
         val request =
             with(redigerbarTekstRequest) {
                 BrevbakerRequest.fra(
-                    brevkode(brevKodeMapperVedtak, generellBrevData),
+                    brevkode(brevKodeMapperVedtak),
                     brevDataMapperRedigerbartUtfall.brevData(this),
                     adresseService.hentAvsender(
                         generellBrevData.avsenderRequest(brukerTokenInfo),
@@ -54,6 +54,6 @@ class BrevbakerService(
 data class RedigerbarTekstRequest(
     val generellBrevData: GenerellBrevData,
     val brukerTokenInfo: BrukerTokenInfo,
-    val brevkode: (mapper: BrevKodeMapperVedtak, g: GenerellBrevData) -> EtterlatteBrevKode,
+    val brevkode: (mapper: BrevKodeMapperVedtak) -> EtterlatteBrevKode,
     val migrering: MigreringBrevRequest? = null,
 )

@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -41,20 +42,25 @@ class VedtaksbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest? = null,
+        // TODO EY-3232 - Fjerne migreringstilpasning
     ): Brev =
         brevoppretter.opprettVedtaksbrev(
             sakId = sakId,
             behandlingId = behandlingId,
             brukerTokenInfo = brukerTokenInfo,
+            automatiskMigreringRequest = automatiskMigreringRequest,
         )
 
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest? = null,
     ): Pdf =
         pdfGenerator.genererPdf(
             id = id,
             bruker = bruker,
+            automatiskMigreringRequest = automatiskMigreringRequest,
             avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
             brevKode = { brevKodeMapper.brevKode(it) },
         ) { generellBrevData, brev, pdf ->
@@ -63,12 +69,14 @@ class VedtaksbrevService(
                 generellBrevData.forenkletVedtak!!,
                 pdf,
                 bruker,
+                automatiskMigreringRequest != null,
             )
         }
 
     suspend fun ferdigstillVedtaksbrev(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        migrering: Boolean = false,
     ) {
         val brev =
             requireNotNull(hentVedtaksbrev(behandlingId)) {
@@ -90,7 +98,7 @@ class VedtaksbrevService(
                 brukerTokenInfo,
             )
 
-        if (vedtakStatus != VedtakStatus.FATTET_VEDTAK) {
+        if (vedtakStatus != VedtakStatus.FATTET_VEDTAK && !migrering) {
             throw IllegalStateException(
                 "Vedtak status er $vedtakStatus. Avventer ferdigstilling av brev (id=${brev.id})",
             )
@@ -124,8 +132,9 @@ class VedtaksbrevService(
         vedtak: ForenkletVedtak,
         pdf: Pdf,
         brukerTokenInfo: BrukerTokenInfo,
+        migrering: Boolean = false,
     ) {
-        if (vedtak.status != VedtakStatus.FATTET_VEDTAK) {
+        if (vedtak.status != VedtakStatus.FATTET_VEDTAK && !migrering) {
             logger.info("Vedtak status er ${vedtak.status}. Avventer ferdigstilling av brev (id=$brevId)")
             return
         }
@@ -151,6 +160,13 @@ class VedtaksbrevService(
         return db.fjernFerdigstiltStatusUnderkjentVedtak(id, vedtak)
     }
 }
+
+// TODO EY-3232 - Fjerne
+data class MigreringBrevRequest(
+    val brutto: Int,
+    val yrkesskade: Boolean,
+    val utlandstilknytningType: UtlandstilknytningType?,
+)
 
 class UgyldigStatusKanIkkeFerdigstilles(id: BrevID, status: Status) : UgyldigForespoerselException(
     code = "UGYLDIG_STATUS_BREV",

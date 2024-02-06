@@ -127,6 +127,7 @@ export const ToggleMinOppgaveliste = () => {
               />
               <Oppgavelista
                 filtrerteOppgaver={filtrerteOppgaver}
+                alleOppgaver={hentedeOppgaver}
                 oppdaterTildeling={oppdaterTildeling}
                 hentOppgaver={hentAlleOppgaver}
                 filter={filter}
@@ -145,6 +146,7 @@ export const ToggleMinOppgaveliste = () => {
               </ValgWrapper>
               <Oppgavelista
                 filtrerteOppgaver={filtrerOppgaveStatus(filter.oppgavestatusFilter, innloggetSaksbehandleroppgaver)}
+                alleOppgaver={hentedeOppgaver}
                 hentOppgaver={hentAlleOppgaver}
                 filter={filter}
                 setFilter={setFilter}

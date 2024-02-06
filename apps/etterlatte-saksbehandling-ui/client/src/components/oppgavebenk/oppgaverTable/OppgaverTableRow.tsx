@@ -1,11 +1,10 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { Table } from '@navikt/ds-react'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
 import { formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/FristWrapper'
 import SaksoversiktLenke from '~components/oppgavebenk/SaksoversiktLenke'
 import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/Tags'
-import { RedigerSaksbehandler } from '~components/oppgavebenk/tildeling/RedigerSaksbehandler'
 import { HandlingerForOppgave } from '~components/oppgavebenk/HandlingerForOppgave'
 import { FristHandlinger } from '~components/oppgavebenk/FristHandlinger'
 import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/oppgavelistafiltre'
@@ -13,12 +12,28 @@ import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbeh
 
 interface Props {
   oppgave: OppgaveDTO
+  oppgaver: ReadonlyArray<OppgaveDTO>
+  alleOppgaver: Array<OppgaveDTO>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveListe: boolean
   hentOppgaver: () => void
 }
 
-export const OppgaverTableRow = ({ oppgave, oppdaterTildeling, erMinOppgaveListe, hentOppgaver }: Props): ReactNode => {
+export const OppgaverTableRow = ({
+  oppgave,
+  alleOppgaver,
+  oppdaterTildeling,
+  erMinOppgaveListe,
+  hentOppgaver,
+}: Props): ReactNode => {
+  const [saksbehandlere] = useState<Array<string>>(
+    Array.from(
+      new Set(
+        alleOppgaver.map((oppgave) => oppgave.saksbehandler).filter((s): s is Exclude<typeof s, null> => s !== null)
+      )
+    )
+  )
+
   return (
     <Table.Row>
       <Table.HeaderCell>{formaterStringDato(oppgave.opprettet)}</Table.HeaderCell>
@@ -47,16 +62,16 @@ export const OppgaverTableRow = ({ oppgave, oppdaterTildeling, erMinOppgaveListe
       <Table.DataCell>{oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] : 'Ukjent'}</Table.DataCell>
       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
       <Table.DataCell>
-        {/*<RedigerSaksbehandler*/}
-        {/*  saksbehandler={oppgave.saksbehandler}*/}
-        {/*  oppgaveId={oppgave.id}*/}
-        {/*  sakId={oppgave.sakId}*/}
-        {/*  oppdaterTildeling={oppdaterTildeling}*/}
-        {/*  erRedigerbar={erOppgaveRedigerbar(oppgave.status)}*/}
-        {/*  versjon={oppgave.versjon}*/}
-        {/*  type={oppgave.type}*/}
-        {/*/>*/}
-        <VelgSaksbehandler />
+        <VelgSaksbehandler
+          saksbehandlere={saksbehandlere}
+          saksbehandler={oppgave.saksbehandler}
+          oppgaveId={oppgave.id}
+          sakId={oppgave.sakId}
+          oppdaterTildeling={oppdaterTildeling}
+          erRedigerbar={erOppgaveRedigerbar(oppgave.status)}
+          versjon={oppgave.versjon}
+          type={oppgave.type}
+        />
       </Table.DataCell>
       <Table.DataCell>
         <HandlingerForOppgave oppgave={oppgave} />

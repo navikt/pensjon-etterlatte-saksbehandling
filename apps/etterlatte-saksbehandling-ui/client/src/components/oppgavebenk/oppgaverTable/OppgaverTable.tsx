@@ -7,6 +7,7 @@ import { Filter } from '~components/oppgavebenk/oppgavelistafiltre'
 
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
+  alleOppgaver: Array<OppgaveDTO>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveliste: boolean
   hentOppgaver: () => void
@@ -21,6 +22,7 @@ export enum SortKey {
 
 export const OppgaverTable = ({
   oppgaver,
+  alleOppgaver,
   oppdaterTildeling,
   erMinOppgaveliste,
   hentOppgaver,
@@ -61,6 +63,8 @@ export const OppgaverTable = ({
               <OppgaverTableRow
                 key={oppgave.id}
                 oppgave={oppgave}
+                oppgaver={oppgaver}
+                alleOppgaver={alleOppgaver}
                 oppdaterTildeling={oppdaterTildeling}
                 erMinOppgaveListe={erMinOppgaveliste}
                 hentOppgaver={hentOppgaver}

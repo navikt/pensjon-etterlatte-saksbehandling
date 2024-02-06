@@ -8,6 +8,7 @@ import { Filter } from '~components/oppgavebenk/oppgavelistafiltre'
 interface Props {
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   filtrerteOppgaver: ReadonlyArray<OppgaveDTO>
+  alleOppgaver: Array<OppgaveDTO>
   hentOppgaver: () => void
   filter: Filter
   setFilter: Dispatch<SetStateAction<Filter>>
@@ -17,6 +18,7 @@ interface Props {
 export const Oppgavelista = ({
   oppdaterTildeling,
   filtrerteOppgaver,
+  alleOppgaver,
   hentOppgaver,
   filter,
   setFilter,
@@ -38,6 +40,7 @@ export const Oppgavelista = ({
         <>
           <OppgaverTable
             oppgaver={paginerteOppgaver}
+            alleOppgaver={alleOppgaver}
             oppdaterTildeling={oppdaterTildeling}
             erMinOppgaveliste={false}
             hentOppgaver={hentOppgaver}

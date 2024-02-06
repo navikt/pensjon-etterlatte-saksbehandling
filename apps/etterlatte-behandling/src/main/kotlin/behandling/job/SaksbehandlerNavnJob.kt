@@ -22,17 +22,21 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
             val tidbrukt =
                 measureTime {
                     val sbidenter = context.saksbehandlerInfoDao.hentalleSaksbehandlere()
-                    logger.info("Antall identer ${sbidenter.size}")
+                    logger.info("Antall saksbehandlingsidenter ${sbidenter.size}")
 
                     val filtrerteIdenter = sbidenter.filter { !context.saksbehandlerInfoDao.saksbehandlerFinnes(it) }
 
+                    logger.info("Antall saksbehandlingsidenter uten navn i databasen ${sbidenter.size}")
+
                     val egneIdenter =
-                        filtrerteIdenter.filter { listOf("PESYS", "EY").contains(it) }
+                        filtrerteIdenter.filter { listOf("PESYS", "EY", "GJENOPPRETTA").contains(it) }
                             .map { it to SaksbehandlerInfo(it, it) }
+
+                    logger.info("Mappet egne ${sbidenter.size}")
 
                     val hentedeIdenter =
                         coroutineScope {
-                            filtrerteIdenter.filter { !listOf("PESYS", "EY").contains(it) }
+                            filtrerteIdenter.filter { !listOf("PESYS", "EY", "GJENOPPRETTA").contains(it) }
                                 .map { it to async { context.navAnsattKlient.hentSaksbehanderNavn(it) } }
                                 .map { it.first to it.second.await() }
                         }

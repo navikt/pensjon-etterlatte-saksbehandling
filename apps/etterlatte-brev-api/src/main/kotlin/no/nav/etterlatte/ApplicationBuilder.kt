@@ -57,6 +57,8 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
@@ -74,8 +76,6 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.getRapidEnv
 import java.util.UUID
 import kotlin.concurrent.thread
 

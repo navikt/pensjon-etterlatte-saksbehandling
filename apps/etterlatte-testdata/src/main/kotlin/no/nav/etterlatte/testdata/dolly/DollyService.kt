@@ -1,6 +1,5 @@
 package no.nav.etterlatte.testdata.dolly
 
-import dolly.TestnavClient
 import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

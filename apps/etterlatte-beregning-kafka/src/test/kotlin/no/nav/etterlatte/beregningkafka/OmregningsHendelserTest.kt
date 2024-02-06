@@ -12,10 +12,10 @@ import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.grunnlag.Metadata
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import rapidsandrivers.BEREGNING_KEY
 import java.io.FileNotFoundException
 import java.util.UUID
 

@@ -1,4 +1,4 @@
-package joarkhendelser.behandling
+package no.nav.etterlatte.joarkhendelser.behandling
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.HttpClient

@@ -4,16 +4,16 @@ import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.rapidsandrivers.DATO_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.dato
+import no.nav.etterlatte.rapidsandrivers.sakId
+import no.nav.etterlatte.rapidsandrivers.tilbakestilteBehandlinger
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.DATO_KEY
-import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import rapidsandrivers.dato
-import rapidsandrivers.sakId
-import rapidsandrivers.tilbakestilteBehandlinger
 
 internal class ReguleringsforespoerselRiver(
     rapidsConnection: RapidsConnection,

@@ -8,20 +8,20 @@ import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.rapidsandrivers.AVKORTING_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
+import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
+import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
-import rapidsandrivers.AVKORTING_KEY
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
-import rapidsandrivers.BEREGNING_KEY
-import rapidsandrivers.HENDELSE_DATA_KEY
-import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import rapidsandrivers.SAK_TYPE
-import rapidsandrivers.behandlingId
 
 internal class OmregningHendelserRiver(
     rapidsConnection: RapidsConnection,

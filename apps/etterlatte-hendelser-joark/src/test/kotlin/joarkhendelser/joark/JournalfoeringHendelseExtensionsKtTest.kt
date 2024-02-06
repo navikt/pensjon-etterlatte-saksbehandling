@@ -1,9 +1,7 @@
-package joarkhendelser.joark
+package no.nav.etterlatte.joarkhendelser.joark
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.joarkhendelser.joark.erTemaEtterlatte
-import no.nav.etterlatte.joarkhendelser.joark.temaTilSakType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.junit.jupiter.api.Assertions.assertEquals

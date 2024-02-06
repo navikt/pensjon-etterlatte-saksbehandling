@@ -1,4 +1,4 @@
-package behandling.revurdering
+package no.nav.etterlatte.behandling.revurdering
 
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -13,8 +13,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
-import no.nav.etterlatte.behandling.revurdering.OpprettRevurderingRequest
-import no.nav.etterlatte.behandling.revurdering.RevurderingRoutesFeatureToggle
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken

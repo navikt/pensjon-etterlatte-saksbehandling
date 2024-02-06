@@ -33,9 +33,9 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
+import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.helse.rapids_rivers.RapidApplication
 import org.slf4j.Logger
-import rapidsandrivers.getRapidEnv
 
 val sikkerLogg: Logger = sikkerlogger()
 

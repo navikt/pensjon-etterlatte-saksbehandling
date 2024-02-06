@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
@@ -24,7 +25,6 @@ import no.nav.etterlatte.statistikk.service.SoeknadStatistikkServiceImpl
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.getRapidEnv
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource

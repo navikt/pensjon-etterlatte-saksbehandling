@@ -1,4 +1,4 @@
-package person
+package no.nav.etterlatte.person
 
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering.FORTROLIG

@@ -1,7 +1,5 @@
 package no.nav.etterlatte.beregning
 
-import beregning.regler.finnAnvendtGrunnbeloep
-import beregning.regler.finnAnvendtTrygdetid
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
@@ -12,6 +10,8 @@ import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGr
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.grunnbeloep
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidBruktRegel
+import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
+import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.toSamlet
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.GrunnlagKlient

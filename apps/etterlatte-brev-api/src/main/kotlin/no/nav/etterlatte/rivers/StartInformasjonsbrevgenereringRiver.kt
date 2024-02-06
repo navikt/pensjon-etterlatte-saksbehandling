@@ -11,11 +11,11 @@ import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.FNR_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.FNR_KEY
 import java.time.Duration
 import java.util.UUID
 import javax.sql.DataSource

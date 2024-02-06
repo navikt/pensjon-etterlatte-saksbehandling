@@ -1,4 +1,4 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
@@ -7,9 +7,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.migrering.Migreringsstatus
-import no.nav.etterlatte.migrering.PesysRepository
-import no.nav.etterlatte.migrering.Pesyssak
 import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet

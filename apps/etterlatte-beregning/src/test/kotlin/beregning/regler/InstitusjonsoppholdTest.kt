@@ -1,11 +1,11 @@
 package no.nav.etterlatte.beregning.regler.beregning.regler
 
-import beregning.regler.barnepensjon.institusjonsoppholdRegel
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Prosent
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.REGEL_PERIODE
+import no.nav.etterlatte.beregning.regler.barnepensjon.institusjonsoppholdRegel
 import no.nav.etterlatte.beregning.regler.barnepensjonGrunnlag
 import org.junit.jupiter.api.Test
 

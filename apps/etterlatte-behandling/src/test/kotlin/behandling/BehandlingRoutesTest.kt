@@ -1,4 +1,4 @@
-package behandling
+package no.nav.etterlatte.behandling
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.header
@@ -17,12 +17,7 @@ import io.mockk.runs
 import io.mockk.verify
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.attachMockContext
-import no.nav.etterlatte.behandling.BehandlingFactory
-import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.BoddEllerArbeidetUtlandetRequest
-import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
-import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer

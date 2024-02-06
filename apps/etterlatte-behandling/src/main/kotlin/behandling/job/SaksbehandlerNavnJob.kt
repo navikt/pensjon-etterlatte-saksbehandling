@@ -34,9 +34,16 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
 
                     logger.info("Mappet egne ${sbidenter.size}")
 
+                    val pattern = Regex("[a-zA-Z]\\d{6}")
                     val hentedeIdenter =
                         coroutineScope {
-                            filtrerteIdenter.filter { !listOf("PESYS", "EY", "GJENOPPRETTA").contains(it) }
+                            filtrerteIdenter.filter {
+                                !listOf(
+                                    "PESYS",
+                                    "EY",
+                                    "GJENOPPRETTA",
+                                ).contains(it) && it.length == 7 && pattern.containsMatchIn(it)
+                            }
                                 .map { it to async { context.navAnsattKlient.hentSaksbehanderNavn(it) } }
                                 .map { it.first to it.second.await() }
                         }

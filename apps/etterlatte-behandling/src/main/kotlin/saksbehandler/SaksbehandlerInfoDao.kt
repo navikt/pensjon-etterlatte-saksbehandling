@@ -1,4 +1,4 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.saksbehandler
 
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.libs.database.setJsonb

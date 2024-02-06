@@ -61,8 +61,8 @@ class Brevoppretter(
             sakId = sakId,
             behandlingId = behandlingId,
             bruker = brukerTokenInfo,
-            brevKode = brevKode,
             automatiskMigreringRequest = automatiskMigreringRequest,
+            brevKode = brevKode,
             brevtype = Brevtype.VEDTAK,
             brevDataMapping = brevDataMapper,
         ).first
@@ -73,8 +73,8 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
+        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         brevtype: Brevtype,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
     ): Pair<Brev, GenerellBrevData> =

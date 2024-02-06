@@ -42,8 +42,8 @@ class BrevService(
             sakId = sakId,
             behandlingId = null,
             bruker = bruker,
-            brevKode = { brevkoder.redigering },
             automatiskMigreringRequest = null,
+            brevKode = { brevkoder.redigering },
             brevtype = brevkoder.redigering.brevtype,
             brevDataMapping = brevDataMapping,
         ).first

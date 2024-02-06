@@ -97,6 +97,7 @@ class PDFGenerator(
                             brevkodePar,
                             automatiskMigreringRequest,
                             brev.tittel,
+                            brev.prosessType,
                         ),
                     ),
                 avsender = avsender,

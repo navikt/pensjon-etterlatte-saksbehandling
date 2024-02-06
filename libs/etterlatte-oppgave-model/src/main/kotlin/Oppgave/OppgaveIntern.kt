@@ -68,7 +68,7 @@ data class GosysOppgave(
     override val sakType: SakType,
     override val fnr: String,
     val gjelder: String,
-    val beskrivelse: String,
+    val beskrivelse: String?,
 ) : Oppgave() {
     override val type: OppgaveType
         get() = OppgaveType.GOSYS

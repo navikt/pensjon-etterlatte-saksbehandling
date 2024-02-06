@@ -46,6 +46,7 @@ internal class VarselbrevService(
     ) = pdfGenerator.genererPdf(
         id = brevId,
         bruker = bruker,
+        automatiskMigreringRequest = null,
         avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
         brevKode = { _ -> Brevkoder.BP_VARSEL },
         // TODO: Brevkode her kan også vera OMS_VARSEL i OMS-saker. Generelt kjens brevkodemappinga ut som noko som

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.varselbrev
 
 import no.nav.etterlatte.brev.Brevoppretter
+import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
@@ -14,6 +15,7 @@ internal class VarselbrevService(
     private val db: BrevRepository,
     private val brevoppretter: Brevoppretter,
     private val behandlingKlient: BehandlingKlient,
+    private val pdfGenerator: PDFGenerator,
 ) {
     fun hentVarselbrev(behandlingId: UUID) = db.hentBrevForBehandling(behandlingId, Brevtype.VARSEL)
 
@@ -37,4 +39,14 @@ internal class VarselbrevService(
             brevtype = Brevtype.VARSEL,
         ).first
     }
+
+    suspend fun genererPdf(
+        brevId: Long,
+        bruker: BrukerTokenInfo,
+    ) = pdfGenerator.genererPdf(
+        id = brevId,
+        bruker = bruker,
+        avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
+        brevKode = { _ -> Brevkoder.BP_VARSEL },
+    )
 }

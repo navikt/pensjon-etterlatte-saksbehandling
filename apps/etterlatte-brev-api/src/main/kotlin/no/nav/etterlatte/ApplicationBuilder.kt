@@ -169,7 +169,7 @@ class ApplicationBuilder {
             pdfGenerator,
         )
 
-    private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient)
+    private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator)
 
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 

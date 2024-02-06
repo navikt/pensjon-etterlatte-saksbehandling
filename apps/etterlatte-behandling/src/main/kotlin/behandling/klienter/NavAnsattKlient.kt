@@ -19,10 +19,17 @@ private enum class InfoType(val urlSuffix: String) {
     TEMA("fagomrader"),
 }
 
+data class SaksbehandlerInfo(
+    val ident: String,
+    val navn: String,
+)
+
 interface NavAnsattKlient {
     suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet>
 
     suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema>
+
+    suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo?
 }
 
 class NavAnsattKlientImpl(
@@ -39,6 +46,28 @@ class NavAnsattKlientImpl(
         Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(15))
             .build<String, List<SaksbehandlerTema>>()
+
+    private val navneCache =
+        Caffeine.newBuilder()
+            .build<String, SaksbehandlerInfo>()
+
+    override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? =
+        try {
+            val saksbehandlerCache = navneCache.getIfPresent(ident)
+
+            if (saksbehandlerCache != null) {
+                logger.info("Fant cachet saksbehandler med ident $ident")
+                saksbehandlerCache
+            } else {
+                logger.info("Henter info om saksbehandler med ident $ident")
+
+                retryOgPakkUt<SaksbehandlerInfo?> {
+                    client.get("$url/navansatt/$ident").body()
+                }.also { navneCache.put(ident, it) }
+            }
+        } catch (exception: Exception) {
+            throw RuntimeException("Feil i kall mot navansatt med ident: $ident", exception)
+        }
 
     override suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet> =
         hentSaksbehandler(

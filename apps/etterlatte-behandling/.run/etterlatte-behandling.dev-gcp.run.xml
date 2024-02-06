@@ -34,7 +34,6 @@
       <env name="HTTP_PORT" value="8090" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="NAIS_APP_NAME" value="etterlatte-behandling" />
-      <env name="NAIS_CLUSTER_NAME" value="dev-gcp" />
       <env name="NAVANSATT_URL" value="https://navansatt.dev-fss-pub.nais.io" />
       <env name="NORG2_URL" value="https://norg2.dev-fss-pub.nais.io/norg2/api/v1" />
       <env name="OPPGAVE_CLIENT_ID" value="dev-fss.oppgavehandtering.oppgave" />

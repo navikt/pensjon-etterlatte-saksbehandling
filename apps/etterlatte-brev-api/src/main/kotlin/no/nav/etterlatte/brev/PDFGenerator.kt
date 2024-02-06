@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -68,10 +69,16 @@ class PDFGenerator(
         val avsender = adresseService.hentAvsender(avsenderRequest(bruker, generellBrevData))
 
         val brevkodePar =
-            brevKode(BrevkodeRequest(generellBrevData.erMigrering(), generellBrevData.sak.sakType, generellBrevData.forenkletVedtak?.type))
+            brevKode(
+                BrevkodeRequest(
+                    generellBrevData.erMigrering(),
+                    generellBrevData.sak.sakType,
+                    generellBrevData.forenkletVedtak?.type,
+                ),
+            )
 
         val sak = generellBrevData.sak
-        val letterData =
+        val brevData =
             opprettBrevData(
                 brev,
                 generellBrevData,
@@ -82,7 +89,7 @@ class PDFGenerator(
         val brevRequest =
             BrevbakerRequest.fra(
                 brevKode = brevkodePar.ferdigstilling,
-                letterData = letterData,
+                letterData = brevData,
                 avsender = avsender,
                 soekerOgEventuellVerge = generellBrevData.personerISak.soekerOgEventuellVerge(),
                 sakId = sak.id,
@@ -104,12 +111,14 @@ class PDFGenerator(
         when (brev.prosessType) {
             BrevProsessType.REDIGERBAR ->
                 brevDataMapper.brevDataFerdigstilling(
-                    generellBrevData,
-                    brukerTokenInfo,
-                    InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
-                    brevkode,
-                    automatiskMigreringRequest,
-                    brev.tittel,
+                    BrevDataFerdigstillingRequest(
+                        generellBrevData,
+                        brukerTokenInfo,
+                        InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
+                        brevkode,
+                        automatiskMigreringRequest,
+                        brev.tittel,
+                    ),
                 )
 
             BrevProsessType.AUTOMATISK -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype automatisk")

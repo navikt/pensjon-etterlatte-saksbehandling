@@ -6,7 +6,7 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.BrevKodeMapper
+import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
@@ -20,7 +20,7 @@ import java.util.UUID
 class VedtaksbrevService(
     private val db: BrevRepository,
     private val vedtaksvurderingService: VedtaksvurderingService,
-    private val brevKodeMapper: BrevKodeMapper,
+    private val brevKodeMapperVedtak: BrevKodeMapperVedtak,
     private val brevoppretter: Brevoppretter,
     private val pdfGenerator: PDFGenerator,
 ) {
@@ -62,7 +62,7 @@ class VedtaksbrevService(
             bruker = bruker,
             automatiskMigreringRequest = automatiskMigreringRequest,
             avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
-            brevKode = { brevKodeMapper.brevKode(it) },
+            brevKode = { brevKodeMapperVedtak.brevKode(it) },
         ) { generellBrevData, brev, pdf ->
             lagrePdfHvisVedtakFattet(
                 brev.id,

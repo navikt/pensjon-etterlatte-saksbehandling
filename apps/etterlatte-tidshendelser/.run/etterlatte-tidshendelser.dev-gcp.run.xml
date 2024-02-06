@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="etterlatte-tidshendelser.dev-gcp" type="JetRunConfigurationType">
     <envs>
-      <env name="SCHEDULE_INITIAL_DELAY" value="5" />
-      <env name="SCHEDULE_INTERVAL" value="PT10S" />
+      <env name="JOBB_POLLER_INITIAL_DELAY" value="5" />
+      <env name="JOBB_POLLER_INTERVAL" value="PT10S" />
       <env name="ETTERLATTE_GRUNNLAG_URL" value="https://etterlatte-grunnlag.intern.dev.nav.no" />
       <env name="ETTERLATTE_GRUNNLAG_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-grunnlag/.default" />
       <env name="NAIS_APP_NAME" value="etterlatte-tidshendelser" />

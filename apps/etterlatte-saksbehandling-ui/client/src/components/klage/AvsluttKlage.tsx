@@ -94,7 +94,9 @@ export default function AvsluttKlage() {
           name="kommentar"
           rules={{
             validate: (value, formValues) => {
-              return formValues.aarsakTilAvbrytelse == 'ANNET' && value.length === 0 ? 'Du må skrive en kommentar' : true
+              return formValues.aarsakTilAvbrytelse == 'ANNET' && value.length === 0
+                ? 'Du må skrive en kommentar'
+                : true
             },
           }}
           control={control}

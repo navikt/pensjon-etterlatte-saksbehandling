@@ -10,10 +10,11 @@ import no.nav.etterlatte.joarkhendelser.joark.Kanal
 import no.nav.etterlatte.joarkhendelser.joark.erTemaEtterlatte
 import no.nav.etterlatte.joarkhendelser.joark.lagMerknadFraStatus
 import no.nav.etterlatte.joarkhendelser.joark.temaTilSakType
+import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.isDev
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory
 class JoarkHendelseHandler(
     private val behandlingService: BehandlingService,
     private val safKlient: SafKlient,
+    private val oppgaveKlient: OppgaveKlient,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(JoarkHendelseHandler::class.java)
@@ -63,15 +65,11 @@ class JoarkHendelseHandler(
 
         try {
             if (journalpost.bruker == null) {
-                // TODO:
-                //  Burde vi lage oppgave på dette? Alt krever SakID, så hvordan skal det fungere hvis bruker mangler?
+                logger.warn("Bruker mangler på journalpost id=$journalpost")
 
-                if (isDev()) {
-                    logger.error("Journalpost med id=$journalpostId mangler bruker!")
-                    return // Ignorer hvis miljø er dev. Skal i teorien ikke være et problem i produksjon.
-                } else {
-                    throw IllegalStateException("Journalpost med id=$journalpostId mangler bruker!")
-                }
+                oppgaveKlient.opprettOppgave(journalpostId, hendelse.temaNytt)
+
+                return
             } else if (journalpost.bruker.type == BrukerIdType.ORGNR) {
                 // TODO:
                 //  Må vi lage støtte for ORGNR...?
@@ -124,8 +122,8 @@ class JoarkHendelseHandler(
                 else -> throw IllegalArgumentException("Journalpost=$journalpostId har ukjent hendelsesType=$type")
             }
         } catch (e: Exception) {
-            logger.error("Ukjent feil ved behandling av hendelse=${hendelse.hendelsesId}. Se sikkerlogg for mer detaljer.")
-            sikkerlogger().error("Ukjent feil oppsto ved behandling av journalpost for bruker=${journalpost.bruker}: ", e)
+            logger.error("Feil ved behandling av hendelse=${hendelse.hendelsesId} (se sikkerlogg for mer info)", e)
+            sikkerlogger().error("Feil oppsto ved behandling av journalpost: \n${journalpost.toJson()}: ")
             throw e
         }
     }

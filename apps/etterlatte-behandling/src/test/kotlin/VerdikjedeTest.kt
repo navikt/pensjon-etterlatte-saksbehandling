@@ -163,6 +163,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
                 }.body()
+
             val oppgaverforbehandling = oppgaver.filter { it.referanse == behandlingId.toString() }
             client.post("/api/oppgaver/${oppgaverforbehandling[0].id}/tildel-saksbehandler/") {
                 addAuthToken(tokenSaksbehandler)

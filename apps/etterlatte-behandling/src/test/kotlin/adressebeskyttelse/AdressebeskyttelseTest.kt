@@ -318,14 +318,13 @@ class AdressebeskyttelseTest : BehandlingIntegrationTest() {
                     module(applicationContext)
                 }
 
-            val sak =
-                httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsNummerMedGraderingDTO(fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG))
-                }.apply {
-                    Assertions.assertEquals(HttpStatusCode.OK, status)
-                }.body<Sak>()
+            httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
+                addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsNummerMedGraderingDTO(fnr, AdressebeskyttelseGradering.STRENGT_FORTROLIG))
+            }.apply {
+                Assertions.assertEquals(HttpStatusCode.OK, status)
+            }.body<Sak>()
 
             httpClient.post("/personer/saker/${SakType.BARNEPENSJON}") {
                 addAuthToken(tokenSaksbehandler)

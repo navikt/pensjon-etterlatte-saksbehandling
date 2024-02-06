@@ -14,7 +14,6 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
-import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Brevtype
@@ -35,7 +34,6 @@ class Brevoppretter(
     private val brevdataFacade: BrevdataFacade,
     private val brevbaker: BrevbakerService,
     private val redigerbartVedleggHenter: RedigerbartVedleggHenter,
-    private val brevKodeMapperVedtak: BrevKodeMapperVedtak,
 ) {
     suspend fun opprettVedtaksbrev(
         sakId: Long,
@@ -43,6 +41,7 @@ class Brevoppretter(
         brukerTokenInfo: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         // TODO EY-3232 - Fjerne migreringstilpasning
+        brevKode: ((b: BrevkodeRequest) -> EtterlatteBrevKode),
     ): Brev {
         require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -61,7 +60,7 @@ class Brevoppretter(
             behandlingId = behandlingId,
             bruker = brukerTokenInfo,
             automatiskMigreringRequest = automatiskMigreringRequest,
-            brevKode = { brevKodeMapperVedtak.brevKode(it).redigering },
+            brevKode = brevKode,
             brevtype = Brevtype.VEDTAK,
         ).first
     }

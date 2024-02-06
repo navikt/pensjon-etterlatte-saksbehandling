@@ -159,7 +159,7 @@ class ApplicationBuilder {
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
 
     private val brevoppretter =
-        Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter, brevKodeMapperVedtak)
+        Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
 
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, brevDataMapperFerdigstilling, adresseService, brevbakerService)

@@ -50,6 +50,7 @@ class VedtaksbrevService(
             behandlingId = behandlingId,
             brukerTokenInfo = brukerTokenInfo,
             automatiskMigreringRequest = automatiskMigreringRequest,
+            brevKode = { brevKodeMapperVedtak.brevKode(it).redigering },
         )
 
     suspend fun genererPdf(

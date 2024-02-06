@@ -56,17 +56,17 @@ class NavAnsattKlientImpl(
             val saksbehandlerCache = navneCache.getIfPresent(ident)
 
             if (saksbehandlerCache != null) {
-                logger.info("Fant cachet saksbehandler med ident $ident")
+                logger.info("Fant cachet saksbehandlernavn med ident $ident")
                 saksbehandlerCache
             } else {
-                logger.info("Henter info om saksbehandler med ident $ident")
+                logger.info("Henter info om saksbehandlernavn med ident $ident")
 
                 retryOgPakkUt<SaksbehandlerInfo?> {
                     client.get("$url/navansatt/$ident").body()
                 }.also { navneCache.put(ident, it) }
             }
         } catch (exception: Exception) {
-            throw RuntimeException("Feil i kall mot navansatt med ident: $ident", exception)
+            throw RuntimeException("Feil i kall mot navansatt navn med ident: $ident", exception)
         }
 
     override suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet> =

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.job
 
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -18,22 +19,36 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
     Thread.sleep(Duration.ofMinutes(3L).toMillis())
     if (context.leaderElectionKlient.isLeader()) {
         logger.info("Henting av saksbehandlernavn jobb leader is true, starter jobb")
+        val handler =
+            CoroutineExceptionHandler { _, exception ->
+                logger.error("saksbehandlernavnjob feilet se exception $exception")
+            }
+
         GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
             val tidbrukt =
                 measureTime {
                     val sbidenter = context.saksbehandlerInfoDao.hentalleSaksbehandlere()
-                    logger.info("Antall identer ${sbidenter.size}")
-
+                    logger.info("Antall saksbehandlingsidenter ${sbidenter.size}")
                     val filtrerteIdenter = sbidenter.filter { !context.saksbehandlerInfoDao.saksbehandlerFinnes(it) }
+                    logger.info("Antall saksbehandlingsidenter uten navn i databasen ${sbidenter.size}")
 
                     val egneIdenter =
-                        filtrerteIdenter.filter { listOf("PESYS", "EY").contains(it) }
+                        filtrerteIdenter.filter { listOf("PESYS", "EY", "GJENOPPRETTA").contains(it) }
                             .map { it to SaksbehandlerInfo(it, it) }
 
+                    logger.info("Mappet egne ${sbidenter.size}")
+
+                    val pattern = Regex("[a-zA-Z]\\d{6}")
                     val hentedeIdenter =
                         coroutineScope {
-                            filtrerteIdenter.filter { !listOf("PESYS", "EY").contains(it) }
-                                .map { it to async { context.navAnsattKlient.hentSaksbehanderNavn(it) } }
+                            filtrerteIdenter.filter {
+                                !listOf(
+                                    "PESYS",
+                                    "EY",
+                                    "GJENOPPRETTA",
+                                ).contains(it) && it.length == 7 && pattern.containsMatchIn(it)
+                            }
+                                .map { it to async(handler) { context.navAnsattKlient.hentSaksbehanderNavn(it) } }
                                 .map { it.first to it.second.await() }
                         }
 

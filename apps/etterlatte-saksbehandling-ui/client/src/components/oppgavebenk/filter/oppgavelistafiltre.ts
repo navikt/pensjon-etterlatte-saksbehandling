@@ -140,7 +140,7 @@ function filtrerOppgavekilde(oppgaveKildeFilterKeys: OppgaveKildeFilterKeys, opp
 
 function finnFnrIOppgaver(fnr: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   if (fnr && fnr.length > 0) {
-    return oppgaver.filter((o) => o.fnr.includes(fnr.trim()))
+    return oppgaver.filter((o) => o.fnr?.includes(fnr.trim()))
   } else {
     return oppgaver
   }
@@ -190,12 +190,12 @@ export function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
   switch (retning) {
     case 'ascending':
       return oppgaver.sort((a: OppgaveDTO, b: OppgaveDTO) => {
-        return Number(a.fnr.slice(0, 5)) - Number(b.fnr.slice(0, 5))
+        return Number(a.fnr?.slice(0, 5)) - Number(b.fnr?.slice(0, 5))
       })
     case 'descending':
       return oppgaver
         .sort((a: OppgaveDTO, b: OppgaveDTO) => {
-          return Number(a.fnr.slice(0, 5)) - Number(b.fnr.slice(0, 5))
+          return Number(a.fnr?.slice(0, 5)) - Number(b.fnr?.slice(0, 5))
         })
         .reverse()
     case 'ingen':

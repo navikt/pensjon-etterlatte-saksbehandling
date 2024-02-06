@@ -29,7 +29,7 @@ data class GosysApiOppgave(
     val aktoerId: String?,
     val beskrivelse: String,
     val status: String,
-    val fristFerdigstillelse: LocalDate,
+    val fristFerdigstillelse: LocalDate? = null,
 )
 
 data class GosysEndreSaksbehandlerRequest(
@@ -90,7 +90,6 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                     .plus("&tema=EYO")
                     .plus("&limit=1000")
                     .plus(enhetsnr?.let { "&tildeltEnhetsnr=$it" } ?: "")
-//                .plus("&tilordnetRessurs=${brukerTokenInfo.ident()}")
 
             return downstreamResourceClient
                 .get(

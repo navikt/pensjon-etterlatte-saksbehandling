@@ -151,7 +151,7 @@ class BehandlingFactory(
 
         val persongalleri =
             with(request) {
-                if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
+                if (kilde?.foerstOpprettaIPesys() == true) {
                     persongalleri.copy(innsender = kilde!!.name)
                 } else if (persongalleri.innsender == null) {
                     persongalleri.copy(innsender = brukerTokenInfo.ident())
@@ -197,7 +197,7 @@ class BehandlingFactory(
                     SoeknadMottattDato(mottattDato).toJsonNode(),
                 ),
             )
-        if (request.kilde == Vedtaksloesning.PESYS || request.kilde == Vedtaksloesning.GJENOPPRETTA) {
+        if (request.kilde?.foerstOpprettaIPesys() == true) {
             opplysninger.add(lagOpplysning(Opplysningstype.FORELDRELOES, kilde, request.foreldreloes.toJsonNode()))
             // TODO Legge til uføre her?
         }
@@ -315,3 +315,5 @@ class ManuellMigreringHarEksisterendeIverksattBehandling : UgyldigForespoerselEx
     code = "MANUELL_MIGRERING_EKSISTERENDE_IVERKSATT",
     detail = "Det eksisterer allerede en sak med en iverksatt behandling for angitt søker",
 )
+
+fun Vedtaksloesning.foerstOpprettaIPesys() = this == Vedtaksloesning.PESYS || this == Vedtaksloesning.GJENOPPRETTA

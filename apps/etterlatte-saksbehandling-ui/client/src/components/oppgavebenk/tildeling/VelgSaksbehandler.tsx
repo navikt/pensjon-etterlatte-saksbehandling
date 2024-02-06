@@ -8,7 +8,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 
 interface Props {
   saksbehandlere: Array<string>
-  saksbehandler: string | null
+  saksbehandlerNavn: string | null
   oppgaveId: string
   sakId: number
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
@@ -19,7 +19,7 @@ interface Props {
 
 export const VelgSaksbehandler = ({
   saksbehandlere,
-  saksbehandler,
+  saksbehandlerNavn,
   erRedigerbar,
   oppgaveId,
   sakId,
@@ -31,7 +31,7 @@ export const VelgSaksbehandler = ({
 
   const [openDropdown, setOpenDropdown] = useState<boolean>(false)
 
-  const [valgtSaksbehandler, setValgtSaksbehandler] = useState<string | null>(saksbehandler)
+  const [valgtSaksbehandler, setValgtSaksbehandler] = useState<string | null>(saksbehandlerNavn)
 
   const [, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
   const [, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
@@ -90,7 +90,7 @@ export const VelgSaksbehandler = ({
             onClick={() => setOpenDropdown(true)}
           >
             {valgtSaksbehandler
-              ? valgtSaksbehandler === innloggetSaksbehandler.ident
+              ? valgtSaksbehandler === innloggetSaksbehandler.navn
                 ? `${valgtSaksbehandler} (meg)`
                 : valgtSaksbehandler
               : 'Ikke tildelt'}
@@ -127,7 +127,7 @@ export const VelgSaksbehandler = ({
           </Dropdown.Menu>
         </Dropdown>
       ) : (
-        <SaksbehandlerWrapper>{saksbehandler}</SaksbehandlerWrapper>
+        <SaksbehandlerWrapper>{saksbehandlerNavn}</SaksbehandlerWrapper>
       )}
     </div>
   )

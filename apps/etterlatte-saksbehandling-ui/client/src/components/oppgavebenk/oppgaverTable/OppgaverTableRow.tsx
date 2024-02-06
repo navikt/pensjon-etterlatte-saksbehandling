@@ -29,7 +29,7 @@ export const OppgaverTableRow = ({
   const [saksbehandlere] = useState<Array<string>>(
     Array.from(
       new Set(
-        alleOppgaver.map((oppgave) => oppgave.saksbehandler).filter((s): s is Exclude<typeof s, null> => s !== null)
+        alleOppgaver.map((oppgave) => oppgave.saksbehandlerNavn).filter((s): s is Exclude<typeof s, null> => s !== null)
       )
     )
   )
@@ -64,7 +64,7 @@ export const OppgaverTableRow = ({
       <Table.DataCell>
         <VelgSaksbehandler
           saksbehandlere={saksbehandlere}
-          saksbehandler={oppgave.saksbehandlerNavn}
+          saksbehandlerNavn={oppgave.saksbehandlerNavn}
           oppgaveId={oppgave.id}
           sakId={oppgave.sakId}
           oppdaterTildeling={oppdaterTildeling}

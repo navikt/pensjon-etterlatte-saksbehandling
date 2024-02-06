@@ -9,7 +9,7 @@ class AldersovergangerService(
 ) {
     private val logger = LoggerFactory.getLogger(AldersovergangerService::class.java)
 
-    suspend fun execute(jobb: HendelserJobb) {
+    fun execute(jobb: HendelserJobb) {
         logger.info("Handling jobb ${jobb.id} med type ${jobb.type} (${jobb.type.beskrivelse})")
 
         if (jobb.type == JobbType.AO_BP20) {

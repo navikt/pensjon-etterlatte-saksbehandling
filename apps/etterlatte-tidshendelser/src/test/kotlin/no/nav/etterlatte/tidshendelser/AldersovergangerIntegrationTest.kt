@@ -4,9 +4,8 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.mockk.clearAllMocks
-import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
@@ -54,9 +53,9 @@ class AldersovergangerIntegrationTest {
         val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
         val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
 
-        coEvery { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(20)) } returns listOf(1, 2, 3)
+        every { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(20)) } returns listOf(1, 2, 3)
 
-        runBlocking { aldersovergangerService.execute(jobb) }
+        aldersovergangerService.execute(jobb)
 
         val hendelser = hendelseDao.hentHendelserForJobb(jobb.id)
 

@@ -14,9 +14,10 @@ class JobbRunner(
         hendelseDao.hentJobber("NY").forEach { jobb ->
             logger.info("Fant jobb ${jobb.id} med type ${jobb.type}, status (${jobb.status})")
 
-//            when (jobb.type) {
-//                JobbType.AO_BP20 -> aldersovergangerService.execute(jobb)
-//            }
+            when (jobb.type) {
+                JobbType.AO_BP20 -> aldersovergangerService.execute(jobb)
+                JobbType.AO_BP18 -> logger.warn("Ikke implementert: AO_BP18")
+            }
         }
     }
 }

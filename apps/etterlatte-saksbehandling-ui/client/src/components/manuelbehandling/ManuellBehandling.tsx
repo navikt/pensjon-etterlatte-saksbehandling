@@ -1,5 +1,5 @@
 import { Alert, Button, Checkbox, Select, TextField } from '@navikt/ds-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
@@ -18,9 +18,14 @@ import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~components/person/EndreEnhet'
+import { useParams } from 'react-router-dom'
+import { hentOppgave } from '~shared/api/oppgaver'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
+  const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
+  const { '*': oppgaveId } = useParams()
+
   const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const [status, opprettNyBehandling] = useApiCall(opprettBehandling)
   const [nyBehandlingId, setNyId] = useState('')
@@ -33,6 +38,19 @@ export default function ManuellBehandling() {
   const [overstyrTrygdetid, setOverstyrTrygdetid] = useState<boolean>(false)
 
   const [pesysId, setPesysId] = useState<number | undefined>(undefined)
+  const [fnrFraOppgave, setFnr] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    if (oppgaveId) {
+      apiHentOppgave(oppgaveId, (oppgave) => {
+        setFnr(oppgave.fnr)
+        if (oppgave.merknad) {
+          const pesysid = oppgave.merknad.split('=')[1]
+          setPesysId(Number(pesysid))
+        }
+      })
+    }
+  }, [oppgaveId])
 
   const [enhet, setEnhet] = useState<EnhetFilterKeys>('VELGENHET')
 
@@ -72,6 +90,9 @@ export default function ManuellBehandling() {
     )
   }
 
+  if (isPending(oppgaveStatus)) {
+    return <div>Henter oppgave</div>
+  }
   return (
     <FormWrapper>
       <h1>Manuell behandling</h1>
@@ -175,7 +196,7 @@ export default function ManuellBehandling() {
       <Checkbox checked={erForeldreloes} onChange={() => setErForeldreloes(!erForeldreloes)}>
         Er foreldreløs
       </Checkbox>
-      <PersongalleriBarnepensjon erManuellMigrering={true} />
+      <PersongalleriBarnepensjon erManuellMigrering={true} fnrFraOppgave={fnrFraOppgave} />
 
       <Knapp>
         <Button

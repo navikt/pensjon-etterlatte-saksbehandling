@@ -35,8 +35,8 @@ class ApplicationContext(env: Map<String, String> = System.getenv()) {
 
     private val oppgaveKlient =
         OppgaveKlient(
-            httpClientCredentials(config.getString("oppgave.base.url")),
-            config.getString("oppgave.azure.scope"),
+            httpClientCredentials(config.getString("oppgave.azure.scope")),
+            config.getString("oppgave.base.url"),
         )
 
     private val joarkHendelseHandler =

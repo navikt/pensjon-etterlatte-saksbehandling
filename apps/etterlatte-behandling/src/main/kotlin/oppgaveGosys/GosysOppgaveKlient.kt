@@ -27,7 +27,7 @@ data class GosysApiOppgave(
     val tildeltEnhetsnr: String,
     val tilordnetRessurs: String?,
     val aktoerId: String?,
-    val beskrivelse: String,
+    val beskrivelse: String?,
     val status: String,
     val fristFerdigstillelse: LocalDate,
 )

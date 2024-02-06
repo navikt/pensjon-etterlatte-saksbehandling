@@ -24,7 +24,7 @@ class OppgaveKlient(
         logger.info("Oppretter manuell journalføringsoppgave")
 
         val response =
-            httpClient.post("$url/pdlident") {
+            httpClient.post("$url/api/v1/oppgaver") {
                 contentType(ContentType.Application.Json)
                 setBody(OpprettOppgaveRequest(journalpostId.toString(), tema))
             }.body<JsonNode>()

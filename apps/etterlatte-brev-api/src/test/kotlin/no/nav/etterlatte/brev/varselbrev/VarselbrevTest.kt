@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.Brevoppretter
+import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
@@ -98,7 +99,8 @@ class VarselbrevTest {
                 redigerbartVedleggHenter,
             )
         val behandlingKlient = mockk<BehandlingKlient>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
-        service = VarselbrevService(brevRepository, brevoppretter, behandlingKlient)
+        val pdfGenerator = mockk<PDFGenerator>()
+        service = VarselbrevService(brevRepository, brevoppretter, behandlingKlient, pdfGenerator)
     }
 
     @AfterEach

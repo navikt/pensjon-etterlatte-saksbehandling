@@ -66,14 +66,14 @@ class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
             BARNEPENSJON_INNVILGELSE -> barnepensjonInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
             BARNEPENSJON_AVSLAG -> barnepensjonAvslag(innholdMedVedlegg, generellBrevData)
             BARNEPENSJON_OPPHOER -> barnepensjonOpphoer(innholdMedVedlegg, generellBrevData)
-            BARNEPENSJON_VARSEL -> ManueltBrevData()
+            BARNEPENSJON_VARSEL -> ManueltBrevData(innholdMedVedlegg.innhold())
 
             OMSTILLINGSSTOENAD_INNVILGELSE -> omstillingsstoenadInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
             OMSTILLINGSSTOENAD_REVURDERING -> omstillingsstoenadRevurdering(bruker, generellBrevData, innholdMedVedlegg)
             OMSTILLINGSSTOENAD_AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, innholdMedVedlegg.innhold())
             OMSTILLINGSSTOENAD_OPPHOER ->
                 OmstillingsstoenadOpphoer.fra(generellBrevData.utlandstilknytning, innholdMedVedlegg.innhold())
-            OMSTILLINGSSTOENAD_VARSEL -> ManueltBrevData()
+            OMSTILLINGSSTOENAD_VARSEL -> ManueltBrevData(innholdMedVedlegg.innhold())
 
             TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
             else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")

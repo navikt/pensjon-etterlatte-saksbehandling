@@ -20,11 +20,14 @@ export default function ForhaandsvisningBrev({ brev }: { brev: IBrev }) {
   }, [fileURL])
 
   useEffect(() => {
-    genererBrevPdf({ brevId: brev.id, behandlingId: brev.behandlingId, sakId: brev.sakId }, (bytes) => {
-      const blob = new Blob([bytes], { type: 'application/pdf' })
+    genererBrevPdf(
+      { brevId: brev.id, behandlingId: brev.behandlingId, sakId: brev.sakId, brevtype: brev.brevtype },
+      (bytes) => {
+        const blob = new Blob([bytes], { type: 'application/pdf' })
 
-      setFileURL(URL.createObjectURL(blob))
-    })
+        setFileURL(URL.createObjectURL(blob))
+      }
+    )
   }, [brev.id, brev.behandlingId])
 
   return (

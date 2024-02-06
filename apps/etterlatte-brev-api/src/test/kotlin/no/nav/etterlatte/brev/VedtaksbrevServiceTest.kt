@@ -618,6 +618,7 @@ internal class VedtaksbrevServiceTest {
         Tidspunkt.now(),
         Tidspunkt.now(),
         mottaker = opprettMottaker(),
+        brevtype = Brevtype.VEDTAK,
     )
 
     private fun opprettGenerellBrevdata(

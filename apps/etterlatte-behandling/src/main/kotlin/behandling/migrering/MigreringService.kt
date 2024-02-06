@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.rapidsandrivers.migrering.GJENNOPPRETTELSE_OPPGAVE
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -146,7 +147,7 @@ class MigreringService(
         inTransaction {
             val sak = finnEllerOpprettSak(request)
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = "MANGLER",
+                referanse = GJENNOPPRETTELSE_OPPGAVE,
                 sakId = sak.id,
                 oppgaveKilde = OppgaveKilde.BEHANDLING,
                 oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,

@@ -43,6 +43,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.rapidsandrivers.migrering.GJENNOPPRETTELSE_OPPGAVE
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -170,7 +171,7 @@ class BehandlingFactory(
             }.behandling
 
         if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
-            oppgaveService.hentOppgaverForSak(sak.id).find { it.referanse == "TOM" }?.let {
+            oppgaveService.hentOppgaverForSak(sak.id).find { it.referanse == GJENNOPPRETTELSE_OPPGAVE }?.let {
                 oppgaveService.hentOgFerdigstillOppgaveById(it.id, brukerTokenInfo)
             }
         }

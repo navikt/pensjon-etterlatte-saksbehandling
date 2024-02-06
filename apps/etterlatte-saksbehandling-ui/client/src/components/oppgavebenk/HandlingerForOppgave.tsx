@@ -76,10 +76,12 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
               size="small"
               as="a"
               href={
-                referanse === 'MANGLER' ? `/manuellbehandling/${fnr}/${pesysid(merknad)}` : `/behandling/${referanse}`
+                referanse === 'GJENNOPPRETTELSE_OPPGAVE'
+                  ? `/manuellbehandling/${fnr}/${pesysid(merknad)}`
+                  : `/behandling/${referanse}`
               }
             >
-              {referanse === 'MANGLER' ? 'Gå til manuell opprettelse' : 'Gå til behandling'}
+              {referanse === 'GJENNOPPRETTELSE_OPPGAVE' ? 'Gå til manuell opprettelse' : 'Gå til behandling'}
             </Button>
           )}
         </>

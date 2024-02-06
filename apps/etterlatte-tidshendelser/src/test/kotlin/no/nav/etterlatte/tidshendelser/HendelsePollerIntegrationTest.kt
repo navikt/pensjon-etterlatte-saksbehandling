@@ -46,7 +46,7 @@ class HendelsePollerIntegrationTest {
     fun `poll skal sjekke for hendelser med status NY og starte behandling`() {
         val behandlingsmaaned = YearMonth.of(2024, Month.FEBRUARY)
         val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP18, behandlingsmaaned)
-        hendelseDao.opprettHendelserForSaker(jobb.id, listOf(5, 7, 12, 20, 33, 50))
+        hendelseDao.opprettHendelserForSaker(jobb.id, listOf(5, 7, 12, 20, 33, 50), Steg.IDENTIFISERT_SAK)
 
         hendelsePoller.poll(3)
 

@@ -27,6 +27,16 @@ data class Hendelse(
     val endret: LocalDateTime,
     val versjon: Int,
     val status: String,
-    val utfall: String?,
+    val steg: String,
     val info: Any?,
 )
+
+enum class JobbType(val beskrivelse: String) {
+    AO_BP18("Aldersovergang barnepensjon ved 18 år"),
+    AO_BP20("Aldersovergang barnepensjon ved 20 år"),
+}
+
+enum class Steg {
+    IDENTIFISERT_SAK,
+    VURDERT_LOEPENDE_YTELSE,
+}

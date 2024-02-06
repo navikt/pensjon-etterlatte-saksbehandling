@@ -29,6 +29,6 @@ class JobbTestdata(
                 )
             }
 
-        return hendelseDao.hentJobb(id!!)!!
+        return hendelseDao.hentJobb(id!!.toInt())
     }
 }

@@ -19,10 +19,11 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
             this.block(it)
         }
 
-    fun hentJobb(id: Long): HendelserJobb? {
+    fun hentJobb(id: Int): HendelserJobb {
         return datasource.transaction { tx ->
             queryOf("SELECT * FROM jobb WHERE id = :id", mapOf("id" to id))
                 .let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asSingle) }
+                ?: throw NoSuchElementException("Fant ikke jobb med id $id")
         }
     }
 
@@ -36,6 +37,45 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                 mapOf("status" to status),
             )
                 .let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
+        }
+    }
+
+    fun oppdaterJobbstatusStartet(hendelserJobb: HendelserJobb) {
+        oppdaterJobbstatus(hendelserJobb, "STARTET")
+    }
+
+    fun oppdaterJobbstatusFerdig(hendelserJobb: HendelserJobb) {
+        oppdaterJobbstatus(hendelserJobb, "FERDIG")
+    }
+
+    private fun oppdaterJobbstatus(
+        hendelserJobb: HendelserJobb,
+        status: String,
+    ) {
+        datasource.transaction {
+            queryOf(
+                """
+                UPDATE jobb 
+                SET status = :status, 
+                    endret = now(),
+                    versjon = versjon + 1
+                WHERE id = :id
+                AND versjon = :versjon
+                """.trimIndent(),
+                mapOf(
+                    "status" to status,
+                    "id" to hendelserJobb.id,
+                    "versjon" to hendelserJobb.versjon,
+                ),
+            )
+                .let { query -> it.run(query.asUpdate) }
+                .also {
+                    if (it == 0) {
+                        throw ConcurrentModificationException(
+                            "Kunne ikke oppdatere jobb [id=${hendelserJobb.id}, versjon=${hendelserJobb.versjon}]",
+                        )
+                    }
+                }
         }
     }
 

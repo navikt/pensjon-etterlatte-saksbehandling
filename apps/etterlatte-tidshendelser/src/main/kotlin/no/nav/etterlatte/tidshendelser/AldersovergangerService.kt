@@ -11,6 +11,7 @@ class AldersovergangerService(
 
     fun execute(jobb: HendelserJobb) {
         logger.info("Handling jobb ${jobb.id} med type ${jobb.type} (${jobb.type.beskrivelse})")
+        hendelseDao.oppdaterJobbstatusStartet(jobb)
 
         if (jobb.type == JobbType.AO_BP20) {
             val foedselsmaaned = jobb.behandlingsmaaned.minusYears(20)
@@ -18,7 +19,14 @@ class AldersovergangerService(
             val saker = grunnlagKlient.hentSaker(foedselsmaaned = foedselsmaaned)
             logger.info("Hentet ${saker.size} saker for brukere født i $foedselsmaaned")
 
-            hendelseDao.opprettHendelserForSaker(jobb.id, saker, Steg.IDENTIFISERT_SAK)
+            if (saker.isNotEmpty()) {
+                hendelseDao.opprettHendelserForSaker(jobb.id, saker, Steg.IDENTIFISERT_SAK)
+            } else {
+                // Nuttin' to do
+                hendelseDao.hentJobb(jobb.id).also {
+                    hendelseDao.oppdaterJobbstatusFerdig(it)
+                }
+            }
         }
     }
 }

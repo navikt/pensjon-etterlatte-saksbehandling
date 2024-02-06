@@ -10,14 +10,14 @@ import java.time.Duration
 import java.util.Date
 import java.util.Timer
 
-class JobbPoller(
+class JobbPollerTask(
     private val leaderElection: LeaderElection,
     private val initialDelaySeconds: Long,
     private val periode: Duration,
     private val clock: Clock,
     private val jobbRunner: JobbRunner,
 ) {
-    private val logger = LoggerFactory.getLogger(JobbPoller::class.java)
+    private val logger = LoggerFactory.getLogger(JobbPollerTask::class.java)
 
     fun start(): Timer {
         logger.info("Starter polling av jobber pr $periode")

@@ -22,7 +22,7 @@ fun main() {
                 object : RapidsConnection.StatusListener {
                     override fun onStartup(rapidsConnection: RapidsConnection) {
                         appContext.dataSource.migrate()
-                        timers.add(appContext.jobbPoller.start())
+                        timers.add(appContext.jobbPollerTask.start())
                         timers.add(appContext.hendelsePoller.start())
                     }
 

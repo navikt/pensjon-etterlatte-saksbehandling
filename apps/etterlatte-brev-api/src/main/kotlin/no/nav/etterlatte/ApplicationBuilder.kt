@@ -172,6 +172,7 @@ class ApplicationBuilder {
             brevoppretter,
             pdfGenerator,
             brevDataMapperRedigerbartUtfall,
+            brevDataMapperFerdigstilling,
         )
 
     private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator)

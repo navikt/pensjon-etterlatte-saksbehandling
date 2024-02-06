@@ -109,6 +109,7 @@ class InformasjonsbrevTest {
                         any(),
                         any(),
                         any(),
+                        any(),
                     )
                 } returns mockk()
             }

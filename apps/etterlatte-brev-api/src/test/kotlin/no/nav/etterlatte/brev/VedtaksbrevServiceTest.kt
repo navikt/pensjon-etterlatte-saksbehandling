@@ -105,6 +105,7 @@ internal class VedtaksbrevServiceTest {
             brevoppretter,
             pdfGenerator,
             BrevDataMapperRedigerbartUtfall(brevdataFacade, migreringBrevDataService),
+            BrevDataMapperFerdigstilling(brevdataFacade),
         )
 
     @BeforeEach

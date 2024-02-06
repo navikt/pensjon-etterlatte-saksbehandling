@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Fagsaksystem
@@ -77,6 +78,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                     )
                 },
                 brevKode = { brevKode },
+                brevDataReq = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
             )
         }
         logger.info("Journalfører $brevKode-brev i sak $sakId")

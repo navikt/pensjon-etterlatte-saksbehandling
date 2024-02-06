@@ -13,6 +13,7 @@ export const ToolTip = (props: {
   return (
     <>
       <IconButton
+        type="button"
         size="small"
         ref={ref}
         onClick={() => setIsOpen(true)}

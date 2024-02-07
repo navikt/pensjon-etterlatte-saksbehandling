@@ -59,7 +59,7 @@ class PenKlient(config: Config, pen: HttpClient) {
             )
     }
 
-    suspend fun sakMedUfoere(fnr: String): SakMedUfoere {
+    suspend fun sakMedUfoere(fnr: String): List<SakMedUfoere> {
         /*
         TODO implementere request til /pen/springapi/sak/sammendrag
         eksempel respons
@@ -73,9 +73,11 @@ class PenKlient(config: Config, pen: HttpClient) {
                 "arkivtema": "UFO"
             }
          */
-        return SakMedUfoere(
-            sakType = "UFOREP",
-            sakStatus = "LOPENDE",
+        return listOf(
+            SakMedUfoere(
+                sakType = "UFOREP",
+                sakStatus = "LOPENDE",
+            ),
         )
     }
 }

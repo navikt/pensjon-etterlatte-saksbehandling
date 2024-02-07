@@ -8,11 +8,13 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.Pesyssak
 import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
+import no.nav.etterlatte.migrering.pen.SakMedUfoere
 import no.nav.etterlatte.migrering.pen.tilVaarModell
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
@@ -95,14 +97,13 @@ internal class MigrerSpesifikkSakRiver(
                 .also { pesysRepository.lagrePesyssak(pesyssak = it) }
         packet.setEventNameForHendelseType(Migreringshendelser.MIGRER_SAK)
 
-        val erUfoere = hentErUfoere(pesyssak.soeker.value) // TODO Avgjør om skal lede til manuelt eller til automatisk
-
         val verifisertRequest =
-            verifiserer.verifiserRequest(pesyssak.tilMigreringsrequest()).also {
+            verifiserer.verifiserRequest(pesyssak.tilMigreringsrequest()).let {
+                verifiserUfoere(it)
+            }.also {
                 pesysRepository.oppdaterKanGjenopprettesAutomatisk(it)
             }
         packet.hendelseData = verifisertRequest
-        // TODO Her hvis trygd fortsatt skal tas automatisk
 
         if (featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)) {
             sendSakTilMigrering(packet, verifisertRequest, context, pesyssak)
@@ -110,6 +111,24 @@ internal class MigrerSpesifikkSakRiver(
             logger.info("Migrering er skrudd av. Sender ikke pesys-sak ${pesyssak.id} videre.")
             pesysRepository.lagreGyldigDryRun(verifisertRequest)
         }
+    }
+
+    private fun verifiserUfoere(request: MigreringRequest): MigreringRequest {
+        if (request.kanAutomatiskGjenopprettes) {
+            val ufoere = hentUfoereSak(request.soeker.value)
+            if (ufoere != null) {
+                pesysRepository.lagreFeilkjoering(
+                    request.toJson(),
+                    feilendeSteg = Migreringshendelser.VERIFISER.lagEventnameForType(),
+                    feil = "Har uføretrygd med status ${ufoere.sakStatus}",
+                    pesysId = request.pesysId,
+                )
+                return request.copy(
+                    kanAutomatiskGjenopprettes = false,
+                )
+            }
+        }
+        return request
     }
 
     private fun hentSak(
@@ -122,12 +141,11 @@ internal class MigrerSpesifikkSakRiver(
         return sakFraPEN
     }
 
-    private fun hentErUfoere(fnr: String): Boolean {
+    private fun hentUfoereSak(fnr: String): SakMedUfoere? {
         logger.info("Prøver å hente sak med uføre for ${fnr.maskerFnr()} fra PEN")
         val sakFraPEN = runBlocking { penKlient.sakMedUfoere(fnr) }
         logger.info("Henta sak med uføre for ${fnr.maskerFnr()} fra PEN")
-        // TODO skille mellom løpende og under behandling/har søknad?
-        return sakFraPEN.sakStatus == "LOPENDE" && sakFraPEN.sakType == "UFOREP"
+        return sakFraPEN.firstOrNull() // TODO finn uføre hvis finnes ellers null
     }
 
     private fun sendSakTilMigrering(

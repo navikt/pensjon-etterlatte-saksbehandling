@@ -71,8 +71,18 @@ internal class Verifiserer(
 
         val alleFeil = feilSomAvbryter + feilSomMedfoererManuell
         if (alleFeil.isNotEmpty()) {
-            lagreFeil(request, alleFeil)
+            logger.warn(
+                "Sak ${request.pesysId} har ufullstendige data i PDL, eller feiler verifisering av andre grunner. " +
+                    "Kan ikke migrere. Se sikkerlogg for detaljer",
+            )
+            repository.lagreFeilkjoering(
+                request.toJson(),
+                feilendeSteg = Migreringshendelser.VERIFISER.lagEventnameForType(),
+                feil = alleFeil.map { it.message }.toJson(),
+                pesysId = request.pesysId,
+            )
             if (feilSomAvbryter.isNotEmpty()) {
+                repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
                 throw samleExceptions(feilSomAvbryter)
             }
         }
@@ -87,23 +97,6 @@ internal class Verifiserer(
             true -> listOf(SoekerHaddeFlyktningerfordel)
             false -> emptyList()
         }
-
-    private fun lagreFeil(
-        request: MigreringRequest,
-        feil: List<Exception>,
-    ) {
-        logger.warn(
-            "Sak ${request.pesysId} har ufullstendige data i PDL, eller feiler verifisering av andre grunner. " +
-                "Kan ikke migrere. Se sikkerlogg for detaljer",
-        )
-        repository.lagreFeilkjoering(
-            request.toJson(),
-            feilendeSteg = Migreringshendelser.VERIFISER.lagEventnameForType(),
-            feil = feil.map { it.message }.toJson(),
-            pesysId = request.pesysId,
-        )
-        repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
-    }
 
     private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {
         val personer = mutableListOf(Pair(PersonRolle.BARN, request.soeker))

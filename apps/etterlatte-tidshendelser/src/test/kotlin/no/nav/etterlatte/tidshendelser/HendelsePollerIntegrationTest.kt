@@ -42,8 +42,8 @@ class HendelsePollerIntegrationTest {
 
         hendelserEtterPoll.forEach {
             when {
-                it.sakId <= 12 -> it.status shouldBe HENDELSE_STATUS_SENDT
-                else -> it.status shouldBe HENDELSE_STATUS_OPPRETTET
+                it.sakId <= 12 -> it.status shouldBe HendelseStatus.SENDT
+                else -> it.status shouldBe HendelseStatus.NY
             }
         }
     }

@@ -40,7 +40,7 @@ class AldersovergangerIntegrationTest {
         aldersovergangerService.execute(jobb)
 
         hendelseDao.hentHendelserForJobb(jobb.id) shouldHaveSize 0
-        hendelseDao.hentJobb(jobb.id).status shouldBe "FERDIG"
+        hendelseDao.hentJobb(jobb.id).status shouldBe JobbStatus.FERDIG
     }
 
     @Test
@@ -57,10 +57,10 @@ class AldersovergangerIntegrationTest {
         hendelser shouldHaveSize 3
         hendelser.map { it.sakId } shouldContainExactlyInAnyOrder listOf(2, 1, 3)
         hendelser.map { it.jobbId } shouldContainOnly setOf(jobb.id)
-        hendelser.map { it.status } shouldContainOnly setOf("NY")
+        hendelser.map { it.status } shouldContainOnly setOf(HendelseStatus.NY)
 
         with(hendelseDao.hentJobb(jobb.id)) {
-            status shouldBe "STARTET"
+            status shouldBe JobbStatus.STARTET
             versjon shouldBe 2
         }
     }

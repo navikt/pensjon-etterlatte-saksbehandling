@@ -22,6 +22,7 @@ enum class EtterlatteBrevKode(val brevtype: Brevtype, val tittel: String? = null
     BARNEPENSJON_VEDTAK_OMREGNING(VEDTAK, "Vedtak - endring av barnepensjon"),
     BARNEPENSJON_VEDTAK_OMREGNING_FERDIG(VEDTAK),
     BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL(VEDLEGG, "Trygdetid i vedlegg beregning av barnepensjon"),
+
     OMSTILLINGSSTOENAD_AVSLAG(VEDTAK, "Vedtak om avslått omstillingsstønad"),
     OMSTILLINGSSTOENAD_AVSLAG_UTFALL(VEDTAK),
     OMSTILLINGSSTOENAD_INNVILGELSE(VEDTAK, "Vedtak om innvilget omstillingsstønad"),
@@ -29,12 +30,14 @@ enum class EtterlatteBrevKode(val brevtype: Brevtype, val tittel: String? = null
     OMSTILLINGSSTOENAD_OPPHOER(VEDTAK, "Opphør av omstillingsstønad"),
     OMSTILLINGSSTOENAD_OPPHOER_UTFALL(VEDTAK),
     OMSTILLINGSSTOENAD_REVURDERING(VEDTAK),
-    OMSTILLINGSSTOENAD_REVURDERING_OPPHOER_MANUELL(VEDTAK), // Denne bør fjernes,
     OMSTILLINGSSTOENAD_VARSEL(VARSEL),
     OMSTILLINGSSTOENAD_VARSEL_UTFALL(VARSEL),
-    OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL(VEDTAK, "Utfall ved beregning av omstillingsstønad"),
+    OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL(VEDLEGG, "Utfall ved beregning av omstillingsstønad"),
+    OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL(VEDLEGG, "Utfall ved forhåndsvarsel av feilutbetaling"),
+
     TILBAKEKREVING_INNHOLD(VEDTAK),
     TILBAKEKREVING_FERDIG(VEDTAK),
+
     TOM_DELMAL(MANUELT),
     TOM_MAL_INFORMASJONSBREV(INFORMASJON),
     TOM_MAL(MANUELT),

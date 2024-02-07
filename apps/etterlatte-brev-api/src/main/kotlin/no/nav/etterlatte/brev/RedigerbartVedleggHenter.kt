@@ -18,52 +18,65 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService) {
         when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> innvilgelseOMS(bruker, generellBrevData)
-                    VedtakType.ENDRING -> endringOMS(bruker, generellBrevData)
+                    VedtakType.INNVILGELSE -> vedleggInnvilgelseOmstillingsstoenad(bruker, generellBrevData)
+                    VedtakType.ENDRING -> vedleggEndringOmstillingsstoenad(bruker, generellBrevData)
                     else -> null
                 }
             }
 
             SakType.BARNEPENSJON -> {
                 when (generellBrevData.forenkletVedtak?.type) {
-                    VedtakType.INNVILGELSE -> innvilgelseBP(bruker, generellBrevData)
-                    VedtakType.ENDRING -> endringBP(bruker, generellBrevData)
+                    VedtakType.INNVILGELSE -> vedleggInnvilgelseBarnepensjon(bruker, generellBrevData)
+                    VedtakType.ENDRING -> vedleggEndringBarnepensjon(bruker, generellBrevData)
                     else -> null
                 }
             }
         }
 
-    private suspend fun innvilgelseOMS(
+    private suspend fun vedleggInnvilgelseOmstillingsstoenad(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
-    ) = listOf(utfallBeregningOMS(bruker, generellBrevData))
+    ) = listOf(hentInnholdBeregningVedleggOms(bruker, generellBrevData))
 
-    private suspend fun endringOMS(
+    private suspend fun vedleggEndringOmstillingsstoenad(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
-    ) = listOf(utfallBeregningOMS(bruker, generellBrevData))
+    ) = listOf(
+        hentInnholdBeregningVedleggOms(bruker, generellBrevData),
+        hentInnholdForhaandsvarselFeilutbetalingVedleggOms(bruker, generellBrevData),
+    )
 
-    private suspend fun innvilgelseBP(
+    private suspend fun vedleggInnvilgelseBarnepensjon(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
-    ) = listOf(beregningAvBarnepensjonTrygdetid(bruker, generellBrevData))
+    ) = listOf(hentInnholdBeregningAvTrygdetidBp(bruker, generellBrevData))
 
-    private suspend fun endringBP(
+    private suspend fun vedleggEndringBarnepensjon(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
-    ) = listOf(beregningAvBarnepensjonTrygdetid(bruker, generellBrevData))
+    ) = listOf(hentInnholdBeregningAvTrygdetidBp(bruker, generellBrevData))
 
-    private suspend fun utfallBeregningOMS(
+    private suspend fun hentInnholdBeregningVedleggOms(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = hentInnholdFraBrevbakeren(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_BEREGNING_UTFALL,
-        BrevVedleggKey.BEREGNING_INNHOLD,
+        BrevVedleggKey.OMS_BEREGNING,
         generellBrevData,
         bruker,
     )
 
-    private suspend fun beregningAvBarnepensjonTrygdetid(
+    private suspend fun hentInnholdForhaandsvarselFeilutbetalingVedleggOms(
+        bruker: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+    ) = hentInnholdFraBrevbakeren(
+        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+        BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+        generellBrevData,
+        bruker,
+    )
+
+    private suspend fun hentInnholdBeregningAvTrygdetidBp(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = hentInnholdFraBrevbakeren(

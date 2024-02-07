@@ -152,7 +152,8 @@ data class BrevInnholdVedlegg(
 )
 
 enum class BrevVedleggKey {
-    BEREGNING_INNHOLD,
+    OMS_BEREGNING,
+    OMS_FORHAANDSVARSEL_FEILUTBETALING,
     BP_BEREGNING_TRYGDETID,
 }
 

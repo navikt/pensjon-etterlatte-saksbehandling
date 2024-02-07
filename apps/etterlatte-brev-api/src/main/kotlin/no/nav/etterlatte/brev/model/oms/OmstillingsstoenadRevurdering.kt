@@ -22,6 +22,7 @@ import java.time.LocalDate
 
 data class OmstillingsstoenadRevurdering(
     val innhold: List<Slate.Element>,
+    val innholdForhaandsvarsel: List<Slate.Element>,
     val erEndret: Boolean,
     val erOmgjoering: Boolean,
     val datoVedtakOmgjoering: LocalDate?,
@@ -55,14 +56,17 @@ data class OmstillingsstoenadRevurdering(
                     )
                 }
 
+            val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
+
             return OmstillingsstoenadRevurdering(
                 innhold = innholdMedVedlegg.innhold(),
+                innholdForhaandsvarsel = vedleggHvisFeilutbetaling(feilutbetaling, innholdMedVedlegg),
                 erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
                 datoVedtakOmgjoering = null, // TODO klage kobler seg på her
                 beregning =
                     OmstillingsstoenadBeregning(
-                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.BEREGNING_INNHOLD),
+                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
                         virkningsdato = avkortingsinfo.virkningsdato,
                         inntekt = avkortingsinfo.inntekt,
                         grunnbeloep = avkortingsinfo.grunnbeloep,
@@ -89,7 +93,7 @@ data class OmstillingsstoenadRevurdering(
                 harFlereUtbetalingsperioder = beregningsperioder.size > 1,
                 harUtbetaling = beregningsperioder.any { it.utbetaltBeloep.value > 0 },
                 lavEllerIngenInntekt = brevutfall.lavEllerIngenInntekt == LavEllerIngenInntekt.JA,
-                feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
+                feilutbetaling = feilutbetaling,
             )
         }
     }
@@ -120,3 +124,12 @@ private fun toFeilutbetalingType(feilutbetalingValg: FeilutbetalingValg) =
         FeilutbetalingValg.JA_INGEN_TK -> FeilutbetalingType.FEILUTBETALING_UTEN_VARSEL
         FeilutbetalingValg.JA_VARSEL -> FeilutbetalingType.FEILUTBETALING_MED_VARSEL
     }
+
+private fun vedleggHvisFeilutbetaling(
+    feilutbetaling: FeilutbetalingType,
+    innholdMedVedlegg: InnholdMedVedlegg,
+) = if (feilutbetaling == FeilutbetalingType.FEILUTBETALING_MED_VARSEL) {
+    innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING)
+} else {
+    emptyList()
+}

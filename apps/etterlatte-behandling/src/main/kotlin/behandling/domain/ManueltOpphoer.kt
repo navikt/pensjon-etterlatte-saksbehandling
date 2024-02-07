@@ -45,8 +45,9 @@ data class ManueltOpphoer(
                 BehandlingStatus.BEREGNET,
                 BehandlingStatus.RETURNERT,
             ),
+            BehandlingStatus.BEREGNET,
         ) {
-            endreTilStatus(BehandlingStatus.BEREGNET)
+            endreTilStatus(it)
         }
 
     override fun tilAvkortet(): ManueltOpphoer =
@@ -56,8 +57,9 @@ data class ManueltOpphoer(
                 BehandlingStatus.AVKORTET,
                 BehandlingStatus.RETURNERT,
             ),
+            BehandlingStatus.BEREGNET,
         ) {
-            endreTilStatus(BehandlingStatus.BEREGNET)
+            endreTilStatus(it)
         }
 
     override fun tilFattetVedtak(): ManueltOpphoer {
@@ -66,39 +68,39 @@ data class ManueltOpphoer(
             throw TilstandException.IkkeFyltUt
         }
 
-        return hvisTilstandEr(listOf(BehandlingStatus.BEREGNET, BehandlingStatus.RETURNERT)) {
-            endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
+        return hvisTilstandEr(listOf(BehandlingStatus.BEREGNET, BehandlingStatus.RETURNERT), BehandlingStatus.FATTET_VEDTAK) {
+            endreTilStatus(it)
         }
     }
 
     override fun tilAttestert() =
-        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-            endreTilStatus(BehandlingStatus.ATTESTERT)
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK, BehandlingStatus.ATTESTERT) {
+            endreTilStatus(it)
         }
 
     override fun tilAvslag() =
-        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-            endreTilStatus(BehandlingStatus.AVSLAG)
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK, BehandlingStatus.AVSLAG) {
+            endreTilStatus(it)
         }
 
     override fun tilReturnert() =
-        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-            endreTilStatus(BehandlingStatus.RETURNERT)
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK, BehandlingStatus.RETURNERT) {
+            endreTilStatus(it)
         }
 
     override fun tilTilSamordning() =
-        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT)) {
-            endreTilStatus(BehandlingStatus.TIL_SAMORDNING)
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT), BehandlingStatus.TIL_SAMORDNING) {
+            endreTilStatus(it)
         }
 
     override fun tilSamordnet() =
-        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING)) {
-            endreTilStatus(BehandlingStatus.SAMORDNET)
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING), BehandlingStatus.SAMORDNET) {
+            endreTilStatus(it)
         }
 
     override fun tilIverksatt() =
-        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.SAMORDNET)) {
-            endreTilStatus(BehandlingStatus.IVERKSATT)
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.SAMORDNET), BehandlingStatus.IVERKSATT) {
+            endreTilStatus(it)
         }
 
     private fun endreTilStatus(status: BehandlingStatus) =

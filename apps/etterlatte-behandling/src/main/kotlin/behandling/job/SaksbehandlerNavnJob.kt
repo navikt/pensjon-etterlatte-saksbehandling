@@ -27,14 +27,21 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
                 logger.error("Saksbehandlerdatanavn feilet se exception $exception")
             }
 
+        val ugyldigeIdenter =
+            listOf(
+                "PESYS",
+                "EY",
+                "GJENOPPRETTA",
+            )
+
         GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
             try {
-                oppdaterSaksbehandlerNavn(logger, context, subCoroutineExceptionHandler)
+                oppdaterSaksbehandlerNavn(logger, context, subCoroutineExceptionHandler, ugyldigeIdenter)
             } catch (e: Exception) {
                 logger.error("Kunne ikke hente navn for saksbehandlere", e)
             }
             try {
-                oppdaterSaksbehandlerEnhet(logger, context, subCoroutineExceptionHandler)
+                oppdaterSaksbehandlerEnhet(logger, context, subCoroutineExceptionHandler, ugyldigeIdenter)
             } catch (e: Exception) {
                 logger.error("Kunne ikke hente enheter for saksbehandlere", e)
             }
@@ -50,6 +57,7 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
     logger: Logger,
     context: ApplicationContext,
     subCoroutineExceptionHandler: CoroutineExceptionHandler,
+    ugyldigeIdenter: List<String>,
 ) {
     val tidbrukt =
         measureTime {
@@ -60,11 +68,7 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
             val scope = CoroutineScope(SupervisorJob())
             val alleIdenterMedEnheter =
                 sbidenter.filter {
-                    !listOf(
-                        "PESYS",
-                        "EY",
-                        "GJENOPPRETTA",
-                    ).contains(it) && SAKSBEHANDLERPATTERN.matches(it)
+                    it !in ugyldigeIdenter && SAKSBEHANDLERPATTERN.matches(it)
                 }
                     .map {
                         it to
@@ -97,6 +101,7 @@ internal suspend fun oppdaterSaksbehandlerNavn(
     logger: Logger,
     context: ApplicationContext,
     subCoroutineExceptionHandler: CoroutineExceptionHandler,
+    ugyldigeIdenter: List<String>,
 ) {
     val tidbrukt =
         measureTime {
@@ -106,7 +111,7 @@ internal suspend fun oppdaterSaksbehandlerNavn(
             logger.info("Antall saksbehandlingsidenter uten navn i databasen ${sbidenter.size}")
 
             val egneIdenter =
-                filtrerteIdenter.filter { listOf("PESYS", "EY", "GJENOPPRETTA").contains(it) }
+                filtrerteIdenter.filter { it in ugyldigeIdenter }
                     .map { it to SaksbehandlerInfo(it, it) }
 
             logger.info("Mappet egne ${sbidenter.size}")
@@ -114,11 +119,7 @@ internal suspend fun oppdaterSaksbehandlerNavn(
             val hentedeIdenter =
                 coroutineScope {
                     filtrerteIdenter.filter {
-                        !listOf(
-                            "PESYS",
-                            "EY",
-                            "GJENOPPRETTA",
-                        ).contains(it) && SAKSBEHANDLERPATTERN.matches(it)
+                        it !in ugyldigeIdenter && SAKSBEHANDLERPATTERN.matches(it)
                     }
                         .map { it to async(subCoroutineExceptionHandler) { context.navAnsattKlient.hentSaksbehanderNavn(it) } }
                         .map { it.first to it.second.await() }

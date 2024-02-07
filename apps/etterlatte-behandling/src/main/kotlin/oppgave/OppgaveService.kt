@@ -54,20 +54,22 @@ class OppgaveService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    fun finnOppgaverForBruker(bruker: SaksbehandlerMedEnheterOgRoller): List<OppgaveIntern> {
+    fun finnOppgaverForBruker(
+        bruker: SaksbehandlerMedEnheterOgRoller,
+        oppgaveStatuser: List<String>,
+    ): List<OppgaveIntern> {
         val rollerSomBrukerHar = finnAktuelleRoller(bruker.saksbehandlerMedRoller)
         val aktuelleOppgavetyperForRoller = aktuelleOppgavetyperForRolleTilSaksbehandler(rollerSomBrukerHar)
 
         return if (bruker.saksbehandlerMedRoller.harRolleStrengtFortrolig()) {
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
         } else {
-            val oppgaverForBruker =
-                oppgaveDao.hentOppgaver(
-                    aktuelleOppgavetyperForRoller,
-                    bruker.enheter(),
-                    bruker.erSuperbruker(),
-                )
-            oppgaverForBruker.sortedByDescending { it.opprettet }
+            oppgaveDao.hentOppgaver(
+                aktuelleOppgavetyperForRoller,
+                bruker.enheter(),
+                bruker.erSuperbruker(),
+                oppgaveStatuser,
+            ).sortedByDescending { it.opprettet }
         }
     }
 
@@ -103,7 +105,6 @@ class OppgaveService(
                     )
                 }
             }
-
             is ExternalUser -> throw IllegalArgumentException("ExternalUser er ikke støttet for å tildele oppgave")
             else -> throw IllegalArgumentException(
                 "Ukjent brukertype ${appUser.name()} støtter ikke tildeling av oppgave",

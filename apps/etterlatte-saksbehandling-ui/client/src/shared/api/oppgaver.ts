@@ -1,5 +1,6 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { SakType } from '~shared/types/sak'
+import { konverterFilterValuesTilKeys } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 export interface OppgaveDTO {
   id: string
@@ -55,7 +56,17 @@ export type Oppgavetype =
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 
-export const hentOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver')
+export const hentOppgaverMedStatus = async (oppgavestatusFilter: Array<string>): Promise<ApiResponse<OppgaveDTO[]>> => {
+  const konverterteFiltre = konverterFilterValuesTilKeys(oppgavestatusFilter)
+
+  const queryParams = konverterteFiltre
+    .map((i) => `oppgaveStatus=${i}&`)
+    .join('')
+    .slice(0, -1)
+
+  return apiClient.get(`/oppgaver?${queryParams}`)
+}
+
 export const hentOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/${id}`)
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
 

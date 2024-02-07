@@ -20,7 +20,7 @@ internal fun Route.saksbehandlerRoutes(saksbehandlerService: SaksbehandlerServic
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/api") {
-        get("/saksbehandlere/enhet/${ENHET_PATH_PARAMETER}") {
+        get("/saksbehandlere/enhet/{$ENHET_PATH_PARAMETER}") {
             val saksbehandlere = saksbehandlerService.hentSaksbehandlereForEnhet(enhet)
             logger.info("Henter saksbehandlere ${saksbehandlere.size} for $enhet")
             call.respond(saksbehandlere)

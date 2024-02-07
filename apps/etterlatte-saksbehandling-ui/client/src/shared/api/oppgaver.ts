@@ -13,8 +13,10 @@ export interface OppgaveDTO {
   merknad: string | null
   opprettet: string
   sakType: SakType
-  fnr: string
+  fnr: string | null
   frist: string
+  //Oppgaveliste spesifikt
+  saksbehandlerNavn: string | null
 
   // GOSYS-spesifikt
   beskrivelse: string | null

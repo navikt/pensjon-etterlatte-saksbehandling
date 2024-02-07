@@ -7,6 +7,7 @@ import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
+import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.PDFService
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
@@ -40,7 +41,7 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
-import no.nav.etterlatte.brev.model.BrevKodeMapper
+import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
@@ -141,13 +142,15 @@ class ApplicationBuilder {
 
     private val distribusjonService = DistribusjonServiceImpl(distribusjonKlient, db)
 
-    private val brevDataMapperRedigerbartUtfall = BrevDataMapperRedigerbartUtfall(brevdataFacade)
+    private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
+
+    private val brevDataMapperRedigerbartUtfall = BrevDataMapperRedigerbartUtfall(brevdataFacade, migreringBrevDataService)
 
     private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade)
 
-    private val brevKodeMapper = BrevKodeMapper()
+    private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapperRedigerbartUtfall, brevKodeMapper)
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapperRedigerbartUtfall)
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
@@ -155,7 +158,8 @@ class ApplicationBuilder {
 
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
 
-    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
+    private val brevoppretter =
+        Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
 
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, brevDataMapperFerdigstilling, adresseService, brevbakerService)
@@ -164,12 +168,12 @@ class ApplicationBuilder {
         VedtaksbrevService(
             db,
             vedtaksvurderingService,
-            brevKodeMapper,
+            brevKodeMapperVedtak,
             brevoppretter,
             pdfGenerator,
         )
 
-    private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient)
+    private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator)
 
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 

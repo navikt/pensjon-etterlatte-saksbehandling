@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
@@ -77,6 +78,7 @@ internal class DokarkivServiceTest {
                         null,
                         Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
                     ),
+                brevtype = Brevtype.MANUELT,
             )
         val forventetResponse = OpprettJournalpostResponse("12345", journalpostferdigstilt = true)
 

@@ -26,6 +26,7 @@ data class OppgaveIntern(
     val kilde: OppgaveKilde? = null,
     override val type: OppgaveType,
     override val saksbehandler: String? = null,
+    val saksbehandlerNavn: String? = null,
     val referanse: String,
     val merknad: String? = null,
     override val opprettet: Tidspunkt,
@@ -35,6 +36,10 @@ data class OppgaveIntern(
 ) : Oppgave() {
     fun manglerSaksbehandler(): Boolean {
         return saksbehandler == null
+    }
+
+    fun harSaksbehandler(): Boolean {
+        return saksbehandler != null
     }
 
     fun erAvsluttet(): Boolean {
@@ -61,9 +66,9 @@ data class GosysOppgave(
     override val opprettet: Tidspunkt,
     override val frist: Tidspunkt?,
     override val sakType: SakType,
-    override val fnr: String,
+    override val fnr: String? = null,
     val gjelder: String,
-    val beskrivelse: String,
+    val beskrivelse: String?,
 ) : Oppgave() {
     override val type: OppgaveType
         get() = OppgaveType.GOSYS

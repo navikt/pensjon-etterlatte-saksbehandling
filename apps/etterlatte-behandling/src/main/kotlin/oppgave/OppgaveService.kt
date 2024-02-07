@@ -54,11 +54,13 @@ class OppgaveService(
         return if (bruker.saksbehandlerMedRoller.harRolleStrengtFortrolig()) {
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
         } else {
-            oppgaveDao.hentOppgaver(
-                aktuelleOppgavetyperForRoller,
-                bruker.enheter(),
-                bruker.erSuperbruker(),
-            ).sortedByDescending { it.opprettet }
+            val oppgaverForBruker =
+                oppgaveDao.hentOppgaver(
+                    aktuelleOppgavetyperForRoller,
+                    bruker.enheter(),
+                    bruker.erSuperbruker(),
+                )
+            oppgaverForBruker.sortedByDescending { it.opprettet }
         }
     }
 
@@ -340,6 +342,7 @@ class OppgaveService(
     fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
         referanse: String,
         sakId: Long,
+        merknad: String? = null,
     ): OppgaveIntern {
         val oppgaverForBehandling = oppgaveDao.hentOppgaverForReferanse(referanse)
         val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
@@ -352,7 +355,7 @@ class OppgaveService(
             sakId = sakId,
             oppgaveKilde = OppgaveKilde.BEHANDLING,
             oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = null,
+            merknad = merknad,
         )
     }
 

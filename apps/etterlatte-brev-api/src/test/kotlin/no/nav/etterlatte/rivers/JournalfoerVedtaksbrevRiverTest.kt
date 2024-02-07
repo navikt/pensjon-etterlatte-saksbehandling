@@ -16,6 +16,7 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -68,6 +69,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 Tidspunkt.now(),
                 Tidspunkt.now(),
                 mottaker = mockk(),
+                brevtype = Brevtype.VEDTAK,
             )
         val response = OpprettJournalpostResponse("1234", true, emptyList())
 

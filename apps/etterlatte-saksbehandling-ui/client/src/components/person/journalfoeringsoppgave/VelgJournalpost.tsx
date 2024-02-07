@@ -37,7 +37,7 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
           velgJournalpost(journalpost)
         })
       } else {
-        apiHentJournalposter(oppgave!!.fnr, (journalposter) => {
+        apiHentJournalposter(oppgave!!.fnr!!, (journalposter) => {
           if (journalposter.length === 1) {
             velgJournalpost(journalposter[0])
           }

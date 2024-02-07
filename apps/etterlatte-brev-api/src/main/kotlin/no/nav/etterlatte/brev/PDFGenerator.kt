@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Pdf
@@ -32,13 +33,14 @@ class PDFGenerator(
     suspend fun ferdigstillOgGenererPDF(
         id: BrevID,
         bruker: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
-        brevKode: (GenerellBrevData) -> Brevkoder,
+        brevKode: (BrevkodeRequest) -> Brevkoder,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         sjekkOmBrevKanEndres(id)
         val pdf =
-            genererPdf(id, bruker, avsenderRequest, brevKode, lagrePdfHvisVedtakFattet)
+            genererPdf(id, bruker, automatiskMigreringRequest, avsenderRequest, brevKode, lagrePdfHvisVedtakFattet)
         db.lagrePdfOgFerdigstillBrev(id, pdf)
         return pdf
     }
@@ -46,8 +48,9 @@ class PDFGenerator(
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
-        brevKode: (GenerellBrevData) -> Brevkoder,
+        brevKode: (BrevkodeRequest) -> Brevkoder,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
@@ -64,7 +67,8 @@ class PDFGenerator(
             retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId, bruker) }
         val avsender = adresseService.hentAvsender(avsenderRequest(bruker, generellBrevData))
 
-        val brevkodePar = brevKode(generellBrevData)
+        val brevkodePar =
+            brevKode(BrevkodeRequest(generellBrevData.erMigrering(), generellBrevData.sak.sakType, generellBrevData.forenkletVedtak?.type))
 
         val sak = generellBrevData.sak
         val letterData =
@@ -72,6 +76,7 @@ class PDFGenerator(
                 brev,
                 generellBrevData,
                 bruker,
+                automatiskMigreringRequest,
                 brevkodePar,
             )
         val brevRequest =
@@ -93,6 +98,7 @@ class PDFGenerator(
         brev: Brev,
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
+        automatiskMigreringRequest: MigreringBrevRequest?,
         brevkode: Brevkoder,
     ): BrevData =
         when (brev.prosessType) {
@@ -101,8 +107,9 @@ class PDFGenerator(
                     generellBrevData,
                     brukerTokenInfo,
                     InnholdMedVedlegg({ hentLagretInnhold(brev) }, { hentLagretInnholdVedlegg(brev) }),
+                    brevkode,
+                    automatiskMigreringRequest,
                     brev.tittel,
-                    brevkode.ferdigstilling,
                 )
 
             BrevProsessType.AUTOMATISK -> throw IllegalStateException("Skal ikke lenger opprette brev med prosesstype automatisk")

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.varselbrev
 
 import no.nav.etterlatte.brev.Brevoppretter
+import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
@@ -14,6 +15,7 @@ internal class VarselbrevService(
     private val db: BrevRepository,
     private val brevoppretter: Brevoppretter,
     private val behandlingKlient: BehandlingKlient,
+    private val pdfGenerator: PDFGenerator,
 ) {
     fun hentVarselbrev(behandlingId: UUID) = db.hentBrevForBehandling(behandlingId, Brevtype.VARSEL)
 
@@ -33,8 +35,21 @@ internal class VarselbrevService(
             sakId = sakId,
             behandlingId = behandlingId,
             bruker = brukerTokenInfo,
-            brevKode = brevkode.redigering,
+            brevKode = { brevkode.redigering },
             brevtype = Brevtype.VARSEL,
         ).first
     }
+
+    suspend fun genererPdf(
+        brevId: Long,
+        bruker: BrukerTokenInfo,
+    ) = pdfGenerator.genererPdf(
+        id = brevId,
+        bruker = bruker,
+        automatiskMigreringRequest = null,
+        avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
+        brevKode = { _ -> Brevkoder.BP_VARSEL },
+        // TODO: Brevkode her kan også vera OMS_VARSEL i OMS-saker. Generelt kjens brevkodemappinga ut som noko som
+        // fortener litt opprydding snart.
+    )
 }

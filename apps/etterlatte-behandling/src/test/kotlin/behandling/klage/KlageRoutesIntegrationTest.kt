@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.klage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -16,7 +17,10 @@ import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
+import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
+import no.nav.etterlatte.libs.common.behandling.KabalStatus
+import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -29,7 +33,7 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.skjermet.EgenAnsattSkjermet
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -59,28 +63,10 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `opprettelse av klage går bra og henting gir 404 etter at saken blir skjermet`() {
         withTestApplication { client ->
-            val fnr = AVDOED_FOEDSELSNUMMER.value
-            val sak: Sak =
-                client.post("/personer/saker/${SakType.BARNEPENSJON}") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                }.apply {
-                    assertEquals(HttpStatusCode.OK, status)
-                }.body()
+            val sak: Sak = opprettSak(client)
 
             val klage: Klage =
-                client.post("/api/klage/opprett/${sak.id}") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(
-                        InnkommendeKlage(
-                            mottattDato = LocalDate.now(),
-                            journalpostId = "",
-                            innsender = "En klager",
-                        ),
-                    )
-                }.body()
+                opprettKlage(client, sak)
             val response =
                 client.get("/api/klage/${klage.id}") {
                     addAuthToken(tokenSaksbehandler)
@@ -93,7 +79,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             client.post("/egenansatt") {
                 addAuthToken(fagsystemTokenEY)
                 contentType(ContentType.Application.Json)
-                setBody(EgenAnsattSkjermet(fnr = fnr, inntruffet = Tidspunkt.now(), skjermet = true))
+                setBody(EgenAnsattSkjermet(fnr = sak.ident, inntruffet = Tidspunkt.now(), skjermet = true))
             }
 
             // henter med saksbehandler som mangler tilgang
@@ -115,27 +101,9 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `opprettelse av klage går bra og henting gjør tilgangskontroll når saken får adressebeskyttelse`() {
         withTestApplication { client ->
-            val fnr = AVDOED_FOEDSELSNUMMER.value
-            val sak: Sak =
-                client.post("/personer/saker/${SakType.BARNEPENSJON}") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                }.apply {
-                    assertEquals(HttpStatusCode.OK, status)
-                }.body()
+            val sak: Sak = opprettSak(client)
             val klage: Klage =
-                client.post("/api/klage/opprett/${sak.id}") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(
-                        InnkommendeKlage(
-                            mottattDato = LocalDate.now(),
-                            journalpostId = "",
-                            innsender = "En klager",
-                        ),
-                    )
-                }.body()
+                opprettKlage(client, sak)
             val response =
                 client.get("/api/klage/${klage.id}") {
                     addAuthToken(tokenSaksbehandler)
@@ -152,7 +120,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                     Adressebeskyttelse(
                         hendelseId = "1",
                         endringstype = Endringstype.OPPRETTET,
-                        fnr = fnr,
+                        fnr = sak.ident,
                         adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
                     ),
                 )
@@ -178,28 +146,10 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `avbrytelse av klage går bra`() {
         withTestApplication { client ->
-            val fnr = AVDOED_FOEDSELSNUMMER.value
-            val sak: Sak =
-                client.post("/personer/saker/${SakType.BARNEPENSJON}") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(FoedselsnummerDTO(fnr))
-                }.apply {
-                    assertEquals(HttpStatusCode.OK, status)
-                }.body()
+            val sak: Sak = opprettSak(client)
 
             val klage: Klage =
-                client.post("/api/klage/opprett/${sak.id}") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(
-                        InnkommendeKlage(
-                            mottattDato = LocalDate.now(),
-                            journalpostId = "",
-                            innsender = "En klager",
-                        ),
-                    )
-                }.body()
+                opprettKlage(client, sak)
             val oppgaver: OppgaveListe =
                 client.get("/api/oppgaver/sak/${sak.id}/oppgaver") {
                     addAuthToken(systemBruker)
@@ -230,6 +180,64 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             assertEquals(KlageStatus.AVBRUTT, avbruttKlage.status)
             assertEquals(AarsakTilAvbrytelse.ANNET, avbruttKlage.aarsakTilAvbrytelse)
         }
+    }
+
+    @Test
+    fun `oppdatering av kabalstatus går bra`() {
+        withTestApplication { client ->
+            val sak: Sak = opprettSak(client)
+
+            val klage: Klage = opprettKlage(client, sak)
+
+            val response =
+                client.patch("/api/klage/${klage.id}/kabalstatus") {
+                    addAuthToken(fagsystemTokenEY)
+                    contentType(ContentType.Application.Json)
+                    setBody(Kabalrespons(KabalStatus.FERDIGSTILT, BehandlingResultat.IKKE_MEDHOLD))
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+
+            client.get("/api/klage/${klage.id}") {
+                addAuthToken(tokenSaksbehandler)
+            }.also { assertEquals(HttpStatusCode.OK, it.status) }
+                .also { respons ->
+                    val oppdatert = respons.body<Klage>()
+                    assertEquals(oppdatert.id, klage.id)
+                    assertEquals(KabalStatus.FERDIGSTILT, oppdatert.kabalStatus)
+                }
+        }
+    }
+
+    private suspend fun opprettSak(client: HttpClient): Sak {
+        val fnr = SOEKER_FOEDSELSNUMMER.value
+        val sak: Sak =
+            client.post("/personer/saker/${SakType.BARNEPENSJON}") {
+                addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(FoedselsnummerDTO(fnr))
+            }.apply {
+                assertEquals(HttpStatusCode.OK, status)
+            }.body()
+        return sak
+    }
+
+    private suspend fun opprettKlage(
+        client: HttpClient,
+        sak: Sak,
+    ): Klage {
+        val klage: Klage =
+            client.post("/api/klage/opprett/${sak.id}") {
+                addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(
+                    InnkommendeKlage(
+                        mottattDato = LocalDate.now(),
+                        journalpostId = "",
+                        innsender = "En klager",
+                    ),
+                )
+            }.body()
+        return klage
     }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {

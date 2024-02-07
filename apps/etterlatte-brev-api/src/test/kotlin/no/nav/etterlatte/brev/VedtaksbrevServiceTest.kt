@@ -32,7 +32,7 @@ import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
-import no.nav.etterlatte.brev.model.BrevKodeMapper
+import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
@@ -80,19 +80,21 @@ internal class VedtaksbrevServiceTest {
     private val vedtaksvurderingService = mockk<VedtaksvurderingService>()
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
+    private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
     private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade)
-    private val brevKodeMapper = BrevKodeMapper()
+    private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
     private val brevbakerService = mockk<BrevbakerService>()
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, brevDataMapperFerdigstilling, adresseService, brevbakerService)
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
-    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
+    private val brevoppretter =
+        Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
             vedtaksvurderingService,
-            brevKodeMapper,
+            brevKodeMapperVedtak,
             brevoppretter,
             pdfGenerator,
         )
@@ -615,6 +617,7 @@ internal class VedtaksbrevServiceTest {
         Tidspunkt.now(),
         Tidspunkt.now(),
         mottaker = opprettMottaker(),
+        brevtype = Brevtype.VEDTAK,
     )
 
     private fun opprettGenerellBrevdata(

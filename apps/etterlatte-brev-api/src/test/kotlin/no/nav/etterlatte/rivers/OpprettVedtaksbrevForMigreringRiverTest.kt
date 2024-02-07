@@ -10,6 +10,7 @@ import io.mockk.runs
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
@@ -68,15 +69,15 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         val melding = opprettMelding(vedtak, migreringRequest, VedtakKafkaHendelseHendelseType.FATTET)
         val brev = opprettBrev()
 
-        coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) } returns brev
-        coEvery { vedtaksbrevService.genererPdf(brev.id, any()) } returns mockk<Pdf>()
-        coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any()) } just runs
+        coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), any()) } returns brev
+        coEvery { vedtaksbrevService.genererPdf(brev.id, any(), any()) } returns mockk<Pdf>()
+        coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) } just runs
 
         val inspektoer = opprettBrevRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
 
-        coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any()) }
-        coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any()) }
-        coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any()) }
+        coVerify(exactly = 1) { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), any()) }
+        coVerify(exactly = 1) { vedtaksbrevService.genererPdf(brev.id, any(), any()) }
+        coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) }
 
         val meldingSendt = inspektoer.message(0)
         assertEquals(VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType(), meldingSendt.get(EVENT_NAME_KEY).asText())
@@ -105,6 +106,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
             Tidspunkt.now(),
             Tidspunkt.now(),
             mottaker = mockk(),
+            brevtype = Brevtype.VEDTAK,
         )
 
     private fun opprettMelding(

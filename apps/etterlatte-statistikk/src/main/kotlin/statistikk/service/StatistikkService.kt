@@ -72,7 +72,9 @@ class StatistikkService(
                                 sakRad.pesysId,
                             ),
                         )
+
                     VedtakType.TILBAKEKREVING,
+                    VedtakType.AVVIST_KLAGE,
                     VedtakType.AVSLAG,
                     -> null
                 }
@@ -196,7 +198,12 @@ class StatistikkService(
         if (statistikkBehandling.status == BehandlingStatus.AVBRUTT) {
             return BehandlingResultat.AVBRUTT
         }
-        if (vedtakKafkaHendelseType !in listOf(VedtakKafkaHendelseHendelseType.ATTESTERT, VedtakKafkaHendelseHendelseType.IVERKSATT)) {
+        if (vedtakKafkaHendelseType !in
+            listOf(
+                VedtakKafkaHendelseHendelseType.ATTESTERT,
+                VedtakKafkaHendelseHendelseType.IVERKSATT,
+            )
+        ) {
             return null
         }
         return when (

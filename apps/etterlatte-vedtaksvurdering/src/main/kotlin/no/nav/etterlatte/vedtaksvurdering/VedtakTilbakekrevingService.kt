@@ -29,7 +29,7 @@ class VedtakTilbakekrevingService(
                         sakType = tilbakekrevingVedtakData.sakType,
                         behandlingId = tilbakekrevingVedtakData.tilbakekrevingId,
                         type = VedtakType.TILBAKEKREVING,
-                        innhold = VedtakTilbakekrevingInnhold(tilbakekrevingVedtakData.tilbakekreving),
+                        innhold = VedtakInnhold.Tilbakekreving(tilbakekrevingVedtakData.tilbakekreving),
                     ),
                 )
             } else {
@@ -40,7 +40,7 @@ class VedtakTilbakekrevingService(
                 repository.oppdaterVedtak(
                     eksisterendeVedtak.copy(
                         innhold =
-                            VedtakTilbakekrevingInnhold(
+                            VedtakInnhold.Tilbakekreving(
                                 tilbakekreving = tilbakekrevingVedtakData.tilbakekreving,
                             ),
                     ),

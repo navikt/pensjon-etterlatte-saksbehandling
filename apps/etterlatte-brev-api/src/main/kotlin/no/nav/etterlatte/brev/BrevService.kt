@@ -1,14 +1,11 @@
 package no.nav.etterlatte.brev
 
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
-import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
@@ -36,7 +33,6 @@ class BrevService(
         sakId: Long,
         bruker: BrukerTokenInfo,
         brevkoder: Brevkoder,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
     ): Brev =
         brevoppretter.opprettBrev(
             sakId = sakId,
@@ -45,7 +41,6 @@ class BrevService(
             automatiskMigreringRequest = null,
             brevKode = { brevkoder.redigering },
             brevtype = brevkoder.redigering.brevtype,
-            brevDataMapping = brevDataMapping,
         ).first
 
     data class BrevPayload(
@@ -111,7 +106,6 @@ class BrevService(
             null,
             avsenderRequest = { b, g -> g.avsenderRequest(b) },
             brevKode = { Brevkoder.TOMT_INFORMASJONSBREV },
-            brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )
 
     suspend fun ferdigstill(

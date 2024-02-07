@@ -30,7 +30,6 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
@@ -40,7 +39,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
@@ -86,8 +84,8 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     @BeforeEach
     fun beforeEach() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        every { saksbehandler.enheter() } returns Enheter.enheterForVanligSaksbehandlere()
         every { saksbehandler.name() } returns "ident"
-        every { saksbehandler.erSuperbruker() } returns false
 
         nyKontekstMedBrukerOgDatabaseContext(saksbehandler, DatabaseContextTest(dataSource))
 
@@ -117,27 +115,6 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler?.ident)
-    }
-
-    @Test
-    fun `skal kunne tildele seg oppgave som er tildelt systembruker`() {
-        val systemBruker = mockk<SystemUser> { every { name() } returns Fagsaksystem.EY.navn }
-        nyKontekstMedBruker(systemBruker)
-
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
-        val referanse = "referanse"
-        val nyOppgave =
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse,
-                opprettetSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.FOERSTEGANGSBEHANDLING,
-                null,
-            )
-
-        val bruker = Saksbehandler("", "ident1", null)
-        oppgaveService.tildelSaksbehandler(nyOppgave.id, Fagsaksystem.EY.navn)
-        assertDoesNotThrow { oppgaveService.tildelSaksbehandler(nyOppgave.id, bruker.ident()) }
     }
 
     @Test
@@ -837,40 +814,6 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
         val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
-        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
-
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
-        assertEquals(1, oppgaver.size)
-        val attesteringsoppgave = oppgaver[0]
-        assertEquals(attestantOppgave.id, attesteringsoppgave.id)
-        assertEquals(attestantOppgave.sakId, attestantSak.id)
-    }
-
-    @Test
-    fun `Superbruker kan se oppgave på en annen enhet unntatt strengt fortrolig`() {
-        val randomenhet = "1111"
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
-        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null,
-        )
-
-        val attestantSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
-        val attestantOppgave =
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                "referanse",
-                attestantSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.ATTESTERING,
-                null,
-            )
-
-        val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
-        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr) // må ikke endres
-        every { saksbehandler.erSuperbruker() } returns true
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
 
         val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })

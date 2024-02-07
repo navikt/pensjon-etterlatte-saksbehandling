@@ -22,7 +22,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
     fun `saksbehandler faar riktig skrive og lesetilgang enheter`(
         beskrivelse: String,
         enheterForSaksbehandler: List<SaksbehandlerEnhet>,
-        nasjonalTilgang: Boolean,
         forventetSkriveEnheter: List<String>,
         forventetLeseEnheter: List<String>,
     ) {
@@ -43,10 +42,6 @@ class SaksbehandlerMedEnheterOgRollerTest {
             navAnsattKlient.hentEnheterForSaksbehandler(any())
         } returns enheterForSaksbehandler
 
-        every {
-            saksbehandlerMedRoller.harRolleNasjonalTilgang()
-        } returns nasjonalTilgang
-
         val saksbehandler = SaksbehandlerMedEnheterOgRoller(identifiedBy, navAnsattKlient, saksbehandlerMedRoller)
 
         val skriveEnheter = saksbehandler.enheterMedSkrivetilgang()
@@ -63,21 +58,30 @@ class SaksbehandlerMedEnheterOgRollerTest {
                 Arguments.of(
                     "Vanlig saksbehandler",
                     listOf(SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.name)),
-                    false,
                     listOf(Enheter.PORSGRUNN.enhetNr),
-                    emptyList<String>(),
+                    listOf(
+                        Enheter.AALESUND.enhetNr,
+                        Enheter.STEINKJER.enhetNr,
+                        Enheter.AALESUND_UTLAND.enhetNr,
+                        Enheter.UTLAND.enhetNr,
+                    ),
                 ),
                 Arguments.of(
-                    "Saksbehandler med nasjonal tilgang",
-                    listOf(SaksbehandlerEnhet(Enheter.PORSGRUNN.enhetNr, Enheter.PORSGRUNN.name)),
-                    true,
-                    listOf(Enheter.PORSGRUNN.enhetNr),
-                    listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr, Enheter.AALESUND_UTLAND.enhetNr, Enheter.UTLAND.enhetNr),
+                    "Vanlig saksbehandler med utland",
+                    listOf(
+                        SaksbehandlerEnhet(Enheter.AALESUND.enhetNr, Enheter.AALESUND.name),
+                        SaksbehandlerEnhet(Enheter.AALESUND_UTLAND.enhetNr, Enheter.AALESUND_UTLAND.name),
+                    ),
+                    listOf(Enheter.AALESUND.enhetNr, Enheter.AALESUND_UTLAND.enhetNr),
+                    listOf(
+                        Enheter.PORSGRUNN.enhetNr,
+                        Enheter.STEINKJER.enhetNr,
+                        Enheter.UTLAND.enhetNr,
+                    ),
                 ),
                 Arguments.of(
                     "Kontaktsenter",
-                    listOf(SaksbehandlerEnhet(Enheter.TROENDELAG.enhetNr, Enheter.TROENDELAG.navn)),
-                    false,
+                    listOf(SaksbehandlerEnhet("12345", "En annen enhet")),
                     emptyList<String>(),
                     listOf(
                         Enheter.AALESUND.enhetNr,

@@ -286,20 +286,14 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: (
     }
 }
 
-val saksbehandlereMedTilgangTilAlleEnheter = listOf("S128848", "K105085", "O113803")
-
 fun <T> List<T>.filterForEnheter(
     user: User,
     filter: (item: T, enheter: List<String>) -> Boolean,
-) = if (user.name() !in (saksbehandlereMedTilgangTilAlleEnheter)) {
-    when (user) {
-        is SaksbehandlerMedEnheterOgRoller -> {
-            val enheter = user.enheter()
-            this.filter { filter(it, enheter) }
-        }
-
-        else -> this
+) = when (user) {
+    is SaksbehandlerMedEnheterOgRoller -> {
+        val enheter = user.enheter()
+        this.filter { filter(it, enheter) }
     }
-} else {
-    this
+
+    else -> this
 }

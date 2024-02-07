@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.Brevtype
-import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.UUID
@@ -25,7 +24,12 @@ internal class VarselbrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
-        val brevkode = hentBrevkode(behandlingKlient.hentSak(sakId, brukerTokenInfo).sakType)
+        val brevkode =
+            if (behandlingKlient.hentSak(sakId, brukerTokenInfo).sakType == SakType.BARNEPENSJON) {
+                Brevkoder.BP_VARSEL
+            } else {
+                Brevkoder.OMS_VARSEL
+            }
 
         return brevoppretter.opprettBrev(
             sakId = sakId,
@@ -33,15 +37,8 @@ internal class VarselbrevService(
             bruker = brukerTokenInfo,
             brevKode = { brevkode.redigering },
             brevtype = Brevtype.VARSEL,
-        ) { ManueltBrevData() }.first
+        ).first
     }
-
-    private fun hentBrevkode(sakType: SakType) =
-        if (sakType == SakType.BARNEPENSJON) {
-            Brevkoder.BP_VARSEL
-        } else {
-            Brevkoder.OMS_VARSEL
-        }
 
     suspend fun genererPdf(
         brevId: Long,
@@ -51,7 +48,8 @@ internal class VarselbrevService(
         bruker = bruker,
         automatiskMigreringRequest = null,
         avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
-        brevKode = { hentBrevkode(it.sakType) },
-        brevData = { ManueltBrevData(it.innholdMedVedlegg.innhold()) },
+        brevKode = { _ -> Brevkoder.BP_VARSEL },
+        // TODO: Brevkode her kan også vera OMS_VARSEL i OMS-saker. Generelt kjens brevkodemappinga ut som noko som
+        // fortener litt opprydding snart.
     )
 }

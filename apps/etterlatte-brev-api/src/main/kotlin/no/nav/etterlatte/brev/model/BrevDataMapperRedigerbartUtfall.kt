@@ -16,7 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 
-class BrevDataMapperRedigerbartUtfallVedtak(
+class BrevDataMapperRedigerbartUtfall(
     private val brevdataFacade: BrevdataFacade,
     private val migreringBrevDataService: MigreringBrevDataService,
 ) {

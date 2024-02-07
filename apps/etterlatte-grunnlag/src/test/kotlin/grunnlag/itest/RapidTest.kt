@@ -1,4 +1,4 @@
-package grunnlag.itest
+package no.nav.etterlatte.grunnlag.itest
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk

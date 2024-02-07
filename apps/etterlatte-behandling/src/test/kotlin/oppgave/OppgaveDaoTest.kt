@@ -44,6 +44,61 @@ internal class OppgaveDaoTest {
     }
 
     @Test
+    fun `Skal filtrere på saksbehandlerident`() {
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveForIdentFiltrering = lagNyOppgave(sakAalesund)
+        oppgaveDao.opprettOppgave(oppgaveForIdentFiltrering)
+        val saksbehandlerIdent = "Z994762"
+        oppgaveDao.settNySaksbehandler(oppgaveForIdentFiltrering.id, saksbehandlerIdent)
+
+        val oppgaveto = lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr))
+        oppgaveDao.opprettOppgave(oppgaveto)
+        oppgaveDao.settNySaksbehandler(oppgaveto.id, "Z000000")
+
+        oppgaveDao.opprettOppgave(lagNyOppgave(sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)))
+
+        val alleOppgavera =
+            oppgaveDao.hentOppgaver(
+                OppgaveType.entries,
+                listOf(Enheter.AALESUND.enhetNr),
+                true,
+                Status.entries.map {
+                    it.name
+                },
+                null,
+            )
+        println(alleOppgavera.size)
+
+        val oppgaverKunForSaksbehandler =
+            oppgaveDao.hentOppgaver(
+                OppgaveType.entries,
+                listOf(
+                    Enheter.AALESUND.enhetNr,
+                ),
+                false,
+                Status.entries.map {
+                    it.name
+                },
+                saksbehandlerIdent,
+            )
+        assertEquals(1, oppgaverKunForSaksbehandler.size)
+        assertEquals(saksbehandlerIdent, oppgaverKunForSaksbehandler[0].saksbehandlerIdent)
+        assertEquals(oppgaveForIdentFiltrering.id, oppgaverKunForSaksbehandler[0].id)
+
+        val alleOppgaver =
+            oppgaveDao.hentOppgaver(
+                OppgaveType.entries,
+                listOf(Enheter.AALESUND.enhetNr),
+                false,
+                Status.entries.map {
+                    it.name
+                },
+                null,
+            )
+        assertEquals(3, alleOppgaver.size)
+    }
+
+    @Test
     fun `Skal filtrere på status`() {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)

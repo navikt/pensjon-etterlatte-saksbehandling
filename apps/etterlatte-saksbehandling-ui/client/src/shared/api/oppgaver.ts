@@ -56,15 +56,24 @@ export type Oppgavetype =
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 
-export const hentOppgaverMedStatus = async (oppgavestatusFilter: Array<string>): Promise<ApiResponse<OppgaveDTO[]>> => {
-  const konverterteFiltre = konverterFilterValuesTilKeys(oppgavestatusFilter)
+export const hentOppgaverMedStatus = async (args: {
+  oppgavestatusFilter: Array<string>
+  minOppgavelisteIdent?: string
+}): Promise<ApiResponse<OppgaveDTO[]>> => {
+  const konverterteFiltre = konverterFilterValuesTilKeys(args.oppgavestatusFilter)
 
   const queryParams = konverterteFiltre
     .map((i) => `oppgaveStatus=${i}&`)
     .join('')
     .slice(0, -1)
 
-  return apiClient.get(`/oppgaver?${queryParams}`)
+  const identfilterGenerator = () => {
+    if (args.minOppgavelisteIdent) {
+      return `&minOppgavelisteIdent=${args.minOppgavelisteIdent}`
+    }
+    return ''
+  }
+  return apiClient.get(`/oppgaver?${queryParams}${identfilterGenerator()}`)
 }
 
 export const hentOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/${id}`)

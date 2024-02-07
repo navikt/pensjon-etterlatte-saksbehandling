@@ -13,6 +13,7 @@ import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.job.SAKSBEHANDLERPATTERN
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_GOSYS_CALL_PARAMETER
@@ -53,6 +54,23 @@ fun filtrerGyldigeStatuser(statuser: List<String>?): List<String> {
         ?.filter { i -> Status.entries.map { it.name }.contains(i) || i == VISALLE } ?: emptyList()
 }
 
+class UgyldigSaksbehandlerIdentException(msg: String) :
+    UgyldigForespoerselException(
+        code = "SAKSBEHANDLERIDENT_ER_UGYLDIG",
+        detail = msg,
+    )
+
+inline val PipelineContext<*, ApplicationCall>.minOppgavelisteident: String?
+    get() {
+        val minOppgavelisteIdentFilter = call.request.queryParameters["minOppgavelisteIdent"]
+        if (minOppgavelisteIdentFilter != null) {
+            if (!SAKSBEHANDLERPATTERN.matches(minOppgavelisteIdentFilter)) {
+                throw UgyldigSaksbehandlerIdentException("Saksbehandlerident er ugyldig, ident: $minOppgavelisteIdentFilter")
+            }
+        }
+        return minOppgavelisteIdentFilter
+    }
+
 internal fun Route.oppgaveRoutes(
     service: OppgaveService,
     gosysOppgaveService: GosysOppgaveService,
@@ -68,6 +86,7 @@ internal fun Route.oppgaveRoutes(
                         service.finnOppgaverForBruker(
                             Kontekst.get().appUserAsSaksbehandler(),
                             filtrerteStatuser,
+                            minOppgavelisteident,
                         )
                     },
                 )

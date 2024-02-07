@@ -57,6 +57,7 @@ class OppgaveService(
     fun finnOppgaverForBruker(
         bruker: SaksbehandlerMedEnheterOgRoller,
         oppgaveStatuser: List<String>,
+        minOppgavelisteIdentFilter: String? = null,
     ): List<OppgaveIntern> {
         val rollerSomBrukerHar = finnAktuelleRoller(bruker.saksbehandlerMedRoller)
         val aktuelleOppgavetyperForRoller = aktuelleOppgavetyperForRolleTilSaksbehandler(rollerSomBrukerHar)
@@ -69,6 +70,7 @@ class OppgaveService(
                 bruker.enheter(),
                 bruker.erSuperbruker(),
                 oppgaveStatuser,
+                minOppgavelisteIdentFilter,
             ).sortedByDescending { it.opprettet }
         }
     }

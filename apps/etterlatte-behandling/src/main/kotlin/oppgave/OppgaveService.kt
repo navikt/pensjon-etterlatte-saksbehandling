@@ -437,6 +437,14 @@ class OppgaveService(
             }
     }
 
+    fun avbrytAapneOppgaverMedReferanse(referanse: String) {
+        logger.info("Avbryter åpne oppgaver med referanse=$referanse")
+
+        oppgaveDao.hentOppgaverForReferanse(referanse)
+            .filterNot { Status.erAvsluttet(it.status) }
+            .forEach { oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT) }
+    }
+
     fun hentSakOgOppgaverForSak(sakId: Long): OppgaveListe {
         val sak = sakDao.hentSak(sakId)
         if (sak != null) {

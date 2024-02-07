@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingRedigerbartUtfall
+import no.nav.etterlatte.brev.model.klage.AvvistKlageInnholdBrevData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslag
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoerRedigerbartUtfall
@@ -41,6 +42,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     VedtakType.AVSLAG -> ManueltBrevData()
                     VedtakType.OPPHOER -> ManueltBrevData()
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
+                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData)
                     null -> ManueltBrevData()
                 }
             }
@@ -52,6 +54,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                     VedtakType.AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, emptyList())
                     VedtakType.OPPHOER -> OmstillingsstoenadOpphoerRedigerbartUtfall.fra(generellBrevData, emptyList())
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
+                    VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData)
                     null -> ManueltBrevData()
                 }
             }

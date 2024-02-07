@@ -69,7 +69,9 @@ class BrevdataFacade(
 
             val grunnlag =
                 when (vedtakDeferred?.await()?.type) {
-                    VedtakType.TILBAKEKREVING ->
+                    VedtakType.TILBAKEKREVING,
+                    VedtakType.AVVIST_KLAGE,
+                    ->
                         async {
                             grunnlagKlient.hentGrunnlagForSak(
                                 sakId,
@@ -150,6 +152,29 @@ class BrevdataFacade(
                                 tilbakekreving =
                                     objectMapper.readValue(
                                         (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
+                                    ),
+                            ),
+                        spraak = grunnlag.mapSpraak(),
+                        systemkilde = systemkilde,
+                    )
+
+                VedtakType.AVVIST_KLAGE ->
+                    GenerellBrevData(
+                        sak = sak,
+                        personerISak = personerISak,
+                        behandlingId = behandlingId,
+                        forenkletVedtak =
+                            ForenkletVedtak(
+                                vedtak.id,
+                                vedtak.status,
+                                vedtak.type,
+                                sak.enhet,
+                                saksbehandlerIdent,
+                                null,
+                                vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
+                                klage =
+                                    objectMapper.readValue(
+                                        (vedtak.innhold as VedtakInnholdDto.Klage).klage.toJson(),
                                     ),
                             ),
                         spraak = grunnlag.mapSpraak(),
@@ -294,12 +319,14 @@ fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperio
                 beregningsperiode.samletNorskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
                 null,
             )
+
         BeregningsMetode.PRORATA -> {
             Pair(
                 beregningsperiode.samletTeoretiskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
                 beregningsperiode.broek ?: throw BeregningsperiodeBroekMangler(),
             )
         }
+
         BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
         null -> beregningsperiode.trygdetid to null
     }

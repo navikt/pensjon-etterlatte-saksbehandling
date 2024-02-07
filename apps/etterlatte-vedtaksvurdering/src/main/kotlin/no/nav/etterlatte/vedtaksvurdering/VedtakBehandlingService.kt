@@ -447,7 +447,7 @@ class VedtakBehandlingService(
                 status = VedtakStatus.OPPRETTET,
                 type = vedtakType,
                 innhold =
-                    VedtakBehandlingInnhold(
+                    VedtakInnhold.Behandling(
                         behandlingType = behandling.behandlingType,
                         virkningstidspunkt = virkningstidspunkt,
                         beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
@@ -480,7 +480,7 @@ class VedtakBehandlingService(
             eksisterendeVedtak.copy(
                 type = vedtakType,
                 innhold =
-                    (eksisterendeVedtak.innhold as VedtakBehandlingInnhold).copy(
+                    (eksisterendeVedtak.innhold as VedtakInnhold.Behandling).copy(
                         virkningstidspunkt = virkningstidspunkt,
                         beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
                         avkorting = beregningOgAvkorting?.avkorting?.toObjectNode(),
@@ -575,6 +575,7 @@ class VedtakBehandlingService(
 
             VedtakType.TILBAKEKREVING,
             VedtakType.AVSLAG,
+            VedtakType.AVVIST_KLAGE,
             -> emptyList()
         }
     }

@@ -6,4 +6,5 @@ enum class VedtakType {
     AVSLAG,
     ENDRING,
     TILBAKEKREVING,
+    AVVIST_KLAGE,
 }

@@ -177,6 +177,33 @@ internal class JoarkHendelseHandlerTest {
                 behandlingKlientMock.opprettOppgave(any(), any(), journalpostId.toString())
             }
         }
+
+        @ParameterizedTest
+        @EnumSource(SakType::class)
+        fun `Journalpost med JOURNALPOST_UTGAATT skal avbryte tilhørende oppgaver`(sakType: SakType) {
+            val journalpostId = Random.nextLong()
+            val ident = "09498230323"
+            val journalpost =
+                opprettJournalpost(journalpostId, sakType = sakType, bruker = Bruker(ident, BrukerIdType.FNR))
+
+            coEvery { safKlientMock.hentJournalpost(any()) } returns HentJournalpostResult(journalpost)
+            coEvery { pdlTjenesterKlientMock.hentPdlIdentifikator(any()) } returns
+                PdlIdentifikator.FolkeregisterIdent(
+                    Folkeregisteridentifikator.of(ident),
+                )
+
+            val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.JOURNALPOST_UTGAATT)
+
+            runBlocking {
+                sut.haandterHendelse(hendelse)
+            }
+
+            coVerify(exactly = 1) {
+                safKlientMock.hentJournalpost(journalpostId)
+                pdlTjenesterKlientMock.hentPdlIdentifikator(ident)
+                behandlingKlientMock.avbrytOppgaver(journalpostId.toString())
+            }
+        }
     }
 
     @Nested
@@ -235,7 +262,7 @@ internal class JoarkHendelseHandlerTest {
                     opprettJournalpost(journalpostId, status = Journalstatus.MOTTATT, bruker = null),
                     null,
                 )
-            coEvery { oppgaveKlient.opprettOppgave(any(), any()) } just Runs
+            coEvery { oppgaveKlient.opprettManuellJournalfoeringsoppgave(any(), any()) } just Runs
 
             val hendelse = opprettHendelse(journalpostId, SakType.OMSTILLINGSSTOENAD.tema)
 
@@ -245,7 +272,7 @@ internal class JoarkHendelseHandlerTest {
 
             coVerify(exactly = 1) {
                 safKlientMock.hentJournalpost(journalpostId)
-                oppgaveKlient.opprettOppgave(journalpostId, "EYO")
+                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId, "EYO")
             }
             coVerify {
                 behandlingKlientMock wasNot Called

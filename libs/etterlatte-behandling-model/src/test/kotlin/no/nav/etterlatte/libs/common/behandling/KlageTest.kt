@@ -52,7 +52,7 @@ class KlageTest {
             Klage.ny(sak, null)
                 .copy(
                     utfall =
-                        KlageUtfall.Omgjoering(
+                        KlageUtfallMedData.Omgjoering(
                             KlageOmgjoering(GrunnForOmgjoering.PROSESSUELL_FEIL, "svada"),
                             Grunnlagsopplysning.Saksbehandler.create("en saksbehandler"),
                         ),

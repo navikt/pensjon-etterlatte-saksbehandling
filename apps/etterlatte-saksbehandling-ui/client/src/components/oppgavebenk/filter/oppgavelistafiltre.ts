@@ -140,7 +140,7 @@ function filtrerOppgavekilde(oppgaveKildeFilterKeys: OppgaveKildeFilterKeys, opp
 
 function finnFnrIOppgaver(fnr: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   if (fnr && fnr.length > 0) {
-    return oppgaver.filter((o) => o.fnr.includes(fnr.trim()))
+    return oppgaver.filter((o) => o.fnr?.includes(fnr.trim()))
   } else {
     return oppgaver
   }
@@ -169,35 +169,29 @@ export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: Oppgave
 
 type Retning = 'descending' | 'ascending' | 'ingen'
 
+const sammenlignFrist = (a: OppgaveDTO, b: OppgaveDTO) =>
+  (!!a.frist ? new Date(a.frist).getTime() : 0) - (!!b.frist ? new Date(b.frist).getTime() : 0)
+
 export function sorterFrist(retning: Retning, oppgaver: OppgaveDTO[]) {
   switch (retning) {
     case 'ascending':
-      return oppgaver.sort((a: OppgaveDTO, b: OppgaveDTO) => {
-        return new Date(a.frist).valueOf() - new Date(b.frist).valueOf()
-      })
+      return oppgaver.sort(sammenlignFrist)
     case 'descending':
-      return oppgaver
-        .sort((a: OppgaveDTO, b: OppgaveDTO) => {
-          return new Date(a.frist).valueOf() - new Date(b.frist).valueOf()
-        })
-        .reverse()
+      return oppgaver.sort(sammenlignFrist).reverse()
     case 'ingen':
       return oppgaver
   }
 }
 
+const sammenlignFnr = (a: OppgaveDTO, b: OppgaveDTO) =>
+  (a.fnr ? Number(a.fnr.slice(0, 5)) : 0) - (b.fnr ? Number(b.fnr.slice(0, 5)) : 0)
+
 export function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
   switch (retning) {
     case 'ascending':
-      return oppgaver.sort((a: OppgaveDTO, b: OppgaveDTO) => {
-        return Number(a.fnr.slice(0, 5)) - Number(b.fnr.slice(0, 5))
-      })
+      return oppgaver.sort(sammenlignFnr)
     case 'descending':
-      return oppgaver
-        .sort((a: OppgaveDTO, b: OppgaveDTO) => {
-          return Number(a.fnr.slice(0, 5)) - Number(b.fnr.slice(0, 5))
-        })
-        .reverse()
+      return oppgaver.sort(sammenlignFnr).reverse()
     case 'ingen':
       return oppgaver
   }

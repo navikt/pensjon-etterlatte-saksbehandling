@@ -1,6 +1,7 @@
 package no.nav.etterlatte.joarkhendelser
 
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
+import no.nav.etterlatte.joarkhendelser.joark.Bruker
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
@@ -49,9 +50,7 @@ class JoarkHendelseHandler(
 
         logger.info("Starter behandling av hendelse (id=${hendelse.hendelsesId}) med tema ${hendelse.temaNytt}")
 
-        val sakType = hendelse.temaTilSakType()
         val journalpostId = hendelse.journalpostId
-
         val journalpost = safKlient.hentJournalpost(journalpostId).journalpost
 
         if (journalpost == null) {
@@ -66,27 +65,13 @@ class JoarkHendelseHandler(
         try {
             if (journalpost.bruker == null) {
                 logger.warn("Bruker mangler på journalpost id=$journalpost")
-
-                oppgaveKlient.opprettOppgave(journalpostId, hendelse.temaNytt)
-
+                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId, hendelse.temaNytt)
                 return
-            } else if (journalpost.bruker.type == BrukerIdType.ORGNR) {
-                // TODO:
-                //  Må vi lage støtte for ORGNR...?
-                throw IllegalStateException("Journalpost med id=$journalpostId har brukerId av typen ${BrukerIdType.ORGNR}")
             }
 
-            val ident =
-                when (val pdlIdentifikator = pdlTjenesterKlient.hentPdlIdentifikator(journalpost.bruker.id)) {
-                    is PdlIdentifikator.FolkeregisterIdent -> pdlIdentifikator.folkeregisterident.value
-                    is PdlIdentifikator.Npid -> {
-                        throw IllegalStateException("Bruker tilknyttet journalpost=$journalpostId har kun NPID!")
-                    }
+            val ident = hentFolkeregisterIdent(journalpostId, journalpost.bruker)
 
-                    null -> throw IllegalStateException(
-                        "Ident tilknyttet journalpost=$journalpostId er null i PDL – avbryter behandling",
-                    )
-                }
+            val sakType = hendelse.temaTilSakType()
 
             when (val type = hendelse.hendelsesType) {
                 HendelseType.JOURNALPOST_MOTTATT -> {
@@ -112,13 +97,11 @@ class JoarkHendelseHandler(
 
                 // TODO: Må avklare om dette er noe vi faktisk trenger å behandle
                 HendelseType.JOURNALPOST_UTGAATT -> {
-                    behandlingService.opprettOppgave(
-                        ident,
-                        sakType,
-                        "Journalpost har utgått",
-                        hendelse.journalpostId.toString(),
-                    )
+                    logger.info("Journalpost $journalpostId har status=${journalpost.journalstatus}")
+
+                    behandlingService.avbrytOppgaverTilknyttetJournalpost(journalpostId)
                 }
+
                 else -> throw IllegalArgumentException("Journalpost=$journalpostId har ukjent hendelsesType=$type")
             }
         } catch (e: Exception) {
@@ -158,6 +141,28 @@ class JoarkHendelseHandler(
             return
         } else {
             logger.info("Uhåndtert tilstand av journalpost=${journalpost.journalpostId}")
+        }
+    }
+
+    private suspend fun hentFolkeregisterIdent(
+        journalpostId: Long,
+        bruker: Bruker,
+    ): String {
+        if (bruker.type == BrukerIdType.ORGNR) {
+            // TODO:
+            //  Må vi lage støtte for ORGNR...?
+            throw IllegalStateException("Journalpost med id=$journalpostId har brukerId av typen ${BrukerIdType.ORGNR}")
+        }
+
+        return when (val pdlIdentifikator = pdlTjenesterKlient.hentPdlIdentifikator(bruker.id)) {
+            is PdlIdentifikator.FolkeregisterIdent -> pdlIdentifikator.folkeregisterident.value
+            is PdlIdentifikator.Npid -> {
+                throw IllegalStateException("Bruker tilknyttet journalpost=$journalpostId har kun NPID!")
+            }
+
+            null -> throw IllegalStateException(
+                "Ident tilknyttet journalpost=$journalpostId er null i PDL – avbryter behandling",
+            )
         }
     }
 }

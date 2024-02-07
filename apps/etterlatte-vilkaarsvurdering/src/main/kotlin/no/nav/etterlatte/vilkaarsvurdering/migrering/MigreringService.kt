@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarTypeOgUtfall
 import no.nav.etterlatte.vilkaarsvurdering.Vilkaarsvurdering
 import no.nav.etterlatte.vilkaarsvurdering.VilkaarsvurderingRepository
@@ -41,7 +42,7 @@ class MigreringService(
                     VilkaarVurderingData(
                         kommentar = "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
                         tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
-                        saksbehandler = "Gjenoppretta",
+                        saksbehandler = Fagsaksystem.EY.navn,
                     ),
             ),
     )

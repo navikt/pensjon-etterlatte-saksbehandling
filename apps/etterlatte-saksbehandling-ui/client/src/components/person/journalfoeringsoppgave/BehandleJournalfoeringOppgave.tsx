@@ -38,15 +38,15 @@ export default function BehandleJournalfoeringOppgave() {
     if (!oppgave && oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
         dispatch(settOppgave(oppgave))
-        dispatch(settBruker(oppgave.fnr))
+        dispatch(settBruker(oppgave.fnr!!))
         dispatch(
           settNyBehandlingRequest({
             ...nyBehandlingRequest,
             sakType: oppgave.sakType,
-            persongalleri: { ...nyBehandlingRequest?.persongalleri, soeker: oppgave.fnr },
+            persongalleri: { ...nyBehandlingRequest?.persongalleri, soeker: oppgave.fnr!! },
           })
         )
-        apiHentSak(oppgave.fnr, (sak) => {
+        apiHentSak(oppgave.fnr!!, (sak) => {
           dispatch(settSak(sak))
         })
       })

@@ -329,12 +329,12 @@ internal class VedtakBehandlingServiceTest {
                             behandlingId = behandlingId,
                         ),
                     )
-                (nyttVedtak.innhold as VedtakBehandlingInnhold).virkningstidspunkt shouldBe virkningstidspunkt2023
+                (nyttVedtak.innhold as VedtakInnhold.Behandling).virkningstidspunkt shouldBe virkningstidspunkt2023
 
                 service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler)
             }
 
-        (oppdatertVedtak.innhold as VedtakBehandlingInnhold).virkningstidspunkt shouldBe virkningstidspunkt2024
+        (oppdatertVedtak.innhold as VedtakInnhold.Behandling).virkningstidspunkt shouldBe virkningstidspunkt2024
     }
 
     @Test
@@ -1069,7 +1069,7 @@ internal class VedtakBehandlingServiceTest {
         coEvery { trygdetidKlientMock.hentTrygdetid(any(), any()) } returns trygdetidDtoUtenDiff()
 
         with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
-            val innhold = innhold as VedtakBehandlingInnhold
+            val innhold = innhold as VedtakInnhold.Behandling
             innhold.utbetalingsperioder.size shouldBe 1
             innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(100)
             innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt
@@ -1083,7 +1083,7 @@ internal class VedtakBehandlingServiceTest {
             )
 
         with(runBlocking { service.opprettEllerOppdaterVedtak(behandlingId, saksbehandler) }) {
-            val innhold = innhold as VedtakBehandlingInnhold
+            val innhold = innhold as VedtakInnhold.Behandling
             innhold.utbetalingsperioder.size shouldBe 1
             innhold.utbetalingsperioder[0].beloep shouldBe BigDecimal(50)
             innhold.utbetalingsperioder[0].periode.fom shouldBe virkningstidspunkt

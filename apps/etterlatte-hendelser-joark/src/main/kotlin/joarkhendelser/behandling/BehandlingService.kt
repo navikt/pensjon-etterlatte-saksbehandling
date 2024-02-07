@@ -36,6 +36,12 @@ class BehandlingService(
             }
     }
 
+    suspend fun avbrytOppgaverTilknyttetJournalpost(journalpostId: Long) {
+        logger.info("Avbryter oppgaver tilknyttet journalpostId=$journalpostId")
+
+        behandlingKlient.avbrytOppgaver(journalpostId.toString())
+    }
+
     private suspend fun hentEllerOpprettSak(
         ident: String,
         sakType: SakType,

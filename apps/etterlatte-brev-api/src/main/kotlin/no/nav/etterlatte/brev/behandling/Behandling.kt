@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -73,6 +74,7 @@ data class ForenkletVedtak(
     val virkningstidspunkt: YearMonth? = null,
     val revurderingInfo: RevurderingInfo? = null,
     val tilbakekreving: Tilbakekreving? = null,
+    val klage: Klage? = null,
 )
 
 data class Utbetalingsinfo(

@@ -3,12 +3,15 @@ package no.nav.etterlatte.behandling.klage
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.FormkravMedBeslutter
+import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
+import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -118,6 +121,24 @@ internal class KlageDaoImplTest {
         klager[sak1]?.map { it.innkommendeDokument?.journalpostId } shouldContainExactlyInAnyOrder listOf("JP-1", "JP-3")
         klager[sak2]?.map { it.innkommendeDokument?.journalpostId } shouldContainExactlyInAnyOrder listOf("JP-2")
         klager[sak3] shouldBe emptyList()
+    }
+
+    @Test
+    fun `Lagre initielt utfall og hent det ut`() {
+        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = Enheter.AALESUND.enhetNr)
+        val klage = Klage.ny(sak, null).copy(status = KlageStatus.FORMKRAV_OPPFYLT)
+
+        klageDao.lagreKlage(klage)
+        val utfalldto = InitieltUtfallMedBegrunnelseDto(KlageUtfall.OMGJOERING, "begrunnelse")
+        val saksbehandlerIdent = "z123456"
+        val oppdatertKlage = klage.oppdaterIntieltUtfallMedBegrunnelse(utfalldto, saksbehandlerIdent)
+        klageDao.lagreKlage(oppdatertKlage)
+
+        val hentetKlage = klageDao.hentKlage(klage.id)
+
+        Assertions.assertEquals(utfalldto.utfall, hentetKlage?.initieltUtfall?.utfallMedBegrunnelse?.utfall)
+        Assertions.assertEquals(utfalldto.begrunnelse, hentetKlage?.initieltUtfall?.utfallMedBegrunnelse?.begrunnelse)
+        Assertions.assertEquals(saksbehandlerIdent, hentetKlage?.initieltUtfall?.saksbehandler)
     }
 
     private fun lagreKlage(

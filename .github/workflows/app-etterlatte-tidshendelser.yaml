@@ -37,20 +37,23 @@ permissions:
   id-token: write
 
 jobs:
-  test:
-    if: github.event_name == 'pull_request'
-    uses: ./.github/workflows/.test.yaml
-    secrets: inherit
-
   build:
-    if: github.event_name != 'pull_request'
     uses: ./.github/workflows/.build.yaml
     secrets: inherit
 
-  deploy:
-    if: github.event_name != 'pull_request'
+  deploy-to-dev-gcp:
+    name: dev-gcp
     needs: build
-    uses: ./.github/workflows/.deploy.yaml
-    with:
-      image: ${{ needs.build.outputs.image }}
-    secrets: inherit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: apps/${{ github.workflow }}/.nais/dev.yaml
+          VAR: image=${{ needs.build.outputs.image }}
+

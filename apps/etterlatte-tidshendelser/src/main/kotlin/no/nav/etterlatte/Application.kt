@@ -2,8 +2,8 @@ package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.tidshendelser.AppContext
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
+import no.nav.etterlatte.tidshendelser.AppContext
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.util.Timer

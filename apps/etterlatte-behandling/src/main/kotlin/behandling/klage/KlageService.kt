@@ -84,6 +84,11 @@ interface KlageService {
     )
 }
 
+class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
+    code = "MANGLER_SAKSBEHANDLER_PAA_OPPGAVE",
+    detail = msg,
+)
+
 class KlageServiceImpl(
     private val klageDao: KlageDao,
     private val sakDao: SakDao,
@@ -282,7 +287,9 @@ class KlageServiceImpl(
 
         val saksbehandlerForKlageOppgave =
             oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(klageId.toString())
-        if (saksbehandlerForKlageOppgave != saksbehandler.ident) {
+                ?: throw ManglerSaksbehandlerException("Fant ingen saksbehandler på oppgave relatert til klageid $klageId")
+
+        if (saksbehandlerForKlageOppgave.saksbehandlerIdent != saksbehandler.ident) {
             throw UgyldigForespoerselException(
                 code = "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
                 detail =

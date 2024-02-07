@@ -77,7 +77,7 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
             statement.setString(3, oppgaveIntern.enhet)
             statement.setLong(4, oppgaveIntern.sakId)
             statement.setString(5, oppgaveIntern.type.name)
-            statement.setString(6, oppgaveIntern.saksbehandler)
+            statement.setString(6, oppgaveIntern.saksbehandlerIdent)
             statement.setString(7, oppgaveIntern.referanse)
             statement.setString(8, oppgaveIntern.merknad)
             statement.setTidspunkt(9, oppgaveIntern.opprettet)
@@ -95,9 +95,9 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
             val statement =
                 prepareStatement(
                     """
-                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde
-                    FROM oppgave
-                    WHERE id = ?::UUID
+                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
+                    FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                    WHERE o.id = ?::UUID
                     """.trimIndent(),
                 )
             statement.setObject(1, oppgaveId)
@@ -112,9 +112,9 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
             val statement =
                 prepareStatement(
                     """
-                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde
-                    FROM oppgave
-                    WHERE referanse = ?
+                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
+                    FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                    WHERE o.referanse = ?
                     """.trimIndent(),
                 )
             statement.setString(1, referanse)
@@ -131,9 +131,9 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
             val statement =
                 prepareStatement(
                     """
-                    SELECT id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde
-                    FROM oppgave
-                    WHERE sak_id = ?
+                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
+                    FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                    WHERE o.sak_id = ?
                     """.trimIndent(),
                 )
             statement.setLong(1, sakId)
@@ -190,7 +190,7 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
             statement.setString(5, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
 
             return statement.executeQuery().toList {
-                asOppgaveMedSaksbehandlerNavn()
+                asOppgave()
             }.also {
                 logger.info("Hentet antall nye oppgaver: ${it.size}")
             }
@@ -202,8 +202,8 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
             val statement =
                 prepareStatement(
                     """
-                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
-                    FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
+                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
+                    FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                     WHERE ((s.adressebeskyttelse = ?) OR (s.adressebeskyttelse = ?))
                     AND o.type = ANY(?)
                     """.trimIndent(),
@@ -321,25 +321,6 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
         }
     }
 
-    private fun ResultSet.asOppgaveMedSaksbehandlerNavn(): OppgaveIntern {
-        return OppgaveIntern(
-            id = getObject("id") as UUID,
-            status = Status.valueOf(getString("status")),
-            enhet = getString("enhet"),
-            sakId = getLong("sak_id"),
-            kilde = getString("kilde")?.let { OppgaveKilde.valueOf(it) },
-            type = OppgaveType.valueOf(getString("type")),
-            saksbehandler = getString("saksbehandler"),
-            referanse = getString("referanse"),
-            merknad = getString("merknad"),
-            opprettet = getTidspunkt("opprettet"),
-            sakType = SakType.valueOf(getString("saktype")),
-            fnr = getString("fnr"),
-            frist = getTidspunktOrNull("frist"),
-            saksbehandlerNavn = getString("navn"),
-        )
-    }
-
     private fun ResultSet.asOppgave(): OppgaveIntern {
         return OppgaveIntern(
             id = getObject("id") as UUID,
@@ -348,13 +329,14 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
             sakId = getLong("sak_id"),
             kilde = getString("kilde")?.let { OppgaveKilde.valueOf(it) },
             type = OppgaveType.valueOf(getString("type")),
-            saksbehandler = getString("saksbehandler"),
             referanse = getString("referanse"),
             merknad = getString("merknad"),
             opprettet = getTidspunkt("opprettet"),
             sakType = SakType.valueOf(getString("saktype")),
             fnr = getString("fnr"),
             frist = getTidspunktOrNull("frist"),
+            saksbehandlerIdent = getString("saksbehandler"),
+            saksbehandlerNavn = getString("navn"),
         )
     }
 }

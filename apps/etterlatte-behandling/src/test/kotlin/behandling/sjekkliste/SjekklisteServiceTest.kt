@@ -9,6 +9,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -76,7 +77,9 @@ class SjekklisteServiceTest {
         every { behandlingService.hentBehandling(behandlingId) } returns
             foerstegangsbehandling(id = behandlingId, sakId = 33L, status = BehandlingStatus.FATTET_VEDTAK)
         every { user.name() } returns "Sak B. Handlersen"
-        every { oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(behandlingId.toString()) } returns "Noe helt annet"
+        every {
+            oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(behandlingId.toString())
+        } returns OppgaveSaksbehandler("Noe helt annet")
 
         assertThrows<SjekklisteIkkeTillattException> {
             sjekklisteService.oppdaterSjekkliste(

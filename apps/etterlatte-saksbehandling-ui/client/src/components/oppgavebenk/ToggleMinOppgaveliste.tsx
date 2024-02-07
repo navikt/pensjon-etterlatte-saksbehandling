@@ -75,7 +75,7 @@ export const ToggleMinOppgaveliste = () => {
     setTimeout(() => {
       const oppdatertOppgaveState = [...hentedeOppgaver]
       const index = oppdatertOppgaveState.findIndex((o) => o.id === id)
-      oppdatertOppgaveState[index].saksbehandler = saksbehandler
+      oppdatertOppgaveState[index].saksbehandlerIdent = saksbehandler
       oppdatertOppgaveState[index].status = 'UNDER_BEHANDLING'
       oppdatertOppgaveState[index].versjon = versjon
       setHentedeOppgaver(oppdatertOppgaveState)
@@ -83,7 +83,9 @@ export const ToggleMinOppgaveliste = () => {
   }
 
   const mutableOppgaver = hentedeOppgaver.concat()
-  const innloggetSaksbehandleroppgaver = mutableOppgaver.filter((o) => o.saksbehandler === innloggetSaksbehandler.ident)
+  const innloggetSaksbehandleroppgaver = mutableOppgaver.filter(
+    (o) => o.saksbehandlerIdent === innloggetSaksbehandler.ident
+  )
   const filtrerteOppgaver = filtrerOppgaver(
     filter.enhetsFilter,
     filter.fristFilter,

@@ -98,9 +98,9 @@ internal class OppgaveDaoTest {
 
         val nySaksbehandler = "nysaksbehandler"
         oppgaveDao.settNySaksbehandler(oppgaveNy.id, nySaksbehandler)
-        val hentOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
-        assertEquals(nySaksbehandler, hentOppgave?.saksbehandler)
-        assertEquals(Status.UNDER_BEHANDLING, hentOppgave?.status)
+        val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
+        assertEquals(nySaksbehandler, hentetOppgave?.saksbehandlerIdent)
+        assertEquals(Status.UNDER_BEHANDLING, hentetOppgave?.status)
     }
 
     @Test

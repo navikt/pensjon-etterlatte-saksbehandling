@@ -37,7 +37,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                 ORDER BY id asc
                 LIMIT 1
                 """.trimIndent(),
-                mapOf("status" to "NY"),
+                mapOf("status" to JobbStatus.NY.name),
             )
                 .let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
         }
@@ -56,16 +56,16 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
     }
 
     fun oppdaterJobbstatusStartet(hendelserJobb: HendelserJobb) {
-        oppdaterJobbstatus(hendelserJobb, "STARTET")
+        oppdaterJobbstatus(hendelserJobb, JobbStatus.STARTET)
     }
 
     fun oppdaterJobbstatusFerdig(hendelserJobb: HendelserJobb) {
-        oppdaterJobbstatus(hendelserJobb, "FERDIG")
+        oppdaterJobbstatus(hendelserJobb, JobbStatus.FERDIG)
     }
 
     private fun oppdaterJobbstatus(
         hendelserJobb: HendelserJobb,
-        status: String,
+        status: JobbStatus,
     ) {
         datasource.transaction {
             queryOf(
@@ -78,7 +78,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                 AND versjon = :versjon
                 """.trimIndent(),
                 mapOf(
-                    "status" to status,
+                    "status" to status.name,
                     "id" to hendelserJobb.id,
                     "versjon" to hendelserJobb.versjon,
                 ),
@@ -136,7 +136,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
 
     fun oppdaterHendelseStatus(
         hendelse: Hendelse,
-        status: String,
+        status: HendelseStatus,
     ) {
         datasource.transaction {
             queryOf(
@@ -147,7 +147,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                     versjon = versjon + 1
                 WHERE id = :id
                 """.trimIndent(),
-                mapOf("status" to status, "id" to hendelse.id),
+                mapOf("status" to status.name, "id" to hendelse.id),
             )
                 .let { query -> it.run(query.asUpdate) }
         }
@@ -176,7 +176,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
             opprettet = tidspunkt("opprettet").toLocalDatetimeUTC(),
             endret = tidspunkt("endret").toLocalDatetimeUTC(),
             versjon = int("versjon"),
-            status = string("status"),
+            status = HendelseStatus.valueOf(string("status")),
             steg = string("steg"),
             info = anyOrNull("info"),
         )
@@ -191,6 +191,6 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
             kjoeredato = localDate("kjoeredato"),
             behandlingsmaaned = YearMonth.parse(string("behandlingsmaaned")),
             dryrun = boolean("dryrun"),
-            status = string("status"),
+            status = JobbStatus.valueOf(string("status")),
         )
 }

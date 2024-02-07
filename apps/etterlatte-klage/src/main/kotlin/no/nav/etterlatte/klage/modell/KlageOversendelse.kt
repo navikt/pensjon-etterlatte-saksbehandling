@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
-import no.nav.etterlatte.libs.common.behandling.KlageUtfall
+import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.klage.kodeverk.Fagsystem
@@ -85,8 +85,8 @@ data class KabalOversendelse(
         ): KabalOversendelse {
             val innstilling =
                 when (val utfall = klage.utfall) {
-                    is KlageUtfall.DelvisOmgjoering -> utfall.innstilling
-                    is KlageUtfall.StadfesteVedtak -> utfall.innstilling
+                    is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling
+                    is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling
                     else -> throw IllegalArgumentException("Kan ikke sende noe som ikke er innstilling til Kabal")
                 }
 

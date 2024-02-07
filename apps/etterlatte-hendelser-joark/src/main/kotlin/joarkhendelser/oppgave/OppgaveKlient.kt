@@ -43,4 +43,6 @@ data class OpprettOppgaveRequest(
     val oppgavetype = "JFR" // JFR = Journalføring
     val prioritet = "NORM"
     val aktivDato = LocalDate.now().toString()
+    val fristFerdigstillelse = LocalDate.now().plusDays(30).toString()
+    val beskrivelse = "Journalpost $journalpostId mangler bruker"
 }

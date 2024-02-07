@@ -9,14 +9,11 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VARSEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.BarnepensjonAvslag
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelse
@@ -30,53 +27,66 @@ import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurdering
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingFerdigData
 import no.nav.etterlatte.token.BrukerTokenInfo
 
-class BrevDataMapperFerdigstilling(private val brevdataFacade: BrevdataFacade) {
-    suspend fun brevDataFerdigstilling(
-        generellBrevData: GenerellBrevData,
-        bruker: BrukerTokenInfo,
-        innholdMedVedlegg: InnholdMedVedlegg,
-        kode: Brevkoder,
-        automatiskMigreringRequest: MigreringBrevRequest?,
-        tittel: String? = null,
-    ): BrevData {
-        if (generellBrevData.erMigrering()) {
-            return coroutineScope {
-                val fetcher = BrevDatafetcher(brevdataFacade, bruker, generellBrevData)
-                val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-                val trygdetid = async { fetcher.hentTrygdetid() }
-                val grunnbeloep = async { fetcher.hentGrunnbeloep() }
-                val etterbetaling = async { fetcher.hentEtterbetaling() }
+data class BrevDataFerdigstillingRequest(
+    val generellBrevData: GenerellBrevData,
+    val bruker: BrukerTokenInfo,
+    val innholdMedVedlegg: InnholdMedVedlegg,
+    val kode: Brevkoder,
+    val automatiskMigreringRequest: MigreringBrevRequest?,
+    val tittel: String? = null,
+)
 
-                BarnepensjonOmregnetNyttRegelverk.fra(
-                    innhold = innholdMedVedlegg,
-                    erUnder18Aar = generellBrevData.personerISak.soeker.under18,
-                    utbetalingsinfo = utbetalingsinfo.await(),
-                    etterbetaling = etterbetaling.await(),
-                    trygdetid = requireNotNull(trygdetid.await()),
-                    grunnbeloep = grunnbeloep.await(),
-                    migreringRequest = automatiskMigreringRequest,
-                    utlandstilknytning = generellBrevData.utlandstilknytning?.type,
-                )
+class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFacade) {
+    suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevData {
+        with(request) {
+            if (generellBrevData.erMigrering()) {
+                return coroutineScope {
+                    val fetcher = BrevDatafetcher(brevdataFacade, bruker, generellBrevData)
+                    val utbetalingsinfo = async { fetcher.hentUtbetaling() }
+                    val trygdetid = async { fetcher.hentTrygdetid() }
+                    val grunnbeloep = async { fetcher.hentGrunnbeloep() }
+                    val etterbetaling = async { fetcher.hentEtterbetaling() }
+
+                    BarnepensjonOmregnetNyttRegelverk.fra(
+                        innhold = innholdMedVedlegg,
+                        erUnder18Aar = generellBrevData.personerISak.soeker.under18,
+                        utbetalingsinfo = utbetalingsinfo.await(),
+                        etterbetaling = etterbetaling.await(),
+                        trygdetid = requireNotNull(trygdetid.await()),
+                        grunnbeloep = grunnbeloep.await(),
+                        migreringRequest = automatiskMigreringRequest,
+                        utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+                    )
+                }
             }
-        }
 
-        return when (kode.ferdigstilling) {
-            TOM_MAL_INFORMASJONSBREV -> ManueltBrevMedTittelData(innholdMedVedlegg.innhold(), tittel)
-            BARNEPENSJON_REVURDERING -> barnepensjonRevurdering(bruker, generellBrevData, innholdMedVedlegg)
-            BARNEPENSJON_INNVILGELSE -> barnepensjonInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
-            BARNEPENSJON_AVSLAG -> barnepensjonAvslag(innholdMedVedlegg, generellBrevData)
-            BARNEPENSJON_OPPHOER -> barnepensjonOpphoer(innholdMedVedlegg, generellBrevData)
-            BARNEPENSJON_VARSEL -> ManueltBrevData()
+            return when (kode.ferdigstilling) {
+                BARNEPENSJON_REVURDERING -> barnepensjonRevurdering(bruker, generellBrevData, innholdMedVedlegg)
+                BARNEPENSJON_INNVILGELSE -> barnepensjonInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
+                BARNEPENSJON_AVSLAG -> barnepensjonAvslag(innholdMedVedlegg, generellBrevData)
+                BARNEPENSJON_OPPHOER -> barnepensjonOpphoer(innholdMedVedlegg, generellBrevData)
 
-            OMSTILLINGSSTOENAD_INNVILGELSE -> omstillingsstoenadInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
-            OMSTILLINGSSTOENAD_REVURDERING -> omstillingsstoenadRevurdering(bruker, generellBrevData, innholdMedVedlegg)
-            OMSTILLINGSSTOENAD_AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, innholdMedVedlegg.innhold())
-            OMSTILLINGSSTOENAD_OPPHOER ->
-                OmstillingsstoenadOpphoer.fra(generellBrevData.utlandstilknytning, innholdMedVedlegg.innhold())
-            OMSTILLINGSSTOENAD_VARSEL -> ManueltBrevData()
+                OMSTILLINGSSTOENAD_INNVILGELSE ->
+                    omstillingsstoenadInnvilgelse(
+                        bruker,
+                        generellBrevData,
+                        innholdMedVedlegg,
+                    )
 
-            TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
-            else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
+                OMSTILLINGSSTOENAD_REVURDERING ->
+                    omstillingsstoenadRevurdering(
+                        bruker,
+                        generellBrevData,
+                        innholdMedVedlegg,
+                    )
+
+                OMSTILLINGSSTOENAD_AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, innholdMedVedlegg.innhold())
+                OMSTILLINGSSTOENAD_OPPHOER ->
+                    OmstillingsstoenadOpphoer.fra(generellBrevData.utlandstilknytning, innholdMedVedlegg.innhold())
+
+                TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
+                else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
+            }
         }
     }
 

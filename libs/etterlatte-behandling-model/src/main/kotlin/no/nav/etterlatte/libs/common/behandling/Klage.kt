@@ -92,6 +92,23 @@ data class InnkommendeKlage(
     val innsender: String?,
 )
 
+data class InitieltUtfallMedBegrunnelseOgSaksbehandler(
+    val utfallMedBegrunnelse: InitieltUtfallMedBegrunnelseDto,
+    val saksbehandler: String,
+    val tidspunkt: Tidspunkt,
+)
+
+data class InitieltUtfallMedBegrunnelseDto(
+    val utfall: KlageUtfall,
+    val begrunnelse: String,
+)
+
+enum class KlageUtfall {
+    OMGJOERING,
+    DELVIS_OMGJOERING,
+    STADFESTE_VEDTAK,
+}
+
 data class Klage(
     val id: UUID,
     val sak: Sak,
@@ -99,7 +116,8 @@ data class Klage(
     val status: KlageStatus,
     val kabalStatus: KabalStatus?,
     val formkrav: FormkravMedBeslutter?,
-    val utfall: KlageUtfall?,
+    val initieltUtfall: InitieltUtfallMedBegrunnelseOgSaksbehandler?,
+    val utfall: KlageUtfallMedData?,
     val resultat: KlageResultat?,
     val kabalResultat: BehandlingResultat?,
     val innkommendeDokument: InnkommendeKlage?,
@@ -134,7 +152,7 @@ data class Klage(
         )
     }
 
-    fun oppdaterUtfall(utfallMedBrev: KlageUtfall): Klage {
+    fun oppdaterUtfall(utfallMedBrev: KlageUtfallMedData): Klage {
         if (!this.kanOppdatereUtfall()) {
             throw IllegalStateException(
                 "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen" +
@@ -143,9 +161,9 @@ data class Klage(
         }
         val hjemmel =
             when (utfallMedBrev) {
-                is KlageUtfall.StadfesteVedtak -> utfallMedBrev.innstilling.lovhjemmel
-                is KlageUtfall.DelvisOmgjoering -> utfallMedBrev.innstilling.lovhjemmel
-                is KlageUtfall.Omgjoering -> null
+                is KlageUtfallMedData.StadfesteVedtak -> utfallMedBrev.innstilling.lovhjemmel
+                is KlageUtfallMedData.DelvisOmgjoering -> utfallMedBrev.innstilling.lovhjemmel
+                is KlageUtfallMedData.Omgjoering -> null
             }
         hjemmel?.let {
             require(it.kanBrukesForSaktype(this.sak.sakType)) {
@@ -157,6 +175,20 @@ data class Klage(
             utfall = utfallMedBrev,
             status = KlageStatus.UTFALL_VURDERT,
         )
+    }
+
+    fun oppdaterIntieltUtfallMedBegrunnelse(
+        utfall: InitieltUtfallMedBegrunnelseDto,
+        saksbehandlerIdent: String,
+    ): Klage {
+        if (!this.kanOppdatereUtfall()) {
+            throw IllegalStateException(
+                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen" +
+                    "til klagen (${this.status})",
+            )
+        } else {
+            return this.copy(initieltUtfall = InitieltUtfallMedBegrunnelseOgSaksbehandler(utfall, saksbehandlerIdent, Tidspunkt.now()))
+        }
     }
 
     fun ferdigstill(resultat: KlageResultat): Klage {
@@ -235,33 +267,34 @@ data class Klage(
                 kabalResultat = null,
                 innkommendeDokument = innkommendeDokument,
                 aarsakTilAvbrytelse = null,
+                initieltUtfall = null,
             )
         }
     }
 }
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "utfall")
-sealed class KlageUtfall {
+sealed class KlageUtfallMedData {
     abstract val saksbehandler: Grunnlagsopplysning.Saksbehandler
 
     @JsonTypeName("OMGJOERING")
     data class Omgjoering(
         val omgjoering: KlageOmgjoering,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfall()
+    ) : KlageUtfallMedData()
 
     @JsonTypeName("DELVIS_OMGJOERING")
     data class DelvisOmgjoering(
         val omgjoering: KlageOmgjoering,
         val innstilling: InnstillingTilKabal,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfall()
+    ) : KlageUtfallMedData()
 
     @JsonTypeName("STADFESTE_VEDTAK")
     data class StadfesteVedtak(
         val innstilling: InnstillingTilKabal,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfall()
+    ) : KlageUtfallMedData()
 }
 
 sealed class GyldigForYtelse {

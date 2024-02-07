@@ -3,6 +3,7 @@ import React from 'react'
 import {
   Aldersgruppe,
   BrevutfallOgEtterbetaling,
+  FeilutbetalingValg,
   LavEllerIngenInntekt,
 } from '~components/behandling/brevutfall/Brevutfall'
 import { format, parseISO } from 'date-fns'
@@ -27,6 +28,19 @@ function lavEllerIngenInntektToString(lavEllerIngenInntekt?: LavEllerIngenInntek
       return 'Ja'
     case LavEllerIngenInntekt.NEI:
       return 'Nei'
+    default:
+      return 'Ikke satt'
+  }
+}
+
+export function feilutbetalingToString(feilutbetaling?: FeilutbetalingValg | null) {
+  switch (feilutbetaling) {
+    case FeilutbetalingValg.NEI:
+      return 'Nei'
+    case FeilutbetalingValg.JA_VARSEL:
+      return 'Ja, det skal sendes varsel'
+    case FeilutbetalingValg.JA_INGEN_TK:
+      return 'Ja, men under 4 rettsgebyr, så ingen tilbakekreving'
     default:
       return 'Ikke satt'
   }
@@ -76,6 +90,14 @@ export const BrevutfallVisning = (props: {
           <BodyShort>
             {lavEllerIngenInntektToString(brevutfallOgEtterbetaling.brevutfall.lavEllerIngenInntekt)}
           </BodyShort>
+        </VStack>
+      )}
+
+      {brevutfallOgEtterbetaling.brevutfall.feilutbetaling && (
+        <VStack gap="2">
+          <Label>Medfører revurderingen en feilutbetaling?</Label>
+          <BodyShort>{feilutbetalingToString(brevutfallOgEtterbetaling.brevutfall.feilutbetaling.valg)}</BodyShort>
+          <BodyShort>{brevutfallOgEtterbetaling.brevutfall.feilutbetaling.kommentar}</BodyShort>
         </VStack>
       )}
       {redigerbar && (

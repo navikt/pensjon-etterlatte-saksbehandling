@@ -3,21 +3,15 @@ package no.nav.etterlatte.brev.brevbaker
 import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
+import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
-class BrevbakerService(
-    private val brevbakerKlient: BrevbakerKlient,
-    private val adresseService: AdresseService,
-    private val brevDataMapperRedigerbartUtfall: BrevDataMapperRedigerbartUtfall,
-    private val brevKodeMapper: BrevKodeMapper,
-) {
+class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val adresseService: AdresseService) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun genererPdf(
@@ -35,8 +29,8 @@ class BrevbakerService(
         val request =
             with(redigerbarTekstRequest) {
                 BrevbakerRequest.fra(
-                    brevkode(brevKodeMapper, generellBrevData),
-                    brevDataMapperRedigerbartUtfall.brevData(this),
+                    brevkode,
+                    brevdata(this),
                     adresseService.hentAvsender(
                         generellBrevData.avsenderRequest(brukerTokenInfo),
                     ),
@@ -54,6 +48,7 @@ class BrevbakerService(
 data class RedigerbarTekstRequest(
     val generellBrevData: GenerellBrevData,
     val brukerTokenInfo: BrukerTokenInfo,
-    val brevkode: (mapper: BrevKodeMapper, g: GenerellBrevData) -> EtterlatteBrevKode,
+    val brevkode: EtterlatteBrevKode,
     val migrering: MigreringBrevRequest? = null,
+    val brevdata: suspend (RedigerbarTekstRequest) -> BrevData,
 )

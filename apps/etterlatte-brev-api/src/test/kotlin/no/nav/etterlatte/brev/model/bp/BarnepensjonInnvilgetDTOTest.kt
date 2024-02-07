@@ -12,6 +12,8 @@ import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
+import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
+import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.Assertions
@@ -67,7 +69,17 @@ internal class BarnepensjonInnvilgetDTOTest {
                     ),
                 innhold = lagInnholdMedVedlegg(),
                 utlandstilknytning = null,
-                brevutfall = BrevutfallDto(UUID.randomUUID(), Aldersgruppe.UNDER_18, null, null),
+                brevutfall =
+                    BrevutfallDto(
+                        UUID.randomUUID(),
+                        Aldersgruppe.UNDER_18,
+                        null,
+                        Feilutbetaling(
+                            FeilutbetalingValg.NEI,
+                            null,
+                        ),
+                        null,
+                    ),
             )
 
         Assertions.assertEquals(

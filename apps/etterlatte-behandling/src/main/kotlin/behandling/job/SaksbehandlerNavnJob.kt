@@ -27,21 +27,14 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
                 logger.error("Saksbehandlerdatanavn feilet se exception $exception")
             }
 
-        val ugyldigeIdenter =
-            listOf(
-                "PESYS",
-                "EY",
-                "GJENOPPRETTA",
-            )
-
         GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
             try {
-                oppdaterSaksbehandlerNavn(logger, context, subCoroutineExceptionHandler, ugyldigeIdenter)
+                oppdaterSaksbehandlerNavn(logger, context, subCoroutineExceptionHandler)
             } catch (e: Exception) {
                 logger.error("Kunne ikke hente navn for saksbehandlere", e)
             }
             try {
-                oppdaterSaksbehandlerEnhet(logger, context, subCoroutineExceptionHandler, ugyldigeIdenter)
+                oppdaterSaksbehandlerEnhet(logger, context, subCoroutineExceptionHandler)
             } catch (e: Exception) {
                 logger.error("Kunne ikke hente enheter for saksbehandlere", e)
             }
@@ -51,13 +44,18 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
     }
 }
 
+val ugyldigeIdenter =
+    listOf(
+        "PESYS",
+        "EY",
+        "GJENOPPRETTA",
+    )
 val SAKSBEHANDLERPATTERN = Regex("[a-zA-Z]\\d{6}")
 
 internal suspend fun oppdaterSaksbehandlerEnhet(
     logger: Logger,
     context: ApplicationContext,
     subCoroutineExceptionHandler: CoroutineExceptionHandler,
-    ugyldigeIdenter: List<String>,
 ) {
     val tidbrukt =
         measureTime {
@@ -100,7 +98,6 @@ internal suspend fun oppdaterSaksbehandlerNavn(
     logger: Logger,
     context: ApplicationContext,
     subCoroutineExceptionHandler: CoroutineExceptionHandler,
-    ugyldigeIdenter: List<String>,
 ) {
     val tidbrukt =
         measureTime {

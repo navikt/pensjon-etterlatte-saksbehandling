@@ -52,6 +52,8 @@ spec:
       value: "PT30S"
     - name: HENDELSE_POLLER_MAX_ANTALL
       value: "3"
+    - name: ETTERLATTE_GRUNNLAG_URL
+      value: http://etterlatte-grunnlag
     - name: ETTERLATTE_GRUNNLAG_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
   accessPolicy:

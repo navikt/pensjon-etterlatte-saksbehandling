@@ -23,7 +23,7 @@ import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser
 
 interface Props {
   hentAlleOppgaver: () => void
-  hentOppgaver: () => void
+  hentOppgaver: (oppgavestatusFilter: Array<string>) => void
   filter: Filter
   setFilter: (filter: Filter) => void
   alleOppgaver: OppgaveDTO[]
@@ -105,8 +105,8 @@ export const FilterRad = ({ hentAlleOppgaver, hentOppgaver, filter, setFilter, a
         <VelgOppgavestatuser
           value={filter.oppgavestatusFilter}
           onChange={(oppgavestatusFilter) => {
+            hentOppgaver(oppgavestatusFilter)
             setFilter({ ...filter, oppgavestatusFilter })
-            hentOppgaver()
           }}
         />
 

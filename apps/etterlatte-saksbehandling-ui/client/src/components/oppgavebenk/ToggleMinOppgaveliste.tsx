@@ -3,7 +3,7 @@ import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentGosysOppgaver, hentOppgaver, OppgaveDTO } from '~shared/api/oppgaver'
+import { hentGosysOppgaver, hentOppgaverMedStatus, OppgaveDTO } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import { FilterRad } from '~components/oppgavebenk/FilterRad'
@@ -31,7 +31,7 @@ export const ToggleMinOppgaveliste = () => {
 
   const [filter, setFilter] = useState<Filter>(hentFilterFraLocalStorage())
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
-  const [oppgaver, hentOppgaverFetch] = useApiCall(hentOppgaver)
+  const [oppgaver, hentOppgaverStatusFetch] = useApiCall(hentOppgaverMedStatus)
   const [gosysOppgaver, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
 
   const [hentedeOppgaver, setHentedeOppgaver] = useState<OppgaveDTO[]>([])
@@ -52,7 +52,7 @@ export const ToggleMinOppgaveliste = () => {
   }, [oppgaver, gosysOppgaver])
 
   const hentAlleOppgaver = () => {
-    hentOppgaverFetch(filter.oppgavestatusFilter)
+    hentOppgaverStatusFetch(filter.oppgavestatusFilter)
     hentGosysOppgaverFunc({})
   }
 
@@ -130,7 +130,7 @@ export const ToggleMinOppgaveliste = () => {
             <>
               <FilterRad
                 hentAlleOppgaver={hentAlleOppgaver}
-                hentOppgaver={() => hentOppgaverFetch(filter.oppgavestatusFilter)}
+                hentOppgaver={(oppgavestatusFilter: Array<string>) => hentOppgaverStatusFetch(oppgavestatusFilter)}
                 filter={filter}
                 setFilter={setFilter}
                 alleOppgaver={hentedeOppgaver}

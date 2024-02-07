@@ -56,7 +56,7 @@ export type Oppgavetype =
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 
-export const hentOppgaver = async (oppgavestatusFilter: Array<string>): Promise<ApiResponse<OppgaveDTO[]>> => {
+export const hentOppgaverMedStatus = async (oppgavestatusFilter: Array<string>): Promise<ApiResponse<OppgaveDTO[]>> => {
   const konverterteFiltre = konverterFilterValuesTilKeys(oppgavestatusFilter)
 
   const queryParams = konverterteFiltre

@@ -1,31 +1,31 @@
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { SortState, Table } from '@navikt/ds-react'
 import { OppgaverTableHeader } from '~components/oppgavebenk/oppgaverTable/OppgaverTableHeader'
-import { OppgaveDTO } from '~shared/api/oppgaver'
+import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
 import { OppgaverTableRow } from '~components/oppgavebenk/oppgaverTable/OppgaverTableRow'
 import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
-
-interface Props {
-  oppgaver: ReadonlyArray<OppgaveDTO>
-  alleOppgaver: Array<OppgaveDTO>
-  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
-  erMinOppgaveliste: boolean
-  hentOppgaver: () => void
-  filter: Filter
-  setFilter: Dispatch<SetStateAction<Filter>>
-}
 
 export enum SortKey {
   FRIST = 'frist',
   FNR = 'fnr',
 }
 
+interface Props {
+  oppgaver: ReadonlyArray<OppgaveDTO>
+  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
+  erMinOppgaveliste: boolean
+  hentOppgaver: () => void
+  saksbehandlereIEnhet: Array<Saksbehandler>
+  filter: Filter
+  setFilter: Dispatch<SetStateAction<Filter>>
+}
+
 export const OppgaverTable = ({
   oppgaver,
-  alleOppgaver,
   oppdaterTildeling,
   erMinOppgaveliste,
   hentOppgaver,
+  saksbehandlereIEnhet,
   filter,
   setFilter,
 }: Props): ReactNode => {
@@ -64,7 +64,7 @@ export const OppgaverTable = ({
                 key={oppgave.id}
                 oppgave={oppgave}
                 oppgaver={oppgaver}
-                alleOppgaver={alleOppgaver}
+                saksbehandlereIEnhet={saksbehandlereIEnhet}
                 oppdaterTildeling={oppdaterTildeling}
                 erMinOppgaveListe={erMinOppgaveliste}
                 hentOppgaver={hentOppgaver}

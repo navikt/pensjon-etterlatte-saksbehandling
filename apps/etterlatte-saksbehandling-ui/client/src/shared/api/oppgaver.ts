@@ -47,6 +47,11 @@ export type Oppgavetype =
   | 'OMGJOERING'
   | 'JOURNALFOERING'
 
+export interface Saksbehandler {
+  ident: string | null
+  navn: string | null
+}
+
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 
 export const hentOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver')
@@ -80,6 +85,10 @@ export const tildelSaksbehandlerApi = async (args: {
   } else {
     return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
   }
+}
+
+export const saksbehandlereIEnhetApi = async (args: { enhet: string }): Promise<ApiResponse<Array<Saksbehandler>>> => {
+  return apiClient.get(`/saksbehandlere/enhet/${args.enhet}`)
 }
 
 export const byttSaksbehandlerApi = async (args: {

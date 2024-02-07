@@ -1,6 +1,6 @@
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode } from 'react'
 import { Table } from '@navikt/ds-react'
-import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
+import { erOppgaveRedigerbar, OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
 import { formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/FristWrapper'
 import SaksoversiktLenke from '~components/oppgavebenk/SaksoversiktLenke'
@@ -13,7 +13,7 @@ import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filter/oppgavelista
 interface Props {
   oppgave: OppgaveDTO
   oppgaver: ReadonlyArray<OppgaveDTO>
-  alleOppgaver: Array<OppgaveDTO>
+  saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveListe: boolean
   hentOppgaver: () => void
@@ -21,19 +21,11 @@ interface Props {
 
 export const OppgaverTableRow = ({
   oppgave,
-  alleOppgaver,
+  saksbehandlereIEnhet,
   oppdaterTildeling,
   erMinOppgaveListe,
   hentOppgaver,
 }: Props): ReactNode => {
-  const [saksbehandlere] = useState<Array<string>>(
-    Array.from(
-      new Set(
-        alleOppgaver.map((oppgave) => oppgave.saksbehandlerNavn).filter((s): s is Exclude<typeof s, null> => s !== null)
-      )
-    )
-  )
-
   return (
     <Table.Row>
       <Table.HeaderCell>{formaterStringDato(oppgave.opprettet)}</Table.HeaderCell>
@@ -63,8 +55,8 @@ export const OppgaverTableRow = ({
       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
       <Table.DataCell>
         <VelgSaksbehandler
-          saksbehandlere={saksbehandlere}
-          saksbehandlerNavn={oppgave.saksbehandlerNavn}
+          saksbehandler={{ ident: oppgave.saksbehandler, navn: oppgave.saksbehandlerNavn }}
+          saksbehandlereIEnhet={saksbehandlereIEnhet}
           oppgaveId={oppgave.id}
           sakId={oppgave.sakId}
           oppdaterTildeling={oppdaterTildeling}

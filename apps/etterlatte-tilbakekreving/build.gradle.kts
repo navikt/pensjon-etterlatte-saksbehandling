@@ -34,9 +34,6 @@ dependencies {
     implementation(libs.messaginghub.pooled.jms)
     implementation(libs.navfelles.tjenestespesifikasjoner.tilbakekreving)
 
-    implementation(libs.jakartabind.api)
-    implementation(libs.jakartabind.impl)
-
     implementation(libs.database.kotliquery)
 
     testImplementation(libs.ktor2.clientmock)

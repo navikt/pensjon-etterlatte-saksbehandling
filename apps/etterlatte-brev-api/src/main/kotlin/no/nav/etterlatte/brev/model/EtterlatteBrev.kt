@@ -64,19 +64,3 @@ data class TrygdetidMedBeregningsmetode(
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
 )
-
-enum class TrygdetidType {
-    FREMTIDIG,
-    FAKTISK,
-}
-
-data class Periode(
-    val aar: Int,
-    val maaneder: Int,
-    val dager: Int,
-)
-
-data class Avdoed(
-    val navn: String,
-    val doedsdato: LocalDate,
-)

@@ -38,17 +38,9 @@ data class OppgaveIntern(
         return saksbehandler == null
     }
 
-    fun harSaksbehandler(): Boolean {
-        return saksbehandler != null
-    }
+    fun erAvsluttet(): Boolean = status.erAvsluttet()
 
-    fun erAvsluttet(): Boolean {
-        return Status.erAvsluttet(this.status)
-    }
-
-    fun erFerdigstilt(): Boolean {
-        return Status.erFerdigstilt(this.status)
-    }
+    fun erFerdigstilt(): Boolean = status.erFerdigstilt()
 
     fun erAttestering(): Boolean {
         return OppgaveType.ATTESTERING === type
@@ -82,27 +74,20 @@ enum class Status {
     AVBRUTT,
     ;
 
-    companion object {
-        fun erAvsluttet(status: Status): Boolean {
-            return when (status) {
-                NY,
-                UNDER_BEHANDLING,
-                -> false
-                FERDIGSTILT,
-                FEILREGISTRERT,
-                AVBRUTT,
-                -> true
-            }
-        }
+    fun erAvsluttet(): Boolean {
+        return when (this) {
+            NY,
+            UNDER_BEHANDLING,
+            -> false
 
-        fun erFerdigstilt(status: Status): Boolean {
-            return status === FERDIGSTILT
-        }
-
-        fun erUnderbehandling(status: Status): Boolean {
-            return status === UNDER_BEHANDLING
+            FERDIGSTILT,
+            FEILREGISTRERT,
+            AVBRUTT,
+            -> true
         }
     }
+
+    fun erFerdigstilt(): Boolean = this === FERDIGSTILT
 }
 
 enum class OppgaveKilde {

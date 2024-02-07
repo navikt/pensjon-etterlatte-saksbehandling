@@ -25,27 +25,6 @@ import org.slf4j.LoggerFactory
 class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: String) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun hentVergeadresseGittVergehaversFnr(vergehaverFnr: String): PersondataAdresse? {
-        try {
-            val kontaktadresse = hentKontaktadresse(vergehaverFnr, seEtterVerge = true)
-
-            return if (erVergesAdresse(kontaktadresse)) {
-                kontaktadresse
-            } else {
-                null
-            }
-        } catch (e: ClientRequestException) {
-            if (e.response.status == HttpStatusCode.NotFound) {
-                return null
-            }
-            logger.error("Feil i henting av vergeadresse", e)
-            return null
-        } catch (e: Exception) {
-            logger.error("Feil i henting av vergeadresse", e)
-            return null
-        }
-    }
-
     fun hentAdresseGittFnr(foedselsnummer: String): PersondataAdresse? {
         try {
             return hentKontaktadresse(foedselsnummer, false)

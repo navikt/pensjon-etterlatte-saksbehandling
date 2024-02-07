@@ -4,7 +4,6 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.jobs.MetrikkerJob
 import no.nav.etterlatte.jobs.addShutdownHook
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
@@ -53,7 +52,6 @@ class ApplicationBuilder {
     private val config: Config = ConfigFactory.load()
     private val dataSource = DataSourceBuilder.createDataSource(env)
 
-    private val featureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
     private val behandlingKlient = BehandlingKlientImpl(config, httpClient())
     private val samKlient =
         SamKlientImpl(

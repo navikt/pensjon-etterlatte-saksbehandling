@@ -441,7 +441,7 @@ class OppgaveService(
         logger.info("Avbryter åpne oppgaver med referanse=$referanse")
 
         oppgaveDao.hentOppgaverForReferanse(referanse)
-            .filterNot { Status.erAvsluttet(it.status) }
+            .filterNot(OppgaveIntern::erAvsluttet)
             .forEach { oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT) }
     }
 

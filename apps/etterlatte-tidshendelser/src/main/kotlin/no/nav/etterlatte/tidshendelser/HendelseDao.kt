@@ -153,6 +153,30 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
         }
     }
 
+    fun oppdaterHendelseForSteg(
+        hendelseId: String,
+        steg: String,
+        info: Any? = null,
+    ) {
+        datasource.transaction {
+            queryOf(
+                """
+                UPDATE hendelse 
+                SET steg = :steg,
+                    endret = now(),
+                    versjon = versjon + 1
+                WHERE id = :id
+                AND   versjon = :versjon
+                """.trimIndent(),
+                mapOf(
+                    "id" to hendelseId,
+                    "steg" to steg,
+                ),
+            )
+                .let { query -> it.run(query.asUpdate) }
+        }
+    }
+
     fun pollHendelser(limit: Int = 5): List<Hendelse> {
         return datasource.transaction {
             queryOf(

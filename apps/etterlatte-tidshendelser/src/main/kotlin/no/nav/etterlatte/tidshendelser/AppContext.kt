@@ -36,7 +36,7 @@ class AppContext(
             config.getString("etterlatte.grunnlag.url"),
         )
 
-    private val hendelseDao = HendelseDao(dataSource)
+    val hendelseDao = HendelseDao(dataSource)
 
     private val aldersovergangerService =
         AldersovergangerService(

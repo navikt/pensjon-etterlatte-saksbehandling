@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents.VURDERT_LOEPENDE_YTELSE
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
-import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEP_KEY
+import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -36,7 +36,7 @@ class AldersovergangRiverTest {
             JsonMessage.newMessage(
                 EventNames.ALDERSOVERGANG.name,
                 mapOf(
-                    ALDERSOVERGANG_STEP_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
+                    ALDERSOVERGANG_STEG_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
                     ALDERSOVERGANG_TYPE_KEY to "BP20",
                     ALDERSOVERGANG_ID_KEY to "123-123-123",
                     SAK_ID_KEY to sakId,
@@ -47,7 +47,7 @@ class AldersovergangRiverTest {
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
-            field(0, ALDERSOVERGANG_STEP_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
+            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "123-123-123"
             field(0, "loependeYtelse").asBoolean() shouldBe true
@@ -62,7 +62,7 @@ class AldersovergangRiverTest {
             JsonMessage.newMessage(
                 EventNames.ALDERSOVERGANG.name,
                 mapOf(
-                    ALDERSOVERGANG_STEP_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
+                    ALDERSOVERGANG_STEG_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
                     ALDERSOVERGANG_TYPE_KEY to "BP20",
                     ALDERSOVERGANG_ID_KEY to "432-987-234",
                     SAK_ID_KEY to sakId,
@@ -73,7 +73,7 @@ class AldersovergangRiverTest {
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
-            field(0, ALDERSOVERGANG_STEP_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
+            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "432-987-234"
             field(0, "loependeYtelse").asBoolean() shouldBe false

@@ -15,7 +15,7 @@ class JobbPollerTask(
     private val initialDelaySeconds: Long,
     private val periode: Duration,
     private val clock: Clock,
-    private val jobbRunner: JobbRunner,
+    private val jobbPoller: JobbPoller,
 ) {
     private val logger = LoggerFactory.getLogger(JobbPollerTask::class.java)
 
@@ -29,7 +29,27 @@ class JobbPollerTask(
             loggerInfo = LoggerInfo(logger = logger, sikkerLogg = sikkerlogger(), loggTilSikkerLogg = true),
         ) {
             if (leaderElection.isLeader()) {
-                jobbRunner.run()
+                jobbPoller.poll()
+            }
+        }
+    }
+}
+
+class JobbPoller(
+    private val hendelseDao: HendelseDao,
+    private val aldersovergangerService: AldersovergangerService,
+) {
+    private val logger = LoggerFactory.getLogger(JobbPoller::class.java)
+
+    fun poll() {
+        logger.info("Sjekker for jobber å starte...")
+
+        hendelseDao.finnAktuellJobb().forEach {
+            logger.info("Fant jobb ${it.id} med type ${it.type}, status (${it.status})")
+
+            when (it.type) {
+                JobbType.AO_BP20 -> aldersovergangerService.execute(it)
+                JobbType.AO_BP18 -> logger.warn("Ikke implementert: AO_BP18")
             }
         }
     }

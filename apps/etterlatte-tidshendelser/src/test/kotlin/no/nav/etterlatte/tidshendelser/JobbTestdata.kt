@@ -13,6 +13,7 @@ class JobbTestdata(
     fun opprettJobb(
         type: JobbType,
         behandlingsmaaned: YearMonth,
+        kjoeredato: LocalDate = LocalDate.now(),
     ): HendelserJobb {
         val id =
             dataSource.transaction(true) {
@@ -23,7 +24,7 @@ class JobbTestdata(
                         VALUES (?, ?, ?)
                         """.trimIndent(),
                         type.name,
-                        LocalDate.now(),
+                        kjoeredato,
                         behandlingsmaaned.toString(),
                     ).asUpdateAndReturnGeneratedKey,
                 )

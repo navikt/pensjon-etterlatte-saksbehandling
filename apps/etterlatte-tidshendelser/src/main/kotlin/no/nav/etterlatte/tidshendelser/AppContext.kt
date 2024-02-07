@@ -38,13 +38,11 @@ class AppContext(
 
     private val hendelseDao = HendelseDao(dataSource)
 
-    val aldersovergangerService =
+    private val aldersovergangerService =
         AldersovergangerService(
             hendelseDao,
             grunnlagKlient,
         )
-
-    private val jobbRunner = JobbRunner(hendelseDao, aldersovergangerService)
 
     val jobbPollerTask =
         JobbPollerTask(
@@ -52,7 +50,7 @@ class AppContext(
             initialDelaySeconds = env.maybeEnvValue("JOBB_POLLER_INITIAL_DELAY")?.toLong() ?: 60L,
             periode = env.maybeEnvValue("JOBB_POLLER_INTERVAL")?.let { Duration.parse(it) } ?: Duration.ofMinutes(5),
             clock = clock,
-            jobbRunner = jobbRunner,
+            jobbPoller = JobbPoller(hendelseDao, aldersovergangerService),
         )
 
     val hendelsePollerTask =

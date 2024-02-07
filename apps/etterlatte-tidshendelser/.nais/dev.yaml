@@ -1,0 +1,60 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: etterlatte-tidshendelser
+  namespace: etterlatte
+  labels:
+    team: etterlatte
+spec:
+  image: "{{image}}"
+  port: 8080
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        name: etterlatte-tidshendelser
+        databases:
+          - name: tidshendelser
+            envVarPrefix: DB
+  liveness:
+    initialDelay: 5
+    path: /isalive
+  readiness:
+    initialDelay: 5
+    path: /isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  kafka:
+    pool: nav-dev
+  azure:
+    application:
+      enabled: true
+  resources:
+    requests:
+      cpu: 15m
+      memory: 256Mi
+  replicas:
+    cpuThresholdPercentage: 90
+    max: 1
+    min: 1
+  env:
+    - name: KAFKA_RAPID_TOPIC
+      value: etterlatte.dodsmelding
+    - name: KAFKA_RESET_POLICY
+      value: earliest
+    - name: JOBB_POLLER_INITIAL_DELAY
+      value: "60"
+    - name: JOBB_POLLER_INTERVAL
+      value: "PT10S"
+    - name: HENDELSE_POLLER_INITIAL_DELAY
+      value: "60"
+    - name: HENDELSE_POLLER_INTERVAL
+      value: "PT30S"
+    - name: HENDELSE_POLLER_MAX_ANTALL
+      value: "3"
+    - name: ETTERLATTE_GRUNNLAG_AZURE_SCOPE
+      value: api://dev-gcp.etterlatte.etterlatte-grunnlag/.default
+  accessPolicy:
+    outbound:
+      rules:
+        - application: etterlatte-grunnlag

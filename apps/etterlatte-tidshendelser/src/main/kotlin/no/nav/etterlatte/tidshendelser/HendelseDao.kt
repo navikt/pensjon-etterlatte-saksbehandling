@@ -27,14 +27,17 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
         }
     }
 
-    fun hentJobber(status: String): List<HendelserJobb> {
+    fun finnAktuellJobb(): List<HendelserJobb> {
         return datasource.transaction { tx ->
             queryOf(
                 """
-                SELECT * FROM jobb WHERE status = :status
+                SELECT * FROM jobb 
+                WHERE status = :status
+                AND kjoeredato = CURRENT_DATE
+                ORDER BY id asc
                 LIMIT 1
                 """.trimIndent(),
-                mapOf("status" to status),
+                mapOf("status" to "NY"),
             )
                 .let { query -> tx.run(query.map { row -> row.toHendelserJobb() }.asList) }
         }

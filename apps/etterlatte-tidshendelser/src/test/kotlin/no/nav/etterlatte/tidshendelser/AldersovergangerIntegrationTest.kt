@@ -7,52 +7,27 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Month
 import java.time.YearMonth
+import javax.sql.DataSource
 
+@ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AldersovergangerIntegrationTest {
-    // private val pgLogger = LoggerFactory.getLogger("POSTGRES")
-
-    @Container
-    private val postgreSQLContainer =
-        PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-            .also {
-                // it.setCommand("postgres", "-c", "fsync=off", "-c", "log_statement=all")
-                it.start()
-                // it.followOutput(org.testcontainers.containers.output.Slf4jLogConsumer(pgLogger))
-            }
-
-    private val dataSource =
-        DataSourceBuilder.createDataSource(
-            postgreSQLContainer.jdbcUrl,
-            postgreSQLContainer.username,
-            postgreSQLContainer.password,
-        ).also { it.migrate() }
-
+    private val dataSource: DataSource = DatabaseExtension.dataSource
     private val grunnlagKlient: GrunnlagKlient = mockk<GrunnlagKlient>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
     private val aldersovergangerService = AldersovergangerService(hendelseDao, grunnlagKlient)
 
     @AfterEach
-    fun beforeAll() {
+    fun afterEach() {
         clearAllMocks()
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Test

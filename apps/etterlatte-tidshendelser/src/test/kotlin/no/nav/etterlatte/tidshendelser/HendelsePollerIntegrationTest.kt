@@ -2,35 +2,21 @@ package no.nav.etterlatte.tidshendelser
 
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.LoggerFactory
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
 import java.time.Month
 import java.time.YearMonth
+import javax.sql.DataSource
 
+@ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HendelsePollerIntegrationTest {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @Container
-    private val postgreSQLContainer =
-        PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-            .also { it.start() }
-
-    private val dataSource =
-        DataSourceBuilder.createDataSource(
-            postgreSQLContainer.jdbcUrl,
-            postgreSQLContainer.username,
-            postgreSQLContainer.password,
-        ).also { it.migrate() }
-
+    private val dataSource: DataSource = DatabaseExtension.dataSource
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
     private val hendelsePoller =
@@ -40,13 +26,8 @@ class HendelsePollerIntegrationTest {
         )
 
     @AfterEach
-    fun beforeAll() {
+    fun afterEach() {
         clearAllMocks()
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Test

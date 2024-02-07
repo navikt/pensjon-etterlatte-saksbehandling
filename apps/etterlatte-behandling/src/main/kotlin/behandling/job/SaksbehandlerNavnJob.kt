@@ -76,7 +76,7 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                                 subCoroutineExceptionHandler,
                             ) { context.navAnsattKlient.hentEnhetForSaksbehandler(it) }
                     }
-                    .map {
+                    .mapNotNull {
                         try {
                             val enheter = it.second.await()
                             it.first to enheter.map { enhet -> enhet.id }
@@ -85,7 +85,6 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                             null
                         }
                     }
-                    .filterNotNull()
 
             logger.info("Hentet enheter for saksbehandlere antall: ${alleIdenterMedEnheter.size}")
 

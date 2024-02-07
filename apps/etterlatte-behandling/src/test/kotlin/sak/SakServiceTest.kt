@@ -419,37 +419,6 @@ internal class SakServiceTest {
     }
 
     @Test
-    fun `Hent enkeltsak - Bruker har sak, men saksbehandler mangler tilgang til enhet`() {
-        saksbehandlerKontekst()
-
-        val ident = Random.nextLong().toString()
-
-        every { sakDao.finnSaker(any()) } returns
-            listOf(
-                Sak(
-                    ident = ident,
-                    sakType = SakType.BARNEPENSJON,
-                    id = Random.nextLong(),
-                    enhet = Enheter.UTLAND.enhetNr,
-                ),
-            )
-        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
-            listOf(
-                SaksbehandlerEnhet(
-                    id = Enheter.PORSGRUNN.enhetNr,
-                    navn = Enheter.PORSGRUNN.navn,
-                ),
-            )
-
-        assertThrows<ManglerTilgangTilEnhet> {
-            service.hentEnkeltSakForPerson(ident)
-        }
-
-        verify { sakDao.finnSaker(ident) }
-        coVerify { navansattKlient.hentEnheterForSaksbehandler(any()) }
-    }
-
-    @Test
     fun `Hent enkeltsak - Bruker har sak, og saksbehandler har tilgang til enhet`() {
         saksbehandlerKontekst()
 

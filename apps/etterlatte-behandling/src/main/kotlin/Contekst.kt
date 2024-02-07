@@ -9,7 +9,6 @@ import no.nav.etterlatte.libs.ktor.hentTokenClaims
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.etterlatte.tilgangsstyring.saksbehandlereMedTilgangTilAlleEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
@@ -67,8 +66,6 @@ class SaksbehandlerMedEnheterOgRoller(
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
     }
 
-    fun erSuperbruker() = name() in (saksbehandlereMedTilgangTilAlleEnheter)
-
     fun enheterMedSkrivetilgang() =
         try {
             runBlocking {
@@ -84,13 +81,8 @@ class SaksbehandlerMedEnheterOgRoller(
     fun enheterMedLesetilgang() =
         enheterMedSkrivetilgang().let { egenSkriveEnheter ->
             when (egenSkriveEnheter.size) {
-                0 -> Enheter.nasjonalTilgangEnheter()
-                else ->
-                    if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
-                        Enheter.nasjonalTilgangEnheter() - egenSkriveEnheter.toSet()
-                    } else {
-                        emptyList()
-                    }
+                0 -> Enheter.enheterForVanligSaksbehandlere()
+                else -> Enheter.enheterForVanligSaksbehandlere() - egenSkriveEnheter.toSet()
             }
         }
 

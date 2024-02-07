@@ -8,8 +8,8 @@ data class Saksbehandler(
     val navn: String,
     val enheter: List<String>,
     val kanAttestere: Boolean,
-    val leseTilgang: Boolean,
-    val skriveTilgang: Boolean,
+    val skriveEnheter: List<String>,
+    val leseEnheter: List<String>,
 )
 
 class SaksbehandlerService(private val dao: SaksbehandlerInfoDao) {
@@ -23,8 +23,8 @@ class SaksbehandlerService(private val dao: SaksbehandlerInfoDao) {
             if (!saksbehandlerNavn.isNullOrEmpty()) saksbehandlerNavn else ident,
             innloggetSaksbehandler.enheter(),
             innloggetSaksbehandler.saksbehandlerMedRoller.harRolleAttestant(),
-            innloggetSaksbehandler.harLesetilgang(),
-            innloggetSaksbehandler.harSkrivetilgang(),
+            innloggetSaksbehandler.enheterMedSkrivetilgang(),
+            innloggetSaksbehandler.enheterMedLesetilgang(),
         )
     }
 

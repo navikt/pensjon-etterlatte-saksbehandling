@@ -29,7 +29,6 @@ interface OppgaveDao {
     fun hentOppgaver(
         oppgaveTyper: List<OppgaveType>,
         enheter: List<String>,
-        erSuperBruker: Boolean,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String? = null,
     ): List<OppgaveIntern>
@@ -161,7 +160,6 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
     override fun hentOppgaver(
         oppgaveTyper: List<OppgaveType>,
         enheter: List<String>,
-        erSuperBruker: Boolean,
         oppgaveStatuser: List<String>,
         minOppgavelisteIdentFilter: String?,
     ): List<OppgaveIntern> {
@@ -176,7 +174,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                         FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.type = ANY(?)
                         AND (? OR o.status = ANY(?))
-                        AND (? OR o.enhet = ANY(?))
+                        AND (o.enhet = ANY(?))
                         AND (
                             s.adressebeskyttelse is null OR 
                             (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))
@@ -188,12 +186,11 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setArray(1, createArrayOf("text", oppgaveTyper.toTypedArray()))
                 statement.setBoolean(2, oppgaveStatuser.isEmpty() || oppgaveStatuser.contains(VISALLE))
                 statement.setArray(3, createArrayOf("text", oppgaveStatuser.toTypedArray()))
-                statement.setBoolean(4, erSuperBruker)
-                statement.setArray(5, createArrayOf("text", enheter.toTypedArray()))
-                statement.setString(6, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
-                statement.setString(7, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
-                statement.setBoolean(8, minOppgavelisteIdentFilter == null)
-                statement.setString(9, minOppgavelisteIdentFilter)
+                statement.setArray(4, createArrayOf("text", enheter.toTypedArray()))
+                statement.setString(5, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
+                statement.setString(6, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
+                statement.setBoolean(7, minOppgavelisteIdentFilter == null)
+                statement.setString(8, minOppgavelisteIdentFilter)
 
                 statement.executeQuery().toList {
                     asOppgave()

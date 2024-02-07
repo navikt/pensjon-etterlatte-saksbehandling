@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurderingUaktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
+import no.nav.etterlatte.mockedSakTilgangDao
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -57,6 +58,7 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
             Context(
                 user,
                 DatabaseContextTest(dataSource),
+                mockedSakTilgangDao(),
             ),
         )
     }

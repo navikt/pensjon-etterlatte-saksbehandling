@@ -69,7 +69,6 @@ class OppgaveService(
             oppgaveDao.hentOppgaver(
                 aktuelleOppgavetyperForRoller,
                 bruker.enheter(),
-                bruker.erSuperbruker(),
                 oppgaveStatuser,
                 minOppgavelisteIdentFilter,
             ).sortedByDescending { it.opprettet }

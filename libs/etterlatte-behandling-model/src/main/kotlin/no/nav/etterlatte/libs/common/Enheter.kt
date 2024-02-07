@@ -3,7 +3,7 @@ package no.nav.etterlatte.common
 enum class Enheter(
     val enhetNr: String,
     val navn: String,
-    val inkludertForNasjonalTilgang: Boolean,
+    val vanligSaksbehandlerEnhet: Boolean,
     val skrivetilgang: Boolean,
 ) {
     STRENGT_FORTROLIG("2103", "NAV Vikafossen", false, true),
@@ -23,7 +23,7 @@ enum class Enheter(
     companion object {
         val defaultEnhet = PORSGRUNN
 
-        fun nasjonalTilgangEnheter() = entries.filter { it.inkludertForNasjonalTilgang }.map { it.enhetNr }
+        fun enheterForVanligSaksbehandlere() = entries.filter { it.vanligSaksbehandlerEnhet }.map { it.enhetNr }
 
         fun enheterMedSkrivetilgang() = entries.filter { it.skrivetilgang }.map { it.enhetNr }.toSet()
     }

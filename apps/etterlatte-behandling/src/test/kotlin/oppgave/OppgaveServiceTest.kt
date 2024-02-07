@@ -94,9 +94,8 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     @BeforeEach
     fun beforeEach() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.enheter() } returns Enheter.enheterForVanligSaksbehandlere()
         every { saksbehandler.name() } returns "ident"
-        every { saksbehandler.erSuperbruker() } returns false
 
         nyKontekstMedBrukerOgDatabaseContext(saksbehandler, DatabaseContextTest(dataSource))
 
@@ -811,40 +810,6 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
         val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
-        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
-
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
-        assertEquals(1, oppgaver.size)
-        val attesteringsoppgave = oppgaver[0]
-        assertEquals(attestantOppgave.id, attesteringsoppgave.id)
-        assertEquals(attestantOppgave.sakId, attestantSak.id)
-    }
-
-    @Test
-    fun `Superbruker kan se oppgave på en annen enhet unntatt strengt fortrolig`() {
-        val randomenhet = "1111"
-        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
-        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            "referanse",
-            opprettetSak.id,
-            OppgaveKilde.BEHANDLING,
-            OppgaveType.FOERSTEGANGSBEHANDLING,
-            null,
-        )
-
-        val attestantSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
-        val attestantOppgave =
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                "referanse",
-                attestantSak.id,
-                OppgaveKilde.BEHANDLING,
-                OppgaveType.ATTESTERING,
-                null,
-            )
-
-        val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
-        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr) // må ikke endres
-        every { saksbehandler.erSuperbruker() } returns true
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
 
         val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })

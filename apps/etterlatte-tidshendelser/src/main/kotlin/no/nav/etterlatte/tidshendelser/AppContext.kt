@@ -26,7 +26,7 @@ class AppContext(
             azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
             azureAppJwk = env.requireEnvValue("AZURE_APP_JWK"),
             azureAppWellKnownUrl = env.requireEnvValue("AZURE_APP_WELL_KNOWN_URL"),
-            azureAppScope = env.requireEnvValue("ETTERLATTE_GRUNNLAG_SCOPE"),
+            azureAppScope = env.requireEnvValue("ETTERLATTE_GRUNNLAG_AZURE_SCOPE"),
         )
     }
 

@@ -2,19 +2,19 @@ package no.nav.etterlatte.migrering.start
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_FLERE_KEY
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.LOPENDE_JANUAR_2024_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.loependeJanuer2024
 import no.nav.etterlatte.rapidsandrivers.migrering.migreringKjoringVariant
+import no.nav.etterlatte.rapidsandrivers.sakIdFlere
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import rapidsandrivers.SAK_ID_FLERE_KEY
-import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.sakIdFlere
 
 internal class StartMigreringRiver(rapidsConnection: RapidsConnection) :
     ListenerMedLoggingOgFeilhaandtering() {

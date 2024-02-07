@@ -18,13 +18,13 @@ import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoeknadstypeOpplysni
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Utbetalingsinformasjon
 import no.nav.etterlatte.opplysningerfrasoknad.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsuthenter
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.soeknad.InnsendtSoeknadTestData
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.SAK_ID_KEY
-import soeknad.InnsendtSoeknadTestData
 import java.time.LocalDate
 import java.time.Month
 

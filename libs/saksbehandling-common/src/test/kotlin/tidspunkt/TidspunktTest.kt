@@ -1,4 +1,4 @@
-package tidspunkt
+package no.nav.etterlatte.tidspunkt
 
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.standardTidssoneUTC

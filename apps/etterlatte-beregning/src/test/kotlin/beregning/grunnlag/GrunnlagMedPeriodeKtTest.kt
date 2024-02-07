@@ -1,7 +1,5 @@
-package beregning.grunnlag
+package no.nav.etterlatte.beregning.grunnlag
 
-import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
-import no.nav.etterlatte.beregning.grunnlag.erGrunnlagLiktFoerEnDato
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

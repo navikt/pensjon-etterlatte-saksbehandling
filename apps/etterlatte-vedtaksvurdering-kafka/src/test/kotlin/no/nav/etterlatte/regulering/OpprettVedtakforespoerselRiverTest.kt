@@ -4,13 +4,13 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.VedtakService
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.DATO_KEY
-import rapidsandrivers.SAK_ID_KEY
 import java.time.LocalDate
 import java.util.UUID
 

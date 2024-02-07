@@ -1,9 +1,8 @@
-package rapidsandrivers
+package no.nav.etterlatte.rapidsandrivers
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems

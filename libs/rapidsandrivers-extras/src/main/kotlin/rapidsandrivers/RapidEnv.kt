@@ -1,4 +1,4 @@
-package rapidsandrivers
+package no.nav.etterlatte.rapidsandrivers
 
 fun getRapidEnv(): Map<String, String> {
     return System.getenv().toMutableMap().apply {

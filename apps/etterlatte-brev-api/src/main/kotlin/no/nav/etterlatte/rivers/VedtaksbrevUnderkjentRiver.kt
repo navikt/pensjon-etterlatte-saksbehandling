@@ -3,11 +3,11 @@ package no.nav.etterlatte.rivers
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.ListenerMedLogging
 import java.util.UUID
 
 internal class VedtaksbrevUnderkjentRiver(

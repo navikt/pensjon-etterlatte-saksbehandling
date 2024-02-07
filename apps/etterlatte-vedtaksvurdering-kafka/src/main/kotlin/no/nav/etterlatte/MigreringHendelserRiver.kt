@@ -1,21 +1,21 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.migreringKjoringVariant
+import no.nav.etterlatte.rapidsandrivers.sakId
+import no.nav.etterlatte.rapidsandrivers.withFeilhaandtering
 import no.nav.etterlatte.vedtaksvurdering.RapidUtsender
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.ListenerMedLogging
-import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.behandlingId
-import rapidsandrivers.sakId
-import rapidsandrivers.withFeilhaandtering
 
 internal class MigreringHendelserRiver(
     rapidsConnection: RapidsConnection,

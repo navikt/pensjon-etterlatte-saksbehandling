@@ -1,4 +1,4 @@
-package behandling.sjekkliste
+package no.nav.etterlatte.behandling.sjekkliste
 
 import io.kotest.matchers.collections.shouldHaveAtLeastSize
 import io.kotest.matchers.shouldBe
@@ -11,10 +11,6 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.sjekkliste.OppdaterSjekklisteItem
-import no.nav.etterlatte.behandling.sjekkliste.OppdatertSjekkliste
-import no.nav.etterlatte.behandling.sjekkliste.SjekklisteDao
-import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.oppgave.OppgaveService
 import org.junit.jupiter.api.AfterAll

@@ -1,12 +1,7 @@
-package avkorting
+package no.nav.etterlatte.avkorting
 
 import io.kotest.assertions.asClue
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.avkorting.Aarsoppgjoer
-import no.nav.etterlatte.avkorting.AvkortetYtelseType
-import no.nav.etterlatte.avkorting.Avkorting
-import no.nav.etterlatte.avkorting.AvkortingRepository
-import no.nav.etterlatte.avkorting.Inntektsavkorting
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag

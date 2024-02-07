@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.etterlatte.utbetaling.common.UtbetalinghendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -15,7 +16,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 
 internal class LyttPaaIverksattVedtakRiver(
     rapidsConnection: RapidsConnection,

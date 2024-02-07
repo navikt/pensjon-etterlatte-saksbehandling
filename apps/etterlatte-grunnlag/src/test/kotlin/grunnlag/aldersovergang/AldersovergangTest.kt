@@ -1,4 +1,4 @@
-package grunnlag.aldersovergang
+package no.nav.etterlatte.grunnlag.aldersovergang
 
 import com.fasterxml.jackson.databind.node.TextNode
 import io.ktor.client.HttpClient
@@ -12,9 +12,6 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.mockk
 import no.nav.etterlatte.grunnlag.OpplysningDao
-import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangDao
-import no.nav.etterlatte.grunnlag.aldersovergang.AldersovergangService
-import no.nav.etterlatte.grunnlag.aldersovergang.aldersovergangRoutes
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.fordeler
 
-import fordeler.FordelerFeatureToggle
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling

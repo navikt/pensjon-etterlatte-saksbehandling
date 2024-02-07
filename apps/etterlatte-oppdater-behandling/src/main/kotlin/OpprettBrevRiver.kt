@@ -7,14 +7,14 @@ import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
+import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import rapidsandrivers.sakId
 import java.util.UUID
 
 internal class OpprettBrevRiver(
@@ -37,7 +37,7 @@ internal class OpprettBrevRiver(
         context: MessageContext,
     ) {
         val sakType = enumValueOf<SakType>(packet[SAK_TYPE_KEY].textValue())
-        val fnr = packet[rapidsandrivers.FNR_KEY].textValue()
+        val fnr = packet[no.nav.etterlatte.rapidsandrivers.FNR_KEY].textValue()
         val behandlingId = packet[BEHANDLING_ID_KEY].textValue()
         if (!featureToggleService.isEnabled(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, false)) {
             logger.info("Utsending av informasjonsbrev er skrudd av. Avbryter.")

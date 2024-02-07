@@ -23,13 +23,19 @@ import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser
 
 interface Props {
   hentAlleOppgaver: () => void
-  hentOppgaver: (oppgavestatusFilter: Array<string>) => void
+  hentOppgaverStatus: (oppgavestatusFilter: Array<string>) => void
   filter: Filter
   setFilter: (filter: Filter) => void
   alleOppgaver: OppgaveDTO[]
 }
 
-export const FilterRad = ({ hentAlleOppgaver, hentOppgaver, filter, setFilter, alleOppgaver }: Props): ReactNode => {
+export const FilterRad = ({
+  hentAlleOppgaver,
+  hentOppgaverStatus,
+  filter,
+  setFilter,
+  alleOppgaver,
+}: Props): ReactNode => {
   const saksbehandlere = new Set(
     alleOppgaver.map((oppgave) => oppgave.saksbehandlerIdent).filter((s): s is Exclude<typeof s, null> => s !== null)
   )
@@ -105,7 +111,7 @@ export const FilterRad = ({ hentAlleOppgaver, hentOppgaver, filter, setFilter, a
         <VelgOppgavestatuser
           value={filter.oppgavestatusFilter}
           onChange={(oppgavestatusFilter) => {
-            hentOppgaver(oppgavestatusFilter)
+            hentOppgaverStatus(oppgavestatusFilter)
             setFilter({ ...filter, oppgavestatusFilter })
           }}
         />

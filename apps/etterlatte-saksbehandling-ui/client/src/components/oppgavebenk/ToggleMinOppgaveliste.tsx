@@ -130,7 +130,9 @@ export const ToggleMinOppgaveliste = () => {
             <>
               <FilterRad
                 hentAlleOppgaver={hentAlleOppgaver}
-                hentOppgaver={(oppgavestatusFilter: Array<string>) => hentOppgaverStatusFetch(oppgavestatusFilter)}
+                hentOppgaverStatus={(oppgavestatusFilter: Array<string>) =>
+                  hentOppgaverStatusFetch(oppgavestatusFilter)
+                }
                 filter={filter}
                 setFilter={setFilter}
                 alleOppgaver={hentedeOppgaver}

@@ -128,11 +128,11 @@ internal suspend fun oppdaterSaksbehandlerNavn(
 
             logger.info("mappedMedNavn antall: ${alleIdenterMedNavn.size}")
 
-            alleIdenterMedNavn.forEach {
-                if (it.second == null) {
-                    context.saksbehandlerInfoDao.upsertSaksbehandlerNavn(SaksbehandlerInfo(it.first, it.first))
+            alleIdenterMedNavn.forEach { (ident, saksbehandlerInfo) ->
+                if (saksbehandlerInfo == null) {
+                    context.saksbehandlerInfoDao.upsertSaksbehandlerNavn(SaksbehandlerInfo(ident, ident))
                 } else {
-                    context.saksbehandlerInfoDao.upsertSaksbehandlerNavn(it.second!!)
+                    context.saksbehandlerInfoDao.upsertSaksbehandlerNavn(saksbehandlerInfo)
                 }
             }
         }

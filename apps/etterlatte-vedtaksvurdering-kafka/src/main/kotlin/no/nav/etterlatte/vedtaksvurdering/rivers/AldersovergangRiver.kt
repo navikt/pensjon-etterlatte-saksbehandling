@@ -52,14 +52,14 @@ class AldersovergangRiver(
             ),
         ) {
             if (step == VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name) {
-                val datoFoersteIAktuellBehandlingsmaaned = packet.dato
-                logger.info("Sjekker løpende ytelse for sak $sakId, dato=$datoFoersteIAktuellBehandlingsmaaned")
+                val behandlingsdato = packet.dato
+                logger.info("Sjekker løpende ytelse for sak $sakId, behandlingsmåned=$behandlingsdato")
 
-                val loependeYtelse = vedtakService.harLoependeYtelserFra(sakId, datoFoersteIAktuellBehandlingsmaaned)
-                logger.info("Sak $sakId, dato=$datoFoersteIAktuellBehandlingsmaaned har løpende ytelse: ${loependeYtelse.erLoepende}")
+                val loependeYtelse = vedtakService.harLoependeYtelserFra(sakId, behandlingsdato)
+                logger.info("Sak $sakId, behandlingsmåned=$behandlingsdato har løpende ytelse: ${loependeYtelse.erLoepende}")
 
                 packet[ALDERSOVERGANG_STEG_KEY] = VedtakAldersovergangStepEvents.VURDERT_LOEPENDE_YTELSE.name
-                packet["loependeYtelse"] = loependeYtelse.erLoepende
+                packet["data"] = loependeYtelse.erLoepende
                 context.publish(packet.toJson())
             }
         }

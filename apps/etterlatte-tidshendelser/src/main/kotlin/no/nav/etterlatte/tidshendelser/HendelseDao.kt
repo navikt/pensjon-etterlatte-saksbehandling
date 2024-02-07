@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
+import java.util.UUID
 import javax.sql.DataSource
 
 class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao> {
@@ -154,7 +155,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
     }
 
     fun oppdaterHendelseForSteg(
-        hendelseId: String,
+        hendelseId: UUID,
         steg: String,
         info: Any? = null,
     ) {
@@ -166,7 +167,6 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                     endret = now(),
                     versjon = versjon + 1
                 WHERE id = :id
-                AND   versjon = :versjon
                 """.trimIndent(),
                 mapOf(
                     "id" to hendelseId,

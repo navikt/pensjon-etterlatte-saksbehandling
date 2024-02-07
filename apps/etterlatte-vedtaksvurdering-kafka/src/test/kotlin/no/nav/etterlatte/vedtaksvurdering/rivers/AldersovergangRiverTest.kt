@@ -50,7 +50,7 @@ class AldersovergangRiverTest {
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "123-123-123"
-            field(0, "loependeYtelse").asBoolean() shouldBe true
+            field(0, "data").asBoolean() shouldBe true
         }
     }
 
@@ -76,7 +76,7 @@ class AldersovergangRiverTest {
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "432-987-234"
-            field(0, "loependeYtelse").asBoolean() shouldBe false
+            field(0, "data").asBoolean() shouldBe false
         }
     }
 }

@@ -11,6 +11,7 @@ import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
+import java.util.UUID
 
 class HendelseRiverTest {
     private val hendelseDao = mockk<HendelseDao>()
@@ -18,7 +19,8 @@ class HendelseRiverTest {
 
     @Test
     fun `skal lese melding og sjekke loepende ytelse`() {
-        every { hendelseDao.oppdaterHendelseForSteg("123-123-123", "VURDERT_LOPENDE_YTELSE") } returns Unit
+        val hendelseId = UUID.randomUUID()
+        every { hendelseDao.oppdaterHendelseForSteg(hendelseId, "VURDERT_LOPENDE_YTELSE") } returns Unit
 
         val melding =
             JsonMessage.newMessage(
@@ -26,13 +28,13 @@ class HendelseRiverTest {
                 mapOf(
                     ALDERSOVERGANG_STEG_KEY to "VURDERT_LOPENDE_YTELSE",
                     ALDERSOVERGANG_TYPE_KEY to "BP20",
-                    ALDERSOVERGANG_ID_KEY to "123-123-123",
+                    ALDERSOVERGANG_ID_KEY to hendelseId.toString(),
                     SAK_ID_KEY to 8763L,
                 ),
             )
 
         inspector.apply { sendTestMessage(melding.toJson()) }
 
-        verify { hendelseDao.oppdaterHendelseForSteg("123-123-123", "VURDERT_LOPENDE_YTELSE") }
+        verify { hendelseDao.oppdaterHendelseForSteg(hendelseId, "VURDERT_LOPENDE_YTELSE") }
     }
 }

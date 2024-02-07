@@ -63,7 +63,7 @@ class HendelsePoller(
                 ) {
                     logger.info("Behandler hendelse: [id=${it.id}, sakId=${it.sakId}]")
 
-                    hendelsePublisher.publish(hendelse = it, jobbType = jobsById[it.jobbId]!!.type)
+                    hendelsePublisher.publish(hendelse = it, jobb = jobsById[it.jobbId]!!)
 
                     hendelseDao.oppdaterHendelseStatus(it, HendelseStatus.SENDT)
                 }

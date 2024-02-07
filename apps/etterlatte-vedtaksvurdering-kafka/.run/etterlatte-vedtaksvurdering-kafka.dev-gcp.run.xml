@@ -1,0 +1,30 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="etterlatte-vedtaksvurdering-kafka.dev-gcp" type="JetRunConfigurationType">
+    <envs>
+      <env name="HTTP_PORT" value="8098" />
+      <env name="LOGBACK_APPENDER" value="STDOUT" />
+      <env name="NAIS_APP_NAME" value="etterlatte-vedtaksvurdering_kafka" />
+      <env name="KAFKA_RAPID_TOPIC" value="etterlatte" />
+      <env name="KAFKA_BOOTSTRAP_SERVERS" value="0.0.0.0:9092" />
+      <env name="VEDTAK_AZURE_SCOPE" value="dev-gcp.etterlatte.etterlatte-vedtaksvurdering" />
+      <env name="ETTERLATTE_VEDTAK_URL" value="https://etterlatte-vedtaksvurdering.intern.dev.nav.no" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="no.nav.etterlatte.ApplicationKt" />
+    <module name="pensjon-etterlatte-saksbehandling.apps.etterlatte-vedtaksvurdering-kafka.main" />
+    <shortenClasspath name="ARGS_FILE" />
+    <extension name="net.ashald.envfile">
+      <option name="IS_ENABLED" value="true" />
+      <option name="IS_SUBST" value="false" />
+      <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+      <option name="IS_IGNORE_MISSING_FILES" value="false" />
+      <option name="IS_ENABLE_EXPERIMENTAL_INTEGRATIONS" value="false" />
+      <ENTRIES>
+        <ENTRY IS_ENABLED="true" PARSER="runconfig" IS_EXECUTABLE="false" />
+        <ENTRY IS_ENABLED="true" PARSER="env" IS_EXECUTABLE="false" PATH="apps/etterlatte-vedtaksvurdering-kafka/.env.dev-gcp" />
+      </ENTRIES>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -211,7 +211,7 @@ internal class VedtaksbrevServiceTest {
             every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
-            coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
+            coEvery { adresseService.hentMottakerAdresse(any(), any()) } returns mottaker
             coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns Slate(emptyList())
             coEvery { brevdataFacade.hentBehandling(any(), any()) } returns
                 mockk<DetaljertBehandling>().apply {
@@ -232,7 +232,7 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
                 brevdataFacade.hentGenerellBrevData(sakId, BEHANDLING_ID, any())
-                adresseService.hentMottakerAdresse(behandling.personerISak.innsender!!.fnr.value)
+                adresseService.hentMottakerAdresse(sakType, behandling.personerISak.innsender!!.fnr.value)
             }
 
             verify {
@@ -270,7 +270,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns opprettRenderedJsonLetter()
             every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
+            coEvery { adresseService.hentMottakerAdresse(sakType, any()) } returns mottaker
             coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
             coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
             coEvery { brevdataFacade.hentBehandling(any(), any()) } returns
@@ -291,7 +291,7 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
                 brevdataFacade.hentGenerellBrevData(sakId, BEHANDLING_ID, any())
-                adresseService.hentMottakerAdresse(behandling.personerISak.innsender!!.fnr.value)
+                adresseService.hentMottakerAdresse(sakType, behandling.personerISak.innsender!!.fnr.value)
                 brevbakerService.hentRedigerbarTekstFraBrevbakeren(any())
             }
 
@@ -350,7 +350,7 @@ internal class VedtaksbrevServiceTest {
 
             every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns listOf()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
+            coEvery { adresseService.hentMottakerAdresse(any(), any()) } returns mottaker
 
             coEvery { brevdataFacade.hentBehandling(any(), any()) } returns
                 mockk<DetaljertBehandling>().apply {

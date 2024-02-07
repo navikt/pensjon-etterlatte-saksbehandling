@@ -30,6 +30,7 @@ dependencies {
     implementation(libs.ktor2.auth)
 
     implementation(libs.bundles.jackson)
+    implementation(libs.etterlatte.common)
 
     implementation(libs.navfelles.tokenclientcore)
     implementation(libs.navfelles.tokenvalidationktor2)

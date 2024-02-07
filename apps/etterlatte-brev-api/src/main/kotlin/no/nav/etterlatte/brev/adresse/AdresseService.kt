@@ -4,6 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.adresse.navansatt.NavansattKlient
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Telefonnummer
@@ -13,8 +14,11 @@ class AdresseService(
     private val navansattKlient: NavansattKlient,
     private val regoppslagKlient: RegoppslagKlient,
 ) {
-    suspend fun hentMottakerAdresse(ident: String): Mottaker {
-        val regoppslag = regoppslagKlient.hentMottakerAdresse(ident)
+    suspend fun hentMottakerAdresse(
+        sakType: SakType,
+        ident: String,
+    ): Mottaker {
+        val regoppslag = regoppslagKlient.hentMottakerAdresse(sakType, ident)
 
         val fnr = Folkeregisteridentifikator.of(ident)
 

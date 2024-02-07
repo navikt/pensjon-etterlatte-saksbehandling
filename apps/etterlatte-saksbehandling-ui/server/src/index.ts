@@ -54,6 +54,7 @@ app.use(
     '/api/grunnlagsendringshendelse/:sakid/institusjon',
     '/api/sak/:sakid',
     '/api/institusjonsoppholdbegrunnelse/:sakid',
+    '/api/saksbehandlere',
     '/api/oppgaver',
     '/api/klage',
     '/api/tilbakekreving',

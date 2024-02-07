@@ -219,7 +219,7 @@ export function KlageFormkravRedigering() {
           </VurderingWrapper>
         </InnholdPadding>
         <FlexRow justify="center">
-          <Button type="submit" loading={isPending(lagreFormkravStatus)}>
+          <Button style={{ marginBottom: '3em' }} type="submit" loading={isPending(lagreFormkravStatus)}>
             Lagre vurdering av formkrav
           </Button>
         </FlexRow>

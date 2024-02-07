@@ -5,7 +5,7 @@ import {
   formaterEnumTilLesbarString,
   formaterSakstype,
   formaterStringDato,
-  formaterStringTidspunkt,
+  formaterStringTidspunktTimeMinutter,
 } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
@@ -61,7 +61,9 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
   }
 
   const fattetDato = behandlingsInfo.datoFattet
-    ? formaterStringDato(behandlingsInfo.datoFattet) + ' kl. ' + formaterStringTidspunkt(behandlingsInfo.datoFattet)
+    ? formaterStringDato(behandlingsInfo.datoFattet) +
+      ' kl. ' +
+      formaterStringTidspunktTimeMinutter(behandlingsInfo.datoFattet)
     : null
 
   if (isInitial(oppgaveForBehandlingStatus) || isPending(oppgaveForBehandlingStatus)) {

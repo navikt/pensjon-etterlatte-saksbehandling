@@ -2,6 +2,7 @@ import { KlageVurderingVisning } from '~components/klage/vurdering/KlageVurderin
 import React from 'react'
 import { Klage } from '~shared/types/Klage'
 import { Heading } from '@navikt/ds-react'
+import { formaterStringTidspunktTimeMinutter } from '~utils/formattering'
 
 export const KlageInitiellVurderingVisning = (props: { klage: Klage }) => {
   const klage = props.klage
@@ -10,6 +11,16 @@ export const KlageInitiellVurderingVisning = (props: { klage: Klage }) => {
       <Heading level="2" size="large">
         Initiell vurdering
       </Heading>
+      <InitiellVurderingVisning klage={klage} />
+      <KlageVurderingVisning klage={klage} />
+    </>
+  )
+}
+
+export const InitiellVurderingVisning = (props: { klage: Klage }) => {
+  const klage = props.klage
+  return (
+    <>
       {klage.initieltUtfall && (
         <>
           <dl>
@@ -20,11 +31,10 @@ export const KlageInitiellVurderingVisning = (props: { klage: Klage }) => {
             <dt>Saksbehandler</dt>
             <dd>{klage.initieltUtfall.saksbehandler}</dd>
             <dt>Tidspunkt</dt>
-            <dd>{klage.initieltUtfall.tidspunkt}</dd>
+            <dd>{formaterStringTidspunktTimeMinutter(klage.initieltUtfall.tidspunkt)}</dd>
           </dl>
         </>
       )}
-      <KlageVurderingVisning klage={klage} />
     </>
   )
 }

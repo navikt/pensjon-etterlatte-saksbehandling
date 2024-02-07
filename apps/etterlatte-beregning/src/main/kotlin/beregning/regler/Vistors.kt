@@ -1,6 +1,5 @@
-package beregning.regler
+package no.nav.etterlatte.beregning.regler
 
-import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.regler.Node
 import no.nav.etterlatte.libs.regler.Regel

@@ -9,6 +9,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -31,11 +32,12 @@ import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
-import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
-import no.nav.etterlatte.brev.model.BrevKodeMapper
+import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
+import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
+import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -82,22 +84,30 @@ internal class VedtaksbrevServiceTest {
     private val adresseService = mockk<AdresseService>()
     private val dokarkivService = mockk<DokarkivServiceImpl>()
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
-    private val brevDataMapperRedigerbartUtfall = BrevDataMapperRedigerbartUtfall(brevdataFacade, migreringBrevDataService)
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade)
-    private val brevKodeMapper = BrevKodeMapper()
+    private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
     private val brevbakerService = mockk<BrevbakerService>()
     private val pdfGenerator =
-        PDFGenerator(db, brevdataFacade, brevDataMapperFerdigstilling, adresseService, brevbakerService)
+        PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
-    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
+    private val brevoppretter =
+        Brevoppretter(
+            adresseService,
+            db,
+            brevdataFacade,
+            brevbakerService,
+            redigerbartVedleggHenter,
+        )
 
+    private val brevDataMapperFerdigstilling = spyk(BrevDataMapperFerdigstillingVedtak(brevdataFacade))
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
             vedtaksvurderingService,
-            brevKodeMapper,
+            brevKodeMapperVedtak,
             brevoppretter,
             pdfGenerator,
+            BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService),
+            brevDataMapperFerdigstilling,
         )
 
     @BeforeEach
@@ -201,7 +211,7 @@ internal class VedtaksbrevServiceTest {
             every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
-            coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
+            coEvery { adresseService.hentMottakerAdresse(any(), any()) } returns mottaker
             coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns Slate(emptyList())
             coEvery { brevdataFacade.hentBehandling(any(), any()) } returns
                 mockk<DetaljertBehandling>().apply {
@@ -222,7 +232,7 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
                 brevdataFacade.hentGenerellBrevData(sakId, BEHANDLING_ID, any())
-                adresseService.hentMottakerAdresse(behandling.personerISak.innsender!!.fnr.value)
+                adresseService.hentMottakerAdresse(sakType, behandling.personerISak.innsender!!.fnr.value)
             }
 
             verify {
@@ -260,7 +270,7 @@ internal class VedtaksbrevServiceTest {
             coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returns opprettRenderedJsonLetter()
             every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns emptyList()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
+            coEvery { adresseService.hentMottakerAdresse(sakType, any()) } returns mottaker
             coEvery { brevdataFacade.finnUtbetalingsinfo(any(), any(), any(), any()) } returns utbetalingsinfo
             coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns null
             coEvery { brevdataFacade.hentBehandling(any(), any()) } returns
@@ -281,7 +291,7 @@ internal class VedtaksbrevServiceTest {
             coVerify {
                 db.hentBrevForBehandling(BEHANDLING_ID, Brevtype.VEDTAK)
                 brevdataFacade.hentGenerellBrevData(sakId, BEHANDLING_ID, any())
-                adresseService.hentMottakerAdresse(behandling.personerISak.innsender!!.fnr.value)
+                adresseService.hentMottakerAdresse(sakType, behandling.personerISak.innsender!!.fnr.value)
                 brevbakerService.hentRedigerbarTekstFraBrevbakeren(any())
             }
 
@@ -300,7 +310,13 @@ internal class VedtaksbrevServiceTest {
 
         @Test
         fun `Vedtaksbrev finnes allerede - skal kaste feil`() {
-            every { db.hentBrevForBehandling(any(), any()) } returns listOf(opprettBrev(Status.OPPRETTET, BrevProsessType.AUTOMATISK))
+            every { db.hentBrevForBehandling(any(), any()) } returns
+                listOf(
+                    opprettBrev(
+                        Status.OPPRETTET,
+                        BrevProsessType.AUTOMATISK,
+                    ),
+                )
 
             assertThrows<IllegalArgumentException> {
                 runBlocking {
@@ -334,14 +350,14 @@ internal class VedtaksbrevServiceTest {
 
             every { db.hentBrevForBehandling(behandling.behandlingId!!, Brevtype.VEDTAK) } returns listOf()
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
-            coEvery { adresseService.hentMottakerAdresse(any()) } returns mottaker
+            coEvery { adresseService.hentMottakerAdresse(any(), any()) } returns mottaker
 
             coEvery { brevdataFacade.hentBehandling(any(), any()) } returns
                 mockk<DetaljertBehandling>().apply {
                     every { status } returns BehandlingStatus.IVERKSATT
                 }
 
-            assertThrows<IllegalArgumentException> {
+            assertThrows<KanIkkeOppretteVedtaksbrev> {
                 runBlocking {
                     vedtaksbrevService.opprettVedtaksbrev(
                         sakId,
@@ -459,15 +475,16 @@ internal class VedtaksbrevServiceTest {
         }
 
         @Test
-        fun `MANUELL - PDF genereres uten lagring`() {
+        fun `PDF genereres uten lagring`() {
             val behandling =
                 opprettGenerellBrevdata(SakType.OMSTILLINGSSTOENAD, VedtakType.INNVILGELSE, VedtakStatus.OPPRETTET)
 
-            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL)
+            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.REDIGERBAR)
             every { db.hentBrev(any()) } returns brev
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbakerService.genererPdf(any(), any()) } returns opprettBrevbakerResponse()
+            coEvery { brevDataMapperFerdigstilling.brevDataFerdigstilling(any()) } returns ManueltBrevData()
 
             runBlocking {
                 vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
@@ -475,7 +492,6 @@ internal class VedtaksbrevServiceTest {
 
             verify {
                 db.hentBrev(brev.id)
-                db.hentBrevPayload(brev.id) // Henter Slate payload fra db
             }
 
             coVerify {
@@ -486,15 +502,16 @@ internal class VedtaksbrevServiceTest {
         }
 
         @Test
-        fun `MANUELL - PDF genereres og lagres hvis vedtak er fattet`() {
+        fun `PDF genereres og lagres hvis vedtak er fattet`() {
             val behandling =
                 opprettGenerellBrevdata(SakType.OMSTILLINGSSTOENAD, VedtakType.INNVILGELSE, VedtakStatus.FATTET_VEDTAK)
 
-            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL)
+            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.REDIGERBAR)
             every { db.hentBrev(any()) } returns brev
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbakerService.genererPdf(any(), any()) } returns opprettBrevbakerResponse()
+            coEvery { brevDataMapperFerdigstilling.brevDataFerdigstilling(any()) } returns ManueltBrevData()
 
             runBlocking {
                 vedtaksbrevService.genererPdf(brev.id, bruker = ATTESTANT)
@@ -502,7 +519,6 @@ internal class VedtaksbrevServiceTest {
 
             verify {
                 db.hentBrev(brev.id)
-                db.hentBrevPayload(brev.id)
                 db.lagrePdf(brev.id, any())
             }
 
@@ -514,15 +530,16 @@ internal class VedtaksbrevServiceTest {
         }
 
         @Test
-        fun `MANUELL - PDF genereres, men lagres ikke hvis saksbehandler sjekker sin egen sak med FATTET_VEDTAK`() {
+        fun `PDF genereres, men lagres ikke hvis saksbehandler sjekker sin egen sak med FATTET_VEDTAK`() {
             val behandling =
                 opprettGenerellBrevdata(SakType.OMSTILLINGSSTOENAD, VedtakType.INNVILGELSE, VedtakStatus.FATTET_VEDTAK)
 
-            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.MANUELL)
+            val brev = opprettBrev(Status.OPPRETTET, BrevProsessType.REDIGERBAR)
             every { db.hentBrev(any()) } returns brev
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
             coEvery { adresseService.hentAvsender(any()) } returns opprettAvsender()
             coEvery { brevbakerService.genererPdf(any(), any()) } returns opprettBrevbakerResponse()
+            coEvery { brevDataMapperFerdigstilling.brevDataFerdigstilling(any()) } returns ManueltBrevData()
 
             runBlocking {
                 vedtaksbrevService.genererPdf(brev.id, bruker = SAKSBEHANDLER)
@@ -530,7 +547,6 @@ internal class VedtaksbrevServiceTest {
 
             verify {
                 db.hentBrev(brev.id)
-                db.hentBrevPayload(brev.id)
             }
 
             coVerify {
@@ -618,6 +634,7 @@ internal class VedtaksbrevServiceTest {
         Tidspunkt.now(),
         Tidspunkt.now(),
         mottaker = opprettMottaker(),
+        brevtype = Brevtype.VEDTAK,
     )
 
     private fun opprettGenerellBrevdata(

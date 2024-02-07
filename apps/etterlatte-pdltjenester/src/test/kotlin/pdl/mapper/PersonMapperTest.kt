@@ -1,4 +1,4 @@
-package pdl.mapper
+package no.nav.etterlatte.pdl.mapper
 
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -12,7 +12,6 @@ import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlMetadata
 import no.nav.etterlatte.pdl.PdlNavn
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
-import no.nav.etterlatte.pdl.mapper.PersonMapper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

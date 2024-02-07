@@ -1,4 +1,4 @@
-package rapidsandrivers
+package no.nav.etterlatte.rapidsandrivers
 
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate

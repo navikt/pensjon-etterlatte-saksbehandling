@@ -1,4 +1,4 @@
-package avkorting
+package no.nav.etterlatte.avkorting
 
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.get
@@ -13,12 +13,6 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import no.nav.etterlatte.avkorting.AvkortetYtelseType
-import no.nav.etterlatte.avkorting.Avkorting
-import no.nav.etterlatte.avkorting.AvkortingService
-import no.nav.etterlatte.avkorting.Inntektsavkorting
-import no.nav.etterlatte.avkorting.avkorting
-import no.nav.etterlatte.avkorting.fromDto
 import no.nav.etterlatte.beregning.regler.aarsoppgjoer
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag

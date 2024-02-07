@@ -1,11 +1,9 @@
-package beregning.regler.barnepensjon
+package no.nav.etterlatte.beregning.regler.barnepensjon
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
-import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
-import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.libs.common.beregning.SamletTrygdetidMedBeregningsMetode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.regler.FaktumNode

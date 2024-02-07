@@ -10,6 +10,7 @@ import io.mockk.runs
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
@@ -30,6 +31,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
@@ -43,7 +45,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import rapidsandrivers.HENDELSE_DATA_KEY
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -105,6 +106,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
             Tidspunkt.now(),
             Tidspunkt.now(),
             mottaker = mockk(),
+            brevtype = Brevtype.VEDTAK,
         )
 
     private fun opprettMelding(

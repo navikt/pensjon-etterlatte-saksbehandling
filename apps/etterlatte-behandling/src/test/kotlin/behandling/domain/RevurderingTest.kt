@@ -1,8 +1,5 @@
-package behandling.domain
+package no.nav.etterlatte.behandling.domain
 
-import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.kommerBarnetTilGodeVurdering
 import no.nav.etterlatte.libs.common.Vedtaksloesning

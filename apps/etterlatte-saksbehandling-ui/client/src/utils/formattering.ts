@@ -24,7 +24,9 @@ export const formaterKanskjeStringDato = (dato?: string): string =>
 export const formaterKanskjeStringDatoMedFallback = (fallback: string, dato?: string): string =>
   dato ? formaterStringDato(dato) : fallback
 
-export const formaterStringTidspunkt = (dato: string) => format(new Date(dato), 'HH:mm').toString()
+export const formaterTidspunktTimeMinutterSekunder = (dato: Date) => format(new Date(dato), 'HH:mm:ss').toString()
+
+export const formaterStringTidspunktTimeMinutter = (dato: string) => format(new Date(dato), 'HH:mm').toString()
 
 export const formaterDatoMedTidspunkt = (dato: Date) => format(new Date(dato), 'dd.MM.yyyy HH:mm').toString()
 

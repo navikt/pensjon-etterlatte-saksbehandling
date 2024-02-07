@@ -22,13 +22,6 @@ const InfoGrid = styled.div`
   margin-bottom: 2rem;
 `
 
-const BeskrivelseWrapper = styled.div`
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  width: 46rem;
-`
-
 export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const [open, setOpen] = useState(false)
   const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandlerIdent, beskrivelse, sakType } = oppgave
@@ -66,7 +59,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
             </div>
             <div>
               <Label>Fødselsnummer</Label>
-              <BodyShort>{formaterFnr(fnr)}</BodyShort>
+              <BodyShort>{fnr ? formaterFnr(fnr) : <i>Mangler</i>}</BodyShort>
             </div>
             <div>
               <Label>Gjelder</Label>
@@ -81,12 +74,13 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
               <BodyShort>{hyphenIfNull(saksbehandlerIdent)}</BodyShort>
             </div>
           </InfoGrid>
-          <BeskrivelseWrapper>
-            <div>
-              <Label>Beskrivelse</Label>
-              <BodyShort>{beskrivelse}</BodyShort>
-            </div>
-          </BeskrivelseWrapper>
+          <div>
+            <Label>Beskrivelse</Label>
+            <BodyShort>{beskrivelse || <i>Mangler beskrivelse</i>}</BodyShort>
+          </div>
+
+          <br />
+
           <FlexRow justify="right">
             <Button variant="tertiary" onClick={() => setOpen(false)}>
               Avbryt
@@ -94,7 +88,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
             <Button
               variant="primary"
               as="a"
-              href={`${configContext['gosysUrl']}/personoversikt/fnr=${fnr}`}
+              href={fnr ? `${configContext['gosysUrl']}/personoversikt/fnr=${fnr}` : configContext['gosysUrl']}
               target="_blank"
             >
               Åpne og rediger i Gosys

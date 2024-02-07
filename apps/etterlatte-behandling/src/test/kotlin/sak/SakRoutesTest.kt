@@ -1,4 +1,4 @@
-package sak
+package no.nav.etterlatte.sak
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -30,11 +30,6 @@ import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.sak.EnhetRequest
-import no.nav.etterlatte.sak.SakService
-import no.nav.etterlatte.sak.TilgangService
-import no.nav.etterlatte.sak.sakSystemRoutes
-import no.nav.etterlatte.sak.sakWebRoutes
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach

@@ -5,7 +5,6 @@ import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.SaksbehandlerInfoDao
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
@@ -85,6 +84,8 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
+import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDaoTrans
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -212,6 +213,7 @@ internal class ApplicationContext(
     val behandlingInfoDao = BehandlingInfoDao { databaseContext().activeTx() }
     val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
+    val saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)

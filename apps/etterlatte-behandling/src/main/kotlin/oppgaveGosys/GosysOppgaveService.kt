@@ -65,7 +65,6 @@ class GosysOppgaveServiceImpl(
             }
 
         return gosysOppgaver.oppgaver
-            .filter { it.aktoerId != null }
             .map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }.filterForEnheter(Kontekst.get().AppUser)
     }
 
@@ -93,7 +92,12 @@ class GosysOppgaveServiceImpl(
         tilordnes: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long {
-        return gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(oppgaveId, oppgaveVersjon, tilordnes, brukerTokenInfo).versjon
+        return gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(
+            oppgaveId,
+            oppgaveVersjon,
+            tilordnes,
+            brukerTokenInfo,
+        ).versjon
     }
 
     override suspend fun endreFrist(
@@ -119,8 +123,11 @@ class GosysOppgaveServiceImpl(
                 versjon = this.versjon,
                 status = Status.NY,
                 opprettet = this.opprettetTidspunkt,
-                frist = Tidspunkt.ofNorskTidssone(dato = this.fristFerdigstillelse, tid = LocalTime.MIDNIGHT),
-                fnr = fnrByAktoerId[this.aktoerId]!!,
+                frist =
+                    this.fristFerdigstillelse?.let { frist ->
+                        Tidspunkt.ofNorskTidssone(frist, LocalTime.MIDNIGHT)
+                    },
+                fnr = fnrByAktoerId[this.aktoerId],
                 gjelder = temaTilSakType[this.tema]!!.name,
                 enhet = this.tildeltEnhetsnr,
                 saksbehandlerIdent = this.tilordnetRessurs,

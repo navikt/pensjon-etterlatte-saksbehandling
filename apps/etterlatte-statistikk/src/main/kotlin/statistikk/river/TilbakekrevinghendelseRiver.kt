@@ -10,12 +10,12 @@ import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
 import no.nav.etterlatte.libs.common.tilbakekreving.TILBAKEKREVING_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.ListenerMedLogging
 
 class TilbakekrevinghendelseRiver(
     rapidsConnection: RapidsConnection,

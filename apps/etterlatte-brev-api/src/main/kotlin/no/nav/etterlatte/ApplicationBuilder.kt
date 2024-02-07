@@ -39,9 +39,9 @@ import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
-import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
-import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
-import no.nav.etterlatte.brev.model.BrevKodeMapper
+import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
+import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
@@ -57,6 +57,8 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
@@ -74,8 +76,6 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.getRapidEnv
 import java.util.UUID
 import kotlin.concurrent.thread
 
@@ -144,13 +144,13 @@ class ApplicationBuilder {
 
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
 
-    private val brevDataMapperRedigerbartUtfall = BrevDataMapperRedigerbartUtfall(brevdataFacade, migreringBrevDataService)
+    private val brevDataMapperRedigerbartUtfallVedtak = BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService)
 
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade)
+    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(brevdataFacade)
 
-    private val brevKodeMapper = BrevKodeMapper()
+    private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapperRedigerbartUtfall, brevKodeMapper)
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService)
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
@@ -158,21 +158,24 @@ class ApplicationBuilder {
 
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
 
-    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
+    private val brevoppretter =
+        Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
 
     private val pdfGenerator =
-        PDFGenerator(db, brevdataFacade, brevDataMapperFerdigstilling, adresseService, brevbakerService)
+        PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
             vedtaksvurderingService,
-            brevKodeMapper,
+            brevKodeMapperVedtak,
             brevoppretter,
             pdfGenerator,
+            brevDataMapperRedigerbartUtfallVedtak,
+            brevDataMapperFerdigstilling,
         )
 
-    private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient)
+    private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator)
 
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 

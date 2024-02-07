@@ -1,5 +1,6 @@
 package no.nav.etterlatte.migrering
 
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
@@ -7,7 +8,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 
 internal class PauseMigreringRiver(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
     ListenerMedLoggingOgFeilhaandtering() {

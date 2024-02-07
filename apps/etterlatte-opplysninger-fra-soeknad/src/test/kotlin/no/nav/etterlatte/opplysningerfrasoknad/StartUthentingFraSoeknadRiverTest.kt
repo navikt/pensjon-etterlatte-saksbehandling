@@ -7,13 +7,13 @@ import io.mockk.mockk
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsuthenter
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.OPPLYSNING_KEY
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.OPPLYSNING_KEY
-import rapidsandrivers.SAK_ID_KEY
 import java.io.FileNotFoundException
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

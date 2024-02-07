@@ -12,13 +12,17 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
-import no.nav.etterlatte.brev.model.BrevKodeMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.retryOgPakkUt
@@ -41,6 +45,8 @@ class Brevoppretter(
         brukerTokenInfo: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         // TODO EY-3232 - Fjerne migreringstilpasning
+        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevDataMapper: suspend (RedigerbarTekstRequest) -> BrevData,
     ): Brev {
         require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -48,8 +54,8 @@ class Brevoppretter(
 
         if (brukerTokenInfo is Saksbehandler) {
             brevdataFacade.hentBehandling(behandlingId, brukerTokenInfo).status.let { status ->
-                require(status.kanEndres()) {
-                    "Behandling (id=$behandlingId) har status $status og kan ikke opprette vedtaksbrev"
+                if (!status.kanEndres()) {
+                    throw KanIkkeOppretteVedtaksbrev(behandlingId, status)
                 }
             }
         }
@@ -59,8 +65,9 @@ class Brevoppretter(
             behandlingId = behandlingId,
             bruker = brukerTokenInfo,
             automatiskMigreringRequest = automatiskMigreringRequest,
-            brevKode = null,
+            brevKode = brevKode,
             brevtype = Brevtype.VEDTAK,
+            brevDataMapping = brevDataMapper,
         ).first
     }
 
@@ -69,18 +76,28 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKode: EtterlatteBrevKode? = null,
+        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         brevtype: Brevtype,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
     ): Pair<Brev, GenerellBrevData> =
-        with(hentInnData(sakId, behandlingId, bruker, brevKode, automatiskMigreringRequest)) {
+        with(
+            hentInnData(
+                sakId,
+                behandlingId,
+                bruker,
+                brevKode,
+                automatiskMigreringRequest,
+                brevDataMapping,
+            ),
+        ) {
             val nyttBrev =
                 OpprettNyttBrev(
                     sakId = sakId,
                     behandlingId = behandlingId,
                     prosessType = BrevProsessType.REDIGERBAR,
                     soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
-                    mottaker = finnMottaker(generellBrevData.personerISak),
+                    mottaker = finnMottaker(generellBrevData.sak.sakType, generellBrevData.personerISak),
                     opprettet = Tidspunkt.now(),
                     innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
@@ -94,10 +111,20 @@ class Brevoppretter(
         brevId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKode: EtterlatteBrevKode? = null,
+        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
-    ): BrevService.BrevPayload =
-        with(hentInnData(sakId, behandlingId, bruker, brevKode, automatiskMigreringRequest)) {
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
+    ): BrevService.BrevPayload {
+        with(
+            hentInnData(
+                sakId,
+                behandlingId,
+                bruker,
+                brevKode,
+                automatiskMigreringRequest,
+                brevDataMapping,
+            ),
+        ) {
             if (innhold.payload != null) {
                 db.oppdaterPayload(brevId, innhold.payload)
             }
@@ -111,28 +138,24 @@ class Brevoppretter(
                 innholdVedlegg ?: db.hentBrevPayloadVedlegg(brevId),
             )
         }
+    }
 
     private suspend fun hentInnData(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKode: EtterlatteBrevKode?,
+        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
     ): OpprettBrevRequest {
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
 
-        val brevkode: (mapper: BrevKodeMapper, g: GenerellBrevData) -> EtterlatteBrevKode =
-            if (brevKode != null) {
-                { _, _ -> brevKode }
-            } else {
-                { mapper, data ->
-                    mapper.brevKode(data).redigering
-                }
-            }
+        val brevkodeRequest =
+            BrevkodeRequest(generellBrevData.erMigrering(), generellBrevData.sak.sakType, generellBrevData.forenkletVedtak?.type)
 
-        val tittel =
-            brevKode?.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
+        val kode = brevKode(brevkodeRequest)
+        val tittel = kode.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
         return coroutineScope {
             val innhold =
                 async {
@@ -140,8 +163,9 @@ class Brevoppretter(
                         RedigerbarTekstRequest(
                             generellBrevData,
                             bruker,
-                            brevkode,
+                            kode,
                             automatiskMigreringRequest,
+                            brevDataMapping,
                         ),
                     )
                 }
@@ -155,7 +179,10 @@ class Brevoppretter(
         }
     }
 
-    private suspend fun finnMottaker(personerISak: PersonerISak): Mottaker =
+    private suspend fun finnMottaker(
+        sakType: SakType,
+        personerISak: PersonerISak,
+    ): Mottaker =
         with(personerISak) {
             when (verge) {
                 is Vergemaal -> verge.toMottaker()
@@ -164,7 +191,7 @@ class Brevoppretter(
                     val mottakerFnr =
                         innsender?.fnr?.value?.takeIf { Folkeregisteridentifikator.isValid(it) }
                             ?: soeker.fnr.value
-                    adresseService.hentMottakerAdresse(mottakerFnr)
+                    adresseService.hentMottakerAdresse(sakType, mottakerFnr)
                 }
             }
         }
@@ -201,3 +228,9 @@ fun Vergemaal.toMottaker(): Mottaker {
     return Mottaker.tom(Folkeregisteridentifikator.of(mottaker.foedselsnummer!!.value))
         .copy(navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!)
 }
+
+class KanIkkeOppretteVedtaksbrev(behandlingId: UUID, status: BehandlingStatus) : UgyldigForespoerselException(
+    code = "KAN_IKKE_ENDRE_VEDTAKSBREV",
+    detail = "Kan ikke opprette vedtaksbrev når behandlingen har status $status",
+    meta = mapOf("behandlingId" to behandlingId),
+)

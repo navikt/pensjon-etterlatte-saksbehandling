@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.distribusjon.FeilStatusForDistribusjon
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -105,6 +106,7 @@ class BrevdistribuererTest {
         statusEndret = Tidspunkt.now(),
         opprettet = Tidspunkt.now(),
         mottaker = opprettMottaker(),
+        brevtype = Brevtype.MANUELT,
     )
 
     private fun opprettMottaker() =

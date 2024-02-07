@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class KlageServiceTest() {
+internal class KlageServiceTest {
     private lateinit var service: KlageService
 
     private val saksbehandler = Saksbehandler("token", "ident", null)
@@ -124,6 +124,7 @@ internal class KlageServiceTest() {
         omsSak(GrunnlagTestData().gjenlevende.foedselsnummer),
         mockk(),
         status,
+        mockk(),
         mockk(),
         mockk(),
         mockk(),

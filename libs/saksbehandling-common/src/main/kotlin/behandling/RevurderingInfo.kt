@@ -1,8 +1,8 @@
 package no.nav.etterlatte.libs.common.behandling
 
-import behandling.utland.LandMedDokumenter
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import java.time.LocalDate
 import java.util.UUID
 

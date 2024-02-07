@@ -5,6 +5,8 @@ import io.mockk.mockk
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
+import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
+import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -345,6 +347,7 @@ internal class BehandlingTest {
                 UUID.randomUUID(),
                 Aldersgruppe.OVER_18,
                 LavEllerIngenInntekt.NEI,
+                Feilutbetaling(FeilutbetalingValg.NEI, null),
                 Grunnlagsopplysning.Saksbehandler("Casey", Tidspunkt.now()),
             )
         val vergeBarnepensjon = grunnlag.mapVerge(SakType.BARNEPENSJON, UUID.randomUUID(), brevutfallDto)

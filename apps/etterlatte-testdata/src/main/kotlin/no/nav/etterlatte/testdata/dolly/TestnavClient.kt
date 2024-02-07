@@ -1,4 +1,4 @@
-package dolly
+package no.nav.etterlatte.testdata.dolly
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -11,7 +11,6 @@ import io.ktor.http.HttpHeaders
 import no.nav.etterlatte.getTestnavAccessToken
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.testdata.dolly.DollyPersonResponse
 
 class TestnavClient(
     private val config: Config,

@@ -35,7 +35,7 @@ class VedtakSamordningService(private val repository: VedtaksvurderingRepository
 }
 
 private fun Vedtak.toSamordningsvedtakDto(): VedtakSamordningDto {
-    val innhold = innhold as VedtakBehandlingInnhold
+    val innhold = innhold as VedtakInnhold.Behandling
     val avkorting = innhold.avkorting?.let { deserialize<AvkortingDto>(it.toString()) }
 
     return VedtakSamordningDto(

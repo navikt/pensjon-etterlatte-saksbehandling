@@ -1,4 +1,4 @@
-package beregning.grunnlag
+package no.nav.etterlatte.beregning.grunnlag
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.kotest.matchers.shouldBe
@@ -11,20 +11,6 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.beregning.grunnlag.BPBeregningsgrunnlagMerEnnEnAvdoedException
-import no.nav.etterlatte.beregning.grunnlag.BPBeregningsgrunnlagSoeskenIkkeAvdoedesBarnException
-import no.nav.etterlatte.beregning.grunnlag.BPBeregningsgrunnlagSoeskenMarkertDoedException
-import no.nav.etterlatte.beregning.grunnlag.BarnepensjonBeregningsGrunnlag
-import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
-import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
-import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
-import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
-import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDTO
-import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagDao
-import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
-import no.nav.etterlatte.beregning.grunnlag.REFORM_TIDSPUNKT_BP
-import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.toGrunnlag
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlient

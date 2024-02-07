@@ -1,6 +1,5 @@
 package no.nav.etterlatte.trygdetid.kafka
 
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -8,6 +7,10 @@ import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResulta
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -15,15 +18,12 @@ import no.nav.etterlatte.rapidsandrivers.migrering.TRYGDETID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.HENDELSE_DATA_KEY
-import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import rapidsandrivers.behandlingId
 import java.util.UUID
 
 internal class MigreringTrygdetidHendelserRiver(
@@ -149,7 +149,7 @@ internal class MigreringTrygdetidHendelserRiver(
             kilde =
                 TrygdetidGrunnlagKildeDto(
                     tidspunkt = Tidspunkt.now().toString(),
-                    ident = Vedtaksloesning.GJENOPPRETTA.name,
+                    ident = Fagsaksystem.EY.navn,
                 ),
             beregnet = null,
             begrunnelse = "Gjenopprettet basert på opphørt sak fra pesys",

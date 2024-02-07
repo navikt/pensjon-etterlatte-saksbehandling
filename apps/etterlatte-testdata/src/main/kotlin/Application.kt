@@ -9,7 +9,6 @@ import com.github.michaelbull.result.get
 import com.github.mustachejava.DefaultMustacheFactory
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import dolly.TestnavClient
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
@@ -50,6 +49,7 @@ import no.nav.etterlatte.libs.ktor.metricsModule
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.testdata.dolly.DollyClientImpl
 import no.nav.etterlatte.testdata.dolly.DollyService
+import no.nav.etterlatte.testdata.dolly.TestnavClient
 import no.nav.etterlatte.testdata.features.dolly.DollyFeature
 import no.nav.etterlatte.testdata.features.egendefinert.EgendefinertMeldingFeature
 import no.nav.etterlatte.testdata.features.index.IndexFeature

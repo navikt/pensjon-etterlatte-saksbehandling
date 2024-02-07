@@ -1,9 +1,9 @@
 package no.nav.etterlatte.behandling.bosattutland
 
-import behandling.utland.LandMedDokumenter
-import behandling.utland.MottattDokument
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.behandling.utland.LandMedDokumenter
+import no.nav.etterlatte.behandling.utland.MottattDokument
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance

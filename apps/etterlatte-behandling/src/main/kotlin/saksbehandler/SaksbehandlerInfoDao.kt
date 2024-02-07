@@ -1,6 +1,7 @@
-package no.nav.etterlatte
+package no.nav.etterlatte.saksbehandler
 
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
+import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.single
 import no.nav.etterlatte.libs.database.toList
 import javax.sql.DataSource
@@ -20,7 +21,7 @@ class SaksbehandlerInfoDao(private val dataSource: DataSource) {
         }
     }
 
-    fun upsertSaksbehandler(saksbehandler: SaksbehandlerInfo) {
+    fun upsertSaksbehandlerNavn(saksbehandler: SaksbehandlerInfo) {
         dataSource.connection.use {
             val statement =
                 it.prepareStatement(
@@ -33,6 +34,22 @@ class SaksbehandlerInfoDao(private val dataSource: DataSource) {
                 )
             statement.setString(1, saksbehandler.ident)
             statement.setString(2, saksbehandler.navn)
+            statement.executeUpdate()
+        }
+    }
+
+    fun upsertSaksbehandlerEnheter(saksbehandlerMedEnheter: Pair<String, List<String>>) {
+        dataSource.connection.use {
+            val statement =
+                it.prepareStatement(
+                    """
+                    UPDATE saksbehandler_info
+                    SET enheter = ?
+                    WHERE id = ?
+                    """.trimIndent(),
+                )
+            statement.setJsonb(1, saksbehandlerMedEnheter.second)
+            statement.setString(2, saksbehandlerMedEnheter.first)
             statement.executeUpdate()
         }
     }

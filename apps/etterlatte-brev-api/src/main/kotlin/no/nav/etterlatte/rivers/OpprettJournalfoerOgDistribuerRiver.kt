@@ -9,7 +9,12 @@ import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
+import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.token.Systembruker
@@ -17,9 +22,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.sakId
 
 class OpprettJournalfoerOgDistribuerRiver(
     rapidsConnection: RapidsConnection,
@@ -57,9 +59,9 @@ class OpprettJournalfoerOgDistribuerRiver(
                     sakId = sakId,
                     behandlingId = null,
                     bruker = brukerTokenInfo,
-                    brevKode = brevKode.redigering,
+                    brevKode = { brevKode.redigering },
                     brevtype = brevKode.redigering.brevtype,
-                )
+                ) { ManueltBrevData() }
             }
         logger.info("Ferdigstiller $brevKode-brev i sak $sakId")
         val brevId = brevOgData.first.id
@@ -75,7 +77,8 @@ class OpprettJournalfoerOgDistribuerRiver(
                         attestantIdent = Fagsaksystem.EY.navn,
                     )
                 },
-                brevKode = { _ -> brevKode },
+                brevKode = { brevKode },
+                brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
             )
         }
         logger.info("Journalfører $brevKode-brev i sak $sakId")

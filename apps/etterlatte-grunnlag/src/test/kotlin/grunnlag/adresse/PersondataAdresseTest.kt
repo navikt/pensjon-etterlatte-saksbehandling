@@ -1,15 +1,9 @@
-package grunnlag.adresse
+package no.nav.etterlatte.grunnlag.adresse
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.grunnlag.adresse.AdresseKilde
-import no.nav.etterlatte.grunnlag.adresse.AdresseType
-import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
-import no.nav.etterlatte.grunnlag.adresse.RegoppslagFormat
-import no.nav.etterlatte.grunnlag.adresse.VergePersonFormat
-import no.nav.etterlatte.grunnlag.adresse.VergeSamhandlerFormat
 import no.nav.etterlatte.libs.common.objectMapper
 import org.junit.jupiter.api.Test
 

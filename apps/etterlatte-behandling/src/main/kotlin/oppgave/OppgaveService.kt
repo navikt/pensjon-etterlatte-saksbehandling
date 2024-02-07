@@ -8,6 +8,7 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -102,6 +103,7 @@ class OppgaveService(
                     )
                 }
             }
+
             is ExternalUser -> throw IllegalArgumentException("ExternalUser er ikke støttet for å tildele oppgave")
             else -> throw IllegalArgumentException(
                 "Ukjent brukertype ${appUser.name()} støtter ikke tildeling av oppgave",
@@ -168,11 +170,15 @@ class OppgaveService(
         frist: Tidspunkt,
     ) {
         if (frist.isBefore(Tidspunkt.now())) {
-            throw BadRequestException("Tidspunkt tilbake i tid id: $oppgaveId")
+            throw FristTilbakeITid(oppgaveId)
         }
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+                ?: throw IkkeFunnetException(
+                    code = "OPPGAVE_IKKE_FUNNET",
+                    detail = "Oppgaven finnes ikke",
+                    meta = mapOf("oppgaveId" to oppgaveId),
+                )
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         if (hentetOppgave.saksbehandlerIdent != null) {
             oppgaveDao.redigerFrist(oppgaveId, frist)
@@ -275,14 +281,9 @@ class OppgaveService(
         saksbehandler: BrukerTokenInfo,
     ) {
         if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandlerIdent)) {
-            throw FeilSaksbehandlerPaaOppgaveException(
-                "Kan ikke lukke oppgave for en annen saksbehandler oppgave:" +
-                    " ${oppgaveUnderBehandling.id}",
-            )
+            throw FeilSaksbehandlerPaaOppgave(oppgaveUnderBehandling.id)
         }
     }
-
-    class FeilSaksbehandlerPaaOppgaveException(message: String) : Exception(message)
 
     fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
         sakerMedNyEnhet.forEach {
@@ -348,6 +349,7 @@ class OppgaveService(
     fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
         referanse: String,
         sakId: Long,
+        merknad: String? = null,
     ): OppgaveIntern {
         val oppgaverForBehandling = oppgaveDao.hentOppgaverForReferanse(referanse)
         val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
@@ -360,7 +362,7 @@ class OppgaveService(
             sakId = sakId,
             oppgaveKilde = OppgaveKilde.BEHANDLING,
             oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = null,
+            merknad = merknad,
         )
     }
 
@@ -446,6 +448,14 @@ class OppgaveService(
             }
     }
 
+    fun avbrytAapneOppgaverMedReferanse(referanse: String) {
+        logger.info("Avbryter åpne oppgaver med referanse=$referanse")
+
+        oppgaveDao.hentOppgaverForReferanse(referanse)
+            .filterNot { Status.erAvsluttet(it.status) }
+            .forEach { oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT) }
+    }
+
     fun hentSakOgOppgaverForSak(sakId: Long): OppgaveListe {
         val sak = sakDao.hentSak(sakId)
         if (sak != null) {
@@ -457,6 +467,18 @@ class OppgaveService(
 }
 
 class FantIkkeSakException(msg: String) : Exception(msg)
+
+class FeilSaksbehandlerPaaOppgave(oppgaveId: UUID) : UgyldigForespoerselException(
+    code = "FEIL_SAKSBEHANDLER_PAA_OPPGAVE",
+    detail = "Kan ikke lukke oppgave som tilhører en annen saksbehandler",
+    meta = mapOf("oppgaveId" to oppgaveId),
+)
+
+class FristTilbakeITid(oppgaveId: UUID) : UgyldigForespoerselException(
+    code = "FRIST_TILBAKE_I_TID",
+    detail = "Frist kan ikke settes tilbake i tid",
+    meta = mapOf("oppgaveId" to oppgaveId),
+)
 
 enum class Rolle {
     SAKSBEHANDLER,

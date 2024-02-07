@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.LOPENDE_JANUAR_2024_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
@@ -14,7 +15,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.SAK_ID_KEY
 import java.util.UUID
 import javax.sql.DataSource
 import kotlin.concurrent.thread

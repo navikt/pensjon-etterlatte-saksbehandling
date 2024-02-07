@@ -7,7 +7,7 @@ import { FlexRow } from '~shared/styled'
 import { ISak } from '~shared/types/sak'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import {
   kanFerdigstilleJournalpost,
   temaTilhoererGjenny,
@@ -82,11 +82,11 @@ export default function FerdigstillJournalpostModal({ journalpost, sak }: ModalP
             </FlexRow>
           )}
 
-          {isFailure(oppdaterStatus) && (
+          {mapFailure(oppdaterStatus, (error) => (
             <Modal.Footer>
-              <ApiErrorAlert>Det oppsto en feil ved ferdigstilling av journalposten</ApiErrorAlert>
+              <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved ferdigstilling av journalposten'}</ApiErrorAlert>
             </Modal.Footer>
-          )}
+          ))}
         </Modal.Body>
       </Modal>
     </>

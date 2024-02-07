@@ -35,10 +35,13 @@ export function oppdaterUtfallForKlage(args: {
 
 export function oppdaterInitieltUtfallForKlage(args: {
   klageId: string
-  utfallMedBegrunnelse: IniteltUtfallMedBegrunnelseDto //TODO type her Må også slenges på klage obj dto
+  utfallMedBegrunnelse: IniteltUtfallMedBegrunnelseDto
 }): Promise<ApiResponse<Klage>> {
   const { klageId, utfallMedBegrunnelse } = args
-  return apiClient.put(`/klage/${klageId}/initieltutfall`, { utfallMedBegrunnelse })
+  return apiClient.put(`/klage/${klageId}/initieltutfall`, {
+    utfall: utfallMedBegrunnelse.utfall,
+    begrunnelse: utfallMedBegrunnelse.begrunnelse,
+  })
 }
 
 export function ferdigstillKlagebehandling(klageId: string): Promise<ApiResponse<Klage>> {

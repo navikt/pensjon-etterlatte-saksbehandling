@@ -107,6 +107,8 @@ enum class KlageUtfall {
     OMGJOERING,
     DELVIS_OMGJOERING,
     STADFESTE_VEDTAK,
+    AVVIST,
+    AVVIST_MED_OMGJOERING,
 }
 
 data class Klage(

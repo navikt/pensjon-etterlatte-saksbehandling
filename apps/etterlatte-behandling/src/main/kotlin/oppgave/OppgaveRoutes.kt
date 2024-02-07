@@ -227,13 +227,15 @@ internal fun Route.oppgaveRoutes(
         }
 
         put("/avbryt/referanse/{referanse}") {
-            val referanse = call.parameters["referanse"]!!
+            kunSystembruker {
+                val referanse = call.parameters["referanse"]!!
 
-            inTransaction {
-                service.avbrytAapneOppgaverMedReferanse(referanse)
+                inTransaction {
+                    service.avbrytAapneOppgaverMedReferanse(referanse)
+                }
+
+                call.respond(HttpStatusCode.OK)
             }
-
-            call.respond(HttpStatusCode.OK)
         }
     }
 }

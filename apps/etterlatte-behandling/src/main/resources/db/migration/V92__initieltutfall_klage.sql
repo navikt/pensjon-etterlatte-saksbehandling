@@ -1,0 +1,1 @@
+alter table klage add column initielt_utfall JSONB;

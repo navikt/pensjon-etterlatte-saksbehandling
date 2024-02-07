@@ -5,7 +5,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
-import no.nav.etterlatte.libs.common.behandling.KlageUtfall
+import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
@@ -183,7 +183,8 @@ class StatistikkService(
             revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
             kilde = statistikkBehandling.kilde,
             pesysId = statistikkBehandling.pesysId,
-            relatertTil = null, // TODO: Hvis dette er en revurdering pga klage så skal klage-id'en sendes med her
+            // TODO: Hvis dette er en revurdering pga klage så skal klage-id'en sendes med her
+            relatertTil = null,
         )
     }
 
@@ -321,9 +322,9 @@ class StatistikkService(
         status = hendelse.name,
         resultat =
             when (statistikkKlage.klage.utfall) {
-                is KlageUtfall.Omgjoering -> "OMGJOERING"
-                is KlageUtfall.DelvisOmgjoering -> "DELVIS_OMGJOERING"
-                is KlageUtfall.StadfesteVedtak -> "STADFESTE_VEDTAK"
+                is KlageUtfallMedData.Omgjoering -> "OMGJOERING"
+                is KlageUtfallMedData.DelvisOmgjoering -> "DELVIS_OMGJOERING"
+                is KlageUtfallMedData.StadfesteVedtak -> "STADFESTE_VEDTAK"
                 null -> null
             },
         saksbehandler = statistikkKlage.saksbehandler,

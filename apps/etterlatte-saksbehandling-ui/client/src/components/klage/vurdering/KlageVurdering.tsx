@@ -1,5 +1,5 @@
-import { KlageVurderingRedigering } from '~components/klage/vurdering/KlageVurderingRedigering'
-import { KlageVurderingVisning } from '~components/klage/vurdering/KlageVurderingVisning'
+import { KlageInitiellVurdering } from '~components/klage/vurdering/KlageInitiellVurdering'
+import { KlageInitiellVurderingVisning } from '~components/klage/vurdering/KlageInitiellVurderingVisning'
 import { useKlage } from '~components/klage/useKlage'
 import Spinner from '~shared/Spinner'
 import React from 'react'
@@ -9,7 +9,6 @@ import { KlageAvvisningRedigering } from '~components/klage/vurdering/KlageAvvis
 
 export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
   const klage = useKlage()
-
   if (!klage) {
     return <Spinner visible label="Henter klage" />
   }
@@ -22,5 +21,5 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
     return <KlageInfoInnhenting klage={klage} />
   }
 
-  return kanRedigere ? <KlageVurderingRedigering klage={klage} /> : <KlageVurderingVisning klage={klage} />
+  return kanRedigere ? <KlageInitiellVurdering klage={klage} /> : <KlageInitiellVurderingVisning klage={klage} />
 }

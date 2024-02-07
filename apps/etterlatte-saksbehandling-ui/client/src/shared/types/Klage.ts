@@ -42,6 +42,7 @@ export interface Klage {
   status: KlageStatus
   kabalStatus?: KabalStatus
   formkrav?: FormkravMedSaksbehandler
+  initieltUtfall?: InitieltUtfallMedBegrunnelseOgMeta
   utfall?: KlageUtfall
   kabalResultat?: KabalResultat
   innkommendeDokument?: InnkommendeKlage
@@ -123,6 +124,17 @@ export enum Utfall {
   STADFESTE_VEDTAK = 'STADFESTE_VEDTAK',
   AVVIST = 'AVVIST',
   AVVIST_MED_OMGJOERING = 'AVVIST_MED_OMGJOERING',
+}
+
+export interface InitieltUtfallMedBegrunnelseOgMeta {
+  utfallMedBegrunnelse: IniteltUtfallMedBegrunnelseDto
+  saksbehandler: string
+  tidspunkt: string
+}
+
+export interface IniteltUtfallMedBegrunnelseDto {
+  utfall: Utfall
+  begrunnelse: string
 }
 
 export const teksterKlageutfall: Record<Utfall, string> = {

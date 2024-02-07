@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-pdl-model"))
     implementation(project(":libs:etterlatte-migrering-model"))
+    implementation(project(":libs:etterlatte-brev-model"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcore)

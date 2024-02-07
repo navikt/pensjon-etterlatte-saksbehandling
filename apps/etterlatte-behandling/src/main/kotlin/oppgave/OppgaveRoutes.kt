@@ -1,12 +1,12 @@
 package no.nav.etterlatte.oppgave
 
-import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
@@ -113,7 +113,7 @@ internal fun Route.oppgaveRoutes(
             get("/ikkeattestert/{referanse}") {
                 kunSaksbehandler {
                     val saksbehandler = inTransaction { service.hentSisteSaksbehandlerIkkeAttestertOppgave(referanse) }
-                    call.respond(saksbehandler ?: HttpStatusCode.NoContent)
+                    call.respond(saksbehandler)
                 }
             }
         }
@@ -158,12 +158,10 @@ internal fun Route.oppgaveRoutes(
                     call.respond(HttpStatusCode.OK)
                 }
             }
-            route("saksbehandler", HttpMethod.Delete) {
-                handle {
-                    kunSaksbehandlerMedSkrivetilgang {
-                        inTransaction { service.fjernSaksbehandler(oppgaveId) }
-                        call.respond(HttpStatusCode.OK)
-                    }
+            delete("saksbehandler") {
+                kunSaksbehandlerMedSkrivetilgang {
+                    inTransaction { service.fjernSaksbehandler(oppgaveId) }
+                    call.respond(HttpStatusCode.OK)
                 }
             }
             put("frist") {
@@ -222,8 +220,8 @@ internal fun Route.oppgaveRoutes(
         }
     }
 
-    route("/oppgaver/sak/{$SAKID_CALL_PARAMETER}/opprett") {
-        post {
+    route("/oppgaver") {
+        post("/sak/{$SAKID_CALL_PARAMETER}/opprett") {
             kunSystembruker {
                 val nyOppgaveDto = call.receive<NyOppgaveDto>()
                 call.respond(
@@ -237,6 +235,18 @@ internal fun Route.oppgaveRoutes(
                         )
                     },
                 )
+            }
+        }
+
+        put("/avbryt/referanse/{referanse}") {
+            kunSystembruker {
+                val referanse = call.parameters["referanse"]!!
+
+                inTransaction {
+                    service.avbrytAapneOppgaverMedReferanse(referanse)
+                }
+
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
@@ -35,12 +36,13 @@ class BehandlingInfoService(
         return Pair(lagretBrevutfall, lagretEtterbetaling)
     }
 
-    fun lagreBrevutfall(
+    private fun lagreBrevutfall(
         behandling: Behandling,
         brevutfall: Brevutfall,
     ): Brevutfall {
         sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
         sjekkLavEllerIngenInntektSattVedOmstillingsstoenad(behandling, brevutfall)
+        sjekkFeilutbetalingSattVedOmstillingsstoenad(behandling, brevutfall)
         return behandlingInfoDao.lagreBrevutfall(brevutfall)
     }
 
@@ -120,6 +122,17 @@ class BehandlingInfoService(
     ) {
         if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD && brevutfall.lavEllerIngenInntekt == null) {
             throw BrevutfallException.LavEllerIngenInntektIkkeSatt()
+        }
+    }
+
+    private fun sjekkFeilutbetalingSattVedOmstillingsstoenad(
+        behandling: Behandling,
+        brevutfall: Brevutfall,
+    ) {
+        if (behandling.type == BehandlingType.REVURDERING &&
+            brevutfall.feilutbetaling == null
+        ) {
+            throw BrevutfallException.FeilutbetalingIkkeSatt()
         }
     }
 

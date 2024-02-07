@@ -1,7 +1,7 @@
-import { Button, Heading, Panel, TextField } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Panel, TextField } from '@navikt/ds-react'
 import { Persongalleri } from '~shared/types/Person'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { InputList, InputRow } from './OpprettNyBehandling'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
@@ -9,7 +9,13 @@ import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveRe
 
 type PersonArray = keyof Omit<Persongalleri, 'soeker' | 'innsender'>
 
-export default function PersongalleriBarnepensjon({ erManuellMigrering = false }: { erManuellMigrering?: boolean }) {
+export default function PersongalleriBarnepensjon({
+  erManuellMigrering = false,
+  fnrFraOppgave = undefined,
+}: {
+  erManuellMigrering?: boolean
+  fnrFraOppgave?: string | undefined
+}) {
   const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
@@ -18,6 +24,12 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
   const oppdaterPersongalleri = (persongalleri: Persongalleri) => {
     dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, persongalleri }))
   }
+
+  useEffect(() => {
+    if (fnrFraOppgave) {
+      oppdaterPersongalleri({ ...persongalleri, soeker: fnrFraOppgave })
+    }
+  }, [fnrFraOppgave])
 
   const oppdater = (field: PersonArray, fnr: string, index: number) => {
     const nyState = persongalleri ? [...(persongalleri[field] || [])] : []
@@ -49,7 +61,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
       <InputRow>
         <TextField
           label="Søker (barnet)"
-          value={persongalleri?.soeker || ''}
+          value={fnrFraOppgave || persongalleri?.soeker || ''}
           pattern="[0-9]{11}"
           maxLength={11}
           onChange={(e) => oppdaterPersongalleri({ ...persongalleri, soeker: e.target.value })}
@@ -63,7 +75,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
       <InputRow>
         <TextField
           label="Innsender"
-          description="Oppgi innsenderen sitt fødselsnummer dersom det er tilgjengelig"
+          description="Oppgi innsenderen sitt fødselsnummer (dersom det er tilgjengelig)"
           value={persongalleri?.innsender || ''}
           pattern="[0-9]{11}"
           maxLength={11}
@@ -74,6 +86,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
       <Panel border>
         <Heading size="small" spacing>
           Gjenlevende forelder
+          <BodyShort textColor="subtle">Legg til gjenlevende hvis tilgjengelig</BodyShort>
         </Heading>
 
         <InputList>
@@ -99,6 +112,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
       <Panel border>
         <Heading size="small" spacing>
           Avdød forelder
+          <BodyShort textColor="subtle">Legg til avdød hvis tilgjengelig</BodyShort>
         </Heading>
 
         <InputList>
@@ -124,6 +138,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
       <Panel border>
         <Heading size="small" spacing>
           Søsken
+          <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>
         </Heading>
 
         <InputList>

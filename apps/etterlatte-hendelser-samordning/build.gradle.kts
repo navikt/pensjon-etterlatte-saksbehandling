@@ -6,6 +6,7 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-kafka"))
+    implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.servercio)
@@ -19,7 +20,6 @@ dependencies {
 
     implementation(libs.kafka.clients)
     implementation(libs.kafka.avro)
-    implementation(libs.kafka.avroserializer)
 
     testImplementation(libs.kafka.embeddedenv)
     testImplementation(libs.el.api)

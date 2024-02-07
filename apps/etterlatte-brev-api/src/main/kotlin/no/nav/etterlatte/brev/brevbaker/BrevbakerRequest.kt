@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.brevbaker
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
+import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Verge
@@ -17,7 +18,7 @@ data class BrevbakerRequest private constructor(
     companion object {
         fun fra(
             brevKode: EtterlatteBrevKode,
-            letterData: Any,
+            brevData: BrevData,
             avsender: Avsender,
             soekerOgEventuellVerge: SoekerOgEventuellVerge,
             sakId: Long,
@@ -26,7 +27,7 @@ data class BrevbakerRequest private constructor(
         ): BrevbakerRequest =
             BrevbakerRequest(
                 kode = brevKode,
-                letterData = letterData,
+                letterData = brevData,
                 felles =
                     mapFelles(
                         sakId = sakId,
@@ -95,37 +96,6 @@ enum class LanguageCode {
             }
         }
     }
-}
-
-enum class EtterlatteBrevKode(val tittel: String? = null) {
-    BARNEPENSJON_AVSLAG,
-    BARNEPENSJON_AVSLAG_ENKEL,
-    BARNEPENSJON_INNVILGELSE,
-    BARNEPENSJON_INNVILGELSE_NY,
-    BARNEPENSJON_INNVILGELSE_ENKEL,
-    OMSTILLINGSSTOENAD_INNVILGELSE,
-    OMSTILLINGSSTOENAD_INNVILGELSE_UTFALL,
-    OMS_AVSLAG,
-    OMS_AVSLAG_BEGRUNNELSE,
-    OMS_OPPHOER_MANUELL,
-    OMS_REVURDERING_ENDRING,
-    OMS_REVURDERING_OPPHOER,
-    OMS_REVURDERING_OPPHOER_GENERELL,
-    BARNEPENSJON_REVURDERING_ADOPSJON,
-    BARNEPENSJON_REVURDERING_ENDRING,
-    BARNEPENSJON_REVURDERING_OMGJOERING_AV_FARSKAP,
-    BARNEPENSJON_REVURDERING_OPPHOER,
-    BARNEPENSJON_REVURDERING_SOESKENJUSTERING,
-    BARNEPENSJON_FORHAANDSVARSEL_OMREGNING,
-    BARNEPENSJON_VEDTAK_OMREGNING,
-    BARNEPENSJON_VEDTAK_OMREGNING_FERDIG,
-    OMREGNING_INFORMASJON,
-    TILBAKEKREVING_INNHOLD,
-    TILBAKEKREVING_FERDIG,
-    TOM_DELMAL,
-    TOM_MAL_INFORMASJONSBREV,
-    TOM_MAL,
-    UTSATT_KLAGEFRIST("Informasjon om barnepensjon fra 1. januar 2024"),
 }
 
 data class SoekerOgEventuellVerge(val soeker: Soeker, val verge: Verge?)

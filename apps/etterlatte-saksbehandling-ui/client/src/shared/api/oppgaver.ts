@@ -9,18 +9,26 @@ export interface OppgaveDTO {
   sakId: number
   type: Oppgavetype
   kilde: OppgaveKilde
-  saksbehandler: string | null
   referanse: string | null
   merknad: string | null
   opprettet: string
   sakType: SakType
-  fnr: string
+  fnr: string | null
   frist: string
+  saksbehandlerIdent: string | null
+
+  //Oppgaveliste spesifikt
+  saksbehandlerNavn: string | null
 
   // GOSYS-spesifikt
   beskrivelse: string | null
   gjelder: string | null
   versjon: number | null
+}
+
+export interface OppgaveSaksbehandler {
+  saksbehandlerIdent: string | null
+  saksbehandlerNavn: string | null
 }
 
 export interface NyOppgaveDto {
@@ -138,10 +146,11 @@ export const redigerFristApi = async (args: {
 export const hentOppgaveForBehandlingUnderBehandlingIkkeattestert = async (args: {
   referanse: string
   sakId: number
-}): Promise<ApiResponse<string>> => apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestert/${args.referanse}`)
+}): Promise<ApiResponse<OppgaveSaksbehandler>> =>
+  apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestert/${args.referanse}`)
 
 export const hentSaksbehandlerForReferanseOppgaveUnderArbeid = async (args: {
   referanse: string
   sakId: number
-}): Promise<ApiResponse<string | null>> =>
+}): Promise<ApiResponse<OppgaveSaksbehandler>> =>
   apiClient.get(`/oppgaver/sak/${args.sakId}/oppgaveunderbehandling/${args.referanse}`)

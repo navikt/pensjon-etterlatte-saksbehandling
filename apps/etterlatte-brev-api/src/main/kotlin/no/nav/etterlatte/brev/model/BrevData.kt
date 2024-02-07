@@ -36,9 +36,7 @@ object BrevDataValidator {
 
 abstract class EndringBrevData : BrevData()
 
-abstract class OpphoerBrevData : BrevData()
-
-data class ManueltBrevData(val innhold: List<Slate.Element>) : BrevData() {
+data class ManueltBrevData(val innhold: List<Slate.Element> = emptyList()) : BrevData() {
     companion object {
         fun fra(innhold: List<Slate.Element> = emptyList()) = ManueltBrevData(innhold)
     }

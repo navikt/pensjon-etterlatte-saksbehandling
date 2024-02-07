@@ -57,7 +57,6 @@ internal val defaultSjekklisteItemsOMS =
         "Opprettet oppgave i Gosys for videre oppfølging av aktivitetsplikt",
         "Ikke registrert/feil kontonummer i saken - opprettet oppgave til NØP",
         "Refusjonskrav (annen NAV-ytelse) i etterbetaling av OMS - opprettet oppgave til NØP",
-        "Samordning - løst opp pga ingen refusjon, se eget notat",
         "Bosatt Norge: Innhenter EØS og bank-opplysninger",
         "Bosatt Norge: Sendt brev til bruker om krav til avtaleland",
         "Bosatt Norge: Opprettet oppfølgingsoppgave på sluttbehandling i Gosys",

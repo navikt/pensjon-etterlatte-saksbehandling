@@ -87,7 +87,8 @@ data class ManuellRevurdering(
                 BehandlingStatus.AVKORTET,
                 BehandlingStatus.RETURNERT,
             ),
-        ) { endreTilStatus(BehandlingStatus.TRYGDETID_OPPDATERT) }
+            BehandlingStatus.TRYGDETID_OPPDATERT,
+        ) { endreTilStatus(it) }
 
     override fun tilBeregnet() =
         hvisTilstandEr(
@@ -106,7 +107,8 @@ data class ManuellRevurdering(
                     BehandlingStatus.RETURNERT,
                 )
             },
-        ) { endreTilStatus(BehandlingStatus.BEREGNET) }
+            BehandlingStatus.BEREGNET,
+        ) { endreTilStatus(it) }
 
     override fun tilAvkortet() =
         hvisTilstandEr(
@@ -115,7 +117,8 @@ data class ManuellRevurdering(
                 BehandlingStatus.AVKORTET,
                 BehandlingStatus.RETURNERT,
             ),
-        ) { endreTilStatus(BehandlingStatus.AVKORTET) }
+            BehandlingStatus.AVKORTET,
+        ) { endreTilStatus(it) }
 
     /**
      Utforskning av mulighet for vilkaarsvurdert -> fattet_vedtak i kontekst av opphør
@@ -133,8 +136,9 @@ data class ManuellRevurdering(
                 BehandlingStatus.AVKORTET,
                 BehandlingStatus.RETURNERT,
             ),
+            BehandlingStatus.FATTET_VEDTAK,
         ) {
-            endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
+            endreTilStatus(it)
         }
     }
 
@@ -150,39 +154,40 @@ data class ManuellRevurdering(
                 BehandlingStatus.AVKORTET,
                 BehandlingStatus.RETURNERT,
             ),
+            BehandlingStatus.FATTET_VEDTAK,
         ) {
-            endreTilStatus(BehandlingStatus.FATTET_VEDTAK)
+            endreTilStatus(it)
         }
     }
 
     override fun tilAttestert() =
-        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-            endreTilStatus(BehandlingStatus.ATTESTERT)
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK, BehandlingStatus.ATTESTERT) {
+            endreTilStatus(it)
         }
 
     override fun tilAvslag() =
-        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-            endreTilStatus(BehandlingStatus.AVSLAG)
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK, BehandlingStatus.AVSLAG) {
+            endreTilStatus(it)
         }
 
     override fun tilReturnert() =
-        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK) {
-            endreTilStatus(BehandlingStatus.RETURNERT)
+        hvisTilstandEr(BehandlingStatus.FATTET_VEDTAK, BehandlingStatus.RETURNERT) {
+            endreTilStatus(it)
         }
 
     override fun tilTilSamordning() =
-        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT)) {
-            endreTilStatus(BehandlingStatus.TIL_SAMORDNING)
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT), BehandlingStatus.TIL_SAMORDNING) {
+            endreTilStatus(it)
         }
 
     override fun tilSamordnet() =
-        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING)) {
-            endreTilStatus(BehandlingStatus.SAMORDNET)
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.TIL_SAMORDNING), BehandlingStatus.SAMORDNET) {
+            endreTilStatus(it)
         }
 
     override fun tilIverksatt() =
-        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.SAMORDNET)) {
-            endreTilStatus(BehandlingStatus.IVERKSATT)
+        hvisTilstandEr(listOf(BehandlingStatus.ATTESTERT, BehandlingStatus.SAMORDNET), BehandlingStatus.IVERKSATT) {
+            endreTilStatus(it)
         }
 
     private fun endreTilStatus(status: BehandlingStatus) = this.copy(status = status, sistEndret = Tidspunkt.now().toLocalDatetimeUTC())

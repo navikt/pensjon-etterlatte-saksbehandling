@@ -4,26 +4,25 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.OMREGNINGSHENDELSE
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.VILKAARSVURDER
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
+import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
-import rapidsandrivers.HENDELSE_DATA_KEY
-import rapidsandrivers.SAK_TYPE
-import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class OmregningsHendelserRiver(rapidsConnection: RapidsConnection, private val behandlinger: BehandlingService) :
-    ListenerMedLoggingOgFeilhaandtering(OMREGNINGSHENDELSE) {
+    ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.OMREGNINGSHENDELSE) {
             validate { it.rejectKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
         }
@@ -40,7 +39,7 @@ internal class OmregningsHendelserRiver(rapidsConnection: RapidsConnection, priv
         packet.behandlingId = behandlingId
         packet[BEHANDLING_VI_OMREGNER_FRA_KEY] = behandlingViOmregnerFra
         packet[SAK_TYPE] = sakType
-        packet.eventName = VILKAARSVURDER
+        packet.setEventNameForHendelseType(ReguleringHendelseType.VILKAARSVURDER)
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert omregningshendelse")
     }

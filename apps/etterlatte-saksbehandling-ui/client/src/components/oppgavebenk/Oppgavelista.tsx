@@ -1,17 +1,29 @@
 import { Alert } from '@navikt/ds-react'
 import { OppgaveDTO } from '~shared/api/oppgaver'
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
+import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 interface Props {
-  oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   filtrerteOppgaver: ReadonlyArray<OppgaveDTO>
   hentOppgaver: () => void
+  filter: Filter
+  setFilter: Dispatch<SetStateAction<Filter>>
+  totaltAntallOppgaver?: number
+  erMinOppgaveliste: boolean
 }
 
-export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver, hentOppgaver }: Props): ReactNode => {
+export const Oppgavelista = ({
+  oppdaterTildeling,
+  filtrerteOppgaver,
+  hentOppgaver,
+  filter,
+  setFilter,
+  totaltAntallOppgaver,
+  erMinOppgaveliste,
+}: Props): ReactNode => {
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
 
@@ -29,8 +41,10 @@ export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver, h
           <OppgaverTable
             oppgaver={paginerteOppgaver}
             oppdaterTildeling={oppdaterTildeling}
-            erMinOppgaveliste={false}
+            erMinOppgaveliste={erMinOppgaveliste}
             hentOppgaver={hentOppgaver}
+            filter={filter}
+            setFilter={setFilter}
           />
 
           <PagineringsKontroller
@@ -41,7 +55,9 @@ export const Oppgavelista = ({ oppgaver, oppdaterTildeling, filtrerteOppgaver, h
             setRaderPerSide={setRowsPerPage}
             totalAvOppgaverTeksts={`Viser ${(page - 1) * rowsPerPage + 1} - ${
               (page - 1) * rowsPerPage + paginerteOppgaver.length
-            } av ${filtrerteOppgaver.length} oppgaver (totalt ${oppgaver.length} oppgaver)`}
+            } av ${filtrerteOppgaver.length} oppgaver ${
+              totaltAntallOppgaver ? `(totalt ${totaltAntallOppgaver} oppgaver)` : ''
+            }`}
           />
         </>
       ) : (

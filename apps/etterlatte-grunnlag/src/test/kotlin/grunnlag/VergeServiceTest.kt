@@ -1,10 +1,9 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag
 
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.etterlatte.grunnlag.VergeService
 import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
 import no.nav.etterlatte.grunnlag.adresse.REGOPPSLAG_ADRESSE
 import no.nav.etterlatte.grunnlag.klienter.PersondataKlient

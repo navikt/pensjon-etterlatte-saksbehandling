@@ -1,22 +1,22 @@
 [plugins]
 avro = { id = "com.github.davidmc24.gradle.plugin.avro", version = "1.9.1" }
-cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.1" }
+cutterslade-analyze = { id = "ca.cutterslade.analyze", version = "1.9.2" }
 
 [versions]
 jackson-version = "2.16.1"
 jupiter-version = "5.10.1"
 kotlinx-version = "1.7.3"
-ktor2-version = "2.3.7"
-navfelles-token-version = "4.1.0"
+ktor2-version = "2.3.8"
+navfelles-token-version = "4.1.3"
 prometheus-version = "0.16.0"
-testcontainer-version = "1.19.3"
+testcontainer-version = "1.19.4"
 
 [libraries]
 cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8" }
 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
-database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.4.1" }
-database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.4.1" }
+database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.7.1" }
+database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.7.1" }
 database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.1" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
@@ -73,11 +73,11 @@ ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2
 etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.01.17-13.26.695db1c36957"}
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
-logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.10" }
+logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.11" }
 logging-logbackclassic = { module = "ch.qos.logback:logback-classic", version = "1.4.14" }
 logging-logstashlogbackencoder = { module = "net.logstash.logback:logstash-logback-encoder", version = "7.4" }
 
-metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.12.1" }
+metrics-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version = "1.12.2" }
 metrics-prometheus-simpleclientcommon = { module = "io.prometheus:simpleclient_common", version.ref = "prometheus-version" }
 metrics-prometheus-simpleclienthotspot = { module = "io.prometheus:simpleclient_hotspot", version.ref = "prometheus-version" }
 
@@ -91,7 +91,7 @@ navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.na
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version = "1.78ffd1e" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }
-navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.0" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.1" }
 
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }

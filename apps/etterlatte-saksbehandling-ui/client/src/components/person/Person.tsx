@@ -16,7 +16,7 @@ import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
 
-import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { isSuccess, mapAllApiResult, mapApiResult } from '~shared/api/apiUtils'
 
 enum Fane {
   SAKER = 'SAKER',
@@ -54,7 +54,7 @@ export const Person = () => {
 
   const handleError = (error: ApiError) => {
     if (error.status === 400) {
-      return <ApiErrorAlert>Ugyldig forespørsel. Er fødselsnummeret korrekt?</ApiErrorAlert>
+      return <ApiErrorAlert>Ugyldig forespørsel. {error.detail}</ApiErrorAlert>
     } else if (error.status === 404) {
       return <ApiErrorAlert>Fant ikke person med fødselsnummer {fnr}</ApiErrorAlert>
     } else {
@@ -70,10 +70,20 @@ export const Person = () => {
     <>
       <StatusBar result={personStatus} />
       <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
-
       {mapApiResult(
+        sakStatus,
+        <Spinner visible label="Laster saker ..." />,
+        (error) => (
+          <Container>{handleError(error)}</Container>
+        ),
+        () => (
+          <></>
+        )
+      )}
+      {mapAllApiResult(
         personStatus,
         <Spinner visible label="Laster personinfo ..." />,
+        null,
         (error) => (
           <Container>{handleError(error)}</Container>
         ),

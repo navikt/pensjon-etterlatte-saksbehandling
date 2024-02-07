@@ -5,8 +5,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
@@ -191,12 +191,7 @@ class RealGrunnlagService(
             sisteGrunnlagPerFnr.find { it.opplysning.opplysningType == INNSENDER_PDL_V1 }
         val soker = sisteGrunnlagPerFnr.find { it.opplysning.opplysningType == SOEKER_PDL_V1 }
         val avdode = sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == AVDOED_PDL_V1 }
-        val gjenlevende =
-            if (sakstype == SakType.OMSTILLINGSSTOENAD) {
-                listOf(soker)
-            } else {
-                sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
-            }
+        val gjenlevende = sisteGrunnlagPerFnr.filter { it.opplysning.opplysningType == GJENLEVENDE_FORELDER_PDL_V1 }
 
         return PersonopplysningerResponse(
             innsender = innsender?.opplysning?.asPersonopplysning(),
@@ -218,7 +213,7 @@ class RealGrunnlagService(
     override fun hentSakerOgRoller(fnr: Folkeregisteridentifikator): PersonMedSakerOgRoller {
         return opplysningDao.finnAllePersongalleriHvorPersonFinnes(fnr)
             .map { it.sakId to deserialize<Persongalleri>(it.opplysning.opplysning.toJson()) }
-            .map { (sakId, persongalleri) -> SakOgRolle(sakId, rolle = mapTilRolle(fnr.value, persongalleri)) }
+            .map { (sakId, persongalleri) -> SakidOgRolle(sakId, rolle = mapTilRolle(fnr.value, persongalleri)) }
             .let { PersonMedSakerOgRoller(fnr.value, it) }
     }
 

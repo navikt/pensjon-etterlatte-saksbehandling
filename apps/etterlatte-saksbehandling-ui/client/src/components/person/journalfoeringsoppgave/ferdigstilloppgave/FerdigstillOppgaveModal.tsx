@@ -5,7 +5,8 @@ import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { ferdigstillOppgave, OppgaveDTO } from '~shared/api/oppgaver'
 import { FlexRow } from '~shared/styled'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 interface ModalProps {
   oppgave: OppgaveDTO
@@ -56,11 +57,11 @@ export default function FerdigstillOppgaveModal({ oppgave, kanFerdigstilles }: M
             </FlexRow>
           )}
 
-          {isFailure(ferdigstillOppgaveStatus) && (
+          {mapFailure(ferdigstillOppgaveStatus, (error) => (
             <Modal.Footer>
-              <Alert variant="error">Det oppsto en feil ved ferdigstilling av oppgave.</Alert>
+              <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved ferdigstilling av oppgave'}</ApiErrorAlert>
             </Modal.Footer>
-          )}
+          ))}
         </Modal.Body>
       </Modal>
     </>

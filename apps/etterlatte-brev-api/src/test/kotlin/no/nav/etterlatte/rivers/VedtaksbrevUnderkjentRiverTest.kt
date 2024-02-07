@@ -9,11 +9,12 @@ import io.mockk.verify
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -21,7 +22,7 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -93,7 +94,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
         return JsonMessage.newMessage(
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                EVENT_NAME_KEY to VedtakKafkaHendelseType.UNDERKJENT.toString(),
+                VedtakKafkaHendelseHendelseType.UNDERKJENT.lagParMedEventNameKey(),
                 "vedtak" to vedtak,
             ),
         )
@@ -130,5 +131,6 @@ internal class VedtaksbrevUnderkjentRiverTest {
             Tidspunkt.now(),
             Tidspunkt.now(),
             mottaker = mockk(),
+            brevtype = Brevtype.VEDTAK,
         )
 }

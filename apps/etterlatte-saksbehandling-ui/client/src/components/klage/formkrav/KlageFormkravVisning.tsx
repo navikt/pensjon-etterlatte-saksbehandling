@@ -1,16 +1,19 @@
 import { useKlage } from '~components/klage/useKlage'
-import { Content, ContentHeader } from '~shared/styled'
+import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
-import { BodyShort, Heading } from '@navikt/ds-react'
+import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import { formaterKanskjeStringDato, formaterVedtakType } from '~utils/formattering'
 import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
+import { useNavigate } from 'react-router-dom'
+import { nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 
 export function KlageFormkravVisning() {
   const klage = useKlage()
 
   if (!klage) return
 
+  const navigate = useNavigate()
   const formkrav = klage.formkrav?.formkrav
   const vedtak = formkrav?.vedtaketKlagenGjelder
   const saksbehandler = klage.formkrav?.saksbehandler
@@ -19,7 +22,7 @@ export function KlageFormkravVisning() {
       <ContentHeader>
         <HeadingWrapper>
           <Heading level="1" size="large">
-            Formkrav
+            Formkrav og klagefrist
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
@@ -54,10 +57,18 @@ export function KlageFormkravVisning() {
         <BodyShort spacing>{formkrav?.erKlagenFramsattInnenFrist == JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
 
         <Heading size="small" spacing>
+          Begrunnelse
+        </Heading>
+        <BodyShort spacing>{formkrav?.begrunnelse}</BodyShort>
+
+        <Heading size="small" spacing>
           Saksbehandler
         </Heading>
         <BodyShort spacing>{saksbehandler?.ident}</BodyShort>
       </InnholdPadding>
+      <FlexRow justify="center">
+        <Button onClick={() => navigate(nesteSteg(klage, 'formkrav'))}>Neste side</Button>
+      </FlexRow>
     </Content>
   )
 }

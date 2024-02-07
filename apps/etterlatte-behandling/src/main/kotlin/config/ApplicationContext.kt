@@ -49,6 +49,7 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteDao
 import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
+import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServiceImpl
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
@@ -56,7 +57,6 @@ import no.nav.etterlatte.databaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
-import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseJob
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
@@ -84,6 +84,8 @@ import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
+import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDaoTrans
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -210,14 +212,18 @@ internal class ApplicationContext(
     val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
     val behandlingInfoDao = BehandlingInfoDao { databaseContext().activeTx() }
     val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
+    val saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
+    val saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
-    val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
+    val leaderElectionKlient = LeaderElection(env.maybeEnvValue("ELECTOR_PATH"), leaderElectionHttpClient)
+
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
     val klageHendelser = KlageHendelserServiceImpl(rapid)
+    val tilbakekreving = TilbakekrevingHendelserServiceImpl(rapid)
     val klageKlient = KlageKlientImpl(klageHttpClient, resourceUrl = env.getValue("ETTERLATTE_KLAGE_API_URL"))
     val tilbakekrevingKlient =
         TilbakekrevingKlientImpl(tilbakekrevingHttpClient, resourceUrl = env.getValue("ETTERLATTE_TILBAKEKREVING_URL"))
@@ -353,17 +359,7 @@ internal class ApplicationContext(
             oppgaveService = oppgaveService,
             vedtakKlient = vedtakKlient,
             tilbakekrevingKlient = tilbakekrevingKlient,
-        )
-
-    // Job
-    val grunnlagsendringshendelseJob =
-        GrunnlagsendringshendelseJob(
-            datasource = dataSource,
-            grunnlagsendringshendelseService = grunnlagsendringshendelseService,
-            leaderElection = leaderElectionKlient,
-            initialDelay = Duration.of(1, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(env.getValue("HENDELSE_JOB_FREKVENS").toLong(), ChronoUnit.MINUTES),
-            minutterGamleHendelser = env.getValue("HENDELSE_MINUTTER_GAMLE_HENDELSER").toLong(),
+            tilbakekrevinghendelser = tilbakekreving,
         )
 
     val metrikkerJob: MetrikkerJob by lazy {

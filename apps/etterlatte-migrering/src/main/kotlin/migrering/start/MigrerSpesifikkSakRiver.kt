@@ -6,7 +6,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.Pesyssak
@@ -15,27 +15,26 @@ import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.pen.tilVaarModell
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.LOPENDE_JANUAR_2024_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser.MIGRER_SPESIFIKK_SAK
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
 import no.nav.etterlatte.rapidsandrivers.migrering.kilde
 import no.nav.etterlatte.rapidsandrivers.migrering.loependeJanuer2024
 import no.nav.etterlatte.rapidsandrivers.migrering.migreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.pesysId
+import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
-import rapidsandrivers.sakId
 
 internal class MigrerSpesifikkSakRiver(
     rapidsConnection: RapidsConnection,
@@ -44,11 +43,11 @@ internal class MigrerSpesifikkSakRiver(
     private val featureToggleService: FeatureToggleService,
     private val verifiserer: Verifiserer,
     private val krrKlient: KrrKlient,
-) : ListenerMedLoggingOgFeilhaandtering(MIGRER_SPESIFIKK_SAK) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.MIGRER_SPESIFIKK_SAK) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(LOPENDE_JANUAR_2024_KEY) }
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }
@@ -93,8 +92,12 @@ internal class MigrerSpesifikkSakRiver(
             hentSak(sakId, lopendeJanuar2024)
                 .tilVaarModell { runBlocking { krrKlient.hentDigitalKontaktinformasjon(it) } }
                 .also { pesysRepository.lagrePesyssak(pesyssak = it) }
-        packet.eventName = Migreringshendelser.MIGRER_SAK
-        val verifisertRequest = verifiserer.verifiserRequest(pesyssak.tilMigreringsrequest())
+        packet.setEventNameForHendelseType(Migreringshendelser.MIGRER_SAK)
+
+        val verifisertRequest =
+            verifiserer.verifiserRequest(pesyssak.tilMigreringsrequest()).also {
+                pesysRepository.oppdaterKanGjenopprettesAutomatisk(it)
+            }
         packet.hendelseData = verifisertRequest
 
         if (featureToggleService.isEnabled(MigreringFeatureToggle.SendSakTilMigrering, false)) {
@@ -124,7 +127,7 @@ internal class MigrerSpesifikkSakRiver(
         packet[FNR_KEY] = request.soeker.value
         packet[BEHOV_NAME_KEY] = Opplysningstype.AVDOED_PDL_V1
         packet.pesysId = PesysId(sak.id)
-        packet.kilde = Vedtaksloesning.PESYS
+        packet.kilde = Vedtaksloesning.GJENOPPRETTA
         context.publish(packet.toJson())
         logger.info(
             "Migrering starta for pesys-sak ${sak.id} og melding om behandling ble sendt.",
@@ -147,7 +150,7 @@ internal class MigrerSpesifikkSakRiver(
                 ?: throw IllegalStateException("Mangler kobling mellom behandling i Gjenny og pesys sak for pesysId=$sakId")
 
         packet[BEHANDLING_ID_KEY] = behandlingId
-        packet.eventName = Migreringshendelser.VEDTAK
+        packet.setEventNameForHendelseType(Migreringshendelser.VEDTAK)
         context.publish(packet.toJson())
         logger.info("Fortsetter migrering for sak $sakId.")
     }

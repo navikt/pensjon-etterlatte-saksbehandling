@@ -1,4 +1,4 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
@@ -7,9 +7,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.migrering.Migreringsstatus
-import no.nav.etterlatte.migrering.PesysRepository
-import no.nav.etterlatte.migrering.Pesyssak
 import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
@@ -53,17 +50,18 @@ class PesysRepositoryTest {
     @Test
     fun `lagre kobling til behandlingid`() {
         val behandlingId = UUID.randomUUID()
-        sakMedKobling(pesysSak(123L), behandlingId)
+        sakMedKobling(pesysSak(123L), behandlingId, 321L)
 
         val kobling = repository.hentKoplingTilBehandling(PesysId(123L))
 
         assertEquals(behandlingId, kobling!!.behandlingId)
+        assertEquals(321L, kobling.sakId)
     }
 
     @Test
     fun `Skal oppdatere migreringsstatus til ferdig naar brevdistribusjon er ferdig foerst`() {
         val behandlingId = UUID.randomUUID()
-        sakMedKobling(pesysSak(123L), behandlingId)
+        sakMedKobling(pesysSak(123L), behandlingId, 321L)
 
         repository.oppdaterStatus(PesysId(123L), Migreringsstatus.BREVUTSENDING_OK)
         assertEquals(Migreringsstatus.BREVUTSENDING_OK, repository.hentStatus(123L))
@@ -75,7 +73,7 @@ class PesysRepositoryTest {
     @Test
     fun `Skal oppdatere migreringsstatus til ferdig naar utbetaling er godkjent foerst`() {
         val behandlingId = UUID.randomUUID()
-        sakMedKobling(pesysSak(123L), behandlingId)
+        sakMedKobling(pesysSak(123L), behandlingId, 321L)
 
         repository.oppdaterStatus(PesysId(123L), Migreringsstatus.UTBETALING_OK)
         assertEquals(Migreringsstatus.UTBETALING_OK, repository.hentStatus(123L))
@@ -86,13 +84,25 @@ class PesysRepositoryTest {
 
     @Test
     fun `lagre kobling til behandlingid oppdateres til ny behandlingsid`() {
-        sakMedKobling(pesysSak(123L), UUID.randomUUID())
+        sakMedKobling(pesysSak(123L), UUID.randomUUID(), 321L)
         val nyBehandlingId = UUID.randomUUID()
-        sakMedKobling(pesysSak(123L), nyBehandlingId)
+        sakMedKobling(pesysSak(123L), nyBehandlingId, 321L)
 
         val nyKobling = repository.hentKoplingTilBehandling(PesysId(123L))
 
         assertEquals(nyBehandlingId, nyKobling!!.behandlingId)
+    }
+
+    @Test
+    fun `skal oppdatere pesyssak med gjenopprettes_automatisk`() {
+        val psak = pesysSak(123L)
+        repository.lagrePesyssak(psak)
+
+        val request =
+            psak.tilMigreringsrequest().copy(
+                kanAutomatiskGjenopprettes = true,
+            )
+        repository.oppdaterKanGjenopprettesAutomatisk(request)
     }
 
     @Test
@@ -116,10 +126,11 @@ class PesysRepositoryTest {
     private fun sakMedKobling(
         pesyssak: Pesyssak,
         behandlingsId: UUID,
+        sakId: Long,
     ) {
         repository.lagrePesyssak(pesyssak)
         repository.oppdaterStatus(PesysId(pesyssak.id), Migreringsstatus.UNDER_MIGRERING)
-        repository.lagreKoplingTilBehandling(behandlingsId, PesysId(pesyssak.id))
+        repository.lagreKoplingTilBehandling(behandlingsId, PesysId(pesyssak.id), sakId)
     }
 
     companion object {

@@ -2,12 +2,14 @@ package no.nav.etterlatte.rivers
 
 import io.mockk.coEvery
 import io.mockk.mockk
+import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -16,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -24,15 +27,15 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import rapidsandrivers.HENDELSE_DATA_KEY
 import java.time.YearMonth
 import java.util.UUID
 
@@ -66,7 +69,7 @@ internal class OpprettJournalfoerOgDistribuer {
             JsonMessage.newMessage(
                 mapOf(
                     CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                    EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
+                    VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                     "vedtak" to lagVedtakDto(behandlingId),
                     KILDE_KEY to Vedtaksloesning.GJENNY.name,
                 ),
@@ -74,11 +77,11 @@ internal class OpprettJournalfoerOgDistribuer {
         )
 
         val distribuermelding = testRapid.hentMelding(0)
-        Assertions.assertEquals(BrevEventTypes.JOURNALFOERT.toString(), distribuermelding.somMap()[EVENT_NAME_KEY])
+        Assertions.assertEquals(BrevHendelseType.JOURNALFOERT.lagEventnameForType(), distribuermelding.somMap()[EVENT_NAME_KEY])
         testRapid.sendTestMessage(distribuermelding)
 
         val distribuert = testRapid.hentMelding(1).somMap()
-        Assertions.assertEquals(BrevEventTypes.DISTRIBUERT.toString(), distribuert[EVENT_NAME_KEY])
+        Assertions.assertEquals(BrevHendelseType.DISTRIBUERT.lagEventnameForType(), distribuert[EVENT_NAME_KEY])
     }
 
     @Test
@@ -110,7 +113,7 @@ internal class OpprettJournalfoerOgDistribuer {
             JsonMessage.newMessage(
                 mapOf(
                     CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                    EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
+                    VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                     "vedtak" to lagVedtakDto(behandlingId),
                     KILDE_KEY to Vedtaksloesning.PESYS.name,
                     HENDELSE_DATA_KEY to migreringRequest(),
@@ -119,11 +122,11 @@ internal class OpprettJournalfoerOgDistribuer {
         )
 
         val distribuermelding = testRapid.hentMelding(0)
-        Assertions.assertEquals(BrevEventTypes.JOURNALFOERT.toString(), distribuermelding.somMap()[EVENT_NAME_KEY])
+        Assertions.assertEquals(BrevHendelseType.JOURNALFOERT.lagEventnameForType(), distribuermelding.somMap()[EVENT_NAME_KEY])
         testRapid.sendTestMessage(distribuermelding)
 
         val distribuert = testRapid.hentMelding(1).somMap()
-        Assertions.assertEquals(BrevEventTypes.DISTRIBUERT.toString(), distribuert[EVENT_NAME_KEY])
+        Assertions.assertEquals(BrevHendelseType.DISTRIBUERT.lagEventnameForType(), distribuert[EVENT_NAME_KEY])
     }
 
     private fun lagBrev(behandlingId: UUID?) =
@@ -144,6 +147,7 @@ internal class OpprettJournalfoerOgDistribuer {
                     null,
                     Adresse(adresseType = "privat", landkode = "NO", land = "Norge"),
                 ),
+            brevtype = Brevtype.INFORMASJON,
         )
 
     private fun lagVedtakDto(behandlingId: UUID) =

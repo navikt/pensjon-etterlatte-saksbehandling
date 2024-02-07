@@ -10,6 +10,7 @@ export interface Journalpost {
   kanal: string
   sak?: JournalpostSak
   datoOpprettet: string
+  utsendingsinfo?: object
 }
 
 export interface OppdaterJournalpostRequest {

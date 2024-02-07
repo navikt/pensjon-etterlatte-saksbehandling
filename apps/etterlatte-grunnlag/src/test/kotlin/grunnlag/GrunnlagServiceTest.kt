@@ -474,26 +474,26 @@ internal class GrunnlagServiceTest {
              * Barn 1 søker barnepensjon og har rolle søsken i annen sak
              */
             val barn1 = grunnlagService.hentSakerOgRoller(barnepensjonSoeker1)
-            assertEquals(2, barn1.sakerOgRoller.size)
+            assertEquals(2, barn1.sakiderOgRoller.size)
             assertEquals(barnepensjonSoeker1.value, barn1.fnr)
 
-            val barn1ErSoekerIEgenSak = barn1.sakerOgRoller.single { it.rolle == Saksrolle.SOEKER }
+            val barn1ErSoekerIEgenSak = barn1.sakiderOgRoller.single { it.rolle == Saksrolle.SOEKER }
             assertEquals(grunnlaghendelse1.sakId, barn1ErSoekerIEgenSak.sakId)
 
-            val barn1ErSoeskenIAnnenSak = barn1.sakerOgRoller.single { it.rolle == Saksrolle.SOESKEN }
+            val barn1ErSoeskenIAnnenSak = barn1.sakiderOgRoller.single { it.rolle == Saksrolle.SOESKEN }
             assertEquals(grunnlaghendelse2.sakId, barn1ErSoeskenIAnnenSak.sakId)
 
             /*
              * Barn 2 søker barnepensjon og har rolle søsken i annen sak
              */
             val barn2 = grunnlagService.hentSakerOgRoller(barnepensjonSoeker2)
-            assertEquals(2, barn2.sakerOgRoller.size)
+            assertEquals(2, barn2.sakiderOgRoller.size)
             assertEquals(barnepensjonSoeker2.value, barn2.fnr)
 
-            val barn2ErSoekerIEgenSak = barn2.sakerOgRoller.single { it.rolle == Saksrolle.SOEKER }
+            val barn2ErSoekerIEgenSak = barn2.sakiderOgRoller.single { it.rolle == Saksrolle.SOEKER }
             assertEquals(grunnlaghendelse2.sakId, barn2ErSoekerIEgenSak.sakId)
 
-            val barn2ErSoeskenIAnnenSak = barn2.sakerOgRoller.single { it.rolle == Saksrolle.SOESKEN }
+            val barn2ErSoeskenIAnnenSak = barn2.sakiderOgRoller.single { it.rolle == Saksrolle.SOESKEN }
             assertEquals(grunnlaghendelse1.sakId, barn2ErSoeskenIAnnenSak.sakId)
 
             verify(exactly = 1) { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(barnepensjonSoeker1) }
@@ -510,13 +510,13 @@ internal class GrunnlagServiceTest {
                 )
 
             val gjenlevende = grunnlagService.hentSakerOgRoller(gjenlevendeFnr)
-            assertEquals(3, gjenlevende.sakerOgRoller.size)
+            assertEquals(3, gjenlevende.sakiderOgRoller.size)
             assertEquals(gjenlevendeFnr.value, gjenlevende.fnr)
 
-            val gjenlevendeSomForelder = gjenlevende.sakerOgRoller.filter { it.rolle == Saksrolle.GJENLEVENDE }
+            val gjenlevendeSomForelder = gjenlevende.sakiderOgRoller.filter { it.rolle == Saksrolle.GJENLEVENDE }
             assertEquals(2, gjenlevendeSomForelder.size)
 
-            val gjenlevendeErSoeker = gjenlevende.sakerOgRoller.single { it.rolle == Saksrolle.SOEKER }
+            val gjenlevendeErSoeker = gjenlevende.sakiderOgRoller.single { it.rolle == Saksrolle.SOEKER }
             assertEquals(grunnlaghendelse3.sakId, gjenlevendeErSoeker.sakId)
 
             verify(exactly = 1) { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(gjenlevendeFnr) }
@@ -533,8 +533,8 @@ internal class GrunnlagServiceTest {
                 )
 
             val soesken = grunnlagService.hentSakerOgRoller(soeskenFnr)
-            assertEquals(2, soesken.sakerOgRoller.size)
-            assertTrue(soesken.sakerOgRoller.all { it.rolle == Saksrolle.SOESKEN })
+            assertEquals(2, soesken.sakiderOgRoller.size)
+            assertTrue(soesken.sakiderOgRoller.all { it.rolle == Saksrolle.SOESKEN })
 
             verify(exactly = 1) { opplysningDaoMock.finnAllePersongalleriHvorPersonFinnes(soeskenFnr) }
         }
@@ -816,7 +816,7 @@ internal class GrunnlagServiceTest {
                         hendelseNummer = 4,
                         opplysningType = Opplysningstype.AVDOED_PDL_V1,
                         id = behandlingsid,
-                        fnr = GJENLEVENDE_FOEDSELSNUMMER, // litt dum gjenbruk inn i annen opplysning
+                        fnr = GJENLEVENDE_FOEDSELSNUMMER,
                         verdi = testData.gjenlevende.toJsonNode(),
                         kilde = kilde,
                     ),
@@ -893,7 +893,7 @@ internal class GrunnlagServiceTest {
                         4,
                         Opplysningstype.GJENLEVENDE_FORELDER_PDL_V1,
                         id = behandlingsid,
-                        fnr = GJENLEVENDE_FOEDSELSNUMMER, // litt dum gjenbruk inn i annen opplysning
+                        fnr = GJENLEVENDE_FOEDSELSNUMMER,
                         verdi = testData.gjenlevende.toJsonNode(),
                         kilde = kilde,
                     ),

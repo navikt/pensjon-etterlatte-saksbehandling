@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlag.klienter
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import grunnlag.VurdertBostedsland
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
@@ -14,6 +13,7 @@ import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.grunnlag.VurdertBostedsland
 import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper

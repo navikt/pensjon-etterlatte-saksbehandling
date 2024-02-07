@@ -4,13 +4,14 @@ import React, { useState } from 'react'
 import { PencilIcon, PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { redigerFamilieforhold } from '~shared/api/behandling'
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { Personopplysninger } from '~shared/types/grunnlag'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { fnrErGyldig } from '~utils/fnr'
 import { FlexRow } from '~shared/styled'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
+import { SakType } from '~shared/types/sak'
 
 type Props = {
   behandling: IDetaljertBehandling
@@ -50,18 +51,22 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
   const lagre = () => {
     setFeilmelding(null)
     const familieforhold = getValues()
-    const foreldre = [...familieforhold.avdoede, ...familieforhold.gjenlevende]
 
-    if (foreldre.length != 2) {
-      setFeilmelding('Mangler en eller flere forelder')
+    if (familieforhold.avdoede.length === 0) {
+      setFeilmelding(`Det er ikke angitt noen avdød, men det skal være minst 1.`)
     } else {
-      redigerFamilieforholdRequest({
-        behandlingId: behandling.id,
-        redigert: {
-          gjenlevende: familieforhold.gjenlevende.map((v) => v.fnr),
-          avdoede: familieforhold.avdoede.map((v) => v.fnr),
+      redigerFamilieforholdRequest(
+        {
+          behandlingId: behandling.id,
+          redigert: {
+            gjenlevende: familieforhold.gjenlevende.map((v) => v.fnr),
+            avdoede: familieforhold.avdoede.map((v) => v.fnr),
+          },
         },
-      })
+        () => {
+          setTimeout(() => window.location.reload(), 2000)
+        }
+      )
     }
   }
 
@@ -105,7 +110,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                           fnrErGyldig: (value) => fnrErGyldig(value) || 'Ugyldig fødselsnummer',
                         },
                       })}
-                      label="Avdød forelder"
+                      label={behandling.sakType === SakType.BARNEPENSJON ? 'Avdød forelder' : 'Avdød'}
                       description="Oppgi fødselsnummer"
                       error={errors?.avdoede?.[index]?.fnr?.message}
                     />
@@ -154,7 +159,9 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
           <br />
 
           {isSuccess(status) && <Alert variant="success">Lagret redigert familieforhold</Alert>}
-          {isFailure(status) && <Alert variant="error">Noe gikk galt!</Alert>}
+          {mapFailure(status, (error) => (
+            <Alert variant="error">{error.detail}</Alert>
+          ))}
           {feilmelding && <Alert variant="error">{feilmelding}</Alert>}
         </Modal.Body>
 

@@ -5,12 +5,11 @@ import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.IngenEnhetFunnetException
-import no.nav.etterlatte.common.IngenGeografiskOmraadeFunnetForEnhet
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.LoggerFactory
 
 interface BrukerService {
@@ -26,10 +25,7 @@ interface BrukerService {
     ): Navkontor
 }
 
-class GeografiskTilknytningMangler : IkkeFunnetException(
-    code = "BRUKER_MANGLER_GEOGRAFISKTILKNYTNING",
-    detail = "Fant ikke geografisk tilknytning for bruker",
-)
+val sikkerLogg = sikkerlogger()
 
 class BrukerServiceImpl(
     private val pdltjenesterKlient: PdlTjenesterKlient,
@@ -45,18 +41,25 @@ class BrukerServiceImpl(
 
         return when {
             tilknytning.ukjent -> {
-                Navkontor(navn = "UKjent kontor", enhetNr = "ukjent enhetsnummer")
+                Navkontor(navn = "Ukjent kontor", enhetNr = "ukjent enhetsnummer")
             }
 
             else -> {
-                val geografiskTilknytning = tilknytning.geografiskTilknytning() ?: throw GeografiskTilknytningMangler()
-                if (tilknytning.harBareLandTilknytning()) {
-                    if (tilknytning.land!! == "NO") {
-                        Navkontor(navn = "UKjent kontor, men har Norge som landkode", enhetNr = "ukjent enhetsnummer")
+                val geografiskTilknytning = tilknytning.geografiskTilknytning()
+                when {
+                    tilknytning.harBareLandTilknytning() -> {
+                        if (tilknytning.land!! == "NO") {
+                            Navkontor(navn = "Ukjent kontor, men har Norge som landkode", enhetNr = "ukjent enhetsnummer")
+                        } else {
+                            Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
+                        }
                     }
-                    Navkontor(navn = "Utlandssak - ikke tilknyttet et navkontor", enhetNr = Enheter.UTLAND.enhetNr)
-                } else {
-                    norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)
+                    geografiskTilknytning == null -> {
+                        Navkontor(navn = "Utlandssak - ingen geografisk område", enhetNr = Enheter.UTLAND.enhetNr)
+                    }
+                    else -> {
+                        norg2Klient.hentNavkontorForOmraade(geografiskTilknytning)
+                    }
                 }
             }
         }
@@ -70,23 +73,44 @@ class BrukerServiceImpl(
         saktype: SakType,
     ): ArbeidsFordelingEnhet {
         val tilknytning = pdltjenesterKlient.hentGeografiskTilknytning(fnr, saktype)
-        val geografiskTilknytning = tilknytning.geografiskTilknytning()
 
         return when {
-            tilknytning.ukjent ->
+            tilknytning.ukjent -> {
                 ArbeidsFordelingEnhet(
                     Enheter.defaultEnhet.navn,
                     Enheter.defaultEnhet.enhetNr,
                 )
-
-            geografiskTilknytning == null -> throw IngenGeografiskOmraadeFunnetForEnhet(
-                Folkeregisteridentifikator.of(fnr),
-                tema,
-            ).also {
-                logger.warn(it.message)
             }
 
-            else -> finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
+            tilknytning.harBareLandTilknytning() -> {
+                if (tilknytning.land!! == "NO") {
+                    ArbeidsFordelingEnhet(
+                        Enheter.defaultEnhet.navn,
+                        Enheter.defaultEnhet.enhetNr,
+                    )
+                } else {
+                    ArbeidsFordelingEnhet(
+                        Enheter.UTLAND.navn,
+                        Enheter.UTLAND.enhetNr,
+                    )
+                }
+            }
+            else -> {
+                logger.warn("Fant ikke geografisk omraade for ${fnr.maskerFnr()} og tema $tema med saktype: $saktype")
+                sikkerLogg.error("Fant ikke geografisk omraade for fnr:  $fnr og tema $tema med saktype: $saktype")
+                val geografiskTilknytning = tilknytning.geografiskTilknytning()
+                when (geografiskTilknytning) {
+                    null -> {
+                        ArbeidsFordelingEnhet(
+                            Enheter.UTLAND.navn,
+                            Enheter.UTLAND.enhetNr,
+                        )
+                    }
+                    else -> {
+                        finnEnhetForTemaOgOmraade(tema, geografiskTilknytning)
+                    }
+                }
+            }
         }
     }
 

@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Samtykke
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoekerOmstillingSoeknad
@@ -17,11 +18,13 @@ import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.SoeknadstypeOpplysni
 import no.nav.etterlatte.opplysningerfrasoknad.opplysninger.Utbetalingsinformasjon
 import no.nav.etterlatte.opplysningerfrasoknad.opplysningstyper.AvdoedSoeknad
 import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsuthenter
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.soeknad.InnsendtSoeknadTestData
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import soeknad.InnsendtSoeknadTestData
 import java.time.LocalDate
 import java.time.Month
 
@@ -134,9 +137,9 @@ internal class OpplysningsuthenterOmstillingsstoenadTest {
             val soeknad = InnsendtSoeknadTestData.omstillingsSoeknad()
             return """
                 {
-                  "@event_name": "GYLDIG_SOEKNAD:VURDERT",
-                  "behandlingId": "f525f2f7-e246-43d7-b61a-5f0757472916",
-                  "sakId": 1,
+                  "$EVENT_NAME_KEY": "GYLDIG_SOEKNAD:VURDERT",
+                  "$BEHANDLING_ID_KEY": "f525f2f7-e246-43d7-b61a-5f0757472916",
+                  "$SAK_ID_KEY": 1,
                   "@skjema_info": ${soeknad.toJson()},
                   "@lagret_soeknad_id": 360,
                   "@template": "soeknad",

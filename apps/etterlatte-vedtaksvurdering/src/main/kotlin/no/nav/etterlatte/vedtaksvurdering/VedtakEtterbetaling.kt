@@ -17,7 +17,7 @@ internal fun erVedtakMedEtterbetaling(
     clock: Clock = norskKlokke(),
 ): Boolean {
     when (val innhold = vedtakSomBehandles.innhold) {
-        is VedtakBehandlingInnhold -> {
+        is VedtakInnhold.Behandling -> {
             val now = YearMonth.now(clock)
 
             if (innhold.virkningstidspunkt < now) {
@@ -25,8 +25,8 @@ internal fun erVedtakMedEtterbetaling(
                 val tidligereVedtakTidslinje = Vedtakstidslinje(ferdigstilteVedtak).sammenstill(OMS_START_YTELSE)
                 val tidligereUtbetalingsperioder =
                     tidligereVedtakTidslinje
-                        .filter { it.innhold is VedtakBehandlingInnhold }
-                        .flatMap { (it.innhold as VedtakBehandlingInnhold).utbetalingsperioder }
+                        .filter { it.innhold is VedtakInnhold.Behandling }
+                        .flatMap { (it.innhold as VedtakInnhold.Behandling).utbetalingsperioder }
                         .filter { it.periode.fom < now }
 
                 // Finn tidligere utbetalingsperiode som matcher ny(e)
@@ -38,7 +38,8 @@ internal fun erVedtakMedEtterbetaling(
             }
             return false
         }
-        is VedtakTilbakekrevingInnhold -> throw IllegalArgumentException("Ikke aktuelt for tilbakekreving")
+
+        is VedtakInnhold.Tilbakekreving, is VedtakInnhold.Klage -> throw IllegalArgumentException("Ikke aktuelt for tilbakekreving")
     }
 }
 

@@ -4,11 +4,10 @@ import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
-import io.ktor.http.isSuccess
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.ktor.PingResult
 import no.nav.etterlatte.libs.ktor.Pingable
 import no.nav.etterlatte.libs.ktor.ping
@@ -20,10 +19,17 @@ private enum class InfoType(val urlSuffix: String) {
     TEMA("fagomrader"),
 }
 
+data class SaksbehandlerInfo(
+    val ident: String,
+    val navn: String,
+)
+
 interface NavAnsattKlient {
     suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet>
 
     suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema>
+
+    suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo?
 }
 
 class NavAnsattKlientImpl(
@@ -40,6 +46,28 @@ class NavAnsattKlientImpl(
         Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(15))
             .build<String, List<SaksbehandlerTema>>()
+
+    private val navneCache =
+        Caffeine.newBuilder()
+            .build<String, SaksbehandlerInfo>()
+
+    override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? =
+        try {
+            val saksbehandlerCache = navneCache.getIfPresent(ident)
+
+            if (saksbehandlerCache != null) {
+                logger.info("Fant cachet saksbehandlernavn med ident $ident")
+                saksbehandlerCache
+            } else {
+                logger.info("Henter info om saksbehandlernavn med ident $ident")
+
+                retryOgPakkUt<SaksbehandlerInfo?> {
+                    client.get("$url/navansatt/$ident").body()
+                }.also { navneCache.put(ident, it) }
+            }
+        } catch (exception: Exception) {
+            throw RuntimeException("Feil i kall mot navansatt navn med ident: $ident", exception)
+        }
 
     override suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet> =
         hentSaksbehandler(
@@ -69,14 +97,9 @@ class NavAnsattKlientImpl(
             } else {
                 logger.info("Henter enhet for saksbehandler med ident $ident")
 
-                val response = client.get("$url/navansatt/$ident/${infoType.urlSuffix}")
-
-                if (response.status.isSuccess()) {
-                    response.body<T>()
-                        .also { cache.put(ident, it) }
-                } else {
-                    throw ResponseException(response, "Ukjent feil fra navansatt api")
-                }
+                retryOgPakkUt<T> {
+                    client.get("$url/navansatt/$ident/${infoType.urlSuffix}").body()
+                }.also { cache.put(ident, it) }
             }
         } catch (exception: Exception) {
             throw RuntimeException("Feil i kall mot navansatt med ident: $ident", exception)

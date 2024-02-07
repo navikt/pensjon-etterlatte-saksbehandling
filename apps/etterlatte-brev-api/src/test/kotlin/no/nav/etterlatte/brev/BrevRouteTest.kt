@@ -26,6 +26,7 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
@@ -48,6 +49,7 @@ import kotlin.random.Random
 internal class BrevRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private val brevService = mockk<BrevService>()
+    private val pdfService = mockk<PDFService>()
     private val brevdistribuerer = mockk<Brevdistribuerer>()
     private val tilgangssjekker = mockk<Tilgangssjekker>()
 
@@ -234,12 +236,14 @@ internal class BrevRouteTest {
                         landkode = "NOR",
                     ),
                 ),
+            brevtype = Brevtype.INFORMASJON,
         )
 
     private fun ApplicationTestBuilder.httpClient(): HttpClient =
         runServer(mockOAuth2Server, "api") {
             brevRoute(
                 brevService,
+                pdfService,
                 brevdistribuerer,
                 tilgangssjekker,
             )

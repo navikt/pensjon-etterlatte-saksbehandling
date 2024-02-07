@@ -88,11 +88,11 @@ data class BrukerId(
 
 data class Journalpost(
     val journalpostId: String,
-    val tittel: String,
+    val tittel: String?,
     val tema: String?,
     val journalposttype: String,
     val journalstatus: String,
-    val dokumenter: List<Dokumenter>,
+    val dokumenter: List<DokumentInfo>,
     val avsenderMottaker: AvsenderMottaker,
     val kanal: String?,
     val bruker: Bruker?,
@@ -100,15 +100,25 @@ data class Journalpost(
     val datoOpprettet: String,
 )
 
-data class Dokumenter(
+data class DokumentInfo(
     val dokumentInfoId: String,
     val tittel: String?,
-    val dokumentvarianter: List<Dokumentvarianter>,
+    val dokumentvarianter: List<Dokumentvariant>,
 )
 
-data class Dokumentvarianter(
+data class Dokumentvariant(
+    val variantformat: Variantformat?,
     val saksbehandlerHarTilgang: Boolean,
 )
+
+enum class Variantformat {
+    ARKIV,
+    ORIGINAL,
+    SLADDET,
+    FULLVERSJON,
+    PRODUKSJON,
+    PRODUKSJON_DLF,
+}
 
 data class Bruker(
     val id: String,
@@ -122,3 +132,28 @@ data class AvsenderMottaker(
     val land: String?,
     val erLikBruker: Boolean?,
 )
+
+// https://confluence.adeo.no/display/BOA/Type%3A+Utsendingsinfo
+data class Utsendingsinfo(
+    val fysiskpostSendt: FysiskpostSendt?,
+    val digitalpostSendt: DigitalpostSendt?,
+    val varselSendt: VarselSendt?,
+) {
+    // Mappes hvis Journalpost.utsendingskanal er S (sentral utskrift)
+    data class FysiskpostSendt(
+        val adressetekstKonvolutt: String?,
+    )
+
+    // Mappes hvis Journalpost.utsendingskanal er SDP (sikker digital postkasse)
+    data class DigitalpostSendt(
+        val adresse: String?,
+    )
+
+    data class VarselSendt(
+        val type: String?,
+        val adresse: String?,
+        val tittel: String?,
+        val tekst: String?,
+        val tidspunkt: String?,
+    )
+}

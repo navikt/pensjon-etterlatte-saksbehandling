@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { Alert, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { getData, hentVedtaksbrev, isSuccessOrNotFound, opprettVedtaksbrev } from '~shared/api/brev'
+import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/Soeknadsdato'
 import styled from 'styled-components'
@@ -14,7 +14,6 @@ import {
   sisteBehandlingHendelse,
 } from '~components/behandling/felles/utils'
 import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
 import { BrevProsessType, IBrev } from '~shared/types/Brev'
@@ -27,14 +26,14 @@ import { IHendelse } from '~shared/types/IHendelse'
 import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
 import { hentBehandling } from '~shared/api/behandling'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
-import { VergeFeilhaandtering } from '~components/person/VergeFeilhaandtering'
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { addValideringsfeil, Valideringsfeilkoder } from '~store/reducers/SjekklisteReducer'
 import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
+import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
+import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -44,13 +43,12 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   const redigerbar = behandlingErRedigerbar(props.behandling.status) && innloggetSaksbehandler.skriveTilgang
 
-  const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
+  const [vedtaksbrev, setVedtaksbrev] = useState<IBrev>()
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
-  const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
 
   const sjekkliste = useSjekkliste()
   const valideringsfeil = useSjekklisteValideringsfeil()
@@ -79,12 +77,6 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
         },
         () => dispatch(resetBehandling())
       )
-    }
-  }, [vedtaksbrev])
-
-  useEffect(() => {
-    if (behandlingId) {
-      getVergeadresse(behandlingId)
     }
   }, [vedtaksbrev])
 
@@ -153,14 +145,18 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 for å få oppdaterte verdier fra behandlingen.
               </WarningAlert>
             )}
-            <br />
-            {vedtaksbrev && isSuccessOrNotFound(vergeadresse) && (
-              <MottakerPanel
-                vedtaksbrev={vedtaksbrev}
-                oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
-                vergeadresse={getData(vergeadresse)}
-                redigerbar={redigerbar}
-              />
+
+            {vedtaksbrev && (
+              <>
+                <BrevTittel
+                  brevId={vedtaksbrev.id}
+                  sakId={vedtaksbrev.sakId}
+                  tittel={vedtaksbrev.tittel}
+                  kanRedigeres={redigerbar}
+                />
+                <br />
+                <BrevMottaker brev={vedtaksbrev} kanRedigeres={redigerbar} />
+              </>
             )}
           </ContentHeader>
         </Sidebar>
@@ -178,7 +174,6 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
         {isFailureHandler({ apiResult: hentBrevStatus, errorMessage: 'Feil ved henting av brev' })}
         {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}
-        {VergeFeilhaandtering(vergeadresse)}
       </BrevContent>
 
       <Border />

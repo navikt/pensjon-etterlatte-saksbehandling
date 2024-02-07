@@ -24,13 +24,13 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregningsperiode
@@ -57,13 +57,6 @@ class BrevdataFacade(
         return behandlingKlient.hentEtterbetaling(behandlingId, brukerTokenInfo)
     }
 
-    suspend fun hentInnvilgelsesdato(
-        sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): LocalDate? {
-        return vedtaksvurderingKlient.hentInnvilgelsesdato(sakId, brukerTokenInfo)
-    }
-
     suspend fun hentGenerellBrevData(
         sakId: Long,
         behandlingId: UUID?,
@@ -76,7 +69,9 @@ class BrevdataFacade(
 
             val grunnlag =
                 when (vedtakDeferred?.await()?.type) {
-                    VedtakType.TILBAKEKREVING ->
+                    VedtakType.TILBAKEKREVING,
+                    VedtakType.AVVIST_KLAGE,
+                    ->
                         async {
                             grunnlagKlient.hentGrunnlagForSak(
                                 sakId,
@@ -157,6 +152,29 @@ class BrevdataFacade(
                                 tilbakekreving =
                                     objectMapper.readValue(
                                         (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
+                                    ),
+                            ),
+                        spraak = grunnlag.mapSpraak(),
+                        systemkilde = systemkilde,
+                    )
+
+                VedtakType.AVVIST_KLAGE ->
+                    GenerellBrevData(
+                        sak = sak,
+                        personerISak = personerISak,
+                        behandlingId = behandlingId,
+                        forenkletVedtak =
+                            ForenkletVedtak(
+                                vedtak.id,
+                                vedtak.status,
+                                vedtak.type,
+                                sak.enhet,
+                                saksbehandlerIdent,
+                                null,
+                                vedtak.vedtakFattet?.tidspunkt?.toNorskLocalDate(),
+                                klage =
+                                    objectMapper.readValue(
+                                        (vedtak.innhold as VedtakInnholdDto.Klage).klage.toJson(),
                                     ),
                             ),
                         spraak = grunnlag.mapSpraak(),
@@ -296,13 +314,37 @@ class BrevdataFacade(
 
 fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> {
     return when (beregningsperiode.beregningsMetode) {
-        BeregningsMetode.NASJONAL -> beregningsperiode.samletNorskTrygdetid!! to null
-        BeregningsMetode.PRORATA -> beregningsperiode.samletTeoretiskTrygdetid!! to beregningsperiode.broek!!
-        BeregningsMetode.BEST -> throw IllegalArgumentException(
-            "Kan ikke ha brukt beregningsmetode 'BEST' i en faktisk beregning, " +
-                "siden best velger mellom nasjonal eller prorata når det beregnes.",
-        )
+        BeregningsMetode.NASJONAL ->
+            Pair(
+                beregningsperiode.samletNorskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
+                null,
+            )
 
+        BeregningsMetode.PRORATA -> {
+            Pair(
+                beregningsperiode.samletTeoretiskTrygdetid ?: throw SamletTeoretiskTrygdetidMangler(),
+                beregningsperiode.broek ?: throw BeregningsperiodeBroekMangler(),
+            )
+        }
+
+        BeregningsMetode.BEST -> throw UgyldigBeregningsMetode()
         null -> beregningsperiode.trygdetid to null
     }
 }
+
+class UgyldigBeregningsMetode : UgyldigForespoerselException(
+    code = "UGYLDIG_BEREGNINGS_METODE",
+    detail =
+        "Kan ikke ha brukt beregningsmetode 'BEST' i en faktisk beregning, " +
+            "siden best velger mellom nasjonal eller prorata når det beregnes.",
+)
+
+class SamletTeoretiskTrygdetidMangler : UgyldigForespoerselException(
+    code = "SAMLET_TEORETISK_TRYGDETID_MANGLER",
+    detail = "Samlet teoretisk trygdetid mangler i beregningen",
+)
+
+class BeregningsperiodeBroekMangler : UgyldigForespoerselException(
+    code = "BEREGNINGSPERIODE_BROEK_MANGLER",
+    detail = "Beregningsperioden mangler brøk",
+)

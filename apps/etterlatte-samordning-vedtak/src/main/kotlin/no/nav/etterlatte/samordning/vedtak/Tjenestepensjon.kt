@@ -1,5 +1,6 @@
 package no.nav.etterlatte.samordning.vedtak
 
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -43,6 +44,13 @@ class TjenestepensjonUgyldigForesporselException(detail: String) : UgyldigForesp
 
 class TjenestepensjonIkkeFunnetException(detail: String) : IkkeFunnetException(
     code = "012-TP-IKKE-FUNNET",
+    detail = detail,
+    meta = getMeta(),
+)
+
+class TjenestepensjonInternFeil(detail: String) : ForespoerselException(
+    status = 500,
+    code = "TP-INTERNFEIL",
     detail = detail,
     meta = getMeta(),
 )

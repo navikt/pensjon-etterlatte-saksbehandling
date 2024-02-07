@@ -7,8 +7,10 @@ import { GosysOppgaveModal } from '~components/oppgavebenk/oppgavemodal/GosysOpp
 export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const innloggetsaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const { type, kilde, fnr, saksbehandler, referanse } = oppgave
-  const erInnloggetSaksbehandlerOppgave = saksbehandler ? saksbehandler === innloggetsaksbehandler.ident : false
+  const { id, type, kilde, fnr, saksbehandlerIdent, referanse } = oppgave
+  const erInnloggetSaksbehandlerOppgave = saksbehandlerIdent
+    ? saksbehandlerIdent === innloggetsaksbehandler.ident
+    : false
   if (kilde === 'GENERELL_BEHANDLING') {
     switch (type) {
       case 'UNDERKJENT':
@@ -71,8 +73,12 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
       return (
         <>
           {erInnloggetSaksbehandlerOppgave && (
-            <Button size="small" as="a" href={`/behandling/${referanse}`}>
-              Gå til behandling
+            <Button
+              size="small"
+              as="a"
+              href={referanse === 'GJENOPPRETTELSE_OPPGAVE' ? `/manuellbehandling/${id}` : `/behandling/${referanse}`}
+            >
+              {referanse === 'GJENOPPRETTELSE_OPPGAVE' ? 'Gå til manuell opprettelse' : 'Gå til behandling'}
             </Button>
           )}
         </>

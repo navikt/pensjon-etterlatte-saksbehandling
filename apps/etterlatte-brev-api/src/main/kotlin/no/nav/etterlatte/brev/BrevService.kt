@@ -1,22 +1,18 @@
 package no.nav.etterlatte.brev
 
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
+import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.BrevkodePar
+import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Mottaker
-import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 
@@ -39,12 +35,17 @@ class BrevService(
     suspend fun opprettBrev(
         sakId: Long,
         bruker: BrukerTokenInfo,
+        brevkoder: Brevkoder,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
     ): Brev =
         brevoppretter.opprettBrev(
             sakId = sakId,
             behandlingId = null,
             bruker = bruker,
             automatiskMigreringRequest = null,
+            brevKode = { brevkoder.redigering },
+            brevtype = brevkoder.redigering.brevtype,
+            brevDataMapping = brevDataMapping,
         ).first
 
     data class BrevPayload(
@@ -109,7 +110,8 @@ class BrevService(
             bruker,
             null,
             avsenderRequest = { b, g -> g.avsenderRequest(b) },
-            brevKode = { _, _ -> BrevkodePar(TOM_DELMAL, TOM_MAL_INFORMASJONSBREV) },
+            brevKode = { Brevkoder.TOMT_INFORMASJONSBREV },
+            brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
         )
 
     suspend fun ferdigstill(
@@ -142,31 +144,6 @@ class BrevService(
 
         val result = db.settBrevSlettet(id, bruker)
         logger.info("Brev med id=$id slettet=$result")
-    }
-
-    fun lagrePdf(
-        sakId: Long,
-        fil: ByteArray,
-        innhold: BrevInnhold,
-        sak: Sak,
-    ): Brev {
-        val brev =
-            db.opprettBrev(
-                OpprettNyttBrev(
-                    sakId = sakId,
-                    behandlingId = null,
-                    soekerFnr = sak.ident,
-                    prosessType = BrevProsessType.OPPLASTET_PDF,
-                    mottaker = Mottaker.tom(Folkeregisteridentifikator.of(sak.ident)),
-                    opprettet = Tidspunkt.now(),
-                    innhold = innhold,
-                    innholdVedlegg = null,
-                ),
-            )
-
-        db.lagrePdf(brev.id, Pdf(fil))
-
-        return brev
     }
 
     private fun sjekkOmBrevKanEndres(brevID: BrevID): Brev {

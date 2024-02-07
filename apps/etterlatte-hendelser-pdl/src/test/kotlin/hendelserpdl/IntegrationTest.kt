@@ -2,7 +2,6 @@ package no.nav.etterlatte.hendelserpdl
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
-import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -17,6 +16,7 @@ import io.mockk.verify
 import no.nav.common.KafkaEnvironment
 import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
 import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
+import no.nav.etterlatte.kafka.Avrokonstanter
 import no.nav.etterlatte.kafka.KafkaConsumerConfiguration
 import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
@@ -24,6 +24,7 @@ import no.nav.etterlatte.lesHendelserFraLeesah
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
+import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.person.pdl.leesah.Endringstype
@@ -91,7 +92,7 @@ class IntegrationTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE.lagEventnameForType(),
                 hendelse = LeesahOpplysningstype.DOEDSFALL_V1,
                 hendelse_data =
                     Doedshendelse(
@@ -126,14 +127,14 @@ class IntegrationTest {
                     put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, kafkaEnv.brokersURL)
                     put(ConsumerConfig.GROUP_ID_CONFIG, env["LEESAH_KAFKA_GROUP_ID"])
                     put(ConsumerConfig.CLIENT_ID_CONFIG, "etterlatte-pdl-hendelser")
-                    put(KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, kafkaEnv.schemaRegistry?.url!!)
+                    put(Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG, kafkaEnv.schemaRegistry?.url!!)
                     put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
                     put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer::class.java)
                     put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
                     put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
                     put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
                     put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, trettiSekunder)
-                    put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, true)
+                    put(Avrokonstanter.SPECIFIC_AVRO_READER_CONFIG, true)
                 }
             return properties
         }
@@ -145,7 +146,7 @@ class IntegrationTest {
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaEnv.brokersURL,
                 ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to KafkaAvroSerializer::class.java.canonicalName,
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to KafkaAvroSerializer::class.java.canonicalName,
-                KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG to kafkaEnv.schemaRegistry?.url,
+                Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG to kafkaEnv.schemaRegistry?.url,
                 ProducerConfig.ACKS_CONFIG to "all",
             ),
         )

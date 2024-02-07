@@ -12,12 +12,15 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.utils.EmptyContent.status
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.libs.common.RetryResult
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -48,8 +51,23 @@ class SafClient(
                 header("Authorization", "Bearer ${getToken(accessToken)}")
                 header("Content-Type", "application/json")
             }.body()
-        } catch (ex: Exception) {
-            throw JournalpostException("Feil ved kall til hentdokument", ex)
+        } catch (re: ResponseException) {
+            logger.error("Feil i kall mot Saf: ${re.response.bodyAsText()}")
+
+            if (re.response.status == HttpStatusCode.NotFound) {
+                throw IkkeFunnetException(
+                    code = "JOURNALPOST_IKKE_FUNNET",
+                    detail =
+                        "Dokument med journalpostId=$journalpostId, dokumentInfoId=$dokumentInfoId, " +
+                            "variantFormat=ARKIV ikke funnet i Joark",
+                )
+            } else {
+                throw ForespoerselException(
+                    status = re.response.status.value,
+                    code = "UKJENT_FEIL_HENT_JOURNALPOST_PDF",
+                    detail = "Ukjent feil oppsto ved henting av journalpost",
+                )
+            }
         }
 
     // TODO: Fjerne param [visTemaPen] når gjenlevendepensjon er borte
@@ -73,7 +91,7 @@ class SafClient(
                             ),
                         tema = if (visTemaPen) listOf("EYO", "EYB", "PEN") else listOf("EYO", "EYB"),
                         // TODO: Finn en grense eller fiks paginering
-                        foerste = 10,
+                        foerste = 20,
                     ),
             )
 
@@ -178,5 +196,3 @@ class SafClient(
         return token.get()?.accessToken ?: ""
     }
 }
-
-class JournalpostException(msg: String, cause: Throwable) : Exception(msg, cause)

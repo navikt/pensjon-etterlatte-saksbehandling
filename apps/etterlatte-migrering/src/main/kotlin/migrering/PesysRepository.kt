@@ -21,6 +21,7 @@ import javax.sql.DataSource
 data class Pesyskopling(
     val pesysId: PesysId,
     val behandlingId: UUID,
+    val sakId: Long,
 )
 
 internal class PesysRepository(private val dataSource: DataSource) : Transactions<PesysRepository> {
@@ -51,6 +52,18 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
                 " ON CONFLICT(id) DO UPDATE SET sak=excluded.sak, status=excluded.status",
             mapOf("id" to pesysId, "status" to Migreringsstatus.UNDER_MIGRERING_MANUELT.name, "sak" to "{}".toJson()),
             "Lagra pesyssak $pesysId i migreringsbasen manuelt",
+        )
+    }
+
+    fun oppdaterKanGjenopprettesAutomatisk(
+        migreringRequest: MigreringRequest,
+        tx: TransactionalSession? = null,
+    ) = tx.session {
+        oppdater(
+            "UPDATE pesyssak SET gjenopprettes_automatisk = :automatisk " +
+                "WHERE id = :pesyssak",
+            mapOf("id" to migreringRequest.pesysId, "automatisk" to migreringRequest.kanAutomatiskGjenopprettes),
+            "Oppdaterer pesyssak med kan gjenopprettes automatisk",
         )
     }
 
@@ -104,14 +117,15 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
     fun lagreKoplingTilBehandling(
         behandlingId: UUID,
         pesysId: PesysId,
+        sakId: Long,
         tx: TransactionalSession? = null,
     ) {
         tx.session {
             opprett(
-                "INSERT INTO pesyskopling(behandling_id,pesys_id) VALUES(:behandling_id,:pesys_id)" +
-                    " ON CONFLICT(pesys_id) DO UPDATE SET behandling_id = :behandling_id",
-                mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id),
-                "Lagra koplinga mellom behandling $behandlingId og pesyssak $pesysId i migreringsbasen",
+                "INSERT INTO pesyskopling(behandling_id,pesys_id,sak_id) VALUES(:behandling_id,:pesys_id,:sak_id)" +
+                    " ON CONFLICT(pesys_id) DO UPDATE SET behandling_id = :behandling_id, sak_id = :sak_id",
+                mapOf("behandling_id" to behandlingId, "pesys_id" to pesysId.id, "sak_id" to sakId),
+                "Lagra koplinga mellom sak $sakId, behandling $behandlingId og pesyssak $pesysId i migreringsbasen",
             )
         }
     }
@@ -121,12 +135,13 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         tx: TransactionalSession? = null,
     ) = tx.session {
         hent(
-            "SELECT pesys_id, behandling_id from pesyskopling WHERE behandling_id = :behandling_id",
+            "SELECT pesys_id, behandling_id, sak_id from pesyskopling WHERE behandling_id = :behandling_id",
             mapOf("behandling_id" to behandlingId),
         ) {
             Pesyskopling(
                 PesysId(it.long("pesys_id")),
                 it.uuid("behandling_id"),
+                it.long("sak_id"),
             )
         }
     }
@@ -170,11 +185,16 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
         tx: TransactionalSession? = null,
     ) = tx.session {
         hent(
-            "SELECT ${Pesyskoplingtabell.BEHANDLING_ID} FROM ${Pesyskoplingtabell.TABELLNAVN} " +
+            "SELECT ${Pesyskoplingtabell.BEHANDLING_ID}, ${Pesyskoplingtabell.SAK_ID}" +
+                " FROM ${Pesyskoplingtabell.TABELLNAVN} " +
                 "WHERE ${Pesyskoplingtabell.PESYS_ID} = :${Pesyskoplingtabell.PESYS_ID}",
             mapOf(Pesyskoplingtabell.PESYS_ID to pesysId.id),
         ) {
-            Pesyskopling(pesysId, it.uuid(Pesyskoplingtabell.BEHANDLING_ID))
+            Pesyskopling(
+                pesysId,
+                it.uuid(Pesyskoplingtabell.BEHANDLING_ID),
+                it.long(Pesyskoplingtabell.SAK_ID),
+            )
         }
     }
 
@@ -220,6 +240,7 @@ private object Pesyskoplingtabell {
     const val TABELLNAVN = "pesyskopling"
     const val PESYS_ID = "pesys_id"
     const val BEHANDLING_ID = "behandling_id"
+    const val SAK_ID = "sak_id"
 }
 
 private object Feilkjoering {

@@ -12,9 +12,10 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.mq.DummyJmsConnectionFactory
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.utbetaling.TestContainers
-import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
+import no.nav.etterlatte.utbetaling.attestertvedtakEvent
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
+import no.nav.etterlatte.utbetaling.common.UtbetalinghendelseType
 import no.nav.etterlatte.utbetaling.config.ApplicationContext
 import no.nav.etterlatte.utbetaling.config.ApplicationProperties
 import no.nav.etterlatte.utbetaling.iverksetting.oppdrag.OppdragJaxb
@@ -22,7 +23,6 @@ import no.nav.etterlatte.utbetaling.oppdragMedFeiletKvittering
 import no.nav.etterlatte.utbetaling.oppdragMedGodkjentKvittering
 import no.nav.etterlatte.utbetaling.ugyldigVedtakTilUtbetaling
 import no.nav.etterlatte.utbetaling.vedtak
-import no.nav.etterlatte.utbetaling.vedtakEvent
 import no.trygdeetaten.skjema.oppdrag.Oppdrag
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -79,7 +79,7 @@ class ApplicationIntegrationTest {
     fun `skal sende utbetaling til oppdrag`() {
         val behandlingId = UUID.randomUUID()
         sendFattetVedtakEvent(
-            vedtakEvent(
+            attestertvedtakEvent(
                 vedtak(
                     behandling =
                         Behandling(
@@ -94,7 +94,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
-                        this.event == EVENT_NAME_OPPDATERT &&
+                        this.eventName == UtbetalinghendelseType.OPPDATERT.lagEventnameForType() &&
                             this.utbetalingResponse.vedtakId == 1L &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.SENDT &&
                             this.utbetalingResponse.behandlingId == behandlingId
@@ -106,13 +106,13 @@ class ApplicationIntegrationTest {
 
     @Test
     fun `skal feile dersom vedtak ikke kan leses`() {
-        sendFattetVedtakEvent(vedtakEvent(ugyldigVedtakTilUtbetaling()))
+        sendFattetVedtakEvent(attestertvedtakEvent(ugyldigVedtakTilUtbetaling()))
 
         verify(timeout = TIMEOUT) {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
-                        this.event == EVENT_NAME_OPPDATERT &&
+                        this.eventName == UtbetalinghendelseType.OPPDATERT.lagEventnameForType() &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
                                 ?.contains(
@@ -130,7 +130,7 @@ class ApplicationIntegrationTest {
         val behandlingIdForste = UUID.randomUUID()
         val behandlingIdAndre = UUID.randomUUID()
         sendFattetVedtakEvent(
-            vedtakEvent(
+            attestertvedtakEvent(
                 vedtak(
                     behandling =
                         Behandling(
@@ -141,7 +141,7 @@ class ApplicationIntegrationTest {
             ),
         )
         sendFattetVedtakEvent(
-            vedtakEvent(
+            attestertvedtakEvent(
                 vedtak(
                     behandling =
                         Behandling(
@@ -156,7 +156,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
-                        this.event == EVENT_NAME_OPPDATERT &&
+                        this.eventName == UtbetalinghendelseType.OPPDATERT.lagEventnameForType() &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
                                 ?.contains("Vedtak med vedtakId=1 eksisterer fra før") != false &&
@@ -174,13 +174,13 @@ class ApplicationIntegrationTest {
     @Test
     fun `skal feile dersom det eksisterer utbetalingslinjer med samme id som i nytt vedtak`() {
         sendFattetVedtakEvent(
-            vedtakEvent(
+            attestertvedtakEvent(
                 vedtak(),
             ),
         )
         val behandlingId = UUID.randomUUID()
         sendFattetVedtakEvent(
-            vedtakEvent(
+            attestertvedtakEvent(
                 vedtak(
                     vedtakId = 2,
                     behandling =
@@ -196,7 +196,7 @@ class ApplicationIntegrationTest {
             rapidsConnection.publish(
                 match {
                     objectMapper.readValue(it, UtbetalingEventDto::class.java).run {
-                        this.event == EVENT_NAME_OPPDATERT &&
+                        this.eventName == UtbetalinghendelseType.OPPDATERT.lagEventnameForType() &&
                             this.utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                             this.utbetalingResponse.feilmelding
                                 ?.contains(
@@ -213,7 +213,7 @@ class ApplicationIntegrationTest {
     fun `skal motta kvittering fra oppdrag som er godkjent`() {
         val behandlingId = UUID.randomUUID()
         sendFattetVedtakEvent(
-            vedtakEvent(
+            attestertvedtakEvent(
                 vedtak(
                     behandling =
                         Behandling(
@@ -231,7 +231,7 @@ class ApplicationIntegrationTest {
                 match {
                     val (eventName, utbetalingResponse) = it.toResponse()
 
-                    return@match eventName == EVENT_NAME_OPPDATERT &&
+                    return@match eventName == UtbetalinghendelseType.OPPDATERT.lagEventnameForType() &&
                         utbetalingResponse.vedtakId == 1L &&
                         utbetalingResponse.status == UtbetalingStatusDto.GODKJENT &&
                         utbetalingResponse.behandlingId == behandlingId
@@ -250,7 +250,7 @@ class ApplicationIntegrationTest {
                 match {
                     val (eventName, utbetalingResponse) = it.toResponse()
 
-                    return@match eventName == EVENT_NAME_OPPDATERT &&
+                    return@match eventName == UtbetalinghendelseType.OPPDATERT.lagEventnameForType() &&
                         utbetalingResponse.vedtakId == 1L &&
                         utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                         utbetalingResponse.behandlingId == null
@@ -263,7 +263,7 @@ class ApplicationIntegrationTest {
     fun `skal motta kvittering fra oppdrag som er godkjent men feiler fordi status for utbetaling er ugyldig`() {
         val behandlingId = UUID.randomUUID()
         sendFattetVedtakEvent(
-            vedtakEvent(
+            attestertvedtakEvent(
                 vedtak(
                     behandling =
                         Behandling(
@@ -282,7 +282,7 @@ class ApplicationIntegrationTest {
                 match {
                     val (eventName, utbetalingResponse) = it.toResponse()
 
-                    return@match eventName == EVENT_NAME_OPPDATERT &&
+                    return@match eventName == UtbetalinghendelseType.OPPDATERT.lagEventnameForType() &&
                         utbetalingResponse.vedtakId == 1L &&
                         utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                         utbetalingResponse.feilmelding ==
@@ -297,7 +297,7 @@ class ApplicationIntegrationTest {
     fun `skal motta kvittering fra oppdrag som har feilet`() {
         val behandlingId = UUID.randomUUID()
         sendFattetVedtakEvent(
-            vedtakEvent(
+            attestertvedtakEvent(
                 vedtak(
                     behandling =
                         Behandling(
@@ -315,7 +315,7 @@ class ApplicationIntegrationTest {
                 match {
                     val (eventName, utbetalingResponse) = it.toResponse()
 
-                    return@match eventName == EVENT_NAME_OPPDATERT &&
+                    return@match eventName == UtbetalinghendelseType.OPPDATERT.lagEventnameForType() &&
                         utbetalingResponse.vedtakId == 1L &&
                         utbetalingResponse.status == UtbetalingStatusDto.FEILET &&
                         utbetalingResponse.feilmelding == "KodeMelding Beskrivelse" &&

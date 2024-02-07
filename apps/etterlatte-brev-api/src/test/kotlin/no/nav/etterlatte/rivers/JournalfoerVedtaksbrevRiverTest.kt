@@ -9,18 +9,21 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -28,7 +31,7 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -66,6 +69,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 Tidspunkt.now(),
                 Tidspunkt.now(),
                 mottaker = mockk(),
+                brevtype = Brevtype.VEDTAK,
             )
         val response = OpprettJournalpostResponse("1234", true, emptyList())
 
@@ -89,7 +93,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         assertEquals(vedtak.attestasjon!!.attesterendeEnhet, vedtakActual.ansvarligEnhet)
 
         val actualMessage = inspektoer.message(0)
-        assertEquals(BrevEventTypes.JOURNALFOERT.toString(), actualMessage.get(EVENT_NAME_KEY).asText())
+        assertEquals(BrevHendelseType.JOURNALFOERT.lagEventnameForType(), actualMessage.get(EVENT_NAME_KEY).asText())
         assertEquals(brev.id, actualMessage.get("brevId").asLong())
         assertEquals(response.journalpostId, actualMessage.get("journalpostId").asText())
         assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asText())
@@ -102,7 +106,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.name,
+                    VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                     "vedtak" to vedtak,
                 ),
             )
@@ -119,7 +123,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventTypes.FERDIGSTILT.name,
+                    VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                     "vedtak" to vedtak,
                     SKAL_SENDE_BREV to false,
                 ),
@@ -134,7 +138,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         return JsonMessage.newMessage(
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                EVENT_NAME_KEY to VedtakKafkaHendelseType.ATTESTERT.toString(),
+                VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
                 "vedtak" to vedtak,
             ),
         )

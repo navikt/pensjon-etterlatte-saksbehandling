@@ -18,12 +18,13 @@ import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.klienter.BrevStatus
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
+import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
@@ -36,8 +37,8 @@ import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -48,6 +49,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
@@ -89,10 +91,7 @@ abstract class BehandlingIntegrationTest {
                         put("AZUREAD_FORTROLIG_GROUPID", "ea930b6b-9397-44d9-b9e6-f4cf527a632a")
                         put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", "753805ea-65a7-4855-bdc3-e6130348df9f")
                         put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", "ea7411eb-8b48-41a0-bc56-7b521fbf0c25")
-                        put("HENDELSE_JOB_FREKVENS", "1")
-                        put("HENDELSE_MINUTTER_GAMLE_HENDELSER", "1")
                         put("NORG2_URL", "http://localhost")
-                        put("ELECTOR_PATH", "http://localhost")
                         put("NAVANSATT_URL", "http://localhost")
                         put("SKJERMING_URL", "http://localhost")
                         put("OPPGAVE_URL", "http://localhost")
@@ -159,6 +158,10 @@ abstract class BehandlingIntegrationTest {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         val json = emptyMap<String, String>().toJson()
                         respond(json, headers = headers)
+                    } else if (request.url.fullPath.contains("person/v2")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        val json = mockPerson().toJson()
+                        respond(json, headers = headers)
                     } else if (request.url.fullPath.startsWith("/")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         val json = javaClass.getResource("")!!.readText() // TODO: endre name
@@ -206,13 +209,19 @@ abstract class BehandlingIntegrationTest {
                     } else if (request.url.fullPath.endsWith("/roller")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(
-                            PersonMedSakerOgRoller("08071272487", listOf(SakOgRolle(1, Saksrolle.SOEKER))).toJson(),
+                            PersonMedSakerOgRoller("08071272487", listOf(SakidOgRolle(1, Saksrolle.SOEKER))).toJson(),
                             headers = headers,
                         )
                     } else if (request.url.fullPath.endsWith("/saker")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(
                             setOf(1).toJson(),
+                            headers = headers,
+                        )
+                    } else if (request.url.fullPath.contains("/grunnlag/sak")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        respond(
+                            Grunnlag.empty().toJson(),
                             headers = headers,
                         )
                     } else if (request.url.fullPath.endsWith("/oppdater-grunnlag")) {
@@ -443,13 +452,16 @@ class BrevApiKlientTest : BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
         return OpprettetBrevDto(
-            brevId++,
+            id = brevId++,
+            status = BrevStatus.OPPRETTET,
             mottaker =
                 Mottaker(
                     navn = "Mottaker mottakersen",
                     foedselsnummer = Mottakerident("19448310410"),
                     orgnummer = null,
                 ),
+            journalpostId = null,
+            bestillingsID = null,
         )
     }
 
@@ -483,12 +495,15 @@ class BrevApiKlientTest : BrevApiKlient {
     ): OpprettetBrevDto {
         return OpprettetBrevDto(
             id = brevId,
+            status = BrevStatus.OPPRETTET,
             mottaker =
                 Mottaker(
                     navn = "Mottaker mottakersen",
                     foedselsnummer = Mottakerident("19448310410"),
                     orgnummer = null,
                 ),
+            journalpostId = null,
+            bestillingsID = null,
         )
     }
 }
@@ -567,5 +582,9 @@ class NavAnsattKlientTest : NavAnsattKlient {
 
     override suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema> {
         return listOf(SaksbehandlerTema(SakType.BARNEPENSJON.name), SaksbehandlerTema(SakType.OMSTILLINGSSTOENAD.name))
+    }
+
+    override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? {
+        return SaksbehandlerInfo("ident", "Max Manus")
     }
 }

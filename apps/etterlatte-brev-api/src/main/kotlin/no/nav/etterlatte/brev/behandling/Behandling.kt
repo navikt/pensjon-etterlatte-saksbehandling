@@ -5,6 +5,7 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -15,7 +16,6 @@ import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
@@ -41,9 +41,9 @@ data class GenerellBrevData(
             )
         } ?: AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = sak.enhet)
 
-    fun erMigrering() =
-        systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null &&
-            forenkletVedtak?.saksbehandlerIdent == Fagsaksystem.EY.navn
+    fun erMigrering() = systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null
+
+    fun vedtakstype() = forenkletVedtak?.type?.name?.lowercase()
 }
 
 data class Trygdetid(
@@ -74,6 +74,7 @@ data class ForenkletVedtak(
     val virkningstidspunkt: YearMonth? = null,
     val revurderingInfo: RevurderingInfo? = null,
     val tilbakekreving: Tilbakekreving? = null,
+    val klage: Klage? = null,
 )
 
 data class Utbetalingsinfo(

@@ -20,7 +20,8 @@ class Samordningsvedtak(
 class Samordningsmelding(
     val samId: Long,
     val meldingstatusKode: String,
-    val tssEksternId: String,
+    val tpNr: String,
+    val tpNavn: String,
     val sendtDato: LocalDate,
     val svartDato: LocalDate?,
     val purretDato: LocalDate?,

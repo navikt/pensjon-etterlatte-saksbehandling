@@ -5,7 +5,6 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.klage.KLAGE_STATISTIKK_RIVER_KEY
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.klage.StatistikkKlage
-import no.nav.etterlatte.libs.common.klage.lagEventnameForType
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.TEKNISK_TID_KEY
@@ -43,7 +42,7 @@ class KlageHendelserServiceImpl(
             ).toJson(),
         ).also { (partition, offset) ->
             logger.info(
-                "Posted event KLAGE:${klageHendelseType.name} for KLAGE ${statistikkKlage.id}" +
+                "Posted event ${klageHendelseType.lagEventnameForType()} for KLAGE ${statistikkKlage.id}" +
                     " to partiton $partition, offset $offset correlationid: $correlationId",
             )
         }

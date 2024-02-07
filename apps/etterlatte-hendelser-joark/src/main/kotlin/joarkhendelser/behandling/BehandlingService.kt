@@ -1,7 +1,6 @@
 package no.nav.etterlatte.joarkhendelser.behandling
 
-import joarkhendelser.behandling.BehandlingKlient
-import joarkhendelser.pdl.PdlTjenesterKlient
+import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.LoggerFactory
@@ -35,6 +34,12 @@ class BehandlingService(
             .also { oppgaveId ->
                 logger.info("Opprettet oppgave=$oppgaveId med sakId=$sakId for journalpost=$journalpostId")
             }
+    }
+
+    suspend fun avbrytOppgaverTilknyttetJournalpost(journalpostId: Long) {
+        logger.info("Avbryter oppgaver tilknyttet journalpostId=$journalpostId")
+
+        behandlingKlient.avbrytOppgaver(journalpostId.toString())
     }
 
     private suspend fun hentEllerOpprettSak(

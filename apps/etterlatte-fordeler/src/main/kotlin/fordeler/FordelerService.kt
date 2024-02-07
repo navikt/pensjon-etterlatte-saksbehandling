@@ -1,6 +1,5 @@
 package no.nav.etterlatte.fordeler
 
-import fordeler.FordelerFeatureToggle
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
@@ -65,6 +64,7 @@ class FordelerService(
                 when (it.fordeltTil) {
                     Vedtaksloesning.GJENNY -> GyldigForBehandling(it.gradering)
                     Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
+                    Vedtaksloesning.GJENOPPRETTA -> throw RuntimeException("Gjenoppretta er ikke relevant for fordeling")
                 }
             }
         } catch (e: PersonFinnesIkkeException) {

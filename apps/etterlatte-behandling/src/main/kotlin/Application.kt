@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.ServerReady
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.principal
@@ -20,6 +21,7 @@ import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
+import no.nav.etterlatte.behandling.job.populerSaksbehandlereMedNavn
 import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
@@ -45,6 +47,8 @@ import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
+import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
 import javax.sql.DataSource
@@ -67,6 +71,7 @@ private class Server(private val context: ApplicationContext) {
                 applicationEngineEnvironment {
                     config = HoconApplicationConfig(context.config)
                     module { module(context) }
+                    module { moduleOnServerReady(context) }
                     connector { port = context.httpPort }
                 },
         )
@@ -74,9 +79,15 @@ private class Server(private val context: ApplicationContext) {
     fun run() =
         with(context) {
             dataSource.migrate()
-            grunnlagsendringshendelseJob.schedule().also { addShutdownHook(it) }
             setReady().also { engine.start(true) }
         }
+}
+
+internal fun Application.moduleOnServerReady(context: ApplicationContext) {
+    environment.monitor.subscribe(ServerReady) {
+        environment.log.info("Server is started")
+        populerSaksbehandlereMedNavn(context)
+    }
 }
 
 internal fun Application.module(context: ApplicationContext) {
@@ -136,6 +147,8 @@ internal fun Application.module(context: ApplicationContext) {
                 requestLogger = behandlingRequestLogger,
             )
             institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))
+            saksbehandlerRoutes(saksbehandlerService = SaksbehandlerService(context.saksbehandlerInfoDaoTrans))
+
             tilgangRoutes(tilgangService)
 
             context.metrikkerJob.schedule().also { addShutdownHook(it) }

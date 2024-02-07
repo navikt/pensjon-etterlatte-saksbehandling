@@ -5,22 +5,26 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotliquery.queryOf
+import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
+import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.PDFGenerator
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.event.BrevEventKeys
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.database.transaction
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.FNR_KEY
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository.Databasetabell
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -31,9 +35,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.FNR_KEY
-import rapidsandrivers.SAK_ID_KEY
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -70,7 +71,7 @@ class InformasjonsbrevTest {
 
     @Test
     fun `starter generering av informasjonsbrev, og verifiserer at brevet faktisk blir oppretta og distribuert`() {
-        val brevkode = EtterlatteBrevKode.OMREGNING_INFORMASJON
+        val brevkode = Brevkoder.UTSATT_KLAGEFRIST_INFORMASJONSBREV
         val saktype = SakType.BARNEPENSJON
         lagreBrevTilGenereringIDatabasen(brevkode, saktype)
         val testRapid =
@@ -92,6 +93,9 @@ class InformasjonsbrevTest {
                         any(),
                         any(),
                         any(),
+                        any(),
+                        any(),
+                        any(),
                     )
                 } returns Pair(mockk<Brev>().also { every { it.id } returns brevId }, mockk())
             }
@@ -100,6 +104,7 @@ class InformasjonsbrevTest {
                 coEvery {
                     it.ferdigstillOgGenererPDF(
                         brevId,
+                        any(),
                         any(),
                         any(),
                         any(),
@@ -124,13 +129,13 @@ class InformasjonsbrevTest {
         assertEquals(2, testRapid.inspektør.size)
         with(testRapid.inspektør.message(0)) {
             val fnr = get(FNR_KEY).also { assertEquals(SOEKER_FOEDSELSNUMMER.value, it.asText()) }
-            val brevmal = get(BrevEventKeys.BREVMAL_KEY).also { assertEquals(brevkode.name, it.asText()) }
+            val brevmal = get(BREVMAL_RIVER_KEY).also { assertEquals(brevkode.name, it.asText()) }
             val sakstype = get(SAK_TYPE_KEY).also { assertEquals(saktype.name, it.asText()) }
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER,
+                    BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagParMedEventNameKey(),
                     FNR_KEY to fnr,
-                    BrevEventKeys.BREVMAL_KEY to brevmal,
+                    BREVMAL_RIVER_KEY to brevmal,
                     SAK_TYPE_KEY to sakstype,
                     SAK_ID_KEY to saksnr,
                 ),
@@ -138,13 +143,13 @@ class InformasjonsbrevTest {
         }
         with(testRapid.inspektør.message(1)) {
             val behandling = get(BEHANDLING_ID_KEY).also { assertEquals(behandlingId.toString(), it.asText()) }
-            val brevmal = get(BrevEventKeys.BREVMAL_KEY).also { assertEquals(brevkode.name, it.asText()) }
+            val brevmal = get(BREVMAL_RIVER_KEY).also { assertEquals(brevkode.name, it.asText()) }
             val sakstype = get(SAK_TYPE_KEY).also { assertEquals(saktype.name, it.asText()) }
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER,
+                    BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagParMedEventNameKey(),
                     BEHANDLING_ID_KEY to behandling,
-                    BrevEventKeys.BREVMAL_KEY to brevmal,
+                    BREVMAL_RIVER_KEY to brevmal,
                     SAK_TYPE_KEY to sakstype,
                     SAK_ID_KEY to saksnr,
                 ),
@@ -154,7 +159,7 @@ class InformasjonsbrevTest {
     }
 
     private fun lagreBrevTilGenereringIDatabasen(
-        brevkode: EtterlatteBrevKode,
+        brevkode: Brevkoder,
         saktype: SakType,
     ) {
         dataSource.transaction { tx ->

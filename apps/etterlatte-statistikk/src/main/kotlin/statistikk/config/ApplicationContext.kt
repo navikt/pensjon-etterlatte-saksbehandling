@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
+import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
 import no.nav.etterlatte.statistikk.clients.BehandlingKlientImpl
 import no.nav.etterlatte.statistikk.clients.BeregningKlient
@@ -17,13 +18,13 @@ import no.nav.etterlatte.statistikk.jobs.MaanedligStatistikkJob
 import no.nav.etterlatte.statistikk.river.BehandlinghendelseRiver
 import no.nav.etterlatte.statistikk.river.KlagehendelseRiver
 import no.nav.etterlatte.statistikk.river.SoeknadStatistikkRiver
+import no.nav.etterlatte.statistikk.river.TilbakekrevinghendelseRiver
 import no.nav.etterlatte.statistikk.river.VedtakhendelserRiver
 import no.nav.etterlatte.statistikk.service.SoeknadStatistikkService
 import no.nav.etterlatte.statistikk.service.SoeknadStatistikkServiceImpl
 import no.nav.etterlatte.statistikk.service.StatistikkService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.getRapidEnv
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
@@ -38,6 +39,10 @@ class ApplicationContext {
 
     val behandlinghendelseRiver: BehandlinghendelseRiver by lazy {
         BehandlinghendelseRiver(rapidsConnection, statistikkService)
+    }
+
+    val tilbakekrevingriver: TilbakekrevinghendelseRiver by lazy {
+        TilbakekrevinghendelseRiver(rapidsConnection, statistikkService)
     }
 
     val vedtakhendelserRiver: VedtakhendelserRiver by lazy {
@@ -87,7 +92,7 @@ class ApplicationContext {
     }
 
     private val leaderElection: LeaderElection by lazy {
-        LeaderElection(env.requireEnvValue("ELECTOR_PATH"))
+        LeaderElection(env["ELECTOR_PATH"])
     }
 
     private val beregningHttpClient: HttpClient by lazy {

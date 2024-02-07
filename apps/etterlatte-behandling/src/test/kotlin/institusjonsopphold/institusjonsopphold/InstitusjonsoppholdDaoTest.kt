@@ -1,4 +1,4 @@
-package institusjonsopphold.institusjonsopphold
+package no.nav.etterlatte.institusjonsopphold.institusjonsopphold
 
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdBegrunnelse

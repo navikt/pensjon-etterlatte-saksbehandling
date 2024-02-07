@@ -11,12 +11,17 @@ abstract class Oppgave {
     abstract val status: Status
     abstract val type: OppgaveType
     abstract val enhet: String
-    abstract val saksbehandler: String?
+    abstract val saksbehandlerIdent: String?
     abstract val opprettet: Tidspunkt
     abstract val sakType: SakType
     abstract val fnr: String?
     abstract val frist: Tidspunkt?
 }
+
+data class OppgaveSaksbehandler(
+    val saksbehandlerIdent: String? = null,
+    val saksbehandlerNavn: String? = null,
+)
 
 data class OppgaveIntern(
     val id: UUID,
@@ -25,7 +30,8 @@ data class OppgaveIntern(
     val sakId: Long,
     val kilde: OppgaveKilde? = null,
     override val type: OppgaveType,
-    override val saksbehandler: String? = null,
+    override val saksbehandlerIdent: String? = null,
+    val saksbehandlerNavn: String? = null,
     val referanse: String,
     val merknad: String? = null,
     override val opprettet: Tidspunkt,
@@ -33,8 +39,10 @@ data class OppgaveIntern(
     override val fnr: String? = null,
     override val frist: Tidspunkt?,
 ) : Oppgave() {
+    fun toSaksbehandler() = OppgaveSaksbehandler(saksbehandlerIdent, saksbehandlerNavn)
+
     fun manglerSaksbehandler(): Boolean {
-        return saksbehandler == null
+        return saksbehandlerIdent == null
     }
 
     fun erAvsluttet(): Boolean {
@@ -56,14 +64,14 @@ data class GosysOppgave(
     val id: Long,
     val versjon: Long,
     override val status: Status,
-    override val saksbehandler: String?,
+    override val saksbehandlerIdent: String?,
     override val enhet: String,
     override val opprettet: Tidspunkt,
     override val frist: Tidspunkt?,
     override val sakType: SakType,
-    override val fnr: String,
+    override val fnr: String? = null,
     val gjelder: String,
-    val beskrivelse: String,
+    val beskrivelse: String?,
 ) : Oppgave() {
     override val type: OppgaveType
         get() = OppgaveType.GOSYS
@@ -173,7 +181,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
         enhet = sak.enhet,
         sakId = sak.id,
         kilde = oppgaveKilde,
-        saksbehandler = null,
+        saksbehandlerIdent = null,
         referanse = referanse,
         merknad = merknad,
         opprettet = Tidspunkt.now(),

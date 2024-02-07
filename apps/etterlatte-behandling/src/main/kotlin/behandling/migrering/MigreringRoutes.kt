@@ -38,6 +38,13 @@ fun Route.migreringRoutes(migreringService: MigreringService) {
                 }
             }
         }
+        post("/manuell-gjenoppretting") {
+            kunSkrivetilgang {
+                migreringService.opprettOppgaveManuellGjenoppretting(call.receive())
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
         put("/{$BEHANDLINGID_CALL_PARAMETER}/avbryt") {
             kunSkrivetilgang {
                 inTransaction { migreringService.avbrytBehandling(behandlingId, brukerTokenInfo) }

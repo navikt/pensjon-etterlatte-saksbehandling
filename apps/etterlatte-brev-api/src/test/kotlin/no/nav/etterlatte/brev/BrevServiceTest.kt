@@ -15,12 +15,10 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Status
@@ -41,16 +39,15 @@ internal class BrevServiceTest {
     private val db = mockk<BrevRepository>(relaxed = true)
     private val brevbaker = mockk<BrevbakerKlient>()
     private val sakOgBehandlingService = mockk<BrevdataFacade>()
-    private val sakService = mockk<SakService>()
     private val adresseService = mockk<AdresseService>()
     private val journalfoerBrevService = mockk<JournalfoerBrevService>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
-    private val brevDataMapper = mockk<BrevDataMapper>()
     private val brevDataFacade = mockk<BrevdataFacade>()
     private val pdfGenerator = mockk<PDFGenerator>()
-    private val brevProsessTypeFactory = mockk<BrevProsessTypeFactory>()
     private val brevbakerService = mockk<BrevbakerService>()
-    private val brevoppretter = Brevoppretter(adresseService, db, brevDataFacade, brevProsessTypeFactory, brevbakerService)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
+    private val brevoppretter =
+        Brevoppretter(adresseService, db, brevDataFacade, brevbakerService, redigerbartVedleggHenter)
 
     private val brevService =
         BrevService(
@@ -254,6 +251,7 @@ internal class BrevServiceTest {
         statusEndret = Tidspunkt.now(),
         opprettet = Tidspunkt.now(),
         mottaker = opprettMottaker(),
+        brevtype = Brevtype.INFORMASJON,
     )
 
     private fun opprettMottaker() =

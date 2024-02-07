@@ -1,6 +1,5 @@
 package no.nav.etterlatte.kafka
 
-import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -83,7 +82,7 @@ class SkjermingslesingTest {
                 ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to kafkaEnv.brokersURL,
                 ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.canonicalName,
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java.canonicalName,
-                KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG to kafkaEnv.schemaRegistry?.url,
+                Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG to kafkaEnv.schemaRegistry?.url,
                 ProducerConfig.ACKS_CONFIG to "all",
             ),
         )
@@ -97,7 +96,7 @@ class SkjermingslesingTest {
                     put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, kafkaEnv.brokersURL)
                     put(ConsumerConfig.GROUP_ID_CONFIG, env["SKJERMING_GROUP_ID"])
                     put(ConsumerConfig.CLIENT_ID_CONFIG, "etterlatte-egne-ansatte-lytter")
-                    put(KafkaAvroDeserializerConfig.SCHEMA_REGISTRY_URL_CONFIG, kafkaEnv.schemaRegistry?.url!!)
+                    put(Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG, kafkaEnv.schemaRegistry?.url!!)
                     put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
                     put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
                     put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")

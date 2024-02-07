@@ -1,19 +1,21 @@
 package no.nav.etterlatte.joarkhendelser
 
-import isDev
-import joarkhendelser.joark.SafKlient
-import joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
+import no.nav.etterlatte.joarkhendelser.joark.Bruker
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
 import no.nav.etterlatte.joarkhendelser.joark.Kanal
+import no.nav.etterlatte.joarkhendelser.joark.SafKlient
 import no.nav.etterlatte.joarkhendelser.joark.erTemaEtterlatte
 import no.nav.etterlatte.joarkhendelser.joark.lagMerknadFraStatus
 import no.nav.etterlatte.joarkhendelser.joark.temaTilSakType
+import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
+import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory
 class JoarkHendelseHandler(
     private val behandlingService: BehandlingService,
     private val safKlient: SafKlient,
+    private val oppgaveKlient: OppgaveKlient,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(JoarkHendelseHandler::class.java)
@@ -47,9 +50,7 @@ class JoarkHendelseHandler(
 
         logger.info("Starter behandling av hendelse (id=${hendelse.hendelsesId}) med tema ${hendelse.temaNytt}")
 
-        val sakType = hendelse.temaTilSakType()
         val journalpostId = hendelse.journalpostId
-
         val journalpost = safKlient.hentJournalpost(journalpostId).journalpost
 
         if (journalpost == null) {
@@ -63,32 +64,14 @@ class JoarkHendelseHandler(
 
         try {
             if (journalpost.bruker == null) {
-                // TODO:
-                //  Burde vi lage oppgave på dette? Alt krever SakID, så hvordan skal det fungere hvis bruker mangler?
-
-                if (isDev()) {
-                    logger.error("Journalpost med id=$journalpostId mangler bruker!")
-                    return // Ignorer hvis miljø er dev. Skal i teorien ikke være et problem i produksjon.
-                } else {
-                    throw IllegalStateException("Journalpost med id=$journalpostId mangler bruker!")
-                }
-            } else if (journalpost.bruker.type == BrukerIdType.ORGNR) {
-                // TODO:
-                //  Må vi lage støtte for ORGNR...?
-                throw IllegalStateException("Journalpost med id=$journalpostId har brukerId av typen ${BrukerIdType.ORGNR}")
+                logger.warn("Bruker mangler på journalpost id=$journalpost")
+                oppgaveKlient.opprettManuellJournalfoeringsoppgave(journalpostId, hendelse.temaNytt)
+                return
             }
 
-            val ident =
-                when (val pdlIdentifikator = pdlTjenesterKlient.hentPdlIdentifikator(journalpost.bruker.id)) {
-                    is PdlIdentifikator.FolkeregisterIdent -> pdlIdentifikator.folkeregisterident.value
-                    is PdlIdentifikator.Npid -> {
-                        throw IllegalStateException("Bruker tilknyttet journalpost=$journalpostId har kun NPID!")
-                    }
+            val ident = hentFolkeregisterIdent(journalpostId, journalpost.bruker)
 
-                    null -> throw IllegalStateException(
-                        "Ident tilknyttet journalpost=$journalpostId er null i PDL – avbryter behandling",
-                    )
-                }
+            val sakType = hendelse.temaTilSakType()
 
             when (val type = hendelse.hendelsesType) {
                 HendelseType.JOURNALPOST_MOTTATT -> {
@@ -114,18 +97,16 @@ class JoarkHendelseHandler(
 
                 // TODO: Må avklare om dette er noe vi faktisk trenger å behandle
                 HendelseType.JOURNALPOST_UTGAATT -> {
-                    behandlingService.opprettOppgave(
-                        ident,
-                        sakType,
-                        "Journalpost har utgått",
-                        hendelse.journalpostId.toString(),
-                    )
+                    logger.info("Journalpost $journalpostId har status=${journalpost.journalstatus}")
+
+                    behandlingService.avbrytOppgaverTilknyttetJournalpost(journalpostId)
                 }
+
                 else -> throw IllegalArgumentException("Journalpost=$journalpostId har ukjent hendelsesType=$type")
             }
         } catch (e: Exception) {
-            logger.error("Ukjent feil ved behandling av hendelse=${hendelse.hendelsesId}. Se sikkerlogg for mer detaljer.")
-            sikkerlogger().error("Ukjent feil oppsto ved behandling av journalpost for bruker=${journalpost.bruker}: ", e)
+            logger.error("Feil ved behandling av hendelse=${hendelse.hendelsesId} (se sikkerlogg for mer info)", e)
+            sikkerlogger().error("Feil oppsto ved behandling av journalpost: \n${journalpost.toJson()}: ")
             throw e
         }
     }
@@ -160,6 +141,28 @@ class JoarkHendelseHandler(
             return
         } else {
             logger.info("Uhåndtert tilstand av journalpost=${journalpost.journalpostId}")
+        }
+    }
+
+    private suspend fun hentFolkeregisterIdent(
+        journalpostId: Long,
+        bruker: Bruker,
+    ): String {
+        if (bruker.type == BrukerIdType.ORGNR) {
+            // TODO:
+            //  Må vi lage støtte for ORGNR...?
+            throw IllegalStateException("Journalpost med id=$journalpostId har brukerId av typen ${BrukerIdType.ORGNR}")
+        }
+
+        return when (val pdlIdentifikator = pdlTjenesterKlient.hentPdlIdentifikator(bruker.id)) {
+            is PdlIdentifikator.FolkeregisterIdent -> pdlIdentifikator.folkeregisterident.value
+            is PdlIdentifikator.Npid -> {
+                throw IllegalStateException("Bruker tilknyttet journalpost=$journalpostId har kun NPID!")
+            }
+
+            null -> throw IllegalStateException(
+                "Ident tilknyttet journalpost=$journalpostId er null i PDL – avbryter behandling",
+            )
         }
     }
 }

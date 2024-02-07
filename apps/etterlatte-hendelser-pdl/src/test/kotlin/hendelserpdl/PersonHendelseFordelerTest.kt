@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
@@ -156,7 +157,7 @@ internal class PersonHendelseFordelerTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE.lagEventnameForType(),
                 hendelse = LeesahOpplysningstype.DOEDSFALL_V1,
                 hendelse_data =
                     Doedshendelse(
@@ -202,7 +203,7 @@ internal class PersonHendelseFordelerTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE.lagEventnameForType(),
                 hendelse = LeesahOpplysningstype.SIVILSTAND_V1,
                 hendelse_data =
                     SivilstandHendelse(
@@ -250,7 +251,7 @@ internal class PersonHendelseFordelerTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE.lagEventnameForType(),
                 hendelse = LeesahOpplysningstype.UTFLYTTING_FRA_NORGE,
                 hendelse_data =
                     UtflyttingsHendelse(
@@ -299,7 +300,7 @@ internal class PersonHendelseFordelerTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE.lagEventnameForType(),
                 hendelse = LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1,
                 hendelse_data =
                     VergeMaalEllerFremtidsfullmakt(
@@ -343,7 +344,7 @@ internal class PersonHendelseFordelerTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE.lagEventnameForType(),
                 hendelse = LeesahOpplysningstype.ADRESSEBESKYTTELSE_V1,
                 hendelse_data =
                     no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse(
@@ -397,7 +398,7 @@ internal class PersonHendelseFordelerTest {
 
         val forventetMeldingPaaRapid =
             MeldingSendtPaaRapid(
-                eventName = "PDL:PERSONHENDELSE",
+                eventName = PdlHendelserKeys.PERSONHENDELSE.lagEventnameForType(),
                 hendelse = LeesahOpplysningstype.FORELDERBARNRELASJON_V1,
                 hendelse_data =
                     ForelderBarnRelasjonHendelse(

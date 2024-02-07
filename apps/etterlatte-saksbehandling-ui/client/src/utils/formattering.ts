@@ -24,7 +24,9 @@ export const formaterKanskjeStringDato = (dato?: string): string =>
 export const formaterKanskjeStringDatoMedFallback = (fallback: string, dato?: string): string =>
   dato ? formaterStringDato(dato) : fallback
 
-export const formaterStringTidspunkt = (dato: string) => format(new Date(dato), 'HH:mm').toString()
+export const formaterTidspunktTimeMinutterSekunder = (dato: Date) => format(new Date(dato), 'HH:mm:ss').toString()
+
+export const formaterStringTidspunktTimeMinutter = (dato: string) => format(new Date(dato), 'HH:mm').toString()
 
 export const formaterDatoMedTidspunkt = (dato: Date) => format(new Date(dato), 'dd.MM.yyyy HH:mm').toString()
 
@@ -91,6 +93,19 @@ export const formaterSpraak = (spraak: Spraak) => {
       return 'Nynorsk'
     case Spraak.EN:
       return 'Engelsk'
+  }
+}
+
+export const formaterJournalpostType = (type: string) => {
+  switch (type) {
+    case 'I':
+      return 'Inngående'
+    case 'U':
+      return 'Utgående'
+    case 'N':
+      return 'Notat'
+    default:
+      return 'Ukjent'
   }
 }
 

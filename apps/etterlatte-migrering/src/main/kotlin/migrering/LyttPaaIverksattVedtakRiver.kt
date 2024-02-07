@@ -8,27 +8,25 @@ import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
-import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
+import no.nav.etterlatte.utbetaling.common.UtbetalinghendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class LyttPaaIverksattVedtakRiver(
     rapidsConnection: RapidsConnection,
     private val pesysRepository: PesysRepository,
     private val penKlient: PenKlient,
     private val featureToggleService: FeatureToggleService,
-) :
-    ListenerMedLoggingOgFeilhaandtering(Migreringshendelser.IVERKSATT) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, EVENT_NAME_OPPDATERT) {
+        initialiserRiver(rapidsConnection, UtbetalinghendelseType.OPPDATERT) {
             validate { it.requireKey(UTBETALING_RESPONSE) }
         }
     }

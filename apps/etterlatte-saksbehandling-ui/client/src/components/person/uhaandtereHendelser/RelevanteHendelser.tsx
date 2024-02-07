@@ -95,6 +95,7 @@ export default function RelevanteHendelser(props: Props) {
                     {relevanteHendelser.map((hendelse) => (
                       <UhaandtertHendelse
                         key={hendelse.id}
+                        sakType={sak.sakType}
                         hendelse={hendelse}
                         harAapenRevurdering={harAapenRevurdering}
                         startRevurdering={startRevurdering}

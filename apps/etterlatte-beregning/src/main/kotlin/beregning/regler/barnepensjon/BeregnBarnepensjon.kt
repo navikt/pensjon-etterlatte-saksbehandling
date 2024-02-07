@@ -1,7 +1,5 @@
 package no.nav.etterlatte.beregning.regler.barnepensjon
 
-import beregning.regler.barnepensjon.erBrukerIInstitusjon
-import beregning.regler.barnepensjon.institusjonsoppholdSatsRegel
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.sats.barnepensjonSatsRegel
 import no.nav.etterlatte.beregning.regler.barnepensjon.trygdetidsfaktor.trygdetidsFaktor

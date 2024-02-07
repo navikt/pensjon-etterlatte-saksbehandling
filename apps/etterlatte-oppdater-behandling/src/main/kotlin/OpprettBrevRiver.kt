@@ -1,31 +1,31 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.event.BrevEventKeys
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.migrering.FNR_KEY
+import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
-import rapidsandrivers.sakId
 import java.util.UUID
 
 internal class OpprettBrevRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
-) : ListenerMedLoggingOgFeilhaandtering(BrevEventKeys.OPPRETT_BREV) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, BrevEventKeys.OPPRETT_BREV) {
+        initialiserRiver(rapidsConnection, BrevRequestHendelseType.OPPRETT_BREV) {
             validate { it.interestedIn(FNR_KEY) }
             validate { it.interestedIn(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_TYPE_KEY) }
@@ -37,7 +37,7 @@ internal class OpprettBrevRiver(
         context: MessageContext,
     ) {
         val sakType = enumValueOf<SakType>(packet[SAK_TYPE_KEY].textValue())
-        val fnr = packet[rapidsandrivers.FNR_KEY].textValue()
+        val fnr = packet[no.nav.etterlatte.rapidsandrivers.FNR_KEY].textValue()
         val behandlingId = packet[BEHANDLING_ID_KEY].textValue()
         if (!featureToggleService.isEnabled(InformasjonsbrevFeatureToggle.SendInformasjonsbrev, false)) {
             logger.info("Utsending av informasjonsbrev er skrudd av. Avbryter.")
@@ -53,7 +53,7 @@ internal class OpprettBrevRiver(
                 throw IllegalArgumentException("Verken fnr eller behandlingId er definert")
             }
         packet.sakId = sak
-        packet.eventName = BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER
+        packet.setEventNameForHendelseType(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER)
         context.publish(packet.toJson())
     }
 }

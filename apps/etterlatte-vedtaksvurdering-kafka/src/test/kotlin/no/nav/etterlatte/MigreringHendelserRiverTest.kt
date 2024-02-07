@@ -11,10 +11,12 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -25,8 +27,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.SAK_ID_KEY
 import java.time.YearMonth
 import java.util.UUID
 
@@ -38,7 +38,7 @@ class MigreringHendelserRiverTest {
     fun `hvis opprett vedtak feila, legg meldinga rett paa feila-koea`() {
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.VEDTAK,
+                Migreringshendelser.VEDTAK.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     SAK_ID_KEY to "1",
@@ -53,14 +53,14 @@ class MigreringHendelserRiverTest {
 
         assertEquals(1, inspector.inspektør.size)
         val sendtMelding = inspector.inspektør.message(0)
-        assertEquals(sendtMelding.get(EVENT_NAME_KEY).asText(), EventNames.FEILA)
+        assertEquals(sendtMelding.get(EVENT_NAME_KEY).asText(), EventNames.FEILA.lagEventnameForType())
     }
 
     @Test
     fun `oppretter vedtak, fatter vedtak og attesterer`() {
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.VEDTAK,
+                Migreringshendelser.VEDTAK.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to behandlingId,
                     SAK_ID_KEY to "1",
@@ -75,7 +75,7 @@ class MigreringHendelserRiverTest {
 
         assertEquals(1, inspector.inspektør.size)
         val sendtTilRapid = inspector.inspektør.message(0)
-        assertEquals(VedtakKafkaHendelseType.ATTESTERT.toString(), sendtTilRapid.get(EVENT_NAME_KEY).textValue())
+        assertEquals(VedtakKafkaHendelseHendelseType.ATTESTERT.lagEventnameForType(), sendtTilRapid.get(EVENT_NAME_KEY).textValue())
         assertEquals(sendtTilRapid.get(BEHANDLING_ID_KEY).textValue(), behandlingId)
     }
 
@@ -83,7 +83,7 @@ class MigreringHendelserRiverTest {
     fun `Sender hendelse om pause om kjoeringsvariant er pause`() {
         val melding =
             JsonMessage.newMessage(
-                Migreringshendelser.VEDTAK,
+                Migreringshendelser.VEDTAK.lagEventnameForType(),
                 mapOf(
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     SAK_ID_KEY to "1",
@@ -99,7 +99,7 @@ class MigreringHendelserRiverTest {
 
         assertEquals(2, inspector.inspektør.size)
         val resultat = inspector.inspektør.message(0)
-        assertEquals(PAUSE, resultat.get(EVENT_NAME_KEY).asText())
+        assertEquals(PAUSE.lagEventnameForType(), resultat.get(EVENT_NAME_KEY).asText())
     }
 
     companion object {
@@ -124,7 +124,7 @@ class MigreringHendelserRiverTest {
             VedtakOgRapid(
                 vedtakDto,
                 RapidInfo(
-                    vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
+                    vedtakhendelse = VedtakKafkaHendelseHendelseType.ATTESTERT,
                     vedtak =
                         VedtakDto(
                             123,

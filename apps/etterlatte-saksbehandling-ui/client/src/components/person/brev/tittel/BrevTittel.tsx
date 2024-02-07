@@ -1,21 +1,28 @@
 import React, { useState } from 'react'
 import { Alert, BodyShort, Heading, Panel } from '@navikt/ds-react'
-import RedigerBrevTittelModal from '~components/person/brev/tittel/RedigerBrevTittelModal'
+import { BrevTittelModal } from '~components/person/brev/tittel/BrevTittelModal'
+import { FlexRow } from '~shared/styled'
 
-export default function BrevTittel({ brevId, sakId, tittel }: { brevId: number; sakId: number; tittel: string }) {
+interface Props {
+  brevId: number
+  sakId: number
+  tittel: string
+  kanRedigeres: boolean
+}
+
+export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres }: Props) {
   const [nyTittel, setNyTittel] = useState(tittel)
 
   return (
     <Panel border>
-      <Heading spacing level="2" size="medium">
-        Tittel
-        <RedigerBrevTittelModal
-          brevId={brevId}
-          sakId={sakId}
-          tittel={tittel}
-          oppdater={(tittel) => setNyTittel(tittel)}
-        />
-      </Heading>
+      <FlexRow justify="space-between">
+        <Heading spacing level="2" size="medium">
+          Tittel
+        </Heading>
+        {kanRedigeres && (
+          <BrevTittelModal nyTittel={nyTittel} setNyTittel={setNyTittel} brevId={brevId} sakId={sakId} />
+        )}
+      </FlexRow>
 
       {nyTittel ? (
         <>

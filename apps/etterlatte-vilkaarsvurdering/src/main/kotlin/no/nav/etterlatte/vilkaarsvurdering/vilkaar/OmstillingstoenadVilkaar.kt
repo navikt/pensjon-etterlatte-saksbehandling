@@ -18,6 +18,7 @@ object OmstillingstoenadVilkaar {
             avdoedesMedlemskapEoes(),
             gjenlevendesMedlemskap(),
             vurderingAvEksport(),
+            rettTilStoenadUtenTidsbegrensning(),
             aktivitetEtter6Maaneder(),
         )
 
@@ -35,6 +36,7 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-1",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-1",
                         ),
                 ),
         )
@@ -53,11 +55,11 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-1",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-1",
                         ),
                 ),
         )
 
-    // TODO: Obs skal egentlig kun være på revurdering men kan sette ikke vurdert på førstegangsbehandling
     private fun overlappendeYtelser() =
         Vilkaar(
             hovedvilkaar =
@@ -118,6 +120,7 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-12",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-12",
                         ),
                 ),
         )
@@ -145,6 +148,7 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-2",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-2",
                         ),
                 ),
             unntaksvilkaar =
@@ -192,7 +196,8 @@ object OmstillingstoenadVilkaar {
                 """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-2", // TODO
+                    paragraf = "§ 17-2",
+                    ledd = 6,
                 ),
         )
 
@@ -205,7 +210,8 @@ object OmstillingstoenadVilkaar {
                 """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-2", // TODO
+                    paragraf = "§ 17-2",
+                    ledd = 5,
                 ),
         )
 
@@ -218,7 +224,9 @@ object OmstillingstoenadVilkaar {
                 """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-2", // TODO
+                    paragraf = "§ 17-2",
+                    ledd = 3,
+                    bokstav = "b",
                 ),
         )
 
@@ -228,7 +236,9 @@ object OmstillingstoenadVilkaar {
             tittel = "Ja, avdøde var medlem av trygden ved dødsfallet og ikke fylt 26 år",
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-2", // TODO
+                    paragraf = "§ 17-2",
+                    ledd = 3,
+                    bokstav = "a",
                 ),
         )
 
@@ -238,7 +248,9 @@ object OmstillingstoenadVilkaar {
             tittel = "Ja, dødsfallet skyldes en godkjent yrkes-skade/sykdom",
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-2", // TODO
+                    paragraf = "§ 17-12",
+                    ledd = 1,
+                    bokstav = "a",
                 ),
         )
 
@@ -258,6 +270,7 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-3",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-3",
                         ),
                 ),
             unntaksvilkaar =
@@ -277,7 +290,8 @@ object OmstillingstoenadVilkaar {
                 """.trimIndent(),
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-3", // TODO
+                    paragraf = "§ 17-3",
+                    ledd = 2,
                 ),
         )
 
@@ -287,7 +301,8 @@ object OmstillingstoenadVilkaar {
             tittel = "Ja, den avdøde eller den gjenlevende har minst 20 års samlet botid",
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-3", // TODO
+                    paragraf = "§ 17-3",
+                    ledd = 2,
                 ),
         )
 
@@ -297,7 +312,9 @@ object OmstillingstoenadVilkaar {
             tittel = "Ja, dødsfallet skyldes en godkjent yrkes-skade/sykdom",
             lovreferanse =
                 Lovreferanse(
-                    paragraf = "§ 17-2", // TODO
+                    paragraf = "§ 17-12",
+                    ledd = 1,
+                    bokstav = "b",
                 ),
         )
 
@@ -321,6 +338,7 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-4",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-4",
                         ),
                 ),
         )
@@ -329,7 +347,7 @@ object OmstillingstoenadVilkaar {
         Vilkaar(
             hovedvilkaar =
                 Delvilkaar(
-                    type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND,
+                    type = VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
                     tittel = "Krav til aktivitet etter 6 måneder",
                     beskrivelse =
                         """
@@ -346,12 +364,33 @@ object OmstillingstoenadVilkaar {
                     lovreferanse =
                         Lovreferanse(
                             paragraf = "§ 17-7",
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-7",
                         ),
                 ),
             unntaksvilkaar =
                 listOf(
                     aktivitetEtter6MaanederGjenlevendeOver55ogLavInntekt(),
                     aktivitetEtter6MaanederGjenlevendeHarBarnUnder1Aar(),
+                ),
+        )
+
+    private fun rettTilStoenadUtenTidsbegrensning() =
+        Vilkaar(
+            hovedvilkaar =
+                Delvilkaar(
+                    type = VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
+                    tittel = "Rett til stønad uten tidsbegrensning?",
+                    beskrivelse =
+                        """
+                        Er etterlatte født i 1963 eller tidligere, kan hen få stønad frem til fylte 67 år hvis hen de siste fem årene før dødsfallet ikke har hatt en gjennomsnittlig årlig arbeidsinntekt som overstiger 2G det enkelte år. Den årlige arbeidsinntekten må i tillegg ikke ha oversteget 3G hvert av de siste to årene før dødsfallet. Er dette oppfylt er man også unntatt fra aktivitetsplikten.
+                        """.trimIndent(),
+                    spoersmaal = "Er vilkåret oppfylt?",
+                    lovreferanse =
+                        Lovreferanse(
+                            paragraf = "§ 17-5",
+                            ledd = 3,
+                            lenke = "https://lovdata.no/pro/lov/1997-02-28-19/§17-5",
+                        ),
                 ),
         )
 
@@ -379,6 +418,7 @@ object OmstillingstoenadVilkaar {
                         Lovreferanse(
                             paragraf = "§ 17-3",
                             ledd = 2,
+                            lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-3",
                         ),
                 ),
         )
@@ -390,6 +430,7 @@ object OmstillingstoenadVilkaar {
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-7",
+                    lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-7",
                 ),
         )
 
@@ -400,6 +441,7 @@ object OmstillingstoenadVilkaar {
             lovreferanse =
                 Lovreferanse(
                     paragraf = "§ 17-7",
+                    lenke = "https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/%C2%A717-7",
                 ),
         )
 }

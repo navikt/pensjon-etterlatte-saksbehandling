@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.behandling
 
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import java.time.LocalDate
 
 data class Persongalleri(
@@ -9,7 +10,16 @@ data class Persongalleri(
     val avdoed: List<String> = emptyList(),
     val gjenlevende: List<String> = emptyList(),
     val personerUtenIdent: List<PersonUtenIdent>? = null,
-)
+) {
+    override fun toString(): String {
+        return "Persongalleri(soeker=${soeker.maskerFnr()}," +
+            "innsender=${innsender?.maskerFnr()}," +
+            "soesken=${soesken.map { it.maskerFnr() }}," +
+            "avdoed=${avdoed.map { it.maskerFnr() }}," +
+            "gjenlevende=${gjenlevende.map { it.maskerFnr() }}," +
+            "personerUtenIdent=${personerUtenIdent?.map { it.person.foedselsdato.toString() }})"
+    }
+}
 
 enum class RelativPersonrolle {
     FORELDER,

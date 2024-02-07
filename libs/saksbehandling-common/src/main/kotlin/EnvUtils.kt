@@ -9,6 +9,10 @@ fun Map<String, String>.requireEnvValue(key: String) =
 data class Miljoevariabler(val props: Map<String, String>) {
     fun requireEnvValue(key: String): String = props.requireEnvValue(key)
 
+    fun maybeEnvValue(key: String): String? {
+        return props[key]
+    }
+
     operator fun get(key: String) = props[key]
 
     fun getValue(key: String): String = props.getValue(key)

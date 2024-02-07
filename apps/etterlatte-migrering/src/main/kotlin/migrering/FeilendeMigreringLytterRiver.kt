@@ -3,11 +3,15 @@ package no.nav.etterlatte.migrering
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilendeSteg
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilmelding
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
+import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PESYS_ID_KEY
@@ -19,10 +23,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.HENDELSE_DATA_KEY
-import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLogging
 import java.util.UUID
 
 internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, private val repository: PesysRepository) :
@@ -42,7 +42,10 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
             validate {
                 it.rejectValues(
                     FEILENDE_STEG,
-                    listOf(Migreringshendelser.VERIFISER, Migreringshendelser.AVBRYT_BEHANDLING),
+                    listOf(
+                        Migreringshendelser.VERIFISER.lagEventnameForType(),
+                        Migreringshendelser.AVBRYT_BEHANDLING.lagEventnameForType(),
+                    ),
                 )
             }
         }
@@ -68,7 +71,7 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
             pesysId = pesyskopling.first!!,
         )
         repository.oppdaterStatus(pesyskopling.first!!, Migreringsstatus.MIGRERING_FEILA)
-        packet.eventName = Migreringshendelser.AVBRYT_BEHANDLING
+        packet.setEventNameForHendelseType(Migreringshendelser.AVBRYT_BEHANDLING)
         pesyskopling.second?.let {
             packet.behandlingId = it
             context.publish(packet.toJson())

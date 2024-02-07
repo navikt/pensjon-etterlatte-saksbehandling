@@ -24,7 +24,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
 
     private fun hentSenesteVedtakPaaDato(dato: LocalDate): Vedtak? =
         iverksatteVedtak
-            .filter { (it.innhold as VedtakBehandlingInnhold).virkningstidspunkt.atDay(1).isAfter(foersteMuligeVedtaksdag(dato)).not() }
+            .filter { (it.innhold as VedtakInnhold.Behandling).virkningstidspunkt.atDay(1).isAfter(foersteMuligeVedtaksdag(dato)).not() }
             .maxByOrNull { it.attestasjon?.tidspunkt!! }
 
     private fun hentIverksatteVedtak(): List<Vedtak> = vedtak.filter { it.status === VedtakStatus.IVERKSATT }
@@ -34,7 +34,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
             (
                 iverksatteVedtak.minBy {
                     it.attestasjon?.tidspunkt ?: throw Error("Kunne ikke finne datoattestert paa vedtak")
-                }.innhold as VedtakBehandlingInnhold
+                }.innhold as VedtakInnhold.Behandling
             ).virkningstidspunkt.atDay(1)
         return maxOf(foersteVirkningsdato, fraDato)
     }
@@ -47,7 +47,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
         var currentVirkningstidspunkt: YearMonth? = null
 
         for (currentVedtak in vedtak
-            .filter { it.innhold is VedtakBehandlingInnhold }
+            .filter { it.innhold is VedtakInnhold.Behandling }
             .sortedByDescending { it.vedtakFattet!!.tidspunkt }) {
             with(currentVedtak) {
                 if (currentVirkningstidspunkt?.isAfter(virkningstidspunkt) != false) {
@@ -78,8 +78,8 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
             attestasjon = attestasjon,
             innhold =
                 when (innhold) {
-                    is VedtakBehandlingInnhold -> innhold.kopier(gyldighetsperiode)
-                    is VedtakTilbakekrevingInnhold -> throw UgyldigForespoerselException(
+                    is VedtakInnhold.Behandling -> innhold.kopier(gyldighetsperiode)
+                    is VedtakInnhold.Tilbakekreving, is VedtakInnhold.Klage -> throw UgyldigForespoerselException(
                         code = "VEDTAKSINNHOLD_IKKE_STOETTET",
                         detail = "Skal ikke benyttes på annet enn vedtak med behandlingsinnhold",
                     )
@@ -87,7 +87,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
         )
     }
 
-    private fun VedtakBehandlingInnhold.kopier(gyldighetsperiode: Periode): VedtakBehandlingInnhold {
+    private fun VedtakInnhold.Behandling.kopier(gyldighetsperiode: Periode): VedtakInnhold.Behandling {
         return copy(
             behandlingType = behandlingType,
             revurderingAarsak = revurderingAarsak,
@@ -105,7 +105,7 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
      * - fjerne perioder som er utenfor vedtakets tidsrom (kan være endret pga revurdering tilbake i tid osv)
      * - lukke siste perioder dersom vedtakets gyldighetsperiode også er lukket, dvs det finnes vedtak med senere virkningstidspunkt
      */
-    private fun VedtakBehandlingInnhold.filtrerUtbetalingsperioder(gyldighetsperiode: Periode): List<Utbetalingsperiode> {
+    private fun VedtakInnhold.Behandling.filtrerUtbetalingsperioder(gyldighetsperiode: Periode): List<Utbetalingsperiode> {
         return utbetalingsperioder
             .filter {
                 gyldighetsperiode.tom?.let { tom -> !it.periode.fom.isAfter(tom) } ?: true
@@ -125,5 +125,5 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     }
 
     private val Vedtak.virkningstidspunkt: YearMonth
-        get() = (this.innhold as VedtakBehandlingInnhold).virkningstidspunkt
+        get() = (this.innhold as VedtakInnhold.Behandling).virkningstidspunkt
 }

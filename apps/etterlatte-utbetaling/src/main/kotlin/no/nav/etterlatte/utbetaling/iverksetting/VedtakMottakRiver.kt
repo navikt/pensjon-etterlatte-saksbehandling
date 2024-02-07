@@ -7,8 +7,9 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.utbetaling.common.UtbetalingEventDto
@@ -22,7 +23,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.migrering.ListenerMedLogging
 import java.util.UUID
 
 data class KunneIkkeLeseVedtakException(val e: Exception) : RuntimeException(e)
@@ -33,7 +33,7 @@ class VedtakMottakRiver(
 ) : ListenerMedLogging() {
     init {
         // Barnepensjon
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
             validate { it.requireKey("vedtak") }
             validate { it.requireValue("vedtak.sak.sakType", SakType.BARNEPENSJON.name) }
             validate {
@@ -46,7 +46,7 @@ class VedtakMottakRiver(
         }
 
         // Omstillingsstønad
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.SAMORDNET.toString()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.SAMORDNET) {
             validate { it.requireKey("vedtak") }
             validate { it.requireValue("vedtak.sak.sakType", SakType.OMSTILLINGSSTOENAD.name) }
             validate {

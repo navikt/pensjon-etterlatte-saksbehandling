@@ -1,18 +1,19 @@
 package no.nav.etterlatte.vedtaksvurdering.samordning
 
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.migrering.ListenerMedLogging
 
 internal class SamordningMottattRiver(
     rapidsConnection: RapidsConnection,
     private val vedtaksvurderingService: VedtakService,
 ) : ListenerMedLogging() {
     init {
-        initialiserRiver(rapidsConnection, "VEDTAK:SAMORDNING_MOTTATT") {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.SAMORDNING_MOTTATT) {
             validate { it.requireKey("vedtakId") }
         }
     }
@@ -27,8 +28,11 @@ internal class SamordningMottattRiver(
         logger.info("Behandle mottatt samordning for vedtak [vedtakId=$vedtakId]")
 
         try {
-            val samordnetVedtak = vedtaksvurderingService.samordnetVedtak(vedtakId)
-            logger.info("Behandlet samordning ferdig for vedtak [behandlingId=${samordnetVedtak.behandlingId}]")
+            vedtaksvurderingService.samordnetVedtak(vedtakId)?.let {
+                logger.info("Behandlet samordning ferdig for vedtak [behandlingId=${it.behandlingId}]")
+            } ?: {
+                logger.info("Samordning skippet for vedtak [vedtakId=$vedtakId]")
+            }
         } catch (e: Exception) {
             logger.error("Feil ved oppdatering av vedtak til SAMORDNET [vedtakId=$vedtakId]")
             throw e

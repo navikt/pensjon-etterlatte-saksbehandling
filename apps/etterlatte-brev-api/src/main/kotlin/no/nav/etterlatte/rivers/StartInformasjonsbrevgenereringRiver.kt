@@ -1,20 +1,21 @@
 package no.nav.etterlatte.rivers
 
 import kotliquery.TransactionalSession
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
+import no.nav.etterlatte.brev.BrevRequestHendelseType
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.event.BrevEventKeys
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.FNR_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.FNR_KEY
 import java.time.Duration
 import java.util.UUID
 import javax.sql.DataSource
@@ -34,10 +35,10 @@ class StartInformasjonsbrevgenereringRiver(
         logger.info("Starter å generere informasjonsbrev for mottakerne som ligger i databasetabellen")
         val brevAaOpprette =
             repository.hentTilBrevgenerering().distinct().also { logger.info("Genererer ${it.size} brev") }
-        repository.settBrevPaastarta(brevAaOpprette)
         if (brevAaOpprette.isEmpty()) {
             return
         }
+        repository.settBrevPaastarta(brevAaOpprette)
         iTraad {
             sleep(Duration.ofMinutes(1))
             logger.info("Starter informasjonsbrev-genereringa")
@@ -52,10 +53,10 @@ class StartInformasjonsbrevgenereringRiver(
     private fun lagMelding(brevgenereringRequest: BrevgenereringRequest) =
         JsonMessage.newMessage(
             listOf(
-                EVENT_NAME_KEY to BrevEventKeys.OPPRETT_BREV,
+                BrevRequestHendelseType.OPPRETT_BREV.lagParMedEventNameKey(),
                 FNR_KEY to (brevgenereringRequest.fnr),
                 BEHANDLING_ID_KEY to (brevgenereringRequest.behandlingId?.toString()),
-                BrevEventKeys.BREVMAL_KEY to brevgenereringRequest.brevmal.name,
+                BREVMAL_RIVER_KEY to brevgenereringRequest.brevmal.name,
                 SAK_TYPE_KEY to brevgenereringRequest.sakType.name,
             )
                 .filter { it.second != null }
@@ -83,7 +84,7 @@ class StartBrevgenereringRepository(private val dataSource: DataSource) : Transa
             ) {
                 BrevgenereringRequest(
                     fnr = it.stringOrNull(Databasetabell.FNR),
-                    brevmal = EtterlatteBrevKode.valueOf(it.string(Databasetabell.BREVMAL)),
+                    brevmal = Brevkoder.valueOf(it.string(Databasetabell.BREVMAL)),
                     sakType = SakType.valueOf(it.string(Databasetabell.SAKTYPE)),
                     behandlingId = it.uuidOrNull(Databasetabell.BEHANDLING_ID),
                 )
@@ -120,7 +121,7 @@ class StartBrevgenereringRepository(private val dataSource: DataSource) : Transa
 data class BrevgenereringRequest(
     val fnr: String?,
     val behandlingId: UUID?,
-    val brevmal: EtterlatteBrevKode,
+    val brevmal: Brevkoder,
     val sakType: SakType,
 ) {
     init {

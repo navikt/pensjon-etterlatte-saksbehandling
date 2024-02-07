@@ -38,7 +38,7 @@ interface VedtakService {
 
     fun tilSamordningVedtak(behandlingId: UUID): VedtakDto
 
-    fun samordnetVedtak(vedtakId: String): VedtakDto
+    fun samordnetVedtak(vedtakId: String): VedtakDto?
 
     fun iverksattVedtak(behandlingId: UUID): VedtakDto
 }
@@ -85,7 +85,7 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
             }.body()
         }
 
-    override fun samordnetVedtak(vedtakId: String): VedtakDto =
+    override fun samordnetVedtak(vedtakId: String): VedtakDto? =
         runBlocking {
             vedtakKlient.post("$url/vedtak/samordnet/$vedtakId") {
                 contentType(ContentType.Application.Json)

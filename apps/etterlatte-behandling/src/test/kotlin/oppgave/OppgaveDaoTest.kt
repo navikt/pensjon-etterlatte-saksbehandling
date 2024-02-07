@@ -151,9 +151,9 @@ internal class OppgaveDaoTest {
 
         val nySaksbehandler = "nysaksbehandler"
         oppgaveDao.settNySaksbehandler(oppgaveNy.id, nySaksbehandler)
-        val hentOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
-        assertEquals(nySaksbehandler, hentOppgave?.saksbehandler)
-        assertEquals(Status.UNDER_BEHANDLING, hentOppgave?.status)
+        val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
+        assertEquals(nySaksbehandler, hentetOppgave?.saksbehandlerIdent)
+        assertEquals(Status.UNDER_BEHANDLING, hentetOppgave?.status)
     }
 
     @Test
@@ -189,23 +189,23 @@ internal class OppgaveDaoTest {
                 .finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(OppgaveType.entries)
         assertEquals(1, hentetOppgave.size)
     }
-
-    fun lagNyOppgave(
-        sak: Sak,
-        oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
-        oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-    ) = OppgaveIntern(
-        id = UUID.randomUUID(),
-        status = Status.NY,
-        enhet = sak.enhet,
-        sakId = sak.id,
-        kilde = oppgaveKilde,
-        referanse = "referanse",
-        merknad = "merknad",
-        opprettet = Tidspunkt.now(),
-        sakType = sak.sakType,
-        fnr = sak.ident,
-        frist = null,
-        type = oppgaveType,
-    )
 }
+
+fun lagNyOppgave(
+    sak: Sak,
+    oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
+    oppgaveType: OppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+) = OppgaveIntern(
+    id = UUID.randomUUID(),
+    status = Status.NY,
+    enhet = sak.enhet,
+    sakId = sak.id,
+    kilde = oppgaveKilde,
+    referanse = "referanse",
+    merknad = "merknad",
+    opprettet = Tidspunkt.now(),
+    sakType = sak.sakType,
+    fnr = sak.ident,
+    frist = null,
+    type = oppgaveType,
+)

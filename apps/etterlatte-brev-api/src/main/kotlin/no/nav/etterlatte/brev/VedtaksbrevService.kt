@@ -5,8 +5,11 @@ import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.BrevKodeMapper
+import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
@@ -19,9 +22,11 @@ import java.util.UUID
 class VedtaksbrevService(
     private val db: BrevRepository,
     private val vedtaksvurderingService: VedtaksvurderingService,
-    private val brevKodeMapper: BrevKodeMapper,
+    private val brevKodeMapperVedtak: BrevKodeMapperVedtak,
     private val brevoppretter: Brevoppretter,
     private val pdfGenerator: PDFGenerator,
+    private val brevDataMapperRedigerbartUtfallVedtak: BrevDataMapperRedigerbartUtfallVedtak,
+    private val brevDataMapperFerdigstilling: BrevDataMapperFerdigstillingVedtak,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -34,7 +39,7 @@ class VedtaksbrevService(
     fun hentVedtaksbrev(behandlingId: UUID): Brev? {
         logger.info("Henter vedtaksbrev for behandling (id=$behandlingId)")
 
-        return db.hentBrevForBehandling(behandlingId)
+        return db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull()
     }
 
     suspend fun opprettVedtaksbrev(
@@ -43,14 +48,14 @@ class VedtaksbrevService(
         brukerTokenInfo: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         // TODO EY-3232 - Fjerne migreringstilpasning
-    ): Brev {
-        return brevoppretter.opprettVedtaksbrev(
+    ): Brev =
+        brevoppretter.opprettVedtaksbrev(
             sakId = sakId,
             behandlingId = behandlingId,
             brukerTokenInfo = brukerTokenInfo,
             automatiskMigreringRequest = automatiskMigreringRequest,
-        )
-    }
+            brevKode = { brevKodeMapperVedtak.brevKode(it).redigering },
+        ) { brevDataMapperRedigerbartUtfallVedtak.brevData(it) }
 
     suspend fun genererPdf(
         id: BrevID,
@@ -62,12 +67,8 @@ class VedtaksbrevService(
             bruker = bruker,
             automatiskMigreringRequest = automatiskMigreringRequest,
             avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
-            brevKode = { generellBrevData, brev ->
-                brevKodeMapper.brevKode(
-                    generellBrevData,
-                    brev.prosessType,
-                )
-            },
+            brevKode = { brevKodeMapperVedtak.brevKode(it) },
+            brevData = { brevDataMapperFerdigstilling.brevDataFerdigstilling(it) },
         ) { generellBrevData, brev, pdf ->
             lagrePdfHvisVedtakFattet(
                 brev.id,
@@ -130,7 +131,10 @@ class VedtaksbrevService(
         brevId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BrevService.BrevPayload = brevoppretter.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo)
+    ): BrevService.BrevPayload =
+        brevoppretter.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo, {
+            brevKodeMapperVedtak.brevKode(it).redigering
+        }) { brevDataMapperRedigerbartUtfallVedtak.brevData(it) }
 
     private fun lagrePdfHvisVedtakFattet(
         brevId: BrevID,

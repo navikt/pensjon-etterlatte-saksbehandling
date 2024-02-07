@@ -22,7 +22,7 @@ import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
@@ -138,7 +138,7 @@ class VedtakBehandlingService(
         return VedtakOgRapid(
             fattetVedtak.toDto(),
             RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.FATTET,
+                vedtakhendelse = VedtakKafkaHendelseHendelseType.FATTET,
                 vedtak = fattetVedtak.toDto(),
                 tekniskTid = fattetVedtak.vedtakFattet!!.tidspunkt,
                 behandlingId = behandlingId,
@@ -210,7 +210,7 @@ class VedtakBehandlingService(
         return VedtakOgRapid(
             attestertVedtak.toDto(),
             RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.ATTESTERT,
+                vedtakhendelse = VedtakKafkaHendelseHendelseType.ATTESTERT,
                 vedtak = attestertVedtak.toDto(),
                 tekniskTid = attestertVedtak.attestasjon!!.tidspunkt,
                 behandlingId = behandlingId,
@@ -268,7 +268,7 @@ class VedtakBehandlingService(
         return VedtakOgRapid(
             repository.hentVedtak(behandlingId)!!.toDto(),
             RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.UNDERKJENT,
+                vedtakhendelse = VedtakKafkaHendelseHendelseType.UNDERKJENT,
                 vedtak = underkjentVedtak.toDto(),
                 tekniskTid = underkjentTid,
                 behandlingId = behandlingId,
@@ -297,7 +297,7 @@ class VedtakBehandlingService(
 
         val tilSamordning =
             RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.TIL_SAMORDNING,
+                vedtakhendelse = VedtakKafkaHendelseHendelseType.TIL_SAMORDNING,
                 vedtak = tilSamordningVedtakLocal.toDto(),
                 tekniskTid = Tidspunkt.now(),
                 behandlingId = behandlingId,
@@ -308,7 +308,7 @@ class VedtakBehandlingService(
         if (!samKlient.samordneVedtak(tilSamordningVedtakLocal, isEtterbetaling, brukerTokenInfo)) {
             logger.info("Svar fra samordning: ikke nødvendig å vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
 
-            val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)
+            val vedtakEtterSvar = samordnetVedtak(behandlingId, brukerTokenInfo, tilSamordningVedtakLocal)!!
             return VedtakOgRapid(vedtakEtterSvar.vedtak, tilSamordning, vedtakEtterSvar.rapidInfo1)
         } else {
             logger.info("Svar fra samordning: må vente for vedtak=${vedtak.id} [behandlingId=$behandlingId]")
@@ -321,30 +321,43 @@ class VedtakBehandlingService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
         vedtakTilSamordning: Vedtak? = null,
-    ): VedtakOgRapid {
+    ): VedtakOgRapid? {
         logger.info("Setter vedtak til samordnet for behandling med behandlingId=$behandlingId")
         val vedtak = vedtakTilSamordning ?: hentVedtakNonNull(behandlingId)
 
-        verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.TIL_SAMORDNING))
-        val samordnetVedtakLocal =
-            repository.inTransaction { tx ->
-                repository.samordnetVedtak(behandlingId, tx = tx)
-                    .also {
-                        runBlocking {
-                            behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
-                        }
+        when (vedtak.status) {
+            VedtakStatus.TIL_SAMORDNING -> {
+                val samordnetVedtakLocal =
+                    repository.inTransaction { tx ->
+                        repository.samordnetVedtak(behandlingId, tx = tx)
+                            .also {
+                                runBlocking {
+                                    behandlingKlient.samordnet(behandlingId, brukerTokenInfo, it.id)
+                                }
+                            }
                     }
-            }
 
-        return VedtakOgRapid(
-            samordnetVedtakLocal.toDto(),
-            RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.SAMORDNET,
-                vedtak = samordnetVedtakLocal.toDto(),
-                tekniskTid = Tidspunkt.now(),
-                behandlingId = behandlingId,
-            ),
-        )
+                return VedtakOgRapid(
+                    samordnetVedtakLocal.toDto(),
+                    RapidInfo(
+                        vedtakhendelse = VedtakKafkaHendelseHendelseType.SAMORDNET,
+                        vedtak = samordnetVedtakLocal.toDto(),
+                        tekniskTid = Tidspunkt.now(),
+                        behandlingId = behandlingId,
+                    ),
+                )
+            }
+            VedtakStatus.IVERKSATT -> {
+                logger.warn(
+                    "Behandlet svar på samording for vedtak ${vedtak.id}, " +
+                        "men vedtaket er allerede iverksatt [behandling=$behandlingId. Skipper",
+                )
+            }
+            else -> {
+                verifiserGyldigVedtakStatus(vedtak.status, listOf(VedtakStatus.TIL_SAMORDNING))
+            }
+        }
+        return null
     }
 
     suspend fun samordningsinfo(behandlingId: UUID): List<Samordningsvedtak> {
@@ -374,7 +387,7 @@ class VedtakBehandlingService(
         return VedtakOgRapid(
             iverksattVedtak.toDto(),
             RapidInfo(
-                vedtakhendelse = VedtakKafkaHendelseType.IVERKSATT,
+                vedtakhendelse = VedtakKafkaHendelseHendelseType.IVERKSATT,
                 vedtak = iverksattVedtak.toDto(),
                 tekniskTid = Tidspunkt.now(),
                 behandlingId = behandlingId,
@@ -434,7 +447,7 @@ class VedtakBehandlingService(
                 status = VedtakStatus.OPPRETTET,
                 type = vedtakType,
                 innhold =
-                    VedtakBehandlingInnhold(
+                    VedtakInnhold.Behandling(
                         behandlingType = behandling.behandlingType,
                         virkningstidspunkt = virkningstidspunkt,
                         beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
@@ -467,7 +480,7 @@ class VedtakBehandlingService(
             eksisterendeVedtak.copy(
                 type = vedtakType,
                 innhold =
-                    (eksisterendeVedtak.innhold as VedtakBehandlingInnhold).copy(
+                    (eksisterendeVedtak.innhold as VedtakInnhold.Behandling).copy(
                         virkningstidspunkt = virkningstidspunkt,
                         beregning = beregningOgAvkorting?.beregning?.toObjectNode(),
                         avkorting = beregningOgAvkorting?.avkorting?.toObjectNode(),
@@ -562,6 +575,7 @@ class VedtakBehandlingService(
 
             VedtakType.TILBAKEKREVING,
             VedtakType.AVSLAG,
+            VedtakType.AVVIST_KLAGE,
             -> emptyList()
         }
     }
@@ -603,14 +617,6 @@ class VedtakBehandlingService(
         requireNotNull(vilkaarsvurderingUtfall) { "Behandling mangler utfall på vilkårsvurdering" }
 
     fun tilbakestillIkkeIverksatteVedtak(behandlingId: UUID): Vedtak? = repository.tilbakestillIkkeIverksatteVedtak(behandlingId)
-
-    fun hentNyesteBehandlingMedResultat(
-        sakId: Long,
-        resultat: VedtakType,
-    ) = repository.hentVedtakForSak(sakId)
-        .filter { it.status == VedtakStatus.IVERKSATT }
-        .filter { it.type == resultat }
-        .maxByOrNull { it.id }
 
     fun hentIverksatteVedtakISak(sakId: Long): List<Vedtak> {
         return repository.hentVedtakForSak(sakId)

@@ -25,7 +25,7 @@ import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
-import no.nav.etterlatte.libs.common.behandling.SakOgRolle
+import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
@@ -80,7 +80,7 @@ internal class PersonRoutesTest {
             PersonMedSakerOgRoller(
                 SOEKER_FOEDSELSNUMMER.value,
                 listOf(
-                    SakOgRolle(1, Saksrolle.SOEKER),
+                    SakidOgRolle(1, Saksrolle.SOEKER),
                 ),
             )
         every { grunnlagService.hentSakerOgRoller(any()) } returns response

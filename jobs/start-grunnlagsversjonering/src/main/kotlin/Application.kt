@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.standardProducer
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -23,7 +24,7 @@ fun main() {
         noekkel = "StartGrunnlagsversjoneringJobb-${UUID.randomUUID()}",
         verdi =
             JsonMessage.newMessage(
-                mapOf("@event_name" to EventNames.GRUNNLAGSVERSJONERING_EVENT_NAME),
+                mapOf(EventNames.GRUNNLAGSVERSJONERING_EVENT_NAME.lagParMedEventNameKey()),
             ).toJson(),
     )
     producer.close()

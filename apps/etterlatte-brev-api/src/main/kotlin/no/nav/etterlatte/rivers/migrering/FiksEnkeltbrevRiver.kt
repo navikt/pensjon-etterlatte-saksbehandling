@@ -2,24 +2,23 @@ package no.nav.etterlatte.rivers.migrering
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
-import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.retryOgPakkUt
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rivers.BrevEventTypes
 import no.nav.etterlatte.token.Systembruker
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class FiksEnkeltbrevRiver(
     rapidsConnection: RapidsConnection,
     private val vedtaksvurderingService: VedtaksvurderingService,
-) : ListenerMedLoggingOgFeilhaandtering(BrevEventTypes.FIKS_ENKELTBREV.toString()) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -36,7 +35,7 @@ internal class FiksEnkeltbrevRiver(
         logger.info("Fikser vedtaksbrev for behandling $behandlingId")
 
         runBlocking {
-            packet.eventName = VedtakKafkaHendelseType.ATTESTERT.toString()
+            packet.setEventNameForHendelseType(VedtakKafkaHendelseHendelseType.ATTESTERT)
             val vedtak = retryOgPakkUt { vedtaksvurderingService.hentVedtak(behandlingId, Systembruker.migrering) }
             packet["vedtak"] = vedtak
         }

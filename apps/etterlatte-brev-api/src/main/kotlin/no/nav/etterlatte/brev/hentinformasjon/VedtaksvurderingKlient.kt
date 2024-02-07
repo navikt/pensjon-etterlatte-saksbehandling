@@ -3,19 +3,18 @@ package no.nav.etterlatte.brev.hentinformasjon
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.UUID
-
-class VedtakvurderingKlientException(override val message: String, override val cause: Throwable) :
-    Exception(message, cause)
 
 class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
     private val logger = LoggerFactory.getLogger(VedtaksvurderingKlient::class.java)
@@ -37,41 +36,24 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
                 Resource(clientId, "$resourceUrl/api/vedtak/$behandlingId"),
                 brukerTokenInfo,
             ).mapBoth(
-                success = { resource -> resource.response.let { deserialize(it.toString()) } },
+                success = { resource -> deserialize(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse },
             )
-        } catch (e: Exception) {
-            throw VedtakvurderingKlientException(
-                "Henting vedtak for behandling med behandlingId=$behandlingId feilet",
-                e,
-            )
-        }
-    }
-
-    internal suspend fun hentInnvilgelsesdato(
-        sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): LocalDate? {
-        try {
-            logger.info("Henter innvilgelsesdato for sak med id $sakId")
-
-            return downstreamResourceClient.get(
-                Resource(clientId, "$resourceUrl/vedtak/$sakId/behandlinger/nyeste/${VedtakType.INNVILGELSE}"),
-                brukerTokenInfo,
-            ).mapBoth(
-                success = { resource ->
-                    resource.response?.toString()?.let {
-                        val deserialize: VedtakDto? = deserialize(it)
-                        deserialize?.vedtakFattet?.tidspunkt?.toLocalDate()
-                    }
-                },
-                failure = { errorResponse -> throw errorResponse },
-            )
-        } catch (e: Exception) {
-            throw VedtakvurderingKlientException(
-                "Henting av innvilgelsesdato for sak med id $sakId feilet",
-                e,
-            )
+        } catch (re: ResponseException) {
+            if (re.response.status == HttpStatusCode.NotFound) {
+                throw IkkeFunnetException(
+                    code = "VEDTAK_IKKE_FUNNET",
+                    detail = "Ingen vedtak funnet for behandlingen",
+                    meta = mapOf("behandlingId" to behandlingId),
+                )
+            } else {
+                throw ForespoerselException(
+                    status = re.response.status.value,
+                    code = "UKJENT_FEIL_HENTING_AV_VEDTAKSVURDERING",
+                    detail = "Ukjent feil oppsto ved henting av vedtak for behandling",
+                    meta = mapOf("behandlingId" to behandlingId),
+                )
+            }
         }
     }
 }

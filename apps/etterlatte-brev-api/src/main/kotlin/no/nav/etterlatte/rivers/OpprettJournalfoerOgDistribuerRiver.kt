@@ -1,15 +1,20 @@
 package no.nav.etterlatte.rivers
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
+import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
-import no.nav.etterlatte.brev.model.BrevkodePar
-import no.nav.etterlatte.libs.common.event.BrevEventKeys
+import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.token.Systembruker
@@ -17,9 +22,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
-import rapidsandrivers.sakId
 
 class OpprettJournalfoerOgDistribuerRiver(
     rapidsConnection: RapidsConnection,
@@ -27,13 +29,13 @@ class OpprettJournalfoerOgDistribuerRiver(
     private val pdfGenerator: PDFGenerator,
     private val journalfoerBrevService: JournalfoerBrevService,
     private val brevdistribuerer: Brevdistribuerer,
-) : ListenerMedLoggingOgFeilhaandtering(BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER) {
+        initialiserRiver(rapidsConnection, BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER) {
             validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.requireKey(BrevEventKeys.BREVMAL_KEY) }
+            validate { it.requireKey(BREVMAL_RIVER_KEY) }
         }
     }
 
@@ -41,13 +43,13 @@ class OpprettJournalfoerOgDistribuerRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) = runBlocking {
-        val brevkode = packet[BrevEventKeys.BREVMAL_KEY].asText().let { EtterlatteBrevKode.valueOf(it) }
+        val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
         opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.brev)
     }
 
     private suspend fun opprettJournalfoerOgDistribuer(
         sakId: Long,
-        brevKode: EtterlatteBrevKode,
+        brevKode: Brevkoder,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
@@ -57,8 +59,9 @@ class OpprettJournalfoerOgDistribuerRiver(
                     sakId = sakId,
                     behandlingId = null,
                     bruker = brukerTokenInfo,
-                    brevKode = brevKode,
-                )
+                    brevKode = { brevKode.redigering },
+                    brevtype = brevKode.redigering.brevtype,
+                ) { ManueltBrevData() }
             }
         logger.info("Ferdigstiller $brevKode-brev i sak $sakId")
         val brevId = brevOgData.first.id
@@ -74,12 +77,8 @@ class OpprettJournalfoerOgDistribuerRiver(
                         attestantIdent = Fagsaksystem.EY.navn,
                     )
                 },
-                brevKode = { _, _ ->
-                    BrevkodePar(
-                        brevKode,
-                        EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
-                    )
-                },
+                brevKode = { brevKode },
+                brevData = { ManueltBrevMedTittelData(it.innholdMedVedlegg.innhold(), it.tittel) },
             )
         }
         logger.info("Journalfører $brevKode-brev i sak $sakId")

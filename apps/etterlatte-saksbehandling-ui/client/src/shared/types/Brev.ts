@@ -9,6 +9,7 @@ export interface IBrev {
   statusEndret: string
   mottaker: Mottaker
   opprettet: string
+  brevtype: Brevtype
 }
 
 export interface Mottaker {
@@ -60,4 +61,13 @@ export enum Spraak {
   NB = 'nb',
   NN = 'nn',
   EN = 'en',
+}
+
+export enum Brevtype {
+  VEDTAK = 'VEDTAK',
+  VARSEL = 'VARSEL',
+  INFORMASJON = 'INFORMASJON',
+  OPPLASTET_PDF = 'OPPLASTET_PDF',
+  MANUELT = 'MANUELT',
+  VEDLEGG = 'VEDLEGG',
 }

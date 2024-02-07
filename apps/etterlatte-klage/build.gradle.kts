@@ -11,7 +11,6 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
 
     implementation(libs.kafka.clients)
-    implementation(libs.kafka.avroserializer)
     implementation(libs.klage.kodeverk)
     implementation(libs.ktor2.okhttp)
 

@@ -1,10 +1,7 @@
 package no.nav.etterlatte.brev
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.PartData
 import io.ktor.http.content.readAllParts
-import io.ktor.http.content.streamProvider
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
@@ -16,17 +13,16 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
-import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -42,6 +38,7 @@ inline val PipelineContext<*, ApplicationCall>.brevId: Long
 
 fun Route.brevRoute(
     service: BrevService,
+    pdfService: PDFService,
     distribuerer: Brevdistribuerer,
     tilgangssjekker: Tilgangssjekker,
 ) {
@@ -158,7 +155,11 @@ fun Route.brevRoute(
                 logger.info("Oppretter nytt brev på sak=$sakId)")
 
                 measureTimedValue {
-                    service.opprettBrev(sakId, brukerTokenInfo)
+                    service.opprettBrev(
+                        sakId,
+                        brukerTokenInfo,
+                        Brevkoder.TOMT_INFORMASJONSBREV,
+                    ) { ManueltBrevData() }
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(HttpStatusCode.Created, brev)
@@ -169,19 +170,13 @@ fun Route.brevRoute(
         post("pdf") {
             withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 try {
-                    val mp = call.receiveMultipart().readAllParts()
-
-                    val request =
-                        mp.first { it is PartData.FormItem }
-                            .let { objectMapper.readValue<BrevFraOpplastningRequest>((it as PartData.FormItem).value) }
-
-                    val fil: ByteArray =
-                        mp.first { it is PartData.FileItem }
-                            .let { (it as PartData.FileItem).streamProvider().readBytes() }
-
-                    val brev = service.lagrePdf(sakId, fil, request.innhold, request.sak)
-
-                    call.respond(brev)
+                    val brev = pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts())
+                    brev.onSuccess {
+                        call.respond(brev)
+                    }
+                    brev.onFailure {
+                        call.respond(HttpStatusCode.UnprocessableEntity)
+                    }
                 } catch (e: Exception) {
                     logger.error("Getting multipart error", e)
                     call.respond(HttpStatusCode.BadRequest)
@@ -202,9 +197,4 @@ data class OppdaterMottakerRequest(
 
 data class OppdaterTittelRequest(
     val tittel: String,
-)
-
-data class BrevFraOpplastningRequest(
-    val innhold: BrevInnhold,
-    val sak: Sak,
 )

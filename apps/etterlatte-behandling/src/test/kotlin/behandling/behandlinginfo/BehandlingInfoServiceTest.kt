@@ -8,7 +8,10 @@ import no.nav.etterlatte.behandling.BehandlingStatusService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
+import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
+import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -64,6 +67,7 @@ internal class BehandlingInfoServiceTest {
         every { behandlingService.hentBehandling(any()) } returns
             behandling(
                 behandlingId,
+                BehandlingType.FØRSTEGANGSBEHANDLING,
                 SakType.OMSTILLINGSSTOENAD,
                 BehandlingStatus.AVKORTET,
             )
@@ -101,6 +105,31 @@ internal class BehandlingInfoServiceTest {
     }
 
     @Test
+    fun `skal feile ved opprettelse av brevutfall hvis feilutbetaling ikke er satt`() {
+        val behandlingId = randomUUID()
+
+        every { behandlingService.hentBehandling(any()) } returns
+            behandling(
+                behandlingId = behandlingId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                behandlingType = BehandlingType.REVURDERING,
+                behandlingStatus = BehandlingStatus.AVKORTET,
+            )
+        every { behandlingInfoDao.lagreBrevutfall(any()) } returns mockk()
+        every { behandlingInfoDao.lagreEtterbetaling(any()) } returns mockk()
+        every { behandlingsstatusService.settAvkortet(any(), any(), any()) } returns Unit
+
+        assertThrows<BrevutfallException.FeilutbetalingIkkeSatt> {
+            behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+                behandlingId,
+                bruker,
+                brevutfall(behandlingId).copy(feilutbetaling = null),
+                etterbetaling(behandlingId = behandlingId),
+            )
+        }
+    }
+
+    @Test
     fun `skal feile ved opprettelse av etterbetaling hvis etterbetaling fra-dato er foer virkningstidspunkt`() {
         val behandlingId = randomUUID()
         val etterbetaling =
@@ -131,14 +160,16 @@ internal class BehandlingInfoServiceTest {
 
     private fun behandling(
         behandlingId: UUID,
-        type: SakType = SakType.BARNEPENSJON,
+        behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        sakType: SakType = SakType.BARNEPENSJON,
         behandlingStatus: BehandlingStatus = BehandlingStatus.BEREGNET,
     ): Behandling =
         mockk {
             every { id } returns behandlingId
+            every { type } returns behandlingType
             every { sak } returns
                 mockk {
-                    every { sakType } returns type
+                    every { this@mockk.sakType } returns sakType
                 }
             every { status } returns behandlingStatus
             every { virkningstidspunkt } returns
@@ -150,6 +181,7 @@ internal class BehandlingInfoServiceTest {
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
             lavEllerIngenInntekt = LavEllerIngenInntekt.NEI,
+            feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
 

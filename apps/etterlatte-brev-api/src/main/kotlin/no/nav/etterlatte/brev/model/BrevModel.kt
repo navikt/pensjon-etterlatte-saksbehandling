@@ -2,17 +2,14 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
-import no.nav.etterlatte.brev.behandling.Beregningsperiode
-import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
+import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.apache.pdfbox.Loader
 import org.apache.pdfbox.multipdf.PDFMergerUtility
 import java.io.ByteArrayOutputStream
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 
 typealias BrevID = Long
@@ -106,6 +103,9 @@ data class Brev(
     val statusEndret: Tidspunkt,
     val opprettet: Tidspunkt,
     val mottaker: Mottaker,
+    val journalpostId: String? = null,
+    val bestillingsID: BestillingsID? = null,
+    val brevtype: Brevtype,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
 
@@ -124,6 +124,7 @@ data class Brev(
             statusEndret = opprettNyttBrev.opprettet,
             mottaker = opprettNyttBrev.mottaker,
             opprettet = opprettNyttBrev.opprettet,
+            brevtype = opprettNyttBrev.brevtype,
         )
     }
 }
@@ -166,6 +167,7 @@ data class OpprettNyttBrev(
     val opprettet: Tidspunkt,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
+    val brevtype: Brevtype,
 ) {
     val status: Status = Status.OPPRETTET
 }
@@ -182,37 +184,11 @@ data class EtterbetalingDTO(
     val datoTom: LocalDate,
 )
 
-data class Beregningsinfo(
-    val innhold: List<Slate.Element>,
-    val grunnbeloep: Kroner,
-    val beregningsperioder: List<NyBeregningsperiode>,
-    val trygdetidsperioder: List<Trygdetidsperiode>,
-)
-
-data class NyBeregningsperiode(
-    val inntekt: Kroner,
-    val trygdetid: Int,
-    val stoenadFoerReduksjon: Kroner,
-    var utbetaltBeloep: Kroner,
-)
-
-data class EtterbetalingBrev(
-    val fraDato: LocalDate,
-    val tilDato: LocalDate,
-    val etterbetalingsperioder: List<Beregningsperiode>,
-) {
-    companion object {
-        fun fra(
-            dto: EtterbetalingDTO?,
-            perioder: List<Beregningsperiode>,
-        ) = if (dto == null) {
-            null
-        } else {
-            EtterbetalingBrev(
-                fraDato = dto.datoFom,
-                tilDato = dto.datoTom,
-                etterbetalingsperioder = perioder.filter { YearMonth.from(it.datoFOM) <= YearMonth.from(dto.datoTom) },
-            )
-        }
-    }
+enum class Brevtype {
+    VEDTAK,
+    VARSEL,
+    INFORMASJON,
+    OPPLASTET_PDF,
+    MANUELT,
+    VEDLEGG,
 }

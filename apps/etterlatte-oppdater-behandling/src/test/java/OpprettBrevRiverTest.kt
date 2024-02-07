@@ -4,20 +4,21 @@ import io.mockk.mockk
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.InformasjonsbrevFeatureToggle
 import no.nav.etterlatte.OpprettBrevRiver
+import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.event.BrevEventKeys
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.FNR_KEY
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.FNR_KEY
-import rapidsandrivers.SAK_ID_KEY
 import java.util.UUID
 
 class OpprettBrevRiverTest {
@@ -31,7 +32,7 @@ class OpprettBrevRiverTest {
         testRapid.sendTestMessage(
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventKeys.OPPRETT_BREV,
+                    BrevRequestHendelseType.OPPRETT_BREV.lagParMedEventNameKey(),
                     FNR_KEY to "123",
                     SAK_TYPE_KEY to SakType.BARNEPENSJON.name,
                 ),
@@ -39,7 +40,7 @@ class OpprettBrevRiverTest {
         )
         assertEquals(1, testRapid.inspektør.size)
         with(testRapid.inspektør.message(0)) {
-            assertEquals(BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER, get(EVENT_NAME_KEY).asText())
+            assertEquals(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagEventnameForType(), get(EVENT_NAME_KEY).asText())
             assertEquals(1L, get(SAK_ID_KEY).asLong())
         }
     }
@@ -55,7 +56,7 @@ class OpprettBrevRiverTest {
         testRapid.sendTestMessage(
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventKeys.OPPRETT_BREV,
+                    BrevRequestHendelseType.OPPRETT_BREV.lagParMedEventNameKey(),
                     BEHANDLING_ID_KEY to behandlingId,
                     SAK_TYPE_KEY to SakType.BARNEPENSJON.name,
                 ),
@@ -63,7 +64,7 @@ class OpprettBrevRiverTest {
         )
         assertEquals(1, testRapid.inspektør.size)
         with(testRapid.inspektør.message(0)) {
-            assertEquals(BrevEventKeys.OPPRETT_JOURNALFOER_OG_DISTRIBUER, get(EVENT_NAME_KEY).asText())
+            assertEquals(BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagEventnameForType(), get(EVENT_NAME_KEY).asText())
             assertEquals(behandlingId.toString(), get(BEHANDLING_ID_KEY).asText())
         }
     }

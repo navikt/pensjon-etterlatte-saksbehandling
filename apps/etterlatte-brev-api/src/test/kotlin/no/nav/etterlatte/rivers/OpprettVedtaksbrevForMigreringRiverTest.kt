@@ -10,6 +10,7 @@ import io.mockk.runs
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
@@ -18,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -25,10 +27,11 @@ import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
@@ -42,7 +45,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import rapidsandrivers.HENDELSE_DATA_KEY
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -64,7 +66,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
     fun `oppretter for migrering nytt brev, genererer pdf og sender videre`() {
         val vedtak = opprettVedtak()
         val migreringRequest = migreringRequest()
-        val melding = opprettMelding(vedtak, migreringRequest, VedtakKafkaHendelseType.FATTET)
+        val melding = opprettMelding(vedtak, migreringRequest, VedtakKafkaHendelseHendelseType.FATTET)
         val brev = opprettBrev()
 
         coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), behandlingId, any(), any()) } returns brev
@@ -78,7 +80,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         coVerify(exactly = 1) { vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, any(), true) }
 
         val meldingSendt = inspektoer.message(0)
-        assertEquals(VedtakKafkaHendelseType.FATTET.toString(), meldingSendt.get(EVENT_NAME_KEY).asText())
+        assertEquals(VedtakKafkaHendelseHendelseType.FATTET.lagEventnameForType(), meldingSendt.get(EVENT_NAME_KEY).asText())
     }
 
     @Test
@@ -104,12 +106,13 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
             Tidspunkt.now(),
             Tidspunkt.now(),
             mottaker = mockk(),
+            brevtype = Brevtype.VEDTAK,
         )
 
     private fun opprettMelding(
         vedtak: VedtakDto,
         migreringRequest: MigreringRequest?,
-        hendelse: VedtakKafkaHendelseType = VedtakKafkaHendelseType.FATTET,
+        hendelse: VedtakKafkaHendelseHendelseType = VedtakKafkaHendelseHendelseType.FATTET,
     ): JsonMessage {
         val kilde =
             when (migreringRequest) {
@@ -119,7 +122,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         val messageKeys =
             mapOf(
                 CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                EVENT_NAME_KEY to hendelse.toString(),
+                hendelse.lagParMedEventNameKey(),
                 "vedtak" to vedtak,
                 KILDE_KEY to kilde,
             )

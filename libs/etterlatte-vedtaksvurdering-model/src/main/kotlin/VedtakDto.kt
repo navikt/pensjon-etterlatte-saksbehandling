@@ -51,6 +51,9 @@ sealed class VedtakInnholdDto {
     data class VedtakTilbakekrevingDto(
         val tilbakekreving: ObjectNode,
     ) : VedtakInnholdDto()
+
+    @JsonTypeName("KLAGE")
+    data class Klage(val klage: ObjectNode) : VedtakInnholdDto()
 }
 
 enum class VedtakStatus {

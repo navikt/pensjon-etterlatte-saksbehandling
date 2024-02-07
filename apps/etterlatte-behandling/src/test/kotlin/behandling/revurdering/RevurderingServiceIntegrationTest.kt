@@ -1,7 +1,5 @@
 package no.nav.etterlatte.behandling.revurdering
 
-import behandling.utland.LandMedDokumenter
-import behandling.utland.MottattDokument
 import io.ktor.server.plugins.BadRequestException
 import io.mockk.coVerify
 import io.mockk.confirmVerified
@@ -22,6 +20,8 @@ import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
+import no.nav.etterlatte.behandling.utland.LandMedDokumenter
+import no.nav.etterlatte.behandling.utland.MottattDokument
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.inTransaction

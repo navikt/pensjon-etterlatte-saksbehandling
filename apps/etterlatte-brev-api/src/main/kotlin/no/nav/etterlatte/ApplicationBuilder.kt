@@ -9,6 +9,8 @@ import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.MigreringBrevDataService
 import no.nav.etterlatte.brev.PDFGenerator
+import no.nav.etterlatte.brev.PDFService
+import no.nav.etterlatte.brev.RedigerbartVedleggHenter
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.Norg2Klient
@@ -37,13 +39,17 @@ import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
-import no.nav.etterlatte.brev.model.BrevDataMapper
-import no.nav.etterlatte.brev.model.BrevKodeMapper
-import no.nav.etterlatte.brev.model.BrevProsessTypeFactory
+import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
+import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
+import no.nav.etterlatte.brev.varselbrev.VarselbrevService
+import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
+import no.nav.etterlatte.brev.virusskanning.ClamAvClient
+import no.nav.etterlatte.brev.virusskanning.VirusScanService
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
@@ -51,6 +57,8 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
@@ -68,8 +76,6 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.Logger
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.getRapidEnv
 import java.util.UUID
 import kotlin.concurrent.thread
 
@@ -138,30 +144,39 @@ class ApplicationBuilder {
 
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
 
-    private val brevDataMapper = BrevDataMapper(brevdataFacade, migreringBrevDataService)
+    private val brevDataMapperRedigerbartUtfallVedtak = BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService)
 
-    private val brevKodeMapper = BrevKodeMapper()
+    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(brevdataFacade)
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper, brevKodeMapper)
+    private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
-    private val brevProsessTypeFactory = BrevProsessTypeFactory()
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService)
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
     private val brevdistribuerer = Brevdistribuerer(db, distribusjonService)
 
-    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevProsessTypeFactory, brevbakerService)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
 
-    private val pdfGenerator = PDFGenerator(db, brevdataFacade, brevDataMapper, adresseService, brevbakerService, migreringBrevDataService)
+    private val brevoppretter =
+        Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
+
+    private val pdfGenerator =
+        PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
             vedtaksvurderingService,
-            brevKodeMapper,
+            brevKodeMapperVedtak,
             brevoppretter,
             pdfGenerator,
+            brevDataMapperRedigerbartUtfallVedtak,
+            brevDataMapperFerdigstilling,
         )
+
+    private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator)
+
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 
     private val brevService =
@@ -172,6 +187,10 @@ class ApplicationBuilder {
             pdfGenerator,
         )
 
+    private val clamAvClient = ClamAvClient(httpClient(), env.requireEnvValue("CLAMAV_ENDPOINT_URL"))
+    private val virusScanService = VirusScanService(clamAvClient)
+    private val pdfService = PDFService(db, virusScanService)
+
     private val journalpostService =
         SafClient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE"))
 
@@ -181,9 +200,10 @@ class ApplicationBuilder {
         RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(env))
             .withKtorModule {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
-                    brevRoute(brevService, brevdistribuerer, tilgangssjekker)
+                    brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(journalpostService, dokarkivService, tilgangssjekker)
+                    varselbrevRoute(varselbrevService, tilgangssjekker)
                 }
             }
             .build()
@@ -233,7 +253,7 @@ class ApplicationBuilder {
     private fun lagMelding(behandlingId: String) =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to Migreringshendelser.FIKS_ENKELTBREV,
+                Migreringshendelser.FIKS_ENKELTBREV.lagParMedEventNameKey(),
                 BEHANDLING_ID_KEY to behandlingId,
                 FIKS_BREV_MIGRERING to true,
             ),

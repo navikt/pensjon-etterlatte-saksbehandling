@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.rapidsandrivers
 
+import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.River
@@ -19,6 +20,14 @@ const val FEILMELDING_KEY = "feilmelding"
 
 fun River.eventName(eventName: String) {
     validate { it.demandValue(EVENT_NAME_KEY, eventName) }
+}
+
+fun JsonMessage.setEventNameForHendelseType(eventnameHendelseType: EventnameHendelseType) {
+    this[EVENT_NAME_KEY] = eventnameHendelseType.lagEventnameForType()
+}
+
+fun EventnameHendelseType.lagParMedEventNameKey(): Pair<String, String> {
+    return Pair(EVENT_NAME_KEY, this.lagEventnameForType())
 }
 
 var JsonMessage.eventName: String

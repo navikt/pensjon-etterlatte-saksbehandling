@@ -14,7 +14,7 @@ import {
   SAKSBEHANDLERFILTER,
   YTELSEFILTER,
   YtelseFilterKeys,
-} from '~components/oppgavebenk/Oppgavelistafiltre'
+} from '~components/oppgavebenk/filter/oppgavelistafiltre'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
 import { OppgaveDTO } from '~shared/api/oppgaver'
@@ -31,7 +31,7 @@ interface Props {
 
 export const FilterRad = ({ hentAlleOppgaver, hentOppgaver, filter, setFilter, alleOppgaver }: Props): ReactNode => {
   const saksbehandlere = new Set(
-    alleOppgaver.map((oppgave) => oppgave.saksbehandler).filter((s): s is Exclude<typeof s, null> => s !== null)
+    alleOppgaver.map((oppgave) => oppgave.saksbehandlerIdent).filter((s): s is Exclude<typeof s, null> => s !== null)
   )
   const [saksbehandlerFilterLokal, setSaksbehandlerFilterLokal] = useState<string>(filter.saksbehandlerFilter)
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)

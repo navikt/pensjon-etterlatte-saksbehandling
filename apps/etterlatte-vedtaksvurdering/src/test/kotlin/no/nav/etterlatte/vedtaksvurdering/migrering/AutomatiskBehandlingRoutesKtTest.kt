@@ -27,7 +27,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.vedtaksvurdering.AutomatiskBehandlingService
@@ -91,7 +91,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 VedtakOgRapid(
                     opprettetVedtak.toDto(),
                     RapidInfo(
-                        VedtakKafkaHendelseType.FATTET,
+                        VedtakKafkaHendelseHendelseType.FATTET,
                         opprettetVedtak.toDto(),
                         Tidspunkt.now(),
                         behandlingId,
@@ -114,7 +114,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 VedtakOgRapid(
                     opprettetVedtak.toDto(),
                     RapidInfo(
-                        VedtakKafkaHendelseType.ATTESTERT,
+                        VedtakKafkaHendelseHendelseType.ATTESTERT,
                         opprettetVedtak.toDto(),
                         Tidspunkt.now(),
                         behandlingId,
@@ -139,8 +139,8 @@ internal class AutomatiskBehandlingRoutesKtTest {
                 }
 
             assertEquals(respons.vedtak.id, opprettetVedtak.id)
-            assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseType.FATTET)
-            assertEquals(respons.rapidInfo2!!.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
+            assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseHendelseType.FATTET)
+            assertEquals(respons.rapidInfo2!!.vedtakhendelse, VedtakKafkaHendelseHendelseType.ATTESTERT)
 
             coVerify(exactly = 1) {
                 vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
@@ -169,7 +169,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     VedtakOgRapid(
                         opprettetVedtak.toDto(),
                         RapidInfo(
-                            VedtakKafkaHendelseType.FATTET,
+                            VedtakKafkaHendelseHendelseType.FATTET,
                             opprettetVedtak.toDto(),
                             Tidspunkt.now(),
                             behandlingId,
@@ -192,7 +192,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     VedtakOgRapid(
                         opprettetVedtak.toDto(),
                         RapidInfo(
-                            VedtakKafkaHendelseType.ATTESTERT,
+                            VedtakKafkaHendelseHendelseType.ATTESTERT,
                             opprettetVedtak.toDto(),
                             Tidspunkt.now(),
                             behandlingId,
@@ -219,8 +219,8 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     }
 
                 assertEquals(respons.vedtak.id, opprettetVedtak.id)
-                assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseType.FATTET)
-                assertEquals(respons.rapidInfo2!!.vedtakhendelse, VedtakKafkaHendelseType.ATTESTERT)
+                assertEquals(respons.rapidInfo1.vedtakhendelse, VedtakKafkaHendelseHendelseType.FATTET)
+                assertEquals(respons.rapidInfo2!!.vedtakhendelse, VedtakKafkaHendelseHendelseType.ATTESTERT)
 
                 coVerify(exactly = 1) {
                     vedtakService.opprettEllerOppdaterVedtak(behandlingId, any())
@@ -246,7 +246,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     VedtakOgRapid(
                         opprettetVedtak.toDto(),
                         RapidInfo(
-                            VedtakKafkaHendelseType.FATTET,
+                            VedtakKafkaHendelseHendelseType.FATTET,
                             opprettetVedtak.toDto(),
                             Tidspunkt.now(),
                             behandlingId,
@@ -308,7 +308,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
                     VedtakOgRapid(
                         opprettetVedtak.toDto(),
                         RapidInfo(
-                            VedtakKafkaHendelseType.ATTESTERT,
+                            VedtakKafkaHendelseHendelseType.ATTESTERT,
                             opprettetVedtak.toDto(),
                             Tidspunkt.now(),
                             behandlingId,
@@ -354,7 +354,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             sakId = 1,
             kilde = null,
             type = OppgaveType.ATTESTERING,
-            saksbehandler = null,
+            saksbehandlerIdent = null,
             referanse = referanse.toString(),
             merknad = null,
             sakType = SakType.BARNEPENSJON,

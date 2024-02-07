@@ -10,17 +10,17 @@ import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.FINN_LOEPENDE_YTELSER
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.OMREGNINGSHENDELSE
+import no.nav.etterlatte.rapidsandrivers.DATO_KEY
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import rapidsandrivers.DATO_KEY
-import rapidsandrivers.HENDELSE_DATA_KEY
-import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.TILBAKESTILTE_BEHANDLINGER_KEY
 import java.time.LocalDate
 import java.util.UUID
 
@@ -31,7 +31,7 @@ internal class LoependeYtelserforespoerselRiverTest {
     private fun genererReguleringMelding(dato: LocalDate) =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to FINN_LOEPENDE_YTELSER,
+                ReguleringHendelseType.FINN_LOEPENDE_YTELSER.lagParMedEventNameKey(),
                 SAK_ID_KEY to 1,
                 DATO_KEY to dato,
                 TILBAKESTILTE_BEHANDLINGER_KEY to "",
@@ -61,7 +61,7 @@ internal class LoependeYtelserforespoerselRiverTest {
 
         inspector.sendTestMessage(melding.toJson())
         val sendtMelding = inspector.inspektør.message(0)
-        Assertions.assertEquals(OMREGNINGSHENDELSE, sendtMelding.get(EVENT_NAME_KEY).asText())
+        Assertions.assertEquals(ReguleringHendelseType.OMREGNINGSHENDELSE.lagEventnameForType(), sendtMelding.get(EVENT_NAME_KEY).asText())
         Assertions.assertEquals(
             Omregningshendelse(
                 sakId = sakId,
@@ -92,7 +92,7 @@ internal class LoependeYtelserforespoerselRiverTest {
         val behandlinger = listOf(UUID.randomUUID(), UUID.randomUUID())
         val melding =
             mapOf(
-                EVENT_NAME_KEY to FINN_LOEPENDE_YTELSER,
+                ReguleringHendelseType.FINN_LOEPENDE_YTELSER.lagParMedEventNameKey(),
                 SAK_ID_KEY to 1,
                 DATO_KEY to foersteMai2023,
                 TILBAKESTILTE_BEHANDLINGER_KEY to "${behandlinger[0]};${behandlinger[1]}",

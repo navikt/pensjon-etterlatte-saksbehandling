@@ -4,14 +4,14 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnlag.GrunnlagService
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import rapidsandrivers.migrering.ListenerMedLogging
 import java.util.UUID
 
 // TODO: Fjerne når grunnlag er versjonert (EY-2567)
@@ -60,7 +60,7 @@ class GrunnlagsversjoneringRiver(
     private val logger: Logger = LoggerFactory.getLogger(GrunnlagsversjoneringRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
             validate { it.requireKey("vedtak.behandlingId") }
         }
     }

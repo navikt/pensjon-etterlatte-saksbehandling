@@ -29,12 +29,14 @@ data class MigreringRequest(
     val spraak: Spraak,
     val utlandstilknytningType: UtlandstilknytningType? = null,
     val erUnder18: Boolean = true,
+    val kanAutomatiskGjenopprettes: Boolean = false,
 ) {
     fun opprettPersongalleri() =
         Persongalleri(
             soeker = this.soeker.value,
             avdoed = this.avdoedForelder.map { it.ident.value },
             gjenlevende = listOfNotNull(this.gjenlevendeForelder?.value),
+            // TODO Endre?
             innsender = Vedtaksloesning.PESYS.name,
         )
 
@@ -58,6 +60,8 @@ data class MigreringRequest(
             beregning.anvendtTrygdetid == 40
     }
 }
+
+const val GJENOPPRETTELSE_OPPGAVE = "GJENOPPRETTELSE_OPPGAVE"
 
 data class AvdoedForelder(
     val ident: Folkeregisteridentifikator,

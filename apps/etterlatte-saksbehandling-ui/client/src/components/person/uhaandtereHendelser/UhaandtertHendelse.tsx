@@ -14,14 +14,17 @@ import { ButtonGroup } from '~components/person/VurderHendelseModal'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { SakType } from '~shared/types/sak'
 
-const UhaandtertHendelse = (props: {
+interface Props {
+  sakType: SakType
   hendelse: Grunnlagsendringshendelse
   harAapenRevurdering: boolean
   startRevurdering: (hendelse: Grunnlagsendringshendelse) => void
   revurderinger: Array<Revurderingaarsak>
-}) => {
-  const { hendelse, harAapenRevurdering, startRevurdering, revurderinger } = props
+}
+
+const UhaandtertHendelse = ({ sakType, hendelse, harAapenRevurdering, startRevurdering, revurderinger }: Props) => {
   const { samsvarMellomKildeOgGrunnlag, opprettet } = hendelse
   const [open, setOpen] = useState(false)
   const [hendelsekommentar, oppdaterKommentar] = useState<string>('')
@@ -47,7 +50,7 @@ const UhaandtertHendelse = (props: {
     <Table.ExpandableRow
       content={
         <>
-          <HendelseBeskrivelse hendelse={hendelse} />
+          <HendelseBeskrivelse sakType={sakType} hendelse={hendelse} />
 
           <BodyShort spacing>
             {tattMedIBehandling ? (

@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":libs:etterlatte-tilbakekreving-model"))
     implementation(project(":libs:etterlatte-funksjonsbrytere"))
     implementation(project(":libs:etterlatte-migrering-model"))
+    implementation(project(":libs:etterlatte-brev-model"))
 
     implementation("no.nav.pensjon.brevbaker:brevbaker-api-model-common:1.0.2")
     implementation(libs.etterlatte.common)
@@ -51,4 +52,5 @@ dependencies {
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
+    testImplementation(testFixtures((project(":libs:etterlatte-database"))))
 }

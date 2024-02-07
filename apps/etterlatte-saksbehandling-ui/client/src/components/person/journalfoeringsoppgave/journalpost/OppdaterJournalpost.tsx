@@ -16,6 +16,7 @@ import { EndreSak } from '~components/person/journalfoeringsoppgave/journalpost/
 import { EndreDokumenter } from '~components/person/journalfoeringsoppgave/journalpost/EndreDokumenter'
 import FerdigstillJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/FerdigstillJournalpostModal'
 import LagreJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/LagreJournalpostModal'
+import { EndreTittelJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/EndreTittelJournalpost'
 
 interface Props {
   initialJournalpost: Journalpost
@@ -60,6 +61,10 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
 
         <EndreBruker bruker={journalpost.bruker} />
 
+        <EndreTittelJournalpost
+          journalpost={journalpost}
+          oppdaterTittelJournalpost={(nyTittel) => setJournalpost({ ...journalpost, tittel: nyTittel })}
+        />
         <EndreAvsenderMottaker
           avsenderMottaker={journalpost.avsenderMottaker}
           oppdaterAvsenderMottaker={(avsenderMottaker) => setJournalpost({ ...journalpost, avsenderMottaker })}

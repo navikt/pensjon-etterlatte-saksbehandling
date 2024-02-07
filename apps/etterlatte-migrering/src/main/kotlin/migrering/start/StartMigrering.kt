@@ -2,11 +2,12 @@ package no.nav.etterlatte.migrering.start
 
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.database.Transactions
 import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.libs.database.oppdater
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.LOPENDE_JANUAR_2024_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
@@ -14,7 +15,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.SAK_ID_KEY
 import java.util.UUID
 import javax.sql.DataSource
 import kotlin.concurrent.thread
@@ -52,7 +52,7 @@ class StartMigrering(
     private fun lagMelding(sakTilMigrering: SakTilMigrering) =
         JsonMessage.newMessage(
             mapOf(
-                EVENT_NAME_KEY to Migreringshendelser.MIGRER_SPESIFIKK_SAK,
+                Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagParMedEventNameKey(),
                 SAK_ID_KEY to sakTilMigrering.sakId,
                 LOPENDE_JANUAR_2024_KEY to sakTilMigrering.lopendeJanuar2024,
                 MIGRERING_KJORING_VARIANT to sakTilMigrering.kjoringVariant,

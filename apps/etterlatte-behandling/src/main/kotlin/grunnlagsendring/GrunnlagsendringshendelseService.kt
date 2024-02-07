@@ -3,32 +3,22 @@ package no.nav.etterlatte.grunnlagsendring
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.BrukerService
-import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.common.klienter.hentAnsvarligeForeldre
-import no.nav.etterlatte.common.klienter.hentBarn
-import no.nav.etterlatte.common.klienter.hentBostedsadresse
-import no.nav.etterlatte.common.klienter.hentDoedsdato
-import no.nav.etterlatte.common.klienter.hentSivilstand
-import no.nav.etterlatte.common.klienter.hentUtland
-import no.nav.etterlatte.common.klienter.hentVergemaal
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
@@ -37,7 +27,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -171,10 +161,12 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettEndretGrunnbeloepHendelse(sakId: Long): List<Grunnlagsendringshendelse> {
-        return opprettHendelseAvTypeForSak(
-            sakId,
-            GrunnlagsendringsType.GRUNNBELOEP,
-        )
+        return inTransaction {
+            opprettHendelseAvTypeForSak(
+                sakId,
+                GrunnlagsendringsType.GRUNNBELOEP,
+            )
+        }
     }
 
     suspend fun oppdaterAdressebeskyttelseHendelse(adressebeskyttelse: Adressebeskyttelse) {
@@ -243,7 +235,7 @@ class GrunnlagsendringshendelseService(
         val grunnlagendringType: GrunnlagsendringsType = GrunnlagsendringsType.INSTITUSJONSOPPHOLD
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
 
-        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
+        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakiderOgRoller }
         val sakerOgRollerGruppert = sakerOgRoller.distinct()
 
         val sakerForSoeker = sakerOgRollerGruppert.filter { Saksrolle.SOEKER == it.rolle }
@@ -281,216 +273,133 @@ class GrunnlagsendringshendelseService(
         }
     }
 
+    data class SakOgRolle(
+        val sak: Sak,
+        val sakiderOgRolle: SakidOgRolle,
+    )
+
     fun opprettHendelseAvTypeForPerson(
         fnr: String,
         grunnlagendringType: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
         val grunnlagsEndringsStatus: GrunnlagsendringStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB
         val tidspunktForMottakAvHendelse = Tidspunkt.now().toLocalDatetimeUTC()
-        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakerOgRoller }
+        val sakerOgRoller = runBlocking { grunnlagKlient.hentPersonSakOgRolle(fnr).sakiderOgRoller }
 
         val sakerOgRollerGruppert = sakerOgRoller.distinct()
 
         return sakerOgRollerGruppert
-            .filter { rolleOgSak -> sakService.finnSak(rolleOgSak.sakId) != null }
-            .filter { rolleOgSak ->
-                !hendelseEksistererFraFoer(
-                    rolleOgSak.sakId,
-                    fnr,
-                    grunnlagendringType,
-                )
-            }
+            .map { sakiderOgRoller -> Pair(sakService.finnSak(sakiderOgRoller.sakId), sakiderOgRoller) }
+            .filter { rollerogSak -> rollerogSak.first != null }
+            .map { SakOgRolle(it.first!!, it.second) }
             .map { rolleOgSak ->
-                val hendelseId = UUID.randomUUID()
-                logger.info(
-                    "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
-                        "type $grunnlagendringType på sak med id=${rolleOgSak.sakId}",
-                )
                 val hendelse =
                     Grunnlagsendringshendelse(
-                        id = hendelseId,
-                        sakId = rolleOgSak.sakId,
+                        id = UUID.randomUUID(),
+                        sakId = rolleOgSak.sak.id,
                         status = grunnlagsEndringsStatus,
                         type = grunnlagendringType,
                         opprettet = tidspunktForMottakAvHendelse,
-                        hendelseGjelderRolle = rolleOgSak.rolle,
+                        hendelseGjelderRolle = rolleOgSak.sakiderOgRolle.rolle,
                         gjelderPerson = fnr,
                     )
-                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
-            }
+                logger.info(
+                    "Oppretter grunnlagsendringshendelse med id=${hendelse.id} for hendelse av " +
+                        "type $grunnlagendringType på sak med id=${rolleOgSak.sak.id}",
+                )
+                grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse) to rolleOgSak
+            }.onEach {
+                verifiserOgHaandterHendelse(it.first, it.second.sak)
+            }.map { it.first }
     }
 
     private fun opprettHendelseAvTypeForSak(
         sakId: Long,
         grunnlagendringType: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
-        return inTransaction {
-            if (hendelseEksistererFraFoer(sakId, null, grunnlagendringType)) {
-                emptyList()
-            } else {
-                val hendelseId = UUID.randomUUID()
-                logger.info(
-                    "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
-                        "type $grunnlagendringType på sak med id=$sakId",
-                )
-                val hendelse =
-                    Grunnlagsendringshendelse(
-                        id = hendelseId,
-                        sakId = sakId,
-                        status = GrunnlagsendringStatus.VENTER_PAA_JOBB,
-                        type = grunnlagendringType,
-                        opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                        hendelseGjelderRolle = Saksrolle.SOEKER,
-                        gjelderPerson = sakService.finnSak(sakId)?.ident!!,
-                    )
-                listOf(
-                    grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse),
-                )
-            }
-        }
+        val hendelseId = UUID.randomUUID()
+        logger.info(
+            "Oppretter grunnlagsendringshendelse med id=$hendelseId for hendelse av " +
+                "type $grunnlagendringType på sak med id=$sakId",
+        )
+
+        val sak = sakService.finnSak(sakId)
+        val hendelse =
+            Grunnlagsendringshendelse(
+                id = hendelseId,
+                sakId = sakId,
+                status = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+                type = grunnlagendringType,
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                hendelseGjelderRolle = Saksrolle.SOEKER,
+                gjelderPerson = sak?.ident!!,
+            )
+        return listOf(grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse) to sak)
+            .onEach {
+                verifiserOgHaandterHendelse(it.first, it.second)
+            }.map { it.first }
     }
 
-    fun sjekkKlareGrunnlagsendringshendelser(minutterGamle: Long) =
-        inTransaction {
-            grunnlagsendringshendelseDao.hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(minutterGamle)
-                .forEach { hendelse ->
-                    try {
-                        verifiserOgHaandterHendelse(hendelse)
-                    } catch (e: Exception) {
-                        logger.error(
-                            "Kunne ikke sjekke opp for hendelsen med id=${hendelse.id} på sak ${hendelse.sakId} " +
-                                "på grunn av feil",
-                            e,
-                        )
-                    }
-                }
-        }
-
-    private fun verifiserOgHaandterHendelse(hendelse: Grunnlagsendringshendelse) {
-        val sak = sakService.finnSak(hendelse.sakId)!!
-        val personRolle = hendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
-        val pdlData = pdltjenesterKlient.hentPdlModell(hendelse.gjelderPerson, personRolle, sak.sakType)
+    fun verifiserOgHaandterHendelse(
+        grunnlagsendringshendelse: Grunnlagsendringshendelse,
+        sak: Sak,
+    ) {
+        val personRolle = grunnlagsendringshendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
+        val pdlData = pdltjenesterKlient.hentPdlModell(grunnlagsendringshendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag =
             runBlocking {
-                grunnlagKlient.hentGrunnlag(hendelse.sakId)
+                grunnlagKlient.hentGrunnlag(sak.id)
             }
         try {
-            val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(hendelse, pdlData, grunnlag, personRolle, sak.sakType)
+            val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
+            val erDuplikat =
+                erDuplikatHendelse(sak.id, sak.ident, grunnlagsendringshendelse.type, samsvarMellomPdlOgGrunnlag)
+
             if (!samsvarMellomPdlOgGrunnlag.samsvar) {
-                oppdaterHendelseSjekket(hendelse, samsvarMellomPdlOgGrunnlag)
+                if (erDuplikat) {
+                    forkastHendelse(grunnlagsendringshendelse.id, samsvarMellomPdlOgGrunnlag)
+                } else {
+                    oppdaterHendelseSjekket(grunnlagsendringshendelse, samsvarMellomPdlOgGrunnlag)
+                }
             } else {
-                forkastHendelse(hendelse.id, samsvarMellomPdlOgGrunnlag)
+                forkastHendelse(grunnlagsendringshendelse.id, samsvarMellomPdlOgGrunnlag)
             }
         } catch (e: GrunnlagRolleException) {
-            forkastHendelse(hendelse.id, SamsvarMellomKildeOgGrunnlag.FeilRolle(pdlData, grunnlag, false))
+            forkastHendelse(grunnlagsendringshendelse.id, SamsvarMellomKildeOgGrunnlag.FeilRolle(pdlData, grunnlag, false))
         }
     }
 
-    private fun oppdaterHendelseSjekket(
+    internal fun oppdaterHendelseSjekket(
         hendelse: Grunnlagsendringshendelse,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ) {
-        sisteIkkeAvbrutteBehandlingUtenManueltOpphoer(hendelse.sakId, samsvarMellomKildeOgGrunnlag, hendelse.id)
-            ?: return
-        logger.info(
-            "Grunnlagsendringshendelse for ${hendelse.type} med id ${hendelse.id} er naa sjekket av jobb " +
-                "naa sjekket av jobb, og informasjonen i pdl og grunnlag samsvarer ikke. " +
-                "Hendelsen forkastes derfor ikke.",
-        )
-        grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
-            hendelseId = hendelse.id,
-            foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
-            etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-            samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
-        )
-        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-            referanse = hendelse.id.toString(),
-            sakId = hendelse.sakId,
-            oppgaveKilde = OppgaveKilde.HENDELSE,
-            oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-            merknad = hendelse.beskrivelse(),
-        ).also {
-            logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
-        }
-    }
-
-    private fun finnSamsvarForHendelse(
-        hendelse: Grunnlagsendringshendelse,
-        pdlData: PersonDTO,
-        grunnlag: Grunnlag?,
-        personRolle: PersonRolle,
-        sakType: SakType,
-    ): SamsvarMellomKildeOgGrunnlag {
-        val rolle = hendelse.hendelseGjelderRolle
-        val fnr = hendelse.gjelderPerson
-
-        return when (hendelse.type) {
-            GrunnlagsendringsType.DOEDSFALL -> {
-                samsvarDoedsdatoer(
-                    doedsdatoPdl = pdlData.hentDoedsdato(),
-                    doedsdatoGrunnlag = grunnlag?.doedsdato(rolle, fnr)?.verdi,
-                )
-            }
-
-            GrunnlagsendringsType.UTFLYTTING -> {
-                samsvarUtflytting(
-                    utflyttingPdl = pdlData.hentUtland(),
-                    utflyttingGrunnlag = grunnlag?.utland(rolle, fnr),
-                )
-            }
-
-            GrunnlagsendringsType.FORELDER_BARN_RELASJON -> {
-                if (personRolle in listOf(PersonRolle.BARN, PersonRolle.TILKNYTTET_BARN)) {
-                    samsvarAnsvarligeForeldre(
-                        ansvarligeForeldrePdl = pdlData.hentAnsvarligeForeldre(),
-                        ansvarligeForeldreGrunnlag = grunnlag?.ansvarligeForeldre(rolle, fnr),
-                    )
-                } else {
-                    samsvarBarn(
-                        barnPdl = pdlData.hentBarn(),
-                        barnGrunnlag = grunnlag?.barn(rolle),
-                    )
-                }
-            }
-
-            GrunnlagsendringsType.VERGEMAAL_ELLER_FREMTIDSFULLMAKT -> {
-                val pdlVergemaal = pdlData.hentVergemaal()
-                val grunnlagVergemaal = grunnlag?.vergemaalellerfremtidsfullmakt(rolle)
-                SamsvarMellomKildeOgGrunnlag.VergemaalEllerFremtidsfullmaktForhold(
-                    fraPdl = pdlVergemaal,
-                    fraGrunnlag = grunnlagVergemaal,
-                    samsvar = pdlVergemaal erLikRekkefoelgeIgnorert grunnlagVergemaal,
-                )
-            }
-
-            GrunnlagsendringsType.SIVILSTAND -> {
-                when (sakType) {
-                    SakType.BARNEPENSJON -> samsvarSivilstandBP()
-                    SakType.OMSTILLINGSSTOENAD -> {
-                        val pdlSivilstand = pdlData.hentSivilstand()
-                        val grunnlagSivilstand = grunnlag?.sivilstand(rolle)
-                        samsvarSivilstandOMS(pdlSivilstand, grunnlagSivilstand)
-                    }
-                }
-            }
-
-            GrunnlagsendringsType.BOSTED -> {
-                val pdlBosted = pdlData.hentBostedsadresse()
-                val grunnlagBosted = grunnlag?.bostedsadresse(rolle, fnr)?.verdi
-                samsvarBostedsadresse(pdlBosted, grunnlagBosted)
-            }
-
-            GrunnlagsendringsType.GRUNNBELOEP -> {
-                SamsvarMellomKildeOgGrunnlag.Grunnbeloep(samsvar = false)
-            }
-
-            GrunnlagsendringsType.INSTITUSJONSOPPHOLD -> {
-                throw IllegalStateException("Denne hendelsen skal gå rett til oppgavelisten og aldri komme hit")
+        val bleIkkeForkastet =
+            forkastHendelseHvisKunAvbrytteBehandlinger(hendelse.sakId, samsvarMellomKildeOgGrunnlag, hendelse.id)
+        if (bleIkkeForkastet) {
+            logger.info(
+                "Grunnlagsendringshendelse for ${hendelse.type} med id ${hendelse.id} er naa sjekket " +
+                    "og informasjonen i pdl og grunnlag samsvarer ikke. " +
+                    "Hendelsen vises derfor til saksbehandler.",
+            )
+            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
+                hendelseId = hendelse.id,
+                foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+                etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
+            )
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse = hendelse.id.toString(),
+                sakId = hendelse.sakId,
+                oppgaveKilde = OppgaveKilde.HENDELSE,
+                oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+                merknad = hendelse.beskrivelse(),
+            ).also {
+                logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
             }
         }
     }
 
-    private fun forkastHendelse(
+    internal fun forkastHendelse(
         hendelseId: UUID,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ) {
@@ -503,48 +412,40 @@ class GrunnlagsendringshendelseService(
         )
     }
 
-    private fun sisteIkkeAvbrutteBehandlingUtenManueltOpphoer(
+    private fun forkastHendelseHvisKunAvbrytteBehandlinger(
         sakId: Long,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
         hendelseId: UUID,
-    ): Behandling? {
+    ): Boolean {
         val behandlingerISak = behandlingService.hentBehandlingerForSak(sakId)
-        // Har vi en eksisterende behandling som ikke er avbrutt?
-        val sisteBehandling =
-            behandlingerISak
-                .sisteIkkeAvbrutteBehandling()
-                ?: run {
-                    logger.info(
-                        "Forkaster hendelse med id=$hendelseId fordi vi " +
-                            "ikke har noen behandlinger som ikke er avbrutt",
-                    )
-                    forkastHendelse(hendelseId, samsvarMellomKildeOgGrunnlag)
-                    return null
-                }
-        val harAlleredeEtManueltOpphoer = behandlingerISak.any { it.type == BehandlingType.MANUELT_OPPHOER }
-        return if (harAlleredeEtManueltOpphoer) {
-            logger.info("Forkaster hendelse med id=$hendelseId fordi vi har et manuelt opphør i saken")
+
+        val kunAvbrutteBehandlinger = behandlingerISak.all { it.status == BehandlingStatus.AVBRUTT }
+        if (kunAvbrutteBehandlinger) {
+            logger.info(
+                "Forkaster hendelse med id=$hendelseId fordi vi " +
+                    "ikke har noen behandlinger som ikke er avbrutt",
+            )
             forkastHendelse(hendelseId, samsvarMellomKildeOgGrunnlag)
-            null
+            return false
         } else {
-            sisteBehandling
+            return true
         }
     }
 
-    private fun hendelseEksistererFraFoer(
+    internal fun erDuplikatHendelse(
         sakId: Long,
         fnr: String?,
         hendelsesType: GrunnlagsendringsType,
+        samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ): Boolean {
-        return grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
-            sakId,
-            listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB),
-        ).any {
-            (fnr == null) || it.gjelderPerson == fnr && it.type == hendelsesType
-        }
-    }
+        val relevanteHendelser =
+            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                sakId,
+                listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+            ).filter {
+                (fnr == null) || it.gjelderPerson == fnr && it.type == hendelsesType
+            }
 
-    private fun List<Behandling>.sisteIkkeAvbrutteBehandling() =
-        this.sortedByDescending { it.behandlingOpprettet }
-            .firstOrNull { it.status in BehandlingStatus.ikkeAvbrutt() }
+        return relevanteHendelser.any { it.samsvarMellomKildeOgGrunnlag == samsvarMellomKildeOgGrunnlag }
+    }
 }

@@ -29,12 +29,12 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
 
         GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
             try {
-                saksbehandlereNavnJob(logger, context, subCoroutineExceptionHandler)
+                oppdaterSaksbehandlerNavn(logger, context, subCoroutineExceptionHandler)
             } catch (e: Exception) {
                 logger.error("Kunne ikke hente navn for saksbehandlere", e)
             }
             try {
-                hentEnheterForSaksbehandlereJob(logger, context, subCoroutineExceptionHandler)
+                oppdaterSaksbehandlerEnhet(logger, context, subCoroutineExceptionHandler)
             } catch (e: Exception) {
                 logger.error("Kunne ikke hente enheter for saksbehandlere", e)
             }
@@ -46,7 +46,7 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
 
 val SAKSBEHANDLERPATTERN = Regex("[a-zA-Z]\\d{6}")
 
-internal suspend fun hentEnheterForSaksbehandlereJob(
+internal suspend fun oppdaterSaksbehandlerEnhet(
     logger: Logger,
     context: ApplicationContext,
     subCoroutineExceptionHandler: CoroutineExceptionHandler,
@@ -64,7 +64,7 @@ internal suspend fun hentEnheterForSaksbehandlereJob(
                         "PESYS",
                         "EY",
                         "GJENOPPRETTA",
-                    ).contains(it) && it.length == 7 && SAKSBEHANDLERPATTERN.containsMatchIn(it)
+                    ).contains(it) && SAKSBEHANDLERPATTERN.matches(it)
                 }
                     .map {
                         it to
@@ -93,7 +93,7 @@ internal suspend fun hentEnheterForSaksbehandlereJob(
     logger.info("Ferdig, tid brukt for å hente enheter $tidbrukt")
 }
 
-internal suspend fun saksbehandlereNavnJob(
+internal suspend fun oppdaterSaksbehandlerNavn(
     logger: Logger,
     context: ApplicationContext,
     subCoroutineExceptionHandler: CoroutineExceptionHandler,
@@ -118,7 +118,7 @@ internal suspend fun saksbehandlereNavnJob(
                             "PESYS",
                             "EY",
                             "GJENOPPRETTA",
-                        ).contains(it) && it.length == 7 && SAKSBEHANDLERPATTERN.containsMatchIn(it)
+                        ).contains(it) && SAKSBEHANDLERPATTERN.matches(it)
                     }
                         .map { it to async(subCoroutineExceptionHandler) { context.navAnsattKlient.hentSaksbehanderNavn(it) } }
                         .map { it.first to it.second.await() }

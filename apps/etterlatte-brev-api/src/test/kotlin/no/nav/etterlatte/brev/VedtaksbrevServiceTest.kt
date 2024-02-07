@@ -340,7 +340,7 @@ internal class VedtaksbrevServiceTest {
                     every { status } returns BehandlingStatus.IVERKSATT
                 }
 
-            assertThrows<IllegalArgumentException> {
+            assertThrows<KanIkkeOppretteVedtaksbrev> {
                 runBlocking {
                     vedtaksbrevService.opprettVedtaksbrev(
                         sakId,

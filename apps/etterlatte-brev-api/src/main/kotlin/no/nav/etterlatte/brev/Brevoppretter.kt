@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -41,7 +42,8 @@ class Brevoppretter(
         brukerTokenInfo: BrukerTokenInfo,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         // TODO EY-3232 - Fjerne migreringstilpasning
-        brevKode: ((b: BrevkodeRequest) -> EtterlatteBrevKode),
+        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
+        brevDataMapper: suspend (RedigerbarTekstRequest) -> BrevData,
     ): Brev {
         require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -62,6 +64,7 @@ class Brevoppretter(
             automatiskMigreringRequest = automatiskMigreringRequest,
             brevKode = brevKode,
             brevtype = Brevtype.VEDTAK,
+            brevDataMapping = brevDataMapper,
         ).first
     }
 
@@ -70,11 +73,21 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKode: ((b: BrevkodeRequest) -> EtterlatteBrevKode),
+        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         brevtype: Brevtype,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
     ): Pair<Brev, GenerellBrevData> =
-        with(hentInnData(sakId, behandlingId, bruker, brevKode, automatiskMigreringRequest)) {
+        with(
+            hentInnData(
+                sakId,
+                behandlingId,
+                bruker,
+                brevKode,
+                automatiskMigreringRequest,
+                brevDataMapping,
+            ),
+        ) {
             val nyttBrev =
                 OpprettNyttBrev(
                     sakId = sakId,
@@ -95,10 +108,20 @@ class Brevoppretter(
         brevId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKode: ((b: BrevkodeRequest) -> EtterlatteBrevKode),
+        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
     ): BrevService.BrevPayload {
-        with(hentInnData(sakId, behandlingId, bruker, brevKode, automatiskMigreringRequest)) {
+        with(
+            hentInnData(
+                sakId,
+                behandlingId,
+                bruker,
+                brevKode,
+                automatiskMigreringRequest,
+                brevDataMapping,
+            ),
+        ) {
             if (innhold.payload != null) {
                 db.oppdaterPayload(brevId, innhold.payload)
             }
@@ -118,8 +141,9 @@ class Brevoppretter(
         sakId: Long,
         behandlingId: UUID?,
         bruker: BrukerTokenInfo,
-        brevKode: ((b: BrevkodeRequest) -> EtterlatteBrevKode),
+        brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
     ): OpprettBrevRequest {
         val generellBrevData =
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
@@ -138,6 +162,7 @@ class Brevoppretter(
                             bruker,
                             kode,
                             automatiskMigreringRequest,
+                            brevDataMapping,
                         ),
                     )
                 }

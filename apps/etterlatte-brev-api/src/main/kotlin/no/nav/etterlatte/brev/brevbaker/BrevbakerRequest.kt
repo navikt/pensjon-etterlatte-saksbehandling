@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.brevbaker
 import no.nav.etterlatte.brev.adresse.Avsender
 import no.nav.etterlatte.brev.behandling.Soeker
 import no.nav.etterlatte.brev.brevbaker.BrevbakerHelpers.mapFelles
+import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.Verge
@@ -10,14 +11,14 @@ import no.nav.pensjon.brevbaker.api.model.Felles
 
 data class BrevbakerRequest private constructor(
     val kode: EtterlatteBrevKode,
-    val letterData: Any,
+    val brevData: BrevData,
     val felles: Felles,
     val language: LanguageCode,
 ) {
     companion object {
         fun fra(
             brevKode: EtterlatteBrevKode,
-            letterData: Any,
+            brevData: BrevData,
             avsender: Avsender,
             soekerOgEventuellVerge: SoekerOgEventuellVerge,
             sakId: Long,
@@ -26,7 +27,7 @@ data class BrevbakerRequest private constructor(
         ): BrevbakerRequest =
             BrevbakerRequest(
                 kode = brevKode,
-                letterData = letterData,
+                brevData = brevData,
                 felles =
                     mapFelles(
                         sakId = sakId,

@@ -6,16 +6,13 @@ import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import org.slf4j.LoggerFactory
-import java.time.Clock
 import java.time.Duration
-import java.util.Date
 import java.util.Timer
 
 class HendelsePollerTask(
     private val leaderElection: LeaderElection,
     private val initialDelaySeconds: Long,
     private val periode: Duration,
-    private val clock: Clock,
     private val hendelsePoller: HendelsePoller,
     private val maxAntallHendelsePerPoll: Int = 5,
 ) {
@@ -26,7 +23,7 @@ class HendelsePollerTask(
 
         return fixedRateCancellableTimer(
             name = "HENDELSE_POLLER_TASK",
-            startAt = Date(clock.millis() + (initialDelaySeconds * 1000)),
+            initialDelay = initialDelaySeconds * 1000,
             period = periode.toMillis(),
             loggerInfo = LoggerInfo(logger = logger),
         ) {

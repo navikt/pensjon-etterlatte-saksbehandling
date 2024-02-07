@@ -49,7 +49,6 @@ class AppContext(
             leaderElection = LeaderElection(electorPath = env.maybeEnvValue("ELECTOR_PATH")),
             initialDelaySeconds = env.maybeEnvValue("JOBB_POLLER_INITIAL_DELAY")?.toLong() ?: 60L,
             periode = env.maybeEnvValue("JOBB_POLLER_INTERVAL")?.let { Duration.parse(it) } ?: Duration.ofMinutes(5),
-            clock = clock,
             jobbPoller = JobbPoller(hendelseDao, aldersovergangerService),
         )
 
@@ -60,7 +59,6 @@ class AppContext(
             periode =
                 env.maybeEnvValue("HENDELSE_POLLER_INTERVAL")?.let { Duration.parse(it) }
                     ?: Duration.ofMinutes(5),
-            clock = clock,
             hendelsePoller =
                 HendelsePoller(
                     hendelseDao = hendelseDao,

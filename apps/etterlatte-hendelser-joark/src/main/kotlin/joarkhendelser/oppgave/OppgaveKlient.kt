@@ -17,7 +17,7 @@ class OppgaveKlient(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun opprettOppgave(
+    suspend fun opprettManuellJournalfoeringsoppgave(
         journalpostId: Long,
         tema: String,
     ) {

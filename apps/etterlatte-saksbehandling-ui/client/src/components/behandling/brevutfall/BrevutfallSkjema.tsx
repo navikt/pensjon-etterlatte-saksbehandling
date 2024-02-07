@@ -1,24 +1,27 @@
-import { Alert, Button, HStack, Radio, VStack } from '@navikt/ds-react'
+import { Alert, Button, HStack, Label, Radio, VStack } from '@navikt/ds-react'
 import React, { ReactNode } from 'react'
 import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { lagreBrevutfallApi } from '~shared/api/behandling'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { isFailure, isPending } from '~shared/api/apiUtils'
 import {
   Aldersgruppe,
   BrevutfallOgEtterbetaling,
+  FeilutbetalingValg,
   LavEllerIngenInntekt,
 } from '~components/behandling/brevutfall/Brevutfall'
 import { add, formatISO, lastDayOfMonth, startOfDay } from 'date-fns'
 import { updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { ControlledMaanedVelger } from '~shared/components/maanedVelger/ControlledMaanedVelger'
 import { ControlledRadioGruppe } from '~shared/components/radioGruppe/ControlledRadioGruppe'
 import { EtterbetalingHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/EtterbetalingHjelpeTekst'
 import { AldersgruppeHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/AldersgruppeHjelpeTekst'
 import { LavEllerIngenInntektHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/LavEllerIngenInntektHjelpeTekst'
+import { FeilutbetalingHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/FeilutbetalingHjelpeTekst'
+import { feilutbetalingToString } from '~components/behandling/brevutfall/BrevutfallVisning'
 
 enum HarEtterbetaling {
   JA = 'JA',
@@ -32,6 +35,8 @@ interface BrevutfallSkjemaData {
   datoTom?: Date | null
   aldersgruppe?: Aldersgruppe | null
   lavEllerIngenInntekt?: LavEllerIngenInntekt | null
+  feilutbetalingValg?: FeilutbetalingValg | null
+  feilutbetalingKommentar: string | null
 }
 
 interface Props {
@@ -71,6 +76,8 @@ export const BrevutfallSkjema = ({
         : undefined,
       aldersgruppe: brevutfallOgEtterbetaling.brevutfall.aldersgruppe,
       lavEllerIngenInntekt: brevutfallOgEtterbetaling.brevutfall.lavEllerIngenInntekt,
+      feilutbetalingValg: brevutfallOgEtterbetaling.brevutfall.feilutbetaling?.valg,
+      feilutbetalingKommentar: brevutfallOgEtterbetaling.brevutfall.feilutbetaling?.kommentar ?? '',
     },
   })
 
@@ -81,6 +88,9 @@ export const BrevutfallSkjema = ({
       brevutfall: {
         aldersgruppe: data.aldersgruppe,
         lavEllerIngenInntekt: data.lavEllerIngenInntekt,
+        feilutbetaling: data.feilutbetalingValg
+          ? { valg: data.feilutbetalingValg, kommentar: data.feilutbetalingKommentar }
+          : null,
       },
       etterbetaling:
         data.harEtterbetaling === HarEtterbetaling.JA
@@ -217,6 +227,47 @@ export const BrevutfallSkjema = ({
               }
             />
           </VStack>
+        )}
+
+        {IBehandlingsType.REVURDERING == behandling.behandlingType && (
+          <>
+            <VStack gap="4">
+              <ControlledRadioGruppe
+                name="feilutbetalingValg"
+                control={control}
+                errorVedTomInput="Du må velge om det er feilutbetaling eller ikke"
+                legend={<FeilutbetalingHjelpeTekst />}
+                radios={
+                  <>
+                    {Object.keys(FeilutbetalingValg).map((option) => (
+                      <Radio key={option} size="small" value={option}>
+                        {feilutbetalingToString(option as FeilutbetalingValg)}
+                      </Radio>
+                    ))}
+                  </>
+                }
+              />
+            </VStack>
+
+            {watch().feilutbetalingValg && (
+              <HStack gap="4">
+                <Label>Kommentar</Label>
+                <Controller
+                  name="feilutbetalingKommentar"
+                  render={(props) => (
+                    <textarea
+                      style={{ width: '100%' }}
+                      {...props}
+                      onChange={(e) => {
+                        props.field.onChange(e.target.value)
+                      }}
+                    />
+                  )}
+                  control={control}
+                />
+              </HStack>
+            )}
+          </>
         )}
 
         <HStack gap="4">

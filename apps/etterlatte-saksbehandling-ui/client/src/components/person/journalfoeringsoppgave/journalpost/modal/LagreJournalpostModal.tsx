@@ -6,7 +6,7 @@ import { oppdaterJournalpost } from '~shared/api/dokument'
 import { FlexRow } from '~shared/styled'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, isSuccess, mapFailure } from '~shared/api/apiUtils'
 import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 import { ferdigstillOppgave } from '~shared/api/oppgaver'
 import { useNavigate } from 'react-router-dom'
@@ -93,18 +93,16 @@ export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: 
                 </Button>
               </FlexRow>
             )}
-
-            {isFailure(oppdaterStatus) && (
-              <Modal.Footer>
-                <ApiErrorAlert>Det oppsto en feil ved oppdatering av journalposten</ApiErrorAlert>
-              </Modal.Footer>
-            )}
-            {isFailure(ferdigstillOppgaveStatus) && (
-              <Modal.Footer>
-                <ApiErrorAlert>Det oppsto en feil ved ferdigstilling av oppgaven</ApiErrorAlert>
-              </Modal.Footer>
-            )}
           </Modal.Body>
+
+          <Modal.Footer>
+            {mapFailure(oppdaterStatus, (error) => (
+              <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved oppdatering av journalposten'}</ApiErrorAlert>
+            ))}
+            {mapFailure(ferdigstillOppgaveStatus, (error) => (
+              <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved ferdigstilling av oppgaven'}</ApiErrorAlert>
+            ))}
+          </Modal.Footer>
         </Modal>
       </>
     )

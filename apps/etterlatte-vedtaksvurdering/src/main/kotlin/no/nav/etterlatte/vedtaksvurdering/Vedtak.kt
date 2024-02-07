@@ -52,7 +52,7 @@ data class Vedtak(
             attestasjon = attestasjon,
             innhold =
                 when (innhold) {
-                    is VedtakBehandlingInnhold ->
+                    is VedtakInnhold.Behandling ->
                         VedtakInnholdDto.VedtakBehandlingDto(
                             virkningstidspunkt = innhold.virkningstidspunkt,
                             behandling =
@@ -65,30 +65,40 @@ data class Vedtak(
                             utbetalingsperioder = innhold.utbetalingsperioder,
                         )
 
-                    is VedtakTilbakekrevingInnhold ->
+                    is VedtakInnhold.Tilbakekreving ->
                         VedtakInnholdDto.VedtakTilbakekrevingDto(
                             tilbakekreving = innhold.tilbakekreving,
                         )
+
+                    is VedtakInnhold.Klage -> {
+                        VedtakInnholdDto.Klage(
+                            klage = innhold.klage,
+                        )
+                    }
                 },
         )
     }
 }
 
-sealed interface VedtakInnhold
+sealed interface VedtakInnhold {
+    data class Behandling(
+        val behandlingType: BehandlingType,
+        val revurderingAarsak: Revurderingaarsak?,
+        val virkningstidspunkt: YearMonth,
+        val beregning: ObjectNode?,
+        val avkorting: ObjectNode?,
+        val vilkaarsvurdering: ObjectNode?,
+        val utbetalingsperioder: List<Utbetalingsperiode>,
+        val revurderingInfo: RevurderingInfo? = null,
+    ) : VedtakInnhold
 
-data class VedtakBehandlingInnhold(
-    val behandlingType: BehandlingType,
-    val revurderingAarsak: Revurderingaarsak?,
-    val virkningstidspunkt: YearMonth,
-    val beregning: ObjectNode?,
-    val avkorting: ObjectNode?,
-    val vilkaarsvurdering: ObjectNode?,
-    val utbetalingsperioder: List<Utbetalingsperiode>,
-    val revurderingInfo: RevurderingInfo? = null,
-) : VedtakInnhold
+    data class Tilbakekreving(
+        val tilbakekreving: ObjectNode,
+    ) : VedtakInnhold
 
-data class VedtakTilbakekrevingInnhold(
-    val tilbakekreving: ObjectNode,
-) : VedtakInnhold
+    data class Klage(
+        val klage: ObjectNode,
+    ) : VedtakInnhold
+}
 
 data class LoependeYtelse(val erLoepende: Boolean, val dato: LocalDate)

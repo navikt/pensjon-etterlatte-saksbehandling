@@ -21,6 +21,7 @@ export interface BrevutfallOgEtterbetaling {
 export interface Brevutfall {
   aldersgruppe?: Aldersgruppe | null
   lavEllerIngenInntekt?: LavEllerIngenInntekt | null
+  feilutbetaling?: Feilutbetaling | null
 }
 
 export enum Aldersgruppe {
@@ -33,6 +34,17 @@ export enum LavEllerIngenInntekt {
   JA = 'JA',
   NEI = 'NEI',
   IKKE_VALGT = 'IKKE_VALGT',
+}
+
+export interface Feilutbetaling {
+  valg: FeilutbetalingValg
+  kommentar?: string | null
+}
+
+export enum FeilutbetalingValg {
+  NEI = 'NEI',
+  JA_VARSEL = 'JA_VARSEL',
+  JA_INGEN_TK = 'JA_INGEN_TK',
 }
 
 export interface Etterbetaling {

@@ -1,5 +1,12 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
-import { AvsluttKlageRequest, Formkrav, Klage, KlageUtfallUtenBrev, NyKlageRequest } from '~shared/types/Klage'
+import {
+  AvsluttKlageRequest,
+  Formkrav,
+  IniteltUtfallMedBegrunnelseDto,
+  Klage,
+  KlageUtfallUtenBrev,
+  NyKlageRequest,
+} from '~shared/types/Klage'
 
 export function opprettNyKlage(nyKlageRequest: NyKlageRequest): Promise<ApiResponse<Klage>> {
   return apiClient.post(`/klage/opprett/${nyKlageRequest.sakId}`, { ...nyKlageRequest })
@@ -24,6 +31,17 @@ export function oppdaterUtfallForKlage(args: {
 }): Promise<ApiResponse<Klage>> {
   const { klageId, utfall } = args
   return apiClient.put(`/klage/${klageId}/utfall`, { utfall })
+}
+
+export function oppdaterInitieltUtfallForKlage(args: {
+  klageId: string
+  utfallMedBegrunnelse: IniteltUtfallMedBegrunnelseDto
+}): Promise<ApiResponse<Klage>> {
+  const { klageId, utfallMedBegrunnelse } = args
+  return apiClient.put(`/klage/${klageId}/initieltutfall`, {
+    utfall: utfallMedBegrunnelse.utfall,
+    begrunnelse: utfallMedBegrunnelse.begrunnelse,
+  })
 }
 
 export function ferdigstillKlagebehandling(klageId: string): Promise<ApiResponse<Klage>> {

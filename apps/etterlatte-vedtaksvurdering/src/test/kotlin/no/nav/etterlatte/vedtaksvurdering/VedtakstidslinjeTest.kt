@@ -444,7 +444,7 @@ internal class VedtakstidslinjeTest {
         }
 
         private val Vedtak.utbetalingsperioder: List<Utbetalingsperiode>
-            get() = (this.innhold as VedtakBehandlingInnhold).utbetalingsperioder
+            get() = (this.innhold as VedtakInnhold.Behandling).utbetalingsperioder
     }
 }
 
@@ -479,7 +479,7 @@ private fun lagVedtak(
                 tidspunkt = datoAttestert,
             ),
         innhold =
-            VedtakBehandlingInnhold(
+            VedtakInnhold.Behandling(
                 virkningstidspunkt = virkningsDato.let { YearMonth.from(it) },
                 behandlingType = behandlingType,
                 beregning = null,

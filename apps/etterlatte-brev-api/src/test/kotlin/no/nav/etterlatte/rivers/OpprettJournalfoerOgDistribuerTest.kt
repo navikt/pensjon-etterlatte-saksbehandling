@@ -9,6 +9,7 @@ import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -146,6 +147,7 @@ internal class OpprettJournalfoerOgDistribuer {
                     null,
                     Adresse(adresseType = "privat", landkode = "NO", land = "Norge"),
                 ),
+            brevtype = Brevtype.INFORMASJON,
         )
 
     private fun lagVedtakDto(behandlingId: UUID) =

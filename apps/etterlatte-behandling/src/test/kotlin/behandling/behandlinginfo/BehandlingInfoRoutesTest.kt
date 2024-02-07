@@ -25,10 +25,13 @@ import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
+import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
+import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
@@ -175,6 +178,7 @@ internal class BehandlingInfoRoutesTest {
 
     private fun behandling(behandlingId: UUID): Behandling =
         mockk {
+            every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
             every { id } returns behandlingId
             every { sak } returns
                 mockk {
@@ -190,6 +194,7 @@ internal class BehandlingInfoRoutesTest {
             behandlingId = behandlingId,
             aldersgruppe = Aldersgruppe.UNDER_18,
             lavEllerIngenInntekt = LavEllerIngenInntekt.JA,
+            feilutbetaling = Feilutbetaling(FeilutbetalingValg.NEI, null),
             kilde = Grunnlagsopplysning.Saksbehandler.create("Saksbehandler01"),
         )
 
@@ -204,7 +209,14 @@ internal class BehandlingInfoRoutesTest {
     private fun brevutfallOgEtterbetalingDto(behandlingId: UUID = UUID.randomUUID()) =
         BrevutfallOgEtterbetalingDto(
             behandlingId = UUID.randomUUID(),
-            brevutfall = BrevutfallDto(behandlingId, Aldersgruppe.UNDER_18, LavEllerIngenInntekt.JA, null),
+            brevutfall =
+                BrevutfallDto(
+                    behandlingId,
+                    Aldersgruppe.UNDER_18,
+                    LavEllerIngenInntekt.JA,
+                    Feilutbetaling(FeilutbetalingValg.NEI, null),
+                    null,
+                ),
             etterbetaling =
                 EtterbetalingDto(
                     behandlingId = behandlingId,

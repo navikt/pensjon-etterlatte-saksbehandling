@@ -43,9 +43,7 @@ export const OppgaverTableRow = ({
           <FristWrapper dato={oppgave.frist} />
         )}
       </Table.DataCell>
-      <Table.DataCell>
-        <SaksoversiktLenke fnr={oppgave.fnr} />
-      </Table.DataCell>
+      <Table.DataCell>{oppgave.fnr ? <SaksoversiktLenke fnr={oppgave.fnr} /> : 'Mangler'}</Table.DataCell>
       <Table.DataCell>
         {oppgave.type ? <OppgavetypeTag oppgavetype={oppgave.type} /> : <div>oppgaveid {oppgave.id}</div>}
       </Table.DataCell>

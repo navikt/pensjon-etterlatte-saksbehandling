@@ -49,6 +49,10 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-pdltjenester/.default
     - name: ETTERLATTE_PDLTJENESTER_URL
       value: http://etterlatte-pdltjenester
+    - name: OPPGAVE_SCOPE
+      value: api://prod-fss.oppgavehandtering.oppgave/.default
+    - name: OPPGAVE_BASE_URL
+      value: https://oppgave.prod-fss-pub.nais.io
   accessPolicy:
     outbound:
       rules:
@@ -56,3 +60,4 @@ spec:
         - application: etterlatte-pdltjenester
       external:
         - host: saf.prod-fss-pub.nais.io
+        - host: oppgave.prod-fss-pub.nais.io

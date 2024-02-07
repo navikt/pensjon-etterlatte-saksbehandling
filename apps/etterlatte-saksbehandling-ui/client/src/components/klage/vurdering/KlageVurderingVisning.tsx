@@ -8,10 +8,9 @@ import { formaterKlageutfall, VisInnstilling, VisOmgjoering } from '~components/
 import { Klage } from '~shared/types/Klage'
 
 export function KlageVurderingVisning(props: { klage: Klage }) {
-  const { klage } = props
-  const navigate = useNavigate()
+  const klage = props.klage
 
-  if (!klage) return
+  const navigate = useNavigate()
 
   const { utfall, sak } = klage
   return (

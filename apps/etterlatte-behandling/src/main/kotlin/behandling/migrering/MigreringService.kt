@@ -26,9 +26,11 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.rapidsandrivers.migrering.GJENOPPRETTELSE_OPPGAVE
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Fagsaksystem
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
@@ -67,7 +69,6 @@ class MigreringService(
                             "Finnes allerede behandling for sak=${behandling.sak.id}. Stopper migrering for pesysId=${request.pesysId}",
                         )
                     }
-                    val gjenoppretta = Vedtaksloesning.GJENOPPRETTA.name
                     kommerBarnetTilGodeService.lagreKommerBarnetTilgode(
                         KommerBarnetTilgode(
                             JaNei.JA,
@@ -78,7 +79,7 @@ class MigreringService(
                     )
                     gyldighetsproevingService.lagreGyldighetsproeving(
                         behandling.id,
-                        gjenoppretta,
+                        Fagsaksystem.EY.navn,
                         JaNeiMedBegrunnelse(JaNei.JA, "Automatisk gjenoppretta basert på opphørt sak fra Pesys"),
                     )
 
@@ -86,7 +87,7 @@ class MigreringService(
                     behandlingService.oppdaterVirkningstidspunkt(
                         behandling.id,
                         virkningstidspunktForMigrering,
-                        gjenoppretta,
+                        Fagsaksystem.EY.navn,
                         "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
                     )
 
@@ -131,7 +132,7 @@ class MigreringService(
                         requireNotNull(behandlingOgOppgave.oppgave) {
                             "Mangler oppgave for behandling=${behandling.id}. Stopper gjenoppretting for pesysId=${request.pesysId}"
                         }
-                    oppgaveService.tildelSaksbehandler(nyopprettaOppgave.id, gjenoppretta)
+                    oppgaveService.tildelSaksbehandler(nyopprettaOppgave.id, Fagsaksystem.EY.navn)
 
                     behandlingsHendelser.sendMeldingForHendelseMedDetaljertBehandling(
                         behandling.toStatistikkBehandling(request.opprettPersongalleri(), pesysId = request.pesysId.id),
@@ -146,11 +147,12 @@ class MigreringService(
         inTransaction {
             val sak = finnEllerOpprettSak(request)
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = request.pesysId.toString(),
+                referanse = GJENOPPRETTELSE_OPPGAVE,
                 sakId = sak.id,
                 oppgaveKilde = OppgaveKilde.BEHANDLING,
                 oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-                merknad = "Oppgave for manuell gjenoppretting av opphørt sak i Pesys",
+                merknad =
+                    "Opprettelse av manuell behandling for gjenoppretting av opphørt sak i Pesys id=${request.pesysId.id}",
                 frist = Tidspunkt.now().plus(5, ChronoUnit.DAYS),
             )
         }

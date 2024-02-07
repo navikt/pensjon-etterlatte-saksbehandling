@@ -167,14 +167,14 @@ class BehandlingFactory(
                     persongalleri,
                     request.mottattDato,
                     request.kilde ?: Vedtaksloesning.GJENNY,
-                ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
+                ).also {
+                    if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
+                        oppgaveService.hentOppgaverForSak(sak.id).find { it.referanse == GJENOPPRETTELSE_OPPGAVE }?.let {
+                            oppgaveService.hentOgFerdigstillOppgaveById(it.id, brukerTokenInfo)
+                        }
+                    }
+                } ?: throw IllegalStateException("Kunne ikke opprette behandling")
             }.behandling
-
-        if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
-            oppgaveService.hentOppgaverForSak(sak.id).find { it.referanse == GJENOPPRETTELSE_OPPGAVE }?.let {
-                oppgaveService.hentOgFerdigstillOppgaveById(it.id, brukerTokenInfo)
-            }
-        }
 
         val gyldighetsvurdering =
             GyldighetsResultat(

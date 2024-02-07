@@ -29,7 +29,7 @@ export default function ManuellBehandling() {
   const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const [status, opprettNyBehandling] = useApiCall(opprettBehandling)
   const [nyBehandlingId, setNyId] = useState('')
-  const [erMigrering, setErMigrering] = useState<boolean | null>(null)
+  const [vedtaksloesning, setVedtaksloesning] = useState<string>('')
 
   const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
   const [overstyrBeregning, setOverstyrBeregning] = useState<boolean>(false)
@@ -60,7 +60,7 @@ export default function ManuellBehandling() {
   const [error, setError] = useState<boolean>(false)
 
   const ferdigstill = () => {
-    if (!gradering) {
+    if (!gradering || !vedtaksloesning || !nyBehandlingRequest?.mottattDato) {
       setError(true)
       return
     }
@@ -69,7 +69,7 @@ export default function ManuellBehandling() {
         ...nyBehandlingRequest,
         sakType: SakType.BARNEPENSJON,
         mottattDato: nyBehandlingRequest!!.mottattDato!!.replace('Z', ''),
-        kilde: erMigrering ? 'PESYS' : undefined,
+        kilde: vedtaksloesning,
         pesysId: pesysId,
         enhet: enhet === 'VELGENHET' ? undefined : filtrerEnhet(enhet),
         foreldreloes: erForeldreloes,
@@ -98,18 +98,14 @@ export default function ManuellBehandling() {
       <h1>Manuell behandling</h1>
 
       <Select
-        label="Er det migrering fra Pesys?"
-        value={erMigrering == null ? '' : erMigrering ? 'ja' : 'nei'}
-        onChange={(e) => {
-          const svar = e.target.value
-          if (svar === 'ja') setErMigrering(true)
-          else if (svar === 'nei') setErMigrering(false)
-          else setErMigrering(null)
-        }}
+        label="Er det sak fra Pesys? (påkrevd)"
+        value={vedtaksloesning ?? ''}
+        onChange={(e) => setVedtaksloesning(e.target.value)}
       >
         <option>Velg ...</option>
-        <option value="ja">Ja</option>
-        <option value="nei">Nei</option>
+        <option value="PESYS">Løpende i Pesys</option>
+        <option value="GJENOPPRETTA">Opphørt i Pesys</option>
+        <option value="GJENNY">Nei</option>
       </Select>
 
       <InputRow>
@@ -122,9 +118,8 @@ export default function ManuellBehandling() {
           onChange={(e) => setPesysId(Number(e.target.value))}
         />
       </InputRow>
-      {error && <Alert variant="error">Gradering må velges</Alert>}
       <Select
-        label="Gradering - Adressebeskyttelse(obligatorisk)"
+        label="Gradering - Adressebeskyttelse (påkrevd)"
         value={gradering}
         onChange={(e) => {
           setGradering(e.target.value)
@@ -180,7 +175,7 @@ export default function ManuellBehandling() {
       </Select>
 
       <DatoVelger
-        label="Mottatt dato"
+        label="Mottatt dato (påkrevd)"
         description="Datoen søknaden ble mottatt"
         value={nyBehandlingRequest?.mottattDato ? new Date(nyBehandlingRequest?.mottattDato) : undefined}
         onChange={(mottattDato) =>
@@ -203,11 +198,11 @@ export default function ManuellBehandling() {
           variant="secondary"
           onClick={ferdigstill}
           loading={isPending(status) || isPending(overstyrBeregningStatus) || isPending(overstyrTrygdetidStatus)}
-          disabled={erMigrering == null || (erMigrering && pesysId == null)}
         >
           Send inn
         </Button>
       </Knapp>
+      {error && <Alert variant="error">Alle påkrevde felter er ikke fylt ut</Alert>}
       {isSuccess(status) && <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>}
       {isFailureHandler({
         apiResult: status,

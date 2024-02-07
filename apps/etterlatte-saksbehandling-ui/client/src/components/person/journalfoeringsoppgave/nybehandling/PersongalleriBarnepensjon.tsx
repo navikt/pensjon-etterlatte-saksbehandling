@@ -1,7 +1,7 @@
 import { BodyShort, Button, Heading, Panel, TextField } from '@navikt/ds-react'
 import { Persongalleri } from '~shared/types/Person'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { InputList, InputRow } from './OpprettNyBehandling'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
@@ -24,6 +24,12 @@ export default function PersongalleriBarnepensjon({
   const oppdaterPersongalleri = (persongalleri: Persongalleri) => {
     dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, persongalleri }))
   }
+
+  useEffect(() => {
+    if (fnrFraOppgave) {
+      oppdaterPersongalleri({ ...persongalleri, soeker: fnrFraOppgave })
+    }
+  }, [fnrFraOppgave])
 
   const oppdater = (field: PersonArray, fnr: string, index: number) => {
     const nyState = persongalleri ? [...(persongalleri[field] || [])] : []

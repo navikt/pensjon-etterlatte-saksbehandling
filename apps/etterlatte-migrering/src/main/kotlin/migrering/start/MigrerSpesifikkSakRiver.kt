@@ -14,7 +14,7 @@ import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.Pesyssak
 import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
-import no.nav.etterlatte.migrering.pen.SakMedUfoere
+import no.nav.etterlatte.migrering.pen.SakSammendragResponse
 import no.nav.etterlatte.migrering.pen.tilVaarModell
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
@@ -115,12 +115,12 @@ internal class MigrerSpesifikkSakRiver(
 
     private fun verifiserUfoere(request: MigreringRequest): MigreringRequest {
         if (request.kanAutomatiskGjenopprettes) {
-            val ufoere = hentUfoereSak(request.soeker.value)
-            if (ufoere != null) {
+            val ufoereSak = hentSakSammendragForSoeker(request.soeker.value)
+            if (ufoereSak != null) {
                 pesysRepository.lagreFeilkjoering(
                     request.toJson(),
                     feilendeSteg = Migreringshendelser.VERIFISER.lagEventnameForType(),
-                    feil = "Har uføretrygd med status ${ufoere.sakStatus}",
+                    feil = "Har uføretrygd med status ${ufoereSak.sakStatus.name}",
                     pesysId = request.pesysId,
                 )
                 return request.copy(
@@ -141,11 +141,18 @@ internal class MigrerSpesifikkSakRiver(
         return sakFraPEN
     }
 
-    private fun hentUfoereSak(fnr: String): SakMedUfoere? {
-        logger.info("Prøver å hente sak med uføre for ${fnr.maskerFnr()} fra PEN")
+    private fun hentSakSammendragForSoeker(fnr: String): SakSammendragResponse? {
+        logger.info("Prøver å hente sak sammendrag for ${fnr.maskerFnr()} fra PEN")
         val sakFraPEN = runBlocking { penKlient.sakMedUfoere(fnr) }
-        logger.info("Henta sak med uføre for ${fnr.maskerFnr()} fra PEN")
-        return sakFraPEN.firstOrNull() // TODO finn uføre hvis finnes ellers null
+        logger.info("Henta sak sammendrag for ${fnr.maskerFnr()} fra PEN")
+        return sakFraPEN.firstOrNull {
+            it.sakType == SakSammendragResponse.UFORE_SAKTYPE &&
+                listOf(
+                    SakSammendragResponse.Status.LOPENDE,
+                    SakSammendragResponse.Status.OPPRETTET,
+                    SakSammendragResponse.Status.TIL_BEHANDLING,
+                ).contains(it.sakStatus)
+        }
     }
 
     private fun sendSakTilMigrering(

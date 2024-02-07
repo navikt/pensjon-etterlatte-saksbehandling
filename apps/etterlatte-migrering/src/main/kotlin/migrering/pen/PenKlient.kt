@@ -5,6 +5,7 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -59,30 +60,21 @@ class PenKlient(config: Config, pen: HttpClient) {
             )
     }
 
-    suspend fun sakMedUfoere(fnr: String): List<SakMedUfoere> {
-        /*
-        TODO implementere request til /pen/springapi/sak/sammendrag
-        eksempel respons
-           {
-                "sakId": 123456,
-                "sakType": "UFOREP",
-                "sakStatus": "LOPENDE",
-                "fomDato": "2021-05-01T00:00:00+0200",
-                "tomDato": null,
-                "enhetId": "4410",
-                "arkivtema": "UFO"
-            }
-         */
-        return listOf(
-            SakMedUfoere(
-                sakType = "UFOREP",
-                sakStatus = "LOPENDE",
-            ),
-        )
+    suspend fun sakMedUfoere(fnr: String): List<SakSammendragResponse> {
+        logger.info("Henter sak sammendrag for  ${fnr.maskerFnr()} fra PEN")
+        return downstreamResourceClient
+            .get(
+                resource =
+                    Resource(
+                        clientId = clientId,
+                        url = "$resourceUrl/sak/sammendragWonderful",
+                        additionalHeaders = mapOf("fnr" to fnr),
+                    ),
+                brukerTokenInfo = Systembruker.migrering,
+            )
+            .mapBoth(
+                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                failure = { errorResponse -> throw errorResponse },
+            )
     }
 }
-
-data class SakMedUfoere(
-    val sakType: String,
-    val sakStatus: String,
-)

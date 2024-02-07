@@ -61,3 +61,19 @@ data class TrygdetidBP(
     val virkFom: LocalDate,
     val virkTom: LocalDate?,
 )
+
+data class SakSammendragResponse(
+    val sakType: String,
+    val sakStatus: Status,
+) {
+    companion object {
+        const val UFORE_SAKTYPE = "UFOREP"
+    }
+
+    enum class Status {
+        AVSLUTTET,
+        LOPENDE,
+        OPPRETTET,
+        TIL_BEHANDLING,
+    }
+}

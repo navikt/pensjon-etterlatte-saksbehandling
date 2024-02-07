@@ -4,13 +4,11 @@ import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
-import no.nav.etterlatte.libs.jobs.LeaderElection
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
 
 class HendelsePollerTask(
-    private val leaderElection: LeaderElection,
     private val initialDelaySeconds: Long,
     private val periode: Duration,
     private val hendelsePoller: HendelsePoller,
@@ -27,9 +25,7 @@ class HendelsePollerTask(
             period = periode.toMillis(),
             loggerInfo = LoggerInfo(logger = logger),
         ) {
-            if (leaderElection.isLeader()) {
-                hendelsePoller.poll(maxAntallHendelsePerPoll)
-            }
+            hendelsePoller.poll(maxAntallHendelsePerPoll)
         }
     }
 }

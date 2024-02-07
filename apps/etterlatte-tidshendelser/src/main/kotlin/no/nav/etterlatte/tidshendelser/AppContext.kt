@@ -4,9 +4,7 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.libs.common.Miljoevariabler
-import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.tidshendelser.klient.GrunnlagKlient
 import java.time.Duration
@@ -17,7 +15,6 @@ class AppContext(
     publisher: (UUID, String) -> Unit,
 ) {
     private val config: Config = ConfigFactory.load()
-    private val clock = utcKlokke()
 
     val dataSource = DataSourceBuilder.createDataSource(env.props)
 
@@ -46,24 +43,22 @@ class AppContext(
 
     val jobbPollerTask =
         JobbPollerTask(
-            leaderElection = LeaderElection(electorPath = env.maybeEnvValue("ELECTOR_PATH")),
-            initialDelaySeconds = env.maybeEnvValue("JOBB_POLLER_INITIAL_DELAY")?.toLong() ?: 60L,
-            periode = env.maybeEnvValue("JOBB_POLLER_INTERVAL")?.let { Duration.parse(it) } ?: Duration.ofMinutes(5),
+            initialDelaySeconds = env.requireEnvValue("JOBB_POLLER_INITIAL_DELAY").toLong(),
+            periode = env.requireEnvValue("JOBB_POLLER_INTERVAL").let { Duration.parse(it) } ?: Duration.ofMinutes(5),
             jobbPoller = JobbPoller(hendelseDao, aldersovergangerService),
         )
 
     val hendelsePollerTask =
         HendelsePollerTask(
-            leaderElection = LeaderElection(electorPath = env.maybeEnvValue("ELECTOR_PATH")),
-            initialDelaySeconds = env.maybeEnvValue("HENDELSE_POLLER_INITIAL_DELAY")?.toLong() ?: 60L,
+            initialDelaySeconds = env.requireEnvValue("HENDELSE_POLLER_INITIAL_DELAY").toLong(),
             periode =
-                env.maybeEnvValue("HENDELSE_POLLER_INTERVAL")?.let { Duration.parse(it) }
+                env.requireEnvValue("HENDELSE_POLLER_INTERVAL").let { Duration.parse(it) }
                     ?: Duration.ofMinutes(5),
             hendelsePoller =
                 HendelsePoller(
                     hendelseDao = hendelseDao,
                     hendelsePublisher = HendelsePublisher(publisher),
                 ),
-            maxAntallHendelsePerPoll = env.maybeEnvValue("HENDELSE_POLLER_MAX_ANTALL")?.toInt() ?: 5,
+            maxAntallHendelsePerPoll = env.requireEnvValue("HENDELSE_POLLER_MAX_ANTALL").toInt(),
         )
 }

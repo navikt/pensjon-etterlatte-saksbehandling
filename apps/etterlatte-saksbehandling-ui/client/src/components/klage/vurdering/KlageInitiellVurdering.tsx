@@ -15,10 +15,13 @@ export const KlageInitiellVurdering = (props: { klage: Klage }) => {
   const [redigerbar, setRedigerbar] = useState<boolean>(!klage?.initieltUtfall)
 
   const [lagreInitiellStatus, lagreInitiellKlageUtfall] = useApiCall(oppdaterInitieltUtfallForKlage)
-  const harInitieltUtfall = klage.initieltUtfall
 
   const getTextFromutfall = (utfall: Utfall): string => {
     switch (utfall) {
+      case Utfall.AVVIST:
+        return 'Hvorfor avvises det?'
+      case Utfall.AVVIST_MED_OMGJOERING:
+        return 'Hvorfor avvises det med omgjøring?'
       case Utfall.OMGJOERING:
         return 'Hvorfor skal det omgjøres?'
       case Utfall.DELVIS_OMGJOERING:
@@ -32,7 +35,7 @@ export const KlageInitiellVurdering = (props: { klage: Klage }) => {
     <>
       {redigerbar && (
         <>
-          <Heading level="1" size="large">
+          <Heading level="2" size="large">
             Første vurdering av utfall saksbehandler
           </Heading>
           <RadioGroup legend="" onChange={(e) => setUtfall(e as Utfall)}>
@@ -71,11 +74,11 @@ export const KlageInitiellVurdering = (props: { klage: Klage }) => {
           )}
         </>
       )}
-      <Button type="button" variant="secondary" onClick={() => setRedigerbar(true)}>
+      <Button style={{ marginBottom: '3em' }} type="button" variant="secondary" onClick={() => setRedigerbar(true)}>
         Rediger
       </Button>
 
-      {harInitieltUtfall && <KlageVurderingRedigering klage={klage} />}
+      <KlageVurderingRedigering klage={klage} />
     </>
   )
 }

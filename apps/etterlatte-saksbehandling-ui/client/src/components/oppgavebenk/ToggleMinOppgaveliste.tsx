@@ -87,6 +87,7 @@ export const ToggleMinOppgaveliste = () => {
   const innloggetSaksbehandleroppgaver = mutableOppgaver.filter(
     (o) => o.saksbehandlerIdent === innloggetSaksbehandler.ident
   )
+
   const filtrerteOppgaver = filtrerOppgaver(
     filter.enhetsFilter,
     filter.fristFilter,
@@ -105,7 +106,7 @@ export const ToggleMinOppgaveliste = () => {
     <Container>
       <TabsWidth value={oppgaveListeValg} onChange={(e) => setOppgaveListeValg(e as OppgavelisteToggle)}>
         <Tabs.List>
-          <Tabs.Tab value="Oppgavelista" label="Oppgavelisten" icon={<InboxIcon />} />
+          <Tabs.Tab value="Oppgavelista" label={`Oppgavelisten (${hentedeOppgaver.length})`} icon={<InboxIcon />} />
           <Tabs.Tab
             value="MinOppgaveliste"
             label={`Min oppgaveliste (${innloggetSaksbehandleroppgaver.length})`}

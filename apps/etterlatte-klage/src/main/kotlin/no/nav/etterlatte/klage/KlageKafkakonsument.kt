@@ -1,7 +1,6 @@
 package no.nav.etterlatte.klage
 
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
-import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
+import no.nav.etterlatte.kafka.Avrokonstanter
 import no.nav.etterlatte.kafka.Kafkakonfigurasjon
 import no.nav.etterlatte.kafka.Kafkakonsument
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -27,6 +26,6 @@ class KlageKafkakonsument(
 internal class KafkaEnvironment : Kafkakonfigurasjon<StringDeserializer>(
     groupId = "KLAGE_GROUP_ID",
     deserializerClass = StringDeserializer::class.java,
-    userInfoConfigKey = SchemaRegistryClientConfig.USER_INFO_CONFIG,
-    schemaRegistryUrlConfigKey = AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+    userInfoConfigKey = Avrokonstanter.USER_INFO_CONFIG,
+    schemaRegistryUrlConfigKey = Avrokonstanter.SCHEMA_REGISTRY_URL_CONFIG,
 )

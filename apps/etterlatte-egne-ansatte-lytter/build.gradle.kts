@@ -21,7 +21,6 @@ dependencies {
 
     implementation(libs.kafka.clients)
     implementation(libs.kafka.avro)
-    implementation(libs.kafka.avroserializer)
 
     testImplementation(libs.kafka.embeddedenv)
     testImplementation(libs.el.api)

@@ -164,11 +164,7 @@ class OppgaveService(
         frist: Tidspunkt,
     ) {
         if (frist.isBefore(Tidspunkt.now())) {
-            throw UgyldigForespoerselException(
-                code = "FRIST_TILBAKE_I_TID",
-                detail = "Frist kan ikke settes tilbake i tid",
-                meta = mapOf("oppgaveId" to oppgaveId),
-            )
+            throw FristTilbakeITid(oppgaveId)
         }
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId)
@@ -279,11 +275,7 @@ class OppgaveService(
         saksbehandler: BrukerTokenInfo,
     ) {
         if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandler)) {
-            throw UgyldigForespoerselException(
-                code = "FEIL_SAKSBEHANDLER_PAA_OPPGAVE",
-                detail = "Kan ikke lukke oppgave som tilhører en annen saksbehandler",
-                meta = mapOf("oppgaveId" to oppgaveUnderBehandling.id),
-            )
+            throw FeilSaksbehandlerPaaOppgave(oppgaveUnderBehandling.id)
         }
     }
 
@@ -456,6 +448,18 @@ class OppgaveService(
 }
 
 class FantIkkeSakException(msg: String) : Exception(msg)
+
+class FeilSaksbehandlerPaaOppgave(oppgaveId: UUID) : UgyldigForespoerselException(
+    code = "FEIL_SAKSBEHANDLER_PAA_OPPGAVE",
+    detail = "Kan ikke lukke oppgave som tilhører en annen saksbehandler",
+    meta = mapOf("oppgaveId" to oppgaveId),
+)
+
+class FristTilbakeITid(oppgaveId: UUID) : UgyldigForespoerselException(
+    code = "FRIST_TILBAKE_I_TID",
+    detail = "Frist kan ikke settes tilbake i tid",
+    meta = mapOf("oppgaveId" to oppgaveId),
+)
 
 enum class Rolle {
     SAKSBEHANDLER,

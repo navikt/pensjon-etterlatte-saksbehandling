@@ -60,7 +60,7 @@ class UgyldigSaksbehandlerIdentException(msg: String) :
         detail = msg,
     )
 
-inline val PipelineContext<*, ApplicationCall>.minOppgavelisteident: String?
+inline val PipelineContext<*, ApplicationCall>.minOppgavelisteidentQueryParam: String?
     get() {
         val minOppgavelisteIdentFilter = call.request.queryParameters["minOppgavelisteIdent"]
         if (minOppgavelisteIdentFilter != null) {
@@ -86,7 +86,7 @@ internal fun Route.oppgaveRoutes(
                         service.finnOppgaverForBruker(
                             Kontekst.get().appUserAsSaksbehandler(),
                             filtrerteStatuser,
-                            minOppgavelisteident,
+                            minOppgavelisteidentQueryParam,
                         )
                     },
                 )

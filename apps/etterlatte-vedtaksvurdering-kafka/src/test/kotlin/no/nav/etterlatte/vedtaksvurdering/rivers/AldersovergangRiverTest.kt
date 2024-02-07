@@ -20,10 +20,10 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
 
-class AldersovergangSjekkLoependeYtelseRiverTest {
+class AldersovergangRiverTest {
     private val vedtakService = mockk<VedtakService>()
 
-    private val inspector = TestRapid().apply { AldersovergangSjekkLoependeYtelseRiver(this, vedtakService) }
+    private val inspector = TestRapid().apply { AldersovergangRiver(this, vedtakService) }
 
     private val sakId = 1234L
     private val datoFom = LocalDate.of(2024, Month.FEBRUARY, 1)
@@ -36,9 +36,9 @@ class AldersovergangSjekkLoependeYtelseRiverTest {
             JsonMessage.newMessage(
                 EventNames.ALDERSOVERGANG.name,
                 mapOf(
-                    ALDERSOVERGANG_STEP_KEY to VedtakAldersovergangStepEvents.SAK_IDENTIFISERT.name,
+                    ALDERSOVERGANG_STEP_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
                     ALDERSOVERGANG_TYPE_KEY to "BP20",
-                    ALDERSOVERGANG_ID_KEY to "123",
+                    ALDERSOVERGANG_ID_KEY to "123-123-123",
                     SAK_ID_KEY to sakId,
                     DATO_KEY to datoFom,
                 ),
@@ -49,7 +49,7 @@ class AldersovergangSjekkLoependeYtelseRiverTest {
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
             field(0, ALDERSOVERGANG_STEP_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "123"
+            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "123-123-123"
             field(0, "loependeYtelse").asBoolean() shouldBe true
         }
     }
@@ -62,9 +62,9 @@ class AldersovergangSjekkLoependeYtelseRiverTest {
             JsonMessage.newMessage(
                 EventNames.ALDERSOVERGANG.name,
                 mapOf(
-                    ALDERSOVERGANG_STEP_KEY to VedtakAldersovergangStepEvents.SAK_IDENTIFISERT.name,
+                    ALDERSOVERGANG_STEP_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
                     ALDERSOVERGANG_TYPE_KEY to "BP20",
-                    ALDERSOVERGANG_ID_KEY to "432",
+                    ALDERSOVERGANG_ID_KEY to "432-987-234",
                     SAK_ID_KEY to sakId,
                     DATO_KEY to datoFom,
                 ),
@@ -75,7 +75,7 @@ class AldersovergangSjekkLoependeYtelseRiverTest {
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
             field(0, ALDERSOVERGANG_STEP_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
-            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "432"
+            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "432-987-234"
             field(0, "loependeYtelse").asBoolean() shouldBe false
         }
     }

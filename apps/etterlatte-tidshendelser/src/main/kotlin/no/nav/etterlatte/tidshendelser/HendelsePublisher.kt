@@ -3,6 +3,7 @@ package no.nav.etterlatte.tidshendelser
 import no.nav.etterlatte.libs.common.logging.CORRELATION_ID
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
+import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEP_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
@@ -19,8 +20,8 @@ class HendelsePublisher(private val rapidsPublisher: (UUID, String) -> Unit) {
             JsonMessage.newMessage(
                 mapOf(
                     EventNames.ALDERSOVERGANG.lagParMedEventNameKey(),
-                    "hendelse_id" to hendelse.id,
                     SAK_ID_KEY to hendelse.sakId,
+                    ALDERSOVERGANG_ID_KEY to hendelse.id,
                     ALDERSOVERGANG_STEP_KEY to hendelse.steg,
                     ALDERSOVERGANG_TYPE_KEY to jobbType.name,
                     CORRELATION_ID to getCorrelationId(),

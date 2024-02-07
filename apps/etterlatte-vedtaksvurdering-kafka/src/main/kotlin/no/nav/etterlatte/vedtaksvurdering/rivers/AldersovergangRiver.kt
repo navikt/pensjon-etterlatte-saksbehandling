@@ -1,6 +1,8 @@
 package no.nav.etterlatte.vedtaksvurdering.rivers
 
 import no.nav.etterlatte.VedtakService
+import no.nav.etterlatte.libs.common.logging.getCorrelationId
+import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.vedtak.VedtakAldersovergangStepEvents
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEP_KEY
@@ -16,7 +18,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-class AldersovergangSjekkLoependeYtelseRiver(
+class AldersovergangRiver(
     rapidsConnection: RapidsConnection,
     private val vedtakService: VedtakService,
 ) : ListenerMedLogging() {
@@ -24,7 +26,7 @@ class AldersovergangSjekkLoependeYtelseRiver(
 
     init {
         initialiserRiver(rapidsConnection, EventNames.ALDERSOVERGANG) {
-            validate { it.requireValue(ALDERSOVERGANG_STEP_KEY, VedtakAldersovergangStepEvents.SAK_IDENTIFISERT.name) }
+            validate { it.requireKey(ALDERSOVERGANG_STEP_KEY) }
             validate { it.requireKey(ALDERSOVERGANG_TYPE_KEY) }
             validate { it.requireKey(ALDERSOVERGANG_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
@@ -36,15 +38,30 @@ class AldersovergangSjekkLoependeYtelseRiver(
         packet: JsonMessage,
         context: MessageContext,
     ) {
+        val type = packet[ALDERSOVERGANG_TYPE_KEY].asText()
+        val step = packet[ALDERSOVERGANG_STEP_KEY].asText()
+        val hendelseId = packet[ALDERSOVERGANG_ID_KEY].asText()
         val sakId = packet.sakId
-        val datoFoersteIAktuellBehandlingsmaaned = packet.dato
-        logger.info("Sjekker løpende ytelse for sak $sakId, dato=$datoFoersteIAktuellBehandlingsmaaned")
 
-        val loependeYtelse = vedtakService.harLoependeYtelserFra(sakId, datoFoersteIAktuellBehandlingsmaaned)
-        logger.info("Sak $sakId, dato=$datoFoersteIAktuellBehandlingsmaaned har løpende ytelse: ${loependeYtelse.erLoepende}")
+        withLogContext(
+            correlationId = getCorrelationId(),
+            mapOf(
+                "hendelseId" to hendelseId,
+                "sakId" to sakId.toString(),
+                "type" to type,
+            ),
+        ) {
+            if (step == VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name) {
+                val datoFoersteIAktuellBehandlingsmaaned = packet.dato
+                logger.info("Sjekker løpende ytelse for sak $sakId, dato=$datoFoersteIAktuellBehandlingsmaaned")
 
-        packet["ao_step"] = VedtakAldersovergangStepEvents.VURDERT_LOEPENDE_YTELSE.name
-        packet["loependeYtelse"] = loependeYtelse.erLoepende
-        context.publish(packet.toJson())
+                val loependeYtelse = vedtakService.harLoependeYtelserFra(sakId, datoFoersteIAktuellBehandlingsmaaned)
+                logger.info("Sak $sakId, dato=$datoFoersteIAktuellBehandlingsmaaned har løpende ytelse: ${loependeYtelse.erLoepende}")
+
+                packet[ALDERSOVERGANG_STEP_KEY] = VedtakAldersovergangStepEvents.VURDERT_LOEPENDE_YTELSE.name
+                packet["loependeYtelse"] = loependeYtelse.erLoepende
+                context.publish(packet.toJson())
+            }
+        }
     }
 }

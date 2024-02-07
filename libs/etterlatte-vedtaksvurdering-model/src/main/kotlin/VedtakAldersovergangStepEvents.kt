@@ -4,7 +4,7 @@ enum class VedtakAldersovergangStepEvents {
     /**
      * Skal ageres på
      */
-    SAK_IDENTIFISERT,
+    IDENTIFISERT_SAK,
 
     /**
      *  Etter at løpende ytelser er vurdert for sakId fra #SAK_IDENTIFISERT

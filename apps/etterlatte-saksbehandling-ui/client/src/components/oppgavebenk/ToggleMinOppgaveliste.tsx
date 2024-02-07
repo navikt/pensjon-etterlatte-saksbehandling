@@ -59,12 +59,14 @@ export const ToggleMinOppgaveliste = () => {
   useEffect(() => hentAlleOppgaver(), [])
 
   useEffect(() => {
+    const statusValg =
+      oppgaveListeValg === 'MinOppgaveliste'
+        ? [OPPGAVESTATUSFILTER.UNDER_BEHANDLING]
+        : [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING]
+    hentOppgaverStatusFetch(statusValg)
     setFilter({
       ...hentFilterFraLocalStorage(),
-      oppgavestatusFilter:
-        oppgaveListeValg === 'MinOppgaveliste'
-          ? [OPPGAVESTATUSFILTER.UNDER_BEHANDLING]
-          : [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
+      oppgavestatusFilter: statusValg,
     })
   }, [oppgaveListeValg])
 

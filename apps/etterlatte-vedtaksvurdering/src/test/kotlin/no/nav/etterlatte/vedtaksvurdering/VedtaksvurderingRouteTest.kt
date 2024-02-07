@@ -190,7 +190,7 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet shouldBe null
                 attestasjon shouldBe null
                 with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
-                    val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakBehandlingInnhold
+                    val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakInnhold.Behandling
                     virkningstidspunkt shouldBe opprettetVedtakInnhold.virkningstidspunkt
                     behandling.type shouldBe opprettetVedtakInnhold.behandlingType
                     utbetalingsperioder shouldHaveSize 1
@@ -244,7 +244,7 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet shouldBe null
                 attestasjon shouldBe null
                 (innhold as VedtakInnholdDto.VedtakBehandlingDto).let {
-                    val opprettVedtakInnhold = opprettetVedtak.innhold as VedtakBehandlingInnhold
+                    val opprettVedtakInnhold = opprettetVedtak.innhold as VedtakInnhold.Behandling
                     it.virkningstidspunkt shouldBe opprettVedtakInnhold.virkningstidspunkt
                     it.behandling.type shouldBe opprettVedtakInnhold.behandlingType
                     it.utbetalingsperioder shouldHaveSize 1
@@ -298,7 +298,7 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet shouldBe null
                 attestasjon shouldBe null
                 (innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving shouldBe
-                    (opprettetVedtak.innhold as VedtakTilbakekrevingInnhold).tilbakekreving
+                    (opprettetVedtak.innhold as VedtakInnhold.Tilbakekreving).tilbakekreving
             }
         }
 
@@ -419,7 +419,7 @@ internal class VedtaksvurderingRouteTest {
                 type shouldBe opprettetVedtak.type
                 vedtakFattet shouldBe null
                 attestasjon shouldBe null
-                val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakBehandlingInnhold
+                val opprettetVedtakInnhold = opprettetVedtak.innhold as VedtakInnhold.Behandling
                 with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
                     virkningstidspunkt shouldBe opprettetVedtakInnhold.virkningstidspunkt
                     behandling.type shouldBe opprettetVedtakInnhold.behandlingType
@@ -479,7 +479,7 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet shouldBe fattetVedtak.vedtakFattet
                 attestasjon shouldBe null
                 with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
-                    val fattetVedtakInnhold = fattetVedtak.innhold as VedtakBehandlingInnhold
+                    val fattetVedtakInnhold = fattetVedtak.innhold as VedtakInnhold.Behandling
                     virkningstidspunkt shouldBe fattetVedtakInnhold.virkningstidspunkt
                     behandling.type shouldBe fattetVedtakInnhold.behandlingType
                     utbetalingsperioder shouldHaveSize 1
@@ -546,7 +546,7 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet shouldBe attestertVedtak.vedtakFattet
                 attestasjon shouldBe attestertVedtak.attestasjon
                 with(vedtakDto.innhold as VedtakInnholdDto.VedtakBehandlingDto) {
-                    val attestertVedtakInnhold = attestertVedtak.innhold as VedtakBehandlingInnhold
+                    val attestertVedtakInnhold = attestertVedtak.innhold as VedtakInnhold.Behandling
                     virkningstidspunkt shouldBe attestertVedtakInnhold.virkningstidspunkt
                     behandling.type shouldBe attestertVedtakInnhold.behandlingType
                     utbetalingsperioder shouldHaveSize 1
@@ -613,7 +613,7 @@ internal class VedtaksvurderingRouteTest {
                 vedtakFattet shouldBe null
                 attestasjon shouldBe null
                 with(innhold as VedtakInnholdDto.VedtakBehandlingDto) {
-                    val underkjentVedtakInnhold = underkjentVedtak.innhold as VedtakBehandlingInnhold
+                    val underkjentVedtakInnhold = underkjentVedtak.innhold as VedtakInnhold.Behandling
                     virkningstidspunkt shouldBe underkjentVedtakInnhold.virkningstidspunkt
                     behandling.type shouldBe underkjentVedtakInnhold.behandlingType
                     utbetalingsperioder shouldHaveSize 1

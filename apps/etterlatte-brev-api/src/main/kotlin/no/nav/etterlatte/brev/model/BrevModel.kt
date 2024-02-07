@@ -105,6 +105,7 @@ data class Brev(
     val mottaker: Mottaker,
     val journalpostId: String? = null,
     val bestillingsID: BestillingsID? = null,
+    val brevtype: Brevtype,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
 
@@ -123,6 +124,7 @@ data class Brev(
             statusEndret = opprettNyttBrev.opprettet,
             mottaker = opprettNyttBrev.mottaker,
             opprettet = opprettNyttBrev.opprettet,
+            brevtype = opprettNyttBrev.brevtype,
         )
     }
 }

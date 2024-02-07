@@ -20,8 +20,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.Samordningsvedtak
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.Vedtak
-import no.nav.etterlatte.vedtaksvurdering.VedtakBehandlingInnhold
-import no.nav.etterlatte.vedtaksvurdering.VedtakTilbakekrevingInnhold
+import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -93,8 +92,8 @@ class SamKlientImpl(
 internal fun Vedtak.tilSamordneRequest(etterbetaling: Boolean): SamordneVedtakRequest {
     val innhold =
         when (this.innhold) {
-            is VedtakBehandlingInnhold -> this.innhold
-            is VedtakTilbakekrevingInnhold -> throw SamordneVedtakBehandlingUgyldigForespoerselException(
+            is VedtakInnhold.Behandling -> this.innhold
+            is VedtakInnhold.Tilbakekreving, is VedtakInnhold.Klage -> throw SamordneVedtakBehandlingUgyldigForespoerselException(
                 "Tilbakekreving skal ikke gjennom samordning",
             )
         }

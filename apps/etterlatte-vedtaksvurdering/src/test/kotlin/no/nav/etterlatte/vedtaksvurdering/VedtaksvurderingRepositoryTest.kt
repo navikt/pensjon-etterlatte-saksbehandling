@@ -74,8 +74,8 @@ internal class VedtaksvurderingRepositoryTest {
             sakType shouldBe SakType.BARNEPENSJON
             behandlingId shouldNotBe null
             type shouldBe VedtakType.INNVILGELSE
-            innhold should beInstanceOf<VedtakBehandlingInnhold>()
-            (innhold as VedtakBehandlingInnhold).let {
+            innhold should beInstanceOf<VedtakInnhold.Behandling>()
+            (innhold as VedtakInnhold.Behandling).let {
                 it.behandlingType shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
                 it.virkningstidspunkt shouldBe YearMonth.of(2023, Month.JANUARY)
                 it.vilkaarsvurdering shouldBe objectMapper.createObjectNode()
@@ -106,8 +106,8 @@ internal class VedtaksvurderingRepositoryTest {
             sakType shouldBe SakType.BARNEPENSJON
             behandlingId shouldNotBe null
             type shouldBe VedtakType.TILBAKEKREVING
-            innhold should beInstanceOf<VedtakTilbakekrevingInnhold>()
-            (innhold as VedtakTilbakekrevingInnhold).tilbakekreving shouldBe objectMapper.createObjectNode()
+            innhold should beInstanceOf<VedtakInnhold.Tilbakekreving>()
+            (innhold as VedtakInnhold.Tilbakekreving).tilbakekreving shouldBe objectMapper.createObjectNode()
         }
     }
 
@@ -124,7 +124,7 @@ internal class VedtaksvurderingRepositoryTest {
                 vedtak.copy(
                     type = VedtakType.OPPHOER,
                     innhold =
-                        (vedtak.innhold as VedtakBehandlingInnhold).copy(
+                        (vedtak.innhold as VedtakInnhold.Behandling).copy(
                             virkningstidspunkt = nyttVirkningstidspunkt,
                             utbetalingsperioder =
                                 listOf(
@@ -140,8 +140,8 @@ internal class VedtaksvurderingRepositoryTest {
 
         oppdatertVedtak shouldNotBe null
         oppdatertVedtak.type shouldBe VedtakType.OPPHOER
-        oppdatertVedtak.innhold should beInstanceOf<VedtakBehandlingInnhold>()
-        (oppdatertVedtak.innhold as VedtakBehandlingInnhold).let { innhold ->
+        oppdatertVedtak.innhold should beInstanceOf<VedtakInnhold.Behandling>()
+        (oppdatertVedtak.innhold as VedtakInnhold.Behandling).let { innhold ->
             innhold.virkningstidspunkt shouldBe nyttVirkningstidspunkt
             innhold.utbetalingsperioder.first().let {
                 it.id!! shouldBeGreaterThan 0
@@ -164,7 +164,7 @@ internal class VedtaksvurderingRepositoryTest {
             repository.oppdaterVedtak(
                 vedtak.copy(
                     innhold =
-                        (vedtak.innhold as VedtakTilbakekrevingInnhold).copy(
+                        (vedtak.innhold as VedtakInnhold.Tilbakekreving).copy(
                             tilbakekreving = oppdatertTilbakekreving,
                         ),
                 ),
@@ -172,8 +172,8 @@ internal class VedtaksvurderingRepositoryTest {
 
         oppdatertVedtak shouldNotBe null
         oppdatertVedtak.type shouldBe VedtakType.TILBAKEKREVING
-        oppdatertVedtak.innhold should beInstanceOf<VedtakTilbakekrevingInnhold>()
-        (oppdatertVedtak.innhold as VedtakTilbakekrevingInnhold).tilbakekreving shouldBe oppdatertTilbakekreving
+        oppdatertVedtak.innhold should beInstanceOf<VedtakInnhold.Tilbakekreving>()
+        (oppdatertVedtak.innhold as VedtakInnhold.Tilbakekreving).tilbakekreving shouldBe oppdatertTilbakekreving
     }
 
     @Test

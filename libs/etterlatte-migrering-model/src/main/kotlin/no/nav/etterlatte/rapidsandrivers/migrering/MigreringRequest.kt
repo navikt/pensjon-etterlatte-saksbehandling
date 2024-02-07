@@ -36,7 +36,8 @@ data class MigreringRequest(
             soeker = this.soeker.value,
             avdoed = this.avdoedForelder.map { it.ident.value },
             gjenlevende = listOfNotNull(this.gjenlevendeForelder?.value),
-            innsender = Vedtaksloesning.PESYS.name, // TODO Endre?
+            // TODO Endre?
+            innsender = Vedtaksloesning.PESYS.name,
         )
 
     fun erFolketrygdberegnet(): Boolean {
@@ -59,6 +60,8 @@ data class MigreringRequest(
             beregning.anvendtTrygdetid == 40
     }
 }
+
+const val GJENOPPRETTELSE_OPPGAVE = "GJENOPPRETTELSE_OPPGAVE"
 
 data class AvdoedForelder(
     val ident: Folkeregisteridentifikator,

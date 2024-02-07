@@ -115,24 +115,32 @@ sealed class Behandling {
 
     protected fun <T : Behandling> hvisTilstandEr(
         behandlingStatus: BehandlingStatus,
-        block: () -> T,
+        endreTilStatus: BehandlingStatus,
+        block: (endreTilStatus: BehandlingStatus) -> T,
     ): T {
         if (status == behandlingStatus) {
-            return block()
+            return block(endreTilStatus)
         } else {
-            logger.info("Ugyldig operasjon på behandling ($id) med status $status")
+            logger.error(
+                "Ugyldig operasjon på behandling ($id) med status $status, prøver å endre til status ${endreTilStatus.name}." +
+                    " Forventet status er ${behandlingStatus.name}",
+            )
             throw TilstandException.UgyldigTilstand
         }
     }
 
     protected fun <T : Behandling> hvisTilstandEr(
         behandlingStatuser: List<BehandlingStatus>,
-        block: () -> T,
+        endreTilStatus: BehandlingStatus,
+        block: (endreTilStatus: BehandlingStatus) -> T,
     ): T {
         if (status in behandlingStatuser) {
-            return block()
+            return block(endreTilStatus)
         } else {
-            logger.info("Ugyldig operasjon på behandling ($id) med status $status")
+            logger.error(
+                "Ugyldig operasjon på behandling ($id) med status $status, prøver å endre til status ${endreTilStatus.name}." +
+                    " Forventet statuser er ${behandlingStatuser.joinToString { " ," }}",
+            )
             throw TilstandException.UgyldigTilstand
         }
     }

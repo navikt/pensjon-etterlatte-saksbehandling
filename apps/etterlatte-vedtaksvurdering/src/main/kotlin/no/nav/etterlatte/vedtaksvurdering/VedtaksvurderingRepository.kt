@@ -46,8 +46,9 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         tx.session {
             val innholdParams =
                 when (opprettVedtak.innhold) {
-                    is VedtakTilbakekrevingInnhold -> mapOf("tilbakekreving" to opprettVedtak.innhold.tilbakekreving.toJson())
-                    is VedtakBehandlingInnhold ->
+                    is VedtakInnhold.Tilbakekreving -> mapOf("tilbakekreving" to opprettVedtak.innhold.tilbakekreving.toJson())
+                    is VedtakInnhold.Klage -> mapOf("klage" to opprettVedtak.innhold.klage.toJson())
+                    is VedtakInnhold.Behandling ->
                         opprettVedtak.innhold.let {
                             mapOf(
                                 "behandlingtype" to it.behandlingType.name,
@@ -65,10 +66,10 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                         INSERT INTO vedtak(
                             behandlingId, sakid, fnr, behandlingtype, saktype, vedtakstatus, type, datovirkfom, 
                             beregningsresultat, avkorting, vilkaarsresultat, revurderingsaarsak, revurderinginfo,
-                            tilbakekreving)
+                            tilbakekreving, klage)
                         VALUES (:behandlingId, :sakid, :fnr, :behandlingtype, :saktype, :vedtakstatus, :type, 
                             :datovirkfom, :beregningsresultat, :avkorting, :vilkaarsresultat, :revurderingsaarsak,
-                            :revurderinginfo, :tilbakekreving)
+                            :revurderinginfo, :tilbakekreving, :klage)
                         RETURNING id
                         """,
                 mapOf(
@@ -82,7 +83,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
             )
                 .let { query -> this.run(query.asUpdateAndReturnGeneratedKey) }
                 ?.let { vedtakId ->
-                    if (opprettVedtak.innhold is VedtakBehandlingInnhold) {
+                    if (opprettVedtak.innhold is VedtakInnhold.Behandling) {
                         opprettUtbetalingsperioder(vedtakId, opprettVedtak.innhold.utbetalingsperioder, this)
                     }
                 } ?: throw Exception("Kunne ikke opprette vedtak for behandling ${opprettVedtak.behandlingId}")
@@ -97,7 +98,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         tx.session {
             val params =
                 when (oppdatertVedtak.innhold) {
-                    is VedtakBehandlingInnhold ->
+                    is VedtakInnhold.Behandling ->
                         mapOf(
                             "datovirkfom" to oppdatertVedtak.innhold.virkningstidspunkt.atDay(1),
                             "type" to oppdatertVedtak.type.name,
@@ -107,11 +108,17 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                             "behandlingid" to oppdatertVedtak.behandlingId,
                             "revurderinginfo" to oppdatertVedtak.innhold.revurderingInfo?.toJson(),
                         )
-                    is VedtakTilbakekrevingInnhold ->
+                    is VedtakInnhold.Tilbakekreving ->
                         mapOf(
                             "type" to oppdatertVedtak.type.name,
                             "behandlingid" to oppdatertVedtak.behandlingId,
                             "tilbakekreving" to oppdatertVedtak.innhold.tilbakekreving.toJson(),
+                        )
+                    is VedtakInnhold.Klage ->
+                        mapOf(
+                            "type" to oppdatertVedtak.type.name,
+                            "behandlingid" to oppdatertVedtak.behandlingId,
+                            "klage" to oppdatertVedtak.innhold.klage.toJson(),
                         )
                 }
 
@@ -127,7 +134,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 params,
             ).let { query -> this.run(query.asUpdate) }
 
-            if (oppdatertVedtak.innhold is VedtakBehandlingInnhold) {
+            if (oppdatertVedtak.innhold is VedtakInnhold.Behandling) {
                 slettUtbetalingsperioder(oppdatertVedtak.id, this)
                 opprettUtbetalingsperioder(oppdatertVedtak.id, oppdatertVedtak.innhold.utbetalingsperioder, this)
             }
@@ -414,7 +421,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                     VedtakType.ENDRING,
                     VedtakType.INNVILGELSE,
                     ->
-                        VedtakBehandlingInnhold(
+                        VedtakInnhold.Behandling(
                             behandlingType = BehandlingType.valueOf(string("behandlingtype")),
                             virkningstidspunkt = sqlDate("datovirkfom").toLocalDate().let { YearMonth.from(it) },
                             vilkaarsvurdering = stringOrNull("vilkaarsresultat")?.let { objectMapper.readValue(it) },
@@ -426,8 +433,13 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                         )
 
                     VedtakType.TILBAKEKREVING ->
-                        VedtakTilbakekrevingInnhold(
+                        VedtakInnhold.Tilbakekreving(
                             tilbakekreving = string("tilbakekreving").let { objectMapper.readValue(it) },
+                        )
+
+                    VedtakType.AVVIST_KLAGE ->
+                        VedtakInnhold.Klage(
+                            klage = string("klage").let { objectMapper.readValue(it) },
                         )
                 },
         )

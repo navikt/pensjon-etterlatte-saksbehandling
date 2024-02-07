@@ -64,6 +64,8 @@ function mapFraFormdataTilKlageUtfall(skjema: FilledFormDataVurdering): KlageUtf
       return { utfall: 'OMGJOERING', omgjoering: skjema.omgjoering!! }
     case Utfall.STADFESTE_VEDTAK:
       return { utfall: 'STADFESTE_VEDTAK', innstilling: skjema.innstilling!! }
+    default:
+      throw new Error('Valgt utfall er ikke gyldig')
   }
 }
 
@@ -79,12 +81,15 @@ function mapKlageTilFormdata(klage: Klage | null): FormdataVurdering {
       return { utfall: Utfall.OMGJOERING, omgjoering: utfall.omgjoering }
     case 'STADFESTE_VEDTAK':
       return { utfall: Utfall.STADFESTE_VEDTAK, innstilling: utfall.innstilling }
+    default:
+      return { utfall: null }
   }
 }
 
 export function KlageVurderingRedigering(props: { klage: Klage }) {
+  const klage = props.klage
+
   const navigate = useNavigate()
-  const { klage } = props
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)
   const dispatch = useAppDispatch()
 

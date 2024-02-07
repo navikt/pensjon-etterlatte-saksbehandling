@@ -34,7 +34,6 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -514,12 +513,9 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().minusMonths(1L).toTidspunkt()
 
-        val err =
-            assertThrows<BadRequestException> {
-                oppgaveService.redigerFrist(nyOppgave.id, nyFrist)
-            }
-
-        assertTrue(err.message!!.startsWith("Tidspunkt tilbake i tid id: "))
+        assertThrows<FristTilbakeITid> {
+            oppgaveService.redigerFrist(nyOppgave.id, nyFrist)
+        }
     }
 
     @Test
@@ -590,7 +586,7 @@ internal class OppgaveServiceTest {
 
         val saksbehandler1 = "saksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler1)
-        assertThrows<OppgaveService.FeilSaksbehandlerPaaOppgaveException> {
+        assertThrows<FeilSaksbehandlerPaaOppgave> {
             oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                 SakIdOgReferanse(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
@@ -919,7 +915,7 @@ internal class OppgaveServiceTest {
 
         val saksbehandler1 = "saksbehandler01"
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler1)
-        assertThrows<OppgaveService.FeilSaksbehandlerPaaOppgaveException> {
+        assertThrows<FeilSaksbehandlerPaaOppgave> {
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 behandlingsref,
                 Saksbehandler("", "feilSaksbehandler", null),

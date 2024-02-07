@@ -17,7 +17,7 @@ class OppgaveKlient(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    suspend fun opprettOppgave(
+    suspend fun opprettManuellJournalfoeringsoppgave(
         journalpostId: Long,
         tema: String,
     ) {
@@ -43,4 +43,6 @@ data class OpprettOppgaveRequest(
     val oppgavetype = "JFR" // JFR = Journalføring
     val prioritet = "NORM"
     val aktivDato = LocalDate.now().toString()
+    val fristFerdigstillelse = LocalDate.now().plusDays(30).toString()
+    val beskrivelse = "Journalpost $journalpostId mangler bruker"
 }

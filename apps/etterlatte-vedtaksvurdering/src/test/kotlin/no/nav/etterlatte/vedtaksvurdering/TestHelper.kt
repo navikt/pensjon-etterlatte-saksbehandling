@@ -48,7 +48,7 @@ fun opprettVedtak(
     type = type,
     status = status,
     innhold =
-        VedtakBehandlingInnhold(
+        VedtakInnhold.Behandling(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             revurderingAarsak = null,
             virkningstidspunkt = virkningstidspunkt,
@@ -79,7 +79,7 @@ fun opprettVedtakTilbakekreving(
     sakType = SakType.BARNEPENSJON,
     behandlingId = behandlingId,
     type = VedtakType.TILBAKEKREVING,
-    innhold = VedtakTilbakekrevingInnhold(tilbakekreving = tilbakekreving),
+    innhold = VedtakInnhold.Tilbakekreving(tilbakekreving = tilbakekreving),
 )
 
 fun vedtak(
@@ -103,7 +103,7 @@ fun vedtak(
     type = VedtakType.INNVILGELSE,
     vedtakFattet = vedtakFattet,
     innhold =
-        VedtakBehandlingInnhold(
+        VedtakInnhold.Behandling(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = virkningstidspunkt,
             beregning = beregning,
@@ -138,6 +138,6 @@ fun vedtakTilbakekreving(
     behandlingId = behandlingId,
     type = VedtakType.INNVILGELSE,
     innhold =
-        VedtakTilbakekrevingInnhold(tilbakekreving),
+        VedtakInnhold.Tilbakekreving(tilbakekreving),
     vedtakFattet = vedtakFattet,
 )

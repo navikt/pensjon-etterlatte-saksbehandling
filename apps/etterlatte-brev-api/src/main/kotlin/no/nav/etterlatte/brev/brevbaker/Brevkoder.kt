@@ -1,5 +1,7 @@
 package no.nav.etterlatte.brev.brevbaker
 
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.AVVIST_KLAGE_FERDIG
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.AVVIST_KLAGE_INNHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
@@ -68,4 +70,5 @@ enum class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: Ett
     OMS_VARSEL(OMSTILLINGSSTOENAD_VARSEL_UTFALL, OMSTILLINGSSTOENAD_VARSEL),
 
     UTSATT_KLAGEFRIST_INFORMASJONSBREV(UTSATT_KLAGEFRIST, TOM_MAL_INFORMASJONSBREV),
+    AVVIST_KLAGE(AVVIST_KLAGE_INNHOLD, AVVIST_KLAGE_FERDIG),
 }

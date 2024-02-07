@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { FilePdfIcon, PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { IBrev } from '~shared/types/Brev'
-import { format } from 'date-fns'
 import { hentManuellPayload, lagreManuellPayload, tilbakestillManuellPayload } from '~shared/api/brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -12,6 +11,7 @@ import Spinner from '~shared/Spinner'
 import { isPending, isPendingOrInitial, isSuccess, isSuccessOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { TilbakestillOgLagreRad } from '~components/behandling/brev/TilbakestillOgLagreRad'
+import { formaterTidspunktTimeMinutterSekunder } from '~utils/formattering'
 
 enum ManueltBrevFane {
   REDIGER = 'REDIGER',
@@ -23,8 +23,6 @@ export interface LagretStatus {
   lagret: boolean
   beskrivelse?: string
 }
-
-const formaterTidspunkt = (dato: Date) => format(new Date(dato), 'HH:mm:ss').toString()
 
 interface RedigerbartBrevProps {
   brev: IBrev
@@ -53,7 +51,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
 
   const lagre = () => {
     apiLagreManuellPayload({ brevId: brev.id, sakId: brev.sakId, payload: content, payload_vedlegg: vedlegg }, () => {
-      setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunkt(new Date())}` })
+      setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunktTimeMinutterSekunder(new Date())}` })
       if (lukkAdvarselBehandlingEndret) lukkAdvarselBehandlingEndret()
     })
   }
@@ -64,7 +62,10 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
       (payload: any) => {
         setContent(payload.hoveddel)
         setVedlegg(payload.vedlegg)
-        setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunkt(new Date())}` })
+        setLagretStatus({
+          lagret: true,
+          beskrivelse: `Lagret kl. ${formaterTidspunktTimeMinutterSekunder(new Date())}`,
+        })
         if (lukkAdvarselBehandlingEndret) lukkAdvarselBehandlingEndret()
       }
     )
@@ -73,7 +74,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
   const onChange = (value: any[]) => {
     setLagretStatus({
       lagret: false,
-      beskrivelse: `Sist endret kl. ${formaterTidspunkt(new Date())} (ikke lagret)`,
+      beskrivelse: `Sist endret kl. ${formaterTidspunktTimeMinutterSekunder(new Date())} (ikke lagret)`,
     })
     setContent(value)
   }
@@ -82,7 +83,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
     if (!key) return
     setLagretStatus({
       lagret: false,
-      beskrivelse: `Sist endret kl. ${formaterTidspunkt(new Date())} (ikke lagret)`,
+      beskrivelse: `Sist endret kl. ${formaterTidspunktTimeMinutterSekunder(new Date())} (ikke lagret)`,
     })
     const oppdatertVedlegg = vedlegg.map((ved) => {
       if (ved.key === key) return { ...ved, payload: value }

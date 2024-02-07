@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
-import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -89,7 +88,6 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService) {
                         generellBrevData = generellBrevData,
                         brukerTokenInfo = bruker,
                         brevkode = kode,
-                        brevdata = { ManueltBrevData() },
                     ),
                 ),
         )

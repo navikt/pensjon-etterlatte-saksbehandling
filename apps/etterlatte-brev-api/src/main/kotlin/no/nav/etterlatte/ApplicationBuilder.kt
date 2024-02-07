@@ -39,8 +39,8 @@ import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
-import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
-import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
+import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfall
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
@@ -144,13 +144,13 @@ class ApplicationBuilder {
 
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
 
-    private val brevDataMapperRedigerbartUtfallVedtak = BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService)
+    private val brevDataMapperRedigerbartUtfall = BrevDataMapperRedigerbartUtfall(brevdataFacade, migreringBrevDataService)
 
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(brevdataFacade)
+    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade)
 
     private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService)
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapperRedigerbartUtfall)
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
@@ -162,7 +162,7 @@ class ApplicationBuilder {
         Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
 
     private val pdfGenerator =
-        PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
+        PDFGenerator(db, brevdataFacade, brevDataMapperFerdigstilling, adresseService, brevbakerService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
@@ -171,8 +171,6 @@ class ApplicationBuilder {
             brevKodeMapperVedtak,
             brevoppretter,
             pdfGenerator,
-            brevDataMapperRedigerbartUtfallVedtak,
-            brevDataMapperFerdigstilling,
         )
 
     private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator)

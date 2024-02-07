@@ -1,11 +1,15 @@
 import { KlageVurderingVisning } from '~components/klage/vurdering/KlageVurderingVisning'
 import React from 'react'
 import { Klage } from '~shared/types/Klage'
+import { Heading } from '@navikt/ds-react'
 
 export const KlageInitiellVurderingVisning = (props: { klage: Klage }) => {
   const klage = props.klage
   return (
     <>
+      <Heading level="2" size="large">
+        Initiell vurdering
+      </Heading>
       {klage.initieltUtfall && (
         <>
           <dl>

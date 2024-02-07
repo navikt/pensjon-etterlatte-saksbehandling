@@ -1,35 +1,32 @@
 package no.nav.etterlatte.tidshendelser
 
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
+import javax.sql.DataSource
 
+@ExtendWith(DatabaseExtension::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JobbPollerIntegrationTest {
-    @Container
-    private val postgreSQLContainer =
-        PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-            .also { it.start() }
-
-    private val dataSource =
-        DataSourceBuilder.createDataSource(
-            postgreSQLContainer.jdbcUrl,
-            postgreSQLContainer.username,
-            postgreSQLContainer.password,
-        ).also { it.migrate() }
-
+    private val dataSource: DataSource = DatabaseExtension.dataSource
     private val aldersovergangerService = mockk<AldersovergangerService>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
     private val jobbPoller = JobbPoller(hendelseDao, aldersovergangerService)
+
+    @AfterEach
+    fun afterEach() {
+        clearAllMocks()
+        DatabaseExtension.resetDb()
+    }
 
     @Test
     fun `skal kun hente en jobb for dagens dato, og trigge den`() {

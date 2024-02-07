@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.Status
@@ -45,7 +46,8 @@ internal class BrevServiceTest {
     private val pdfGenerator = mockk<PDFGenerator>()
     private val brevbakerService = mockk<BrevbakerService>()
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
-    private val brevoppretter = Brevoppretter(adresseService, db, brevDataFacade, brevbakerService, redigerbartVedleggHenter)
+    private val brevoppretter =
+        Brevoppretter(adresseService, db, brevDataFacade, brevbakerService, redigerbartVedleggHenter)
 
     private val brevService =
         BrevService(
@@ -249,6 +251,7 @@ internal class BrevServiceTest {
         statusEndret = Tidspunkt.now(),
         opprettet = Tidspunkt.now(),
         mottaker = opprettMottaker(),
+        brevtype = Brevtype.INFORMASJON,
     )
 
     private fun opprettMottaker() =

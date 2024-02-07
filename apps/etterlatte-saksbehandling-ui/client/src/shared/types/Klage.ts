@@ -42,6 +42,7 @@ export interface Klage {
   status: KlageStatus
   kabalStatus?: KabalStatus
   formkrav?: FormkravMedSaksbehandler
+  initieltUtfall?: InitieltUtfallMedBegrunnelseOgMeta
   utfall?: KlageUtfall
   kabalResultat?: KabalResultat
   innkommendeDokument?: InnkommendeKlage
@@ -109,6 +110,7 @@ export interface Formkrav {
   gjelderKlagenNoeKonkretIVedtaket: JaNei
   erKlagenFramsattInnenFrist: JaNei
   erFormkraveneOppfylt: JaNei
+  begrunnelse: string | null
 }
 
 export interface FormkravMedSaksbehandler {
@@ -120,12 +122,27 @@ export enum Utfall {
   OMGJOERING = 'OMGJOERING',
   DELVIS_OMGJOERING = 'DELVIS_OMGJOERING',
   STADFESTE_VEDTAK = 'STADFESTE_VEDTAK',
+  AVVIST = 'AVVIST',
+  AVVIST_MED_OMGJOERING = 'AVVIST_MED_OMGJOERING',
+}
+
+export interface InitieltUtfallMedBegrunnelseOgMeta {
+  utfallMedBegrunnelse: IniteltUtfallMedBegrunnelseDto
+  saksbehandler: string
+  tidspunkt: string
+}
+
+export interface IniteltUtfallMedBegrunnelseDto {
+  utfall: Utfall
+  begrunnelse: string
 }
 
 export const teksterKlageutfall: Record<Utfall, string> = {
   OMGJOERING: 'Omgjøring',
   DELVIS_OMGJOERING: 'Delvis omgjøring',
   STADFESTE_VEDTAK: 'Stadfeste vedtak',
+  AVVIST: 'Avvise klage med brev',
+  AVVIST_MED_OMGJOERING: 'Avvise klage',
 } as const
 
 export type KlageUtfall =
@@ -145,6 +162,15 @@ export type KlageUtfall =
       innstilling: InnstillingTilKabal
       saksbehandler: KildeSaksbehandler
     }
+  | {
+      utfall: 'AVVIST'
+      saksbehandler: KildeSaksbehandler
+    }
+  | {
+      utfall: 'AVVIST_MED_OMGJOERING'
+      omgjoering: Omgjoering
+      saksbehandler: KildeSaksbehandler
+    }
 
 export type KlageUtfallUtenBrev =
   | {
@@ -159,6 +185,13 @@ export type KlageUtfallUtenBrev =
   | {
       utfall: 'STADFESTE_VEDTAK'
       innstilling: InnstillingTilKabalUtenBrev
+    }
+  | {
+      utfall: 'AVVIST'
+    }
+  | {
+      utfall: 'AVVIST_MED_OMGJOERING'
+      omgjoering: Omgjoering
     }
 
 export enum AarsakTilAvslutting {
@@ -181,7 +214,7 @@ interface KlageBrevInnstilling {
 
 export interface InnstillingTilKabal {
   lovhjemmel: LovhjemmelFelles
-  tekst: string
+  internKommentar: string | null
   brev: KlageBrevInnstilling
 }
 

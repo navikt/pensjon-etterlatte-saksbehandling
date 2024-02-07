@@ -8,7 +8,7 @@ import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/Tags'
 import { RedigerSaksbehandler } from '~components/oppgavebenk/tildeling/RedigerSaksbehandler'
 import { HandlingerForOppgave } from '~components/oppgavebenk/HandlingerForOppgave'
 import { FristHandlinger } from '~components/oppgavebenk/FristHandlinger'
-import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/oppgavelistafiltre'
+import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 interface Props {
   oppgave: OppgaveDTO
@@ -35,9 +35,7 @@ export const OppgaverTableRow = ({ oppgave, oppdaterTildeling, erMinOppgaveListe
           <FristWrapper dato={oppgave.frist} />
         )}
       </Table.DataCell>
-      <Table.DataCell>
-        <SaksoversiktLenke fnr={oppgave.fnr} />
-      </Table.DataCell>
+      <Table.DataCell>{oppgave.fnr ? <SaksoversiktLenke fnr={oppgave.fnr} /> : 'Mangler'}</Table.DataCell>
       <Table.DataCell>
         {oppgave.type ? <OppgavetypeTag oppgavetype={oppgave.type} /> : <div>oppgaveid {oppgave.id}</div>}
       </Table.DataCell>
@@ -47,6 +45,7 @@ export const OppgaverTableRow = ({ oppgave, oppdaterTildeling, erMinOppgaveListe
       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
       <Table.DataCell>
         <RedigerSaksbehandler
+          saksbehandlerNavn={oppgave.saksbehandlerNavn}
           saksbehandler={oppgave.saksbehandler}
           oppgaveId={oppgave.id}
           sakId={oppgave.sakId}

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgave
 
+import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -18,6 +19,8 @@ import java.sql.ResultSet
 import java.util.UUID
 
 interface OppgaveDao {
+    fun hentSaksbehandlerNavnForidenter(identer: List<String>): List<SaksbehandlerInfo>
+
     fun opprettOppgave(oppgaveIntern: OppgaveIntern)
 
     fun hentOppgave(oppgaveId: UUID): OppgaveIntern?
@@ -142,6 +145,22 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
         }
     }
 
+    override fun hentSaksbehandlerNavnForidenter(identer: List<String>): List<SaksbehandlerInfo> {
+        with(connection()) {
+            val statement =
+                prepareStatement(
+                    """
+                    SELECT * FROM saksbehandler_info
+                    WHERE id = ANY(?)
+                    """.trimIndent(),
+                )
+            statement.setArray(1, createArrayOf("text", identer.toTypedArray()))
+            return statement.executeQuery().toList {
+                SaksbehandlerInfo(getString("id"), getString("navn"))
+            }
+        }
+    }
+
     override fun hentOppgaver(
         oppgaveTypeTyper: List<OppgaveType>,
         enheter: List<String>,
@@ -153,8 +172,8 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
             val statement =
                 prepareStatement(
                     """
-                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde
-                    FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id
+                    SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
+                    FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                     WHERE o.type = ANY(?)
                     AND (? = true OR o.enhet = ANY(?))
                     AND (
@@ -171,7 +190,7 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
             statement.setString(5, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
 
             return statement.executeQuery().toList {
-                asOppgave()
+                asOppgaveMedSaksbehandlerNavn()
             }.also {
                 logger.info("Hentet antall nye oppgaver: ${it.size}")
             }
@@ -300,6 +319,25 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
 
             statement.executeUpdate()
         }
+    }
+
+    private fun ResultSet.asOppgaveMedSaksbehandlerNavn(): OppgaveIntern {
+        return OppgaveIntern(
+            id = getObject("id") as UUID,
+            status = Status.valueOf(getString("status")),
+            enhet = getString("enhet"),
+            sakId = getLong("sak_id"),
+            kilde = getString("kilde")?.let { OppgaveKilde.valueOf(it) },
+            type = OppgaveType.valueOf(getString("type")),
+            saksbehandler = getString("saksbehandler"),
+            referanse = getString("referanse"),
+            merknad = getString("merknad"),
+            opprettet = getTidspunkt("opprettet"),
+            sakType = SakType.valueOf(getString("saktype")),
+            fnr = getString("fnr"),
+            frist = getTidspunktOrNull("frist"),
+            saksbehandlerNavn = getString("navn"),
+        )
     }
 
     private fun ResultSet.asOppgave(): OppgaveIntern {

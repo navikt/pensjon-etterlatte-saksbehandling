@@ -1,4 +1,3 @@
-import { useKlage } from '~components/klage/useKlage'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import React from 'react'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
@@ -6,12 +5,12 @@ import { BodyShort, Button, Heading } from '@navikt/ds-react'
 import { useNavigate } from 'react-router-dom'
 import { forrigeSteg, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { formaterKlageutfall, VisInnstilling, VisOmgjoering } from '~components/klage/vurdering/KlageVurderingFelles'
+import { Klage } from '~shared/types/Klage'
 
-export function KlageVurderingVisning() {
-  const klage = useKlage()
+export function KlageVurderingVisning(props: { klage: Klage }) {
+  const klage = props.klage
+
   const navigate = useNavigate()
-
-  if (!klage) return
 
   const { utfall, sak } = klage
   return (

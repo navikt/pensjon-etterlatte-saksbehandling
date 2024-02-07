@@ -13,9 +13,11 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
@@ -153,7 +155,11 @@ fun Route.brevRoute(
                 logger.info("Oppretter nytt brev på sak=$sakId)")
 
                 measureTimedValue {
-                    service.opprettBrev(sakId, brukerTokenInfo)
+                    service.opprettBrev(
+                        sakId,
+                        brukerTokenInfo,
+                        Brevkoder.TOMT_INFORMASJONSBREV,
+                    ) { ManueltBrevData() }
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(HttpStatusCode.Created, brev)

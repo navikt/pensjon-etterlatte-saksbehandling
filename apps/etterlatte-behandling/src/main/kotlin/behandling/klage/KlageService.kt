@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.klienter.KlageKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
+import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
@@ -15,7 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
-import no.nav.etterlatte.libs.common.behandling.KlageUtfall
+import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -56,6 +57,12 @@ interface KlageService {
     fun lagreUtfallAvKlage(
         klageId: UUID,
         utfall: KlageUtfallUtenBrev,
+        saksbehandler: Saksbehandler,
+    ): Klage
+
+    fun lagreInitieltUtfallMedBegrunnelseAvKlage(
+        klageId: UUID,
+        utfall: InitieltUtfallMedBegrunnelseDto,
         saksbehandler: Saksbehandler,
     ): Klage
 
@@ -155,6 +162,17 @@ class KlageServiceImpl(
         return oppdatertKlage
     }
 
+    override fun lagreInitieltUtfallMedBegrunnelseAvKlage(
+        klageId: UUID,
+        utfall: InitieltUtfallMedBegrunnelseDto,
+        saksbehandler: Saksbehandler,
+    ): Klage {
+        val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
+        val oppdatertKlage = klage.oppdaterIntieltUtfallMedBegrunnelse(utfall, saksbehandler.ident)
+        klageDao.lagreKlage(oppdatertKlage)
+        return oppdatertKlage
+    }
+
     override fun lagreUtfallAvKlage(
         klageId: UUID,
         utfall: KlageUtfallUtenBrev,
@@ -166,29 +184,29 @@ class KlageServiceImpl(
             when (utfall) {
                 // Vurder å slette brev hvis det finnes her? Så vi ikke polluter med hengende brev
                 is KlageUtfallUtenBrev.Omgjoering ->
-                    KlageUtfall.Omgjoering(
+                    KlageUtfallMedData.Omgjoering(
                         omgjoering = utfall.omgjoering,
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
 
                 is KlageUtfallUtenBrev.DelvisOmgjoering ->
-                    KlageUtfall.DelvisOmgjoering(
+                    KlageUtfallMedData.DelvisOmgjoering(
                         omgjoering = utfall.omgjoering,
                         innstilling =
                             InnstillingTilKabal(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
-                                tekst = utfall.innstilling.tekst,
+                                internKommentar = utfall.innstilling.internKommentar,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
 
                 is KlageUtfallUtenBrev.StadfesteVedtak ->
-                    KlageUtfall.StadfesteVedtak(
+                    KlageUtfallMedData.StadfesteVedtak(
                         innstilling =
                             InnstillingTilKabal(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
-                                tekst = utfall.innstilling.tekst,
+                                internKommentar = utfall.innstilling.internKommentar,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
@@ -206,8 +224,8 @@ class KlageServiceImpl(
         saksbehandler: Saksbehandler,
     ): KlageBrevInnstilling {
         return when (val utfall = klage.utfall) {
-            is KlageUtfall.DelvisOmgjoering -> utfall.innstilling.brev
-            is KlageUtfall.StadfesteVedtak -> utfall.innstilling.brev
+            is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling.brev
+            is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling.brev
             else -> {
                 val brev = runBlocking { brevApiKlient.opprettKlageInnstillingsbrevISak(klage.sak.id, saksbehandler) }
                 KlageBrevInnstilling(brev.id)
@@ -275,9 +293,9 @@ class KlageServiceImpl(
 
         val (innstilling, omgjoering) =
             when (val utfall = klage.utfall) {
-                is KlageUtfall.StadfesteVedtak -> utfall.innstilling to null
-                is KlageUtfall.DelvisOmgjoering -> utfall.innstilling to utfall.omgjoering
-                is KlageUtfall.Omgjoering -> null to utfall.omgjoering
+                is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling to null
+                is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling to utfall.omgjoering
+                is KlageUtfallMedData.Omgjoering -> null to utfall.omgjoering
                 null -> null to null
             }
 

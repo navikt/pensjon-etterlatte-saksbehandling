@@ -17,9 +17,8 @@
       <env name="DB_PORT" value="5439" />
       <env name="DB_USERNAME" value="postgres" />
       <env name="DEV" value="true" />
-      <env name="ELECTOR_PATH" value="localhost:9094" />
       <env name="ETTERLATTE_BREV_API_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-brev-api" />
-      <env name="ETTERLATTE_BREV_API_URL" value="https://etterlatte-brev-api.intern.dev.no" />
+      <env name="ETTERLATTE_BREV_API_URL" value="https://etterlatte-brev-api.intern.dev.nav.no" />
       <env name="ETTERLATTE_GRUNNLAG_CLIENT_ID" value="ce96a301-13db-4409-b277-5b27f464d08b" />
       <env name="ETTERLATTE_GRUNNLAG_URL" value="https://etterlatte-grunnlag.intern.dev.nav.no/api" />
       <env name="ETTERLATTE_KLAGE_API_URL" value="https://etterlatte-klage" />
@@ -35,7 +34,6 @@
       <env name="HTTP_PORT" value="8090" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />
       <env name="NAIS_APP_NAME" value="etterlatte-behandling" />
-      <env name="NAIS_CLUSTER_NAME" value="dev-gcp" />
       <env name="NAVANSATT_URL" value="https://navansatt.dev-fss-pub.nais.io" />
       <env name="NORG2_URL" value="https://norg2.dev-fss-pub.nais.io/norg2/api/v1" />
       <env name="OPPGAVE_CLIENT_ID" value="dev-fss.oppgavehandtering.oppgave" />

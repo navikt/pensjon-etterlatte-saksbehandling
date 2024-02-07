@@ -5,6 +5,7 @@ import com.typesafe.config.ConfigFactory
 import com.zaxxer.hikari.HikariDataSource
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerInfoDao
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingFactory
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
@@ -210,12 +211,14 @@ internal class ApplicationContext(
     val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
     val behandlingInfoDao = BehandlingInfoDao { databaseContext().activeTx() }
     val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
+    val saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
 
     // Klient
     val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
-    val leaderElectionKlient = LeaderElection(env.getValue("ELECTOR_PATH"), leaderElectionHttpClient)
+    val leaderElectionKlient = LeaderElection(env.maybeEnvValue("ELECTOR_PATH"), leaderElectionHttpClient)
+
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)
     val klageHendelser = KlageHendelserServiceImpl(rapid)
     val tilbakekreving = TilbakekrevingHendelserServiceImpl(rapid)

@@ -39,9 +39,11 @@ import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
-import no.nav.etterlatte.brev.model.BrevDataMapper
-import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstilling
-import no.nav.etterlatte.brev.model.BrevKodeMapper
+import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
+import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
+import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
+import no.nav.etterlatte.brev.varselbrev.VarselbrevService
+import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
 import no.nav.etterlatte.brev.virusskanning.ClamAvClient
 import no.nav.etterlatte.brev.virusskanning.VirusScanService
@@ -142,13 +144,13 @@ class ApplicationBuilder {
 
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
 
-    private val brevDataMapper = BrevDataMapper(brevdataFacade, migreringBrevDataService)
+    private val brevDataMapperRedigerbartUtfallVedtak = BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService)
 
-    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstilling(brevdataFacade, migreringBrevDataService, brevDataMapper)
+    private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(brevdataFacade)
 
-    private val brevKodeMapper = BrevKodeMapper()
+    private val brevKodeMapperVedtak = BrevKodeMapperVedtak()
 
-    private val brevbakerService = BrevbakerService(brevbaker, adresseService, brevDataMapper, brevKodeMapper)
+    private val brevbakerService = BrevbakerService(brevbaker, adresseService)
 
     private val vedtaksvurderingService = VedtaksvurderingService(vedtakKlient)
 
@@ -156,19 +158,25 @@ class ApplicationBuilder {
 
     private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
 
-    private val brevoppretter = Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
+    private val brevoppretter =
+        Brevoppretter(adresseService, db, brevdataFacade, brevbakerService, redigerbartVedleggHenter)
 
     private val pdfGenerator =
-        PDFGenerator(db, brevdataFacade, brevDataMapperFerdigstilling, adresseService, brevbakerService, migreringBrevDataService)
+        PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
 
     private val vedtaksbrevService =
         VedtaksbrevService(
             db,
             vedtaksvurderingService,
-            brevKodeMapper,
+            brevKodeMapperVedtak,
             brevoppretter,
             pdfGenerator,
+            brevDataMapperRedigerbartUtfallVedtak,
+            brevDataMapperFerdigstilling,
         )
+
+    private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator)
+
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 
     private val brevService =
@@ -195,6 +203,7 @@ class ApplicationBuilder {
                     brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(journalpostService, dokarkivService, tilgangssjekker)
+                    varselbrevRoute(varselbrevService, tilgangssjekker)
                 }
             }
             .build()

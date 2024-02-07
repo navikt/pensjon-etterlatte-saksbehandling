@@ -47,6 +47,11 @@ internal class MigrerEnEnkeltSakRiver(
         logger.info("Mottatt migreringshendelse")
 
         val hendelse: MigreringRequest = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
+        if (!hendelse.kanAutomatiskGjenopprettes) {
+            behandlinger.opprettOppgaveManuellGjenoppretting(hendelse)
+            return
+        }
+
         val (behandlingId, sakId) = behandlinger.migrer(hendelse)
 
         packet.behandlingId = behandlingId

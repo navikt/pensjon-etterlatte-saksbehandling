@@ -1,10 +1,12 @@
 package joarkhendelser
 
 import io.mockk.Called
+import io.mockk.Runs
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
+import io.mockk.just
 import io.mockk.mockk
 import joarkhendelser.behandling.BehandlingKlient
 import joarkhendelser.joark.SafKlient
@@ -23,6 +25,7 @@ import no.nav.etterlatte.joarkhendelser.joark.Journalpost
 import no.nav.etterlatte.joarkhendelser.joark.JournalpostStatus
 import no.nav.etterlatte.joarkhendelser.joark.Journalstatus
 import no.nav.etterlatte.joarkhendelser.joark.Kanal
+import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -45,10 +48,16 @@ import kotlin.random.Random
 internal class JoarkHendelseHandlerTest {
     private val behandlingKlientMock = mockk<BehandlingKlient>(relaxed = true)
     private val safKlientMock = mockk<SafKlient>()
+    private val oppgaveKlient = mockk<OppgaveKlient>()
     private val pdlTjenesterKlientMock = mockk<PdlTjenesterKlient>()
 
     private val sut =
-        JoarkHendelseHandler(BehandlingService(behandlingKlientMock, pdlTjenesterKlientMock), safKlientMock, pdlTjenesterKlientMock)
+        JoarkHendelseHandler(
+            BehandlingService(behandlingKlientMock, pdlTjenesterKlientMock),
+            safKlientMock,
+            oppgaveKlient,
+            pdlTjenesterKlientMock,
+        )
 
     @BeforeEach
     fun beforeEach() {
@@ -76,7 +85,12 @@ internal class JoarkHendelseHandlerTest {
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
-            coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelse(any(), any()) } returns AdressebeskyttelseGradering.UGRADERT
+            coEvery {
+                pdlTjenesterKlientMock.hentAdressebeskyttelse(
+                    any(),
+                    any(),
+                )
+            } returns AdressebeskyttelseGradering.UGRADERT
 
             val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.JOURNALPOST_MOTTATT)
 
@@ -106,7 +120,12 @@ internal class JoarkHendelseHandlerTest {
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
-            coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelse(any(), any()) } returns AdressebeskyttelseGradering.UGRADERT
+            coEvery {
+                pdlTjenesterKlientMock.hentAdressebeskyttelse(
+                    any(),
+                    any(),
+                )
+            } returns AdressebeskyttelseGradering.UGRADERT
 
             val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.TEMA_ENDRET)
 
@@ -136,7 +155,12 @@ internal class JoarkHendelseHandlerTest {
                 PdlIdentifikator.FolkeregisterIdent(
                     Folkeregisteridentifikator.of(ident),
                 )
-            coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelse(any(), any()) } returns AdressebeskyttelseGradering.UGRADERT
+            coEvery {
+                pdlTjenesterKlientMock.hentAdressebeskyttelse(
+                    any(),
+                    any(),
+                )
+            } returns AdressebeskyttelseGradering.UGRADERT
             coEvery { behandlingKlientMock.hentSak(any(), any()) } returns null
 
             val hendelse = opprettHendelse(journalpostId, sakType.tema, HendelseType.ENDELIG_JOURNALFOERT)
@@ -212,16 +236,18 @@ internal class JoarkHendelseHandlerTest {
                     opprettJournalpost(journalpostId, status = Journalstatus.MOTTATT, bruker = null),
                     null,
                 )
+            coEvery { oppgaveKlient.opprettOppgave(any(), any()) } just Runs
 
             val hendelse = opprettHendelse(journalpostId, SakType.OMSTILLINGSSTOENAD.tema)
 
             runBlocking {
-                assertThrows<IllegalStateException> {
-                    sut.haandterHendelse(hendelse)
-                }
+                sut.haandterHendelse(hendelse)
             }
 
-            coVerify(exactly = 1) { safKlientMock.hentJournalpost(journalpostId) }
+            coVerify(exactly = 1) {
+                safKlientMock.hentJournalpost(journalpostId)
+                oppgaveKlient.opprettOppgave(journalpostId, "EYO")
+            }
             coVerify {
                 behandlingKlientMock wasNot Called
                 pdlTjenesterKlientMock wasNot Called

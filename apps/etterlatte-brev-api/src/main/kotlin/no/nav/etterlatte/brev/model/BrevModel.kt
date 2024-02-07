@@ -105,6 +105,7 @@ data class Brev(
     val mottaker: Mottaker,
     val journalpostId: String? = null,
     val bestillingsID: BestillingsID? = null,
+    val brevtype: Brevtype,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
 
@@ -123,6 +124,7 @@ data class Brev(
             statusEndret = opprettNyttBrev.opprettet,
             mottaker = opprettNyttBrev.mottaker,
             opprettet = opprettNyttBrev.opprettet,
+            brevtype = opprettNyttBrev.brevtype,
         )
     }
 }
@@ -165,6 +167,7 @@ data class OpprettNyttBrev(
     val opprettet: Tidspunkt,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
+    val brevtype: Brevtype,
 ) {
     val status: Status = Status.OPPRETTET
 }
@@ -180,3 +183,12 @@ data class EtterbetalingDTO(
     val datoFom: LocalDate,
     val datoTom: LocalDate,
 )
+
+enum class Brevtype {
+    VEDTAK,
+    VARSEL,
+    INFORMASJON,
+    OPPLASTET_PDF,
+    MANUELT,
+    VEDLEGG,
+}

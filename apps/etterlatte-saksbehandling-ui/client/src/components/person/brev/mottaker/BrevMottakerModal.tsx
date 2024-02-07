@@ -5,8 +5,6 @@ import styled, { css } from 'styled-components'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterMottaker } from '~shared/api/brev'
 import { FlexRow } from '~shared/styled'
-import { Grunnlagsopplysning } from '~shared/types/grunnlag'
-import { KildePersondata } from '~shared/types/kilde'
 
 import { isPending, Result } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -22,7 +20,7 @@ enum MottakerType {
 interface Props {
   brev: IBrev
   setBrev: Dispatch<SetStateAction<IBrev>>
-  vergeadresse: Result<Grunnlagsopplysning<Mottaker, KildePersondata>>
+  vergeadresse: Result<Mottaker>
 }
 
 export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {

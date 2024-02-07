@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.ServerReady
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.principal
@@ -20,6 +21,7 @@ import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
+import no.nav.etterlatte.behandling.job.populerSaksbehandlereMedNavn
 import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
@@ -67,6 +69,7 @@ private class Server(private val context: ApplicationContext) {
                 applicationEngineEnvironment {
                     config = HoconApplicationConfig(context.config)
                     module { module(context) }
+                    module { moduleOnServerReady(context) }
                     connector { port = context.httpPort }
                 },
         )
@@ -76,6 +79,13 @@ private class Server(private val context: ApplicationContext) {
             dataSource.migrate()
             setReady().also { engine.start(true) }
         }
+}
+
+internal fun Application.moduleOnServerReady(context: ApplicationContext) {
+    environment.monitor.subscribe(ServerReady) {
+        environment.log.info("Server is started")
+        populerSaksbehandlereMedNavn(context)
+    }
 }
 
 internal fun Application.module(context: ApplicationContext) {

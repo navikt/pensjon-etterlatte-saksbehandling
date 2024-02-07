@@ -51,14 +51,13 @@ updates:
           - "ch.qos.logback*"
           - "net.logstash*"
           - "com.github.navikt:rapids-and-rivers"
+          - "ca.cutterslade.analyze"
+          - "io.ktor*"
+          - "org.jetbrains.kotlinx*"
       jms-mq:
         patterns:
           - "org.messaginghub:pooled-jms"
           - "com.ibm.mq:com.ibm.mq.jakarta.client"
-      ktor-og-kotlinx:
-        patterns:
-          - "io.ktor*"
-          - "org.jetbrains.kotlinx*"
 
 
   # =============
@@ -78,6 +77,7 @@ updates:
           - "eslint"
           - "husky"
           - "lint-staged"
+          - "@typescript-eslint/*"
 
   # ===============
   # FRONTEND CLIENT
@@ -112,6 +112,7 @@ updates:
           - "prom-client"
           - "unleash-klient"
           - "@types/node"
+          - "jsdom"
       react:
         patterns:
           - "react"

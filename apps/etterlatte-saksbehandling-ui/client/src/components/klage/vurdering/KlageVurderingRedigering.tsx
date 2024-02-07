@@ -1,4 +1,4 @@
-import { BodyShort, Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
+import { Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import React from 'react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
@@ -28,7 +28,6 @@ import { SakType } from '~shared/types/sak'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
-import Spinner from '~shared/Spinner'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -50,7 +49,7 @@ function erSkjemaUtfylt(skjema: FormdataVurdering): skjema is FilledFormDataVurd
   }
   if (skjema.utfall === Utfall.STADFESTE_VEDTAK || skjema.utfall === Utfall.DELVIS_OMGJOERING) {
     const { innstilling } = skjema
-    if (!innstilling || !innstilling.lovhjemmel || !innstilling.tekst) {
+    if (!innstilling || !innstilling.lovhjemmel) {
       return false
     }
   }
@@ -65,6 +64,8 @@ function mapFraFormdataTilKlageUtfall(skjema: FilledFormDataVurdering): KlageUtf
       return { utfall: 'OMGJOERING', omgjoering: skjema.omgjoering!! }
     case Utfall.STADFESTE_VEDTAK:
       return { utfall: 'STADFESTE_VEDTAK', innstilling: skjema.innstilling!! }
+    default:
+      throw new Error('Valgt utfall er ikke gyldig')
   }
 }
 
@@ -80,18 +81,17 @@ function mapKlageTilFormdata(klage: Klage | null): FormdataVurdering {
       return { utfall: Utfall.OMGJOERING, omgjoering: utfall.omgjoering }
     case 'STADFESTE_VEDTAK':
       return { utfall: Utfall.STADFESTE_VEDTAK, innstilling: utfall.innstilling }
+    default:
+      return { utfall: null }
   }
 }
 
-export function KlageVurderingRedigering() {
+export function KlageVurderingRedigering(props: { klage: Klage }) {
+  const klage = props.klage
+
   const navigate = useNavigate()
-  const klage = useKlage()
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)
   const dispatch = useAppDispatch()
-
-  if (!klage) {
-    return <Spinner visible label="Henter klage" />
-  }
 
   const {
     control,
@@ -264,11 +264,10 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
 
   return (
     <>
-      <Heading level="2" size="medium">
+      <Heading level="2" size="medium" spacing>
         Innstilling til KA
       </Heading>
 
-      <BodyShort spacing>Angi hvilken hjemmel klagen hovedsakelig knytter seg til</BodyShort>
       <VurderingWrapper>
         <Controller
           rules={{
@@ -281,7 +280,12 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
             const { value, ...rest } = field
             return (
               <>
-                <Select label="Hjemmel" value={value ?? ''} {...rest}>
+                <Select
+                  label="Hjemmel"
+                  value={value ?? ''}
+                  {...rest}
+                  description="Angi hvilken hjemmel klagen hovedsakelig knytter seg til"
+                >
                   <option value="">Velg hjemmel</option>
                   {aktuelleHjemler.map((hjemmel) => (
                     <option key={hjemmel} value={hjemmel}>
@@ -298,21 +302,15 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
         />
       </VurderingWrapper>
 
-      <BodyShort spacing>Skriv innstilling til klagen, som blir med i brev til KA og bruker</BodyShort>
       <VurderingWrapper>
         <Controller
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
-          name="innstilling.tekst"
+          name="innstilling.internKommentar"
           control={control}
-          render={({ field, fieldState }) => {
+          render={({ field }) => {
             const { value, ...rest } = field
             return (
               <>
-                <Textarea label="Innstilling til KA" value={value ?? ''} {...rest} />
-                {fieldState.error ? <Feilmelding>Du må skrive en innstillingstekst.</Feilmelding> : null}
+                <Textarea label="Intern kommentar til KA" value={value ?? ''} {...rest} />
               </>
             )
           }}

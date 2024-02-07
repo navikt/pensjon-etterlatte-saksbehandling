@@ -57,6 +57,11 @@ export function KlageFormkravVisning() {
         <BodyShort spacing>{formkrav?.erKlagenFramsattInnenFrist == JaNei.JA ? 'Ja' : 'Nei'}</BodyShort>
 
         <Heading size="small" spacing>
+          Begrunnelse
+        </Heading>
+        <BodyShort spacing>{formkrav?.begrunnelse}</BodyShort>
+
+        <Heading size="small" spacing>
           Saksbehandler
         </Heading>
         <BodyShort spacing>{saksbehandler?.ident}</BodyShort>

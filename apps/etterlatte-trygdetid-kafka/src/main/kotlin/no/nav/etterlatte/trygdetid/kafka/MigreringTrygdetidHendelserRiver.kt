@@ -1,6 +1,5 @@
 package no.nav.etterlatte.trygdetid.kafka
 
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
@@ -15,6 +14,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.TRYGDETID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -56,14 +56,14 @@ internal class MigreringTrygdetidHendelserRiver(
                 logger.info("Avdød hadde yrkesskade i Pesys, oppretter yrkesskadegrunnlag for behandling $behandlingId")
                 trygdetidService.opprettGrunnlagVedYrkesskade(behandlingId)
             } else if (request.anvendtFlyktningerfordel()) {
-                logger.info("Avdød hadde flyktningerfordel i Pesys, overstyrer med samme trygdetid $behandlingId")
-                overstyrBeregnetTrygdetid(request, behandlingId)
+                throw TrygdetidIkkeGyldigForAutomatiskGjenoppretting("Avdød hadde flyktningerfordel i Pesys")
             } else if (request.trygdetid.perioder.isNotEmpty()) {
                 logger.info("Mottok trygdetidsperioder for behandling $behandlingId")
                 leggTilPerioder(request, behandlingId)
             } else {
-                logger.info("Vi mottok ingen trygdetidsperioder fra Pesys for behandling $behandlingId")
-                overstyrBeregnetTrygdetid(request, behandlingId)
+                throw TrygdetidIkkeGyldigForAutomatiskGjenoppretting(
+                    "Vi mottok ingen trygdetidsperioder fra Pesys for behandling $behandlingId",
+                )
             }
 
         sendBeregnetTrygdetid(packet, oppdatertTrygdetid, context, behandlingId)
@@ -82,21 +82,15 @@ internal class MigreringTrygdetidHendelserRiver(
                 trygdetidService.beregnTrygdetidGrunnlag(behandlingId, grunnlag)
             }.last()
 
-        val trygdetid =
-            if (!trygdetidIGjennyStemmerMedTrygdetidIPesys(trygdetidMedFremtidig, request.beregning)) {
-                trygdetidService.reberegnUtenFremtidigTrygdetid(behandlingId)
-            } else {
-                trygdetidMedFremtidig
-            }
-
-        check(trygdetidIGjennyStemmerMedTrygdetidIPesys(trygdetid, request.beregning)) {
+        check(trygdetidIGjennyStemmerMedTrygdetidIPesys(trygdetidMedFremtidig, request.beregning)) {
             "Beregnet trygdetid i Gjenny basert på perioder fra Pesys stemmer ikke med anvendt trygdetid i Pesys"
         }
 
-        trygdetid
+        trygdetidMedFremtidig
     } catch (e: Exception) {
-        logger.warn("Klarte ikke legge til perioder fra Pesys for behandling $behandlingId", e)
-        overstyrBeregnetTrygdetid(request, behandlingId)
+        throw TrygdetidIkkeGyldigForAutomatiskGjenoppretting(
+            e.message ?: "Klarte ikke legge til perioder fra Pesys for behandling $behandlingId",
+        )
     }
 
     private fun trygdetidIGjennyStemmerMedTrygdetidIPesys(
@@ -155,12 +149,14 @@ internal class MigreringTrygdetidHendelserRiver(
             kilde =
                 TrygdetidGrunnlagKildeDto(
                     tidspunkt = Tidspunkt.now().toString(),
-                    ident = Vedtaksloesning.PESYS.name,
+                    ident = Fagsaksystem.EY.navn,
                 ),
             beregnet = null,
-            begrunnelse = "Migrert fra pesys",
+            begrunnelse = "Gjenopprettet basert på opphørt sak fra pesys",
             poengInnAar = trygdetidsgrunnlag.poengIInnAar,
             poengUtAar = trygdetidsgrunnlag.poengIUtAar,
             prorata = !trygdetidsgrunnlag.ikkeIProrata,
         )
 }
+
+class TrygdetidIkkeGyldigForAutomatiskGjenoppretting(msg: String) : Exception(msg)

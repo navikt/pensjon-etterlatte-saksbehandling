@@ -92,7 +92,7 @@ class ApplicationContext {
     }
 
     private val leaderElection: LeaderElection by lazy {
-        LeaderElection(env.requireEnvValue("ELECTOR_PATH"))
+        LeaderElection(env["ELECTOR_PATH"])
     }
 
     private val beregningHttpClient: HttpClient by lazy {

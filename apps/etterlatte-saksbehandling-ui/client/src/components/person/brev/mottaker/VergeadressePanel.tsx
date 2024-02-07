@@ -1,20 +1,16 @@
 import { Mottaker } from '~shared/types/Brev'
-import { formaterFnr } from '~utils/formattering'
+import { formaterDato, formaterFnr } from '~utils/formattering'
 import React from 'react'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { Grunnlagsopplysning } from '~shared/types/grunnlag'
-import { KildePersondata } from '~shared/types/kilde'
 import { mapSuccess, Result } from '~shared/api/apiUtils'
 
 interface Props {
-  vergeadresseResult: Result<Grunnlagsopplysning<Mottaker, KildePersondata>>
+  vergeadresseResult: Result<Mottaker>
 }
 
 export const VergeadressePanel = ({ vergeadresseResult }: Props) =>
-  mapSuccess(vergeadresseResult, (grunnlagsopplysning) => {
-    const vergeadresse = grunnlagsopplysning?.opplysning
-
+  mapSuccess(vergeadresseResult, (vergeadresse) => {
     if (!vergeadresse) {
       return null
     }
@@ -42,6 +38,7 @@ export const VergeadressePanel = ({ vergeadresseResult }: Props) =>
               {vergeadresse.adresse.landkode})
             </>
           }
+          undertekst={'PDL: ' + formaterDato(new Date())}
         />
         <br />
       </InfoWrapper>

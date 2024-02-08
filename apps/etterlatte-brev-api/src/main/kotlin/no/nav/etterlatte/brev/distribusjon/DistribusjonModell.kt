@@ -41,7 +41,7 @@ enum class AdresseType(
     ;
 
     companion object {
-        fun fra(s: String) = values().first { s.equals(it.verdi, ignoreCase = true) }
+        fun fra(s: String) = entries.first { s.equals(it.verdi, ignoreCase = true) }
     }
 }
 

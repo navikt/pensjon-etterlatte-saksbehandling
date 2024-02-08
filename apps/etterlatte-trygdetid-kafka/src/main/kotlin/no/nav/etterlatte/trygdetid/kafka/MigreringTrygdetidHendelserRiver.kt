@@ -3,7 +3,6 @@ package no.nav.etterlatte.trygdetid.kafka
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
@@ -104,26 +103,6 @@ internal class MigreringTrygdetidHendelserRiver(
             trygdetid.beregnetTrygdetid?.resultat?.prorataBroek == beregning.prorataBroek &&
                 trygdetid.beregnetTrygdetid?.resultat?.samletTrygdetidTeoretisk == beregning.anvendtTrygdetid
         }
-
-    private fun overstyrBeregnetTrygdetid(
-        request: MigreringRequest,
-        behandlingId: UUID,
-    ): TrygdetidDto {
-        val beregnetTrygdetid =
-            if (request.beregning.prorataBroek == null) {
-                DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(request.beregning.anvendtTrygdetid)
-            } else {
-                DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidProrata(
-                    request.beregning.anvendtTrygdetid,
-                    request.beregning.prorataBroek,
-                )
-            }
-
-        return trygdetidService.overstyrBeregnetTrygdetid(
-            behandlingId = behandlingId,
-            beregnetTrygdetid = beregnetTrygdetid,
-        ).also { logger.warn("Trygdetid for behandling $behandlingId ble overstyrt med anvendt trygdetid fra Pesys") }
-    }
 
     private fun sendBeregnetTrygdetid(
         packet: JsonMessage,

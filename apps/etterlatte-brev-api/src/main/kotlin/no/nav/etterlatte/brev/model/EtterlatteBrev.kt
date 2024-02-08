@@ -65,22 +65,6 @@ data class TrygdetidMedBeregningsmetode(
     val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
 )
 
-enum class TrygdetidType {
-    FREMTIDIG,
-    FAKTISK,
-}
-
-data class Periode(
-    val aar: Int,
-    val maaneder: Int,
-    val dager: Int,
-)
-
-data class Avdoed(
-    val navn: String,
-    val doedsdato: LocalDate,
-)
-
 enum class FeilutbetalingType {
     FEILUTBETALING_UTEN_VARSEL,
     FEILUTBETALING_MED_VARSEL,

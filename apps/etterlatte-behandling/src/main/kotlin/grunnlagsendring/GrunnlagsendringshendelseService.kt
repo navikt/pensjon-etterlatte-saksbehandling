@@ -60,7 +60,7 @@ class GrunnlagsendringshendelseService(
         logger.info("Henter alle relevante hendelser for sak $sakId")
         return grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
             sakId,
-            GrunnlagsendringStatus.relevantForSaksbehandler().toList(),
+            GrunnlagsendringStatus.relevantForSaksbehandler(),
         )
     }
 
@@ -71,7 +71,7 @@ class GrunnlagsendringshendelseService(
         logger.info("Henter alle relevante hendelser for sak $sakId")
         grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISakAvType(
             sakId,
-            GrunnlagsendringStatus.relevantForSaksbehandler().toList(),
+            GrunnlagsendringStatus.relevantForSaksbehandler(),
             type,
         )
     }

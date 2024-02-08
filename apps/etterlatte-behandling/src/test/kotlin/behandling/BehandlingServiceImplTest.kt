@@ -28,7 +28,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -389,18 +388,6 @@ class BehandlingServiceImplTest {
         verify(exactly = 1) {
             grunnlagsendringshendelseDaoMock.kobleGrunnlagsendringshendelserFraBehandlingId(nyFoerstegangsbehandling.id)
         }
-    }
-
-    @Test
-    fun `skal sette rett enum for rolle eller ukjent rolle`() {
-        val kjentRolle = "gjenlevende"
-        val ukjentRolle = "abcde"
-
-        val resKjentRolle = Saksrolle.enumVedNavnEllerUkjent(kjentRolle)
-        val resUkjentRolle = Saksrolle.enumVedNavnEllerUkjent(ukjentRolle)
-
-        assertEquals(Saksrolle.GJENLEVENDE, resKjentRolle)
-        assertEquals(Saksrolle.UKJENT, resUkjentRolle)
     }
 
     @ParameterizedTest

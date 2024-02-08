@@ -63,7 +63,8 @@ data class OmstillingsstoenadRevurdering(
                 innholdForhaandsvarsel = vedleggHvisFeilutbetaling(feilutbetaling, innholdMedVedlegg),
                 erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
-                datoVedtakOmgjoering = null, // TODO klage kobler seg på her
+                // TODO klage kobler seg på her
+                datoVedtakOmgjoering = null,
                 beregning =
                     OmstillingsstoenadBeregning(
                         innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),

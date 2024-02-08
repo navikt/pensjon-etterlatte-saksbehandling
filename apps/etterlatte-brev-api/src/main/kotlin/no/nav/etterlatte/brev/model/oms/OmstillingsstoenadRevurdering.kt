@@ -3,7 +3,8 @@ package no.nav.etterlatte.brev.model.oms
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -21,7 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import java.time.LocalDate
 
 data class OmstillingsstoenadRevurdering(
-    val innhold: List<Slate.Element>,
+    override val innhold: List<Slate.Element>,
     val innholdForhaandsvarsel: List<Slate.Element>,
     val erEndret: Boolean,
     val erOmgjoering: Boolean,
@@ -32,7 +33,7 @@ data class OmstillingsstoenadRevurdering(
     val harUtbetaling: Boolean,
     val lavEllerIngenInntekt: Boolean,
     val feilutbetaling: FeilutbetalingType,
-) : BrevData {
+) : BrevDataFerdigstilling {
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
@@ -104,7 +105,7 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
     val feilutbetaling: FeilutbetalingType,
     val harUtbetaling: Boolean,
     val harEtterbetaling: Boolean,
-) : BrevData {
+) : BrevDataRedigerbar {
     companion object {
         fun fra(
             avkortingsinfo: Avkortingsinfo,

@@ -1,12 +1,14 @@
 package no.nav.etterlatte.brev.model.klage
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.SakType
 
-data class AvvistKlageFerdigData(val innhold: List<Slate.Element>, val data: AvvistKlageInnholdBrevData) : BrevData {
+data class AvvistKlageFerdigData(override val innhold: List<Slate.Element>, val data: AvvistKlageInnholdBrevData) :
+    BrevDataFerdigstilling {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
@@ -23,7 +25,7 @@ data class AvvistKlageFerdigData(val innhold: List<Slate.Element>, val data: Avv
 // TODO: Mer innhold inn i greia
 data class AvvistKlageInnholdBrevData(
     val sakType: SakType,
-) : BrevData {
+) : BrevDataRedigerbar {
     companion object {
         fun fra(generellBrevData: GenerellBrevData): AvvistKlageInnholdBrevData {
             val klage = generellBrevData.forenkletVedtak?.klage ?: throw IllegalArgumentException("Vedtak mangler klage")

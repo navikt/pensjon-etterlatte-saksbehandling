@@ -7,7 +7,8 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonBeregningsperiode
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -22,13 +23,13 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 data class BarnepensjonInnvilgelse(
-    val innhold: List<Slate.Element>,
+    override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
-) : BrevData {
+) : BrevDataFerdigstilling {
     companion object {
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
 
@@ -68,7 +69,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
     val sisteBeregningsperiodeBeloep: Kroner,
     val erEtterbetaling: Boolean,
     val harFlereUtbetalingsperioder: Boolean,
-) : BrevData {
+) : BrevDataRedigerbar {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,

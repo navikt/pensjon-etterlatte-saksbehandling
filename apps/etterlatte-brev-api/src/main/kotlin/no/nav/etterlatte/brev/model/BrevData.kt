@@ -6,6 +6,10 @@ interface BrevdataMedInnhold : BrevData {
     val innhold: List<Slate.Element>
 }
 
+interface BrevDataFerdigstilling : BrevdataMedInnhold
+
+interface BrevDataRedigerbar : BrevData
+
 data class ManueltBrevData(override val innhold: List<Slate.Element> = emptyList()) : BrevdataMedInnhold
 
 data class ManueltBrevMedTittelData(override val innhold: List<Slate.Element>, val tittel: String? = null) :

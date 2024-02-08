@@ -1,15 +1,15 @@
 package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 
 data class OmstillingsstoenadAvslag(
-    val innhold: List<Slate.Element>,
+    override val innhold: List<Slate.Element>,
     val avdoedNavn: String,
     val bosattUtland: Boolean,
-) : BrevData {
+) : BrevDataFerdigstilling {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,

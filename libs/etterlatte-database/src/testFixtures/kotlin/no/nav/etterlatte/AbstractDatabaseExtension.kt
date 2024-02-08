@@ -19,10 +19,8 @@ import javax.sql.DataSource
  * Det tar veldig mye tid å kjøre opp stadig nye Postgres-containere og kjøre Flyway migreringer.
  * Denne extensionen kjører opp èn instans, som så gjenbrukes av de som måtte ønske det.
  */
-abstract class AbstractDatabaseExtension(
-    val resetsql: String,
-) : BeforeAllCallback, AfterAllCallback, ExtensionContext.Store.CloseableResource {
-    private val logger: org.slf4j.Logger = LoggerFactory.getLogger(AbstractDatabaseExtension::class.java)
+abstract class AbstractDatabaseExtension : BeforeAllCallback, AfterAllCallback, ExtensionContext.Store.CloseableResource {
+    val logger: org.slf4j.Logger = LoggerFactory.getLogger(AbstractDatabaseExtension::class.java)
 
     val postgreSQLContainer =
         PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
@@ -68,12 +66,7 @@ abstract class AbstractDatabaseExtension(
     /**
      * Sikre at hver testklasse starter med en fresh database
      */
-    fun resetDb() {
-        logger.info("Resetting database...")
-        dataSource.connection.use {
-            it.prepareStatement(resetsql.trimIndent()).execute()
-        }
-    }
+    abstract fun resetDb()
 
     /**
      * Wrappe slik at når konsument ber om ny connection så kan den tas vare på mtp eviction

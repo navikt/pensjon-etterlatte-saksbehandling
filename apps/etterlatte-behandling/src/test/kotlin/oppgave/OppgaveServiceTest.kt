@@ -262,7 +262,7 @@ internal class OppgaveServiceTest {
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
-        assertThrows<OppgaveAlleredeTildeltException> {
+        assertThrows<OppgaveAlleredeTildeltSaksbehandler> {
             oppgaveService.tildelSaksbehandler(nyOppgave.id, "enda en")
         }
     }
@@ -587,7 +587,7 @@ internal class OppgaveServiceTest {
 
         val saksbehandler1 = "saksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler1)
-        assertThrows<FeilSaksbehandlerPaaOppgave> {
+        assertThrows<OppgaveTilhoererAnnenSaksbehandler> {
             oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                 SakIdOgReferanse(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
@@ -916,7 +916,7 @@ internal class OppgaveServiceTest {
 
         val saksbehandler1 = "saksbehandler01"
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler1)
-        assertThrows<FeilSaksbehandlerPaaOppgave> {
+        assertThrows<OppgaveTilhoererAnnenSaksbehandler> {
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 behandlingsref,
                 Saksbehandler("", "feilSaksbehandler", null),

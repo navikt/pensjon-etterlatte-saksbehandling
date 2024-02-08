@@ -31,7 +31,7 @@ internal class Verifiserer(
     fun verifiserRequest(request: MigreringRequest): MigreringRequest {
         val patchedRequest = gjenlevendeForelderPatcher.patchGjenlevendeHvisIkkeOppgitt(request)
 
-        val feilSomMedfoererMistetRett = mutableListOf<Exception>()
+        val feilSomAvbryter = mutableListOf<Exception>()
         val feilSomMedfoererManuell = mutableListOf<Exception>()
 
         patchedRequest.onFailure { feilen ->
@@ -39,19 +39,18 @@ internal class Verifiserer(
         }
         patchedRequest.onSuccess {
             if (request.enhet.nr == Enheter.STRENGT_FORTROLIG.enhetNr) {
-                feilSomMedfoererManuell.add(StrengtFortroligPesys) // TODO Strengt fortrolig
+                // Vi kjører strengt fortrolig til sist.
+                feilSomAvbryter.add(StrengtFortroligPesys)
             }
-            val finnesIPdlFeil = sjekkAtPersonerFinsIPDL(it)
-            if (finnesIPdlFeil.any { finnes -> finnes is SoekerErDoed }) {
-                feilSomMedfoererMistetRett.addAll(finnesIPdlFeil)
-            } else {
-                feilSomMedfoererManuell.addAll(finnesIPdlFeil)
-            }
+            val finnesIPdlFeil = pesonerFinnesIPdlEllerSoekerErDoed(it)
+            feilSomAvbryter.addAll(finnesIPdlFeil)
+
             val soeker = personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()
 
             if (soeker != null) {
                 if (soeker.adressebeskyttelse?.verdi?.erStrengtFortrolig() == true) {
-                    feilSomMedfoererManuell.add(StrengtFortroligPDL) // TODO Strengt fortrolig
+                    // Vi kjører strengt fortrolig til sist. Hvis saker har blitt strengt fortrolig etter opphør avbryter vi.
+                    feilSomAvbryter.add(StrengtFortroligPDL)
                 }
                 feilSomMedfoererManuell.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
                 if (!request.erUnder18) {
@@ -67,11 +66,21 @@ internal class Verifiserer(
             feilSomMedfoererManuell.add(BeregningsmetodeIkkeNasjonal)
         }
 
-        val alleFeil = feilSomMedfoererMistetRett + feilSomMedfoererManuell
+        val alleFeil = feilSomAvbryter + feilSomMedfoererManuell
         if (alleFeil.isNotEmpty()) {
-            lagreFeil(request, alleFeil)
-            if (feilSomMedfoererMistetRett.isNotEmpty()) {
-                throw samleExceptions(feilSomMedfoererMistetRett)
+            logger.warn(
+                "Sak ${request.pesysId} har ufullstendige data i PDL, eller feiler verifisering av andre grunner. " +
+                    "Kan ikke migrere. Se sikkerlogg for detaljer",
+            )
+            repository.lagreFeilkjoering(
+                request.toJson(),
+                feilendeSteg = Migreringshendelser.VERIFISER.lagEventnameForType(),
+                feil = alleFeil.map { it.message }.toJson(),
+                pesysId = request.pesysId,
+            )
+            if (feilSomAvbryter.isNotEmpty()) {
+                repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
+                throw samleExceptions(feilSomAvbryter)
             }
         }
         return patchedRequest.getOrThrow().copy(
@@ -86,24 +95,7 @@ internal class Verifiserer(
             false -> emptyList()
         }
 
-    private fun lagreFeil(
-        request: MigreringRequest,
-        feil: List<Exception>,
-    ) {
-        logger.warn(
-            "Sak ${request.pesysId} har ufullstendige data i PDL, eller feiler verifisering av andre grunner. " +
-                "Kan ikke migrere. Se sikkerlogg for detaljer",
-        )
-        repository.lagreFeilkjoering(
-            request.toJson(),
-            feilendeSteg = Migreringshendelser.VERIFISER.lagEventnameForType(),
-            feil = feil.map { it.message }.toJson(),
-            pesysId = request.pesysId,
-        )
-        repository.oppdaterStatus(request.pesysId, Migreringsstatus.VERIFISERING_FEILA)
-    }
-
-    private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {
+    private fun pesonerFinnesIPdlEllerSoekerErDoed(request: MigreringRequest): List<Verifiseringsfeil> {
         val personer = mutableListOf(Pair(PersonRolle.BARN, request.soeker))
         request.avdoedForelder.forEach { personer.add(Pair(PersonRolle.AVDOED, it.ident)) }
         request.gjenlevendeForelder?.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }

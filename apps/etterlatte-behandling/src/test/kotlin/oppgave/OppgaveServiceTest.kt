@@ -2,7 +2,6 @@ package no.nav.etterlatte.oppgave
 
 import com.nimbusds.jwt.JWTClaimsSet
 import io.ktor.server.plugins.BadRequestException
-import io.ktor.server.plugins.NotFoundException
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.Context
@@ -262,7 +261,7 @@ internal class OppgaveServiceTest {
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
-        assertThrows<OppgaveAlleredeTildeltException> {
+        assertThrows<OppgaveAlleredeTildeltSaksbehandler> {
             oppgaveService.tildelSaksbehandler(nyOppgave.id, "enda en")
         }
     }
@@ -271,7 +270,7 @@ internal class OppgaveServiceTest {
     fun `skal ikke kunne tildele hvis oppgaven ikke finnes`() {
         val nysaksbehandler = "nysaksbehandler"
         val err =
-            assertThrows<NotFoundException> {
+            assertThrows<OppgaveIkkeFunnet> {
                 oppgaveService.tildelSaksbehandler(UUID.randomUUID(), nysaksbehandler)
             }
         assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
@@ -290,7 +289,7 @@ internal class OppgaveServiceTest {
             )
         oppgaveDao.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
-        assertThrows<IllegalStateException> {
+        assertThrows<OppgaveKanIkkeEndres> {
             oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
         }
     }
@@ -405,7 +404,7 @@ internal class OppgaveServiceTest {
             )
         oppgaveDao.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
-        assertThrows<IllegalStateException> {
+        assertThrows<OppgaveKanIkkeEndres> {
             oppgaveService.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
         }
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
@@ -416,7 +415,7 @@ internal class OppgaveServiceTest {
     fun `skal ikke kunne bytte saksbehandler på en ikke eksisterende sak`() {
         val nysaksbehandler = "nysaksbehandler"
         val err =
-            assertThrows<NotFoundException> {
+            assertThrows<OppgaveIkkeFunnet> {
                 oppgaveService.byttSaksbehandler(UUID.randomUUID(), nysaksbehandler)
             }
         assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
@@ -453,11 +452,10 @@ internal class OppgaveServiceTest {
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
             )
-        val err =
-            assertThrows<BadRequestException> {
-                oppgaveService.fjernSaksbehandler(nyOppgave.id)
-            }
-        assertTrue(err.message!!.startsWith("Oppgaven har ingen saksbehandler"))
+
+        assertThrows<OppgaveIkkeTildeltSaksbehandler> {
+            oppgaveService.fjernSaksbehandler(nyOppgave.id)
+        }
     }
 
     @Test
@@ -474,7 +472,7 @@ internal class OppgaveServiceTest {
         val saksbehandler = "saksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler)
         oppgaveDao.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
-        assertThrows<IllegalStateException> {
+        assertThrows<OppgaveKanIkkeEndres> {
             oppgaveService.fjernSaksbehandler(nyOppgave.id)
         }
         val lagretOppgave = oppgaveService.hentOppgave(nyOppgave.id)
@@ -532,7 +530,7 @@ internal class OppgaveServiceTest {
             )
 
         oppgaveDao.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
-        assertThrows<IllegalStateException> {
+        assertThrows<OppgaveKanIkkeEndres> {
             oppgaveService.redigerFrist(
                 oppgaveId = nyOppgave.id,
                 frist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(1L).toTidspunkt(),
@@ -587,7 +585,7 @@ internal class OppgaveServiceTest {
 
         val saksbehandler1 = "saksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler1)
-        assertThrows<FeilSaksbehandlerPaaOppgave> {
+        assertThrows<OppgaveTilhoererAnnenSaksbehandler> {
             oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                 SakIdOgReferanse(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
@@ -688,7 +686,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `kan ikke fjerne saksbehandler hvis oppgaven ikke finnes`() {
         val err =
-            assertThrows<NotFoundException> {
+            assertThrows<OppgaveIkkeFunnet> {
                 oppgaveService.fjernSaksbehandler(UUID.randomUUID())
             }
         assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
@@ -916,7 +914,7 @@ internal class OppgaveServiceTest {
 
         val saksbehandler1 = "saksbehandler01"
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler1)
-        assertThrows<FeilSaksbehandlerPaaOppgave> {
+        assertThrows<OppgaveTilhoererAnnenSaksbehandler> {
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 behandlingsref,
                 Saksbehandler("", "feilSaksbehandler", null),

@@ -187,7 +187,7 @@ internal class MigrerSpesifikkSakRiver(
                 ?: throw IllegalStateException("Mangler kobling mellom behandling i Gjenny og pesys sak for pesysId=$sakId")
 
         packet[BEHANDLING_ID_KEY] = behandlingId
-        packet.setEventNameForHendelseType(Migreringshendelser.VEDTAK)
+        packet.setEventNameForHendelseType(Migreringshendelser.BEREGNET_FERDIG)
         context.publish(packet.toJson())
         logger.info("Fortsetter migrering for sak $sakId.")
     }

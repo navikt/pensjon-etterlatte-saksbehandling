@@ -24,7 +24,7 @@ internal class MigreringHendelserRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.VEDTAK) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.BEREGNET_FERDIG) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }
@@ -39,7 +39,7 @@ internal class MigreringHendelserRiver(
         logger.info("Oppretter, fatter og attesterer vedtak for migrer behandling $behandlingId")
 
         val kjoringVariant = packet.migreringKjoringVariant
-        withFeilhaandtering(packet, context, Migreringshendelser.VEDTAK.lagEventnameForType()) {
+        withFeilhaandtering(packet, context, Migreringshendelser.BEREGNET_FERDIG.lagEventnameForType()) {
             val respons = vedtakService.opprettVedtakFattOgAttester(packet.sakId, behandlingId, kjoringVariant)
             if (kjoringVariant == MigreringKjoringVariant.MED_PAUSE) {
                 packet.setEventNameForHendelseType(Migreringshendelser.PAUSE)

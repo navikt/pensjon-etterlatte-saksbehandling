@@ -27,7 +27,7 @@ data class OmstillingsstoenadInnvilgelse(
     val innvilgetMindreEnnFireMndEtterDoedsfall: Boolean,
     val lavEllerIngenInntekt: Boolean,
     val etterbetaling: OmstillingsstoenadEtterbetaling?,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
@@ -92,7 +92,7 @@ data class OmstillingsstoenadInnvilgelseRedigerbartUtfall(
     val avdoed: Avdoed,
     val utbetalingsbeloep: Kroner,
     val etterbetaling: Boolean,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,

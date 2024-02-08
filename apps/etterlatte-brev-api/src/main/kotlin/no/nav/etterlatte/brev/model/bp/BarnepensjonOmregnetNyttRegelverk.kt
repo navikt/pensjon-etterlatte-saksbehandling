@@ -22,7 +22,7 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
     val utbetaltEtterReform: Kroner,
     val erForeldreloes: Boolean,
     val erBosattUtlandet: Boolean,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
@@ -73,7 +73,7 @@ data class BarnepensjonOmregnetNyttRegelverk(
     val etterbetaling: BarnepensjonEtterbetaling?,
     val erUnder18Aar: Boolean,
     val erBosattUtlandet: Boolean,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             innhold: InnholdMedVedlegg,

@@ -10,7 +10,7 @@ import java.time.LocalDate
 data class OmstillingsstoenadOpphoer(
     val innhold: List<Slate.Element>,
     val bosattUtland: Boolean,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             utlandstilknytning: Utlandstilknytning?,
@@ -26,7 +26,7 @@ data class OmstillingsstoenadOpphoer(
 data class OmstillingsstoenadOpphoerRedigerbartUtfall(
     val innhold: List<Slate.Element>,
     val virkningsdato: LocalDate,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,

@@ -9,7 +9,7 @@ data class OmstillingsstoenadAvslag(
     val innhold: List<Slate.Element>,
     val avdoedNavn: String,
     val bosattUtland: Boolean,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,

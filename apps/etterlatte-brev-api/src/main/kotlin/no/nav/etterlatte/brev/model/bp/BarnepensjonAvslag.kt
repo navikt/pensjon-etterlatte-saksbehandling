@@ -9,7 +9,7 @@ data class BarnepensjonAvslag(
     val innhold: List<Slate.Element>,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             innhold: InnholdMedVedlegg,

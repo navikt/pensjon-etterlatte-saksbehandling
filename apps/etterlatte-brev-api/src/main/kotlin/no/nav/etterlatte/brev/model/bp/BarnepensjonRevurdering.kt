@@ -23,7 +23,7 @@ data class BarnepensjonRevurdering(
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
     val harFlereUtbetalingsperioder: Boolean,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             innhold: InnholdMedVedlegg,
@@ -61,7 +61,7 @@ data class BarnepensjonRevurdering(
 
 data class BarnepensjonRevurderingRedigerbartUtfall(
     val erEtterbetaling: Boolean,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(etterbetaling: EtterbetalingDTO?): BrevData {
             return BarnepensjonRevurderingRedigerbartUtfall(

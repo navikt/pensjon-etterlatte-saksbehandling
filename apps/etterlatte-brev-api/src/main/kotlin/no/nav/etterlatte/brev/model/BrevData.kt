@@ -1,7 +1,12 @@
 package no.nav.etterlatte.brev.model
 
-abstract class BrevData
+interface BrevData
 
-data class ManueltBrevData(val innhold: List<Slate.Element> = emptyList()) : BrevData()
+interface BrevdataMedInnhold : BrevData {
+    val innhold: List<Slate.Element>
+}
 
-data class ManueltBrevMedTittelData(val innhold: List<Slate.Element>, val tittel: String? = null) : BrevData()
+data class ManueltBrevData(override val innhold: List<Slate.Element> = emptyList()) : BrevdataMedInnhold
+
+data class ManueltBrevMedTittelData(override val innhold: List<Slate.Element>, val tittel: String? = null) :
+    BrevdataMedInnhold

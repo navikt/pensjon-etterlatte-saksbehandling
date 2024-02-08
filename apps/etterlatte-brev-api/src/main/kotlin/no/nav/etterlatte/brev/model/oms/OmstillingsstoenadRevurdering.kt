@@ -32,7 +32,7 @@ data class OmstillingsstoenadRevurdering(
     val harUtbetaling: Boolean,
     val lavEllerIngenInntekt: Boolean,
     val feilutbetaling: FeilutbetalingType,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
@@ -104,7 +104,7 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
     val feilutbetaling: FeilutbetalingType,
     val harUtbetaling: Boolean,
     val harEtterbetaling: Boolean,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             avkortingsinfo: Avkortingsinfo,

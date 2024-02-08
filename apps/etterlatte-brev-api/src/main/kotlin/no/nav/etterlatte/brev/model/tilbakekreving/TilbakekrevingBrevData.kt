@@ -14,7 +14,7 @@ import java.time.LocalDate
 data class TilbakekrevingFerdigData(
     val innhold: List<Slate.Element>,
     val data: TilbakekrevingInnholdBrevData,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
@@ -33,7 +33,7 @@ data class TilbakekrevingInnholdBrevData(
     val harForeldelse: Boolean,
     val perioder: List<TilbakekrevingPeriodeData>,
     val summer: TilbakekrevingBeloeperData,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(generellBrevData: GenerellBrevData): TilbakekrevingInnholdBrevData {
             val tilbakekreving =

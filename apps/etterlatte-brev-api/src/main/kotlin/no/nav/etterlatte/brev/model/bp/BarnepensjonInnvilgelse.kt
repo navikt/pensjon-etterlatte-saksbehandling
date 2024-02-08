@@ -28,7 +28,7 @@ data class BarnepensjonInnvilgelse(
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
-) : BrevData() {
+) : BrevData {
     companion object {
         val tidspunktNyttRegelverk: LocalDate = LocalDate.of(2024, 1, 1)
 
@@ -68,7 +68,7 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
     val sisteBeregningsperiodeBeloep: Kroner,
     val erEtterbetaling: Boolean,
     val harFlereUtbetalingsperioder: Boolean,
-) : BrevData() {
+) : BrevData {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,

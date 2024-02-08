@@ -2,10 +2,10 @@ import styled from 'styled-components'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import {
   formaterBehandlingstype,
+  formaterDatoMedKlokkeslett,
   formaterEnumTilLesbarString,
   formaterSakstype,
   formaterStringDato,
-  formaterStringTidspunktTimeMinutter,
 } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
@@ -58,12 +58,6 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
     }
   }
 
-  const fattetDato = behandlingsInfo.datoFattet
-    ? formaterStringDato(behandlingsInfo.datoFattet) +
-      ' kl. ' +
-      formaterStringTidspunktTimeMinutter(behandlingsInfo.datoFattet)
-    : null
-
   if (isInitial(oppgaveForBehandlingStatus) || isPending(oppgaveForBehandlingStatus)) {
     return <Spinner visible={true} label="Henter saksbehandler" />
   }
@@ -74,7 +68,9 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       <Heading size="xsmall" spacing>
         {hentStatus()}
       </Heading>
-      {fattetDato && <Tekst>{fattetDato}</Tekst>}
+
+      {behandlingsInfo.datoFattet && <Tekst>{formaterDatoMedKlokkeslett(behandlingsInfo.datoFattet)}</Tekst>}
+
       <TagList>
         <li>
           <Tag variant={tagColors[behandlingsInfo.sakType]} size="small">
@@ -99,21 +95,14 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           () => (
             <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
           ),
-          () => (
-            <>
-              {saksbehandlerPaaOppgave ? (
-                <Tekst>
-                  {saksbehandlerPaaOppgave.saksbehandlerNavn
-                    ? saksbehandlerPaaOppgave.saksbehandlerNavn
-                    : saksbehandlerPaaOppgave.saksbehandlerIdent}
-                </Tekst>
-              ) : (
-                <Alert size="small" variant="warning">
-                  Ingen saksbehandler har tatt denne oppgaven
-                </Alert>
-              )}
-            </>
-          )
+          () =>
+            saksbehandlerPaaOppgave ? (
+              <Tekst>{saksbehandlerPaaOppgave.saksbehandlerNavn || saksbehandlerPaaOppgave.saksbehandlerIdent}</Tekst>
+            ) : (
+              <Alert size="small" variant="warning">
+                Ingen saksbehandler har tatt denne oppgaven
+              </Alert>
+            )
         )}
       </div>
       <div className="flex">

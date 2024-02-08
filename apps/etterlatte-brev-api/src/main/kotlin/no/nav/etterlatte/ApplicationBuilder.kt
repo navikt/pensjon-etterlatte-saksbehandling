@@ -69,6 +69,7 @@ import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
+import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForGjenopprettaRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.migrering.behandlingerAaJournalfoereBrevFor
 import no.nav.etterlatte.security.ktor.clientCredential
@@ -107,7 +108,8 @@ class ApplicationBuilder {
             env.requireEnvValue("BREVBAKER_URL"),
         )
 
-    private val regoppslagKlient = RegoppslagKlient(httpClient("REGOPPSLAG_SCOPE"), env.requireEnvValue("REGOPPSLAG_URL"))
+    private val regoppslagKlient =
+        RegoppslagKlient(httpClient("REGOPPSLAG_SCOPE"), env.requireEnvValue("REGOPPSLAG_URL"))
     private val navansattKlient = NavansattKlient(navansattHttpKlient, env.requireEnvValue("NAVANSATT_URL"))
     private val grunnlagKlient = GrunnlagKlient(config, httpClient())
     private val vedtakKlient = VedtaksvurderingKlient(config, httpClient())
@@ -135,7 +137,8 @@ class ApplicationBuilder {
 
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
 
-    private val dokarkivKlient = DokarkivKlient(httpClient("DOKARKIV_SCOPE", false), env.requireEnvValue("DOKARKIV_URL"))
+    private val dokarkivKlient =
+        DokarkivKlient(httpClient("DOKARKIV_SCOPE", false), env.requireEnvValue("DOKARKIV_URL"))
     private val dokarkivService = DokarkivServiceImpl(dokarkivKlient, db)
 
     private val distribusjonKlient =
@@ -145,7 +148,8 @@ class ApplicationBuilder {
 
     private val migreringBrevDataService = MigreringBrevDataService(brevdataFacade)
 
-    private val brevDataMapperRedigerbartUtfallVedtak = BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService)
+    private val brevDataMapperRedigerbartUtfallVedtak =
+        BrevDataMapperRedigerbartUtfallVedtak(brevdataFacade, migreringBrevDataService)
 
     private val brevDataMapperFerdigstilling = BrevDataMapperFerdigstillingVedtak(brevdataFacade)
 
@@ -223,8 +227,6 @@ class ApplicationBuilder {
                     },
                 )
                 OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
-                FiksEnkeltbrevRiver(this, vedtaksvurderingService)
-                    .also { fiksEnkeltbrev() }
                 val opprettFerdigstillJournalfoerOgDistribuerBrev =
                     OpprettFerdigstillJournalfoerOgDistribuerBrev(
                         brevoppretter,
@@ -232,6 +234,13 @@ class ApplicationBuilder {
                         journalfoerBrevService,
                         brevdistribuerer,
                     )
+                OpprettVedtaksbrevForGjenopprettaRiver(
+                    this,
+                    varselbrevService,
+                    opprettFerdigstillJournalfoerOgDistribuerBrev,
+                )
+                FiksEnkeltbrevRiver(this, vedtaksvurderingService)
+                    .also { fiksEnkeltbrev() }
                 OpprettJournalfoerOgDistribuerRiver(this, opprettFerdigstillJournalfoerOgDistribuerBrev)
 
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)

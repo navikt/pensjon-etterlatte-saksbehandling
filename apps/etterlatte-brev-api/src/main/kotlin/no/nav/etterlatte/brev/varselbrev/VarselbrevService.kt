@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.varselbrev
 
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.PDFGenerator
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
@@ -24,8 +25,8 @@ internal class VarselbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Brev {
-        val brevkode = hentBrevkode(behandlingKlient.hentSak(sakId, brukerTokenInfo).sakType)
+    ): Pair<Brev, GenerellBrevData> {
+        val brevkode = hentBrevkodeForSak(sakId, brukerTokenInfo)
 
         return brevoppretter.opprettBrev(
             sakId = sakId,
@@ -33,8 +34,13 @@ internal class VarselbrevService(
             bruker = brukerTokenInfo,
             brevKode = { brevkode.redigering },
             brevtype = Brevtype.VARSEL,
-        ) { ManueltBrevData() }.first
+        ) { ManueltBrevData() }
     }
+
+    suspend fun hentBrevkodeForSak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) = hentBrevkode(behandlingKlient.hentSak(sakId, brukerTokenInfo).sakType)
 
     private fun hentBrevkode(sakType: SakType) =
         if (sakType == SakType.BARNEPENSJON) {

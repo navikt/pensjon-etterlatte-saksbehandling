@@ -126,6 +126,6 @@ class VarselbrevTest {
             }
 
         val henta = service.hentVarselbrev(behandling)
-        assertEquals(varselbrev, henta.first())
+        assertEquals(varselbrev.first, henta.first())
     }
 }

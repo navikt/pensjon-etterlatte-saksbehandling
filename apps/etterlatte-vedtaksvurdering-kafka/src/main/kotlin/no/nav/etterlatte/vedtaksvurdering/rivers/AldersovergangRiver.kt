@@ -9,6 +9,7 @@ import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.dato
@@ -59,7 +60,7 @@ class AldersovergangRiver(
                 logger.info("Sak $sakId, behandlingsmåned=$behandlingsdato har løpende ytelse: ${loependeYtelse.erLoepende}")
 
                 packet[ALDERSOVERGANG_STEG_KEY] = VedtakAldersovergangStepEvents.VURDERT_LOEPENDE_YTELSE.name
-                packet["data"] = loependeYtelse.erLoepende
+                packet[HENDELSE_DATA_KEY] = loependeYtelse.erLoepende
                 context.publish(packet.toJson())
             }
         }

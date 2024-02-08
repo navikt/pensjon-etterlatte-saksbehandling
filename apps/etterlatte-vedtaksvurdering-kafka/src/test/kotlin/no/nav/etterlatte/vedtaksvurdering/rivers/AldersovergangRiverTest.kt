@@ -13,6 +13,7 @@ import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -50,7 +51,7 @@ class AldersovergangRiverTest {
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "123-123-123"
-            field(0, "data").asBoolean() shouldBe true
+            field(0, HENDELSE_DATA_KEY).asBoolean() shouldBe true
         }
     }
 
@@ -76,7 +77,7 @@ class AldersovergangRiverTest {
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "432-987-234"
-            field(0, "data").asBoolean() shouldBe false
+            field(0, HENDELSE_DATA_KEY).asBoolean() shouldBe false
         }
     }
 }

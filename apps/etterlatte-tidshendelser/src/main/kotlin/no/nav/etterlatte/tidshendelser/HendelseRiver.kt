@@ -6,6 +6,7 @@ import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -27,7 +28,7 @@ class HendelseRiver(
             validate { it.requireKey(ALDERSOVERGANG_TYPE_KEY) }
             validate { it.requireKey(ALDERSOVERGANG_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
-            validate { it.interestedIn("data") }
+            validate { it.interestedIn(HENDELSE_DATA_KEY) }
         }
     }
 
@@ -54,7 +55,7 @@ class HendelseRiver(
             hendelseDao.oppdaterHendelseForSteg(hendelseIdUUID, steg)
 
             if (steg == "VURDERT_LOEPENDE_YTELSE") {
-                val loependeYtelse = packet["data"].asBoolean()
+                val loependeYtelse = packet[HENDELSE_DATA_KEY].asBoolean()
                 logger.info("Sak $sakId har løpende ytelse? $loependeYtelse")
             }
         }

@@ -120,7 +120,7 @@ internal class MigrerSpesifikkSakRiver(
                 pesysRepository.lagreFeilkjoering(
                     request.toJson(),
                     feilendeSteg = Migreringshendelser.VERIFISER.lagEventnameForType(),
-                    feil = "Har uføretrygd med status ${ufoereSak.sakStatus.name}",
+                    feil = "Har uføretrygd med status ${ufoereSak.sakStatus.name}".toJson(),
                     pesysId = request.pesysId,
                 )
                 return request.copy(

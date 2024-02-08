@@ -34,11 +34,11 @@ internal class SaksbehandlerInfoDaoTransTest {
 
         val saksBehandlereMedAalesundEnhet = saksbehandlerInfoDaoTrans.hentSaksbehandlereForEnhet(Enheter.AALESUND.enhetNr)
         Assertions.assertEquals(1, saksBehandlereMedAalesundEnhet.size)
-        Assertions.assertEquals(sbaalesund.ident, saksBehandlereMedAalesundEnhet[0])
+        Assertions.assertEquals(sbaalesund.ident, saksBehandlereMedAalesundEnhet[0].ident)
 
         val porsgrunn = saksbehandlerInfoDaoTrans.hentSaksbehandlereForEnhet(Enheter.PORSGRUNN.enhetNr)
         Assertions.assertEquals(1, porsgrunn.size)
-        Assertions.assertEquals(sbporsgrunn.ident, porsgrunn[0])
+        Assertions.assertEquals(sbporsgrunn.ident, porsgrunn[0].ident)
 
         val ingenSteinkjerSaksbehandlere = saksbehandlerInfoDaoTrans.hentSaksbehandlereForEnhet(Enheter.STEINKJER.enhetNr)
         Assertions.assertEquals(0, ingenSteinkjerSaksbehandlere.size)

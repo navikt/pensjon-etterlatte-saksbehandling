@@ -194,6 +194,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
         val trygdetid = async { fetcher.hentTrygdetid() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
+        val brevutfall = async { fetcher.hentBrevutfall() }
 
         OmstillingsstoenadRevurdering.fra(
             innholdMedVedlegg,
@@ -202,6 +203,8 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
             forrigeUtbetalingsinfo.await(),
             etterbetaling.await(),
             requireNotNull(trygdetid.await()),
+            requireNotNull(brevutfall.await()),
+            generellBrevData.revurderingsaarsak,
         )
     }
 }

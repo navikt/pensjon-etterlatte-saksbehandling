@@ -64,3 +64,9 @@ data class TrygdetidMedBeregningsmetode(
     val beregningsMetodeFraGrunnlag: BeregningsMetode,
     val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
 )
+
+enum class FeilutbetalingType {
+    FEILUTBETALING_UTEN_VARSEL,
+    FEILUTBETALING_MED_VARSEL,
+    INGEN_FEILUTBETALING,
+}

@@ -58,7 +58,7 @@ export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'U
 
 export const hentOppgaverMedStatus = async (args: {
   oppgavestatusFilter: Array<string>
-  minOppgavelisteIdent?: string
+  minOppgavelisteIdent?: boolean
 }): Promise<ApiResponse<OppgaveDTO[]>> => {
   const konverterteFiltre = konverterFilterValuesTilKeys(args.oppgavestatusFilter)
 
@@ -69,7 +69,7 @@ export const hentOppgaverMedStatus = async (args: {
 
   const identfilterGenerator = () => {
     if (args.minOppgavelisteIdent) {
-      return `&minOppgavelisteIdent=${args.minOppgavelisteIdent}`
+      return `&kunInnloggetOppgaver=${args.minOppgavelisteIdent}`
     }
     return ''
   }

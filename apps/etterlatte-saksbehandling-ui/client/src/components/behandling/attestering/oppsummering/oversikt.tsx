@@ -13,7 +13,7 @@ import { tagColors, TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
+import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
@@ -22,17 +22,15 @@ import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
-  const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<string | null>(null)
+  const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<OppgaveSaksbehandler | null>(null)
   const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(
     hentOppgaveForBehandlingUnderBehandlingIkkeattestert
   )
   useEffect(() => {
     requesthentOppgaveForBehandling(
       { referanse: behandlingsInfo.behandlingId, sakId: behandlingsInfo.sakId },
-      (saksbehandler, statusCode) => {
-        if (statusCode === 200) {
-          setSaksbehandlerPaaOppgave(saksbehandler)
-        }
+      (saksbehandler) => {
+        setSaksbehandlerPaaOppgave(saksbehandler)
       }
     )
   }, [])
@@ -104,7 +102,11 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           () => (
             <>
               {saksbehandlerPaaOppgave ? (
-                <Tekst>{saksbehandlerPaaOppgave}</Tekst>
+                <Tekst>
+                  {saksbehandlerPaaOppgave.saksbehandlerNavn
+                    ? saksbehandlerPaaOppgave.saksbehandlerNavn
+                    : saksbehandlerPaaOppgave.saksbehandlerIdent}
+                </Tekst>
               ) : (
                 <Alert variant="warning">Ingen saksbehandler har tatt denne oppgaven</Alert>
               )}

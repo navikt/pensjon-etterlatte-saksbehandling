@@ -19,7 +19,10 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.AvdoedForelder
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.BeregningMeta
@@ -34,9 +37,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.BEREGNING_KEY
-import rapidsandrivers.HENDELSE_DATA_KEY
 import java.time.YearMonth
 import java.util.UUID
 

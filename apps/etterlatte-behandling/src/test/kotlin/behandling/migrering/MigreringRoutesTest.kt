@@ -1,4 +1,4 @@
-package behandling.migrering
+package no.nav.etterlatte.behandling.migrering
 
 import io.ktor.client.call.body
 import io.ktor.client.request.get

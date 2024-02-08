@@ -6,16 +6,16 @@ import no.nav.etterlatte.libs.common.innsendtsoeknad.common.SoeknadType
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.opplysningerfrasoknad.opplysningsuthenter.Opplysningsuthenter
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
+import no.nav.etterlatte.rapidsandrivers.NY_OPPLYSNING_KEY
+import no.nav.etterlatte.rapidsandrivers.OPPLYSNING_KEY
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.ListenerMedLogging
-import rapidsandrivers.NY_OPPLYSNING_KEY
-import rapidsandrivers.OPPLYSNING_KEY
-import rapidsandrivers.SAK_ID_KEY
 
 internal class StartUthentingFraSoeknadRiver(
     rapidsConnection: RapidsConnection,

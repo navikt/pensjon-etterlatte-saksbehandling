@@ -21,6 +21,7 @@ import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
@@ -96,7 +97,7 @@ class Brevoppretter(
                     behandlingId = behandlingId,
                     prosessType = BrevProsessType.REDIGERBAR,
                     soekerFnr = generellBrevData.personerISak.soeker.fnr.value,
-                    mottaker = finnMottaker(generellBrevData.personerISak),
+                    mottaker = finnMottaker(generellBrevData.sak.sakType, generellBrevData.personerISak),
                     opprettet = Tidspunkt.now(),
                     innhold = innhold,
                     innholdVedlegg = innholdVedlegg,
@@ -178,7 +179,10 @@ class Brevoppretter(
         }
     }
 
-    private suspend fun finnMottaker(personerISak: PersonerISak): Mottaker =
+    private suspend fun finnMottaker(
+        sakType: SakType,
+        personerISak: PersonerISak,
+    ): Mottaker =
         with(personerISak) {
             when (verge) {
                 is Vergemaal -> verge.toMottaker()
@@ -187,7 +191,7 @@ class Brevoppretter(
                     val mottakerFnr =
                         innsender?.fnr?.value?.takeIf { Folkeregisteridentifikator.isValid(it) }
                             ?: soeker.fnr.value
-                    adresseService.hentMottakerAdresse(mottakerFnr)
+                    adresseService.hentMottakerAdresse(sakType, mottakerFnr)
                 }
             }
         }

@@ -1,17 +1,17 @@
 package no.nav.etterlatte.joarkhendelser
 
-import joarkhendelser.joark.SafKlient
-import joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.joark.Bruker
 import no.nav.etterlatte.joarkhendelser.joark.BrukerIdType
 import no.nav.etterlatte.joarkhendelser.joark.HendelseType
 import no.nav.etterlatte.joarkhendelser.joark.Journalpost
 import no.nav.etterlatte.joarkhendelser.joark.Kanal
+import no.nav.etterlatte.joarkhendelser.joark.SafKlient
 import no.nav.etterlatte.joarkhendelser.joark.erTemaEtterlatte
 import no.nav.etterlatte.joarkhendelser.joark.lagMerknadFraStatus
 import no.nav.etterlatte.joarkhendelser.joark.temaTilSakType
 import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
+import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator

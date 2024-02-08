@@ -77,17 +77,19 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
     behandling && innloggetSaksbehandler.kanAttestere && behandlingsinfo?.status === IBehandlingStatus.FATTET_VEDTAK
 
   useEffect(() => {
-    fetchVedtakSammendrag(behandling.id, (vedtakSammendrag, statusCode) => {
-      if (statusCode === 200) {
-        dispatch(updateVedtakSammendrag(vedtakSammendrag))
-      }
+    fetchVedtakSammendrag(behandling.id, (vedtakSammendrag) => {
+      dispatch(updateVedtakSammendrag(vedtakSammendrag))
     })
   }, [])
 
   useEffect(() => {
     hentSaksbehandlerForOppgave(
       { referanse: behandling.id, sakId: behandling.sakId },
-      (saksbehandler) => dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler)),
+      (saksbehandler, statusCode) => {
+        if (statusCode === 200) {
+          dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler.saksbehandlerIdent))
+        }
+      },
       () => dispatch(resetSaksbehandlerGjeldendeOppgave())
     )
   }, [behandling.id])

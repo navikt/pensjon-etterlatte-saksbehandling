@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.database.jdbcUrl
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.mq.EtterlatteJmsConnectionFactory
 import no.nav.etterlatte.mq.JmsConnectionFactory
+import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.utbetaling.avstemming.AvstemmingDao
 import no.nav.etterlatte.utbetaling.avstemming.GrensesnittsavstemmingJob
 import no.nav.etterlatte.utbetaling.avstemming.GrensesnittsavstemmingService
@@ -36,7 +37,6 @@ import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingDao
 import no.nav.etterlatte.utbetaling.iverksetting.utbetaling.UtbetalingService
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.getRapidEnv
 import java.time.Duration
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit

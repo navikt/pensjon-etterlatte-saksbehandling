@@ -1,4 +1,4 @@
-package joarkhendelser
+package no.nav.etterlatte.joarkhendelser
 
 import io.mockk.Called
 import io.mockk.Runs
@@ -8,11 +8,8 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.just
 import io.mockk.mockk
-import joarkhendelser.behandling.BehandlingKlient
-import joarkhendelser.joark.SafKlient
-import joarkhendelser.pdl.PdlTjenesterKlient
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.joarkhendelser.JoarkHendelseHandler
+import no.nav.etterlatte.joarkhendelser.behandling.BehandlingKlient
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.joark.AvsenderMottaker
 import no.nav.etterlatte.joarkhendelser.joark.Bruker
@@ -25,7 +22,9 @@ import no.nav.etterlatte.joarkhendelser.joark.Journalpost
 import no.nav.etterlatte.joarkhendelser.joark.JournalpostStatus
 import no.nav.etterlatte.joarkhendelser.joark.Journalstatus
 import no.nav.etterlatte.joarkhendelser.joark.Kanal
+import no.nav.etterlatte.joarkhendelser.joark.SafKlient
 import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
+import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator

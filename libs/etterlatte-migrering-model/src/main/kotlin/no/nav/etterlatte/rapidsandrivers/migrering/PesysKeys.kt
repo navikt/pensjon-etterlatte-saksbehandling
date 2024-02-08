@@ -3,8 +3,8 @@ package no.nav.etterlatte.rapidsandrivers.migrering
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
-import rapidsandrivers.HENDELSE_DATA_KEY
 
 const val FNR_KEY = "fnr"
 const val ROLLE_KEY = "rolle"

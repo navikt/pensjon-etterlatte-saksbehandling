@@ -1,9 +1,8 @@
-package rapidsandrivers
+package no.nav.etterlatte.rapidsandrivers
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilendeSteg
 import no.nav.etterlatte.libs.common.rapidsandrivers.feilmelding
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import org.slf4j.LoggerFactory

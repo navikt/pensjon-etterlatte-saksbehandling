@@ -51,7 +51,7 @@ class VarselbrevTest {
         val brevRepository = BrevRepository(datasource)
         val adresseService =
             mockk<AdresseService>().also {
-                coEvery { it.hentMottakerAdresse(any()) } returns Mottaker.tom(SOEKER_FOEDSELSNUMMER)
+                coEvery { it.hentMottakerAdresse(any(), any()) } returns Mottaker.tom(SOEKER_FOEDSELSNUMMER)
             }
         val brevdataFacade =
             mockk<BrevdataFacade>().also {

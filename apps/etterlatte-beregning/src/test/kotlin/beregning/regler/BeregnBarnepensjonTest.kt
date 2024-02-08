@@ -1,12 +1,10 @@
-package beregning.regler
+package no.nav.etterlatte.beregning.regler
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.grunnlag.InstitusjonsoppholdBeregningsgrunnlag
 import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.barnepensjon.beregnBarnepensjon1967Regel
 import no.nav.etterlatte.beregning.regler.barnepensjon.beregnBarnepensjon1967RegelMedInstitusjon
-import no.nav.etterlatte.beregning.regler.barnepensjonGrunnlag
-import no.nav.etterlatte.beregning.regler.toBeregningstall
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN3_FOEDSELSNUMMER

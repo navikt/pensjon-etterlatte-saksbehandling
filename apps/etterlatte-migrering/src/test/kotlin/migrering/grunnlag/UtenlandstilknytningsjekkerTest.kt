@@ -1,15 +1,13 @@
-package migrering.grunnlag
+package no.nav.etterlatte.migrering.grunnlag
 
-import grunnlag.Bostedsland
-import grunnlag.VurdertBostedsland
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.grunnlag.Bostedsland
+import no.nav.etterlatte.grunnlag.VurdertBostedsland
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import no.nav.etterlatte.migrering.grunnlag.GrunnlagKlient
-import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import org.junit.jupiter.api.Assertions.assertEquals

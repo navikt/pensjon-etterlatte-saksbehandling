@@ -54,7 +54,7 @@ export const VelgSaksbehandler = ({
 
       if (selectedSaksbehandler) {
         byttSaksbehandler(
-          { oppgaveId, type, nysaksbehandler: { saksbehandler: selectedSaksbehandler.ident, versjon } },
+          { oppgaveId, type, nysaksbehandler: { saksbehandler: selectedSaksbehandler.ident!, versjon } },
           (result) => {
             oppdaterTildeling(oppgaveId, selectedSaksbehandler.ident, result.versjon)
             setValgtSaksbehandler(saksbehandler)
@@ -98,13 +98,13 @@ export const VelgSaksbehandler = ({
         <Dropdown open={openDropdown}>
           <Button
             as={Dropdown.Toggle}
-            icon={valgtSaksbehandler ? <PersonPencilIcon /> : <PersonPlusIcon />}
+            icon={valgtSaksbehandler?.ident ? <PersonPencilIcon /> : <PersonPlusIcon />}
             iconPosition="left"
             size="small"
             variant="tertiary"
             onClick={() => setOpenDropdown(true)}
           >
-            {valgtSaksbehandler
+            {valgtSaksbehandler?.navn
               ? valgtSaksbehandler.navn === innloggetSaksbehandler.navn
                 ? `${valgtSaksbehandler.navn} (meg)`
                 : valgtSaksbehandler.navn
@@ -125,7 +125,7 @@ export const VelgSaksbehandler = ({
                   </ValgButton>
                 )}
               </div>
-              {valgtSaksbehandler && (
+              {valgtSaksbehandler?.ident && (
                 <div>
                   <ValgButton
                     variant="secondary"

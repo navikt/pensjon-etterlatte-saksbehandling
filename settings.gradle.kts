@@ -28,6 +28,7 @@ include(
     "apps:etterlatte-statistikk",
     "apps:etterlatte-vilkaarsvurdering",
     "apps:etterlatte-vilkaarsvurdering-kafka",
+    "apps:etterlatte-tidshendelser",
     "apps:etterlatte-trygdetid",
     "apps:etterlatte-trygdetid-kafka",
     "apps:etterlatte-samordning-vedtak",

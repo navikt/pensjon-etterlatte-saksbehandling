@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import rapidsandrivers.HENDELSE_DATA_KEY
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource

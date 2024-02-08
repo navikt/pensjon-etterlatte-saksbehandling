@@ -1,6 +1,10 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.hendelseData
@@ -9,10 +13,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.HENDELSE_DATA_KEY
-import rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
-import rapidsandrivers.behandlingId
 
 internal class MigreringVilkaarsvurderingRiver(
     rapidsConnection: RapidsConnection,

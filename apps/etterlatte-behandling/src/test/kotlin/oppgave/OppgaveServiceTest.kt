@@ -34,6 +34,7 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -144,7 +145,7 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
+        Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandlerIdent)
     }
 
     @Test
@@ -177,7 +178,7 @@ internal class OppgaveServiceTest {
 
         oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, systembruker)
         val systembrukerOppgave = oppgaveService.hentOppgave(sakIdOgReferanse.id)
-        Assertions.assertEquals(systembruker, systembrukerOppgave?.saksbehandler!!)
+        Assertions.assertEquals(systembruker, systembrukerOppgave?.saksbehandlerIdent!!)
     }
 
     @Test
@@ -211,7 +212,7 @@ internal class OppgaveServiceTest {
 
         oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, attestantmedRoller.saksbehandler.ident)
         val attestantTildeltOppgave = oppgaveService.hentOppgave(sakIdOgReferanse.id)
-        Assertions.assertEquals(attestantmedRoller.saksbehandler.ident, attestantTildeltOppgave?.saksbehandler!!)
+        Assertions.assertEquals(attestantmedRoller.saksbehandler.ident, attestantTildeltOppgave?.saksbehandlerIdent!!)
     }
 
     @Test
@@ -388,7 +389,7 @@ internal class OppgaveServiceTest {
         oppgaveService.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
+        Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandlerIdent)
     }
 
     @Test
@@ -408,7 +409,7 @@ internal class OppgaveServiceTest {
             oppgaveService.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
         }
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        Assertions.assertEquals(nyOppgave.saksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
+        Assertions.assertEquals(nyOppgave.saksbehandlerIdent, oppgaveMedNySaksbehandler?.saksbehandlerIdent)
     }
 
     @Test
@@ -437,7 +438,7 @@ internal class OppgaveServiceTest {
         oppgaveService.fjernSaksbehandler(nyOppgave.id)
         val oppgaveUtenSaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
         Assertions.assertNotNull(oppgaveUtenSaksbehandler?.id)
-        Assertions.assertNull(oppgaveUtenSaksbehandler?.saksbehandler)
+        Assertions.assertNull(oppgaveUtenSaksbehandler?.saksbehandlerIdent)
         Assertions.assertEquals(Status.NY, oppgaveUtenSaksbehandler?.status)
     }
 
@@ -478,7 +479,7 @@ internal class OppgaveServiceTest {
         }
         val lagretOppgave = oppgaveService.hentOppgave(nyOppgave.id)
 
-        Assertions.assertEquals(lagretOppgave?.saksbehandler, saksbehandler)
+        Assertions.assertEquals(lagretOppgave?.saksbehandlerIdent, saksbehandler)
     }
 
     @Test
@@ -720,7 +721,7 @@ internal class OppgaveServiceTest {
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         Assertions.assertEquals(1, oppgaver.size)
         val oppgaveUtenbeskyttelse = oppgaver[0]
         Assertions.assertEquals(nyOppgave.id, oppgaveUtenbeskyttelse.id)
@@ -742,14 +743,14 @@ internal class OppgaveServiceTest {
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         Assertions.assertEquals(1, oppgaverUtenEndring.size)
         Assertions.assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
 
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
             listOf(GrunnlagsendringshendelseService.SakMedEnhet(oppgaverUtenEndring[0].sakId, Enheter.STEINKJER.enhetNr)),
         )
-        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
 
         Assertions.assertEquals(1, oppgaverMedEndring.size)
         Assertions.assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
@@ -781,7 +782,7 @@ internal class OppgaveServiceTest {
         every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerStrengtFortrolig
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         Assertions.assertEquals(1, oppgaver.size)
         val strengtFortroligOppgave = oppgaver[0]
         Assertions.assertEquals(adressebeskyttetOppgave.id, strengtFortroligOppgave.id)
@@ -813,7 +814,7 @@ internal class OppgaveServiceTest {
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         Assertions.assertEquals(1, oppgaver.size)
         val attesteringsoppgave = oppgaver[0]
         Assertions.assertEquals(attestantOppgave.id, attesteringsoppgave.id)
@@ -847,7 +848,7 @@ internal class OppgaveServiceTest {
         every { saksbehandler.erSuperbruker() } returns true
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
         Assertions.assertEquals(1, oppgaver.size)
         val attesteringsoppgave = oppgaver[0]
         Assertions.assertEquals(attestantOppgave.id, attesteringsoppgave.id)
@@ -869,13 +870,13 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
+        Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandlerIdent)
 
         val hentEndringerForOppgave = oppgaveDaoMedEndringssporing.hentEndringerForOppgave(nyOppgave.id)
         Assertions.assertEquals(1, hentEndringerForOppgave.size)
         val endringPaaOppgave = hentEndringerForOppgave[0]
-        Assertions.assertNull(endringPaaOppgave.oppgaveFoer.saksbehandler)
-        Assertions.assertEquals("nysaksbehandler", endringPaaOppgave.oppgaveEtter.saksbehandler)
+        Assertions.assertNull(endringPaaOppgave.oppgaveFoer.saksbehandlerIdent)
+        Assertions.assertEquals("nysaksbehandler", endringPaaOppgave.oppgaveEtter.saksbehandlerIdent)
         Assertions.assertEquals(Status.NY, endringPaaOppgave.oppgaveFoer.status)
         Assertions.assertEquals(Status.UNDER_BEHANDLING, endringPaaOppgave.oppgaveEtter.status)
     }
@@ -992,7 +993,7 @@ internal class OppgaveServiceTest {
         every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        val finnOppgaverForBruker = oppgaveService.finnOppgaverForBruker(saksbehandler)
+        val finnOppgaverForBruker = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
 
         Assertions.assertEquals(1, finnOppgaverForBruker.size)
         val aalesundfunnetOppgave = finnOppgaverForBruker[0]
@@ -1011,14 +1012,34 @@ internal class OppgaveServiceTest {
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
             )
-        val saksbehandler = "saksbehandler"
+        val saksbehandlerIdent = "saksbehandler"
 
-        oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler)
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandlerIdent)
 
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        Assertions.assertEquals(saksbehandler, saksbehandlerHentet)
+        Assertions.assertEquals(saksbehandlerIdent, saksbehandlerHentet.saksbehandlerIdent)
+    }
+
+    @Test
+    fun `Skal kaste om ingen oppgave som ikke er attestering finnes`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = UUID.randomUUID().toString()
+        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            behandlingId,
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.ATTESTERING,
+            null,
+        )
+
+        assertThrows<ManglerSaksbehandlerException> {
+            oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
+        }
+
+        val attestertoppgave = oppgaveService.hentOppgaverForReferanse(behandlingId)
+        assertEquals(1, attestertoppgave.size)
     }
 
     @Test
@@ -1033,14 +1054,14 @@ internal class OppgaveServiceTest {
                 OppgaveType.REVURDERING,
                 null,
             )
-        val saksbehandler = "saksbehandler"
+        val saksbehandlerIdent = "saksbehandler"
 
-        oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler)
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandlerIdent)
 
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(revurderingId)
 
-        Assertions.assertEquals(saksbehandler, saksbehandlerHentet)
+        Assertions.assertEquals(saksbehandlerIdent, saksbehandlerHentet.saksbehandlerIdent)
     }
 
     @Test
@@ -1076,7 +1097,7 @@ internal class OppgaveServiceTest {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        Assertions.assertEquals(saksbehandler.ident, saksbehandlerHentet)
+        Assertions.assertEquals(saksbehandler.ident, saksbehandlerHentet.saksbehandlerIdent)
     }
 
     @Test
@@ -1093,6 +1114,6 @@ internal class OppgaveServiceTest {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        Assertions.assertNull(saksbehandlerHentet)
+        Assertions.assertNull(saksbehandlerHentet.saksbehandlerIdent)
     }
 }

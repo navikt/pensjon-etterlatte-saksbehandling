@@ -11,18 +11,18 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.eventName
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.FNR_KEY
+import no.nav.etterlatte.rapidsandrivers.GRUNNLAG_OPPDATERT
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
+import no.nav.etterlatte.rapidsandrivers.NY_OPPLYSNING_KEY
+import no.nav.etterlatte.rapidsandrivers.OPPLYSNING_KEY
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.FNR_KEY
-import rapidsandrivers.GRUNNLAG_OPPDATERT
-import rapidsandrivers.ListenerMedLogging
-import rapidsandrivers.NY_OPPLYSNING_KEY
-import rapidsandrivers.OPPLYSNING_KEY
-import rapidsandrivers.SAK_ID_KEY
 import java.util.UUID
 
 class GrunnlagHendelserRiver(

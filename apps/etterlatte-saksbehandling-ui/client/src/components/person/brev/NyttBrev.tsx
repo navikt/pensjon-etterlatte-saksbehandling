@@ -77,7 +77,7 @@ export default function NyttBrev() {
                 <Heading spacing level="2" size="medium">
                   Handlinger
                 </Heading>
-                <NyttBrevHandlingerPanel brev={brev} setKanRedigeres={setKanRedigeres} callback={() => {}} />
+                <NyttBrevHandlingerPanel brev={brev} setKanRedigeres={setKanRedigeres} />
               </Panel>
             </Column>
           </GridContainer>

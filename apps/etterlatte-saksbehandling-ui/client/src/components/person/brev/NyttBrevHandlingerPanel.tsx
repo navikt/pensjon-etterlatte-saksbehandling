@@ -11,7 +11,7 @@ import { isInitial, isPending, isSuccess, mapAllApiResult } from '~shared/api/ap
 interface Props {
   brev: IBrev
   setKanRedigeres: (kanRedigeres: boolean) => void
-  callback: () => void
+  callback?: () => void
 }
 
 export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callback }: Props) {
@@ -32,7 +32,9 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
       },
       () => journalfoer()
     )
-    callback()
+    if (callback) {
+      callback()
+    }
   }
 
   const journalfoer = () => {

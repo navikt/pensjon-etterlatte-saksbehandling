@@ -54,9 +54,9 @@ export const VelgSaksbehandler = ({
 
       if (selectedSaksbehandler) {
         byttSaksbehandler(
-          { oppgaveId, type, nysaksbehandler: { saksbehandler: selectedSaksbehandler.ident!, versjon } },
+          { oppgaveId, type, nysaksbehandler: { saksbehandler: selectedSaksbehandler.ident, versjon } },
           (result) => {
-            oppdaterTildeling(oppgaveId, selectedSaksbehandler.ident!, result.versjon)
+            oppdaterTildeling(oppgaveId, selectedSaksbehandler.ident, result.versjon)
             setValgtSaksbehandler(saksbehandler)
             setOpenDropdown(false)
           },

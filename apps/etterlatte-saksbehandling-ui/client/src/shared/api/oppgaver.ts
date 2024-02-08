@@ -48,8 +48,8 @@ export type Oppgavetype =
   | 'JOURNALFOERING'
 
 export interface Saksbehandler {
-  ident: string | null
-  navn: string | null
+  ident: string
+  navn: string
 }
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)

@@ -18,6 +18,7 @@ import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 import { mapApiResult } from '~shared/api/apiUtils'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
+import { Heading, Panel } from '@navikt/ds-react'
 
 export default function NyttBrev() {
   const { brevId, sakId, fnr } = useParams()
@@ -72,7 +73,12 @@ export default function NyttBrev() {
             </Column>
             <Column>
               <BrevStatusPanel brev={brev} />
-              <NyttBrevHandlingerPanel brev={brev} setKanRedigeres={setKanRedigeres} />
+              <Panel>
+                <Heading spacing level="2" size="medium">
+                  Handlinger
+                </Heading>
+                <NyttBrevHandlingerPanel brev={brev} setKanRedigeres={setKanRedigeres} callback={() => {}} />
+              </Panel>
             </Column>
           </GridContainer>
         )

@@ -1,11 +1,11 @@
 package no.nav.etterlatte.beregning
 
-import beregning.regler.finnAnvendtGrunnbeloep
-import beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagOMS
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
+import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
+import no.nav.etterlatte.beregning.regler.finnAnvendtTrygdetid
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.Avdoed
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.PeriodisertOmstillingstoenadGrunnlag
 import no.nav.etterlatte.beregning.regler.omstillingstoenad.kroneavrundetOmstillingstoenadRegel

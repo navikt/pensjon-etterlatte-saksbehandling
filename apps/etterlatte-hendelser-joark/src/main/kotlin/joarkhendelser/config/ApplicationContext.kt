@@ -2,13 +2,13 @@ package no.nav.etterlatte.joarkhendelser.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import joarkhendelser.behandling.BehandlingKlient
-import joarkhendelser.joark.SafKlient
-import joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.joarkhendelser.JoarkHendelseHandler
+import no.nav.etterlatte.joarkhendelser.behandling.BehandlingKlient
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.common.JoarkhendelseKonsument
+import no.nav.etterlatte.joarkhendelser.joark.SafKlient
 import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
+import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 

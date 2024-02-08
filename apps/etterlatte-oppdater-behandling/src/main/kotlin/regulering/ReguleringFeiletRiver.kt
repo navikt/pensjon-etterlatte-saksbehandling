@@ -3,14 +3,14 @@ package no.nav.etterlatte.regulering
 import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.ReguleringFeiletHendelse
 import no.nav.etterlatte.rapidsandrivers.EventNames.FEILA
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.ReguleringEvents
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.ListenerMedLogging
-import rapidsandrivers.SAK_ID_KEY
-import rapidsandrivers.sakId
 
 internal class ReguleringFeiletRiver(
     rapidsConnection: RapidsConnection,

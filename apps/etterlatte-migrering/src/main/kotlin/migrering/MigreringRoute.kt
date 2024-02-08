@@ -1,4 +1,4 @@
-package migrering
+package no.nav.etterlatte.migrering
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
 import org.slf4j.LoggerFactory
 

@@ -1,4 +1,4 @@
-package tilbakekreving.hendelse
+package no.nav.etterlatte.tilbakekreving.hendelse
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -6,8 +6,6 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.database.singleOrNull
-import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
-import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseType
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll

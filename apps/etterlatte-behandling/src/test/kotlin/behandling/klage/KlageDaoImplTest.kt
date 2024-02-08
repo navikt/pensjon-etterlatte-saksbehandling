@@ -1,9 +1,8 @@
-package behandling.klage
+package no.nav.etterlatte.behandling.klage
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.FormkravMedBeslutter

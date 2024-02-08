@@ -28,7 +28,11 @@ export const GenerellbehandlingSidemeny = (props: {
   useEffect(() => {
     hentSaksbehandlerForOppgaveUnderArbeid(
       { referanse: utlandsBehandling.id, sakId: utlandsBehandling.sakId },
-      (saksbehandler) => setGeldendeSaksbehandler(saksbehandler),
+      (saksbehandler, statusCode) => {
+        if (statusCode === 200) {
+          setGeldendeSaksbehandler(saksbehandler?.saksbehandlerIdent)
+        }
+      },
       () => setGeldendeSaksbehandler(null)
     )
   }, [utlandsBehandling.id])

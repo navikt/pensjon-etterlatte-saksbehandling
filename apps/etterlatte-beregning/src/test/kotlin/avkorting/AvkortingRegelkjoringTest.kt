@@ -1,10 +1,7 @@
-package avkorting
+package no.nav.etterlatte.avkorting
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.etterlatte.avkorting.AvkortetYtelseType
-import no.nav.etterlatte.avkorting.AvkortingRegelkjoring
-import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag
 import no.nav.etterlatte.beregning.regler.avkortingsperiode

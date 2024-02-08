@@ -1,8 +1,7 @@
-package grunnbeloep
+package no.nav.etterlatte.grunnbeloep
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 

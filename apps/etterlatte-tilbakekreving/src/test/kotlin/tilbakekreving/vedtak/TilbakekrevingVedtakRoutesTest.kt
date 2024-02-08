@@ -1,4 +1,4 @@
-package tilbakekreving.vedtak
+package no.nav.etterlatte.tilbakekreving.vedtak
 
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.header
@@ -18,8 +18,6 @@ import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.tilbakekrevingsvedtak
-import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingVedtakService
-import no.nav.etterlatte.tilbakekreving.vedtak.tilbakekrevingVedtakRoutes
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll

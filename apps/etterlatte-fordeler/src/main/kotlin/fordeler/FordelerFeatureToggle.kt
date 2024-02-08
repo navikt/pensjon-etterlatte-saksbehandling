@@ -1,4 +1,4 @@
-package fordeler
+package no.nav.etterlatte.fordeler
 
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 

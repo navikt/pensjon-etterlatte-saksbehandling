@@ -59,7 +59,7 @@ export const SendTilAttesteringModal = ({
     <>
       {isSuccess(oppgaveForBehandlingStatus) && (
         <>
-          {!saksbehandlerPaaOppgave?.saksbehandlerIdent ? (
+          {saksbehandlerPaaOppgave?.saksbehandlerIdent ? (
             <>
               <Button variant="primary" onClick={klikkAttester}>
                 {handlinger.SEND_TIL_ATTESTERING.navn}

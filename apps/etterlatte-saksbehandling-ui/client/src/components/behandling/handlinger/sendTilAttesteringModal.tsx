@@ -37,7 +37,7 @@ export const SendTilAttesteringModal = ({
   const soeker = usePersonopplysninger()?.soeker?.opplysning
 
   useEffect(() => {
-    requesthentOppgaveForBehandling({ referanse: behandlingId, sakId: sakId }, () => {})
+    requesthentOppgaveForBehandling({ referanse: behandlingId, sakId: sakId })
   }, [])
 
   const fattVedtakWrapper = () => {

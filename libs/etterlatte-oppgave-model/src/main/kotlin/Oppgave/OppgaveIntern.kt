@@ -45,6 +45,8 @@ data class OppgaveIntern(
         return saksbehandlerIdent == null
     }
 
+    fun erAvsluttet(): Boolean = status.erAvsluttet()
+
     fun erFerdigstilt(): Boolean = status.erFerdigstilt()
 
     fun erAttestering(): Boolean {

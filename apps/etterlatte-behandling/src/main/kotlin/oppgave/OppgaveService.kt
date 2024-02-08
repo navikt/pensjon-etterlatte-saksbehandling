@@ -378,7 +378,7 @@ class OppgaveService(
         frist: Tidspunkt? = null,
     ): OppgaveIntern {
         val sak = sakDao.hentSak(sakId)!!
-        return opprettOppave(
+        return opprettOppgave(
             opprettNyOppgaveMedReferanseOgSak(
                 referanse = referanse,
                 sak = sak,
@@ -426,7 +426,7 @@ class OppgaveService(
         }
     }
 
-    private fun opprettOppave(oppgaveIntern: OppgaveIntern): OppgaveIntern {
+    private fun opprettOppgave(oppgaveIntern: OppgaveIntern): OppgaveIntern {
         var oppgaveLagres = oppgaveIntern
         if (oppgaveIntern.frist === null) {
             val enMaanedFrem = oppgaveIntern.opprettet.toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()

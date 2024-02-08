@@ -10,6 +10,7 @@ import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert, OppgaveSaksbehand
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { useAppSelector } from '~store/Store'
 
 export const SendTilAttesteringModal = ({
   behandlingId,
@@ -24,6 +25,7 @@ export const SendTilAttesteringModal = ({
 }) => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const [fattVedtakStatus, fattVedtak] = useApiCall(fattVedtakApi)
   const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<OppgaveSaksbehandler | null>(null)
   const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(
@@ -59,7 +61,7 @@ export const SendTilAttesteringModal = ({
     <>
       {isSuccess(oppgaveForBehandlingStatus) && (
         <>
-          {saksbehandlerPaaOppgave?.saksbehandlerIdent ? (
+          {saksbehandlerPaaOppgave?.saksbehandlerIdent === innloggetSaksbehandler.ident ? (
             <>
               <Button variant="primary" onClick={klikkAttester}>
                 {handlinger.SEND_TIL_ATTESTERING.navn}
@@ -67,7 +69,7 @@ export const SendTilAttesteringModal = ({
             </>
           ) : (
             <Alert variant="error">
-              Oppgaven til denne behandlingen må tildeles en saksbehandler før man kan sende til attestering
+              Oppgaven til denne behandlingen må tildeles deg før du kan sende til attestering
             </Alert>
           )}
         </>

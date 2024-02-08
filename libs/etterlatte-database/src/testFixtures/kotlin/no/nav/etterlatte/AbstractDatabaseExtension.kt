@@ -24,7 +24,7 @@ abstract class AbstractDatabaseExtension(
 ) : BeforeAllCallback, AfterAllCallback, ExtensionContext.Store.CloseableResource {
     private val logger: org.slf4j.Logger = LoggerFactory.getLogger(AbstractDatabaseExtension::class.java)
 
-    private val postgreSQLContainer =
+    val postgreSQLContainer =
         PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
             .also { logger.info("Starting shared Postgres testcontainer") }
             .also { it.start() }

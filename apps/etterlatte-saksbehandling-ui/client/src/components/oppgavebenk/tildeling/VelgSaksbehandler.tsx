@@ -23,9 +23,6 @@ interface Props {
   type: Oppgavetype
 }
 
-// TODO Ta inn følgende:
-//  Saksbehandler objektet på det spesifike oppgaven
-//  Fikse at det funker med resten av flyten :)
 export const VelgSaksbehandler = ({
   saksbehandler,
   saksbehandlereIEnhet,
@@ -110,36 +107,34 @@ export const VelgSaksbehandler = ({
                 : valgtSaksbehandler.navn
               : 'Ikke tildelt'}
           </Button>
-          <Dropdown.Menu onClose={() => setOpenDropdown(false)}>
-            <MenyWrapper>
-              <div>
-                <UNSAFE_Combobox
-                  label="Velg saksbehandler"
-                  options={saksbehandlereIEnhet.map((behandler) => behandler.navn!)}
-                  onToggleSelected={onSaksbehandlerSelect}
-                  selectedOptions={!!valgtSaksbehandler ? [valgtSaksbehandler.navn!] : []}
-                />
-                {!valgtSaksbehandler?.ident?.includes(innloggetSaksbehandler.ident) && (
-                  <ValgButton variant="tertiary" size="xsmall" onClick={onTildelTilMeg}>
-                    Tildel til meg
-                  </ValgButton>
-                )}
-              </div>
-              {valgtSaksbehandler?.ident && (
-                <div>
-                  <ValgButton
-                    variant="secondary"
-                    size="small"
-                    onClick={onFjernTildeling}
-                    icon={<PersonCrossIcon />}
-                    iconPosition="right"
-                  >
-                    Fjern tildeling
-                  </ValgButton>
-                </div>
+          <DropdownMeny onClose={() => setOpenDropdown(false)}>
+            <div>
+              <VelgSaksbehandlerCombobox
+                label="Velg saksbehandler"
+                options={saksbehandlereIEnhet.map((behandler) => behandler.navn!)}
+                onToggleSelected={onSaksbehandlerSelect}
+                selectedOptions={!!valgtSaksbehandler ? [valgtSaksbehandler.navn!] : []}
+              />
+              {!valgtSaksbehandler?.ident?.includes(innloggetSaksbehandler.ident) && (
+                <ValgButton variant="tertiary" size="xsmall" onClick={onTildelTilMeg}>
+                  Tildel til meg
+                </ValgButton>
               )}
-            </MenyWrapper>
-          </Dropdown.Menu>
+            </div>
+            {valgtSaksbehandler?.ident && (
+              <div>
+                <ValgButton
+                  variant="secondary"
+                  size="small"
+                  onClick={onFjernTildeling}
+                  icon={<PersonCrossIcon />}
+                  iconPosition="right"
+                >
+                  Fjern tildeling
+                </ValgButton>
+              </div>
+            )}
+          </DropdownMeny>
         </Dropdown>
       ) : (
         <SaksbehandlerWrapper>{saksbehandler.navn}</SaksbehandlerWrapper>
@@ -148,14 +143,19 @@ export const VelgSaksbehandler = ({
   )
 }
 
-const MenyWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+const DropdownMeny = styled(Dropdown.Menu)`
+  position: absolute;
+  overflow: visible;
+  min-width: fit-content;
+  max-width: fit-content;
 `
 
 const ValgButton = styled(Button)`
   margin-top: 0.75rem;
+`
+
+const VelgSaksbehandlerCombobox = styled(UNSAFE_Combobox)`
+  width: 20rem;
 `
 
 const SaksbehandlerWrapper = styled(Label)`

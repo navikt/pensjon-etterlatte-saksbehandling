@@ -39,7 +39,7 @@ data class BrevDataFerdigstillingRequest(
 )
 
 class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFacade) {
-    suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevData {
+    suspend fun brevDataFerdigstilling(request: BrevDataFerdigstillingRequest): BrevDataFerdigstilling {
         with(request) {
             if (generellBrevData.erMigrering()) {
                 return coroutineScope {

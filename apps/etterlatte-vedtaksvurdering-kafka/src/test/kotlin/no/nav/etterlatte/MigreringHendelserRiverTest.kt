@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
@@ -17,6 +18,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -43,6 +45,7 @@ class MigreringHendelserRiverTest {
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     SAK_ID_KEY to "1",
                     MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
+                    KILDE_KEY to Vedtaksloesning.PESYS.name,
                 ),
             )
         coEvery {
@@ -65,6 +68,7 @@ class MigreringHendelserRiverTest {
                     BEHANDLING_ID_KEY to behandlingId,
                     SAK_ID_KEY to "1",
                     MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
+                    KILDE_KEY to Vedtaksloesning.PESYS.name,
                 ),
             )
         coEvery { vedtakService.opprettVedtakFattOgAttester(any(), any(), any()) } returns vedtakOgRapid
@@ -88,6 +92,7 @@ class MigreringHendelserRiverTest {
                     BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
                     SAK_ID_KEY to "1",
                     MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.MED_PAUSE,
+                    KILDE_KEY to Vedtaksloesning.PESYS.name,
                 ),
             )
 

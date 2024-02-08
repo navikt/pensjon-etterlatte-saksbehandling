@@ -3,12 +3,12 @@ package no.nav.etterlatte.rivers.migrering
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
+import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rivers.OpprettFerdigstillJournalfoerOgDistribuerBrev
 import no.nav.etterlatte.token.Systembruker
@@ -25,7 +25,7 @@ internal class OpprettVedtaksbrevForGjenopprettaRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.FATTET) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.BEREGNET_FERDIG) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireValue(KILDE_KEY, Vedtaksloesning.GJENOPPRETTA.name) }

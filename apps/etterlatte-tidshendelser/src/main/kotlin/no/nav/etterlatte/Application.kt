@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.tidshendelser.AppContext
+import no.nav.etterlatte.tidshendelser.HendelseRiver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import java.util.Timer
@@ -14,6 +15,8 @@ fun main() {
 
     RapidApplication.create(rapidEnv).also { rapidsConnection ->
         val appContext = AppContext(miljoevariabler) { key, message -> rapidsConnection.publish(key.toString(), message) }
+
+        HendelseRiver(rapidsConnection, appContext.hendelseDao)
 
         rapidsConnection.apply {
             val timers = mutableListOf<Timer>()

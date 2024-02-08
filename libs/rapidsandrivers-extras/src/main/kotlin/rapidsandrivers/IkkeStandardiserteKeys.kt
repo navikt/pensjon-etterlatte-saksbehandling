@@ -20,6 +20,7 @@ const val GRUNNLAG_OPPDATERT = "grunnlag_oppdatert" // TODO: eventname
 const val OPPLYSNING_KEY = "opplysning"
 const val FNR_KEY = "fnr"
 const val NY_OPPLYSNING_KEY = "OPPLYSNING:NY"
+const val DRYRUN = "dry_run"
 
 var JsonMessage.sakId: Long
     get() = this[SAK_ID_KEY].asLong()

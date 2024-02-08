@@ -7,6 +7,7 @@ import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
+import no.nav.etterlatte.rapidsandrivers.DRYRUN
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -26,6 +27,7 @@ class HendelsePublisher(private val rapidsPublisher: (UUID, String) -> Unit) {
                     ALDERSOVERGANG_STEG_KEY to hendelse.steg,
                     ALDERSOVERGANG_TYPE_KEY to jobb.type.name,
                     DATO_KEY to jobb.behandlingsmaaned.atDay(1).toString(),
+                    DRYRUN to jobb.dryrun,
                     CORRELATION_ID to getCorrelationId(),
                 ),
             )

@@ -12,6 +12,7 @@ import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
+import no.nav.etterlatte.rapidsandrivers.DRYRUN
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
@@ -42,6 +43,7 @@ class AldersovergangRiverTest {
                     ALDERSOVERGANG_ID_KEY to "123-123-123",
                     SAK_ID_KEY to sakId,
                     DATO_KEY to datoFom,
+                    DRYRUN to false,
                 ),
             )
 
@@ -52,6 +54,7 @@ class AldersovergangRiverTest {
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "123-123-123"
             field(0, HENDELSE_DATA_KEY).asBoolean() shouldBe true
+            field(0, DRYRUN).asBoolean() shouldBe false
         }
     }
 
@@ -68,6 +71,7 @@ class AldersovergangRiverTest {
                     ALDERSOVERGANG_ID_KEY to "432-987-234",
                     SAK_ID_KEY to sakId,
                     DATO_KEY to datoFom,
+                    DRYRUN to true,
                 ),
             )
 
@@ -78,6 +82,7 @@ class AldersovergangRiverTest {
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "432-987-234"
             field(0, HENDELSE_DATA_KEY).asBoolean() shouldBe false
+            field(0, DRYRUN).asBoolean() shouldBe true
         }
     }
 }

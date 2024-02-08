@@ -6,13 +6,13 @@ import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.SakType
 
-data class AvvistKlageBrevData(val innhold: List<Slate.Element>, val data: AvvistKlageInnholdBrevData) : BrevData() {
+data class AvvistKlageFerdigData(val innhold: List<Slate.Element>, val data: AvvistKlageInnholdBrevData) : BrevData() {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
             innholdMedVedlegg: InnholdMedVedlegg,
-        ): AvvistKlageBrevData {
-            return AvvistKlageBrevData(
+        ): AvvistKlageFerdigData {
+            return AvvistKlageFerdigData(
                 innhold = innholdMedVedlegg.innhold(),
                 data = AvvistKlageInnholdBrevData.fra(generellBrevData),
             )

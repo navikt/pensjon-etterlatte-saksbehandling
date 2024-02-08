@@ -4,8 +4,6 @@ import com.zaxxer.hikari.HikariDataSource
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
-import org.junit.jupiter.api.extension.AfterAllCallback
-import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL
 import org.slf4j.LoggerFactory
@@ -15,12 +13,8 @@ import java.sql.Connection
 import java.util.logging.Logger
 import javax.sql.DataSource
 
-/**
- * Det tar veldig mye tid å kjøre opp stadig nye Postgres-containere og kjøre Flyway migreringer.
- * Denne extensionen kjører opp èn instans, som så gjenbrukes av de som måtte ønske det.
- */
-abstract class AbstractDatabaseExtension : BeforeAllCallback, AfterAllCallback, ExtensionContext.Store.CloseableResource {
-    val logger: org.slf4j.Logger = LoggerFactory.getLogger(AbstractDatabaseExtension::class.java)
+object GenerellDatabaseExtension {
+    private val logger: org.slf4j.Logger = LoggerFactory.getLogger(this::class.java)
 
     val postgreSQLContainer =
         PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
@@ -36,15 +30,15 @@ abstract class AbstractDatabaseExtension : BeforeAllCallback, AfterAllCallback, 
 
     private val connections = mutableListOf<Connection>()
 
-    override fun beforeAll(context: ExtensionContext) {
+    fun beforeAll(context: ExtensionContext) {
         context.root.getStore(GLOBAL).put("postgres-testdb", this)
     }
 
     /**
      * Ikke gå tom for tilkoblinger, så kast ut alle som er ferdige med jobben sin
      */
-    override fun afterAll(context: ExtensionContext) {
-        resetDb()
+    fun afterAll(resetDatabase: String) {
+        resetDb(resetDatabase)
 
         connections.forEach {
             (ds as HikariDataSource).evictConnection(it)
@@ -58,15 +52,20 @@ abstract class AbstractDatabaseExtension : BeforeAllCallback, AfterAllCallback, 
     /**
      * Trigges av rammeverket når siste testinstans er kjørt.
      */
-    override fun close() {
+    fun close() {
         logger.info("Stopping shared Postgres testcontainer")
         postgreSQLContainer.stop()
     }
 
     /**
-     * Sikre at hver testklasse starter med en fresh database
+     * Sikre at hver testklasse starter med en fresh database, i det minste for sentrale tabeller
      */
-    abstract fun resetDb()
+    fun resetDb(sql: String) {
+        logger.info("Resetting database...")
+        dataSource.connection.use {
+            it.prepareStatement(sql.trimIndent()).execute()
+        }
+    }
 
     /**
      * Wrappe slik at når konsument ber om ny connection så kan den tas vare på mtp eviction

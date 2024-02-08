@@ -249,9 +249,6 @@ data class Klage(
         return KlageStatus.kanAvbryte(this.status)
     }
 
-    fun tilKabalForsendelse() {
-    }
-
     companion object {
         fun ny(
             sak: Sak,

@@ -51,7 +51,6 @@ spec:
     inbound:
       rules:
         - application: etterlatte-fordeler
-        - application: etterlatte-gyldig-soeknad
         - application: etterlatte-hendelser-pdl
         - application: etterlatte-hendelser-joark
         - application: etterlatte-behandling

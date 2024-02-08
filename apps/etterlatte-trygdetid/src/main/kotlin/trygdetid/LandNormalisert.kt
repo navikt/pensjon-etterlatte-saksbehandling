@@ -275,13 +275,7 @@ enum class LandNormalisert(val isoCode: String, val beskrivelse: String) {
     ;
 
     companion object {
-        private val mapAvLandkodeOgBeskrivelse = HashMap<String, String>()
-
-        init {
-            entries.forEach {
-                mapAvLandkodeOgBeskrivelse[it.isoCode] = it.beskrivelse
-            }
-        }
+        private val mapAvLandkodeOgBeskrivelse = entries.associate { it.isoCode to it.beskrivelse }
 
         fun hentBeskrivelse(isoCode: String): String? {
             return mapAvLandkodeOgBeskrivelse[isoCode]

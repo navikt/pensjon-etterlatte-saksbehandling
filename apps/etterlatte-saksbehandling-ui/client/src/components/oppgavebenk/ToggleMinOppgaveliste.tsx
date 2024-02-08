@@ -3,7 +3,7 @@ import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentGosysOppgaver, hentOppgaver, OppgaveDTO } from '~shared/api/oppgaver'
+import { hentGosysOppgaver, hentOppgaverMedStatus, OppgaveDTO } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import { FilterRad } from '~components/oppgavebenk/FilterRad'
@@ -31,17 +31,13 @@ export const ToggleMinOppgaveliste = () => {
 
   const [filter, setFilter] = useState<Filter>(hentFilterFraLocalStorage())
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
-  const [oppgaver, hentOppgaverFetch] = useApiCall(hentOppgaver)
+  const [oppgaver, hentOppgaverStatusFetch] = useApiCall(hentOppgaverMedStatus)
   const [gosysOppgaver, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
 
   const [hentedeOppgaver, setHentedeOppgaver] = useState<OppgaveDTO[]>([])
 
   const sorterOppgaverEtterOpprettet = (oppgaver: OppgaveDTO[]) => {
     return oppgaver.sort((a, b) => new Date(b.opprettet).getTime() - new Date(a.opprettet).getTime())
-  }
-  const hentAlleOppgaver = () => {
-    hentOppgaverFetch({})
-    hentGosysOppgaverFunc({})
   }
 
   useEffect(() => {
@@ -55,15 +51,22 @@ export const ToggleMinOppgaveliste = () => {
     }
   }, [oppgaver, gosysOppgaver])
 
+  const hentAlleOppgaver = () => {
+    hentOppgaverStatusFetch(filter.oppgavestatusFilter)
+    hentGosysOppgaverFunc({})
+  }
+
   useEffect(() => hentAlleOppgaver(), [])
 
   useEffect(() => {
+    const statusValg =
+      oppgaveListeValg === 'MinOppgaveliste'
+        ? [OPPGAVESTATUSFILTER.UNDER_BEHANDLING]
+        : [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING]
+    hentOppgaverStatusFetch(statusValg)
     setFilter({
       ...hentFilterFraLocalStorage(),
-      oppgavestatusFilter:
-        oppgaveListeValg === 'MinOppgaveliste'
-          ? [OPPGAVESTATUSFILTER.UNDER_BEHANDLING]
-          : [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
+      oppgavestatusFilter: statusValg,
     })
   }, [oppgaveListeValg])
 
@@ -75,7 +78,7 @@ export const ToggleMinOppgaveliste = () => {
     setTimeout(() => {
       const oppdatertOppgaveState = [...hentedeOppgaver]
       const index = oppdatertOppgaveState.findIndex((o) => o.id === id)
-      oppdatertOppgaveState[index].saksbehandler = saksbehandler
+      oppdatertOppgaveState[index].saksbehandlerIdent = saksbehandler
       oppdatertOppgaveState[index].status = 'UNDER_BEHANDLING'
       oppdatertOppgaveState[index].versjon = versjon
       setHentedeOppgaver(oppdatertOppgaveState)
@@ -83,7 +86,10 @@ export const ToggleMinOppgaveliste = () => {
   }
 
   const mutableOppgaver = hentedeOppgaver.concat()
-  const innloggetSaksbehandleroppgaver = mutableOppgaver.filter((o) => o.saksbehandler === innloggetSaksbehandler.ident)
+  const innloggetSaksbehandleroppgaver = mutableOppgaver.filter(
+    (o) => o.saksbehandlerIdent === innloggetSaksbehandler.ident
+  )
+
   const filtrerteOppgaver = filtrerOppgaver(
     filter.enhetsFilter,
     filter.fristFilter,
@@ -102,7 +108,7 @@ export const ToggleMinOppgaveliste = () => {
     <Container>
       <TabsWidth value={oppgaveListeValg} onChange={(e) => setOppgaveListeValg(e as OppgavelisteToggle)}>
         <Tabs.List>
-          <Tabs.Tab value="Oppgavelista" label="Oppgavelisten" icon={<InboxIcon />} />
+          <Tabs.Tab value="Oppgavelista" label={`Oppgavelisten (${hentedeOppgaver.length})`} icon={<InboxIcon />} />
           <Tabs.Tab
             value="MinOppgaveliste"
             label={`Min oppgaveliste (${innloggetSaksbehandleroppgaver.length})`}
@@ -125,7 +131,10 @@ export const ToggleMinOppgaveliste = () => {
           {oppgaveListeValg === 'Oppgavelista' && (
             <>
               <FilterRad
-                hentOppgaver={hentAlleOppgaver}
+                hentAlleOppgaver={hentAlleOppgaver}
+                hentOppgaverStatus={(oppgavestatusFilter: Array<string>) =>
+                  hentOppgaverStatusFetch(oppgavestatusFilter)
+                }
                 filter={filter}
                 setFilter={setFilter}
                 alleOppgaver={hentedeOppgaver}

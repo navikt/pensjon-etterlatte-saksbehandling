@@ -6,9 +6,6 @@ import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import org.apache.pdfbox.Loader
-import org.apache.pdfbox.multipdf.PDFMergerUtility
-import java.io.ByteArrayOutputStream
 import java.time.LocalDate
 import java.util.UUID
 
@@ -129,17 +126,7 @@ data class Brev(
     }
 }
 
-class Pdf(val bytes: ByteArray) {
-    fun medPdfAppended(pdf: Pdf): Pdf {
-        val foerstePdf = Loader.loadPDF(this.bytes)
-        val andrePdf = Loader.loadPDF(pdf.bytes)
-        PDFMergerUtility().appendDocument(foerstePdf, andrePdf)
-
-        val out = ByteArrayOutputStream()
-        foerstePdf.save(out)
-        return Pdf(out.toByteArray())
-    }
-}
+class Pdf(val bytes: ByteArray)
 
 data class BrevInnhold(
     val tittel: String,
@@ -154,7 +141,8 @@ data class BrevInnholdVedlegg(
 )
 
 enum class BrevVedleggKey {
-    BEREGNING_INNHOLD,
+    OMS_BEREGNING,
+    OMS_FORHAANDSVARSEL_FEILUTBETALING,
     BP_BEREGNING_TRYGDETID,
 }
 

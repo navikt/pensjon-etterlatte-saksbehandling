@@ -127,7 +127,7 @@ internal class BehandlingMetricsOppgaveTest {
     ) = OppgaveIntern(
         id = UUID.randomUUID(),
         status = status,
-        saksbehandler = saksbehandler,
+        saksbehandlerIdent = saksbehandler,
         enhet = sak.enhet,
         sakId = sak.id,
         kilde = OppgaveKilde.BEHANDLING,

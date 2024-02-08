@@ -223,7 +223,7 @@ class GenerellBehandlingServiceTest {
         Assertions.assertEquals(OppgaveKilde.GENERELL_BEHANDLING, manuellBehandlingOppgave.kilde)
         Assertions.assertEquals(OppgaveType.KRAVPAKKE_UTLAND, manuellBehandlingOppgave.type)
         Assertions.assertEquals(sak.id, manuellBehandlingOppgave.sakId)
-        Assertions.assertNull(manuellBehandlingOppgave.saksbehandler)
+        Assertions.assertNull(manuellBehandlingOppgave.saksbehandlerIdent)
     }
 
     @Test
@@ -258,7 +258,7 @@ class GenerellBehandlingServiceTest {
         Assertions.assertEquals(OppgaveKilde.GENERELL_BEHANDLING, manuellBehandlingOppgave.kilde)
         Assertions.assertEquals(OppgaveType.KRAVPAKKE_UTLAND, manuellBehandlingOppgave.type)
         Assertions.assertEquals(sak.id, manuellBehandlingOppgave.sakId)
-        Assertions.assertNull(manuellBehandlingOppgave.saksbehandler)
+        Assertions.assertNull(manuellBehandlingOppgave.saksbehandlerIdent)
 
         verify {
             hendelseDao.generellBehandlingHendelse(

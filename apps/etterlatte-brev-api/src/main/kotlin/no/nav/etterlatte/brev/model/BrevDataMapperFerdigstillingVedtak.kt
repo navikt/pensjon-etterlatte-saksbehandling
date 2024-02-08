@@ -5,6 +5,7 @@ import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.AVVIST_KLAGE_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
@@ -20,6 +21,7 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelse
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOmregnetNyttRegelverk
 import no.nav.etterlatte.brev.model.bp.BarnepensjonOpphoer
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurdering
+import no.nav.etterlatte.brev.model.klage.AvvistKlageFerdigData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslag
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelse
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoer
@@ -85,6 +87,9 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
                     OmstillingsstoenadOpphoer.fra(generellBrevData.utlandstilknytning, innholdMedVedlegg.innhold())
 
                 TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
+
+                AVVIST_KLAGE_FERDIG -> AvvistKlageFerdigData.fra(generellBrevData, innholdMedVedlegg)
+
                 else -> throw IllegalStateException("Klarte ikke å finne brevdata for brevkode $kode for ferdigstilling.")
             }
         }
@@ -194,6 +199,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
         val trygdetid = async { fetcher.hentTrygdetid() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
+        val brevutfall = async { fetcher.hentBrevutfall() }
 
         OmstillingsstoenadRevurdering.fra(
             innholdMedVedlegg,
@@ -202,6 +208,8 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
             forrigeUtbetalingsinfo.await(),
             etterbetaling.await(),
             requireNotNull(trygdetid.await()),
+            requireNotNull(brevutfall.await()),
+            generellBrevData.revurderingsaarsak,
         )
     }
 }

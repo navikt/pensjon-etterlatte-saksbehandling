@@ -17,7 +17,6 @@ import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.barnepensjon.BP_2024_DATO
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
@@ -63,7 +62,6 @@ internal class BeregnBarnepensjonServiceTest {
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
-    private val featureToggleService = DummyFeatureToggleService()
 
     private fun beregnBarnepensjonService(): BeregnBarnepensjonService {
         return BeregnBarnepensjonService(

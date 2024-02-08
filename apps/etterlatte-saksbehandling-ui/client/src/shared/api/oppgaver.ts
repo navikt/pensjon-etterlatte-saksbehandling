@@ -1,5 +1,6 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { SakType } from '~shared/types/sak'
+import { konverterFilterValuesTilKeys } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 export interface OppgaveDTO {
   id: string
@@ -8,13 +9,14 @@ export interface OppgaveDTO {
   sakId: number
   type: Oppgavetype
   kilde: OppgaveKilde
-  saksbehandler: string | null
   referanse: string | null
   merknad: string | null
   opprettet: string
   sakType: SakType
   fnr: string | null
   frist: string
+  saksbehandlerIdent: string | null
+
   //Oppgaveliste spesifikt
   saksbehandlerNavn: string | null
 
@@ -22,6 +24,11 @@ export interface OppgaveDTO {
   beskrivelse: string | null
   gjelder: string | null
   versjon: number | null
+}
+
+export interface OppgaveSaksbehandler {
+  saksbehandlerIdent: string | null
+  saksbehandlerNavn: string | null
 }
 
 export interface NyOppgaveDto {
@@ -49,7 +56,17 @@ export type Oppgavetype =
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 
-export const hentOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver')
+export const hentOppgaverMedStatus = async (oppgavestatusFilter: Array<string>): Promise<ApiResponse<OppgaveDTO[]>> => {
+  const konverterteFiltre = konverterFilterValuesTilKeys(oppgavestatusFilter)
+
+  const queryParams = konverterteFiltre
+    .map((i) => `oppgaveStatus=${i}&`)
+    .join('')
+    .slice(0, -1)
+
+  return apiClient.get(`/oppgaver?${queryParams}`)
+}
+
 export const hentOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/${id}`)
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
 
@@ -129,10 +146,11 @@ export const redigerFristApi = async (args: {
 export const hentOppgaveForBehandlingUnderBehandlingIkkeattestert = async (args: {
   referanse: string
   sakId: number
-}): Promise<ApiResponse<string>> => apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestert/${args.referanse}`)
+}): Promise<ApiResponse<OppgaveSaksbehandler>> =>
+  apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestert/${args.referanse}`)
 
 export const hentSaksbehandlerForReferanseOppgaveUnderArbeid = async (args: {
   referanse: string
   sakId: number
-}): Promise<ApiResponse<string | null>> =>
+}): Promise<ApiResponse<OppgaveSaksbehandler>> =>
   apiClient.get(`/oppgaver/sak/${args.sakId}/oppgaveunderbehandling/${args.referanse}`)

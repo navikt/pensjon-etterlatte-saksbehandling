@@ -11,12 +11,17 @@ abstract class Oppgave {
     abstract val status: Status
     abstract val type: OppgaveType
     abstract val enhet: String
-    abstract val saksbehandler: String?
+    abstract val saksbehandlerIdent: String?
     abstract val opprettet: Tidspunkt
     abstract val sakType: SakType
     abstract val fnr: String?
     abstract val frist: Tidspunkt?
 }
+
+data class OppgaveSaksbehandler(
+    val saksbehandlerIdent: String? = null,
+    val saksbehandlerNavn: String? = null,
+)
 
 data class OppgaveIntern(
     val id: UUID,
@@ -25,7 +30,7 @@ data class OppgaveIntern(
     val sakId: Long,
     val kilde: OppgaveKilde? = null,
     override val type: OppgaveType,
-    override val saksbehandler: String? = null,
+    override val saksbehandlerIdent: String? = null,
     val saksbehandlerNavn: String? = null,
     val referanse: String,
     val merknad: String? = null,
@@ -34,21 +39,15 @@ data class OppgaveIntern(
     override val fnr: String? = null,
     override val frist: Tidspunkt?,
 ) : Oppgave() {
+    fun toSaksbehandler() = OppgaveSaksbehandler(saksbehandlerIdent, saksbehandlerNavn)
+
     fun manglerSaksbehandler(): Boolean {
-        return saksbehandler == null
+        return saksbehandlerIdent == null
     }
 
-    fun harSaksbehandler(): Boolean {
-        return saksbehandler != null
-    }
+    fun erAvsluttet(): Boolean = status.erAvsluttet()
 
-    fun erAvsluttet(): Boolean {
-        return Status.erAvsluttet(this.status)
-    }
-
-    fun erFerdigstilt(): Boolean {
-        return Status.erFerdigstilt(this.status)
-    }
+    fun erFerdigstilt(): Boolean = status.erFerdigstilt()
 
     fun erAttestering(): Boolean {
         return OppgaveType.ATTESTERING === type
@@ -61,7 +60,7 @@ data class GosysOppgave(
     val id: Long,
     val versjon: Long,
     override val status: Status,
-    override val saksbehandler: String?,
+    override val saksbehandlerIdent: String?,
     override val enhet: String,
     override val opprettet: Tidspunkt,
     override val frist: Tidspunkt?,
@@ -82,27 +81,20 @@ enum class Status {
     AVBRUTT,
     ;
 
-    companion object {
-        fun erAvsluttet(status: Status): Boolean {
-            return when (status) {
-                NY,
-                UNDER_BEHANDLING,
-                -> false
-                FERDIGSTILT,
-                FEILREGISTRERT,
-                AVBRUTT,
-                -> true
-            }
-        }
+    fun erAvsluttet(): Boolean {
+        return when (this) {
+            NY,
+            UNDER_BEHANDLING,
+            -> false
 
-        fun erFerdigstilt(status: Status): Boolean {
-            return status === FERDIGSTILT
-        }
-
-        fun erUnderbehandling(status: Status): Boolean {
-            return status === UNDER_BEHANDLING
+            FERDIGSTILT,
+            FEILREGISTRERT,
+            AVBRUTT,
+            -> true
         }
     }
+
+    fun erFerdigstilt(): Boolean = this === FERDIGSTILT
 }
 
 enum class OppgaveKilde {
@@ -178,7 +170,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
         enhet = sak.enhet,
         sakId = sak.id,
         kilde = oppgaveKilde,
-        saksbehandler = null,
+        saksbehandlerIdent = null,
         referanse = referanse,
         merknad = merknad,
         opprettet = Tidspunkt.now(),

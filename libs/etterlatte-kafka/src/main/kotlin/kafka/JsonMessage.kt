@@ -36,10 +36,8 @@ open class JsonMessage(
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 
-        private const val NESTED_KEY_SEPARATOR = '.'
         private const val OPPRETTET_KEY = "@opprettet"
         private const val EVENT_NAME_KEY = "@event_name"
-        private const val NEED_KEY = "@behov"
         private const val READ_COUNT_KEY = "system_read_count"
         private const val PARTICIPATING_SERVICES_KEY = "system_participating_services"
 

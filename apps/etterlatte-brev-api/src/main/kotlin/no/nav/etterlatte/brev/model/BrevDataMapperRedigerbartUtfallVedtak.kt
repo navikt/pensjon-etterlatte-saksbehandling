@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.model.klage.AvvistKlageInnholdBrevData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslag
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInnvilgelseRedigerbartUtfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadOpphoerRedigerbartUtfall
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadRevurderingRedigerbartUtfall
 import no.nav.etterlatte.brev.model.tilbakekreving.TilbakekrevingInnholdBrevData
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -50,7 +51,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             SakType.OMSTILLINGSSTOENAD -> {
                 when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> omstillingsstoenadInnvilgelse(brukerTokenInfo, generellBrevData)
-                    VedtakType.ENDRING -> ManueltBrevData()
+                    VedtakType.ENDRING -> omstillingsstoenadEndring(brukerTokenInfo, generellBrevData)
                     VedtakType.AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, emptyList())
                     VedtakType.OPPHOER -> OmstillingsstoenadOpphoerRedigerbartUtfall.fra(generellBrevData, emptyList())
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
@@ -99,6 +100,22 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             utbetalingsinfo.await(),
             requireNotNull(avkortingsinfo.await()),
             etterbetaling.await(),
+        )
+    }
+
+    private suspend fun omstillingsstoenadEndring(
+        bruker: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+    ) = coroutineScope {
+        val fetcher = BrevDatafetcher(brevdataFacade, bruker, generellBrevData)
+        val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
+        val etterbetaling = async { fetcher.hentEtterbetaling() }
+        val brevutfall = async { fetcher.hentBrevutfall() }
+
+        OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
+            requireNotNull(avkortingsinfo.await()),
+            etterbetaling.await(),
+            requireNotNull(brevutfall.await()),
         )
     }
 }

@@ -58,7 +58,7 @@ fun Application.restModule(
             val status = call.response.status()?.value
             val method = call.request.httpMethod.value
             val path = call.request.path()
-
+            mdc("response_time") { "$responseTime" }
             skjulAllePotensielleFnr(
                 "<- $status $method $path in $responseTime ms",
             )

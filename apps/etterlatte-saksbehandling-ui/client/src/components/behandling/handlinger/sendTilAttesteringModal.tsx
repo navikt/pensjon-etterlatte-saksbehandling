@@ -5,12 +5,14 @@ import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
 import { ApiResponse } from '~shared/api/apiClient'
-import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert, OppgaveSaksbehandler } from '~shared/api/oppgaver'
+import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
 
-import { isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { useAppSelector } from '~store/Store'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const SendTilAttesteringModal = ({
   behandlingId,
@@ -27,7 +29,7 @@ export const SendTilAttesteringModal = ({
   const [isOpen, setIsOpen] = useState(false)
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const [fattVedtakStatus, fattVedtak] = useApiCall(fattVedtakApi)
-  const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<OppgaveSaksbehandler | null>(null)
+
   const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(
     hentOppgaveForBehandlingUnderBehandlingIkkeattestert
   )
@@ -35,9 +37,7 @@ export const SendTilAttesteringModal = ({
   const soeker = usePersonopplysninger()?.soeker?.opplysning
 
   useEffect(() => {
-    requesthentOppgaveForBehandling({ referanse: behandlingId, sakId: sakId }, (saksbehandler) => {
-      setSaksbehandlerPaaOppgave(saksbehandler)
-    })
+    requesthentOppgaveForBehandling({ referanse: behandlingId, sakId: sakId }, () => {})
   }, [])
 
   const fattVedtakWrapper = () => {
@@ -59,9 +59,16 @@ export const SendTilAttesteringModal = ({
 
   return (
     <>
-      {isSuccess(oppgaveForBehandlingStatus) && (
-        <>
-          {!saksbehandlerPaaOppgave?.saksbehandlerIdent ? (
+      {mapApiResult(
+        oppgaveForBehandlingStatus,
+        <Spinner visible={true} label="Henter saksbehandler" />,
+        () => (
+          <ApiErrorAlert size="small">
+            Fatting er ikke tilgjengelig for øyeblikket. Sjekk oppgavestatus for vedkommende
+          </ApiErrorAlert>
+        ),
+        (saksbehandlerPaaOppgave) => {
+          return !saksbehandlerPaaOppgave?.saksbehandlerIdent ? (
             <Alert size="small" variant="warning">
               Oppgaven til denne behandlingen må tildeles en saksbehandler før den kan sende til attestering
             </Alert>
@@ -73,9 +80,10 @@ export const SendTilAttesteringModal = ({
             <Alert size="small" variant="warning">
               Oppgaven til denne behandlingen må tildeles deg før du kan sende til attestering
             </Alert>
-          )}
-        </>
+          )
+        }
       )}
+
       {isFailureHandler({
         apiResult: oppgaveForBehandlingStatus,
         errorMessage: 'Fatting er ikke tilgjengelig for øyeblikket. Sjekk oppgavestatus for vedkommende',

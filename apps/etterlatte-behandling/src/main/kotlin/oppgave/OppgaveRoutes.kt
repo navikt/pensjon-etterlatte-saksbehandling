@@ -53,6 +53,16 @@ fun filtrerGyldigeStatuser(statuser: List<String>?): List<String> {
         ?.filter { i -> Status.entries.map { it.name }.contains(i) || i == VISALLE } ?: emptyList()
 }
 
+inline val PipelineContext<*, ApplicationCall>.minOppgavelisteidentQueryParam: String?
+    get() {
+        val minOppgavelisteIdentFilter = call.request.queryParameters["kunInnloggetOppgaver"].toBoolean()
+        return if (minOppgavelisteIdentFilter) {
+            brukerTokenInfo.ident()
+        } else {
+            null
+        }
+    }
+
 internal fun Route.oppgaveRoutes(
     service: OppgaveService,
     gosysOppgaveService: GosysOppgaveService,
@@ -68,6 +78,7 @@ internal fun Route.oppgaveRoutes(
                         service.finnOppgaverForBruker(
                             Kontekst.get().appUserAsSaksbehandler(),
                             filtrerteStatuser,
+                            minOppgavelisteidentQueryParam,
                         )
                     },
                 )

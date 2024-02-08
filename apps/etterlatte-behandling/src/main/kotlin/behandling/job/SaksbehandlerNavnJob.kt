@@ -50,6 +50,7 @@ val ugyldigeIdenter =
         "EY",
         "GJENOPPRETTA",
     )
+
 val SAKSBEHANDLERPATTERN = Regex("[a-zA-Z]\\d{6}")
 
 internal suspend fun oppdaterSaksbehandlerEnhet(

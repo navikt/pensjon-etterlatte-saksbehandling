@@ -63,6 +63,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
+import no.nav.etterlatte.rivers.OpprettFerdigstillJournalfoerOgDistribuerBrev
 import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
@@ -224,13 +225,14 @@ class ApplicationBuilder {
                 OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
                 FiksEnkeltbrevRiver(this, vedtaksvurderingService)
                     .also { fiksEnkeltbrev() }
-                OpprettJournalfoerOgDistribuerRiver(
-                    this,
-                    brevoppretter,
-                    pdfGenerator,
-                    journalfoerBrevService,
-                    brevdistribuerer,
-                )
+                val opprettFerdigstillJournalfoerOgDistribuerBrev =
+                    OpprettFerdigstillJournalfoerOgDistribuerBrev(
+                        brevoppretter,
+                        pdfGenerator,
+                        journalfoerBrevService,
+                        brevdistribuerer,
+                    )
+                OpprettJournalfoerOgDistribuerRiver(this, opprettFerdigstillJournalfoerOgDistribuerBrev)
 
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)

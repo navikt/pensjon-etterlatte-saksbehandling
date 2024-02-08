@@ -84,10 +84,6 @@ export const SendTilAttesteringModal = ({
         }
       )}
 
-      {isFailureHandler({
-        apiResult: oppgaveForBehandlingStatus,
-        errorMessage: 'Fatting er ikke tilgjengelig for øyeblikket. Sjekk oppgavestatus for vedkommende',
-      })}
       <Modal
         open={isOpen}
         onClose={() => {

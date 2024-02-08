@@ -41,18 +41,17 @@ internal class OpprettVedtaksbrevForGjenopprettaRiver(
         val behandlingId = packet.behandlingId
         val brukerTokenInfo = Systembruker.migrering
         runBlocking {
-            val vedtaksbrev = service.opprettVarselbrev(sakId, behandlingId, brukerTokenInfo)
-            val brevkoder = service.hentBrevkodeForSak(sakId, brukerTokenInfo)
+            val varselbrev = service.opprettVarselbrev(sakId, behandlingId, brukerTokenInfo)
             opprettFerdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
-                brevkoder,
+                varselbrev.brevkoder,
                 sakId,
-                vedtaksbrev,
+                varselbrev.let { Pair(it.brev, it.generellBrevData) },
                 brukerTokenInfo,
             )
             opprettFerdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(
-                brevkoder,
+                varselbrev.brevkoder,
                 sakId,
-                vedtaksbrev.first.id,
+                varselbrev.brev.id,
                 brukerTokenInfo,
             )
         }

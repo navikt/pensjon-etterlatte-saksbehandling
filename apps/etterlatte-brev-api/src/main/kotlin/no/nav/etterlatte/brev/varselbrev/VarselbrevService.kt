@@ -25,7 +25,7 @@ internal class VarselbrevService(
         sakId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Pair<Brev, GenerellBrevData> {
+    ): VarselbrevResponse {
         val brevkode = hentBrevkodeForSak(sakId, brukerTokenInfo)
 
         return brevoppretter.opprettBrev(
@@ -34,10 +34,12 @@ internal class VarselbrevService(
             bruker = brukerTokenInfo,
             brevKode = { brevkode.redigering },
             brevtype = Brevtype.VARSEL,
-        ) { ManueltBrevData() }
+        ) { ManueltBrevData() }.let {
+            VarselbrevResponse(it.first, it.second, brevkode)
+        }
     }
 
-    suspend fun hentBrevkodeForSak(
+    private suspend fun hentBrevkodeForSak(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) = hentBrevkode(behandlingKlient.hentSak(sakId, brukerTokenInfo).sakType)
@@ -61,3 +63,5 @@ internal class VarselbrevService(
         brevData = { ManueltBrevData(it.innholdMedVedlegg.innhold()) },
     )
 }
+
+data class VarselbrevResponse(val brev: Brev, val generellBrevData: GenerellBrevData, val brevkoder: Brevkoder)

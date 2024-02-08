@@ -46,7 +46,7 @@ internal fun Route.varselbrevRoute(
                 logger.info("Oppretter varselbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
 
                 measureTimedValue {
-                    service.opprettVarselbrev(sakId, behandlingId, brukerTokenInfo).first
+                    service.opprettVarselbrev(sakId, behandlingId, brukerTokenInfo).brev
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(HttpStatusCode.Created, brev)

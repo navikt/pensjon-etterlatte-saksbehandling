@@ -157,19 +157,21 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
     fun oppdaterHendelseForSteg(
         hendelseId: UUID,
         steg: String,
-        info: Any? = null,
+        info: String,
     ) {
         datasource.transaction {
             queryOf(
                 """
                 UPDATE hendelse 
                 SET steg = :steg,
+                    info = COALESCE(info, '[]'::JSONB) || :ny_info::JSONB,
                     endret = now(),
                     versjon = versjon + 1
                 WHERE id = :id
                 """.trimIndent(),
                 mapOf(
                     "id" to hendelseId,
+                    "ny_info" to info,
                     "steg" to steg,
                 ),
             )

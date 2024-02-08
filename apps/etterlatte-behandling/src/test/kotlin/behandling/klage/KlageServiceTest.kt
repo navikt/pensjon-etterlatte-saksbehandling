@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -38,6 +39,7 @@ internal class KlageServiceTest {
     private val oppgaveServiceMock = mockk<OppgaveService>()
     private val hendelseDaoMock = mockk<HendelseDao>()
     private val klageHendelserServiceMock = mockk<IKlageHendelserService>()
+    private val vedtakKlient = mockk<VedtakKlient>()
 
     @BeforeEach
     fun setUp() {
@@ -50,6 +52,7 @@ internal class KlageServiceTest {
                 brevApiKlient = mockk(),
                 klageKlient = mockk(),
                 klageHendelser = klageHendelserServiceMock,
+                vedtakKlient = vedtakKlient,
             )
         every { hendelseDaoMock.klageHendelse(any(), any(), any(), any(), any(), any(), any()) } returns Unit
         every { klageHendelserServiceMock.sendKlageHendelseRapids(any(), any()) } returns Unit

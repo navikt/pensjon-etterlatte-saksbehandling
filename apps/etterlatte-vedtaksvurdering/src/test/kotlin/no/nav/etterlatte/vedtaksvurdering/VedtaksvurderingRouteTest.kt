@@ -23,11 +23,15 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.KlageVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -36,6 +40,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakSammendragDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -54,6 +59,7 @@ internal class VedtaksvurderingRouteTest {
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val vedtaksvurderingService: VedtaksvurderingService = mockk()
     private val vedtakBehandlingService: VedtakBehandlingService = mockk()
+    private val vedtakKlageService: VedtakKlageService = mockk()
     private val rapidService: VedtaksvurderingRapidService = mockk()
 
     @BeforeAll
@@ -666,6 +672,54 @@ internal class VedtaksvurderingRouteTest {
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any(), any())
                 vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(any())
+            }
+        }
+    }
+
+    @Test
+    fun `skal opprette vedtak for avvist klage`() {
+        val vedtakKlage = vedtakKlage()
+        coEvery { vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(any()) } returns vedtakKlage.id
+        every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns vedtakKlage
+
+        testApplication {
+            runServer(server) {
+                vedtaksvurderingRoute(
+                    vedtaksvurderingService,
+                    vedtakBehandlingService,
+                    rapidService,
+                    behandlingKlient,
+                )
+                klagevedtakRoute(
+                    vedtakKlageService,
+                    behandlingKlient,
+                )
+            }
+            val klageId = UUID.randomUUID()
+            val klageVedtakDto =
+                KlageVedtakDto(
+                    klageId,
+                    123L,
+                    SakType.OMSTILLINGSSTOENAD,
+                    Folkeregisteridentifikator.of("04417103428"),
+                    objectMapper.createObjectNode(),
+                    "enheten",
+                )
+
+            val vedtakId: Long =
+                client.post("/api/vedtak/klage/$klageId/lagre-vedtak") {
+                    header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                    header(HttpHeaders.Authorization, "Bearer $token")
+                    setBody(klageVedtakDto.toJson())
+                }.let {
+                    it.status shouldBe HttpStatusCode.OK
+                    deserialize<Long>(it.bodyAsText())
+                }
+            vedtakId shouldBe vedtakKlage.id
+
+            coVerify(exactly = 1) {
+                behandlingKlient.harTilgangTilBehandling(any(), any(), any())
+                vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klageVedtakDto)
             }
         }
     }

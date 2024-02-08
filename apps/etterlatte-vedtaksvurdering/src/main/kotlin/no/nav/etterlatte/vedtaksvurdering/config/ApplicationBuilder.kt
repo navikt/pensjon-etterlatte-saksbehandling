@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.libs.ktor.setReady
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
 import no.nav.etterlatte.rapidsandrivers.getRapidEnv
@@ -26,6 +27,7 @@ import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRapidService
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingService
 import no.nav.etterlatte.vedtaksvurdering.automatiskBehandlingRoutes
+import no.nav.etterlatte.vedtaksvurdering.klagevedtakRoute
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.BeregningKlientImpl
 import no.nav.etterlatte.vedtaksvurdering.klienter.SamKlientImpl
@@ -80,6 +82,11 @@ class ApplicationBuilder {
         VedtakTilbakekrevingService(
             repository = VedtaksvurderingRepository(dataSource),
         )
+    private val vedtakKlageService =
+        VedtakKlageService(
+            repository = VedtaksvurderingRepository(dataSource),
+        )
+
     private val vedtakSamordningService =
         VedtakSamordningService(
             repository = VedtaksvurderingRepository(dataSource),
@@ -108,6 +115,7 @@ class ApplicationBuilder {
                     automatiskBehandlingRoutes(automatiskBehandlingService, behandlingKlient)
                     samordningsvedtakRoute(vedtakSamordningService)
                     tilbakekrevingvedtakRoute(vedtakTilbakekrevingService, behandlingKlient)
+                    klagevedtakRoute(vedtakKlageService, behandlingKlient)
                     metrikkerJob.schedule().also { addShutdownHook(it) }
                 }
             }

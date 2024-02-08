@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.KlageVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
@@ -26,6 +27,7 @@ import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.AuthorizationPlugin
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import no.nav.etterlatte.vedtaksvurdering.klienter.BehandlingKlient
 import java.time.LocalDate
 
@@ -270,6 +272,24 @@ fun Route.tilbakekrevingvedtakRoute(
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Underkjenner vedtak for tilbakekreving=$behandlingId")
                 call.respond(service.underkjennVedtak(behandlingId))
+            }
+        }
+    }
+}
+
+fun Route.klagevedtakRoute(
+    service: VedtakKlageService,
+    behandlingKlient: BehandlingKlient,
+) {
+    val logger = application.log
+
+    // TODO api eller ikke api... Ok path?
+    route("/api/vedtak/klage/{$BEHANDLINGID_CALL_PARAMETER}") {
+        post("/lagre-vedtak") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                val dto = call.receive<KlageVedtakDto>()
+                logger.info("Oppretter vedtak for klage=${dto.klageId}")
+                call.respond(service.opprettEllerOppdaterVedtakOmAvvisning(dto))
             }
         }
     }

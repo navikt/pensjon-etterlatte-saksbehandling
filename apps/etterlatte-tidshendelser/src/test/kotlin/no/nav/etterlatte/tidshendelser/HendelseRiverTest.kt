@@ -1,8 +1,7 @@
 package no.nav.etterlatte.tidshendelser
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
@@ -11,16 +10,26 @@ import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.YearMonth
+import javax.sql.DataSource
+import kotlin.random.Random
 
+@ExtendWith(DatabaseExtension::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HendelseRiverTest {
-    private val hendelseDao = mockk<HendelseDao>()
+    private val dataSource: DataSource = DatabaseExtension.dataSource
+    private val hendelseDao = HendelseDao(dataSource)
+    private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
+
     private val inspector = TestRapid().apply { HendelseRiver(this, hendelseDao) }
 
     @Test
     fun `skal lese melding og sjekke loepende ytelse`() {
-        val hendelseId = UUID.randomUUID()
-        every { hendelseDao.oppdaterHendelseForSteg(hendelseId, "VURDERT_LOPENDE_YTELSE") } returns Unit
+        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.now())
+        hendelseDao.opprettHendelserForSaker(jobb.id, listOf(Random.nextLong(9999)), Steg.IDENTIFISERT_SAK)
+        val hendelseId = hendelseDao.hentHendelserForJobb(jobb.id).first().id
 
         val melding =
             JsonMessage.newMessage(
@@ -35,6 +44,9 @@ class HendelseRiverTest {
 
         inspector.apply { sendTestMessage(melding.toJson()) }
 
-        verify { hendelseDao.oppdaterHendelseForSteg(hendelseId, "VURDERT_LOPENDE_YTELSE") }
+        with(hendelseDao.hentHendelserForJobb(jobb.id).first()) {
+            this.steg shouldBe "VURDERT_LOPENDE_YTELSE"
+            this.info shouldNotBe null
+        }
     }
 }

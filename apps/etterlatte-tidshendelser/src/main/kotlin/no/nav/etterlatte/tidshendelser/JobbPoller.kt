@@ -2,13 +2,11 @@ package no.nav.etterlatte.tidshendelser
 
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
-import no.nav.etterlatte.libs.jobs.LeaderElection
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
 
 class JobbPollerTask(
-    private val leaderElection: LeaderElection,
     private val initialDelaySeconds: Long,
     private val periode: Duration,
     private val jobbPoller: JobbPoller,
@@ -24,9 +22,7 @@ class JobbPollerTask(
             period = periode.toMillis(),
             loggerInfo = LoggerInfo(logger = logger),
         ) {
-            if (leaderElection.isLeader()) {
-                jobbPoller.poll()
-            }
+            jobbPoller.poll()
         }
     }
 }

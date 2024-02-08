@@ -108,7 +108,9 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
                     : saksbehandlerPaaOppgave.saksbehandlerIdent}
                 </Tekst>
               ) : (
-                <Alert variant="warning">Ingen saksbehandler har tatt denne oppgaven</Alert>
+                <Alert size="small" variant="warning">
+                  Ingen saksbehandler har tatt denne oppgaven
+                </Alert>
               )}
             </>
           )

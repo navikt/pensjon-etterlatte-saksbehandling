@@ -65,7 +65,7 @@ export const ToggleMinOppgaveliste = () => {
         : [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING]
     hentOppgaverStatusFetch({
       oppgavestatusFilter: statusValg,
-      minOppgavelisteIdent: oppgaveListeValg === 'MinOppgaveliste' ? innloggetSaksbehandler.ident : undefined,
+      minOppgavelisteIdent: oppgaveListeValg === 'MinOppgaveliste',
     })
 
     setFilter({
@@ -159,7 +159,13 @@ export const ToggleMinOppgaveliste = () => {
               <ValgWrapper>
                 <VelgOppgavestatuser
                   value={filter.oppgavestatusFilter}
-                  onChange={(oppgavestatusFilter) => setFilter({ ...filter, oppgavestatusFilter })}
+                  onChange={(oppgavestatusFilter) => {
+                    hentOppgaverStatusFetch({
+                      oppgavestatusFilter: oppgavestatusFilter,
+                      minOppgavelisteIdent: true,
+                    })
+                    setFilter({ ...filter, oppgavestatusFilter })
+                  }}
                 />
               </ValgWrapper>
               <Oppgavelista

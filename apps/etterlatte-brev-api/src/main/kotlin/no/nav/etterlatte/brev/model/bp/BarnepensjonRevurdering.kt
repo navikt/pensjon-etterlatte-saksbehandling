@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
 import no.nav.etterlatte.brev.model.BrevData
-import no.nav.etterlatte.brev.model.EndringBrevData
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
@@ -24,7 +23,7 @@ data class BarnepensjonRevurdering(
     val bosattUtland: Boolean,
     val kunNyttRegelverk: Boolean,
     val harFlereUtbetalingsperioder: Boolean,
-) : EndringBrevData() {
+) : BrevData() {
     companion object {
         fun fra(
             innhold: InnholdMedVedlegg,
@@ -62,7 +61,7 @@ data class BarnepensjonRevurdering(
 
 data class BarnepensjonRevurderingRedigerbartUtfall(
     val erEtterbetaling: Boolean,
-) : EndringBrevData() {
+) : BrevData() {
     companion object {
         fun fra(etterbetaling: EtterbetalingDTO?): BrevData {
             return BarnepensjonRevurderingRedigerbartUtfall(

@@ -119,7 +119,10 @@ internal class StartMigreringRiverIntegrationTest {
                             rapidsConnection = this,
                             penKlient =
                                 mockk<PenKlient>()
-                                    .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN },
+                                    .also {
+                                        every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN
+                                        every { runBlocking { it.sakMedUfoere(any()) } } returns emptyList()
+                                    },
                             pesysRepository = repository,
                             featureToggleService = featureToggleService,
                             verifiserer =
@@ -189,8 +192,11 @@ internal class StartMigreringRiverIntegrationTest {
                 )
             val penKlient =
                 mockk<PenKlient>()
-                    .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN }
-                    .also { every { runBlocking { it.opphoerSak(any()) } } just runs }
+                    .also {
+                        every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN
+                        every { runBlocking { it.opphoerSak(any()) } } just runs
+                        every { runBlocking { it.sakMedUfoere(any()) } } returns emptyList()
+                    }
 
             val inspector =
                 TestRapid()
@@ -309,8 +315,15 @@ internal class StartMigreringRiverIntegrationTest {
                 )
             val penKlient =
                 mockk<PenKlient>()
-                    .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN }
-                    .also { every { runBlocking { it.opphoerSak(any()) } } just runs }
+                    .also {
+                        every {
+                            runBlocking {
+                                it.hentSak(any(), any())
+                            }
+                        } returns responsFraPEN
+                        every { runBlocking { it.opphoerSak(any()) } } just runs
+                        every { runBlocking { it.sakMedUfoere(any()) } } returns emptyList()
+                    }
 
             val inspector =
                 TestRapid()

@@ -36,5 +36,10 @@ class OpprettJournalfoerOgDistribuerRiver(
         sakId: Long,
         brevKode: Brevkoder,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = opprettFerdigstillJournalfoerOgDistribuerBrev.opprettJournalfoerOgDistribuer(sakId, brevKode, brukerTokenInfo)
+    ) = opprettFerdigstillJournalfoerOgDistribuerBrev.opprettJournalfoerOgDistribuer(
+        sakId,
+        brevKode,
+        brukerTokenInfo,
+        null,
+    )
 }

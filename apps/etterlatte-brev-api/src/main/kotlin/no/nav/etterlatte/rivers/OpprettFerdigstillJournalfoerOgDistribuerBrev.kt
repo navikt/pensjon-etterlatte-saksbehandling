@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Fagsaksystem
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class OpprettFerdigstillJournalfoerOgDistribuerBrev(
     private val brevoppretter: Brevoppretter,
@@ -25,13 +26,14 @@ class OpprettFerdigstillJournalfoerOgDistribuerBrev(
         sakId: Long,
         brevKode: Brevkoder,
         brukerTokenInfo: BrukerTokenInfo,
+        behandlingId: UUID?,
     ) {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
         val brevOgData =
             retryOgPakkUt {
                 brevoppretter.opprettBrev(
                     sakId = sakId,
-                    behandlingId = null,
+                    behandlingId = behandlingId,
                     bruker = brukerTokenInfo,
                     brevKode = { brevKode.redigering },
                     brevtype = brevKode.redigering.brevtype,

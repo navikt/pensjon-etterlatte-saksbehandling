@@ -61,7 +61,7 @@ class HendelsePoller(
 
                     hendelsePublisher.publish(hendelse = it, jobb = jobsById[it.jobbId]!!)
 
-                    hendelseDao.oppdaterHendelseStatus(it, HendelseStatus.SENDT)
+                    hendelseDao.oppdaterHendelseStatus(it.id, HendelseStatus.SENDT)
                 }
             }
         }

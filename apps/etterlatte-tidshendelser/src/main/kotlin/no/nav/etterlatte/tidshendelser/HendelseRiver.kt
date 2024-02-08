@@ -58,6 +58,9 @@ class HendelseRiver(
             if (steg == "VURDERT_LOEPENDE_YTELSE") {
                 val loependeYtelse = packet[HENDELSE_DATA_KEY].asBoolean()
                 logger.info("Sak $sakId har løpende ytelse? $loependeYtelse")
+            } else if (steg == "OPPGAVE_OPPRETTET") {
+                logger.info("Ferdigstiller hendelse")
+                hendelseDao.oppdaterHendelseStatus(hendelseIdUUID, HendelseStatus.FERDIG)
             }
         }
     }

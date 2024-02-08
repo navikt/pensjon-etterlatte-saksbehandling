@@ -492,13 +492,9 @@ internal class StartMigreringRiverIntegrationTest {
                 ).toJson(),
             )
             with(inspector.inspektør.message(0)) {
-                val kanAutomatiskGjenopprettes =
-                    objectMapper.treeToValue(
-                        this[HENDELSE_DATA_KEY],
-                        MigreringRequest::class.java,
-                    ).kanAutomatiskGjenopprettes
-                assertFalse(kanAutomatiskGjenopprettes)
+                assertEquals(EventNames.FEILA.lagEventnameForType(), get(EVENT_NAME_KEY).textValue())
             }
+            assertEquals(Migreringsstatus.VERIFISERING_FEILA, repository.hentStatus(pesysid))
         }
     }
 

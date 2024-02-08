@@ -42,12 +42,9 @@ internal class Verifiserer(
                 // Vi kjører strengt fortrolig til sist.
                 feilSomAvbryter.add(StrengtFortroligPesys)
             }
-            val finnesIPdlFeil = sjekkAtPersonerFinsIPDL(it)
-            if (finnesIPdlFeil.any { finnes -> finnes is SoekerErDoed }) {
-                feilSomAvbryter.addAll(finnesIPdlFeil)
-            } else {
-                feilSomMedfoererManuell.addAll(finnesIPdlFeil)
-            }
+            val finnesIPdlFeil = pesonerFinnesIPdlEllerSoekerErDoed(it)
+            feilSomAvbryter.addAll(finnesIPdlFeil)
+
             val soeker = personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()
 
             if (soeker != null) {
@@ -98,7 +95,7 @@ internal class Verifiserer(
             false -> emptyList()
         }
 
-    private fun sjekkAtPersonerFinsIPDL(request: MigreringRequest): List<Verifiseringsfeil> {
+    private fun pesonerFinnesIPdlEllerSoekerErDoed(request: MigreringRequest): List<Verifiseringsfeil> {
         val personer = mutableListOf(Pair(PersonRolle.BARN, request.soeker))
         request.avdoedForelder.forEach { personer.add(Pair(PersonRolle.AVDOED, it.ident)) }
         request.gjenlevendeForelder?.let { personer.add(Pair(PersonRolle.GJENLEVENDE, it)) }

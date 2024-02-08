@@ -62,23 +62,17 @@ export const SendTilAttesteringModal = ({
       {isSuccess(oppgaveForBehandlingStatus) && (
         <>
           {!saksbehandlerPaaOppgave?.saksbehandlerIdent ? (
-            <Alert variant="error">
+            <Alert size="small" variant="warning">
               Oppgaven til denne behandlingen må tildeles en saksbehandler før den kan sende til attestering
             </Alert>
+          ) : saksbehandlerPaaOppgave?.saksbehandlerIdent === innloggetSaksbehandler.ident ? (
+            <Button variant="primary" onClick={klikkAttester}>
+              {handlinger.SEND_TIL_ATTESTERING.navn}
+            </Button>
           ) : (
-            <>
-              {saksbehandlerPaaOppgave?.saksbehandlerIdent === innloggetSaksbehandler.ident ? (
-                <>
-                  <Button variant="primary" onClick={klikkAttester}>
-                    {handlinger.SEND_TIL_ATTESTERING.navn}
-                  </Button>
-                </>
-              ) : (
-                <Alert variant="error">
-                  Oppgaven til denne behandlingen må tildeles deg før du kan sende til attestering
-                </Alert>
-              )}
-            </>
+            <Alert size="small" variant="warning">
+              Oppgaven til denne behandlingen må tildeles deg før du kan sende til attestering
+            </Alert>
           )}
         </>
       )}

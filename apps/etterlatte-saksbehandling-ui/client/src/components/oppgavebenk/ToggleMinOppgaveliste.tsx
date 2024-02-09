@@ -51,9 +51,7 @@ export const ToggleMinOppgaveliste = () => {
   }
 
   const hentAlleSaksbehandlereIEnhet = () => {
-    const testEnheter = ['4815', '4808', '4817']
-    testEnheter.map((enhet) => hentSaksbehandlereIEnhet({ enhet }))
-    //innloggetSaksbehandler.enheter.map((enhet) => hentSaksbehandlereIEnhet({ enhet: enhet.enhetId }))
+    innloggetSaksbehandler.enheter.map((enhet) => hentSaksbehandlereIEnhet({ enhet: enhet.enhetId }))
   }
 
   useEffect(() => {

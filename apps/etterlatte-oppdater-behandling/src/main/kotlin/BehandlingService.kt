@@ -226,7 +226,7 @@ class BehandlingServiceImpl(
         frist: Tidspunkt?,
     ): UUID {
         return runBlocking {
-            behandlingKlient.post("$url/oppgaver/$sakId/opprett") {
+            behandlingKlient.post("$url/oppgaver/sak/$sakId/opprett") {
                 contentType(ContentType.Application.Json)
                 setBody(
                     NyOppgaveDto(

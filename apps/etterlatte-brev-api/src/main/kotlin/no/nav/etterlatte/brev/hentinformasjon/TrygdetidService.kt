@@ -50,6 +50,7 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
             // vi har en overstyrt trygdetid fra pesys, og vi kan dermed ikke gi ut noe detaljert grunnlag på hvordan
             // vi har kommet frem til trygdetiden
             return Trygdetid(
+                ident = trygdetidgrunnlagForAnvendtTrygdetid.ident,
                 aarTrygdetid = anvendtTrygdetid,
                 prorataBroek = prorataBroek,
                 maanederTrygdetid = 0,
@@ -68,6 +69,7 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
             )
 
         return Trygdetid(
+            ident = trygdetidgrunnlagForAnvendtTrygdetid.ident,
             aarTrygdetid = anvendtTrygdetid,
             maanederTrygdetid = 0,
             prorataBroek = prorataBroek,

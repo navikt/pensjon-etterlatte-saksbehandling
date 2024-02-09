@@ -53,6 +53,7 @@ internal class BarnepensjonInnvilgetDTOTest {
                     ),
                 trygdetid =
                     Trygdetid(
+                        ident = "",
                         aarTrygdetid = 10,
                         maanederTrygdetid = 0,
                         perioder = listOf(),

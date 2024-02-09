@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
+import no.nav.etterlatte.brev.behandling.Avdoed
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
@@ -41,13 +42,26 @@ data class BarnepensjonInnvilgelseForeldreloes(
             utlandstilknytning: UtlandstilknytningType?,
             brevutfall: BrevutfallDto,
             vedtattIPesys: Boolean,
+            avdoede: List<Avdoed>,
         ): BarnepensjonInnvilgelseForeldreloes {
             val beregningsperioder =
                 barnepensjonBeregningsperioder(utbetalingsinfo)
 
             return BarnepensjonInnvilgelseForeldreloes(
                 innhold = innhold.innhold(),
-                beregning = barnepensjonBeregning(innhold, utbetalingsinfo, grunnbeloep, beregningsperioder, trygdetid),
+                beregning =
+                    barnepensjonBeregning(
+                        innhold,
+                        utbetalingsinfo,
+                        grunnbeloep,
+                        beregningsperioder,
+                        trygdetid,
+                    ).copy(
+                        erForeldreloes = true,
+                        bruktAvdoed =
+                            avdoede.find { it.fnr.value == trygdetid.ident }?.navn
+                                ?: throw ManglerAvdoedBruktTilTrygdetidExceoption(),
+                    ),
                 etterbetaling =
                     etterbetaling
                         ?.let { dto -> Etterbetaling.fraBarnepensjonBeregningsperioder(dto, beregningsperioder) },
@@ -81,3 +95,6 @@ data class BarnepensjonForeldreloesRedigerbar(
             )
     }
 }
+
+class ManglerAvdoedBruktTilTrygdetidExceoption() :
+    IllegalArgumentException("Mangler avdoed som er brukt til beregning av trygdetid")

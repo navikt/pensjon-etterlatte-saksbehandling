@@ -651,7 +651,7 @@ internal class VedtaksbrevServiceTest {
                 PersonerISak(
                     Innsender(Foedselsnummer("11057523044")),
                     Soeker("GRØNN", "MELLOMNAVN", "KOPP", Foedselsnummer(soeker)),
-                    listOf(Avdoed("DØD TESTPERSON", LocalDate.now().minusMonths(1))),
+                    listOf(Avdoed(Foedselsnummer(""), "DØD TESTPERSON", LocalDate.now().minusMonths(1))),
                     verge = null,
                 ),
             behandlingId = BEHANDLING_ID,

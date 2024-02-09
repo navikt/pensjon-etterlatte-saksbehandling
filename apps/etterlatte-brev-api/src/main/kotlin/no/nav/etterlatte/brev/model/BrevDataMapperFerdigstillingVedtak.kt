@@ -92,18 +92,18 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
 
         if (generellBrevData.erForeldreloes()) {
             barnepensjonInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
+        } else {
+            BarnepensjonOmregnetNyttRegelverk.fra(
+                innhold = innholdMedVedlegg,
+                erUnder18Aar = generellBrevData.personerISak.soeker.under18,
+                utbetalingsinfo = utbetalingsinfo.await(),
+                etterbetaling = etterbetaling.await(),
+                trygdetid = requireNotNull(trygdetid.await()),
+                grunnbeloep = grunnbeloep.await(),
+                migreringRequest = automatiskMigreringRequest,
+                utlandstilknytning = generellBrevData.utlandstilknytning?.type,
+            )
         }
-
-        BarnepensjonOmregnetNyttRegelverk.fra(
-            innhold = innholdMedVedlegg,
-            erUnder18Aar = generellBrevData.personerISak.soeker.under18,
-            utbetalingsinfo = utbetalingsinfo.await(),
-            etterbetaling = etterbetaling.await(),
-            trygdetid = requireNotNull(trygdetid.await()),
-            grunnbeloep = grunnbeloep.await(),
-            migreringRequest = automatiskMigreringRequest,
-            utlandstilknytning = generellBrevData.utlandstilknytning?.type,
-        )
     }
 
     private suspend fun barnepensjonRevurdering(
@@ -152,18 +152,20 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
                 requireNotNull(grunnbeloep.await()),
                 generellBrevData.utlandstilknytning?.type,
                 requireNotNull(brevutfall.await()),
-                vedtattIPesys = generellBrevData.loependeIPesys(),
+                generellBrevData.loependeIPesys(),
+                generellBrevData.personerISak.avdoede,
+            )
+        } else {
+            BarnepensjonInnvilgelse.fra(
+                innholdMedVedlegg,
+                utbetalingsinfo.await(),
+                etterbetaling.await(),
+                requireNotNull(trygdetid.await()),
+                requireNotNull(grunnbeloep.await()),
+                generellBrevData.utlandstilknytning?.type,
+                requireNotNull(brevutfall.await()),
             )
         }
-        BarnepensjonInnvilgelse.fra(
-            innholdMedVedlegg,
-            utbetalingsinfo.await(),
-            etterbetaling.await(),
-            requireNotNull(trygdetid.await()),
-            requireNotNull(grunnbeloep.await()),
-            generellBrevData.utlandstilknytning?.type,
-            requireNotNull(brevutfall.await()),
-        )
     }
 
     private fun barnepensjonAvslag(

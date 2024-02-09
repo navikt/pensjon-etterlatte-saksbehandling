@@ -49,6 +49,7 @@ data class GenerellBrevData(
 }
 
 data class Trygdetid(
+    val ident: String,
     val aarTrygdetid: Int,
     val prorataBroek: IntBroek?,
     val maanederTrygdetid: Int,

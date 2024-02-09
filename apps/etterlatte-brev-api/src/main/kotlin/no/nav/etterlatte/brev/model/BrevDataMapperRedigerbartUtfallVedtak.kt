@@ -87,13 +87,13 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                 generellBrevData,
                 etterbetaling.await(),
             )
+        } else {
+            BarnepensjonInnvilgelseRedigerbartUtfall.fra(
+                generellBrevData,
+                utbetalingsinfo.await(),
+                etterbetaling.await(),
+            )
         }
-
-        BarnepensjonInnvilgelseRedigerbartUtfall.fra(
-            generellBrevData,
-            utbetalingsinfo.await(),
-            etterbetaling.await(),
-        )
     }
 
     private suspend fun barnepensjonEndring(

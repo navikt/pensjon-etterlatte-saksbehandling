@@ -243,6 +243,7 @@ internal fun Route.oppgaveRoutes(
                             nyOppgaveDto.oppgaveKilde,
                             nyOppgaveDto.oppgaveType,
                             nyOppgaveDto.merknad,
+                            nyOppgaveDto.frist,
                         )
                     },
                 )

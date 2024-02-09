@@ -29,8 +29,8 @@ import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
-import java.time.YearMonth
 import java.util.UUID
 
 interface BehandlingService {
@@ -71,10 +71,10 @@ interface BehandlingService {
 
     fun opprettOppgave(
         sakId: Long,
-        behandlingsmaaned: YearMonth,
         oppgaveType: OppgaveType,
         referanse: String? = null,
         merknad: String? = null,
+        frist: Tidspunkt? = null,
     ): UUID
 }
 
@@ -220,10 +220,10 @@ class BehandlingServiceImpl(
 
     override fun opprettOppgave(
         sakId: Long,
-        behandlingsmaaned: YearMonth,
         oppgaveType: OppgaveType,
         referanse: String?,
         merknad: String?,
+        frist: Tidspunkt?,
     ): UUID {
         return runBlocking {
             behandlingKlient.post("$url/oppgaver/$sakId/opprett") {
@@ -234,6 +234,7 @@ class BehandlingServiceImpl(
                         oppgaveType,
                         merknad,
                         referanse,
+                        frist,
                     ),
                 )
             }.body<ObjectNode>().let {

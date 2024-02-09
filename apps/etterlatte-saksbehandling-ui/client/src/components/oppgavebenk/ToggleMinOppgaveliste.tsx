@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/Tilgangsmelding'
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -27,9 +27,7 @@ export const ToggleMinOppgaveliste = () => {
       navigate('/')
     }
   }, [oppgaveListeValg])
-  const location = useLocation()
 
-  console.log('renders toggle: ', location.pathname)
   return (
     <Container>
       <TabsWidth value={oppgaveListeValg} onChange={(e) => setOppgaveListeValg(e as OppgavelisteToggle)}>

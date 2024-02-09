@@ -72,7 +72,7 @@ internal class BehandlingInfoRoutesTest {
                 behandlingsstatusService,
             )
 
-        coEvery { applicationContext.navAnsattKlient.hentEnhetForSaksbehandler(any()) } returns
+        coEvery { applicationContext.navAnsattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
             )

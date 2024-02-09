@@ -1,8 +1,6 @@
 export interface ISaksbehandler {
   ident: string
   navn: string
-  fornavn: string
-  etternavn: string
   enheter: IEnhet[]
   kanAttestere: boolean
   leseTilgang: boolean

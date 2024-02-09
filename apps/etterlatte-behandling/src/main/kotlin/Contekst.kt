@@ -81,7 +81,7 @@ class SaksbehandlerMedEnheterOgRoller(
         } else {
             try {
                 runBlocking {
-                    navAnsattKlient.hentEnhetForSaksbehandler(name()).map { it.id }
+                    navAnsattKlient.hentEnheterForSaksbehandler(name()).map { it.id }
                 }
             } catch (e: Exception) {
                 throw HentEnhetException("Henting av enheter feilet. Sjekk on-prem status(fss)", e)

@@ -72,7 +72,7 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                         it to
                             scope.async(
                                 subCoroutineExceptionHandler,
-                            ) { context.navAnsattKlient.hentEnhetForSaksbehandler(it) }
+                            ) { context.navAnsattKlient.hentEnheterForSaksbehandler(it) }
                     }
                     .mapNotNull {
                         try {

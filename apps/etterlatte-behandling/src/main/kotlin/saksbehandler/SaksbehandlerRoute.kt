@@ -8,6 +8,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
 
 val ENHET_PATH_PARAMETER = "enhet"
@@ -21,6 +22,14 @@ internal fun Route.saksbehandlerRoutes(saksbehandlerService: SaksbehandlerServic
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/api") {
+        get("/saksbehandlere/innlogget") {
+            val saksbehandler =
+                inTransaction {
+                    saksbehandlerService.hentKomplettSaksbehandler(brukerTokenInfo.ident())
+                }
+            call.respond(saksbehandler)
+        }
+
         get("/saksbehandlere/enhet/{$ENHET_PATH_PARAMETER}") {
             val saksbehandlere =
                 inTransaction {

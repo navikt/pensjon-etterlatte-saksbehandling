@@ -52,7 +52,7 @@ class BrukerServiceTest {
         val service = klient()
 
         runBlocking {
-            val resultat = service.hentEnhetForSaksbehandler(testNavIdent)
+            val resultat = service.hentEnheterForSaksbehandler(testNavIdent)
 
             resultat.size shouldBeExactly 3
 
@@ -70,7 +70,7 @@ class BrukerServiceTest {
         val service = klient()
 
         runBlocking {
-            val resultat = harTilgangTilEnhet(service.hentEnhetForSaksbehandler(testNavIdent), "id1")
+            val resultat = harTilgangTilEnhet(service.hentEnheterForSaksbehandler(testNavIdent), "id1")
 
             resultat shouldBe true
         }
@@ -81,7 +81,7 @@ class BrukerServiceTest {
         val service = klient()
 
         runBlocking {
-            val resultat = harTilgangTilEnhet(service.hentEnhetForSaksbehandler(testNavIdent), "id4")
+            val resultat = harTilgangTilEnhet(service.hentEnheterForSaksbehandler(testNavIdent), "id4")
 
             resultat shouldBe false
         }

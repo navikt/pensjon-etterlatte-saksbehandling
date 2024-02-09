@@ -5,9 +5,9 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.extension.AfterAllCallback
-import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace.GLOBAL
+import org.junit.jupiter.api.extension.ParameterContext
+import org.junit.jupiter.api.extension.ParameterResolver
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.PostgreSQLContainer
 import java.io.PrintWriter
@@ -19,26 +19,23 @@ import javax.sql.DataSource
  * Det tar veldig mye tid å kjøre opp stadig nye Postgres-containere og kjøre Flyway migreringer.
  * Denne extensionen kjører opp èn instans, som så gjenbrukes av de som måtte ønske det.
  */
-object DatabaseExtension : BeforeAllCallback, AfterAllCallback, ExtensionContext.Store.CloseableResource {
-    private val logger: org.slf4j.Logger = LoggerFactory.getLogger(DatabaseExtension::class.java)
+open class DatabaseExtension : AfterAllCallback, ExtensionContext.Store.CloseableResource, ParameterResolver {
+    companion object {
+        val logger: org.slf4j.Logger = LoggerFactory.getLogger(DatabaseExtension::class.java)
+        val postgreSQLContainer =
+            PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
+                .also { logger.info("Starting shared Postgres testcontainer") }
+                .also { it.start() }
 
-    private val postgreSQLContainer =
-        PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-            .also { logger.info("Starting shared Postgres testcontainer") }
-            .also { it.start() }
-
-    private val ds: DataSource =
-        DataSourceBuilder.createDataSource(
-            jdbcUrl = postgreSQLContainer.jdbcUrl,
-            username = postgreSQLContainer.username,
-            password = postgreSQLContainer.password,
-        ).apply { migrate() }
+        val ds: DataSource =
+            DataSourceBuilder.createDataSource(
+                jdbcUrl = postgreSQLContainer.jdbcUrl,
+                username = postgreSQLContainer.username,
+                password = postgreSQLContainer.password,
+            ).apply { migrate() }
+    }
 
     private val connections = mutableListOf<Connection>()
-
-    override fun beforeAll(context: ExtensionContext) {
-        context.root.getStore(GLOBAL).put("postgres-testdb", this)
-    }
 
     /**
      * Ikke gå tom for tilkoblinger, så kast ut alle som er ferdige med jobben sin
@@ -52,7 +49,7 @@ object DatabaseExtension : BeforeAllCallback, AfterAllCallback, ExtensionContext
         connections.clear()
     }
 
-    val dataSource: DataSource
+    private val dataSource: DataSource
         get() = DataSourceWrapper(ds, connections::add)
 
     /**
@@ -67,16 +64,19 @@ object DatabaseExtension : BeforeAllCallback, AfterAllCallback, ExtensionContext
      * Sikre at hver testklasse starter med en fresh database
      */
     fun resetDb() {
-        logger.info("Resetting database...")
-        dataSource.connection.use {
-            it.prepareStatement(
-                """
-                TRUNCATE hendelse CASCADE;
-                TRUNCATE jobb CASCADE;
-                ALTER SEQUENCE jobb_id_seq RESTART WITH 1;
-                """.trimIndent(),
-            ).execute()
-        }
+        (
+            this::class.java.annotations
+                .find { it.annotationClass == ResetDatabaseStatement::class } as? ResetDatabaseStatement
+        )
+            ?.let { annotation ->
+                ds.connection.use {
+                    logger.info("Resetting database...")
+                    it.createStatement().execute(annotation.statement)
+                }
+            }
+            ?: {
+                logger.info("Skipper reset av database, @ResetDatabaseStatement ikke funnet.")
+            }
     }
 
     /**
@@ -108,4 +108,39 @@ object DatabaseExtension : BeforeAllCallback, AfterAllCallback, ExtensionContext
             password: String?,
         ): Connection = datasource.getConnection(username, password).also { collector.invoke(it) }
     }
+
+    override fun supportsParameter(
+        parameterContext: ParameterContext,
+        extensionContext: ExtensionContext,
+    ): Boolean {
+        return parameterContext.parameter?.type == DataSource::class.java ||
+            parameterContext.parameter?.type == ResetDb::class.java
+    }
+
+    override fun resolveParameter(
+        parameterContext: ParameterContext,
+        extensionContext: ExtensionContext,
+    ): Any {
+        if (parameterContext.parameter?.type == DataSource::class.java) {
+            return dataSource
+        } else if (parameterContext.parameter?.type == ResetDb::class.java) {
+            return ResetDbImpl(this)
+        } else {
+            throw IllegalArgumentException("Kan ikke resolve parameter av type ${parameterContext.parameter?.type}")
+        }
+    }
 }
+
+interface ResetDb {
+    fun invoke()
+}
+
+private class ResetDbImpl(private val extension: DatabaseExtension) : ResetDb {
+    override fun invoke() {
+        extension.resetDb()
+    }
+}
+
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.CLASS)
+annotation class ResetDatabaseStatement(val statement: String)

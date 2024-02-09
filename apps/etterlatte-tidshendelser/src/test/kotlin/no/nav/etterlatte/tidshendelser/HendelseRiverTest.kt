@@ -16,10 +16,9 @@ import java.time.YearMonth
 import javax.sql.DataSource
 import kotlin.random.Random
 
-@ExtendWith(DatabaseExtension::class)
+@ExtendWith(TidshendelserDatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class HendelseRiverTest {
-    private val dataSource: DataSource = DatabaseExtension.dataSource
+class HendelseRiverTest(dataSource: DataSource) {
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
 

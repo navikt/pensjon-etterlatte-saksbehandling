@@ -13,10 +13,9 @@ import java.time.Month
 import java.time.YearMonth
 import javax.sql.DataSource
 
-@ExtendWith(DatabaseExtension::class)
+@ExtendWith(TidshendelserDatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class JobbPollerIntegrationTest {
-    private val dataSource: DataSource = DatabaseExtension.dataSource
+class JobbPollerIntegrationTest(dataSource: DataSource, private val resetDb: ResetDb) {
     private val aldersovergangerService = mockk<AldersovergangerService>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
@@ -25,7 +24,7 @@ class JobbPollerIntegrationTest {
     @AfterEach
     fun afterEach() {
         clearAllMocks()
-        DatabaseExtension.resetDb()
+        resetDb.invoke()
     }
 
     @Test

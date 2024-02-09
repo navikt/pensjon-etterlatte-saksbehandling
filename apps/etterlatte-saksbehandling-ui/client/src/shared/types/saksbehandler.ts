@@ -1,13 +1,8 @@
 export interface ISaksbehandler {
   ident: string
   navn: string
-  enheter: IEnhet[]
+  enheter: Array<string>
   kanAttestere: boolean
   leseTilgang: boolean
   skriveTilgang: boolean
-}
-
-interface IEnhet {
-  enhetId: string
-  navn: string
 }

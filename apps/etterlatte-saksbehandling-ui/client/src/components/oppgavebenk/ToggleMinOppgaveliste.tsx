@@ -51,7 +51,7 @@ export const ToggleMinOppgaveliste = () => {
   }
 
   const hentAlleSaksbehandlereIEnhet = () => {
-    innloggetSaksbehandler.enheter.map((enhet) => hentSaksbehandlereIEnhet({ enhet: enhet.enhetId }))
+    innloggetSaksbehandler.enheter.map((enhet) => hentSaksbehandlereIEnhet({ enhet: enhet }))
   }
 
   useEffect(() => {
@@ -69,6 +69,7 @@ export const ToggleMinOppgaveliste = () => {
     // Utrolig hacky måte å løse det på...
     // Problemet er at en saksbehandler kan leve i flere enhet, så for å forhindre at det blir
     // duplikate saksbehandlere, må man konvertere til et Set og konvertere det tilbake til array
+    // TODO: sortere alfabetisk
     if (isSuccess(saksbehandlereIEnhet)) {
       const saksbehandlereSomJSONString: string[] = []
       saksbehandlereIEnhet.data.map((behandler) => saksbehandlereSomJSONString.push(JSON.stringify(behandler)))

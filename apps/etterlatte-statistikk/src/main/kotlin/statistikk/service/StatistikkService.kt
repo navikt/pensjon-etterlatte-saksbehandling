@@ -185,8 +185,7 @@ class StatistikkService(
             revurderingAarsak = statistikkBehandling.revurderingsaarsak?.name,
             kilde = statistikkBehandling.kilde,
             pesysId = statistikkBehandling.pesysId,
-            // TODO: Hvis dette er en revurdering pga klage så skal klage-id'en sendes med her
-            relatertTil = null,
+            relatertTil = statistikkBehandling.relatertBehandlingId,
         )
     }
 

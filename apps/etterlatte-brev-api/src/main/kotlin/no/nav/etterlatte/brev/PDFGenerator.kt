@@ -78,7 +78,8 @@ class PDFGenerator(
         val brevkodePar =
             brevKode(
                 BrevkodeRequest(
-                    generellBrevData.erMigrering(),
+                    generellBrevData.loependeIPesys(),
+                    generellBrevData.erForeldreloes(),
                     generellBrevData.sak.sakType,
                     generellBrevData.forenkletVedtak?.type,
                 ),

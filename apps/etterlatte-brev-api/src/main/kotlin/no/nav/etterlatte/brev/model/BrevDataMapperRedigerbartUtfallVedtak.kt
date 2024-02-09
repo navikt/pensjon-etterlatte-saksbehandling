@@ -3,9 +3,11 @@ package no.nav.etterlatte.brev.model
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.MigreringBrevDataService
+import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.model.bp.BarnepensjonForeldreloesRedigerbar
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingRedigerbartUtfall
 import no.nav.etterlatte.brev.model.klage.AvvistKlageInnholdBrevData
@@ -24,12 +26,23 @@ class BrevDataMapperRedigerbartUtfallVedtak(
 ) {
     suspend fun brevData(redigerbarTekstRequest: RedigerbarTekstRequest) =
         with(redigerbarTekstRequest) {
-            if (generellBrevData.erMigrering()) {
-                migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, migrering, brukerTokenInfo)
+            if (generellBrevData.loependeIPesys()) {
+                fraPesys(generellBrevData, brukerTokenInfo, migrering)
             } else {
                 brevData(generellBrevData, brukerTokenInfo)
             }
         }
+
+    private suspend fun fraPesys(
+        generellBrevData: GenerellBrevData,
+        brukerTokenInfo: BrukerTokenInfo,
+        migrering: MigreringBrevRequest? = null,
+    ): BrevData {
+        if (generellBrevData.erForeldreloes()) {
+            return barnepensjonInnvilgelse(brukerTokenInfo, generellBrevData)
+        }
+        return migreringBrevDataService.opprettMigreringBrevdata(generellBrevData, migrering, brukerTokenInfo)
+    }
 
     private suspend fun brevData(
         generellBrevData: GenerellBrevData,
@@ -68,6 +81,13 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
         val utbetalingsinfo = async { fetcher.hentUtbetaling() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
+
+        if (generellBrevData.erForeldreloes()) {
+            BarnepensjonForeldreloesRedigerbar.fra(
+                generellBrevData,
+                etterbetaling.await(),
+            )
+        }
 
         BarnepensjonInnvilgelseRedigerbartUtfall.fra(
             generellBrevData,

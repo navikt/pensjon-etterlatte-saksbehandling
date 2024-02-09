@@ -4,7 +4,13 @@ import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
-data class BrevkodeRequest(val erMigrering: Boolean, val sakType: SakType, val vedtakType: VedtakType?)
+data class BrevkodeRequest(
+    val erMigrering: Boolean,
+    // TODO BP_INNVILGELSE og BP_INNVILGELSE_FORELDRELOES skal slåes sammen og da kan denne fjernes
+    val erForeldreloes: Boolean,
+    val sakType: SakType,
+    val vedtakType: VedtakType?,
+)
 
 class BrevKodeMapperVedtak {
     fun brevKode(request: BrevkodeRequest): Brevkoder {
@@ -16,7 +22,8 @@ class BrevKodeMapperVedtak {
         return when (request.sakType) {
             SakType.BARNEPENSJON -> {
                 when (request.vedtakType) {
-                    VedtakType.INNVILGELSE -> Brevkoder.BP_INNVILGELSE
+                    VedtakType.INNVILGELSE ->
+                        if (request.erForeldreloes) Brevkoder.BP_INNVILGELSE_FORELDRELOES else Brevkoder.BP_INNVILGELSE
                     VedtakType.AVSLAG -> Brevkoder.BP_AVSLAG
                     VedtakType.ENDRING -> Brevkoder.BP_REVURDERING
                     VedtakType.OPPHOER -> Brevkoder.BP_OPPHOER

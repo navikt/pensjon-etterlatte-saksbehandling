@@ -5,7 +5,9 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.AVVIST_KLAGE_INNHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_FORELDRELOES
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_UTFALL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_UTFALL_FORELDRELOES
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING
@@ -50,6 +52,10 @@ enum class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: Ett
     BP_INNVILGELSE(
         BARNEPENSJON_INNVILGELSE_UTFALL,
         BARNEPENSJON_INNVILGELSE,
+    ),
+    BP_INNVILGELSE_FORELDRELOES(
+        BARNEPENSJON_INNVILGELSE_FORELDRELOES,
+        BARNEPENSJON_INNVILGELSE_UTFALL_FORELDRELOES,
     ),
     BP_OPPHOER(BARNEPENSJON_OPPHOER_UTFALL, BARNEPENSJON_OPPHOER),
     BP_REVURDERING(BARNEPENSJON_REVURDERING_UTFALL, BARNEPENSJON_REVURDERING),

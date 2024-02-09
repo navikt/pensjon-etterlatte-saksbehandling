@@ -51,7 +51,9 @@ export const ToggleMinOppgaveliste = () => {
   }
 
   const hentAlleSaksbehandlereIEnhet = () => {
-    hentSaksbehandlereIEnhet({ enhet: '4815' })
+    const testEnheter = ['4815', '4808', '4817']
+    testEnheter.map((enhet) => hentSaksbehandlereIEnhet({ enhet }))
+    //innloggetSaksbehandler.enheter.map((enhet) => hentSaksbehandlereIEnhet({ enhet: enhet.enhetId }))
   }
 
   useEffect(() => {
@@ -66,7 +68,25 @@ export const ToggleMinOppgaveliste = () => {
   }, [oppgaver, gosysOppgaver])
 
   useEffect(() => {
-    if (isSuccess(saksbehandlereIEnhet)) setHentedeSaksbehandlereIEnhet([...saksbehandlereIEnhet.data])
+    // Utrolig hacky måte å løse det på...
+    // Problemet er at en saksbehandler kan leve i flere enhet, så for å forhindre at det blir
+    // duplikate saksbehandlere, må man konvertere til et Set og konvertere det tilbake til array
+    if (isSuccess(saksbehandlereIEnhet)) {
+      const saksbehandlereSomJSONString: string[] = []
+      saksbehandlereIEnhet.data.map((behandler) => saksbehandlereSomJSONString.push(JSON.stringify(behandler)))
+
+      const eksisterendeSaksbehandlereSomJSONString: string[] = []
+      hentedeSaksbehandlereIEnhet.map((behander) =>
+        eksisterendeSaksbehandlereSomJSONString.push(JSON.stringify(behander))
+      )
+      const setAvUnikeSaksbehandlereSomStrenger = new Set(
+        [...eksisterendeSaksbehandlereSomJSONString].concat(saksbehandlereSomJSONString)
+      )
+
+      const unikeSaksbehandlere: Saksbehandler[] = []
+      setAvUnikeSaksbehandlereSomStrenger.forEach((behandler) => unikeSaksbehandlere.push(JSON.parse(behandler)))
+      setHentedeSaksbehandlereIEnhet(unikeSaksbehandlere)
+    }
   }, [saksbehandlereIEnhet])
 
   useEffect(() => {

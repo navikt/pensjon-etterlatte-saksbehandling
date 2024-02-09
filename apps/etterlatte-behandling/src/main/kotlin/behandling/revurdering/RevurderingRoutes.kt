@@ -98,6 +98,7 @@ internal fun Route.revurderingRoutes(
                                     saksbehandler,
                                 )
                             }
+                        call.respond(revurdering)
                     }
                 }
             }

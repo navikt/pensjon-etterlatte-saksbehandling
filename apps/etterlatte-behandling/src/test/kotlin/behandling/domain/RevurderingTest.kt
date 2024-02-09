@@ -43,6 +43,7 @@ internal class RevurderingTest {
             kilde = Vedtaksloesning.GJENNY,
             revurderingInfo = null,
             begrunnelse = null,
+            relatertBehandlingId = null,
         ).tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet()
             .tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet().tilFattetVedtak().tilAttestert()
             .tilIverksatt()
@@ -208,5 +209,6 @@ private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
         kilde = Vedtaksloesning.GJENNY,
         revurderingInfo = null,
         begrunnelse = null,
+        relatertBehandlingId = null,
     )
 }

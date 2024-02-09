@@ -28,6 +28,7 @@ sealed class Revurdering(
     override val prosesstype: Prosesstype,
     override val kilde: Vedtaksloesning,
     open val begrunnelse: String?,
+    override val relatertBehandlingId: String?,
 ) : Behandling() {
     override val type: BehandlingType = BehandlingType.REVURDERING
 
@@ -50,6 +51,7 @@ sealed class Revurdering(
             prosesstype: Prosesstype,
             kilde: Vedtaksloesning,
             revurderingInfo: RevurderingInfoMedBegrunnelse?,
+            relatertBehandlingId: String?,
             begrunnelse: String?,
         ) = when (prosesstype) {
             Prosesstype.MANUELL ->
@@ -67,6 +69,7 @@ sealed class Revurdering(
                     revurderingInfo = revurderingInfo,
                     kilde = kilde,
                     begrunnelse = begrunnelse,
+                    relatertBehandlingId = relatertBehandlingId,
                 )
 
             Prosesstype.AUTOMATISK ->
@@ -84,6 +87,7 @@ sealed class Revurdering(
                     revurderingInfo = revurderingInfo,
                     kilde = kilde,
                     begrunnelse = begrunnelse,
+                    relatertBehandlingId = relatertBehandlingId,
                 )
         }
     }

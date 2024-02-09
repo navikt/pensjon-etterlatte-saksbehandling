@@ -99,12 +99,6 @@ class BehandlingDao(
         return stmt.executeQuery().toListPassesRsToBlock { rs -> asRevurdering(rs) }
     }
 
-    private fun ResultSet.asRevurderingExtension() =
-        revurderingDao.asRevurdering(
-            this,
-            mapSak(this),
-        ) { i: UUID -> kommerBarnetTilGodeDao.hentKommerBarnetTilGode(i) }
-
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): SakIDListe {
         with(connection()) {
             val stmt =
@@ -184,8 +178,8 @@ class BehandlingDao(
                 """
                 INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
                 soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
-                revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, begrunnelse)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """.trimIndent(),
             )
         with(behandling) {
@@ -205,6 +199,7 @@ class BehandlingDao(
             stmt.setString(14, prosesstype.toString())
             stmt.setString(15, kilde.toString())
             stmt.setString(16, begrunnelse)
+            stmt.setString(17, relatertBehandlingId)
         }
         require(stmt.executeUpdate() == 1)
     }

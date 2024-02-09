@@ -258,6 +258,18 @@ internal class ApplicationContext(
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
     val aktivtetspliktService = AktivitetspliktService(aktivitetspliktDao)
     val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
+
+    val klageService =
+        KlageServiceImpl(
+            klageDao = klageDao,
+            sakDao = sakDao,
+            hendelseDao = hendelseDao,
+            oppgaveService = oppgaveService,
+            brevApiKlient = brevApiHttpClient,
+            klageKlient = klageKlient,
+            klageHendelser = klageHendelser,
+        )
+
     val revurderingService =
         RevurderingService(
             oppgaveService = oppgaveService,
@@ -268,6 +280,7 @@ internal class ApplicationContext(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             revurderingDao = revurderingDao,
+            klageService = klageService,
             behandlingService = behandlingService,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
@@ -339,17 +352,6 @@ internal class ApplicationContext(
         )
 
     val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
-
-    val klageService =
-        KlageServiceImpl(
-            klageDao = klageDao,
-            sakDao = sakDao,
-            hendelseDao = hendelseDao,
-            oppgaveService = oppgaveService,
-            brevApiKlient = brevApiHttpClient,
-            klageKlient = klageKlient,
-            klageHendelser = klageHendelser,
-        )
 
     val tilbakekrevingService =
         TilbakekrevingService(

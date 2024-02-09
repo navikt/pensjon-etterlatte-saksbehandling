@@ -26,6 +26,7 @@ data class StatistikkBehandling(
     val prosesstype: Prosesstype,
     val enhet: String,
     val kilde: Vedtaksloesning,
+    val relatertBehandlingId: String?,
     val pesysId: Long?,
 )
 

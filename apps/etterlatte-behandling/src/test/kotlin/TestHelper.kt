@@ -167,6 +167,7 @@ fun revurdering(
     enhet: String = Enheter.defaultEnhet.enhetNr,
     revurderingInfo: RevurderingInfoMedBegrunnelse? = null,
     begrunnelse: String? = null,
+    relatertBehandlingId: String? = null,
 ) = Revurdering.opprett(
     id = id,
     sak =
@@ -188,6 +189,7 @@ fun revurdering(
     kilde = kilde,
     revurderingInfo = revurderingInfo,
     begrunnelse = begrunnelse,
+    relatertBehandlingId = relatertBehandlingId,
 )
 
 fun persongalleri(

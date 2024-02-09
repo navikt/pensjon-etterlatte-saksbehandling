@@ -276,30 +276,32 @@ fun grunnlagsOpplysningMedPersonopplysning(personopplysning: Person) =
         periode = null,
     )
 
-fun personOpplysning(doedsdato: LocalDate? = null) =
-    Person(
-        fornavn = "Test",
-        etternavn = "Testulfsen",
-        foedselsnummer = SOEKER_FOEDSELSNUMMER,
-        foedselsdato = LocalDate.parse("2020-06-10"),
-        foedselsaar = 1985,
-        foedeland = null,
-        doedsdato = doedsdato,
-        adressebeskyttelse = AdressebeskyttelseGradering.UGRADERT,
-        bostedsadresse = null,
-        deltBostedsadresse = null,
-        kontaktadresse = null,
-        oppholdsadresse = null,
-        sivilstatus = null,
-        sivilstand = null,
-        statsborgerskap = null,
-        utland = null,
-        familieRelasjon = FamilieRelasjon(null, null, null),
-        avdoedesBarn = null,
-        avdoedesBarnUtenIdent = null,
-        vergemaalEllerFremtidsfullmakt = null,
-        pdlStatsborgerskap = null,
-    )
+fun personOpplysning(
+    doedsdato: LocalDate? = null,
+    foedselsdato: LocalDate? = LocalDate.parse("2020-06-10"),
+) = Person(
+    fornavn = "Test",
+    etternavn = "Testulfsen",
+    foedselsnummer = SOEKER_FOEDSELSNUMMER,
+    foedselsdato = foedselsdato,
+    foedselsaar = 1985,
+    foedeland = null,
+    doedsdato = doedsdato,
+    adressebeskyttelse = AdressebeskyttelseGradering.UGRADERT,
+    bostedsadresse = null,
+    deltBostedsadresse = null,
+    kontaktadresse = null,
+    oppholdsadresse = null,
+    sivilstatus = null,
+    sivilstand = null,
+    statsborgerskap = null,
+    utland = null,
+    familieRelasjon = FamilieRelasjon(null, null, null),
+    avdoedesBarn = null,
+    avdoedesBarnUtenIdent = null,
+    vergemaalEllerFremtidsfullmakt = null,
+    pdlStatsborgerskap = null,
+)
 
 fun kommerBarnetTilgode(
     behandlingId: UUID,

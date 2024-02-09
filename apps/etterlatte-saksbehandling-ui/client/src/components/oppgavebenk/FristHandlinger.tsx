@@ -96,7 +96,7 @@ export const FristHandlinger = (props: {
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      hentOppgaver()
+                      hentOppgaver() //TODO: hvorfor ikke bare oppdatere lista?
                       setOpen(false)
                     }}
                   >

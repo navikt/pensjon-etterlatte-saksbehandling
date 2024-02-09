@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/Tilgangsmelding'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -14,11 +14,20 @@ export const ToggleMinOppgaveliste = () => {
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
   }
+  const location = useLocation()
 
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
   const navigate = useNavigate()
 
   const oppgavelengde = useAppSelector((state) => state.oppgaveRedurcer)
+
+  useEffect(() => {
+    if (location.pathname.includes('minoppgaveliste')) {
+      if (oppgaveListeValg !== 'MinOppgaveliste') {
+        setOppgaveListeValg('MinOppgaveliste')
+      }
+    }
+  }, [location.pathname])
 
   useEffect(() => {
     if (oppgaveListeValg === 'MinOppgaveliste') {

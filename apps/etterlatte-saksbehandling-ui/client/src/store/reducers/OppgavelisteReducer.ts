@@ -16,4 +16,4 @@ export const oppgaveRedurcer = createReducer(initialState, (builder) => {
   builder.addCase(settMinOppgavelisteLengde, (state, action) => {
     state.minliste = action.payload
   })
-})
+}) //TODO: rm?

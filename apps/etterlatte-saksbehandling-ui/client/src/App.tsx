@@ -57,7 +57,7 @@ function App() {
               <ConfigContext.Provider value={hentConfigStatus.data}>
                 <Routes>
                   <Route path="/" element={<ToggleMinOppgaveliste />}>
-                    <Route path="/" element={<OppgavelistaWrapper />} />
+                    <Route index element={<OppgavelistaWrapper />} />
                     <Route path="/minoppgaveliste" element={<MinOppgaveliste />} />
                   </Route>
 

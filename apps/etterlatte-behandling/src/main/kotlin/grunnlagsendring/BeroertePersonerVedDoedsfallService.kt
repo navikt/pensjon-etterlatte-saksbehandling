@@ -13,7 +13,7 @@ class BeroertePersonerVedDoedsfallService(private val pdlTjenesterKlient: PdlTje
     fun hentBeroertePersoner(fnr: String): List<Person> {
         val avdoed = pdlTjenesterKlient.hentPdlModell(fnr, PersonRolle.AVDOED, SakType.BARNEPENSJON)
 
-        assert(avdoed.doedsdato != null) { "Personen er ikke død" }
+        checkNotNull(avdoed.doedsdato) { "Personen er ikke død" }
 
         return finnBeroerteBarn(avdoed)
     }
@@ -28,7 +28,7 @@ class BeroertePersonerVedDoedsfallService(private val pdlTjenesterKlient: PdlTje
     }
 }
 
-fun Person.under20PaaDato(dato: LocalDate): Boolean =
+private fun Person.under20PaaDato(dato: LocalDate): Boolean =
     if (foedselsdato != null) {
         ChronoUnit.YEARS.between(foedselsdato, dato) < 20
     } else {

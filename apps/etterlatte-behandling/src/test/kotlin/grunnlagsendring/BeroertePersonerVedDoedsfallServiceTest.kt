@@ -44,7 +44,7 @@ internal class BeroertePersonerVedDoedsfallServiceTest {
         val avdoed = mockPerson()
         every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
 
-        shouldThrow<AssertionError> {
+        shouldThrow<IllegalStateException> {
             service.hentBeroertePersoner(avdoed.foedselsnummer.verdi.value)
         }
     }

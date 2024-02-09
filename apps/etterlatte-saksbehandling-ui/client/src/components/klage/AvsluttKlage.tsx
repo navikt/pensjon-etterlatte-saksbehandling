@@ -23,10 +23,6 @@ export default function AvsluttKlage() {
   const klage = useKlage()
   const klageRedigerbar = useKlageRedigerbar()
 
-  if (!klage || !klageRedigerbar) {
-    return null
-  }
-
   const {
     control,
     handleSubmit,
@@ -35,7 +31,7 @@ export default function AvsluttKlage() {
     watch,
     formState: { errors },
   } = useForm<AvsluttKlageRequest>({
-    defaultValues: { klageId: klage.id, aarsakTilAvbrytelse: AarsakTilAvslutting.ANNET, kommentar: '' },
+    defaultValues: { klageId: klage?.id, aarsakTilAvbrytelse: AarsakTilAvslutting.ANNET, kommentar: '' },
   })
 
   const avslutt = (request: AvsluttKlageRequest) => {

@@ -211,8 +211,21 @@ internal class BehandlingServiceImpl(
             }
 
             if (behandling is Revurdering && behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
-                // lag en ny omgjøringsoppgave
-                oppgaveService.hentOppgaverForSak(behandling.sak.id)
+                val omgjoeringsoppgaveForKlage =
+                    oppgaveService.hentOppgaverForSak(behandling.sak.id)
+                        .find { it.type == OppgaveType.OMGJOERING && it.referanse == behandling.relatertBehandlingId }
+                        ?: throw InternfeilException(
+                            "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
+                                "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",
+                        )
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    referanse = omgjoeringsoppgaveForKlage.referanse,
+                    sakId = omgjoeringsoppgaveForKlage.sakId,
+                    oppgaveKilde = omgjoeringsoppgaveForKlage.kilde,
+                    oppgaveType = omgjoeringsoppgaveForKlage.type,
+                    merknad = omgjoeringsoppgaveForKlage.merknad,
+                    frist = omgjoeringsoppgaveForKlage.frist,
+                )
             }
 
             hendelseDao.behandlingAvbrutt(behandling, saksbehandler.ident())

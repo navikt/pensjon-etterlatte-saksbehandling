@@ -78,7 +78,7 @@ export const ToggleMinOppgaveliste = () => {
         eksisterendeSaksbehandlereSomJSONString.push(JSON.stringify(behander))
       )
       const setAvUnikeSaksbehandlereSomStrenger = new Set(
-        [...eksisterendeSaksbehandlereSomJSONString].concat(saksbehandlereSomJSONString)
+        eksisterendeSaksbehandlereSomJSONString.concat(saksbehandlereSomJSONString)
       )
 
       const unikeSaksbehandlere: Saksbehandler[] = []

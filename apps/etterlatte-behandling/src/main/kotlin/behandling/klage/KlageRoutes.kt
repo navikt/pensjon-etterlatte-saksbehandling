@@ -30,7 +30,7 @@ import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
     KanBrukeKlageToggle("pensjon-etterlatte.kan-bruke-klage"),
-    KanFerdigstilleKlageToggle("pensjons-etterlatte.kan-ferdigstille-klage"),
+    KanFerdigstilleKlageToggle("pensjon-etterlatte.kan-ferdigstille-klage"),
     ;
 
     override fun key(): String = key

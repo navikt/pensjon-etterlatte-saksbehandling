@@ -155,6 +155,13 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
             redigerbar={redigerbar}
           />
+          <TrygdetidGrunnlagListe
+            trygdetid={trygdetid}
+            setTrygdetid={oppdaterTrygdetid}
+            landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
+            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
+            redigerbar={redigerbar}
+          />
           <OverstyrtTrygdetid
             redigerbar={redigerbar}
             sakType={behandling.sakType}
@@ -163,13 +170,6 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
             virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
           />
           {isPending(overstyrTrygdetidRequest) && <Spinner visible={true} label="Oppdatere poengår" />}
-          <TrygdetidGrunnlagListe
-            trygdetid={trygdetid}
-            setTrygdetid={oppdaterTrygdetid}
-            landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
-            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
-            redigerbar={redigerbar}
-          />
           {trygdetid.beregnetTrygdetid && (
             <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
           )}

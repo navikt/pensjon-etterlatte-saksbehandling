@@ -15,6 +15,7 @@ import {
   Omgjoering,
   TEKSTER_AARSAK_OMGJOERING,
   TEKSTER_LOVHJEMLER,
+  teksterKlageutfall,
   Utfall,
 } from '~shared/types/Klage'
 import { Control, Controller, useForm } from 'react-hook-form'
@@ -146,9 +147,9 @@ export function KlageVurderingRedigering(props: { klage: Klage }) {
               render={({ field, fieldState }) => (
                 <>
                   <RadioGroup legend="Velg utfall" {...field}>
-                    <Radio value={Utfall.OMGJOERING}>Omgjøring av vedtak</Radio>
-                    <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>
-                    <Radio value={Utfall.STADFESTE_VEDTAK}>Stadfeste vedtaket</Radio>
+                    <Radio value={Utfall.OMGJOERING}> {teksterKlageutfall[Utfall.OMGJOERING]}</Radio>
+                    <Radio value={Utfall.DELVIS_OMGJOERING}>{teksterKlageutfall[Utfall.DELVIS_OMGJOERING]}</Radio>
+                    <Radio value={Utfall.STADFESTE_VEDTAK}> {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]}</Radio>
                   </RadioGroup>
                   {fieldState.error ? <Feilmelding>Du må velge et utfall for klagen.</Feilmelding> : null}
                 </>

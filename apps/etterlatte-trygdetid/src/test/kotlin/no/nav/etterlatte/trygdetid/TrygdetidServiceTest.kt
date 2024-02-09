@@ -14,7 +14,6 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -54,7 +53,6 @@ internal class TrygdetidServiceTest {
     private val behandlingKlient: BehandlingKlient = mockk()
     private val grunnlagKlient: GrunnlagKlient = mockk()
     private val vilkaarsvurderingKlient: VilkaarsvuderingKlient = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
     private val beregningService: TrygdetidBeregningService = spyk(TrygdetidBeregningService)
     private val service: TrygdetidService =
         TrygdetidServiceImpl(
@@ -63,7 +61,6 @@ internal class TrygdetidServiceTest {
             grunnlagKlient,
             vilkaarsvurderingKlient,
             beregningService,
-            featureToggleService,
         )
 
     @BeforeEach

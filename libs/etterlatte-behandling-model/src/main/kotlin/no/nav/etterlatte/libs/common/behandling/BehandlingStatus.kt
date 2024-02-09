@@ -45,8 +45,6 @@ enum class BehandlingStatus {
 
         fun kanEndres() = underBehandling() - FATTET_VEDTAK
 
-        fun ikkeAvbrutt() = iverksattEllerAttestert() + underBehandling()
-
         fun skalIkkeOmregnesVedGRegulering() =
             listOf(
                 IVERKSATT,

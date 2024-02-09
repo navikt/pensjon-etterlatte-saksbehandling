@@ -11,8 +11,6 @@ import no.nav.etterlatte.beregning.BeregningRepository
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagRepository
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
@@ -24,20 +22,11 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.no.nav.etterlatte.grunnbeloep.GrunnbeloepService
 import no.nav.etterlatte.ytelseMedGrunnlag.YtelseMedGrunnlagService
 
-private fun featureToggleProperties(config: Config) =
-    FeatureToggleProperties(
-        applicationName = config.getString("funksjonsbrytere.unleash.applicationName"),
-        host = config.getString("funksjonsbrytere.unleash.host"),
-        apiKey = config.getString("funksjonsbrytere.unleash.token"),
-    )
-
 class ApplicationContext {
     val config: Config = ConfigFactory.load()
     private val env = System.getenv()
     val properties: ApplicationProperties = ApplicationProperties.fromEnv(env)
     val dataSource = DataSourceBuilder.createDataSource(properties)
-
-    val featureToggleService: FeatureToggleService = FeatureToggleService.initialiser(featureToggleProperties(config))
 
     val vilkaarsvurderingKlient = VilkaarsvurderingKlientImpl(config, httpClient())
     val grunnlagKlient = GrunnlagKlientImpl(config, httpClient())

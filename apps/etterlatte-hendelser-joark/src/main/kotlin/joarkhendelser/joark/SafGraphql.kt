@@ -142,6 +142,6 @@ enum class Kanal(val beskrivelse: String) {
     companion object {
         @JvmStatic
         @JsonCreator
-        fun fraVerdi(kanal: String) = values().firstOrNull { it.name == kanal } ?: UKJENT
+        fun fraVerdi(kanal: String) = entries.firstOrNull { it.name == kanal } ?: UKJENT
     }
 }

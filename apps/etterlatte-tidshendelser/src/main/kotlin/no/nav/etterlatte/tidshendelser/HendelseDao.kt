@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
 import org.slf4j.LoggerFactory
 import java.time.YearMonth
+import java.util.UUID
 import javax.sql.DataSource
 
 class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao> {
@@ -135,7 +136,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
     }
 
     fun oppdaterHendelseStatus(
-        hendelse: Hendelse,
+        hendelseId: UUID,
         status: HendelseStatus,
     ) {
         datasource.transaction {
@@ -147,7 +148,32 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                     versjon = versjon + 1
                 WHERE id = :id
                 """.trimIndent(),
-                mapOf("status" to status.name, "id" to hendelse.id),
+                mapOf("status" to status.name, "id" to hendelseId),
+            )
+                .let { query -> it.run(query.asUpdate) }
+        }
+    }
+
+    fun oppdaterHendelseForSteg(
+        hendelseId: UUID,
+        steg: String,
+        info: String,
+    ) {
+        datasource.transaction {
+            queryOf(
+                """
+                UPDATE hendelse 
+                SET steg = :steg,
+                    info = COALESCE(info, '[]'::JSONB) || :ny_info::JSONB,
+                    endret = now(),
+                    versjon = versjon + 1
+                WHERE id = :id
+                """.trimIndent(),
+                mapOf(
+                    "id" to hendelseId,
+                    "ny_info" to info,
+                    "steg" to steg,
+                ),
             )
                 .let { query -> it.run(query.asUpdate) }
         }

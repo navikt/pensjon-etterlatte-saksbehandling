@@ -95,7 +95,7 @@ class UtbetalingService(
             }?.let { oppdrag -> utbetalingDao.oppdaterKvittering(oppdrag, Tidspunkt.now(clock), utbetaling.id) }
         }
 
-    fun Utbetaling.sendtUtbetalingshendelse(clock: Clock) =
+    private fun Utbetaling.sendtUtbetalingshendelse(clock: Clock) =
         Utbetalingshendelse(
             utbetalingId = this.id,
             status = UtbetalingStatus.SENDT,
@@ -106,10 +106,10 @@ class UtbetalingService(
      * Hvis vi har en utbetaling og mottar en kvittering fra OS, er dette gyldig _hviss_
      * utbetalingen har enten status sendt eller mottatt fra OS (hvis ikke har noe skjedd ut av sekvens)!
      */
-    fun Utbetaling.ugyldigStatusForAaMottaNyKvittering() =
+    private fun Utbetaling.ugyldigStatusForAaMottaNyKvittering() =
         this.status() != UtbetalingStatus.SENDT && this.status() != UtbetalingStatus.MOTTATT
 
-    fun Utbetaling?.utbetalingEksisterer() = this != null && this.status() != UtbetalingStatus.MOTTATT
+    private fun Utbetaling?.utbetalingEksisterer() = this != null && this.status() != UtbetalingStatus.MOTTATT
 
     companion object {
         private val logger = LoggerFactory.getLogger(UtbetalingService::class.java)

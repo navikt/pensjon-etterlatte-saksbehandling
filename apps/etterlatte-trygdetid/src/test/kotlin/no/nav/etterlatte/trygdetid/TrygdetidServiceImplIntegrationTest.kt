@@ -5,7 +5,6 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -67,7 +66,6 @@ internal class TrygdetidServiceImplIntegrationTest {
                 grunnlagKlient,
                 vilkaarsvuderingKlient,
                 TrygdetidBeregningService,
-                DummyFeatureToggleService(),
             )
     }
 

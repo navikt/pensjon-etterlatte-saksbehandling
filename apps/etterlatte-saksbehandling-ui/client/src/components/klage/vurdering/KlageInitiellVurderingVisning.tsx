@@ -1,7 +1,7 @@
 import { KlageVurderingVisning } from '~components/klage/vurdering/KlageVurderingVisning'
 import React from 'react'
-import { Klage } from '~shared/types/Klage'
-import { Heading } from '@navikt/ds-react'
+import { Klage, teksterKlageutfall } from '~shared/types/Klage'
+import { BodyShort, Heading } from '@navikt/ds-react'
 import { formaterStringTidspunktTimeMinutter } from '~utils/formattering'
 
 export const KlageInitiellVurderingVisning = (props: { klage: Klage }) => {
@@ -24,14 +24,22 @@ export const InitiellVurderingVisning = (props: { klage: Klage }) => {
       {klage.initieltUtfall && (
         <>
           <dl>
-            <dt>Utfall</dt>
-            <dd>{klage.initieltUtfall.utfallMedBegrunnelse.utfall}</dd>
-            <dt>Begrunnelse</dt>
-            <dd>{klage.initieltUtfall.utfallMedBegrunnelse.begrunnelse}</dd>
-            <dt>Saksbehandler</dt>
-            <dd>{klage.initieltUtfall.saksbehandler}</dd>
-            <dt>Tidspunkt</dt>
-            <dd>{formaterStringTidspunktTimeMinutter(klage.initieltUtfall.tidspunkt)}</dd>
+            <Heading size="small" spacing>
+              Utfall
+            </Heading>
+            <BodyShort spacing>{teksterKlageutfall[klage.initieltUtfall.utfallMedBegrunnelse.utfall]}</BodyShort>
+            <Heading size="small" spacing>
+              Begrunnelse
+            </Heading>
+            <BodyShort spacing>{klage.initieltUtfall.utfallMedBegrunnelse.begrunnelse || 'Ikke registrert'}</BodyShort>
+            <Heading size="small" spacing>
+              Saksbehandler
+            </Heading>
+            <BodyShort spacing>{klage.initieltUtfall.saksbehandler}</BodyShort>
+            <Heading size="small" spacing>
+              Tidspunkt
+            </Heading>
+            <BodyShort spacing>{formaterStringTidspunktTimeMinutter(klage.initieltUtfall.tidspunkt)}</BodyShort>
           </dl>
         </>
       )}

@@ -19,7 +19,7 @@ data class Utbetalingsvedtak(
             val innhold = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
             return Utbetalingsvedtak(
                 vedtakId = vedtak.id,
-                sak = Sak(vedtak.sak.ident, vedtak.sak.id, Saktype.fraString(vedtak.sak.sakType.toString())),
+                sak = Sak(vedtak.sak.ident, vedtak.sak.id, Saktype.valueOf(vedtak.sak.sakType.toString())),
                 behandling =
                     Behandling(
                         type = innhold.behandling.type,
@@ -64,16 +64,6 @@ data class Sak(val ident: String, val id: Long, val sakType: Saktype)
 enum class Saktype {
     BARNEPENSJON,
     OMSTILLINGSSTOENAD,
-    ;
-
-    companion object {
-        fun fraString(str: String) =
-            when (str) {
-                "BARNEPENSJON" -> BARNEPENSJON
-                "OMSTILLINGSSTOENAD" -> OMSTILLINGSSTOENAD
-                else -> throw IllegalArgumentException("$str er ikke en kjent sakstype.")
-            }
-    }
 }
 
 data class Attestasjon(

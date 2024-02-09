@@ -392,7 +392,7 @@ internal class BrevRepositoryIntegrationTest {
                         listOf(
                             BrevInnholdVedlegg(
                                 tittel = "Tittel",
-                                key = BrevVedleggKey.BEREGNING_INNHOLD,
+                                key = BrevVedleggKey.OMS_BEREGNING,
                                 payload = Slate(listOf(Slate.Element(Slate.ElementType.PARAGRAPH))),
                             ),
                         ),
@@ -414,7 +414,7 @@ internal class BrevRepositoryIntegrationTest {
                         listOf(
                             BrevInnholdVedlegg(
                                 tittel = "tittel",
-                                key = BrevVedleggKey.BEREGNING_INNHOLD,
+                                key = BrevVedleggKey.OMS_BEREGNING,
                                 payload = null,
                             ),
                         ),
@@ -434,7 +434,7 @@ internal class BrevRepositoryIntegrationTest {
                 listOf(
                     BrevInnholdVedlegg(
                         tittel = "tittel",
-                        key = BrevVedleggKey.BEREGNING_INNHOLD,
+                        key = BrevVedleggKey.OMS_BEREGNING,
                         payload =
                             Slate(
                                 listOf(

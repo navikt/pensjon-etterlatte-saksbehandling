@@ -13,13 +13,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
-import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
-import no.nav.etterlatte.behandling.klienter.Norg2Klient
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 
@@ -43,9 +40,6 @@ class BrukerServiceTest {
             ),
             "",
         )
-
-    private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
-    private val norg2Klient = mockk<Norg2Klient>()
 
     @Test
     fun `hent enheter skal returnere en liste av enheter`() {

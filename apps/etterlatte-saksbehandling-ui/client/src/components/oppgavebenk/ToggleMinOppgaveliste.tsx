@@ -93,7 +93,7 @@ export const ToggleMinOppgaveliste = () => {
   }, [])
 
   const hentAlleOppgaver = () => {
-    hentOppgaverStatusFetch(filter.oppgavestatusFilter)
+    hentOppgaverStatusFetch({ oppgavestatusFilter: filter.oppgavestatusFilter })
     hentGosysOppgaverFunc({})
   }
 
@@ -102,7 +102,11 @@ export const ToggleMinOppgaveliste = () => {
       oppgaveListeValg === 'MinOppgaveliste'
         ? [OPPGAVESTATUSFILTER.UNDER_BEHANDLING]
         : [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING]
-    hentOppgaverStatusFetch(statusValg)
+    hentOppgaverStatusFetch({
+      oppgavestatusFilter: statusValg,
+      minOppgavelisteIdent: oppgaveListeValg === 'MinOppgaveliste',
+    })
+
     setFilter({
       ...hentFilterFraLocalStorage(),
       oppgavestatusFilter: statusValg,
@@ -172,7 +176,7 @@ export const ToggleMinOppgaveliste = () => {
               <FilterRad
                 hentAlleOppgaver={hentAlleOppgaver}
                 hentOppgaverStatus={(oppgavestatusFilter: Array<string>) =>
-                  hentOppgaverStatusFetch(oppgavestatusFilter)
+                  hentOppgaverStatusFetch({ oppgavestatusFilter: oppgavestatusFilter })
                 }
                 filter={filter}
                 setFilter={setFilter}
@@ -195,7 +199,13 @@ export const ToggleMinOppgaveliste = () => {
               <ValgWrapper>
                 <VelgOppgavestatuser
                   value={filter.oppgavestatusFilter}
-                  onChange={(oppgavestatusFilter) => setFilter({ ...filter, oppgavestatusFilter })}
+                  onChange={(oppgavestatusFilter) => {
+                    hentOppgaverStatusFetch({
+                      oppgavestatusFilter: oppgavestatusFilter,
+                      minOppgavelisteIdent: true,
+                    })
+                    setFilter({ ...filter, oppgavestatusFilter })
+                  }}
                 />
               </ValgWrapper>
               <Oppgavelista

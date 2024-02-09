@@ -12,11 +12,8 @@ import no.nav.etterlatte.pdl.PdlForelderBarnRelasjon
 import no.nav.etterlatte.pdl.PdlForelderBarnRelasjonRolle
 import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlRelatertBiPerson
-import org.slf4j.LoggerFactory
 
 object FamilieRelasjonMapper {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     fun mapFamilieRelasjon(
         hentPerson: PdlHentPerson,
         personRolle: PersonRolle,

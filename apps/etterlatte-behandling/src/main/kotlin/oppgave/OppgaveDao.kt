@@ -34,6 +34,7 @@ interface OppgaveDao {
         enheter: List<String>,
         erSuperBruker: Boolean,
         oppgaveStatuser: List<String>,
+        minOppgavelisteIdentFilter: String? = null,
     ): List<OppgaveIntern>
 
     fun finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(oppgaveTypeTyper: List<OppgaveType>): List<OppgaveIntern>
@@ -167,6 +168,7 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
         enheter: List<String>,
         erSuperBruker: Boolean,
         oppgaveStatuser: List<String>,
+        minOppgavelisteIdentFilter: String?,
     ): List<OppgaveIntern> {
         if (oppgaveTyper.isEmpty()) return emptyList()
 
@@ -177,12 +179,13 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
                     SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
                     FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                     WHERE o.type = ANY(?)
-                    AND (? = true OR o.status = ANY(?))
-                    AND (? = true OR o.enhet = ANY(?))
+                    AND (? OR o.status = ANY(?))
+                    AND (? OR o.enhet = ANY(?))
                     AND (
                         s.adressebeskyttelse is null OR 
                         (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))
                     )
+                    AND (? OR o.saksbehandler = ?)
                     """.trimIndent(),
                 )
 
@@ -193,6 +196,8 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
             statement.setArray(5, createArrayOf("text", enheter.toTypedArray()))
             statement.setString(6, AdressebeskyttelseGradering.STRENGT_FORTROLIG.name)
             statement.setString(7, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND.name)
+            statement.setBoolean(8, minOppgavelisteIdentFilter == null)
+            statement.setString(9, minOppgavelisteIdentFilter)
 
             return statement.executeQuery().toList {
                 asOppgave()

@@ -1,7 +1,8 @@
 package no.nav.etterlatte.brev.model.tilbakekreving
 
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -12,9 +13,9 @@ import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
 data class TilbakekrevingFerdigData(
-    val innhold: List<Slate.Element>,
+    override val innhold: List<Slate.Element>,
     val data: TilbakekrevingInnholdBrevData,
-) : BrevData() {
+) : BrevDataFerdigstilling {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
@@ -33,7 +34,7 @@ data class TilbakekrevingInnholdBrevData(
     val harForeldelse: Boolean,
     val perioder: List<TilbakekrevingPeriodeData>,
     val summer: TilbakekrevingBeloeperData,
-) : BrevData() {
+) : BrevDataRedigerbar {
     companion object {
         fun fra(generellBrevData: GenerellBrevData): TilbakekrevingInnholdBrevData {
             val tilbakekreving =

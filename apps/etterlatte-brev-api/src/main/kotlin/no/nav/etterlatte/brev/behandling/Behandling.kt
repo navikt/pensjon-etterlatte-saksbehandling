@@ -1,7 +1,6 @@
 package no.nav.etterlatte.brev.behandling
 
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
-import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -83,23 +82,7 @@ data class Utbetalingsinfo(
     val virkningsdato: LocalDate,
     val soeskenjustering: Boolean,
     val beregningsperioder: List<Beregningsperiode>,
-) {
-    companion object {
-        fun kopier(
-            utbetalingsinfo: Utbetalingsinfo,
-            etterbetalingDTO: EtterbetalingDTO?,
-        ) = if (etterbetalingDTO == null) {
-            utbetalingsinfo
-        } else {
-            utbetalingsinfo.copy(
-                beregningsperioder =
-                    utbetalingsinfo.beregningsperioder.filter {
-                        YearMonth.from(it.datoFOM) > YearMonth.from(etterbetalingDTO.datoTom)
-                    },
-            )
-        }
-    }
-}
+)
 
 data class Avkortingsinfo(
     val grunnbeloep: Kroner,

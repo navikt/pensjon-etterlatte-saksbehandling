@@ -3,7 +3,6 @@ package no.nav.etterlatte.trygdetid
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -252,7 +251,6 @@ class TrygdetidServiceImpl(
     private val grunnlagKlient: GrunnlagKlient,
     private val vilkaarsvurderingKlient: VilkaarsvuderingKlient,
     private val beregnTrygdetidService: TrygdetidBeregningService,
-    private val featureToggleService: FeatureToggleService,
 ) : GammelTrygdetidServiceMedNy {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

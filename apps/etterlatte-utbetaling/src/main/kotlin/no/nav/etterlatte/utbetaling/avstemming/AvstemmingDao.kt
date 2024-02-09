@@ -113,6 +113,6 @@ class AvstemmingDao(private val dataSource: DataSource) {
                 ),
             antallOppdrag = row.int("antall_oppdrag"),
             avstemmingsdata = row.string("avstemmingsdata"),
-            saktype = row.string("saktype").let { Saktype.fraString(it) },
+            saktype = row.string("saktype").let { Saktype.valueOf(it) },
         )
 }

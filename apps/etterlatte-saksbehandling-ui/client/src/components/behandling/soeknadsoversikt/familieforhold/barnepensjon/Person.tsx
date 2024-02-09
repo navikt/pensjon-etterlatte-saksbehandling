@@ -69,7 +69,7 @@ export const Person = ({ person, kilde, avdoed = false, mottaker = false, gjenle
           statsborgerskap={person.statsborgerskap}
           pdlStatsborgerskap={person.pdlStatsborgerskap}
         />
-        <Detail>
+        <Detail as="div">
           <Label size="small" as="p">
             Kilde
           </Label>

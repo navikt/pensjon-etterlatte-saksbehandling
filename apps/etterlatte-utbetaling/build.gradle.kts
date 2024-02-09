@@ -24,9 +24,6 @@ dependencies {
     implementation(libs.navfelles.tjenestespesifikasjoner.oppdragsbehandling)
     implementation(libs.navfelles.tjenestespesifikasjoner.avstemming)
 
-    implementation(libs.jakartabind.api)
-    implementation(libs.jakartabind.impl)
-
     implementation(libs.database.kotliquery)
 
     testImplementation(libs.ktor2.clientmock)

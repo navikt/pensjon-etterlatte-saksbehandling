@@ -9,11 +9,9 @@ import kotliquery.using
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
-import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaarsgrunnlag
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.database.hent
@@ -260,22 +258,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         return vilkaar.id
     }
 
-    private fun lagreGrunnlag(
-        vilkaarId: UUID,
-        grunnlag: Vilkaarsgrunnlag<out Any?>,
-        tx: TransactionalSession,
-    ) = queryOf(
-        statement = Queries.LAGRE_GRUNNLAG,
-        paramMap =
-            mapOf(
-                "vilkaar_id" to vilkaarId,
-                "grunnlag_id" to grunnlag.id,
-                "opplysning_type" to grunnlag.opplysningsType.name,
-                "kilde" to grunnlag.kilde.toJson(),
-                "opplysning" to grunnlag.opplysning?.toJson(),
-            ),
-    ).let { tx.run(it.asExecute) }
-
     fun oppdaterGrunnlagsversjon(
         behandlingId: UUID,
         grunnlagVersjon: Long,
@@ -345,11 +327,6 @@ class VilkaarsvurderingRepository(private val ds: DataSource, private val delvil
         const val LAGRE_VILKAAR = """
             INSERT INTO vilkaar(id, vilkaarsvurdering_id, resultat_kommentar, resultat_tidspunkt, resultat_saksbehandler) 
             VALUES(:id, :vilkaarsvurdering_id, :resultat_kommentar, :resultat_tidspunkt, :resultat_saksbehandler) 
-        """
-
-        const val LAGRE_GRUNNLAG = """
-            INSERT INTO grunnlag(vilkaar_id, grunnlag_id, opplysning_type, kilde, opplysning) 
-            VALUES(:vilkaar_id, :grunnlag_id, :opplysning_type, :kilde::JSONB, :opplysning::JSONB)
         """
 
         const val LAGRE_VILKAARSVURDERING_RESULTAT = """

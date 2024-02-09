@@ -20,7 +20,6 @@ import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
-import { handlinger } from '~components/behandling/handlinger/typer'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
@@ -45,6 +44,11 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [, fetchBehandling] = useApiCall(hentBehandling)
 
   const onSubmit = () => {
+    next()
+  }
+
+  const settPaaVent = () => {
+    // TODO: Her skal det inn kall for å setje på vent fram til xx
     next()
   }
 
@@ -128,9 +132,11 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
             onClick={onSubmit}
             loading={isPending(hentBrevStatus) || isPending(opprettBrevStatus)}
           >
-            {handlinger.NESTE.navn}
+            Neste side uten å sende varselbrev
           </Button>
-          {varselbrev && <NyttBrevHandlingerPanel brev={varselbrev} setKanRedigeres={setKanRedigeres} />}
+          {varselbrev && (
+            <NyttBrevHandlingerPanel brev={varselbrev} setKanRedigeres={setKanRedigeres} callback={settPaaVent} />
+          )}
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />

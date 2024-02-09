@@ -46,23 +46,26 @@ export default function AvsluttKlage() {
   }
 
   return (
-    <>
-      {!showAvsluttForm && (
-        <SidebarPanel>
-          <FlexRow>
-            <Button variant="secondary" icon={<TrashIcon />} onClick={() => setShowAvsluttForm(!showAvsluttForm)}>
-              Avslutt sak
-            </Button>
-          </FlexRow>
-        </SidebarPanel>
-      )}
-      {showAvsluttForm && (
-        <SidebarPanel border>
-          <AvsluttKlageForm />
-        </SidebarPanel>
-      )}
-      <BekreftelseModal />
-    </>
+    klage &&
+    klageRedigerbar && (
+      <>
+        {!showAvsluttForm && (
+          <SidebarPanel>
+            <FlexRow>
+              <Button variant="secondary" icon={<TrashIcon />} onClick={() => setShowAvsluttForm(!showAvsluttForm)}>
+                Avslutt sak
+              </Button>
+            </FlexRow>
+          </SidebarPanel>
+        )}
+        {showAvsluttForm && (
+          <SidebarPanel border>
+            <AvsluttKlageForm />
+          </SidebarPanel>
+        )}
+        <BekreftelseModal />
+      </>
+    )
   )
 
   function AvsluttKlageForm() {

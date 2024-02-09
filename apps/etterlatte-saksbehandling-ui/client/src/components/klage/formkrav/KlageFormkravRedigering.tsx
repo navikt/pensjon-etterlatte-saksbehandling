@@ -207,7 +207,7 @@ export function KlageFormkravRedigering() {
           <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
 
           <VurderingWrapper>
-            <Textarea {...register('begrunnelse')} label="Begrunnelse (valgfritt)" />
+            <Textarea {...register('begrunnelse')} label="Totalvurdering (valgfritt)" />
           </VurderingWrapper>
         </InnholdPadding>
         <FlexRow justify="center">

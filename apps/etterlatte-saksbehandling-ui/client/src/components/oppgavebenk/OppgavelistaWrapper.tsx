@@ -4,7 +4,7 @@ import { FilterRad } from '~components/oppgavebenk/FilterRad'
 import { Filter, filtrerOppgaver } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 import { hentFilterFraLocalStorage, leggFilterILocalStorage } from '~components/oppgavebenk/filter/filterLocalStorage'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentGosysOppgaver, hentOppgaverMedStatus, OppgaveDTO } from '~shared/api/oppgaver'
+import { hentGosysOppgaver, hentOppgaverMedStatus } from '~shared/api/oppgaver'
 import { oppdaterTildeling } from '~components/oppgavebenk/oppgaveutils'
 import { useAppDispatch } from '~store/Store'
 import { settHovedOppgavelisteLengde } from '~store/reducers/OppgavelisteReducer'
@@ -14,7 +14,6 @@ import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
 export const OppgavelistaWrapper = () => {
   const dispatch = useAppDispatch()
 
-  const [hentedeOppgaver, setHentedeOppgaver] = useState<OppgaveDTO[]>([])
   const [filter, setFilter] = useState<Filter>(hentFilterFraLocalStorage())
 
   const [oppgaver, hentOppgaverStatusFetch] = useApiCall(hentOppgaverMedStatus)
@@ -25,11 +24,10 @@ export const OppgavelistaWrapper = () => {
     hentGosysOppgaverFunc({})
   }
 
-  useOppgaverEffect({
+  const { hentedeOppgaver, setHentedeOppgaver } = useOppgaverEffect({
     oppgaver,
     gosysOppgaver,
     hentAlleOppgaver,
-    setHentedeOppgaver,
     filtrerGosysOppgaverForInnloggetSaksbehandler: false,
   })
 

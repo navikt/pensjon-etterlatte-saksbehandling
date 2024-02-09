@@ -1,5 +1,5 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentGosysOppgaver, hentOppgaverMedStatus, OppgaveDTO } from '~shared/api/oppgaver'
+import { hentGosysOppgaver, hentOppgaverMedStatus } from '~shared/api/oppgaver'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/filter/oppgavelistafiltre'
@@ -15,7 +15,6 @@ export const MinOppgaveliste = () => {
   const dispatch = useAppDispatch()
 
   const [filter, setFilter] = useState<Filter>(minOppgavelisteFiltre())
-  const [hentedeOppgaver, setHentedeOppgaver] = useState<OppgaveDTO[]>([])
 
   const [oppgaver, hentOppgaverStatusFetch] = useApiCall(hentOppgaverMedStatus)
   const [gosysOppgaver, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
@@ -25,11 +24,10 @@ export const MinOppgaveliste = () => {
     hentGosysOppgaverFunc({})
   }
 
-  useOppgaverEffect({
+  const { hentedeOppgaver, setHentedeOppgaver } = useOppgaverEffect({
     oppgaver,
     gosysOppgaver,
     hentAlleOppgaver,
-    setHentedeOppgaver,
     filtrerGosysOppgaverForInnloggetSaksbehandler: true,
   })
 

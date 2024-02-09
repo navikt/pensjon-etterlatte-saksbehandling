@@ -1,28 +1,26 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { isSuccess, Result } from '~shared/api/apiUtils'
 import { sorterOppgaverEtterOpprettet } from '~components/oppgavebenk/oppgaveutils'
 import { useAppSelector } from '~store/Store'
 
 export const useOppgaverEffect = (props: {
-  setHentedeOppgaver: React.Dispatch<React.SetStateAction<OppgaveDTO[]>>
   oppgaver: Result<Array<OppgaveDTO>>
   gosysOppgaver: Result<Array<OppgaveDTO>>
   hentAlleOppgaver: () => void
   filtrerGosysOppgaverForInnloggetSaksbehandler: boolean
-}): void => {
-  const {
-    setHentedeOppgaver,
-    oppgaver,
-    gosysOppgaver,
-    hentAlleOppgaver,
-    filtrerGosysOppgaverForInnloggetSaksbehandler = false,
-  } = props
+}): {
+  hentedeOppgaver: Array<OppgaveDTO>
+  setHentedeOppgaver: (value: ((prevState: Array<OppgaveDTO>) => Array<OppgaveDTO>) | Array<OppgaveDTO>) => void
+} => {
+  const { oppgaver, gosysOppgaver, hentAlleOppgaver, filtrerGosysOppgaverForInnloggetSaksbehandler = false } = props
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
     return oppgaver.filter((o) => o.saksbehandlerIdent === innloggetSaksbehandler.ident)
   }
+
+  const [hentedeOppgaver, setHentedeOppgaver] = useState<Array<OppgaveDTO>>([])
 
   useEffect(() => hentAlleOppgaver(), [])
 
@@ -45,4 +43,6 @@ export const useOppgaverEffect = (props: {
       )
     }
   }, [oppgaver, gosysOppgaver])
+
+  return { hentedeOppgaver, setHentedeOppgaver }
 }

@@ -13,6 +13,7 @@ import { sjekklisteReducer } from '~store/reducers/SjekklisteReducer'
 import { behandlingsidemenyReducer } from '~store/reducers/BehandlingSidemenyReducer'
 import { saksbehandlerGjeldendeOppgaveForBehandlingReducer } from '~store/reducers/SaksbehandlerGjeldendeOppgaveForBehandlingReducer'
 import { personopplysningerReducer } from '~store/reducers/PersonopplysningerReducer'
+import { oppgaveRedurcer } from '~store/reducers/OppgavelisteReducer'
 
 const reducer = {
   menuReducer: menuReducer,
@@ -22,6 +23,7 @@ const reducer = {
   behandlingSidemenyReducer: behandlingsidemenyReducer,
   vedtakReducer: vedtakReducer,
   appReducer: appReducer,
+  oppgaveRedurcer: oppgaveRedurcer,
   klageReducer: klageReducer,
   tilbakekrevingReducer: tilbakekrevingReducer,
   journalfoeringOppgaveReducer: journalfoeringOppgaveReducer,

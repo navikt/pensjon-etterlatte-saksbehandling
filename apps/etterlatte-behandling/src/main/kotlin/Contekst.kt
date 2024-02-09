@@ -76,13 +76,6 @@ class SaksbehandlerMedEnheterOgRoller(
         }
 
     fun enheter() = (enheterMedSkrivetilgang() + enheterMedLesetilgang()).distinct()
-
-    // TODO - EY-3441 - lesetilgang for forvaltningsutviklere
-    fun kanSeOppgaveliste(): Boolean {
-        val enheter = enheterMedSkrivetilgang()
-
-        return enheter.isNotEmpty()
-    }
 }
 
 fun decideUser(

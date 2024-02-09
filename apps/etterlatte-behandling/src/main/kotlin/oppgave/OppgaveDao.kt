@@ -174,7 +174,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                         FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.type = ANY(?)
                         AND (? OR o.status = ANY(?))
-                        AND (o.enhet = ANY(?))
+                        AND o.enhet = ANY(?)
                         AND (
                             s.adressebeskyttelse is null OR 
                             (s.adressebeskyttelse is NOT NULL AND (s.adressebeskyttelse != ? AND s.adressebeskyttelse != ?))

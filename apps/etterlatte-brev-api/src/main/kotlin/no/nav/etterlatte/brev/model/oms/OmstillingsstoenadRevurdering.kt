@@ -104,7 +104,7 @@ data class OmstillingsstoenadRevurdering(
 data class OmstillingsstoenadRevurderingRedigerbartUtfall(
     val feilutbetaling: FeilutbetalingType,
     val harUtbetaling: Boolean,
-    val harEtterbetaling: Boolean,
+    val erEtterbetaling: Boolean,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(
@@ -115,7 +115,7 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
             OmstillingsstoenadRevurderingRedigerbartUtfall(
                 feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
                 harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                harEtterbetaling = etterbetaling != null,
+                erEtterbetaling = etterbetaling != null,
             )
     }
 }

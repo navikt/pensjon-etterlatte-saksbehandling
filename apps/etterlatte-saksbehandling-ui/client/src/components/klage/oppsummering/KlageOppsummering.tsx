@@ -12,15 +12,15 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { ferdigstillKlagebehandling } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
-import { ApiErrorAlert } from '~ErrorBoundary'
 
-import { isFailure, isPending } from '~shared/api/apiUtils'
+import { isPending } from '~shared/api/apiUtils'
 import {
   formaterKlageutfall,
   VisInnstilling,
   VisKlageavslag,
   VisOmgjoering,
 } from '~components/klage/vurdering/KlageVurderingFelles'
+import { isFailureHandler } from '~shared/api/IsFailureHandler'
 
 export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
   const navigate = useNavigate()
@@ -71,17 +71,19 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
           <VisInnstilling innstilling={utfall.innstilling} sakId={sak.id} kanRedigere={kanRedigere} />
         ) : null}
 
-        {utfall?.utfall === 'DELVIS_OMGJOERING' || utfall?.utfall === 'OMGJOERING' ? (
+        {utfall?.utfall === 'DELVIS_OMGJOERING' ||
+        utfall?.utfall === 'OMGJOERING' ||
+        utfall?.utfall === 'AVVIST_MED_OMGJOERING' ? (
           <VisOmgjoering omgjoering={utfall.omgjoering} kanRedigere={kanRedigere} />
         ) : null}
       </Innhold>
 
-      {isFailure(ferdigstillStatus) ? (
-        <ApiErrorAlert>
-          Kunne ikke ferdigstille klagebehandling på grunn av en feil. Prøv igjen etter å ha lastet siden på nytt, og
-          meld sak hvis problemet vedvarer.
-        </ApiErrorAlert>
-      ) : null}
+      {isFailureHandler({
+        apiResult: ferdigstillStatus,
+        errorMessage:
+          'Kunne ikke ferdigstille klagebehandling på grunn av en feil. Prøv igjen etter å ha ' +
+          'lastet siden på nytt, og meld sak hvis problemet vedvarer.',
+      })}
 
       <FlexRow justify="center" $spacing>
         <Button variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'oppsummering'))}>

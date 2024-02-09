@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
@@ -18,6 +19,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.LocalTime
 import java.time.YearMonth
 import java.util.UUID
 
@@ -78,8 +80,14 @@ class TidshendelseRiver(
                     logger.info("Løpende ytelse: opprette oppgave for sak $sakId, behandlingsmåned=$behandlingsmaaned")
 
                     if (!dryrun) {
-                        // Frist...?
-                        val oppgaveId = behandlingService.opprettOppgave(sakId, behandlingsmaaned, OppgaveType.REVURDERING)
+                        val frist = Tidspunkt.ofNorskTidssone(behandlingsmaaned.atDay(20), LocalTime.NOON)
+                        val oppgaveId =
+                            behandlingService.opprettOppgave(
+                                sakId,
+                                OppgaveType.MANUELT_OPPHOER,
+                                merknad = "Aldersovergang",
+                                frist = frist,
+                            )
                         kvittering[HENDELSE_DATA_KEY] = oppgaveId
                     } else {
                         logger.info("Dry run: skipper oppgave")

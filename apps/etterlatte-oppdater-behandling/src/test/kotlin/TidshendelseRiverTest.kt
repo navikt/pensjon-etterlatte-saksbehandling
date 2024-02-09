@@ -6,6 +6,7 @@ import no.nav.etterlatte.BehandlingServiceImpl
 import no.nav.etterlatte.TidshendelseRiver
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_STEG_KEY
 import no.nav.etterlatte.rapidsandrivers.ALDERSOVERGANG_TYPE_KEY
@@ -18,6 +19,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalTime
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
@@ -31,11 +33,12 @@ class TidshendelseRiverTest {
         val hendelseId = UUID.randomUUID()
         val sakId = 321L
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
+        val frist = Tidspunkt.ofNorskTidssone(behandlingsmaaned.atDay(20), LocalTime.NOON)
         val nyOppgaveID = UUID.randomUUID()
 
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, dryRun = false)
 
-        every { behandlingService.opprettOppgave(sakId, behandlingsmaaned, OppgaveType.REVURDERING) } returns nyOppgaveID
+        every { behandlingService.opprettOppgave(sakId, OppgaveType.MANUELT_OPPHOER, any(), "Aldersovergang", frist) } returns nyOppgaveID
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
@@ -47,7 +50,7 @@ class TidshendelseRiverTest {
             field(0, HENDELSE_DATA_KEY).asText() shouldBe nyOppgaveID.toString()
         }
 
-        verify { behandlingService.opprettOppgave(sakId, behandlingsmaaned, OppgaveType.REVURDERING) }
+        verify { behandlingService.opprettOppgave(sakId, OppgaveType.MANUELT_OPPHOER, any(), "Aldersovergang", frist) }
     }
 
     @Test
@@ -70,7 +73,7 @@ class TidshendelseRiverTest {
             }
         }
 
-        verify(exactly = 0) { behandlingService.opprettOppgave(sakId, behandlingsmaaned, any()) }
+        verify(exactly = 0) { behandlingService.opprettOppgave(sakId, any(), any(), "Aldersovergang", any()) }
     }
 
     private fun lagMeldingForVurdertLoependeYtelse(

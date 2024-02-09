@@ -29,6 +29,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { FlyttJournalpost } from '~components/person/flyttjournalpost/FlyttJournalpost'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
+import { OppgavelistaWrapper } from '~components/oppgavebenk/OppgavelistaWrapper'
 
 function App() {
   const innloggetbrukerHentet = useInnloggetSaksbehandler()
@@ -56,8 +57,10 @@ function App() {
               <ConfigContext.Provider value={hentConfigStatus.data}>
                 <Routes>
                   <Route path="/" element={<ToggleMinOppgaveliste />}>
-                    <Route path="minoppgaveliste" element={<MinOppgaveliste />} />
+                    <Route index path="/" element={<OppgavelistaWrapper />} />
+                    <Route path="/minoppgaveliste" element={<MinOppgaveliste />} />
                   </Route>
+
                   <Route path="/flyttjournalpost" element={<FlyttJournalpost />} />
                   <Route path="/person/:fnr" element={<Person />} />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />

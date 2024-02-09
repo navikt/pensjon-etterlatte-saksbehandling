@@ -1,13 +1,11 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/Tilgangsmelding'
-import { Route, Routes, useNavigate } from 'react-router-dom'
-import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
-import { OppgavelistaWrapper } from '~components/oppgavebenk/OppgavelistaWrapper'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -24,12 +22,14 @@ export const ToggleMinOppgaveliste = () => {
 
   useEffect(() => {
     if (oppgaveListeValg === 'MinOppgaveliste') {
-      navigate('minoppgaveliste')
+      navigate('/minoppgaveliste')
     } else {
       navigate('/')
     }
   }, [oppgaveListeValg])
+  const location = useLocation()
 
+  console.log('renders toggle: ', location.pathname)
   return (
     <Container>
       <TabsWidth value={oppgaveListeValg} onChange={(e) => setOppgaveListeValg(e as OppgavelisteToggle)}>
@@ -42,12 +42,7 @@ export const ToggleMinOppgaveliste = () => {
           />
         </Tabs.List>
       </TabsWidth>
-
-      <Routes>
-        <Route index element={<OppgavelistaWrapper />} />
-        <Route key="minoppgaveliste" path="minoppgaveliste" element={<MinOppgaveliste />} />
-        <Route path="*" element={<OppgavelistaWrapper />} />
-      </Routes>
+      <Outlet />
     </Container>
   )
 }

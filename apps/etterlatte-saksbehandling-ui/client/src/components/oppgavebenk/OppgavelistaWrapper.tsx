@@ -5,12 +5,11 @@ import { Filter, filtrerOppgaver } from '~components/oppgavebenk/filter/oppgavel
 import { hentFilterFraLocalStorage, leggFilterILocalStorage } from '~components/oppgavebenk/filter/filterLocalStorage'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGosysOppgaver, hentOppgaverMedStatus, OppgaveDTO } from '~shared/api/oppgaver'
-import { isPending, isSuccess } from '~shared/api/apiUtils'
-import Spinner from '~shared/Spinner'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { oppdaterTildeling, sorterOppgaverEtterOpprettet } from '~components/oppgavebenk/oppgaveutils'
+import { oppdaterTildeling } from '~components/oppgavebenk/oppgaveutils'
 import { useAppDispatch } from '~store/Store'
 import { settHovedOppgavelisteLengde } from '~store/reducers/OppgavelisteReducer'
+import { useOppgaverEffect } from '~components/oppgavebenk/useOppgaverEffect'
+import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
 
 export const OppgavelistaWrapper = () => {
   const dispatch = useAppDispatch()
@@ -25,21 +24,18 @@ export const OppgavelistaWrapper = () => {
     hentOppgaverStatusFetch({ oppgavestatusFilter: filter.oppgavestatusFilter })
     hentGosysOppgaverFunc({})
   }
-  useEffect(() => hentAlleOppgaver(), [])
+
+  useOppgaverEffect({
+    oppgaver,
+    gosysOppgaver,
+    hentAlleOppgaver,
+    setHentedeOppgaver,
+    filtrerGosysOppgaverForInnloggetSaksbehandler: false,
+  })
+
   useEffect(() => {
     leggFilterILocalStorage(filter)
   }, [filter])
-
-  useEffect(() => {
-    if (isSuccess(oppgaver) && isSuccess(gosysOppgaver)) {
-      const alleOppgaver = sorterOppgaverEtterOpprettet([...oppgaver.data, ...gosysOppgaver.data])
-      setHentedeOppgaver(alleOppgaver)
-    } else if (isSuccess(oppgaver) && !isSuccess(gosysOppgaver)) {
-      setHentedeOppgaver(sorterOppgaverEtterOpprettet(oppgaver.data))
-    } else if (!isSuccess(oppgaver) && isSuccess(gosysOppgaver)) {
-      setHentedeOppgaver(sorterOppgaverEtterOpprettet(gosysOppgaver.data))
-    }
-  }, [oppgaver, gosysOppgaver])
 
   useEffect(() => {
     dispatch(settHovedOppgavelisteLengde(hentedeOppgaver.length))
@@ -62,38 +58,27 @@ export const OppgavelistaWrapper = () => {
   )
 
   return (
-    <>
-      {isPending(oppgaver) && <Spinner visible={true} label="Henter nye oppgaver" />}
-      {isFailureHandler({
-        apiResult: oppgaver,
-        errorMessage: 'Kunne ikke hente oppgaver',
-      })}
-      {isFailureHandler({
-        apiResult: gosysOppgaver,
-        errorMessage: 'Kunne ikke hente gosys oppgaver',
-      })}
-      {isSuccess(oppgaver) && (
-        <>
-          <FilterRad
-            hentAlleOppgaver={hentAlleOppgaver}
-            hentOppgaverStatus={(oppgavestatusFilter: Array<string>) =>
-              hentOppgaverStatusFetch({ oppgavestatusFilter: oppgavestatusFilter })
-            }
-            filter={filter}
-            setFilter={setFilter}
-            alleOppgaver={hentedeOppgaver}
-          />
-          <Oppgavelista
-            oppgaver={filtrerteOppgaver}
-            oppdaterTildeling={() => oppdaterTildeling(setHentedeOppgaver, hentedeOppgaver)}
-            hentOppgaver={hentAlleOppgaver}
-            filter={filter}
-            setFilter={setFilter}
-            totaltAntallOppgaver={hentedeOppgaver.length}
-            erMinOppgaveliste={false}
-          />
-        </>
-      )}
-    </>
+    <OppgaveFeilWrapper oppgaver={oppgaver} gosysOppgaver={gosysOppgaver}>
+      <>
+        <FilterRad
+          hentAlleOppgaver={hentAlleOppgaver}
+          hentOppgaverStatus={(oppgavestatusFilter: Array<string>) =>
+            hentOppgaverStatusFetch({ oppgavestatusFilter: oppgavestatusFilter })
+          }
+          filter={filter}
+          setFilter={setFilter}
+          alleOppgaver={hentedeOppgaver}
+        />
+        <Oppgavelista
+          oppgaver={filtrerteOppgaver}
+          oppdaterTildeling={() => oppdaterTildeling(setHentedeOppgaver, hentedeOppgaver)}
+          hentOppgaver={hentAlleOppgaver}
+          filter={filter}
+          setFilter={setFilter}
+          totaltAntallOppgaver={hentedeOppgaver.length}
+          erMinOppgaveliste={false}
+        />
+      </>
+    </OppgaveFeilWrapper>
   )
 }

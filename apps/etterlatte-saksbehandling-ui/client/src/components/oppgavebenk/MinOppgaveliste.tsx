@@ -4,16 +4,14 @@ import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 import { useEffect, useState } from 'react'
-import { isPending, isSuccess } from '~shared/api/apiUtils'
-import { oppdaterTildeling, sorterOppgaverEtterOpprettet } from '~components/oppgavebenk/oppgaveutils'
+import { oppdaterTildeling } from '~components/oppgavebenk/oppgaveutils'
 import styled from 'styled-components'
-import { useAppDispatch, useAppSelector } from '~store/Store'
-import Spinner from '~shared/Spinner'
-import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useAppDispatch } from '~store/Store'
 import { settMinOppgavelisteLengde } from '~store/reducers/OppgavelisteReducer'
+import { useOppgaverEffect } from '~components/oppgavebenk/useOppgaverEffect'
+import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
 
 export const MinOppgaveliste = () => {
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const dispatch = useAppDispatch()
 
   const [filter, setFilter] = useState<Filter>(minOppgavelisteFiltre())
@@ -27,67 +25,45 @@ export const MinOppgaveliste = () => {
     hentGosysOppgaverFunc({})
   }
 
-  const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
-    return oppgaver.filter((o) => o.saksbehandlerIdent === innloggetSaksbehandler.ident)
-  }
-
-  useEffect(() => hentAlleOppgaver(), [])
-  useEffect(() => {
-    if (isSuccess(oppgaver) && isSuccess(gosysOppgaver)) {
-      const alleOppgaver = sorterOppgaverEtterOpprettet([
-        ...oppgaver.data,
-        ...filtrerKunInnloggetBrukerOppgaver(gosysOppgaver.data),
-      ])
-      setHentedeOppgaver(alleOppgaver)
-    } else if (isSuccess(oppgaver) && !isSuccess(gosysOppgaver)) {
-      setHentedeOppgaver(sorterOppgaverEtterOpprettet(oppgaver.data))
-    } else if (!isSuccess(oppgaver) && isSuccess(gosysOppgaver)) {
-      setHentedeOppgaver(sorterOppgaverEtterOpprettet(filtrerKunInnloggetBrukerOppgaver(gosysOppgaver.data)))
-    }
-  }, [oppgaver, gosysOppgaver])
+  useOppgaverEffect({
+    oppgaver,
+    gosysOppgaver,
+    hentAlleOppgaver,
+    setHentedeOppgaver,
+    filtrerGosysOppgaverForInnloggetSaksbehandler: true,
+  })
 
   useEffect(() => {
     dispatch(settMinOppgavelisteLengde(hentedeOppgaver.length))
   }, [hentedeOppgaver])
 
   return (
-    <>
-      {isPending(oppgaver) && <Spinner visible={true} label="Henter nye oppgaver" />}
-      {isFailureHandler({
-        apiResult: oppgaver,
-        errorMessage: 'Kunne ikke hente oppgaver',
-      })}
-      {isFailureHandler({
-        apiResult: gosysOppgaver,
-        errorMessage: 'Kunne ikke hente gosys oppgaver',
-      })}
-      {isSuccess(oppgaver) && (
-        <>
-          <ValgWrapper>
-            <VelgOppgavestatuser
-              value={filter.oppgavestatusFilter}
-              onChange={(oppgavestatusFilter) => {
-                hentOppgaverStatusFetch({
-                  oppgavestatusFilter: oppgavestatusFilter,
-                  minOppgavelisteIdent: true,
-                })
-                setFilter({ ...filter, oppgavestatusFilter })
-              }}
-            />
-          </ValgWrapper>
-          <Oppgavelista
-            oppgaver={hentedeOppgaver}
-            hentOppgaver={hentAlleOppgaver}
-            filter={filter}
-            setFilter={setFilter}
-            oppdaterTildeling={(id, _saksbehandler, versjon) =>
-              oppdaterTildeling(setHentedeOppgaver, hentedeOppgaver)(id, null, versjon)
-            }
-            erMinOppgaveliste={true}
+    <OppgaveFeilWrapper oppgaver={oppgaver} gosysOppgaver={gosysOppgaver}>
+      <>
+        <ValgWrapper>
+          <VelgOppgavestatuser
+            value={filter.oppgavestatusFilter}
+            onChange={(oppgavestatusFilter) => {
+              hentOppgaverStatusFetch({
+                oppgavestatusFilter: oppgavestatusFilter,
+                minOppgavelisteIdent: true,
+              })
+              setFilter({ ...filter, oppgavestatusFilter })
+            }}
           />
-        </>
-      )}
-    </>
+        </ValgWrapper>
+        <Oppgavelista
+          oppgaver={hentedeOppgaver}
+          hentOppgaver={hentAlleOppgaver}
+          filter={filter}
+          setFilter={setFilter}
+          oppdaterTildeling={(id, _saksbehandler, versjon) =>
+            oppdaterTildeling(setHentedeOppgaver, hentedeOppgaver)(id, null, versjon)
+          }
+          erMinOppgaveliste={true}
+        />
+      </>
+    </OppgaveFeilWrapper>
   )
 }
 

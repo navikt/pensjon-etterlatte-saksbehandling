@@ -12,7 +12,8 @@ export const MinOppgaveliste = (props: {
   minsideOppgaverResult: Result<OppgaveDTO[]>
   gosysOppgaverResult: Result<OppgaveDTO[]>
   minsideFilter: Filter
-  setMinsideFilter: React.Dispatch<React.SetStateAction<Filter>>
+  setMinsideFilter: (filter: Filter) => void
+  setFilter: React.Dispatch<React.SetStateAction<Filter>>
   setMinsideOppgaver: React.Dispatch<React.SetStateAction<OppgaveDTO[]>>
 }) => {
   const {
@@ -22,6 +23,7 @@ export const MinOppgaveliste = (props: {
     minsideFilter,
     setMinsideFilter,
     setMinsideOppgaver,
+    setFilter,
   } = props
 
   return (
@@ -39,7 +41,7 @@ export const MinOppgaveliste = (props: {
           oppgaver={minsideOppgaver}
           hentOppgaver={() => {}}
           filter={minsideFilter}
-          setFilter={setMinsideFilter}
+          setFilter={setFilter}
           oppdaterTildeling={(id, _saksbehandler, versjon) =>
             oppdaterTildeling(setMinsideOppgaver, minsideOppgaver)(id, null, versjon)
           }

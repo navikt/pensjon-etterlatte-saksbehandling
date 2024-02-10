@@ -47,10 +47,6 @@ export const ToggleMinOppgaveliste = () => {
   const [hovedsideFilter, setHovedsideFilter] = useState<Filter>(hentFilterFraLocalStorage())
 
   useEffect(() => {
-    hentMinsideOppgaver(minsideFilter.oppgavestatusFilter)
-  }, [minsideFilter.oppgavestatusFilter])
-
-  useEffect(() => {
     leggFilterILocalStorage(hovedsideFilter)
   }, [hovedsideFilter])
 
@@ -80,16 +76,16 @@ export const ToggleMinOppgaveliste = () => {
     hentGosysOppgaverFunc({})
   }
 
+  useEffect(() => {
+    hentAlleOppgaver()
+  }, [])
+
   const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
     return oppgaver.filter((o) => o.saksbehandlerIdent === innloggetSaksbehandler.ident)
   }
 
   const [hovedsideOppgaver, setHovedsideOppgaver] = useState<Array<OppgaveDTO>>([])
   const [minsideOppgaver, setMinsideOppgaver] = useState<Array<OppgaveDTO>>([])
-
-  useEffect(() => {
-    hentAlleOppgaver()
-  }, [])
 
   useEffect(() => {
     if (isSuccess(hovedsideOppgaverResult) && isSuccess(gosysOppgaverResult)) {
@@ -137,7 +133,11 @@ export const ToggleMinOppgaveliste = () => {
           minsideOppgaverResult={minsideOppgaverResult}
           gosysOppgaverResult={gosysOppgaverResult}
           minsideFilter={minsideFilter}
-          setMinsideFilter={setMinsideFilter}
+          setMinsideFilter={(filter: Filter) => {
+            hentMinsideOppgaver(filter.oppgavestatusFilter)
+            setMinsideFilter(filter)
+          }}
+          setFilter={setMinsideFilter}
           setMinsideOppgaver={setMinsideOppgaver}
         />
       ) : (

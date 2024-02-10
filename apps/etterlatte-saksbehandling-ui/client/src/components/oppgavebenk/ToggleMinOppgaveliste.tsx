@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/Tilgangsmelding'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -12,7 +12,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGosysOppgaver, hentOppgaverMedStatus, OppgaveDTO } from '~shared/api/oppgaver'
 import { isSuccess } from '~shared/api/apiUtils'
 import { sorterOppgaverEtterOpprettet } from '~components/oppgavebenk/oppgaveutils'
-import { settHovedOppgavelisteLengde, settMinOppgavelisteLengde } from '~store/reducers/OppgavelisteReducer'
 import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
 import { OppgavelistaWrapper } from '~components/oppgavebenk/OppgavelistaWrapper'
 
@@ -23,12 +22,10 @@ export const ToggleMinOppgaveliste = () => {
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
   }
-  const location = useLocation()
-
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
-  const navigate = useNavigate()
 
-  const oppgavelengde = useAppSelector((state) => state.oppgaveRedurcer)
+  const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (location.pathname.includes('minoppgaveliste')) {
@@ -45,8 +42,6 @@ export const ToggleMinOppgaveliste = () => {
       navigate('/')
     }
   }, [oppgaveListeValg])
-
-  const dispatch = useAppDispatch()
 
   const [minsideFilter, setMinsideFilter] = useState<Filter>(minOppgavelisteFiltre())
   const [hovedsideFilter, setHovedsideFilter] = useState<Filter>(hentFilterFraLocalStorage())
@@ -124,22 +119,14 @@ export const ToggleMinOppgaveliste = () => {
     }
   }, [gosysOppgaverResult, minsideOppgaverResult])
 
-  useEffect(() => {
-    dispatch(settHovedOppgavelisteLengde(hovedsideOppgaver.length))
-  }, [hovedsideOppgaver])
-
-  useEffect(() => {
-    dispatch(settMinOppgavelisteLengde(minsideOppgaver.length))
-  }, [minsideOppgaver])
-
   return (
     <Container>
       <TabsWidth value={oppgaveListeValg} onChange={(e) => setOppgaveListeValg(e as OppgavelisteToggle)}>
         <Tabs.List>
-          <Tabs.Tab value="Oppgavelista" label={`Oppgavelisten (${oppgavelengde.hovedlista})`} icon={<InboxIcon />} />
+          <Tabs.Tab value="Oppgavelista" label={`Oppgavelisten (${hovedsideOppgaver.length})`} icon={<InboxIcon />} />
           <Tabs.Tab
             value="MinOppgaveliste"
-            label={`Min oppgaveliste (${oppgavelengde.minliste})`}
+            label={`Min oppgaveliste (${minsideOppgaver.length})`}
             icon={<PersonIcon aria-hidden />}
           />
         </Tabs.List>
@@ -148,7 +135,7 @@ export const ToggleMinOppgaveliste = () => {
         <MinOppgaveliste
           minsideOppgaver={minsideOppgaver}
           minsideOppgaverResult={minsideOppgaverResult}
-          gosysOppgaverResult={gosysOppgaverResult} //TODO: hvem skal filtrere for sb sine?
+          gosysOppgaverResult={gosysOppgaverResult}
           minsideFilter={minsideFilter}
           setMinsideFilter={setMinsideFilter}
           setMinsideOppgaver={setMinsideOppgaver}

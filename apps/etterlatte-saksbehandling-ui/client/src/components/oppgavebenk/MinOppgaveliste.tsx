@@ -3,18 +3,26 @@ import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { oppdaterTildeling } from '~components/oppgavebenk/oppgaveutils'
 import styled from 'styled-components'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
-import { useOppgaverEffect } from '~components/oppgavebenk/useOppgaverEffect'
+import { OppgaveDTO } from '~shared/api/oppgaver'
+import { Result } from '~shared/api/apiUtils'
+import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
-export const MinOppgaveliste = () => {
+export const MinOppgaveliste = (props: {
+  minsideOppgaver: OppgaveDTO[]
+  minsideOppgaverResult: Result<OppgaveDTO[]>
+  gosysOppgaverResult: Result<OppgaveDTO[]>
+  minsideFilter: Filter
+  setMinsideFilter: React.Dispatch<React.SetStateAction<Filter>>
+  setMinsideOppgaver: React.Dispatch<React.SetStateAction<OppgaveDTO[]>>
+}) => {
   const {
     minsideOppgaver,
     minsideOppgaverResult,
     gosysOppgaverResult,
     minsideFilter,
-    hentMinsideOppgaver,
     setMinsideFilter,
     setMinsideOppgaver,
-  } = useOppgaverEffect()
+  } = props
 
   return (
     <OppgaveFeilWrapper oppgaver={minsideOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
@@ -23,7 +31,6 @@ export const MinOppgaveliste = () => {
           <VelgOppgavestatuser
             value={minsideFilter.oppgavestatusFilter}
             onChange={(oppgavestatusFilter) => {
-              hentMinsideOppgaver(oppgavestatusFilter)
               setMinsideFilter({ ...minsideFilter, oppgavestatusFilter })
             }}
           />

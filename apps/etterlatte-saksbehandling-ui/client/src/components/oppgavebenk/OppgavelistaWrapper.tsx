@@ -1,11 +1,21 @@
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { FilterRad } from '~components/oppgavebenk/FilterRad'
-import { filtrerOppgaver } from '~components/oppgavebenk/filter/oppgavelistafiltre'
+import { Filter, filtrerOppgaver } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 import { oppdaterTildeling } from '~components/oppgavebenk/oppgaveutils'
-import { useOppgaverEffect } from '~components/oppgavebenk/useOppgaverEffect'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
+import { OppgaveDTO } from '~shared/api/oppgaver'
+import { Result } from '~shared/api/apiUtils'
 
-export const OppgavelistaWrapper = () => {
+export const OppgavelistaWrapper = (props: {
+  hovedsideOppgaver: OppgaveDTO[]
+  hentHovedsideOppgaverAlle: () => void
+  hovedsideOppgaverResult: Result<OppgaveDTO[]>
+  gosysOppgaverResult: Result<OppgaveDTO[]>
+  hentHovedsideOppgaver: (oppgavestatusFilter: Array<string>) => void
+  hovedsideFilter: Filter
+  setHovedsideFilter: React.Dispatch<React.SetStateAction<Filter>>
+  setHovedsideOppgaver: React.Dispatch<React.SetStateAction<OppgaveDTO[]>>
+}) => {
   const {
     hovedsideOppgaver,
     hentHovedsideOppgaverAlle,
@@ -15,7 +25,7 @@ export const OppgavelistaWrapper = () => {
     hovedsideFilter,
     setHovedsideFilter,
     setHovedsideOppgaver,
-  } = useOppgaverEffect()
+  } = props
 
   const mutableOppgaver = hovedsideOppgaver.concat()
 

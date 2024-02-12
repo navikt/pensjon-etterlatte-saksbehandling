@@ -17,7 +17,8 @@ import javax.sql.DataSource
 class JobbPollerIntegrationTest(dataSource: DataSource) {
     companion object {
         @RegisterExtension
-        private val tidshendelserDatabaseExtension = TidshendelserDatabaseExtension()
+        @Suppress("unused")
+        private val tidshendelserDatabaseExtension = TidshendelserDatabaseExtension(resetAfterEach = true)
     }
 
     private val aldersovergangerService = mockk<AldersovergangerService>()
@@ -28,7 +29,6 @@ class JobbPollerIntegrationTest(dataSource: DataSource) {
     @AfterEach
     fun afterEach() {
         clearAllMocks()
-        tidshendelserDatabaseExtension.resetDb()
     }
 
     @Test

@@ -7,4 +7,5 @@ package no.nav.etterlatte.tidshendelser
     ALTER SEQUENCE jobb_id_seq RESTART WITH 1;
 """,
 )
-class TidshendelserDatabaseExtension : DatabaseExtension()
+class TidshendelserDatabaseExtension(resetAfterEach: Boolean = false) :
+    DatabaseExtension(resetAfterEach = resetAfterEach)

@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
 import org.junit.jupiter.api.extension.AfterAllCallback
+import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.ParameterContext
 import org.junit.jupiter.api.extension.ParameterResolver
@@ -19,7 +20,8 @@ import javax.sql.DataSource
  * Det tar veldig mye tid å kjøre opp stadig nye Postgres-containere og kjøre Flyway migreringer.
  * Denne extensionen kjører opp èn instans, som så gjenbrukes av de som måtte ønske det.
  */
-open class DatabaseExtension : AfterAllCallback, ExtensionContext.Store.CloseableResource, ParameterResolver {
+open class DatabaseExtension(private val resetAfterEach: Boolean = false) :
+    AfterEachCallback, AfterAllCallback, ExtensionContext.Store.CloseableResource, ParameterResolver {
     companion object {
         val logger: org.slf4j.Logger = LoggerFactory.getLogger(DatabaseExtension::class.java)
         val postgreSQLContainer =
@@ -36,6 +38,12 @@ open class DatabaseExtension : AfterAllCallback, ExtensionContext.Store.Closeabl
     }
 
     private val connections = mutableListOf<Connection>()
+
+    override fun afterEach(context: ExtensionContext) {
+        if (resetAfterEach) {
+            resetDb()
+        }
+    }
 
     /**
      * Ikke gå tom for tilkoblinger, så kast ut alle som er ferdige med jobben sin

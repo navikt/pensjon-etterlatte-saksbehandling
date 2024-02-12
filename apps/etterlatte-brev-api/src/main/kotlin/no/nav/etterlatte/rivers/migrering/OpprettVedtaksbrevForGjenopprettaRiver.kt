@@ -54,6 +54,7 @@ internal class OpprettVedtaksbrevForGjenopprettaRiver(
                 varselbrev.brev.id,
                 brukerTokenInfo,
             )
+            // Her skal vi sette på vent
         }
     }
 }

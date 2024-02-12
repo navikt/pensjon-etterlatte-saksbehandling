@@ -7,16 +7,19 @@ import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import javax.sql.DataSource
 
-@ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class JobbPollerIntegrationTest {
-    private val dataSource: DataSource = DatabaseExtension.dataSource
+class JobbPollerIntegrationTest(dataSource: DataSource) {
+    companion object {
+        @RegisterExtension
+        private val dbExtension = DatabaseExtension()
+    }
+
     private val aldersovergangerService = mockk<AldersovergangerService>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
@@ -25,7 +28,7 @@ class JobbPollerIntegrationTest {
     @AfterEach
     fun afterEach() {
         clearAllMocks()
-        DatabaseExtension.resetDb()
+        dbExtension.resetDb()
     }
 
     @Test

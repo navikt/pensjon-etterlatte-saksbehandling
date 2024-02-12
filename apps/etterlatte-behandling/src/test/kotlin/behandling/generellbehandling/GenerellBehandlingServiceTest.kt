@@ -57,11 +57,11 @@ import java.sql.Connection
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID.randomUUID
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class GenerellBehandlingServiceTest {
-    private val dataSource = DatabaseExtension.dataSource
+class GenerellBehandlingServiceTest(val dataSource: DataSource) {
     private lateinit var dao: GenerellBehandlingDao
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var hendelseDao: HendelseDao

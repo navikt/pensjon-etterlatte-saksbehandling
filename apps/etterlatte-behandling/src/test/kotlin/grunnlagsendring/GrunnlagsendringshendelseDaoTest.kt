@@ -37,11 +37,11 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.util.UUID
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class GrunnlagsendringshendelseDaoTest {
-    private val dataSource = DatabaseExtension.dataSource
+internal class GrunnlagsendringshendelseDaoTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
     private lateinit var grunnlagsendringshendelsesRepo: GrunnlagsendringshendelseDao
     private lateinit var behandlingRepo: BehandlingDao

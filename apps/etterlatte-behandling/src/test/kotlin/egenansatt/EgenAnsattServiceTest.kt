@@ -38,13 +38,13 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.Logger
 import java.sql.Connection
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class EgenAnsattServiceTest {
-    val sikkerLogg: Logger = sikkerlogger()
+internal class EgenAnsattServiceTest(val dataSource: DataSource) {
+    private val sikkerLogg: Logger = sikkerlogger()
 
-    private val dataSource = DatabaseExtension.dataSource
     private lateinit var sakRepo: SakDao
     private lateinit var oppgaveRepo: OppgaveDaoImpl
     private lateinit var oppgaveRepoMedSporing: OppgaveDaoMedEndringssporingImpl

@@ -39,9 +39,9 @@ export const VelgSaksbehandler = ({
 
   const [valgtSaksbehandler, setValgtSaksbehandler] = useState<Saksbehandler | undefined>(saksbehandler)
 
-  const [, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
-  const [, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
-  const [, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
+  const [tildelSaksbehandlerResult, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
+  const [fjernSaksbehandlerResult, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
+  const [byttSaksbehandlerResult, byttSaksbehandler] = useApiCall(byttSaksbehandlerApi)
 
   const onSaksbehandlerSelect = (saksbehandlerNavn: string, erValgt: boolean) => {
     if (erValgt) {
@@ -100,6 +100,7 @@ export const VelgSaksbehandler = ({
             size="small"
             variant="tertiary"
             onClick={() => setOpenDropdown(true)}
+            loading={byttSaksbehandlerResult.status === 'pending'}
           >
             {valgtSaksbehandler?.navn
               ? `${valgtSaksbehandler.navn} ${valgtSaksbehandler.navn === innloggetSaksbehandler.navn ? '(meg)' : ''}`
@@ -112,9 +113,15 @@ export const VelgSaksbehandler = ({
                 options={saksbehandlereIEnhet.map((behandler) => behandler.navn!)}
                 onToggleSelected={onSaksbehandlerSelect}
                 selectedOptions={!!valgtSaksbehandler ? [valgtSaksbehandler.navn!] : []}
+                isLoading={byttSaksbehandlerResult.status === 'pending'}
               />
               {!valgtSaksbehandler?.ident?.includes(innloggetSaksbehandler.ident) && (
-                <ValgButton variant="tertiary" size="xsmall" onClick={onTildelTilMeg}>
+                <ValgButton
+                  variant="tertiary"
+                  size="xsmall"
+                  onClick={onTildelTilMeg}
+                  loading={tildelSaksbehandlerResult.status === 'pending'}
+                >
                   Tildel til meg
                 </ValgButton>
               )}
@@ -127,6 +134,7 @@ export const VelgSaksbehandler = ({
                   onClick={onFjernTildeling}
                   icon={<PersonCrossIcon />}
                   iconPosition="right"
+                  loading={fjernSaksbehandlerResult.status === 'pending'}
                 >
                   Fjern tildeling
                 </ValgButton>

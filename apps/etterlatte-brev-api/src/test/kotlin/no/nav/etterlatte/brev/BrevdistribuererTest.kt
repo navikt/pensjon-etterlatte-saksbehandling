@@ -15,6 +15,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -50,7 +51,7 @@ class BrevdistribuererTest {
                 journalpostId,
                 DistribusjonsType.ANNET,
                 DistribusjonsTidspunktType.KJERNETID,
-                brev.mottaker!!.adresse,
+                brev.mottaker.adresse,
             )
         }
     }
@@ -100,6 +101,7 @@ class BrevdistribuererTest {
         sakId = Random.nextLong(10000),
         behandlingId = null,
         tittel = null,
+        spraak = Spraak.NB,
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,

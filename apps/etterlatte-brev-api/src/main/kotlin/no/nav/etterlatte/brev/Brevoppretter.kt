@@ -181,9 +181,10 @@ class Brevoppretter(
                 }
 
             val innholdVedlegg = async { redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData) }
+
             OpprettBrevRequest(
                 generellBrevData,
-                BrevInnhold(tittel, overstyrSpraak ?: generellBrevData.spraak, innhold.await()),
+                BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),
                 innholdVedlegg.await(),
             )
         }

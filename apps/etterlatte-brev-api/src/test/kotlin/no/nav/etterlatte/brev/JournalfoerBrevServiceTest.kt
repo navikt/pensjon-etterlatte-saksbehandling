@@ -18,6 +18,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -126,6 +127,7 @@ class JournalfoerBrevServiceTest {
                 41,
                 BEHANDLING_ID,
                 "tittel",
+                spraak = Spraak.NB,
                 BrevProsessType.AUTOMATISK,
                 "fnr",
                 Status.JOURNALFOERT,
@@ -156,6 +158,7 @@ class JournalfoerBrevServiceTest {
                 sakId = 41,
                 behandlingId = null,
                 tittel = null,
+                spraak = Spraak.NB,
                 prosessType = BrevProsessType.AUTOMATISK,
                 soekerFnr = "soeker_fnr",
                 status = Status.FERDIGSTILT,
@@ -225,6 +228,7 @@ class JournalfoerBrevServiceTest {
                 sakId = 41,
                 behandlingId = null,
                 tittel = null,
+                spraak = Spraak.NB,
                 prosessType = BrevProsessType.AUTOMATISK,
                 soekerFnr = "soeker_fnr1",
                 status = Status.FERDIGSTILT,
@@ -289,6 +293,7 @@ class JournalfoerBrevServiceTest {
         sakId = Random.nextLong(10000),
         behandlingId = null,
         tittel = null,
+        spraak = Spraak.NB,
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,

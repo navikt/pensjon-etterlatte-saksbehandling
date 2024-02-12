@@ -58,7 +58,7 @@ export const OppgavelistaWrapper = (props: {
         <Oppgavelista
           oppgaver={filtrerteOppgaver}
           oppdaterTildeling={() => oppdaterTildeling(setHovedsideOppgaver, hovedsideOppgaver)}
-          hentOppgaver={() => {}}
+          oppdaterFrist={() => {}}
           filter={hovedsideFilter}
           setFilter={setHovedsideFilter}
           totaltAntallOppgaver={hovedsideOppgaver.length}

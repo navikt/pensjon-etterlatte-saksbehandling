@@ -15,7 +15,7 @@ interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveListe: boolean
-  hentOppgaver: () => void
+  oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
 }
 
 export const OppgaverTableRow = ({
@@ -23,7 +23,7 @@ export const OppgaverTableRow = ({
   saksbehandlereIEnhet,
   oppdaterTildeling,
   erMinOppgaveListe,
-  hentOppgaver,
+  oppdaterFrist,
 }: Props): ReactNode => {
   return (
     <Table.Row>
@@ -33,7 +33,7 @@ export const OppgaverTableRow = ({
           <FristHandlinger
             orginalFrist={oppgave.frist}
             oppgaveId={oppgave.id}
-            hentOppgaver={hentOppgaver}
+            oppdaterFrist={oppdaterFrist}
             erRedigerbar={erOppgaveRedigerbar(oppgave.status)}
             oppgaveVersjon={oppgave.versjon}
             type={oppgave.type}

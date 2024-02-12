@@ -18,7 +18,7 @@ interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveliste: boolean
-  hentOppgaver: () => void
+  oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
   filter: Filter
   setFilter: Dispatch<SetStateAction<Filter>>
@@ -28,7 +28,7 @@ export const OppgaverTable = ({
   oppgaver,
   oppdaterTildeling,
   erMinOppgaveliste,
-  hentOppgaver,
+  oppdaterFrist,
   saksbehandlereIEnhet,
   filter,
   setFilter,
@@ -73,7 +73,7 @@ export const OppgaverTable = ({
                 saksbehandlereIEnhet={saksbehandlereIEnhet}
                 oppdaterTildeling={oppdaterTildeling}
                 erMinOppgaveListe={erMinOppgaveliste}
-                hentOppgaver={hentOppgaver}
+                oppdaterFrist={oppdaterFrist}
               />
             )
           })}

@@ -8,7 +8,7 @@ import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 export interface oppgaveListaProps {
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   oppgaver: ReadonlyArray<OppgaveDTO>
-  hentOppgaver: () => void
+  oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
   filter: Filter
   setFilter: Dispatch<SetStateAction<Filter>>
@@ -19,7 +19,7 @@ export interface oppgaveListaProps {
 export const Oppgavelista = ({
   oppdaterTildeling,
   oppgaver,
-  hentOppgaver,
+  oppdaterFrist,
   saksbehandlereIEnhet,
   filter,
   setFilter,
@@ -44,7 +44,7 @@ export const Oppgavelista = ({
             oppgaver={paginerteOppgaver}
             oppdaterTildeling={oppdaterTildeling}
             erMinOppgaveliste={erMinOppgaveliste}
-            hentOppgaver={hentOppgaver}
+            oppdaterFrist={oppdaterFrist}
             saksbehandlereIEnhet={saksbehandlereIEnhet}
             filter={filter}
             setFilter={setFilter}

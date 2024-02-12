@@ -31,7 +31,7 @@ data class BarnepensjonOpphoer(
                 innholdForhaandsvarsel = vedleggHvisFeilutbetaling(feilutbetaling, innhold),
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
-                feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
+                feilutbetaling = feilutbetaling,
             )
         }
     }

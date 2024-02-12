@@ -31,7 +31,7 @@ data class OmstillingsstoenadOpphoer(
                 innhold = innholdMedVedlegg.innhold(),
                 innholdForhaandsvarsel = vedleggHvisFeilutbetaling(feilutbetaling, innholdMedVedlegg),
                 bosattUtland = utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
-                feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
+                feilutbetaling = feilutbetaling,
             )
         }
     }

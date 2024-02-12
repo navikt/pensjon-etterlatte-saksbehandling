@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -60,6 +61,7 @@ class BrevdataFacade(
     suspend fun hentGenerellBrevData(
         sakId: Long,
         behandlingId: UUID?,
+        spraak: Spraak? = null,
         brukerTokenInfo: BrukerTokenInfo,
     ): GenerellBrevData {
         return coroutineScope {
@@ -128,7 +130,7 @@ class BrevdataFacade(
                                     virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
                                     revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
                                 ),
-                            spraak = grunnlag.mapSpraak(),
+                            spraak = spraak ?: grunnlag.mapSpraak(),
                             revurderingsaarsak = vedtakInnhold.behandling.revurderingsaarsak,
                             systemkilde = systemkilde,
                             utlandstilknytning = behandling?.utlandstilknytning,

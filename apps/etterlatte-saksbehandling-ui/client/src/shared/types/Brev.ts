@@ -2,6 +2,7 @@ export interface IBrev {
   id: number
   sakId: number
   tittel: string
+  spraak: Spraak
   behandlingId: string
   prosessType: BrevProsessType
   soekerFnr: string

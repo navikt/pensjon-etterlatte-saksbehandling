@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from './apiClient'
-import { Brevtype, IBrev, Mottaker } from '~shared/types/Brev'
+import { Brevtype, IBrev, Mottaker, Spraak } from '~shared/types/Brev'
 
 export const hentBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<IBrev>> =>
   apiClient.get(`/brev/${props.brevId}?sakId=${props.sakId}`)
@@ -38,6 +38,13 @@ export const oppdaterTittel = async (args: {
   tittel: string
 }): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/${args.brevId}/tittel?sakId=${args.sakId}`, { tittel: args.tittel })
+
+export const oppdaterSpraak = async (args: {
+  brevId: number
+  sakId: number
+  spraak: Spraak
+}): Promise<ApiResponse<IBrev>> =>
+  apiClient.post(`/brev/${args.brevId}/spraak?sakId=${args.sakId}`, { spraak: args.spraak })
 
 export const slettBrev = async (args: { brevId: number; sakId: number }): Promise<ApiResponse<IBrev>> =>
   apiClient.delete(`/brev/${args.brevId}?sakId=${args.sakId}`)

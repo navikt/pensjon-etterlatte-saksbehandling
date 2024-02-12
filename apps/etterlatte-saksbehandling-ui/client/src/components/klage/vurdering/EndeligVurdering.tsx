@@ -1,8 +1,7 @@
 import { Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import React from 'react'
-import { Content, ContentHeader, FlexRow } from '~shared/styled'
-import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
-import { Feilmelding, Innhold, VurderingWrapper } from '~components/klage/styled'
+import { FlexRow } from '~shared/styled'
+import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { useKlage } from '~components/klage/useKlage'
 import {
@@ -87,7 +86,7 @@ function mapKlageTilFormdata(klage: Klage | null): FormdataVurdering {
   }
 }
 
-export function KlageVurderingRedigering(props: { klage: Klage }) {
+export function EndeligVurdering(props: { klage: Klage }) {
   const klage = props.klage
 
   const navigate = useNavigate()
@@ -126,45 +125,39 @@ export function KlageVurderingRedigering(props: { klage: Klage }) {
   }
 
   return (
-    <Content>
-      <ContentHeader>
-        <HeadingWrapper>
-          <Heading level="1" size="large">
-            Ta stilling til klagen
-          </Heading>
-        </HeadingWrapper>
-      </ContentHeader>
+    <>
+      <Heading level="2" size="medium">
+        Ta stilling til klagen
+      </Heading>
 
       <form onSubmit={handleSubmit(sendInnVurdering)}>
-        <Innhold>
-          <VurderingWrapper>
-            <Controller
-              rules={{
-                required: true,
-              }}
-              name="utfall"
-              control={control}
-              render={({ field, fieldState }) => (
-                <>
-                  <RadioGroup legend="Velg utfall" {...field}>
-                    <Radio value={Utfall.OMGJOERING}> {teksterKlageutfall[Utfall.OMGJOERING]}</Radio>
-                    <Radio value={Utfall.DELVIS_OMGJOERING}>{teksterKlageutfall[Utfall.DELVIS_OMGJOERING]}</Radio>
-                    <Radio value={Utfall.STADFESTE_VEDTAK}> {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]}</Radio>
-                  </RadioGroup>
-                  {fieldState.error ? <Feilmelding>Du må velge et utfall for klagen.</Feilmelding> : null}
-                </>
-              )}
-            />
-          </VurderingWrapper>
+        <VurderingWrapper>
+          <Controller
+            rules={{
+              required: true,
+            }}
+            name="utfall"
+            control={control}
+            render={({ field, fieldState }) => (
+              <>
+                <RadioGroup legend="Velg utfall" {...field}>
+                  <Radio value={Utfall.OMGJOERING}> {teksterKlageutfall[Utfall.OMGJOERING]}</Radio>
+                  <Radio value={Utfall.DELVIS_OMGJOERING}>{teksterKlageutfall[Utfall.DELVIS_OMGJOERING]}</Radio>
+                  <Radio value={Utfall.STADFESTE_VEDTAK}> {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]}</Radio>
+                </RadioGroup>
+                {fieldState.error ? <Feilmelding>Du må velge et utfall for klagen.</Feilmelding> : null}
+              </>
+            )}
+          />
+        </VurderingWrapper>
 
-          {valgtUtfall === Utfall.STADFESTE_VEDTAK || valgtUtfall === Utfall.DELVIS_OMGJOERING ? (
-            <KlageInnstilling control={control} />
-          ) : null}
+        {valgtUtfall === Utfall.STADFESTE_VEDTAK || valgtUtfall === Utfall.DELVIS_OMGJOERING ? (
+          <KlageInnstilling control={control} />
+        ) : null}
 
-          {valgtUtfall === Utfall.OMGJOERING || valgtUtfall === Utfall.DELVIS_OMGJOERING ? (
-            <KlageOmgjoering control={control} />
-          ) : null}
-        </Innhold>
+        {valgtUtfall === Utfall.OMGJOERING || valgtUtfall === Utfall.DELVIS_OMGJOERING ? (
+          <KlageOmgjoering control={control} />
+        ) : null}
 
         {isFailureHandler({
           apiResult: lagreUtfallStatus,
@@ -180,7 +173,7 @@ export function KlageVurderingRedigering(props: { klage: Klage }) {
           </Button>
         </FlexRow>
       </form>
-    </Content>
+    </>
   )
 }
 
@@ -202,7 +195,7 @@ function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) {
 
   return (
     <>
-      <Heading level="2" size="medium">
+      <Heading level="3" size="medium">
         Omgjøring
       </Heading>
 
@@ -265,7 +258,7 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
 
   return (
     <>
-      <Heading level="2" size="medium" spacing>
+      <Heading level="3" size="medium" spacing>
         Innstilling til KA
       </Heading>
 

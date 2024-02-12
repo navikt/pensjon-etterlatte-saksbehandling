@@ -26,7 +26,7 @@ type FilledFormDataVurdering = {
 
 type FormdataVurdering = FieldOrNull<FilledFormDataVurdering>
 
-export function KlageAvvisningRedigering(props: { klage: Klage }) {
+export function KlageAvvisning(props: { klage: Klage }) {
   const navigate = useNavigate()
   const { klage } = props
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)

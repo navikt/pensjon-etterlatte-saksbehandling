@@ -1,24 +1,24 @@
-import { KlageVurderingVisning } from '~components/klage/vurdering/KlageVurderingVisning'
 import React from 'react'
 import { Klage, teksterKlageutfall } from '~shared/types/Klage'
 import { BodyShort, Heading } from '@navikt/ds-react'
 import { formaterStringTidspunktTimeMinutter } from '~utils/formattering'
 
-export const KlageInitiellVurderingVisning = (props: { klage: Klage }) => {
+export const InitiellVurderingVisning = (props: { klage: Klage }) => {
   const klage = props.klage
+
   return (
     <>
-      <Heading level="2" size="large">
+      <Heading level="2" size="medium">
         Initiell vurdering
       </Heading>
-      <InitiellVurderingVisning klage={klage} />
-      <KlageVurderingVisning klage={klage} />
+      <InitiellVurderingVisningContent klage={klage} />
     </>
   )
 }
 
-export const InitiellVurderingVisning = (props: { klage: Klage }) => {
+export const InitiellVurderingVisningContent = (props: { klage: Klage }) => {
   const klage = props.klage
+
   return (
     <>
       {klage.initieltUtfall && (

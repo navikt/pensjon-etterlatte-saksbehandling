@@ -102,9 +102,7 @@ export const VelgSaksbehandler = ({
             onClick={() => setOpenDropdown(true)}
           >
             {valgtSaksbehandler?.navn
-              ? valgtSaksbehandler.navn === innloggetSaksbehandler.navn
-                ? `${valgtSaksbehandler.navn} (meg)`
-                : valgtSaksbehandler.navn
+              ? `${valgtSaksbehandler.navn}${valgtSaksbehandler.navn === innloggetSaksbehandler.navn ? '(meg)' : ''}`
               : 'Ikke tildelt'}
           </Button>
           <DropdownMeny onClose={() => setOpenDropdown(false)}>

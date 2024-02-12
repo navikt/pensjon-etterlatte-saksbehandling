@@ -30,7 +30,7 @@ export const ToggleMinOppgaveliste = () => {
   }
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
   const [, hentSaksbehandlereIEnhet] = useApiCall(saksbehandlereIEnhetApi)
-  const [hentedeSaksbehandlereIEnhet, setHentedeSaksbehandlereIEnhet] = useState<Array<Saksbehandler>>([])
+  const [saksbehandlereForEnhet, setSaksbehandlereForEnhet] = useState<Array<Saksbehandler>>([])
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -67,6 +67,7 @@ export const ToggleMinOppgaveliste = () => {
       oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : minsideFilter.oppgavestatusFilter,
       minOppgavelisteIdent: true,
     })
+
   const hentHovedsideOppgaver = (oppgavestatusFilter: Array<string> | undefined) =>
     hentAlleOppgaverStatusFetch({
       oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : hovedsideFilter.oppgavestatusFilter,
@@ -87,7 +88,7 @@ export const ToggleMinOppgaveliste = () => {
   useEffect(() => {
     hentAlleOppgaver()
     hentSaksbehandlereIEnhet({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
-      setHentedeSaksbehandlereIEnhet(saksbehandlere)
+      setSaksbehandlereForEnhet(saksbehandlere)
     })
   }, [])
 
@@ -150,11 +151,11 @@ export const ToggleMinOppgaveliste = () => {
           }}
           setFilter={setMinsideFilter}
           setMinsideOppgaver={setMinsideOppgaver}
-          saksbehandlereIEnhet={hentedeSaksbehandlereIEnhet}
+          saksbehandlereIEnhet={saksbehandlereForEnhet}
         />
       ) : (
         <OppgavelistaWrapper
-          saksbehandlereIEnhet={hentedeSaksbehandlereIEnhet}
+          saksbehandlereIEnhet={saksbehandlereForEnhet}
           hovedsideOppgaver={hovedsideOppgaver}
           hentHovedsideOppgaverAlle={hentHovedsideOppgaverAlle}
           hovedsideOppgaverResult={hovedsideOppgaverResult}

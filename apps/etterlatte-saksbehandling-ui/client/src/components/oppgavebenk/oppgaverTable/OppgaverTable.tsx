@@ -10,6 +10,10 @@ export enum SortKey {
   FNR = 'fnr',
 }
 
+interface SorteringsState extends Omit<SortState, 'direction'> {
+  direction: 'ascending' | 'descending' | 'no-order'
+}
+
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
@@ -29,32 +33,44 @@ export const OppgaverTable = ({
   filter,
   setFilter,
 }: Props): ReactNode => {
-  const [sort, setSort] = useState<SortState>()
+  const [sort, setSort] = useState<SorteringsState>()
 
   const handleSort = (sortKey: SortKey) => {
     setSort(
       sort && sortKey === sort.orderBy && sort.direction === 'descending'
-        ? undefined
+        ? { orderBy: sortKey, direction: 'no-order' }
         : {
             orderBy: sortKey,
             direction: sort && sortKey === sort.orderBy && sort.direction === 'ascending' ? 'descending' : 'ascending',
           }
     )
+
+    switch (sort?.orderBy) {
+      case SortKey.FRIST:
+        setFilter({ ...filter, fristSortering: sort ? sort.direction : 'no-order' })
+        break
+      case SortKey.FNR:
+        setFilter({ ...filter, fnrSortering: sort ? sort.direction : 'no-order' })
+        break
+    }
   }
 
   useEffect(() => {
     switch (sort?.orderBy) {
       case SortKey.FRIST:
-        setFilter({ ...filter, fristSortering: sort?.direction ? sort.direction : 'ingen' })
+        setFilter({ ...filter, fristSortering: sort ? sort.direction : 'no-order' })
         break
       case SortKey.FNR:
-        setFilter({ ...filter, fnrSortering: sort?.direction ? sort.direction : 'ingen' })
+        setFilter({ ...filter, fnrSortering: sort ? sort.direction : 'no-order' })
         break
     }
   }, [sort])
 
   return (
-    <Table sort={sort} onSortChange={(sortKey) => handleSort(sortKey as SortKey)}>
+    <Table
+      sort={sort && sort.direction !== 'no-order' ? { direction: sort.direction, orderBy: sort.orderBy } : undefined}
+      onSortChange={(sortKey) => handleSort(sortKey as SortKey)}
+    >
       <OppgaverTableHeader />
       <Table.Body>
         {oppgaver &&

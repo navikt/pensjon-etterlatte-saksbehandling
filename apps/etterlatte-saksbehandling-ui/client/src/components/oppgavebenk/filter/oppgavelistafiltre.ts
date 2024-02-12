@@ -171,18 +171,20 @@ export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: Oppgave
   }
 }
 
-type Retning = 'descending' | 'ascending' | 'ingen'
+type Retning = 'descending' | 'ascending' | 'no-order'
 
 const sammenlignFrist = (a: OppgaveDTO, b: OppgaveDTO) =>
   (!!a.frist ? new Date(a.frist).getTime() : 0) - (!!b.frist ? new Date(b.frist).getTime() : 0)
 
 export function sorterFrist(retning: Retning, oppgaver: OppgaveDTO[]) {
+  console.log(retning)
+
   switch (retning) {
     case 'ascending':
       return oppgaver.sort(sammenlignFrist)
     case 'descending':
       return oppgaver.sort(sammenlignFrist).reverse()
-    case 'ingen':
+    case 'no-order':
       return oppgaver
   }
 }
@@ -198,7 +200,7 @@ export function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
       return oppgaver.sort(sammenlignFnr)
     case 'descending':
       return oppgaver.sort(sammenlignFnr).reverse()
-    case 'ingen':
+    case 'no-order':
       return oppgaver
   }
 }
@@ -252,7 +254,7 @@ export const initialFilter = (): Filter => {
     oppgavetypeFilter: 'visAlle',
     oppgavekildeFilter: 'visAlle',
     fnrFilter: '',
-    fristSortering: 'ingen',
-    fnrSortering: 'ingen',
+    fristSortering: 'no-order',
+    fnrSortering: 'no-order',
   }
 }

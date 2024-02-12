@@ -8,6 +8,14 @@ export const leggFilterILocalStorage = (filter: Filter) => {
 
 export const hentFilterFraLocalStorage = (): Filter => {
   const filter = localStorage[FILTER_KEY]
-  if (!!filter) return JSON.parse(filter)
-  else return initialFilter()
+  if (!!filter) {
+    const parsetFilter = JSON.parse(filter)
+    // TODO: quickfix etter endring i type i localstorage, fjernes etter at
+    //  en viss tid, slik at alle saksbehandlere har kommet seg bort fra den gamel typen
+    return {
+      ...parsetFilter,
+      fristFilter: parsetFilter.fristFilter === 'ingen' ? 'no-order' : parsetFilter.fristFilter,
+      fnrFilter: parsetFilter.fnrFilter === 'ingen' ? 'no-order' : parsetFilter.fnrFilter,
+    }
+  } else return initialFilter()
 }

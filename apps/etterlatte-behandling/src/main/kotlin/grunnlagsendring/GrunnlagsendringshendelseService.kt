@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
@@ -51,6 +52,7 @@ class GrunnlagsendringshendelseService(
     private val grunnlagKlient: GrunnlagKlient,
     private val sakService: SakService,
     private val brukerService: BrukerService,
+    private val doedshendelseService: DoedshendelseService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -112,7 +114,11 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
-        return inTransaction { opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL) }
+        doedshendelseService.lagreDoedshendelseForBeroertePersoner(doedshendelse)
+
+        return inTransaction {
+            opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
+        }
     }
 
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> {
@@ -340,7 +346,7 @@ class GrunnlagsendringshendelseService(
             }.map { it.first }
     }
 
-    fun verifiserOgHaandterHendelse(
+    private fun verifiserOgHaandterHendelse(
         grunnlagsendringshendelse: Grunnlagsendringshendelse,
         sak: Sak,
     ) {

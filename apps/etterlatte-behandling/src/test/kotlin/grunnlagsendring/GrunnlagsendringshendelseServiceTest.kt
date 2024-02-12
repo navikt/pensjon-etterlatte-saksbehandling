@@ -26,6 +26,7 @@ import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -72,6 +73,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val sakService = mockk<SakService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val brukerService = mockk<BrukerService>()
+    private val doedshendelseService = mockk<DoedshendelseService>()
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "hendelseid",
@@ -110,6 +112,9 @@ internal class GrunnlagsendringshendelseServiceTest {
                     grunnlagKlient,
                     sakService,
                     brukerService,
+                    doedshendelseService.apply {
+                        every { lagreDoedshendelseForBeroertePersoner(any()) } returns Unit
+                    },
                 ),
             )
     }

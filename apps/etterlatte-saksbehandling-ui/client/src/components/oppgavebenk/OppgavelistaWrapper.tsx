@@ -3,7 +3,7 @@ import { FilterRad } from '~components/oppgavebenk/FilterRad'
 import { Filter, filtrerOppgaver } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 import { oppdaterTildeling } from '~components/oppgavebenk/oppgaveutils'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
-import { OppgaveDTO } from '~shared/api/oppgaver'
+import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
 import { Result } from '~shared/api/apiUtils'
 
 export const OppgavelistaWrapper = (props: {
@@ -15,6 +15,7 @@ export const OppgavelistaWrapper = (props: {
   hovedsideFilter: Filter
   setHovedsideFilter: React.Dispatch<React.SetStateAction<Filter>>
   setHovedsideOppgaver: React.Dispatch<React.SetStateAction<OppgaveDTO[]>>
+  saksbehandlereIEnhet: Array<Saksbehandler>
 }) => {
   const {
     hovedsideOppgaver,
@@ -25,6 +26,7 @@ export const OppgavelistaWrapper = (props: {
     hovedsideFilter,
     setHovedsideFilter,
     setHovedsideOppgaver,
+    saksbehandlereIEnhet,
   } = props
 
   const mutableOppgaver = hovedsideOppgaver.concat()
@@ -61,6 +63,7 @@ export const OppgavelistaWrapper = (props: {
           setFilter={setHovedsideFilter}
           totaltAntallOppgaver={hovedsideOppgaver.length}
           erMinOppgaveliste={false}
+          saksbehandlereIEnhet={saksbehandlereIEnhet}
         />
       </>
     </OppgaveFeilWrapper>

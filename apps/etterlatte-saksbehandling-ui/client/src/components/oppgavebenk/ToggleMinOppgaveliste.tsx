@@ -9,7 +9,13 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 import { hentFilterFraLocalStorage, leggFilterILocalStorage } from '~components/oppgavebenk/filter/filterLocalStorage'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentGosysOppgaver, hentOppgaverMedStatus, OppgaveDTO } from '~shared/api/oppgaver'
+import {
+  hentGosysOppgaver,
+  hentOppgaverMedStatus,
+  OppgaveDTO,
+  Saksbehandler,
+  saksbehandlereIEnhetApi,
+} from '~shared/api/oppgaver'
 import { isSuccess } from '~shared/api/apiUtils'
 import { sorterOppgaverEtterOpprettet } from '~components/oppgavebenk/oppgaveutils'
 import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
@@ -23,6 +29,8 @@ export const ToggleMinOppgaveliste = () => {
     return <Tilgangsmelding />
   }
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
+  const [, hentSaksbehandlereIEnhet] = useApiCall(saksbehandlereIEnhetApi)
+  const [hentedeSaksbehandlereIEnhet, setHentedeSaksbehandlereIEnhet] = useState<Array<Saksbehandler>>([])
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -78,6 +86,9 @@ export const ToggleMinOppgaveliste = () => {
 
   useEffect(() => {
     hentAlleOppgaver()
+    hentSaksbehandlereIEnhet({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
+      setHentedeSaksbehandlereIEnhet(saksbehandlere)
+    })
   }, [])
 
   const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
@@ -139,9 +150,11 @@ export const ToggleMinOppgaveliste = () => {
           }}
           setFilter={setMinsideFilter}
           setMinsideOppgaver={setMinsideOppgaver}
+          saksbehandlereIEnhet={hentedeSaksbehandlereIEnhet}
         />
       ) : (
         <OppgavelistaWrapper
+          saksbehandlereIEnhet={hentedeSaksbehandlereIEnhet}
           hovedsideOppgaver={hovedsideOppgaver}
           hentHovedsideOppgaverAlle={hentHovedsideOppgaverAlle}
           hovedsideOppgaverResult={hovedsideOppgaverResult}

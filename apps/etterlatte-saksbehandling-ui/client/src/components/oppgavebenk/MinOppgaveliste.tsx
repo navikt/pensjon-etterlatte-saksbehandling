@@ -3,7 +3,7 @@ import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { oppdaterTildeling } from '~components/oppgavebenk/oppgaveutils'
 import styled from 'styled-components'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
-import { OppgaveDTO } from '~shared/api/oppgaver'
+import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
 import { Result } from '~shared/api/apiUtils'
 import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
@@ -15,6 +15,7 @@ export const MinOppgaveliste = (props: {
   setMinsideFilter: (filter: Filter) => void
   setFilter: React.Dispatch<React.SetStateAction<Filter>>
   setMinsideOppgaver: React.Dispatch<React.SetStateAction<OppgaveDTO[]>>
+  saksbehandlereIEnhet: Array<Saksbehandler>
 }) => {
   const {
     minsideOppgaver,
@@ -24,6 +25,7 @@ export const MinOppgaveliste = (props: {
     setMinsideFilter,
     setMinsideOppgaver,
     setFilter,
+    saksbehandlereIEnhet,
   } = props
 
   return (
@@ -46,6 +48,7 @@ export const MinOppgaveliste = (props: {
             oppdaterTildeling(setMinsideOppgaver, minsideOppgaver)(id, null, versjon)
           }
           erMinOppgaveliste={true}
+          saksbehandlereIEnhet={saksbehandlereIEnhet}
         />
       </>
     </OppgaveFeilWrapper>

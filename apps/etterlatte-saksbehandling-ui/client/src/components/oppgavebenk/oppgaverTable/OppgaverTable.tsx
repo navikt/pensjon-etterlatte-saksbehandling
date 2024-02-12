@@ -63,7 +63,6 @@ export const OppgaverTable = ({
               <OppgaverTableRow
                 key={oppgave.id}
                 oppgave={oppgave}
-                oppgaver={oppgaver}
                 saksbehandlereIEnhet={saksbehandlereIEnhet}
                 oppdaterTildeling={oppdaterTildeling}
                 erMinOppgaveListe={erMinOppgaveliste}

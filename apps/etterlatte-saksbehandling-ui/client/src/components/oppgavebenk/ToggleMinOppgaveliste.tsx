@@ -43,13 +43,14 @@ export const ToggleMinOppgaveliste = () => {
     }
   }, [location.pathname])
 
-  useEffect(() => {
+  const oppdaterOppgavelisteValg = (oppgaveListeValg: OppgavelisteToggle) => {
+    setOppgaveListeValg(oppgaveListeValg)
     if (oppgaveListeValg === 'MinOppgaveliste') {
       navigate('/minoppgaveliste')
     } else {
       navigate('/')
     }
-  }, [oppgaveListeValg])
+  }
 
   const [minsideFilter, setMinsideFilter] = useState<Filter>(minOppgavelisteFiltre())
   const [hovedsideFilter, setHovedsideFilter] = useState<Filter>(hentFilterFraLocalStorage())
@@ -129,7 +130,12 @@ export const ToggleMinOppgaveliste = () => {
 
   return (
     <Container>
-      <TabsWidth value={oppgaveListeValg} onChange={(e) => setOppgaveListeValg(e as OppgavelisteToggle)}>
+      <TabsWidth
+        value={oppgaveListeValg}
+        onChange={(e) => {
+          oppdaterOppgavelisteValg(e as OppgavelisteToggle)
+        }}
+      >
         <Tabs.List>
           <Tabs.Tab value="Oppgavelista" label={`Oppgavelisten (${hovedsideOppgaver.length})`} icon={<InboxIcon />} />
           <Tabs.Tab

@@ -113,8 +113,7 @@ open class DatabaseExtension : AfterAllCallback, ExtensionContext.Store.Closeabl
         parameterContext: ParameterContext,
         extensionContext: ExtensionContext,
     ): Boolean {
-        return parameterContext.parameter?.type == DataSource::class.java ||
-            parameterContext.parameter?.type == ResetDb::class.java
+        return parameterContext.parameter?.type == DataSource::class.java
     }
 
     override fun resolveParameter(
@@ -123,21 +122,9 @@ open class DatabaseExtension : AfterAllCallback, ExtensionContext.Store.Closeabl
     ): Any {
         if (parameterContext.parameter?.type == DataSource::class.java) {
             return dataSource
-        } else if (parameterContext.parameter?.type == ResetDb::class.java) {
-            return ResetDbImpl(this)
         } else {
             throw IllegalArgumentException("Kan ikke resolve parameter av type ${parameterContext.parameter?.type}")
         }
-    }
-}
-
-interface ResetDb {
-    fun invoke()
-}
-
-private class ResetDbImpl(private val extension: DatabaseExtension) : ResetDb {
-    override fun invoke() {
-        extension.resetDb()
     }
 }
 

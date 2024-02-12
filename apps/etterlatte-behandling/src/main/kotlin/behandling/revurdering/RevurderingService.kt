@@ -345,9 +345,9 @@ class RevurderingService(
         saksbehandler: Saksbehandler,
     ): Revurdering {
         val omgjoeringsoppgave =
-            oppgaveService.hentOppgave(oppgaveIdOmgjoering) ?: throw FeilIOmgjoering.IngenOmgjoeringsoppgave
+            oppgaveService.hentOppgave(oppgaveIdOmgjoering) ?: throw FeilIOmgjoering.IngenOmgjoeringsoppgave()
         if (omgjoeringsoppgave.type != OppgaveType.OMGJOERING) {
-            throw FeilIOmgjoering.IngenOmgjoeringsoppgave
+            throw FeilIOmgjoering.IngenOmgjoeringsoppgave()
         }
         if (omgjoeringsoppgave.status.erAvsluttet()) {
             throw FeilIOmgjoering.OmgjoeringsOppgaveLukket(omgjoeringsoppgave)
@@ -416,7 +416,7 @@ data class RevurderingOgOppfoelging(
 }
 
 sealed class FeilIOmgjoering {
-    object IngenOmgjoeringsoppgave :
+    class IngenOmgjoeringsoppgave :
         UgyldigForespoerselException("INGEN_OMGJOERINGSOPPGAVE", "Mottok ikke en gyldig omgjøringsoppgave")
 
     class OmgjoeringsOppgaveLukket(oppgave: OppgaveIntern) :
@@ -427,7 +427,7 @@ sealed class FeilIOmgjoering {
 
     class OppgaveOgSakErForskjellig(sakId: Long, oppgave: OppgaveIntern) :
         UgyldigForespoerselException(
-            "SAK_I_OPPGAVE_MATHCER_IKKE",
+            "SAK_I_OPPGAVE_MATCHER_IKKE",
             "Saken det skal omgjøres i har id=$sakId, men omgjøringsoppgaven er i sak med id=${oppgave.sakId}",
         )
 

@@ -173,12 +173,12 @@ export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: Oppgave
 
 type Retning = 'descending' | 'ascending' | 'no-order'
 
-const sammenlignFrist = (a: OppgaveDTO, b: OppgaveDTO) =>
-  (!!a.frist ? new Date(a.frist).getTime() : 0) - (!!b.frist ? new Date(b.frist).getTime() : 0)
+const sammenlignFrist = (a: OppgaveDTO, b: OppgaveDTO) => {
+  // Konverterer datoene til en numerisk verdi og sammenligner dem
+  return (!!a.frist ? new Date(a.frist).getTime() : 0) - (!!b.frist ? new Date(b.frist).getTime() : 0)
+}
 
 export function sorterFrist(retning: Retning, oppgaver: OppgaveDTO[]) {
-  console.log(retning)
-
   switch (retning) {
     case 'ascending':
       return oppgaver.sort(sammenlignFrist)

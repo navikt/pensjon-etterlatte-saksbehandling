@@ -22,11 +22,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.YearMonth
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class BehandlingMetricsTest(private val ds: DataSource) {
+internal class BehandlingMetricsTest {
+    private val ds = DatabaseExtension.dataSource
     private lateinit var behandlingMetrikkerDao: BehandlingMetrikkerDao
     private lateinit var oppgaveDao: OppgaveMetrikkerDao
     private lateinit var behandlingRepo: BehandlingDao

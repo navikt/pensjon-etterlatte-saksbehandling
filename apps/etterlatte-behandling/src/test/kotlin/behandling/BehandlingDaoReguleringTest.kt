@@ -18,18 +18,15 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.RegisterExtension
+import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BehandlingDaoReguleringTest(val dataSource: DataSource) {
-    companion object {
-        @RegisterExtension
-        private val dbExtension = DatabaseExtension()
-    }
-
+@ExtendWith(DatabaseExtension::class)
+internal class BehandlingDaoReguleringTest {
+    private val dataSource: DataSource = DatabaseExtension.dataSource
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingRepo: BehandlingDao
 
@@ -43,7 +40,7 @@ internal class BehandlingDaoReguleringTest(val dataSource: DataSource) {
 
     @AfterEach
     fun afterEach() {
-        dbExtension.resetDb()
+        DatabaseExtension.resetDb()
     }
 
     private fun hentMigrerbareStatuses() = BehandlingStatus.entries - BehandlingStatus.skalIkkeOmregnesVedGRegulering().toSet()

@@ -21,11 +21,10 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.extension.ExtendWith
 import java.sql.Connection
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class SjekklisteIntegrationTest(val dataSource: DataSource) {
+class SjekklisteIntegrationTest {
     private val user =
         mockk<SaksbehandlerMedEnheterOgRoller>().apply {
             every { this@apply.name() } returns "Z123456"
@@ -33,6 +32,7 @@ class SjekklisteIntegrationTest(val dataSource: DataSource) {
 
     private val behandlingService = mockk<BehandlingService>()
     private val oppgaveService = mockk<OppgaveService>()
+    private val dataSource = DatabaseExtension.dataSource
     private lateinit var sjekklisteDao: SjekklisteDao
     private lateinit var sjekklisteService: SjekklisteService
 

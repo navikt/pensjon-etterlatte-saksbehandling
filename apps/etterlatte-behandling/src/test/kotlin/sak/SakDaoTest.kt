@@ -12,11 +12,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class SakDaoTest(val dataSource: DataSource) {
+internal class SakDaoTest {
+    private val dataSource = DatabaseExtension.dataSource
     private lateinit var sakRepo: SakDao
     private lateinit var tilgangService: TilgangService
 

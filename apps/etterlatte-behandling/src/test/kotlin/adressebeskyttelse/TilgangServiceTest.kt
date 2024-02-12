@@ -29,11 +29,11 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class TilgangServiceTest(val dataSource: DataSource) {
+internal class TilgangServiceTest {
+    private val dataSource = DatabaseExtension.dataSource
     private lateinit var tilgangService: TilgangService
     private lateinit var sakService: SakService
     private lateinit var sakRepo: SakDao

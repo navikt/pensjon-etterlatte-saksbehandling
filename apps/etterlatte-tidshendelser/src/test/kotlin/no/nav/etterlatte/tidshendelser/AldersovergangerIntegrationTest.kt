@@ -18,7 +18,8 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AldersovergangerIntegrationTest(dataSource: DataSource) {
+class AldersovergangerIntegrationTest {
+    private val dataSource: DataSource = DatabaseExtension.dataSource
     private val grunnlagKlient: GrunnlagKlient = mockk<GrunnlagKlient>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)

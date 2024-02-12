@@ -43,11 +43,11 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.sql.Connection
 import java.util.UUID
-import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class OppgaveServiceTest(val dataSource: DataSource) {
+internal class OppgaveServiceTest {
+    private val dataSource = DatabaseExtension.dataSource
     private lateinit var sakDao: SakDao
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var oppgaveService: OppgaveService

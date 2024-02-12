@@ -59,17 +59,13 @@ import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.junit.jupiter.api.extension.RegisterExtension
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.util.UUID
 
+@ExtendWith(DatabaseExtension::class)
 abstract class BehandlingIntegrationTest {
-    companion object {
-        @RegisterExtension
-        private val dbExtension = DatabaseExtension()
-    }
-
-    private val postgreSQLContainer = GenerellDatabaseExtension.postgreSQLContainer
+    private val postgreSQLContainer = DatabaseExtension.postgreSQLContainer
     protected val server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
 
@@ -305,7 +301,7 @@ abstract class BehandlingIntegrationTest {
         }
 
     fun resetDatabase() {
-        dbExtension.resetDb()
+        DatabaseExtension.resetDb()
     }
 
     protected fun afterAll() {

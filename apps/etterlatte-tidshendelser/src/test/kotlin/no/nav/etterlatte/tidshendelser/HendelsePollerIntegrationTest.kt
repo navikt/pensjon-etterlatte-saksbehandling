@@ -13,9 +13,10 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class HendelsePollerIntegrationTest(dataSource: DataSource) {
+class HendelsePollerIntegrationTest {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    private val dataSource: DataSource = DatabaseExtension.dataSource
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
     private val hendelsePoller =

@@ -50,15 +50,7 @@ export const BosattUtland = ({
   const [feilkoderMottatte, setFeilkoderMottatte] = useState<Set<string>>(new Set([]))
 
   const [rinanummer, setRinanummer] = useState<string>(bosattutland?.rinanummer ?? '')
-  const initalStateLandMedDokumenter = [
-    {
-      landIsoKode: undefined,
-      dokumenter: [],
-    },
-  ]
-  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(
-    bosattutland?.sendteSeder ?? initalStateLandMedDokumenter
-  )
+  const [landMedDokumenter, setLandMedDokumenter] = useState<LandMedDokumenter[]>(bosattutland?.sendteSeder ?? [])
   const [feilkoder, setFeilkoder] = useState<Set<string>>(new Set([]))
 
   const validerSkjema = (landMedDokumenter: LandMedDokumenter[]): Set<string> => {

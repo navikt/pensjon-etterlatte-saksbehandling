@@ -3,7 +3,8 @@ package no.nav.etterlatte.brev.model.oms
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
@@ -14,14 +15,15 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
+import no.nav.etterlatte.brev.model.toFeilutbetalingType
+import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
-import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import java.time.LocalDate
 
 data class OmstillingsstoenadRevurdering(
-    val innhold: List<Slate.Element>,
+    override val innhold: List<Slate.Element>,
     val innholdForhaandsvarsel: List<Slate.Element>,
     val erEndret: Boolean,
     val erOmgjoering: Boolean,
@@ -32,7 +34,7 @@ data class OmstillingsstoenadRevurdering(
     val harUtbetaling: Boolean,
     val lavEllerIngenInntekt: Boolean,
     val feilutbetaling: FeilutbetalingType,
-) : BrevData() {
+) : BrevDataFerdigstilling {
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
@@ -103,8 +105,8 @@ data class OmstillingsstoenadRevurdering(
 data class OmstillingsstoenadRevurderingRedigerbartUtfall(
     val feilutbetaling: FeilutbetalingType,
     val harUtbetaling: Boolean,
-    val harEtterbetaling: Boolean,
-) : BrevData() {
+    val erEtterbetaling: Boolean,
+) : BrevDataRedigerbar {
     companion object {
         fun fra(
             avkortingsinfo: Avkortingsinfo,
@@ -114,23 +116,7 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
             OmstillingsstoenadRevurderingRedigerbartUtfall(
                 feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
                 harUtbetaling = avkortingsinfo.beregningsperioder.any { it.utbetaltBeloep.value > 0 },
-                harEtterbetaling = etterbetaling != null,
+                erEtterbetaling = etterbetaling != null,
             )
     }
-}
-
-private fun toFeilutbetalingType(feilutbetalingValg: FeilutbetalingValg) =
-    when (feilutbetalingValg) {
-        FeilutbetalingValg.NEI -> FeilutbetalingType.INGEN_FEILUTBETALING
-        FeilutbetalingValg.JA_INGEN_TK -> FeilutbetalingType.FEILUTBETALING_UTEN_VARSEL
-        FeilutbetalingValg.JA_VARSEL -> FeilutbetalingType.FEILUTBETALING_MED_VARSEL
-    }
-
-private fun vedleggHvisFeilutbetaling(
-    feilutbetaling: FeilutbetalingType,
-    innholdMedVedlegg: InnholdMedVedlegg,
-) = if (feilutbetaling == FeilutbetalingType.FEILUTBETALING_MED_VARSEL) {
-    innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING)
-} else {
-    emptyList()
 }

@@ -5,7 +5,9 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.AVVIST_KLAGE_INNHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_AVSLAG_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_FORELDRELOES
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_UTFALL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_INNVILGELSE_UTFALL_FORELDRELOES
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_OPPHOER_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_REVURDERING
@@ -21,12 +23,12 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_IN
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_REVURDERING_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TILBAKEKREVING_INNHOLD
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_DELMAL
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.UTSATT_KLAGEFRIST
 
@@ -51,6 +53,10 @@ enum class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: Ett
         BARNEPENSJON_INNVILGELSE_UTFALL,
         BARNEPENSJON_INNVILGELSE,
     ),
+    BP_INNVILGELSE_FORELDRELOES(
+        BARNEPENSJON_INNVILGELSE_UTFALL_FORELDRELOES,
+        BARNEPENSJON_INNVILGELSE_FORELDRELOES,
+    ),
     BP_OPPHOER(BARNEPENSJON_OPPHOER_UTFALL, BARNEPENSJON_OPPHOER),
     BP_REVURDERING(BARNEPENSJON_REVURDERING_UTFALL, BARNEPENSJON_REVURDERING),
     BP_VARSEL(BARNEPENSJON_VARSEL_UTFALL, BARNEPENSJON_VARSEL),
@@ -66,7 +72,7 @@ enum class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: Ett
         OMSTILLINGSSTOENAD_OPPHOER_UTFALL,
         OMSTILLINGSSTOENAD_OPPHOER,
     ),
-    OMS_REVURDERING(TOM_MAL, OMSTILLINGSSTOENAD_REVURDERING),
+    OMS_REVURDERING(OMSTILLINGSSTOENAD_REVURDERING_UTFALL, OMSTILLINGSSTOENAD_REVURDERING),
     OMS_VARSEL(OMSTILLINGSSTOENAD_VARSEL_UTFALL, OMSTILLINGSSTOENAD_VARSEL),
 
     UTSATT_KLAGEFRIST_INFORMASJONSBREV(UTSATT_KLAGEFRIST, TOM_MAL_INFORMASJONSBREV),

@@ -1,14 +1,15 @@
 import { Alert } from '@navikt/ds-react'
-import { OppgaveDTO } from '~shared/api/oppgaver'
+import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
 import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
-interface Props {
+export interface oppgaveListaProps {
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
-  filtrerteOppgaver: ReadonlyArray<OppgaveDTO>
+  oppgaver: ReadonlyArray<OppgaveDTO>
   hentOppgaver: () => void
+  saksbehandlereIEnhet: Array<Saksbehandler>
   filter: Filter
   setFilter: Dispatch<SetStateAction<Filter>>
   totaltAntallOppgaver?: number
@@ -17,22 +18,23 @@ interface Props {
 
 export const Oppgavelista = ({
   oppdaterTildeling,
-  filtrerteOppgaver,
+  oppgaver,
   hentOppgaver,
+  saksbehandlereIEnhet,
   filter,
   setFilter,
   totaltAntallOppgaver,
   erMinOppgaveliste,
-}: Props): ReactNode => {
+}: oppgaveListaProps): ReactNode => {
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
 
-  let paginerteOppgaver = filtrerteOppgaver
+  let paginerteOppgaver = oppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
   useEffect(() => {
-    if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
-  }, [paginerteOppgaver, filtrerteOppgaver])
+    if (paginerteOppgaver.length === 0 && oppgaver.length > 0) setPage(1)
+  }, [paginerteOppgaver, oppgaver])
 
   return (
     <>
@@ -43,6 +45,7 @@ export const Oppgavelista = ({
             oppdaterTildeling={oppdaterTildeling}
             erMinOppgaveliste={erMinOppgaveliste}
             hentOppgaver={hentOppgaver}
+            saksbehandlereIEnhet={saksbehandlereIEnhet}
             filter={filter}
             setFilter={setFilter}
           />
@@ -50,12 +53,12 @@ export const Oppgavelista = ({
           <PagineringsKontroller
             page={page}
             setPage={setPage}
-            antallSider={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
+            antallSider={Math.ceil(oppgaver.length / rowsPerPage)}
             raderPerSide={rowsPerPage}
             setRaderPerSide={setRowsPerPage}
             totalAvOppgaverTeksts={`Viser ${(page - 1) * rowsPerPage + 1} - ${
               (page - 1) * rowsPerPage + paginerteOppgaver.length
-            } av ${filtrerteOppgaver.length} oppgaver ${
+            } av ${oppgaver.length} oppgaver ${
               totaltAntallOppgaver ? `(totalt ${totaltAntallOppgaver} oppgaver)` : ''
             }`}
           />

@@ -154,6 +154,7 @@ data class NyOppgaveDto(
     val oppgaveType: OppgaveType,
     val merknad: String?,
     val referanse: String? = null,
+    val frist: Tidspunkt? = null,
 )
 
 fun opprettNyOppgaveMedReferanseOgSak(

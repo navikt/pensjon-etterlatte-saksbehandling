@@ -166,6 +166,8 @@ data class Klage(
                 is KlageUtfallMedData.StadfesteVedtak -> utfallMedBrev.innstilling.lovhjemmel
                 is KlageUtfallMedData.DelvisOmgjoering -> utfallMedBrev.innstilling.lovhjemmel
                 is KlageUtfallMedData.Omgjoering -> null
+                is KlageUtfallMedData.Avvist -> null
+                is KlageUtfallMedData.AvvistMedOmgjoering -> null
             }
         hjemmel?.let {
             require(it.kanBrukesForSaktype(this.sak.sakType)) {
@@ -292,6 +294,18 @@ sealed class KlageUtfallMedData {
     @JsonTypeName("STADFESTE_VEDTAK")
     data class StadfesteVedtak(
         val innstilling: InnstillingTilKabal,
+        override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
+    ) : KlageUtfallMedData()
+
+    @JsonTypeName("AVVIST")
+    data class Avvist(
+        override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
+        val vedtakId: Long,
+    ) : KlageUtfallMedData()
+
+    @JsonTypeName("AVVIST_MED_OMGJOERING")
+    data class AvvistMedOmgjoering(
+        val omgjoering: KlageOmgjoering,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
     ) : KlageUtfallMedData()
 }
@@ -471,6 +485,14 @@ sealed class KlageUtfallUtenBrev {
     @JsonTypeName("STADFESTE_VEDTAK")
     data class StadfesteVedtak(
         val innstilling: InnstillingTilKabalUtenBrev,
+    ) : KlageUtfallUtenBrev()
+
+    @JsonTypeName("AVVIST")
+    class Avvist() : KlageUtfallUtenBrev()
+
+    @JsonTypeName("AVVIST_MED_OMGJOERING")
+    data class AvvistMedOmgjoering(
+        val omgjoering: KlageOmgjoering,
     ) : KlageUtfallUtenBrev()
 }
 

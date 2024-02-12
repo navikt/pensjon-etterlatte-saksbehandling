@@ -1,23 +1,30 @@
 import React, { ReactNode } from 'react'
 import { Table } from '@navikt/ds-react'
-import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
+import { erOppgaveRedigerbar, OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
 import { formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/FristWrapper'
 import SaksoversiktLenke from '~components/oppgavebenk/SaksoversiktLenke'
 import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/Tags'
-import { RedigerSaksbehandler } from '~components/oppgavebenk/tildeling/RedigerSaksbehandler'
 import { HandlingerForOppgave } from '~components/oppgavebenk/HandlingerForOppgave'
 import { FristHandlinger } from '~components/oppgavebenk/FristHandlinger'
+import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 interface Props {
   oppgave: OppgaveDTO
+  saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveListe: boolean
   hentOppgaver: () => void
 }
 
-export const OppgaverTableRow = ({ oppgave, oppdaterTildeling, erMinOppgaveListe, hentOppgaver }: Props): ReactNode => {
+export const OppgaverTableRow = ({
+  oppgave,
+  saksbehandlereIEnhet,
+  oppdaterTildeling,
+  erMinOppgaveListe,
+  hentOppgaver,
+}: Props): ReactNode => {
   return (
     <Table.Row>
       <Table.HeaderCell>{formaterStringDato(oppgave.opprettet)}</Table.HeaderCell>
@@ -44,9 +51,9 @@ export const OppgaverTableRow = ({ oppgave, oppdaterTildeling, erMinOppgaveListe
       <Table.DataCell>{oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] : 'Ukjent'}</Table.DataCell>
       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
       <Table.DataCell>
-        <RedigerSaksbehandler
-          saksbehandlerNavn={oppgave.saksbehandlerNavn}
-          saksbehandler={oppgave.saksbehandlerIdent}
+        <VelgSaksbehandler
+          saksbehandler={{ ident: oppgave.saksbehandlerIdent, navn: oppgave.saksbehandlerNavn }}
+          saksbehandlereIEnhet={saksbehandlereIEnhet}
           oppgaveId={oppgave.id}
           sakId={oppgave.sakId}
           oppdaterTildeling={oppdaterTildeling}

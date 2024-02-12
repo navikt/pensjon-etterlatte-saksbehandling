@@ -49,6 +49,7 @@ dependencies {
     testImplementation(project(":libs:testdata"))
     testImplementation(project(":libs:etterlatte-funksjonsbrytere"))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
+    testImplementation(testFixtures(project(":libs:etterlatte-database")))
 }
 
 tasks {

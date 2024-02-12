@@ -1,25 +1,49 @@
 package no.nav.etterlatte.brev.model.bp
 
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.model.BrevDataRedigerbar
+import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.toFeilutbetalingType
+import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
+import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 
 data class BarnepensjonOpphoer(
-    val innhold: List<Slate.Element>,
+    override val innhold: List<Slate.Element>,
+    val innholdForhaandsvarsel: List<Slate.Element>,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
-) : BrevData() {
+    val feilutbetaling: FeilutbetalingType,
+) : BrevDataFerdigstilling {
     companion object {
         fun fra(
             innhold: InnholdMedVedlegg,
-            brukerUnder18Aar: Boolean,
             utlandstilknytning: UtlandstilknytningType?,
-        ): BarnepensjonOpphoer =
-            BarnepensjonOpphoer(
+            brevutfall: BrevutfallDto,
+        ): BarnepensjonOpphoer {
+            val feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg))
+
+            return BarnepensjonOpphoer(
                 innhold = innhold.innhold(),
-                brukerUnder18Aar = brukerUnder18Aar,
+                innholdForhaandsvarsel = vedleggHvisFeilutbetaling(feilutbetaling, innhold),
+                brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                feilutbetaling = feilutbetaling,
+            )
+        }
+    }
+}
+
+data class BarnepensjonOpphoerRedigerbarUtfall(
+    val feilutbetaling: FeilutbetalingType,
+) : BrevDataRedigerbar {
+    companion object {
+        fun fra(brevutfall: BrevutfallDto): BarnepensjonOpphoerRedigerbarUtfall =
+            BarnepensjonOpphoerRedigerbarUtfall(
+                feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
             )
     }
 }

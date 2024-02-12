@@ -48,7 +48,7 @@ fun Route.dokumentRoute(
 
             put {
                 val journalpostId = call.parameters["journalpostId"]!!
-                val forsoekFerdistill = call.request.queryParameters["forsoekFerdigstill"]?.toBoolean() ?: false
+                val forsoekFerdistill = call.request.queryParameters["forsoekFerdigstill"].toBoolean()
                 val journalfoerendeEnhet = call.request.queryParameters["journalfoerendeEnhet"]
 
                 val request = call.receive<OppdaterJournalpostRequest>()

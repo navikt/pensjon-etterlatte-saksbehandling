@@ -6,7 +6,8 @@ import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BarnepensjonBeregning
 import no.nav.etterlatte.brev.model.BarnepensjonEtterbetaling
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
+import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.Etterbetaling
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
@@ -22,7 +23,7 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
     val utbetaltEtterReform: Kroner,
     val erForeldreloes: Boolean,
     val erBosattUtlandet: Boolean,
-) : BrevData() {
+) : BrevDataRedigerbar {
     companion object {
         fun fra(
             generellBrevData: GenerellBrevData,
@@ -41,7 +42,7 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
                                     generellBrevData.personerISak.verge !is ForelderVerge
                             ),
                 )
-            if (generellBrevData.erMigrering()) {
+            if (generellBrevData.loependeIPesys()) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
                 val pesysUtenlandstilknytning =
                     migreringRequest?.utlandstilknytningType ?: requireNotNull(generellBrevData.utlandstilknytning) {
@@ -68,12 +69,12 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
 }
 
 data class BarnepensjonOmregnetNyttRegelverk(
-    val innhold: List<Slate.Element>,
+    override val innhold: List<Slate.Element>,
     val beregning: BarnepensjonBeregning,
     val etterbetaling: BarnepensjonEtterbetaling?,
     val erUnder18Aar: Boolean,
     val erBosattUtlandet: Boolean,
-) : BrevData() {
+) : BrevDataFerdigstilling {
     companion object {
         fun fra(
             innhold: InnholdMedVedlegg,

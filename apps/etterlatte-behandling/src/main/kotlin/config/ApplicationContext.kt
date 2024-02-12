@@ -268,6 +268,7 @@ internal class ApplicationContext(
             brevApiKlient = brevApiHttpClient,
             klageKlient = klageKlient,
             klageHendelser = klageHendelser,
+            vedtakKlient = vedtakKlient,
         )
 
     val revurderingService =

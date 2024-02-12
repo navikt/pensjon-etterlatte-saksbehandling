@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.hvisEnabled
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.klageId
@@ -30,7 +31,8 @@ import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
     KanBrukeKlageToggle("pensjon-etterlatte.kan-bruke-klage"),
-    KanFerdigstilleKlageToggle("pensjons-etterlatte.kan-ferdigstille-klage"),
+    KanFerdigstilleKlageToggle("pensjon-etterlatte.kan-ferdigstille-klage"),
+    KanOppretteVedtakAvvisningToggle("pensjon-etterlatte.kan-opprette-vedtak-avvist-klage"),
     ;
 
     override fun key(): String = key
@@ -102,6 +104,7 @@ internal fun Route.klageRoutes(
                 hvisEnabled(featureToggleService, KlageFeatureToggle.KanBrukeKlageToggle) {
                     kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                         medBody<VurdertUtfallDto> { utfall ->
+                            sjekkStoetterUtfallHvisAvvist(featureToggleService, utfall)
                             val oppdatertKlage =
                                 inTransaction {
                                     klageService.lagreUtfallAvKlage(klageId, utfall.utfall, saksbehandler)
@@ -165,6 +168,21 @@ internal fun Route.klageRoutes(
                 call.respond(klager)
             }
         }
+    }
+}
+
+private fun sjekkStoetterUtfallHvisAvvist(
+    featureToggleService: FeatureToggleService,
+    utfall: VurdertUtfallDto,
+) {
+    val vedtakAktivert =
+        featureToggleService
+            .isEnabled(KlageFeatureToggle.KanOppretteVedtakAvvisningToggle, false)
+    if (utfall.utfall is KlageUtfallUtenBrev.Avvist && !vedtakAktivert) {
+        throw IkkeTillattException(
+            "KLAGE_KAN_IKKE_AVVISES_MED_VEDTAK",
+            "Avvisning med vedtak er ikke aktivert ennå",
+        )
     }
 }
 

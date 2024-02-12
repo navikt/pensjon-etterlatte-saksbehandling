@@ -1,4 +1,4 @@
-import { Alert, BodyLong, Button, Heading, HelpText, Radio, RadioGroup } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading, Radio, RadioGroup } from '@navikt/ds-react'
 import React from 'react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
@@ -17,6 +17,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { erSkjemaUtfylt, KlageOmgjoering } from '~components/klage/vurdering/KlageVurderingForms'
 import styled from 'styled-components'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -26,7 +27,7 @@ type FilledFormDataVurdering = {
 
 type FormdataVurdering = FieldOrNull<FilledFormDataVurdering>
 
-export function KlageAvvisningRedigering(props: { klage: Klage }) {
+export function KlageAvvisning(props: { klage: Klage }) {
   const navigate = useNavigate()
   const { klage } = props
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)
@@ -41,7 +42,7 @@ export function KlageAvvisningRedigering(props: { klage: Klage }) {
     defaultValues: mapKlageTilFormdata(klage),
   })
 
-  const valgtUtfall = watch('utfall')
+  const valgtUtfall: Utfall | null = watch('utfall')
 
   function sendInnVurdering(skjema: FormdataVurdering) {
     if (!klage) {
@@ -62,6 +63,12 @@ export function KlageAvvisningRedigering(props: { klage: Klage }) {
       navigate(nesteSteg(valgtUtfall, klage.id))
     })
   }
+
+  const vedtakOmAvvistErAktivert = useFeatureEnabledMedDefault(
+    'pensjon-etterlatte.kan-opprette-vedtak-avvist-klage',
+    false
+  )
+  const lagreUtfallAktivert = valgtUtfall !== Utfall.AVVIST || vedtakOmAvvistErAktivert
 
   return (
     <Content>
@@ -98,7 +105,7 @@ export function KlageAvvisningRedigering(props: { klage: Klage }) {
           </VurderingWrapper>
 
           {valgtUtfall === Utfall.AVVIST_MED_OMGJOERING ? <KlageOmgjoering control={control} /> : null}
-          {valgtUtfall === Utfall.AVVIST ? (
+          {!lagreUtfallAktivert ? (
             <InfoAlert variant="info" inline>
               Det skal fattes et vedtak om avvisning. Gjenny støtter ikke dette ennå, men det kommer snart.
             </InfoAlert>
@@ -114,11 +121,11 @@ export function KlageAvvisningRedigering(props: { klage: Klage }) {
           <Button type="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
             Gå tilbake
           </Button>
-          {/*TODO Enable når lagring er på plass*/}
-          <Button disabled={true} loading={isPending(lagreUtfallStatus)} type="submit" variant="primary">
-            {kanSeBrev(valgtUtfall) ? 'Gå til brev' : 'Gå til oppsummering'}
-          </Button>
-          <HelpText>Blir aktivert når lagring av utfall for avvisning er støttet</HelpText>
+          {lagreUtfallAktivert && (
+            <Button loading={isPending(lagreUtfallStatus)} type="submit" variant="primary">
+              {kanSeBrev(valgtUtfall) ? 'Gå til brev' : 'Gå til oppsummering'}
+            </Button>
+          )}
         </FlexRow>
       </form>
     </Content>

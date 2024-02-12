@@ -1,4 +1,4 @@
-import { Alert, BodyLong, Button, Heading, Modal, Panel } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading, Modal } from '@navikt/ds-react'
 import { BrevStatus, IBrev } from '~shared/types/Brev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect, useState } from 'react'
@@ -11,9 +11,10 @@ import { isInitial, isPending, isSuccess, mapAllApiResult } from '~shared/api/ap
 interface Props {
   brev: IBrev
   setKanRedigeres: (kanRedigeres: boolean) => void
+  callback?: () => void
 }
 
-export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props) {
+export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callback }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [statusModalOpen, setStatusModalOpen] = useState(false)
 
@@ -31,6 +32,9 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
       },
       () => journalfoer()
     )
+    if (callback) {
+      callback()
+    }
   }
 
   const journalfoer = () => {
@@ -55,11 +59,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
   }, [ferdigstillStatus, journalfoerStatus, distribuerStatus])
 
   return (
-    <Panel>
-      <Heading spacing level="2" size="medium">
-        Handlinger
-      </Heading>
-
+    <>
       {brev.status === BrevStatus.FERDIGSTILT ? (
         <Button variant="primary" onClick={journalfoer} loading={isPending(journalfoerStatus)}>
           Journalfør
@@ -134,6 +134,6 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres }: Props
           </FlexRow>
         </Modal.Body>
       </Modal>
-    </Panel>
+    </>
   )
 }

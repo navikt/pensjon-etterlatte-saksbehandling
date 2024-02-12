@@ -30,6 +30,7 @@ import no.nav.etterlatte.libs.database.hentListe
 import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
+import no.nav.etterlatte.migrering.pen.SakSammendragResponse
 import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.start.MigrerSpesifikkSakRiver
@@ -119,7 +120,10 @@ internal class StartMigreringRiverIntegrationTest {
                             rapidsConnection = this,
                             penKlient =
                                 mockk<PenKlient>()
-                                    .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN },
+                                    .also {
+                                        every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN
+                                        every { runBlocking { it.sakMedUfoere(any()) } } returns emptyList()
+                                    },
                             pesysRepository = repository,
                             featureToggleService = featureToggleService,
                             verifiserer =
@@ -189,8 +193,11 @@ internal class StartMigreringRiverIntegrationTest {
                 )
             val penKlient =
                 mockk<PenKlient>()
-                    .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN }
-                    .also { every { runBlocking { it.opphoerSak(any()) } } just runs }
+                    .also {
+                        every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN
+                        every { runBlocking { it.opphoerSak(any()) } } just runs
+                        every { runBlocking { it.sakMedUfoere(any()) } } returns emptyList()
+                    }
 
             val inspector =
                 TestRapid()
@@ -309,8 +316,15 @@ internal class StartMigreringRiverIntegrationTest {
                 )
             val penKlient =
                 mockk<PenKlient>()
-                    .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN }
-                    .also { every { runBlocking { it.opphoerSak(any()) } } just runs }
+                    .also {
+                        every {
+                            runBlocking {
+                                it.hentSak(any(), any())
+                            }
+                        } returns responsFraPEN
+                        every { runBlocking { it.opphoerSak(any()) } } just runs
+                        every { runBlocking { it.sakMedUfoere(any()) } } returns emptyList()
+                    }
 
             val inspector =
                 TestRapid()
@@ -411,10 +425,10 @@ internal class StartMigreringRiverIntegrationTest {
             )
             assertEquals(3, inspector.inspektør.size)
             val forttsettMigreringMelding = inspector.inspektør.message(2)
-            assertEquals(Migreringshendelser.VEDTAK.lagEventnameForType(), forttsettMigreringMelding.get(EVENT_NAME_KEY).asText())
+            assertEquals(Migreringshendelser.BEREGNET_FERDIG.lagEventnameForType(), forttsettMigreringMelding.get(EVENT_NAME_KEY).asText())
             assertEquals(behandlingId.toString(), forttsettMigreringMelding.get(BEHANDLING_ID_KEY).asText())
             assertEquals(pesysId.id, forttsettMigreringMelding.get(SAK_ID_KEY).asLong())
-            assertEquals(Migreringshendelser.VEDTAK.lagEventnameForType(), forttsettMigreringMelding.get(EVENT_NAME_KEY).asText())
+            assertEquals(Migreringshendelser.BEREGNET_FERDIG.lagEventnameForType(), forttsettMigreringMelding.get(EVENT_NAME_KEY).asText())
             assertEquals(
                 MigreringKjoringVariant.FORTSETT_ETTER_PAUSE.name,
                 forttsettMigreringMelding.get(MIGRERING_KJORING_VARIANT).asText(),
@@ -454,6 +468,93 @@ internal class StartMigreringRiverIntegrationTest {
                             penKlient =
                                 mockk<PenKlient>()
                                     .also { every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN },
+                            pesysRepository = repository,
+                            featureToggleService = featureToggleService,
+                            verifiserer =
+                                Verifiserer(
+                                    repository,
+                                    GjenlevendeForelderPatcher(pdlTjenesterKlient, personHenter),
+                                    mockk<Utenlandstilknytningsjekker>().also { every { it.finnUtenlandstilknytning(any()) } returns null },
+                                    personHenter,
+                                    featureToggleService,
+                                    grunnlagKlient = mockk(),
+                                ),
+                            krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
+                        )
+                    }
+            inspector.sendTestMessage(
+                JsonMessage.newMessage(
+                    mapOf(
+                        Migreringshendelser.MIGRER_SPESIFIKK_SAK.lagParMedEventNameKey(),
+                        SAK_ID_KEY to pesysid,
+                        LOPENDE_JANUAR_2024_KEY to true,
+                        MIGRERING_KJORING_VARIANT to MigreringKjoringVariant.FULL_KJORING,
+                    ),
+                ).toJson(),
+            )
+            with(inspector.inspektør.message(0)) {
+                assertEquals(EventNames.FEILA.lagEventnameForType(), get(EVENT_NAME_KEY).textValue())
+            }
+            assertEquals(Migreringsstatus.VERIFISERING_FEILA, repository.hentStatus(pesysid))
+        }
+    }
+
+    @Test
+    fun `Setter kanGjenopprettesAutomatisk false hvis finnes en form for ufore`() {
+        testApplication {
+            val pesysid = 22974139L
+            val repository = PesysRepository(datasource)
+            val featureToggleService =
+                DummyFeatureToggleService().also {
+                    it.settBryter(MigreringFeatureToggle.SendSakTilMigrering, true)
+                }
+            val responsFraPEN =
+                objectMapper.readValue<BarnepensjonGrunnlagResponse>(
+                    this::class.java.getResource("/penrespons.json")!!.readText(),
+                )
+
+            val inspector =
+                TestRapid()
+                    .apply {
+                        val pdlTjenesterKlient =
+                            mockk<PdlTjenesterKlient>().also {
+                                every {
+                                    it.hentPerson(
+                                        any(),
+                                        any(),
+                                    )
+                                } returns
+                                    mockk<PersonDTO>().also {
+                                        every { it.vergemaalEllerFremtidsfullmakt } returns emptyList()
+                                        every { it.foedselsdato } returns
+                                            OpplysningDTO(
+                                                LocalDate.of(
+                                                    2010,
+                                                    Month.JANUARY,
+                                                    1,
+                                                ),
+                                                "",
+                                            )
+                                        every { it.adressebeskyttelse } returns null
+                                        every { it.doedsdato } returns null
+                                    }
+                            }
+                        val personHenter = PersonHenter(pdlTjenesterKlient)
+                        MigrerSpesifikkSakRiver(
+                            rapidsConnection = this,
+                            penKlient =
+                                mockk<PenKlient>()
+                                    .also {
+                                        every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN
+                                        every { runBlocking { it.opphoerSak(any()) } } just runs
+                                        every { runBlocking { it.sakMedUfoere(any()) } } returns
+                                            listOf(
+                                                SakSammendragResponse(
+                                                    sakType = SakSammendragResponse.UFORE_SAKTYPE,
+                                                    sakStatus = SakSammendragResponse.Status.LOPENDE,
+                                                ),
+                                            )
+                                    },
                             pesysRepository = repository,
                             featureToggleService = featureToggleService,
                             verifiserer =

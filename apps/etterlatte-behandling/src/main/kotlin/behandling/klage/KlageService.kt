@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.KlageKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
@@ -97,6 +98,7 @@ class KlageServiceImpl(
     private val brevApiKlient: BrevApiKlient,
     private val klageKlient: KlageKlient,
     private val klageHendelser: IKlageHendelserService,
+    private val vedtakKlient: VedtakKlient,
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -216,6 +218,18 @@ class KlageServiceImpl(
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
+
+                is KlageUtfallUtenBrev.Avvist ->
+                    KlageUtfallMedData.Avvist(
+                        saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
+                        vedtakId = runBlocking { vedtakKlient.lagreVedtakKlage(klage, saksbehandler) },
+                    )
+
+                is KlageUtfallUtenBrev.AvvistMedOmgjoering ->
+                    KlageUtfallMedData.AvvistMedOmgjoering(
+                        omgjoering = utfall.omgjoering,
+                        saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
+                    )
             }
 
         val klageMedOppdatertUtfall = klage.oppdaterUtfall(utfallMedBrev)
@@ -303,6 +317,8 @@ class KlageServiceImpl(
                 is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling to null
                 is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling to utfall.omgjoering
                 is KlageUtfallMedData.Omgjoering -> null to utfall.omgjoering
+                is KlageUtfallMedData.Avvist -> null to null
+                is KlageUtfallMedData.AvvistMedOmgjoering -> null to utfall.omgjoering
                 null -> null to null
             }
 

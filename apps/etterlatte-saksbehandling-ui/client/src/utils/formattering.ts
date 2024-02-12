@@ -30,6 +30,9 @@ export const formaterStringTidspunktTimeMinutter = (dato: string) => format(new 
 
 export const formaterDatoMedTidspunkt = (dato: Date) => format(new Date(dato), 'dd.MM.yyyy HH:mm').toString()
 
+export const formaterDatoMedKlokkeslett = (dato: Date | string) =>
+  format(new Date(dato), "dd.MM.yyyy 'kl.' HH:mm").toString()
+
 export const formaterBehandlingstype = (behandlingstype: IBehandlingsType): string => {
   switch (behandlingstype) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:

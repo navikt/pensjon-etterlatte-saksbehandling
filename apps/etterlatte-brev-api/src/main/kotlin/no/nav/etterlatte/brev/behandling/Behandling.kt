@@ -40,12 +40,16 @@ data class GenerellBrevData(
             )
         } ?: AvsenderRequest(saksbehandlerIdent = bruker.ident(), sakenhet = sak.enhet)
 
-    fun erMigrering() = systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null
+    // Tidligere erMigrering - Vil si saker som er løpende i Pesys når det vedtas i Gjenny og opphøres etter vedtaket.
+    fun loependeIPesys() = systemkilde == Vedtaksloesning.PESYS && behandlingId != null && revurderingsaarsak == null
 
     fun vedtakstype() = forenkletVedtak?.type?.name?.lowercase()
+
+    fun erForeldreloes() = personerISak.avdoede.size > 1 // TODO må støtte scenariet hvor en avdød er ukjent
 }
 
 data class Trygdetid(
+    val ident: String,
     val aarTrygdetid: Int,
     val prorataBroek: IntBroek?,
     val maanederTrygdetid: Int,

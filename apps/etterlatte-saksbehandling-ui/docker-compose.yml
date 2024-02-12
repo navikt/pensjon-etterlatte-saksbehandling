@@ -11,6 +11,7 @@ services:
       PORT: 8080
       NODE_ENV: production
       GOSYS_URL: https://gosys-q2.dev.intern.nav.no/gosys
+      EESSI_PENSJON_URL: https://pensjon-utland-q2.intern.dev.nav.no/gjenny/
       RINA_URL: https://rina-ss3-q.adeo.no
       NORG2_URL: https://norg2.dev-fss-pub.nais.io
       APP_VERSION: 1

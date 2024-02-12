@@ -3,12 +3,11 @@ package no.nav.etterlatte.behandling.job
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.config.ApplicationContext
 import org.slf4j.Logger
@@ -26,17 +25,18 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
             CoroutineExceptionHandler { _, exception ->
                 logger.error("Saksbehandlerdatanavn feilet se exception $exception")
             }
-
-        GlobalScope.launch(newSingleThreadContext("saksbehandlernavnjob")) {
-            try {
-                oppdaterSaksbehandlerNavn(logger, context, subCoroutineExceptionHandler)
-            } catch (e: Exception) {
-                logger.error("Kunne ikke hente navn for saksbehandlere", e)
-            }
-            try {
-                oppdaterSaksbehandlerEnhet(logger, context, subCoroutineExceptionHandler)
-            } catch (e: Exception) {
-                logger.error("Kunne ikke hente enheter for saksbehandlere", e)
+        newSingleThreadContext("saksbehandlernavnjob").use { ctx ->
+            runBlocking(ctx) {
+                try {
+                    oppdaterSaksbehandlerNavn(logger, context, subCoroutineExceptionHandler)
+                } catch (e: Exception) {
+                    logger.error("Kunne ikke hente navn for saksbehandlere", e)
+                }
+                try {
+                    oppdaterSaksbehandlerEnhet(logger, context, subCoroutineExceptionHandler)
+                } catch (e: Exception) {
+                    logger.error("Kunne ikke hente enheter for saksbehandlere", e)
+                }
             }
         }
     } else {
@@ -73,7 +73,7 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                         it to
                             scope.async(
                                 subCoroutineExceptionHandler,
-                            ) { context.navAnsattKlient.hentEnhetForSaksbehandler(it) }
+                            ) { context.navAnsattKlient.hentEnheterForSaksbehandler(it) }
                     }
                     .mapNotNull {
                         try {

@@ -110,6 +110,10 @@ export function formaterKlageutfall(klage: Klage) {
       return 'stadfesting av vedtak'
     case 'OMGJOERING':
       return 'omgjøring av vedtak'
+    case 'AVVIST':
+      return 'avvist med vedtak'
+    case 'AVVIST_MED_OMGJOERING':
+      return 'avvist med omgjøring av vedtak'
   }
   return 'ukjent'
 }

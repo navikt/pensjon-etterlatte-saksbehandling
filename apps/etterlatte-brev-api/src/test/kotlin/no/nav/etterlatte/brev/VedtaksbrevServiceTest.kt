@@ -48,7 +48,9 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -90,7 +92,7 @@ internal class VedtaksbrevServiceTest {
     private val brevbakerService = mockk<BrevbakerService>()
     private val pdfGenerator =
         PDFGenerator(db, brevdataFacade, adresseService, brevbakerService)
-    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevdataFacade)
     private val brevoppretter =
         Brevoppretter(
             adresseService,
@@ -220,6 +222,10 @@ internal class VedtaksbrevServiceTest {
                     every { status } returns BehandlingStatus.BEREGNET
                 }
             coEvery { brevdataFacade.hentEtterbetaling(any(), any()) } returns mockk()
+            coEvery { brevdataFacade.hentBrevutfall(any(), any()) } returns
+                mockk<BrevutfallDto> {
+                    every { feilutbetaling?.valg } returns FeilutbetalingValg.JA_VARSEL
+                }
 
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(
@@ -570,6 +576,10 @@ internal class VedtaksbrevServiceTest {
 
             every { db.hentBrev(any()) } returns brev
             coEvery { brevdataFacade.hentGenerellBrevData(any(), any(), any()) } returns behandling
+            coEvery { brevdataFacade.hentBrevutfall(any(), any()) } returns
+                mockk<BrevutfallDto> {
+                    every { feilutbetaling?.valg } returns FeilutbetalingValg.JA_VARSEL
+                }
             coEvery { brevbakerService.hentRedigerbarTekstFraBrevbakeren(any()) } returnsMany
                 listOf(
                     opprettOpphoerPayload(), opprettVedleggPayload(),

@@ -20,11 +20,31 @@ class MigreringService(
         vilkaarsvurdering: Vilkaarsvurdering,
         yrkesskade: Boolean,
     ) = vilkaarsvurdering.vilkaar.forEach { vilkaar ->
-        if (vilkaar.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED_2024) {
-            val utfall = if (yrkesskade) Utfall.OPPFYLT else Utfall.IKKE_OPPFYLT
-            lagreVilkaarsResultat(vilkaarsvurdering, vilkaar, utfall)
-        } else {
-            lagreVilkaarsResultat(vilkaarsvurdering, vilkaar, Utfall.IKKE_VURDERT)
+        when (vilkaar.hovedvilkaar.type) {
+            VilkaarType.BP_FORMAAL_2024 -> {
+                val kommentar = "Ja på virkningstidspunktet jf PDL. Informasjon hentet fra Pesys."
+                lagreVilkaarsResultat(vilkaarsvurdering, vilkaar, Utfall.OPPFYLT, kommentar)
+            }
+            VilkaarType.BP_DOEDSFALL_FORELDER_2024 -> {
+                val kommentar = "Ja. Bruker har hatt BP i Pesys etter en forelder død."
+                lagreVilkaarsResultat(vilkaarsvurdering, vilkaar, Utfall.OPPFYLT, kommentar)
+            }
+            VilkaarType.BP_YRKESSKADE_AVDOED_2024 -> {
+                val utfall = if (yrkesskade) Utfall.OPPFYLT else Utfall.IKKE_OPPFYLT
+                lagreVilkaarsResultat(vilkaarsvurdering, vilkaar, utfall)
+            }
+            VilkaarType.BP_ALDER_BARN_2024 -> {
+                val kommentar =
+                    "Ja, på virkningstidspunktet etter nye regler fra 01.01.2024. Informasjon hentet fra Pesys."
+                lagreVilkaarsResultat(vilkaarsvurdering, vilkaar, Utfall.OPPFYLT, kommentar)
+            }
+            VilkaarType.BP_FORTSATT_MEDLEMSKAP -> {
+                val kommentar = "Bor i Norge på virkningstidspunktet. Informasjon hentet fra PDL."
+                // Saker hvor medlemskap er endret gjøres manuelt
+                val utfall = Utfall.OPPFYLT
+                lagreVilkaarsResultat(vilkaarsvurdering, vilkaar, utfall, kommentar)
+            }
+            else -> lagreVilkaarsResultat(vilkaarsvurdering, vilkaar, Utfall.IKKE_VURDERT)
         }
     }
 
@@ -32,6 +52,7 @@ class MigreringService(
         vilkaarsvurdering: Vilkaarsvurdering,
         vilkaar: Vilkaar,
         yrkesskadeUtfall: Utfall,
+        kommentar: String = "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
     ) = vilkaarsvurderingRepository.lagreVilkaarResultat(
         behandlingId = vilkaarsvurdering.behandlingId,
         vurdertVilkaar =
@@ -40,7 +61,7 @@ class MigreringService(
                 hovedvilkaar = VilkaarTypeOgUtfall(vilkaar.hovedvilkaar.type, yrkesskadeUtfall),
                 vurdering =
                     VilkaarVurderingData(
-                        kommentar = "Automatisk gjenoppretta basert på opphørt sak fra Pesys",
+                        kommentar = kommentar,
                         tidspunkt = Tidspunkt.now().toLocalDatetimeUTC(),
                         saksbehandler = Fagsaksystem.EY.navn,
                     ),

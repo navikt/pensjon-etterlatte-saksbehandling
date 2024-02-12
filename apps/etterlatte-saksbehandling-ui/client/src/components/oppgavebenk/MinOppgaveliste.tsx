@@ -1,6 +1,6 @@
 import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
-import { oppdaterTildeling } from '~components/oppgavebenk/oppgaveutils'
+import { oppdaterFrist, oppdaterTildeling } from '~components/oppgavebenk/oppgaveutils'
 import styled from 'styled-components'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
 import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
@@ -41,7 +41,9 @@ export const MinOppgaveliste = (props: {
         </ValgWrapper>
         <Oppgavelista
           oppgaver={minsideOppgaver}
-          hentOppgaver={() => {}}
+          oppdaterFrist={(id: string, nyfrist: string) =>
+            oppdaterFrist(setMinsideOppgaver, minsideOppgaver, id, nyfrist)
+          }
           filter={minsideFilter}
           setFilter={setFilter}
           oppdaterTildeling={(id, _saksbehandler, versjon) =>

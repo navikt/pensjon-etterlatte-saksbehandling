@@ -1,7 +1,7 @@
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { FilterRad } from '~components/oppgavebenk/FilterRad'
 import { Filter, filtrerOppgaver } from '~components/oppgavebenk/filter/oppgavelistafiltre'
-import { oppdaterTildeling } from '~components/oppgavebenk/oppgaveutils'
+import { oppdaterFrist, oppdaterTildeling } from '~components/oppgavebenk/oppgaveutils'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
 import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
 import { Result } from '~shared/api/apiUtils'
@@ -58,7 +58,9 @@ export const OppgavelistaWrapper = (props: {
         <Oppgavelista
           oppgaver={filtrerteOppgaver}
           oppdaterTildeling={() => oppdaterTildeling(setHovedsideOppgaver, hovedsideOppgaver)}
-          hentOppgaver={() => {}}
+          oppdaterFrist={(id: string, nyfrist: string) =>
+            oppdaterFrist(setHovedsideOppgaver, hovedsideOppgaver, id, nyfrist)
+          }
           filter={hovedsideFilter}
           setFilter={setHovedsideFilter}
           totaltAntallOppgaver={hovedsideOppgaver.length}

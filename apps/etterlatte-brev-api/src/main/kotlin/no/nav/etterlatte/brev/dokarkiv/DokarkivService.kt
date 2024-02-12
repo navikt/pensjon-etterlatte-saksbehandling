@@ -105,7 +105,7 @@ internal class DokarkivServiceImpl(
             avsenderMottaker = request.avsenderMottaker(),
             bruker = Bruker(request.brukerident),
             eksternReferanseId = "${request.eksternReferansePrefiks}.${request.brevId}",
-            sak = JournalpostSak(Sakstype.FAGSAK, request.sakId.toString()),
+            sak = JournalpostSak(Sakstype.FAGSAK, request.sakId.toString(), request.sakType.tema, "EY"),
             dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
             tema = request.sakType.tema,
             kanal = "S",

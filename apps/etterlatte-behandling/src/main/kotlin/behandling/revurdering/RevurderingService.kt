@@ -380,7 +380,7 @@ class RevurderingService(
             sakId = sakId,
             persongalleri = persongalleri,
             forrigeBehandling = behandlingSomOmgjoeresId,
-            mottattDato = klagenViOmgjoerPaaGrunnAv.innkommendeDokument?.mottattDato?.toString(),
+            mottattDato = klagenViOmgjoerPaaGrunnAv.innkommendeDokument?.mottattDato?.atStartOfDay()?.toString(),
             prosessType = Prosesstype.MANUELL,
             kilde = Vedtaksloesning.GJENNY,
             revurderingAarsak = Revurderingaarsak.OMGJOERING_ETTER_KLAGE,

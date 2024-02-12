@@ -85,7 +85,6 @@ private class Server(private val context: ApplicationContext) {
 
 internal fun Application.moduleOnServerReady(context: ApplicationContext) {
     environment.monitor.subscribe(ServerReady) {
-        environment.log.info("Server is started")
         populerSaksbehandlereMedNavn(context)
     }
 }

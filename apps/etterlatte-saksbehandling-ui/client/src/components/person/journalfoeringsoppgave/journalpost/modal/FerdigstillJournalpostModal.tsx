@@ -18,7 +18,7 @@ interface ModalProps {
   sak: ISak
 }
 
-export default function JournalfoerJournalpostModal({ journalpost, sak }: ModalProps) {
+export default function FerdigstillJournalpostModal({ journalpost, sak }: ModalProps) {
   const [open, setOpen] = useState(false)
 
   const [oppdaterStatus, apiOppdaterJournalpost] = useApiCall(oppdaterJournalpost)
@@ -37,23 +37,23 @@ export default function JournalfoerJournalpostModal({ journalpost, sak }: ModalP
         onClick={() => setOpen(true)}
         disabled={!sak?.id || !sak?.sakType || !temaTilhoererGjenny(journalpost)}
       >
-        Journalfør
+        Ferdigstill
       </Button>
 
       <Modal open={open} aria-labelledby="modal-heading" onClose={() => setOpen(false)}>
         <Modal.Body>
           <Heading size="medium" id="modal-heading" spacing>
-            Journalfør
+            Ferdigstill journalpost
           </Heading>
 
           {kanFerdigstilles ? (
             <BodyLong spacing>
-              Du journalfører nå journalposten. Denne handlingen kan ikke angres. <br />
-              Er du sikker på at du vil fortsette?
+              Du ferdigstiller nå journalposten. Denne handlingen kan ikke angres. <br />
+              Er du sikker på at du vil ferdigstille?
             </BodyLong>
           ) : (
             <Alert variant="error">
-              <strong>Kan ikke journalføre før følgende er fikset: </strong>
+              <strong>Kan ikke ferdigstille journalpost</strong>
               <ul>
                 {feilmeldinger.map((e, i) => (
                   <li key={`feilmelding-${i}`}>{e}</li>
@@ -65,7 +65,7 @@ export default function JournalfoerJournalpostModal({ journalpost, sak }: ModalP
           <br />
 
           {isSuccess(oppdaterStatus) ? (
-            <Alert variant="success">Journalpost journalført ok! Laster siden på nytt...</Alert>
+            <Alert variant="success">Journalpost ferdigstilt. Laster siden på nytt...</Alert>
           ) : (
             <FlexRow justify="center">
               <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(oppdaterStatus)}>
@@ -77,14 +77,14 @@ export default function JournalfoerJournalpostModal({ journalpost, sak }: ModalP
                 loading={isPending(oppdaterStatus)}
                 disabled={!kanFerdigstilles}
               >
-                Ja, journalfør
+                Ja, ferdigstill
               </Button>
             </FlexRow>
           )}
 
           {mapFailure(oppdaterStatus, (error) => (
             <Modal.Footer>
-              <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved journalføring av journalposten'}</ApiErrorAlert>
+              <ApiErrorAlert>{error.detail || 'Det oppsto en feil ved ferdigstilling av journalposten'}</ApiErrorAlert>
             </Modal.Footer>
           ))}
         </Modal.Body>

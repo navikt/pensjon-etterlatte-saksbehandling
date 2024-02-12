@@ -14,7 +14,7 @@ import { EndreBruker } from '~components/person/journalfoeringsoppgave/journalpo
 import { EndreAvsenderMottaker } from '~components/person/journalfoeringsoppgave/journalpost/EndreAvsenderMottaker'
 import { EndreSak } from '~components/person/journalfoeringsoppgave/journalpost/EndreSak'
 import { EndreDokumenter } from '~components/person/journalfoeringsoppgave/journalpost/EndreDokumenter'
-import JournalfoerJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/JournalfoerJournalpostModal'
+import FerdigstillJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/FerdigstillJournalpostModal'
 import LagreJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/LagreJournalpostModal'
 import { EndreTittelJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/EndreTittelJournalpost'
 
@@ -85,7 +85,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
           <FlexRow justify="center" $spacing>
             <LagreJournalpostModal journalpost={journalpost} oppgaveId={oppgaveId} />
 
-            <JournalfoerJournalpostModal journalpost={journalpost} sak={sak} />
+            <FerdigstillJournalpostModal journalpost={journalpost} sak={sak} />
           </FlexRow>
           <FlexRow justify="center">
             <AvbrytBehandleJournalfoeringOppgave />

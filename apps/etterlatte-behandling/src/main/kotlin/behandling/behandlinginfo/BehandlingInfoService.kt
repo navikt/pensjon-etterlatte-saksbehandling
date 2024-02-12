@@ -30,12 +30,7 @@ class BehandlingInfoService(
         sjekkBehandlingKanEndres(behandling)
 
         val lagretBrevutfall = lagreBrevutfall(behandling, brevutfall)
-        val lagretEtterbetaling =
-            if (!behandling.revurderingMedOpphoer()) {
-                lagreEtterbetaling(behandling, etterbetaling)
-            } else {
-                null
-            }
+        val lagretEtterbetaling = lagreEtterbetaling(behandling, etterbetaling)
 
         oppdaterBehandlingStatus(behandling, brukerTokenInfo)
 
@@ -126,10 +121,7 @@ class BehandlingInfoService(
         behandling: Behandling,
         brevutfall: Brevutfall,
     ) {
-        if (behandling.sak.sakType == SakType.BARNEPENSJON &&
-            !behandling.revurderingMedOpphoer() &&
-            brevutfall.aldersgruppe == null
-        ) {
+        if (behandling.sak.sakType == SakType.BARNEPENSJON && brevutfall.aldersgruppe == null) {
             throw BrevutfallException.AldergruppeIkkeSatt()
         }
     }

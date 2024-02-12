@@ -173,6 +173,7 @@ internal class BehandlingInfoServiceTest {
             )
         every { behandlingInfoDao.lagreBrevutfall(any()) } returns mockk()
         every { behandlingsstatusService.settVilkaarsvurdert(any(), any(), any()) } returns Unit
+        every { behandlingInfoDao.hentEtterbetaling(any()) } returns null
 
         behandlingInfoService.lagreBrevutfallOgEtterbetaling(
             behandlingId,
@@ -188,7 +189,7 @@ internal class BehandlingInfoServiceTest {
     }
 
     @Test
-    fun `skal lagre brevutfall med kun feilutbetaling ved opphoer av barnepensjon`() {
+    fun `skal lagre brevutfall med kun feilutbetaling og aldergruppe ved opphoer av barnepensjon`() {
         val behandlingId = randomUUID()
 
         every { behandlingService.hentBehandling(any()) } returns
@@ -201,11 +202,12 @@ internal class BehandlingInfoServiceTest {
             )
         every { behandlingInfoDao.lagreBrevutfall(any()) } returns mockk()
         every { behandlingsstatusService.settVilkaarsvurdert(any(), any(), any()) } returns Unit
+        every { behandlingInfoDao.hentEtterbetaling(any()) } returns null
 
         behandlingInfoService.lagreBrevutfallOgEtterbetaling(
             behandlingId,
             bruker,
-            brevutfall(behandlingId).copy(aldersgruppe = null, lavEllerIngenInntekt = null),
+            brevutfall(behandlingId).copy(lavEllerIngenInntekt = null),
             null,
         )
 

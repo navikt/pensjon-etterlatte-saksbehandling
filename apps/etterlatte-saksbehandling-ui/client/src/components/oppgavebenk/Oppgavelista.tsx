@@ -6,7 +6,7 @@ import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontro
 import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 export interface oppgaveListaProps {
-  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
   oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>

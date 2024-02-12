@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.girOpphoer
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.UUID
@@ -29,7 +30,12 @@ class BehandlingInfoService(
         sjekkBehandlingKanEndres(behandling)
 
         val lagretBrevutfall = lagreBrevutfall(behandling, brevutfall)
-        val lagretEtterbetaling = lagreEtterbetaling(behandling, etterbetaling)
+        val lagretEtterbetaling =
+            if (!behandling.revurderingMedOpphoer()) {
+                lagreEtterbetaling(behandling, etterbetaling)
+            } else {
+                null
+            }
 
         oppdaterBehandlingStatus(behandling, brukerTokenInfo)
 
@@ -42,7 +48,7 @@ class BehandlingInfoService(
     ): Brevutfall {
         sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
         sjekkLavEllerIngenInntektSattVedOmstillingsstoenad(behandling, brevutfall)
-        sjekkFeilutbetalingSattVedOmstillingsstoenad(behandling, brevutfall)
+        sjekkFeilutbetalingErSatt(behandling, brevutfall)
         return behandlingInfoDao.lagreBrevutfall(brevutfall)
     }
 
@@ -72,19 +78,28 @@ class BehandlingInfoService(
     private fun sjekkBehandlingKanEndres(behandling: Behandling) {
         val kanEndres =
             when (behandling.sak.sakType) {
-                SakType.BARNEPENSJON ->
-                    behandling.status in
-                        listOf(
-                            BehandlingStatus.BEREGNET,
-                            BehandlingStatus.RETURNERT,
-                        )
+                SakType.BARNEPENSJON -> {
+                    if (behandling.revurderingMedOpphoer()) {
+                        behandling.status == BehandlingStatus.VILKAARSVURDERT
+                    } else {
+                        behandling.status in
+                            listOf(
+                                BehandlingStatus.BEREGNET,
+                                BehandlingStatus.RETURNERT,
+                            )
+                    }
+                }
 
                 SakType.OMSTILLINGSSTOENAD ->
-                    behandling.status in
-                        listOf(
-                            BehandlingStatus.AVKORTET,
-                            BehandlingStatus.RETURNERT,
-                        )
+                    if (behandling.revurderingMedOpphoer()) {
+                        behandling.status == BehandlingStatus.VILKAARSVURDERT
+                    } else {
+                        behandling.status in
+                            listOf(
+                                BehandlingStatus.AVKORTET,
+                                BehandlingStatus.RETURNERT,
+                            )
+                    }
             }
         if (!kanEndres) {
             throw BrevutfallException.BehandlingKanIkkeEndres(
@@ -111,7 +126,10 @@ class BehandlingInfoService(
         behandling: Behandling,
         brevutfall: Brevutfall,
     ) {
-        if (behandling.sak.sakType == SakType.BARNEPENSJON && brevutfall.aldersgruppe == null) {
+        if (behandling.sak.sakType == SakType.BARNEPENSJON &&
+            !behandling.revurderingMedOpphoer() &&
+            brevutfall.aldersgruppe == null
+        ) {
             throw BrevutfallException.AldergruppeIkkeSatt()
         }
     }
@@ -120,12 +138,15 @@ class BehandlingInfoService(
         behandling: Behandling,
         brevutfall: Brevutfall,
     ) {
-        if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD && brevutfall.lavEllerIngenInntekt == null) {
+        if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD &&
+            !behandling.revurderingMedOpphoer() &&
+            brevutfall.lavEllerIngenInntekt == null
+        ) {
             throw BrevutfallException.LavEllerIngenInntektIkkeSatt()
         }
     }
 
-    private fun sjekkFeilutbetalingSattVedOmstillingsstoenad(
+    private fun sjekkFeilutbetalingErSatt(
         behandling: Behandling,
         brevutfall: Brevutfall,
     ) {
@@ -140,9 +161,15 @@ class BehandlingInfoService(
         behandling: Behandling,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        when (behandling.sak.sakType) {
-            SakType.BARNEPENSJON -> behandlingsstatusService.settBeregnet(behandling.id, brukerTokenInfo, false)
-            SakType.OMSTILLINGSSTOENAD -> behandlingsstatusService.settAvkortet(behandling.id, brukerTokenInfo, false)
+        if (behandling.revurderingMedOpphoer()) {
+            behandlingsstatusService.settVilkaarsvurdert(behandling.id, brukerTokenInfo, false)
+        } else {
+            when (behandling.sak.sakType) {
+                SakType.BARNEPENSJON -> behandlingsstatusService.settBeregnet(behandling.id, brukerTokenInfo, false)
+                SakType.OMSTILLINGSSTOENAD -> behandlingsstatusService.settAvkortet(behandling.id, brukerTokenInfo, false)
+            }
         }
     }
+
+    private fun Behandling.revurderingMedOpphoer(): Boolean = revurderingsaarsak()?.let { it.girOpphoer() } ?: false
 }

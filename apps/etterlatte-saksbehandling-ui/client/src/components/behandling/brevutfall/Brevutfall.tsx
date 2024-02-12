@@ -124,6 +124,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling; resetBrevu
             />
           ) : (
             <BrevutfallVisning
+              behandling={behandling}
               redigerbar={redigerbar}
               brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
               sakType={behandling.sakType}

@@ -62,7 +62,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const opprettEllerOppdaterVedtak = () => {
     const erBarnepensjon = behandling.sakType === SakType.BARNEPENSJON
     const skalSendeBrev = behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
-    if (skalSendeBrev && !erOpphoer && !brevutfallOgEtterbetaling?.brevutfall) {
+    if (skalSendeBrev && !brevutfallOgEtterbetaling?.brevutfall) {
       setManglerbrevutfall(true)
       return
     }
@@ -91,7 +91,22 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
       </ContentHeader>
       {erOpphoer ? (
         <BeregningWrapper>
-          {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? null : (
+          {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? (
+            <>
+              <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+              {manglerBrevutfall && (
+                <MapSakType
+                  saktype={behandling.sakType}
+                  barnepensjon={
+                    <Alert variant="error">Du må fylle ut om brevet gjelder for person under eller over 18 år</Alert>
+                  }
+                  omstillingsstoenad={
+                    <Alert variant="error">Du må fylle ut om omstillingsstønad skal gis etter unntaksregel</Alert>
+                  }
+                ></MapSakType>
+              )}
+            </>
+          ) : (
             <InfoAlert variant="info" inline>
               Det sendes ikke vedtaksbrev for denne behandlingen.
             </InfoAlert>

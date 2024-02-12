@@ -10,6 +10,8 @@ import { format, parseISO } from 'date-fns'
 import nb from 'date-fns/locale/nb'
 import { SakType } from '~shared/types/sak'
 import { PencilIcon } from '@navikt/aksel-icons'
+import { erOpphoer } from '~shared/types/Revurderingaarsak'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 function aldersgruppeToString(aldersgruppe?: Aldersgruppe | null) {
   switch (aldersgruppe) {
@@ -51,40 +53,44 @@ function formaterDatoSomMaaned(dato: string) {
 }
 
 export const BrevutfallVisning = (props: {
+  behandling: IDetaljertBehandling
   redigerbar: boolean
   brevutfallOgEtterbetaling: BrevutfallOgEtterbetaling
   sakType: SakType
   setVisSkjema: (visSkjema: boolean) => void
 }) => {
-  const { redigerbar, brevutfallOgEtterbetaling, sakType, setVisSkjema } = props
+  const { behandling, redigerbar, brevutfallOgEtterbetaling, sakType, setVisSkjema } = props
+  const ikkeOpphoer = !erOpphoer(behandling.revurderingsaarsak!!)
 
   return (
     <VStack gap="8">
-      <VStack gap="2">
+      {ikkeOpphoer && (
         <VStack gap="2">
-          <Label>Skal det etterbetales?</Label>
-          <BodyShort>{brevutfallOgEtterbetaling.etterbetaling ? 'Ja' : 'Nei'}</BodyShort>
+          <VStack gap="2">
+            <Label>Skal det etterbetales?</Label>
+            <BodyShort>{brevutfallOgEtterbetaling.etterbetaling ? 'Ja' : 'Nei'}</BodyShort>
+          </VStack>
+          {brevutfallOgEtterbetaling.etterbetaling && (
+            <HStack gap="8">
+              <VStack gap="2">
+                <Label>Fra og med</Label>
+                <BodyShort>{formaterDatoSomMaaned(brevutfallOgEtterbetaling.etterbetaling.datoFom!!)}</BodyShort>
+              </VStack>
+              <VStack gap="2">
+                <Label>Til og med</Label>
+                <BodyShort>{formaterDatoSomMaaned(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
+              </VStack>
+            </HStack>
+          )}
         </VStack>
-        {brevutfallOgEtterbetaling.etterbetaling && (
-          <HStack gap="8">
-            <VStack gap="2">
-              <Label>Fra og med</Label>
-              <BodyShort>{formaterDatoSomMaaned(brevutfallOgEtterbetaling.etterbetaling.datoFom!!)}</BodyShort>
-            </VStack>
-            <VStack gap="2">
-              <Label>Til og med</Label>
-              <BodyShort>{formaterDatoSomMaaned(brevutfallOgEtterbetaling.etterbetaling.datoTom!!)}</BodyShort>
-            </VStack>
-          </HStack>
-        )}
-      </VStack>
-      {sakType == SakType.BARNEPENSJON && (
+      )}
+      {ikkeOpphoer && sakType == SakType.BARNEPENSJON && (
         <VStack gap="2">
           <Label>Gjelder brevet under eller over 18 år?</Label>
           <BodyShort>{aldersgruppeToString(brevutfallOgEtterbetaling.brevutfall.aldersgruppe)}</BodyShort>
         </VStack>
       )}
-      {sakType == SakType.OMSTILLINGSSTOENAD && (
+      {ikkeOpphoer && sakType == SakType.OMSTILLINGSSTOENAD && (
         <VStack gap="2">
           <Label>Gi omstillingsstønad til 67 år etter unntaksregel for bruker født tom 1963?</Label>
           <BodyShort>
@@ -97,6 +103,7 @@ export const BrevutfallVisning = (props: {
         <VStack gap="2">
           <Label>Medfører revurderingen en feilutbetaling?</Label>
           <BodyShort>{feilutbetalingToString(brevutfallOgEtterbetaling.brevutfall.feilutbetaling.valg)}</BodyShort>
+          <Label>Kommentar</Label>
           <BodyShort>{brevutfallOgEtterbetaling.brevutfall.feilutbetaling.kommentar}</BodyShort>
         </VStack>
       )}

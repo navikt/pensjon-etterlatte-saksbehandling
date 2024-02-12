@@ -185,6 +185,7 @@ internal class BehandlingInfoRoutesTest {
                     every { sakType } returns SakType.BARNEPENSJON
                 }
             every { status } returns BehandlingStatus.BEREGNET
+            every { revurderingsaarsak() } returns null
             every { virkningstidspunkt } returns
                 Virkningstidspunkt.create(YearMonth.of(2023, 1), "ident", "begrunnelse")
         }

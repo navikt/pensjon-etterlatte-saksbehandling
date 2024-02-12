@@ -30,7 +30,6 @@ import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
-import { MapSakType } from '~shared/components/MapSakType'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -94,17 +93,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
           {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? (
             <>
               <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
-              {manglerBrevutfall && (
-                <MapSakType
-                  saktype={behandling.sakType}
-                  barnepensjon={
-                    <Alert variant="error">Du må fylle ut om brevet gjelder for person under eller over 18 år</Alert>
-                  }
-                  omstillingsstoenad={
-                    <Alert variant="error">Du må fylle ut om omstillingsstønad skal gis etter unntaksregel</Alert>
-                  }
-                ></MapSakType>
-              )}
+              {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
             </>
           ) : (
             <InfoAlert variant="info" inline>
@@ -143,17 +132,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                 )}
 
                 <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
-                {manglerBrevutfall && (
-                  <MapSakType
-                    saktype={behandling.sakType}
-                    barnepensjon={
-                      <Alert variant="error">Du må fylle ut om brevet gjelder for person under eller over 18 år</Alert>
-                    }
-                    omstillingsstoenad={
-                      <Alert variant="error">Du må fylle ut om omstillingsstønad skal gis etter unntaksregel</Alert>
-                    }
-                  ></MapSakType>
-                )}
+                {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
               </BeregningWrapper>
             )
           )}

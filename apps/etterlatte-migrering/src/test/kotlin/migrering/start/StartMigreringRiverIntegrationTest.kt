@@ -425,10 +425,10 @@ internal class StartMigreringRiverIntegrationTest {
             )
             assertEquals(3, inspector.inspektør.size)
             val forttsettMigreringMelding = inspector.inspektør.message(2)
-            assertEquals(Migreringshendelser.VEDTAK.lagEventnameForType(), forttsettMigreringMelding.get(EVENT_NAME_KEY).asText())
+            assertEquals(Migreringshendelser.BEREGNET_FERDIG.lagEventnameForType(), forttsettMigreringMelding.get(EVENT_NAME_KEY).asText())
             assertEquals(behandlingId.toString(), forttsettMigreringMelding.get(BEHANDLING_ID_KEY).asText())
             assertEquals(pesysId.id, forttsettMigreringMelding.get(SAK_ID_KEY).asLong())
-            assertEquals(Migreringshendelser.VEDTAK.lagEventnameForType(), forttsettMigreringMelding.get(EVENT_NAME_KEY).asText())
+            assertEquals(Migreringshendelser.BEREGNET_FERDIG.lagEventnameForType(), forttsettMigreringMelding.get(EVENT_NAME_KEY).asText())
             assertEquals(
                 MigreringKjoringVariant.FORTSETT_ETTER_PAUSE.name,
                 forttsettMigreringMelding.get(MIGRERING_KJORING_VARIANT).asText(),

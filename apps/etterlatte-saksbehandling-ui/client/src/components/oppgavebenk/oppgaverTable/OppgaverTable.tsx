@@ -44,15 +44,6 @@ export const OppgaverTable = ({
             direction: sort && sortKey === sort.orderBy && sort.direction === 'ascending' ? 'descending' : 'ascending',
           }
     )
-
-    switch (sort?.orderBy) {
-      case SortKey.FRIST:
-        setFilter({ ...filter, fristSortering: sort ? sort.direction : 'no-order' })
-        break
-      case SortKey.FNR:
-        setFilter({ ...filter, fnrSortering: sort ? sort.direction : 'no-order' })
-        break
-    }
   }
 
   useEffect(() => {

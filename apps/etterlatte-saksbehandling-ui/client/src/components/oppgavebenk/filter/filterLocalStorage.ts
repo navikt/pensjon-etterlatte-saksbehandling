@@ -1,4 +1,5 @@
 import { Filter, initialFilter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
+import { logger } from '~utils/logger'
 
 export const FILTER_KEY = 'filter'
 
@@ -7,7 +8,24 @@ export const leggFilterILocalStorage = (filter: Filter) => {
 }
 
 export const hentFilterFraLocalStorage = (): Filter => {
-  const filter = localStorage[FILTER_KEY]
-  if (!!filter) return JSON.parse(filter)
-  else return initialFilter()
+  try {
+    const filterFraLocalStorage = localStorage[FILTER_KEY]
+
+    if (!!filterFraLocalStorage) {
+      const parsetFilter = JSON.parse(filterFraLocalStorage)
+      // TODO: quickfix etter endring i type i localstorage, fjernes etter at
+      //  en viss tid, slik at alle saksbehandlere har kommet seg bort fra den gamel typen
+      return {
+        ...parsetFilter,
+        fristSortering: parsetFilter.fristSortering === 'ingen' ? 'no-order' : parsetFilter.fristSortering,
+        fnrSortering: parsetFilter.fnrSortering === 'ingen' ? 'no-order' : parsetFilter.fnrSortering,
+      }
+    } else {
+      return initialFilter()
+    }
+  } catch (error) {
+    logger.generalError({ message: 'Feil i hentingen av filter fra localstorage' })
+
+    return initialFilter()
+  }
 }

@@ -19,7 +19,7 @@ import {
 import { isSuccess } from '~shared/api/apiUtils'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
-  oppdaterTildelingPaaEgenOppgave,
+  leggTilOppgavenIMinliste,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/oppgaveutils'
 import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
@@ -140,7 +140,7 @@ export const ToggleMinOppgaveliste = () => {
     setTimeout(() => {
       setHovedsideOppgaver(finnOgOppdaterSaksbehandlerTildeling(hovedsideOppgaver, oppgave.id, saksbehandler, versjon))
       if (innloggetSaksbehandler.ident === saksbehandler) {
-        setMinsideOppgaver(oppdaterTildelingPaaEgenOppgave(minsideOppgaver, oppgave, saksbehandler, versjon))
+        setMinsideOppgaver(leggTilOppgavenIMinliste(minsideOppgaver, oppgave, saksbehandler, versjon))
       } else {
         setMinsideOppgaver(
           filtrerKunInnloggetBrukerOppgaver(

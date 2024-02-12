@@ -18,7 +18,7 @@ export const finnOgOppdaterSaksbehandlerTildeling = (
   }
 }
 
-export const oppdaterTildelingPaaEgenOppgave = (
+export const leggTilOppgavenIMinliste = (
   oppgaver: OppgaveDTO[],
   oppgave: OppgaveDTO,
   saksbehandler: string | null,

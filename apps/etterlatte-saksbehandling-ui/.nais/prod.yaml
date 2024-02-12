@@ -87,7 +87,7 @@ spec:
     - name: GOSYS_URL
       value: https://gosys.intern.nav.no/gosys
     - name: EESSI_PENSJON_URL
-      value: https://pensjon-utland.intern.dev.nav.no/gjenny
+      value: https://pensjon-utland.intern.nav.no/gjenny
     - name: RINA_URL
       value: http://rina-ss1.adeo.no
     - name: NORG2_URL

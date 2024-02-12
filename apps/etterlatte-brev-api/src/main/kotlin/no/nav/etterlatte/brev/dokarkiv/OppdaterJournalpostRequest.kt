@@ -10,12 +10,12 @@ import com.fasterxml.jackson.annotation.JsonProperty
  **/
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 data class OppdaterJournalpostRequest(
-    val avsenderMottaker: AvsenderMottaker?,
-    val bruker: Bruker?,
-    val dokumenter: List<DokumentInfo>?,
-    val sak: JournalpostSak?,
-    val tema: String?,
-    val tittel: String?,
+    val avsenderMottaker: AvsenderMottaker? = null,
+    val bruker: Bruker? = null,
+    val dokumenter: List<DokumentInfo>? = null,
+    val sak: JournalpostSak? = null,
+    val tema: String? = null,
+    val tittel: String? = null,
 ) {
     data class Bruker(
         val id: String,

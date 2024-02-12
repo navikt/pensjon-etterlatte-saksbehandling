@@ -22,7 +22,7 @@ import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
-import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForGjenopprettaRiver
+import no.nav.etterlatte.rivers.migrering.OpprettVarselbrevForGjenopprettaRiver
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
@@ -30,7 +30,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class OpprettVedtaksbrevForGjenopprettaRiverTest {
+internal class OpprettVarselbrevForGjenopprettaRiverTest {
     private val varselbrevService = mockk<VarselbrevService>()
 
     private val brevId: Long = 2
@@ -39,7 +39,7 @@ internal class OpprettVedtaksbrevForGjenopprettaRiverTest {
     private val brevhaandterer = mockk<FerdigstillJournalfoerOgDistribuerBrev>()
 
     private val opprettBrevRapid =
-        TestRapid().apply { OpprettVedtaksbrevForGjenopprettaRiver(this, varselbrevService, brevhaandterer) }
+        TestRapid().apply { OpprettVarselbrevForGjenopprettaRiver(this, varselbrevService, brevhaandterer) }
 
     private val behandlingId = UUID.randomUUID()
 

@@ -69,7 +69,7 @@ import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
 import no.nav.etterlatte.rivers.VedtaksbrevUnderkjentRiver
 import no.nav.etterlatte.rivers.migrering.FiksEnkeltbrevRiver
-import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForGjenopprettaRiver
+import no.nav.etterlatte.rivers.migrering.OpprettVarselbrevForGjenopprettaRiver
 import no.nav.etterlatte.rivers.migrering.OpprettVedtaksbrevForMigreringRiver
 import no.nav.etterlatte.rivers.migrering.behandlingerAaJournalfoereBrevFor
 import no.nav.etterlatte.security.ktor.clientCredential
@@ -233,7 +233,7 @@ class ApplicationBuilder {
                         journalfoerBrevService,
                         brevdistribuerer,
                     )
-                OpprettVedtaksbrevForGjenopprettaRiver(
+                OpprettVarselbrevForGjenopprettaRiver(
                     this,
                     varselbrevService,
                     ferdigstillJournalfoerOgDistribuerBrev,

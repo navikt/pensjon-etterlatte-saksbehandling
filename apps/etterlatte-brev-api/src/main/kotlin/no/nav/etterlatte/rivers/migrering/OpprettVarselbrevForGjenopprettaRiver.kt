@@ -17,7 +17,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-internal class OpprettVedtaksbrevForGjenopprettaRiver(
+internal class OpprettVarselbrevForGjenopprettaRiver(
     rapidsConnection: RapidsConnection,
     private val service: VarselbrevService,
     private val ferdigstillJournalfoerOgDistribuerBrev: FerdigstillJournalfoerOgDistribuerBrev,

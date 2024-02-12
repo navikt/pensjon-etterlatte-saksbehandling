@@ -86,6 +86,8 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-trygdetid/.default
     - name: GOSYS_URL
       value: https://gosys-q2.dev.intern.nav.no/gosys
+    - name: EESSI_PENSJON_URL
+      value: https://pensjon-utland-q2.intern.dev.nav.no/gjenny
     - name: RINA_URL
       value: https://rina-ss3-q.adeo.no
     - name: NORG2_URL

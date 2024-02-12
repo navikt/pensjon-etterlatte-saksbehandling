@@ -171,10 +171,12 @@ export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: Oppgave
   }
 }
 
-type Retning = 'descending' | 'ascending' | 'ingen'
+type Retning = 'descending' | 'ascending' | 'no-order'
 
-const sammenlignFrist = (a: OppgaveDTO, b: OppgaveDTO) =>
-  (!!a.frist ? new Date(a.frist).getTime() : 0) - (!!b.frist ? new Date(b.frist).getTime() : 0)
+const sammenlignFrist = (a: OppgaveDTO, b: OppgaveDTO) => {
+  // Konverterer datoene til en numerisk verdi og sammenligner dem
+  return (!!a.frist ? new Date(a.frist).getTime() : 0) - (!!b.frist ? new Date(b.frist).getTime() : 0)
+}
 
 export function sorterFrist(retning: Retning, oppgaver: OppgaveDTO[]) {
   switch (retning) {
@@ -182,13 +184,15 @@ export function sorterFrist(retning: Retning, oppgaver: OppgaveDTO[]) {
       return oppgaver.sort(sammenlignFrist)
     case 'descending':
       return oppgaver.sort(sammenlignFrist).reverse()
-    case 'ingen':
+    case 'no-order':
       return oppgaver
   }
 }
 
-const sammenlignFnr = (a: OppgaveDTO, b: OppgaveDTO) =>
-  (a.fnr ? Number(a.fnr.slice(0, 5)) : 0) - (b.fnr ? Number(b.fnr.slice(0, 5)) : 0)
+const sammenlignFnr = (a: OppgaveDTO, b: OppgaveDTO) => {
+  // Sammenligner de første 6 sifrene i fødselsnummerene
+  return (a.fnr ? Number(a.fnr.slice(0, 5)) : 0) - (b.fnr ? Number(b.fnr.slice(0, 5)) : 0)
+}
 
 export function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
   switch (retning) {
@@ -196,7 +200,7 @@ export function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
       return oppgaver.sort(sammenlignFnr)
     case 'descending':
       return oppgaver.sort(sammenlignFnr).reverse()
-    case 'ingen':
+    case 'no-order':
       return oppgaver
   }
 }
@@ -250,8 +254,8 @@ export const initialFilter = (): Filter => {
     oppgavetypeFilter: 'visAlle',
     oppgavekildeFilter: 'visAlle',
     fnrFilter: '',
-    fristSortering: 'ingen',
-    fnrSortering: 'ingen',
+    fristSortering: 'no-order',
+    fnrSortering: 'no-order',
   }
 }
 
@@ -265,7 +269,7 @@ export const minOppgavelisteFiltre = (): Filter => {
     oppgavetypeFilter: 'visAlle',
     oppgavekildeFilter: 'visAlle',
     fnrFilter: '',
-    fristSortering: 'ingen',
-    fnrSortering: 'ingen',
+    fristSortering: 'no-order',
+    fnrSortering: 'no-order',
   }
 }

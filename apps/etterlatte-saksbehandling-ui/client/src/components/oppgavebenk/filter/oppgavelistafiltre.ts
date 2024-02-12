@@ -187,8 +187,10 @@ export function sorterFrist(retning: Retning, oppgaver: OppgaveDTO[]) {
   }
 }
 
-const sammenlignFnr = (a: OppgaveDTO, b: OppgaveDTO) =>
-  (a.fnr ? Number(a.fnr.slice(0, 5)) : 0) - (b.fnr ? Number(b.fnr.slice(0, 5)) : 0)
+const sammenlignFnr = (a: OppgaveDTO, b: OppgaveDTO) => {
+  // Sammenligner de første 6 sifrene i fødselsnummerene
+  return (a.fnr ? Number(a.fnr.slice(0, 5)) : 0) - (b.fnr ? Number(b.fnr.slice(0, 5)) : 0)
+}
 
 export function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
   switch (retning) {

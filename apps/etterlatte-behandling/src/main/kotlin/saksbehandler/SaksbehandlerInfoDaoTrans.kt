@@ -2,12 +2,12 @@ package no.nav.etterlatte.saksbehandler
 
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.libs.database.setJsonb
-import no.nav.etterlatte.libs.database.single
+import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import java.sql.Connection
 
 class SaksbehandlerInfoDaoTrans(private val connection: () -> Connection) {
-    fun hentSaksbehandlerNavn(ident: String): String {
+    fun hentSaksbehandlerNavn(ident: String): String? {
         with(connection()) {
             val statement =
                 prepareStatement(
@@ -17,7 +17,7 @@ class SaksbehandlerInfoDaoTrans(private val connection: () -> Connection) {
                     """.trimIndent(),
                 )
             statement.setString(1, ident)
-            return statement.executeQuery().single {
+            return statement.executeQuery().singleOrNull {
                 getString(1)
             }
         }

@@ -51,14 +51,7 @@ internal class DokarkivServiceImpl(
         journalfoerendeEnhet: String?,
         request: OppdaterJournalpostRequest,
     ): OppdaterJournalpostResponse {
-        // Hack for å unngå feil mot dokarkiv. Alle generelle saker i dokarkiv får fagsaksystem FS22, men vi kan ikke
-        // returnere det samme tilbake ved oppdatering. Må derfor tømme saksobjektet og sette sakstype til GENERELL_SAK
-        val response =
-            if (request.sak?.fagsaksystem == "FS22") {
-                client.oppdaterJournalpost(journalpostId, request.copy(sak = JournalpostSak(Sakstype.GENERELL_SAK)))
-            } else {
-                client.oppdaterJournalpost(journalpostId, request)
-            }
+        val response = client.oppdaterJournalpost(journalpostId, request)
 
         logger.info("Journalpost med id=$journalpostId oppdatert OK!")
 

@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.dokarkiv
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
+import no.nav.etterlatte.token.Fagsaksystem
 import java.time.LocalDateTime
 
 /**
@@ -81,8 +82,9 @@ data class JournalpostSak(
     val sakstype: Sakstype,
     val fagsakId: String? = null,
     val tema: String? = null,
-    val fagsaksystem: String? = null,
-)
+) {
+    val fagsaksystem: String = Fagsaksystem.EY.navn
+}
 
 enum class Sakstype {
     FAGSAK,

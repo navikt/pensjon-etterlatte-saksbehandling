@@ -42,7 +42,7 @@ data class BarnepensjonOmregnetNyttRegelverkRedigerbartUtfall(
                                     generellBrevData.personerISak.verge !is ForelderVerge
                             ),
                 )
-            if (generellBrevData.erMigrering()) {
+            if (generellBrevData.loependeIPesys()) {
                 val pesysUtbetaltFoerReform = migreringRequest?.brutto ?: 0
                 val pesysUtenlandstilknytning =
                     migreringRequest?.utlandstilknytningType ?: requireNotNull(generellBrevData.utlandstilknytning) {

@@ -152,7 +152,12 @@ class Brevoppretter(
             retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
 
         val brevkodeRequest =
-            BrevkodeRequest(generellBrevData.erMigrering(), generellBrevData.sak.sakType, generellBrevData.forenkletVedtak?.type)
+            BrevkodeRequest(
+                generellBrevData.loependeIPesys(),
+                generellBrevData.erForeldreloes(),
+                generellBrevData.sak.sakType,
+                generellBrevData.forenkletVedtak?.type,
+            )
 
         val kode = brevKode(brevkodeRequest)
         val tittel = kode.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")

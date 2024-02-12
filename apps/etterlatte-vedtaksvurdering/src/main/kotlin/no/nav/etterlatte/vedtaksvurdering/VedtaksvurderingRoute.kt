@@ -283,8 +283,7 @@ fun Route.klagevedtakRoute(
 ) {
     val logger = application.log
 
-    // TODO api eller ikke api... Ok path?
-    route("/api/vedtak/klage/{$BEHANDLINGID_CALL_PARAMETER}") {
+    route("/vedtak/klage/{$BEHANDLINGID_CALL_PARAMETER}") {
         post("/lagre-vedtak") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<KlageVedtakDto>()

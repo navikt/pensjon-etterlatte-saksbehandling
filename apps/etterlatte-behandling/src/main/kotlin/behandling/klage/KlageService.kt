@@ -222,6 +222,7 @@ class KlageServiceImpl(
                 is KlageUtfallUtenBrev.Avvist ->
                     KlageUtfallMedData.Avvist(
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
+                        vedtakId = runBlocking { vedtakKlient.lagreVedtakKlage(klage, saksbehandler) },
                     )
 
                 is KlageUtfallUtenBrev.AvvistMedOmgjoering ->
@@ -234,20 +235,7 @@ class KlageServiceImpl(
         val klageMedOppdatertUtfall = klage.oppdaterUtfall(utfallMedBrev)
         klageDao.lagreKlage(klageMedOppdatertUtfall)
 
-        if (skalOppretteVedtak(utfallMedBrev)) {
-            runBlocking {
-                vedtakKlient.lagreVedtakKlage(klageMedOppdatertUtfall, saksbehandler)
-            }
-        }
-
         return klageMedOppdatertUtfall
-    }
-
-    private fun skalOppretteVedtak(utfall: KlageUtfallMedData): Boolean {
-        return when (utfall) {
-            is KlageUtfallMedData.Avvist -> true
-            else -> false
-        }
     }
 
     private fun brevForInnstilling(

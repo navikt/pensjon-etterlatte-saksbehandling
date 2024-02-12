@@ -23,7 +23,6 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -698,16 +697,16 @@ internal class VedtaksvurderingRouteTest {
             val klageId = UUID.randomUUID()
             val klageVedtakDto =
                 KlageVedtakDto(
-                    klageId,
-                    123L,
-                    SakType.OMSTILLINGSSTOENAD,
-                    Folkeregisteridentifikator.of("04417103428"),
-                    objectMapper.createObjectNode(),
-                    "enheten",
+                    klageId = klageId,
+                    sakId = vedtakKlage.sakId,
+                    sakType = vedtakKlage.sakType,
+                    soeker = Folkeregisteridentifikator.of("04417103428"),
+                    klage = objectMapper.createObjectNode(),
+                    enhet = "enheten",
                 )
 
             val vedtakId: Long =
-                client.post("/api/vedtak/klage/$klageId/lagre-vedtak") {
+                client.post("/vedtak/klage/$klageId/lagre-vedtak") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                     setBody(klageVedtakDto.toJson())

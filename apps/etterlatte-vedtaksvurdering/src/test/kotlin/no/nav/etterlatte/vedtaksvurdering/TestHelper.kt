@@ -155,7 +155,7 @@ fun vedtakKlage(
     sakId = sakId,
     sakType = SakType.BARNEPENSJON,
     behandlingId = behandlingId,
-    type = VedtakType.INNVILGELSE,
+    type = VedtakType.AVVIST_KLAGE,
     innhold = VedtakInnhold.Klage(klage),
     vedtakFattet = vedtakFattet,
 )

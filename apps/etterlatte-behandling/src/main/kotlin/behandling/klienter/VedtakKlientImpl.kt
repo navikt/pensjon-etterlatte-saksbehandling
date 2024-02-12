@@ -202,7 +202,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     ): Long {
         try {
             logger.info(
-                "Sender tilbakekreving som det skal lagre vedtak for tilbakekreving=${klage.id} til vedtak",
+                "Sender klage som skal lages avvist klage-vedtak for med id=${klage.id} til vedtak",
             )
             return downstreamResourceClient
                 .post(
@@ -227,7 +227,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     failure = { errorResponse -> throw errorResponse },
                 )
         } catch (e: Exception) {
-            throw InternfeilException("Lagre vedtak for tilbakekreving med id=${klage.id} feilet", e)
+            throw InternfeilException("Lagre vedtak for klage med id=${klage.id} feilet", e)
         }
     }
 }

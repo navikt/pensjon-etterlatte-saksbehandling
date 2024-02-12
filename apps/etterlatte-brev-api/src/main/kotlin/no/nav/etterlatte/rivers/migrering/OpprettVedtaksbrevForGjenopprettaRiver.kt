@@ -10,7 +10,7 @@ import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.sakId
-import no.nav.etterlatte.rivers.OpprettFerdigstillJournalfoerOgDistribuerBrev
+import no.nav.etterlatte.rivers.FerdigstillJournalfoerOgDistribuerBrev
 import no.nav.etterlatte.token.Systembruker
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory
 internal class OpprettVedtaksbrevForGjenopprettaRiver(
     rapidsConnection: RapidsConnection,
     private val service: VarselbrevService,
-    private val opprettFerdigstillJournalfoerOgDistribuerBrev: OpprettFerdigstillJournalfoerOgDistribuerBrev,
+    private val ferdigstillJournalfoerOgDistribuerBrev: FerdigstillJournalfoerOgDistribuerBrev,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -42,13 +42,13 @@ internal class OpprettVedtaksbrevForGjenopprettaRiver(
         val brukerTokenInfo = Systembruker.migrering
         runBlocking {
             val varselbrev = service.opprettVarselbrev(sakId, behandlingId, brukerTokenInfo)
-            opprettFerdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
+            ferdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
                 varselbrev.brevkoder,
                 sakId,
                 varselbrev.let { Pair(it.brev, it.generellBrevData) },
                 brukerTokenInfo,
             )
-            opprettFerdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(
+            ferdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(
                 varselbrev.brevkoder,
                 sakId,
                 varselbrev.brev.id,

@@ -36,7 +36,7 @@ internal class OpprettVedtaksbrevForGjenopprettaRiverTest {
     private val brevId: Long = 2
     private val saksnr = 41L
 
-    private val brevhaandterer = mockk<OpprettFerdigstillJournalfoerOgDistribuerBrev>()
+    private val brevhaandterer = mockk<FerdigstillJournalfoerOgDistribuerBrev>()
 
     private val opprettBrevRapid =
         TestRapid().apply { OpprettVedtaksbrevForGjenopprettaRiver(this, varselbrevService, brevhaandterer) }

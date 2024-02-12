@@ -62,8 +62,8 @@ import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.etterlatte.rapidsandrivers.migrering.FIKS_BREV_MIGRERING
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rivers.DistribuerBrevRiver
+import no.nav.etterlatte.rivers.FerdigstillJournalfoerOgDistribuerBrev
 import no.nav.etterlatte.rivers.JournalfoerVedtaksbrevRiver
-import no.nav.etterlatte.rivers.OpprettFerdigstillJournalfoerOgDistribuerBrev
 import no.nav.etterlatte.rivers.OpprettJournalfoerOgDistribuerRiver
 import no.nav.etterlatte.rivers.StartBrevgenereringRepository
 import no.nav.etterlatte.rivers.StartInformasjonsbrevgenereringRiver
@@ -227,9 +227,8 @@ class ApplicationBuilder {
                     },
                 )
                 OpprettVedtaksbrevForMigreringRiver(this, vedtaksbrevService)
-                val opprettFerdigstillJournalfoerOgDistribuerBrev =
-                    OpprettFerdigstillJournalfoerOgDistribuerBrev(
-                        brevoppretter,
+                val ferdigstillJournalfoerOgDistribuerBrev =
+                    FerdigstillJournalfoerOgDistribuerBrev(
                         pdfGenerator,
                         journalfoerBrevService,
                         brevdistribuerer,
@@ -237,11 +236,11 @@ class ApplicationBuilder {
                 OpprettVedtaksbrevForGjenopprettaRiver(
                     this,
                     varselbrevService,
-                    opprettFerdigstillJournalfoerOgDistribuerBrev,
+                    ferdigstillJournalfoerOgDistribuerBrev,
                 )
                 FiksEnkeltbrevRiver(this, vedtaksvurderingService)
                     .also { fiksEnkeltbrev() }
-                OpprettJournalfoerOgDistribuerRiver(this, opprettFerdigstillJournalfoerOgDistribuerBrev)
+                OpprettJournalfoerOgDistribuerRiver(this, brevoppretter, ferdigstillJournalfoerOgDistribuerBrev)
 
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)

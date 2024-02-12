@@ -120,8 +120,8 @@ class InformasjonsbrevTest {
         val brevdistribuerer = mockk<Brevdistribuerer>().also { every { it.distribuer(brevId) } returns "" }
         OpprettJournalfoerOgDistribuerRiver(
             testRapid,
-            OpprettFerdigstillJournalfoerOgDistribuerBrev(
-                brevoppretter,
+            brevoppretter,
+            FerdigstillJournalfoerOgDistribuerBrev(
                 pdfGenerator,
                 journalfoerBrevService,
                 brevdistribuerer,

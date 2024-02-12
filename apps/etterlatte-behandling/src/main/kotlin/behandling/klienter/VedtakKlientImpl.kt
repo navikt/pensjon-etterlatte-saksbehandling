@@ -4,10 +4,13 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.vedtak.KlageVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
@@ -39,6 +42,11 @@ interface VedtakKlient {
 
     suspend fun underkjennVedtakTilbakekreving(
         tilbakekrevingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long
+
+    suspend fun lagreVedtakKlage(
+        klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long
 }
@@ -185,6 +193,41 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                 "Underkjennelse av vedtak for tilbakekreving med id=$tilbakekrevingId feilet",
                 e,
             )
+        }
+    }
+
+    override suspend fun lagreVedtakKlage(
+        klage: Klage,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        try {
+            logger.info(
+                "Sender klage som skal lages avvist klage-vedtak for med id=${klage.id} til vedtak",
+            )
+            return downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/klage/${klage.id}/lagre-vedtak",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody =
+                        KlageVedtakDto(
+                            klageId = klage.id,
+                            sakId = klage.sak.id,
+                            sakType = klage.sak.sakType,
+                            soeker = Folkeregisteridentifikator.of(klage.sak.ident),
+                            klage = klage.toObjectNode(),
+                            enhet = klage.sak.enhet,
+                        ),
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw InternfeilException("Lagre vedtak for klage med id=${klage.id} feilet", e)
         }
     }
 }

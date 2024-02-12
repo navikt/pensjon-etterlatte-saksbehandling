@@ -20,6 +20,7 @@ import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import { SamordningModal } from '~components/person/Samordning'
+import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 
 const BehandlingPanel = styled.div`
   margin: 3rem 0;
@@ -86,6 +87,7 @@ export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehan
                   <Table.DataCell>
                     <BehandlingstypeWrapper>
                       {formaterBehandlingstype(behandling.behandlingType)}
+                      <EessiPensjonLenke />
                     </BehandlingstypeWrapper>
                   </Table.DataCell>
                   <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>
@@ -110,7 +112,10 @@ export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehan
                 <Table.Row key={i} shadeOnHover={false}>
                   <Table.DataCell>{formaterStringDato(behandling.opprettet)}</Table.DataCell>
                   <Table.DataCell>
-                    <BehandlingstypeWrapper>{genbehandlingTypeTilLesbartNavn(behandling.type)}</BehandlingstypeWrapper>
+                    <BehandlingstypeWrapper>
+                      {genbehandlingTypeTilLesbartNavn(behandling.type)}
+                      <EessiPensjonLenke />
+                    </BehandlingstypeWrapper>
                   </Table.DataCell>
                   <Table.DataCell>-</Table.DataCell>
                   <Table.DataCell>{generellBehandlingsStatusTilLesbartNavn(behandling.status)}</Table.DataCell>

@@ -258,3 +258,18 @@ export const initialFilter = (): Filter => {
     fnrSortering: 'no-order',
   }
 }
+
+export const minOppgavelisteFiltre = (): Filter => {
+  return {
+    enhetsFilter: 'visAlle',
+    fristFilter: 'visAlle',
+    saksbehandlerFilter: 'visAlle',
+    ytelseFilter: 'visAlle',
+    oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
+    oppgavetypeFilter: 'visAlle',
+    oppgavekildeFilter: 'visAlle',
+    fnrFilter: '',
+    fristSortering: 'ingen',
+    fnrSortering: 'ingen',
+  }
+}

@@ -141,3 +141,21 @@ fun vedtakTilbakekreving(
         VedtakInnhold.Tilbakekreving(tilbakekreving),
     vedtakFattet = vedtakFattet,
 )
+
+fun vedtakKlage(
+    sakId: Long = 142L,
+    behandlingId: UUID = UUID.randomUUID(),
+    klage: ObjectNode = objectMapper.createObjectNode(),
+    status: VedtakStatus = VedtakStatus.OPPRETTET,
+    vedtakFattet: VedtakFattet? = null,
+) = Vedtak(
+    id = 1L,
+    status = status,
+    soeker = SOEKER_FOEDSELSNUMMER,
+    sakId = sakId,
+    sakType = SakType.BARNEPENSJON,
+    behandlingId = behandlingId,
+    type = VedtakType.AVVIST_KLAGE,
+    innhold = VedtakInnhold.Klage(klage),
+    vedtakFattet = vedtakFattet,
+)

@@ -300,6 +300,7 @@ sealed class KlageUtfallMedData {
     @JsonTypeName("AVVIST")
     data class Avvist(
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
+        val vedtakId: Long,
     ) : KlageUtfallMedData()
 
     @JsonTypeName("AVVIST_MED_OMGJOERING")

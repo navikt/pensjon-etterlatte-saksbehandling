@@ -15,8 +15,9 @@ import no.nav.etterlatte.brev.model.OmstillingsstoenadBeregningsperiode
 import no.nav.etterlatte.brev.model.OmstillingsstoenadEtterbetaling
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.brev.model.TrygdetidMedBeregningsmetode
+import no.nav.etterlatte.brev.model.toFeilutbetalingType
+import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
-import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import java.time.LocalDate
@@ -118,20 +119,4 @@ data class OmstillingsstoenadRevurderingRedigerbartUtfall(
                 erEtterbetaling = etterbetaling != null,
             )
     }
-}
-
-private fun toFeilutbetalingType(feilutbetalingValg: FeilutbetalingValg) =
-    when (feilutbetalingValg) {
-        FeilutbetalingValg.NEI -> FeilutbetalingType.INGEN_FEILUTBETALING
-        FeilutbetalingValg.JA_INGEN_TK -> FeilutbetalingType.FEILUTBETALING_UTEN_VARSEL
-        FeilutbetalingValg.JA_VARSEL -> FeilutbetalingType.FEILUTBETALING_MED_VARSEL
-    }
-
-private fun vedleggHvisFeilutbetaling(
-    feilutbetaling: FeilutbetalingType,
-    innholdMedVedlegg: InnholdMedVedlegg,
-) = if (feilutbetaling == FeilutbetalingType.FEILUTBETALING_MED_VARSEL) {
-    innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING)
-} else {
-    emptyList()
 }

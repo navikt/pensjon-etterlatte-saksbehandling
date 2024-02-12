@@ -42,7 +42,6 @@ export default function AvsluttKlage() {
   }
 
   return (
-    klage &&
     klageRedigerbar && (
       <>
         {!showAvsluttForm && (

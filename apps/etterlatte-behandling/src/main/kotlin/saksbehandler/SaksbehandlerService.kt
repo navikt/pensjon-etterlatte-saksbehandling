@@ -16,9 +16,11 @@ class SaksbehandlerService(private val dao: SaksbehandlerInfoDaoTrans) {
     fun hentKomplettSaksbehandler(ident: String): Saksbehandler {
         val innloggetSaksbehandler = Kontekst.get().appUserAsSaksbehandler()
 
+        val saksbehandlerNavn: String? = dao.hentSaksbehandlerNavn(ident)
+
         return Saksbehandler(
             ident,
-            dao.hentSaksbehandlerNavn(ident),
+            if (!saksbehandlerNavn.isNullOrEmpty()) saksbehandlerNavn else ident,
             innloggetSaksbehandler.enheter(),
             innloggetSaksbehandler.saksbehandlerMedRoller.harRolleAttestant(),
             innloggetSaksbehandler.harLesetilgang(),

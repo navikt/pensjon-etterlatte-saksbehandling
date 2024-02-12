@@ -55,6 +55,7 @@ export default function ManuellBehandling() {
   const [enhet, setEnhet] = useState<EnhetFilterKeys>('VELGENHET')
 
   const [erForeldreloes, setErForeldreloes] = useState<boolean>(false)
+  const [erUfoere, setErUfoere] = useState<boolean>(false)
 
   const [gradering, setGradering] = useState<string>('')
   const [error, setError] = useState<boolean>(false)
@@ -73,6 +74,7 @@ export default function ManuellBehandling() {
         pesysId: pesysId,
         enhet: enhet === 'VELGENHET' ? undefined : filtrerEnhet(enhet),
         foreldreloes: erForeldreloes,
+        ufoere: erUfoere,
         gradering: gradering,
       },
       (nyBehandlingRespons) => {
@@ -191,6 +193,11 @@ export default function ManuellBehandling() {
       <Checkbox checked={erForeldreloes} onChange={() => setErForeldreloes(!erForeldreloes)}>
         Er foreldreløs
       </Checkbox>
+
+      <Checkbox checked={erUfoere} onChange={() => setErUfoere(!erUfoere)}>
+        Søker har en sak for uføretrygd løpende eller under behandling.
+      </Checkbox>
+
       <PersongalleriBarnepensjon erManuellMigrering={true} fnrFraOppgave={fnrFraOppgave} />
 
       <Knapp>

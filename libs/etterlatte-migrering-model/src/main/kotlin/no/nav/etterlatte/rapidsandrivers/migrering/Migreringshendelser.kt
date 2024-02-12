@@ -12,7 +12,7 @@ enum class Migreringshendelser : EventnameHendelseType {
     VILKAARSVURDER,
     BEREGN,
     TRYGDETID,
-    VEDTAK,
+    BEREGNET_FERDIG,
     PAUSE,
     IVERKSATT,
     AVBRYT_BEHANDLING,

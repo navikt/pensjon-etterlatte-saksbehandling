@@ -12,7 +12,6 @@ import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filter/oppgavelista
 
 interface Props {
   oppgave: OppgaveDTO
-  oppgaver: ReadonlyArray<OppgaveDTO>
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveListe: boolean

@@ -1,4 +1,4 @@
-import { Alert, BodyShort, ErrorSummary, Heading, TextField } from '@navikt/ds-react'
+import { Alert, BodyShort, ErrorSummary, TextField } from '@navikt/ds-react'
 import SEDLandMedDokumenter from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SEDLandMedDokumenter'
 import { ILand } from '~shared/api/trygdetid'
 import React from 'react'
@@ -26,7 +26,7 @@ export const MottatteSeder = ({
   const resetFeilkoder = () => setFeilkoderMottatte(new Set([]))
   return (
     <>
-      {!!feilkoder?.size ? (
+      {!!feilkoder?.size && (
         <ErrorSummary
           style={{ marginTop: '10rem' }}
           heading="SED`ene er ufullstendig utfylt, vennligst rett opp så du kan gå videre i revurderingen."
@@ -35,10 +35,8 @@ export const MottatteSeder = ({
             <ErrorSummary.Item key={i}>{feilmelding}</ErrorSummary.Item>
           ))}
         </ErrorSummary>
-      ) : null}
-      <Heading level="2" size="medium" style={{ marginTop: '2rem' }} spacing>
-        Mottatt krav fra utland
-      </Heading>
+      )}
+
       <BodyShort spacing>Fyll inn hvilke SED som er mottatt i RINA pr. land.</BodyShort>
       <Alert variant="info" style={{ width: '35rem' }}>
         Det kan hende det allerede ligger P5000/P4000 i avdødes eller i gjenlevendes/søskens sak. Sjekk dette før du

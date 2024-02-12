@@ -21,7 +21,7 @@ export const FristHandlinger = (props: {
   oppgaveId: string
   oppgaveVersjon: number | null
   type: Oppgavetype
-  oppdaterFrist: (id: string, nyfrist: string) => void
+  oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
   erRedigerbar: boolean
 }) => {
   const { orginalFrist, oppgaveId, oppdaterFrist, erRedigerbar, oppgaveVersjon, type } = props
@@ -96,7 +96,7 @@ export const FristHandlinger = (props: {
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      oppdaterFrist(oppgaveId, nyFrist.toISOString())
+                      oppdaterFrist(oppgaveId, nyFrist.toISOString(), oppgaveVersjon)
                       setOpen(false)
                     }}
                   >

@@ -8,7 +8,7 @@ import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 export interface oppgaveListaProps {
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   oppgaver: ReadonlyArray<OppgaveDTO>
-  oppdaterFrist: (id: string, nyfrist: string) => void
+  oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
   filter: Filter
   setFilter: Dispatch<SetStateAction<Filter>>

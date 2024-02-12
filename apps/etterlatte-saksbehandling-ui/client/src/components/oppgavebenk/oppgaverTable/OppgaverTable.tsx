@@ -14,7 +14,7 @@ interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveliste: boolean
-  oppdaterFrist: (id: string, nyfrist: string) => void
+  oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
   filter: Filter
   setFilter: Dispatch<SetStateAction<Filter>>

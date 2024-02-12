@@ -15,7 +15,7 @@ interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveListe: boolean
-  oppdaterFrist: (id: string, nyfrist: string) => void
+  oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
 }
 
 export const OppgaverTableRow = ({

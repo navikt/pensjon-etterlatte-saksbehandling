@@ -41,8 +41,8 @@ export const MinOppgaveliste = (props: {
         </ValgWrapper>
         <Oppgavelista
           oppgaver={minsideOppgaver}
-          oppdaterFrist={(id: string, nyfrist: string) =>
-            oppdaterFrist(setMinsideOppgaver, minsideOppgaver, id, nyfrist)
+          oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
+            oppdaterFrist(setMinsideOppgaver, minsideOppgaver, id, nyfrist, versjon)
           }
           filter={minsideFilter}
           setFilter={setFilter}

@@ -58,8 +58,8 @@ export const OppgavelistaWrapper = (props: {
         <Oppgavelista
           oppgaver={filtrerteOppgaver}
           oppdaterTildeling={() => oppdaterTildeling(setHovedsideOppgaver, hovedsideOppgaver)}
-          oppdaterFrist={(id: string, nyfrist: string) =>
-            oppdaterFrist(setHovedsideOppgaver, hovedsideOppgaver, id, nyfrist)
+          oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
+            oppdaterFrist(setHovedsideOppgaver, hovedsideOppgaver, id, nyfrist, versjon)
           }
           filter={hovedsideFilter}
           setFilter={setHovedsideFilter}

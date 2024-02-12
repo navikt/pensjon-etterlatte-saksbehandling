@@ -113,8 +113,10 @@ export const tildelSaksbehandlerApi = async (args: {
   }
 }
 
-export const saksbehandlereIEnhetApi = async (args: { enhet: string }): Promise<ApiResponse<Array<Saksbehandler>>> => {
-  return apiClient.get(`/saksbehandlere/enhet/${args.enhet}`)
+export const saksbehandlereIEnhetApi = async (args: {
+  enheter: string[]
+}): Promise<ApiResponse<Array<Saksbehandler>>> => {
+  return apiClient.get(`/saksbehandlere?enheter=${args.enheter}`)
 }
 
 export const byttSaksbehandlerApi = async (args: {

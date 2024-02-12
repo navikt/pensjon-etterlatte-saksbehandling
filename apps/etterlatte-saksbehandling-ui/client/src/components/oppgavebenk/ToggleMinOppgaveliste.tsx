@@ -6,10 +6,10 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 
 import {
   hentGosysOppgaver,
+  hentOppgaverMedStatus,
   OppgaveDTO,
   Saksbehandler,
   saksbehandlereIEnhetApi,
-  hentOppgaverMedStatus,
 } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
@@ -40,7 +40,7 @@ export const ToggleMinOppgaveliste = () => {
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
   const [oppgaver, hentOppgaverStatusFetch] = useApiCall(hentOppgaverMedStatus)
   const [gosysOppgaver, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
-  const [saksbehandlereIEnhet, hentSaksbehandlereIEnhet] = useApiCall(saksbehandlereIEnhetApi)
+  const [, hentSaksbehandlereIEnhet] = useApiCall(saksbehandlereIEnhetApi)
 
   const [hentedeOppgaver, setHentedeOppgaver] = useState<OppgaveDTO[]>([])
 
@@ -48,10 +48,6 @@ export const ToggleMinOppgaveliste = () => {
 
   const sorterOppgaverEtterOpprettet = (oppgaver: OppgaveDTO[]) => {
     return oppgaver.sort((a, b) => new Date(b.opprettet).getTime() - new Date(a.opprettet).getTime())
-  }
-
-  const hentAlleSaksbehandlereIEnhet = () => {
-    innloggetSaksbehandler.enheter.map((enhet) => hentSaksbehandlereIEnhet({ enhet: enhet }))
   }
 
   useEffect(() => {
@@ -66,35 +62,10 @@ export const ToggleMinOppgaveliste = () => {
   }, [oppgaver, gosysOppgaver])
 
   useEffect(() => {
-    // Utrolig hacky måte å løse det på...
-    // Problemet er at en saksbehandler kan leve i flere enhet, så for å forhindre at det blir
-    // duplikate saksbehandlere, må man konvertere til et Set og konvertere det tilbake til array
-    if (isSuccess(saksbehandlereIEnhet)) {
-      const saksbehandlereSomJSONString: string[] = []
-      saksbehandlereIEnhet.data.map((behandler) => saksbehandlereSomJSONString.push(JSON.stringify(behandler)))
-
-      const eksisterendeSaksbehandlereSomJSONString: string[] = []
-      hentedeSaksbehandlereIEnhet.map((behandler) =>
-        eksisterendeSaksbehandlereSomJSONString.push(JSON.stringify(behandler))
-      )
-      const setAvUnikeSaksbehandlereSomStrenger = new Set(
-        eksisterendeSaksbehandlereSomJSONString.concat(saksbehandlereSomJSONString)
-      )
-
-      const unikeSaksbehandlere: Saksbehandler[] = []
-      setAvUnikeSaksbehandlereSomStrenger.forEach((behandler) => unikeSaksbehandlere.push(JSON.parse(behandler)))
-      // Sorter liste over saksbehandlere alfabetisk
-      setHentedeSaksbehandlereIEnhet(
-        unikeSaksbehandlere.sort((a, b) => {
-          return a.navn && b.navn ? a.navn?.localeCompare(b.navn!) : 0
-        })
-      )
-    }
-  }, [saksbehandlereIEnhet])
-
-  useEffect(() => {
     hentAlleOppgaver()
-    hentAlleSaksbehandlereIEnhet()
+    hentSaksbehandlereIEnhet({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
+      setHentedeSaksbehandlereIEnhet(saksbehandlere)
+    })
   }, [])
 
   const hentAlleOppgaver = () => {

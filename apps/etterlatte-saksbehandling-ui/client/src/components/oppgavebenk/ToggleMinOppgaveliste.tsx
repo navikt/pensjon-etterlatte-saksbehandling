@@ -83,7 +83,12 @@ export const ToggleMinOppgaveliste = () => {
 
       const unikeSaksbehandlere: Saksbehandler[] = []
       setAvUnikeSaksbehandlereSomStrenger.forEach((behandler) => unikeSaksbehandlere.push(JSON.parse(behandler)))
-      setHentedeSaksbehandlereIEnhet(unikeSaksbehandlere.sort())
+      // Sorter liste over saksbehandlere alfabetisk
+      setHentedeSaksbehandlereIEnhet(
+        unikeSaksbehandlere.sort((a, b) => {
+          return a.navn && b.navn ? a.navn?.localeCompare(b.navn!) : 0
+        })
+      )
     }
   }, [saksbehandlereIEnhet])
 

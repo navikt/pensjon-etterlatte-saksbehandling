@@ -573,7 +573,7 @@ class Norg2KlientTest : Norg2Klient {
 }
 
 class NavAnsattKlientTest : NavAnsattKlient {
-    override suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
+    override suspend fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
         return listOf(
             SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
             SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),

@@ -3,7 +3,14 @@ import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentGosysOppgaver, hentOppgaverMedStatus, OppgaveDTO } from '~shared/api/oppgaver'
+
+import {
+  hentGosysOppgaver,
+  hentOppgaverMedStatus,
+  OppgaveDTO,
+  Saksbehandler,
+  saksbehandlereIEnhetApi,
+} from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import { FilterRad } from '~components/oppgavebenk/FilterRad'
@@ -33,8 +40,11 @@ export const ToggleMinOppgaveliste = () => {
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
   const [oppgaver, hentOppgaverStatusFetch] = useApiCall(hentOppgaverMedStatus)
   const [gosysOppgaver, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
+  const [, hentSaksbehandlereIEnhet] = useApiCall(saksbehandlereIEnhetApi)
 
   const [hentedeOppgaver, setHentedeOppgaver] = useState<OppgaveDTO[]>([])
+
+  const [hentedeSaksbehandlereIEnhet, setHentedeSaksbehandlereIEnhet] = useState<Array<Saksbehandler>>([])
 
   const sorterOppgaverEtterOpprettet = (oppgaver: OppgaveDTO[]) => {
     return oppgaver.sort((a, b) => new Date(b.opprettet).getTime() - new Date(a.opprettet).getTime())
@@ -51,12 +61,17 @@ export const ToggleMinOppgaveliste = () => {
     }
   }, [oppgaver, gosysOppgaver])
 
+  useEffect(() => {
+    hentAlleOppgaver()
+    hentSaksbehandlereIEnhet({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
+      setHentedeSaksbehandlereIEnhet(saksbehandlere)
+    })
+  }, [])
+
   const hentAlleOppgaver = () => {
     hentOppgaverStatusFetch({ oppgavestatusFilter: filter.oppgavestatusFilter })
     hentGosysOppgaverFunc({})
   }
-
-  useEffect(() => hentAlleOppgaver(), [])
 
   useEffect(() => {
     const statusValg =
@@ -147,6 +162,7 @@ export const ToggleMinOppgaveliste = () => {
                 filtrerteOppgaver={filtrerteOppgaver}
                 oppdaterTildeling={oppdaterTildeling}
                 hentOppgaver={hentAlleOppgaver}
+                saksbehandlereIEnhet={hentedeSaksbehandlereIEnhet}
                 filter={filter}
                 setFilter={setFilter}
                 totaltAntallOppgaver={hentedeOppgaver.length}
@@ -171,6 +187,7 @@ export const ToggleMinOppgaveliste = () => {
               <Oppgavelista
                 filtrerteOppgaver={filtrerOppgaveStatus(filter.oppgavestatusFilter, innloggetSaksbehandleroppgaver)}
                 hentOppgaver={hentAlleOppgaver}
+                saksbehandlereIEnhet={hentedeSaksbehandlereIEnhet}
                 filter={filter}
                 setFilter={setFilter}
                 oppdaterTildeling={(id, _saksbehandler, versjon) => oppdaterTildeling(id, null, versjon)}

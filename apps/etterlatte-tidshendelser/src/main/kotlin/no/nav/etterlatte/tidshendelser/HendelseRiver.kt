@@ -52,11 +52,15 @@ class HendelseRiver(
             ),
         ) {
             logger.info("Behandler melding [hendelseId=$hendelseId, sak=$sakId, type=$type, step=$steg]")
-            hendelseDao.oppdaterHendelseForSteg(hendelseIdUUID, steg)
+
+            hendelseDao.oppdaterHendelseForSteg(hendelseIdUUID, steg, packet.toJson())
 
             if (steg == "VURDERT_LOEPENDE_YTELSE") {
                 val loependeYtelse = packet[HENDELSE_DATA_KEY].asBoolean()
                 logger.info("Sak $sakId har løpende ytelse? $loependeYtelse")
+            } else if (steg == "OPPGAVE_OPPRETTET") {
+                logger.info("Ferdigstiller hendelse")
+                hendelseDao.oppdaterHendelseStatus(hendelseIdUUID, HendelseStatus.FERDIG)
             }
         }
     }

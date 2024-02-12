@@ -26,7 +26,9 @@ data class BarnepensjonBeregning(
     val beregningsperioder: List<BarnepensjonBeregningsperiode>,
     val sisteBeregningsperiode: BarnepensjonBeregningsperiode,
     val trygdetid: TrygdetidMedBeregningsmetode,
-) : BrevDTO
+    val erForeldreloes: Boolean = false,
+    val bruktAvdoed: String? = null,
+) : BrevdataMedInnhold
 
 data class BarnepensjonBeregningsperiode(
     val datoFOM: LocalDate,
@@ -44,7 +46,7 @@ data class OmstillingsstoenadBeregning(
     val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
     val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
     val trygdetid: TrygdetidMedBeregningsmetode,
-) : BrevDTO
+) : BrevdataMedInnhold
 
 data class OmstillingsstoenadBeregningsperiode(
     val datoFOM: LocalDate,

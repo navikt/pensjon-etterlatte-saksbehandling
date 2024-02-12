@@ -1,4 +1,4 @@
-import { Button, Heading, HelpText, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
+import { Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
@@ -85,13 +85,11 @@ export function KlageFormkravRedigering() {
     handleSubmit,
     formState: { isDirty },
     register,
-    watch,
   } = useForm<FormDataFormkrav>({
     defaultValues: klageFormkravTilDefaultFormValues(klage),
   })
 
   const navigate = useNavigate()
-  const erKlagenFramsattInnenFrist = watch('erKlagenFramsattInnenFrist')
 
   useEffect(() => {
     if (!klage?.sak.id) {
@@ -204,18 +202,12 @@ export function KlageFormkravRedigering() {
               legend="Er klagen framsatt innenfor klagefristen?"
               control={control}
             />
-            {erKlagenFramsattInnenFrist == JaNei.NEI && (
-              <HelpText strategy="fixed" title="Avvisning ved utløpt klagefrist">
-                Hvis klagefristen ikke er overholdt og dette sannsynligvis vil resultere i en avvisning av klagen bør du
-                vurdere å direkte gå til vedtak om avvisning (velg formkrav oppfylt)
-              </HelpText>
-            )}
           </FlexRow>
 
           <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
 
           <VurderingWrapper>
-            <Textarea {...register('begrunnelse')} label="Begrunnelse (valgfritt)" />
+            <Textarea {...register('begrunnelse')} label="Totalvurdering (valgfritt)" />
           </VurderingWrapper>
         </InnholdPadding>
         <FlexRow justify="center">

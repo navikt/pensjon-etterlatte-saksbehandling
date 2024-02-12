@@ -36,11 +36,13 @@ export const OverstyrtTrygdetid = ({
   const eksportBeskrivelse = () => {
     switch (sakType) {
       case SakType.BARNEPENSJON:
-        return `Fyll ut ved eksportvurdering når pensjonen er innvilget etter unntaksregelen om at avdød har mindre enn 20
-              års botid, ${opptjentTekst()}. Trygdetid skal da være lik antall poengår.`
+        return `Poengår skal registreres kun ved eksportvurdering når pensjonen er innvilget etter unntaksregelen om
+              at avdød har mindre enn 20 års botid, ${opptjentTekst()}. Når poengår registreres, blir trygdetiden
+              beregnet til antall poengår.`
       case SakType.OMSTILLINGSSTOENAD:
-        return `Fyll ut ved eksportvurderdering når stønaden er innvilget etter unntaksregelen om å få trygdetid lik
-              avdødes antall poengår hvis samlet botid til avdøde eller gjenlevende er mindre enn 20 år.`
+        return `Poengår skal registreres kun ved eksportvurdering når stønaden er innvilget etter unntaksregelen om
+        at avdød har mindre enn 20 års botid, men har minimum tre poengår. Når poengår registreres, blir trygdetiden
+        beregnet til antall poengår.`
     }
   }
 
@@ -49,7 +51,7 @@ export const OverstyrtTrygdetid = ({
       {(redigerbar || overstyrtNorskPoengaar !== undefined) && (
         <FlexHeader>
           <Heading size="small" level="4">
-            Poengår i Norge
+            Poengår i Norge - registreres kun ved eksportvurdering
           </Heading>
         </FlexHeader>
       )}

@@ -136,7 +136,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
     }
 
     fun oppdaterHendelseStatus(
-        hendelse: Hendelse,
+        hendelseId: UUID,
         status: HendelseStatus,
     ) {
         datasource.transaction {
@@ -148,7 +148,7 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
                     versjon = versjon + 1
                 WHERE id = :id
                 """.trimIndent(),
-                mapOf("status" to status.name, "id" to hendelse.id),
+                mapOf("status" to status.name, "id" to hendelseId),
             )
                 .let { query -> it.run(query.asUpdate) }
         }
@@ -157,19 +157,21 @@ class HendelseDao(private val datasource: DataSource) : Transactions<HendelseDao
     fun oppdaterHendelseForSteg(
         hendelseId: UUID,
         steg: String,
-        info: Any? = null,
+        info: String,
     ) {
         datasource.transaction {
             queryOf(
                 """
                 UPDATE hendelse 
                 SET steg = :steg,
+                    info = COALESCE(info, '[]'::JSONB) || :ny_info::JSONB,
                     endret = now(),
                     versjon = versjon + 1
                 WHERE id = :id
                 """.trimIndent(),
                 mapOf(
                     "id" to hendelseId,
+                    "ny_info" to info,
                     "steg" to steg,
                 ),
             )

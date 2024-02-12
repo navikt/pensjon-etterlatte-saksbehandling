@@ -216,6 +216,17 @@ class KlageServiceImpl(
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
+
+                is KlageUtfallUtenBrev.Avvist ->
+                    KlageUtfallMedData.Avvist(
+                        saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
+                    )
+
+                is KlageUtfallUtenBrev.AvvistMedOmgjoering ->
+                    KlageUtfallMedData.AvvistMedOmgjoering(
+                        omgjoering = utfall.omgjoering,
+                        saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
+                    )
             }
 
         val klageMedOppdatertUtfall = klage.oppdaterUtfall(utfallMedBrev)
@@ -303,6 +314,8 @@ class KlageServiceImpl(
                 is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling to null
                 is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling to utfall.omgjoering
                 is KlageUtfallMedData.Omgjoering -> null to utfall.omgjoering
+                is KlageUtfallMedData.Avvist -> null to null
+                is KlageUtfallMedData.AvvistMedOmgjoering -> null to utfall.omgjoering
                 null -> null to null
             }
 

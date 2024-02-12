@@ -1,11 +1,18 @@
-import { KlageInitiellVurdering } from '~components/klage/vurdering/KlageInitiellVurdering'
-import { KlageInitiellVurderingVisning } from '~components/klage/vurdering/KlageInitiellVurderingVisning'
+import { InitiellVurdering } from '~components/klage/vurdering/InitiellVurdering'
+import { InitiellVurderingVisning } from '~components/klage/vurdering/InitiellVurderingVisning'
 import { useKlage } from '~components/klage/useKlage'
 import Spinner from '~shared/Spinner'
 import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
 import { KlageInfoInnhenting } from '~components/klage/vurdering/innhenting/KlageInfoInnhenting'
-import { KlageAvvisningRedigering } from '~components/klage/vurdering/KlageAvvisningRedigering'
+import { KlageAvvisning } from '~components/klage/vurdering/KlageAvvisning'
+import { HeadingWrapper } from '~components/person/SakOversikt'
+import { Heading } from '@navikt/ds-react'
+import { ContentHeader } from '~shared/styled'
+import { InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
+import { EndeligVurdering } from '~components/klage/vurdering/EndeligVurdering'
+import { EndeligVurderingVisning } from '~components/klage/vurdering/EndeligVurderingVisning'
+import { Klage } from '~shared/types/Klage'
 
 export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
   const klage = useKlage()
@@ -13,13 +20,48 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
     return <Spinner visible label="Henter klage" />
   }
 
-  if (klage.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.NEI) {
-    return <KlageAvvisningRedigering klage={klage} />
+  if (kanRedigere && skalAvvises(klage)) {
+    return <KlageAvvisning klage={klage} />
   }
 
-  if (klage.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.NEI) {
+  if (kanRedigere && maaInnhenteInfo(klage)) {
     return <KlageInfoInnhenting klage={klage} />
   }
 
-  return kanRedigere ? <KlageInitiellVurdering klage={klage} /> : <KlageInitiellVurderingVisning klage={klage} />
+  return (
+    <>
+      <ContentHeader>
+        <HeadingWrapper>
+          <Heading level="1" size="large">
+            Vurder klagen
+          </Heading>
+        </HeadingWrapper>
+      </ContentHeader>
+      <InnholdPadding>
+        {kanRedigere ? (
+          <>
+            <InitiellVurdering klage={klage} />
+            {(klage.utfall || klage.initieltUtfall) && <EndeligVurdering klage={klage} />}
+          </>
+        ) : (
+          <>
+            <InitiellVurderingVisning klage={klage} />
+            <EndeligVurderingVisning klage={klage} />
+          </>
+        )}
+      </InnholdPadding>
+    </>
+  )
+}
+
+function skalAvvises(klage: Klage) {
+  const formkrav = klage.formkrav?.formkrav
+  return formkrav?.erKlagenFramsattInnenFrist === JaNei.NEI
+}
+
+function maaInnhenteInfo(klage: Klage) {
+  return (
+    klage.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.NEI &&
+    klage.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.JA
+  )
 }

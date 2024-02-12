@@ -55,6 +55,7 @@ fun Grunnlag.mapAvdoede(): List<Avdoed> =
             .filter { it.hentDoedsdato() != null }
             .map { avdoed ->
                 Avdoed(
+                    fnr = Foedselsnummer(avdoed.hentFoedselsnummer()!!.verdi.value),
                     navn = avdoed.hentNavn()!!.verdi.fulltNavn(),
                     doedsdato = avdoed.hentDoedsdato()!!.verdi!!,
                 )

@@ -8,26 +8,33 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
 
-val ENHET_PATH_PARAMETER = "enhet"
-inline val PipelineContext<*, ApplicationCall>.enhet: String
+inline val PipelineContext<*, ApplicationCall>.enheter: List<String>
     get() =
-        call.parameters[ENHET_PATH_PARAMETER] ?: throw NullPointerException(
-            "Enhet er ikke i query params",
-        )
+        call.request.queryParameters["enheter"]?.split(",") ?: emptyList()
 
 internal fun Route.saksbehandlerRoutes(saksbehandlerService: SaksbehandlerService) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
     route("/api") {
-        get("/saksbehandlere/enhet/{$ENHET_PATH_PARAMETER}") {
+        get("/saksbehandlere") {
             val saksbehandlere =
                 inTransaction {
-                    saksbehandlerService.hentSaksbehandlereForEnhet(enhet)
+                    saksbehandlerService.hentSaksbehandlereForEnhet(enheter)
                 }
-            logger.info("Henter saksbehandlere ${saksbehandlere.size} for $enhet")
+
+            logger.info("Henter saksbehandlere ${saksbehandlere.size} for $enheter")
             call.respond(saksbehandlere)
+        }
+
+        get("/saksbehandlere/innlogget") {
+            val saksbehandler =
+                inTransaction {
+                    saksbehandlerService.hentKomplettSaksbehandler(brukerTokenInfo.ident())
+                }
+            call.respond(saksbehandler)
         }
     }
 }

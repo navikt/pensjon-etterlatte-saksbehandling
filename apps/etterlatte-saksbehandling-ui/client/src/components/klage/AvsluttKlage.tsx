@@ -23,10 +23,6 @@ export default function AvsluttKlage() {
   const klage = useKlage()
   const klageRedigerbar = useKlageRedigerbar()
 
-  if (!klage || !klageRedigerbar) {
-    return null
-  }
-
   const {
     control,
     handleSubmit,
@@ -35,7 +31,7 @@ export default function AvsluttKlage() {
     watch,
     formState: { errors },
   } = useForm<AvsluttKlageRequest>({
-    defaultValues: { klageId: klage.id, aarsakTilAvbrytelse: AarsakTilAvslutting.ANNET, kommentar: '' },
+    defaultValues: { klageId: klage?.id, aarsakTilAvbrytelse: AarsakTilAvslutting.ANNET, kommentar: '' },
   })
 
   const avslutt = (request: AvsluttKlageRequest) => {
@@ -46,23 +42,26 @@ export default function AvsluttKlage() {
   }
 
   return (
-    <>
-      {!showAvsluttForm && (
-        <SidebarPanel>
-          <FlexRow>
-            <Button variant="secondary" icon={<TrashIcon />} onClick={() => setShowAvsluttForm(!showAvsluttForm)}>
-              Avslutt sak
-            </Button>
-          </FlexRow>
-        </SidebarPanel>
-      )}
-      {showAvsluttForm && (
-        <SidebarPanel border>
-          <AvsluttKlageForm />
-        </SidebarPanel>
-      )}
-      <BekreftelseModal />
-    </>
+    klage &&
+    klageRedigerbar && (
+      <>
+        {!showAvsluttForm && (
+          <SidebarPanel>
+            <FlexRow>
+              <Button variant="secondary" icon={<TrashIcon />} onClick={() => setShowAvsluttForm(!showAvsluttForm)}>
+                Avslutt sak
+              </Button>
+            </FlexRow>
+          </SidebarPanel>
+        )}
+        {showAvsluttForm && (
+          <SidebarPanel border>
+            <AvsluttKlageForm />
+          </SidebarPanel>
+        )}
+        <BekreftelseModal />
+      </>
+    )
   )
 
   function AvsluttKlageForm() {

@@ -1,5 +1,6 @@
 package no.nav.etterlatte
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -14,6 +15,9 @@ import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
@@ -25,6 +29,7 @@ import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import java.util.UUID
 
@@ -63,6 +68,14 @@ interface BehandlingService {
     ): Sak
 
     fun hentBehandling(behandlingId: UUID): DetaljertBehandling
+
+    fun opprettOppgave(
+        sakId: Long,
+        oppgaveType: OppgaveType,
+        referanse: String? = null,
+        merknad: String? = null,
+        frist: Tidspunkt? = null,
+    ): UUID
 }
 
 data class ReguleringFeiletHendelse(val sakId: Long)
@@ -204,6 +217,31 @@ class BehandlingServiceImpl(
         runBlocking {
             behandlingKlient.get("$url/behandlinger/$behandlingId").body()
         }
+
+    override fun opprettOppgave(
+        sakId: Long,
+        oppgaveType: OppgaveType,
+        referanse: String?,
+        merknad: String?,
+        frist: Tidspunkt?,
+    ): UUID {
+        return runBlocking {
+            behandlingKlient.post("$url/oppgaver/sak/$sakId/opprett") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    NyOppgaveDto(
+                        OppgaveKilde.HENDELSE,
+                        oppgaveType,
+                        merknad,
+                        referanse,
+                        frist,
+                    ),
+                )
+            }.body<ObjectNode>().let {
+                UUID.fromString(it["id"].textValue())
+            }
+        }
+    }
 }
 
 data class OpprettOmregningResponse(val behandlingId: UUID, val forrigeBehandlingId: UUID, val sakType: SakType)

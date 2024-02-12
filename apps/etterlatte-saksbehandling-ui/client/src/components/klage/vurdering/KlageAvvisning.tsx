@@ -26,7 +26,7 @@ type FilledFormDataVurdering = {
 
 type FormdataVurdering = FieldOrNull<FilledFormDataVurdering>
 
-export function KlageAvvisningRedigering(props: { klage: Klage }) {
+export function KlageAvvisning(props: { klage: Klage }) {
   const navigate = useNavigate()
   const { klage } = props
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)
@@ -41,7 +41,7 @@ export function KlageAvvisningRedigering(props: { klage: Klage }) {
     defaultValues: mapKlageTilFormdata(klage),
   })
 
-  const valgtUtfall = watch('utfall')
+  const valgtUtfall: Utfall | null = watch('utfall')
 
   function sendInnVurdering(skjema: FormdataVurdering) {
     if (!klage) {
@@ -114,11 +114,15 @@ export function KlageAvvisningRedigering(props: { klage: Klage }) {
           <Button type="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'vurdering'))}>
             Gå tilbake
           </Button>
-          {/*TODO Enable når lagring er på plass*/}
-          <Button disabled={true} loading={isPending(lagreUtfallStatus)} type="submit" variant="primary">
+          <Button
+            disabled={valgtUtfall == Utfall.AVVIST}
+            loading={isPending(lagreUtfallStatus)}
+            type="submit"
+            variant="primary"
+          >
             {kanSeBrev(valgtUtfall) ? 'Gå til brev' : 'Gå til oppsummering'}
           </Button>
-          <HelpText>Blir aktivert når lagring av utfall for avvisning er støttet</HelpText>
+          <HelpText>Blir aktivert når oppretting av vedtak er støttet</HelpText>
         </FlexRow>
       </form>
     </Content>

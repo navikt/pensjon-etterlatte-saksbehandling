@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-oppdater-behandling/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
@@ -30,6 +31,7 @@ on:
       - apps/etterlatte-oppdater-behandling/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**

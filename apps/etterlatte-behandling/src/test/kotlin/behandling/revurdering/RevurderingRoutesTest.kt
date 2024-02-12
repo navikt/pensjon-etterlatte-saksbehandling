@@ -42,7 +42,7 @@ internal class RevurderingRoutesTest {
                 every { harTilgangTilBehandling(any(), any()) } returns true
                 every { harTilgangTilSak(any(), any()) } returns true
             }
-        coEvery { applicationContext.navAnsattKlient.hentEnhetForSaksbehandler(any()) } returns
+        coEvery { applicationContext.navAnsattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.name),
             )

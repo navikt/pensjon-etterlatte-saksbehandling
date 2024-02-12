@@ -1,4 +1,5 @@
 {
+  "license": "MIT",
   "scripts": {
     "postinstall": "yarn --cwd server install && yarn --cwd client install",
     "prepare": "cd ../../ && husky install .husky"

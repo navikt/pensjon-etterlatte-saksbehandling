@@ -2,16 +2,16 @@ import styled from 'styled-components'
 import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
 import {
   formaterBehandlingstype,
+  formaterDatoMedKlokkeslett,
   formaterEnumTilLesbarString,
   formaterSakstype,
   formaterStringDato,
-  formaterStringTidspunktTimeMinutter,
 } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
 import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
@@ -19,6 +19,8 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
+import { FlexRow } from '~shared/styled'
+import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
@@ -58,23 +60,22 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
     }
   }
 
-  const fattetDato = behandlingsInfo.datoFattet
-    ? formaterStringDato(behandlingsInfo.datoFattet) +
-      ' kl. ' +
-      formaterStringTidspunktTimeMinutter(behandlingsInfo.datoFattet)
-    : null
-
   if (isInitial(oppgaveForBehandlingStatus) || isPending(oppgaveForBehandlingStatus)) {
     return <Spinner visible={true} label="Henter saksbehandler" />
   }
 
   return (
     <SidebarPanel border>
-      <Heading size="small">{formaterBehandlingstype(behandlingsInfo.type)}</Heading>
+      <Heading size="small">
+        {formaterBehandlingstype(behandlingsInfo.type)} <EessiPensjonLenke />
+      </Heading>
+
       <Heading size="xsmall" spacing>
         {hentStatus()}
       </Heading>
-      {fattetDato && <Tekst>{fattetDato}</Tekst>}
+
+      {behandlingsInfo.datoFattet && <Tekst>{formaterDatoMedKlokkeslett(behandlingsInfo.datoFattet)}</Tekst>}
+
       <TagList>
         <li>
           <Tag variant={tagColors[behandlingsInfo.sakType]} size="small">
@@ -99,21 +100,14 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           () => (
             <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
           ),
-          () => (
-            <>
-              {saksbehandlerPaaOppgave ? (
-                <Tekst>
-                  {saksbehandlerPaaOppgave.saksbehandlerNavn
-                    ? saksbehandlerPaaOppgave.saksbehandlerNavn
-                    : saksbehandlerPaaOppgave.saksbehandlerIdent}
-                </Tekst>
-              ) : (
-                <Alert size="small" variant="warning">
-                  Ingen saksbehandler har tatt denne oppgaven
-                </Alert>
-              )}
-            </>
-          )
+          () =>
+            saksbehandlerPaaOppgave ? (
+              <Tekst>{saksbehandlerPaaOppgave.saksbehandlerNavn || saksbehandlerPaaOppgave.saksbehandlerIdent}</Tekst>
+            ) : (
+              <Alert size="small" variant="warning">
+                Ingen saksbehandler har tatt denne oppgaven
+              </Alert>
+            )
         )}
       </div>
       <div className="flex">
@@ -136,24 +130,13 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           <Tekst>{kommentarFraAttestant}</Tekst>
         </div>
       )}
-      <SakFlexbox>
-        <InfoSakId>Sakid: </InfoSakId>
+      <FlexRow align="center">
+        <Info>Sakid:</Info>
         <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
-      </SakFlexbox>
+      </FlexRow>
     </SidebarPanel>
   )
 }
-
-const SakFlexbox = styled.div`
-  display: flex;
-  flex-direction: row;
-  margin-top: 1em;
-`
-const InfoSakId = styled.div`
-  margin-top: 8px;
-  font-size: 14px;
-  font-weight: 600;
-`
 
 const Info = styled.div`
   font-size: 14px;

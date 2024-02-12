@@ -1,5 +1,5 @@
 import { Alert } from '@navikt/ds-react'
-import { OppgaveDTO } from '~shared/api/oppgaver'
+import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
 import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
@@ -9,6 +9,7 @@ export interface oppgaveListaProps {
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
   oppgaver: ReadonlyArray<OppgaveDTO>
   hentOppgaver: () => void
+  saksbehandlereIEnhet: Array<Saksbehandler>
   filter: Filter
   setFilter: Dispatch<SetStateAction<Filter>>
   totaltAntallOppgaver?: number
@@ -19,6 +20,7 @@ export const Oppgavelista = ({
   oppdaterTildeling,
   oppgaver,
   hentOppgaver,
+  saksbehandlereIEnhet,
   filter,
   setFilter,
   totaltAntallOppgaver,
@@ -43,6 +45,7 @@ export const Oppgavelista = ({
             oppdaterTildeling={oppdaterTildeling}
             erMinOppgaveliste={erMinOppgaveliste}
             hentOppgaver={hentOppgaver}
+            saksbehandlereIEnhet={saksbehandlereIEnhet}
             filter={filter}
             setFilter={setFilter}
           />

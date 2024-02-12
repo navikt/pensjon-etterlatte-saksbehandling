@@ -18,5 +18,6 @@ data class NyBehandlingRequest(
     val pesysId: Long?,
     val enhet: String?,
     val foreldreloes: Boolean = false,
+    val ufoere: Boolean = false,
     val gradering: AdressebeskyttelseGradering? = AdressebeskyttelseGradering.UGRADERT,
 )

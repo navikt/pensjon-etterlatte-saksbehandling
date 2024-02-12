@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsdata
 import no.nav.etterlatte.libs.common.grunnlag.hentDoedsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentErForeldreloes
+import no.nav.etterlatte.libs.common.grunnlag.hentErUfoere
 import no.nav.etterlatte.libs.common.grunnlag.hentFamilierelasjon
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsdato
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
@@ -44,6 +45,7 @@ fun Grunnlag.mapSoeker(brevutfallDto: BrevutfallDto?): Soeker =
             fnr = Foedselsnummer(hentFoedselsnummer()!!.verdi.value),
             under18 = !erOver18(brevutfallDto),
             foreldreloes = sak.hentErForeldreloes()?.verdi ?: false,
+            ufoere = sak.hentErUfoere()?.verdi ?: false,
         )
     }
 

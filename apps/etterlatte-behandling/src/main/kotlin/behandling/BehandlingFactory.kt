@@ -199,7 +199,7 @@ class BehandlingFactory(
             )
         if (request.kilde?.foerstOpprettaIPesys() == true) {
             opplysninger.add(lagOpplysning(Opplysningstype.FORELDRELOES, kilde, request.foreldreloes.toJsonNode()))
-            // TODO Legge til uføre her?
+            opplysninger.add(lagOpplysning(Opplysningstype.UFOERE, kilde, request.ufoere.toJsonNode()))
         }
 
         grunnlagService.leggTilNyeOpplysninger(behandling.id, NyeSaksopplysninger(sak.id, opplysninger))

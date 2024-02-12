@@ -85,7 +85,11 @@ const Dokument = ({
       )}
 
       <br />
-      {!dokument.tittel && <Alert variant="warning">Dokumentet mangler tittel!</Alert>}
+      {!dokument.tittel && (
+        <Alert variant="warning" size="small">
+          Dokumentet mangler tittel!
+        </Alert>
+      )}
     </div>
   )
 }

@@ -8,11 +8,11 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class SaksbehandlerInfoDaoTransTest {
-    private val dataSource = DatabaseExtension.dataSource
+internal class SaksbehandlerInfoDaoTransTest(val dataSource: DataSource) {
     private lateinit var saksbehandlerInfoDaoTrans: SaksbehandlerInfoDaoTrans
     private lateinit var saksbehandlerInfoDao: SaksbehandlerInfoDao
 

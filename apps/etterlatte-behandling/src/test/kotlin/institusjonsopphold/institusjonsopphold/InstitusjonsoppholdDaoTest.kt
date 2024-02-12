@@ -12,11 +12,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class InstitusjonsoppholdDaoTest {
-    private val dataSource = DatabaseExtension.dataSource
+internal class InstitusjonsoppholdDaoTest(val dataSource: DataSource) {
     private lateinit var institusjonsoppholdDao: InstitusjonsoppholdDao
 
     @BeforeAll

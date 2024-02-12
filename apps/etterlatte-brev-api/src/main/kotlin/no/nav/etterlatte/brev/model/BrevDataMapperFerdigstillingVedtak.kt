@@ -66,7 +66,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
                 BARNEPENSJON_REVURDERING -> barnepensjonRevurdering(bruker, generellBrevData, innholdMedVedlegg)
                 BARNEPENSJON_INNVILGELSE -> barnepensjonInnvilgelse(bruker, generellBrevData, innholdMedVedlegg)
                 BARNEPENSJON_AVSLAG -> barnepensjonAvslag(innholdMedVedlegg, generellBrevData)
-                BARNEPENSJON_OPPHOER -> barnepensjonOpphoer(innholdMedVedlegg, generellBrevData)
+                BARNEPENSJON_OPPHOER -> barnepensjonOpphoer(bruker, innholdMedVedlegg, generellBrevData)
 
                 OMSTILLINGSSTOENAD_INNVILGELSE ->
                     omstillingsstoenadInnvilgelse(
@@ -83,8 +83,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
                     )
 
                 OMSTILLINGSSTOENAD_AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, innholdMedVedlegg.innhold())
-                OMSTILLINGSSTOENAD_OPPHOER ->
-                    OmstillingsstoenadOpphoer.fra(generellBrevData.utlandstilknytning, innholdMedVedlegg.innhold())
+                OMSTILLINGSSTOENAD_OPPHOER -> omstillingsstoenadOpphoer(bruker, generellBrevData, innholdMedVedlegg)
 
                 TILBAKEKREVING_FERDIG -> TilbakekrevingFerdigData.fra(generellBrevData, innholdMedVedlegg)
 
@@ -154,16 +153,20 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         utlandstilknytning = generellBrevData.utlandstilknytning?.type,
     )
 
-    private fun barnepensjonOpphoer(
+    private suspend fun barnepensjonOpphoer(
+        brukerTokenInfo: BrukerTokenInfo,
         innholdMedVedlegg: InnholdMedVedlegg,
         generellBrevData: GenerellBrevData,
-    ) = BarnepensjonOpphoer.fra(
-        innhold = innholdMedVedlegg,
-        // TODO må kunne sette brevutfall ved opphør.
-        //  Det er pr nå ikke mulig da dette ligger i beregningssteget.
-        brukerUnder18Aar = generellBrevData.personerISak.soeker.under18 ?: true,
-        utlandstilknytning = generellBrevData.utlandstilknytning?.type,
-    )
+    ) = coroutineScope {
+        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val brevutfall = async { fetcher.hentBrevutfall() }
+
+        BarnepensjonOpphoer.fra(
+            innholdMedVedlegg,
+            generellBrevData.utlandstilknytning?.type,
+            requireNotNull(brevutfall.await()),
+        )
+    }
 
     private suspend fun omstillingsstoenadInnvilgelse(
         brukerTokenInfo: BrukerTokenInfo,
@@ -210,6 +213,21 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
             requireNotNull(trygdetid.await()),
             requireNotNull(brevutfall.await()),
             generellBrevData.revurderingsaarsak,
+        )
+    }
+
+    private suspend fun omstillingsstoenadOpphoer(
+        brukerTokenInfo: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+        innholdMedVedlegg: InnholdMedVedlegg,
+    ) = coroutineScope {
+        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val brevutfall = async { fetcher.hentBrevutfall() }
+
+        OmstillingsstoenadOpphoer.fra(
+            innholdMedVedlegg,
+            generellBrevData.utlandstilknytning,
+            requireNotNull(brevutfall.await()),
         )
     }
 }

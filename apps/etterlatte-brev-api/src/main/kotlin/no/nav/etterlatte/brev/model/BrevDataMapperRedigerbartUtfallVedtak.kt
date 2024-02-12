@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInnvilgelseRedigerbartUtfall
+import no.nav.etterlatte.brev.model.bp.BarnepensjonOpphoerRedigerbarUtfall
 import no.nav.etterlatte.brev.model.bp.BarnepensjonRevurderingRedigerbartUtfall
 import no.nav.etterlatte.brev.model.klage.AvvistKlageInnholdBrevData
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadAvslag
@@ -40,8 +41,8 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                 when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> barnepensjonInnvilgelse(brukerTokenInfo, generellBrevData)
                     VedtakType.ENDRING -> barnepensjonEndring(brukerTokenInfo, generellBrevData)
+                    VedtakType.OPPHOER -> barnepensjonOpphoer(brukerTokenInfo, generellBrevData)
                     VedtakType.AVSLAG -> ManueltBrevData()
-                    VedtakType.OPPHOER -> ManueltBrevData()
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
                     VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData)
                     null -> ManueltBrevData()
@@ -52,8 +53,8 @@ class BrevDataMapperRedigerbartUtfallVedtak(
                 when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> omstillingsstoenadInnvilgelse(brukerTokenInfo, generellBrevData)
                     VedtakType.ENDRING -> omstillingsstoenadEndring(brukerTokenInfo, generellBrevData)
+                    VedtakType.OPPHOER -> omstillingsstoenadOpphoer(brukerTokenInfo, generellBrevData)
                     VedtakType.AVSLAG -> OmstillingsstoenadAvslag.fra(generellBrevData, emptyList())
-                    VedtakType.OPPHOER -> OmstillingsstoenadOpphoerRedigerbartUtfall.fra(generellBrevData, emptyList())
                     VedtakType.TILBAKEKREVING -> TilbakekrevingInnholdBrevData.fra(generellBrevData)
                     VedtakType.AVVIST_KLAGE -> AvvistKlageInnholdBrevData.fra(generellBrevData)
                     null -> ManueltBrevData()
@@ -73,6 +74,18 @@ class BrevDataMapperRedigerbartUtfallVedtak(
             generellBrevData,
             utbetalingsinfo.await(),
             etterbetaling.await(),
+        )
+    }
+
+    private suspend fun barnepensjonOpphoer(
+        brukerTokenInfo: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+    ) = coroutineScope {
+        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val brevutfall = async { fetcher.hentBrevutfall() }
+
+        BarnepensjonOpphoerRedigerbarUtfall.fra(
+            requireNotNull(brevutfall.await()),
         )
     }
 
@@ -115,6 +128,19 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         OmstillingsstoenadRevurderingRedigerbartUtfall.fra(
             requireNotNull(avkortingsinfo.await()),
             etterbetaling.await(),
+            requireNotNull(brevutfall.await()),
+        )
+    }
+
+    private suspend fun omstillingsstoenadOpphoer(
+        bruker: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+    ) = coroutineScope {
+        val fetcher = BrevDatafetcher(brevdataFacade, bruker, generellBrevData)
+        val brevutfall = async { fetcher.hentBrevutfall() }
+
+        OmstillingsstoenadOpphoerRedigerbartUtfall.fra(
+            generellBrevData,
             requireNotNull(brevutfall.await()),
         )
     }

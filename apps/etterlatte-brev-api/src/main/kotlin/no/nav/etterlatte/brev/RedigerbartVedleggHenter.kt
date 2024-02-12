@@ -20,6 +20,8 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService) {
             SakType.OMSTILLINGSSTOENAD -> {
                 when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> vedleggInnvilgelseOmstillingsstoenad(bruker, generellBrevData)
+                    // TODO kun hente vedlegg hvis feilutbetaling er satt til varsle i brevutfall
+                    VedtakType.OPPHOER -> vedleggOpphoerOmstillingsstoenad(bruker, generellBrevData)
                     VedtakType.ENDRING -> vedleggEndringOmstillingsstoenad(bruker, generellBrevData)
                     else -> null
                 }
@@ -28,6 +30,8 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService) {
             SakType.BARNEPENSJON -> {
                 when (generellBrevData.forenkletVedtak?.type) {
                     VedtakType.INNVILGELSE -> vedleggInnvilgelseBarnepensjon(bruker, generellBrevData)
+                    // TODO kun hente vedlegg hvis feilutbetaling er satt til varsle i brevutfall
+                    VedtakType.OPPHOER -> vedleggOpphoerBarnepensjon(bruker, generellBrevData)
                     VedtakType.ENDRING -> vedleggEndringBarnepensjon(bruker, generellBrevData)
                     else -> null
                 }
@@ -38,6 +42,11 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService) {
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = listOf(hentInnholdBeregningVedleggOms(bruker, generellBrevData))
+
+    private suspend fun vedleggOpphoerOmstillingsstoenad(
+        bruker: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+    ) = listOf(hentInnholdForhaandsvarselFeilutbetalingVedleggOms(bruker, generellBrevData))
 
     private suspend fun vedleggEndringOmstillingsstoenad(
         bruker: BrukerTokenInfo,
@@ -57,6 +66,11 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService) {
         generellBrevData: GenerellBrevData,
     ) = listOf(hentInnholdBeregningAvTrygdetidBp(bruker, generellBrevData))
 
+    private suspend fun vedleggOpphoerBarnepensjon(
+        bruker: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+    ) = listOf(hentInnholdForhaandsvarselFeilutbetalingVedleggBp(bruker, generellBrevData))
+
     private suspend fun hentInnholdBeregningVedleggOms(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
@@ -73,6 +87,16 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService) {
     ) = hentInnholdFraBrevbakeren(
         EtterlatteBrevKode.OMSTILLINGSSTOENAD_VEDLEGG_FORHAANDSVARSEL_UTFALL,
         BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+        generellBrevData,
+        bruker,
+    )
+
+    private suspend fun hentInnholdForhaandsvarselFeilutbetalingVedleggBp(
+        bruker: BrukerTokenInfo,
+        generellBrevData: GenerellBrevData,
+    ) = hentInnholdFraBrevbakeren(
+        EtterlatteBrevKode.BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL,
+        BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
         generellBrevData,
         bruker,
     )

@@ -22,7 +22,6 @@ import { AldersgruppeHjelpeTekst } from '~components/behandling/brevutfall/hjelp
 import { LavEllerIngenInntektHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/LavEllerIngenInntektHjelpeTekst'
 import { FeilutbetalingHjelpeTekst } from '~components/behandling/brevutfall/hjelpeTekster/FeilutbetalingHjelpeTekst'
 import { feilutbetalingToString } from '~components/behandling/brevutfall/BrevutfallVisning'
-import { erOpphoer } from '~shared/types/Revurderingaarsak'
 
 enum HarEtterbetaling {
   JA = 'JA',
@@ -41,6 +40,7 @@ interface BrevutfallSkjemaData {
 }
 
 interface Props {
+  behandlingErOpphoer: boolean
   behandling: IDetaljertBehandling
   brevutfallOgEtterbetaling: BrevutfallOgEtterbetaling
   setBrevutfallOgEtterbetaling: (brevutfall: BrevutfallOgEtterbetaling) => void
@@ -50,6 +50,7 @@ interface Props {
 }
 
 export const BrevutfallSkjema = ({
+  behandlingErOpphoer,
   behandling,
   brevutfallOgEtterbetaling,
   setBrevutfallOgEtterbetaling,
@@ -58,7 +59,6 @@ export const BrevutfallSkjema = ({
   onAvbryt,
 }: Props): ReactNode => {
   const [lagreBrevutfallResultat, lagreBrevutfallRequest, lagreBrevutfallReset] = useApiCall(lagreBrevutfallApi)
-  const ikkeOpphoer = !erOpphoer(behandling.revurderingsaarsak!!)
   const dispatch = useAppDispatch()
 
   const { handleSubmit, control, getValues, watch } = useForm<BrevutfallSkjemaData>({
@@ -147,7 +147,7 @@ export const BrevutfallSkjema = ({
   return (
     <form onSubmit={handleSubmit((data) => submitBrevutfall(data))}>
       <VStack gap="8">
-        {ikkeOpphoer && (
+        {!behandlingErOpphoer && (
           <VStack gap="4">
             <ControlledRadioGruppe
               name="harEtterbetaling"
@@ -190,7 +190,7 @@ export const BrevutfallSkjema = ({
           </VStack>
         )}
 
-        {ikkeOpphoer && behandling.sakType == SakType.BARNEPENSJON && (
+        {behandling.sakType == SakType.BARNEPENSJON && (
           <VStack gap="4">
             <ControlledRadioGruppe
               name="aldersgruppe"
@@ -211,7 +211,7 @@ export const BrevutfallSkjema = ({
           </VStack>
         )}
 
-        {ikkeOpphoer && behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
+        {!behandlingErOpphoer && behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
           <VStack gap="4">
             <ControlledRadioGruppe
               name="lavEllerIngenInntekt"
@@ -258,6 +258,7 @@ export const BrevutfallSkjema = ({
                 render={(props) => (
                   <Textarea
                     label="Kommentar"
+                    value={watch().feilutbetalingKommentar ?? ''}
                     style={{ width: '100%' }}
                     {...props}
                     onChange={(e) => {

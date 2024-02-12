@@ -10,8 +10,6 @@ import { format, parseISO } from 'date-fns'
 import nb from 'date-fns/locale/nb'
 import { SakType } from '~shared/types/sak'
 import { PencilIcon } from '@navikt/aksel-icons'
-import { erOpphoer } from '~shared/types/Revurderingaarsak'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 function aldersgruppeToString(aldersgruppe?: Aldersgruppe | null) {
   switch (aldersgruppe) {
@@ -53,18 +51,17 @@ function formaterDatoSomMaaned(dato: string) {
 }
 
 export const BrevutfallVisning = (props: {
-  behandling: IDetaljertBehandling
+  behandlingErOpphoer: Boolean
   redigerbar: boolean
   brevutfallOgEtterbetaling: BrevutfallOgEtterbetaling
   sakType: SakType
   setVisSkjema: (visSkjema: boolean) => void
 }) => {
-  const { behandling, redigerbar, brevutfallOgEtterbetaling, sakType, setVisSkjema } = props
-  const ikkeOpphoer = !erOpphoer(behandling.revurderingsaarsak!!)
+  const { behandlingErOpphoer, redigerbar, brevutfallOgEtterbetaling, sakType, setVisSkjema } = props
 
   return (
     <VStack gap="8">
-      {ikkeOpphoer && (
+      {!behandlingErOpphoer && (
         <VStack gap="2">
           <VStack gap="2">
             <Label>Skal det etterbetales?</Label>
@@ -84,13 +81,13 @@ export const BrevutfallVisning = (props: {
           )}
         </VStack>
       )}
-      {ikkeOpphoer && sakType == SakType.BARNEPENSJON && (
+      {sakType == SakType.BARNEPENSJON && (
         <VStack gap="2">
           <Label>Gjelder brevet under eller over 18 år?</Label>
           <BodyShort>{aldersgruppeToString(brevutfallOgEtterbetaling.brevutfall.aldersgruppe)}</BodyShort>
         </VStack>
       )}
-      {ikkeOpphoer && sakType == SakType.OMSTILLINGSSTOENAD && (
+      {!behandlingErOpphoer && sakType == SakType.OMSTILLINGSSTOENAD && (
         <VStack gap="2">
           <Label>Gi omstillingsstønad til 67 år etter unntaksregel for bruker født tom 1963?</Label>
           <BodyShort>

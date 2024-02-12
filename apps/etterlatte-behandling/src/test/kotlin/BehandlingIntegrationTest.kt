@@ -33,6 +33,7 @@ import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
@@ -438,6 +439,13 @@ class VedtakKlientTest : VedtakKlient {
 
     override suspend fun underkjennVedtakTilbakekreving(
         tilbakekrevingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        return 123L
+    }
+
+    override suspend fun lagreVedtakKlage(
+        klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long {
         return 123L

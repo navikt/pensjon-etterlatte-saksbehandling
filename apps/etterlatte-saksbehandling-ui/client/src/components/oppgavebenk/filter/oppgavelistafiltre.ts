@@ -269,7 +269,7 @@ export const minOppgavelisteFiltre = (): Filter => {
     oppgavetypeFilter: 'visAlle',
     oppgavekildeFilter: 'visAlle',
     fnrFilter: '',
-    fristSortering: 'ingen',
-    fnrSortering: 'ingen',
+    fristSortering: 'no-order',
+    fnrSortering: 'no-order',
   }
 }

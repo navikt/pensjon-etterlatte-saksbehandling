@@ -48,6 +48,7 @@ class SakTilgangDao(private val datasource: DataSource) {
                 )
             statement.setString(1, behandlingId)
             statement.setString(2, behandlingId)
+            statement.setString(3, behandlingId)
             return statement.executeQuery().singleOrNull {
                 SakMedGraderingOgSkjermet(
                     id = getLong(1),

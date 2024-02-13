@@ -56,7 +56,7 @@ class HendelseRiver(
             hendelseDao.oppdaterHendelseForSteg(hendelseIdUUID, steg, packet.toJson())
 
             if (steg == "VURDERT_LOEPENDE_YTELSE") {
-                val loependeYtelse = packet[HENDELSE_DATA_KEY].asBoolean()
+                val loependeYtelse = packet[HENDELSE_DATA_KEY]["loependeYtelse"].asBoolean()
                 logger.info("Sak $sakId har løpende ytelse? $loependeYtelse")
             } else if (steg == "OPPGAVE_OPPRETTET") {
                 logger.info("Ferdigstiller hendelse")

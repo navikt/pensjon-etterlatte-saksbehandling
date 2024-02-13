@@ -100,7 +100,9 @@ class GrunnlagsendringshendelseService(
                     "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil",
                     e,
                 )
-                throw KunneIkkeLukkeOppgaveForhendelse(e.message ?: "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil")
+                throw KunneIkkeLukkeOppgaveForhendelse(
+                    e.message ?: "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil",
+                )
             }
         }
     }
@@ -109,12 +111,16 @@ class GrunnlagsendringshendelseService(
         grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
     }
 
-    fun opprettBostedhendelse(bostedsadresse: Bostedsadresse): List<Grunnlagsendringshendelse> {
+    private fun opprettBostedhendelse(bostedsadresse: Bostedsadresse): List<Grunnlagsendringshendelse> {
         return inTransaction { opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED) }
     }
 
     fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
-        doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
+        try {
+            doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
+        } catch (e: Exception) {
+            logger.error("Noe gikk galt ved opprettelse av dødshendelse i behandling.", e)
+        }
 
         return inTransaction {
             opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
@@ -122,7 +128,12 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> {
-        return inTransaction { opprettHendelseAvTypeForPerson(utflyttingsHendelse.fnr, GrunnlagsendringsType.UTFLYTTING) }
+        return inTransaction {
+            opprettHendelseAvTypeForPerson(
+                utflyttingsHendelse.fnr,
+                GrunnlagsendringsType.UTFLYTTING,
+            )
+        }
     }
 
     fun opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse: ForelderBarnRelasjonHendelse): List<Grunnlagsendringshendelse> {
@@ -351,13 +362,15 @@ class GrunnlagsendringshendelseService(
         sak: Sak,
     ) {
         val personRolle = grunnlagsendringshendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
-        val pdlData = pdltjenesterKlient.hentPdlModell(grunnlagsendringshendelse.gjelderPerson, personRolle, sak.sakType)
+        val pdlData =
+            pdltjenesterKlient.hentPdlModell(grunnlagsendringshendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag =
             runBlocking {
                 grunnlagKlient.hentGrunnlag(sak.id)
             }
         try {
-            val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
+            val samsvarMellomPdlOgGrunnlag =
+                finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
             val erDuplikat =
                 erDuplikatHendelse(sak.id, sak.ident, grunnlagsendringshendelse.type, samsvarMellomPdlOgGrunnlag)
 
@@ -371,7 +384,10 @@ class GrunnlagsendringshendelseService(
                 forkastHendelse(grunnlagsendringshendelse.id, samsvarMellomPdlOgGrunnlag)
             }
         } catch (e: GrunnlagRolleException) {
-            forkastHendelse(grunnlagsendringshendelse.id, SamsvarMellomKildeOgGrunnlag.FeilRolle(pdlData, grunnlag, false))
+            forkastHendelse(
+                grunnlagsendringshendelse.id,
+                SamsvarMellomKildeOgGrunnlag.FeilRolle(pdlData, grunnlag, false),
+            )
         }
     }
 

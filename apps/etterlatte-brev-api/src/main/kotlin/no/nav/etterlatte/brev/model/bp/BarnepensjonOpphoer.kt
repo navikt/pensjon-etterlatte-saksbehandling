@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.model.bp
 
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
+import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
@@ -28,7 +29,12 @@ data class BarnepensjonOpphoer(
 
             return BarnepensjonOpphoer(
                 innhold = innhold.innhold(),
-                innholdForhaandsvarsel = vedleggHvisFeilutbetaling(feilutbetaling, innhold),
+                innholdForhaandsvarsel =
+                    vedleggHvisFeilutbetaling(
+                        feilutbetaling,
+                        innhold,
+                        BrevVedleggKey.BP_FORHAANDSVARSEL_FEILUTBETALING,
+                    ),
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
                 feilutbetaling = feilutbetaling,

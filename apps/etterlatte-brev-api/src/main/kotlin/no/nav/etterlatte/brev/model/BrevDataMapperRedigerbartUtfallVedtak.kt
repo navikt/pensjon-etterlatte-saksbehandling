@@ -115,8 +115,14 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     ) = coroutineScope {
         val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
         val etterbetaling = async { fetcher.hentEtterbetaling() }
+        val brevutfall = async { fetcher.hentBrevutfall() }
+        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
 
-        BarnepensjonRevurderingRedigerbartUtfall.fra(etterbetaling.await())
+        BarnepensjonRevurderingRedigerbartUtfall.fra(
+            etterbetaling.await(),
+            utbetalingsinfo.await(),
+            requireNotNull(brevutfall.await()),
+        )
     }
 
     private suspend fun omstillingsstoenadInnvilgelse(

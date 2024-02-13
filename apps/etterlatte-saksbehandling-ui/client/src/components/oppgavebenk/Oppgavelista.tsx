@@ -1,5 +1,5 @@
 import { Alert } from '@navikt/ds-react'
-import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
+import { OppgaveDTO } from '~shared/api/oppgaver'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
@@ -9,6 +9,7 @@ import {
   sorterFnr,
   sorterFrist,
 } from '~components/oppgavebenk/oppgaverTable/oppgavesortering'
+import { Saksbehandler } from '~shared/types/saksbehandler'
 
 export interface oppgaveListaProps {
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void

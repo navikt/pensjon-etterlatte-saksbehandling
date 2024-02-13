@@ -13,18 +13,18 @@ import { tagColors, TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert, OppgaveSaksbehandler } from '~shared/api/oppgaver'
+import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { FlexRow } from '~shared/styled'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
+import { Saksbehandler } from '~shared/types/saksbehandler'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
-  const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<OppgaveSaksbehandler | null>(null)
+  const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<Saksbehandler | null>(null)
   const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(
     hentOppgaveForBehandlingUnderBehandlingIkkeattestert
   )
@@ -102,7 +102,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           ),
           () =>
             saksbehandlerPaaOppgave ? (
-              <Tekst>{saksbehandlerPaaOppgave.saksbehandlerNavn || saksbehandlerPaaOppgave.saksbehandlerIdent}</Tekst>
+              <Tekst>{saksbehandlerPaaOppgave.navn || saksbehandlerPaaOppgave.ident}</Tekst>
             ) : (
               <Alert size="small" variant="warning">
                 Ingen saksbehandler har tatt denne oppgaven

@@ -87,7 +87,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
       { referanse: behandling.id, sakId: behandling.sakId },
       (saksbehandler, statusCode) => {
         if (statusCode === 200) {
-          dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler.saksbehandlerIdent))
+          dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler.ident))
         }
       },
       () => dispatch(resetSaksbehandlerGjeldendeOppgave())

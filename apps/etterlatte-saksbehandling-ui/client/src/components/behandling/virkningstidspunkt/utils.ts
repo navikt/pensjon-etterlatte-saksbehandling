@@ -120,8 +120,8 @@ export const OMS_INST_HJEMLER_VIRK: Array<Hjemmel> = [
 
 export const OMS_INNTEKTSENDRING_HJEMLER: Array<Hjemmel> = [
   {
-    lenke: 'https://lovdata.no/lov/(finnes ikke)',
-    tittel: 'Folketrygdloven § 17-9, jf. utkast til forskrift § 10 (er ikke vedtatt enda)',
+    lenke: 'https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/§17-9',
+    tittel: 'Folketrygdloven § 17-9, jf. utkast til forskrift § 10',
   },
 ]
 

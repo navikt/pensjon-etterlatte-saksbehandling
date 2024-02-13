@@ -30,6 +30,7 @@ import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
@@ -217,6 +218,7 @@ internal class BrevRouteTest {
             sakId = 41,
             behandlingId = null,
             tittel = null,
+            spraak = Spraak.NB,
             prosessType = BrevProsessType.AUTOMATISK,
             soekerFnr = "soeker_fnr",
             status = Status.OPPRETTET,

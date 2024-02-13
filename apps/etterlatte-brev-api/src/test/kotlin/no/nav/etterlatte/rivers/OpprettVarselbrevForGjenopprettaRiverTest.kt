@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.varselbrev.VarselbrevResponse
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
@@ -80,6 +81,7 @@ internal class OpprettVarselbrevForGjenopprettaRiverTest {
             saksnr,
             behandlingId,
             "tittel",
+            Spraak.NB,
             BrevProsessType.AUTOMATISK,
             "fnr",
             Status.FERDIGSTILT,

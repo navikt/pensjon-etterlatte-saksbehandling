@@ -9,6 +9,7 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
 import no.nav.etterlatte.brev.model.Spraak
@@ -91,19 +92,20 @@ internal class BrevdataFacadeImplTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns lagBehandling()
         coEvery { behandlingKlient.hentBrevutfall(any(), any()) } returns hentBrevutfall()
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
+        val grunnlag = opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns grunnlag
         coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
         coEvery { beregningKlient.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
         coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns opprettTrygdetid()
 
         val generellBrevData =
             runBlocking {
-                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
+                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, null, BRUKERTokenInfo)
             }
 
         Assertions.assertEquals(SAK_ID, generellBrevData.sak.id)
         Assertions.assertEquals(BEHANDLING_ID, generellBrevData.behandlingId)
-        Assertions.assertEquals(Spraak.NB, generellBrevData.spraak)
+        Assertions.assertEquals(grunnlag.mapSpraak(), generellBrevData.spraak)
         with(generellBrevData.personerISak.soeker) {
             Assertions.assertEquals("Søker", fornavn)
             Assertions.assertEquals("Mellom", mellomnavn)
@@ -132,12 +134,12 @@ internal class BrevdataFacadeImplTest {
 
         val generellBrevData =
             runBlocking {
-                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
+                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, Spraak.EN, BRUKERTokenInfo)
             }
 
         generellBrevData.sak.id shouldBe SAK_ID
         generellBrevData.behandlingId shouldBe BEHANDLING_ID
-        generellBrevData.spraak shouldBe Spraak.NB
+        generellBrevData.spraak shouldBe Spraak.EN
         generellBrevData.personerISak.avdoede.first().navn shouldBe "Død Mellom Far"
         with(generellBrevData.personerISak.soeker) {
             fornavn shouldBe "Søker"

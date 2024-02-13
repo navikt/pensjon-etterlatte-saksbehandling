@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -135,6 +136,7 @@ internal class OpprettJournalfoerOgDistribuer {
             sakId = 1L,
             behandlingId = behandlingId,
             tittel = "tittel",
+            spraak = Spraak.NB,
             prosessType = BrevProsessType.AUTOMATISK,
             soekerFnr = "123",
             status = Status.FERDIGSTILT,
@@ -142,7 +144,7 @@ internal class OpprettJournalfoerOgDistribuer {
             Tidspunkt.now(),
             mottaker =
                 Mottaker(
-                    "Marte Kirkerud",
+                    "Langsom Hest",
                     mockk(),
                     null,
                     Adresse(adresseType = "privat", landkode = "NO", land = "Norge"),

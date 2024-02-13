@@ -39,31 +39,30 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
                 success = { resource -> deserialize(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse },
             )
-        } catch (re: ResponseException) {
-            if (er404(re)) {
-                logger.info("Fant ikke vedtak for behandling $behandlingId. Dette er forventa hvis det f.eks. er et varselbrev.")
+        } catch (ex: ThrowableErrorMessage) {
+            if (ex.cause is ResponseException) {
+                haandterResponseException(ex.cause as ResponseException, behandlingId)
                 return null
             } else {
-                throw ForespoerselException(
-                    status = re.response.status.value,
-                    code = "UKJENT_FEIL_HENTING_AV_VEDTAKSVURDERING",
-                    detail = "Ukjent feil oppsto ved henting av vedtak for behandling",
-                    meta = mapOf("behandlingId" to behandlingId),
-                )
-            }
-        } catch (tem: ThrowableErrorMessage) {
-            if (er404(tem)) {
-                logger.info("Fant ikke vedtak for behandling $behandlingId. Dette er forventa hvis det f.eks. er et varselbrev.")
-                return null
-            } else {
-                throw tem
+                throw ex
             }
         }
     }
 
-    private fun er404(e: ResponseException) = e.response.status == HttpStatusCode.NotFound
+    private fun haandterResponseException(
+        re: ResponseException,
+        behandlingId: UUID,
+    ) = if (er404(re)) {
+        logger.info("Fant ikke vedtak for behandling $behandlingId. Dette er forventa hvis det f.eks. er et varselbrev.")
+        null
+    } else {
+        throw ForespoerselException(
+            status = re.response.status.value,
+            code = "UKJENT_FEIL_HENTING_AV_VEDTAKSVURDERING",
+            detail = "Ukjent feil oppsto ved henting av vedtak for behandling",
+            meta = mapOf("behandlingId" to behandlingId),
+        )
+    }
 
-    private fun er404(tem: ThrowableErrorMessage) =
-        tem.response?.status == HttpStatusCode.NotFound ||
-            (tem.cause is ResponseException && er404(tem.cause as ResponseException))
+    private fun er404(e: ResponseException) = e.response.status == HttpStatusCode.NotFound
 }

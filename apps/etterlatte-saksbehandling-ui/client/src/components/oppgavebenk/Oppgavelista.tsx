@@ -29,8 +29,8 @@ export const Oppgavelista = ({
 }: oppgaveListaProps): ReactNode => {
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
 
-  const sortertFrist = sorterFrist(sortering?.fristSortering, oppgaver)
-  const sorterteOppgaver = sorterFnr(sortering?.fnrSortering, sortertFrist)
+  const sortertFrist = sorterFrist(sortering.fristSortering, oppgaver)
+  const sorterteOppgaver = sorterFnr(sortering.fnrSortering, sortertFrist)
 
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(10)

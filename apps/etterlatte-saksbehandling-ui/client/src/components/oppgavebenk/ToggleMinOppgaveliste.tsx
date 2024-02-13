@@ -27,20 +27,24 @@ export const ToggleMinOppgaveliste = () => {
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
   }
+
+  const [hovedsideOppgaver, setHovedsideOppgaver] = useState<Array<OppgaveDTO>>([])
+  const [minsideOppgaver, setMinsideOppgaver] = useState<Array<OppgaveDTO>>([])
+
+  const [minsideFilter, setMinsideFilter] = useState<Filter>(minOppgavelisteFiltre())
+  const [hovedsideFilter, setHovedsideFilter] = useState<Filter>(hentFilterFraLocalStorage())
+
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
+
   const [, hentSaksbehandlereIEnhet] = useApiCall(saksbehandlereIEnhetApi)
   const [saksbehandlereForEnhet, setSaksbehandlereForEnhet] = useState<Array<Saksbehandler>>([])
 
+  const [minsideOppgaverResult, hentOppgaverMinside] = useApiCall(hentOppgaverMedStatus)
+  const [hovedsideOppgaverResult, hentAlleOppgaverStatusFetch] = useApiCall(hentOppgaverMedStatus)
+  const [gosysOppgaverResult, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
+
   const location = useLocation()
   const navigate = useNavigate()
-
-  useEffect(() => {
-    if (location.pathname.includes('minoppgaveliste')) {
-      if (oppgaveListeValg !== 'MinOppgaveliste') {
-        setOppgaveListeValg('MinOppgaveliste')
-      }
-    }
-  }, [location.pathname])
 
   const oppdaterOppgavelisteValg = (oppgaveListeValg: OppgavelisteToggle) => {
     setOppgaveListeValg(oppgaveListeValg)
@@ -50,17 +54,6 @@ export const ToggleMinOppgaveliste = () => {
       navigate('/')
     }
   }
-
-  const [minsideFilter, setMinsideFilter] = useState<Filter>(minOppgavelisteFiltre())
-  const [hovedsideFilter, setHovedsideFilter] = useState<Filter>(hentFilterFraLocalStorage())
-
-  useEffect(() => {
-    leggFilterILocalStorage(hovedsideFilter)
-  }, [hovedsideFilter])
-
-  const [minsideOppgaverResult, hentOppgaverMinside] = useApiCall(hentOppgaverMedStatus)
-  const [hovedsideOppgaverResult, hentAlleOppgaverStatusFetch] = useApiCall(hentOppgaverMedStatus)
-  const [gosysOppgaverResult, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
 
   const hentMinsideOppgaver = (oppgavestatusFilter: Array<string> | undefined) =>
     hentOppgaverMinside({
@@ -85,6 +78,41 @@ export const ToggleMinOppgaveliste = () => {
     hentGosysOppgaverFunc({})
   }
 
+  const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
+    return oppgaver.filter((o) => o.saksbehandlerIdent === innloggetSaksbehandler.ident)
+  }
+
+  const oppdaterSaksbehandlerTildeling = (
+    oppgave: OppgaveDTO,
+    saksbehandler: string | null,
+    versjon: number | null
+  ) => {
+    setTimeout(() => {
+      setHovedsideOppgaver(finnOgOppdaterSaksbehandlerTildeling(hovedsideOppgaver, oppgave.id, saksbehandler, versjon))
+      if (innloggetSaksbehandler.ident === saksbehandler) {
+        setMinsideOppgaver(leggTilOppgavenIMinliste(minsideOppgaver, oppgave, saksbehandler, versjon))
+      } else {
+        setMinsideOppgaver(
+          filtrerKunInnloggetBrukerOppgaver(
+            finnOgOppdaterSaksbehandlerTildeling(minsideOppgaver, oppgave.id, saksbehandler, versjon)
+          )
+        )
+      }
+    }, 2000)
+  }
+
+  useEffect(() => {
+    if (location.pathname.includes('minoppgaveliste')) {
+      if (oppgaveListeValg !== 'MinOppgaveliste') {
+        setOppgaveListeValg('MinOppgaveliste')
+      }
+    }
+  }, [location.pathname])
+
+  useEffect(() => {
+    leggFilterILocalStorage(hovedsideFilter)
+  }, [hovedsideFilter])
+
   useEffect(() => {
     hentAlleOppgaver()
     if (!!innloggetSaksbehandler.enheter.length) {
@@ -93,13 +121,6 @@ export const ToggleMinOppgaveliste = () => {
       })
     }
   }, [])
-
-  const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
-    return oppgaver.filter((o) => o.saksbehandlerIdent === innloggetSaksbehandler.ident)
-  }
-
-  const [hovedsideOppgaver, setHovedsideOppgaver] = useState<Array<OppgaveDTO>>([])
-  const [minsideOppgaver, setMinsideOppgaver] = useState<Array<OppgaveDTO>>([])
 
   useEffect(() => {
     if (isSuccess(hovedsideOppgaverResult) && isSuccess(gosysOppgaverResult)) {
@@ -128,25 +149,6 @@ export const ToggleMinOppgaveliste = () => {
       setMinsideOppgaver(sorterOppgaverEtterOpprettet(filtrerKunInnloggetBrukerOppgaver(gosysOppgaverResult.data)))
     }
   }, [gosysOppgaverResult, minsideOppgaverResult])
-
-  const oppdaterSaksbehandlerTildeling = (
-    oppgave: OppgaveDTO,
-    saksbehandler: string | null,
-    versjon: number | null
-  ) => {
-    setTimeout(() => {
-      setHovedsideOppgaver(finnOgOppdaterSaksbehandlerTildeling(hovedsideOppgaver, oppgave.id, saksbehandler, versjon))
-      if (innloggetSaksbehandler.ident === saksbehandler) {
-        setMinsideOppgaver(leggTilOppgavenIMinliste(minsideOppgaver, oppgave, saksbehandler, versjon))
-      } else {
-        setMinsideOppgaver(
-          filtrerKunInnloggetBrukerOppgaver(
-            finnOgOppdaterSaksbehandlerTildeling(minsideOppgaver, oppgave.id, saksbehandler, versjon)
-          )
-        )
-      }
-    }, 2000)
-  }
 
   return (
     <Container>

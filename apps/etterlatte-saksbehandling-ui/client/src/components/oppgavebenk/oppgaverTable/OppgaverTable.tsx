@@ -16,7 +16,7 @@ interface SorteringsState extends Omit<SortState, 'direction'> {
 
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
-  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveliste: boolean
   oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>

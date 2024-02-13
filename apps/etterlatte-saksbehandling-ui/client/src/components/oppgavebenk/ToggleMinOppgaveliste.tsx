@@ -17,7 +17,11 @@ import {
   saksbehandlereIEnhetApi,
 } from '~shared/api/oppgaver'
 import { isSuccess } from '~shared/api/apiUtils'
-import { sorterOppgaverEtterOpprettet } from '~components/oppgavebenk/oppgaveutils'
+import {
+  finnOgOppdaterSaksbehandlerTildeling,
+  leggTilOppgavenIMinliste,
+  sorterOppgaverEtterOpprettet,
+} from '~components/oppgavebenk/oppgaveutils'
 import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
 import { OppgavelistaWrapper } from '~components/oppgavebenk/OppgavelistaWrapper'
 
@@ -128,6 +132,25 @@ export const ToggleMinOppgaveliste = () => {
     }
   }, [gosysOppgaverResult, minsideOppgaverResult])
 
+  const oppdaterSaksbehandlerTildeling = (
+    oppgave: OppgaveDTO,
+    saksbehandler: string | null,
+    versjon: number | null
+  ) => {
+    setTimeout(() => {
+      setHovedsideOppgaver(finnOgOppdaterSaksbehandlerTildeling(hovedsideOppgaver, oppgave.id, saksbehandler, versjon))
+      if (innloggetSaksbehandler.ident === saksbehandler) {
+        setMinsideOppgaver(leggTilOppgavenIMinliste(minsideOppgaver, oppgave, saksbehandler, versjon))
+      } else {
+        setMinsideOppgaver(
+          filtrerKunInnloggetBrukerOppgaver(
+            finnOgOppdaterSaksbehandlerTildeling(minsideOppgaver, oppgave.id, saksbehandler, versjon)
+          )
+        )
+      }
+    }, 2000)
+  }
+
   return (
     <Container>
       <TabsWidth
@@ -157,6 +180,7 @@ export const ToggleMinOppgaveliste = () => {
           }}
           setMinsideOppgaver={setMinsideOppgaver}
           saksbehandlereIEnhet={saksbehandlereForEnhet}
+          oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
         />
       ) : (
         <OppgavelistaWrapper
@@ -168,7 +192,7 @@ export const ToggleMinOppgaveliste = () => {
           hentHovedsideOppgaver={hentHovedsideOppgaver}
           hovedsideFilter={hovedsideFilter}
           setHovedsideFilter={setHovedsideFilter}
-          setHovedsideOppgaver={setHovedsideOppgaver}
+          oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
         />
       )}
     </Container>

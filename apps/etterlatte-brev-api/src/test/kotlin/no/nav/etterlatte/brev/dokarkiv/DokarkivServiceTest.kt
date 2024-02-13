@@ -132,7 +132,7 @@ internal class DokarkivServiceTest {
             journalfoerendeEnhet shouldBe vedtak.ansvarligEnhet
             avsenderMottaker shouldBe AvsenderMottaker(forventetBrevMottakerFnr, navn = "Stor Snerk")
             bruker shouldBe Bruker(vedtak.sak.ident)
-            sak shouldBe JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString())
+            sak shouldBe JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString(), vedtak.sak.sakType.tema, "EY")
             eksternReferanseId shouldBe "${vedtak.behandlingId}.$brevId"
 
             with(dokumenter.single()) {

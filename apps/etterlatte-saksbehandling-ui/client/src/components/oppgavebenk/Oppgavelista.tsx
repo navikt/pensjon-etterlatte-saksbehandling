@@ -11,7 +11,7 @@ import {
 } from '~components/oppgavebenk/oppgaverTable/oppgavesortering'
 
 export interface oppgaveListaProps {
-  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
   oppgaver: OppgaveDTO[]
   oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>

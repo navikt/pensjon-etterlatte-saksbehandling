@@ -11,7 +11,6 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.personOpplysning
 import org.junit.jupiter.api.BeforeEach
@@ -41,9 +40,9 @@ internal class DoedshendelseServiceTest {
                 listOf(
                     personOpplysning(foedselsdato = LocalDate.of(2000, 1, 1)),
                     personOpplysning(foedselsdato = LocalDate.of(2002, 8, 30)),
+                    personOpplysning().copy(foedselsaar = 2022),
                     personOpplysning(foedselsdato = LocalDate.of(2002, 9, 15)),
                     personOpplysning(foedselsdato = LocalDate.of(2005, 9, 15), doedsdato = LocalDate.of(2020, 8, 17)),
-                    personOpplysning(foedselsdato = null).copy(foedselsnummer = Folkeregisteridentifikator.of("26061363474")),
                     personOpplysning(foedselsdato = LocalDate.of(2020, 9, 15)),
                 ),
         )

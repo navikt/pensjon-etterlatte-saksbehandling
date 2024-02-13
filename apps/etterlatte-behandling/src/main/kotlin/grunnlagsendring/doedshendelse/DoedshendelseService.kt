@@ -75,9 +75,10 @@ class DoedshendelseService(
     }
 }
 
-private fun Person.under20PaaDato(dato: LocalDate): Boolean =
-    if (foedselsdato != null) {
-        ChronoUnit.YEARS.between(foedselsdato, dato) < 20
-    } else {
-        foedselsnummer.getAgeAtDate(dato) < 20
-    }
+private fun Person.under20PaaDato(dato: LocalDate): Boolean {
+    // Dersom vi ikke har en fødselsdato antar vi at personen kan ha bursdag på nyttårsaften,
+    // for å sikre at vi får med alle som er under 20 år.
+    val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)
+
+    return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato) < 20
+}

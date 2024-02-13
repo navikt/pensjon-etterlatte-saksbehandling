@@ -103,10 +103,10 @@ internal fun Route.behandlingVedtakRoute(
                                     merknad = merknadFraAttestant,
                                     saksbehandler = brukerTokenInfo,
                                 )
-                            if (sisteSaksbehandlerIkkeAttestering.saksbehandlerIdent != null) {
+                            if (sisteSaksbehandlerIkkeAttestering.ident != null) {
                                 oppgaveService.tildelSaksbehandler(
                                     ferdigstillOppgaveUnderbehandlingOgLagNyMedType.id,
-                                    sisteSaksbehandlerIkkeAttestering.saksbehandlerIdent!!,
+                                    sisteSaksbehandlerIkkeAttestering.ident!!,
                                 )
                             } else {
                                 logger.warn(

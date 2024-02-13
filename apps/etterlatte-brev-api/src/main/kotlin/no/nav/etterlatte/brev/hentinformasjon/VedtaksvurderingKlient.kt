@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
+import no.nav.etterlatte.libs.ktorobo.ThrowableErrorMessage
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -39,7 +40,7 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
                 failure = { errorResponse -> throw errorResponse },
             )
         } catch (re: ResponseException) {
-            if (re.response.status == HttpStatusCode.NotFound) {
+            if (er404(re)) {
                 logger.info("Fant ikke vedtak for behandling $behandlingId. Dette er forventa hvis det f.eks. er et varselbrev.")
                 return null
             } else {
@@ -50,6 +51,19 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
                     meta = mapOf("behandlingId" to behandlingId),
                 )
             }
+        } catch (tem: ThrowableErrorMessage) {
+            if (er404(tem)) {
+                logger.info("Fant ikke vedtak for behandling $behandlingId. Dette er forventa hvis det f.eks. er et varselbrev.")
+                return null
+            } else {
+                throw tem
+            }
         }
     }
+
+    private fun er404(e: ResponseException) = e.response.status == HttpStatusCode.NotFound
+
+    private fun er404(tem: ThrowableErrorMessage) =
+        tem.response?.status == HttpStatusCode.NotFound ||
+            (tem.cause is ResponseException && er404(tem.cause as ResponseException))
 }

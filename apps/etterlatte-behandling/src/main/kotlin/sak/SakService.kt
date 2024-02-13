@@ -77,9 +77,12 @@ class SakServiceImpl(
     }
 
     override fun hentEnkeltSakForPerson(fnr: String): Sak {
-        return this.finnSaker(
-            fnr,
-        ).firstOrNull() ?: throw PersonManglerSak("Personen har ikke sak")
+        val saker = finnSakerForPerson(fnr)
+
+        if (saker.isEmpty()) throw PersonManglerSak()
+
+        return saker.filterForEnheter().firstOrNull()
+            ?: throw ManglerTilgangTilEnhet(saker.map { it.enhet })
     }
 
     override suspend fun finnNavkontorForPerson(fnr: String): Navkontor {

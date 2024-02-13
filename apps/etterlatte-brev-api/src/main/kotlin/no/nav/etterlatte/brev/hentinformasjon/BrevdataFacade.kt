@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
@@ -38,7 +39,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregn
 class BrevdataFacade(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val beregningKlient: BeregningKlient,
+    private val beregningService: BeregningService,
     private val behandlingKlient: BehandlingKlient,
     private val sakService: SakService,
     private val trygdetidService: TrygdetidService,
@@ -226,8 +227,8 @@ class BrevdataFacade(
         brukerTokenInfo: BrukerTokenInfo,
         sakType: SakType,
     ): Utbetalingsinfo? {
-        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo) ?: return null
-        val beregningsGrunnlag = beregningKlient.hentBeregningsGrunnlag(behandlingId, sakType, brukerTokenInfo)
+        val beregning = beregningService.hentBeregning(behandlingId, brukerTokenInfo) ?: return null
+        val beregningsGrunnlag = beregningService.hentBeregningsGrunnlag(behandlingId, sakType, brukerTokenInfo)
 
         val beregningsperioder =
             beregning.beregningsperioder.map {
@@ -263,7 +264,7 @@ class BrevdataFacade(
         )
     }
 
-    suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo) = beregningKlient.hentGrunnbeloep(brukerTokenInfo)
+    suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo) = beregningService.hentGrunnbeloep(brukerTokenInfo)
 
     suspend fun finnAvkortingsinfo(
         behandlingId: UUID,
@@ -274,7 +275,7 @@ class BrevdataFacade(
     ): Avkortingsinfo? {
         if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
 
-        val ytelseMedGrunnlag = beregningKlient.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
+        val ytelseMedGrunnlag = beregningService.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
 
         val beregningsperioder =
             ytelseMedGrunnlag.perioder.map {

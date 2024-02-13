@@ -36,10 +36,10 @@ class PesysKlientImpl(config: Config, pen: HttpClient) : PesysKlient {
                         url = "$resourceUrl/sak/sammendragWonderful",
                         additionalHeaders = mapOf("fnr" to fnr),
                     ),
-                brukerTokenInfo = Systembruker.migrering,
+                brukerTokenInfo = Systembruker.doedshendelse,
             )
             .mapBoth(
-                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                success = { resource -> objectMapper.readValue(resource.response.toString()) },
                 failure = { errorResponse -> throw errorResponse },
             )
     }

@@ -183,7 +183,7 @@ class ApplicationBuilder {
         )
 
     private val beregningService = BeregningService(beregningKlient)
-    private val brevDataMapperVarsel = BrevDataMapperVarsel(brevdataFacade, beregningService, trygdetidService)
+    private val brevDataMapperVarsel = BrevDataMapperVarsel(beregningService, trygdetidService)
 
     private val varselbrevService =
         VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator, brevDataMapperVarsel)

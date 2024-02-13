@@ -2,19 +2,17 @@ package no.nav.etterlatte.brev.varselbrev
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
-import no.nav.etterlatte.brev.model.BrevDatafetcherVedtak
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarsel
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
 import no.nav.etterlatte.libs.common.behandling.SakType
+import java.time.YearMonth
 
 class BrevDataMapperVarsel(
-    private val brevdataFacade: BrevdataFacade,
     private val beregningService: BeregningService,
     private val trygdetidService: TrygdetidService,
 ) {
@@ -28,15 +26,20 @@ class BrevDataMapperVarsel(
 
     private suspend fun hentBrevDataFerdigstillingBarnepensjon(it: BrevDataFerdigstillingRequest) =
         coroutineScope {
-            val fetcher = BrevDatafetcherVedtak(brevdataFacade, it.bruker, it.generellBrevData)
+            val behandlingId = requireNotNull(it.generellBrevData.behandlingId)
             val grunnbeloep = async { beregningService.hentGrunnbeloep(it.bruker) }
-            val trygdetid =
+            val trygdetid = async { trygdetidService.finnTrygdetid(behandlingId, it.bruker) }
+            val utbetalingsinfo =
                 async {
-                    it.generellBrevData.behandlingId?.let { behandling ->
-                        trygdetidService.finnTrygdetid(behandling, it.bruker)
-                    }
+                    beregningService.finnUtbetalingsinfo(
+                        behandlingId,
+                        YearMonth.now(),
+                        // Virkningstidspunkt-feltet blir per no ikkje brukt i dette brevet.
+                        // Pga gjenbruk av objekt etc er det ikkje trivielt å skrive oss bort frå det heller
+                        it.bruker,
+                        it.generellBrevData.sak.sakType,
+                    )
                 }
-            val utbetalingsinfo = async { fetcher.hentUtbetaling() }
             BarnepensjonVarsel(
                 innhold = it.innholdMedVedlegg.innhold(),
                 beregning =

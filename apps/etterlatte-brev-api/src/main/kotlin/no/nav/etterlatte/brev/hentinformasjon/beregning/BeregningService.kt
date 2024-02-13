@@ -30,6 +30,16 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
         brukerTokenInfo: BrukerTokenInfo,
     ) = beregningKlient.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
 
+    suspend fun finnUtbetalingsinfo(
+        behandlingId: UUID,
+        virkningstidspunkt: YearMonth,
+        brukerTokenInfo: BrukerTokenInfo,
+        sakType: SakType,
+    ): Utbetalingsinfo =
+        requireNotNull(finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo, sakType)) {
+            "Utbetalingsinfo er nødvendig, men mangler"
+        }
+
     suspend fun finnUtbetalingsinfoNullable(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,

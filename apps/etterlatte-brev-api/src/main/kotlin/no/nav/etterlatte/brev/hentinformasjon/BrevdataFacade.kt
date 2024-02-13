@@ -212,12 +212,9 @@ class BrevdataFacade(
     suspend fun finnUtbetalingsinfo(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         sakType: SakType,
-    ): Utbetalingsinfo =
-        requireNotNull(beregningService.finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo, sakType)) {
-            "Utbetalingsinfo er nødvendig, men mangler"
-        }
+    ): Utbetalingsinfo = beregningService.finnUtbetalingsinfo(behandlingId, virkningstidspunkt, bruker, sakType)
 
     suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo) = beregningService.hentGrunnbeloep(brukerTokenInfo)
 

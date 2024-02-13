@@ -10,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.sakId
@@ -91,7 +92,7 @@ fun Route.vedtaksbrevRoute(
                 logger.info("Tilbakestiller payload for vedtaksbrev (id=$brevId)")
 
                 measureTimedValue {
-                    service.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo)
+                    service.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo, body.brevtype)
                 }.let { (brevPayload, varighet) ->
                     logger.info(
                         "Oppretting av nytt innhold til brev (id=$brevId) tok ${varighet.toString(
@@ -109,4 +110,5 @@ fun Route.vedtaksbrevRoute(
 data class ResetPayloadRequest(
     val brevId: Long,
     val sakId: Long,
+    val brevtype: Brevtype,
 )

@@ -2,6 +2,8 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -12,13 +14,21 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse as PdlDoedshendelse
 
+enum class DoedshendelseFeatureToggle(private val key: String) : FeatureToggle {
+    KanLagreDoedshendelse("pensjon-etterlatte.kan-lage-doedhendelse"),
+    ;
+
+    override fun key(): String = key
+}
+
 class DoedshendelseService(
     private val doedshendelseDao: DoedshendelseDao,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun lagreDoedshendelseForBeroertePersoner(doedshendelse: PdlDoedshendelse) {
+    fun opprettDoedshendelseForBeroertePersoner(doedshendelse: PdlDoedshendelse) {
         logger.info("Mottok dødsmelding fra PDL, finner berørte personer og lagrer ned dødsmelding.")
 
         val avdoed = pdlTjenesterKlient.hentPdlModell(doedshendelse.fnr, PersonRolle.AVDOED, SakType.BARNEPENSJON)
@@ -32,16 +42,25 @@ class DoedshendelseService(
         val beroerte = finnBeroerteBarn(avdoed)
         sikkerLogg.info("Fant ${beroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")
 
-        inTransaction {
-            beroerte.forEach { barn ->
-                doedshendelseDao.opprettDoedshendelse(
-                    Doedshendelse.nyHendelse(
-                        avdoedFnr = avdoed.foedselsnummer.verdi.value,
-                        avdoedDoedsdato = avdoed.doedsdato!!.verdi,
-                        beroertFnr = barn.foedselsnummer.value,
-                        relasjon = Relasjon.BARN,
-                    ),
-                )
+        lagreDoedshendelse(beroerte, avdoed)
+    }
+
+    private fun lagreDoedshendelse(
+        beroerte: List<Person>,
+        avdoed: PersonDTO,
+    ) {
+        if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)) {
+            inTransaction {
+                beroerte.forEach { barn ->
+                    doedshendelseDao.opprettDoedshendelse(
+                        Doedshendelse.nyHendelse(
+                            avdoedFnr = avdoed.foedselsnummer.verdi.value,
+                            avdoedDoedsdato = avdoed.doedsdato!!.verdi,
+                            beroertFnr = barn.foedselsnummer.value,
+                            relasjon = Relasjon.BARN,
+                        ),
+                    )
+                }
             }
         }
     }

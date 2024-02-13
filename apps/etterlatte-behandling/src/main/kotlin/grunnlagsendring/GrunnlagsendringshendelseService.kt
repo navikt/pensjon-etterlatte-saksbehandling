@@ -114,7 +114,7 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
-        doedshendelseService.lagreDoedshendelseForBeroertePersoner(doedshendelse)
+        doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
 
         return inTransaction {
             opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)

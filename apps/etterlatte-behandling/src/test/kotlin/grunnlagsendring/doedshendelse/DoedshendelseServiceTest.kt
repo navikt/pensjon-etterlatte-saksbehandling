@@ -7,6 +7,7 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -22,7 +23,16 @@ import java.util.UUID
 internal class DoedshendelseServiceTest {
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val dao = mockk<DoedshendelseDao>()
-    private val service = DoedshendelseService(pdlTjenesterKlient = pdlTjenesterKlient, doedshendelseDao = dao)
+    private val toggle =
+        mockk<FeatureToggleService> {
+            every { isEnabled(any(), any()) } returns true
+        }
+    private val service =
+        DoedshendelseService(
+            pdlTjenesterKlient = pdlTjenesterKlient,
+            doedshendelseDao = dao,
+            featureToggleService = toggle,
+        )
 
     private val avdoed =
         mockPerson().copy(
@@ -61,7 +71,7 @@ internal class DoedshendelseServiceTest {
         every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
         every { dao.opprettDoedshendelse(any()) } returns 1
 
-        service.lagreDoedshendelseForBeroertePersoner(
+        service.opprettDoedshendelseForBeroertePersoner(
             Doedshendelse(
                 UUID.randomUUID().toString(),
                 Endringstype.OPPRETTET,
@@ -81,7 +91,27 @@ internal class DoedshendelseServiceTest {
             avdoed.copy(doedsdato = null)
         every { dao.opprettDoedshendelse(any()) } returns 1
 
-        service.lagreDoedshendelseForBeroertePersoner(
+        service.opprettDoedshendelseForBeroertePersoner(
+            Doedshendelse(
+                UUID.randomUUID().toString(),
+                Endringstype.OPPRETTET,
+                fnr = avdoed.foedselsnummer.verdi.value,
+                doedsdato = avdoed.doedsdato!!.verdi,
+            ),
+        )
+
+        coVerify(exactly = 0) {
+            dao.opprettDoedshendelse(any())
+        }
+    }
+
+    @Test
+    fun `Skal ikke lagre doedshendelser naar feature toggle ikke er skrudd paa`() {
+        every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
+        every { dao.opprettDoedshendelse(any()) } returns 1
+        every { toggle.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false) } returns false
+
+        service.opprettDoedshendelseForBeroertePersoner(
             Doedshendelse(
                 UUID.randomUUID().toString(),
                 Endringstype.OPPRETTET,

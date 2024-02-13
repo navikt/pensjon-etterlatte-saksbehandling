@@ -319,7 +319,7 @@ internal class ApplicationContext(
             grunnlagKlient = grunnlagKlient,
             sakService = sakService,
             brukerService = enhetService,
-            doedshendelseService = DoedshendelseService(doedshendelseDao, pdlKlient),
+            doedshendelseService = DoedshendelseService(doedshendelseDao, pdlKlient, featureToggleService),
         )
 
     val behandlingsStatusService =

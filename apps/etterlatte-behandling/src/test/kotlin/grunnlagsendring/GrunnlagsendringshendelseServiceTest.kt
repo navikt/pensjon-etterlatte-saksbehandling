@@ -113,7 +113,7 @@ internal class GrunnlagsendringshendelseServiceTest {
                     sakService,
                     brukerService,
                     doedshendelseService.apply {
-                        every { lagreDoedshendelseForBeroertePersoner(any()) } returns Unit
+                        every { opprettDoedshendelseForBeroertePersoner(any()) } returns Unit
                     },
                 ),
             )

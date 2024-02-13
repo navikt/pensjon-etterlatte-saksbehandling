@@ -5,6 +5,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
+import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
@@ -15,7 +16,6 @@ import no.nav.etterlatte.migrering.Pesyssak
 import no.nav.etterlatte.migrering.pen.BarnepensjonGrunnlagResponse
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.pen.SakSammendragResponse
-import no.nav.etterlatte.migrering.pen.tilVaarModell
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
@@ -119,6 +119,9 @@ internal class MigrerSpesifikkSakRiver(
 
     private fun verifiserUfoere(request: MigreringRequest): MigreringRequest {
         if (request.kanAutomatiskGjenopprettes) {
+            // TODO STUB
+            return request
+
             val ufoereSak = hentSakSammendragForSoeker(request.soeker.value)
             if (ufoereSak != null) {
                 pesysRepository.lagreFeilkjoering(

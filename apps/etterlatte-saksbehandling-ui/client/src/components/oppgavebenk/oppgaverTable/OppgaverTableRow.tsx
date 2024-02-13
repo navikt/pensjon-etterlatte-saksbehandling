@@ -52,7 +52,10 @@ export const OppgaverTableRow = ({
       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
       <Table.DataCell>
         <VelgSaksbehandler
-          saksbehandler={{ ident: oppgave.saksbehandlerIdent, navn: oppgave.saksbehandlerNavn }}
+          saksbehandler={{
+            saksbehandlerIdent: oppgave.saksbehandlerIdent,
+            saksbehandlerNavn: oppgave.saksbehandlerNavn,
+          }}
           saksbehandlereIEnhet={saksbehandlereIEnhet}
           oppgaveId={oppgave.id}
           sakId={oppgave.sakId}

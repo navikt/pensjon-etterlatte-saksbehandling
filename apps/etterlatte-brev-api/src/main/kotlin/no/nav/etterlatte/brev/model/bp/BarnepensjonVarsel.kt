@@ -13,7 +13,6 @@ data class BarnepensjonVarsel(
 ) : BrevDataFerdigstilling
 
 data class BarnepensjonVarselRedigerbartUtfall(
-    val beregning: BarnepensjonBeregning,
     val automatiskBehandla: Boolean,
     val erBosattUtlandet: Boolean,
 ) : BrevDataRedigerbar

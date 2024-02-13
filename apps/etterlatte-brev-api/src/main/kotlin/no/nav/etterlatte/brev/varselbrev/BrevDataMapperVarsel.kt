@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.varselbrev
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.model.BrevData
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.BrevDatafetcher
 import no.nav.etterlatte.brev.model.ManueltBrevData
@@ -11,7 +10,6 @@ import no.nav.etterlatte.brev.model.bp.BarnepensjonVarsel
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 
 class BrevDataMapperVarsel(private val brevdataFacade: BrevdataFacade) {
     suspend fun hentBrevDataFerdigstilling(request: BrevDataFerdigstillingRequest) =
@@ -22,7 +20,7 @@ class BrevDataMapperVarsel(private val brevdataFacade: BrevdataFacade) {
             }
         }
 
-    private suspend fun hentBrevDataFerdigstillingBarnepensjon(it: BrevDataFerdigstillingRequest): BrevData =
+    private suspend fun hentBrevDataFerdigstillingBarnepensjon(it: BrevDataFerdigstillingRequest) =
         coroutineScope {
             val fetcher = BrevDatafetcher(brevdataFacade, it.bruker, it.generellBrevData)
             val grunnbeloep = async { fetcher.hentGrunnbeloep() }
@@ -39,7 +37,7 @@ class BrevDataMapperVarsel(private val brevdataFacade: BrevdataFacade) {
                         trygdetid = requireNotNull(trygdetid.await()),
                     ),
                 erUnder18Aar = it.generellBrevData.personerISak.soeker.under18 ?: true,
-                erBosattUtlandet = it.generellBrevData.utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                erBosattUtlandet = it.generellBrevData.utlandstilknytning?.erBosattUtland() ?: false,
             )
         }
 }

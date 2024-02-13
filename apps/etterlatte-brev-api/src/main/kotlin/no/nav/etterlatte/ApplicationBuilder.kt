@@ -39,6 +39,7 @@ import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
@@ -181,7 +182,8 @@ class ApplicationBuilder {
             brevDataMapperFerdigstilling,
         )
 
-    private val brevDataMapperVarsel = BrevDataMapperVarsel(brevdataFacade)
+    private val beregningService = BeregningService(beregningKlient)
+    private val brevDataMapperVarsel = BrevDataMapperVarsel(brevdataFacade, beregningService)
 
     private val varselbrevService =
         VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator, brevDataMapperVarsel)

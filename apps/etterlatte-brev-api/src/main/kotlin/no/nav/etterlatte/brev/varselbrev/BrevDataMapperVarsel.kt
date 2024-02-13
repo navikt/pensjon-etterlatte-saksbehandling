@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.varselbrev
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.BrevDatafetcherVedtak
 import no.nav.etterlatte.brev.model.ManueltBrevData
@@ -11,7 +12,7 @@ import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
 import no.nav.etterlatte.libs.common.behandling.SakType
 
-class BrevDataMapperVarsel(private val brevdataFacade: BrevdataFacade) {
+class BrevDataMapperVarsel(private val brevdataFacade: BrevdataFacade, private val beregningService: BeregningService) {
     suspend fun hentBrevDataFerdigstilling(request: BrevDataFerdigstillingRequest) =
         coroutineScope {
             when (request.generellBrevData.sak.sakType) {
@@ -23,7 +24,7 @@ class BrevDataMapperVarsel(private val brevdataFacade: BrevdataFacade) {
     private suspend fun hentBrevDataFerdigstillingBarnepensjon(it: BrevDataFerdigstillingRequest) =
         coroutineScope {
             val fetcher = BrevDatafetcherVedtak(brevdataFacade, it.bruker, it.generellBrevData)
-            val grunnbeloep = async { fetcher.hentGrunnbeloep() }
+            val grunnbeloep = async { beregningService.hentGrunnbeloep(it.bruker) }
             val trygdetid = async { fetcher.hentTrygdetid() }
             val utbetalingsinfo = async { fetcher.hentUtbetaling() }
             BarnepensjonVarsel(

@@ -38,7 +38,7 @@ class MigreringService(
                     "Ja, på virkningstidspunktet etter nye regler fra 01.01.2024. Informasjon hentet fra Pesys."
                 lagreVilkaarsResultat(vilkaarsvurdering, vilkaar, Utfall.OPPFYLT, kommentar)
             }
-            VilkaarType.BP_FORTSATT_MEDLEMSKAP -> {
+            VilkaarType.BP_FORTSATT_MEDLEMSKAP_2024 -> {
                 val kommentar = "Bor i Norge på virkningstidspunktet. Informasjon hentet fra PDL."
                 // Saker hvor medlemskap er endret gjøres manuelt
                 val utfall = Utfall.OPPFYLT

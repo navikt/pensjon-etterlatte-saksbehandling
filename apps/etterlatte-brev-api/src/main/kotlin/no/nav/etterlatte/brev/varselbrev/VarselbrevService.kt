@@ -21,7 +21,7 @@ internal class VarselbrevService(
     private val brevoppretter: Brevoppretter,
     private val behandlingKlient: BehandlingKlient,
     private val pdfGenerator: PDFGenerator,
-    private val brevDataMapperVarsel: BrevDataMapperVarsel,
+    private val brevDataMapperFerdigstillVarsel: BrevDataMapperFerdigstillVarsel,
 ) {
     fun hentVarselbrev(behandlingId: UUID) = db.hentBrevForBehandling(behandlingId, Brevtype.VARSEL)
 
@@ -76,7 +76,7 @@ internal class VarselbrevService(
         automatiskMigreringRequest = null,
         avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
         brevKode = { hentBrevkode(it.sakType) },
-        brevData = { brevDataMapperVarsel.hentBrevDataFerdigstilling(it) },
+        brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
 }
 

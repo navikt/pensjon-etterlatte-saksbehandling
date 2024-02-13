@@ -13,7 +13,11 @@ import no.nav.etterlatte.token.Systembruker
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
-class PesysKlient(config: Config, pen: HttpClient) {
+interface PesysKlient {
+    suspend fun hentSaker(fnr: String): List<SakSammendragResponse>
+}
+
+class PesysKlientImpl(config: Config, pen: HttpClient) : PesysKlient {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val azureAdClient = AzureAdClient(config)
     private val downstreamResourceClient = DownstreamResourceClient(azureAdClient, pen)
@@ -21,7 +25,7 @@ class PesysKlient(config: Config, pen: HttpClient) {
     private val clientId = config.getString("pen.client.id")
     private val resourceUrl = config.getString("pen.client.url")
 
-    suspend fun hentSaker(fnr: String): List<SakSammendragResponse> {
+    override suspend fun hentSaker(fnr: String): List<SakSammendragResponse> {
         logger.info("Henter sak sammendrag for  ${fnr.maskerFnr()} fra PEN")
 
         return downstreamResourceClient

@@ -3,6 +3,7 @@ package no.nav.etterlatte.vedtaksvurdering
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -12,12 +13,18 @@ import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.KlageVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class VedtakKlageServiceTest {
     private val vedtaksvurderingRepository = mockk<VedtaksvurderingRepository>()
     private val vedtakKlageService: VedtakKlageService = VedtakKlageService(vedtaksvurderingRepository)
+
+    @AfterEach
+    fun tearDown() {
+        clearAllMocks()
+    }
 
     @Test
     fun `opprettEllerOppdaterVedtakOmAvvisning skal opprette vedtak når det ikke finnes fra før`() {
@@ -41,6 +48,7 @@ class VedtakKlageServiceTest {
         vedtakId shouldBeEqual vedtakKlage.id
 
         verify {
+            vedtaksvurderingRepository.hentVedtak(klageId)
             vedtaksvurderingRepository.opprettVedtak(
                 withArg {
                     it.soeker shouldBe klageVedtakDto.soeker
@@ -77,6 +85,7 @@ class VedtakKlageServiceTest {
         vedtakId shouldBeEqual vedtakKlage.id
 
         verify {
+            vedtaksvurderingRepository.hentVedtak(klageId)
             vedtaksvurderingRepository.oppdaterVedtak(
                 withArg {
                     it.shouldBeEqualToIgnoringFields(vedtakKlage, Vedtak::innhold)

@@ -6,25 +6,20 @@ import io.prometheus.client.CollectorRegistry
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrics
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.metrics.VedtakMetrikkerDao
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
+import no.nav.etterlatte.vedtaksvurdering.database.DatabaseExtension
 import no.nav.etterlatte.vedtaksvurdering.opprettVedtak
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class VedtakMetricsTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
+@ExtendWith(DatabaseExtension::class)
+class VedtakMetricsTest(private val dataSource: DataSource) {
     private lateinit var vedtakRepo: VedtaksvurderingRepository
 
     private lateinit var vedtakMetrikkerDao: VedtakMetrikkerDao
@@ -34,27 +29,13 @@ class VedtakMetricsTest {
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-
-        val ds =
-            DataSourceBuilder.createDataSource(
-                postgreSQLContainer.jdbcUrl,
-                postgreSQLContainer.username,
-                postgreSQLContainer.password,
-            ).also { it.migrate() }
-
-        vedtakRepo = VedtaksvurderingRepository.using(ds)
+        vedtakRepo = VedtaksvurderingRepository.using(dataSource)
         opprettLoependeVedtak()
 
-        vedtakMetrikkerDao = VedtakMetrikkerDao.using(ds)
+        vedtakMetrikkerDao = VedtakMetrikkerDao.using(dataSource)
         vedtakMetrics = VedtakMetrics(vedtakMetrikkerDao, testreg)
 
         vedtakMetrics.run()
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Test

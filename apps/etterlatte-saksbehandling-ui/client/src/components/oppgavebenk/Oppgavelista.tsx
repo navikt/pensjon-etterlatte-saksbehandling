@@ -4,6 +4,7 @@ import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/PagineringsKontroller'
 import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
+import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/oppgaveutils'
 
 export interface oppgaveListaProps {
   oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
@@ -27,7 +28,7 @@ export const Oppgavelista = ({
   erMinOppgaveliste,
 }: oppgaveListaProps): ReactNode => {
   const [page, setPage] = useState<number>(1)
-  const [rowsPerPage, setRowsPerPage] = useState<number>(50)
+  const [rowsPerPage, setRowsPerPage] = useState<number>(hentPagineringSizeFraLocalStorage())
 
   let paginerteOppgaver = oppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)

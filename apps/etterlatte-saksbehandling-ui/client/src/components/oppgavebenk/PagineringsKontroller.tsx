@@ -1,6 +1,7 @@
 import React, { Dispatch, ReactNode, SetStateAction } from 'react'
 import styled from 'styled-components'
 import { Pagination } from '@navikt/ds-react'
+import { leggTilPagineringLocalStorage, pagineringslisteverdier } from '~components/oppgavebenk/oppgaveutils'
 
 interface Props {
   page: number
@@ -26,11 +27,13 @@ export const PagineringsKontroller = ({
       <select
         value={raderPerSide}
         onChange={(e) => {
-          setRaderPerSide(Number(e.target.value))
+          const size = Number(e.target.value)
+          setRaderPerSide(size)
+          leggTilPagineringLocalStorage(size)
         }}
         title="Antall oppgaver som vises"
       >
-        {[10, 20, 30, 40, 50].map((rowsPerPage) => (
+        {pagineringslisteverdier.map((rowsPerPage) => (
           <option key={rowsPerPage} value={rowsPerPage}>
             Vis {rowsPerPage} oppgaver
           </option>

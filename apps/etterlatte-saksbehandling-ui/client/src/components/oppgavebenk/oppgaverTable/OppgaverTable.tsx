@@ -20,7 +20,6 @@ interface Props {
   erMinOppgaveliste: boolean
   oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
-  sortering: OppgaveSortering
   setSortering: (nySortering: OppgaveSortering) => void
 }
 
@@ -31,7 +30,6 @@ export const OppgaverTable = ({
   oppdaterFrist,
   saksbehandlereIEnhet,
   setSortering,
-  sortering,
 }: Props): ReactNode => {
   const [sort, setSort] = useState<SorteringsState>()
 
@@ -46,12 +44,12 @@ export const OppgaverTable = ({
     )
     switch (sort?.orderBy) {
       case SortKey.FRIST:
-        const nySorteringFrist = { ...sortering, fristSortering: sort ? sort.direction : 'no-order' }
+        const nySorteringFrist = { fnrSortering: 'no-order', fristSortering: sort ? sort.direction : 'no-order' }
         setSortering(nySorteringFrist)
         leggTilSorteringILocalStorage(nySorteringFrist)
         break
       case SortKey.FNR:
-        const nySorteringFnr = { ...sortering, fnrSortering: sort ? sort.direction : 'no-order' }
+        const nySorteringFnr = { fristSortering: 'no-order', fnrSortering: sort ? sort.direction : 'no-order' }
         setSortering(nySorteringFnr)
         leggTilSorteringILocalStorage(nySorteringFnr)
         break

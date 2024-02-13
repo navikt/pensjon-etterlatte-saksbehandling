@@ -53,7 +53,6 @@ export const Oppgavelista = ({
             oppdaterFrist={oppdaterFrist}
             saksbehandlereIEnhet={saksbehandlereIEnhet}
             setSortering={setSortering}
-            sortering={sortering}
           />
 
           <PagineringsKontroller

@@ -92,7 +92,7 @@ export const ToggleMinOppgaveliste = () => {
 
   useEffect(() => {
     hentAlleOppgaver()
-    if (innloggetSaksbehandler.enheter.length > 0) {
+    if (!!innloggetSaksbehandler.enheter.length) {
       hentSaksbehandlereIEnhet({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
         setSaksbehandlereForEnhet(saksbehandlere)
       })

@@ -52,6 +52,8 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServiceImpl
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.common.klienter.PesysKlient
+import no.nav.etterlatte.common.klienter.PesysKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.databaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
@@ -187,6 +189,7 @@ internal class ApplicationContext(
     val klageHttpClient: HttpClient = klageHttpClient(config),
     val tilbakekrevingHttpClient: HttpClient = tilbakekrevingHttpClient(config),
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
+    val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }

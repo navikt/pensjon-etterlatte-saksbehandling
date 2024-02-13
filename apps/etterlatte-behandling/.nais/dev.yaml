@@ -120,6 +120,10 @@ spec:
       value: http://etterlatte-migrering
     - name: ETTERLATTE_MIGRERING_OUTBOUND_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-migrering/.default
+    - name: PEN_URL
+      value: https://pensjon-pen-q2.dev-fss-pub.nais.io/pen/springapi
+    - name: PEN_CLIENT_ID
+      value: ddd52335-cfe8-4ee9-9e68-416a5ab26efa
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -140,6 +144,7 @@ spec:
         - host: navansatt.dev-fss-pub.nais.io
         - host: oppgave.dev-fss-pub.nais.io
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: pensjon-pen-q2.dev-fss-pub.nais.io
     inbound:
       rules:
         - application: etterlatte-egne-ansatte-lytter

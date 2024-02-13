@@ -40,8 +40,6 @@ export const OppgavelistaWrapper = (props: {
     hovedsideFilter.oppgavetypeFilter,
     hovedsideFilter.oppgavekildeFilter,
     mutableOppgaver,
-    hovedsideFilter.fristSortering,
-    hovedsideFilter.fnrSortering,
     hovedsideFilter.fnrFilter
   )
 
@@ -59,8 +57,6 @@ export const OppgavelistaWrapper = (props: {
           oppgaver={filtrerteOppgaver}
           oppdaterTildeling={() => oppdaterTildeling(setHovedsideOppgaver, hovedsideOppgaver)}
           oppdaterFrist={() => {}}
-          filter={hovedsideFilter}
-          setFilter={setHovedsideFilter}
           totaltAntallOppgaver={hovedsideOppgaver.length}
           erMinOppgaveliste={false}
           saksbehandlereIEnhet={saksbehandlereIEnhet}

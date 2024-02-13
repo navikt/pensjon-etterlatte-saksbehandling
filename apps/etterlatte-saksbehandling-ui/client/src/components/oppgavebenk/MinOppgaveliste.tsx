@@ -13,7 +13,6 @@ export const MinOppgaveliste = (props: {
   gosysOppgaverResult: Result<OppgaveDTO[]>
   minsideFilter: Filter
   setMinsideFilter: (filter: Filter) => void
-  setFilter: React.Dispatch<React.SetStateAction<Filter>>
   setMinsideOppgaver: React.Dispatch<React.SetStateAction<OppgaveDTO[]>>
   saksbehandlereIEnhet: Array<Saksbehandler>
 }) => {
@@ -24,7 +23,6 @@ export const MinOppgaveliste = (props: {
     minsideFilter,
     setMinsideFilter,
     setMinsideOppgaver,
-    setFilter,
     saksbehandlereIEnhet,
   } = props
 
@@ -44,8 +42,6 @@ export const MinOppgaveliste = (props: {
           oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
             oppdaterFrist(setMinsideOppgaver, minsideOppgaver, id, nyfrist, versjon)
           }
-          filter={minsideFilter}
-          setFilter={setFilter}
           oppdaterTildeling={(id, _saksbehandler, versjon) =>
             oppdaterTildeling(setMinsideOppgaver, minsideOppgaver)(id, null, versjon)
           }

@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
-import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakService
@@ -53,18 +52,19 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
+        val connection = dataSource.connection
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
-        sakRepo = SakDao { dataSource.connection }
+        sakRepo = SakDao { connection }
 
         sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService)
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao {
-                    dataSource.connection
+                    connection
                 },
-                RevurderingDao { dataSource.connection },
-            ) { dataSource.connection }
-        klageDao = KlageDaoImpl { dataSource.connection }
+                RevurderingDao { connection },
+            ) { connection }
+        klageDao = KlageDaoImpl { connection }
     }
 
     @Test
@@ -95,7 +95,7 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
 
     @Test
     fun `Skal sjekke tilganger til klager med klageId for behandlingId`() {
-        val fnr = SOEKER_FOEDSELSNUMMER.value
+        val fnr = AVDOED_FOEDSELSNUMMER.value
         val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
         val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
 

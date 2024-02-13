@@ -42,6 +42,8 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
             response.body<OpprettJournalpostResponse>()
                 .also { logger.warn("Konflikt ved lagring av journalpost ${it.journalpostId}") }
         } else {
+            logger.error("Feil oppsto på opprett journalpost: ${response.bodyAsText()}")
+
             throw ForespoerselException(
                 status = response.status.value,
                 code = "UKJENT_FEIL_VED_JOURNALFOERING",

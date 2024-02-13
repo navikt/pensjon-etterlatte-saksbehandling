@@ -171,40 +171,6 @@ export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: Oppgave
   }
 }
 
-type Retning = 'descending' | 'ascending' | 'no-order'
-
-const sammenlignFrist = (a: OppgaveDTO, b: OppgaveDTO) => {
-  // Konverterer datoene til en numerisk verdi og sammenligner dem
-  return (!!a.frist ? new Date(a.frist).getTime() : 0) - (!!b.frist ? new Date(b.frist).getTime() : 0)
-}
-
-export function sorterFrist(retning: Retning, oppgaver: OppgaveDTO[]) {
-  switch (retning) {
-    case 'ascending':
-      return oppgaver.sort(sammenlignFrist)
-    case 'descending':
-      return oppgaver.sort(sammenlignFrist).reverse()
-    case 'no-order':
-      return oppgaver
-  }
-}
-
-const sammenlignFnr = (a: OppgaveDTO, b: OppgaveDTO) => {
-  // Sammenligner de første 6 sifrene i fødselsnummerene
-  return (a.fnr ? Number(a.fnr.slice(0, 5)) : 0) - (b.fnr ? Number(b.fnr.slice(0, 5)) : 0)
-}
-
-export function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
-  switch (retning) {
-    case 'ascending':
-      return oppgaver.sort(sammenlignFnr)
-    case 'descending':
-      return oppgaver.sort(sammenlignFnr).reverse()
-    case 'no-order':
-      return oppgaver
-  }
-}
-
 export function filtrerOppgaver(
   enhetsFilter: EnhetFilterKeys,
   fristFilter: FristFilterKeys,
@@ -214,8 +180,6 @@ export function filtrerOppgaver(
   oppgavetypeFilter: OppgavetypeFilterKeys,
   oppgaveKildeFilterKeys: OppgaveKildeFilterKeys,
   oppgaver: OppgaveDTO[],
-  fristRetning: Retning,
-  fnrRetning: Retning,
   fnr: string
 ): OppgaveDTO[] {
   const enhetFiltrert = filtrerEnhet(enhetsFilter, oppgaver)
@@ -225,10 +189,8 @@ export function filtrerOppgaver(
   const oppgaveTypeFiltrert = filtrerOppgaveType(oppgavetypeFilter, oppgaveFiltrert)
   const oppgaveKildeFiltrert = filtrerOppgavekilde(oppgaveKildeFilterKeys, oppgaveTypeFiltrert)
   const fristFiltrert = filtrerFrist(fristFilter, oppgaveKildeFiltrert)
-  const fristSortert = sorterFrist(fristRetning, fristFiltrert)
-  const fnrSortert = sorterFnr(fnrRetning, fristSortert)
 
-  return finnFnrIOppgaver(fnr, fnrSortert)
+  return finnFnrIOppgaver(fnr, fristFiltrert)
 }
 
 export interface Filter {
@@ -240,8 +202,6 @@ export interface Filter {
   oppgavetypeFilter: OppgavetypeFilterKeys
   oppgavekildeFilter: OppgaveKildeFilterKeys
   fnrFilter: string
-  fristSortering: Retning
-  fnrSortering: Retning
 }
 
 export const initialFilter = (): Filter => {
@@ -254,8 +214,6 @@ export const initialFilter = (): Filter => {
     oppgavetypeFilter: 'visAlle',
     oppgavekildeFilter: 'visAlle',
     fnrFilter: '',
-    fristSortering: 'no-order',
-    fnrSortering: 'no-order',
   }
 }
 
@@ -269,7 +227,5 @@ export const minOppgavelisteFiltre = (): Filter => {
     oppgavetypeFilter: 'visAlle',
     oppgavekildeFilter: 'visAlle',
     fnrFilter: '',
-    fristSortering: 'no-order',
-    fnrSortering: 'no-order',
   }
 }

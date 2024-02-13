@@ -13,7 +13,7 @@ import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filter/oppgavelista
 interface Props {
   oppgave: OppgaveDTO
   saksbehandlereIEnhet: Array<Saksbehandler>
-  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveListe: boolean
   oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
 }
@@ -52,14 +52,13 @@ export const OppgaverTableRow = ({
       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
       <Table.DataCell>
         <VelgSaksbehandler
-          saksbehandler={{ ident: oppgave.saksbehandlerIdent, navn: oppgave.saksbehandlerNavn }}
+          saksbehandler={{
+            saksbehandlerIdent: oppgave.saksbehandlerIdent,
+            saksbehandlerNavn: oppgave.saksbehandlerNavn,
+          }}
           saksbehandlereIEnhet={saksbehandlereIEnhet}
-          oppgaveId={oppgave.id}
-          sakId={oppgave.sakId}
           oppdaterTildeling={oppdaterTildeling}
-          erRedigerbar={erOppgaveRedigerbar(oppgave.status)}
-          versjon={oppgave.versjon}
-          type={oppgave.type}
+          oppgave={oppgave}
         />
       </Table.DataCell>
       <Table.DataCell>

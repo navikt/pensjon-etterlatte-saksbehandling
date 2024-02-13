@@ -1,4 +1,4 @@
-import { Alert, Button, HStack, Label, Radio, VStack } from '@navikt/ds-react'
+import { Alert, Button, HStack, Radio, Textarea, VStack } from '@navikt/ds-react'
 import React, { ReactNode } from 'react'
 import { SakType } from '~shared/types/sak'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -40,6 +40,7 @@ interface BrevutfallSkjemaData {
 }
 
 interface Props {
+  behandlingErOpphoer: boolean
   behandling: IDetaljertBehandling
   brevutfallOgEtterbetaling: BrevutfallOgEtterbetaling
   setBrevutfallOgEtterbetaling: (brevutfall: BrevutfallOgEtterbetaling) => void
@@ -49,6 +50,7 @@ interface Props {
 }
 
 export const BrevutfallSkjema = ({
+  behandlingErOpphoer,
   behandling,
   brevutfallOgEtterbetaling,
   setBrevutfallOgEtterbetaling,
@@ -57,7 +59,6 @@ export const BrevutfallSkjema = ({
   onAvbryt,
 }: Props): ReactNode => {
   const [lagreBrevutfallResultat, lagreBrevutfallRequest, lagreBrevutfallReset] = useApiCall(lagreBrevutfallApi)
-
   const dispatch = useAppDispatch()
 
   const { handleSubmit, control, getValues, watch } = useForm<BrevutfallSkjemaData>({
@@ -146,46 +147,48 @@ export const BrevutfallSkjema = ({
   return (
     <form onSubmit={handleSubmit((data) => submitBrevutfall(data))}>
       <VStack gap="8">
-        <VStack gap="4">
-          <ControlledRadioGruppe
-            name="harEtterbetaling"
-            control={control}
-            errorVedTomInput="Du må velge om det skal være etterbetaling eller ikke"
-            legend={<EtterbetalingHjelpeTekst />}
-            radios={
-              <>
-                <Radio size="small" value={HarEtterbetaling.JA}>
-                  Ja
-                </Radio>
-                <Radio size="small" value={HarEtterbetaling.NEI}>
-                  Nei
-                </Radio>
-              </>
-            }
-          />
+        {!behandlingErOpphoer && (
+          <VStack gap="4">
+            <ControlledRadioGruppe
+              name="harEtterbetaling"
+              control={control}
+              errorVedTomInput="Du må velge om det skal være etterbetaling eller ikke"
+              legend={<EtterbetalingHjelpeTekst />}
+              radios={
+                <>
+                  <Radio size="small" value={HarEtterbetaling.JA}>
+                    Ja
+                  </Radio>
+                  <Radio size="small" value={HarEtterbetaling.NEI}>
+                    Nei
+                  </Radio>
+                </>
+              }
+            />
 
-          {watch().harEtterbetaling == HarEtterbetaling.JA && (
-            <HStack gap="4">
-              <ControlledMaanedVelger
-                fromDate={new Date(behandling.virkningstidspunkt?.dato ?? new Date())}
-                toDate={new Date()}
-                name="datoFom"
-                label="Fra og med"
-                control={control}
-                validate={validerFom}
-              />
+            {watch().harEtterbetaling == HarEtterbetaling.JA && (
+              <HStack gap="4">
+                <ControlledMaanedVelger
+                  fromDate={new Date(behandling.virkningstidspunkt?.dato ?? new Date())}
+                  toDate={new Date()}
+                  name="datoFom"
+                  label="Fra og med"
+                  control={control}
+                  validate={validerFom}
+                />
 
-              <ControlledMaanedVelger
-                name="datoTom"
-                label="Til og med"
-                fromDate={new Date(behandling.virkningstidspunkt?.dato ?? new Date())}
-                toDate={add(new Date(), { months: 1 })}
-                control={control}
-                validate={validerTom}
-              />
-            </HStack>
-          )}
-        </VStack>
+                <ControlledMaanedVelger
+                  name="datoTom"
+                  label="Til og med"
+                  fromDate={new Date(behandling.virkningstidspunkt?.dato ?? new Date())}
+                  toDate={add(new Date(), { months: 1 })}
+                  control={control}
+                  validate={validerTom}
+                />
+              </HStack>
+            )}
+          </VStack>
+        )}
 
         {behandling.sakType == SakType.BARNEPENSJON && (
           <VStack gap="4">
@@ -208,7 +211,7 @@ export const BrevutfallSkjema = ({
           </VStack>
         )}
 
-        {behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
+        {!behandlingErOpphoer && behandling.sakType == SakType.OMSTILLINGSSTOENAD && (
           <VStack gap="4">
             <ControlledRadioGruppe
               name="lavEllerIngenInntekt"
@@ -250,22 +253,21 @@ export const BrevutfallSkjema = ({
             </VStack>
 
             {watch().feilutbetalingValg && (
-              <HStack gap="4">
-                <Label>Kommentar</Label>
-                <Controller
-                  name="feilutbetalingKommentar"
-                  render={(props) => (
-                    <textarea
-                      style={{ width: '100%' }}
-                      {...props}
-                      onChange={(e) => {
-                        props.field.onChange(e.target.value)
-                      }}
-                    />
-                  )}
-                  control={control}
-                />
-              </HStack>
+              <Controller
+                name="feilutbetalingKommentar"
+                render={(props) => (
+                  <Textarea
+                    label="Kommentar"
+                    value={watch().feilutbetalingKommentar ?? ''}
+                    style={{ width: '100%' }}
+                    {...props}
+                    onChange={(e) => {
+                      props.field.onChange(e.target.value)
+                    }}
+                  />
+                )}
+                control={control}
+              />
             )}
           </>
         )}

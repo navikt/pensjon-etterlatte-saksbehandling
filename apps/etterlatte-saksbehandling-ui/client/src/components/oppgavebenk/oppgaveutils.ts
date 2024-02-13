@@ -1,18 +1,32 @@
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { logger } from '~utils/logger'
 
-export const oppdaterTildeling =
-  (setHentedeOppgaver: (oppdatertListe: OppgaveDTO[]) => void, hentedeOppgaver: OppgaveDTO[]) =>
-  (id: string, saksbehandler: string | null, versjon: number | null) => {
-    setTimeout(() => {
-      const oppdatertOppgaveState = [...hentedeOppgaver]
-      const index = oppdatertOppgaveState.findIndex((o) => o.id === id)
-      oppdatertOppgaveState[index].saksbehandlerIdent = saksbehandler
-      oppdatertOppgaveState[index].status = 'UNDER_BEHANDLING'
-      oppdatertOppgaveState[index].versjon = versjon
-      setHentedeOppgaver(oppdatertOppgaveState)
-    }, 2000)
+export const finnOgOppdaterSaksbehandlerTildeling = (
+  oppgaver: OppgaveDTO[],
+  oppgaveId: string,
+  saksbehandler: string | null,
+  versjon: number | null
+) => {
+  const index = oppgaver.findIndex((o) => o.id === oppgaveId)
+  if (index > -1) {
+    const oppdatertOppgaveState = [...oppgaver]
+    oppdatertOppgaveState[index].saksbehandlerIdent = saksbehandler
+    oppdatertOppgaveState[index].status = 'UNDER_BEHANDLING'
+    oppdatertOppgaveState[index].versjon = versjon
+    return oppdatertOppgaveState
+  } else {
+    return oppgaver
   }
+}
+
+export const leggTilOppgavenIMinliste = (
+  oppgaver: OppgaveDTO[],
+  oppgave: OppgaveDTO,
+  saksbehandler: string | null,
+  versjon: number | null
+): OppgaveDTO[] => {
+  return [...oppgaver, { ...oppgave, saksbehandlerIdent: saksbehandler, status: 'UNDER_BEHANDLING', versjon: versjon }]
+}
 
 export const oppdaterFrist = (
   setHentedeOppgaver: (oppdatertListe: OppgaveDTO[]) => void,

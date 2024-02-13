@@ -8,7 +8,7 @@ import no.nav.etterlatte.token.BrukerTokenInfo
 import java.time.YearMonth
 import java.util.UUID
 
-internal class BrevDatafetcher(
+internal class BrevDatafetcherVedtak(
     private val brevdataFacade: BrevdataFacade,
     private val brukerTokenInfo: BrukerTokenInfo,
     private val behandlingId: UUID?,

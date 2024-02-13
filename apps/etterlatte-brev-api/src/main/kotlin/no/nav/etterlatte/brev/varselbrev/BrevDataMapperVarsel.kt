@@ -4,7 +4,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
-import no.nav.etterlatte.brev.model.BrevDatafetcher
+import no.nav.etterlatte.brev.model.BrevDatafetcherVedtak
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarsel
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
@@ -22,7 +22,7 @@ class BrevDataMapperVarsel(private val brevdataFacade: BrevdataFacade) {
 
     private suspend fun hentBrevDataFerdigstillingBarnepensjon(it: BrevDataFerdigstillingRequest) =
         coroutineScope {
-            val fetcher = BrevDatafetcher(brevdataFacade, it.bruker, it.generellBrevData)
+            val fetcher = BrevDatafetcherVedtak(brevdataFacade, it.bruker, it.generellBrevData)
             val grunnbeloep = async { fetcher.hentGrunnbeloep() }
             val trygdetid = async { fetcher.hentTrygdetid() }
             val utbetalingsinfo = async { fetcher.hentUtbetaling() }

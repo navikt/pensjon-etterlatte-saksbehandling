@@ -58,26 +58,26 @@ export const ToggleMinOppgaveliste = () => {
     }
   }
 
-  const hentMinsideOppgaver = (oppgavestatusFilter: Array<string> | undefined) =>
+  const hentMinOppgavelisteOppgaver = (oppgavestatusFilter: Array<string> | undefined) =>
     hentMinOppgavelisteOppgaverFetch({
       oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : minOppgavelisteFilter.oppgavestatusFilter,
       minOppgavelisteIdent: true,
     })
 
-  const hentHovedsideOppgaver = (oppgavestatusFilter: Array<string> | undefined) =>
+  const hentOppgavelistaOppgaver = (oppgavestatusFilter: Array<string> | undefined) =>
     hentOppgavelistaOppgaverFetch({
       oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : oppgavelistaFilter.oppgavestatusFilter,
       minOppgavelisteIdent: false,
     })
 
-  const hentHovedsideOppgaverAlle = () => {
-    hentMinsideOppgaver(undefined)
+  const hentAlleMinOppgavelisteOppgaver = () => {
+    hentMinOppgavelisteOppgaver(undefined)
     hentGosysOppgaverFetch({})
   }
 
   const hentAlleOppgaver = () => {
-    hentMinsideOppgaver(undefined)
-    hentHovedsideOppgaver(undefined)
+    hentMinOppgavelisteOppgaver(undefined)
+    hentOppgavelistaOppgaver(undefined)
     hentGosysOppgaverFetch({})
   }
 
@@ -185,7 +185,7 @@ export const ToggleMinOppgaveliste = () => {
           gosysOppgaverResult={gosysOppgaverResult}
           minsideFilter={minOppgavelisteFilter}
           setMinsideFilter={(filter: Filter) => {
-            hentMinsideOppgaver(filter.oppgavestatusFilter)
+            hentMinOppgavelisteOppgaver(filter.oppgavestatusFilter)
             setMinOppgavelisteFilter(filter)
           }}
           setMinsideOppgaver={setMinOppgavelisteOppgaver}
@@ -196,10 +196,10 @@ export const ToggleMinOppgaveliste = () => {
         <Oppgavelista
           saksbehandlereIEnhet={saksbehandlereIEnheter}
           hovedsideOppgaver={oppgavelistaOppgaver}
-          hentHovedsideOppgaverAlle={hentHovedsideOppgaverAlle}
+          hentHovedsideOppgaverAlle={hentAlleMinOppgavelisteOppgaver}
           hovedsideOppgaverResult={oppgavelistaOppgaverResult}
           gosysOppgaverResult={gosysOppgaverResult}
-          hentHovedsideOppgaver={hentHovedsideOppgaver}
+          hentHovedsideOppgaver={hentOppgavelistaOppgaver}
           hovedsideFilter={oppgavelistaFilter}
           setHovedsideFilter={setOppgavelistaFilter}
           oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}

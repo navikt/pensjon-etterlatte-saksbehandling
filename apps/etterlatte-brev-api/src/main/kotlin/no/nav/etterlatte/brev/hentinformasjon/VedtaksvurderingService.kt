@@ -9,7 +9,7 @@ class VedtaksvurderingService(private val vedtaksvurderingKlient: Vedtaksvurderi
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Pair<String, VedtakStatus> {
-        val vedtakDto = vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo)
+        val vedtakDto = requireNotNull(vedtaksvurderingKlient.hentVedtak(behandlingId, brukerTokenInfo))
         val saksbehandlerIdent = vedtakDto.vedtakFattet?.ansvarligSaksbehandler ?: brukerTokenInfo.ident()
 
         return Pair(saksbehandlerIdent, vedtakDto.status)

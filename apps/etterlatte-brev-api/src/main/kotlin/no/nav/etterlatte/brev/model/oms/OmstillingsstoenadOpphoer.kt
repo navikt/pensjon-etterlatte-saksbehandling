@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.model.oms
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
+import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
@@ -29,7 +30,12 @@ data class OmstillingsstoenadOpphoer(
 
             return OmstillingsstoenadOpphoer(
                 innhold = innholdMedVedlegg.innhold(),
-                innholdForhaandsvarsel = vedleggHvisFeilutbetaling(feilutbetaling, innholdMedVedlegg),
+                innholdForhaandsvarsel =
+                    vedleggHvisFeilutbetaling(
+                        feilutbetaling,
+                        innholdMedVedlegg,
+                        BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                    ),
                 bosattUtland = utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
                 feilutbetaling = feilutbetaling,
             )

@@ -62,7 +62,12 @@ data class OmstillingsstoenadRevurdering(
 
             return OmstillingsstoenadRevurdering(
                 innhold = innholdMedVedlegg.innhold(),
-                innholdForhaandsvarsel = vedleggHvisFeilutbetaling(feilutbetaling, innholdMedVedlegg),
+                innholdForhaandsvarsel =
+                    vedleggHvisFeilutbetaling(
+                        feilutbetaling,
+                        innholdMedVedlegg,
+                        BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                    ),
                 erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
                 // TODO klage kobler seg på her

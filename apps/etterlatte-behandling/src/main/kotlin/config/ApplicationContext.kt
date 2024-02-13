@@ -52,6 +52,7 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServiceImpl
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.databaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
@@ -219,6 +220,7 @@ internal class ApplicationContext(
     val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
+    val pesysKlient = PesysKlient(config, httpClient())
     val leaderElectionKlient = LeaderElection(env.maybeEnvValue("ELECTOR_PATH"), leaderElectionHttpClient)
 
     val behandlingsHendelser = BehandlingsHendelserKafkaProducerImpl(rapid)

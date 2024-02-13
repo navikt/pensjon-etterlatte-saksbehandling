@@ -44,12 +44,18 @@ export const OppgaverTable = ({
     )
     switch (sort?.orderBy) {
       case SortKey.FRIST:
-        const nySorteringFrist = { fnrSortering: 'no-order', fristSortering: sort ? sort.direction : 'no-order' }
+        const nySorteringFrist: OppgaveSortering = {
+          fnrSortering: 'no-order',
+          fristSortering: sort ? sort.direction : 'no-order',
+        }
         setSortering(nySorteringFrist)
         leggTilSorteringILocalStorage(nySorteringFrist)
         break
       case SortKey.FNR:
-        const nySorteringFnr = { fristSortering: 'no-order', fnrSortering: sort ? sort.direction : 'no-order' }
+        const nySorteringFnr: OppgaveSortering = {
+          fristSortering: 'no-order',
+          fnrSortering: sort ? sort.direction : 'no-order',
+        }
         setSortering(nySorteringFnr)
         leggTilSorteringILocalStorage(nySorteringFnr)
         break

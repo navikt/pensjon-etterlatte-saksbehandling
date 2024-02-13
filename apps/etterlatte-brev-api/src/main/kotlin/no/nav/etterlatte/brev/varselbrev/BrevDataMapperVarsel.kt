@@ -24,11 +24,11 @@ class BrevDataMapperVarsel(
             }
         }
 
-    private suspend fun hentBrevDataFerdigstillingBarnepensjon(it: BrevDataFerdigstillingRequest) =
+    private suspend fun hentBrevDataFerdigstillingBarnepensjon(request: BrevDataFerdigstillingRequest) =
         coroutineScope {
-            val behandlingId = requireNotNull(it.generellBrevData.behandlingId)
-            val grunnbeloep = async { beregningService.hentGrunnbeloep(it.bruker) }
-            val trygdetid = async { trygdetidService.finnTrygdetid(behandlingId, it.bruker) }
+            val behandlingId = requireNotNull(request.generellBrevData.behandlingId)
+            val grunnbeloep = async { beregningService.hentGrunnbeloep(request.bruker) }
+            val trygdetid = async { trygdetidService.finnTrygdetid(behandlingId, request.bruker) }
             val utbetalingsinfo =
                 async {
                     beregningService.finnUtbetalingsinfo(
@@ -36,22 +36,22 @@ class BrevDataMapperVarsel(
                         YearMonth.now(),
                         // Virkningstidspunkt-feltet blir per no ikkje brukt i dette brevet.
                         // Pga gjenbruk av objekt etc er det ikkje trivielt å skrive oss bort frå det heller
-                        it.bruker,
-                        it.generellBrevData.sak.sakType,
+                        request.bruker,
+                        request.generellBrevData.sak.sakType,
                     )
                 }
             BarnepensjonVarsel(
-                innhold = it.innholdMedVedlegg.innhold(),
+                innhold = request.innholdMedVedlegg.innhold(),
                 beregning =
                     barnepensjonBeregning(
-                        innhold = it.innholdMedVedlegg,
+                        innhold = request.innholdMedVedlegg,
                         utbetalingsinfo = utbetalingsinfo.await(),
                         grunnbeloep = grunnbeloep.await(),
                         beregningsperioder = barnepensjonBeregningsperioder(utbetalingsinfo.await()),
                         trygdetid = requireNotNull(trygdetid.await()),
                     ),
-                erUnder18Aar = it.generellBrevData.personerISak.soeker.under18 ?: true,
-                erBosattUtlandet = it.generellBrevData.utlandstilknytning?.erBosattUtland() ?: false,
+                erUnder18Aar = request.generellBrevData.personerISak.soeker.under18 ?: true,
+                erBosattUtlandet = request.generellBrevData.utlandstilknytning?.erBosattUtland() ?: false,
             )
         }
 }

@@ -56,7 +56,13 @@ export const hentSorteringFraLocalStorage = (): OppgaveSortering => {
   try {
     const sorteringFraLocalStorage = localStorage[SORTERING_KEY_LOCAL_STORAGE]
     if (!!sorteringFraLocalStorage) {
-      return JSON.parse(sorteringFraLocalStorage)
+      const parsetFilter = JSON.parse(sorteringFraLocalStorage)
+      const harGammelVersjon = Object.values(parsetFilter).find((value) => value === 'ingen')
+      if (harGammelVersjon) {
+        return initialSortering()
+      } else {
+        return parsetFilter
+      }
     } else {
       return initialSortering()
     }

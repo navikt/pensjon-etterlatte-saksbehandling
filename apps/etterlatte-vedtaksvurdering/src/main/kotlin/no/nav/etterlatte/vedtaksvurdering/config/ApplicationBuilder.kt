@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.libs.ktor.restModule
@@ -97,11 +96,10 @@ class ApplicationBuilder {
             behandlingKlient,
         )
 
-    val leaderElectionKlient = LeaderElection(env["ELECTOR_PATH"], httpClient())
     private val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
             VedtakMetrics(VedtakMetrikkerDao.using(dataSource)),
-            leaderElectionKlient,
+            { true },
             Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(5, ChronoUnit.MINUTES),
         )

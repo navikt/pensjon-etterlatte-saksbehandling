@@ -1,6 +1,5 @@
 package no.nav.etterlatte.jobs
 
-import no.nav.etterlatte.libs.jobs.LeaderElection
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
@@ -11,7 +10,7 @@ interface MetrikkUthenter {
 
 class MetrikkerJob(
     private val uthenter: MetrikkUthenter,
-    private val leaderElection: LeaderElection,
+    private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val periode: Duration,
 ) {
@@ -27,7 +26,7 @@ class MetrikkerJob(
             loggerInfo = LoggerInfo(logger = logger, loggTilSikkerLogg = false),
             period = periode.toMillis(),
         ) {
-            if (leaderElection.isLeader()) {
+            if (erLeader()) {
                 uthenter.run()
             }
         }

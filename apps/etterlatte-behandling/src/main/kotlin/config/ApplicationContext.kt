@@ -366,7 +366,7 @@ internal class ApplicationContext(
     val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
             BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao),
-            leaderElectionKlient,
+            { leaderElectionKlient.isLeader() },
             Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(5, ChronoUnit.MINUTES),
         )

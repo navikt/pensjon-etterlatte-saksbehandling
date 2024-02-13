@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class DoedshendelseDaoTest {
-    private val dataSource = DatabaseExtension.dataSource
+class DoedshendelseDaoTest(val dataSource: DataSource) {
     private lateinit var doedshendelseDao: DoedshendelseDao
 
     @BeforeAll

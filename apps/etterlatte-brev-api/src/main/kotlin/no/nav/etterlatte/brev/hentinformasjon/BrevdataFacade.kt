@@ -9,7 +9,6 @@ import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
-import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
 import no.nav.etterlatte.brev.behandling.mapAvdoede
@@ -303,11 +302,7 @@ class BrevdataFacade(
     suspend fun finnTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid? {
-        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)!!
-
-        return trygdetidService.finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
-    }
+    ) = trygdetidService.finnTrygdetid(behandlingId, brukerTokenInfo)
 
     suspend fun hentBehandling(
         behandlingId: UUID,

@@ -118,7 +118,7 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
-    private val trygdetidService = TrygdetidService(trygdetidKlient)
+    private val trygdetidService = TrygdetidService(trygdetidKlient, beregningKlient)
 
     private val sakService = SakService(behandlingKlient)
 
@@ -183,7 +183,7 @@ class ApplicationBuilder {
         )
 
     private val beregningService = BeregningService(beregningKlient)
-    private val brevDataMapperVarsel = BrevDataMapperVarsel(brevdataFacade, beregningService)
+    private val brevDataMapperVarsel = BrevDataMapperVarsel(brevdataFacade, beregningService, trygdetidService)
 
     private val varselbrevService =
         VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator, brevDataMapperVarsel)

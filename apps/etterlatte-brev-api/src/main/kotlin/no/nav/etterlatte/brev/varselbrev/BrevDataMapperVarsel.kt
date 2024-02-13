@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.varselbrev
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
+import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.BrevDatafetcherVedtak
@@ -12,7 +13,11 @@ import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
 import no.nav.etterlatte.libs.common.behandling.SakType
 
-class BrevDataMapperVarsel(private val brevdataFacade: BrevdataFacade, private val beregningService: BeregningService) {
+class BrevDataMapperVarsel(
+    private val brevdataFacade: BrevdataFacade,
+    private val beregningService: BeregningService,
+    private val trygdetidService: TrygdetidService,
+) {
     suspend fun hentBrevDataFerdigstilling(request: BrevDataFerdigstillingRequest) =
         coroutineScope {
             when (request.generellBrevData.sak.sakType) {
@@ -25,7 +30,12 @@ class BrevDataMapperVarsel(private val brevdataFacade: BrevdataFacade, private v
         coroutineScope {
             val fetcher = BrevDatafetcherVedtak(brevdataFacade, it.bruker, it.generellBrevData)
             val grunnbeloep = async { beregningService.hentGrunnbeloep(it.bruker) }
-            val trygdetid = async { fetcher.hentTrygdetid() }
+            val trygdetid =
+                async {
+                    it.generellBrevData.behandlingId?.let { behandling ->
+                        trygdetidService.finnTrygdetid(behandling, it.bruker)
+                    }
+                }
             val utbetalingsinfo = async { fetcher.hentUtbetaling() }
             BarnepensjonVarsel(
                 innhold = it.innholdMedVedlegg.innhold(),

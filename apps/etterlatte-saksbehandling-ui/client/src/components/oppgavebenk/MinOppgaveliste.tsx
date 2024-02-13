@@ -1,6 +1,6 @@
 import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
-import { oppdaterFrist, oppdaterTildeling } from '~components/oppgavebenk/oppgaveutils'
+import { oppdaterFrist } from '~components/oppgavebenk/oppgaveutils'
 import styled from 'styled-components'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
 import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
@@ -16,6 +16,7 @@ export const MinOppgaveliste = (props: {
   setFilter: React.Dispatch<React.SetStateAction<Filter>>
   setMinsideOppgaver: React.Dispatch<React.SetStateAction<OppgaveDTO[]>>
   saksbehandlereIEnhet: Array<Saksbehandler>
+  oppdaterSaksbehandlerTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
 }) => {
   const {
     minsideOppgaver,
@@ -26,6 +27,7 @@ export const MinOppgaveliste = (props: {
     setMinsideOppgaver,
     setFilter,
     saksbehandlereIEnhet,
+    oppdaterSaksbehandlerTildeling,
   } = props
 
   return (
@@ -46,9 +48,7 @@ export const MinOppgaveliste = (props: {
           }
           filter={minsideFilter}
           setFilter={setFilter}
-          oppdaterTildeling={(id, _saksbehandler, versjon) =>
-            oppdaterTildeling(setMinsideOppgaver, minsideOppgaver)(id, null, versjon)
-          }
+          oppdaterTildeling={(id, _saksbehandler, versjon) => oppdaterSaksbehandlerTildeling(id, null, versjon)}
           erMinOppgaveliste={true}
           saksbehandlereIEnhet={saksbehandlereIEnhet}
         />

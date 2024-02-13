@@ -5,9 +5,10 @@ import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
 import {
   byttSaksbehandlerApi,
+  erOppgaveRedigerbar,
   fjernSaksbehandlerApi,
+  OppgaveDTO,
   OppgaveSaksbehandler,
-  Oppgavetype,
   Saksbehandler,
   tildelSaksbehandlerApi,
 } from '~shared/api/oppgaver'
@@ -16,24 +17,19 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 interface Props {
   saksbehandler: OppgaveSaksbehandler
   saksbehandlereIEnhet: Array<Saksbehandler>
-  oppgaveId: string
-  sakId: number
-  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
-  erRedigerbar: boolean
-  versjon: number | null
-  type: Oppgavetype
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
+  oppgave: OppgaveDTO
 }
 
 export const VelgSaksbehandler = ({
-  saksbehandler,
   saksbehandlereIEnhet,
-  erRedigerbar,
-  oppgaveId,
-  sakId,
-  type,
-  versjon,
   oppdaterTildeling,
+  oppgave,
+  saksbehandler,
 }: Props): ReactNode => {
+  const { sakId, id: oppgaveId, type, versjon, status } = oppgave
+  const erRedigerbar = erOppgaveRedigerbar(status)
+
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const [openDropdown, setOpenDropdown] = useState<boolean>(false)
@@ -54,7 +50,7 @@ export const VelgSaksbehandler = ({
         byttSaksbehandler(
           { oppgaveId, type, nysaksbehandler: { saksbehandler: selectedSaksbehandler.ident!, versjon } },
           (result) => {
-            oppdaterTildeling(oppgaveId, selectedSaksbehandler.ident, result.versjon)
+            oppdaterTildeling(oppgave, selectedSaksbehandler.ident, result.versjon)
             setValgtSaksbehandler(saksbehandler)
             setOpenDropdown(false)
           },
@@ -68,7 +64,7 @@ export const VelgSaksbehandler = ({
     tildelSaksbehandler(
       { oppgaveId, type, nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon } },
       (result) => {
-        oppdaterTildeling(oppgaveId, innloggetSaksbehandler.ident, result.versjon)
+        oppdaterTildeling(oppgave, innloggetSaksbehandler.ident, result.versjon)
         setValgtSaksbehandler({
           saksbehandlerNavn: innloggetSaksbehandler.navn,
           saksbehandlerIdent: innloggetSaksbehandler.ident,
@@ -85,7 +81,7 @@ export const VelgSaksbehandler = ({
     fjernSaksbehandler(
       { oppgaveId, sakId, type, versjon },
       (result) => {
-        oppdaterTildeling(oppgaveId, null, result.versjon)
+        oppdaterTildeling(oppgave, null, result.versjon)
         setValgtSaksbehandler(undefined)
         setOpenDropdown(false)
       },

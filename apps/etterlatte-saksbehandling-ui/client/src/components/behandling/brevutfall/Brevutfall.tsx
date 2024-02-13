@@ -12,6 +12,7 @@ import { MapApiResult } from '~shared/components/MapApiResult'
 import { SakType } from '~shared/types/sak'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
+import { erOpphoer } from '~shared/types/Revurderingaarsak'
 
 export interface BrevutfallOgEtterbetaling {
   etterbetaling?: Etterbetaling | null
@@ -52,7 +53,7 @@ export interface Etterbetaling {
   datoTom?: string | null
 }
 
-const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {
+const initialBrevutfallOgEtterbetaling = (saktype: SakType, opphoer: boolean) => {
   switch (saktype) {
     case SakType.BARNEPENSJON:
       return {
@@ -63,7 +64,7 @@ const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {
     case SakType.OMSTILLINGSSTOENAD:
       return {
         brevutfall: {
-          lavEllerIngenInntekt: LavEllerIngenInntekt.IKKE_VALGT,
+          lavEllerIngenInntekt: opphoer ? undefined : LavEllerIngenInntekt.IKKE_VALGT,
         },
       }
   }
@@ -71,11 +72,12 @@ const initialBrevutfallOgEtterbetaling = (saktype: SakType) => {
 
 export const Brevutfall = (props: { behandling: IDetaljertBehandling; resetBrevutfallvalidering: () => void }) => {
   const behandling = props.behandling
+  const behandlingErOpphoer = behandling.revurderingsaarsak != null && erOpphoer(behandling.revurderingsaarsak)
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const dispatch = useAppDispatch()
   const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
-    initialBrevutfallOgEtterbetaling(behandling.sakType)
+    initialBrevutfallOgEtterbetaling(behandling.sakType, behandlingErOpphoer)
   )
   const [hentBrevutfallOgEtterbetalingResult, hentBrevutfallOgEtterbetalingRequest] = useApiCall(
     hentBrevutfallOgEtterbetalingApi
@@ -89,7 +91,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling; resetBrevu
         dispatch(updateBrevutfallOgEtterbetaling(brevutfall))
         setVisSkjema(false)
       } else {
-        setBrevutfallOgEtterbetaling(initialBrevutfallOgEtterbetaling(behandling.sakType))
+        setBrevutfallOgEtterbetaling(initialBrevutfallOgEtterbetaling(behandling.sakType, behandlingErOpphoer))
         if (redigerbar) setVisSkjema(true)
       }
     })
@@ -115,6 +117,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling; resetBrevu
         mapSuccess={() =>
           visSkjema ? (
             <BrevutfallSkjema
+              behandlingErOpphoer={behandlingErOpphoer}
               resetBrevutfallvalidering={props.resetBrevutfallvalidering}
               behandling={behandling}
               brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
@@ -124,6 +127,7 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling; resetBrevu
             />
           ) : (
             <BrevutfallVisning
+              behandlingErOpphoer={behandlingErOpphoer}
               redigerbar={redigerbar}
               brevutfallOgEtterbetaling={brevutfallOgEtterbetaling}
               sakType={behandling.sakType}

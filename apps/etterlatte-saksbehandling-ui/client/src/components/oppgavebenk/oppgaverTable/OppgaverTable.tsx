@@ -65,6 +65,7 @@ export const OppgaverTable = ({
 
   return (
     <Table
+      size="small"
       sort={sort && sort.direction !== 'no-order' ? { direction: sort.direction, orderBy: sort.orderBy } : undefined}
       onSortChange={(sortKey) => handleSort(sortKey as SortKey)}
     >

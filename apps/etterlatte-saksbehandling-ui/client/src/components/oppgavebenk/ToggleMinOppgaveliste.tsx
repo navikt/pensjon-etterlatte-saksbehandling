@@ -178,7 +178,6 @@ export const ToggleMinOppgaveliste = () => {
             hentMinsideOppgaver(filter.oppgavestatusFilter)
             setMinsideFilter(filter)
           }}
-          setFilter={setMinsideFilter}
           setMinsideOppgaver={setMinsideOppgaver}
           saksbehandlereIEnhet={saksbehandlereForEnhet}
           oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}

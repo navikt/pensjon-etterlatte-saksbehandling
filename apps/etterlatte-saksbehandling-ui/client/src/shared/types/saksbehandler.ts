@@ -3,7 +3,7 @@ export interface Saksbehandler {
   navn: string
 }
 
-export interface SaksbehandlerMedInformasjon extends Saksbehandler {
+export interface InnloggetSaksbehandler extends Saksbehandler {
   enheter: Array<string>
   kanAttestere: boolean
   leseTilgang: boolean

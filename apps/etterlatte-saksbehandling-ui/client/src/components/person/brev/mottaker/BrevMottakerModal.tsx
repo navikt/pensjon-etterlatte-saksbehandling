@@ -196,7 +196,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
                 {...register('adresse.poststed', {
                   required: {
                     value: erNorskAdresse,
-                    message: 'Poststed må være satt norsk adresse',
+                    message: 'Poststed må være satt på norsk adresse',
                   },
                 })}
                 label="Poststed"

@@ -58,26 +58,26 @@ export const ToggleMinOppgaveliste = () => {
     }
   }
 
-  const hentMinOppgavelisteOppgaver = (oppgavestatusFilter: Array<string> | undefined) =>
+  const hentMinOppgavelisteOppgaver = (oppgavestatusFilter?: Array<string>) =>
     hentMinOppgavelisteOppgaverFetch({
       oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : minOppgavelisteFilter.oppgavestatusFilter,
       minOppgavelisteIdent: true,
     })
 
-  const hentOppgavelistaOppgaver = (oppgavestatusFilter: Array<string> | undefined) =>
+  const hentOppgavelistaOppgaver = (oppgavestatusFilter?: Array<string>) =>
     hentOppgavelistaOppgaverFetch({
       oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : oppgavelistaFilter.oppgavestatusFilter,
       minOppgavelisteIdent: false,
     })
 
   const hentAlleMinOppgavelisteOppgaver = () => {
-    hentMinOppgavelisteOppgaver(undefined)
+    hentMinOppgavelisteOppgaver()
     hentGosysOppgaverFetch({})
   }
 
   const hentAlleOppgaver = () => {
-    hentMinOppgavelisteOppgaver(undefined)
-    hentOppgavelistaOppgaver(undefined)
+    hentMinOppgavelisteOppgaver()
+    hentOppgavelistaOppgaver()
     hentGosysOppgaverFetch({})
   }
 

@@ -25,7 +25,7 @@ data class SaksbehandlerInfo(
 )
 
 interface NavAnsattKlient {
-    suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet>
+    suspend fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet>
 
     suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema>
 
@@ -69,7 +69,7 @@ class NavAnsattKlientImpl(
             throw RuntimeException("Feil i kall mot navansatt navn med ident: $ident", exception)
         }
 
-    override suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet> =
+    override suspend fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> =
         hentSaksbehandler(
             ident,
             InfoType.ENHET,

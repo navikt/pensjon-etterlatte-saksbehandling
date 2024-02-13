@@ -72,7 +72,7 @@ internal class BehandlingInfoRoutesTest {
                 behandlingsstatusService,
             )
 
-        coEvery { applicationContext.navAnsattKlient.hentEnhetForSaksbehandler(any()) } returns
+        coEvery { applicationContext.navAnsattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
             )
@@ -185,6 +185,7 @@ internal class BehandlingInfoRoutesTest {
                     every { sakType } returns SakType.BARNEPENSJON
                 }
             every { status } returns BehandlingStatus.BEREGNET
+            every { revurderingsaarsak() } returns null
             every { virkningstidspunkt } returns
                 Virkningstidspunkt.create(YearMonth.of(2023, 1), "ident", "begrunnelse")
         }

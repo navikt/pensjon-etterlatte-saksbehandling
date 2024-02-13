@@ -26,6 +26,8 @@ data class BarnepensjonBeregning(
     val beregningsperioder: List<BarnepensjonBeregningsperiode>,
     val sisteBeregningsperiode: BarnepensjonBeregningsperiode,
     val trygdetid: TrygdetidMedBeregningsmetode,
+    val erForeldreloes: Boolean = false,
+    val bruktAvdoed: String? = null,
 ) : BrevdataMedInnhold
 
 data class BarnepensjonBeregningsperiode(

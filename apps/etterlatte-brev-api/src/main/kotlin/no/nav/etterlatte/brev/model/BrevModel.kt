@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
-import no.nav.etterlatte.brev.distribusjon.BestillingsID
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -94,14 +93,13 @@ data class Brev(
     val sakId: Long,
     val behandlingId: UUID?,
     val tittel: String?,
+    val spraak: Spraak,
     val prosessType: BrevProsessType,
     val soekerFnr: String,
     val status: Status,
     val statusEndret: Tidspunkt,
     val opprettet: Tidspunkt,
     val mottaker: Mottaker,
-    val journalpostId: String? = null,
-    val bestillingsID: BestillingsID? = null,
     val brevtype: Brevtype,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
@@ -115,6 +113,7 @@ data class Brev(
             sakId = opprettNyttBrev.sakId,
             behandlingId = opprettNyttBrev.behandlingId,
             tittel = opprettNyttBrev.innhold.tittel,
+            spraak = opprettNyttBrev.innhold.spraak,
             prosessType = opprettNyttBrev.prosessType,
             soekerFnr = opprettNyttBrev.soekerFnr,
             status = opprettNyttBrev.status,
@@ -144,6 +143,7 @@ enum class BrevVedleggKey {
     OMS_BEREGNING,
     OMS_FORHAANDSVARSEL_FEILUTBETALING,
     BP_BEREGNING_TRYGDETID,
+    BP_FORHAANDSVARSEL_FEILUTBETALING,
 }
 
 data class OpprettNyttBrev(

@@ -25,10 +25,11 @@ import java.util.UUID
 
 internal class TrygdetidServiceTest {
     private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val beregningKlient = mockk<BeregningKlient>()
 
     @Test
     fun `henter trygdetid nasjonal beregning`() {
-        val service = TrygdetidService(trygdetidKlient)
+        val service = TrygdetidService(trygdetidKlient, beregningKlient)
         val behandlingId = UUID.randomUUID()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetidDto(behandlingId))
 
@@ -51,7 +52,7 @@ internal class TrygdetidServiceTest {
 
     @Test
     fun `henter ut prorata riktig`() {
-        val service = TrygdetidService(trygdetidKlient)
+        val service = TrygdetidService(trygdetidKlient, beregningKlient)
         val behandlingId = UUID.randomUUID()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetidDto(behandlingId))
 

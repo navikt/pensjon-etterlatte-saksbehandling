@@ -1,8 +1,9 @@
-package no.nav.etterlatte.behandling.klage
+package behandling.klage
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.FormkravMedBeslutter
@@ -25,11 +26,11 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class KlageDaoImplTest {
-    private val dataSource = DatabaseExtension.dataSource
+internal class KlageDaoImplTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
     private lateinit var klageDao: KlageDaoImpl
 

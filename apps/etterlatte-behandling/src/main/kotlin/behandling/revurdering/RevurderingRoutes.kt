@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import java.util.UUID
 
 enum class RevurderingRoutesFeatureToggle(private val key: String) : FeatureToggle {
     VisRevurderingsaarsakOpphoerUtenBrev("pensjon-etterlatte.vis-opphoer-uten-brev"),
@@ -85,6 +86,23 @@ internal fun Route.revurderingRoutes(
                     }
                 }
             }
+
+            post("omgjoering-klage") {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    medBody<OpprettOmgjoeringKlageRequest> {
+                        val revurdering =
+                            inTransaction {
+                                revurderingService.opprettOmgjoeringKlage(
+                                    sakId,
+                                    it.oppgaveIdOmgjoering,
+                                    saksbehandler,
+                                )
+                            }
+                        call.respond(revurdering)
+                    }
+                }
+            }
+
             get("/{revurderingsaarsak}") {
                 val revurderingsaarsak =
                     call.parameters["revurderingsaarsak"]?.let { Revurderingaarsak.valueOf(it) }
@@ -118,6 +136,10 @@ internal fun Route.revurderingRoutes(
         }
     }
 }
+
+data class OpprettOmgjoeringKlageRequest(
+    val oppgaveIdOmgjoering: UUID,
+)
 
 data class OpprettRevurderingRequest(
     val aarsak: Revurderingaarsak,

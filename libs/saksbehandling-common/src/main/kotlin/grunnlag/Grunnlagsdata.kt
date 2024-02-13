@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.S
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SIVILSTATUS
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.SOEKNAD_MOTTATT_DATO
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.STATSBORGERSKAP
+import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UFOERE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSADRESSE
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTENLANDSOPPHOLD
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.UTLAND
@@ -97,6 +98,8 @@ fun Grunnlagsdata<JsonNode>.hentUtenlandsadresse() = this.hentKonstantOpplysning
 fun Grunnlagsdata<JsonNode>.hentVergeadresse() = this.hentKonstantOpplysning<BrevMottaker>(VERGES_ADRESSE)
 
 fun Grunnlagsdata<JsonNode>.hentErForeldreloes() = this.hentKonstantOpplysning<Boolean>(FORELDRELOES)
+
+fun Grunnlagsdata<JsonNode>.hentErUfoere() = this.hentKonstantOpplysning<Boolean>(UFOERE)
 
 // TODO:
 //  Dette er duplikat av mottatt dato i behandling.

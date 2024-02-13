@@ -5,8 +5,6 @@ export const initialState: InnloggetSaksbehandlerReducer = {
   innloggetSaksbehandler: {
     ident: '',
     navn: '',
-    fornavn: '',
-    etternavn: '',
     enheter: [],
     kanAttestere: false,
     skriveTilgang: false,

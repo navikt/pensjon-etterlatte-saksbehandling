@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.model.BrevkodeRequest
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -115,6 +116,8 @@ class Brevoppretter(
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
     ): BrevService.BrevPayload {
+        val spraak = db.hentBrevInnhold(brevId)?.spraak
+
         with(
             hentInnData(
                 sakId,
@@ -123,6 +126,7 @@ class Brevoppretter(
                 brevKode,
                 automatiskMigreringRequest,
                 brevDataMapping,
+                spraak,
             ),
         ) {
             if (innhold.payload != null) {
@@ -147,12 +151,18 @@ class Brevoppretter(
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
+        overstyrSpraak: Spraak? = null,
     ): OpprettBrevRequest {
         val generellBrevData =
-            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, bruker) }
+            retryOgPakkUt { brevdataFacade.hentGenerellBrevData(sakId, behandlingId, overstyrSpraak, bruker) }
 
         val brevkodeRequest =
-            BrevkodeRequest(generellBrevData.erMigrering(), generellBrevData.sak.sakType, generellBrevData.forenkletVedtak?.type)
+            BrevkodeRequest(
+                generellBrevData.loependeIPesys(),
+                generellBrevData.erForeldreloes(),
+                generellBrevData.sak.sakType,
+                generellBrevData.forenkletVedtak?.type,
+            )
 
         val kode = brevKode(brevkodeRequest)
         val tittel = kode.tittel ?: (generellBrevData.vedtakstype()?.let { "Vedtak om $it" } ?: "Tittel mangler")
@@ -171,6 +181,7 @@ class Brevoppretter(
                 }
 
             val innholdVedlegg = async { redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData) }
+
             OpprettBrevRequest(
                 generellBrevData,
                 BrevInnhold(tittel, generellBrevData.spraak, innhold.await()),

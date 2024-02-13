@@ -33,6 +33,7 @@ import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
@@ -58,13 +59,17 @@ import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.util.UUID
 
-@ExtendWith(DatabaseExtension::class)
 abstract class BehandlingIntegrationTest {
-    private val postgreSQLContainer = DatabaseExtension.postgreSQLContainer
+    companion object {
+        @RegisterExtension
+        private val dbExtension = DatabaseExtension()
+    }
+
+    private val postgreSQLContainer = GenerellDatabaseExtension.postgreSQLContainer
     protected val server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
 
@@ -300,7 +305,7 @@ abstract class BehandlingIntegrationTest {
         }
 
     fun resetDatabase() {
-        DatabaseExtension.resetDb()
+        dbExtension.resetDb()
     }
 
     protected fun afterAll() {
@@ -442,6 +447,13 @@ class VedtakKlientTest : VedtakKlient {
     ): Long {
         return 123L
     }
+
+    override suspend fun lagreVedtakKlage(
+        klage: Klage,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        return 123L
+    }
 }
 
 class BrevApiKlientTest : BrevApiKlient {
@@ -573,7 +585,7 @@ class Norg2KlientTest : Norg2Klient {
 }
 
 class NavAnsattKlientTest : NavAnsattKlient {
-    override suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
+    override suspend fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
         return listOf(
             SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
             SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),

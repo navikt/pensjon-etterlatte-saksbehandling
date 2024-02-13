@@ -13,7 +13,6 @@ import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
@@ -52,7 +51,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                     every { isEnabled(KlageFeatureToggle.KanBrukeKlageToggle, any()) } returns true
                 },
         ).also {
-            DatabaseExtension.resetDb()
+            resetDatabase()
         }
 
     @AfterEach
@@ -61,7 +60,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `opprettelse av klage går bra og henting gir 404 etter at saken blir skjermet`() {
+    fun `opprettelse av klage gaar bra og henting gir 404 etter at saken blir skjermet`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
 
@@ -99,7 +98,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `opprettelse av klage går bra og henting gjør tilgangskontroll når saken får adressebeskyttelse`() {
+    fun `opprettelse av klage gaar bra og henting gjoer tilgangskontroll naar saken faar adressebeskyttelse`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
             val klage: Klage =
@@ -144,7 +143,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `avbrytelse av klage går bra`() {
+    fun `avbrytelse av klage gaar bra`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
 
@@ -183,7 +182,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `oppdatering av kabalstatus går bra`() {
+    fun `oppdatering av kabalstatus gaar bra`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
 

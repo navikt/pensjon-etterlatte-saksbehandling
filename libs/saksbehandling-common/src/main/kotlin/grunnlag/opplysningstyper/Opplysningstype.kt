@@ -49,4 +49,5 @@ enum class Opplysningstype {
 
     VERGES_ADRESSE,
     FORELDRELOES,
+    UFOERE,
 }

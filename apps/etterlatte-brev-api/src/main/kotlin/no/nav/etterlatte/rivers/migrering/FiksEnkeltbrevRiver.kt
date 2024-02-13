@@ -37,7 +37,7 @@ internal class FiksEnkeltbrevRiver(
         runBlocking {
             packet.setEventNameForHendelseType(VedtakKafkaHendelseHendelseType.ATTESTERT)
             val vedtak = retryOgPakkUt { vedtaksvurderingService.hentVedtak(behandlingId, Systembruker.migrering) }
-            packet["vedtak"] = vedtak
+            packet["vedtak"] = requireNotNull(vedtak)
         }
         context.publish(packet.toJson())
     }

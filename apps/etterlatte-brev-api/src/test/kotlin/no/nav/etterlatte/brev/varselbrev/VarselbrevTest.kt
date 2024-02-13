@@ -56,16 +56,13 @@ class VarselbrevTest {
         val brevdataFacade =
             mockk<BrevdataFacade>().also {
                 coEvery {
-                    it.hentGenerellBrevData(
-                        sak.id,
-                        any(),
-                        any(),
-                    )
+                    it.hentGenerellBrevData(sak.id, any(), any(), any())
                 } returns
                     mockk<GenerellBrevData>().also {
                         every { it.vedtakstype() } returns ""
                         every { it.spraak } returns Spraak.NN
-                        every { it.erMigrering() } returns false
+                        every { it.loependeIPesys() } returns false
+                        every { it.erForeldreloes() } returns false
                         every { it.sak } returns Sak("", SakType.BARNEPENSJON, 1L, "")
                         every { it.forenkletVedtak } returns null
                         every { it.personerISak } returns
@@ -103,7 +100,7 @@ class VarselbrevTest {
             )
         val behandlingKlient = mockk<BehandlingKlient>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
         val pdfGenerator = mockk<PDFGenerator>()
-        service = VarselbrevService(brevRepository, brevoppretter, behandlingKlient, pdfGenerator)
+        service = VarselbrevService(brevRepository, brevoppretter, behandlingKlient, pdfGenerator, mockk())
     }
 
     @AfterEach
@@ -125,6 +122,6 @@ class VarselbrevTest {
             }
 
         val henta = service.hentVarselbrev(behandling)
-        assertEquals(varselbrev, henta.first())
+        assertEquals(varselbrev.brev, henta.first())
     }
 }

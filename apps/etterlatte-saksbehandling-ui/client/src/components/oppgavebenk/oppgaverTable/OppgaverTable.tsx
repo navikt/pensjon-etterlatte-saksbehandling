@@ -1,58 +1,72 @@
-import React, { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { SortState, Table } from '@navikt/ds-react'
 import { OppgaverTableHeader } from '~components/oppgavebenk/oppgaverTable/OppgaverTableHeader'
-import { OppgaveDTO } from '~shared/api/oppgaver'
+import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
 import { OppgaverTableRow } from '~components/oppgavebenk/oppgaverTable/OppgaverTableRow'
-import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
-
-interface Props {
-  oppgaver: ReadonlyArray<OppgaveDTO>
-  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
-  erMinOppgaveliste: boolean
-  hentOppgaver: () => void
-  filter: Filter
-  setFilter: Dispatch<SetStateAction<Filter>>
-}
+import { leggTilSorteringILocalStorage, OppgaveSortering } from '~components/oppgavebenk/oppgaverTable/oppgavesortering'
 
 export enum SortKey {
   FRIST = 'frist',
   FNR = 'fnr',
 }
 
+interface SorteringsState extends Omit<SortState, 'direction'> {
+  direction: 'ascending' | 'descending' | 'no-order'
+}
+
+interface Props {
+  oppgaver: ReadonlyArray<OppgaveDTO>
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
+  erMinOppgaveliste: boolean
+  oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
+  saksbehandlereIEnhet: Array<Saksbehandler>
+  setSortering: (nySortering: OppgaveSortering) => void
+}
+
 export const OppgaverTable = ({
   oppgaver,
   oppdaterTildeling,
   erMinOppgaveliste,
-  hentOppgaver,
-  filter,
-  setFilter,
+  oppdaterFrist,
+  saksbehandlereIEnhet,
+  setSortering,
 }: Props): ReactNode => {
-  const [sort, setSort] = useState<SortState>()
+  const [sort, setSort] = useState<SorteringsState>()
 
   const handleSort = (sortKey: SortKey) => {
     setSort(
       sort && sortKey === sort.orderBy && sort.direction === 'descending'
-        ? undefined
+        ? { orderBy: sortKey, direction: 'no-order' }
         : {
             orderBy: sortKey,
             direction: sort && sortKey === sort.orderBy && sort.direction === 'ascending' ? 'descending' : 'ascending',
           }
     )
-  }
-
-  useEffect(() => {
     switch (sort?.orderBy) {
       case SortKey.FRIST:
-        setFilter({ ...filter, fristSortering: sort?.direction ? sort.direction : 'ingen' })
+        const nySorteringFrist: OppgaveSortering = {
+          fnrSortering: 'no-order',
+          fristSortering: sort ? sort.direction : 'no-order',
+        }
+        setSortering(nySorteringFrist)
+        leggTilSorteringILocalStorage(nySorteringFrist)
         break
       case SortKey.FNR:
-        setFilter({ ...filter, fnrSortering: sort?.direction ? sort.direction : 'ingen' })
+        const nySorteringFnr: OppgaveSortering = {
+          fristSortering: 'no-order',
+          fnrSortering: sort ? sort.direction : 'no-order',
+        }
+        setSortering(nySorteringFnr)
+        leggTilSorteringILocalStorage(nySorteringFnr)
         break
     }
-  }, [sort])
+  }
 
   return (
-    <Table sort={sort} onSortChange={(sortKey) => handleSort(sortKey as SortKey)}>
+    <Table
+      sort={sort && sort.direction !== 'no-order' ? { direction: sort.direction, orderBy: sort.orderBy } : undefined}
+      onSortChange={(sortKey) => handleSort(sortKey as SortKey)}
+    >
       <OppgaverTableHeader />
       <Table.Body>
         {oppgaver &&
@@ -61,9 +75,10 @@ export const OppgaverTable = ({
               <OppgaverTableRow
                 key={oppgave.id}
                 oppgave={oppgave}
+                saksbehandlereIEnhet={saksbehandlereIEnhet}
                 oppdaterTildeling={oppdaterTildeling}
                 erMinOppgaveListe={erMinOppgaveliste}
-                hentOppgaver={hentOppgaver}
+                oppdaterFrist={oppdaterFrist}
               />
             )
           })}

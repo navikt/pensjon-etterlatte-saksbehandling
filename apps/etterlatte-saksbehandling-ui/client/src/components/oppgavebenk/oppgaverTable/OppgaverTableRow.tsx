@@ -1,23 +1,30 @@
 import React, { ReactNode } from 'react'
 import { Table } from '@navikt/ds-react'
-import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
+import { erOppgaveRedigerbar, OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
 import { formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/FristWrapper'
 import SaksoversiktLenke from '~components/oppgavebenk/SaksoversiktLenke'
 import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/Tags'
-import { RedigerSaksbehandler } from '~components/oppgavebenk/tildeling/RedigerSaksbehandler'
 import { HandlingerForOppgave } from '~components/oppgavebenk/HandlingerForOppgave'
 import { FristHandlinger } from '~components/oppgavebenk/FristHandlinger'
+import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 
 interface Props {
   oppgave: OppgaveDTO
-  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
+  saksbehandlereIEnhet: Array<Saksbehandler>
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
   erMinOppgaveListe: boolean
-  hentOppgaver: () => void
+  oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
 }
 
-export const OppgaverTableRow = ({ oppgave, oppdaterTildeling, erMinOppgaveListe, hentOppgaver }: Props): ReactNode => {
+export const OppgaverTableRow = ({
+  oppgave,
+  saksbehandlereIEnhet,
+  oppdaterTildeling,
+  erMinOppgaveListe,
+  oppdaterFrist,
+}: Props): ReactNode => {
   return (
     <Table.Row>
       <Table.HeaderCell>{formaterStringDato(oppgave.opprettet)}</Table.HeaderCell>
@@ -26,7 +33,7 @@ export const OppgaverTableRow = ({ oppgave, oppdaterTildeling, erMinOppgaveListe
           <FristHandlinger
             orginalFrist={oppgave.frist}
             oppgaveId={oppgave.id}
-            hentOppgaver={hentOppgaver}
+            oppdaterFrist={oppdaterFrist}
             erRedigerbar={erOppgaveRedigerbar(oppgave.status)}
             oppgaveVersjon={oppgave.versjon}
             type={oppgave.type}
@@ -44,15 +51,14 @@ export const OppgaverTableRow = ({ oppgave, oppdaterTildeling, erMinOppgaveListe
       <Table.DataCell>{oppgave.status ? OPPGAVESTATUSFILTER[oppgave.status] : 'Ukjent'}</Table.DataCell>
       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
       <Table.DataCell>
-        <RedigerSaksbehandler
-          saksbehandlerNavn={oppgave.saksbehandlerNavn}
-          saksbehandler={oppgave.saksbehandlerIdent}
-          oppgaveId={oppgave.id}
-          sakId={oppgave.sakId}
+        <VelgSaksbehandler
+          saksbehandler={{
+            saksbehandlerIdent: oppgave.saksbehandlerIdent,
+            saksbehandlerNavn: oppgave.saksbehandlerNavn,
+          }}
+          saksbehandlereIEnhet={saksbehandlereIEnhet}
           oppdaterTildeling={oppdaterTildeling}
-          erRedigerbar={erOppgaveRedigerbar(oppgave.status)}
-          versjon={oppgave.versjon}
-          type={oppgave.type}
+          oppgave={oppgave}
         />
       </Table.DataCell>
       <Table.DataCell>

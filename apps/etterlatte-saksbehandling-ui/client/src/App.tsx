@@ -54,8 +54,10 @@ function App() {
             <ErrorBoundary>
               <ConfigContext.Provider value={hentConfigStatus.data}>
                 <Routes>
-                  <Route path="/" element={<ToggleMinOppgaveliste />} />
-                  <Route path="/oppgavebenken" element={<ToggleMinOppgaveliste />} />
+                  <Route path="/" element={<ToggleMinOppgaveliste />}>
+                    <Route path="/minoppgaveliste" element={<ToggleMinOppgaveliste />} />
+                  </Route>
+
                   <Route path="/flyttjournalpost" element={<FlyttJournalpost />} />
                   <Route path="/person/:fnr" element={<Person />} />
                   <Route path="/oppgave/:id/*" element={<BehandleJournalfoeringOppgave />} />

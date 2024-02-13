@@ -11,8 +11,17 @@ import no.nav.etterlatte.trygdetid.TrygdetidType
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
+class TrygdetidService(private val trygdetidKlient: TrygdetidKlient, private val beregningKlient: BeregningKlient) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    suspend fun finnTrygdetid(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid? {
+        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)!!
+
+        return finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
+    }
 
     suspend fun finnTrygdetidsgrunnlag(
         behandlingId: UUID,
@@ -50,6 +59,7 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
             // vi har en overstyrt trygdetid fra pesys, og vi kan dermed ikke gi ut noe detaljert grunnlag på hvordan
             // vi har kommet frem til trygdetiden
             return Trygdetid(
+                ident = trygdetidgrunnlagForAnvendtTrygdetid.ident,
                 aarTrygdetid = anvendtTrygdetid,
                 prorataBroek = prorataBroek,
                 maanederTrygdetid = 0,
@@ -68,6 +78,7 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
             )
 
         return Trygdetid(
+            ident = trygdetidgrunnlagForAnvendtTrygdetid.ident,
             aarTrygdetid = anvendtTrygdetid,
             maanederTrygdetid = 0,
             prorataBroek = prorataBroek,

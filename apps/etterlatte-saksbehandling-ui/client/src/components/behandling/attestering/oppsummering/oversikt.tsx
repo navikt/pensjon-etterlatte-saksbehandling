@@ -11,7 +11,7 @@ import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo
 import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
@@ -19,6 +19,8 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
+import { FlexRow } from '~shared/styled'
+import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
@@ -64,7 +66,10 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
 
   return (
     <SidebarPanel border>
-      <Heading size="small">{formaterBehandlingstype(behandlingsInfo.type)}</Heading>
+      <Heading size="small">
+        {formaterBehandlingstype(behandlingsInfo.type)} <EessiPensjonLenke />
+      </Heading>
+
       <Heading size="xsmall" spacing>
         {hentStatus()}
       </Heading>
@@ -125,24 +130,13 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           <Tekst>{kommentarFraAttestant}</Tekst>
         </div>
       )}
-      <SakFlexbox>
-        <InfoSakId>Sakid: </InfoSakId>
+      <FlexRow align="center">
+        <Info>Sakid:</Info>
         <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
-      </SakFlexbox>
+      </FlexRow>
     </SidebarPanel>
   )
 }
-
-const SakFlexbox = styled.div`
-  display: flex;
-  flex-direction: row;
-  margin-top: 1em;
-`
-const InfoSakId = styled.div`
-  margin-top: 8px;
-  font-size: 14px;
-  font-weight: 600;
-`
 
 const Info = styled.div`
   font-size: 14px;

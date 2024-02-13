@@ -121,9 +121,11 @@ class InformasjonsbrevTest {
         OpprettJournalfoerOgDistribuerRiver(
             testRapid,
             brevoppretter,
-            pdfGenerator,
-            journalfoerBrevService,
-            brevdistribuerer,
+            FerdigstillJournalfoerOgDistribuerBrev(
+                pdfGenerator,
+                journalfoerBrevService,
+                brevdistribuerer,
+            ),
         )
 
         assertEquals(2, testRapid.inspektør.size)

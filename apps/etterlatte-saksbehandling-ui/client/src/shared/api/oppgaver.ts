@@ -54,6 +54,11 @@ export type Oppgavetype =
   | 'OMGJOERING'
   | 'JOURNALFOERING'
 
+export interface Saksbehandler {
+  ident: string
+  navn: string
+}
+
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 
 export const hentOppgaverMedStatus = async (args: {
@@ -106,6 +111,12 @@ export const tildelSaksbehandlerApi = async (args: {
   } else {
     return apiClient.post(`/oppgaver/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
   }
+}
+
+export const saksbehandlereIEnhetApi = async (args: {
+  enheter: string[]
+}): Promise<ApiResponse<Array<Saksbehandler>>> => {
+  return apiClient.get(`/saksbehandlere?enheter=${args.enheter}`)
 }
 
 export const byttSaksbehandlerApi = async (args: {

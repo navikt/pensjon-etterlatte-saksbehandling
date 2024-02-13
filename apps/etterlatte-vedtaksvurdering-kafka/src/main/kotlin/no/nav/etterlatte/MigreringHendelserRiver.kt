@@ -1,10 +1,12 @@
 package no.nav.etterlatte
 
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.behandlingId
+import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.MIGRERING_KJORING_VARIANT
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringKjoringVariant
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -24,10 +26,11 @@ internal class MigreringHendelserRiver(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, Migreringshendelser.VEDTAK) {
+        initialiserRiver(rapidsConnection, Migreringshendelser.BEREGNET_FERDIG) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(MIGRERING_KJORING_VARIANT) }
+            validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
         }
     }
 
@@ -39,7 +42,7 @@ internal class MigreringHendelserRiver(
         logger.info("Oppretter, fatter og attesterer vedtak for migrer behandling $behandlingId")
 
         val kjoringVariant = packet.migreringKjoringVariant
-        withFeilhaandtering(packet, context, Migreringshendelser.VEDTAK.lagEventnameForType()) {
+        withFeilhaandtering(packet, context, Migreringshendelser.BEREGNET_FERDIG.lagEventnameForType()) {
             val respons = vedtakService.opprettVedtakFattOgAttester(packet.sakId, behandlingId, kjoringVariant)
             if (kjoringVariant == MigreringKjoringVariant.MED_PAUSE) {
                 packet.setEventNameForHendelseType(Migreringshendelser.PAUSE)

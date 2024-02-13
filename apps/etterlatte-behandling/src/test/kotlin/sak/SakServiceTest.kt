@@ -141,7 +141,7 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer hvis vi har en saksbehandler`() {
         saksbehandlerKontekst()
 
-        coEvery { navansattKlient.hentEnhetForSaksbehandler(any()) } returns
+        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
@@ -170,7 +170,7 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer hvis vi har en saksbehandler uten riktig enhet`() {
         saksbehandlerKontekst()
 
-        coEvery { navansattKlient.hentEnhetForSaksbehandler(any()) } returns
+        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
@@ -199,7 +199,7 @@ internal class SakServiceTest {
     fun `enhet filtrering skjer ikke hvis vi har en system bruker`() {
         systemBrukerKontekst()
 
-        coEvery { navansattKlient.hentEnhetForSaksbehandler(any()) } returns
+        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )
@@ -381,7 +381,7 @@ internal class SakServiceTest {
     fun `filtrerer for saksbehandler med nasjonal tilgang`() {
         saksbehandlerKontekst(nasjonalTilgang = true)
 
-        coEvery { navansattKlient.hentEnhetForSaksbehandler(any()) } returns
+        coEvery { navansattKlient.hentEnheterForSaksbehandler(any()) } returns
             listOf(
                 SaksbehandlerEnhet(id = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
             )

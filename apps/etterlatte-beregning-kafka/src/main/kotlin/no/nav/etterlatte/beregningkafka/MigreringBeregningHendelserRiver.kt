@@ -52,7 +52,7 @@ internal class MigreringBeregningHendelserRiver(
 
         verifiserNyBeregning(beregning, packet.hendelseData)
 
-        packet.setEventNameForHendelseType(Migreringshendelser.VEDTAK)
+        packet.setEventNameForHendelseType(Migreringshendelser.BEREGNET_FERDIG)
         packet[BEREGNING_KEY] = beregning
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert migreringshendelse fra beregning for behandling $behandlingId")

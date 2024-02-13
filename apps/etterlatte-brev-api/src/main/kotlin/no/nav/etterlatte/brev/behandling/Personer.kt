@@ -23,6 +23,11 @@ data class Soeker(
     val fnr: Foedselsnummer,
     val under18: Boolean? = null,
     val foreldreloes: Boolean = false,
+    val ufoere: Boolean = false,
 )
 
-data class Avdoed(val navn: String, val doedsdato: LocalDate)
+data class Avdoed(
+    val fnr: Foedselsnummer,
+    val navn: String,
+    val doedsdato: LocalDate,
+)

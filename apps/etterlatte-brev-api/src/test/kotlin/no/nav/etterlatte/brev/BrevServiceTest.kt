@@ -21,6 +21,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -45,7 +46,7 @@ internal class BrevServiceTest {
     private val brevDataFacade = mockk<BrevdataFacade>()
     private val pdfGenerator = mockk<PDFGenerator>()
     private val brevbakerService = mockk<BrevbakerService>()
-    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService)
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevDataFacade)
     private val brevoppretter =
         Brevoppretter(adresseService, db, brevDataFacade, brevbakerService, redigerbartVedleggHenter)
 
@@ -245,6 +246,7 @@ internal class BrevServiceTest {
         sakId = Random.nextLong(10000),
         behandlingId = behandlingId,
         tittel = null,
+        spraak = Spraak.NB,
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,

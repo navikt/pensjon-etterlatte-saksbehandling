@@ -16,6 +16,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class OpprettVarselbrevForGjenopprettaRiver(
     rapidsConnection: RapidsConnection,
@@ -41,20 +42,28 @@ internal class OpprettVarselbrevForGjenopprettaRiver(
         val behandlingId = packet.behandlingId
         val brukerTokenInfo = Systembruker.migrering
         runBlocking {
-            val varselbrev = service.opprettVarselbrev(sakId, behandlingId, brukerTokenInfo)
-            ferdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
-                varselbrev.brevkoder,
-                sakId,
-                varselbrev.let { Pair(it.brev, it.generellBrevData) },
-                brukerTokenInfo,
-            )
-            ferdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(
-                varselbrev.brevkoder,
-                sakId,
-                varselbrev.brev.id,
-                brukerTokenInfo,
-            )
+            opprettOgSendUtBrev(sakId, behandlingId, brukerTokenInfo)
             // Her skal vi sette på vent
         }
+    }
+
+    private suspend fun opprettOgSendUtBrev(
+        sakId: Long,
+        behandlingId: UUID,
+        brukerTokenInfo: Systembruker,
+    ) {
+        val varselbrev = service.opprettVarselbrev(sakId, behandlingId, brukerTokenInfo)
+        ferdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
+            varselbrev.brevkoder,
+            sakId,
+            varselbrev.let { Pair(it.brev, it.generellBrevData) },
+            brukerTokenInfo,
+        )
+        ferdigstillJournalfoerOgDistribuerBrev.journalfoerOgDistribuer(
+            varselbrev.brevkoder,
+            sakId,
+            varselbrev.brev.id,
+            brukerTokenInfo,
+        )
     }
 }

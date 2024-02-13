@@ -92,9 +92,11 @@ export const ToggleMinOppgaveliste = () => {
 
   useEffect(() => {
     hentAlleOppgaver()
-    hentSaksbehandlereIEnhet({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
-      setSaksbehandlereForEnhet(saksbehandlere)
-    })
+    if (!!innloggetSaksbehandler.enheter.length) {
+      hentSaksbehandlereIEnhet({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
+        setSaksbehandlereForEnhet(saksbehandlere)
+      })
+    }
   }, [])
 
   const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {

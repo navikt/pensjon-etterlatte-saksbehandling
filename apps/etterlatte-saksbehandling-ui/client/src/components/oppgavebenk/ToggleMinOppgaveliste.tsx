@@ -4,7 +4,7 @@ import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
-import { Tilgangsmelding } from '~components/oppgavebenk/Tilgangsmelding'
+import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
 import {
@@ -20,7 +20,7 @@ import {
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
-import { OppgavelistaWrapper } from '~components/oppgavebenk/OppgavelistaWrapper'
+import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
@@ -185,7 +185,7 @@ export const ToggleMinOppgaveliste = () => {
           oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
         />
       ) : (
-        <OppgavelistaWrapper
+        <Oppgavelista
           saksbehandlereIEnhet={saksbehandlereForEnhet}
           hovedsideOppgaver={hovedsideOppgaver}
           hentHovedsideOppgaverAlle={hentHovedsideOppgaverAlle}

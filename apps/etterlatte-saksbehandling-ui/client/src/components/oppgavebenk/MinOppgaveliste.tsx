@@ -1,12 +1,12 @@
 import React, { Dispatch, SetStateAction } from 'react'
-import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
+import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
-import { oppdaterFrist } from '~components/oppgavebenk/oppgaveutils'
+import { oppdaterFrist } from '~components/oppgavebenk/utils/oppgaveutils'
 import styled from 'styled-components'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { Result } from '~shared/api/apiUtils'
-import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
+import { Filter } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 
 export const MinOppgaveliste = (props: {

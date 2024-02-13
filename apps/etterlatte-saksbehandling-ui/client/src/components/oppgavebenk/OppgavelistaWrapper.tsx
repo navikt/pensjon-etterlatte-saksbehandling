@@ -1,6 +1,6 @@
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
-import { FilterRad } from '~components/oppgavebenk/FilterRad'
-import { Filter, filtrerOppgaver } from '~components/oppgavebenk/filter/oppgavelistafiltre'
+import { FilterRad } from '~components/oppgavebenk/oppgaveFiltrering/FilterRad'
+import { Filter, filtrerOppgaver } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { Result } from '~shared/api/apiUtils'

@@ -14,12 +14,12 @@ import {
   SAKSBEHANDLERFILTER,
   YTELSEFILTER,
   YtelseFilterKeys,
-} from '~components/oppgavebenk/filter/oppgavelistafiltre'
+} from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
-import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
+import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
 
 interface Props {
   hentAlleOppgaver: () => void

@@ -1,4 +1,4 @@
-import { Filter, initialFilter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
+import { Filter, initialFilter } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
 
 const FILTER_KEY = 'filter'
 

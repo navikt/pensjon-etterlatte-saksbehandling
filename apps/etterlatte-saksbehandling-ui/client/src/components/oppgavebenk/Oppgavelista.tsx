@@ -10,7 +10,7 @@ import {
   sorterFrist,
 } from '~components/oppgavebenk/oppgaverTable/oppgavesortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/oppgaveutils'
+import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveutils'
 
 export interface oppgaveListaProps {
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void

@@ -7,7 +7,7 @@ import { formaterFnr, formaterStringDato } from '~utils/formattering'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { ConfigContext } from '~clientConfig'
 import { FlexRow } from '~shared/styled'
-import { FristWrapper } from '~components/oppgavebenk/FristWrapper'
+import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 
 const TagRow = styled.div`
   display: flex;

@@ -6,8 +6,11 @@ import { useAppSelector } from '~store/Store'
 import { Container } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/Tilgangsmelding'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/filter/oppgavelistafiltre'
-import { hentFilterFraLocalStorage, leggFilterILocalStorage } from '~components/oppgavebenk/filter/filterLocalStorage'
+import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
+import {
+  hentFilterFraLocalStorage,
+  leggFilterILocalStorage,
+} from '~components/oppgavebenk/oppgaveFiltrering/filterLocalStorage'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentGosysOppgaver, hentOppgaverMedStatus, OppgaveDTO, saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
 import { isSuccess } from '~shared/api/apiUtils'
@@ -15,7 +18,7 @@ import {
   finnOgOppdaterSaksbehandlerTildeling,
   leggTilOppgavenIMinliste,
   sorterOppgaverEtterOpprettet,
-} from '~components/oppgavebenk/oppgaveutils'
+} from '~components/oppgavebenk/utils/oppgaveutils'
 import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
 import { OppgavelistaWrapper } from '~components/oppgavebenk/OppgavelistaWrapper'
 import { Saksbehandler } from '~shared/types/saksbehandler'

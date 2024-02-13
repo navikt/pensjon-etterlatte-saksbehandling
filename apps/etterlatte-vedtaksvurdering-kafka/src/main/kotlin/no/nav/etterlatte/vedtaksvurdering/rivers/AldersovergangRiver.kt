@@ -68,11 +68,11 @@ class AldersovergangRiver(
                 hendelseData["loependeYtelse"] = loependeYtelse.erLoepende
 
                 if (loependeYtelse.erLoepende) {
-                    val januar2024 = LocalDate.of(2024, Month.JANUARY, 1)
-                    val loependeYtelsePerJanuar2024 = vedtakService.harLoependeYtelserFra(sakId, januar2024)
-                    logger.info("Sak $sakId, behandlingsmåned=$januar2024 har løpende ytelse: ${loependeYtelsePerJanuar2024.erLoepende}")
+                    val loependeYtelsePerJanuar2024 = vedtakService.harLoependeYtelserFra(sakId, ikrafttredenEtterlattereformen)
                     hendelseData["loependeYtelse_januar2024"] = loependeYtelsePerJanuar2024.erLoepende
-                    hendelseData["loependeYtelse_januar2024_behandlingId"] = loependeYtelsePerJanuar2024.behandlingId.toString()
+                    loependeYtelsePerJanuar2024.behandlingId?.let {
+                        hendelseData["loependeYtelse_januar2024_behandlingId"] = it.toString()
+                    }
                 }
 
                 packet[ALDERSOVERGANG_STEG_KEY] = VedtakAldersovergangStepEvents.VURDERT_LOEPENDE_YTELSE.name
@@ -80,5 +80,9 @@ class AldersovergangRiver(
                 context.publish(packet.toJson())
             }
         }
+    }
+
+    companion object {
+        val ikrafttredenEtterlattereformen: LocalDate = LocalDate.of(2024, Month.JANUARY, 1)
     }
 }

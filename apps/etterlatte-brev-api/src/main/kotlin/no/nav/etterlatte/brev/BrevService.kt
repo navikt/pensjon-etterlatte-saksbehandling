@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -99,6 +100,16 @@ class BrevService(
         sjekkOmBrevKanEndres(id)
         return db.oppdaterTittel(id, tittel)
             .also { logger.info("Tittel på brev (id=$id) oppdatert") }
+    }
+
+    suspend fun oppdaterSpraak(
+        id: BrevID,
+        spraak: Spraak,
+    ) {
+        sjekkOmBrevKanEndres(id)
+
+        db.oppdaterSpraak(id, spraak)
+            .also { logger.info("Språk i brev (id=$id) endret til $spraak") }
     }
 
     suspend fun genererPdf(

@@ -20,6 +20,7 @@ import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -81,6 +82,16 @@ fun Route.brevRoute(
                 val request = call.receive<OppdaterTittelRequest>()
 
                 service.oppdaterTittel(brevId, request.tittel)
+
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        post("spraak") {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
+                val request = call.receive<OppdaterSpraakRequest>()
+
+                service.oppdaterSpraak(brevId, request.spraak)
 
                 call.respond(HttpStatusCode.OK)
             }
@@ -197,4 +208,8 @@ data class OppdaterMottakerRequest(
 
 data class OppdaterTittelRequest(
     val tittel: String,
+)
+
+data class OppdaterSpraakRequest(
+    val spraak: Spraak,
 )

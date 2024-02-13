@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -125,6 +126,7 @@ internal class VedtaksbrevUnderkjentRiverTest {
             41,
             UUID.randomUUID(),
             "tittel",
+            Spraak.NB,
             BrevProsessType.AUTOMATISK,
             "fnr",
             Status.JOURNALFOERT,

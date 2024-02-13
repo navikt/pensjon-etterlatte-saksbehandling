@@ -52,6 +52,10 @@ export const OppgaverTableRow = ({
       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
       <Table.DataCell>
         <VelgSaksbehandler
+          saksbehandler={{
+            saksbehandlerIdent: oppgave.saksbehandlerIdent,
+            saksbehandlerNavn: oppgave.saksbehandlerNavn,
+          }}
           saksbehandlereIEnhet={saksbehandlereIEnhet}
           oppdaterTildeling={oppdaterTildeling}
           oppgave={oppgave}

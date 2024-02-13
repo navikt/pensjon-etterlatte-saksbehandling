@@ -26,6 +26,7 @@ data class OpprettBehandling(
     val prosesstype: Prosesstype = Prosesstype.MANUELL,
     val kilde: Vedtaksloesning,
     val begrunnelse: String? = null,
+    val relatertBehandlingId: String? = null,
 ) {
     val id: UUID = UUID.randomUUID()
     val opprettet: Tidspunkt = Tidspunkt.now()

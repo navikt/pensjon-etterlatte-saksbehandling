@@ -8,27 +8,33 @@ import {
   erOppgaveRedigerbar,
   fjernSaksbehandlerApi,
   OppgaveDTO,
+  OppgaveSaksbehandler,
   Saksbehandler,
   tildelSaksbehandlerApi,
 } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 
 interface Props {
+  saksbehandler: OppgaveSaksbehandler
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
   oppgave: OppgaveDTO
 }
 
-export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, oppgave }: Props): ReactNode => {
+export const VelgSaksbehandler = ({
+  saksbehandlereIEnhet,
+  oppdaterTildeling,
+  oppgave,
+  saksbehandler,
+}: Props): ReactNode => {
   const { sakId, id: oppgaveId, type, versjon, status } = oppgave
   const erRedigerbar = erOppgaveRedigerbar(status)
 
-  const saksbehandler = { ident: oppgave.saksbehandlerIdent, navn: oppgave.saksbehandlerNavn }
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const [openDropdown, setOpenDropdown] = useState<boolean>(false)
 
-  const [valgtSaksbehandler, setValgtSaksbehandler] = useState<Saksbehandler | undefined>(saksbehandler)
+  const [valgtSaksbehandler, setValgtSaksbehandler] = useState<OppgaveSaksbehandler | undefined>(saksbehandler)
 
   const [tildelSaksbehandlerResult, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
   const [fjernSaksbehandlerResult, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)
@@ -59,7 +65,10 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
       { oppgaveId, type, nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon } },
       (result) => {
         oppdaterTildeling(oppgave, innloggetSaksbehandler.ident, result.versjon)
-        setValgtSaksbehandler({ navn: innloggetSaksbehandler.navn, ident: innloggetSaksbehandler.ident })
+        setValgtSaksbehandler({
+          saksbehandlerNavn: innloggetSaksbehandler.navn,
+          saksbehandlerIdent: innloggetSaksbehandler.ident,
+        })
         setOpenDropdown(false)
       },
       (error) => {
@@ -86,15 +95,17 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
         <Dropdown open={openDropdown}>
           <Button
             as={Dropdown.Toggle}
-            icon={valgtSaksbehandler?.ident ? <PersonPencilIcon /> : <PersonPlusIcon />}
+            icon={valgtSaksbehandler?.saksbehandlerIdent ? <PersonPencilIcon /> : <PersonPlusIcon />}
             iconPosition="left"
             size="small"
             variant="tertiary"
             onClick={() => setOpenDropdown(true)}
             loading={byttSaksbehandlerResult.status === 'pending'}
           >
-            {valgtSaksbehandler?.navn
-              ? `${valgtSaksbehandler.navn} ${valgtSaksbehandler.navn === innloggetSaksbehandler.navn ? '(meg)' : ''}`
+            {valgtSaksbehandler?.saksbehandlerNavn
+              ? `${valgtSaksbehandler.saksbehandlerNavn} ${
+                  valgtSaksbehandler.saksbehandlerNavn === innloggetSaksbehandler.navn ? '(meg)' : ''
+                }`
               : 'Ikke tildelt'}
           </Button>
           <DropdownMeny onClose={() => setOpenDropdown(false)}>
@@ -103,10 +114,10 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                 label="Velg saksbehandler"
                 options={saksbehandlereIEnhet.map((behandler) => behandler.navn!)}
                 onToggleSelected={onSaksbehandlerSelect}
-                selectedOptions={!!valgtSaksbehandler ? [valgtSaksbehandler.navn!] : []}
+                selectedOptions={!!valgtSaksbehandler ? [valgtSaksbehandler.saksbehandlerNavn!] : []}
                 isLoading={byttSaksbehandlerResult.status === 'pending'}
               />
-              {!valgtSaksbehandler?.ident?.includes(innloggetSaksbehandler.ident) && (
+              {!valgtSaksbehandler?.saksbehandlerIdent?.includes(innloggetSaksbehandler.ident) && (
                 <ValgButton
                   variant="tertiary"
                   size="xsmall"
@@ -117,7 +128,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
                 </ValgButton>
               )}
             </div>
-            {valgtSaksbehandler?.ident && (
+            {valgtSaksbehandler?.saksbehandlerIdent && (
               <div>
                 <ValgButton
                   variant="secondary"
@@ -134,7 +145,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
           </DropdownMeny>
         </Dropdown>
       ) : (
-        <SaksbehandlerWrapper>{saksbehandler.navn}</SaksbehandlerWrapper>
+        <SaksbehandlerWrapper>{saksbehandler.saksbehandlerNavn}</SaksbehandlerWrapper>
       )}
     </div>
   )

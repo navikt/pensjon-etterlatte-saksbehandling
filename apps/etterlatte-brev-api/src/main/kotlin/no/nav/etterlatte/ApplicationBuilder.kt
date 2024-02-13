@@ -122,25 +122,27 @@ class ApplicationBuilder {
 
     private val sakService = SakService(behandlingKlient)
 
+    private val beregningService = BeregningService(beregningKlient)
     private val brevdataFacade =
         BrevdataFacade(
             vedtakKlient,
             grunnlagKlient,
-            beregningKlient,
+            beregningService,
             behandlingKlient,
             sakService,
             trygdetidService,
         )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)
+
     private val db = BrevRepository(datasource)
 
     private val brevgenereringRepository = StartBrevgenereringRepository(datasource)
 
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
-
     private val dokarkivKlient =
         DokarkivKlient(httpClient("DOKARKIV_SCOPE", false), env.requireEnvValue("DOKARKIV_URL"))
+
     private val dokarkivService = DokarkivServiceImpl(dokarkivKlient, db)
 
     private val distribusjonKlient =
@@ -181,8 +183,6 @@ class ApplicationBuilder {
             brevDataMapperRedigerbartUtfallVedtak,
             brevDataMapperFerdigstilling,
         )
-
-    private val beregningService = BeregningService(beregningKlient)
     private val brevDataMapperVarsel = BrevDataMapperVarsel(beregningService, trygdetidService)
 
     private val varselbrevService =

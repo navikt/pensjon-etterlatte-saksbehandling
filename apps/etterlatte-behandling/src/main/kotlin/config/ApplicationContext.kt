@@ -66,6 +66,7 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -157,10 +158,10 @@ internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler(System.getenv()),
     val config: Config = ConfigFactory.load(),
     val rapid: KafkaProdusent<String, String> =
-        if (env["DEV"] == "true") {
-            TestProdusent()
-        } else {
+        if (appIsInGCP()) {
             GcpKafkaConfig.fromEnv(env.props).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
+        } else {
+            TestProdusent()
         },
     val featureToggleService: FeatureToggleService =
         FeatureToggleService.initialiser(

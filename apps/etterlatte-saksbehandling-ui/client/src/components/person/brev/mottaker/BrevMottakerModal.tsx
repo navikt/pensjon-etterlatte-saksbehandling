@@ -180,12 +180,14 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
                 {...register('adresse.postnummer', {
                   required: {
                     value: erNorskAdresse,
-                    message: 'Postnummer må være satt på norske adresser',
+                    message: 'Postnummer må være satt på norsk adresse',
                   },
-                  pattern: {
-                    value: /\d{4}/,
-                    message: 'Postnummer skal være fire siffer',
-                  },
+                  pattern: erNorskAdresse
+                    ? {
+                        value: /\d{4}/,
+                        message: 'Norsk postnummer må være fire siffer',
+                      }
+                    : undefined,
                 })}
                 label="Postnummer"
                 error={errors?.adresse?.postnummer?.message}
@@ -194,7 +196,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
                 {...register('adresse.poststed', {
                   required: {
                     value: erNorskAdresse,
-                    message: 'Poststed må være satt',
+                    message: 'Poststed må være satt norsk adresse',
                   },
                 })}
                 label="Poststed"

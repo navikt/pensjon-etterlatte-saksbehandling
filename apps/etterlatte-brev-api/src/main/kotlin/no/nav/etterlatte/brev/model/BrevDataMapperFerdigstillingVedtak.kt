@@ -86,7 +86,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         innholdMedVedlegg: InnholdMedVedlegg,
         automatiskMigreringRequest: MigreringBrevRequest?,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, bruker, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, bruker, generellBrevData)
         val utbetalingsinfo = async { fetcher.hentUtbetaling() }
         val trygdetid = async { fetcher.hentTrygdetid() }
         val grunnbeloep = async { fetcher.hentGrunnbeloep() }
@@ -113,7 +113,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
         val utbetalingsinfo = async { fetcher.hentUtbetaling() }
         val forrigeUtbetalingsinfo = async { fetcher.hentForrigeUtbetaling() }
         val trygdetid = async { fetcher.hentTrygdetid() }
@@ -138,7 +138,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
         val utbetalingsinfo = async { fetcher.hentUtbetaling() }
         val trygdetid = async { fetcher.hentTrygdetid() }
         val grunnbeloep = async { fetcher.hentGrunnbeloep() }
@@ -186,7 +186,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         innholdMedVedlegg: InnholdMedVedlegg,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
         val brevutfall = async { fetcher.hentBrevutfall() }
 
         BarnepensjonOpphoer.fra(
@@ -201,7 +201,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
         val utbetalingsinfo = async { fetcher.hentUtbetaling() }
         val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
         val trygdetid = async { fetcher.hentTrygdetid() }
@@ -224,7 +224,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
         val utbetalingsinfo = async { fetcher.hentUtbetaling() }
         val forrigeUtbetalingsinfo = async { fetcher.hentForrigeUtbetaling() }
         val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
@@ -249,7 +249,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         generellBrevData: GenerellBrevData,
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
         val brevutfall = async { fetcher.hentBrevutfall() }
 
         OmstillingsstoenadOpphoer.fra(

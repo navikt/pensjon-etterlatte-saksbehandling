@@ -100,7 +100,7 @@ class VarselbrevTest {
             )
         val behandlingKlient = mockk<BehandlingKlient>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
         val pdfGenerator = mockk<PDFGenerator>()
-        service = VarselbrevService(brevRepository, brevoppretter, behandlingKlient, pdfGenerator)
+        service = VarselbrevService(brevRepository, brevoppretter, behandlingKlient, pdfGenerator, mockk())
     }
 
     @AfterEach

@@ -7,7 +7,7 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.model.BrevDatafetcher
+import no.nav.etterlatte.brev.model.BrevDatafetcherVedtak
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.ManueltBrevData
@@ -151,7 +151,7 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService, p
         generellBrevData: GenerellBrevData,
     ): Boolean =
         coroutineScope {
-            val fetcher = BrevDatafetcher(brevdataFacade, bruker, generellBrevData)
+            val fetcher = BrevDatafetcherVedtak(brevdataFacade, bruker, generellBrevData)
             val brevutfall = async { fetcher.hentBrevutfall() }
             val brevutfallHentet = requireNotNull(brevutfall.await())
             brevutfallHentet.feilutbetaling?.valg == FeilutbetalingValg.JA_VARSEL

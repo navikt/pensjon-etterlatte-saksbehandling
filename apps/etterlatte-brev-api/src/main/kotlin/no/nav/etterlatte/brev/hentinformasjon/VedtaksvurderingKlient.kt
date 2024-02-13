@@ -7,7 +7,6 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -28,7 +27,7 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
     internal suspend fun hentVedtak(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): VedtakDto {
+    ): VedtakDto? {
         try {
             logger.info("Henter vedtaksvurdering behandling med behandlingId=$behandlingId")
 
@@ -41,11 +40,8 @@ class VedtaksvurderingKlient(config: Config, httpClient: HttpClient) {
             )
         } catch (re: ResponseException) {
             if (re.response.status == HttpStatusCode.NotFound) {
-                throw IkkeFunnetException(
-                    code = "VEDTAK_IKKE_FUNNET",
-                    detail = "Ingen vedtak funnet for behandlingen",
-                    meta = mapOf("behandlingId" to behandlingId),
-                )
+                logger.info("Fant ikke vedtak for behandling $behandlingId. Dette er forventa hvis det f.eks. er et varselbrev.")
+                return null
             } else {
                 throw ForespoerselException(
                     status = re.response.status.value,

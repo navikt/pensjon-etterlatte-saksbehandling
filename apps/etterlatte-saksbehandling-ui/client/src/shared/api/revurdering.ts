@@ -2,6 +2,7 @@ import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { RevurderingInfo, RevurderinginfoMedIdOgOpprettet } from '~shared/types/RevurderingInfo'
 import { SakType } from '~shared/types/sak'
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 
 export const lagreRevurderingInfo = ({
   behandlingId,
@@ -54,4 +55,11 @@ export const hentRevurderingerForSakMedAarsak = async ({
   revurderingsaarsak: Revurderingaarsak
 }): Promise<ApiResponse<Array<RevurderinginfoMedIdOgOpprettet>>> => {
   return apiClient.get(`/revurdering/${sakId}/${revurderingsaarsak}`)
+}
+
+export const opprettOmgjoeringKlage = async (args: {
+  sakId: number
+  oppgaveId: string
+}): Promise<ApiResponse<IDetaljertBehandling>> => {
+  return apiClient.post(`/revurdering/${args.sakId}/omgjoering-klage`, { oppgaveIdOmgjoering: args.oppgaveId })
 }

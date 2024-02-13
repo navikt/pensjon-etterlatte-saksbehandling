@@ -11,8 +11,17 @@ import no.nav.etterlatte.trygdetid.TrygdetidType
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
+class TrygdetidService(private val trygdetidKlient: TrygdetidKlient, private val beregningKlient: BeregningKlient) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    suspend fun finnTrygdetid(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid? {
+        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)!!
+
+        return finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
+    }
 
     suspend fun finnTrygdetidsgrunnlag(
         behandlingId: UUID,

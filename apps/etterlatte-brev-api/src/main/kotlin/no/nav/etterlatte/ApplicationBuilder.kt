@@ -39,9 +39,11 @@ import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
+import no.nav.etterlatte.brev.varselbrev.BrevDataMapperVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
@@ -116,29 +118,31 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
-    private val trygdetidService = TrygdetidService(trygdetidKlient)
+    private val trygdetidService = TrygdetidService(trygdetidKlient, beregningKlient)
 
     private val sakService = SakService(behandlingKlient)
 
+    private val beregningService = BeregningService(beregningKlient)
     private val brevdataFacade =
         BrevdataFacade(
             vedtakKlient,
             grunnlagKlient,
-            beregningKlient,
+            beregningService,
             behandlingKlient,
             sakService,
             trygdetidService,
         )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)
+
     private val db = BrevRepository(datasource)
 
     private val brevgenereringRepository = StartBrevgenereringRepository(datasource)
 
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
-
     private val dokarkivKlient =
         DokarkivKlient(httpClient("DOKARKIV_SCOPE", false), env.requireEnvValue("DOKARKIV_URL"))
+
     private val dokarkivService = DokarkivServiceImpl(dokarkivKlient, db)
 
     private val distribusjonKlient =
@@ -179,8 +183,10 @@ class ApplicationBuilder {
             brevDataMapperRedigerbartUtfallVedtak,
             brevDataMapperFerdigstilling,
         )
+    private val brevDataMapperVarsel = BrevDataMapperVarsel(beregningService, trygdetidService)
 
-    private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator)
+    private val varselbrevService =
+        VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator, brevDataMapperVarsel)
 
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 

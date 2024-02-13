@@ -19,7 +19,7 @@ import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 
-fun Application.metricsModule(additionalMetrics: List<MeterBinder> = emptyList()) {
+fun Application.metricsRoute(additionalMetrics: List<MeterBinder> = emptyList()) {
     install(MicrometerMetrics) {
         registry = Metrikker.registrySaksbehandling
         meterBinders = listOf(

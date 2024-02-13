@@ -6,7 +6,6 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
 import { ApiResponse } from '~shared/api/apiClient'
 import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert } from '~shared/api/oppgaver'
-
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
@@ -68,11 +67,11 @@ export const SendTilAttesteringModal = ({
           </ApiErrorAlert>
         ),
         (saksbehandlerPaaOppgave) => {
-          return !saksbehandlerPaaOppgave?.saksbehandlerIdent ? (
+          return !saksbehandlerPaaOppgave?.ident ? (
             <Alert size="small" variant="warning">
               Oppgaven til denne behandlingen må tildeles en saksbehandler før den kan sende til attestering
             </Alert>
-          ) : saksbehandlerPaaOppgave?.saksbehandlerIdent === innloggetSaksbehandler.ident ? (
+          ) : saksbehandlerPaaOppgave?.ident === innloggetSaksbehandler.ident ? (
             <Button variant="primary" onClick={klikkAttester}>
               {handlinger.SEND_TIL_ATTESTERING.navn}
             </Button>

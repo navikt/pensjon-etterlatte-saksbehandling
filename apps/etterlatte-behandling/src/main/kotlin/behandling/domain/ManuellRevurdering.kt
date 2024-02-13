@@ -31,6 +31,7 @@ data class ManuellRevurdering(
     override val revurderingInfo: RevurderingInfoMedBegrunnelse?,
     override val kilde: Vedtaksloesning,
     override val begrunnelse: String?,
+    override val relatertBehandlingId: String?,
 ) : Revurdering(
         id = id,
         sak = sak,
@@ -45,6 +46,7 @@ data class ManuellRevurdering(
         prosesstype = Prosesstype.MANUELL,
         kilde = kilde,
         begrunnelse = begrunnelse,
+        relatertBehandlingId = relatertBehandlingId,
     ) {
     private fun erFyltUt(): Boolean =
         when (sak.sakType) {

@@ -1,5 +1,5 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
-import { ISaksbehandler } from '~shared/types/saksbehandler'
+import { InnloggetSaksbehandler } from '~shared/types/saksbehandler'
 
 export const initialState: InnloggetSaksbehandlerReducer = {
   innloggetSaksbehandler: {
@@ -12,10 +12,10 @@ export const initialState: InnloggetSaksbehandlerReducer = {
   },
 }
 
-export const setSaksbehandler = createAction<ISaksbehandler>('saksbehandler/set')
+export const setSaksbehandler = createAction<InnloggetSaksbehandler>('saksbehandler/set')
 
 export interface InnloggetSaksbehandlerReducer {
-  innloggetSaksbehandler: ISaksbehandler
+  innloggetSaksbehandler: InnloggetSaksbehandler
 }
 export const saksbehandlerReducer = createReducer(initialState, (builder) => {
   builder.addCase(setSaksbehandler, (state, action) => {

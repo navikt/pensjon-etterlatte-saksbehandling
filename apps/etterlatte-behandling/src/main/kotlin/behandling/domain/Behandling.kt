@@ -50,6 +50,8 @@ sealed class Behandling {
     abstract val utlandstilknytning: Utlandstilknytning?
     abstract val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
     abstract val kilde: Vedtaksloesning
+
+    open val relatertBehandlingId: String? = null
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
 
     protected val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
@@ -231,6 +233,7 @@ internal fun Behandling.toStatistikkBehandling(
         enhet = sak.enhet,
         kilde = kilde,
         pesysId = pesysId,
+        relatertBehandlingId = relatertBehandlingId,
     )
 }
 

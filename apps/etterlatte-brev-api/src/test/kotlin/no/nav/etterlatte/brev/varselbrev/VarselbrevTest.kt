@@ -56,11 +56,7 @@ class VarselbrevTest {
         val brevdataFacade =
             mockk<BrevdataFacade>().also {
                 coEvery {
-                    it.hentGenerellBrevData(
-                        sak.id,
-                        any(),
-                        any(),
-                    )
+                    it.hentGenerellBrevData(sak.id, any(), any(), any())
                 } returns
                     mockk<GenerellBrevData>().also {
                         every { it.vedtakstype() } returns ""
@@ -104,7 +100,7 @@ class VarselbrevTest {
             )
         val behandlingKlient = mockk<BehandlingKlient>().also { coEvery { it.hentSak(sak.id, any()) } returns sak }
         val pdfGenerator = mockk<PDFGenerator>()
-        service = VarselbrevService(brevRepository, brevoppretter, behandlingKlient, pdfGenerator)
+        service = VarselbrevService(brevRepository, brevoppretter, behandlingKlient, pdfGenerator, mockk())
     }
 
     @AfterEach

@@ -9,13 +9,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 import { hentFilterFraLocalStorage, leggFilterILocalStorage } from '~components/oppgavebenk/filter/filterLocalStorage'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import {
-  hentGosysOppgaver,
-  hentOppgaverMedStatus,
-  OppgaveDTO,
-  Saksbehandler,
-  saksbehandlereIEnhetApi,
-} from '~shared/api/oppgaver'
+import { hentGosysOppgaver, hentOppgaverMedStatus, OppgaveDTO, saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
 import { isSuccess } from '~shared/api/apiUtils'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
@@ -24,6 +18,7 @@ import {
 } from '~components/oppgavebenk/oppgaveutils'
 import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
 import { OppgavelistaWrapper } from '~components/oppgavebenk/OppgavelistaWrapper'
+import { Saksbehandler } from '~shared/types/saksbehandler'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -92,9 +87,11 @@ export const ToggleMinOppgaveliste = () => {
 
   useEffect(() => {
     hentAlleOppgaver()
-    hentSaksbehandlereIEnhet({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
-      setSaksbehandlereForEnhet(saksbehandlere)
-    })
+    if (!!innloggetSaksbehandler.enheter.length) {
+      hentSaksbehandlereIEnhet({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
+        setSaksbehandlereForEnhet(saksbehandlere)
+      })
+    }
   }, [])
 
   const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {

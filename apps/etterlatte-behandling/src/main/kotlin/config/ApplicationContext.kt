@@ -66,6 +66,7 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -157,10 +158,10 @@ internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler(System.getenv()),
     val config: Config = ConfigFactory.load(),
     val rapid: KafkaProdusent<String, String> =
-        if (env["DEV"] == "true") {
-            TestProdusent()
-        } else {
+        if (appIsInGCP()) {
             GcpKafkaConfig.fromEnv(env.props).standardProducer(env.getValue("KAFKA_RAPID_TOPIC"))
+        } else {
+            TestProdusent()
         },
     val featureToggleService: FeatureToggleService =
         FeatureToggleService.initialiser(
@@ -258,6 +259,19 @@ internal class ApplicationContext(
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
     val aktivtetspliktService = AktivitetspliktService(aktivitetspliktDao)
     val sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
+
+    val klageService =
+        KlageServiceImpl(
+            klageDao = klageDao,
+            sakDao = sakDao,
+            hendelseDao = hendelseDao,
+            oppgaveService = oppgaveService,
+            brevApiKlient = brevApiHttpClient,
+            klageKlient = klageKlient,
+            klageHendelser = klageHendelser,
+            vedtakKlient = vedtakKlient,
+        )
+
     val revurderingService =
         RevurderingService(
             oppgaveService = oppgaveService,
@@ -268,6 +282,7 @@ internal class ApplicationContext(
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             kommerBarnetTilGodeService = kommerBarnetTilGodeService,
             revurderingDao = revurderingDao,
+            klageService = klageService,
             behandlingService = behandlingService,
         )
     val automatiskRevurderingService = AutomatiskRevurderingService(revurderingService)
@@ -340,18 +355,6 @@ internal class ApplicationContext(
 
     val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
 
-    val klageService =
-        KlageServiceImpl(
-            klageDao = klageDao,
-            sakDao = sakDao,
-            hendelseDao = hendelseDao,
-            oppgaveService = oppgaveService,
-            brevApiKlient = brevApiHttpClient,
-            klageKlient = klageKlient,
-            klageHendelser = klageHendelser,
-            vedtakKlient = vedtakKlient,
-        )
-
     val tilbakekrevingService =
         TilbakekrevingService(
             tilbakekrevingDao = tilbakekrevingDao,
@@ -366,7 +369,7 @@ internal class ApplicationContext(
     val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
             BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao),
-            leaderElectionKlient,
+            { leaderElectionKlient.isLeader() },
             Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(5, ChronoUnit.MINUTES),
         )

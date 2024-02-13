@@ -79,7 +79,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         brukerTokenInfo: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
         val utbetalingsinfo = async { fetcher.hentUtbetaling() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
 
@@ -101,7 +101,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         brukerTokenInfo: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
         val brevutfall = async { fetcher.hentBrevutfall() }
 
         BarnepensjonOpphoerRedigerbarUtfall.fra(
@@ -113,7 +113,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         brukerTokenInfo: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, brukerTokenInfo, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
         val etterbetaling = async { fetcher.hentEtterbetaling() }
 
         BarnepensjonRevurderingRedigerbartUtfall.fra(etterbetaling.await())
@@ -123,7 +123,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, bruker, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, bruker, generellBrevData)
         val utbetalingsinfo = async { fetcher.hentUtbetaling() }
         val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
@@ -140,7 +140,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, bruker, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, bruker, generellBrevData)
         val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
         val brevutfall = async { fetcher.hentBrevutfall() }
@@ -156,7 +156,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = coroutineScope {
-        val fetcher = BrevDatafetcher(brevdataFacade, bruker, generellBrevData)
+        val fetcher = BrevDatafetcherVedtak(brevdataFacade, bruker, generellBrevData)
         val brevutfall = async { fetcher.hentBrevutfall() }
 
         OmstillingsstoenadOpphoerRedigerbartUtfall.fra(

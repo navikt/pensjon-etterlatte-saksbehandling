@@ -19,6 +19,7 @@ import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { mapApiResult } from '~shared/api/apiUtils'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import { Heading, Panel } from '@navikt/ds-react'
+import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 
 export default function NyttBrev() {
   const { brevId, sakId, fnr } = useParams()
@@ -57,6 +58,9 @@ export default function NyttBrev() {
             <Column>
               <div style={{ margin: '1rem' }}>
                 <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
+              </div>
+              <div style={{ margin: '1rem' }}>
+                <BrevSpraak brev={brev} kanRedigeres={kanRedigeres} />
               </div>
               <div style={{ margin: '1rem' }}>
                 <BrevMottaker brev={brev} kanRedigeres={kanRedigeres} />

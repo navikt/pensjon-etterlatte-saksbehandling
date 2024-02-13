@@ -85,6 +85,7 @@ private class Server(private val context: ApplicationContext) {
 
 internal fun Application.moduleOnServerReady(context: ApplicationContext) {
     environment.monitor.subscribe(ServerReady) {
+        context.metrikkerJob.schedule().also { addShutdownHook(it) }
         populerSaksbehandlereMedNavn(context)
     }
 }
@@ -149,8 +150,6 @@ internal fun Application.module(context: ApplicationContext) {
             saksbehandlerRoutes(saksbehandlerService = SaksbehandlerService(context.saksbehandlerInfoDaoTrans))
 
             tilgangRoutes(tilgangService)
-
-            context.metrikkerJob.schedule().also { addShutdownHook(it) }
 
             install(adressebeskyttelsePlugin) {
                 saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey

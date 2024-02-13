@@ -47,6 +47,7 @@ class RevurderingDao(private val connection: () -> Connection) {
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
             revurderingInfo = revurderingInfo,
             begrunnelse = rs.getString("begrunnelse"),
+            relatertBehandlingId = rs.getString("relatert_behandling"),
         )
     }
 

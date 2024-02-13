@@ -10,6 +10,7 @@ import {
   sorterFrist,
 } from '~components/oppgavebenk/oppgaverTable/oppgavesortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
+import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/oppgaveutils'
 
 export interface oppgaveListaProps {
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
@@ -34,7 +35,7 @@ export const Oppgavelista = ({
   const sorterteOppgaver = sorterFnr(sortering.fnrSortering, sortertFrist)
 
   const [page, setPage] = useState<number>(1)
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10)
+  const [rowsPerPage, setRowsPerPage] = useState<number>(hentPagineringSizeFraLocalStorage())
 
   let paginerteOppgaver = sorterteOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
@@ -47,6 +48,8 @@ export const Oppgavelista = ({
     <>
       {paginerteOppgaver && paginerteOppgaver.length > 0 ? (
         <>
+          <PagineringsKontroller page={page} setPage={setPage} antallSider={Math.ceil(oppgaver.length / rowsPerPage)} />
+
           <OppgaverTable
             oppgaver={paginerteOppgaver}
             oppdaterTildeling={oppdaterTildeling}

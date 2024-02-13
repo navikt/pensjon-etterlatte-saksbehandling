@@ -69,6 +69,7 @@ internal class DokarkivServiceTest {
                 sakId = sakId,
                 behandlingId = null,
                 tittel = null,
+                spraak = Spraak.NB,
                 prosessType = BrevProsessType.AUTOMATISK,
                 soekerFnr = "soeker_fnr",
                 status = Status.OPPRETTET,

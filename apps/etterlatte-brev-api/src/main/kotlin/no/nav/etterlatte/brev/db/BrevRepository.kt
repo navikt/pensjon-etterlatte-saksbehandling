@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD_VEDLEGG
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_MOTTAKER_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_SPRAAK_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_TITTEL_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_ELLER_OPPDATER_PDF_QUERY
@@ -165,6 +166,24 @@ class BrevRepository(private val ds: DataSource) {
         ).also { require(it == 1) }
 
         tx.lagreHendelse(id, Status.OPPDATERT, tittel.toJson())
+            .also { require(it == 1) }
+    }
+
+    fun oppdaterSpraak(
+        id: BrevID,
+        spraak: Spraak,
+    ) = ds.transaction { tx ->
+        tx.run(
+            queryOf(
+                OPPDATER_SPRAAK_QUERY,
+                mapOf(
+                    "brev_id" to id,
+                    "spraak" to spraak.name,
+                ),
+            ).asUpdate,
+        ).also { require(it == 1) }
+
+        tx.lagreHendelse(id, Status.OPPDATERT, spraak.toJson())
             .also { require(it == 1) }
     }
 
@@ -354,6 +373,7 @@ class BrevRepository(private val ds: DataSource) {
             behandlingId = row.uuidOrNull("behandling_id"),
             soekerFnr = row.string("soeker_fnr"),
             tittel = row.stringOrNull("tittel"),
+            spraak = Spraak.valueOf(row.string("spraak")),
             prosessType = BrevProsessType.valueOf(row.string("prosess_type")),
             status = row.string("status_id").let { Status.valueOf(it) },
             statusEndret = row.tidspunkt("hendelse_opprettet"),
@@ -375,8 +395,6 @@ class BrevRepository(private val ds: DataSource) {
                             land = row.string("land"),
                         ),
                 ),
-            journalpostId = row.stringOrNull("journalpost_id"),
-            bestillingsID = row.stringOrNull("bestilling_id"),
             brevtype = row.string("brevtype").let { Brevtype.valueOf(it) },
         )
     }
@@ -405,7 +423,7 @@ class BrevRepository(private val ds: DataSource) {
         const val HENT_BREV_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, b.opprettet, h.status_id, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel, b.journalpost_id, b.bestilling_id, b.brevtype
+                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, b.brevtype
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -421,7 +439,7 @@ class BrevRepository(private val ds: DataSource) {
         const val HENT_BREV_FOR_BEHANDLING_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel, b.journalpost_id, b.bestilling_id, b.brevtype
+                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, b.brevtype
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -439,7 +457,7 @@ class BrevRepository(private val ds: DataSource) {
         const val HENT_BREV_FOR_SAK_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel, b.journalpost_id, b.bestilling_id, b.brevtype
+                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, b.brevtype
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -489,6 +507,12 @@ class BrevRepository(private val ds: DataSource) {
         const val OPPDATER_TITTEL_QUERY = """
             UPDATE innhold 
             SET tittel = :tittel
+            WHERE brev_id = :brev_id
+        """
+
+        const val OPPDATER_SPRAAK_QUERY = """
+            UPDATE innhold 
+            SET spraak = :spraak
             WHERE brev_id = :brev_id
         """
 

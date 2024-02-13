@@ -34,6 +34,7 @@ import { addValideringsfeil, Valideringsfeilkoder } from '~store/reducers/Sjekkl
 import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
+import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -154,6 +155,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                   tittel={vedtaksbrev.tittel}
                   kanRedigeres={redigerbar}
                 />
+                <br />
+                <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
                 <br />
                 <BrevMottaker brev={vedtaksbrev} kanRedigeres={redigerbar} />
               </>

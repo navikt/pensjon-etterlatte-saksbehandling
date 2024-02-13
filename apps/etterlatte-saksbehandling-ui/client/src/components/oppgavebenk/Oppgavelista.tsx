@@ -47,18 +47,8 @@ export const Oppgavelista = ({
     <>
       {paginerteOppgaver && paginerteOppgaver.length > 0 ? (
         <>
-          <PagineringsKontroller
-            page={page}
-            setPage={setPage}
-            antallSider={Math.ceil(oppgaver.length / rowsPerPage)}
-            raderPerSide={rowsPerPage}
-            setRaderPerSide={setRowsPerPage}
-            totalAvOppgaverTeksts={`Viser ${(page - 1) * rowsPerPage + 1} - ${
-              (page - 1) * rowsPerPage + paginerteOppgaver.length
-            } av ${oppgaver.length} oppgaver ${
-              totaltAntallOppgaver ? `(totalt ${totaltAntallOppgaver} oppgaver)` : ''
-            }`}
-          />
+          <PagineringsKontroller page={page} setPage={setPage} antallSider={Math.ceil(oppgaver.length / rowsPerPage)} />
+
           <OppgaverTable
             oppgaver={paginerteOppgaver}
             oppdaterTildeling={oppdaterTildeling}

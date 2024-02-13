@@ -127,6 +127,7 @@ export const ToggleMinOppgaveliste = () => {
     }
   }, [])
 
+  // Denne spaghettien er pga at vi må ha Gosys oppgaver inn i våres oppgave behandling
   useEffect(() => {
     if (isSuccess(oppgavelistaOppgaverResult) && isSuccess(gosysOppgaverResult)) {
       const alleOppgaverMerget = sorterOppgaverEtterOpprettet([

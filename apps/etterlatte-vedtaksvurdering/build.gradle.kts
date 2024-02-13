@@ -45,4 +45,5 @@ dependencies {
     }
     testImplementation(project(":libs:testdata"))
     testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
+    testImplementation(testFixtures(project(":libs:etterlatte-database")))
 }

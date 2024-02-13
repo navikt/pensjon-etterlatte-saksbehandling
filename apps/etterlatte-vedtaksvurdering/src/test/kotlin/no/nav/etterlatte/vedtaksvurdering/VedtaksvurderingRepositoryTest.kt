@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
@@ -18,45 +19,35 @@ import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
-import org.junit.jupiter.api.AfterAll
+import no.nav.etterlatte.vedtaksvurdering.database.DatabaseExtension
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class VedtaksvurderingRepositoryTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-    private lateinit var dataSource: DataSource
+internal class VedtaksvurderingRepositoryTest(private val dataSource: DataSource) {
     private lateinit var repository: VedtaksvurderingRepository
+
+    companion object {
+        @RegisterExtension
+        private val dbExtension = DatabaseExtension()
+    }
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                postgreSQLContainer.jdbcUrl,
-                postgreSQLContainer.username,
-                postgreSQLContainer.password,
-            ).also { it.migrate() }
-
         repository = VedtaksvurderingRepository(dataSource)
     }
 
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
+    @AfterEach
+    fun afterEach() {
+        dbExtension.resetDb()
     }
 
     @Test
@@ -98,7 +89,6 @@ internal class VedtaksvurderingRepositoryTest {
         val vedtak = repository.opprettVedtak(nyttVedtak)
 
         with(vedtak) {
-            vedtak shouldNotBe null
             id shouldNotBe null
             status shouldBe VedtakStatus.OPPRETTET
             soeker shouldBe SOEKER_FOEDSELSNUMMER
@@ -108,6 +98,24 @@ internal class VedtaksvurderingRepositoryTest {
             type shouldBe VedtakType.TILBAKEKREVING
             innhold should beInstanceOf<VedtakInnhold.Tilbakekreving>()
             (innhold as VedtakInnhold.Tilbakekreving).tilbakekreving shouldBe objectMapper.createObjectNode()
+        }
+    }
+
+    @Test
+    fun `skal opprette vedtak for klage`() {
+        val nyttVedtak = opprettVedtakKlage()
+
+        val vedtak = repository.opprettVedtak(nyttVedtak)
+
+        with(vedtak) {
+            id shouldNotBe null
+            status shouldBe VedtakStatus.OPPRETTET
+            soeker shouldBe SOEKER_FOEDSELSNUMMER
+            sakId shouldBe 1L
+            sakType shouldBe SakType.BARNEPENSJON
+            behandlingId shouldNotBe null
+            type shouldBe VedtakType.AVVIST_KLAGE
+            (innhold as VedtakInnhold.Klage).klage shouldBe objectMapper.createObjectNode()
         }
     }
 
@@ -174,6 +182,28 @@ internal class VedtaksvurderingRepositoryTest {
         oppdatertVedtak.type shouldBe VedtakType.TILBAKEKREVING
         oppdatertVedtak.innhold should beInstanceOf<VedtakInnhold.Tilbakekreving>()
         (oppdatertVedtak.innhold as VedtakInnhold.Tilbakekreving).tilbakekreving shouldBe oppdatertTilbakekreving
+    }
+
+    @Test
+    fun `skal oppdatere vedtak for klage`() {
+        val nyttVedtak = opprettVedtakKlage()
+        val vedtak = repository.opprettVedtak(nyttVedtak)
+
+        val oppdatertKlage = mapOf("endret" to "noe").toObjectNode()
+
+        val oppdatertVedtak =
+            repository.oppdaterVedtak(
+                vedtak.copy(
+                    innhold =
+                        (vedtak.innhold as VedtakInnhold.Klage).copy(
+                            klage = oppdatertKlage,
+                        ),
+                ),
+            )
+
+        oppdatertVedtak shouldNotBe null
+        oppdatertVedtak.type shouldBe VedtakType.AVVIST_KLAGE
+        (oppdatertVedtak.innhold as VedtakInnhold.Klage).klage shouldBe oppdatertKlage
     }
 
     @Test

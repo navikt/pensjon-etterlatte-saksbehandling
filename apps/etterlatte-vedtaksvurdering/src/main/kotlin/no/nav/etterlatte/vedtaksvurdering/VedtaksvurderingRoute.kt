@@ -15,7 +15,6 @@ import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
-import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
@@ -286,7 +285,7 @@ fun Route.klagevedtakRoute(
 
     route("/vedtak/klage/{$BEHANDLINGID_CALL_PARAMETER}") {
         post("/lagre-vedtak") {
-            kunSystembruker {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<KlageVedtakDto>()
                 logger.info("Oppretter vedtak for klage=${dto.klageId}")
                 call.respond(service.opprettEllerOppdaterVedtakOmAvvisning(dto))

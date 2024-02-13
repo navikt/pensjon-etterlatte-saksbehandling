@@ -5,12 +5,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
-import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
@@ -204,7 +202,7 @@ class BrevdataFacade(
         brukerTokenInfo: BrukerTokenInfo,
         sakType: SakType,
     ): Utbetalingsinfo? =
-        finnUtbetalingsinfoNullable(
+        beregningService.finnUtbetalingsinfoNullable(
             behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
             virkningstidspunkt,
             brukerTokenInfo,
@@ -217,52 +215,9 @@ class BrevdataFacade(
         brukerTokenInfo: BrukerTokenInfo,
         sakType: SakType,
     ): Utbetalingsinfo =
-        requireNotNull(finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo, sakType)) {
+        requireNotNull(beregningService.finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo, sakType)) {
             "Utbetalingsinfo er nødvendig, men mangler"
         }
-
-    private suspend fun finnUtbetalingsinfoNullable(
-        behandlingId: UUID,
-        virkningstidspunkt: YearMonth,
-        brukerTokenInfo: BrukerTokenInfo,
-        sakType: SakType,
-    ): Utbetalingsinfo? {
-        val beregning = beregningService.hentBeregning(behandlingId, brukerTokenInfo) ?: return null
-        val beregningsGrunnlag = beregningService.hentBeregningsGrunnlag(behandlingId, sakType, brukerTokenInfo)
-
-        val beregningsperioder =
-            beregning.beregningsperioder.map {
-                val (benyttetTrygdetid, prorataBroek) = hentBenyttetTrygdetidOgProratabroek(it)
-
-                Beregningsperiode(
-                    datoFOM = it.datoFOM.atDay(1),
-                    datoTOM = it.datoTOM?.atEndOfMonth(),
-                    grunnbeloep = Kroner(it.grunnbelop),
-                    antallBarn = (it.soeskenFlokk?.size ?: 0) + 1,
-                    // Legger til 1 pga at beregning fjerner soeker
-                    utbetaltBeloep = Kroner(it.utbetaltBeloep),
-                    trygdetid = benyttetTrygdetid,
-                    prorataBroek = prorataBroek,
-                    institusjon = it.institusjonsopphold != null,
-                    beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
-                    beregningsMetodeFraGrunnlag =
-                        beregningsGrunnlag?.beregningsMetode?.beregningsMetode
-                            ?: requireNotNull(it.beregningsMetode),
-                    // ved manuelt overstyrt beregning har vi ikke grunnlag
-                )
-            }
-
-        val soeskenjustering = beregning.beregningsperioder.any { !it.soeskenFlokk.isNullOrEmpty() }
-        val antallBarn = if (soeskenjustering) beregningsperioder.last().antallBarn else 1
-
-        return Utbetalingsinfo(
-            antallBarn,
-            Kroner(beregningsperioder.hentUtbetaltBeloep()),
-            virkningstidspunkt.atDay(1),
-            soeskenjustering,
-            beregningsperioder,
-        )
-    }
 
     suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo) = beregningService.hentGrunnbeloep(brukerTokenInfo)
 

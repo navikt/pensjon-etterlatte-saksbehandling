@@ -144,7 +144,6 @@ enum class BrevVedleggKey {
     OMS_FORHAANDSVARSEL_FEILUTBETALING,
     BP_BEREGNING_TRYGDETID,
     BP_FORHAANDSVARSEL_FEILUTBETALING,
-    BEREGNING_INNHOLD, // TODO denne skal bort, men er lagret i db så må oppdateres - kun for bakoverkompabilitet
 }
 
 data class OpprettNyttBrev(

@@ -2,8 +2,8 @@ import { OppgaveDTO } from '~shared/api/oppgaver'
 import { Button } from '@navikt/ds-react'
 import { EyeIcon } from '@navikt/aksel-icons'
 import { useAppSelector } from '~store/Store'
-import { GosysOppgaveModal } from '~components/oppgavebenk/oppgavemodal/GosysOppgaveModal'
-import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgavemodal/OmgjoerVedtakModal'
+import { GosysOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
+import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 
 export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const innloggetsaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)

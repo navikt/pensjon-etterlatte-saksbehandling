@@ -27,7 +27,7 @@ export const Oppgavelista = ({
   erMinOppgaveliste,
 }: oppgaveListaProps): ReactNode => {
   const [page, setPage] = useState<number>(1)
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10)
+  const [rowsPerPage, setRowsPerPage] = useState<number>(50)
 
   let paginerteOppgaver = oppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
@@ -40,6 +40,18 @@ export const Oppgavelista = ({
     <>
       {paginerteOppgaver && paginerteOppgaver.length > 0 ? (
         <>
+          <PagineringsKontroller
+            page={page}
+            setPage={setPage}
+            antallSider={Math.ceil(oppgaver.length / rowsPerPage)}
+            raderPerSide={rowsPerPage}
+            setRaderPerSide={setRowsPerPage}
+            totalAvOppgaverTeksts={`Viser ${(page - 1) * rowsPerPage + 1} - ${
+              (page - 1) * rowsPerPage + paginerteOppgaver.length
+            } av ${oppgaver.length} oppgaver ${
+              totaltAntallOppgaver ? `(totalt ${totaltAntallOppgaver} oppgaver)` : ''
+            }`}
+          />
           <OppgaverTable
             oppgaver={paginerteOppgaver}
             oppdaterTildeling={oppdaterTildeling}

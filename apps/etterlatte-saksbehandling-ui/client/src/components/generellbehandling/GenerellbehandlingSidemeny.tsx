@@ -30,7 +30,7 @@ export const GenerellbehandlingSidemeny = (props: {
       { referanse: utlandsBehandling.id, sakId: utlandsBehandling.sakId },
       (saksbehandler, statusCode) => {
         if (statusCode === 200) {
-          setGeldendeSaksbehandler(saksbehandler?.saksbehandlerIdent)
+          setGeldendeSaksbehandler(saksbehandler?.ident)
         }
       },
       () => setGeldendeSaksbehandler(null)

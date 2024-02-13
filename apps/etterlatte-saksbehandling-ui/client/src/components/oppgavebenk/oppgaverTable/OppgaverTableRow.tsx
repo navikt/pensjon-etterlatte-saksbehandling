@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
 import { Table } from '@navikt/ds-react'
-import { erOppgaveRedigerbar, OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
+import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
 import { formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/FristWrapper'
 import SaksoversiktLenke from '~components/oppgavebenk/SaksoversiktLenke'
@@ -9,6 +9,7 @@ import { HandlingerForOppgave } from '~components/oppgavebenk/HandlingerForOppga
 import { FristHandlinger } from '~components/oppgavebenk/FristHandlinger'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
 import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filter/oppgavelistafiltre'
+import { Saksbehandler } from '~shared/types/saksbehandler'
 
 interface Props {
   oppgave: OppgaveDTO
@@ -52,10 +53,14 @@ export const OppgaverTableRow = ({
       <Table.DataCell>{oppgave.enhet}</Table.DataCell>
       <Table.DataCell>
         <VelgSaksbehandler
-          saksbehandler={{
-            saksbehandlerIdent: oppgave.saksbehandlerIdent,
-            saksbehandlerNavn: oppgave.saksbehandlerNavn,
-          }}
+          saksbehandler={
+            oppgave.saksbehandlerIdent && oppgave.saksbehandlerNavn
+              ? {
+                  ident: oppgave.saksbehandlerIdent,
+                  navn: oppgave.saksbehandlerNavn,
+                }
+              : undefined
+          }
           saksbehandlereIEnhet={saksbehandlereIEnhet}
           oppdaterTildeling={oppdaterTildeling}
           oppgave={oppgave}

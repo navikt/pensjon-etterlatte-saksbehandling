@@ -1,9 +1,10 @@
 import React, { ReactNode, useState } from 'react'
 import { SortState, Table } from '@navikt/ds-react'
 import { OppgaverTableHeader } from '~components/oppgavebenk/oppgaverTable/OppgaverTableHeader'
-import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
+import { OppgaveDTO } from '~shared/api/oppgaver'
 import { OppgaverTableRow } from '~components/oppgavebenk/oppgaverTable/OppgaverTableRow'
 import { leggTilSorteringILocalStorage, OppgaveSortering } from '~components/oppgavebenk/oppgaverTable/oppgavesortering'
+import { Saksbehandler } from '~shared/types/saksbehandler'
 
 export enum SortKey {
   FRIST = 'frist',

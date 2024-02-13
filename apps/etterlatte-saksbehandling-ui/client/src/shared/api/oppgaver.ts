@@ -1,6 +1,7 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { SakType } from '~shared/types/sak'
 import { konverterFilterValuesTilKeys } from '~components/oppgavebenk/filter/oppgavelistafiltre'
+import { Saksbehandler } from '~shared/types/saksbehandler'
 
 export interface OppgaveDTO {
   id: string
@@ -26,11 +27,6 @@ export interface OppgaveDTO {
   versjon: number | null
 }
 
-export interface OppgaveSaksbehandler {
-  saksbehandlerIdent: string | null
-  saksbehandlerNavn: string | null
-}
-
 export interface NyOppgaveDto {
   oppgaveKilde?: OppgaveKilde
   oppgaveType: Oppgavetype
@@ -53,11 +49,6 @@ export type Oppgavetype =
   | 'TILBAKEKREVING'
   | 'OMGJOERING'
   | 'JOURNALFOERING'
-
-export interface Saksbehandler {
-  ident: string
-  navn: string
-}
 
 export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
 
@@ -166,11 +157,10 @@ export const redigerFristApi = async (args: {
 export const hentOppgaveForBehandlingUnderBehandlingIkkeattestert = async (args: {
   referanse: string
   sakId: number
-}): Promise<ApiResponse<OppgaveSaksbehandler>> =>
-  apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestert/${args.referanse}`)
+}): Promise<ApiResponse<Saksbehandler>> => apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestert/${args.referanse}`)
 
 export const hentSaksbehandlerForReferanseOppgaveUnderArbeid = async (args: {
   referanse: string
   sakId: number
-}): Promise<ApiResponse<OppgaveSaksbehandler>> =>
+}): Promise<ApiResponse<Saksbehandler>> =>
   apiClient.get(`/oppgaver/sak/${args.sakId}/oppgaveunderbehandling/${args.referanse}`)

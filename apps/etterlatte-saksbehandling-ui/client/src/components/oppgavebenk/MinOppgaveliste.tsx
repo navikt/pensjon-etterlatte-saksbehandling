@@ -1,11 +1,13 @@
+import React, { Dispatch, SetStateAction } from 'react'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/VelgOppgavestatuser'
 import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { oppdaterFrist } from '~components/oppgavebenk/oppgaveutils'
 import styled from 'styled-components'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
-import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
+import { OppgaveDTO } from '~shared/api/oppgaver'
 import { Result } from '~shared/api/apiUtils'
 import { Filter } from '~components/oppgavebenk/filter/oppgavelistafiltre'
+import { Saksbehandler } from '~shared/types/saksbehandler'
 
 export const MinOppgaveliste = (props: {
   minsideOppgaver: OppgaveDTO[]
@@ -13,7 +15,7 @@ export const MinOppgaveliste = (props: {
   gosysOppgaverResult: Result<OppgaveDTO[]>
   minsideFilter: Filter
   setMinsideFilter: (filter: Filter) => void
-  setMinsideOppgaver: React.Dispatch<React.SetStateAction<OppgaveDTO[]>>
+  setMinsideOppgaver: Dispatch<SetStateAction<OppgaveDTO[]>>
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterSaksbehandlerTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
 }) => {

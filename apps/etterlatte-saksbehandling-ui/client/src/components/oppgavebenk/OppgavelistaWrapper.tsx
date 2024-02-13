@@ -2,8 +2,9 @@ import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { FilterRad } from '~components/oppgavebenk/FilterRad'
 import { Filter, filtrerOppgaver } from '~components/oppgavebenk/filter/oppgavelistafiltre'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/OppgaveFeilWrapper'
-import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
+import { OppgaveDTO } from '~shared/api/oppgaver'
 import { Result } from '~shared/api/apiUtils'
+import { Saksbehandler } from '~shared/types/saksbehandler'
 
 export const OppgavelistaWrapper = (props: {
   hovedsideOppgaver: OppgaveDTO[]

@@ -78,7 +78,12 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                     .mapNotNull {
                         try {
                             val enheter = it.second.await()
-                            it.first to enheter.map { enhet -> enhet.id }
+                            if (enheter.isNotEmpty()) {
+                                it.first to enheter.map { enhet -> enhet.id }
+                            } else {
+                                logger.info("Saksbehandler med ident ${it.first} har ingen enheter")
+                                null
+                            }
                         } catch (e: Exception) {
                             logger.error("Kunne ikke hente enheter for saksbehandlerident ${it.first}")
                             null

@@ -32,7 +32,7 @@ class DoedshendelseDao(val connection: () -> Connection) {
         with(connection()) {
             prepareStatement(
                 """
-                SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id
+                SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id
                 FROM doedshendelse
                 WHERE status = ?
                 """.trimIndent(),
@@ -55,4 +55,5 @@ private fun ResultSet.asDoedshendelse(): Doedshendelse =
         utfall = getString("utfall")?.let { utfall -> Utfall.valueOf(utfall) },
         oppgaveId = getString("oppgave_id")?.toUUID(),
         brevId = getString("brev_id")?.toLong(),
+        sakId = getString("sak_id")?.toLong(),
     )

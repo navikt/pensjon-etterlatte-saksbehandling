@@ -224,6 +224,7 @@ internal class ApplicationContext(
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
     val saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans { databaseContext().activeTx() }
     val doedshendelseDao = DoedshendelseDao { databaseContext().activeTx() }
+    val doedshendelseDaoJob = DoedshendelseDao { dataSource.connection }
 
     // Klient
     val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
@@ -330,7 +331,7 @@ internal class ApplicationContext(
         )
 
     val doedshendelseJobService =
-        DoedshendelseJobService(doedshendelseDao, featureToggleService, grunnlagsendringshendelseService, if (isProd()) 2 else 0)
+        DoedshendelseJobService(doedshendelseDaoJob, featureToggleService, grunnlagsendringshendelseService, if (isProd()) 2 else 0)
 
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(

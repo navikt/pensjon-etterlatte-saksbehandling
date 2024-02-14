@@ -28,6 +28,8 @@ class DoedshendelseService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    fun kanBrukeDeodshendelserJob() = featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)
+
     fun opprettDoedshendelseForBeroertePersoner(doedshendelse: PdlDoedshendelse) {
         logger.info("Mottok dødsmelding fra PDL, finner berørte personer og lagrer ned dødsmelding.")
 
@@ -50,17 +52,15 @@ class DoedshendelseService(
         beroerte: List<Person>,
         avdoed: PersonDTO,
     ) {
-        if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)) {
-            beroerte.forEach { barn ->
-                doedshendelseDao.opprettDoedshendelse(
-                    Doedshendelse.nyHendelse(
-                        avdoedFnr = avdoed.foedselsnummer.verdi.value,
-                        avdoedDoedsdato = avdoed.doedsdato!!.verdi,
-                        beroertFnr = barn.foedselsnummer.value,
-                        relasjon = Relasjon.BARN,
-                    ),
-                )
-            }
+        beroerte.forEach { barn ->
+            doedshendelseDao.opprettDoedshendelse(
+                Doedshendelse.nyHendelse(
+                    avdoedFnr = avdoed.foedselsnummer.verdi.value,
+                    avdoedDoedsdato = avdoed.doedsdato!!.verdi,
+                    beroertFnr = barn.foedselsnummer.value,
+                    relasjon = Relasjon.BARN,
+                ),
+            )
         }
     }
 

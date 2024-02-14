@@ -24,7 +24,7 @@ class DoedshendelseJobServiceTest {
     private val service = DoedshendelseJobService(dao, toggle, grunnlagsendringshendelseService)
 
     @Test
-    fun `skal kjøre 1 ny gyldig hendelse og droppe 1`() {
+    fun `skal kjøre 1 ny gyldig hendelse som er 2 dager gammel og droppe 1`() {
         val doedshendelse =
             Doedshendelse.nyHendelse(
                 avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,

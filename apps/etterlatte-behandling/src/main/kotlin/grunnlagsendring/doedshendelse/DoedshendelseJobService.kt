@@ -28,7 +28,7 @@ class DoedshendelseJobService(
     private fun hendelserErGyldige(hendelser: List<Doedshendelse>): List<Doedshendelse> {
         val idag = LocalDateTime.now()
         return hendelser.filter {
-            Duration.between(it.opprettet, idag.toTidspunkt()).toDays() >= 2L
+            Duration.between(it.endret, idag.toTidspunkt()).toDays() >= 2L
         }.also { logger.info("Antall gyldige dødsmeldinger ${it.size}") }
     }
 

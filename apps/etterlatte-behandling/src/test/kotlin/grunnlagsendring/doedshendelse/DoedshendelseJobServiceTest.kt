@@ -35,6 +35,6 @@ class DoedshendelseJobServiceTest {
         every { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) } returns emptyList()
         service.run()
 
-        verify { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
+        verify(exactly = 1) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
     }
 }

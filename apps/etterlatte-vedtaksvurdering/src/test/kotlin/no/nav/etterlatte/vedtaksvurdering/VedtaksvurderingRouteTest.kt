@@ -357,7 +357,7 @@ internal class VedtaksvurderingRouteTest {
     @Test
     fun `skal sjekke om sak har loepende vedtak`() {
         val sakId = 1L
-        val loependeYtelse = LoependeYtelse(erLoepende = true, LocalDate.now())
+        val loependeYtelse = LoependeYtelse(erLoepende = true, LocalDate.now(), UUID.randomUUID())
 
         every { vedtakBehandlingService.sjekkOmVedtakErLoependePaaDato(any(), any()) } returns loependeYtelse
         coEvery { behandlingKlient.harTilgangTilSak(any(), any(), any()) } returns true

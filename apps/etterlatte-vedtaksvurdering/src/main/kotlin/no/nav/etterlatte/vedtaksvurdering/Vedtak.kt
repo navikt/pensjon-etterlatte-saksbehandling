@@ -101,4 +101,4 @@ sealed interface VedtakInnhold {
     ) : VedtakInnhold
 }
 
-data class LoependeYtelse(val erLoepende: Boolean, val dato: LocalDate)
+data class LoependeYtelse(val erLoepende: Boolean, val dato: LocalDate, val behandlingId: UUID? = null)

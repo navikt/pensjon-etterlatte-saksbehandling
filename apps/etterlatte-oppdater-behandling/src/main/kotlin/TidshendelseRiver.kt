@@ -21,7 +21,6 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
 import java.time.YearMonth
-import java.util.UUID
 
 class TidshendelseRiver(
     rapidsConnection: RapidsConnection,
@@ -37,7 +36,7 @@ class TidshendelseRiver(
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(DRYRUN) }
-            validate { it.interestedIn(HENDELSE_DATA_KEY) }
+            validate { it.requireKey(HENDELSE_DATA_KEY) }
         }
     }
 
@@ -61,21 +60,9 @@ class TidshendelseRiver(
             ),
         ) {
             if (step == "VURDERT_LOEPENDE_YTELSE") {
-                // Opprette ny for å fjerne datanøkkel
-                val kvittering =
-                    JsonMessage.newMessage(
-                        EventNames.ALDERSOVERGANG.lagEventnameForType(),
-                        mapOf(
-                            ALDERSOVERGANG_STEG_KEY to "OPPGAVE_OPPRETTET",
-                            ALDERSOVERGANG_TYPE_KEY to type,
-                            ALDERSOVERGANG_ID_KEY to UUID.fromString(hendelseId),
-                            SAK_ID_KEY to sakId,
-                            DATO_KEY to packet.dato,
-                            DRYRUN to dryrun,
-                        ),
-                    )
+                val hendelseData = mutableMapOf<String, Any>()
 
-                if (packet[HENDELSE_DATA_KEY].asBoolean()) {
+                if (packet[HENDELSE_DATA_KEY]["loependeYtelse"]?.asBoolean() == true) {
                     val behandlingsmaaned = packet.dato.let { YearMonth.of(it.year, it.month) }
                     logger.info("Løpende ytelse: opprette oppgave for sak $sakId, behandlingsmåned=$behandlingsmaaned")
 
@@ -88,7 +75,7 @@ class TidshendelseRiver(
                                 merknad = "Aldersovergang",
                                 frist = frist,
                             )
-                        kvittering[HENDELSE_DATA_KEY] = oppgaveId
+                        hendelseData["opprettetOppgaveId"] = oppgaveId
                     } else {
                         logger.info("Dry run: skipper oppgave")
                     }
@@ -96,7 +83,9 @@ class TidshendelseRiver(
                     logger.info("Ingen løpende ytelse funnet for sak $sakId")
                 }
 
-                context.publish(kvittering.toJson())
+                packet[ALDERSOVERGANG_STEG_KEY] = "OPPGAVE_OPPRETTET"
+                packet[HENDELSE_DATA_KEY] = hendelseData
+                context.publish(packet.toJson())
             } else {
                 logger.info("Ikke-støttet steg: $step, ignorerer hendelse")
             }

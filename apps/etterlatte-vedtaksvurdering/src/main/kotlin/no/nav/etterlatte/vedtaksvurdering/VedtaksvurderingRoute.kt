@@ -309,6 +309,7 @@ private fun LoependeYtelse.toDto() =
     LoependeYtelseDTO(
         erLoepende = erLoepende,
         dato = dato,
+        behandlingId = behandlingId,
     )
 
 data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)

@@ -30,7 +30,7 @@ class DoedshendelseJobServiceTest {
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
             )
-        val doedshendelser = listOf(doedshendelse, doedshendelse.copy(opprettet = LocalDateTime.now().minusDays(3L).toTidspunkt()))
+        val doedshendelser = listOf(doedshendelse, doedshendelse.copy(opprettet = LocalDateTime.now().minusDays(2L).toTidspunkt()))
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
         every { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) } returns emptyList()
         service.run()

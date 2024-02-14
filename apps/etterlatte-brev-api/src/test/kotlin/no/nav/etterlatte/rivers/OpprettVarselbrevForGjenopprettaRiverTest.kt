@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
+import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.varselbrev.VarselbrevResponse
@@ -56,14 +57,14 @@ internal class OpprettVarselbrevForGjenopprettaRiverTest {
         val response = VarselbrevResponse(brev, mockk(), Brevkoder.BP_VARSEL)
 
         coEvery { varselbrevService.opprettVarselbrev(any(), behandlingId, any()) } returns response
-        coEvery { brevhaandterer.ferdigstillOgGenererPDF(any(), any(), any(), any()) } returns brev.id
+        coEvery { varselbrevService.ferdigstillOgGenererPDF(any(), any(), any()) } returns Pdf(ByteArray(0))
         coEvery { brevhaandterer.journalfoerOgDistribuer(any(), any(), any(), any()) } just runs
 
         opprettBrevRapid.apply { sendTestMessage(opprettMelding(Vedtaksloesning.GJENOPPRETTA).toJson()) }
 
         coVerify {
             varselbrevService.opprettVarselbrev(saksnr, behandlingId, any())
-            brevhaandterer.ferdigstillOgGenererPDF(Brevkoder.BP_VARSEL, saksnr, any(), any())
+            varselbrevService.ferdigstillOgGenererPDF(brev.id, any(), any())
             brevhaandterer.journalfoerOgDistribuer(Brevkoder.BP_VARSEL, saksnr, brev.id, any())
         }
     }

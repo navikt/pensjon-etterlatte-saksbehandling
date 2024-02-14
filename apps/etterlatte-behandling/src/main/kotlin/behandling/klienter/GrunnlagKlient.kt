@@ -61,16 +61,18 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                 )
                 .mapBoth(
                     success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
-                    failure = { errorResponse -> throw errorResponse },
+                    failure = { errorResponse ->
+                        if (errorResponse is ResponseException && errorResponse.response.status == HttpStatusCode.NotFound) {
+                            return null
+                        } else {
+                            throw errorResponse
+                        }
+                    },
                 )
-        } catch (re: ResponseException) {
-            if (re.response.status == HttpStatusCode.NotFound) {
-                return null
-            }
-
+        } catch (e: Exception) {
             throw GrunnlagKlientException(
                 "Henting av opplysning ($opplysningsType) fra grunnlag for behandling med id=$behandlingId feilet",
-                re,
+                e,
             )
         }
     }

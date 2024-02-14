@@ -73,6 +73,7 @@ import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.appIsInGCP
+import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -392,7 +393,7 @@ internal class ApplicationContext(
             doedshendelseJobService,
             { leaderElectionKlient.isLeader() },
             0L,
-            interval = Duration.of(6, ChronoUnit.HOURS),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
         )
     }
 

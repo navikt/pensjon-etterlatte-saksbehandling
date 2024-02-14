@@ -49,7 +49,7 @@ class AldersovergangRiverTest {
                 EventNames.ALDERSOVERGANG.name,
                 mapOf(
                     ALDERSOVERGANG_STEG_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
-                    ALDERSOVERGANG_TYPE_KEY to "BP20",
+                    ALDERSOVERGANG_TYPE_KEY to "AO_BP20",
                     ALDERSOVERGANG_ID_KEY to "123-123-123",
                     SAK_ID_KEY to sakId,
                     DATO_KEY to datoFom,
@@ -61,7 +61,7 @@ class AldersovergangRiverTest {
             size shouldBe 1
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
+            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "123-123-123"
             field(0, HENDELSE_DATA_KEY)["loependeYtelse"].asBoolean() shouldBe true
             field(0, HENDELSE_DATA_KEY)["loependeYtelse_januar2024_behandlingId"].asText() shouldBe behandlingId.toString()
@@ -81,7 +81,7 @@ class AldersovergangRiverTest {
                 EventNames.ALDERSOVERGANG.name,
                 mapOf(
                     ALDERSOVERGANG_STEG_KEY to VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name,
-                    ALDERSOVERGANG_TYPE_KEY to "BP20",
+                    ALDERSOVERGANG_TYPE_KEY to "AO_BP20",
                     ALDERSOVERGANG_ID_KEY to "432-987-234",
                     SAK_ID_KEY to sakId,
                     DATO_KEY to datoFom,
@@ -93,7 +93,7 @@ class AldersovergangRiverTest {
             size shouldBe 1
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe VURDERT_LOEPENDE_YTELSE.name
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
+            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe "432-987-234"
             field(0, HENDELSE_DATA_KEY)["loependeYtelse"].asBoolean() shouldBe false
             field(0, DRYRUN).asBoolean() shouldBe true

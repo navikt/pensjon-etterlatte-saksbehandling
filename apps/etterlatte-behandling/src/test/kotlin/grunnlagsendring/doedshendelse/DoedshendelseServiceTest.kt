@@ -103,24 +103,4 @@ internal class DoedshendelseServiceTest {
             dao.opprettDoedshendelse(any())
         }
     }
-
-    @Test
-    fun `Skal ikke lagre doedshendelser naar feature toggle ikke er skrudd paa`() {
-        every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
-        every { dao.opprettDoedshendelse(any()) } returns 1
-        every { toggle.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false) } returns false
-
-        service.opprettDoedshendelseForBeroertePersoner(
-            Doedshendelse(
-                UUID.randomUUID().toString(),
-                Endringstype.OPPRETTET,
-                fnr = avdoed.foedselsnummer.verdi.value,
-                doedsdato = avdoed.doedsdato!!.verdi,
-            ),
-        )
-
-        coVerify(exactly = 0) {
-            dao.opprettDoedshendelse(any())
-        }
-    }
 }

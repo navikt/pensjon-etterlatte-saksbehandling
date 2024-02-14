@@ -1,8 +1,14 @@
 package no.nav.etterlatte.rivers.migrering
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.adresse.AvsenderRequest
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
+import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
@@ -11,6 +17,8 @@ import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rivers.FerdigstillJournalfoerOgDistribuerBrev
+import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.token.Systembruker
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -53,7 +61,7 @@ internal class OpprettVarselbrevForGjenopprettaRiver(
         brukerTokenInfo: Systembruker,
     ) {
         val varselbrev = service.opprettVarselbrev(sakId, behandlingId, brukerTokenInfo)
-        ferdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
+        ferdigstillOgGenererPDF(
             varselbrev.brevkoder,
             sakId,
             varselbrev.let { Pair(it.brev, it.generellBrevData) },
@@ -65,5 +73,29 @@ internal class OpprettVarselbrevForGjenopprettaRiver(
             varselbrev.brev.id,
             brukerTokenInfo,
         )
+    }
+
+    private suspend fun ferdigstillOgGenererPDF(
+        brevKode: Brevkoder,
+        sakId: Long,
+        brevOgData: Pair<Brev, GenerellBrevData>,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BrevID {
+        logger.info("Ferdigstiller $brevKode-brev i sak $sakId")
+        val brevId = brevOgData.first.id
+        retryOgPakkUt {
+            service.ferdigstillOgGenererPDF(
+                brevId = brevId,
+                bruker = brukerTokenInfo,
+                avsenderRequest = { _, _ ->
+                    AvsenderRequest(
+                        saksbehandlerIdent = Fagsaksystem.EY.navn,
+                        sakenhet = brevOgData.second.sak.enhet,
+                        attestantIdent = Fagsaksystem.EY.navn,
+                    )
+                },
+            )
+        }
+        return brevId
     }
 }

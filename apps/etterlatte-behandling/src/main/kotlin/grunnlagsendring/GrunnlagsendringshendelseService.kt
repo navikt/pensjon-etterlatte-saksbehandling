@@ -116,14 +116,17 @@ class GrunnlagsendringshendelseService(
     }
 
     fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
-        try {
-            doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
-        } catch (e: Exception) {
-            logger.error("Noe gikk galt ved opprettelse av dødshendelse i behandling.", e)
-        }
-
-        return inTransaction {
-            opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
+        if (doedshendelseService.kanBrukeDeodshendelserJob()) {
+            try {
+                doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
+            } catch (e: Exception) {
+                logger.error("Noe gikk galt ved opprettelse av dødshendelse i behandling.", e)
+            }
+            return emptyList()
+        } else {
+            return inTransaction {
+                opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
+            }
         }
     }
 

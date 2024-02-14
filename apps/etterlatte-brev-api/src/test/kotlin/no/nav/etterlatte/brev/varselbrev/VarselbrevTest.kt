@@ -87,6 +87,7 @@ class VarselbrevTest {
                     it.hentInitiellPayloadVedlegg(
                         any(),
                         any(),
+                        any(),
                     )
                 } returns listOf()
             }

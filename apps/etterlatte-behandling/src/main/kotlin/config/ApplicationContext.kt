@@ -23,6 +23,7 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
 import no.nav.etterlatte.behandling.klage.KlageServiceImpl
@@ -61,6 +62,7 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
@@ -71,6 +73,7 @@ import no.nav.etterlatte.kafka.TestProdusent
 import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.appIsInGCP
+import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.libs.ktor.httpClient
@@ -313,6 +316,7 @@ internal class ApplicationContext(
             skjermingKlient,
             enhetService,
         )
+    val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlKlient, featureToggleService)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             oppgaveService = oppgaveService,
@@ -322,8 +326,11 @@ internal class ApplicationContext(
             grunnlagKlient = grunnlagKlient,
             sakService = sakService,
             brukerService = enhetService,
-            doedshendelseService = DoedshendelseService(doedshendelseDao, pdlKlient, featureToggleService),
+            doedshendelseService = doedshendelseService,
         )
+
+    val doedshendelseJobService =
+        DoedshendelseJobService(doedshendelseDao, featureToggleService, grunnlagsendringshendelseService, if (isProd()) 2 else 0)
 
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(
@@ -379,6 +386,15 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             Duration.of(10, ChronoUnit.MINUTES).toMillis(),
             periode = Duration.of(5, ChronoUnit.MINUTES),
+        )
+    }
+
+    val doedsmeldingerJob: DoedsmeldingJob by lazy {
+        DoedsmeldingJob(
+            doedshendelseJobService,
+            { leaderElectionKlient.isLeader() },
+            0L,
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
         )
     }
 

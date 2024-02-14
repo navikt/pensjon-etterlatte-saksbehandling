@@ -2,11 +2,13 @@ package no.nav.etterlatte.brev.varselbrev
 
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.PDFGenerator
+import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarselRedigerbartUtfall
@@ -67,14 +69,30 @@ internal class VarselbrevService(
             Brevkoder.OMS_VARSEL
         }
 
+    suspend fun ferdigstillOgGenererPDF(
+        brevId: BrevID,
+        bruker: BrukerTokenInfo,
+        avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest =
+            { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
+    ) = pdfGenerator.ferdigstillOgGenererPDF(
+        id = brevId,
+        bruker = bruker,
+        automatiskMigreringRequest = null,
+        avsenderRequest = avsenderRequest,
+        brevKode = { hentBrevkode(it.sakType) },
+        brevData = { brevDataMapperVarsel.hentBrevDataFerdigstilling(it) },
+    )
+
     suspend fun genererPdf(
         brevId: Long,
         bruker: BrukerTokenInfo,
+        avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest =
+            { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
     ) = pdfGenerator.genererPdf(
         id = brevId,
         bruker = bruker,
         automatiskMigreringRequest = null,
-        avsenderRequest = { brukerToken, generellBrevData -> generellBrevData.avsenderRequest(brukerToken) },
+        avsenderRequest = avsenderRequest,
         brevKode = { hentBrevkode(it.sakType) },
         brevData = { brevDataMapperVarsel.hentBrevDataFerdigstilling(it) },
     )

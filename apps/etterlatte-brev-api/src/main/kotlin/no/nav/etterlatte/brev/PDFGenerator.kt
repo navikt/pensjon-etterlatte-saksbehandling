@@ -34,7 +34,7 @@ class PDFGenerator(
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (BrevkodeRequest) -> Brevkoder,
-        brevData: (BrevDataFerdigstillingRequest) -> BrevData,
+        brevData: suspend (BrevDataFerdigstillingRequest) -> BrevData,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         sjekkOmBrevKanEndres(id)

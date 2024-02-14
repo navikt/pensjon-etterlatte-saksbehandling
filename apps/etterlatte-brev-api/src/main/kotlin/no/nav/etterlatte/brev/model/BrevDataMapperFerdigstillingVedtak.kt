@@ -130,6 +130,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
             requireNotNull(grunnbeloep.await()),
             generellBrevData.utlandstilknytning?.type,
             requireNotNull(brevutfall.await()),
+            generellBrevData.revurderingsaarsak,
         )
     }
 

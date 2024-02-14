@@ -13,19 +13,24 @@ class AldersovergangerService(
         logger.info("Handling jobb ${jobb.id} med type ${jobb.type} (${jobb.type.beskrivelse})")
         hendelseDao.oppdaterJobbstatusStartet(jobb)
 
-        if (jobb.type == JobbType.AO_BP20) {
-            val foedselsmaaned = jobb.behandlingsmaaned.minusYears(20)
+        val yearsToSubtract =
+            when (jobb.type) {
+                JobbType.AO_BP18 -> 18L
+                JobbType.AO_BP20 -> 20L
+                JobbType.AO_BP21 -> 21L
+            }
 
-            val saker = grunnlagKlient.hentSaker(foedselsmaaned = foedselsmaaned)
-            logger.info("Hentet ${saker.size} saker for brukere født i $foedselsmaaned")
+        val foedselsmaaned = jobb.behandlingsmaaned.minusYears(yearsToSubtract)
 
-            if (saker.isNotEmpty()) {
-                hendelseDao.opprettHendelserForSaker(jobb.id, saker, Steg.IDENTIFISERT_SAK)
-            } else {
-                // Nuttin' to do
-                hendelseDao.hentJobb(jobb.id).also {
-                    hendelseDao.oppdaterJobbstatusFerdig(it)
-                }
+        val saker = grunnlagKlient.hentSaker(foedselsmaaned = foedselsmaaned)
+        logger.info("Hentet ${saker.size} saker for brukere født i $foedselsmaaned")
+
+        if (saker.isNotEmpty()) {
+            hendelseDao.opprettHendelserForSaker(jobb.id, saker, Steg.IDENTIFISERT_SAK)
+        } else {
+            // Nuttin' to do
+            hendelseDao.hentJobb(jobb.id).also {
+                hendelseDao.oppdaterJobbstatusFerdig(it)
             }
         }
     }

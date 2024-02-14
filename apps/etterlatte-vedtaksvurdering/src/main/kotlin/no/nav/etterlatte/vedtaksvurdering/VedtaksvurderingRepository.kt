@@ -96,42 +96,41 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         tx: TransactionalSession? = null,
     ): Vedtak =
         tx.session {
-            val params =
+            val paramMap =
                 when (oppdatertVedtak.innhold) {
                     is VedtakInnhold.Behandling ->
                         mapOf(
                             "datovirkfom" to oppdatertVedtak.innhold.virkningstidspunkt.atDay(1),
-                            "type" to oppdatertVedtak.type.name,
                             "beregningsresultat" to oppdatertVedtak.innhold.beregning?.toJson(),
                             "avkorting" to oppdatertVedtak.innhold.avkorting?.toJson(),
                             "vilkaarsresultat" to oppdatertVedtak.innhold.vilkaarsvurdering?.toJson(),
-                            "behandlingid" to oppdatertVedtak.behandlingId,
                             "revurderinginfo" to oppdatertVedtak.innhold.revurderingInfo?.toJson(),
                         )
                     is VedtakInnhold.Tilbakekreving ->
                         mapOf(
-                            "type" to oppdatertVedtak.type.name,
-                            "behandlingid" to oppdatertVedtak.behandlingId,
                             "tilbakekreving" to oppdatertVedtak.innhold.tilbakekreving.toJson(),
                         )
                     is VedtakInnhold.Klage ->
                         mapOf(
-                            "type" to oppdatertVedtak.type.name,
-                            "behandlingid" to oppdatertVedtak.behandlingId,
                             "klage" to oppdatertVedtak.innhold.klage.toJson(),
                         )
-                }
+                } +
+                    mapOf(
+                        "behandlingid" to oppdatertVedtak.behandlingId,
+                        "type" to oppdatertVedtak.type.name,
+                    )
 
             queryOf(
                 statement = """
                         UPDATE vedtak 
                         SET datovirkfom = :datovirkfom, type = :type, 
                             beregningsresultat = :beregningsresultat, avkorting = :avkorting,
-                             vilkaarsresultat = :vilkaarsresultat, revurderinginfo = :revurderinginfo,
-                             tilbakekreving = :tilbakekreving
+                            vilkaarsresultat = :vilkaarsresultat, revurderinginfo = :revurderinginfo,
+                            tilbakekreving = :tilbakekreving,
+                            klage = :klage
                         WHERE behandlingId = :behandlingid
                         """,
-                params,
+                paramMap = paramMap,
             ).let { query -> this.run(query.asUpdate) }
 
             if (oppdatertVedtak.innhold is VedtakInnhold.Behandling) {
@@ -186,7 +185,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, tilbakekreving 
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo,
+                tilbakekreving, klage 
             FROM vedtak 
             WHERE id = :vedtakId
             """,
@@ -205,7 +205,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                 queryString = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, tilbakekreving 
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, 
+                tilbakekreving, klage 
             FROM vedtak 
             WHERE behandlingId = :behandlingId
             """,
@@ -228,7 +229,8 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
         val hentVedtak = """
             SELECT sakid, behandlingId, saksbehandlerId, beregningsresultat, avkorting, vilkaarsresultat, id, fnr, 
                 datoFattet, datoattestert, attestant, datoVirkFom, vedtakstatus, saktype, behandlingtype, 
-                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo, tilbakekreving 
+                attestertVedtakEnhet, fattetVedtakEnhet, type, revurderingsaarsak, revurderinginfo,
+                tilbakekreving, klage 
             FROM vedtak  
             WHERE sakId = :sakId
             """

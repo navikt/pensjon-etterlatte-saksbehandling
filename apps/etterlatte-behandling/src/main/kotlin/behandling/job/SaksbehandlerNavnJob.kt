@@ -85,7 +85,7 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                                 null
                             }
                         } catch (e: Exception) {
-                            logger.error("Kunne ikke hente enheter for saksbehandlerident ${it.first}")
+                            logger.error("Kunne ikke hente enheter for saksbehandlerident ${it.first}", e)
                             null
                         }
                     }

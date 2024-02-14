@@ -21,7 +21,8 @@ class DoedshendelseJobServiceTest {
             every { isEnabled(any(), any()) } returns true
         }
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
-    private val service = DoedshendelseJobService(dao, toggle, grunnlagsendringshendelseService)
+    private val todagergammel = 2
+    private val service = DoedshendelseJobService(dao, toggle, grunnlagsendringshendelseService, todagergammel)
 
     @Test
     fun `skal kjøre 1 ny gyldig hendelse som er 2 dager gammel og droppe 1`() {
@@ -35,7 +36,10 @@ class DoedshendelseJobServiceTest {
         val doedshendelser =
             listOf(
                 doedshendelse,
-                doedshendelse.copy(avdoedFnr = AVDOED_FOEDSELSNUMMER.value, endret = LocalDateTime.now().minusDays(2L).toTidspunkt()),
+                doedshendelse.copy(
+                    avdoedFnr = AVDOED_FOEDSELSNUMMER.value,
+                    endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt(),
+                ),
             )
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
         every { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) } returns emptyList()

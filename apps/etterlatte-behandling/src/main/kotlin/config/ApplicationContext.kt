@@ -329,7 +329,8 @@ internal class ApplicationContext(
             doedshendelseService = doedshendelseService,
         )
 
-    val doedshendelseJobService = DoedshendelseJobService(doedshendelseDao, featureToggleService, grunnlagsendringshendelseService)
+    val doedshendelseJobService =
+        DoedshendelseJobService(doedshendelseDao, featureToggleService, grunnlagsendringshendelseService, if (isProd()) 2 else 0)
 
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(

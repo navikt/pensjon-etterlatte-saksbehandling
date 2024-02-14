@@ -12,6 +12,7 @@ class DoedshendelseJobService(
     private val doedshendelseDao: DoedshendelseDao,
     private val featureToggleService: FeatureToggleService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
+    private val dagerGamleHendelserSomSkalKjoeres: Int,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -28,7 +29,7 @@ class DoedshendelseJobService(
     private fun hendelserErGyldige(hendelser: List<Doedshendelse>): List<Doedshendelse> {
         val idag = LocalDateTime.now()
         return hendelser.filter {
-            Duration.between(it.endret, idag.toTidspunkt()).toDays() >= 2L
+            Duration.between(it.endret, idag.toTidspunkt()).toDays() >= dagerGamleHendelserSomSkalKjoeres
         }.distinctBy { it.avdoedFnr }.also { logger.info("Antall gyldige dødsmeldinger ${it.size}") }
     }
 

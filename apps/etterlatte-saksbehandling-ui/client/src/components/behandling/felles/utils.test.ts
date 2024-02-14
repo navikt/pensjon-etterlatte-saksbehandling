@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { soeknadsoversiktErFerdigUtfylt, behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
+import { behandlingSkalSendeBrev, soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
 import {
   IBehandlingStatus,
   IBehandlingsType,
@@ -7,6 +7,7 @@ import {
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
+  Vedtaksloesning,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
@@ -205,6 +206,7 @@ const opprettBehandling = (
     revurderinginfo: null,
     begrunnelse: null,
     utlandstilknytning: null,
+    kilde: Vedtaksloesning.GJENNY,
   }
 }
 

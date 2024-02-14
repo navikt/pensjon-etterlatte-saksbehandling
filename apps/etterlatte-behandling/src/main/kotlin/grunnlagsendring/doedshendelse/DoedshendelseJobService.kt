@@ -29,7 +29,7 @@ class DoedshendelseJobService(
         val idag = LocalDateTime.now()
         return hendelser.filter {
             Duration.between(it.endret, idag.toTidspunkt()).toDays() >= 2L
-        }.also { logger.info("Antall gyldige dødsmeldinger ${it.size}") }
+        }.distinctBy { it.avdoedFnr }.also { logger.info("Antall gyldige dødsmeldinger ${it.size}") }
     }
 
     private fun hentAlleNyeDoedsmeldinger() = doedshendelseDao.hentDoedshendelserMedStatus(DoedshendelseStatus.NY)

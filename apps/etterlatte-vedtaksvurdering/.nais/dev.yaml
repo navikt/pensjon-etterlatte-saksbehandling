@@ -19,10 +19,6 @@ spec:
         databases:
           - name: vedtaksvurdering
             envVarPrefix: DB
-  preAuthorizedApplications:
-    - application: ida
-      cluster: prod-fss
-      namespace: traktor
   liveness:
     initialDelay: 5
     path: /health/isalive

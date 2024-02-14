@@ -41,8 +41,9 @@ class DoedshendelseService(
 
         val beroerte = finnBeroerteBarn(avdoed)
         sikkerLogg.info("Fant ${beroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")
-
-        lagreDoedshendelse(beroerte, avdoed)
+        inTransaction {
+            lagreDoedshendelse(beroerte, avdoed)
+        }
     }
 
     private fun lagreDoedshendelse(
@@ -50,17 +51,15 @@ class DoedshendelseService(
         avdoed: PersonDTO,
     ) {
         if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)) {
-            inTransaction {
-                beroerte.forEach { barn ->
-                    doedshendelseDao.opprettDoedshendelse(
-                        Doedshendelse.nyHendelse(
-                            avdoedFnr = avdoed.foedselsnummer.verdi.value,
-                            avdoedDoedsdato = avdoed.doedsdato!!.verdi,
-                            beroertFnr = barn.foedselsnummer.value,
-                            relasjon = Relasjon.BARN,
-                        ),
-                    )
-                }
+            beroerte.forEach { barn ->
+                doedshendelseDao.opprettDoedshendelse(
+                    Doedshendelse.nyHendelse(
+                        avdoedFnr = avdoed.foedselsnummer.verdi.value,
+                        avdoedDoedsdato = avdoed.doedsdato!!.verdi,
+                        beroertFnr = barn.foedselsnummer.value,
+                        relasjon = Relasjon.BARN,
+                    ),
+                )
             }
         }
     }

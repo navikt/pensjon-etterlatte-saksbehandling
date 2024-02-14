@@ -181,16 +181,16 @@ export const ToggleMinOppgaveliste = () => {
       </TabsWidth>
       {oppgaveListeValg === 'MinOppgaveliste' ? (
         <MinOppgaveliste
-          minsideOppgaver={minOppgavelisteOppgaver}
-          minsideOppgaverResult={minOppgavelisteOppgaverResult}
+          oppgaver={minOppgavelisteOppgaver}
+          oppgaverResult={minOppgavelisteOppgaverResult}
           gosysOppgaverResult={gosysOppgaverResult}
-          minsideFilter={minOppgavelisteFilter}
-          setMinsideFilter={(filter: Filter) => {
+          filter={minOppgavelisteFilter}
+          setFilter={(filter: Filter) => {
             hentMinOppgavelisteOppgaver(filter.oppgavestatusFilter)
             setMinOppgavelisteFilter(filter)
           }}
-          setMinsideOppgaver={setMinOppgavelisteOppgaver}
-          saksbehandlereIEnhet={saksbehandlereIEnheter}
+          setOppgaver={setMinOppgavelisteOppgaver}
+          saksbehandlereIEnheter={saksbehandlereIEnheter}
           oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
         />
       ) : (

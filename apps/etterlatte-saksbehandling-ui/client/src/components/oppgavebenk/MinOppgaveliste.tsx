@@ -9,46 +9,46 @@ import { Result } from '~shared/api/apiUtils'
 import { Filter } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 
-export const MinOppgaveliste = (props: {
-  minsideOppgaver: OppgaveDTO[]
-  minsideOppgaverResult: Result<OppgaveDTO[]>
+interface Props {
+  oppgaver: OppgaveDTO[]
+  setOppgaver: Dispatch<SetStateAction<OppgaveDTO[]>>
+  oppgaverResult: Result<OppgaveDTO[]>
   gosysOppgaverResult: Result<OppgaveDTO[]>
-  minsideFilter: Filter
-  setMinsideFilter: (filter: Filter) => void
-  setMinsideOppgaver: Dispatch<SetStateAction<OppgaveDTO[]>>
-  saksbehandlereIEnhet: Array<Saksbehandler>
+  filter: Filter
+  setFilter: (filter: Filter) => void
+  saksbehandlereIEnheter: Array<Saksbehandler>
   oppdaterSaksbehandlerTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
-}) => {
-  const {
-    minsideOppgaver,
-    minsideOppgaverResult,
-    gosysOppgaverResult,
-    minsideFilter,
-    setMinsideFilter,
-    setMinsideOppgaver,
-    saksbehandlereIEnhet,
-    oppdaterSaksbehandlerTildeling,
-  } = props
+}
 
+export const MinOppgaveliste = ({
+  oppgaver,
+  setOppgaver,
+  oppgaverResult,
+  gosysOppgaverResult,
+  filter,
+  setFilter,
+  saksbehandlereIEnheter,
+  oppdaterSaksbehandlerTildeling,
+}: Props) => {
   return (
-    <OppgaveFeilWrapper oppgaver={minsideOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
+    <OppgaveFeilWrapper oppgaver={oppgaverResult} gosysOppgaver={gosysOppgaverResult}>
       <>
         <ValgWrapper>
           <VelgOppgavestatuser
-            value={minsideFilter.oppgavestatusFilter}
+            value={filter.oppgavestatusFilter}
             onChange={(oppgavestatusFilter) => {
-              setMinsideFilter({ ...minsideFilter, oppgavestatusFilter })
+              setFilter({ ...filter, oppgavestatusFilter })
             }}
           />
         </ValgWrapper>
         <Oppgaver
-          oppgaver={minsideOppgaver}
+          oppgaver={oppgaver}
           oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
-            oppdaterFrist(setMinsideOppgaver, minsideOppgaver, id, nyfrist, versjon)
+            oppdaterFrist(setOppgaver, oppgaver, id, nyfrist, versjon)
           }
           oppdaterTildeling={(id, _saksbehandler, versjon) => oppdaterSaksbehandlerTildeling(id, null, versjon)}
           erMinOppgaveliste={true}
-          saksbehandlereIEnhet={saksbehandlereIEnhet}
+          saksbehandlereIEnhet={saksbehandlereIEnheter}
         />
       </>
     </OppgaveFeilWrapper>

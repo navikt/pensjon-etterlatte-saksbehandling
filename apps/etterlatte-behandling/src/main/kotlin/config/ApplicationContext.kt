@@ -391,8 +391,8 @@ internal class ApplicationContext(
         DoedsmeldingJob(
             doedshendelseJobService,
             { leaderElectionKlient.isLeader() },
-            Duration.of(10, ChronoUnit.MINUTES).toMillis(),
-            periode = Duration.of(5, ChronoUnit.MINUTES),
+            0L,
+            interval = Duration.of(6, ChronoUnit.HOURS),
         )
     }
 

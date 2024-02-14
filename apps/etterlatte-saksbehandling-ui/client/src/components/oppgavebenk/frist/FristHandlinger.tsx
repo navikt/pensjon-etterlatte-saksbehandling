@@ -113,6 +113,7 @@ export const FristHandlinger = (props: {
 
           {erRedigerbar ? (
             <Button
+              size="small"
               variant="tertiary"
               iconPosition="right"
               icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}

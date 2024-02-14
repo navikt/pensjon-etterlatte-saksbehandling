@@ -6,6 +6,8 @@ import io.mockk.verify
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
@@ -25,12 +27,16 @@ class DoedshendelseJobServiceTest {
     fun `skal kjøre 1 ny gyldig hendelse og droppe 1`() {
         val doedshendelse =
             Doedshendelse.nyHendelse(
-                avdoedFnr = "12345678901",
+                avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
                 avdoedDoedsdato = LocalDate.now(),
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
             )
-        val doedshendelser = listOf(doedshendelse, doedshendelse.copy(opprettet = LocalDateTime.now().minusDays(2L).toTidspunkt()))
+        val doedshendelser =
+            listOf(
+                doedshendelse,
+                doedshendelse.copy(avdoedFnr = AVDOED_FOEDSELSNUMMER.value, endret = LocalDateTime.now().minusDays(2L).toTidspunkt()),
+            )
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
         every { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) } returns emptyList()
         service.run()

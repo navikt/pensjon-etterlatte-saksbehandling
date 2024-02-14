@@ -11,27 +11,40 @@ import {
 } from '~components/oppgavebenk/oppgaverTable/oppgavesortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveutils'
+import { Filter, filtrerOppgaver } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
 
-export interface oppgaveListaProps {
-  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
+export interface OppgavelisteProps {
   oppgaver: OppgaveDTO[]
-  oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
-  totaltAntallOppgaver?: number
-  erMinOppgaveliste: boolean
+  oppdaterFrist?: (id: string, nyfrist: string, versjon: number | null) => void
+  filter?: Filter
 }
 
 export const Oppgaver = ({
-  oppdaterTildeling,
   oppgaver,
-  oppdaterFrist,
+  oppdaterTildeling,
   saksbehandlereIEnhet,
-  totaltAntallOppgaver,
-  erMinOppgaveliste,
-}: oppgaveListaProps): ReactNode => {
+  oppdaterFrist,
+  filter,
+}: OppgavelisteProps): ReactNode => {
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
 
-  const sortertFrist = sorterFrist(sortering.fristSortering, oppgaver)
+  const filtrerteOppgaver = filter
+    ? filtrerOppgaver(
+        filter.enhetsFilter,
+        filter.fristFilter,
+        filter.saksbehandlerFilter,
+        filter.ytelseFilter,
+        filter.oppgavestatusFilter,
+        filter.oppgavetypeFilter,
+        filter.oppgavekildeFilter,
+        [...oppgaver],
+        filter.fnrFilter
+      )
+    : oppgaver
+
+  const sortertFrist = sorterFrist(sortering.fristSortering, filtrerteOppgaver)
   const sorterteOppgaver = sorterFnr(sortering.fnrSortering, sortertFrist)
 
   const [page, setPage] = useState<number>(1)
@@ -41,40 +54,37 @@ export const Oppgaver = ({
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
   useEffect(() => {
-    if (paginerteOppgaver.length === 0 && oppgaver.length > 0) setPage(1)
-  }, [paginerteOppgaver, oppgaver])
+    if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
+  }, [paginerteOppgaver, filtrerteOppgaver])
+
+  if (!paginerteOppgaver.length) return <Alert variant="info">Ingen oppgaver</Alert>
 
   return (
     <>
-      {paginerteOppgaver && paginerteOppgaver.length > 0 ? (
-        <>
-          <PagineringsKontroller page={page} setPage={setPage} antallSider={Math.ceil(oppgaver.length / rowsPerPage)} />
+      <PagineringsKontroller
+        page={page}
+        setPage={setPage}
+        antallSider={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
+      />
 
-          <OppgaverTable
-            oppgaver={paginerteOppgaver}
-            oppdaterTildeling={oppdaterTildeling}
-            erMinOppgaveliste={erMinOppgaveliste}
-            oppdaterFrist={oppdaterFrist}
-            saksbehandlereIEnhet={saksbehandlereIEnhet}
-            setSortering={setSortering}
-          />
+      <OppgaverTable
+        oppgaver={paginerteOppgaver}
+        oppdaterTildeling={oppdaterTildeling}
+        oppdaterFrist={oppdaterFrist}
+        saksbehandlereIEnhet={saksbehandlereIEnhet}
+        setSortering={setSortering}
+      />
 
-          <PagineringsKontroller
-            page={page}
-            setPage={setPage}
-            antallSider={Math.ceil(oppgaver.length / rowsPerPage)}
-            raderPerSide={rowsPerPage}
-            setRaderPerSide={setRowsPerPage}
-            totalAvOppgaverTeksts={`Viser ${(page - 1) * rowsPerPage + 1} - ${
-              (page - 1) * rowsPerPage + paginerteOppgaver.length
-            } av ${oppgaver.length} oppgaver ${
-              totaltAntallOppgaver ? `(totalt ${totaltAntallOppgaver} oppgaver)` : ''
-            }`}
-          />
-        </>
-      ) : (
-        <Alert variant="info">Ingen oppgaver</Alert>
-      )}
+      <PagineringsKontroller
+        page={page}
+        setPage={setPage}
+        antallSider={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
+        raderPerSide={rowsPerPage}
+        setRaderPerSide={setRowsPerPage}
+        totalAvOppgaverTeksts={`Viser ${(page - 1) * rowsPerPage + 1} - ${
+          (page - 1) * rowsPerPage + paginerteOppgaver.length
+        } av ${filtrerteOppgaver.length} oppgaver ${oppgaver.length ? `(totalt ${oppgaver.length} oppgaver)` : ''}`}
+      />
     </>
   )
 }

@@ -3,7 +3,7 @@ import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
-import { Container } from '~shared/styled'
+import { Container, FlexRow } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
@@ -17,11 +17,14 @@ import { isSuccess } from '~shared/api/apiUtils'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
   leggTilOppgavenIMinliste,
+  oppdaterFrist,
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveutils'
-import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
-import { Oppgavelista } from '~components/oppgavebenk/Oppgavelista'
 import { Saksbehandler } from '~shared/types/saksbehandler'
+import { FilterRad } from '~components/oppgavebenk/oppgaveFiltrering/FilterRad'
+import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
+import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
+import { OppgaveFeilWrapper } from '~components/oppgavebenk/components/OppgaveFeilWrapper'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -179,32 +182,49 @@ export const ToggleMinOppgaveliste = () => {
           />
         </Tabs.List>
       </TabsWidth>
+
       {oppgaveListeValg === 'MinOppgaveliste' ? (
-        <MinOppgaveliste
-          oppgaver={minOppgavelisteOppgaver}
-          setOppgaver={setMinOppgavelisteOppgaver}
-          oppgaverResult={minOppgavelisteOppgaverResult}
-          gosysOppgaverResult={gosysOppgaverResult}
-          filter={minOppgavelisteFilter}
-          setFilter={(filter: Filter) => {
-            hentMinOppgavelisteOppgaver(filter.oppgavestatusFilter)
-            setMinOppgavelisteFilter(filter)
-          }}
-          saksbehandlereIEnheter={saksbehandlereIEnheter}
-          oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
-        />
+        <>
+          <FlexRow>
+            <VelgOppgavestatuser
+              value={minOppgavelisteFilter.oppgavestatusFilter}
+              onChange={(oppgavestatusFilter) => {
+                hentMinOppgavelisteOppgaver(oppgavestatusFilter)
+                setMinOppgavelisteFilter({ ...minOppgavelisteFilter, oppgavestatusFilter })
+              }}
+            />
+          </FlexRow>
+
+          <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
+            <Oppgaver
+              oppgaver={minOppgavelisteOppgaver}
+              oppdaterTildeling={oppdaterSaksbehandlerTildeling}
+              oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
+                oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
+              }
+              saksbehandlereIEnhet={saksbehandlereIEnheter}
+            />
+          </OppgaveFeilWrapper>
+        </>
       ) : (
-        <Oppgavelista
-          oppgaver={oppgavelistaOppgaver}
-          hentOppgavelistaOppgaver={hentOppgavelistaOppgaver}
-          hentAlleMinOppgavelisteOppgaver={hentAlleMinOppgavelisteOppgaver}
-          oppgavelistaOppgaverResult={oppgavelistaOppgaverResult}
-          gosysOppgaverResult={gosysOppgaverResult}
-          filter={oppgavelistaFilter}
-          setFilter={setOppgavelistaFilter}
-          saksbehandlereIEnheter={saksbehandlereIEnheter}
-          oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
-        />
+        <>
+          <FilterRad
+            hentAlleOppgaver={hentAlleMinOppgavelisteOppgaver}
+            hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => hentOppgavelistaOppgaver(oppgavestatusFilter)}
+            filter={oppgavelistaFilter}
+            setFilter={setOppgavelistaFilter}
+            alleOppgaver={oppgavelistaOppgaver}
+          />
+
+          <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
+            <Oppgaver
+              oppgaver={oppgavelistaOppgaver}
+              oppdaterTildeling={oppdaterSaksbehandlerTildeling}
+              saksbehandlereIEnhet={saksbehandlereIEnheter}
+              filter={oppgavelistaFilter}
+            />
+          </OppgaveFeilWrapper>
+        </>
       )}
     </Container>
   )

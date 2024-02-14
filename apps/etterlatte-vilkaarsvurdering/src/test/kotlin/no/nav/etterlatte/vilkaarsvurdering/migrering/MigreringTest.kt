@@ -148,10 +148,23 @@ class MigreringTest {
                     .let { objectMapper.readValue(it.bodyAsText(), VilkaarsvurderingDto::class.java) }
                     .vilkaar
                     .also { assertEquals(it.size, 8) }
-            vilkaar.find { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
-                .let { assertEquals(it!!.hovedvilkaar.resultat, Utfall.IKKE_OPPFYLT) }
-            vilkaar.filter { it.hovedvilkaar.type != VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
+            val vilkaarOppfylles =
+                listOf(
+                    VilkaarType.BP_FORMAAL_2024,
+                    VilkaarType.BP_DOEDSFALL_FORELDER_2024,
+                    VilkaarType.BP_ALDER_BARN_2024,
+                    VilkaarType.BP_FORTSATT_MEDLEMSKAP_2024,
+                )
+            val vilkarIkkeOppfylt = listOf(VilkaarType.BP_YRKESSKADE_AVDOED_2024)
+
+            vilkaar.filter { vilkaarOppfylles.contains(it.hovedvilkaar.type) }
+                .forEach { assertEquals(it.hovedvilkaar.resultat, Utfall.OPPFYLT) }
+
+            vilkaar.filter { !(vilkaarOppfylles + vilkarIkkeOppfylt).contains(it.hovedvilkaar.type) }
                 .forEach { assertEquals(it.hovedvilkaar.resultat, Utfall.IKKE_VURDERT) }
+
+            vilkaar.filter { vilkarIkkeOppfylt.contains(it.hovedvilkaar.type) }
+                .forEach { assertEquals(it.hovedvilkaar.resultat, Utfall.IKKE_OPPFYLT) }
         }
     }
 
@@ -180,9 +193,17 @@ class MigreringTest {
                     .let { objectMapper.readValue(it.bodyAsText(), VilkaarsvurderingDto::class.java) }
                     .vilkaar
                     .also { assertEquals(it.size, 8) }
-            vilkaar.find { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
-                .let { assertEquals(it!!.hovedvilkaar.resultat, Utfall.OPPFYLT) }
-            vilkaar.filter { it.hovedvilkaar.type != VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
+            val vilkaarOppfylles =
+                listOf(
+                    VilkaarType.BP_FORMAAL_2024,
+                    VilkaarType.BP_DOEDSFALL_FORELDER_2024,
+                    VilkaarType.BP_YRKESSKADE_AVDOED_2024,
+                    VilkaarType.BP_ALDER_BARN_2024,
+                    VilkaarType.BP_FORTSATT_MEDLEMSKAP_2024,
+                )
+            vilkaar.filter { vilkaarOppfylles.contains(it.hovedvilkaar.type) }
+                .forEach { assertEquals(it.hovedvilkaar.resultat, Utfall.OPPFYLT) }
+            vilkaar.filter { !vilkaarOppfylles.contains(it.hovedvilkaar.type) }
                 .forEach { assertEquals(it.hovedvilkaar.resultat, Utfall.IKKE_VURDERT) }
         }
     }

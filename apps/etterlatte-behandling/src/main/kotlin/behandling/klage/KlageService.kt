@@ -303,7 +303,7 @@ class KlageServiceImpl(
             oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(klageId.toString())
                 ?: throw ManglerSaksbehandlerException("Fant ingen saksbehandler på oppgave relatert til klageid $klageId")
 
-        if (saksbehandlerForKlageOppgave.saksbehandlerIdent != saksbehandler.ident) {
+        if (saksbehandlerForKlageOppgave.ident != saksbehandler.ident) {
             throw UgyldigForespoerselException(
                 code = "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
                 detail =

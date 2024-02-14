@@ -26,6 +26,8 @@ import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PesysKlient
+import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -100,6 +102,8 @@ abstract class BehandlingIntegrationTest {
                         put("NAVANSATT_URL", "http://localhost")
                         put("SKJERMING_URL", "http://localhost")
                         put("OPPGAVE_URL", "http://localhost")
+                        put("PEN_URL", "http://localhost")
+                        put("PEN_CLIENT_ID", "ddd52335-cfe8-4ee9-9e68-416a5ab26efa")
                         put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
                         put("ETTERLATTE_TILBAKEKREVING_URL", "http://localhost")
                         put("ETTERLATTE_MIGRERING_URL", "http://localhost")
@@ -128,6 +132,7 @@ abstract class BehandlingIntegrationTest {
                 klageHttpClient = klageHttpClientTest(),
                 tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
                 migreringHttpClient = migreringHttpClientTest(),
+                pesysKlient = PesysKlientTest(),
             )
     }
 
@@ -598,5 +603,11 @@ class NavAnsattKlientTest : NavAnsattKlient {
 
     override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? {
         return SaksbehandlerInfo("ident", "Max Manus")
+    }
+}
+
+class PesysKlientTest : PesysKlient {
+    override suspend fun hentSaker(fnr: String): List<SakSammendragResponse> {
+        return emptyList()
     }
 }

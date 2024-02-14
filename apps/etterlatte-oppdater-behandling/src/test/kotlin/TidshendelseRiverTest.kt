@@ -1,3 +1,4 @@
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -18,7 +19,6 @@ import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalTime
 import java.time.Month
 import java.time.YearMonth
@@ -47,7 +47,8 @@ class TidshendelseRiverTest {
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
             field(0, DRYRUN).asBoolean() shouldBe false
-            field(0, HENDELSE_DATA_KEY).asText() shouldBe nyOppgaveID.toString()
+            field(0, HENDELSE_DATA_KEY) shouldHaveSize 1
+            field(0, HENDELSE_DATA_KEY)["opprettetOppgaveId"].asText() shouldBe nyOppgaveID.toString()
         }
 
         verify { behandlingService.opprettOppgave(sakId, OppgaveType.MANUELT_OPPHOER, any(), "Aldersovergang", frist) }
@@ -68,9 +69,7 @@ class TidshendelseRiverTest {
             field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
             field(0, DRYRUN).asBoolean() shouldBe true
-            assertThrows<IllegalArgumentException>(message = "Message does not contain field '$HENDELSE_DATA_KEY'") {
-                field(0, HENDELSE_DATA_KEY)
-            }
+            field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
         }
 
         verify(exactly = 0) { behandlingService.opprettOppgave(sakId, any(), any(), "Aldersovergang", any()) }
@@ -90,8 +89,10 @@ class TidshendelseRiverTest {
             SAK_ID_KEY to sakId,
             DATO_KEY to behandlingsmaaned.atDay(1),
             DRYRUN to dryRun,
-            // har løpende ytelse
-            HENDELSE_DATA_KEY to true,
+            HENDELSE_DATA_KEY to
+                mapOf(
+                    "loependeYtelse" to true,
+                ),
         ),
     )
 }

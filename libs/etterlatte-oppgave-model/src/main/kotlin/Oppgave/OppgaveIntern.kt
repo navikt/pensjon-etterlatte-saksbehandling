@@ -19,8 +19,8 @@ abstract class Oppgave {
 }
 
 data class OppgaveSaksbehandler(
-    val saksbehandlerIdent: String? = null,
-    val saksbehandlerNavn: String? = null,
+    val ident: String? = null,
+    val navn: String? = null,
 )
 
 data class OppgaveIntern(

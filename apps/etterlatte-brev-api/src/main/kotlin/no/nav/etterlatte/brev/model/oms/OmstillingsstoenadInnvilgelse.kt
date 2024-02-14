@@ -58,7 +58,7 @@ data class OmstillingsstoenadInnvilgelse(
                 avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
                 beregning =
                     OmstillingsstoenadBeregning(
-                        innhold = innholdMedVedlegg.finnVedlegg(listOf(BrevVedleggKey.OMS_BEREGNING, BrevVedleggKey.BEREGNING_INNHOLD)),
+                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
                         virkningsdato = avkortingsinfo.virkningsdato,
                         inntekt = avkortingsinfo.inntekt,
                         grunnbeloep = avkortingsinfo.grunnbeloep,

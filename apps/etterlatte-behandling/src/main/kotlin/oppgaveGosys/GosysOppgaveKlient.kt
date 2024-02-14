@@ -4,6 +4,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.objectMapper
@@ -194,11 +196,11 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
             .mapBoth(
                 success = { resource -> resource.response.let { objectMapper.readValue<GosysApiOppgave>(it.toString()) } },
                 failure = { errorResponse ->
-                    if (errorResponse.response?.status == HttpStatusCode.Conflict) {
-                        throw GosysKonfliktException(errorResponse.detail)
-                    } else {
-                        throw errorResponse
+                    if (errorResponse is ResponseException && errorResponse.response.status == HttpStatusCode.Conflict) {
+                        throw GosysKonfliktException(errorResponse.response.bodyAsText())
                     }
+
+                    throw errorResponse
                 },
             )
     }

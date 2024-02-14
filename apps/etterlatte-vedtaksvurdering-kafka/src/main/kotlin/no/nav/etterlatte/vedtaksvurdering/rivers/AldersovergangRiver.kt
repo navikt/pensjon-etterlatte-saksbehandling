@@ -19,6 +19,8 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.Month
 
 class AldersovergangRiver(
     rapidsConnection: RapidsConnection,
@@ -56,16 +58,31 @@ class AldersovergangRiver(
             ),
         ) {
             if (step == VedtakAldersovergangStepEvents.IDENTIFISERT_SAK.name) {
+                val hendelseData = mutableMapOf<String, Any>()
+
                 val behandlingsdato = packet.dato
                 logger.info("Sjekker løpende ytelse for sak $sakId, behandlingsmåned=$behandlingsdato, dryrun=$dryrun")
 
                 val loependeYtelse = vedtakService.harLoependeYtelserFra(sakId, behandlingsdato)
                 logger.info("Sak $sakId, behandlingsmåned=$behandlingsdato har løpende ytelse: ${loependeYtelse.erLoepende}")
+                hendelseData["loependeYtelse"] = loependeYtelse.erLoepende
+
+                if (loependeYtelse.erLoepende) {
+                    val loependeYtelsePerJanuar2024 = vedtakService.harLoependeYtelserFra(sakId, ikrafttredenEtterlattereformen)
+                    hendelseData["loependeYtelse_januar2024"] = loependeYtelsePerJanuar2024.erLoepende
+                    loependeYtelsePerJanuar2024.behandlingId?.let {
+                        hendelseData["loependeYtelse_januar2024_behandlingId"] = it.toString()
+                    }
+                }
 
                 packet[ALDERSOVERGANG_STEG_KEY] = VedtakAldersovergangStepEvents.VURDERT_LOEPENDE_YTELSE.name
-                packet[HENDELSE_DATA_KEY] = loependeYtelse.erLoepende
+                packet[HENDELSE_DATA_KEY] = hendelseData
                 context.publish(packet.toJson())
             }
         }
+    }
+
+    companion object {
+        val ikrafttredenEtterlattereformen: LocalDate = LocalDate.of(2024, Month.JANUARY, 1)
     }
 }

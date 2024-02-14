@@ -1017,7 +1017,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        assertEquals(saksbehandlerIdent, saksbehandlerHentet.saksbehandlerIdent)
+        assertEquals(saksbehandlerIdent, saksbehandlerHentet.ident)
     }
 
     @Test
@@ -1059,7 +1059,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(revurderingId)
 
-        assertEquals(saksbehandlerIdent, saksbehandlerHentet.saksbehandlerIdent)
+        assertEquals(saksbehandlerIdent, saksbehandlerHentet.ident)
     }
 
     @Test
@@ -1095,7 +1095,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        assertEquals(saksbehandler.ident, saksbehandlerHentet.saksbehandlerIdent)
+        assertEquals(saksbehandler.ident, saksbehandlerHentet.ident)
     }
 
     @Test
@@ -1112,6 +1112,6 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        Assertions.assertNull(saksbehandlerHentet.saksbehandlerIdent)
+        Assertions.assertNull(saksbehandlerHentet.ident)
     }
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ResponseException
 import io.ktor.http.HttpStatusCode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -60,18 +61,16 @@ class GrunnlagKlientObo(config: Config, httpClient: HttpClient) : GrunnlagKlient
                 )
                 .mapBoth(
                     success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
-                    failure = { errorResponse ->
-                        if (errorResponse.response?.status == HttpStatusCode.NotFound) {
-                            null
-                        } else {
-                            throw errorResponse
-                        }
-                    },
+                    failure = { errorResponse -> throw errorResponse },
                 )
-        } catch (e: Exception) {
+        } catch (re: ResponseException) {
+            if (re.response.status == HttpStatusCode.NotFound) {
+                return null
+            }
+
             throw GrunnlagKlientException(
                 "Henting av opplysning ($opplysningsType) fra grunnlag for behandling med id=$behandlingId feilet",
-                e,
+                re,
             )
         }
     }

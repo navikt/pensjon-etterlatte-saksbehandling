@@ -83,7 +83,7 @@ class TidshendelseRiverTest {
     ) = JsonMessage.newMessage(
         EventNames.ALDERSOVERGANG.lagEventnameForType(),
         mapOf(
-            ALDERSOVERGANG_STEG_KEY to "VURDERT_LOEPENDE_YTELSE",
+            ALDERSOVERGANG_STEG_KEY to "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR",
             ALDERSOVERGANG_TYPE_KEY to "BP20",
             ALDERSOVERGANG_ID_KEY to hendelseId,
             SAK_ID_KEY to sakId,

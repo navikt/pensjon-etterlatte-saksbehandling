@@ -52,6 +52,14 @@ fun Route.vilkaarsvurdering(
             }
         }
 
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/migrertYrkesskadefordel") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter vilkårsvurdering for $behandlingId")
+                val result = vilkaarsvurderingService.erMigrertYrkesskadefordel(behandlingId)
+                call.respond(mapOf("migrertYrkesskadefordel" to result))
+            }
+        }
+
         post("/{$BEHANDLINGID_CALL_PARAMETER}/opprett") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 try {

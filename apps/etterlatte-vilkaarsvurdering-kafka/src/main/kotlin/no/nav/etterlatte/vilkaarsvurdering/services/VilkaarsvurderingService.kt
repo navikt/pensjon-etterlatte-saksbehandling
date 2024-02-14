@@ -1,6 +1,8 @@
 package no.nav.etterlatte.vilkaarsvurdering.services
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
@@ -23,6 +25,8 @@ interface VilkaarsvurderingService {
         behandlingId: UUID,
         yrkesskadeFordel: Boolean,
     ): HttpResponse
+
+    fun harMigrertYrkesskadefordel(behandlingId: String): Boolean
 }
 
 class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClient, private val url: String) :
@@ -53,4 +57,10 @@ class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClie
             setBody(VilkaarsvurderingMigreringRequest(yrkesskadeFordel))
         }
     }
+
+    override fun harMigrertYrkesskadefordel(behandlingId: String): Boolean =
+        runBlocking {
+            vilkaarsvurderingKlient.get("$url/api/vilkaarsvurdering/$behandlingId/migrertYrkesskadefordel")
+                .body<Map<String, Any>>()["migrertYrkesskadefordel"] as Boolean
+        }
 }

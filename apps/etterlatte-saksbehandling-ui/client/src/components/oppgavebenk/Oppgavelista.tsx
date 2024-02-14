@@ -7,60 +7,60 @@ import { Result } from '~shared/api/apiUtils'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { Dispatch, SetStateAction } from 'react'
 
-export const Oppgavelista = (props: {
-  hovedsideOppgaver: OppgaveDTO[]
-  hentHovedsideOppgaverAlle: () => void
-  hovedsideOppgaverResult: Result<OppgaveDTO[]>
+interface Props {
+  oppgaver: OppgaveDTO[]
+  hentOppgavelistaOppgaver: (oppgavestatusFilter: Array<string>) => void
+  hentAlleMinOppgavelisteOppgaver: () => void
+  oppgavelistaOppgaverResult: Result<OppgaveDTO[]>
   gosysOppgaverResult: Result<OppgaveDTO[]>
-  hentHovedsideOppgaver: (oppgavestatusFilter: Array<string>) => void
-  hovedsideFilter: Filter
-  setHovedsideFilter: Dispatch<SetStateAction<Filter>>
-  saksbehandlereIEnhet: Array<Saksbehandler>
+  filter: Filter
+  setFilter: Dispatch<SetStateAction<Filter>>
+  saksbehandlereIEnheter: Array<Saksbehandler>
   oppdaterSaksbehandlerTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
-}) => {
-  const {
-    hovedsideOppgaver,
-    hentHovedsideOppgaverAlle,
-    hovedsideOppgaverResult,
-    gosysOppgaverResult,
-    hentHovedsideOppgaver,
-    hovedsideFilter,
-    setHovedsideFilter,
-    saksbehandlereIEnhet,
-    oppdaterSaksbehandlerTildeling,
-  } = props
+}
 
-  const mutableOppgaver = hovedsideOppgaver.concat()
+export const Oppgavelista = ({
+  oppgaver,
+  hentAlleMinOppgavelisteOppgaver,
+  oppgavelistaOppgaverResult,
+  gosysOppgaverResult,
+  hentOppgavelistaOppgaver,
+  filter,
+  setFilter,
+  saksbehandlereIEnheter,
+  oppdaterSaksbehandlerTildeling,
+}: Props) => {
+  const mutableOppgaver = oppgaver.concat()
 
   const filtrerteOppgaver = filtrerOppgaver(
-    hovedsideFilter.enhetsFilter,
-    hovedsideFilter.fristFilter,
-    hovedsideFilter.saksbehandlerFilter,
-    hovedsideFilter.ytelseFilter,
-    hovedsideFilter.oppgavestatusFilter,
-    hovedsideFilter.oppgavetypeFilter,
-    hovedsideFilter.oppgavekildeFilter,
+    filter.enhetsFilter,
+    filter.fristFilter,
+    filter.saksbehandlerFilter,
+    filter.ytelseFilter,
+    filter.oppgavestatusFilter,
+    filter.oppgavetypeFilter,
+    filter.oppgavekildeFilter,
     mutableOppgaver,
-    hovedsideFilter.fnrFilter
+    filter.fnrFilter
   )
 
   return (
-    <OppgaveFeilWrapper oppgaver={hovedsideOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
+    <OppgaveFeilWrapper oppgaver={oppgavelistaOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
       <>
         <FilterRad
-          hentAlleOppgaver={hentHovedsideOppgaverAlle}
-          hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => hentHovedsideOppgaver(oppgavestatusFilter)}
-          filter={hovedsideFilter}
-          setFilter={setHovedsideFilter}
-          alleOppgaver={hovedsideOppgaver}
+          hentAlleOppgaver={hentAlleMinOppgavelisteOppgaver}
+          hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => hentOppgavelistaOppgaver(oppgavestatusFilter)}
+          filter={filter}
+          setFilter={setFilter}
+          alleOppgaver={oppgaver}
         />
         <Oppgaver
           oppgaver={filtrerteOppgaver}
           oppdaterTildeling={oppdaterSaksbehandlerTildeling}
           oppdaterFrist={() => {}}
-          totaltAntallOppgaver={hovedsideOppgaver.length}
+          totaltAntallOppgaver={oppgaver.length}
           erMinOppgaveliste={false}
-          saksbehandlereIEnhet={saksbehandlereIEnhet}
+          saksbehandlereIEnhet={saksbehandlereIEnheter}
         />
       </>
     </OppgaveFeilWrapper>

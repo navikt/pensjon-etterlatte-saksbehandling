@@ -182,6 +182,7 @@ export const ToggleMinOppgaveliste = () => {
       {oppgaveListeValg === 'MinOppgaveliste' ? (
         <MinOppgaveliste
           oppgaver={minOppgavelisteOppgaver}
+          setOppgaver={setMinOppgavelisteOppgaver}
           oppgaverResult={minOppgavelisteOppgaverResult}
           gosysOppgaverResult={gosysOppgaverResult}
           filter={minOppgavelisteFilter}
@@ -189,20 +190,19 @@ export const ToggleMinOppgaveliste = () => {
             hentMinOppgavelisteOppgaver(filter.oppgavestatusFilter)
             setMinOppgavelisteFilter(filter)
           }}
-          setOppgaver={setMinOppgavelisteOppgaver}
           saksbehandlereIEnheter={saksbehandlereIEnheter}
           oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
         />
       ) : (
         <Oppgavelista
-          saksbehandlereIEnhet={saksbehandlereIEnheter}
-          hovedsideOppgaver={oppgavelistaOppgaver}
-          hentHovedsideOppgaverAlle={hentAlleMinOppgavelisteOppgaver}
-          hovedsideOppgaverResult={oppgavelistaOppgaverResult}
+          oppgaver={oppgavelistaOppgaver}
+          hentOppgavelistaOppgaver={hentOppgavelistaOppgaver}
+          hentAlleMinOppgavelisteOppgaver={hentAlleMinOppgavelisteOppgaver}
+          oppgavelistaOppgaverResult={oppgavelistaOppgaverResult}
           gosysOppgaverResult={gosysOppgaverResult}
-          hentHovedsideOppgaver={hentOppgavelistaOppgaver}
-          hovedsideFilter={oppgavelistaFilter}
-          setHovedsideFilter={setOppgavelistaFilter}
+          filter={oppgavelistaFilter}
+          setFilter={setOppgavelistaFilter}
+          saksbehandlereIEnheter={saksbehandlereIEnheter}
           oppdaterSaksbehandlerTildeling={oppdaterSaksbehandlerTildeling}
         />
       )}

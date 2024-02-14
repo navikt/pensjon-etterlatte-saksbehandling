@@ -40,8 +40,9 @@ class JobbPoller(
             logger.info("Fant jobb ${it.id} med type ${it.type}, status (${it.status})")
 
             when (it.type) {
-                JobbType.AO_BP20 -> aldersovergangerService.execute(it)
                 JobbType.AO_BP18 -> logger.warn("Ikke implementert: AO_BP18")
+                JobbType.AO_BP20 -> aldersovergangerService.execute(it)
+                JobbType.AO_BP21 -> aldersovergangerService.execute(it)
             }
         }
     }

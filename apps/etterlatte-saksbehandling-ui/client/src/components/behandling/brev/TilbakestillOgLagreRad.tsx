@@ -38,8 +38,12 @@ export const TilbakestillOgLagreRad = ({
             Tilbakestill brev
           </Button>
         )}
-        <div>
-          {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
+        <LagreEndringer>
+          {lagretStatus.beskrivelse && (
+            <Detail as="span" style={{ marginRight: '5px' }}>
+              {lagretStatus.beskrivelse}
+            </Detail>
+          )}
           <Button
             icon={<FloppydiskIcon aria-hidden />}
             variant="primary"
@@ -49,7 +53,7 @@ export const TilbakestillOgLagreRad = ({
           >
             Lagre endringer
           </Button>
-        </div>
+        </LagreEndringer>
       </ButtonRow>
       <GeneriskModal
         tittel="Tilbakestill brevet"
@@ -63,6 +67,11 @@ export const TilbakestillOgLagreRad = ({
     </>
   )
 }
+
+const LagreEndringer = styled.div`
+  display: flex;
+  align-items: end;
+`
 
 const ButtonRow = styled.div`
   display: flex;

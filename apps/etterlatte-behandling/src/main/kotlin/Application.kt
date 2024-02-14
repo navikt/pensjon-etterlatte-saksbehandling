@@ -86,6 +86,7 @@ private class Server(private val context: ApplicationContext) {
 internal fun Application.moduleOnServerReady(context: ApplicationContext) {
     environment.monitor.subscribe(ServerReady) {
         context.metrikkerJob.schedule().also { addShutdownHook(it) }
+        context.doedsmeldingerJob.schedule().also { addShutdownHook(it) }
         populerSaksbehandlereMedNavn(context)
     }
 }

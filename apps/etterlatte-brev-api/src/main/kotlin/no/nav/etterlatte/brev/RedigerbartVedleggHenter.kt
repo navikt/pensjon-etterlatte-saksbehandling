@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.BrevDatafetcherVedtak
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -20,6 +21,7 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService, p
     suspend fun hentInitiellPayloadVedlegg(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
+        brevtype: Brevtype,
     ): List<BrevInnholdVedlegg>? =
         when (generellBrevData.sak.sakType) {
             SakType.OMSTILLINGSSTOENAD -> {
@@ -27,7 +29,13 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService, p
                     VedtakType.INNVILGELSE -> vedleggInnvilgelseOmstillingsstoenad(bruker, generellBrevData)
                     VedtakType.OPPHOER -> vedleggOpphoerOmstillingsstoenad(bruker, generellBrevData)
                     VedtakType.ENDRING -> vedleggEndringOmstillingsstoenad(bruker, generellBrevData)
-                    else -> null
+                    else -> {
+                        if (brevtype == Brevtype.VARSEL) {
+                            listOf(hentInnholdBeregningVedleggOms(bruker, generellBrevData))
+                        } else {
+                            null
+                        }
+                    }
                 }
             }
 
@@ -36,7 +44,13 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService, p
                     VedtakType.INNVILGELSE -> vedleggInnvilgelseBarnepensjon(bruker, generellBrevData)
                     VedtakType.OPPHOER -> vedleggOpphoerBarnepensjon(bruker, generellBrevData)
                     VedtakType.ENDRING -> vedleggEndringBarnepensjon(bruker, generellBrevData)
-                    else -> null
+                    else -> {
+                        if (brevtype == Brevtype.VARSEL) {
+                            listOf(hentInnholdBeregningAvTrygdetidBp(bruker, generellBrevData))
+                        } else {
+                            null
+                        }
+                    }
                 }
             }
         }

@@ -17,7 +17,6 @@ class MetrikkerJob(
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
 
-    // TODO: interface for
     fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med uthenter=${uthenter::class.simpleName} og periode $periode")
 

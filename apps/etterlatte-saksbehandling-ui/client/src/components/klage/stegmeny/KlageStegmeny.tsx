@@ -2,7 +2,7 @@ import { StegMenyWrapper } from '~components/behandling/StegMeny/stegmeny'
 import React from 'react'
 import { KlageNavLenke } from '~components/klage/stegmeny/KlageNavLenke'
 import { useKlage } from '~components/klage/useKlage'
-import { Klage, KlageStatus } from '~shared/types/Klage'
+import { Klage, KlageStatus, Utfall } from '~shared/types/Klage'
 import { JaNei } from '~shared/types/ISvar'
 
 export function kanVurdereUtfall(klage: Klage | null): boolean {
@@ -30,9 +30,15 @@ export function kanSeOppsummering(klage: Klage | null): boolean {
   return false
 }
 
-export function kanSeBrev(klage: Klage | null): boolean {
+export function klageKanSeBrev(klage: Klage | null): boolean {
   const utfall = klage?.utfall?.utfall
-  switch (utfall) {
+  if (!utfall) return false
+
+  return kanSeBrev(utfall as Utfall)
+}
+
+export function kanSeBrev(valgtUtfall: Utfall | null) {
+  switch (valgtUtfall) {
     case 'DELVIS_OMGJOERING':
     case 'STADFESTE_VEDTAK':
     case 'AVVIST':
@@ -48,7 +54,7 @@ export function KlageStegmeny() {
     <StegMenyWrapper>
       <KlageNavLenke path="formkrav" description="Vurder formkrav" enabled={true} />
       <KlageNavLenke path="vurdering" description={tittelVurderingSteg()} enabled={kanVurdereUtfall(klage)} />
-      <KlageNavLenke path="brev" description="Brev" enabled={kanSeBrev(klage)} />
+      <KlageNavLenke path="brev" description="Brev" enabled={klageKanSeBrev(klage)} />
       <KlageNavLenke path="oppsummering" description="Oppsummering" enabled={kanSeOppsummering(klage)} />
     </StegMenyWrapper>
   )
@@ -63,7 +69,7 @@ export function nesteSteg(klage: Klage, aktivSide: 'formkrav' | 'vurdering' | 'b
     return `/klage/${klage.id}/vurdering`
   }
   if (aktivSide === 'vurdering') {
-    return kanSeBrev(klage) ? `/klage/${klage.id}/brev` : `/klage/${klage.id}/oppsummering`
+    return klageKanSeBrev(klage) ? `/klage/${klage.id}/brev` : `/klage/${klage.id}/oppsummering`
   }
   if (aktivSide === 'brev') {
     return `/klage/${klage.id}/oppsummering`
@@ -79,7 +85,7 @@ export function forrigeSteg(klage: Klage, aktivSide: 'formkrav' | 'vurdering' | 
     return `/klage/${klage.id}/vurdering`
   }
   if (aktivSide === 'oppsummering') {
-    return kanSeBrev(klage) ? `/klage/${klage.id}/brev` : `/klage/${klage.id}/vurdering`
+    return klageKanSeBrev(klage) ? `/klage/${klage.id}/brev` : `/klage/${klage.id}/vurdering`
   }
   return `/klage/${klage.id}`
 }

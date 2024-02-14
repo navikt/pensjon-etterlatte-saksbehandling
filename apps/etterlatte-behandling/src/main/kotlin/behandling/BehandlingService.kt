@@ -432,6 +432,7 @@ internal class BehandlingServiceImpl(
             revurderingsaarsak = behandling.revurderingsaarsak(),
             revurderinginfo = behandling.revurderingInfo(),
             begrunnelse = behandling.begrunnelse(),
+            kilde = behandling.kilde,
         )
     }
 

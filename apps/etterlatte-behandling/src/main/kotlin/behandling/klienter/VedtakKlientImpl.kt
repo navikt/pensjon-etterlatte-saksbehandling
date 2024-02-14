@@ -209,7 +209,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/klage/${klage.id}/lagre-vedtak",
+                            url = "$resourceUrl/vedtak/klage/${klage.id}/lagre-vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody =

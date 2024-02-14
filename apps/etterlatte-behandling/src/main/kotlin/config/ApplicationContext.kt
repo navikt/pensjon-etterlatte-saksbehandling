@@ -60,6 +60,8 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
@@ -218,6 +220,7 @@ internal class ApplicationContext(
     val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
     val saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans { databaseContext().activeTx() }
+    val doedshendelseDao = DoedshendelseDao { databaseContext().activeTx() }
 
     // Klient
     val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
@@ -319,6 +322,7 @@ internal class ApplicationContext(
             grunnlagKlient = grunnlagKlient,
             sakService = sakService,
             brukerService = enhetService,
+            doedshendelseService = DoedshendelseService(doedshendelseDao, pdlKlient, featureToggleService),
         )
 
     val behandlingsStatusService =

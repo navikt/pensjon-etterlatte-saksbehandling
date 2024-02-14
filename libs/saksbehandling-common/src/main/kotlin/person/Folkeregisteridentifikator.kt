@@ -90,10 +90,6 @@ class Folkeregisteridentifikator private constructor(
         return ChronoUnit.YEARS.between(getBirthDate(), LocalDate.now()).toInt()
     }
 
-    fun getAgeAtDate(date: LocalDate): Int {
-        return ChronoUnit.YEARS.between(getBirthDate(), date).toInt()
-    }
-
     /**
      * Sjekker om fødselsnummeret er av typen "Hjelpenummer".
      *

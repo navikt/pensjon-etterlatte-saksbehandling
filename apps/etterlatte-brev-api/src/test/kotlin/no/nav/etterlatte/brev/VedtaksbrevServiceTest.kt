@@ -286,6 +286,10 @@ internal class VedtaksbrevServiceTest {
                 mockk<DetaljertBehandling>().apply {
                     every { status } returns BehandlingStatus.BEREGNET
                 }
+            coEvery { brevdataFacade.hentBrevutfall(any(), any()) } returns
+                mockk<BrevutfallDto> {
+                    every { feilutbetaling?.valg } returns FeilutbetalingValg.JA_VARSEL
+                }
 
             runBlocking {
                 vedtaksbrevService.opprettVedtaksbrev(

@@ -3,6 +3,7 @@ package no.nav.etterlatte.vilkaarsvurdering
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -12,7 +13,9 @@ import no.nav.etterlatte.libs.common.behandling.erPaaNyttRegelverk
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.kopier
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -36,6 +39,14 @@ class VilkaarsvurderingService(
 
     fun hentVilkaarsvurdering(behandlingId: UUID): Vilkaarsvurdering? {
         return vilkaarsvurderingRepository.hent(behandlingId)
+    }
+
+    fun erMigrertYrkesskadefordel(behandlingId: UUID): Boolean {
+        return vilkaarsvurderingRepository.hent(behandlingId)?.vilkaar
+            ?.filter { it.hovedvilkaar.type == VilkaarType.BP_YRKESSKADE_AVDOED_2024 }
+            ?.filter { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
+            ?.any { it.vurdering?.saksbehandler?.equals(Vedtaksloesning.PESYS.name, true) == true }
+            ?: false
     }
 
     suspend fun hentBehandlingensGrunnlag(

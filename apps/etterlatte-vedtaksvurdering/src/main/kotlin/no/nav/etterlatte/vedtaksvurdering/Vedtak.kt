@@ -34,6 +34,7 @@ data class Vedtak(
     val soeker: Folkeregisteridentifikator,
     val sakId: Long,
     val sakType: SakType,
+    /** kan være ID-en til en behandling, klage eller tilbakekreving */
     val behandlingId: UUID,
     val status: VedtakStatus,
     val type: VedtakType,

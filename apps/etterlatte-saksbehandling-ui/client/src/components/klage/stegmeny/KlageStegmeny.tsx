@@ -35,6 +35,7 @@ export function kanSeBrev(klage: Klage | null): boolean {
   switch (utfall) {
     case 'DELVIS_OMGJOERING':
     case 'STADFESTE_VEDTAK':
+    case 'AVVIST':
       return true
   }
   return false

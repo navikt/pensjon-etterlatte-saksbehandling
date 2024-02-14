@@ -75,7 +75,16 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService, p
     private suspend fun vedleggEndringBarnepensjon(
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
-    ) = listOf(hentInnholdBeregningAvTrygdetidBp(bruker, generellBrevData))
+    ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
+        listOf(
+            hentInnholdBeregningAvTrygdetidBp(bruker, generellBrevData),
+            hentInnholdForhaandsvarselFeilutbetalingVedleggBp(bruker, generellBrevData),
+        )
+    } else {
+        listOf(
+            hentInnholdBeregningAvTrygdetidBp(bruker, generellBrevData),
+        )
+    }
 
     private suspend fun vedleggOpphoerBarnepensjon(
         bruker: BrukerTokenInfo,

@@ -112,10 +112,16 @@ internal fun Route.sakSystemRoutes(
     }
 }
 
-class PersonManglerSak(message: String) :
+class PersonManglerSak() :
     UgyldigForespoerselException(
         code = "PERSON_MANGLER_SAK",
-        detail = message,
+        detail = "Personen har ingen saker i Gjenny",
+    )
+
+class ManglerTilgangTilEnhet(enheter: List<String>) :
+    UgyldigForespoerselException(
+        code = "MANGLER_TILGANG_TIL_ENHET",
+        detail = "Mangler tilgang til enhet $enheter",
     )
 
 class SakIkkeFunnetException(message: String) :

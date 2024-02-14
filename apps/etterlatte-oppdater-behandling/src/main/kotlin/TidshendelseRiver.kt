@@ -37,6 +37,7 @@ class TidshendelseRiver(
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(DRYRUN) }
             validate { it.requireKey(HENDELSE_DATA_KEY) }
+            validate { it.interestedIn("yrkesskadefordel_pre_20240101") }
         }
     }
 
@@ -60,7 +61,9 @@ class TidshendelseRiver(
         ) {
             val hendelseData = mutableMapOf<String, Any>()
 
-            if (packet[HENDELSE_DATA_KEY]["loependeYtelse"]?.asBoolean() == true) {
+            if (type == "AO_BP20" && packet["yrkesskadefordel_pre_20240101"].asBoolean()) {
+                logger.info("Har migrert yrkesskadefordel: utvidet aldersgrense [sak=$sakId]")
+            } else if (packet[HENDELSE_DATA_KEY]["loependeYtelse"]?.asBoolean() == true) {
                 val behandlingsmaaned = packet.dato.let { YearMonth.of(it.year, it.month) }
                 logger.info("Løpende ytelse: opprette oppgave for sak $sakId, behandlingsmåned=$behandlingsmaaned")
 

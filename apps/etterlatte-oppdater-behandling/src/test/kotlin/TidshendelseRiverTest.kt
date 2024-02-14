@@ -44,7 +44,7 @@ class TidshendelseRiverTest {
             size shouldBe 1
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
+            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
             field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 1
@@ -66,9 +66,31 @@ class TidshendelseRiverTest {
             size shouldBe 1
             field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
             field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
-            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "BP20"
+            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
             field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
             field(0, DRYRUN).asBoolean() shouldBe true
+            field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
+        }
+
+        verify(exactly = 0) { behandlingService.opprettOppgave(sakId, any(), any(), "Aldersovergang", any()) }
+    }
+
+    @Test
+    fun `skal ikke kalle tjeneste for aa opprette oppgave hvis BP20 og yrkesskadefordel`() {
+        val hendelseId = UUID.randomUUID()
+        val sakId = 37465L
+        val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
+
+        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned)
+        melding["yrkesskadefordel_pre_20240101"] = true
+
+        with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
+            size shouldBe 1
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
+            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "AO_BP20"
+            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, DRYRUN).asBoolean() shouldBe false
             field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
         }
 
@@ -84,7 +106,7 @@ class TidshendelseRiverTest {
         EventNames.ALDERSOVERGANG.lagEventnameForType(),
         mapOf(
             ALDERSOVERGANG_STEG_KEY to "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR",
-            ALDERSOVERGANG_TYPE_KEY to "BP20",
+            ALDERSOVERGANG_TYPE_KEY to "AO_BP20",
             ALDERSOVERGANG_ID_KEY to hendelseId,
             SAK_ID_KEY to sakId,
             DATO_KEY to behandlingsmaaned.atDay(1),

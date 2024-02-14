@@ -180,7 +180,7 @@ class Brevoppretter(
                     )
                 }
 
-            val innholdVedlegg = async { redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData) }
+            val innholdVedlegg = async { redigerbartVedleggHenter.hentInitiellPayloadVedlegg(bruker, generellBrevData, kode.brevtype) }
 
             OpprettBrevRequest(
                 generellBrevData,

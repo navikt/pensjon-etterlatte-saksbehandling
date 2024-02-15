@@ -2,11 +2,14 @@ package no.nav.etterlatte.rivers
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
+import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
+import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -18,7 +21,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
 class OpprettJournalfoerOgDistribuerRiver(
-    rapidsConnection: RapidsConnection,
+    private val rapidsConnection: RapidsConnection,
     private val brevoppretter: Brevoppretter,
     private val ferdigstillJournalfoerOgDistribuerBrev: FerdigstillJournalfoerOgDistribuerBrev,
 ) : ListenerMedLoggingOgFeilhaandtering() {
@@ -34,16 +37,19 @@ class OpprettJournalfoerOgDistribuerRiver(
     override fun haandterPakke(
         packet: JsonMessage,
         context: MessageContext,
-    ) = runBlocking {
-        val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
-        opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.brev)
+    ) {
+        runBlocking {
+            val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
+            val brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.brev)
+            rapidsConnection.svarSuksess(packet.sakId, brevId)
+        }
     }
 
     private suspend fun opprettJournalfoerOgDistribuer(
         sakId: Long,
         brevKode: Brevkoder,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
+    ): BrevID {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
         val brevOgData =
             retryOgPakkUt {
@@ -67,6 +73,25 @@ class OpprettJournalfoerOgDistribuerRiver(
             sakId,
             brevID,
             brukerTokenInfo,
+        )
+        return brevID
+    }
+
+    private fun RapidsConnection.svarSuksess(
+        sakId: Long,
+        brevID: BrevID,
+    ) {
+        logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
+
+        publish(
+            sakId.toString(),
+            JsonMessage.newMessage(
+                BrevHendelseType.DISTRIBUERT.lagEventnameForType(),
+                mapOf(
+                    BREV_ID_KEY to brevID,
+                    SAK_ID_KEY to sakId,
+                ),
+            ).toJson(),
         )
     }
 }

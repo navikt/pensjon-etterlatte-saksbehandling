@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.toList
@@ -9,6 +10,22 @@ import java.sql.Date
 import java.sql.ResultSet
 
 class DoedshendelseDao(val connection: () -> Connection) {
+    fun oppdaterBrevDistribuertDoedshendelse(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) {
+        with(connection()) {
+            prepareStatement(
+                """
+                UPDATE doedshendelse 
+                SET status = ?, brev_id = ?
+                WHERE sakId = ?
+                """.trimIndent(),
+            ).apply {
+                setString(1, DoedshendelseStatus.FERDIG.name)
+                setLong(2, doedshendelseBrevDistribuert.brevId)
+                setLong(3, doedshendelseBrevDistribuert.sakId)
+            }
+        }
+    }
+
     fun opprettDoedshendelse(doedshendelse: Doedshendelse) =
         with(connection()) {
             prepareStatement(

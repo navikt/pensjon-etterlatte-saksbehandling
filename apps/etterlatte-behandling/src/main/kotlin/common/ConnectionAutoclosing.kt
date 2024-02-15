@@ -7,8 +7,9 @@ import javax.sql.DataSource
 class ConnectionAutoclosing(val dataSource: DataSource) {
     fun <T> hentConnection(block: (connection: Connection) -> T): T {
         return if (manglerKontekst()) {
-            val connection = dataSource.connection
-            block(connection).also { connection.close() }
+            dataSource.connection.use {
+                block(it)
+            }
         } else {
             block(Kontekst.get().databasecontxt.activeTx())
         }

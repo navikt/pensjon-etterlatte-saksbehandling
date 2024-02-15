@@ -2,11 +2,13 @@ package no.nav.etterlatte
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.toJson
@@ -18,6 +20,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 interface VedtakService {
+    fun hentVedtak(behandlingId: UUID): VedtakDto?
+
     fun harLoependeYtelserFra(
         sakId: Long,
         dato: LocalDate,
@@ -44,6 +48,18 @@ interface VedtakService {
 }
 
 class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: String) : VedtakService {
+    override fun hentVedtak(behandlingId: UUID): VedtakDto? =
+        runBlocking {
+            try {
+                vedtakKlient.post("$url/api/vedtak/$behandlingId").body()
+            } catch (e: ResponseException) {
+                if (e.response.status == HttpStatusCode.NotFound) {
+                    return@runBlocking null
+                }
+                throw e
+            }
+        }
+
     override fun harLoependeYtelserFra(
         sakId: Long,
         dato: LocalDate,

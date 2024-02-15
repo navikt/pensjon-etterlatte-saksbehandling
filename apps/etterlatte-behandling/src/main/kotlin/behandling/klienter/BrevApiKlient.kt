@@ -15,9 +15,16 @@ import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 interface BrevApiKlient {
     suspend fun opprettKlageInnstillingsbrevISak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto
+
+    suspend fun opprettVedtaksbrev(
+        behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto
@@ -93,6 +100,14 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
             )
         }
         return opprettetBrev
+    }
+
+    override suspend fun opprettVedtaksbrev(
+        behandlingId: UUID,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        TODO("Not yet implemented")
     }
 
     override suspend fun ferdigstillBrev(

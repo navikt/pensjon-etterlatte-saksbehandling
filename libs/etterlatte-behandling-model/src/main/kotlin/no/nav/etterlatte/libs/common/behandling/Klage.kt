@@ -473,6 +473,8 @@ class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: Strin
 
 data class KlageBrevInnstilling(val brevId: Long)
 
+data class KlageVedtaksbrev(val brevId: Long)
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "utfall")
 sealed class KlageUtfallUtenBrev {
     @JsonTypeName("OMGJOERING")

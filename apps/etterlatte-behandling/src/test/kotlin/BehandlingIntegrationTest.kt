@@ -482,6 +482,14 @@ class BrevApiKlientTest : BrevApiKlient {
         )
     }
 
+    override suspend fun opprettVedtaksbrev(
+        behandlingId: UUID,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun ferdigstillBrev(
         sakId: Long,
         brevId: Long,

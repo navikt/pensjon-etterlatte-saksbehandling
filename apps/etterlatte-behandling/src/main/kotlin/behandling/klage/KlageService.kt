@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
+import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
 import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -222,7 +223,7 @@ class KlageServiceImpl(
                 is KlageUtfallUtenBrev.Avvist ->
                     KlageUtfallMedData.Avvist(
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
-                        vedtakId = runBlocking { vedtakKlient.lagreVedtakKlage(klage, saksbehandler) },
+                        vedtakId = opprettVedtakOgBrev(klage, saksbehandler),
                     )
 
                 is KlageUtfallUtenBrev.AvvistMedOmgjoering ->
@@ -238,6 +239,17 @@ class KlageServiceImpl(
         return klageMedOppdatertUtfall
     }
 
+    private fun opprettVedtakOgBrev(
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): Long {
+        return runBlocking {
+            val vedtakId = vedtakKlient.lagreVedtakKlage(klage, saksbehandler)
+            opprettVedtaksbrevForAvvisning(klage, saksbehandler)
+            vedtakId
+        }
+    }
+
     private fun brevForInnstilling(
         klage: Klage,
         saksbehandler: Saksbehandler,
@@ -249,6 +261,19 @@ class KlageServiceImpl(
                 val brev = runBlocking { brevApiKlient.opprettKlageInnstillingsbrevISak(klage.sak.id, saksbehandler) }
                 KlageBrevInnstilling(brev.id)
             }
+        }
+    }
+
+    private fun opprettVedtaksbrevForAvvisning(
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): KlageVedtaksbrev {
+        return when (klage.utfall) {
+            is KlageUtfallMedData.Avvist -> {
+                val brevDto = runBlocking { brevApiKlient.opprettVedtaksbrev(klage.id, klage.sak.id, saksbehandler) }
+                KlageVedtaksbrev(brevDto.id)
+            }
+            else -> throw IllegalStateException("Kan ikke opprette vedtaksbrev for annet enn avvist klage")
         }
     }
 

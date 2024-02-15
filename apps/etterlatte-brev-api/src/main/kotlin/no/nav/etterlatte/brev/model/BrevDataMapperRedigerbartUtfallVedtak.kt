@@ -166,7 +166,6 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         val brevutfall = async { fetcher.hentBrevutfall() }
 
         OmstillingsstoenadOpphoerRedigerbartUtfall.fra(
-            generellBrevData,
             requireNotNull(brevutfall.await()),
         )
     }

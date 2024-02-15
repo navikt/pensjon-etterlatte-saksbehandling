@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.model.bp
 
+import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevVedleggKey
@@ -11,17 +12,20 @@ import no.nav.etterlatte.brev.model.vedleggHvisFeilutbetaling
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import java.time.LocalDate
 
 data class BarnepensjonOpphoer(
     override val innhold: List<Slate.Element>,
     val innholdForhaandsvarsel: List<Slate.Element>,
     val brukerUnder18Aar: Boolean,
     val bosattUtland: Boolean,
+    val virkningsdato: LocalDate,
     val feilutbetaling: FeilutbetalingType,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
             innhold: InnholdMedVedlegg,
+            generellBrevData: GenerellBrevData,
             utlandstilknytning: UtlandstilknytningType?,
             brevutfall: BrevutfallDto,
         ): BarnepensjonOpphoer {
@@ -37,6 +41,7 @@ data class BarnepensjonOpphoer(
                     ),
                 brukerUnder18Aar = brevutfall.aldersgruppe == Aldersgruppe.UNDER_18,
                 bosattUtland = utlandstilknytning == UtlandstilknytningType.BOSATT_UTLAND,
+                virkningsdato = requireNotNull(generellBrevData.forenkletVedtak?.virkningstidspunkt?.atDay(1)),
                 feilutbetaling = feilutbetaling,
             )
         }

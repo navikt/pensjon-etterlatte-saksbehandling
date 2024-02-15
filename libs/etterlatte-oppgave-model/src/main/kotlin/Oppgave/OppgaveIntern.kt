@@ -118,6 +118,7 @@ enum class OppgaveType {
     TILBAKEKREVING,
     OMGJOERING,
     JOURNALFOERING,
+    GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
 }
 
 data class SaksbehandlerEndringDto(

@@ -61,8 +61,6 @@ data class MigreringRequest(
     }
 }
 
-const val GJENOPPRETTELSE_OPPGAVE = "GJENOPPRETTELSE_OPPGAVE"
-
 data class AvdoedForelder(
     val ident: Folkeregisteridentifikator,
     val doedsdato: Tidspunkt,

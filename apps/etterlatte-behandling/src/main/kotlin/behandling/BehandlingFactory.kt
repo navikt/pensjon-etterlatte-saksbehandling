@@ -32,6 +32,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
@@ -43,7 +44,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.rapidsandrivers.migrering.GJENOPPRETTELSE_OPPGAVE
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -169,9 +169,10 @@ class BehandlingFactory(
                     request.kilde ?: Vedtaksloesning.GJENNY,
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
-                        oppgaveService.hentOppgaverForSak(sak.id).find { it.referanse == GJENOPPRETTELSE_OPPGAVE }?.let {
-                            oppgaveService.hentOgFerdigstillOppgaveById(it.id, brukerTokenInfo)
-                        }
+                        oppgaveService.hentOppgaverForSak(sak.id)
+                            .find { it.type == OppgaveType.GJENOPPRETTING_ALDERSOVERGANG }?.let {
+                                oppgaveService.hentOgFerdigstillOppgaveById(it.id, brukerTokenInfo)
+                            }
                     }
                 } ?: throw IllegalStateException("Kunne ikke opprette behandling")
             }.behandling

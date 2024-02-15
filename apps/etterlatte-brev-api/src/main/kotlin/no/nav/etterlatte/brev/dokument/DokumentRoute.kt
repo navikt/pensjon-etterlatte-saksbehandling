@@ -79,7 +79,7 @@ fun Route.dokumentRoute(
             get("/{dokumentInfoId}") {
                 val journalpostId = call.parameters["journalpostId"]!!
                 val dokumentInfoId = call.parameters["dokumentInfoId"]!!
-                val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, brukerTokenInfo.accessToken())
+                val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, brukerTokenInfo)
 
                 call.respond(innhold)
             }

@@ -66,11 +66,7 @@ export const Dokumentliste = ({ dokumenter }: { dokumenter: Result<Journalpost[]
                       <FlexRow justify="right">
                         <UtsendingsinfoModal journalpost={dokument} />
 
-                        <DokumentModal
-                          tittel={dokument.tittel}
-                          journalpostId={dokument.journalpostId}
-                          dokumentInfoId={dokument.dokumenter[0].dokumentInfoId}
-                        />
+                        <DokumentModal journalpost={dokument} />
                       </FlexRow>
                     </Table.DataCell>
                   </Table.Row>

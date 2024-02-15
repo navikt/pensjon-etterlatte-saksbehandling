@@ -16,16 +16,16 @@ export const DokumentlisteLiten = ({ dokumenter }: { dokumenter: Result<Journalp
     {isPending(dokumenter) && <Spinner label="Henter dokumenter" visible />}
 
     {isSuccess(dokumenter) &&
-      (dokumenter.data.length ? (
-        dokumenter.data.map((dokument) => (
-          <div key={`${dokument.journalpostId}/${dokument.dokumenter[0].dokumentInfoId}`}>
-            <BodyShort as="div" size="small" spacing>
+      (dokumenter.data?.map((dokument) => (
+        <div key={dokument.journalpostId}>
+          {dokument.dokumenter.map((dokumentInfo) => (
+            <BodyShort key={dokumentInfo.dokumentInfoId} as="div" size="small" spacing>
               <Link
-                href={`/api/dokumenter/${dokument.journalpostId}/${dokument.dokumenter[0].dokumentInfoId}`}
+                href={`/api/dokumenter/${dokument.journalpostId}/${dokumentInfo.dokumentInfoId}`}
                 target="_blank"
                 rel="noreferrer noopener"
               >
-                {dokument.tittel}
+                {dokumentInfo.tittel}
                 <ExternalLinkIcon title={dokument.tittel} />
               </Link>
               <Detail>
@@ -33,9 +33,9 @@ export const DokumentlisteLiten = ({ dokumenter }: { dokumenter: Result<Journalp
                 {dokument.avsenderMottaker.navn || 'Ukjent'} ({formaterStringDato(dokument.datoOpprettet)})
               </Detail>
             </BodyShort>
-          </div>
-        ))
-      ) : (
+          ))}
+        </div>
+      )) || (
         <Detail style={{ textAlign: 'center' }}>
           <i>Ingen dokumenter ble funnet</i>
         </Detail>

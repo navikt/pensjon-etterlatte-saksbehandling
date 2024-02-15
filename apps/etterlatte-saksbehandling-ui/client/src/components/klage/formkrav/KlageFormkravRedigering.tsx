@@ -1,4 +1,4 @@
-import { Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
+import { Alert, BodyLong, Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import { Content, ContentHeader, FlexRow } from '~shared/styled'
 import { HeadingWrapper, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { useKlage } from '~components/klage/useKlage'
@@ -20,6 +20,7 @@ import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
 import { kanVurdereUtfall, nesteSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { isFailure, isPending, isPendingOrInitial, mapSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { EnvelopeClosedIcon } from '@navikt/aksel-icons'
 
 // Vi bruker kun id'en til vedtaket i skjemadata, og transformerer fram / tilbake før sending / lasting
 type FilledFormDataFormkrav = Omit<Formkrav, 'vedtaketKlagenGjelder'> & { vedtaketKlagenGjelderId: null | string }
@@ -79,6 +80,7 @@ export function KlageFormkravRedigering() {
   const [lagreFormkravStatus, lagreFormkrav] = useApiCall(oppdaterFormkravIKlage)
   const dispatch = useAppDispatch()
   const [iverksatteVedtak, hentIverksatteVedtak] = useApiCall(hentIverksatteVedtakISak)
+  const [redigerModus, setRedigerModus] = React.useState(klage?.formkrav?.formkrav === null)
 
   const {
     control,
@@ -108,8 +110,6 @@ export function KlageFormkravRedigering() {
       return
     }
     if (!isDirty) {
-      // Skjemaet er fylt ut, men med samme info som innholdet i klagen fra backend. Dermed lagrer vi ikke på nytt og
-      // bare går videre til neste riktige steg
       if (kanVurdereUtfall(klage)) {
         navigate(`/klage/${klage.id}/vurdering`)
       } else {
@@ -121,7 +121,10 @@ export function KlageFormkravRedigering() {
 
     lagreFormkrav({ klageId: klage.id, formkrav }, (oppdatertKlage) => {
       dispatch(addKlage(oppdatertKlage))
-      navigate(nesteSteg(klage, 'formkrav'))
+      if (kanVurdereUtfall(oppdatertKlage)) {
+        navigate(nesteSteg(oppdatertKlage, 'formkrav'))
+      }
+      setRedigerModus(false)
     })
   }
 
@@ -137,6 +140,8 @@ export function KlageFormkravRedigering() {
       </ApiErrorAlert>
     )
   }
+
+  if (!klage) return null
 
   return (
     <Content>
@@ -163,7 +168,12 @@ export function KlageFormkravRedigering() {
                 const { value, ...rest } = field
                 return (
                   <>
-                    <Select label="Hvilket vedtak klages det på?" value={value ?? ''} {...rest}>
+                    <Select
+                      label="Hvilket vedtak klages det på?"
+                      value={value ?? ''}
+                      {...rest}
+                      readOnly={!redigerModus}
+                    >
                       <option value="">Velg vedtak</option>
                       {kjenteVedtak.map((vedtak) => (
                         <option key={vedtak.id} value={vedtak.id}>
@@ -207,53 +217,84 @@ export function KlageFormkravRedigering() {
           <JaNeiRadiogruppe name="erFormkraveneOppfylt" control={control} legend="Er formkravene til klagen oppfylt?" />
 
           <VurderingWrapper>
-            <Textarea {...register('begrunnelse')} label="Totalvurdering (valgfritt)" />
+            <Textarea {...register('begrunnelse')} label="Totalvurdering (valgfritt)" readOnly={!redigerModus} />
           </VurderingWrapper>
+          {redigerModus ? (
+            <FlexRow justify="center">
+              <Button type="submit" loading={isPending(lagreFormkravStatus)}>
+                Lagre vurdering av formkrav
+              </Button>
+            </FlexRow>
+          ) : (
+            <>
+              <FlexRow $spacing>
+                <Button onClick={() => setRedigerModus(true)} variant="secondary">
+                  Endre vurdering
+                </Button>
+              </FlexRow>
+              <VurderingWrapper>
+                {!kanVurdereUtfall(klage) && (
+                  <>
+                    <Alert variant="info">
+                      <Heading level="2" size="small">
+                        Hent informasjon fra klager
+                      </Heading>
+                      <BodyLong $spacing>
+                        Du må innhente mer informasjon fra klager for å avgjøre om formkravene kan oppfylles. Sett
+                        klagebehandlingen på vent og opprett et nytt brev til klager.
+                      </BodyLong>
+                      <Button
+                        variant="primary"
+                        icon={<EnvelopeClosedIcon />}
+                        onClick={() => navigate(`/person/${klage.sak.ident}?fane=BREV`)}
+                      >
+                        Opprett brev
+                      </Button>
+                    </Alert>
+                  </>
+                )}
+              </VurderingWrapper>
+            </>
+          )}
+          {isFailureHandler({
+            apiResult: lagreFormkravStatus,
+            errorMessage:
+              'Kunne ikke lagre vurderingen av formkrav og klagefrist på grunn av en feil. Last siden på nytt og prøv igjen. Meld sak\n' +
+              '            hvis problemet vedvarer.',
+          })}
         </InnholdPadding>
-        <FlexRow justify="center">
-          <Button style={{ marginBottom: '3em' }} type="submit" loading={isPending(lagreFormkravStatus)}>
-            Lagre vurdering av formkrav
-          </Button>
-        </FlexRow>
-
-        {isFailureHandler({
-          apiResult: lagreFormkravStatus,
-          errorMessage:
-            'Kunne ikke lagre vurderingen av formkrav og klagefrist på grunn av en feil. Last siden på nytt og prøv igjen. Meld sak\n' +
-            '            hvis problemet vedvarer.',
-        })}
       </form>
     </Content>
   )
-}
 
-function JaNeiRadiogruppe(props: {
-  control: Control<FormDataFormkrav>
-  name: Path<FormDataFormkrav>
-  legend: string
-  errorMessage?: string
-}) {
-  const { name, control, legend, errorMessage } = props
-  return (
-    <Controller
-      name={name}
-      rules={{
-        required: true,
-      }}
-      render={({ field, fieldState }) => (
-        <VurderingWrapper>
-          <RadioGroup legend={legend} className="radioGroup" {...field}>
-            <div className="flex">
-              <Radio value={JaNei.JA}>Ja</Radio>
-              <Radio value={JaNei.NEI}>Nei</Radio>
-            </div>
-          </RadioGroup>
-          {fieldState.error ? (
-            <Feilmelding>{errorMessage ?? 'Du må svare på spørsmålet: ' + legend}</Feilmelding>
-          ) : null}
-        </VurderingWrapper>
-      )}
-      control={control}
-    />
-  )
+  function JaNeiRadiogruppe(props: {
+    control: Control<FormDataFormkrav>
+    name: Path<FormDataFormkrav>
+    legend: string
+    errorMessage?: string
+  }) {
+    const { name, control, legend, errorMessage } = props
+    return (
+      <Controller
+        name={name}
+        rules={{
+          required: true,
+        }}
+        render={({ field, fieldState }) => (
+          <VurderingWrapper>
+            <RadioGroup readOnly={!redigerModus} legend={legend} className="radioGroup" {...field}>
+              <div className="flex">
+                <Radio value={JaNei.JA}>Ja</Radio>
+                <Radio value={JaNei.NEI}>Nei</Radio>
+              </div>
+            </RadioGroup>
+            {fieldState.error ? (
+              <Feilmelding>{errorMessage ?? 'Du må svare på spørsmålet: ' + legend}</Feilmelding>
+            ) : null}
+          </VurderingWrapper>
+        )}
+        control={control}
+      />
+    )
+  }
 }

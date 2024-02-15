@@ -12,7 +12,7 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -47,7 +47,7 @@ class Brevoppretter(
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         // TODO EY-3232 - Fjerne migreringstilpasning
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
-        brevDataMapper: suspend (RedigerbarTekstRequest) -> BrevData,
+        brevDataMapper: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Brev {
         require(db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() == null) {
             "Vedtaksbrev finnes allerede på behandling (id=$behandlingId) og kan ikke opprettes på nytt"
@@ -80,7 +80,7 @@ class Brevoppretter(
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
         brevtype: Brevtype,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Pair<Brev, GenerellBrevData> =
         with(
             hentInnData(
@@ -114,7 +114,7 @@ class Brevoppretter(
         bruker: BrukerTokenInfo,
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): BrevService.BrevPayload {
         val spraak = db.hentBrevInnhold(brevId)?.spraak
 
@@ -150,7 +150,7 @@ class Brevoppretter(
         bruker: BrukerTokenInfo,
         brevKode: (b: BrevkodeRequest) -> EtterlatteBrevKode,
         automatiskMigreringRequest: MigreringBrevRequest? = null,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
         overstyrSpraak: Spraak? = null,
     ): OpprettBrevRequest {
         val generellBrevData =

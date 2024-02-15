@@ -104,7 +104,7 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService, p
         bruker: BrukerTokenInfo,
         generellBrevData: GenerellBrevData,
     ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
-        listOf(hentInnholdForhaandsvarselFeilutbetalingVedleggOms(bruker, generellBrevData))
+        listOf(hentInnholdForhaandsvarselFeilutbetalingVedleggBp(bruker, generellBrevData))
     } else {
         null
     }

@@ -192,6 +192,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
 
         BarnepensjonOpphoer.fra(
             innholdMedVedlegg,
+            generellBrevData,
             generellBrevData.utlandstilknytning?.type,
             requireNotNull(brevutfall.await()),
         )
@@ -255,6 +256,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
 
         OmstillingsstoenadOpphoer.fra(
             innholdMedVedlegg,
+            generellBrevData,
             generellBrevData.utlandstilknytning,
             requireNotNull(brevutfall.await()),
         )

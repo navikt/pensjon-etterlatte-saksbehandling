@@ -27,23 +27,20 @@ fun Route.dokumentRoute(
             withFoedselsnummer(tilgangssjekker, skrivetilgang = true) { foedselsnummer ->
                 val visTemaPen = call.request.queryParameters["visTemaPen"]?.toBoolean() ?: false
 
-                val result =
+                val dokumenter =
                     safService.hentDokumenter(foedselsnummer.value, visTemaPen, BrukerIdType.FNR, brukerTokenInfo)
 
-                if (result.error == null) {
-                    call.respond(result.journalposter)
-                } else {
-                    call.respond(result.error.statusCode, result.error.message)
-                }
+                call.respond(dokumenter)
             }
         }
 
         route("{journalpostId}") {
             get {
                 val journalpostId = call.parameters["journalpostId"]!!
-                val result = safService.hentJournalpost(journalpostId, brukerTokenInfo)
 
-                call.respond(result.journalpost ?: HttpStatusCode.NotFound)
+                val journalpost = safService.hentJournalpost(journalpostId, brukerTokenInfo)
+
+                call.respond(journalpost ?: HttpStatusCode.NotFound)
             }
 
             put {

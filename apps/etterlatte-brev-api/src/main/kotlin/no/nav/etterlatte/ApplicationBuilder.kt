@@ -28,7 +28,8 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.dokument.SafClient
+import no.nav.etterlatte.brev.dokument.SafKlient
+import no.nav.etterlatte.brev.dokument.SafService
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -202,8 +203,10 @@ class ApplicationBuilder {
     private val virusScanService = VirusScanService(clamAvClient)
     private val pdfService = PDFService(db, virusScanService)
 
-    private val journalpostService =
-        SafClient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE"))
+    private val safService =
+        SafService(
+            SafKlient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE")),
+        )
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
@@ -213,7 +216,7 @@ class ApplicationBuilder {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
-                    dokumentRoute(journalpostService, dokarkivService, tilgangssjekker)
+                    dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)
                 }
             }

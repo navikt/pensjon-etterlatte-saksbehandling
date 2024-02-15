@@ -2,10 +2,11 @@ package no.nav.etterlatte.brev.varselbrev
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
-import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonVarsel
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregning
 import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
@@ -20,7 +21,11 @@ class BrevDataMapperFerdigstillVarsel(
         coroutineScope {
             when (request.generellBrevData.sak.sakType) {
                 SakType.BARNEPENSJON -> hentBrevDataFerdigstillingBarnepensjon(request)
-                SakType.OMSTILLINGSSTOENAD -> ManueltBrevData(request.innholdMedVedlegg.innhold())
+                SakType.OMSTILLINGSSTOENAD ->
+                    ManueltBrevMedTittelData(
+                        request.innholdMedVedlegg.innhold(),
+                        EtterlatteBrevKode.OMSTILLINGSSTOENAD_VARSEL.tittel,
+                    )
             }
         }
 

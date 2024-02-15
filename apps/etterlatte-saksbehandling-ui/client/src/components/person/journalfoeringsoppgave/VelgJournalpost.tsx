@@ -119,11 +119,7 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
                     <Table.DataCell>{formaterJournalpostType(journalpost.journalposttype)}</Table.DataCell>
                     <Table.DataCell>
                       <FlexRow>
-                        <DokumentModal
-                          tittel={journalpost.tittel}
-                          journalpostId={journalpost.journalpostId}
-                          dokumentInfoId={journalpost.dokumenter[0].dokumentInfoId}
-                        />
+                        <DokumentModal journalpost={journalpost} />
 
                         <Button variant="primary" size="small" onClick={() => velgJournalpost(journalpost)}>
                           Velg

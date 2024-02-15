@@ -19,7 +19,7 @@ class AldersovergangDao(private val datasource: DataSource) : Transactions<Alder
     ): List<String> {
         val sql =
             """
-            select g.sak_id as sak_id from grunnlagshendelse g
+            select distinct g.sak_id as sak_id from grunnlagshendelse g
                      inner join grunnlagshendelse g2 on g.sak_id = g2.sak_id and g.fnr = g2.fnr and g.hendelsenummer != g2.hendelsenummer
                      and g.hendelsenummer = (
                         select max(hendelsenummer) from grunnlagshendelse 

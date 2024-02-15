@@ -19,7 +19,7 @@ class DoedshendelseDao(val connectionAutoclosing: ConnectionAutoclosing) {
                     WHERE sakId = ?
                     """.trimIndent(),
                 ).apply {
-                    setString(1, no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseStatus.FERDIG.name)
+                    setString(1, DoedshendelseStatus.FERDIG.name)
                     setLong(2, doedshendelseBrevDistribuert.brevId)
                     setLong(3, doedshendelseBrevDistribuert.sakId)
                 }

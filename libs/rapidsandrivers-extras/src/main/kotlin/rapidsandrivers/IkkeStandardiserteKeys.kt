@@ -8,6 +8,7 @@ import java.util.UUID
 
 const val SAK_ID_KEY = "sakId"
 const val BREV_ID_KEY = "brevId"
+const val BREV_KODE = "brevKode"
 const val SAK_ID_FLERE_KEY = "sakIdFlere"
 const val SAK_TYPE = "sakType"
 const val BEHANDLING_ID_KEY = "behandlingId"

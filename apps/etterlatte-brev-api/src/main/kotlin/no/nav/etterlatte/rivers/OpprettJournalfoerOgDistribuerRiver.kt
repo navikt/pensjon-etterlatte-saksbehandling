@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.BREV_KODE
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -41,7 +42,7 @@ class OpprettJournalfoerOgDistribuerRiver(
         runBlocking {
             val brevkode = packet[BREVMAL_RIVER_KEY].asText().let { Brevkoder.valueOf(it) }
             val brevId = opprettJournalfoerOgDistribuer(packet.sakId, brevkode, Systembruker.brev)
-            rapidsConnection.svarSuksess(packet.sakId, brevId)
+            rapidsConnection.svarSuksess(packet.sakId, brevId, brevkode)
         }
     }
 
@@ -80,6 +81,7 @@ class OpprettJournalfoerOgDistribuerRiver(
     private fun RapidsConnection.svarSuksess(
         sakId: Long,
         brevID: BrevID,
+        brevkode: Brevkoder,
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
 
@@ -90,6 +92,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                 mapOf(
                     BREV_ID_KEY to brevID,
                     SAK_ID_KEY to sakId,
+                    BREV_KODE to brevkode.name,
                 ),
             ).toJson(),
         )

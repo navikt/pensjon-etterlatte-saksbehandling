@@ -74,12 +74,8 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
       return (
         <>
           {erInnloggetSaksbehandlerOppgave && (
-            <Button
-              size="small"
-              as="a"
-              href={referanse === 'GJENOPPRETTELSE_OPPGAVE' ? `/manuellbehandling/${id}` : `/behandling/${referanse}`}
-            >
-              {referanse === 'GJENOPPRETTELSE_OPPGAVE' ? 'Gå til manuell opprettelse' : 'Gå til behandling'}
+            <Button size="small" as="a" href={`/behandling/${referanse}`}>
+              Gå til behandling
             </Button>
           )}
         </>
@@ -138,6 +134,16 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
       )
     case 'OMGJOERING':
       return erInnloggetSaksbehandlerOppgave && <OmgjoerVedtakModal oppgave={oppgave} />
+    case 'GJENOPPRETTING_ALDERSOVERGANG':
+      return (
+        <>
+          {erInnloggetSaksbehandlerOppgave && (
+            <Button size="small" as="a" href={`/manuellbehandling/${id}`}>
+              Gå til manuell opprettelse
+            </Button>
+          )}
+        </>
+      )
     default:
       return null
   }

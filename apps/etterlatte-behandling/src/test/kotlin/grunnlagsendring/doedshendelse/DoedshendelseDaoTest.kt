@@ -2,6 +2,7 @@ package grunnlagsendring.doedshendelse
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Doedshendelse
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseStatus
@@ -20,7 +21,7 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun setup() {
-        doedshendelseDao = DoedshendelseDao { dataSource.connection }
+        doedshendelseDao = DoedshendelseDao(ConnectionAutoclosing(dataSource))
     }
 
     @Test
@@ -33,7 +34,7 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
                 relasjon = Relasjon.BARN,
             )
 
-        doedshendelseDao.opprettDoedshendelse(doedshendelse) shouldBe 1
+        doedshendelseDao.opprettDoedshendelse(doedshendelse)
         doedshendelseDao.hentDoedshendelserMedStatus(DoedshendelseStatus.NY) shouldBe listOf(doedshendelse)
         doedshendelseDao.hentDoedshendelserMedStatus(DoedshendelseStatus.OPPDATERT) shouldBe emptyList()
     }

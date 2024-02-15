@@ -13,6 +13,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
@@ -35,6 +36,8 @@ import java.util.UUID
 
 interface BehandlingService {
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
+
+    fun oppdaterDoedshendelseBrevDistribuert(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert)
 
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
 
@@ -89,6 +92,15 @@ class BehandlingServiceImpl(
             behandlingKlient.post("$url/grunnlagsendringshendelse/doedshendelse") {
                 contentType(ContentType.Application.Json)
                 setBody(doedshendelse)
+            }
+        }
+    }
+
+    override fun oppdaterDoedshendelseBrevDistribuert(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) {
+        runBlocking {
+            behandlingKlient.post("$url/doedshendelse/brevdistribuert") {
+                contentType(ContentType.Application.Json)
+                setBody(doedshendelseBrevDistribuert)
             }
         }
     }

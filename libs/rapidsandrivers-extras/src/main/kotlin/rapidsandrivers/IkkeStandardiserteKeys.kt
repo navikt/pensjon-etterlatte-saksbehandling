@@ -7,6 +7,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 const val SAK_ID_KEY = "sakId"
+const val BREV_ID_KEY = "brevId"
+const val BREV_KODE = "brevKode"
 const val SAK_ID_FLERE_KEY = "sakIdFlere"
 const val SAK_TYPE = "sakType"
 const val BEHANDLING_ID_KEY = "behandlingId"
@@ -38,6 +40,12 @@ var JsonMessage.behandlingId: UUID
     get() = this[BEHANDLING_ID_KEY].asText().toUUID()
     set(name) {
         this[BEHANDLING_ID_KEY] = name
+    }
+
+var JsonMessage.brevId: Long
+    get() = this[BREV_ID_KEY].asLong()
+    set(name) {
+        this[BREV_ID_KEY] = name
     }
 
 var JsonMessage.dato: LocalDate

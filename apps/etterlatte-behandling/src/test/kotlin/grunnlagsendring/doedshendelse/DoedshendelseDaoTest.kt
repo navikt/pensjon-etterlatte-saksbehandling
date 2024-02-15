@@ -38,4 +38,10 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
         doedshendelseDao.hentDoedshendelserMedStatus(DoedshendelseStatus.NY) shouldBe listOf(doedshendelse)
         doedshendelseDao.hentDoedshendelserMedStatus(DoedshendelseStatus.OPPDATERT) shouldBe emptyList()
     }
+
+    @Test
+    fun `Skal oppdatere hendelse ferdig med brevid`() {
+        // TODO: må først ha egen versjon grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson som setter sak_id
+        // doedshendelseDao.oppdaterBrevDistribuertDoedshendelse()
+    }
 }

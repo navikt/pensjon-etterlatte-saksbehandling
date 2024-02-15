@@ -34,6 +34,7 @@ import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
@@ -143,6 +144,7 @@ internal fun Application.module(context: ApplicationContext) {
                 gosysOppgaveService = gosysOppgaveService,
             )
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
+            doedshendelseRoute(doedshendelseService = doedshendelseService)
             egenAnsattRoute(
                 egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, enhetService),
                 requestLogger = behandlingRequestLogger,

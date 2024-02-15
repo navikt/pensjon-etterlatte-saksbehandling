@@ -136,8 +136,7 @@ export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()
 
-  const varselbrevAktivert =
-    useFeatureEnabledMedDefault(FEATURE_TOGGLE_LAG_VARSELBREV, false)
+  const varselbrevAktivert = useFeatureEnabledMedDefault(FEATURE_TOGGLE_LAG_VARSELBREV, false)
   const aktuelleRoutes = hentAktuelleRoutes(behandling, varselbrevAktivert)
 
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0

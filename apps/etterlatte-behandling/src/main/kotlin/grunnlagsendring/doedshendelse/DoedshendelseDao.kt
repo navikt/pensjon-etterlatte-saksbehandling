@@ -1,6 +1,7 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.toList
@@ -8,6 +9,24 @@ import no.nav.helse.rapids_rivers.toUUID
 import java.sql.ResultSet
 
 class DoedshendelseDao(val connectionAutoclosing: ConnectionAutoclosing) {
+    fun oppdaterBrevDistribuertDoedshendelse(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) {
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    UPDATE doedshendelse 
+                    SET status = ?, brev_id = ?
+                    WHERE sakId = ?
+                    """.trimIndent(),
+                ).apply {
+                    setString(1, DoedshendelseStatus.FERDIG.name)
+                    setLong(2, doedshendelseBrevDistribuert.brevId)
+                    setLong(3, doedshendelseBrevDistribuert.sakId)
+                }
+            }
+        }
+    }
+
     fun opprettDoedshendelse(doedshendelse: Doedshendelse) {
         connectionAutoclosing.hentConnection {
             with(it) {

@@ -105,8 +105,8 @@ export default function ManuellBehandling() {
         onChange={(e) => setVedtaksloesning(e.target.value)}
       >
         <option>Velg ...</option>
-        <option value="PESYS">Løpende i Pesys</option>
-        <option value="GJENOPPRETTA">Opphørt i Pesys</option>
+        <option value="PESYS">Løpende i Pesys til 1.1.2024</option>
+        <option value="GJENOPPRETTA">Gjenoppretting av opphørt aldersovergang</option>
         <option value="GJENNY">Nei</option>
       </Select>
 

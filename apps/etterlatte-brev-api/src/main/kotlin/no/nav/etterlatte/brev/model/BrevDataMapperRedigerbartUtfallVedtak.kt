@@ -38,7 +38,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
         migrering: MigreringBrevRequest? = null,
-    ): BrevData {
+    ): BrevDataRedigerbar {
         if (generellBrevData.erForeldreloes()) {
             return barnepensjonInnvilgelse(brukerTokenInfo, generellBrevData)
         }
@@ -48,7 +48,7 @@ class BrevDataMapperRedigerbartUtfallVedtak(
     private suspend fun brevData(
         generellBrevData: GenerellBrevData,
         brukerTokenInfo: BrukerTokenInfo,
-    ): BrevData =
+    ): BrevDataRedigerbar =
         when (generellBrevData.sak.sakType) {
             SakType.BARNEPENSJON -> {
                 when (generellBrevData.forenkletVedtak?.type) {

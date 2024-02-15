@@ -66,7 +66,7 @@ internal class VarselbrevService(
         automatiskMigreringRequest = null,
         avsenderRequest = avsenderRequest,
         brevKode = { hentBrevkode(it.sakType) },
-        brevData = { brevDataMapperVarsel.hentBrevDataFerdigstilling(it) },
+        brevData = { brevDataMapperFerdigstillVarsel.hentBrevDataFerdigstilling(it) },
     )
 
     suspend fun genererPdf(

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.toList
@@ -8,9 +9,15 @@ import java.sql.Connection
 import java.sql.Date
 import java.sql.ResultSet
 
-class DaoWrapperCloseable()
+private fun shouldCloseConnection(): Boolean {
+    val kontekst = Kontekst.get()
+    return when (kontekst) {
+        null -> true
+        else -> false
+    }
+}
 
-class DoedshendelseDao(val connection: () -> Connection, val shouldCloseConnection: Boolean = false) {
+class DoedshendelseDao(val connection: () -> Connection) {
     fun opprettDoedshendelse(doedshendelse: Doedshendelse) =
         with(connection()) {
             prepareStatement(
@@ -28,7 +35,7 @@ class DoedshendelseDao(val connection: () -> Connection, val shouldCloseConnecti
                 setTidspunkt(7, doedshendelse.endret)
                 setString(8, doedshendelse.status.name)
             }.executeUpdate()
-            if (shouldCloseConnection) {
+            if (shouldCloseConnection()) {
                 close()
             }
         }
@@ -45,7 +52,7 @@ class DoedshendelseDao(val connection: () -> Connection, val shouldCloseConnecti
                 ).apply {
                     setString(1, status.name)
                 }.executeQuery().toList { asDoedshendelse() }
-            if (shouldCloseConnection) {
+            if (shouldCloseConnection()) {
                 close()
             }
             return hendelser

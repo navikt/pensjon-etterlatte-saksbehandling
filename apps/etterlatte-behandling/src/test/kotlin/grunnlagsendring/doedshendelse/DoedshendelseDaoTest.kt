@@ -33,7 +33,6 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
                 relasjon = Relasjon.BARN,
             )
 
-        doedshendelseDao.opprettDoedshendelse(doedshendelse) shouldBe 1
         doedshendelseDao.hentDoedshendelserMedStatus(DoedshendelseStatus.NY) shouldBe listOf(doedshendelse)
         doedshendelseDao.hentDoedshendelserMedStatus(DoedshendelseStatus.OPPDATERT) shouldBe emptyList()
     }

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.dokument
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.michaelbull.result.get
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
@@ -12,7 +13,6 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
-import io.ktor.client.utils.EmptyContent.status
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
@@ -30,18 +30,18 @@ import org.slf4j.LoggerFactory
 /*
 * SAF (Sak- og Arkiv Facade)
 */
-class SafClient(
+class SafKlient(
     private val httpClient: HttpClient,
     private val baseUrl: String,
     private val safScope: String,
-) : SafService {
+) {
     private val logger = LoggerFactory.getLogger(SafService::class.java)
 
     private val configLocation: String? = null
     private val config: Config = configLocation?.let { ConfigFactory.load(it) } ?: ConfigFactory.load()
     private val azureAdClient = AzureAdClient(config, httpClient)
 
-    override suspend fun hentDokumentPDF(
+    suspend fun hentDokumentPDF(
         journalpostId: String,
         dokumentInfoId: String,
         accessToken: String,
@@ -54,7 +54,12 @@ class SafClient(
         } catch (re: ResponseException) {
             logger.error("Feil i kall mot Saf: ${re.response.bodyAsText()}")
 
-            if (re.response.status == HttpStatusCode.NotFound) {
+            if (re.response.status == HttpStatusCode.Forbidden) {
+                val errorMessage = re.response.body<JsonNode>()["message"]?.asText()
+                logger.error(errorMessage ?: "Feil fra Saf: ${re.response.bodyAsText()}")
+
+                throw IkkeTilgangTilJournalpost()
+            } else if (re.response.status == HttpStatusCode.NotFound) {
                 throw IkkeFunnetException(
                     code = "JOURNALPOST_IKKE_FUNNET",
                     detail =
@@ -71,12 +76,12 @@ class SafClient(
         }
 
     // TODO: Fjerne param [visTemaPen] når gjenlevendepensjon er borte
-    override suspend fun hentDokumenter(
+    suspend fun hentDokumenter(
         fnr: String,
         visTemaPen: Boolean,
         idType: BrukerIdType,
         brukerTokenInfo: BrukerTokenInfo,
-    ): HentDokumentoversiktBrukerResult {
+    ): DokumentoversiktBrukerResponse {
         logger.info("VisTemaPen=$visTemaPen")
 
         val request =
@@ -104,25 +109,7 @@ class SafClient(
                 }
 
             if (res.status.isSuccess()) {
-                val journalposter: List<Journalpost> =
-                    res.body<DokumentoversiktBrukerResponse>()
-                        .data?.dokumentoversiktBruker?.journalposter ?: emptyList()
-
-                HentDokumentoversiktBrukerResult(journalposter = journalposter)
-            } else if (res.status == HttpStatusCode.Forbidden) {
-                val error = res.bodyAsText()
-                logger.warn(
-                    "Saksbehandler ${brukerTokenInfo.ident()} " +
-                        "har ikke tilgang til å hente journalposter for bruker: $error",
-                )
-
-                HentDokumentoversiktBrukerResult(
-                    error =
-                        HentDokumentoversiktBrukerResult.Error(
-                            HttpStatusCode.Forbidden,
-                            error,
-                        ),
-                )
+                res.body<DokumentoversiktBrukerResponse>()
             } else {
                 throw ResponseException(res, "Ukjent feil oppsto ved henting av journalposter")
             }
@@ -134,10 +121,10 @@ class SafClient(
         }
     }
 
-    override suspend fun hentJournalpost(
+    suspend fun hentJournalpost(
         journalpostId: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ): HentJournalpostResult {
+    ): JournalpostResponse {
         val request =
             GraphqlRequest(
                 query = getQuery("/graphql/journalpost.graphql"),
@@ -153,23 +140,7 @@ class SafClient(
                 }
 
             if (res.status.isSuccess()) {
-                val journalpost: Journalpost? = res.body<JournalpostResponse>().data?.journalpost
-
-                HentJournalpostResult(journalpost)
-            } else if (res.status == HttpStatusCode.Forbidden) {
-                val error = res.bodyAsText()
-                logger.warn(
-                    "Saksbehandler ${brukerTokenInfo.ident()} " +
-                        "har ikke tilgang til å hente journalposter for bruker: $error",
-                )
-
-                HentJournalpostResult(
-                    error =
-                        HentJournalpostResult.Error(
-                            HttpStatusCode.Forbidden,
-                            error,
-                        ),
-                )
+                res.body<JournalpostResponse>()
             } else {
                 throw ResponseException(res, "Ukjent feil oppsto ved henting av journalposter")
             }

@@ -4,7 +4,6 @@ import { useKlage } from '~components/klage/useKlage'
 import Spinner from '~shared/Spinner'
 import React from 'react'
 import { JaNei } from '~shared/types/ISvar'
-import { KlageInfoInnhenting } from '~components/klage/vurdering/innhenting/KlageInfoInnhenting'
 import { KlageAvvisning } from '~components/klage/vurdering/KlageAvvisning'
 import { HeadingWrapper } from '~components/person/SakOversikt'
 import { Heading } from '@navikt/ds-react'
@@ -22,10 +21,6 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
 
   if (kanRedigere && skalAvvises(klage)) {
     return <KlageAvvisning klage={klage} />
-  }
-
-  if (kanRedigere && maaInnhenteInfo(klage)) {
-    return <KlageInfoInnhenting klage={klage} />
   }
 
   return (
@@ -57,11 +52,4 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
 function skalAvvises(klage: Klage) {
   const formkrav = klage.formkrav?.formkrav
   return formkrav?.erKlagenFramsattInnenFrist === JaNei.NEI
-}
-
-function maaInnhenteInfo(klage: Klage) {
-  return (
-    klage.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.NEI &&
-    klage.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.JA
-  )
 }

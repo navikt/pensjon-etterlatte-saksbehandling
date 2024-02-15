@@ -136,10 +136,9 @@ export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()
 
-  const lagVarselbrev =
-    behandling?.kilde === Vedtaksloesning.GJENOPPRETTA &&
+  const varselbrevAktivert =
     useFeatureEnabledMedDefault(FEATURE_TOGGLE_LAG_VARSELBREV, false)
-  const aktuelleRoutes = hentAktuelleRoutes(behandling, lagVarselbrev)
+  const aktuelleRoutes = hentAktuelleRoutes(behandling, varselbrevAktivert)
 
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0
   const lastPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === aktuelleRoutes.length - 1
@@ -160,8 +159,10 @@ export const useBehandlingRoutes = () => {
   return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
 }
 
-const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, lagVarselbrev: boolean) => {
+const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, varselbrevAktivert: boolean) => {
   if (!behandling) return []
+
+  const lagVarselbrev = varselbrevAktivert && behandling?.kilde === Vedtaksloesning.GJENOPPRETTA
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.MANUELT_OPPHOER:

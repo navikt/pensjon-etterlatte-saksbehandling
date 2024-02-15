@@ -1,48 +1,38 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
-import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.toList
 import no.nav.helse.rapids_rivers.toUUID
-import java.sql.Connection
-import java.sql.Date
 import java.sql.ResultSet
 
-private fun shouldCloseConnection(): Boolean {
-    val kontekst = Kontekst.get()
-    return when (kontekst) {
-        null -> true
-        else -> false
-    }
-}
-
-class DoedshendelseDao(val connection: () -> Connection) {
-    fun opprettDoedshendelse(doedshendelse: Doedshendelse) =
-        with(connection()) {
-            prepareStatement(
-                """
-                INSERT INTO doedshendelse (id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """.trimIndent(),
-            ).apply {
-                setString(1, doedshendelse.id.toString())
-                setString(2, doedshendelse.avdoedFnr)
-                setDate(3, Date.valueOf(doedshendelse.avdoedDoedsdato))
-                setString(4, doedshendelse.beroertFnr)
-                setString(5, doedshendelse.relasjon.name)
-                setTidspunkt(6, doedshendelse.opprettet)
-                setTidspunkt(7, doedshendelse.endret)
-                setString(8, doedshendelse.status.name)
-            }.executeUpdate()
-            if (shouldCloseConnection()) {
-                close()
+class DoedshendelseDao(val connectionAutoclosing: ConnectionAutoclosing) {
+    fun opprettDoedshendelse(doedshendelse: Doedshendelse) {
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    INSERT INTO doedshendelse (id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """.trimIndent(),
+                ).apply {
+                    setString(1, doedshendelse.id.toString())
+                    setString(2, doedshendelse.avdoedFnr)
+                    setDate(3, java.sql.Date.valueOf(doedshendelse.avdoedDoedsdato))
+                    setString(4, doedshendelse.beroertFnr)
+                    setString(5, doedshendelse.relasjon.name)
+                    setTidspunkt(6, doedshendelse.opprettet)
+                    setTidspunkt(7, doedshendelse.endret)
+                    setString(8, doedshendelse.status.name)
+                }.executeUpdate()
             }
         }
+    }
 
-    fun hentDoedshendelserMedStatus(status: DoedshendelseStatus): List<Doedshendelse> =
-        with(connection()) {
-            val hendelser =
+    fun hentDoedshendelserMedStatus(status: DoedshendelseStatus): List<Doedshendelse> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
                 prepareStatement(
                     """
                     SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id
@@ -52,11 +42,9 @@ class DoedshendelseDao(val connection: () -> Connection) {
                 ).apply {
                     setString(1, status.name)
                 }.executeQuery().toList { asDoedshendelse() }
-            if (shouldCloseConnection()) {
-                close()
             }
-            return hendelser
         }
+    }
 }
 
 private fun ResultSet.asDoedshendelse(): Doedshendelse =

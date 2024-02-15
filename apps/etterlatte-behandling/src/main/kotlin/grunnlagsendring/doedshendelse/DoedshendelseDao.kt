@@ -8,7 +8,9 @@ import java.sql.Connection
 import java.sql.Date
 import java.sql.ResultSet
 
-class DoedshendelseDao(val connection: () -> Connection) {
+class DaoWrapperCloseable()
+
+class DoedshendelseDao(val connection: () -> Connection, val shouldCloseConnection: Boolean = false) {
     fun opprettDoedshendelse(doedshendelse: Doedshendelse) =
         with(connection()) {
             prepareStatement(
@@ -26,19 +28,27 @@ class DoedshendelseDao(val connection: () -> Connection) {
                 setTidspunkt(7, doedshendelse.endret)
                 setString(8, doedshendelse.status.name)
             }.executeUpdate()
+            if (shouldCloseConnection) {
+                close()
+            }
         }
 
     fun hentDoedshendelserMedStatus(status: DoedshendelseStatus): List<Doedshendelse> =
         with(connection()) {
-            prepareStatement(
-                """
-                SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id
-                FROM doedshendelse
-                WHERE status = ?
-                """.trimIndent(),
-            ).apply {
-                setString(1, status.name)
-            }.executeQuery().toList { asDoedshendelse() }
+            val hendelser =
+                prepareStatement(
+                    """
+                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id
+                    FROM doedshendelse
+                    WHERE status = ?
+                    """.trimIndent(),
+                ).apply {
+                    setString(1, status.name)
+                }.executeQuery().toList { asDoedshendelse() }
+            if (shouldCloseConnection) {
+                close()
+            }
+            return hendelser
         }
 }
 

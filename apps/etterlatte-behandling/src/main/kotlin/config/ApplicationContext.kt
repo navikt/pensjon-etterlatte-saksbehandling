@@ -232,8 +232,8 @@ internal class ApplicationContext(
     val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
     val saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans { databaseContext().activeTx() }
-    val doedshendelseDao = DoedshendelseDao { databaseContext().activeTx() }
-    val doedshendelseDaoJob = DoedshendelseDao { dataSource.connection }
+    val doedshendelseDao = DoedshendelseDao({ databaseContext().activeTx() }, shouldCloseConnection = false)
+    val doedshendelseDaoJob = DoedshendelseDao({ dataSource.connection }, shouldCloseConnection = true)
 
     // Klient
     val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)

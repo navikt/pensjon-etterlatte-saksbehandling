@@ -4,7 +4,12 @@ import { Beregne } from './beregne/Beregne'
 import { Vilkaarsvurdering } from './vilkaarsvurdering/Vilkaarsvurdering'
 import { Soeknadsoversikt } from './soeknadsoversikt/Soeknadoversikt'
 import Beregningsgrunnlag from './beregningsgrunnlag/Beregningsgrunnlag'
-import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import {
+  IBehandlingStatus,
+  IBehandlingsType,
+  IDetaljertBehandling,
+  Vedtaksloesning,
+} from '~shared/types/IDetaljertBehandling'
 import { Vedtaksbrev } from './brev/Vedtaksbrev'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
@@ -131,7 +136,9 @@ export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()
 
-  const lagVarselbrev = useFeatureEnabledMedDefault(FEATURE_TOGGLE_LAG_VARSELBREV, false)
+  const lagVarselbrev =
+    behandling?.kilde === Vedtaksloesning.GJENOPPRETTA &&
+    useFeatureEnabledMedDefault(FEATURE_TOGGLE_LAG_VARSELBREV, false)
   const aktuelleRoutes = hentAktuelleRoutes(behandling, lagVarselbrev)
 
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0

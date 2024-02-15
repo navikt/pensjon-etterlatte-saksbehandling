@@ -1,6 +1,6 @@
 import React, { Dispatch, ReactNode, SetStateAction } from 'react'
 import { BodyShort, Pagination } from '@navikt/ds-react'
-import { leggTilPagineringLocalStorage, pagineringslisteverdier } from '~components/oppgavebenk/oppgaveutils'
+import { leggTilPagineringLocalStorage, pagineringslisteverdier } from '~components/oppgavebenk/utils/oppgaveutils'
 import { FlexRow } from '~shared/styled'
 
 interface Props {

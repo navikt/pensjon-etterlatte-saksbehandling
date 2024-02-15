@@ -1,8 +1,9 @@
-import { isPending, isSuccess, Result } from '~shared/api/apiUtils'
+import { mapApiResult, Result } from '~shared/api/apiUtils'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { ReactNode } from 'react'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export const OppgaveFeilWrapper = (props: {
   oppgaver: Result<Array<OppgaveDTO>>
@@ -12,16 +13,20 @@ export const OppgaveFeilWrapper = (props: {
   const { oppgaver, gosysOppgaver, children } = props
   return (
     <>
-      {isPending(oppgaver) && <Spinner visible={true} label="Henter nye oppgaver" />}
-      {isFailureHandler({
-        apiResult: oppgaver,
-        errorMessage: 'Kunne ikke hente oppgaver',
-      })}
+      {mapApiResult(
+        oppgaver,
+        <Spinner visible={true} label="Henter nye oppgaver" />,
+        (error) => (
+          <ApiErrorAlert>{error.detail || 'Kunne ikke hente oppgaver'}</ApiErrorAlert>
+        ),
+        () => (
+          <>{children}</>
+        )
+      )}
       {isFailureHandler({
         apiResult: gosysOppgaver,
         errorMessage: 'Kunne ikke hente gosys oppgaver',
       })}
-      {isSuccess(oppgaver) && <>{children}</>}
     </>
   )
 }

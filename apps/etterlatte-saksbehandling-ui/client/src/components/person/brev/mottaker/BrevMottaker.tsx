@@ -82,7 +82,9 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
           wide
           label="Postnummer-/sted"
           tekst={
-            !adresse?.postnummer && !adresse?.poststed ? (
+            mottaker.adresse.adresseType !== AdresseType.UTENLANDSKPOSTADRESSE &&
+            !adresse?.postnummer &&
+            !adresse?.poststed ? (
               <Alert variant="warning" size="small" inline>
                 Postnummer og -sted mangler
               </Alert>

@@ -51,7 +51,7 @@ class VedtakServiceImpl(private val vedtakKlient: HttpClient, private val url: S
     override fun hentVedtak(behandlingId: UUID): VedtakDto? =
         runBlocking {
             try {
-                vedtakKlient.post("$url/api/vedtak/$behandlingId").body()
+                vedtakKlient.get("$url/api/vedtak/$behandlingId").body()
             } catch (e: ResponseException) {
                 if (e.response.status == HttpStatusCode.NotFound) {
                     return@runBlocking null

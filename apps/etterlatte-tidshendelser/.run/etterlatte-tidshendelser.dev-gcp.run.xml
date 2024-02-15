@@ -3,6 +3,7 @@
     <envs>
       <env name="JOBB_POLLER_INITIAL_DELAY" value="5" />
       <env name="JOBB_POLLER_INTERVAL" value="PT10S" />
+      <env name="JOBB_POLLER_OPENING_HOURS" value="00-23" />
       <env name="HENDELSE_POLLER_INITIAL_DELAY" value="10" />
       <env name="HENDELSE_POLLER_INTERVAL" value="PT10S" />
       <env name="HENDELSE_POLLER_MAX_ANTALL" value="5" />

@@ -36,7 +36,7 @@ export function KlageVurdering({ kanRedigere }: { kanRedigere: boolean }) {
         {kanRedigere ? (
           <>
             <InitiellVurdering klage={klage} />
-            {(klage.utfall || klage.initieltUtfall) && <EndeligVurdering klage={klage} />}
+            {klage.initieltUtfall && <EndeligVurdering klage={klage} />}
           </>
         ) : (
           <>

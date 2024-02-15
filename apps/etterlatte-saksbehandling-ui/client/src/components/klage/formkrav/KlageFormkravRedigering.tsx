@@ -244,9 +244,11 @@ export function KlageFormkravRedigering() {
                         klagebehandlingen på vent og opprett et nytt brev til klager.
                       </BodyLong>
                       <Button
+                        as="a"
                         variant="primary"
                         icon={<EnvelopeClosedIcon />}
-                        onClick={() => navigate(`/person/${klage.sak.ident}?fane=BREV`)}
+                        href={`/person/${klage.sak.ident}?fane=BREV`}
+                        target="_blank"
                       >
                         Opprett brev
                       </Button>

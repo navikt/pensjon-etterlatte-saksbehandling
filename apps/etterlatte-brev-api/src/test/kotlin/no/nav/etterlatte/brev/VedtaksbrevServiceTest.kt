@@ -599,7 +599,7 @@ internal class VedtaksbrevServiceTest {
 
             val nyttInnhold =
                 runBlocking {
-                    vedtaksbrevService.hentNyttInnhold(brev.sakId, brev.id, brev.behandlingId!!, SAKSBEHANDLER)
+                    vedtaksbrevService.hentNyttInnhold(brev.sakId, brev.id, brev.behandlingId!!, SAKSBEHANDLER, Brevtype.VEDTAK)
                 }
 
             nyttInnhold shouldBe

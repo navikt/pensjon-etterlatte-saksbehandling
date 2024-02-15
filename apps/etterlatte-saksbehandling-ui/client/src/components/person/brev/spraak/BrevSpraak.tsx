@@ -26,6 +26,7 @@ export default function BrevSpraak({ brev, kanRedigeres }: Props) {
             brevId={brev.id}
             sakId={brev.sakId}
             behandlingId={brev.behandlingId}
+            brevtype={brev.brevtype}
           />
         )}
       </FlexRow>

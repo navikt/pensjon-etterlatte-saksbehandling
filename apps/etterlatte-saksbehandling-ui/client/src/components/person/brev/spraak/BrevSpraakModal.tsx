@@ -7,7 +7,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterSpraak, tilbakestillManuellPayload } from '~shared/api/brev'
 import { useForm } from 'react-hook-form'
 import { DocPencilIcon } from '@navikt/aksel-icons'
-import { Spraak } from '~shared/types/Brev'
+import { Brevtype, Spraak } from '~shared/types/Brev'
 import { formaterSpraak } from '~utils/formattering'
 
 interface Props {
@@ -16,9 +16,17 @@ interface Props {
   brevId: number
   sakId: number
   behandlingId?: string
+  brevtype: Brevtype
 }
 
-export const BrevSpraakModal = ({ nyttSpraak, settNyttSpraak, brevId, sakId, behandlingId }: Props): ReactNode => {
+export const BrevSpraakModal = ({
+  nyttSpraak,
+  settNyttSpraak,
+  brevId,
+  sakId,
+  behandlingId,
+  brevtype,
+}: Props): ReactNode => {
   const [isOpen, setIsOpen] = useState(false)
   const [oppdaterSpraakStatus, apiOppdaterSpraak] = useApiCall(oppdaterSpraak)
   const [tilbakestillBrevStatus, apiTilbakestillBrev] = useApiCall(tilbakestillManuellPayload)
@@ -39,7 +47,7 @@ export const BrevSpraakModal = ({ nyttSpraak, settNyttSpraak, brevId, sakId, beh
     if (spraak) {
       apiOppdaterSpraak({ brevId, sakId, spraak }, () => {
         if (!!behandlingId) {
-          apiTilbakestillBrev({ brevId, sakId, behandlingId }, () => {
+          apiTilbakestillBrev({ brevId, sakId, behandlingId, brevtype }, () => {
             window.location.reload()
           })
         } else {

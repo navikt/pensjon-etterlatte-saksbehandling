@@ -12,7 +12,7 @@ import no.nav.etterlatte.brev.model.bp.barnepensjonBeregningsperioder
 import no.nav.etterlatte.libs.common.behandling.SakType
 import java.time.YearMonth
 
-class BrevDataMapperVarsel(
+class BrevDataMapperFerdigstillVarsel(
     private val beregningService: BeregningService,
     private val trygdetidService: TrygdetidService,
 ) {

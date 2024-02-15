@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.varselbrev.BrevDataMapperRedigerbartUtfallVarsel
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -131,10 +132,21 @@ class VedtaksbrevService(
         brevId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        brevtype: Brevtype,
     ): BrevService.BrevPayload =
         brevoppretter.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo, {
             brevKodeMapperVedtak.brevKode(it).redigering
-        }) { brevDataMapperRedigerbartUtfallVedtak.brevData(it) }
+        }) {
+            if (brevtype == Brevtype.VARSEL) {
+                BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
+                    it.generellBrevData.sak.sakType,
+                    brukerTokenInfo,
+                    it.generellBrevData.utlandstilknytning,
+                )
+            } else {
+                brevDataMapperRedigerbartUtfallVedtak.brevData(it)
+            }
+        }
 
     private fun lagrePdfHvisVedtakFattet(
         brevId: BrevID,

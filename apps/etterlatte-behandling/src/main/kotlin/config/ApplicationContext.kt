@@ -52,6 +52,7 @@ import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServiceImpl
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.PesysKlientImpl
@@ -232,8 +233,7 @@ internal class ApplicationContext(
     val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
     val saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans { databaseContext().activeTx() }
-    val doedshendelseDao = DoedshendelseDao { databaseContext().activeTx() }
-    val doedshendelseDaoJob = DoedshendelseDao { dataSource.connection }
+    val doedshendelseDao = DoedshendelseDao(ConnectionAutoclosing(dataSource))
 
     // Klient
     val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
@@ -340,7 +340,7 @@ internal class ApplicationContext(
         )
 
     val doedshendelseJobService =
-        DoedshendelseJobService(doedshendelseDaoJob, featureToggleService, grunnlagsendringshendelseService, if (isProd()) 2 else 0)
+        DoedshendelseJobService(doedshendelseDao, featureToggleService, grunnlagsendringshendelseService, if (isProd()) 2 else 0)
 
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(

@@ -58,7 +58,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
 
   const tilbakestill = () => {
     apiTilbakestillManuellPayload(
-      { brevId: brev.id, sakId: brev.sakId, behandlingId: brev.behandlingId },
+      { brevId: brev.id, sakId: brev.sakId, behandlingId: brev.behandlingId, brevtype: brev.brevtype },
       (payload: any) => {
         setContent(payload.hoveddel)
         setVedlegg(payload.vedlegg)

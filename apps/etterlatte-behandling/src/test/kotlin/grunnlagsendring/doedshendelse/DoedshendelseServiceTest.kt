@@ -2,7 +2,9 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
@@ -68,7 +70,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal oppdatere doedshendelse med barna som kan ha rett paa barnepensjon ved doedsfall`() {
         every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
-        every { dao.opprettDoedshendelse(any()) } returns 1
+        every { dao.opprettDoedshendelse(any()) } just runs
 
         service.opprettDoedshendelseForBeroertePersoner(
             Doedshendelse(
@@ -88,7 +90,7 @@ internal class DoedshendelseServiceTest {
     fun `Skal ikke opprette doedshendelser dersom avdoed ikke er registert som avdoed i PDL`() {
         every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns
             avdoed.copy(doedsdato = null)
-        every { dao.opprettDoedshendelse(any()) } returns 1
+        every { dao.opprettDoedshendelse(any()) } just runs
 
         service.opprettDoedshendelseForBeroertePersoner(
             Doedshendelse(

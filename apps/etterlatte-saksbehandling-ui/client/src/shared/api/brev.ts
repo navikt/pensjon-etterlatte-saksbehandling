@@ -77,10 +77,12 @@ export const tilbakestillManuellPayload = async (props: {
   brevId: number
   sakId: number
   behandlingId: string
+  brevtype: Brevtype
 }): Promise<ApiResponse<any>> =>
   apiClient.put(`/brev/behandling/${props.behandlingId}/payload/tilbakestill`, {
     brevId: props.brevId,
     sakId: props.sakId,
+    brevtype: props.brevtype,
   })
 
 export const lagreManuellPayload = async (props: {

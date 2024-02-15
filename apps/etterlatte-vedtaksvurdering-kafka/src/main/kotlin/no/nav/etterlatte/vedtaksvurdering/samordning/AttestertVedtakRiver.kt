@@ -45,6 +45,7 @@ internal class AttestertVedtakRiver(
             logger.info("Behandlet til_samordning ferdig for vedtak [behandlingId=${vedtak.behandlingId}]")
         } catch (e: Exception) {
             logger.error("Feil ved oppdatering av vedtak til [TIL_SAMORDNET] for behandlingId: ${vedtak.behandlingId}", e)
+            throw e
         }
     }
 }

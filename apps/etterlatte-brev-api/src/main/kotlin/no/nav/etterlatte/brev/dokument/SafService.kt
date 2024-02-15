@@ -46,6 +46,8 @@ class SafService(
         journalpostId: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): Journalpost? {
+        logger.info("Henter journalpost (id=$journalpostId)")
+
         val response = safKlient.hentJournalpost(journalpostId, brukerTokenInfo)
 
         return if (response.errors.isNullOrEmpty()) {

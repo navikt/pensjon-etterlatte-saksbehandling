@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.dokument
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.michaelbull.result.get
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
@@ -53,7 +54,12 @@ class SafKlient(
         } catch (re: ResponseException) {
             logger.error("Feil i kall mot Saf: ${re.response.bodyAsText()}")
 
-            if (re.response.status == HttpStatusCode.NotFound) {
+            if (re.response.status == HttpStatusCode.Forbidden) {
+                val errorMessage = re.response.body<JsonNode>()["message"]?.asText()
+                logger.error(errorMessage ?: "Feil fra Saf: ${re.response.bodyAsText()}")
+
+                throw IkkeTilgangTilJournalpost()
+            } else if (re.response.status == HttpStatusCode.NotFound) {
                 throw IkkeFunnetException(
                     code = "JOURNALPOST_IKKE_FUNNET",
                     detail =

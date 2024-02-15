@@ -84,7 +84,8 @@ class SafService(
     }
 }
 
-class IkkeTilgangTilJournalpost : UgyldigForespoerselException(
+class IkkeTilgangTilJournalpost : ForespoerselException(
+    status = HttpStatusCode.Forbidden.value,
     code = "IKKE_TILGANG_JOURNALPOST",
     detail = "Ikke tilgang til å se journalposten",
 )

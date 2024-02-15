@@ -95,6 +95,7 @@ import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDaoTrans
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
+import no.nav.etterlatte.token.Fagsaksystem
 import java.time.Duration
 import java.time.temporal.ChronoUnit
 
@@ -161,6 +162,14 @@ private fun migreringHttpClient(config: Config) =
         azureAppScope = config.getString("migrering.outbound.scope"),
     )
 
+private fun finnBrukerIdent(): String {
+    val kontekst = Kontekst.get()
+    return when (kontekst) {
+        null -> Fagsaksystem.EY.navn
+        else -> Kontekst.get().AppUser.name()
+    }
+}
+
 internal class ApplicationContext(
     val env: Miljoevariabler = Miljoevariabler(System.getenv()),
     val config: Config = ConfigFactory.load(),
@@ -173,7 +182,7 @@ internal class ApplicationContext(
     val featureToggleService: FeatureToggleService =
         FeatureToggleService.initialiser(
             properties = featureToggleProperties(config),
-            brukerIdent = { Kontekst.get().AppUser.name() },
+            brukerIdent = { finnBrukerIdent() },
         ),
     val pdlHttpClient: HttpClient = pdlHttpClient(config),
     val skjermingHttpKlient: HttpClient = skjermingHttpClient(config),

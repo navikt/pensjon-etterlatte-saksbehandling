@@ -16,6 +16,7 @@ data class Doedshendelse internal constructor(
     val utfall: Utfall? = null,
     val oppgaveId: UUID? = null,
     val brevId: Long? = null,
+    val sakId: Long? = null,
 ) {
     companion object {
         fun nyHendelse(

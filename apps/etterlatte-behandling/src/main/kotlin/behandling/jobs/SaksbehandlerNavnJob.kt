@@ -26,6 +26,7 @@ internal fun populerSaksbehandlereMedNavn(context: ApplicationContext) {
                 logger.error("Saksbehandlerdatanavn feilet se exception $exception")
             }
         newSingleThreadContext("saksbehandlernavnjob").use { ctx ->
+            Runtime.getRuntime().addShutdownHook(Thread { ctx.close() })
             runBlocking(ctx) {
                 try {
                     oppdaterSaksbehandlerNavn(logger, context, subCoroutineExceptionHandler)

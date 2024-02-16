@@ -35,7 +35,11 @@ import { GrunnlagForVirkningstidspunkt } from '~components/behandling/soeknadsov
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
   const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const personopplysninger = usePersonopplysninger()
   const erBosattUtland = behandling.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND
@@ -83,7 +87,11 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         {behandling.soeknadMottattDato && <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />}
       </ContentHeader>
       <InnholdPadding>
-        <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />
+        <OppdaterGrunnlagModal
+          behandlingId={behandling.id}
+          behandlingStatus={behandling.status}
+          enhetId={behandling.sakEnhetId}
+        />
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
         {personopplysninger && (
           <OversiktGyldigFramsatt behandling={behandling} personopplysninger={personopplysninger} />

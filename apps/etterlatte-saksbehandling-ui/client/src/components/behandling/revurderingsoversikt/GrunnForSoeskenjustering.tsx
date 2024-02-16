@@ -31,7 +31,11 @@ export const GrunnForSoeskenjustering = (props: { behandling: IDetaljertBehandli
   const [begrunnelse, setBegrunnelse] = useState(behandling.revurderinginfo?.begrunnelse ?? '')
   const [lagrestatus, lagre] = useApiCall(lagreRevurderingInfo)
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
   const harEndretInfo =
     soeskenjusteringInfo?.grunnForSoeskenjustering !== null &&
     valgtSoeskenjustering !== soeskenjusteringInfo?.grunnForSoeskenjustering

@@ -75,7 +75,11 @@ export const Brevutfall = (props: { behandling: IDetaljertBehandling; resetBrevu
   const behandlingErOpphoer = behandling.revurderingsaarsak != null && erOpphoer(behandling.revurderingsaarsak)
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const dispatch = useAppDispatch()
-  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = behandlingErRedigerbar(
+    behandling.status,
+    behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
   const [brevutfallOgEtterbetaling, setBrevutfallOgEtterbetaling] = useState<BrevutfallOgEtterbetaling>(
     initialBrevutfallOgEtterbetaling(behandling.sakType, behandlingErOpphoer)
   )

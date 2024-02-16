@@ -42,7 +42,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { sakId, soeknadMottattDato } = props.behandling
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const redigerbar = behandlingErRedigerbar(props.behandling.status) && innloggetSaksbehandler.skriveTilgang
+  const redigerbar = behandlingErRedigerbar(
+    props.behandling.status,
+    props.behandling.sakEnhetId,
+    innloggetSaksbehandler.skriveEnheter
+  )
 
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev>()
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)

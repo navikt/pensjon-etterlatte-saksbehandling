@@ -22,6 +22,7 @@ data class DetaljertBehandlingDto(
     val id: UUID,
     val sakId: Long,
     val sakType: SakType,
+    val sakEnhetId: String,
     val gyldighetsprøving: GyldighetsResultat?,
     val soeknadMottattDato: LocalDateTime?,
     val virkningstidspunkt: Virkningstidspunkt?,

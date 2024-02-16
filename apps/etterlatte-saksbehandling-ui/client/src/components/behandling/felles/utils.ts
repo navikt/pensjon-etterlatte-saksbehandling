@@ -46,14 +46,19 @@ export const hentGyldigeNavigeringsStatuser = (status: IBehandlingStatus) => {
   return rekkefoelge.slice(0, index)
 }
 
-export const behandlingErRedigerbar = (status: IBehandlingStatus): boolean => {
+export const enhetErSkrivbar = (enhetId: string, enheter: Array<string>): boolean => {
+  return enheter.includes(enhetId)
+}
+
+export const behandlingErRedigerbar = (status: IBehandlingStatus, enhetId: string, enheter: Array<string>): boolean => {
   return (
-    status === IBehandlingStatus.OPPRETTET ||
-    status === IBehandlingStatus.VILKAARSVURDERT ||
-    status === IBehandlingStatus.TRYGDETID_OPPDATERT ||
-    status === IBehandlingStatus.BEREGNET ||
-    status === IBehandlingStatus.AVKORTET ||
-    status === IBehandlingStatus.RETURNERT
+    enheter.includes(enhetId) &&
+    (status === IBehandlingStatus.OPPRETTET ||
+      status === IBehandlingStatus.VILKAARSVURDERT ||
+      status === IBehandlingStatus.TRYGDETID_OPPDATERT ||
+      status === IBehandlingStatus.BEREGNET ||
+      status === IBehandlingStatus.AVKORTET ||
+      status === IBehandlingStatus.RETURNERT)
   )
 }
 

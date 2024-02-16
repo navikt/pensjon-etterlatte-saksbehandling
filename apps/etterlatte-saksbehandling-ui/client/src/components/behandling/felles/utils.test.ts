@@ -194,6 +194,7 @@ const opprettBehandling = (
     id: 'id',
     sakId: 1,
     sakType,
+    sakEnhetId: '4808',
     gyldighetsprøving,
     kommerBarnetTilgode,
     soeknadMottattDato: '01-01-2023',

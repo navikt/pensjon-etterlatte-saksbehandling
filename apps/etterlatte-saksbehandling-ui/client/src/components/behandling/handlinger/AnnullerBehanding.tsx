@@ -13,6 +13,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useAppSelector } from '~store/Store'
 
 export default function AnnullerBehandling() {
   const navigate = useNavigate()
@@ -23,7 +24,13 @@ export default function AnnullerBehandling() {
   const soeker = usePersonopplysninger()?.soeker?.opplysning
   const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
-  const behandles = behandlingErRedigerbar(behandling?.status ?? IBehandlingStatus.IVERKSATT)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const behandles = behandlingErRedigerbar(
+    behandling?.status ?? IBehandlingStatus.IVERKSATT,
+    behandling?.sakEnhetId ?? '',
+    innloggetSaksbehandler.skriveEnheter
+  )
+
   if (!behandles) {
     return null
   }

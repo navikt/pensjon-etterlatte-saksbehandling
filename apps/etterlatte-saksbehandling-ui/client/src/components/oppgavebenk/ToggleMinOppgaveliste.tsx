@@ -30,7 +30,7 @@ type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
 export const ToggleMinOppgaveliste = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  if (!innloggetSaksbehandler.skriveTilgang) {
+  if (innloggetSaksbehandler.skriveEnheter.length == 0) {
     return <Tilgangsmelding />
   }
 

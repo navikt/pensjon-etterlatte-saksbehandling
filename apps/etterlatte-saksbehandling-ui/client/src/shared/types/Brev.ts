@@ -72,3 +72,18 @@ export enum Brevtype {
   MANUELT = 'MANUELT',
   VEDLEGG = 'VEDLEGG',
 }
+
+export function formaterBrevtype(brevtype: Brevtype) {
+  switch (brevtype) {
+    case Brevtype.INFORMASJON:
+      return 'Informasjonsbrev'
+    case Brevtype.MANUELT:
+      return 'Manuelt brev'
+    case Brevtype.VARSEL:
+      return 'Varselbrev'
+    case Brevtype.VEDTAK:
+      return 'Vedtaksbrev'
+    case Brevtype.OPPLASTET_PDF:
+      return 'Opplastet PDF'
+  }
+}

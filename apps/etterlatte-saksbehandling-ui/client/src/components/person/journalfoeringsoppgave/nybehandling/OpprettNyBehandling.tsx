@@ -15,6 +15,9 @@ import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import React from 'react'
 import { useAppDispatch } from '~store/Store'
 import { Spraak } from '~shared/types/Brev'
+import { useForm } from 'react-hook-form'
+import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
+import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 
 export default function OpprettNyBehandling() {
   const { oppgave, nyBehandlingRequest } = useJournalfoeringOppgave()
@@ -30,6 +33,10 @@ export default function OpprettNyBehandling() {
   const neste = () => navigate('oppsummering', { relative: 'path' })
   const tilbake = () => navigate('../', { relative: 'path' })
 
+  const { register, control } = useForm<NyBehandlingRequest>({
+    defaultValues: nyBehandlingRequest,
+  })
+
   return (
     <FormWrapper column>
       <Heading size="medium" spacing>
@@ -40,17 +47,34 @@ export default function OpprettNyBehandling() {
       </Heading>
 
       <Select
+        {...register('spraak', { required: { value: true, message: 'Du må velge språk/målform for behandlingen' } })}
         label="Hva skal språket/målform være?"
-        value={nyBehandlingRequest?.spraak || ''}
-        onChange={(e) =>
-          dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, spraak: e.target.value as Spraak }))
-        }
       >
         <option>Velg ...</option>
         <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
         <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
         <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
       </Select>
+
+      <ControlledDatoVelger
+        name="mottattDato"
+        label="Mottatt dato"
+        control={control}
+        errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
+      />
+
+      {/*<Select*/}
+      {/*  label="Hva skal språket/målform være?"*/}
+      {/*  value={nyBehandlingRequest?.spraak || ''}*/}
+      {/*  onChange={(e) =>*/}
+      {/*    dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, spraak: e.target.value as Spraak }))*/}
+      {/*  }*/}
+      {/*>*/}
+      {/*  <option>Velg ...</option>*/}
+      {/*  <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>*/}
+      {/*  <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>*/}
+      {/*  <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>*/}
+      {/*</Select>*/}
 
       <DatoVelger
         label="Mottatt dato"
@@ -72,6 +96,7 @@ export default function OpprettNyBehandling() {
         Persongalleri
       </Heading>
 
+      {/*TODO bruke useControl hooken for å kontrollere disse*/}
       {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
       {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
 
@@ -81,7 +106,7 @@ export default function OpprettNyBehandling() {
             Tilbake
           </Button>
 
-          <Button variant="primary" onClick={neste} disabled={!gyldigBehandlingRequest(nyBehandlingRequest)}>
+          <Button variant="primary" type="submit" onClick={neste}>
             Neste
           </Button>
         </FlexRow>

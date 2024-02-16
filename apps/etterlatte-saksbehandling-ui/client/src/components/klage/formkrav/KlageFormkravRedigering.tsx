@@ -219,6 +219,7 @@ export function KlageFormkravRedigering() {
           <VurderingWrapper>
             <Textarea {...register('begrunnelse')} label="Totalvurdering (valgfritt)" readOnly={!redigerModus} />
           </VurderingWrapper>
+
           {redigerModus ? (
             <FlexRow justify="center">
               <Button type="submit" loading={isPending(lagreFormkravStatus)}>
@@ -233,27 +234,14 @@ export function KlageFormkravRedigering() {
                 </Button>
               </FlexRow>
               <VurderingWrapper>
-                {!kanVurdereUtfall(klage) && (
-                  <>
-                    <Alert variant="info">
-                      <Heading level="2" size="small">
-                        Hent informasjon fra klager
-                      </Heading>
-                      <BodyLong $spacing>
-                        Du må innhente mer informasjon fra klager for å avgjøre om formkravene kan oppfylles. Sett
-                        klagebehandlingen på vent og opprett et nytt brev til klager.
-                      </BodyLong>
-                      <Button
-                        as="a"
-                        variant="primary"
-                        icon={<EnvelopeClosedIcon />}
-                        href={`/person/${klage.sak.ident}?fane=BREV`}
-                        target="_blank"
-                      >
-                        Opprett brev
-                      </Button>
-                    </Alert>
-                  </>
+                {kanVurdereUtfall(klage) ? (
+                  <FlexRow justify="center">
+                    <Button as="a" href={nesteSteg(klage, 'formkrav')}>
+                      Neste side
+                    </Button>
+                  </FlexRow>
+                ) : (
+                  <BeOmInfoFraKlager klage={klage} />
                 )}
               </VurderingWrapper>
             </>
@@ -268,6 +256,31 @@ export function KlageFormkravRedigering() {
       </form>
     </Content>
   )
+
+  function BeOmInfoFraKlager(props: { klage: Klage }) {
+    const klage = props.klage
+
+    return (
+      <Alert variant="info">
+        <Heading level="2" size="small">
+          Hent informasjon fra klager
+        </Heading>
+        <BodyLong $spacing>
+          Du må innhente mer informasjon fra klager for å avgjøre om formkravene kan oppfylles. Sett klagebehandlingen
+          på vent og opprett et nytt brev til klager.
+        </BodyLong>
+        <Button
+          as="a"
+          variant="primary"
+          icon={<EnvelopeClosedIcon />}
+          href={`/person/${klage.sak.ident}?fane=BREV`}
+          target="_blank"
+        >
+          Opprett brev
+        </Button>
+      </Alert>
+    )
+  }
 
   function JaNeiRadiogruppe(props: {
     control: Control<FormDataFormkrav>

@@ -80,7 +80,7 @@ export function KlageFormkravRedigering() {
   const [lagreFormkravStatus, lagreFormkrav] = useApiCall(oppdaterFormkravIKlage)
   const dispatch = useAppDispatch()
   const [iverksatteVedtak, hentIverksatteVedtak] = useApiCall(hentIverksatteVedtakISak)
-  const [redigerModus, setRedigerModus] = React.useState(klage?.formkrav?.formkrav === null)
+  const [redigerModus, setRedigerModus] = React.useState(!klage?.formkrav?.formkrav)
 
   const {
     control,
@@ -273,26 +273,28 @@ export function KlageFormkravRedigering() {
     control: Control<FormDataFormkrav>
     name: Path<FormDataFormkrav>
     legend: string
-    errorMessage?: string
   }) {
-    const { name, control, legend, errorMessage } = props
+    const { name, control, legend } = props
     return (
       <Controller
         name={name}
         rules={{
           required: true,
         }}
-        render={({ field, fieldState }) => (
+        render={({ field, fieldState: { error } }) => (
           <VurderingWrapper>
-            <RadioGroup readOnly={!redigerModus} legend={legend} className="radioGroup" {...field}>
+            <RadioGroup
+              readOnly={!redigerModus}
+              legend={legend}
+              className="radioGroup"
+              {...field}
+              error={error && (error.message || 'Du må svare på spørsmålet: ' + legend)}
+            >
               <div className="flex">
                 <Radio value={JaNei.JA}>Ja</Radio>
                 <Radio value={JaNei.NEI}>Nei</Radio>
               </div>
             </RadioGroup>
-            {fieldState.error ? (
-              <Feilmelding>{errorMessage ?? 'Du må svare på spørsmålet: ' + legend}</Feilmelding>
-            ) : null}
           </VurderingWrapper>
         )}
         control={control}

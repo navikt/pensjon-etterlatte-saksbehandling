@@ -6,15 +6,19 @@ import { InputList, InputRow } from './OpprettNyBehandling'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
+import { Control } from 'react-hook-form'
+import { ControlledTextField } from '~components/person/journalfoeringsoppgave/nybehandling/ControlledTextField'
 
 type PersonArray = keyof Omit<Persongalleri, 'soeker' | 'innsender'>
 
 export default function PersongalleriBarnepensjon({
   erManuellMigrering = false,
   fnrFraOppgave = undefined,
+  control,
 }: {
   erManuellMigrering?: boolean
   fnrFraOppgave?: string | undefined
+  control: Control
 }) {
   const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
@@ -56,15 +60,30 @@ export default function PersongalleriBarnepensjon({
     return (persongalleri?.gjenlevende?.length || 0) + (persongalleri?.avdoed?.length || 0) < 2
   }
 
+  const validerFnrValgfri = (fnr: string): string | undefined => {
+    if (fnr && !new RegExp(/[0-9]{11}/).test(fnr)) {
+      return 'Fødselsnummer er på ugyldig format'
+    }
+    return undefined
+  }
+
+  const validateFnrObligatorisk = (fnr: string): string | undefined => {
+    if (!fnr) {
+      return 'Fødselsnummer må være satt'
+    } else if (!new RegExp(/[0-9]{11}/).test(fnr)) {
+      return 'Fødselsnummer er på ugyldig format'
+    }
+    return undefined
+  }
+
   return (
     <>
       <InputRow>
-        <TextField
+        <ControlledTextField
+          name="persongalleri.soeker"
+          control={control}
+          validate={validateFnrObligatorisk}
           label="Søker (barnet)"
-          value={fnrFraOppgave || persongalleri?.soeker || ''}
-          pattern="[0-9]{11}"
-          maxLength={11}
-          onChange={(e) => oppdaterPersongalleri({ ...persongalleri, soeker: e.target.value })}
           description={
             erManuellMigrering ? 'Oppgi søker sitt fødselsnummer' : 'Fødselsnummeret er automatisk hentet fra oppgaven'
           }
@@ -72,16 +91,40 @@ export default function PersongalleriBarnepensjon({
         />
       </InputRow>
 
+      {/*<InputRow>*/}
+      {/*  <TextField*/}
+      {/*    label="Søker (barnet)"*/}
+      {/*    value={fnrFraOppgave || persongalleri?.soeker || ''}*/}
+      {/*    pattern="[0-9]{11}"*/}
+      {/*    maxLength={11}*/}
+      {/*    onChange={(e) => oppdaterPersongalleri({ ...persongalleri, soeker: e.target.value })}*/}
+      {/*    description={*/}
+      {/*      erManuellMigrering ? 'Oppgi søker sitt fødselsnummer' : 'Fødselsnummeret er automatisk hentet fra oppgaven'*/}
+      {/*    }*/}
+      {/*    readOnly={!erManuellMigrering}*/}
+      {/*  />*/}
+      {/*</InputRow>*/}
+
       <InputRow>
-        <TextField
+        <ControlledTextField
+          name="persongalleri.innsender"
+          control={control}
+          validate={validerFnrValgfri}
           label="Innsender"
           description="Oppgi innsenderen sitt fødselsnummer (dersom det er tilgjengelig)"
-          value={persongalleri?.innsender || ''}
-          pattern="[0-9]{11}"
-          maxLength={11}
-          onChange={(e) => oppdaterPersongalleri({ ...persongalleri, innsender: e.target.value })}
         />
       </InputRow>
+
+      {/*<InputRow>*/}
+      {/*  <TextField*/}
+      {/*    label="Innsender"*/}
+      {/*    description="Oppgi innsenderen sitt fødselsnummer (dersom det er tilgjengelig)"*/}
+      {/*    value={persongalleri?.innsender || ''}*/}
+      {/*    pattern="[0-9]{11}"*/}
+      {/*    maxLength={11}*/}
+      {/*    onChange={(e) => oppdaterPersongalleri({ ...persongalleri, innsender: e.target.value })}*/}
+      {/*  />*/}
+      {/*</InputRow>*/}
 
       <Panel border>
         <Heading size="small" spacing>
@@ -89,6 +132,7 @@ export default function PersongalleriBarnepensjon({
           <BodyShort textColor="subtle">Legg til gjenlevende hvis tilgjengelig</BodyShort>
         </Heading>
 
+        {/* TODO: bruke useFieldArray fra RHF*/}
         <InputList>
           {persongalleri?.gjenlevende?.map((gjenlevende, index) => (
             <InputRow key={index}>

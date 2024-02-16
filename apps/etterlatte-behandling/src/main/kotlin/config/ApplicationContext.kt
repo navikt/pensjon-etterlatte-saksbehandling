@@ -230,7 +230,7 @@ internal class ApplicationContext(
     val grunnlagsendringshendelseDao =
         GrunnlagsendringshendelseDao(
             ConnectionAutoclosingImpl(dataSource),
-        ) // TODO: allokerer denne en connectioN?
+        )
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
     val oppgaveMetrikkerDao = OppgaveMetrikkerDao(dataSource)
     val behandlingMetrikkerDao = BehandlingMetrikkerDao(dataSource)
@@ -239,7 +239,10 @@ internal class ApplicationContext(
     val behandlingInfoDao = BehandlingInfoDao { databaseContext().activeTx() }
     val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
-    val saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans { databaseContext().activeTx() }
+    val saksbehandlerInfoDaoTrans =
+        SaksbehandlerInfoDaoTrans {
+            databaseContext().activeTx()
+        } // TODO: bruk ConnectionAutoclosingImpl overalt... på mandag
     val doedshendelseDao = DoedshendelseDao(ConnectionAutoclosingImpl(dataSource))
 
     // Klient

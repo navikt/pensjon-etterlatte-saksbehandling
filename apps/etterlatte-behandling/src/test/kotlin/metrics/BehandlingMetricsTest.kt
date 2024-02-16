@@ -43,7 +43,7 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
     @BeforeAll
     fun beforeAll() {
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-
+        // TODO: extension med wrapper for database sheet så  man bare får inn user etc?
         Kontekst.set(
             Context(
                 user,

@@ -1,25 +1,21 @@
-import { Button, Heading, Modal } from '@navikt/ds-react'
+import { Button, Dropdown, Heading, Modal } from '@navikt/ds-react'
 import { useState } from 'react'
 import { hentDokumentPDF } from '~shared/api/dokument'
 import Spinner from '~shared/Spinner'
 import { PdfVisning } from '~shared/brev/pdf-visning'
 import { FlexRow } from '~shared/styled'
+import { Journalpost } from '~shared/types/Journalpost'
+import styled from 'styled-components'
 
-export default function DokumentModal({
-  tittel,
-  journalpostId,
-  dokumentInfoId,
-}: {
-  tittel: string
-  journalpostId: string
-  dokumentInfoId: string
-}) {
+export default function DokumentModal({ journalpost }: { journalpost: Journalpost }) {
+  const { tittel, journalpostId, dokumenter } = journalpost
+
   const [error, setError] = useState<string>()
   const [fileURL, setFileURL] = useState<string>('')
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [hasLoaded, setHasLoaded] = useState<boolean>(false)
 
-  const open = async (journalpostId: string, dokumentInfoId: string) => {
+  const open = async (dokumentInfoId: string) => {
     setIsOpen(true)
 
     hentDokumentPDF({ journalpostId, dokumentInfoId })
@@ -42,9 +38,28 @@ export default function DokumentModal({
 
   return (
     <>
-      <Button variant="secondary" size="small" onClick={() => open(journalpostId, dokumentInfoId)}>
-        Åpne dokument
-      </Button>
+      {dokumenter.length > 1 ? (
+        <Dropdown>
+          <Button variant="secondary" size="small" as={Dropdown.Toggle}>
+            Åpne
+          </Button>
+          <DropdownMenu>
+            <Dropdown.Menu.GroupedList>
+              <Dropdown.Menu.GroupedList.Heading>Velg dokument</Dropdown.Menu.GroupedList.Heading>
+              <Dropdown.Menu.Divider />
+              {dokumenter.map((dok) => (
+                <Dropdown.Menu.GroupedList.Item key={dok.dokumentInfoId} onClick={() => open(dok.dokumentInfoId)}>
+                  {dok.tittel}
+                </Dropdown.Menu.GroupedList.Item>
+              ))}
+            </Dropdown.Menu.GroupedList>
+          </DropdownMenu>
+        </Dropdown>
+      ) : dokumenter.length === 1 ? (
+        <Button variant="secondary" size="small" onClick={() => open(dokumenter[0].dokumentInfoId)}>
+          Åpne
+        </Button>
+      ) : null}
 
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>
         <Modal.Header>
@@ -67,3 +82,7 @@ export default function DokumentModal({
     </>
   )
 }
+
+const DropdownMenu = styled(Dropdown.Menu)`
+  width: 50ch;
+`

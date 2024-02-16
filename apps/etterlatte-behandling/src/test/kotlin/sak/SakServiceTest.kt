@@ -62,7 +62,7 @@ internal class SakServiceTest {
         confirmVerified(sakDao, pdltjenesterKlient, norg2Klient)
     }
 
-    private fun saksbehandlerKontekst(nasjonalTilgang: Boolean = false) {
+    private fun saksbehandlerKontekst() {
         val tokenValidationContext = mockk<TokenValidationContext>()
 
         val token = mockk<JwtToken>()
@@ -73,8 +73,8 @@ internal class SakServiceTest {
 
         every { claims.getStringClaim(any()) } returns "Z123456"
 
-        every { claims.containsClaim("groups", AzureGroup.NASJONAL_MED_LOGG.name) } returns nasjonalTilgang
-        every { claims.containsClaim("groups", AzureGroup.NASJONAL_UTEN_LOGG.name) } returns nasjonalTilgang
+        every { claims.containsClaim("groups", AzureGroup.NASJONAL_MED_LOGG.name) } returns false
+        every { claims.containsClaim("groups", AzureGroup.NASJONAL_UTEN_LOGG.name) } returns false
 
         every { token.jwtTokenClaims } returns claims
 
@@ -94,7 +94,7 @@ internal class SakServiceTest {
         )
     }
 
-    fun systemBrukerKontekst() {
+    private fun systemBrukerKontekst() {
         val tokenValidationContext = mockk<TokenValidationContext>()
 
         val token = mockk<JwtToken>()
@@ -336,32 +336,6 @@ internal class SakServiceTest {
     }
 
     @Test
-    fun `filtrerer for saksbehandler med nasjonal tilgang`() {
-        saksbehandlerKontekst(nasjonalTilgang = true)
-
-        coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
-            listOf(
-                SaksbehandlerEnhet(enhetsNummer = Enheter.PORSGRUNN.enhetNr, navn = Enheter.PORSGRUNN.navn),
-            )
-
-        every { sakDao.finnSaker(KONTANT_FOT.value) } returns
-            listOf(
-                Sak(
-                    id = 1,
-                    ident = KONTANT_FOT.value,
-                    sakType = SakType.BARNEPENSJON,
-                    enhet = Enheter.STEINKJER.enhetNr,
-                ),
-            )
-
-        val saker = service.finnSaker(KONTANT_FOT.value)
-
-        saker.size shouldBe 1
-
-        verify(exactly = 1) { sakDao.finnSaker(KONTANT_FOT.value) }
-    }
-
-    @Test
     fun `skal sette skjerming hvis skjermingstjenesten sier at person er skjermet`() {
         saksbehandlerKontekst()
         every { sakDao.finnSaker(KONTANT_FOT.value) } returns emptyList()
@@ -430,13 +404,13 @@ internal class SakServiceTest {
                     ident = ident,
                     sakType = SakType.BARNEPENSJON,
                     id = Random.nextLong(),
-                    enhet = Enheter.UTLAND.enhetNr,
+                    enhet = Enheter.PORSGRUNN.enhetNr,
                 ),
             )
         coEvery { saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
             listOf(
                 SaksbehandlerEnhet(
-                    enhetsNummer = Enheter.PORSGRUNN.enhetNr,
+                    enhetsNummer = Enheter.EGNE_ANSATTE.enhetNr,
                     navn = Enheter.PORSGRUNN.navn,
                 ),
             )

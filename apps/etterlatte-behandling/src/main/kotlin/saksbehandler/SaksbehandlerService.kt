@@ -9,7 +9,7 @@ data class Saksbehandler(
     val enheter: List<String>,
     val kanAttestere: Boolean,
     val skriveEnheter: List<String>,
-    val leseEnheter: List<String>,
+    val kanSeOppgaveliste: Boolean,
 )
 
 class SaksbehandlerService(private val dao: SaksbehandlerInfoDao) {
@@ -19,12 +19,14 @@ class SaksbehandlerService(private val dao: SaksbehandlerInfoDao) {
         val saksbehandlerNavn: String? = dao.hentSaksbehandlerNavn(ident)
 
         return Saksbehandler(
-            ident,
-            if (!saksbehandlerNavn.isNullOrEmpty()) saksbehandlerNavn else ident,
-            innloggetSaksbehandler.enheter(),
-            innloggetSaksbehandler.saksbehandlerMedRoller.harRolleAttestant(),
-            innloggetSaksbehandler.enheterMedSkrivetilgang(),
-            innloggetSaksbehandler.enheterMedLesetilgang(),
+            ident = ident,
+            navn = if (!saksbehandlerNavn.isNullOrEmpty()) saksbehandlerNavn else ident,
+            enheter = innloggetSaksbehandler.enheter(),
+            kanAttestere = innloggetSaksbehandler.saksbehandlerMedRoller.harRolleAttestant(),
+            skriveEnheter = innloggetSaksbehandler.enheterMedSkrivetilgang(),
+            kanSeOppgaveliste =
+                innloggetSaksbehandler.enheterMedSkrivetilgang().isEmpty() &&
+                    innloggetSaksbehandler.enheterMedLesetilgang().isNotEmpty(),
         )
     }
 

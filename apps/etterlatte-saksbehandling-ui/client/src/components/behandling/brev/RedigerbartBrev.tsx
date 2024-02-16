@@ -101,7 +101,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
             label={kanRedigeres ? 'Rediger' : 'Innhold'}
             icon={<PencilIcon fontSize="1.5rem" aria-hidden />}
           />
-          {vedlegg && (
+          {vedlegg?.length > 0 && (
             <Tabs.Tab
               value={ManueltBrevFane.REDIGER_VEDLEGG}
               label={kanRedigeres ? 'Rediger vedlegg' : 'Innhold vedlegg'}
@@ -147,7 +147,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
           {isSuccess(hentManuellPayloadStatus) && isSuccessOrInitial(tilbakestillManuellPayloadStatus) && (
             <>
               <Accordion indent={false}>
-                {vedlegg &&
+                {vedlegg?.length > 0 &&
                   vedlegg.map((brevVedlegg) => (
                     <Accordion.Item key={brevVedlegg.key}>
                       <Accordion.Header>{brevVedlegg.tittel}</Accordion.Header>

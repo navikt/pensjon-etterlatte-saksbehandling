@@ -60,7 +60,6 @@ export const hentPersongalleriSamsvar = async (args: {
 }
 
 export const getPersongalleriFraSoeknad = async (args: {
-  sakId: number
   behandlingId: string
 }): Promise<ApiResponse<Grunnlagsopplysning<Persongalleri, KildePdl>>> => {
   return apiClient.get(`/grunnlag/behandling/${args.behandlingId}/PERSONGALLERI_V1`)

@@ -1,24 +1,54 @@
-import { GlobeIcon } from '@navikt/aksel-icons'
+import { EarthIcon } from '@navikt/aksel-icons'
 import { Link } from '@navikt/ds-react'
-import { useContext } from 'react'
+import { useContext, useEffect } from 'react'
 import { ConfigContext } from '~clientConfig'
+import { SakType } from '~shared/types/sak'
+import { getPersongalleriFraSoeknad } from '~shared/api/grunnlag'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { mapSuccess } from '~shared/api/apiUtils'
+import { Persongalleri } from '~shared/types/Person'
 
-export const EessiPensjonLenke = () => {
+interface Props {
+  sakId: number
+  behandlingId: string
+  sakType: SakType
+}
+
+export const EessiPensjonLenke = ({ sakId, behandlingId, sakType }: Props) => {
   const configContext = useContext(ConfigContext)
 
+  const [persongalleriStatus, hentPersongalleri] = useApiCall(getPersongalleriFraSoeknad)
+
+  useEffect(() => {
+    hentPersongalleri({ behandlingId })
+  }, [])
+
   /**
-   * TODO:
-   *    Må sende med diverse params når EESSI Pensjon har laget støtte for å motta
-   *    - aktoerId
-   *    - sakId
-   *    - kravId
-   *    - vedtakId
-   *    - sakType
-   *    - avdodFnr
+   * Konvertere til et format EP-Gjenny kan tolke
    **/
-  return (
-    <Link href={configContext['eessiPensjonUrl']} target="_blank">
-      <GlobeIcon />
+  const sakTypeEessiFormat = (sakType: SakType) => {
+    switch (sakType) {
+      case SakType.BARNEPENSJON:
+        return 'BARNEP'
+      case SakType.OMSTILLINGSSTOENAD:
+        return 'OMSST'
+    }
+  }
+
+  const opprettUrl = (persongalleri: Persongalleri) => {
+    const params = [
+      `fnr=${persongalleri.soeker}`,
+      `avdodFnr=${persongalleri.avdoed?.[0]}`,
+      `sakType=${sakTypeEessiFormat(sakType)}`,
+      `sakId=${sakId}`,
+    ].join('&')
+
+    return `${configContext['eessiPensjonUrl']}?${params}`
+  }
+
+  return mapSuccess(persongalleriStatus, (persongalleri) => (
+    <Link href={opprettUrl(persongalleri.opplysning)} target="_blank">
+      <EarthIcon />
     </Link>
-  )
+  ))
 }

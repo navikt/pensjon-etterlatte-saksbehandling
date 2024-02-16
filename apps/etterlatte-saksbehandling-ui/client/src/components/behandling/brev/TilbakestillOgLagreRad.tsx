@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import { Button, Detail } from '@navikt/ds-react'
 import { FileResetIcon, FloppydiskIcon } from '@navikt/aksel-icons'
 import { GeneriskModal } from '~shared/modal/modal'
+import { FlexRow } from '~shared/styled'
 
 interface TilbakestillOgLagreRadProps {
   lagretStatus: LagretStatus
@@ -38,12 +39,8 @@ export const TilbakestillOgLagreRad = ({
             Tilbakestill brev
           </Button>
         )}
-        <LagreEndringer>
-          {lagretStatus.beskrivelse && (
-            <Detail as="span" style={{ marginRight: '5px' }}>
-              {lagretStatus.beskrivelse}
-            </Detail>
-          )}
+        <FlexRow align="end">
+          {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
           <Button
             icon={<FloppydiskIcon aria-hidden />}
             variant="primary"
@@ -53,7 +50,7 @@ export const TilbakestillOgLagreRad = ({
           >
             Lagre endringer
           </Button>
-        </LagreEndringer>
+        </FlexRow>
       </ButtonRow>
       <GeneriskModal
         tittel="Tilbakestill brevet"
@@ -67,11 +64,6 @@ export const TilbakestillOgLagreRad = ({
     </>
   )
 }
-
-const LagreEndringer = styled.div`
-  display: flex;
-  align-items: end;
-`
 
 const ButtonRow = styled.div`
   display: flex;

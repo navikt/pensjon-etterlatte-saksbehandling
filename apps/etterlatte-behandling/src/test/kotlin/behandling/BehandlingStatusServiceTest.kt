@@ -213,4 +213,57 @@ internal class BehandlingStatusServiceTest {
         }
         confirmVerified(behandlingdao, behandlingService, grlService, generellBehandlingService)
     }
+
+    @Test
+    fun `attestert vedtak som ikke er avslag skal ikke ha kravpakke(utland)`() {
+        val sakId = 1L
+        val behandling =
+            foerstegangsbehandling(
+                sakId = sakId,
+                status = BehandlingStatus.FATTET_VEDTAK,
+                boddEllerArbeidetUtlandet =
+                    BoddEllerArbeidetUtlandet(
+                        boddEllerArbeidetUtlandet = true,
+                        skalSendeKravpakke = true,
+                        begrunnelse = "beg",
+                        kilde = Grunnlagsopplysning.Saksbehandler.create("navIdent"),
+                    ),
+            )
+        val behandlingId = behandling.id
+        val vedtakId = 1L
+
+        val behandlingdao =
+            mockk<BehandlingDao> {
+                every { lagreStatus(any(), any(), any()) } just runs
+            }
+
+        val vedtakHendelse = VedtakHendelse(vedtakId, Tidspunkt.now(), "saksbehandler")
+        val vedtakEndringDto = VedtakEndringDTO(SakIdOgReferanse(sakId, behandlingId.toString()), vedtakHendelse, VedtakType.INNVILGELSE)
+
+        val behandlingService =
+            mockk<BehandlingService> {
+                every { registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.ATTESTERT) } just runs
+                every { hentBehandling(behandlingId) } returns behandling
+            }
+        val grlService = mockk<GrunnlagsendringshendelseService>()
+        val generellBehandlingService = mockk<GenerellBehandlingService>()
+
+        val sut =
+            BehandlingStatusServiceImpl(
+                behandlingdao,
+                behandlingService,
+                grlService,
+                generellBehandlingService,
+            )
+
+        inTransaction {
+            sut.settAttestertVedtak(behandling, vedtakEndringDto)
+        }
+
+        verify {
+            behandlingdao.lagreStatus(behandlingId, BehandlingStatus.ATTESTERT, any())
+            behandlingService.registrerVedtakHendelse(behandlingId, vedtakHendelse, HendelseType.ATTESTERT)
+        }
+        confirmVerified(behandlingdao, behandlingService, grlService, generellBehandlingService)
+    }
 }

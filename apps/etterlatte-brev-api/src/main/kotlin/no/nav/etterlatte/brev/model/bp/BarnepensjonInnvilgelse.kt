@@ -19,6 +19,7 @@ import no.nav.etterlatte.grunnbeloep.Grunnbeloep
 import no.nav.etterlatte.libs.common.behandling.Aldersgruppe
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.LocalDate
 
@@ -89,9 +90,24 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
 
             return BarnepensjonInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
-                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
-                sisteBeregningsperiodeDatoFom = beregningsperioder.maxBy { it.datoFOM }.datoFOM,
-                sisteBeregningsperiodeBeloep = beregningsperioder.maxBy { it.datoFOM }.utbetaltBeloep,
+                avdoed =
+                    generellBrevData.personerISak.avdoede.minByOrNull { it.doedsdato }
+                        ?: throw UgyldigForespoerselException(
+                            code = "AVDOED_MED_DOEDSDATO_MANGLER",
+                            detail = "Ingen avdød med dødsdato",
+                        ),
+                sisteBeregningsperiodeDatoFom =
+                    beregningsperioder.maxByOrNull { it.datoFOM }?.datoFOM
+                        ?: throw UgyldigForespoerselException(
+                            code = "INGEN_BEREGNINGSPERIODE_MED_FOM",
+                            detail = "Ingen beregningsperiode med dato FOM",
+                        ),
+                sisteBeregningsperiodeBeloep =
+                    beregningsperioder.maxByOrNull { it.datoFOM }?.utbetaltBeloep
+                        ?: throw UgyldigForespoerselException(
+                            code = "INTET_UTBETALT_BELOEP",
+                            detail = "Intet utbetalt beløp i siste beregningsperiode",
+                        ),
                 erEtterbetaling = etterbetaling != null,
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
             )

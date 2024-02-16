@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -15,52 +16,55 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import java.sql.Connection
 import java.sql.ResultSet
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
+class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclosing) {
     fun opprettGrunnlagsendringshendelse(hendelse: Grunnlagsendringshendelse): Grunnlagsendringshendelse {
-        with(connection()) {
-            val stmt =
-                prepareStatement(
-                    """
-                    INSERT INTO grunnlagsendringshendelse(id, sak_id, type, opprettet, status, hendelse_gjelder_rolle, 
-                        samsvar_mellom_pdl_og_grunnlag, gjelder_person)
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?)
-                    """.trimIndent(),
-                )
-            with(hendelse) {
-                stmt.setObject(1, id)
-                stmt.setLong(2, sakId)
-                stmt.setString(3, type.name)
-                stmt.setTidspunkt(4, opprettet.toTidspunkt())
-                stmt.setString(5, status.name)
-                stmt.setString(6, hendelseGjelderRolle.name)
-                stmt.setJsonb(7, samsvarMellomKildeOgGrunnlag)
-                stmt.setString(8, gjelderPerson)
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        INSERT INTO grunnlagsendringshendelse(id, sak_id, type, opprettet, status, hendelse_gjelder_rolle, 
+                            samsvar_mellom_pdl_og_grunnlag, gjelder_person)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+                        """.trimIndent(),
+                    )
+                with(hendelse) {
+                    stmt.setObject(1, id)
+                    stmt.setLong(2, sakId)
+                    stmt.setString(3, type.name)
+                    stmt.setTidspunkt(4, opprettet.toTidspunkt())
+                    stmt.setString(5, status.name)
+                    stmt.setString(6, hendelseGjelderRolle.name)
+                    stmt.setJsonb(7, samsvarMellomKildeOgGrunnlag)
+                    stmt.setString(8, gjelderPerson)
+                }
+                stmt.executeUpdate()
+            }.let {
+                hentGrunnlagsendringshendelse(hendelse.id)
+                    ?: throw Exception("Kunne ikke hente nettopp lagret Grunnlagsendringshendelse med id: ${hendelse.id}")
             }
-            stmt.executeUpdate()
-        }.let {
-            return hentGrunnlagsendringshendelse(hendelse.id)
-                ?: throw Exception("Kunne ikke hente nettopp lagret Grunnlagsendringshendelse med id: ${hendelse.id}")
         }
     }
 
     fun hentGrunnlagsendringshendelse(id: UUID): Grunnlagsendringshendelse? {
-        with(connection()) {
-            val stmt =
-                prepareStatement(
-                    """
-                    SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
-                    FROM grunnlagsendringshendelse
-                    WHERE id = ?
-                    """.trimIndent(),
-                )
-            stmt.setObject(1, id)
-            return stmt.executeQuery().singleOrNull { asGrunnlagsendringshendelse() }
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
+                            samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
+                        FROM grunnlagsendringshendelse
+                        WHERE id = ?
+                        """.trimIndent(),
+                    )
+                stmt.setObject(1, id)
+                stmt.executeQuery().singleOrNull { asGrunnlagsendringshendelse() }
+            }
         }
     }
 
@@ -70,73 +74,81 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         etterStatus: GrunnlagsendringStatus,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ) {
-        with(connection()) {
-            prepareStatement(
-                """
-                UPDATE grunnlagsendringshendelse
-                SET status = ?,
-                samsvar_mellom_pdl_og_grunnlag = ?
-                WHERE id = ?
-                AND status = ?
-                """.trimIndent(),
-            ).use {
-                it.setString(1, etterStatus.name)
-                it.setJsonb(2, samsvarMellomKildeOgGrunnlag)
-                it.setObject(3, hendelseId)
-                it.setString(4, foerStatus.name)
-                it.executeUpdate()
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    UPDATE grunnlagsendringshendelse
+                    SET status = ?,
+                    samsvar_mellom_pdl_og_grunnlag = ?
+                    WHERE id = ?
+                    AND status = ?
+                    """.trimIndent(),
+                ).use {
+                    it.setString(1, etterStatus.name)
+                    it.setJsonb(2, samsvarMellomKildeOgGrunnlag)
+                    it.setObject(3, hendelseId)
+                    it.setString(4, foerStatus.name)
+                    it.executeUpdate()
+                }
             }
         }
     }
 
     fun oppdaterGrunnlagsendringHistorisk(behandlingId: UUID) {
-        with(connection()) {
-            prepareStatement(
-                """
-                UPDATE grunnlagsendringshendelse
-                SET status = ?
-                WHERE behandling_id = ?
-                """.trimIndent(),
-            ).use {
-                it.setString(1, GrunnlagsendringStatus.HISTORISK.toString())
-                it.setObject(2, behandlingId)
-                it.executeUpdate()
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    UPDATE grunnlagsendringshendelse
+                    SET status = ?
+                    WHERE behandling_id = ?
+                    """.trimIndent(),
+                ).use {
+                    it.setString(1, GrunnlagsendringStatus.HISTORISK.toString())
+                    it.setObject(2, behandlingId)
+                    it.executeUpdate()
+                }
             }
         }
     }
 
     fun lukkGrunnlagsendringStatus(hendelse: Grunnlagsendringshendelse) {
-        with(connection()) {
-            prepareStatement(
-                """
-                UPDATE grunnlagsendringshendelse
-                SET kommentar = ?,
-                status = ?
-                WHERE id = ?
-                """.trimIndent(),
-            ).use {
-                it.setString(1, hendelse.kommentar)
-                it.setString(2, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT.toString())
-                it.setObject(3, hendelse.id)
-                it.executeUpdate()
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    UPDATE grunnlagsendringshendelse
+                    SET kommentar = ?,
+                    status = ?
+                    WHERE id = ?
+                    """.trimIndent(),
+                ).use {
+                    it.setString(1, hendelse.kommentar)
+                    it.setString(2, GrunnlagsendringStatus.VURDERT_SOM_IKKE_RELEVANT.toString())
+                    it.setObject(3, hendelse.id)
+                    it.executeUpdate()
+                }
             }
         }
     }
 
     fun kobleGrunnlagsendringshendelserFraBehandlingId(behandlingId: UUID) {
-        with(connection()) {
-            prepareStatement(
-                """
-                UPDATE grunnlagsendringshendelse
-                SET kommentar = null,
-                    status = ?,
-                    behandling_id = null 
-                WHERE behandling_id = ?
-                """.trimIndent(),
-            ).use {
-                it.setString(1, GrunnlagsendringStatus.SJEKKET_AV_JOBB.toString())
-                it.setObject(2, behandlingId)
-                it.executeUpdate()
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    UPDATE grunnlagsendringshendelse
+                    SET kommentar = null,
+                        status = ?,
+                        behandling_id = null 
+                    WHERE behandling_id = ?
+                    """.trimIndent(),
+                ).use {
+                    it.setString(1, GrunnlagsendringStatus.SJEKKET_AV_JOBB.toString())
+                    it.setObject(2, behandlingId)
+                    it.executeUpdate()
+                }
             }
         }
     }
@@ -145,53 +157,59 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         grlaghendelseId: UUID,
         behandlingId: UUID,
     ) {
-        with(connection()) {
-            prepareStatement(
-                """
-                UPDATE grunnlagsendringshendelse
-                SET behandling_id = ?,
-                status = ?
-                WHERE id = ?
-                AND status = ?
-                """.trimIndent(),
-            ).use {
-                it.setObject(1, behandlingId)
-                it.setString(2, GrunnlagsendringStatus.TATT_MED_I_BEHANDLING.name)
-                it.setObject(3, grlaghendelseId)
-                it.setString(4, GrunnlagsendringStatus.SJEKKET_AV_JOBB.name)
-                it.executeUpdate()
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    UPDATE grunnlagsendringshendelse
+                    SET behandling_id = ?,
+                    status = ?
+                    WHERE id = ?
+                    AND status = ?
+                    """.trimIndent(),
+                ).use {
+                    it.setObject(1, behandlingId)
+                    it.setString(2, GrunnlagsendringStatus.TATT_MED_I_BEHANDLING.name)
+                    it.setObject(3, grlaghendelseId)
+                    it.setString(4, GrunnlagsendringStatus.SJEKKET_AV_JOBB.name)
+                    it.executeUpdate()
+                }
             }
         }
     }
 
     fun hentAlleGrunnlagsendringshendelser(): List<Grunnlagsendringshendelse> {
-        with(connection()) {
-            val stmt =
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
+                            samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
+                        FROM grunnlagsendringshendelse
+                        """.trimIndent(),
+                    )
+                stmt.executeQuery().toList { asGrunnlagsendringshendelse() }
+            }
+        }
+    }
+
+    fun hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(minutter: Long): List<Grunnlagsendringshendelse> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
                 prepareStatement(
                     """
                     SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
                         samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
                     FROM grunnlagsendringshendelse
+                    WHERE opprettet <= ?
+                    AND status = ?
                     """.trimIndent(),
-                )
-            return stmt.executeQuery().toList { asGrunnlagsendringshendelse() }
-        }
-    }
-
-    fun hentIkkeVurderteGrunnlagsendringshendelserEldreEnn(minutter: Long): List<Grunnlagsendringshendelse> {
-        with(connection()) {
-            prepareStatement(
-                """
-                SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                    samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
-                FROM grunnlagsendringshendelse
-                WHERE opprettet <= ?
-                AND status = ?
-                """.trimIndent(),
-            ).use {
-                it.setTidspunkt(1, Tidspunkt.now().minus(minutter, ChronoUnit.MINUTES))
-                it.setString(2, GrunnlagsendringStatus.VENTER_PAA_JOBB.name)
-                return it.executeQuery().toList { asGrunnlagsendringshendelse() }
+                ).use {
+                    it.setTidspunkt(1, Tidspunkt.now().minus(minutter, ChronoUnit.MINUTES))
+                    it.setString(2, GrunnlagsendringStatus.VENTER_PAA_JOBB.name)
+                    it.executeQuery().toList { asGrunnlagsendringshendelse() }
+                }
             }
         }
     }
@@ -200,20 +218,22 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         sakId: Long,
         statuser: List<GrunnlagsendringStatus>,
     ): List<Grunnlagsendringshendelse> {
-        with(connection()) {
-            prepareStatement(
-                """
-                SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                    samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
-                FROM grunnlagsendringshendelse
-                WHERE sak_id = ?
-                AND status = ANY(?)
-                """.trimIndent(),
-            ).use {
-                it.setLong(1, sakId)
-                val statusArray = this.createArrayOf("text", statuser.toTypedArray())
-                it.setArray(2, statusArray)
-                return it.executeQuery().toList { asGrunnlagsendringshendelse() }
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
+                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
+                    FROM grunnlagsendringshendelse
+                    WHERE sak_id = ?
+                    AND status = ANY(?)
+                    """.trimIndent(),
+                ).use {
+                    it.setLong(1, sakId)
+                    val statusArray = this.createArrayOf("text", statuser.toTypedArray())
+                    it.setArray(2, statusArray)
+                    it.executeQuery().toList { asGrunnlagsendringshendelse() }
+                }
             }
         }
     }
@@ -223,22 +243,24 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
         statuser: List<GrunnlagsendringStatus>,
         type: GrunnlagsendringsType,
     ): List<Grunnlagsendringshendelse> {
-        with(connection()) {
-            prepareStatement(
-                """
-                SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                    samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
-                FROM grunnlagsendringshendelse
-                WHERE sak_id = ?
-                AND type = ?
-                AND status = ANY(?)
-                """.trimIndent(),
-            ).use {
-                it.setLong(1, sakId)
-                it.setString(2, type.toString())
-                val statusArray = this.createArrayOf("text", statuser.toTypedArray())
-                it.setArray(3, statusArray)
-                return it.executeQuery().toList { asGrunnlagsendringshendelse() }
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
+                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
+                    FROM grunnlagsendringshendelse
+                    WHERE sak_id = ?
+                    AND type = ?
+                    AND status = ANY(?)
+                    """.trimIndent(),
+                ).use {
+                    it.setLong(1, sakId)
+                    it.setString(2, type.toString())
+                    val statusArray = this.createArrayOf("text", statuser.toTypedArray())
+                    it.setArray(3, statusArray)
+                    it.executeQuery().toList { asGrunnlagsendringshendelse() }
+                }
             }
         }
     }
@@ -268,21 +290,22 @@ class GrunnlagsendringshendelseDao(val connection: () -> Connection) {
     }
 
     fun hentGrunnlagsendringshendelseSomErTattMedIBehandling(behandlingId: UUID): List<Grunnlagsendringshendelse> {
-        with(connection()) {
-            prepareStatement(
-                """
-                SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
-                        samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
-                    FROM grunnlagsendringshendelse
-                    WHERE behandling_id = ?
-                """.trimIndent(),
-            )
-                .let {
-                    it.setObject(1, behandlingId)
-                    return it.executeQuery().toList {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    SELECT id, sak_id, type, opprettet, status, behandling_id, hendelse_gjelder_rolle, 
+                            samsvar_mellom_pdl_og_grunnlag, gjelder_person, kommentar
+                        FROM grunnlagsendringshendelse
+                        WHERE behandling_id = ?
+                    """.trimIndent(),
+                )
+                    .apply {
+                        setObject(1, behandlingId)
+                    }.executeQuery().toList {
                         asGrunnlagsendringshendelse()
                     }
-                }
+            }
         }
     }
 }

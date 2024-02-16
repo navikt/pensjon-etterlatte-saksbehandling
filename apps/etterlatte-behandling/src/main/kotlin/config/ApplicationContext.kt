@@ -54,7 +54,7 @@ import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServic
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
 import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
-import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.PesysKlientImpl
@@ -224,10 +224,13 @@ internal class ApplicationContext(
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
     val generellbehandlingDao = GenerellBehandlingDao { databaseContext().activeTx() }
     val vedtaksbehandlingDao = VedtaksbehandlingDao { databaseContext().activeTx() }
-    val oppgaveDaoNy = OppgaveDaoImpl { databaseContext().activeTx() }
-    val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { databaseContext().activeTx() }
-    val sakDao = SakDao { databaseContext().activeTx() }
-    val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
+    val oppgaveDaoNy = OppgaveDaoImpl(ConnectionAutoclosingImpl(dataSource))
+    val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, ConnectionAutoclosingImpl(dataSource))
+    val sakDao = SakDao(ConnectionAutoclosingImpl(dataSource))
+    val grunnlagsendringshendelseDao =
+        GrunnlagsendringshendelseDao(
+            ConnectionAutoclosingImpl(dataSource),
+        ) // TODO: allokerer denne en connectioN?
     val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
     val oppgaveMetrikkerDao = OppgaveMetrikkerDao(dataSource)
     val behandlingMetrikkerDao = BehandlingMetrikkerDao(dataSource)
@@ -237,7 +240,7 @@ internal class ApplicationContext(
     val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
     val saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans { databaseContext().activeTx() }
-    val doedshendelseDao = DoedshendelseDao(ConnectionAutoclosing(dataSource))
+    val doedshendelseDao = DoedshendelseDao(ConnectionAutoclosingImpl(dataSource))
 
     // Klient
     val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)

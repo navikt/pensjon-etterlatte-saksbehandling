@@ -1,6 +1,12 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import io.mockk.mockk
+import no.nav.etterlatte.ConnectionAutoclosingTest
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
@@ -49,10 +55,18 @@ internal class GrunnlagsendringshendelseDaoTest(val dataSource: DataSource) {
     @BeforeAll
     fun beforeAll() {
         val connection = dataSource.connection
-        sakRepo = SakDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
             BehandlingDao(KommerBarnetTilGodeDao { connection }, RevurderingDao { connection }) { connection }
-        grunnlagsendringshendelsesRepo = GrunnlagsendringshendelseDao { connection }
+        grunnlagsendringshendelsesRepo = GrunnlagsendringshendelseDao(ConnectionAutoclosingTest(dataSource))
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+
+        Kontekst.set(
+            Context(
+                user,
+                DatabaseContextTest(dataSource),
+            ),
+        )
     }
 
     @AfterEach

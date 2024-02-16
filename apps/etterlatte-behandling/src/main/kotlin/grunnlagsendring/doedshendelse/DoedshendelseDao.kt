@@ -9,7 +9,7 @@ import no.nav.etterlatte.libs.database.toList
 import no.nav.helse.rapids_rivers.toUUID
 import java.sql.ResultSet
 
-class DoedshendelseDao(val connectionAutoclosing: ConnectionAutoclosing) {
+class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
     fun oppdaterBrevDistribuertDoedshendelse(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) {
         connectionAutoclosing.hentConnection {
             with(it) {

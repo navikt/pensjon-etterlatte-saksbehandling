@@ -2,7 +2,12 @@ package no.nav.etterlatte.adressebeskyttelse
 
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.mockk
+import no.nav.etterlatte.ConnectionAutoclosingTest
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.klage.KlageDao
@@ -54,7 +59,7 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
     fun beforeAll() {
         val connection = dataSource.connection
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
-        sakRepo = SakDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
 
         sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService)
         behandlingRepo =
@@ -65,6 +70,13 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
                 RevurderingDao { connection },
             ) { connection }
         klageDao = KlageDaoImpl { connection }
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+        Kontekst.set(
+            Context(
+                user,
+                DatabaseContextTest(dataSource),
+            ),
+        )
     }
 
     @Test

@@ -17,10 +17,12 @@ import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.personOpplysning
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.sql.Connection
 import java.time.LocalDate
 import java.util.UUID
 
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 internal class DoedshendelseServiceTest {
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val dao = mockk<DoedshendelseDao>()

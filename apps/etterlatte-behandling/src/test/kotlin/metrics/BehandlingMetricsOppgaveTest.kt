@@ -2,8 +2,14 @@ package no.nav.etterlatte.metrics
 
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.mockk.mockk
 import io.prometheus.client.CollectorRegistry
+import no.nav.etterlatte.ConnectionAutoclosingTest
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -36,16 +42,21 @@ internal class BehandlingMetricsOppgaveTest(private val ds: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = ds.connection
-        oppgaveDao = OppgaveDaoImpl { connection }
-        sakDao = SakDao { connection }
-
-        opprettOppgaver()
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+        Kontekst.set(
+            Context(
+                user,
+                DatabaseContextTest(ds),
+            ),
+        )
+        oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
+        sakDao = SakDao(ConnectionAutoclosingTest(ds))
 
         behandlingMetrikkerDao = BehandlingMetrikkerDao(ds)
         oppgaveMetrikkerDao = OppgaveMetrikkerDao(ds)
         behandlingMetrics = BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, testreg)
 
+        opprettOppgaver() // spess
         behandlingMetrics.run()
     }
 

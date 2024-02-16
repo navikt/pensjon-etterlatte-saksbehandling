@@ -8,9 +8,10 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -53,7 +54,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import java.sql.Connection
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID.randomUUID
@@ -76,14 +76,14 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
     fun beforeAll() {
         val connection = dataSource.connection
         dao = GenerellBehandlingDao { connection }
-        oppgaveDao = OppgaveDaoImpl { connection }
-        sakRepo = SakDao { connection }
+        oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         hendelseDao = spyk(HendelseDao { connection })
         behandlingRepo =
             BehandlingDao(KommerBarnetTilGodeDao { connection }, RevurderingDao { connection }) { connection }
         oppgaveService =
             OppgaveService(
-                OppgaveDaoMedEndringssporingImpl(oppgaveDao) { connection },
+                OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),
                 sakRepo,
             )
         service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient, hendelseDao)
@@ -103,15 +103,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         Kontekst.set(
             Context(
                 user,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
+                DatabaseContextTest(dataSource),
             ),
         )
     }

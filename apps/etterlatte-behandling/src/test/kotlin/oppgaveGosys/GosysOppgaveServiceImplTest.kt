@@ -21,10 +21,12 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class GosysOppgaveServiceImplTest {
     private val gosysOppgaveKlient = mockk<GosysOppgaveKlient>()
     private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
@@ -241,7 +243,10 @@ class GosysOppgaveServiceImplTest {
     fun `kalle gosys-klient med riktige params`() {
         coEvery {
             gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(
-                oppgaveId = "123", oppgaveVersjon = 2L, tildeles = "A012345", brukerTokenInfo,
+                oppgaveId = "123",
+                oppgaveVersjon = 2L,
+                tildeles = "A012345",
+                brukerTokenInfo,
             )
         } returns
             GosysApiOppgave(

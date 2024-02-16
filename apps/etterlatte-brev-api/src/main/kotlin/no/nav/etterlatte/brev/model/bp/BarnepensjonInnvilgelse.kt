@@ -89,9 +89,15 @@ data class BarnepensjonInnvilgelseRedigerbartUtfall(
 
             return BarnepensjonInnvilgelseRedigerbartUtfall(
                 virkningsdato = utbetalingsinfo.virkningsdato,
-                avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
-                sisteBeregningsperiodeDatoFom = beregningsperioder.maxBy { it.datoFOM }.datoFOM,
-                sisteBeregningsperiodeBeloep = beregningsperioder.maxBy { it.datoFOM }.utbetaltBeloep,
+                avdoed =
+                    generellBrevData.personerISak.avdoede.minByOrNull { it.doedsdato }
+                        ?: throw IllegalStateException("Ingen avdød med dødsdato"),
+                sisteBeregningsperiodeDatoFom =
+                    beregningsperioder.maxByOrNull { it.datoFOM }?.datoFOM
+                        ?: throw IllegalStateException("Ingen beregningsperiode med dato FOM"),
+                sisteBeregningsperiodeBeloep =
+                    beregningsperioder.maxByOrNull { it.datoFOM }?.utbetaltBeloep
+                        ?: throw IllegalStateException("Intet utbetalt beløp i siste beregningsperiode"),
                 erEtterbetaling = etterbetaling != null,
                 harFlereUtbetalingsperioder = utbetalingsinfo.beregningsperioder.size > 1,
             )

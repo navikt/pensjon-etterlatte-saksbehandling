@@ -252,6 +252,22 @@ class BrevdataFacade(
         )
     }
 
+    suspend fun finnForrigeAvkortingsinfo(
+        sakId: Long,
+        sakType: SakType,
+        virkningstidspunkt: YearMonth,
+        vedtakType: VedtakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Avkortingsinfo? {
+        return finnAvkortingsinfo(
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
+            sakType,
+            virkningstidspunkt,
+            vedtakType,
+            brukerTokenInfo,
+        )
+    }
+
     suspend fun finnTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

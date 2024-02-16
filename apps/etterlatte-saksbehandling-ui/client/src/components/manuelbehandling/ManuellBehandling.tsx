@@ -43,10 +43,10 @@ export default function ManuellBehandling() {
   useEffect(() => {
     if (oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
-        setFnr(oppgave.fnr!!)
-        if (oppgave.merknad) {
-          const pesysid = oppgave.merknad.split('=')[1]
-          setPesysId(Number(pesysid))
+        oppgave.fnr && setFnr(oppgave.fnr)
+        oppgave.referanse && setPesysId(Number(oppgave.referanse))
+        if (oppgave.type == 'GJENOPPRETTING_ALDERSOVERGANG') {
+          setVedtaksloesning('GJENOPPRETTA')
         }
       })
     }
@@ -105,8 +105,8 @@ export default function ManuellBehandling() {
         onChange={(e) => setVedtaksloesning(e.target.value)}
       >
         <option>Velg ...</option>
-        <option value="PESYS">Løpende i Pesys</option>
-        <option value="GJENOPPRETTA">Opphørt i Pesys</option>
+        <option value="PESYS">Løpende i Pesys til 1.1.2024</option>
+        <option value="GJENOPPRETTA">Gjenoppretting av opphørt aldersovergang</option>
         <option value="GJENNY">Nei</option>
       </Select>
 

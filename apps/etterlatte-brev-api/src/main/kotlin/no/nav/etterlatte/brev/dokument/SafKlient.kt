@@ -95,8 +95,8 @@ class SafKlient(
                                 type = idType,
                             ),
                         tema = if (visTemaPen) listOf("EYO", "EYB", "PEN") else listOf("EYO", "EYB"),
-                        // TODO: Finn en grense eller fiks paginering
-                        foerste = 20,
+                        // TODO: EY-3521
+                        foerste = 50,
                     ),
             )
 

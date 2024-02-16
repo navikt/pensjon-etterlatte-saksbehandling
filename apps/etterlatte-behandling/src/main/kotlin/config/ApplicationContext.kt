@@ -22,6 +22,8 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
+import no.nav.etterlatte.behandling.generiskbehandling.GeneriskBehandlingDao
+import no.nav.etterlatte.behandling.generiskbehandling.GeneriskBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
@@ -220,6 +222,7 @@ internal class ApplicationContext(
     val revurderingDao = RevurderingDao { databaseContext().activeTx() }
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
     val generellbehandlingDao = GenerellBehandlingDao { databaseContext().activeTx() }
+    val generiskBehandlingDao = GeneriskBehandlingDao { databaseContext().activeTx() }
     val oppgaveDaoNy = OppgaveDaoImpl { databaseContext().activeTx() }
     val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { databaseContext().activeTx() }
     val sakDao = SakDao { databaseContext().activeTx() }
@@ -273,6 +276,10 @@ internal class ApplicationContext(
             behandlingService,
             grunnlagKlientObo,
             hendelseDao,
+        )
+    val generiskBehandlingService =
+        GeneriskBehandlingService(
+            generiskBehandlingDao,
         )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)

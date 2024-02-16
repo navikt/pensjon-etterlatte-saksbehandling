@@ -50,6 +50,10 @@ enum class KlageStatus {
         fun kanAvbryte(status: KlageStatus): Boolean {
             return status !in listOf(FERDIGSTILT, AVBRUTT)
         }
+
+        fun kanEndres(status: KlageStatus): Boolean {
+            return status in listOf(OPPRETTET, FORMKRAV_OPPFYLT, UTFALL_VURDERT)
+        }
     }
 }
 

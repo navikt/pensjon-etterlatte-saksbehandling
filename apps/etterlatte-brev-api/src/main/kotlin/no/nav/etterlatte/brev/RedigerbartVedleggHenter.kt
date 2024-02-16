@@ -33,7 +33,7 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService, p
                         if (brevtype == Brevtype.VARSEL) {
                             listOf(hentInnholdBeregningVedleggOms(bruker, generellBrevData))
                         } else {
-                            null
+                            emptyList()
                         }
                     }
                 }
@@ -48,7 +48,7 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService, p
                         if (brevtype == Brevtype.VARSEL) {
                             listOf(hentInnholdBeregningAvTrygdetidBp(bruker, generellBrevData))
                         } else {
-                            null
+                            emptyList()
                         }
                     }
                 }
@@ -66,7 +66,7 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService, p
     ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
         listOf(hentInnholdForhaandsvarselFeilutbetalingVedleggOms(bruker, generellBrevData))
     } else {
-        null
+        emptyList()
     }
 
     private suspend fun vedleggEndringOmstillingsstoenad(
@@ -106,7 +106,7 @@ class RedigerbartVedleggHenter(private val brevbakerService: BrevbakerService, p
     ) = if (harFeilutbetalingMedVarsel(bruker, generellBrevData)) {
         listOf(hentInnholdForhaandsvarselFeilutbetalingVedleggBp(bruker, generellBrevData))
     } else {
-        null
+        emptyList()
     }
 
     private suspend fun hentInnholdBeregningVedleggOms(

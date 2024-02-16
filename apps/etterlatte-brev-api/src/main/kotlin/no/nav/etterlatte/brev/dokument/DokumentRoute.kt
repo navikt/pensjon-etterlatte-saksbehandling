@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.dokument
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -9,6 +10,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.KnyttTilAnnenSakRequest
@@ -36,15 +38,12 @@ fun Route.dokumentRoute(
 
         route("{journalpostId}") {
             get {
-                val journalpostId = call.parameters["journalpostId"]!!
-
                 val journalpost = safService.hentJournalpost(journalpostId, brukerTokenInfo)
 
                 call.respond(journalpost ?: HttpStatusCode.NotFound)
             }
 
             put {
-                val journalpostId = call.parameters["journalpostId"]!!
                 val forsoekFerdistill = call.request.queryParameters["forsoekFerdigstill"].toBoolean()
                 val journalfoerendeEnhet = call.request.queryParameters["journalfoerendeEnhet"]
 
@@ -56,28 +55,27 @@ fun Route.dokumentRoute(
             }
 
             put("/knyttTilAnnenSak") {
-                val journalpostId = call.parameters["journalpostId"]!!
                 val request = call.receive<KnyttTilAnnenSakRequest>()
 
                 call.respond(dokarkivService.knyttTilAnnenSak(journalpostId, request))
             }
 
             put("/feilregistrerSakstilknytning") {
-                val journalpostId = call.parameters["journalpostId"]!!
-
                 dokarkivService.feilregistrerSakstilknytning(journalpostId)
                 call.respond(HttpStatusCode.OK)
             }
 
             put("/opphevFeilregistrertSakstilknytning") {
-                val journalpostId = call.parameters["journalpostId"]!!
-
                 dokarkivService.opphevFeilregistrertSakstilknytning(journalpostId)
                 call.respond(HttpStatusCode.OK)
             }
 
+            get("/utsendingsinfo") {
+                val utsendingsinfo = safService.hentUtsendingsinfo(journalpostId, brukerTokenInfo)
+                call.respond(utsendingsinfo ?: HttpStatusCode.NoContent)
+            }
+
             get("/{dokumentInfoId}") {
-                val journalpostId = call.parameters["journalpostId"]!!
                 val dokumentInfoId = call.parameters["dokumentInfoId"]!!
                 val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, brukerTokenInfo)
 
@@ -86,3 +84,9 @@ fun Route.dokumentRoute(
         }
     }
 }
+
+private inline val PipelineContext<*, ApplicationCall>.journalpostId: String
+    get() =
+        requireNotNull(call.parameters["journalpostId"]) {
+            "JournalpostID mangler i requesten"
+        }

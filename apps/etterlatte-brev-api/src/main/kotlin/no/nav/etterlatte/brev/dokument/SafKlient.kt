@@ -150,6 +150,37 @@ class SafKlient(
         }
     }
 
+    suspend fun hentUtsendingsInfo(
+        journalpostId: String,
+        bruker: BrukerTokenInfo,
+    ): HentUtsendingsinfoResponse {
+        val request =
+            GraphqlRequest(
+                query = getQuery("/graphql/utsendingsinfo.graphql"),
+                variables = JournalpostVariables(journalpostId),
+            )
+
+        return retry {
+            val res =
+                httpClient.post("$baseUrl/graphql") {
+                    bearerAuth(getOboToken(bruker))
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }
+
+            if (res.status.isSuccess()) {
+                res.body<HentUtsendingsinfoResponse>()
+            } else {
+                throw ResponseException(res, "Ukjent feil oppsto ved henting av journalposter")
+            }
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> throw it.samlaExceptions()
+            }
+        }
+    }
+
     private fun getQuery(name: String): String {
         return javaClass.getResource(name)!!
             .readText()

@@ -61,6 +61,8 @@ internal class Verifiserer(
                     feilSomMedfoererManuell.addAll(sjekkAdresseOgUtlandsopphold(request.pesysId.id, soeker, request))
                     feilSomMedfoererManuell.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(request))
                     feilSomMedfoererManuell.addAll(sjekkOmForandringIForeldreforhold(request, soeker))
+                    // Trolig unødvendig da ukjente foreldre alltid er utlandsaker
+                    feilSomMedfoererManuell.addAll(sjekkOmUkjentForelder(request))
                 }
             }
         }
@@ -229,6 +231,14 @@ internal class Verifiserer(
         }
         return emptyList()
     }
+
+    private fun sjekkOmUkjentForelder(request: MigreringRequest): List<Exception> {
+        val foreldre = request.avdoedForelder.map { it.ident } + listOfNotNull(request.gjenlevendeForelder)
+        if (foreldre.size < 2) {
+            return listOf(UkjentForelder)
+        }
+        return emptyList()
+    }
 }
 
 sealed class Verifiseringsfeil : Exception()
@@ -316,6 +326,11 @@ data object SoekerHarFlereAvdoedePaaGjenoppstaattYtelse : Verifiseringsfeil() {
 data object ForeldreForholdHarEndretSeg : Verifiseringsfeil() {
     override val message: String
         get() = "Søker har oppdatert foreldreforhold"
+}
+
+data object UkjentForelder : Verifiseringsfeil() {
+    override val message: String
+        get() = "Søker har ukjent forelder"
 }
 
 data object BrukerManglerAdresse : Verifiseringsfeil() {

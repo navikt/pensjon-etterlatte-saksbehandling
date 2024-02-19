@@ -18,6 +18,7 @@ class AldersovergangerService(
                 JobbType.AO_BP18 -> 18L
                 JobbType.AO_BP20 -> 20L
                 JobbType.AO_BP21 -> 21L
+                JobbType.AO_OMS67 -> 67L
             }
 
         val foedselsmaaned = jobb.behandlingsmaaned.minusYears(yearsToSubtract)

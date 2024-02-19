@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
@@ -16,13 +17,18 @@ import java.time.LocalDateTime
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DoedshendelseJobServiceTest {
     private val dao = mockk<DoedshendelseDao>()
+    private val kontrollpunktService =
+        mockk<DoedshendelseKontrollpunktService>().apply {
+            every { identifiserKontrollerpunkter(any()) } returns emptyList()
+        }
     private val toggle =
         mockk<FeatureToggleService> {
             every { isEnabled(any(), any()) } returns true
         }
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
     private val todagergammel = 2
-    private val service = DoedshendelseJobService(dao, toggle, grunnlagsendringshendelseService, todagergammel)
+    private val service =
+        DoedshendelseJobService(dao, kontrollpunktService, toggle, grunnlagsendringshendelseService, todagergammel)
 
     @Test
     fun `skal kjøre 1 ny gyldig hendelse som er 2 dager gammel og droppe 1`() {

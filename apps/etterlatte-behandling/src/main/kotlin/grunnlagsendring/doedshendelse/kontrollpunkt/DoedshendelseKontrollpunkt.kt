@@ -6,7 +6,7 @@ sealed class DoedshendelseKontrollpunkt {
     abstract val opprettOppgave: Boolean
     abstract val avbryt: Boolean
 
-    class AvdoedLeverIPDL : DoedshendelseKontrollpunkt() {
+    data object AvdoedLeverIPDL : DoedshendelseKontrollpunkt() {
         override val beskrivelse: String = "Avdød lever i PDL"
         override val kanSendeBrev: Boolean = false
         override val opprettOppgave: Boolean = false

@@ -20,11 +20,11 @@ class DoedshendelseKontrollpunktService(
 
     private fun verifiserAvdoedDoedsdato(fnr: String): DoedshendelseKontrollpunkt? =
         when (pdlTjenesterKlient.hentPdlModell(fnr, PersonRolle.AVDOED, SakType.BARNEPENSJON).doedsdato) {
-            null -> DoedshendelseKontrollpunkt.AvdoedLeverIPDL()
+            null -> DoedshendelseKontrollpunkt.AvdoedLeverIPDL
             else -> null
         }
 }
 
-fun MutableList<DoedshendelseKontrollpunkt>.addNotNull(element: DoedshendelseKontrollpunkt?) {
+private fun MutableList<DoedshendelseKontrollpunkt>.addNotNull(element: DoedshendelseKontrollpunkt?) {
     element?.let { add(it) }
 }

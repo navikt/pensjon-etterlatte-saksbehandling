@@ -34,7 +34,7 @@ export interface NyOppgaveDto {
   referanse?: string
 }
 
-export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'FERDIGSTILT' | 'FEILREGISTRERT' | 'AVBRUTT'
+export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'PAA_VENT' | 'FERDIGSTILT' | 'FEILREGISTRERT' | 'AVBRUTT'
 export type OppgaveKilde = 'HENDELSE' | 'BEHANDLING' | 'EKSTERN' | 'GENERELL_BEHANDLING' | 'TILBAKEKREVING'
 export type Oppgavetype =
   | 'FOERSTEGANGSBEHANDLING'
@@ -143,6 +143,14 @@ export interface RedigerFristRequest {
   frist: Date
   versjon: number | null
 }
+
+export interface SettPaaVentRequest {
+  frist: Date
+  merknad: String
+  status: Oppgavestatus
+  versjon: number | null
+}
+
 export const redigerFristApi = async (args: {
   oppgaveId: string
   type: string
@@ -155,10 +163,23 @@ export const redigerFristApi = async (args: {
   }
 }
 
+export const settOppgavePaaVentApi = async (args: {
+  oppgaveId: string
+  settPaaVentRequest: SettPaaVentRequest
+}): Promise<ApiResponse<void>> => {
+  return apiClient.put(`/oppgaver/${args.oppgaveId}/sett-paa-vent`, { ...args.settPaaVentRequest })
+}
+
 export const hentOppgaveForBehandlingUnderBehandlingIkkeattestert = async (args: {
   referanse: string
   sakId: number
 }): Promise<ApiResponse<Saksbehandler>> => apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestert/${args.referanse}`)
+
+export const hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave = async (args: {
+  referanse: string
+  sakId: number
+}): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestertOppgave/${args.referanse}`)
 
 export const hentSaksbehandlerForReferanseOppgaveUnderArbeid = async (args: {
   referanse: string

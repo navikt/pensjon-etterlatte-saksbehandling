@@ -76,6 +76,7 @@ data class GosysOppgave(
 enum class Status {
     NY,
     UNDER_BEHANDLING,
+    PAA_VENT,
     FERDIGSTILT,
     FEILREGISTRERT,
     AVBRUTT,
@@ -85,6 +86,7 @@ enum class Status {
         return when (this) {
             NY,
             UNDER_BEHANDLING,
+            PAA_VENT,
             -> false
 
             FERDIGSTILT,
@@ -132,6 +134,12 @@ data class SaksbehandlerEndringGosysDto(
 
 data class RedigerFristRequest(
     val frist: Tidspunkt,
+)
+
+data class SettPaaVentRequest(
+    val frist: Tidspunkt,
+    val merknad: String,
+    val status: Status,
 )
 
 data class RedigerFristGosysRequest(

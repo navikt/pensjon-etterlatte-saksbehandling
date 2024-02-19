@@ -182,6 +182,31 @@ class OppgaveService(
         }
     }
 
+    fun settPaaVent(
+        oppgaveId: UUID,
+        frist: Tidspunkt,
+        merknad: String,
+        status: Status,
+    ) {
+        if (frist.isBefore(Tidspunkt.now())) {
+            throw FristTilbakeITid(oppgaveId)
+        }
+        val nyStatus = if (status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId)
+                ?: throw IkkeFunnetException(
+                    code = "OPPGAVE_IKKE_FUNNET",
+                    detail = "Oppgaven finnes ikke",
+                    meta = mapOf("oppgaveId" to oppgaveId),
+                )
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        if (hentetOppgave.saksbehandlerIdent != null) {
+            oppgaveDao.settPaaVent(oppgaveId, frist, merknad, nyStatus)
+        } else {
+            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
+        }
+    }
+
     fun ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
         fattetoppgaveReferanseOgSak: SakIdOgReferanse,
         oppgaveType: OppgaveType,
@@ -391,6 +416,20 @@ class OppgaveService(
             throw ManglerSaksbehandlerException("Fant ingen saksbehandler for oppgave uten attesteringstype med referanse $referanse")
         } else {
             return sortedByDescending[0].toSaksbehandler()
+        }
+    }
+
+    fun hentSisteIkkeAttestertOppgave(referanse: String): OppgaveIntern {
+        val oppgaverForBehandlingUtenAttesterting =
+            oppgaveDao.hentOppgaverForReferanse(referanse)
+                .filter {
+                    it.type !== OppgaveType.ATTESTERING
+                }
+        val sortedByDescending = oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }
+        if (sortedByDescending.isEmpty()) {
+            throw ManglerSaksbehandlerException("Fant ingen oppgave uten attesteringstype med referanse $referanse")
+        } else {
+            return sortedByDescending[0]
         }
     }
 

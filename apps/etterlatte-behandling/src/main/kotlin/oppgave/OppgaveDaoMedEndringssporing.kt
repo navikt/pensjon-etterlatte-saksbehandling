@@ -165,4 +165,15 @@ class OppgaveDaoMedEndringssporingImpl(
             oppgaveDao.redigerFrist(oppgaveId, frist)
         }
     }
+
+    override fun settPaaVent(
+        oppgaveId: UUID,
+        frist: Tidspunkt,
+        merknad: String,
+        status: Status,
+    ) {
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.settPaaVent(oppgaveId, frist, merknad, status)
+        }
+    }
 }

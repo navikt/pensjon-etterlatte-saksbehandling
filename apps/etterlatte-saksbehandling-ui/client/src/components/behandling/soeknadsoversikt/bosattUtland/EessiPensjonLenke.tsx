@@ -37,10 +37,10 @@ export const EessiPensjonLenke = ({ sakId, behandlingId, sakType }: Props) => {
 
   const opprettUrl = (persongalleri: Persongalleri) => {
     const params = new URLSearchParams({
-      fnr: persongalleri.soeker,
-      avdodFnr: persongalleri.avdoed?.[0],
+      fnr: persongalleri.soeker || '',
+      avdodFnr: persongalleri.avdoed?.[0] || '',
       sakType: sakTypeEessiFormat(sakType),
-      sakId: sakId
+      sakId: sakId.toString(),
     })
 
     return `${configContext['eessiPensjonUrl']}?${params}`

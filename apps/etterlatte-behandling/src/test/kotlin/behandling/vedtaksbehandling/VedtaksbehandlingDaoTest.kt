@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
@@ -51,7 +52,7 @@ internal class VedtaksbehandlingDaoTest(val dataSource: DataSource) {
         val connection = dataSource.connection
         val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { connection }
         val revurderingDao = RevurderingDao { connection }
-        sakRepo = SakDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         vedtaksbehandlingDao = VedtaksbehandlingDao { connection }
         behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { connection }
         klageDao = KlageDaoImpl { connection }

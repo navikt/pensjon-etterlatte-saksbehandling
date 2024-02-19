@@ -38,7 +38,7 @@ class DoedshendelseKontrollpunktServiceTest {
     }
 
     @Test
-    fun `Skal ikke kontrollpunkt hvis avdoed har doedsdato i PDL`() {
+    fun `Skal ikke opprette kontrollpunkt hvis avdoed har doedsdato i PDL`() {
         every { pdlTjenesterKlient.hentPdlModell(doedshendelse.avdoedFnr, PersonRolle.AVDOED, any()) } returns
             mockk {
                 every { doedsdato } returns OpplysningDTO(doedshendelse.avdoedDoedsdato, null)

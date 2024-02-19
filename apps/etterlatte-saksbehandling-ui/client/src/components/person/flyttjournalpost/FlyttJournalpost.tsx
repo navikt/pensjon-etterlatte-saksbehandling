@@ -1,5 +1,5 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentAlleDokumenterInklPensjon, hentDokumentPDF } from '~shared/api/dokument'
+import { hentDokumenter, hentDokumentPDF } from '~shared/api/dokument'
 import React, { useEffect, useState } from 'react'
 import { Button, Detail, Heading, TextField } from '@navikt/ds-react'
 import { fnrErGyldig } from '~utils/fnr'
@@ -21,8 +21,7 @@ export const FlyttJournalpost = ({}: {}) => {
   const [bruker, setBruker] = useState<string>('')
   const [valgtJournalpost, setValgtJournalpost] = useState<Journalpost>()
 
-  const [journalposterStatus, hentAlleJournalposter] = useApiCall(hentAlleDokumenterInklPensjon)
-
+  const [journalposterStatus, hentAlleJournalposter] = useApiCall(hentDokumenter)
   const [dokument, hentDokument, resetHentDokument] = useApiCall(hentDokumentPDF)
 
   useEffect(() => {
@@ -49,14 +48,14 @@ export const FlyttJournalpost = ({}: {}) => {
   }, [fileURL])
 
   const hentDataForBruker = () => {
-    hentAlleJournalposter(bruker, () => {
+    hentAlleJournalposter({ fnr: bruker, temaer: ['EYO', 'EYB', 'PEN'] }, () => {
       resetHentDokument()
       setValgtJournalpost(undefined)
     })
   }
 
   const oppdaterJournalposter = () => {
-    hentAlleJournalposter(bruker, (journalposter) => {
+    hentAlleJournalposter({ fnr: bruker, temaer: ['EYO', 'EYB', 'PEN'] }, (journalposter) => {
       const oppdatertJournalpost = journalposter.find(
         (journalpost) => journalpost.journalpostId === valgtJournalpost!!.journalpostId
       )

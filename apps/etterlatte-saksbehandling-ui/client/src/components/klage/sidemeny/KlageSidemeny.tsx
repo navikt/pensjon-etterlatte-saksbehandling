@@ -1,12 +1,12 @@
 import { useKlage } from '~components/klage/useKlage'
 import { Heading, Tag } from '@navikt/ds-react'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
-import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
 import { teksterKabalstatus, teksterKlagestatus } from '~shared/types/Klage'
 import { tagColors, TagList } from '~shared/Tags'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { Info, Tekst } from '~components/behandling/attestering/styled'
 import AvsluttKlage from '~components/klage/AvsluttKlage'
+import { DokumentlisteLiten } from '~components/person/dokumenter/dokumentlisteLiten'
 
 export function KlageSidemeny() {
   const klage = useKlage()
@@ -55,7 +55,7 @@ export function KlageSidemeny() {
           </div>
         </div>
       </SidebarPanel>
-      <Dokumentoversikt fnr={klage.sak.ident} liten />
+      <DokumentlisteLiten fnr={klage.sak.ident} />
       <AvsluttKlage />
     </Sidebar>
   )

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
+import no.nav.etterlatte.libs.common.person.maskerFnr
 
 data class HentUtsendingsinfoResponse(
     val data: ResponseData? = null,
@@ -71,6 +72,8 @@ data class GraphqlRequest(
 data class DokumentOversiktBrukerVariables(
     val brukerId: BrukerId,
     val tema: List<String>,
+    val journalposttyper: List<Journalposttype>,
+    val journalstatuser: List<Journalstatus>,
     val foerste: Int,
 ) : GraphqlVariables
 
@@ -83,13 +86,15 @@ interface GraphqlVariables
 data class BrukerId(
     val id: String,
     val type: BrukerIdType,
-)
+) {
+    override fun toString(): String = "BrukerId(id=${id.maskerFnr()}, type=$type)"
+}
 
 data class Journalpost(
     val journalpostId: String,
     val tittel: String?,
     val tema: String?,
-    val journalposttype: String,
+    val journalposttype: Journalposttype,
     val journalstatus: Journalstatus,
     val dokumenter: List<DokumentInfo>,
     val avsenderMottaker: AvsenderMottaker,
@@ -98,6 +103,17 @@ data class Journalpost(
     val sak: JournalpostSak?,
     val datoOpprettet: String,
 )
+
+/**
+ * [Journalposttype.U] = Utgående
+ * [Journalposttype.I] = Inngående
+ * [Journalposttype.N] = Notat
+ **/
+enum class Journalposttype {
+    U,
+    I,
+    N,
+}
 
 enum class Journalstatus {
     MOTTATT,

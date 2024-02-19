@@ -76,16 +76,12 @@ class SaksbehandlerMedEnheterOgRoller(
     fun erSuperbruker() = name() in (saksbehandlereMedTilgangTilAlleEnheter)
 
     fun enheter() =
-        if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
-            Enheter.nasjonalTilgangEnheter()
-        } else {
-            try {
-                runBlocking {
-                    navAnsattKlient.hentEnheterForSaksbehandler(name()).map { it.id }
-                }
-            } catch (e: Exception) {
-                throw HentEnhetException("Henting av enheter feilet. Sjekk on-prem status(fss)", e)
+        try {
+            runBlocking {
+                navAnsattKlient.hentEnheterForSaksbehandler(name()).map { it.id }
             }
+        } catch (e: Exception) {
+            throw HentEnhetException("Henting av enheter feilet. Sjekk on-prem status(fss)", e)
         }
 
     override fun harSkrivetilgang(): Boolean {

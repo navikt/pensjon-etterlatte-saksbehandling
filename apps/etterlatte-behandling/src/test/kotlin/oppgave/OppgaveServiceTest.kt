@@ -104,7 +104,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     @BeforeEach
     fun beforeEach() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.enheter() } returns Enheter.enheterMedLesetilgang().toList()
         every { saksbehandler.name() } returns "ident"
         every { saksbehandler.erSuperbruker() } returns false
 

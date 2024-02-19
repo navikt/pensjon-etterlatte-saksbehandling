@@ -46,8 +46,10 @@ class JobbPoller(
 
             when (it.type) {
                 JobbType.AO_BP18 -> logger.warn("Ikke implementert: AO_BP18")
-                JobbType.AO_BP20 -> aldersovergangerService.execute(it)
-                JobbType.AO_BP21 -> aldersovergangerService.execute(it)
+                JobbType.AO_BP20,
+                JobbType.AO_BP21,
+                JobbType.AO_OMS67,
+                -> aldersovergangerService.execute(it)
             }
         }
     }

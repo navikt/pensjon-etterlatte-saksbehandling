@@ -5,9 +5,10 @@ Denne appen styrer jobber som kjører med jevne mellomrom for å håndtere netto
 ## Jobber - scenarier
 
 - Aldersovergang
-  - Opphør barnepensjon ved fylte 20 år
-    - Utvidet aldersgrense til 21 år dersom yrkesskadefordel før 01.01.2024 (Reformtidspunkt)
-  - Opphør barnepensjon ved fylte 21 år
+  - `AO_BP20` Opphør barnepensjon ved fylte 20 år
+    - Unntak: utvidet aldersgrense til 21 år dersom yrkesskadefordel før 01.01.2024 (Reformtidspunkt)
+  - `AO_BP21` Opphør barnepensjon ved fylte 21 år
+  - `AO_OMS67` Opphør omstillingsstønad ved fylte 67 år
 
 ## Oversikt
 

@@ -53,7 +53,7 @@ class Brevoppretter(
         }
 
         if (brukerTokenInfo is Saksbehandler) {
-            val kanRedigeres = brevdataFacade.hentGeneriskBehandlingKanRedigeres(behandlingId, brukerTokenInfo)
+            val kanRedigeres = brevdataFacade.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
             if (!kanRedigeres) {
                 throw KanIkkeOppretteVedtaksbrev(behandlingId)
             }

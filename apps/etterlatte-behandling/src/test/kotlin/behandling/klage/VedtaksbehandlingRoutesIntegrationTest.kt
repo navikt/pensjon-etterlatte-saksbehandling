@@ -28,16 +28,11 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
-import no.nav.etterlatte.libs.common.tilbakekreving.KlasseKode
-import no.nav.etterlatte.libs.common.tilbakekreving.KlasseType
 import no.nav.etterlatte.libs.common.tilbakekreving.Kontrollfelt
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagId
-import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.KravgrunnlagStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.NavIdent
-import no.nav.etterlatte.libs.common.tilbakekreving.Periode
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
@@ -53,14 +48,12 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GeneriskBehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
+class VedtaksbehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
     private lateinit var user: SaksbehandlerMedEnheterOgRoller
 
     @BeforeAll
@@ -95,8 +88,8 @@ class GeneriskBehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
             assertEquals(klage, hentetKlage)
 
             val response =
-                client.get("/generiskbehandling/${klage.id}/redigerbar") {
-                    addAuthToken(tokenSaksbehandler)
+                client.get("/vedtaksbehandling/${klage.id}/redigerbar") {
+                    addAuthToken(fagsystemTokenEY)
                     contentType(ContentType.Application.Json)
                 }
             assertEquals(HttpStatusCode.OK, response.status)
@@ -118,8 +111,8 @@ class GeneriskBehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
         withTestApplication { client ->
 
             val response =
-                client.get("/generiskbehandling/${behandling!!.id}/redigerbar") {
-                    addAuthToken(tokenSaksbehandler)
+                client.get("/vedtaksbehandling/${behandling!!.id}/redigerbar") {
+                    addAuthToken(fagsystemTokenEY)
                     contentType(ContentType.Application.Json)
                 }
             assertEquals(HttpStatusCode.OK, response.status)
@@ -145,8 +138,8 @@ class GeneriskBehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
             )
         withTestApplication { client ->
             val response =
-                client.get("/generiskbehandling/$tilbakekrevingId/redigerbar") {
-                    addAuthToken(tokenSaksbehandler)
+                client.get("/vedtaksbehandling/$tilbakekrevingId/redigerbar") {
+                    addAuthToken(fagsystemTokenEY)
                     contentType(ContentType.Application.Json)
                 }
             assertEquals(HttpStatusCode.OK, response.status)
@@ -164,7 +157,7 @@ class GeneriskBehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
 
         withTestApplication { client ->
             val response =
-                client.get("/generiskbehandling/${UUID.randomUUID()}/redigerbar") {
+                client.get("/vedtaksbehandling/${UUID.randomUUID()}/redigerbar") {
                     addAuthToken(tokenSaksbehandler)
                     contentType(ContentType.Application.Json)
                 }
@@ -245,43 +238,6 @@ class GeneriskBehandlingRoutesIntegrationTest : BehandlingIntegrationTest() {
             status = KravgrunnlagStatus.ANNU,
             saksbehandler = NavIdent(""),
             sisteUtbetalingslinjeId = UUID30(""),
-            perioder =
-                listOf(
-                    KravgrunnlagPeriode(
-                        periode =
-                            Periode(
-                                fraOgMed = YearMonth.of(2023, 1),
-                                tilOgMed = YearMonth.of(2023, 2),
-                            ),
-                        skatt = BigDecimal(200),
-                        grunnlagsbeloep =
-                            listOf(
-                                Grunnlagsbeloep(
-                                    klasseKode = KlasseKode(""),
-                                    klasseType = KlasseType.YTEL,
-                                    bruttoUtbetaling = BigDecimal(1000),
-                                    nyBruttoUtbetaling = BigDecimal(1200),
-                                    bruttoTilbakekreving = BigDecimal(200),
-                                    beloepSkalIkkeTilbakekreves = BigDecimal(200),
-                                    skatteProsent = BigDecimal(20),
-                                    resultat = null,
-                                    skyld = null,
-                                    aarsak = null,
-                                ),
-                                Grunnlagsbeloep(
-                                    klasseKode = KlasseKode(""),
-                                    klasseType = KlasseType.FEIL,
-                                    bruttoUtbetaling = BigDecimal(0),
-                                    nyBruttoUtbetaling = BigDecimal(0),
-                                    bruttoTilbakekreving = BigDecimal(0),
-                                    beloepSkalIkkeTilbakekreves = BigDecimal(0),
-                                    skatteProsent = BigDecimal(0),
-                                    resultat = null,
-                                    skyld = null,
-                                    aarsak = null,
-                                ),
-                            ),
-                    ),
-                ),
+            perioder = emptyList(),
         )
 }

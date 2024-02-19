@@ -21,7 +21,6 @@ import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
-import no.nav.etterlatte.behandling.generiskbehandling.generiskBehandlingRoutes
 import no.nav.etterlatte.behandling.job.populerSaksbehandlereMedNavn
 import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
@@ -31,6 +30,7 @@ import no.nav.etterlatte.behandling.sjekklisteRoute
 import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
+import no.nav.etterlatte.behandling.vedtaksbehandling.vedtaksbehandlingRoutes
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
@@ -129,9 +129,7 @@ internal fun Application.module(context: ApplicationContext) {
                 generellBehandlingService = generellBehandlingService,
                 sakService = sakService,
             )
-            generiskBehandlingRoutes(
-                generiskBehandlingService = generiskBehandlingService,
-            )
+            vedtaksbehandlingRoutes(vedtaksbehandlingService = vedtaksbehandlingService)
             revurderingRoutes(revurderingService = revurderingService, featureToggleService = featureToggleService)
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)

@@ -84,12 +84,12 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
         )
     }
 
-    internal suspend fun hentGeneriskBehandlingKanRedigeres(
+    internal suspend fun hentVedtaksbehandlingKanRedigeres(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Boolean {
         return get(
-            url = "$resourceUrl/generiskbehandling/$behandlingId/redigerbar",
+            url = "$resourceUrl/vedtaksbehandling/$behandlingId/redigerbar",
             onSuccess = { deserialize(it.response!!.toString()) },
             errorMessage = { "Klarte ikke hente svar på om generisk behandling med id=$behandlingId kan redigeres" },
             brukerTokenInfo = brukerTokenInfo,

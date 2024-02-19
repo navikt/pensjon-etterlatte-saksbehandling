@@ -1,9 +1,9 @@
-package no.nav.etterlatte.behandling
+package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.behandling.generiskbehandling.GeneriskBehandlingDao
 import no.nav.etterlatte.behandling.klage.KlageDao
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -39,9 +39,9 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class GeneriskBehandlingDaoTest(val dataSource: DataSource) {
+internal class VedtaksbehandlingDaoTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
-    private lateinit var generiskBehandlingDao: GeneriskBehandlingDao
+    private lateinit var vedtaksbehandlingDao: VedtaksbehandlingDao
     private lateinit var behandlingDao: BehandlingDao
     private lateinit var klageDao: KlageDao
     private lateinit var tilbakekrevingDao: TilbakekrevingDao
@@ -52,7 +52,7 @@ internal class GeneriskBehandlingDaoTest(val dataSource: DataSource) {
         val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { connection }
         val revurderingDao = RevurderingDao { connection }
         sakRepo = SakDao { connection }
-        generiskBehandlingDao = GeneriskBehandlingDao { connection }
+        vedtaksbehandlingDao = VedtaksbehandlingDao { connection }
         behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { connection }
         klageDao = KlageDaoImpl { connection }
         tilbakekrevingDao = TilbakekrevingDao { connection }
@@ -76,11 +76,11 @@ internal class GeneriskBehandlingDaoTest(val dataSource: DataSource) {
             ).also { behandlingDao.opprettBehandling(it) }
                 .let { requireNotNull(behandlingDao.hentBehandling(it.id)) as Foerstegangsbehandling }
 
-        generiskBehandlingDao.erBehandlingRedigerbar(behandling.id) shouldBe true
+        vedtaksbehandlingDao.erBehandlingRedigerbar(behandling.id) shouldBe true
 
         behandlingDao.lagreStatus(behandling.copy(status = BehandlingStatus.AVBRUTT))
 
-        generiskBehandlingDao.erBehandlingRedigerbar(behandling.id) shouldBe false
+        vedtaksbehandlingDao.erBehandlingRedigerbar(behandling.id) shouldBe false
     }
 
     @Test
@@ -93,11 +93,11 @@ internal class GeneriskBehandlingDaoTest(val dataSource: DataSource) {
 
         klageDao.lagreKlage(klage)
 
-        generiskBehandlingDao.erBehandlingRedigerbar(klage.id) shouldBe true
+        vedtaksbehandlingDao.erBehandlingRedigerbar(klage.id) shouldBe true
 
         klageDao.lagreKlage(klage.copy(status = KlageStatus.AVBRUTT))
 
-        generiskBehandlingDao.erBehandlingRedigerbar(klage.id) shouldBe false
+        vedtaksbehandlingDao.erBehandlingRedigerbar(klage.id) shouldBe false
     }
 
     @Test
@@ -110,11 +110,11 @@ internal class GeneriskBehandlingDaoTest(val dataSource: DataSource) {
 
         tilbakekrevingDao.lagreTilbakekreving(tilbakekreving)
 
-        generiskBehandlingDao.erBehandlingRedigerbar(tilbakekreving.id) shouldBe true
+        vedtaksbehandlingDao.erBehandlingRedigerbar(tilbakekreving.id) shouldBe true
 
         tilbakekrevingDao.lagreTilbakekreving(tilbakekreving.copy(status = TilbakekrevingStatus.ATTESTERT))
 
-        generiskBehandlingDao.erBehandlingRedigerbar(tilbakekreving.id) shouldBe false
+        vedtaksbehandlingDao.erBehandlingRedigerbar(tilbakekreving.id) shouldBe false
     }
 
     private fun tilbakekreving(sak: Sak) =

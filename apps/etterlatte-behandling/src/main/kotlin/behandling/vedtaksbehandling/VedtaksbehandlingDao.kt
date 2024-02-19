@@ -1,4 +1,4 @@
-package no.nav.etterlatte.behandling.generiskbehandling
+package no.nav.etterlatte.behandling.vedtaksbehandling
 
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
@@ -8,7 +8,7 @@ import java.sql.Connection
 import java.sql.ResultSet
 import java.util.UUID
 
-class GeneriskBehandlingDao(private val connection: () -> Connection) {
+class VedtaksbehandlingDao(private val connection: () -> Connection) {
     fun erBehandlingRedigerbar(behandlingId: UUID): Boolean {
         return with(connection()) {
             val statement =
@@ -24,28 +24,27 @@ class GeneriskBehandlingDao(private val connection: () -> Connection) {
             statement.setObject(3, behandlingId)
 
             statement.executeQuery()
-                .single { toGeneriskBehandling() }
+                .single { toVedtaksbehandling() }
                 .erRedigerbar()
         }
     }
 
-    private fun ResultSet.toGeneriskBehandling(): GeneriskBehandling {
+    private fun ResultSet.toVedtaksbehandling(): Vedtaksbehandling {
         val type = BehandlingType.valueOf(getString(1))
         val id = UUID.fromString(getString(2))
         val status = getString(3)
 
-        return GeneriskBehandling(id, type, status)
+        return Vedtaksbehandling(id, type, status)
     }
 }
 
-private data class GeneriskBehandling(val id: UUID, val type: BehandlingType, val status: String) {
-    fun erRedigerbar(): Boolean {
+private data class Vedtaksbehandling(val id: UUID, val type: BehandlingType, val status: String) {
+    fun erRedigerbar(): Boolean =
         when (type) {
-            BehandlingType.BEHANDLING -> return BehandlingStatus.valueOf(status).kanEndres()
-            BehandlingType.TILBAKEKREVING -> return TilbakekrevingStatus.valueOf(status).kanEndres()
-            BehandlingType.KLAGE -> return KlageStatus.kanEndres(KlageStatus.valueOf(status))
+            BehandlingType.BEHANDLING -> BehandlingStatus.valueOf(status).kanEndres()
+            BehandlingType.TILBAKEKREVING -> TilbakekrevingStatus.valueOf(status).kanEndres()
+            BehandlingType.KLAGE -> KlageStatus.kanEndres(KlageStatus.valueOf(status))
         }
-    }
 }
 
 private enum class BehandlingType {

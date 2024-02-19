@@ -22,8 +22,6 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandDao
 import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
-import no.nav.etterlatte.behandling.generiskbehandling.GeneriskBehandlingDao
-import no.nav.etterlatte.behandling.generiskbehandling.GeneriskBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
@@ -54,6 +52,8 @@ import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServiceImpl
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
+import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
+import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
@@ -222,7 +222,7 @@ internal class ApplicationContext(
     val revurderingDao = RevurderingDao { databaseContext().activeTx() }
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
     val generellbehandlingDao = GenerellBehandlingDao { databaseContext().activeTx() }
-    val generiskBehandlingDao = GeneriskBehandlingDao { databaseContext().activeTx() }
+    val vedtaksbehandlingDao = VedtaksbehandlingDao { databaseContext().activeTx() }
     val oppgaveDaoNy = OppgaveDaoImpl { databaseContext().activeTx() }
     val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { databaseContext().activeTx() }
     val sakDao = SakDao { databaseContext().activeTx() }
@@ -277,9 +277,9 @@ internal class ApplicationContext(
             grunnlagKlientObo,
             hendelseDao,
         )
-    val generiskBehandlingService =
-        GeneriskBehandlingService(
-            generiskBehandlingDao,
+    val vedtaksbehandlingService =
+        VedtaksbehandlingService(
+            vedtaksbehandlingDao,
         )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)

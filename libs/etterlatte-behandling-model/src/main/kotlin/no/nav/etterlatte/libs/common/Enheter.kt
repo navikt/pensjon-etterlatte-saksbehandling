@@ -18,7 +18,7 @@ enum class Enheter(
     OEST_VIKEN("4101", "NAV Kontaktsenter Øst-Viken", false, true, false),
     TROENDELAG("4116", "NAV Kontaktsenter Trøndelag", false, true, false),
     NORDLAND_BODOE("4118", "NAV Kontaktsenter Nordland Bodø", false, true, false),
-    NOEP("4819", "NAV_OEKONOMI_PENSJON", false, true, false),
+    NOEP("4819", "NAV_OEKONOMI_PENSJON", true, true, false),
     KLAGE_VEST("4294", "NAV Klageinstans vest", false, true, false),
     ;
 

@@ -110,7 +110,6 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
 ) {
     val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
     val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
-    val logger = application.log
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilPerson =
@@ -122,7 +121,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
             if (harTilgangTilPerson) {
                 onSuccess(foedselsnummer)
             } else {
-                logger.info("Har ikke tilgang til person")
+                application.log.info("Har ikke tilgang til person")
                 call.respond(HttpStatusCode.NotFound)
             }
         }

@@ -145,7 +145,6 @@ export interface RedigerFristRequest {
 }
 
 export interface SettPaaVentRequest {
-  frist: Date
   merknad: String
   status: Oppgavestatus
   versjon: number | null
@@ -167,7 +166,7 @@ export const settOppgavePaaVentApi = async (args: {
   oppgaveId: string
   settPaaVentRequest: SettPaaVentRequest
 }): Promise<ApiResponse<void>> => {
-  return apiClient.put(`/oppgaver/${args.oppgaveId}/sett-paa-vent`, { ...args.settPaaVentRequest })
+  return apiClient.post(`/oppgaver/${args.oppgaveId}/sett-paa-vent`, { ...args.settPaaVentRequest })
 }
 
 export const hentOppgaveForBehandlingUnderBehandlingIkkeattestert = async (args: {

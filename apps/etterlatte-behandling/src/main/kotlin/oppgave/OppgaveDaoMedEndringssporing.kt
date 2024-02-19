@@ -168,12 +168,11 @@ class OppgaveDaoMedEndringssporingImpl(
 
     override fun settPaaVent(
         oppgaveId: UUID,
-        frist: Tidspunkt,
         merknad: String,
         status: Status,
     ) {
         lagreEndringerPaaOppgave(oppgaveId) {
-            oppgaveDao.settPaaVent(oppgaveId, frist, merknad, status)
+            oppgaveDao.settPaaVent(oppgaveId, merknad, status)
         }
     }
 }

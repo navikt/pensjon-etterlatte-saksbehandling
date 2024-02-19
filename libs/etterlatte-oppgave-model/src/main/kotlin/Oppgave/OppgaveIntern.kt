@@ -137,7 +137,6 @@ data class RedigerFristRequest(
 )
 
 data class SettPaaVentRequest(
-    val frist: Tidspunkt,
     val merknad: String,
     val status: Status,
 )

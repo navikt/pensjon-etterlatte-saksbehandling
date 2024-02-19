@@ -184,13 +184,9 @@ class OppgaveService(
 
     fun settPaaVent(
         oppgaveId: UUID,
-        frist: Tidspunkt,
         merknad: String,
         status: Status,
     ) {
-        if (frist.isBefore(Tidspunkt.now())) {
-            throw FristTilbakeITid(oppgaveId)
-        }
         val nyStatus = if (status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId)
@@ -201,7 +197,7 @@ class OppgaveService(
                 )
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         if (hentetOppgave.saksbehandlerIdent != null) {
-            oppgaveDao.settPaaVent(oppgaveId, frist, merknad, nyStatus)
+            oppgaveDao.settPaaVent(oppgaveId, merknad, nyStatus)
         } else {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
         }

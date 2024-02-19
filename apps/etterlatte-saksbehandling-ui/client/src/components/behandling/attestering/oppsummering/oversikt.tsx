@@ -39,7 +39,6 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
   const [lagreSettPaaVentStatus, requestSettPaaVent] = useApiCall(settOppgavePaaVentApi)
   const [settPaaVent, setVisPaaVent] = useState(false)
   const [merknad, setMerknad] = useState<string>('')
-  const [frist, setFrist] = useState<Date>(new Date())
   const [minOppgavelisteOppgaver, setMinOppgavelisteOppgaver] = useState<Array<OppgaveDTO>>([])
 
   useEffect(() => {
@@ -53,11 +52,11 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
 
   const lagreVent = (data: SettPaaVentRequest) => {
     if (!oppgavenTilBehandlingen) throw new Error('Mangler oppgave')
-    setFrist(new Date(oppgavenTilBehandlingen.frist))
     requestSettPaaVent({
       oppgaveId: oppgavenTilBehandlingen.id,
       settPaaVentRequest: data,
     })
+    setVisPaaVent(false)
   }
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
@@ -85,7 +84,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
   if (isInitial(oppgaveForBehandlingenStatus) || isPending(oppgaveForBehandlingenStatus)) {
     return <Spinner visible={true} label="Henter oppgave" />
   }
-  if (isInitial(lagreSettPaaVentStatus) || isPending(lagreSettPaaVentStatus)) {
+  if (isPending(lagreSettPaaVentStatus)) {
     return <Spinner visible={true} label="Lagrer oppgave" />
   }
 
@@ -128,7 +127,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         <Info>Saksbehandler</Info>
         {mapApiResult(
           oppgaveForBehandlingenStatus,
-          <Spinner visible={true} label="Henter saksbehandler" />,
+          <Spinner visible={true} label="Henter oppgave" />,
           () => (
             <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
           ),
@@ -180,16 +179,19 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         isSuccess(oppgaveForBehandlingenStatus) &&
         oppgavenTilBehandlingen &&
         oppgavenTilBehandlingen.status !== 'PAA_VENT' && (
-          <FristHandlinger
-            orginalFrist={oppgavenTilBehandlingen.frist}
-            oppgaveId={oppgavenTilBehandlingen.id}
-            oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
-              oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
-            }
-            erRedigerbar={erOppgaveRedigerbar(oppgavenTilBehandlingen.status)}
-            oppgaveVersjon={oppgavenTilBehandlingen.versjon}
-            type={oppgavenTilBehandlingen.type}
-          />
+          <FlexRow>
+            Frist
+            <FristHandlinger
+              orginalFrist={oppgavenTilBehandlingen.frist}
+              oppgaveId={oppgavenTilBehandlingen.id}
+              oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
+                oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
+              }
+              erRedigerbar={erOppgaveRedigerbar(oppgavenTilBehandlingen.status)}
+              oppgaveVersjon={oppgavenTilBehandlingen.versjon}
+              type={oppgavenTilBehandlingen.type}
+            />
+          </FlexRow>
         )}
 
       {settPaaVent &&
@@ -201,7 +203,6 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
               variant="primary"
               onClick={() =>
                 lagreVent({
-                  frist: frist,
                   merknad: merknad,
                   versjon: null,
                   status: oppgavenTilBehandlingen.status,
@@ -210,18 +211,20 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
             >
               Bekreft Vent
             </Button>
+            <Button variant="primary" onClick={() => setVisPaaVent(false)}>
+              Avbryt
+            </Button>
           </FlexRow>
         )}
       {settPaaVent &&
         isSuccess(oppgaveForBehandlingenStatus) &&
         oppgavenTilBehandlingen &&
-        oppgavenTilBehandlingen.status !== 'PAA_VENT' && (
+        oppgavenTilBehandlingen.status == 'PAA_VENT' && (
           <FlexRow>
             <Button
               variant="primary"
               onClick={() =>
                 lagreVent({
-                  frist: frist,
                   merknad: merknad,
                   versjon: null,
                   status: oppgavenTilBehandlingen.status,

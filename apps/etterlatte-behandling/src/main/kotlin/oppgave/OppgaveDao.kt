@@ -63,7 +63,6 @@ interface OppgaveDao {
 
     fun settPaaVent(
         oppgaveId: UUID,
-        frist: Tidspunkt,
         merknad: String,
         status: Status,
     )
@@ -340,7 +339,6 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
 
     override fun settPaaVent(
         oppgaveId: UUID,
-        frist: Tidspunkt,
         merknad: String,
         status: Status,
     ) {
@@ -353,10 +351,9 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
                     where id = ?::UUID
                     """.trimIndent(),
                 )
-            statement.setTidspunkt(1, frist)
-            statement.setString(2, merknad)
-            statement.setString(3, status.name)
-            statement.setObject(4, oppgaveId)
+            statement.setString(1, merknad)
+            statement.setString(2, status.name)
+            statement.setObject(3, oppgaveId)
 
             statement.executeUpdate()
         }

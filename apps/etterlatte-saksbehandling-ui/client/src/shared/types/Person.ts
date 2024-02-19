@@ -106,12 +106,16 @@ export function formaterNavn(person: PersonNavn): string {
   return [person.fornavn, person.mellomnavn, person.etternavn].filter((navn) => !!navn).join(' ')
 }
 
+export interface PersonISkjema {
+  value: string
+}
+
 export interface Persongalleri {
   soeker?: string
   innsender?: string
-  soesken?: string[]
-  avdoed?: string[]
-  gjenlevende?: string[]
+  soesken?: string[] | PersonISkjema[]
+  avdoed?: string[] | PersonISkjema[]
+  gjenlevende?: string[] | PersonISkjema[]
   personerUtenIdent?: PersonUtenIdent[] | null
 }
 

@@ -14,9 +14,14 @@ import { Spraak } from '~shared/types/Brev'
 import { useForm } from 'react-hook-form'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+import { PersonISkjema } from '~shared/types/Person'
+import { useAppDispatch } from '~store/Store'
+import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
+import { formatDateToLocalDateTimeOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
 
 export default function OpprettNyBehandling() {
   const { oppgave, nyBehandlingRequest } = useJournalfoeringOppgave()
+  const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
   if (!oppgave) {
@@ -28,9 +33,38 @@ export default function OpprettNyBehandling() {
   const neste = () => navigate('oppsummering', { relative: 'path' })
   const tilbake = () => navigate('../', { relative: 'path' })
 
-  const { register, handleSubmit, control } = useForm<NyBehandlingRequest>({
-    defaultValues: nyBehandlingRequest,
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<NyBehandlingRequest>({
+    // TODO: fikse at denne konverterer persongalleri gjenlevende osv
+    defaultValues: { ...nyBehandlingRequest },
   })
+
+  const onSubmit = (data: NyBehandlingRequest) => {
+    const gjenlevende: string[] = (data.persongalleri?.gjenlevende as PersonISkjema[]).map(
+      (val: PersonISkjema) => val.value
+    )
+    const avdoed: string[] = (data.persongalleri?.avdoed as PersonISkjema[]).map((val: PersonISkjema) => val.value)
+    const soesken: string[] = (data.persongalleri?.soesken as PersonISkjema[]).map((val: PersonISkjema) => val.value)
+
+    dispatch(
+      settNyBehandlingRequest({
+        ...data,
+        mottattDato: formatDateToLocalDateTimeOrEmptyString(new Date(data.mottattDato!)),
+        persongalleri: {
+          ...data.persongalleri,
+          gjenlevende,
+          avdoed,
+          soesken,
+        },
+      })
+    )
+
+    neste()
+  }
 
   return (
     <FormWrapper column>
@@ -40,14 +74,15 @@ export default function OpprettNyBehandling() {
           {formaterSakstype(sakType)}
         </Tag>
       </Heading>
-      <form onSubmit={handleSubmit((data) => console.log(data))}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Select
           {...register('spraak', {
             required: { value: true, message: 'Du må velge språk/målform for behandlingen' },
           })}
           label="Hva skal språket/målform være?"
+          error={errors.spraak?.message}
         >
-          <option>Velg ...</option>
+          <option value="">Velg ...</option>
           <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
           <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
           <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>

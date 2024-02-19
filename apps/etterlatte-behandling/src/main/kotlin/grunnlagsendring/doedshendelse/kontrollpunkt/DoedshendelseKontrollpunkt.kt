@@ -19,4 +19,18 @@ sealed class DoedshendelseKontrollpunkt {
         override val opprettOppgave: Boolean = false
         override val avbryt: Boolean = true
     }
+
+    data object AvdoedHarDNummer : DoedshendelseKontrollpunkt() {
+        override val beskrivelse: String = "Den avdøde har D-nummer"
+        override val kanSendeBrev: Boolean = false
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+    }
+
+    data object AvdoedHarUtvandret : DoedshendelseKontrollpunkt() {
+        override val beskrivelse: String = "Den avdøde har utvandret"
+        override val kanSendeBrev: Boolean = false
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+    }
 }

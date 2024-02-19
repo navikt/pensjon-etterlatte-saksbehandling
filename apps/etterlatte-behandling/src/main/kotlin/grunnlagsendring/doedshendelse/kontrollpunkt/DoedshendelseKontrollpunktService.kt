@@ -10,6 +10,7 @@ import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.OPPRETTET
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.TIL_BEHANDLING
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
 
 class DoedshendelseKontrollpunktService(
@@ -18,22 +19,23 @@ class DoedshendelseKontrollpunktService(
 ) {
     fun identifiserKontrollerpunkter(hendelse: Doedshendelse): List<DoedshendelseKontrollpunkt> {
         val kontrollpunkter = mutableListOf<DoedshendelseKontrollpunkt>()
+        val avdoed = pdlTjenesterKlient.hentPdlModell(hendelse.avdoedFnr, PersonRolle.AVDOED, SakType.BARNEPENSJON)
 
-        with(hendelse) {
-            kontrollpunkter.addNotNull(verifiserAvdoedDoedsdato(avdoedFnr))
-            kontrollpunkter.addNotNull(verifiserKryssendeYtelse(hendelse))
-        }
+        kontrollpunkter.addNotNull(kontrollerAvdoedDoedsdato(avdoed))
+        kontrollpunkter.addNotNull(kontrollerKryssendeYtelse(hendelse))
+        kontrollpunkter.addNotNull(kontrollerDNummer(avdoed))
+        kontrollpunkter.addNotNull(kontrollerUtvandring(avdoed))
 
         return kontrollpunkter
     }
 
-    private fun verifiserAvdoedDoedsdato(fnr: String): DoedshendelseKontrollpunkt? =
-        when (pdlTjenesterKlient.hentPdlModell(fnr, PersonRolle.AVDOED, SakType.BARNEPENSJON).doedsdato) {
+    private fun kontrollerAvdoedDoedsdato(avdoed: PersonDTO): DoedshendelseKontrollpunkt? =
+        when (avdoed.doedsdato) {
             null -> DoedshendelseKontrollpunkt.AvdoedLeverIPDL
             else -> null
         }
 
-    private fun verifiserKryssendeYtelse(hendelse: Doedshendelse): DoedshendelseKontrollpunkt? =
+    private fun kontrollerKryssendeYtelse(hendelse: Doedshendelse): DoedshendelseKontrollpunkt? =
         runBlocking {
             val kryssendeYtelser =
                 pesysKlient.hentSaker(hendelse.avdoedFnr)
@@ -47,6 +49,35 @@ class DoedshendelseKontrollpunktService(
                 false -> null
             }
         }
+
+    private fun kontrollerDNummer(avdoed: PersonDTO): DoedshendelseKontrollpunkt? =
+        when (avdoed.foedselsnummer.verdi.isDNumber()) {
+            true -> DoedshendelseKontrollpunkt.AvdoedHarDNummer
+            false -> null
+        }
+
+    private fun kontrollerUtvandring(avdoed: PersonDTO): DoedshendelseKontrollpunkt? {
+        val utflytting = avdoed.utland?.verdi?.utflyttingFraNorge
+        val innflytting = avdoed.utland?.verdi?.innflyttingTilNorge
+
+        if (utflytting != null) {
+            if (utflytting.any { it.dato == null }) {
+                // Hvis vi ikke har noen dato så regner vi personen som utvandret på nåværende tidspunkt uansett
+                return DoedshendelseKontrollpunkt.AvdoedHarUtvandret
+            }
+
+            val sisteRegistrerteUtflytting = utflytting.mapNotNull { it.dato }.max()
+            val sisteRegistrerteInnflytting = innflytting?.mapNotNull { it.dato }?.maxOrNull()
+
+            if (sisteRegistrerteInnflytting != null && sisteRegistrerteInnflytting.isAfter(sisteRegistrerteUtflytting)) {
+                return null
+            }
+
+            return DoedshendelseKontrollpunkt.AvdoedHarUtvandret
+        }
+
+        return null
+    }
 }
 
 private fun MutableList<DoedshendelseKontrollpunkt>.addNotNull(element: DoedshendelseKontrollpunkt?) {

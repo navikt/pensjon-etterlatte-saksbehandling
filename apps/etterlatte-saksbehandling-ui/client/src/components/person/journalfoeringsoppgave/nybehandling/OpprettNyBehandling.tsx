@@ -28,7 +28,7 @@ export default function OpprettNyBehandling() {
   const neste = () => navigate('oppsummering', { relative: 'path' })
   const tilbake = () => navigate('../', { relative: 'path' })
 
-  const { register, control } = useForm<NyBehandlingRequest>({
+  const { register, handleSubmit, control } = useForm<NyBehandlingRequest>({
     defaultValues: nyBehandlingRequest,
   })
 
@@ -40,48 +40,51 @@ export default function OpprettNyBehandling() {
           {formaterSakstype(sakType)}
         </Tag>
       </Heading>
+      <form onSubmit={handleSubmit((data) => console.log(data))}>
+        <Select
+          {...register('spraak', {
+            required: { value: true, message: 'Du må velge språk/målform for behandlingen' },
+          })}
+          label="Hva skal språket/målform være?"
+        >
+          <option>Velg ...</option>
+          <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
+          <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
+          <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
+        </Select>
 
-      <Select
-        {...register('spraak', { required: { value: true, message: 'Du må velge språk/målform for behandlingen' } })}
-        label="Hva skal språket/målform være?"
-      >
-        <option>Velg ...</option>
-        <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
-        <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
-        <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
-      </Select>
+        <ControlledDatoVelger
+          name="mottattDato"
+          label="Mottatt dato"
+          description="Datoen søknaden ble mottatt"
+          control={control}
+          errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
+        />
 
-      <ControlledDatoVelger
-        name="mottattDato"
-        label="Mottatt dato"
-        description="Datoen søknaden ble mottatt"
-        control={control}
-        errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
-      />
+        <hr />
 
-      <hr />
+        <Heading size="medium" spacing>
+          Persongalleri
+        </Heading>
 
-      <Heading size="medium" spacing>
-        Persongalleri
-      </Heading>
+        {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
+        {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon control={control} />}
 
-      {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
-      {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon control={control} />}
+        <div>
+          <FlexRow justify="center" $spacing>
+            <Button variant="secondary" onClick={tilbake}>
+              Tilbake
+            </Button>
 
-      <div>
-        <FlexRow justify="center" $spacing>
-          <Button variant="secondary" onClick={tilbake}>
-            Tilbake
-          </Button>
-
-          <Button variant="primary" type="submit" onClick={neste}>
-            Neste
-          </Button>
-        </FlexRow>
-        <FlexRow justify="center">
-          <AvbrytBehandleJournalfoeringOppgave />
-        </FlexRow>
-      </div>
+            <Button variant="primary" type="submit">
+              Neste
+            </Button>
+          </FlexRow>
+          <FlexRow justify="center">
+            <AvbrytBehandleJournalfoeringOppgave />
+          </FlexRow>
+        </div>
+      </form>
     </FormWrapper>
   )
 }

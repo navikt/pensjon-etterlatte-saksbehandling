@@ -343,7 +343,7 @@ internal class ApplicationContext(
     val doedshendelseJobService =
         DoedshendelseJobService(
             doedshendelseDao = doedshendelseDao,
-            doedshendelseKontrollpunktService = DoedshendelseKontrollpunktService(pdlKlient),
+            doedshendelseKontrollpunktService = DoedshendelseKontrollpunktService(pdlKlient, pesysKlient),
             featureToggleService = featureToggleService,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             dagerGamleHendelserSomSkalKjoeres = if (isProd()) 2 else 0,

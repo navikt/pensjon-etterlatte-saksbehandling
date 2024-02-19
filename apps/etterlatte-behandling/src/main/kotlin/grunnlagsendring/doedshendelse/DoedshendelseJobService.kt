@@ -41,7 +41,8 @@ class DoedshendelseJobService(
             true -> {
                 logger.info(
                     "Avbryter behandling av dødshendelse for person ${doedshendelse.avdoedFnr.maskerFnr()} med avdød " +
-                        "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkt",
+                        "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkt: " +
+                        kontrollerpunkter.joinToString(","),
                 )
                 doedshendelseDao.oppdaterDoedshendelse(doedshendelse.tilAvbrutt())
             }

@@ -12,4 +12,11 @@ sealed class DoedshendelseKontrollpunkt {
         override val opprettOppgave: Boolean = false
         override val avbryt: Boolean = true
     }
+
+    data object KryssendeYtelseIPesys : DoedshendelseKontrollpunkt() {
+        override val beskrivelse: String = "Den berørte har uføretrygd eller alderspensjon i Pesys"
+        override val kanSendeBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = true
+    }
 }

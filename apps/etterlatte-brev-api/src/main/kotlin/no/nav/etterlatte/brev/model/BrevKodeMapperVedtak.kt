@@ -24,12 +24,13 @@ class BrevKodeMapperVedtak {
                 when (request.vedtakType) {
                     VedtakType.INNVILGELSE ->
                         if (request.erForeldreloes) Brevkoder.BP_INNVILGELSE_FORELDRELOES else Brevkoder.BP_INNVILGELSE
+
                     VedtakType.AVSLAG -> Brevkoder.BP_AVSLAG
                     VedtakType.ENDRING -> Brevkoder.BP_REVURDERING
                     VedtakType.OPPHOER -> Brevkoder.BP_OPPHOER
                     VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
                     VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE
-                    null -> TODO()
+                    null -> throw IllegalStateException("Skal ikke kunne komme hit med manglande vedtakstype, for request $request")
                 }
             }
 
@@ -41,7 +42,7 @@ class BrevKodeMapperVedtak {
                     VedtakType.OPPHOER -> Brevkoder.OMS_OPPHOER
                     VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
                     VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE
-                    null -> TODO()
+                    null -> throw IllegalStateException("Skal ikke kunne komme hit med manglande vedtakstype, for request $request")
                 }
             }
         }

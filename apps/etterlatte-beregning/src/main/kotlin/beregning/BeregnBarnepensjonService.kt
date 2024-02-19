@@ -5,6 +5,7 @@ import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.REFORM_TIDSPUNKT_BP
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.barnepensjon.PeriodisertBarnepensjonGrunnlag
 import no.nav.etterlatte.beregning.regler.barnepensjon.kroneavrundetBarnepensjonRegelMedInstitusjon
@@ -187,10 +188,14 @@ class BeregnBarnepensjonService(
                                     },
                                 utbetaltBeloep = periodisertResultat.resultat.verdi,
                                 soeskenFlokk =
-                                    beregningsgrunnlag.soeskenKull.finnGrunnlagForPeriode(
-                                        periodisertResultat.periode.fraDato,
-                                    ).verdi.map {
-                                        it.value
+                                    if (periodisertResultat.periode.fraDato >= REFORM_TIDSPUNKT_BP.atDay(1)) {
+                                        beregningsgrunnlag.soeskenKull.finnGrunnlagForPeriode(
+                                            periodisertResultat.periode.fraDato,
+                                        ).verdi.map {
+                                            it.value
+                                        }
+                                    } else {
+                                        emptyList()
                                     },
                                 institusjonsopphold =
                                     beregningsgrunnlag.institusjonsopphold.finnGrunnlagForPeriode(
@@ -277,7 +282,7 @@ class BeregnBarnepensjonService(
                         )
                     },
                     fom,
-                    tom,
+                    tom ?: REFORM_TIDSPUNKT_BP.atDay(1).minusDays(1),
                 )
             } else {
                 KonstantGrunnlag(FaktumNode(emptyList(), beregningsGrunnlag.kilde, "Ingen søsken i kullet"))
@@ -315,6 +320,7 @@ class BeregnBarnepensjonService(
                             beskrivelse = "Avdød er ukjent. Trygdetid er satt manuelt.",
                         ),
                     )
+
                 else -> {
                     if (grunnlag.hentAvdoede().any { it.hentDoedsdato() == null }) {
                         KonstantGrunnlag(

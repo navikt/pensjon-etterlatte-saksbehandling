@@ -38,7 +38,7 @@ class DoedshendelseKontrollpunktService(
     private fun kontrollerKryssendeYtelse(hendelse: Doedshendelse): DoedshendelseKontrollpunkt? =
         runBlocking {
             val kryssendeYtelser =
-                pesysKlient.hentSaker(hendelse.avdoedFnr)
+                pesysKlient.hentSaker(hendelse.beroertFnr)
                     .filter { it.sakStatus in listOf(OPPRETTET, TIL_BEHANDLING, LOPENDE) }
                     .filter { it.sakType in listOf(UFORE_SAKTYPE, ALDER_SAKTYPE) }
                     .filter { it.fomDato == null || it.fomDato.isBefore(hendelse.avdoedDoedsdato) }

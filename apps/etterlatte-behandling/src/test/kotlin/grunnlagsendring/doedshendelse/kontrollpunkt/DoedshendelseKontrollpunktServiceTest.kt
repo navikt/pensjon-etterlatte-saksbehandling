@@ -29,13 +29,13 @@ class DoedshendelseKontrollpunktServiceTest {
         Doedshendelse.nyHendelse(
             avdoedFnr = "12345678901",
             avdoedDoedsdato = LocalDate.now(),
-            beroertFnr = "12345678901",
+            beroertFnr = "109987654321",
             relasjon = Relasjon.BARN,
         )
 
     @Test
     fun `Skal returnere kontrollpunkt hvis avdoed ikke har doedsdato i PDL`() {
-        coEvery { pesysKlient.hentSaker(doedshendelse.avdoedFnr) } returns emptyList()
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr) } returns emptyList()
         every {
             pdlTjenesterKlient.hentPdlModell(
                 foedselsnummer = doedshendelse.avdoedFnr,
@@ -62,7 +62,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 doedsdato = OpplysningDTO(doedshendelse.avdoedDoedsdato, null),
             )
 
-        coEvery { pesysKlient.hentSaker(doedshendelse.avdoedFnr) } returns
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr) } returns
             listOf(
                 SakSammendragResponse(
                     sakType = SakSammendragResponse.UFORE_SAKTYPE,
@@ -95,7 +95,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 doedsdato = OpplysningDTO(doedshendelse.avdoedDoedsdato, null),
             )
 
-        coEvery { pesysKlient.hentSaker(doedshendelse.avdoedFnr) } returns emptyList()
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr) } returns emptyList()
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
 
@@ -116,7 +116,7 @@ class DoedshendelseKontrollpunktServiceTest {
                 foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of("69057949961"), null),
             )
 
-        coEvery { pesysKlient.hentSaker(doedshendelse.avdoedFnr) } returns emptyList()
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr) } returns emptyList()
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
 
@@ -125,7 +125,7 @@ class DoedshendelseKontrollpunktServiceTest {
 
     @Test
     fun `Skal ikke opprette kontrollpunkt hvis alle sjekker er OK`() {
-        coEvery { pesysKlient.hentSaker(doedshendelse.avdoedFnr) } returns emptyList()
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr) } returns emptyList()
         every {
             pdlTjenesterKlient.hentPdlModell(
                 foedselsnummer = doedshendelse.avdoedFnr,

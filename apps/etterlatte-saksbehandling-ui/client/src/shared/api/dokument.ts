@@ -1,5 +1,6 @@
 import {
   Journalpost,
+  JournalpostUtsendingsinfo,
   KnyttTilAnnenSakRequest,
   KnyttTilAnnenSakResponse,
   OppdaterJournalpostRequest,
@@ -41,6 +42,10 @@ export const oppdaterJournalpost = async (args: {
 
 export const hentJournalpost = async (journalpostId: string): Promise<ApiResponse<Journalpost>> =>
   apiClient.get(`/dokumenter/${journalpostId}`)
+
+export const hentUtsendingsinfo = async (args: {
+  journalpostId: string
+}): Promise<ApiResponse<JournalpostUtsendingsinfo>> => apiClient.get(`/dokumenter/${args.journalpostId}/utsendingsinfo`)
 
 export const hentDokumentPDF = async (args: {
   journalpostId: string

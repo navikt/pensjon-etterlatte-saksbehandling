@@ -57,6 +57,21 @@ class SafService(
         }
     }
 
+    suspend fun hentUtsendingsinfo(
+        journalpostId: String,
+        bruker: BrukerTokenInfo,
+    ): JournalpostUtsendingsinfo? {
+        logger.info("Henter utsendingsinfo fra journalpost (id=$journalpostId)")
+
+        val response = safKlient.hentUtsendingsInfo(journalpostId, bruker)
+
+        return if (response.errors.isNullOrEmpty()) {
+            response.data?.journalpost
+        } else {
+            throw konverterTilForespoerselException(response.errors)
+        }
+    }
+
     private fun konverterTilForespoerselException(errors: List<Error>): ForespoerselException {
         errors.forEach {
             logger.error("${errors.size} feil oppsto ved kall mot saf: ${it.toJson()}")

@@ -13,6 +13,18 @@ export interface Journalpost {
   utsendingsinfo?: object
 }
 
+export interface JournalpostUtsendingsinfo {
+  journalpostId: string
+  utsendingsinfo?: {
+    fysiskpostSendt?: {
+      adressetekstKonvolutt?: string
+    }
+    digitalpostSendt?: {
+      adresse?: string
+    }
+  }
+}
+
 export interface OppdaterJournalpostRequest {
   journalpostId: string
   tittel?: string

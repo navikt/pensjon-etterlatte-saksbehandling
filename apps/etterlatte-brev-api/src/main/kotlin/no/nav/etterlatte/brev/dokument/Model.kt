@@ -5,15 +5,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 
-data class HentDokumentoversiktBrukerResult(
-    val journalposter: List<Journalpost> = emptyList(),
-    val error: Error? = null,
-)
-
 data class HentJournalpostResult(
     val journalpost: Journalpost? = null,
     val error: Error? = null,
 )
+
+data class HentUtsendingsinfoResponse(
+    val data: ResponseData? = null,
+    val errors: List<Error>? = null,
+) {
+    data class ResponseData(
+        val journalpost: JournalpostUtsendingsinfo? = null,
+    )
+}
 
 data class JournalpostResponse(
     val data: ResponseData? = null,
@@ -100,6 +104,11 @@ data class Journalpost(
     val datoOpprettet: String,
 )
 
+data class JournalpostUtsendingsinfo(
+    val journalpostId: String,
+    val utsendingsinfo: Utsendingsinfo?,
+)
+
 data class DokumentInfo(
     val dokumentInfoId: String,
     val tittel: String?,
@@ -134,10 +143,10 @@ data class AvsenderMottaker(
 )
 
 // https://confluence.adeo.no/display/BOA/Type%3A+Utsendingsinfo
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Utsendingsinfo(
     val fysiskpostSendt: FysiskpostSendt?,
     val digitalpostSendt: DigitalpostSendt?,
-    val varselSendt: VarselSendt?,
 ) {
     // Mappes hvis Journalpost.utsendingskanal er S (sentral utskrift)
     data class FysiskpostSendt(
@@ -147,13 +156,5 @@ data class Utsendingsinfo(
     // Mappes hvis Journalpost.utsendingskanal er SDP (sikker digital postkasse)
     data class DigitalpostSendt(
         val adresse: String?,
-    )
-
-    data class VarselSendt(
-        val type: String?,
-        val adresse: String?,
-        val tittel: String?,
-        val tekst: String?,
-        val tidspunkt: String?,
     )
 }

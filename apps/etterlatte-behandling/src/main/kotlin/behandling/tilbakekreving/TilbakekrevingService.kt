@@ -210,6 +210,7 @@ class TilbakekrevingService(
                     enhet = behandling.sak.enhet,
                 )
             }
+
         tilbakekrevingDao.lagreTilbakekreving(behandling.copy(status = TilbakekrevingStatus.ATTESTERT))
 
         hendelseDao.vedtakHendelse(

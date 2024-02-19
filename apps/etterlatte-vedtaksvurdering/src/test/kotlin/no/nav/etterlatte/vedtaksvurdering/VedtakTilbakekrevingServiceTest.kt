@@ -106,20 +106,19 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                saksbehandler = "saksbehandler",
                 enhet = "enhet",
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak()
         every { repo.fattVedtak(any(), any()) } returns vedtak()
 
-        service.fattVedtak(dto) shouldBe 1L
+        service.fattVedtak(dto, saksbehandler) shouldBe 1L
 
         verify { repo.hentVedtak(dto.tilbakekrevingId) }
         verify {
             repo.fattVedtak(
                 dto.tilbakekrevingId,
                 withArg {
-                    it.ansvarligSaksbehandler shouldBe dto.saksbehandler
+                    it.ansvarligSaksbehandler shouldBe saksbehandler.ident
                     it.ansvarligEnhet shouldBe dto.enhet
                 },
             )
@@ -131,13 +130,12 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                saksbehandler = "saksbehandler",
                 enhet = "enhet",
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak(status = VedtakStatus.FATTET_VEDTAK)
 
         assertThrows<VedtakTilstandException> {
-            service.fattVedtak(dto)
+            service.fattVedtak(dto, saksbehandler)
         }
         verify { repo.hentVedtak(dto.tilbakekrevingId) }
     }
@@ -147,10 +145,18 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                saksbehandler = "saksbehandler",
                 enhet = "enhet",
             )
-        every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtakTilbakekreving(status = VedtakStatus.FATTET_VEDTAK)
+        every { repo.hentVedtak(dto.tilbakekrevingId) } returns
+            vedtakTilbakekreving(
+                status = VedtakStatus.FATTET_VEDTAK,
+                vedtakFattet =
+                    VedtakFattet(
+                        ansvarligSaksbehandler = "saksbehandler",
+                        ansvarligEnhet = "enhet",
+                        tidspunkt = Tidspunkt.now(),
+                    ),
+            )
         val attestertVedtak =
             vedtakTilbakekreving(
                 vedtakFattet =
@@ -162,7 +168,7 @@ class VedtakTilbakekrevingServiceTest {
             )
         every { repo.attesterVedtak(any(), any()) } returns attestertVedtak
 
-        val vedtakDto = service.attesterVedtak(dto)
+        val vedtakDto = service.attesterVedtak(dto, saksbehandler)
 
         with(vedtakDto) {
             id shouldBe 1L
@@ -175,7 +181,7 @@ class VedtakTilbakekrevingServiceTest {
             repo.attesterVedtak(
                 dto.tilbakekrevingId,
                 withArg {
-                    it.attestant shouldBe dto.saksbehandler
+                    it.attestant shouldBe saksbehandler.ident
                     it.attesterendeEnhet shouldBe dto.enhet
                 },
             )
@@ -187,13 +193,12 @@ class VedtakTilbakekrevingServiceTest {
         val dto =
             TilbakekrevingFattEllerAttesterVedtakDto(
                 tilbakekrevingId = UUID.randomUUID(),
-                saksbehandler = "saksbehandler",
                 enhet = "enhet",
             )
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak(status = VedtakStatus.ATTESTERT)
 
         assertThrows<VedtakTilstandException> {
-            service.attesterVedtak(dto)
+            service.attesterVedtak(dto, saksbehandler)
         }
         verify { repo.hentVedtak(dto.tilbakekrevingId) }
     }

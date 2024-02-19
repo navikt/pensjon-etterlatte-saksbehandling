@@ -118,7 +118,6 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     postBody =
                         TilbakekrevingFattEllerAttesterVedtakDto(
                             tilbakekrevingId = tilbakekrevingId,
-                            saksbehandler = brukerTokenInfo.ident(),
                             enhet = enhet,
                         ),
                 )
@@ -152,7 +151,6 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     postBody =
                         TilbakekrevingFattEllerAttesterVedtakDto(
                             tilbakekrevingId = tilbakekrevingId,
-                            saksbehandler = brukerTokenInfo.ident(),
                             enhet = enhet,
                         ),
                 )

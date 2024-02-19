@@ -62,28 +62,37 @@ class SaksbehandlerMedEnheterOgRoller(
     private val navAnsattKlient: NavAnsattKlient,
     val saksbehandlerMedRoller: SaksbehandlerMedRoller,
 ) : ExternalUser(identifiedBy) {
-    override fun name(): String {
-        return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
-    }
-
-    fun enheterMedSkrivetilgang() =
+    private val saksbehandlersEnheter: Set<String> by lazy {
         try {
             runBlocking {
-                navAnsattKlient.hentEnheterForSaksbehandler(name())
-                    .map { it.id }
-                    .filter { Enheter.enheterMedSkrivetilgang().contains(it) }
+                navAnsattKlient.hentEnheterForSaksbehandler(name()).map { it.id }.toSet()
             }
         } catch (e: Exception) {
             throw HentEnhetException("Henting av enheter feilet. Sjekk on-prem status(fss)", e)
         }
+    }
+
+    override fun name(): String {
+        return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
+    }
+
+    private fun harKjentEnhet() = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
+
+    fun enheterMedSkrivetilgang() =
+        saksbehandlersEnheter
+            .filter { Enheter.saksbehandlendeEnheter().contains(it) }
 
     // TODO - EY-3441 - lesetilgang for forvaltningsutviklere
     fun enheterMedLesetilgang() =
-        enheterMedSkrivetilgang().let { egenSkriveEnheter ->
-            when (egenSkriveEnheter.size) {
-                0 -> Enheter.enheterForVanligSaksbehandlere()
-                else -> Enheter.enheterForVanligSaksbehandlere() - egenSkriveEnheter.toSet()
+        if (harKjentEnhet()) {
+            enheterMedSkrivetilgang().let { egenSkriveEnheter ->
+                when (egenSkriveEnheter.size) {
+                    0 -> Enheter.enheterForVanligSaksbehandlere()
+                    else -> Enheter.enheterForVanligSaksbehandlere() - egenSkriveEnheter.toSet()
+                }
             }
+        } else {
+            emptyList()
         }
 
     fun enheter() = (enheterMedSkrivetilgang() + enheterMedLesetilgang()).distinct()

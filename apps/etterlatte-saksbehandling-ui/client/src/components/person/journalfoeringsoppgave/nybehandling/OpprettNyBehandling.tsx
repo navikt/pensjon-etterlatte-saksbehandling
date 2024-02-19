@@ -39,8 +39,7 @@ export default function OpprettNyBehandling() {
     control,
     formState: { errors },
   } = useForm<NyBehandlingRequest>({
-    // TODO: fikse at denne konverterer persongalleri gjenlevende osv
-    defaultValues: { ...nyBehandlingRequest },
+    defaultValues: nyBehandlingRequest,
   })
 
   const onSubmit = (data: NyBehandlingRequest) => {

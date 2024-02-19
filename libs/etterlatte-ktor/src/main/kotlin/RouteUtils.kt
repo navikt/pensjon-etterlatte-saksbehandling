@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 const val BEHANDLINGID_CALL_PARAMETER = "behandlingId"
@@ -62,6 +63,8 @@ inline val PipelineContext<*, ApplicationCall>.klageId: UUID
             "KlageId er ikke i path params"
         }
 
+val logger = LoggerFactory.getLogger("TilgangsSjekk")
+
 suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     skrivetilgang: Boolean = false,
@@ -74,7 +77,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
             if (harTilgangTilBehandling) {
                 onSuccess(behandlingId)
             } else {
-                application.log.info("Har ikke tilgang til behandling")
+                logger.info("Har ikke tilgang til behandling")
                 call.respond(HttpStatusCode.NotFound)
             }
         }
@@ -94,7 +97,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
             if (harTilgangTilSak) {
                 onSuccess(sakId)
             } else {
-                application.log.info("Har ikke tilgang til sak")
+                logger.info("Har ikke tilgang til sak")
                 call.respond(HttpStatusCode.NotFound)
             }
         }

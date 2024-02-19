@@ -20,10 +20,7 @@ import java.time.LocalDateTime
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DoedshendelseJobServiceTest {
     private val dao = mockk<DoedshendelseDao>()
-    private val kontrollpunktService =
-        mockk<DoedshendelseKontrollpunktService>().apply {
-            every { identifiserKontrollerpunkter(any()) } returns emptyList()
-        }
+    private val kontrollpunktService = mockk<DoedshendelseKontrollpunktService>()
     private val toggle =
         mockk<FeatureToggleService> {
             every { isEnabled(any(), any()) } returns true
@@ -50,8 +47,10 @@ class DoedshendelseJobServiceTest {
                     endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt(),
                 ),
             )
+        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns emptyList()
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
         every { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) } returns emptyList()
+
         service.run()
 
         verify(exactly = 1) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }

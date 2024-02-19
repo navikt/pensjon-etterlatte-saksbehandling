@@ -30,6 +30,7 @@ import no.nav.etterlatte.behandling.sjekklisteRoute
 import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
+import no.nav.etterlatte.behandling.vedtaksbehandling.vedtaksbehandlingRoutes
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
@@ -128,6 +129,7 @@ internal fun Application.module(context: ApplicationContext) {
                 generellBehandlingService = generellBehandlingService,
                 sakService = sakService,
             )
+            vedtaksbehandlingRoutes(vedtaksbehandlingService = vedtaksbehandlingService)
             revurderingRoutes(revurderingService = revurderingService, featureToggleService = featureToggleService)
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)

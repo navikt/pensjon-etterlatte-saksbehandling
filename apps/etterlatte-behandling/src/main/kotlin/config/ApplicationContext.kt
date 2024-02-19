@@ -52,6 +52,8 @@ import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServiceImpl
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
+import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
+import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
@@ -220,6 +222,7 @@ internal class ApplicationContext(
     val revurderingDao = RevurderingDao { databaseContext().activeTx() }
     val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
     val generellbehandlingDao = GenerellBehandlingDao { databaseContext().activeTx() }
+    val vedtaksbehandlingDao = VedtaksbehandlingDao { databaseContext().activeTx() }
     val oppgaveDaoNy = OppgaveDaoImpl { databaseContext().activeTx() }
     val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { databaseContext().activeTx() }
     val sakDao = SakDao { databaseContext().activeTx() }
@@ -273,6 +276,10 @@ internal class ApplicationContext(
             behandlingService,
             grunnlagKlientObo,
             hendelseDao,
+        )
+    val vedtaksbehandlingService =
+        VedtaksbehandlingService(
+            vedtaksbehandlingDao,
         )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)

@@ -38,7 +38,7 @@ class TilbakekrevingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag) =
+    fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag): UUID =
         inTransaction {
             logger.info("Oppretter tilbakekreving=${kravgrunnlag.kravgrunnlagId} på sak=${kravgrunnlag.sakId}")
 
@@ -71,6 +71,8 @@ class TilbakekrevingService(
                     Tidspunkt.now(),
                 )
             tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.OPPRETTET)
+
+            tilbakekrevingBehandling.id
         }
 
     fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling =

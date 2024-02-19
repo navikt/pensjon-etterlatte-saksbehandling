@@ -70,9 +70,12 @@ export const ReleaseAlerts = () => {
                 <UtgivelseInfo key={`utgivelse-${i}`}>
                   <InfoElement>
                     <Label size="small" as="p">
-                      {utgivelse.name} {isToday(new Date(utgivelse.published_at)) && '(i dag)'}
+                      {utgivelse.name}
                     </Label>
-                    <Detail spacing>{formaterDatoMedKlokkeslett(utgivelse.published_at)}</Detail>
+                    <Detail spacing>
+                      {formaterDatoMedKlokkeslett(utgivelse.published_at)}{' '}
+                      {isToday(new Date(utgivelse.published_at)) && '(i dag)'}
+                    </Detail>
                     <BodyShort as="div" style={{ whiteSpace: 'pre-wrap' }} size="small">
                       {utgivelse.body}
                     </BodyShort>

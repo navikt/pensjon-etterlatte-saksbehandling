@@ -3,7 +3,7 @@ import { Control, useFieldArray } from 'react-hook-form'
 import { Button } from '@navikt/ds-react'
 import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
-import { ControlledTekstFelt } from '~components/person/journalfoeringsoppgave/nybehandling/ControlledTekstFelt'
+import { ControlledTekstFelt } from '~shared/components/tekstFelt/ControlledTekstFelt'
 
 export const ControlledListMedTekstFelter = ({
   name,

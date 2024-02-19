@@ -179,42 +179,48 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         isSuccess(oppgaveForBehandlingenStatus) &&
         oppgavenTilBehandlingen &&
         oppgavenTilBehandlingen.status !== 'PAA_VENT' && (
-          <FlexRow>
-            Frist
-            <FristHandlinger
-              orginalFrist={oppgavenTilBehandlingen.frist}
-              oppgaveId={oppgavenTilBehandlingen.id}
-              oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
-                oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
-              }
-              erRedigerbar={erOppgaveRedigerbar(oppgavenTilBehandlingen.status)}
-              oppgaveVersjon={oppgavenTilBehandlingen.versjon}
-              type={oppgavenTilBehandlingen.type}
-            />
-          </FlexRow>
+          <>
+            <FlexRow>Frist</FlexRow>
+            <FlexRow>
+              <FristHandlinger
+                orginalFrist={oppgavenTilBehandlingen.frist}
+                oppgaveId={oppgavenTilBehandlingen.id}
+                oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
+                  oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
+                }
+                erRedigerbar={erOppgaveRedigerbar(oppgavenTilBehandlingen.status)}
+                oppgaveVersjon={oppgavenTilBehandlingen.versjon}
+                type={oppgavenTilBehandlingen.type}
+              />
+            </FlexRow>
+          </>
         )}
 
       {settPaaVent &&
         isSuccess(oppgaveForBehandlingenStatus) &&
         oppgavenTilBehandlingen &&
         oppgavenTilBehandlingen.status !== 'PAA_VENT' && (
-          <FlexRow>
-            <Button
-              variant="primary"
-              onClick={() =>
-                lagreVent({
-                  merknad: merknad,
-                  versjon: null,
-                  status: oppgavenTilBehandlingen.status,
-                } as SettPaaVentRequest)
-              }
-            >
-              Bekreft Vent
-            </Button>
-            <Button variant="primary" onClick={() => setVisPaaVent(false)}>
-              Avbryt
-            </Button>
-          </FlexRow>
+          <>
+            <FlexRow>
+              <Button
+                variant="primary"
+                onClick={() =>
+                  lagreVent({
+                    merknad: merknad,
+                    versjon: null,
+                    status: oppgavenTilBehandlingen.status,
+                  } as SettPaaVentRequest)
+                }
+              >
+                Bekreft Vent
+              </Button>
+            </FlexRow>
+            <FlexRow>
+              <Button variant="tertiary" onClick={() => setVisPaaVent(false)}>
+                Avbryt
+              </Button>
+            </FlexRow>
+          </>
         )}
       {settPaaVent &&
         isSuccess(oppgaveForBehandlingenStatus) &&
@@ -241,9 +247,11 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         </Button>
       )}
       {!settPaaVent && oppgavenTilBehandlingen?.status === 'PAA_VENT' && (
-        <Button variant="primary" onClick={() => setVisPaaVent(true)}>
-          Ta av vent
-        </Button>
+        <>
+          <Button variant="primary" onClick={() => setVisPaaVent(true)}>
+            Ta av vent
+          </Button>
+        </>
       )}
     </SidebarPanel>
   )

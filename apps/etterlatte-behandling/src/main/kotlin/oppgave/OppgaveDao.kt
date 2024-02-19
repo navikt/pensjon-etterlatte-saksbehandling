@@ -347,7 +347,7 @@ class OppgaveDaoImpl(private val connection: () -> Connection) : OppgaveDao {
                 prepareStatement(
                     """
                     UPDATE oppgave
-                    SET frist = ?, merknad = ?, status = ?
+                    SET merknad = ?, status = ?
                     where id = ?::UUID
                     """.trimIndent(),
                 )

@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react'
 import { Control, FieldValues, Path, useController } from 'react-hook-form'
 import { TextField } from '@navikt/ds-react'
 
-export const ControlledTextField = <T extends FieldValues>({
+export const ControlledTekstFelt = <T extends FieldValues>({
   name,
   control,
   label,

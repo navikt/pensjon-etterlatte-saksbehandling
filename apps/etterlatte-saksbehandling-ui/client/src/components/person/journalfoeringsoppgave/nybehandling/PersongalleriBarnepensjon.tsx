@@ -2,8 +2,8 @@ import React from 'react'
 import { BodyShort, Heading, Panel } from '@navikt/ds-react'
 import { InputRow } from './OpprettNyBehandling'
 import { Control } from 'react-hook-form'
-import { ControlledTextField } from '~components/person/journalfoeringsoppgave/nybehandling/ControlledTextField'
-import { ControlledInputArray } from '~components/person/journalfoeringsoppgave/nybehandling/ControlledInputArray'
+import { ControlledTekstFelt } from '~shared/components/tekstFelt/ControlledTekstFelt'
+import { ControlledListMedTekstFelter } from '~shared/components/tekstFelt/ControlledListMedTekstFelter'
 
 export default function PersongalleriBarnepensjon({
   erManuellMigrering = false,
@@ -31,7 +31,7 @@ export default function PersongalleriBarnepensjon({
   return (
     <>
       <InputRow>
-        <ControlledTextField
+        <ControlledTekstFelt
           name="persongalleri.soeker"
           control={control}
           validate={validateFnrObligatorisk}
@@ -44,7 +44,7 @@ export default function PersongalleriBarnepensjon({
       </InputRow>
 
       <InputRow>
-        <ControlledTextField
+        <ControlledTekstFelt
           name="persongalleri.innsender"
           control={control}
           validate={validerFnrValgfri}
@@ -59,7 +59,7 @@ export default function PersongalleriBarnepensjon({
           <BodyShort textColor="subtle">Legg til gjenlevende hvis tilgjengelig</BodyShort>
         </Heading>
 
-        <ControlledInputArray
+        <ControlledListMedTekstFelter
           name="persongalleri.gjenlevende"
           label="Gjenlevende forelder"
           description="Oppgi fødselsnummer"
@@ -76,7 +76,7 @@ export default function PersongalleriBarnepensjon({
           <BodyShort textColor="subtle">Legg til avdød hvis tilgjengelig</BodyShort>
         </Heading>
 
-        <ControlledInputArray
+        <ControlledListMedTekstFelter
           name="persongalleri.avdoed"
           label="Avdød forelder"
           control={control}
@@ -92,7 +92,7 @@ export default function PersongalleriBarnepensjon({
           <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>
         </Heading>
 
-        <ControlledInputArray
+        <ControlledListMedTekstFelter
           name="persongalleri.soesken"
           label="Søsken"
           description="Oppgi fødselsnummer"

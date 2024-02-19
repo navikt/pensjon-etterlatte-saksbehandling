@@ -3,9 +3,9 @@ import { Control, useFieldArray } from 'react-hook-form'
 import { Button } from '@navikt/ds-react'
 import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
-import { ControlledTextField } from '~components/person/journalfoeringsoppgave/nybehandling/ControlledTextField'
+import { ControlledTekstFelt } from '~components/person/journalfoeringsoppgave/nybehandling/ControlledTekstFelt'
 
-export const ControlledInputArray = ({
+export const ControlledListMedTekstFelter = ({
   name,
   label,
   description,
@@ -28,7 +28,7 @@ export const ControlledInputArray = ({
     <InputList>
       {fields.map((field, index) => (
         <InputRow key={index}>
-          <ControlledTextField
+          <ControlledTekstFelt
             key={field.id}
             name={`${name}.${index}.value`}
             control={control}

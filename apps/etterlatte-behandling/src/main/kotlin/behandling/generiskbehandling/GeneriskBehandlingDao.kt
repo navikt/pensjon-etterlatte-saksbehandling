@@ -9,19 +9,19 @@ import java.sql.ResultSet
 import java.util.UUID
 
 class GeneriskBehandlingDao(private val connection: () -> Connection) {
-    fun erBehandlingRedigerbar(behandlingId: UUID) {
+    fun erBehandlingRedigerbar(behandlingId: UUID): Boolean {
         return with(connection()) {
             val statement =
                 prepareStatement(
                     """
-                    SELECT 'BEHANDLING', id, status FROM behandling WHERE id = :behandlingId
-                    union SELECT 'TILBAKEKREVING', id, status FROM tilbakekreving WHERE id = :behandlingId
-                    union SELECT 'KLAGE', id, status FROM klage WHERE id = :behandlingId
+                    SELECT 'BEHANDLING', id, status FROM behandling WHERE id = ?
+                    union SELECT 'TILBAKEKREVING', id, status FROM tilbakekreving WHERE id = ?
+                    union SELECT 'KLAGE', id, status FROM klage WHERE id = ?
                     """.trimIndent(),
                 )
-            statement.setString(1, behandlingId.toString())
-            statement.setString(2, behandlingId.toString())
-            statement.setString(3, behandlingId.toString())
+            statement.setObject(1, behandlingId)
+            statement.setObject(2, behandlingId)
+            statement.setObject(3, behandlingId)
 
             statement.executeQuery()
                 .single { toGeneriskBehandling() }

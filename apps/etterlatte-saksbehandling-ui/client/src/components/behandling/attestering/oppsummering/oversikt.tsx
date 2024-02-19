@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import {
   formaterBehandlingstype,
   formaterDatoMedKlokkeslett,
@@ -19,8 +19,8 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { FlexRow } from '~shared/styled'
-import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { Saksbehandler } from '~shared/types/saksbehandler'
+import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
@@ -67,7 +67,14 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
   return (
     <SidebarPanel border>
       <Heading size="small">
-        {formaterBehandlingstype(behandlingsInfo.type)} <EessiPensjonLenke />
+        {formaterBehandlingstype(behandlingsInfo.type)}
+        {behandlingsInfo.nasjonalEllerUtland !== UtlandstilknytningType.NASJONAL && (
+          <EessiPensjonLenke
+            sakId={behandlingsInfo.sakId}
+            behandlingId={behandlingsInfo.behandlingId}
+            sakType={behandlingsInfo.sakType}
+          />
+        )}
       </Heading>
 
       <Heading size="xsmall" spacing>

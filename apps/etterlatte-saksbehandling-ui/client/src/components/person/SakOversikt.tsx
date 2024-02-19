@@ -96,7 +96,7 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
                 </BodyShort>
               </SelectWrapper>
               <hr />
-              <Behandlingsliste behandlinger={sakOgBehandlinger.behandlinger} sakId={sakOgBehandlinger.sak.id} />
+              <Behandlingsliste sakOgBehandlinger={sakOgBehandlinger} />
 
               {kanBrukeKlage ? <KlageListe sakId={sakOgBehandlinger.sak.id} /> : null}
             </MainContent>

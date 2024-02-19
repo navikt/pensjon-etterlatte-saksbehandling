@@ -1,5 +1,5 @@
 import { Heading, Link, Table } from '@navikt/ds-react'
-import { IBehandlingsammendrag } from './typer'
+import { IBehandlingsammendrag, SakMedBehandlinger } from './typer'
 import { formaterBehandlingstype, formaterEnumTilLesbarString, formaterStringDato } from '~utils/formattering'
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
@@ -18,7 +18,7 @@ import { VedtakKolonner } from '~components/person/VedtakKoloner'
 
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { SamordningModal } from '~components/person/Samordning'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 
@@ -46,12 +46,14 @@ function hentDato(behandling: alleBehandlingsTyper): string {
   }
 }
 
-export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehandlingsammendrag[]; sakId: number }) => {
+export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: SakMedBehandlinger }) => {
   const [generellbehandlingStatus, hentGenerellbehandlinger] = useApiCall(hentGenerelleBehandlingForSak)
 
+  const { sak, behandlinger } = sakOgBehandlinger
+
   useEffect(() => {
-    hentGenerellbehandlinger(sakId)
-  }, [sakId])
+    hentGenerellbehandlinger(sak.id)
+  }, [sak.id])
 
   let allebehandlinger: alleBehandlingsTyper[] = []
   allebehandlinger = allebehandlinger.concat(behandlinger)
@@ -87,7 +89,9 @@ export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehan
                   <Table.DataCell>
                     <BehandlingstypeWrapper>
                       {formaterBehandlingstype(behandling.behandlingType)}
-                      <EessiPensjonLenke />
+                      {sak.utlandstilknytning?.type !== UtlandstilknytningType.NASJONAL && (
+                        <EessiPensjonLenke sakId={sak.id} behandlingId={behandling.id} sakType={sak.sakType} />
+                      )}
                     </BehandlingstypeWrapper>
                   </Table.DataCell>
                   <Table.DataCell>{mapAarsak(behandling.aarsak)}</Table.DataCell>
@@ -114,7 +118,7 @@ export const Behandlingsliste = ({ behandlinger, sakId }: { behandlinger: IBehan
                   <Table.DataCell>
                     <BehandlingstypeWrapper>
                       {genbehandlingTypeTilLesbartNavn(behandling.type)}
-                      <EessiPensjonLenke />
+                      <EessiPensjonLenke sakId={sak.id} behandlingId={behandling.id} sakType={sak.sakType} />
                     </BehandlingstypeWrapper>
                   </Table.DataCell>
                   <Table.DataCell>-</Table.DataCell>

@@ -14,10 +14,13 @@ import { Spraak } from '~shared/types/Brev'
 import { useForm } from 'react-hook-form'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { PersonISkjema } from '~shared/types/Person'
 import { useAppDispatch } from '~store/Store'
 import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { formatDateToLocalDateTimeOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
+
+interface PersonISkjema {
+  value: string
+}
 
 export default function OpprettNyBehandling() {
   const { oppgave, nyBehandlingRequest } = useJournalfoeringOppgave()
@@ -43,11 +46,15 @@ export default function OpprettNyBehandling() {
   })
 
   const onSubmit = (data: NyBehandlingRequest) => {
-    const gjenlevende: string[] = (data.persongalleri?.gjenlevende as PersonISkjema[]).map(
+    const gjenlevende: string[] = (data.persongalleri?.gjenlevende as unknown as PersonISkjema[]).map(
       (val: PersonISkjema) => val.value
     )
-    const avdoed: string[] = (data.persongalleri?.avdoed as PersonISkjema[]).map((val: PersonISkjema) => val.value)
-    const soesken: string[] = (data.persongalleri?.soesken as PersonISkjema[]).map((val: PersonISkjema) => val.value)
+    const avdoed: string[] = (data.persongalleri?.avdoed as unknown as PersonISkjema[]).map(
+      (val: PersonISkjema) => val.value
+    )
+    const soesken: string[] = (data.persongalleri?.soesken as unknown as PersonISkjema[]).map(
+      (val: PersonISkjema) => val.value
+    )
 
     dispatch(
       settNyBehandlingRequest({

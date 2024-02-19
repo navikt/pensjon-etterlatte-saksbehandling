@@ -212,10 +212,12 @@ internal fun Route.sakWebRoutes(
             }
 
             get("/behandlinger/foerstevirk") {
-                logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
-                when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
+                withLesetilgang {
+                    logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
+                    when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {
+                        null -> call.respond(HttpStatusCode.NotFound)
+                        else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
+                    }
                 }
             }
         }

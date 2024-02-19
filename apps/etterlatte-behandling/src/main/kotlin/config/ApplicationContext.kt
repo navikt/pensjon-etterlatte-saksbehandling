@@ -216,14 +216,14 @@ internal class ApplicationContext(
     val dataSource = DataSourceBuilder.createDataSource(env.props)
 
     // Dao
-    val hendelseDao = HendelseDao { databaseContext().activeTx() }
-    val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { databaseContext().activeTx() }
-    val aktivitetspliktDao = AktivitetspliktDao { databaseContext().activeTx() }
-    val sjekklisteDao = SjekklisteDao { databaseContext().activeTx() }
-    val revurderingDao = RevurderingDao { databaseContext().activeTx() }
-    val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
-    val generellbehandlingDao = GenerellBehandlingDao { databaseContext().activeTx() }
-    val vedtaksbehandlingDao = VedtaksbehandlingDao { databaseContext().activeTx() }
+    val hendelseDao = HendelseDao(ConnectionAutoclosingImpl(dataSource))
+    val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingImpl(dataSource))
+    val aktivitetspliktDao = AktivitetspliktDao(ConnectionAutoclosingImpl(dataSource))
+    val sjekklisteDao = SjekklisteDao(ConnectionAutoclosingImpl(dataSource))
+    val revurderingDao = RevurderingDao(ConnectionAutoclosingImpl(dataSource))
+    val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, ConnectionAutoclosingImpl(dataSource))
+    val generellbehandlingDao = GenerellBehandlingDao(ConnectionAutoclosingImpl(dataSource))
+    val vedtaksbehandlingDao = VedtaksbehandlingDao(ConnectionAutoclosingImpl(dataSource))
     val oppgaveDaoNy = OppgaveDaoImpl(ConnectionAutoclosingImpl(dataSource))
     val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, ConnectionAutoclosingImpl(dataSource))
     val sakDao = SakDao(ConnectionAutoclosingImpl(dataSource))
@@ -231,18 +231,18 @@ internal class ApplicationContext(
         GrunnlagsendringshendelseDao(
             ConnectionAutoclosingImpl(dataSource),
         )
-    val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
+    val institusjonsoppholdDao = InstitusjonsoppholdDao(ConnectionAutoclosingImpl(dataSource))
     val oppgaveMetrikkerDao = OppgaveMetrikkerDao(dataSource)
     val behandlingMetrikkerDao = BehandlingMetrikkerDao(dataSource)
-    val klageDao = KlageDaoImpl { databaseContext().activeTx() }
-    val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
-    val behandlingInfoDao = BehandlingInfoDao { databaseContext().activeTx() }
-    val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
-    val saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
-    val saksbehandlerInfoDaoTrans =
+    val klageDao = KlageDaoImpl(ConnectionAutoclosingImpl(dataSource))
+    val tilbakekrevingDao = TilbakekrevingDao(ConnectionAutoclosingImpl(dataSource))
+    val behandlingInfoDao = BehandlingInfoDao(ConnectionAutoclosingImpl(dataSource))
+    val bosattUtlandDao = BosattUtlandDao(ConnectionAutoclosingImpl(dataSource))
+    val saksbehandlerInfoDao = SaksbehandlerInfoDao(ConnectionAutoclosingImpl(dataSource))
+    val saksbehandlerInfoDaoTrans = // TODO merge denne med den over
         SaksbehandlerInfoDaoTrans {
             databaseContext().activeTx()
-        } // TODO: bruk ConnectionAutoclosingImpl overalt... på mandag
+        }
     val doedshendelseDao = DoedshendelseDao(ConnectionAutoclosingImpl(dataSource))
 
     // Klient

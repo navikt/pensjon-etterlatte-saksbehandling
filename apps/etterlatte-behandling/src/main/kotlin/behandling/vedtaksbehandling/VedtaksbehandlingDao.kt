@@ -1,31 +1,33 @@
 package no.nav.etterlatte.behandling.vedtaksbehandling
 
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.database.single
-import java.sql.Connection
 import java.sql.ResultSet
 import java.util.UUID
 
-class VedtaksbehandlingDao(private val connection: () -> Connection) {
+class VedtaksbehandlingDao(private val connectionAutoclosing: ConnectionAutoclosing) {
     fun erBehandlingRedigerbar(behandlingId: UUID): Boolean {
-        return with(connection()) {
-            val statement =
-                prepareStatement(
-                    """
-                    SELECT 'BEHANDLING', id, status FROM behandling WHERE id = ?
-                    union SELECT 'TILBAKEKREVING', id, status FROM tilbakekreving WHERE id = ?
-                    union SELECT 'KLAGE', id, status FROM klage WHERE id = ?
-                    """.trimIndent(),
-                )
-            statement.setObject(1, behandlingId)
-            statement.setObject(2, behandlingId)
-            statement.setObject(3, behandlingId)
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT 'BEHANDLING', id, status FROM behandling WHERE id = ?
+                        union SELECT 'TILBAKEKREVING', id, status FROM tilbakekreving WHERE id = ?
+                        union SELECT 'KLAGE', id, status FROM klage WHERE id = ?
+                        """.trimIndent(),
+                    )
+                statement.setObject(1, behandlingId)
+                statement.setObject(2, behandlingId)
+                statement.setObject(3, behandlingId)
 
-            statement.executeQuery()
-                .single { toVedtaksbehandling() }
-                .erRedigerbar()
+                statement.executeQuery()
+                    .single { toVedtaksbehandling() }
+                    .erRedigerbar()
+            }
         }
     }
 

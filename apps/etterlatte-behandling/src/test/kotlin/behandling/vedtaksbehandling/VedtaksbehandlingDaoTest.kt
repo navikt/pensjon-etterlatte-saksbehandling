@@ -53,7 +53,7 @@ internal class VedtaksbehandlingDaoTest(val dataSource: DataSource) {
         val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { connection }
         val revurderingDao = RevurderingDao { connection }
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
-        vedtaksbehandlingDao = VedtaksbehandlingDao { connection }
+        vedtaksbehandlingDao = VedtaksbehandlingDao(ConnectionAutoclosingTest(dataSource))
         behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { connection }
         klageDao = KlageDaoImpl { connection }
         tilbakekrevingDao = TilbakekrevingDao { connection }

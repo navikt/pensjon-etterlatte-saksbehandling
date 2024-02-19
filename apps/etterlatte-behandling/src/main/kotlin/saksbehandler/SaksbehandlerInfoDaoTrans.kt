@@ -4,9 +4,8 @@ import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import java.sql.Connection
 
-class SaksbehandlerInfoDaoTrans(private val connection: () -> Connection) {
+class SaksbehandlerInfoDaoTrans(private val connectionAutoclosing: ConnectionAutoclosing) {
     fun hentSaksbehandlerNavn(ident: String): String? {
         with(connection()) {
             val statement =

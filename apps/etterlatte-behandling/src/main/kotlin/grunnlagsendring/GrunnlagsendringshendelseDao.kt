@@ -74,8 +74,8 @@ class GrunnlagsendringshendelseDao(val connectionAutoclosing: ConnectionAutoclos
         etterStatus: GrunnlagsendringStatus,
         samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
     ) {
-        connectionAutoclosing.hentConnection {
-            with(it) {
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
                 prepareStatement(
                     """
                     UPDATE grunnlagsendringshendelse

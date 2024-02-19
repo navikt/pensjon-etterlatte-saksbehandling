@@ -43,7 +43,7 @@ class DoedshendelseJobService(
                     "Avbryter behandling av dødshendelse for person ${doedshendelse.avdoedFnr.maskerFnr()} med avdød " +
                         "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkt",
                 )
-                // todo: sett innslag i doedshendelser til ferdig.
+                doedshendelseDao.oppdaterDoedshendelse(doedshendelse.tilAvbrutt())
             }
 
             false -> {
@@ -51,6 +51,7 @@ class DoedshendelseJobService(
                     fnr = doedshendelse.avdoedFnr,
                     grunnlagendringType = GrunnlagsendringsType.DOEDSFALL,
                 )
+                // todo: lukk etter oppgave er opprettet
             }
         }
     }
@@ -62,5 +63,5 @@ class DoedshendelseJobService(
         }.distinctBy { it.avdoedFnr }.also { logger.info("Antall gyldige dødsmeldinger ${it.size}") }
     }
 
-    private fun hentAlleNyeDoedsmeldinger() = doedshendelseDao.hentDoedshendelserMedStatus(DoedshendelseStatus.NY)
+    private fun hentAlleNyeDoedsmeldinger() = doedshendelseDao.hentDoedshendelserMedStatus(Status.NY)
 }

@@ -1,10 +1,13 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedLeverIPDL
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
@@ -31,7 +34,7 @@ class DoedshendelseJobServiceTest {
         DoedshendelseJobService(dao, kontrollpunktService, toggle, grunnlagsendringshendelseService, todagergammel)
 
     @Test
-    fun `skal kjøre 1 ny gyldig hendelse som er 2 dager gammel og droppe 1`() {
+    fun `skal kjoere 1 ny gyldig hendelse som er 2 dager gammel og droppe 1`() {
         val doedshendelse =
             Doedshendelse.nyHendelse(
                 avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
@@ -52,5 +55,28 @@ class DoedshendelseJobServiceTest {
         service.run()
 
         verify(exactly = 1) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
+    }
+
+    @Test
+    fun `skal avbryte ugyldig hendelser`() {
+        val doedshendelse =
+            Doedshendelse.nyHendelse(
+                avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
+                avdoedDoedsdato = LocalDate.now(),
+                beroertFnr = "12345678901",
+                relasjon = Relasjon.BARN,
+            ).copy(endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt())
+
+        every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelse)
+        every { dao.oppdaterDoedshendelse(any()) } returns Unit
+        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns listOf(AvdoedLeverIPDL)
+        val doedshendelseCapture = slot<Doedshendelse>()
+
+        service.run()
+
+        verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
+        verify(exactly = 0) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
+        doedshendelseCapture.captured.status shouldBe Status.FERDIG
+        doedshendelseCapture.captured.utfall shouldBe Utfall.AVBRUTT
     }
 }

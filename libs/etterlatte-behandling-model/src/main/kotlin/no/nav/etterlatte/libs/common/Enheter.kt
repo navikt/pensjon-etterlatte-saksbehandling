@@ -4,7 +4,7 @@ enum class Enheter(
     val enhetNr: String,
     val navn: String,
     val vanligSaksbehandlerEnhet: Boolean,
-    val skrivetilgang: Boolean,
+    val erSaksbehandlendeEnhet: Boolean,
 ) {
     STRENGT_FORTROLIG("2103", "NAV Vikafossen", false, true),
     STRENGT_FORTROLIG_UTLAND("2103", "NAV Vikafossen", false, true),
@@ -26,9 +26,9 @@ enum class Enheter(
 
         fun enheterForVanligSaksbehandlere() = entries.filter { it.vanligSaksbehandlerEnhet }.map { it.enhetNr }
 
-        fun finnEnhetForEnhetsnummer(enhetNr: String) = entries.firstOrNull { it.enhetNr == enhetNr }
+        fun saksbehandlendeEnheter() = entries.filter { it.erSaksbehandlendeEnhet }.map { it.enhetNr }.toSet()
 
-        fun enheterMedSkrivetilgang() = entries.filter { it.skrivetilgang }.map { it.enhetNr }.toSet()
+        fun kjenteEnheter() = entries.map { it.enhetNr }.toSet()
     }
 }
 

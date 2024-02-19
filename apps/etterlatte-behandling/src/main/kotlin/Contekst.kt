@@ -57,22 +57,31 @@ class SaksbehandlerMedEnheterOgRoller(
     private val saksbehandlerService: SaksbehandlerService,
     val saksbehandlerMedRoller: SaksbehandlerMedRoller,
 ) : ExternalUser(identifiedBy) {
+    private val saksbehandlersEnheter: Set<String> by lazy {
+        saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map { it.enhetsNummer }.toSet()
+    }
+
     override fun name(): String {
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
     }
 
     fun enheterMedSkrivetilgang() =
-        saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(name()).map {
-            it.enhetsNummer
-        }.filter { Enheter.enheterMedSkrivetilgang().contains(it) }
+        saksbehandlersEnheter
+            .filter { Enheter.saksbehandlendeEnheter().contains(it) }
+
+    private fun harKjentEnhet() = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
 
     // TODO - EY-3441 - lesetilgang for forvaltningsutviklere
     fun enheterMedLesetilgang() =
-        enheterMedSkrivetilgang().let { egenSkriveEnheter ->
-            when (egenSkriveEnheter.size) {
-                0 -> Enheter.enheterForVanligSaksbehandlere()
-                else -> Enheter.enheterForVanligSaksbehandlere() - egenSkriveEnheter.toSet()
+        if (harKjentEnhet()) {
+            enheterMedSkrivetilgang().let { egenSkriveEnheter ->
+                when (egenSkriveEnheter.size) {
+                    0 -> Enheter.enheterForVanligSaksbehandlere()
+                    else -> Enheter.enheterForVanligSaksbehandlere() - egenSkriveEnheter.toSet()
+                }
             }
+        } else {
+            emptyList()
         }
 
     fun enheter() = (enheterMedSkrivetilgang() + enheterMedLesetilgang()).distinct()

@@ -81,7 +81,7 @@ class SaksbehandlerMedEnheterOgRollerTest {
                 ),
                 Arguments.of(
                     "Kontaktsenter",
-                    listOf(SaksbehandlerEnhet("12345", "En annen enhet")),
+                    listOf(SaksbehandlerEnhet(Enheter.OEST_VIKEN.enhetNr, Enheter.OEST_VIKEN.navn)),
                     emptyList<String>(),
                     listOf(
                         Enheter.AALESUND.enhetNr,
@@ -90,6 +90,12 @@ class SaksbehandlerMedEnheterOgRollerTest {
                         Enheter.AALESUND_UTLAND.enhetNr,
                         Enheter.UTLAND.enhetNr,
                     ),
+                ),
+                Arguments.of(
+                    "Ukjent",
+                    listOf(SaksbehandlerEnhet("12345", "En annen enhet")),
+                    emptyList<String>(),
+                    emptyList<String>(),
                 ),
             )
     }

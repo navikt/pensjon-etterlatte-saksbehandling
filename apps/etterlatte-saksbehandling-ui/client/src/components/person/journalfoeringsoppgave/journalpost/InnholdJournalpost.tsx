@@ -4,7 +4,7 @@ import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React from 'react'
 import { Journalpost } from '~shared/types/Journalpost'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterJournalpostStatus, formaterStringDato } from '~utils/formattering'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
 import { FlexRow } from '~shared/styled'
 
@@ -20,7 +20,7 @@ export const InnholdJournalpost = ({ journalpost }: { journalpost: Journalpost }
           label="Registrert dato"
           tekst={journalpost.datoOpprettet ? formaterStringDato(journalpost.datoOpprettet) : 'Mangler opprettelsesdato'}
         />
-        <Info label="Status" tekst={journalpost.journalstatus} />
+        <Info label="Status" tekst={formaterJournalpostStatus(journalpost.journalstatus)} />
       </InfoWrapper>
 
       <br />

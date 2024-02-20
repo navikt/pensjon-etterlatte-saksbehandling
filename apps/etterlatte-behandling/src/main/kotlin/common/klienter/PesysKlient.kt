@@ -48,8 +48,8 @@ class PesysKlientImpl(config: Config, pen: HttpClient) : PesysKlient {
 data class SakSammendragResponse(
     val sakType: String,
     val sakStatus: Status,
-    val fomDato: LocalDate,
-    val tomDate: LocalDate,
+    val fomDato: LocalDate?,
+    val tomDate: LocalDate?,
 ) {
     companion object {
         const val UFORE_SAKTYPE = "UFOREP"

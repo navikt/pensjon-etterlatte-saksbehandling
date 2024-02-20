@@ -67,6 +67,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
@@ -347,7 +348,13 @@ internal class ApplicationContext(
         )
 
     val doedshendelseJobService =
-        DoedshendelseJobService(doedshendelseDao, featureToggleService, grunnlagsendringshendelseService, if (isProd()) 2 else 0)
+        DoedshendelseJobService(
+            doedshendelseDao = doedshendelseDao,
+            doedshendelseKontrollpunktService = DoedshendelseKontrollpunktService(pdlKlient, pesysKlient),
+            featureToggleService = featureToggleService,
+            grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+            dagerGamleHendelserSomSkalKjoeres = if (isProd()) 2 else 0,
+        )
 
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(

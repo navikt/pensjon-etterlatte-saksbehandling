@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -19,7 +20,7 @@ class DoedshendelseDao(val connectionAutoclosing: ConnectionAutoclosing) {
                     WHERE sakId = ?
                     """.trimIndent(),
                 ).apply {
-                    setString(1, DoedshendelseStatus.FERDIG.name)
+                    setString(1, Status.FERDIG.name)
                     setLong(2, doedshendelseBrevDistribuert.brevId)
                     setLong(3, doedshendelseBrevDistribuert.sakId)
                 }
@@ -49,7 +50,27 @@ class DoedshendelseDao(val connectionAutoclosing: ConnectionAutoclosing) {
         }
     }
 
-    fun hentDoedshendelserMedStatus(status: DoedshendelseStatus): List<Doedshendelse> {
+    fun oppdaterDoedshendelse(doedshendelse: Doedshendelse) {
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    UPDATE doedshendelse 
+                    SET sak_id = ?, status = ?, utfall = ?, endret = ?
+                    WHERE id = ?
+                    """.trimIndent(),
+                ).apply {
+                    setLong(1, doedshendelse.sakId)
+                    setString(2, doedshendelse.status.name)
+                    setString(3, doedshendelse.utfall?.name)
+                    setTidspunkt(4, doedshendelse.endret)
+                    setString(5, doedshendelse.id.toString())
+                }.executeUpdate()
+            }
+        }
+    }
+
+    fun hentDoedshendelserMedStatus(status: Status): List<Doedshendelse> {
         return connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
@@ -75,7 +96,7 @@ private fun ResultSet.asDoedshendelse(): Doedshendelse =
         relasjon = getString("relasjon").let { relasjon -> Relasjon.valueOf(relasjon) },
         opprettet = getTidspunkt("opprettet"),
         endret = getTidspunkt("endret"),
-        status = DoedshendelseStatus.valueOf(getString("status")),
+        status = Status.valueOf(getString("status")),
         utfall = getString("utfall")?.let { utfall -> Utfall.valueOf(utfall) },
         oppgaveId = getString("oppgave_id")?.toUUID(),
         brevId = getString("brev_id")?.toLong(),

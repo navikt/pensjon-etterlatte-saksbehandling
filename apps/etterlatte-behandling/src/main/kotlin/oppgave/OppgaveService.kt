@@ -147,7 +147,7 @@ class OppgaveService(
                 ?: throw OppgaveIkkeFunnet(oppgaveId)
 
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (hentetOppgave.saksbehandlerIdent != null) {
+        if (!hentetOppgave.saksbehandlerIdent.isNullOrEmpty()) {
             oppgaveDao.fjernSaksbehandler(oppgaveId)
         } else {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
@@ -175,14 +175,14 @@ class OppgaveService(
                     meta = mapOf("oppgaveId" to oppgaveId),
                 )
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (hentetOppgave.saksbehandlerIdent != null) {
-            oppgaveDao.redigerFrist(oppgaveId, frist)
-        } else {
+        if (hentetOppgave.saksbehandlerIdent.isNullOrEmpty()) {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
+        } else {
+            oppgaveDao.redigerFrist(oppgaveId, frist)
         }
     }
 
-    fun settPaaVent(
+    fun oppdaterStatusOgMerknad(
         oppgaveId: UUID,
         merknad: String,
         status: Status,
@@ -196,10 +196,10 @@ class OppgaveService(
                     meta = mapOf("oppgaveId" to oppgaveId),
                 )
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (hentetOppgave.saksbehandlerIdent != null) {
-            oppgaveDao.settPaaVent(oppgaveId, merknad, nyStatus)
-        } else {
+        if (hentetOppgave.saksbehandlerIdent.isNullOrEmpty()) {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
+        } else {
+            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, nyStatus)
         }
     }
 

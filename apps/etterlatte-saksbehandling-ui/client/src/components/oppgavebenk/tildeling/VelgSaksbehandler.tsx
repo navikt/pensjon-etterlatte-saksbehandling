@@ -8,6 +8,7 @@ import {
   erOppgaveRedigerbar,
   fjernSaksbehandlerApi,
   OppgaveDTO,
+  OppgaveSaksbehandler,
   tildelSaksbehandlerApi,
 } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -15,15 +16,15 @@ import { Saksbehandler } from '~shared/types/saksbehandler'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
-  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
   oppgave: OppgaveDTO
 }
 
 const mapSaksbehandler = (oppgave: OppgaveDTO): Saksbehandler | undefined =>
-  oppgave.saksbehandlerIdent
+  oppgave.saksbehandler
     ? {
-        ident: oppgave.saksbehandlerIdent,
-        navn: oppgave.saksbehandlerNavn || oppgave.saksbehandlerIdent,
+        ident: oppgave.saksbehandler.ident,
+        navn: oppgave.saksbehandler.navn || oppgave.saksbehandler.ident,
       }
     : undefined
 
@@ -52,7 +53,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
         byttSaksbehandler(
           { oppgaveId, type, nysaksbehandler: { saksbehandler: selectedSaksbehandler.ident!, versjon } },
           (result) => {
-            oppdaterTildeling(oppgave, selectedSaksbehandler.ident, result.versjon)
+            oppdaterTildeling(oppgave, selectedSaksbehandler, result.versjon)
             setValgtSaksbehandler(saksbehandler)
             setOpenDropdown(false)
           },
@@ -66,7 +67,7 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
     tildelSaksbehandler(
       { oppgaveId, type, nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon } },
       (result) => {
-        oppdaterTildeling(oppgave, innloggetSaksbehandler.ident, result.versjon)
+        oppdaterTildeling(oppgave, innloggetSaksbehandler, result.versjon)
         setValgtSaksbehandler({
           ident: innloggetSaksbehandler.ident,
           navn: innloggetSaksbehandler.navn,

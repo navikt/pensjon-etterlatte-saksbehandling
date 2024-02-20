@@ -4,6 +4,7 @@ import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
@@ -83,7 +84,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(3, oppgaveIntern.enhet)
                 statement.setLong(4, oppgaveIntern.sakId)
                 statement.setString(5, oppgaveIntern.type.name)
-                statement.setString(6, oppgaveIntern.saksbehandlerIdent)
+                statement.setString(6, oppgaveIntern.saksbehandler?.ident)
                 statement.setString(7, oppgaveIntern.referanse)
                 statement.setString(8, oppgaveIntern.merknad)
                 statement.setTidspunkt(9, oppgaveIntern.opprettet)
@@ -378,8 +379,10 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
             sakType = SakType.valueOf(getString("saktype")),
             fnr = getString("fnr"),
             frist = getTidspunktOrNull("frist"),
-            saksbehandlerIdent = getString("saksbehandler"),
-            saksbehandlerNavn = getString("navn"),
+            saksbehandler =
+                getString("saksbehandler")?.let {
+                    OppgaveSaksbehandler(getString("saksbehandler"), getString("navn"))
+                },
         )
     }
 }

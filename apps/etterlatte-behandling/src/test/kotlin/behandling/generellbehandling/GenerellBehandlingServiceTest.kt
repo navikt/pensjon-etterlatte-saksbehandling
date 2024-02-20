@@ -213,7 +213,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         Assertions.assertEquals(OppgaveKilde.GENERELL_BEHANDLING, manuellBehandlingOppgave.kilde)
         Assertions.assertEquals(OppgaveType.KRAVPAKKE_UTLAND, manuellBehandlingOppgave.type)
         Assertions.assertEquals(sak.id, manuellBehandlingOppgave.sakId)
-        Assertions.assertNull(manuellBehandlingOppgave.saksbehandlerIdent)
+        Assertions.assertNull(manuellBehandlingOppgave.saksbehandler)
     }
 
     @Test
@@ -248,7 +248,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         Assertions.assertEquals(OppgaveKilde.GENERELL_BEHANDLING, manuellBehandlingOppgave.kilde)
         Assertions.assertEquals(OppgaveType.KRAVPAKKE_UTLAND, manuellBehandlingOppgave.type)
         Assertions.assertEquals(sak.id, manuellBehandlingOppgave.sakId)
-        Assertions.assertNull(manuellBehandlingOppgave.saksbehandlerIdent)
+        Assertions.assertNull(manuellBehandlingOppgave.saksbehandler)
 
         verify {
             hendelseDao.generellBehandlingHendelse(

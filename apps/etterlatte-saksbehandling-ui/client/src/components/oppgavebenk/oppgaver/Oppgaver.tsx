@@ -1,5 +1,5 @@
 import { Alert } from '@navikt/ds-react'
-import { OppgaveDTO } from '~shared/api/oppgaver'
+import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import React, { ReactNode, useEffect, useState } from 'react'
 import { OppgaverTable } from '~components/oppgavebenk/oppgaverTable/OppgaverTable'
 import { PagineringsKontroller } from '~components/oppgavebenk/oppgaver/PagineringsKontroller'
@@ -15,7 +15,7 @@ import { Filter, filtrerOppgaver } from '~components/oppgavebenk/oppgaveFiltreri
 
 export interface OppgavelisteProps {
   oppgaver: OppgaveDTO[]
-  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterFrist?: (id: string, nyfrist: string, versjon: number | null) => void
   filter?: Filter

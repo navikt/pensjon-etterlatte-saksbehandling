@@ -1,16 +1,16 @@
-import { OppgaveDTO } from '~shared/api/oppgaver'
+import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import { logger } from '~utils/logger'
 
 export const finnOgOppdaterSaksbehandlerTildeling = (
   oppgaver: OppgaveDTO[],
   oppgaveId: string,
-  saksbehandler: string | null,
+  saksbehandler: OppgaveSaksbehandler | null,
   versjon: number | null
 ) => {
   const index = oppgaver.findIndex((o) => o.id === oppgaveId)
   if (index > -1) {
     const oppdatertOppgaveState = [...oppgaver]
-    oppdatertOppgaveState[index].saksbehandlerIdent = saksbehandler
+    oppdatertOppgaveState[index].saksbehandler = saksbehandler
     oppdatertOppgaveState[index].status = 'UNDER_BEHANDLING'
     oppdatertOppgaveState[index].versjon = versjon
     return oppdatertOppgaveState
@@ -22,10 +22,10 @@ export const finnOgOppdaterSaksbehandlerTildeling = (
 export const leggTilOppgavenIMinliste = (
   oppgaver: OppgaveDTO[],
   oppgave: OppgaveDTO,
-  saksbehandler: string | null,
+  saksbehandler: OppgaveSaksbehandler | null,
   versjon: number | null
 ): OppgaveDTO[] => {
-  return [...oppgaver, { ...oppgave, saksbehandlerIdent: saksbehandler, status: 'UNDER_BEHANDLING', versjon: versjon }]
+  return [...oppgaver, { ...oppgave, saksbehandler: saksbehandler, status: 'UNDER_BEHANDLING', versjon: versjon }]
 }
 
 export const oppdaterFrist = (

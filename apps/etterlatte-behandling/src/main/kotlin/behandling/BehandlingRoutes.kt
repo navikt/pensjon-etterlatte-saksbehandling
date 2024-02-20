@@ -48,8 +48,13 @@ internal fun Route.behandlingRoutes(
 
     post("/api/behandling") {
         val request = call.receive<NyBehandlingRequest>()
-        val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request, brukerTokenInfo)
-        call.respondText(behandling.id.toString())
+
+        val gjeldendeEnhet = behandlingFactory.finnGjeldendeEnhet(request.persongalleri, request.sakType)
+
+        kunSkrivetilgang(enhetNr = gjeldendeEnhet) {
+            val behandling = behandlingFactory.opprettSakOgBehandlingForOppgave(request, brukerTokenInfo)
+            call.respondText(behandling.id.toString())
+        }
     }
 
     route("/api/behandling/{$BEHANDLINGID_CALL_PARAMETER}/") {

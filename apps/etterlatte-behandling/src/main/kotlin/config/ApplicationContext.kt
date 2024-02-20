@@ -421,7 +421,7 @@ internal class ApplicationContext(
             doedshendelseJobService,
             { leaderElectionKlient.isLeader() },
             0L,
-            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.SECONDS),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
         )
     }
 

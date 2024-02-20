@@ -7,7 +7,7 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { InfoWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import React, { useEffect, useState } from 'react'
-import { Journalpost, KnyttTilAnnenSakResponse } from '~shared/types/Journalpost'
+import { Journalpost, Journalstatus, KnyttTilAnnenSakResponse } from '~shared/types/Journalpost'
 import { temaFraSakstype } from '~components/person/journalfoeringsoppgave/journalpost/EndreSak'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { knyttTilAnnenSak } from '~shared/api/dokument'
@@ -202,7 +202,7 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
               <Button
                 onClick={knyttJournalpostTilGjennySak}
                 loading={isPending(knyttTilAnnenSakStatus) || isPending(nyOppgaveStatus)}
-                disabled={valgtJournalpost.journalstatus !== 'FEILREGISTRERT' || isSuccess(nyOppgaveStatus)}
+                disabled={valgtJournalpost.journalstatus !== Journalstatus.FEILREGISTRERT || isSuccess(nyOppgaveStatus)}
               >
                 Knytt til sak {sak.sak.id}
               </Button>

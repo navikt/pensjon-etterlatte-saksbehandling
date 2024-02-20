@@ -1,42 +1,24 @@
-import { ErrorMessage } from '@navikt/ds-react'
 import styled from 'styled-components'
-import Spinner from '~shared/Spinner'
+import { Modal } from '@navikt/ds-react'
 
-const PdfViewer = styled.embed`
-  min-width: 680px;
-  width: 100%;
-  min-height: 600px;
-  height: 100%;
+/**
+ * Styled ds-react modal tilpasset visning av PDF-er
+ **/
+export const DokumentVisningModal = styled(Modal)`
+  width: 80vw;
+  max-width: 1200px;
+  min-height: 80vh;
 `
 
-const Container = styled.div`
-  margin: auto;
-  height: 100%;
+const PdfViewer = styled.embed`
   width: 100%;
+  height: 80vh;
 `
 
 interface Props {
   fileUrl: string | undefined
-  error?: string | undefined
-  loading?: boolean
 }
 
-export const PdfVisning = ({ fileUrl, error, loading }: Props) => {
-  return (
-    <Container>
-      {error && (
-        <ErrorMessage>
-          En feil har oppstått ved henting av PDF:
-          <br />
-          <code>{error}</code>
-        </ErrorMessage>
-      )}
-
-      {loading ? (
-        <Spinner visible={true} label="Klargjør forhåndsvisning av PDF ..." />
-      ) : (
-        fileUrl && <PdfViewer src={`${fileUrl}#toolbar=0`} />
-      )}
-    </Container>
-  )
+export const PdfVisning = ({ fileUrl }: Props) => {
+  return !!fileUrl && <PdfViewer src={`${fileUrl}`} />
 }

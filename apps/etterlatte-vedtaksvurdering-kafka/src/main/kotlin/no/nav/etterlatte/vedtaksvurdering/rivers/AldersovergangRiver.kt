@@ -61,10 +61,13 @@ class AldersovergangRiver(
                 val hendelseData = mutableMapOf<String, Any>()
 
                 val behandlingsdato = packet.dato
+                // Sjekker løpende ytelse for måneden _etter_ behandlingsdato (dvs når bruker fyller år, dødsdato osv.)
+                // Ytelsen skal løpe ut behandlingsmåneden. Unngå videre behandling der ytelsen kanskje allerede er opphørt.
+                val maanedEtterBehandlingsdato = behandlingsdato.plusMonths(1)
                 logger.info("Sjekker løpende ytelse for sak $sakId, behandlingsmåned=$behandlingsdato, dryrun=$dryrun")
 
-                val loependeYtelse = vedtakService.harLoependeYtelserFra(sakId, behandlingsdato)
-                logger.info("Sak $sakId, behandlingsmåned=$behandlingsdato har løpende ytelse: ${loependeYtelse.erLoepende}")
+                val loependeYtelse = vedtakService.harLoependeYtelserFra(sakId, maanedEtterBehandlingsdato)
+                logger.info("Sak $sakId har løpende ytelse per $maanedEtterBehandlingsdato? ${loependeYtelse.erLoepende}")
                 hendelseData["loependeYtelse"] = loependeYtelse.erLoepende
 
                 if (loependeYtelse.erLoepende && type == "AO_BP20") {

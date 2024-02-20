@@ -4,7 +4,7 @@ import { isPending } from '~shared/api/apiUtils'
 import React from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { feilregistrerSakstilknytning, opphevFeilregistrertSakstilknytning } from '~shared/api/dokument'
-import { Journalpost } from '~shared/types/Journalpost'
+import { Journalpost, Journalstatus } from '~shared/types/Journalpost'
 
 export const FeilregistrerJournalpost = ({
   valgtJournalpost,
@@ -45,7 +45,7 @@ export const FeilregistrerJournalpost = ({
         ))}
       </List>
 
-      {valgtJournalpost?.journalstatus === 'FEILREGISTRERT' ? (
+      {valgtJournalpost?.journalstatus === Journalstatus.FEILREGISTRERT ? (
         <Alert variant="info">
           Journalposten er markert som feilregistrert
           <br />
@@ -64,7 +64,7 @@ export const FeilregistrerJournalpost = ({
       <br />
 
       <FlexRow justify="right">
-        {valgtJournalpost?.journalstatus === 'FEILREGISTRERT' ? (
+        {valgtJournalpost?.journalstatus === Journalstatus.FEILREGISTRERT ? (
           <Button
             variant="secondary"
             onClick={opphevFeilregistrering}

@@ -1,4 +1,4 @@
-import { Journalpost } from '~shared/types/Journalpost'
+import { Journalpost, Journalstatus } from '~shared/types/Journalpost'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 
 export const kanFerdigstilleJournalpost = (journalpost: Journalpost): [boolean, string[]] => {
@@ -44,6 +44,8 @@ export const temaTilhoererGjenny = (journalpost: Journalpost) => {
 
 export const kanEndreJournalpost = (journalpost: Journalpost | undefined) => {
   return (
-    !!journalpost && ['MOTTATT', 'UNDER_ARBEID'].includes(journalpost.journalstatus) && temaTilhoererGjenny(journalpost)
+    !!journalpost &&
+    [Journalstatus.MOTTATT, Journalstatus.UNDER_ARBEID].includes(journalpost.journalstatus) &&
+    temaTilhoererGjenny(journalpost)
   )
 }

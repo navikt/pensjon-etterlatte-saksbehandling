@@ -1,8 +1,8 @@
 import { Button, Detail, Heading, Modal, Table } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterJournalpostStatus, formaterJournalpostType, formaterStringDato } from '~utils/formattering'
 import DokumentModal from './dokumentModal'
 import Spinner from '~shared/Spinner'
-import { Journalpost } from '~shared/types/Journalpost'
+import { Journalpost, Journalposttype } from '~shared/types/Journalpost'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 import { mapApiResult, Result } from '~shared/api/apiUtils'
@@ -63,11 +63,13 @@ export const Dokumentliste = ({ dokumenter }: { dokumenter: Result<Journalpost[]
                     <Table.DataCell>
                       {dokument?.sak ? `${dokument.sak.fagsaksystem}: ${dokument.sak.fagsakId || '-'}` : '-'}
                     </Table.DataCell>
-                    <Table.DataCell>{dokument.journalstatus}</Table.DataCell>
-                    <Table.DataCell>{dokument.journalposttype === 'I' ? 'Inngående' : 'Utgående'}</Table.DataCell>
+                    <Table.DataCell>{formaterJournalpostStatus(dokument.journalstatus)}</Table.DataCell>
+                    <Table.DataCell>{formaterJournalpostType(dokument.journalposttype)}</Table.DataCell>
                     <Table.DataCell>
                       <FlexRow justify="right">
-                        {dokument.journalposttype === 'U' && <UtsendingsinfoModal journalpost={dokument} />}
+                        {dokument.journalposttype === Journalposttype.U && (
+                          <UtsendingsinfoModal journalpost={dokument} />
+                        )}
 
                         <DokumentModal journalpost={dokument} />
                       </FlexRow>

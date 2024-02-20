@@ -97,6 +97,29 @@ class TidshendelseRiverTest {
         verify(exactly = 0) { behandlingService.opprettOppgave(sakId, any(), any(), "Aldersovergang", any()) }
     }
 
+    @Test
+    fun `OMS tre aar siden doedsfall, skal ikke opprette oppgave hvis rett uten tidsbegrensning`() {
+        val hendelseId = UUID.randomUUID()
+        val sakId = 93L
+        val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
+
+        val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned)
+        melding[ALDERSOVERGANG_TYPE_KEY] = "OMS_DOED_3AAR"
+        melding["oms_rett_uten_tidsbegrensning"] = true
+
+        with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
+            size shouldBe 1
+            field(0, EVENT_NAME_KEY).asText() shouldBe EventNames.ALDERSOVERGANG.name
+            field(0, ALDERSOVERGANG_STEG_KEY).asText() shouldBe "OPPGAVE_OPPRETTET"
+            field(0, ALDERSOVERGANG_TYPE_KEY).asText() shouldBe "OMS_DOED_3AAR"
+            field(0, ALDERSOVERGANG_ID_KEY).asText() shouldBe hendelseId.toString()
+            field(0, DRYRUN).asBoolean() shouldBe false
+            field(0, HENDELSE_DATA_KEY) shouldHaveSize 0
+        }
+
+        verify(exactly = 0) { behandlingService.opprettOppgave(sakId, any(), any(), "Aldersovergang", any()) }
+    }
+
     private fun lagMeldingForVurdertLoependeYtelse(
         hendelseId: UUID,
         sakId: Long,

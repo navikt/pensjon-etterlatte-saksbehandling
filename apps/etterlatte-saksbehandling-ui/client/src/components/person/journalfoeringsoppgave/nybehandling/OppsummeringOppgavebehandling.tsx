@@ -26,13 +26,10 @@ export default function OppsummeringOppgavebehandling() {
     !sakMedBehandlinger ||
     !gyldigBehandlingRequest(nyBehandlingRequest)
   ) {
-    return null
+    return <Alert variant="error">Noe data i journalføringen eller behandlingen er feil</Alert>
   }
 
   const { spraak, mottattDato, persongalleri } = nyBehandlingRequest
-  if (!spraak || !mottattDato || !persongalleri) {
-    return null
-  }
 
   return (
     <FormWrapper column>

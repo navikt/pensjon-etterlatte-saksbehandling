@@ -59,8 +59,6 @@ export default function OpprettNyBehandling() {
   } = methods
 
   const onSubmit = (data: NyBehandlingSkjema) => {
-    let avdoed: string[] | undefined = data.persongalleri.avdoed?.map((val) => val.value)
-    if (sakType === SakType.OMSTILLINGSSTOENAD && avdoed && avdoed[0].length === 0) avdoed = undefined
     dispatch(
       settNyBehandlingRequest({
         sakType,
@@ -69,7 +67,7 @@ export default function OpprettNyBehandling() {
         persongalleri: {
           ...data.persongalleri,
           gjenlevende: data.persongalleri.gjenlevende?.map((val) => val.value),
-          avdoed,
+          avdoed: data.persongalleri.avdoed?.map((val) => val.value).filter((val) => val !== ''),
           soesken: data.persongalleri.soesken?.map((val) => val.value),
         },
       })

@@ -18,15 +18,14 @@ class DoedshendelseKontrollpunktService(
     private val pesysKlient: PesysKlient,
 ) {
     fun identifiserKontrollerpunkter(hendelse: Doedshendelse): List<DoedshendelseKontrollpunkt> {
-        val kontrollpunkter = mutableListOf<DoedshendelseKontrollpunkt>()
         val avdoed = pdlTjenesterKlient.hentPdlModell(hendelse.avdoedFnr, PersonRolle.AVDOED, SakType.BARNEPENSJON)
 
-        kontrollpunkter.addNotNull(kontrollerAvdoedDoedsdato(avdoed))
-        kontrollpunkter.addNotNull(kontrollerKryssendeYtelse(hendelse))
-        kontrollpunkter.addNotNull(kontrollerDNummer(avdoed))
-        kontrollpunkter.addNotNull(kontrollerUtvandring(avdoed))
-
-        return kontrollpunkter
+        return listOfNotNull(
+            kontrollerAvdoedDoedsdato(avdoed),
+            kontrollerKryssendeYtelse(hendelse),
+            kontrollerDNummer(avdoed),
+            kontrollerUtvandring(avdoed),
+        )
     }
 
     private fun kontrollerAvdoedDoedsdato(avdoed: PersonDTO): DoedshendelseKontrollpunkt? =
@@ -78,8 +77,4 @@ class DoedshendelseKontrollpunktService(
 
         return null
     }
-}
-
-private fun MutableList<DoedshendelseKontrollpunkt>.addNotNull(element: DoedshendelseKontrollpunkt?) {
-    element?.let { add(it) }
 }

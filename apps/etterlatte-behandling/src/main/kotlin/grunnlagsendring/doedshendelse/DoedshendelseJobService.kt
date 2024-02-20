@@ -35,14 +35,14 @@ class DoedshendelseJobService(
     }
 
     private fun haandterDoedshendelse(doedshendelse: Doedshendelse) {
-        val kontrollerpunkter = doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
+        val kontrollpunkter = doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
 
-        when (kontrollerpunkter.any { it.avbryt }) {
+        when (kontrollpunkter.any { it.avbryt }) {
             true -> {
                 logger.info(
                     "Avbryter behandling av dødshendelse for person ${doedshendelse.avdoedFnr.maskerFnr()} med avdød " +
                         "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkt: " +
-                        kontrollerpunkter.joinToString(","),
+                        kontrollpunkter.joinToString(","),
                 )
                 doedshendelseDao.oppdaterDoedshendelse(doedshendelse.tilAvbrutt())
             }

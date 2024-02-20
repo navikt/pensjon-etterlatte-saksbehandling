@@ -34,6 +34,11 @@ class DoedshendelseJobServiceTest {
     private val service =
         DoedshendelseJobService(dao, kontrollpunktService, toggle, grunnlagsendringshendelseService, todagergammel)
 
+    @AfterEach
+    fun afterEach() {
+        clearMocks(dao, kontrollpunktService, grunnlagsendringshendelseService)
+    }
+
     @Test
     fun `skal kjoere 1 ny gyldig hendelse som er 2 dager gammel og droppe 1`() {
         val doedshendelse =
@@ -61,7 +66,7 @@ class DoedshendelseJobServiceTest {
     }
 
     @Test
-    fun `skal avbryte ugyldig hendelser`() {
+    fun `skal avbryte hendelse hvis avdoed er ikke er registert doed i PDL`() {
         val doedshendelse =
             Doedshendelse.nyHendelse(
                 avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
@@ -84,7 +89,7 @@ class DoedshendelseJobServiceTest {
     }
 
     @Test
-    fun `skal ikke avbryte gyldige hendelser`() {
+    fun `skal ikke avbryte gyldige hendelser dersom kontrollpunktene skal foere til oppgave`() {
         val doedshendelse =
             Doedshendelse.nyHendelse(
                 avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
@@ -103,10 +108,5 @@ class DoedshendelseJobServiceTest {
 
         verify(exactly = 0) { dao.oppdaterDoedshendelse(any()) }
         verify(exactly = 1) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
-    }
-
-    @AfterEach
-    fun afterEach() {
-        clearMocks(dao, kontrollpunktService, grunnlagsendringshendelseService)
     }
 }

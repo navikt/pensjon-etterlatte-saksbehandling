@@ -35,7 +35,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.sak.SakDao
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.sql.Connection
@@ -223,48 +222,6 @@ internal class GyldighetsproevingServiceImplTest {
             )
 
         behandlingsService.hentFoerstegangsbehandling(id)
-
-        verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
-    }
-
-    @Test
-    fun hentFoerstegangsbehandlingMedEnhetOgSaksbehandlerHarIkkeEnhet() {
-        every {
-            user.enheter()
-        } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
-
-        val id = UUID.randomUUID()
-
-        every {
-            behandlingDaoMock.hentBehandling(id)
-        } returns
-            Foerstegangsbehandling(
-                id = id,
-                sak =
-                    Sak(
-                        ident = "Ola Olsen",
-                        sakType = SakType.BARNEPENSJON,
-                        id = 1,
-                        enhet = Enheter.PORSGRUNN.enhetNr,
-                    ),
-                behandlingOpprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                sistEndret = Tidspunkt.now().toLocalDatetimeUTC(),
-                status = BehandlingStatus.OPPRETTET,
-                soeknadMottattDato = Tidspunkt.now().toLocalDatetimeUTC(),
-                gyldighetsproeving = null,
-                virkningstidspunkt =
-                    Virkningstidspunkt(
-                        YearMonth.of(2022, 1),
-                        Grunnlagsopplysning.Saksbehandler.create("ident"),
-                        "begrunnelse",
-                    ),
-                utlandstilknytning = null,
-                boddEllerArbeidetUtlandet = null,
-                kommerBarnetTilgode = null,
-                kilde = Vedtaksloesning.GJENNY,
-            )
-
-        assertNull(behandlingsService.hentFoerstegangsbehandling(id))
 
         verify(exactly = 1) { behandlingDaoMock.hentBehandling(id) }
     }

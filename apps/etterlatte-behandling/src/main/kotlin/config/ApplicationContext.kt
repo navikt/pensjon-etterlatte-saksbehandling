@@ -96,7 +96,6 @@ import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
-import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDaoTrans
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.token.Fagsaksystem
 import java.time.Duration
@@ -216,6 +215,7 @@ internal class ApplicationContext(
 
     // Dao
     val autoClosingDatabase = ConnectionAutoclosingImpl(dataSource)
+
     val hendelseDao = HendelseDao(autoClosingDatabase)
     val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(autoClosingDatabase)
     val aktivitetspliktDao = AktivitetspliktDao(autoClosingDatabase)
@@ -239,8 +239,6 @@ internal class ApplicationContext(
     val behandlingInfoDao = BehandlingInfoDao(autoClosingDatabase)
     val bosattUtlandDao = BosattUtlandDao(autoClosingDatabase)
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(autoClosingDatabase)
-    val saksbehandlerInfoDaoTrans = // TODO merge denne med den over
-        SaksbehandlerInfoDaoTrans(autoClosingDatabase)
     val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
 
     // Klient

@@ -14,12 +14,12 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 internal class SaksbehandlerInfoDaoTransTest(val dataSource: DataSource) {
-    private lateinit var saksbehandlerInfoDaoTrans: SaksbehandlerInfoDaoTrans
+    private lateinit var saksbehandlerInfoDaoTrans: SaksbehandlerInfoDao
     private lateinit var saksbehandlerInfoDao: SaksbehandlerInfoDao
 
     @BeforeAll
     fun beforeAll() {
-        saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans(ConnectionAutoclosingTest(dataSource))
+        saksbehandlerInfoDaoTrans = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
         saksbehandlerInfoDao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
     }
 

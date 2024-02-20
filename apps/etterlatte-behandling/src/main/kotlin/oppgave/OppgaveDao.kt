@@ -1,6 +1,5 @@
 package no.nav.etterlatte.oppgave
 
-import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -19,8 +18,6 @@ import java.sql.ResultSet
 import java.util.UUID
 
 interface OppgaveDao {
-    fun hentSaksbehandlerNavnForidenter(identer: List<String>): List<SaksbehandlerInfo>
-
     fun opprettOppgave(oppgaveIntern: OppgaveIntern)
 
     fun hentOppgave(oppgaveId: UUID): OppgaveIntern?
@@ -156,24 +153,6 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                     asOppgave()
                 }.also {
                     logger.info("Hentet antall nye oppgaver for sak: ${it.size} sak: $sakId")
-                }
-            }
-        }
-    }
-
-    override fun hentSaksbehandlerNavnForidenter(identer: List<String>): List<SaksbehandlerInfo> {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
-                        SELECT * FROM saksbehandler_info
-                        WHERE id = ANY(?)
-                        """.trimIndent(),
-                    )
-                statement.setArray(1, createArrayOf("text", identer.toTypedArray()))
-                statement.executeQuery().toList {
-                    SaksbehandlerInfo(getString("id"), getString("navn"))
                 }
             }
         }

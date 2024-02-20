@@ -152,7 +152,7 @@ internal fun Application.module(context: ApplicationContext) {
                 requestLogger = behandlingRequestLogger,
             )
             institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))
-            saksbehandlerRoutes(saksbehandlerService = SaksbehandlerService(context.saksbehandlerInfoDaoTrans))
+            saksbehandlerRoutes(saksbehandlerService = SaksbehandlerService(context.saksbehandlerInfoDao))
 
             tilgangRoutes(tilgangService)
 

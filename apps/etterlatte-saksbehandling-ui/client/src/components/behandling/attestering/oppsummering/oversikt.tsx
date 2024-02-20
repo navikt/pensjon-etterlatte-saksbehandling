@@ -46,9 +46,10 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       { referanse: behandlingsInfo.behandlingId, sakId: behandlingsInfo.sakId },
       (oppgave) => {
         setOppgave(oppgave)
+        setMerknad(oppgave.merknad || '')
       }
     )
-  }, [])
+  }, [lagreSettPaaVentStatus])
 
   const lagreVent = (data: SettPaaVentRequest) => {
     if (!oppgavenTilBehandlingen) throw new Error('Mangler oppgave')
@@ -248,6 +249,9 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       )}
       {!settPaaVent && oppgavenTilBehandlingen?.status === 'PAA_VENT' && (
         <>
+          <Alert variant="warning">
+            Oppgaven er satt på vent med følgende merknad: {oppgavenTilBehandlingen.merknad}{' '}
+          </Alert>
           <Button variant="primary" onClick={() => setVisPaaVent(true)}>
             Ta av vent
           </Button>

@@ -15,7 +15,6 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { useAppDispatch } from '~store/Store'
 import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
-import { formatDateToLocalDateTimeOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
 
 export interface NyBehandlingSkjema {
   spraak: Spraak | null
@@ -63,7 +62,7 @@ export default function OpprettNyBehandling() {
       settNyBehandlingRequest({
         sakType,
         spraak: data.spraak!,
-        mottattDato: formatDateToLocalDateTimeOrEmptyString(new Date(data.mottattDato)),
+        mottattDato: new Date(data.mottattDato).toISOString(),
         persongalleri: {
           ...data.persongalleri,
           gjenlevende: data.persongalleri.gjenlevende?.map((val) => val.value),

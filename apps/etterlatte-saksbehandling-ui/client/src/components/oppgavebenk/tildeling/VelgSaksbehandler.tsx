@@ -14,20 +14,23 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 
 interface Props {
-  saksbehandler: Saksbehandler | undefined
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
   oppgave: OppgaveDTO
 }
 
-export const VelgSaksbehandler = ({
-  saksbehandlereIEnhet,
-  oppdaterTildeling,
-  oppgave,
-  saksbehandler,
-}: Props): ReactNode => {
+const mapSaksbehandler = (oppgave: OppgaveDTO): Saksbehandler | undefined =>
+  oppgave.saksbehandlerIdent
+    ? {
+        ident: oppgave.saksbehandlerIdent,
+        navn: oppgave.saksbehandlerNavn || oppgave.saksbehandlerIdent,
+      }
+    : undefined
+
+export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, oppgave }: Props): ReactNode => {
   const { sakId, id: oppgaveId, type, versjon, status } = oppgave
   const erRedigerbar = erOppgaveRedigerbar(status)
+  const saksbehandler = mapSaksbehandler(oppgave)
 
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
@@ -102,7 +105,7 @@ export const VelgSaksbehandler = ({
             loading={byttSaksbehandlerResult.status === 'pending'}
           >
             {valgtSaksbehandler?.navn
-              ? `${valgtSaksbehandler.navn} ${valgtSaksbehandler.navn === innloggetSaksbehandler.navn ? '(meg)' : ''}`
+              ? `${valgtSaksbehandler.navn} ${valgtSaksbehandler.ident === innloggetSaksbehandler.ident ? '(meg)' : ''}`
               : 'Ikke tildelt'}
           </Button>
           <DropdownMeny onClose={() => setOpenDropdown(false)}>

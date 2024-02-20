@@ -54,11 +54,20 @@ class TidshendelseRiver(
                 "dryRun" to dryrun.toString(),
             ),
         ) {
-            packet[HENDELSE_DATA_KEY]["loependeYtelse_januar2024_behandlingId"]?.let {
+            val hendelseData = packet[HENDELSE_DATA_KEY]
+
+            hendelseData["loependeYtelse_januar2024_behandlingId"]?.let {
                 val behandlingId = it.asText()
                 val result = vilkaarsvurderingService.harMigrertYrkesskadefordel(behandlingId)
                 logger.info("Løpende ytelse: sjekk av yrkesskadefordel før 2024-01-01: $result")
                 packet["yrkesskadefordel_pre_20240101"] = result
+            }
+
+            if (type == "OMS_DOED_3AAR" && hendelseData["loependeYtelse"]?.asBoolean() == true) {
+                val loependeBehandlingId = hendelseData["loependeYtelse_behandlingId"].asText()
+                val result = vilkaarsvurderingService.harRettUtenTidsbegrensning(loependeBehandlingId)
+                logger.info("OMS: sjekk av rett uten tidsbegrensning: $result")
+                packet["oms_rett_uten_tidsbegrensning"] = result
             }
 
             packet[ALDERSOVERGANG_STEG_KEY] = "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR"

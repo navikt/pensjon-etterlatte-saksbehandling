@@ -60,6 +60,14 @@ fun Route.vilkaarsvurdering(
             }
         }
 
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/rettUtenTidsbegrensning") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter vilkårsvurdering for $behandlingId")
+                val result = vilkaarsvurderingService.harRettUtenTidsbegrensning(behandlingId)
+                call.respond(mapOf("rettUtenTidsbegrensning" to result))
+            }
+        }
+
         post("/{$BEHANDLINGID_CALL_PARAMETER}/opprett") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 try {

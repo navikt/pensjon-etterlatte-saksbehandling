@@ -49,6 +49,13 @@ class VilkaarsvurderingService(
             ?: false
     }
 
+    fun harRettUtenTidsbegrensning(behandlingId: UUID): Boolean {
+        return vilkaarsvurderingRepository.hent(behandlingId)?.vilkaar
+            ?.filter { it.hovedvilkaar.type == VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING }
+            ?.any { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
+            ?: false
+    }
+
     suspend fun hentBehandlingensGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,

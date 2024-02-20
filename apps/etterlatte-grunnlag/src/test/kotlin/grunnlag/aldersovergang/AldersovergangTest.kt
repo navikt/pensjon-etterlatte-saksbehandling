@@ -11,51 +11,37 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.mockk
+import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AldersovergangTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-    private lateinit var dataSource: DataSource
+@ExtendWith(GrunnlagDbExtension::class)
+class AldersovergangTest(private val dataSource: DataSource) {
     private val server = MockOAuth2Server()
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).also { it.migrate() }
-
         server.start()
     }
 
@@ -65,7 +51,7 @@ class AldersovergangTest {
     }
 
     @Test
-    fun hentSaker() {
+    fun `hent saker hvor soeker er foedt i input-maaned, siste opplysning`() {
         val sakId = 1000L
         val fnrInnenfor = SOEKER_FOEDSELSNUMMER
         val opplysningDao = OpplysningDao(dataSource)
@@ -89,10 +75,53 @@ class AldersovergangTest {
                     }
                 }
 
-            Assertions.assertEquals(HttpStatusCode.OK, response.status)
-            Assertions.assertEquals(serialize(listOf(sakId.toString())), response.body<String>())
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals(serialize(listOf(sakId.toString())), response.body<String>())
         }
     }
+
+    @Test
+    fun `hent saker hvor seneste doedsdato-opplysning gjelder input-maaned`() {
+        val sakEn = 1000L
+        val fnrAvdoedEn = AVDOED_FOEDSELSNUMMER
+        val opplysningDao = OpplysningDao(dataSource)
+        opplysningDao.leggTilOpplysning(sakEn, Opplysningstype.DOEDSDATO, TextNode("2024-02-11"), fnrAvdoedEn)
+        opplysningDao.leggTilOpplysning(sakEn, Opplysningstype.AVDOED_PDL_V1, TextNode("hei, hallo"), fnrAvdoedEn)
+
+        val sakTo = 2000L
+        val fnrAvdoedTo = AVDOED2_FOEDSELSNUMMER
+        opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.AVDOED_PDL_V1, TextNode("hei, hallo igjen"), fnrAvdoedTo)
+        opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.DOEDSDATO, TextNode("2024-02-03"), fnrAvdoedTo)
+        opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.DOEDSDATO, TextNode("2024-02-05"), fnrAvdoedTo)
+
+        testApplication {
+            val httpClient = createHttpClient(AldersovergangService(AldersovergangDao(dataSource)))
+            with(httpClient.apiCall("api/grunnlag/doedsdato/2024-02")) {
+                assertEquals(HttpStatusCode.OK, this.status)
+                assertEquals(listOf(sakEn, sakTo), deserialize<List<Long>>(this.body<String>()))
+            }
+
+            // Ingen saker med doedsdato i januar 2024
+            with(httpClient.apiCall("api/grunnlag/doedsdato/2024-01")) {
+                assertEquals(HttpStatusCode.OK, this.status)
+                assertEquals(emptyList<Long>(), deserialize<List<Long>>(this.body<String>()))
+            }
+
+            // Ingen saker med doedsdato i mars 2024
+            with(httpClient.apiCall("api/grunnlag/doedsdato/2024-03")) {
+                assertEquals(HttpStatusCode.OK, this.status)
+                assertEquals(emptyList<Long>(), deserialize<List<Long>>(this.body<String>()))
+            }
+        }
+    }
+
+    private suspend fun HttpClient.apiCall(url: String) =
+        this.get(url) {
+            headers {
+                append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                append(HttpHeaders.Authorization, "Bearer ${server.issueSaksbehandlerToken()}")
+            }
+        }
 
     private fun OpplysningDao.leggTilOpplysning(
         sakId: Long,

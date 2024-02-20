@@ -7,6 +7,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import lagGrunnlagsopplysning
 import no.nav.etterlatte.grunnlag.BehandlingGrunnlagVersjon
+import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -26,9 +27,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.testdata.grunnlag.ADRESSE_DEFAULT
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
@@ -41,7 +39,6 @@ import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -51,8 +48,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -61,41 +57,18 @@ import javax.sql.DataSource
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class GrunnlagDaoIntegrationTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
+@ExtendWith(GrunnlagDbExtension::class)
+internal class GrunnlagDaoIntegrationTest(private val dataSource: DataSource) {
     private lateinit var opplysningRepo: OpplysningDao
-    private lateinit var dataSource: DataSource
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            )
-        dataSource.migrate()
-
         opplysningRepo = spyk(OpplysningDao(dataSource))
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @AfterEach
     fun afterEach() {
         clearAllMocks()
-        dataSource.connection.use {
-            it.prepareStatement("TRUNCATE grunnlagshendelse").execute()
-        }
     }
 
     @Test

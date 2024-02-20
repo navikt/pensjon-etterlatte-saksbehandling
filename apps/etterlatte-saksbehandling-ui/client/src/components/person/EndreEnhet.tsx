@@ -5,18 +5,12 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { isPending } from '~shared/api/apiUtils'
 import { byttEnhetPaaSak } from '~shared/api/sak'
-import { useAppSelector } from '~store/Store'
 
 export const EndreEnhet = ({ sakId }: { sakId: number }) => {
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
   const [enhetsFilter, setEnhetsfilter] = useState<EnhetFilterKeys>('VELGENHET')
   const [endreEnhetStatus, endreEnhetKall, resetApiCall] = useApiCall(byttEnhetPaaSak)
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-
-  if (!innloggetSaksbehandler.skriveTilgang) {
-    return null
-  }
 
   function endreEnhet() {
     if (enhetsFilter === 'VELGENHET') {

@@ -12,7 +12,7 @@ data class Saksbehandler(
     val skriveTilgang: Boolean,
 )
 
-class SaksbehandlerService(private val dao: SaksbehandlerInfoDaoTrans) {
+class SaksbehandlerService(private val dao: SaksbehandlerInfoDao) {
     fun hentKomplettSaksbehandler(ident: String): Saksbehandler {
         val innloggetSaksbehandler = Kontekst.get().appUserAsSaksbehandler()
 

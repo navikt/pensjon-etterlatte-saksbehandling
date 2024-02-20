@@ -12,7 +12,6 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandlingId
-import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
@@ -33,7 +32,7 @@ fun Route.migreringRoutes(migreringService: MigreringService) {
                     else ->
                         call.respond(
                             HttpStatusCode.Companion.Created,
-                            BehandlingOgSak(behandling.id, behandling.sak.id),
+                            behandling,
                         )
                 }
             }

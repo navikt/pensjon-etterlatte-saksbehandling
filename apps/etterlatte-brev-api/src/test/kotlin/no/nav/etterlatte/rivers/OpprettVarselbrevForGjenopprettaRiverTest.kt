@@ -21,6 +21,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.OPPGAVE_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -100,6 +101,7 @@ internal class OpprettVarselbrevForGjenopprettaRiverTest {
                 KILDE_KEY to kilde,
                 SAK_ID_KEY to saksnr,
                 BEHANDLING_ID_KEY to behandlingId,
+                OPPGAVE_KEY to UUID.randomUUID(),
             ),
         )
 }

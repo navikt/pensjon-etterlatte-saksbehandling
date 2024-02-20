@@ -16,6 +16,7 @@ const val BEREGNING_KEY = "beregning"
 const val AVKORTING_KEY = "avkorting"
 const val DATO_KEY = "dato"
 const val HENDELSE_DATA_KEY = "hendelse_data"
+const val OPPGAVE_KEY = "oppgadeId"
 const val BEHANDLING_VI_OMREGNER_FRA_KEY = "behandling_vi_omregner_fra"
 const val TILBAKESTILTE_BEHANDLINGER_KEY = "tilbakestilte_behandlinger"
 const val GRUNNLAG_OPPDATERT = "grunnlag_oppdatert" // TODO: eventname
@@ -52,6 +53,11 @@ var JsonMessage.dato: LocalDate
     get() = this[DATO_KEY].asLocalDate()
     set(name) {
         this[DATO_KEY] = name
+    }
+var JsonMessage.oppgaveId: UUID
+    get() = this[OPPGAVE_KEY].asText().toUUID()
+    set(name) {
+        this[OPPGAVE_KEY] = name
     }
 
 var JsonMessage.tilbakestilteBehandlinger: List<UUID>

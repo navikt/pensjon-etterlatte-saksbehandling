@@ -91,7 +91,7 @@ class AldersovergangTest(private val dataSource: DataSource) {
         val sakTo = 2000L
         val fnrAvdoedTo = AVDOED2_FOEDSELSNUMMER
         opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.AVDOED_PDL_V1, TextNode("hei, hallo igjen"), fnrAvdoedTo)
-        opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.DOEDSDATO, TextNode("2024-02-03"), fnrAvdoedTo)
+        opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.DOEDSDATO, TextNode("2024-01-31"), fnrAvdoedTo)
         opplysningDao.leggTilOpplysning(sakTo, Opplysningstype.DOEDSDATO, TextNode("2024-02-05"), fnrAvdoedTo)
 
         testApplication {

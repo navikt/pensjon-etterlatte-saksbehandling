@@ -118,12 +118,6 @@ class PersonManglerSak() :
         detail = "Personen har ingen saker i Gjenny",
     )
 
-class ManglerTilgangTilEnhet(enheter: List<String>) :
-    UgyldigForespoerselException(
-        code = "MANGLER_TILGANG_TIL_ENHET",
-        detail = "Mangler tilgang til enhet $enheter",
-    )
-
 class SakIkkeFunnetException(message: String) :
     UgyldigForespoerselException(
         code = "FANT_INGEN_SAK",

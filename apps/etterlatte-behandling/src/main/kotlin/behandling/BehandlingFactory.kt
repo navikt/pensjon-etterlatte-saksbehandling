@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -245,7 +244,7 @@ class BehandlingFactory(
                 mottattDato = mottattDato,
                 kilde = kilde,
                 revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
-            )?.oppdater()?.let { BehandlingOgOppgave(it, null) }
+            ).oppdater().let { BehandlingOgOppgave(it, null) }
         } else {
             val harBehandlingUnderbehandling =
                 harBehandlingerForSak.filter { behandling ->
@@ -303,16 +302,9 @@ class BehandlingFactory(
 
             logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
-            behandlingDao.hentBehandling(opprettBehandling.id)?.sjekkEnhet()
+            behandlingDao.hentBehandling(opprettBehandling.id)
         }
     }
-
-    private fun Behandling?.sjekkEnhet() =
-        this?.let { behandling ->
-            listOf(behandling).filterBehandlingerForEnheter(
-                Kontekst.get().AppUser,
-            ).firstOrNull()
-        }
 }
 
 data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveIntern?)

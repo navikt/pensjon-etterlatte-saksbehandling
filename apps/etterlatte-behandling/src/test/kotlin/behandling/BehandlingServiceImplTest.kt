@@ -613,45 +613,6 @@ class BehandlingServiceImplTest {
     }
 
     @Test
-    fun `skal ikke hente behandlinger i sak hvor sak har enhet og brukeren har ikke enhet`() {
-        every {
-            user.enheter()
-        } returns listOf(Enheter.EGNE_ANSATTE.enhetNr)
-
-        val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>()
-        val behandlingDaoMock =
-            mockk<BehandlingDao> {
-                every { alleBehandlingerISak(1) } returns
-                    listOf(
-                        revurdering(
-                            sakId = 1,
-                            revurderingAarsak = Revurderingaarsak.REGULERING,
-                            enhet = Enheter.PORSGRUNN.enhetNr,
-                        ),
-                        foerstegangsbehandling(sakId = 1, enhet = Enheter.PORSGRUNN.enhetNr),
-                    )
-            }
-        val hendelserMock = mockk<HendelseDao>()
-
-        val sut =
-            BehandlingServiceImpl(
-                behandlingDao = behandlingDaoMock,
-                behandlingHendelser = behandlingHendelserKafkaProducerMock,
-                grunnlagsendringshendelseDao = mockk(),
-                hendelseDao = hendelserMock,
-                grunnlagKlient = mockk(),
-                behandlingRequestLogger = mockk(),
-                kommerBarnetTilGodeDao = mockk(),
-                oppgaveService = mockk(),
-                grunnlagService = mockk(),
-            )
-
-        val behandlinger = sut.hentBehandlingerForSak(1)
-
-        assertEquals(0, behandlinger.size)
-    }
-
-    @Test
     fun `kan oppdatere bodd eller arbeidet i utlandet`() {
         every {
             user.enheter()

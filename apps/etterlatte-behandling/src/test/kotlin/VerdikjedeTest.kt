@@ -245,9 +245,9 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 applicationContext.dataSource.connection.use {
                     val actual =
                         BehandlingDao(
-                            KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it },
-                        ) { it }.hentBehandling(behandlingId)!!
+                            KommerBarnetTilGodeDao(ConnectionAutoclosingTest(it)),
+                            RevurderingDao(ConnectionAutoclosingTest(it)),
+                        )(ConnectionAutoclosingTest(dataSource)).hentBehandling(behandlingId)!!
                     assertEquals(BehandlingStatus.OPPRETTET, actual.status)
                 }
 

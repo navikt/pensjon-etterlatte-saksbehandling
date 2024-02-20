@@ -52,7 +52,7 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
     fun setup() {
         val connection = dataSource.connection
         sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
-        tilbakekrevingDao = TilbakekrevingDao { connection }
+        tilbakekrevingDao = TilbakekrevingDao(ConnectionAutoclosingTest(dataSource))
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
         Kontekst.set(
             Context(

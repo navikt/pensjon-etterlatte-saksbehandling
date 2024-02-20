@@ -74,13 +74,16 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-        dao = GenerellBehandlingDao { connection }
+        dao = GenerellBehandlingDao(ConnectionAutoclosingTest(dataSource))
         oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
-        hendelseDao = spyk(HendelseDao { connection })
+        hendelseDao = spyk(HendelseDao(ConnectionAutoclosingTest(dataSource)))
         behandlingRepo =
-            BehandlingDao(KommerBarnetTilGodeDao { connection }, RevurderingDao { connection }) { connection }
+            BehandlingDao(
+                KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                (ConnectionAutoclosingTest(dataSource)),
+            )
         oppgaveService =
             OppgaveService(
                 OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),

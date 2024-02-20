@@ -57,7 +57,7 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
             BehandlingDao(
                 kommerBarnetTilGodeDao = mockk(),
                 revurderingDao = mockk(),
-                connection = { connection },
+                connection = (ConnectionAutoclosingTest(dataSource)),
             )
 
         opprettBehandlinger()

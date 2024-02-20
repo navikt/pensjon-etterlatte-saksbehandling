@@ -59,14 +59,12 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
         val connection = dataSource.connection
 
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
-        kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { connection }
+        kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
             BehandlingDao(
                 kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
-                RevurderingDao {
-                    connection
-                },
-                connection = { connection },
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
             )
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
         Kontekst.set(

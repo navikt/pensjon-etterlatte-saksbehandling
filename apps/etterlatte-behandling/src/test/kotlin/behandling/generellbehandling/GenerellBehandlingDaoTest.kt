@@ -24,7 +24,7 @@ internal class GenerellBehandlingDaoTest(val dataSource: DataSource) {
     @BeforeAll
     fun beforeAll() {
         val connection = dataSource.connection
-        dao = GenerellBehandlingDao { connection }
+        dao = GenerellBehandlingDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @AfterEach

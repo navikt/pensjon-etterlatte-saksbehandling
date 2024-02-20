@@ -22,7 +22,7 @@ internal class InstitusjonsoppholdDaoTest(val dataSource: DataSource) {
     @BeforeAll
     fun beforeAll() {
         val connection = dataSource.connection
-        institusjonsoppholdDao = InstitusjonsoppholdDao { connection }
+        institusjonsoppholdDao = InstitusjonsoppholdDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @Test

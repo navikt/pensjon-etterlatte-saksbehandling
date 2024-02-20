@@ -67,9 +67,9 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
                 KommerBarnetTilGodeDao {
                     connection
                 },
-                RevurderingDao { connection },
-            ) { connection }
-        klageDao = KlageDaoImpl { connection }
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+            )(ConnectionAutoclosingTest(dataSource))
+        klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
         Kontekst.set(
             Context(

@@ -59,7 +59,6 @@ import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.PesysKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
-import no.nav.etterlatte.databaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
@@ -240,9 +239,7 @@ internal class ApplicationContext(
     val bosattUtlandDao = BosattUtlandDao(ConnectionAutoclosingImpl(dataSource))
     val saksbehandlerInfoDao = SaksbehandlerInfoDao(ConnectionAutoclosingImpl(dataSource))
     val saksbehandlerInfoDaoTrans = // TODO merge denne med den over
-        SaksbehandlerInfoDaoTrans {
-            databaseContext().activeTx()
-        }
+        SaksbehandlerInfoDaoTrans(ConnectionAutoclosingImpl(dataSource))
     val doedshendelseDao = DoedshendelseDao(ConnectionAutoclosingImpl(dataSource))
 
     // Klient

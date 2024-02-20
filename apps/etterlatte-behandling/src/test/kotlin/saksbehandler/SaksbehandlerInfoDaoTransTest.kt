@@ -19,7 +19,7 @@ internal class SaksbehandlerInfoDaoTransTest(val dataSource: DataSource) {
     @BeforeAll
     fun beforeAll() {
         val connection = dataSource.connection
-        saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans { connection }
+        saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans(ConnectionAutoclosingTest(dataSource))
         saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
     }
 

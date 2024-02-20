@@ -20,7 +20,7 @@ internal class BosattUtlandDaoTest(val dataSource: DataSource) {
     @BeforeAll
     fun beforeAll() {
         val connection = dataSource.connection
-        bosattUtlandDao = BosattUtlandDao { connection }
+        bosattUtlandDao = BosattUtlandDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @Test

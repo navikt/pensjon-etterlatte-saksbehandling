@@ -39,7 +39,7 @@ class SjekklisteIntegrationTest(val dataSource: DataSource) {
     @BeforeAll
     fun setup() {
         val connection = dataSource.connection
-        sjekklisteDao = SjekklisteDao { connection }
+        sjekklisteDao = SjekklisteDao(ConnectionAutoclosingTest(dataSource))
         sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
 
         settOppKontekst(user)

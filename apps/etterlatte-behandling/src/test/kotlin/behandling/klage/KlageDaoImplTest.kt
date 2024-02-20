@@ -39,7 +39,7 @@ internal class KlageDaoImplTest(val dataSource: DataSource) {
     fun setup() {
         val connection = dataSource.connection
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
-        klageDao = KlageDaoImpl { connection }
+        klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))
     }
 
     @BeforeEach

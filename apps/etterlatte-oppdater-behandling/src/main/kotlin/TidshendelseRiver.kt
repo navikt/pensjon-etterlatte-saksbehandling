@@ -73,7 +73,7 @@ class TidshendelseRiver(
                         behandlingService.opprettOppgave(
                             sakId,
                             OppgaveType.MANUELT_OPPHOER,
-                            merknad = "Aldersovergang",
+                            merknad = generateMerknad(type),
                             frist = frist,
                         )
                     hendelseData["opprettetOppgaveId"] = oppgaveId
@@ -88,5 +88,17 @@ class TidshendelseRiver(
             packet[HENDELSE_DATA_KEY] = hendelseData
             context.publish(packet.toJson())
         }
+    }
+
+    private fun generateMerknad(type: String): String {
+        val argument =
+            when (type) {
+                "AO_BP20" -> "20"
+                "AO_BP21" -> "21"
+                "AO_OMS67" -> "67"
+                else -> throw IllegalArgumentException("Ikke-støttet type: $type")
+            }
+
+        return "Aldersovergang v/$argument år"
     }
 }

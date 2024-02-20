@@ -38,7 +38,15 @@ class TidshendelseRiverTest {
 
         val melding = lagMeldingForVurdertLoependeYtelse(hendelseId, sakId, behandlingsmaaned, dryRun = false)
 
-        every { behandlingService.opprettOppgave(sakId, OppgaveType.MANUELT_OPPHOER, any(), "Aldersovergang", frist) } returns nyOppgaveID
+        every {
+            behandlingService.opprettOppgave(
+                sakId,
+                OppgaveType.MANUELT_OPPHOER,
+                any(),
+                "Aldersovergang v/20 år",
+                frist,
+            )
+        } returns nyOppgaveID
 
         with(inspector.apply { sendTestMessage(melding.toJson()) }.inspektør) {
             size shouldBe 1
@@ -51,7 +59,7 @@ class TidshendelseRiverTest {
             field(0, HENDELSE_DATA_KEY)["opprettetOppgaveId"].asText() shouldBe nyOppgaveID.toString()
         }
 
-        verify { behandlingService.opprettOppgave(sakId, OppgaveType.MANUELT_OPPHOER, any(), "Aldersovergang", frist) }
+        verify { behandlingService.opprettOppgave(sakId, OppgaveType.MANUELT_OPPHOER, any(), "Aldersovergang v/20 år", frist) }
     }
 
     @Test

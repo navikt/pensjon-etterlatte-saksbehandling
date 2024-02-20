@@ -52,7 +52,7 @@ class DoedshendelseJobService(
                     fnr = doedshendelse.avdoedFnr,
                     grunnlagendringType = GrunnlagsendringsType.DOEDSFALL,
                 )
-                // todo: lukk etter oppgave er opprettet
+                // todo: EY-3539 - lukk etter oppgave er opprettet
             }
         }
     }

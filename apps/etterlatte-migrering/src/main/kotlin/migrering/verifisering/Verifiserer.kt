@@ -5,7 +5,9 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.VurdertBostedsland
 import no.nav.etterlatte.libs.common.logging.samleExceptions
+import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.toJson
@@ -168,8 +170,12 @@ internal class Verifiserer(
             utlandSjekker.add(SoekerBorUtland)
         }
 
-        if (adresseland.none { it.verdi.gyldigTilOgMed.let { tilOgMed -> tilOgMed == null || tilOgMed > LocalDateTime.now() } }) {
+        if (adresseland.none { erGyldigNaaEllerFramover(it) }) {
             utlandSjekker.add(BrukerManglerAdresse)
+        }
+
+        if (adresseland.filter { it.verdi.land != null }.none { erGyldigNaaEllerFramover(it) }) {
+            utlandSjekker.add(BrukerManglerAdresseMedLand)
         }
 
         person.utland?.verdi?.let { utland ->
@@ -192,6 +198,9 @@ internal class Verifiserer(
 
         return utlandSjekker
     }
+
+    private fun erGyldigNaaEllerFramover(opplysning: OpplysningDTO<Adresse>) =
+        opplysning.verdi.gyldigTilOgMed.let { tilOgMed -> tilOgMed == null || tilOgMed > LocalDateTime.now() }
 
     private fun sjekkOmSoekerHarFlereAvoedeForeldre(request: MigreringRequest): List<Verifiseringsfeil> {
         if (request.avdoedForelder.size > 1) {
@@ -312,6 +321,11 @@ data object ForeldreForholdHarEndretSeg : Verifiseringsfeil() {
 data object BrukerManglerAdresse : Verifiseringsfeil() {
     override val message: String
         get() = "Bruker mangler adresse i PDL"
+}
+
+data object BrukerManglerAdresseMedLand : Verifiseringsfeil() {
+    override val message: String
+        get() = "Bruker mangler adresse med definert land i PDL"
 }
 
 data object BeregningsmetodeIkkeNasjonal : Verifiseringsfeil() {

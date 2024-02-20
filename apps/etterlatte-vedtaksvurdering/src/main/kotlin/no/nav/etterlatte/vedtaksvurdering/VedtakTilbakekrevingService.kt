@@ -9,6 +9,7 @@ import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -49,13 +50,16 @@ class VedtakTilbakekrevingService(
         return vedtak.id
     }
 
-    fun fattVedtak(tilbakekrevingVedtakData: TilbakekrevingFattEllerAttesterVedtakDto): Long {
+    fun fattVedtak(
+        tilbakekrevingVedtakData: TilbakekrevingFattEllerAttesterVedtakDto,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
         logger.info("Fatter vedtak for tilbakekreving=$tilbakekrevingVedtakData.tilbakekrevingId")
         verifiserGyldigVedtakStatus(tilbakekrevingVedtakData.tilbakekrevingId, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         return repository.fattVedtak(
             tilbakekrevingVedtakData.tilbakekrevingId,
             VedtakFattet(
-                ansvarligSaksbehandler = tilbakekrevingVedtakData.saksbehandler,
+                ansvarligSaksbehandler = brukerTokenInfo.ident(),
                 ansvarligEnhet = tilbakekrevingVedtakData.enhet,
                 // Blir ikke brukt fordi egen now() brukes i db..
                 tidspunkt = Tidspunkt.now(),
@@ -63,22 +67,32 @@ class VedtakTilbakekrevingService(
         ).id
     }
 
-    fun attesterVedtak(tilbakekrevingVedtakData: TilbakekrevingFattEllerAttesterVedtakDto): TilbakekrevingVedtakLagretDto {
+    fun attesterVedtak(
+        tilbakekrevingVedtakData: TilbakekrevingFattEllerAttesterVedtakDto,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): TilbakekrevingVedtakLagretDto {
         logger.info("Attesterer vedtak for tilbakekreving=$tilbakekrevingVedtakData.tilbakekrevingId")
-        verifiserGyldigVedtakStatus(tilbakekrevingVedtakData.tilbakekrevingId, listOf(VedtakStatus.FATTET_VEDTAK))
+        val tilbakekrevingId = tilbakekrevingVedtakData.tilbakekrevingId
         val vedtak =
+            requireNotNull(repository.hentVedtak(tilbakekrevingId)) {
+                "Vedtak for tilbakekreving $tilbakekrevingId finnes ikke"
+            }
+        verifiserGyldigVedtakStatus(tilbakekrevingId, listOf(VedtakStatus.FATTET_VEDTAK))
+        attestantHarAnnenIdentEnnSaksbehandler(vedtak.vedtakFattet!!.ansvarligSaksbehandler, brukerTokenInfo)
+
+        val attestertVedtak =
             repository.attesterVedtak(
-                tilbakekrevingVedtakData.tilbakekrevingId,
+                tilbakekrevingId,
                 Attestasjon(
-                    attestant = tilbakekrevingVedtakData.saksbehandler,
+                    attestant = brukerTokenInfo.ident(),
                     attesterendeEnhet = tilbakekrevingVedtakData.enhet,
                     // Blir ikke brukt for egen now() brukes i db.
                     tidspunkt = Tidspunkt.now(),
                 ),
             )
-        return requireNotNull(vedtak.vedtakFattet).let {
+        return requireNotNull(attestertVedtak.vedtakFattet).let {
             TilbakekrevingVedtakLagretDto(
-                id = vedtak.id,
+                id = attestertVedtak.id,
                 fattetAv = it.ansvarligSaksbehandler,
                 enhet = it.ansvarligEnhet,
                 dato = it.tidspunkt.toLocalDate(),
@@ -106,5 +120,14 @@ class VedtakTilbakekrevingService(
         forventetStatus: List<VedtakStatus>,
     ) {
         if (gjeldendeStatus !in forventetStatus) throw VedtakTilstandException(gjeldendeStatus, forventetStatus)
+    }
+
+    private fun attestantHarAnnenIdentEnnSaksbehandler(
+        ansvarligSaksbehandler: String,
+        innloggetBrukerTokenInfo: BrukerTokenInfo,
+    ) {
+        if (innloggetBrukerTokenInfo.erSammePerson(ansvarligSaksbehandler)) {
+            throw UgyldigAttestantException(innloggetBrukerTokenInfo.ident())
+        }
     }
 }

@@ -258,14 +258,14 @@ fun Route.tilbakekrevingvedtakRoute(
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.fattVedtak(dto))
+                call.respond(service.fattVedtak(dto, brukerTokenInfo))
             }
         }
         post("/attester-vedtak") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.attesterVedtak(dto))
+                call.respond(service.attesterVedtak(dto, brukerTokenInfo))
             }
         }
         post("/underkjenn-vedtak") {

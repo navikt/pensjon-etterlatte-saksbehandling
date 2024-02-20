@@ -50,7 +50,7 @@ fun DataSource.migrate(gcp: Boolean = true): MigrateResult =
                     locations("db/migration", "db/gcp")
                 }
                 if (isProd()) {
-                    locations("db/migration", "db/gcp", "db/prod")
+                    locations("db/prod")
                 }
             }
             .load()

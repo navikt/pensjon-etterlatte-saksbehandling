@@ -1,14 +1,23 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asContextElement
+import kotlinx.coroutines.withContext
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDateTime
+import javax.sql.DataSource
 
 class DoedshendelseJobService(
     private val doedshendelseDao: DoedshendelseDao,
@@ -16,20 +25,31 @@ class DoedshendelseJobService(
     private val featureToggleService: FeatureToggleService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val dagerGamleHendelserSomSkalKjoeres: Int,
+    dataSource: DataSource,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private var jobContext: Context
 
-    fun run() {
-        if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)) {
-            val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
-            logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
+    init {
+        jobContext = Context(Self(this::class.java.simpleName), DatabaseContext(dataSource))
+    }
 
-            val doedshendelserSomSkalHaanderes = finnGyldigeDoedshendelser(nyeDoedshendelser)
-            logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
+    suspend fun run() {
+        withContext(Dispatchers.Default + Kontekst.asContextElement(jobContext)) {
+            println("withContext   'runBlocking': I'm working in thread ${Thread.currentThread().name}")
+            if (true) {
+                inTransaction {
+                    val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
+                    logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
 
-            doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
-                logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
-                haandterDoedshendelse(doedshendelse)
+                    val doedshendelserSomSkalHaanderes = finnGyldigeDoedshendelser(nyeDoedshendelser)
+                    logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
+
+                    doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
+                        logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
+                        haandterDoedshendelse(doedshendelse)
+                    }
+                }
             }
         }
     }

@@ -356,6 +356,7 @@ internal class ApplicationContext(
             featureToggleService = featureToggleService,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             dagerGamleHendelserSomSkalKjoeres = if (isProd()) 2 else 0,
+            dataSource = dataSource,
         )
 
     val behandlingsStatusService =
@@ -420,7 +421,7 @@ internal class ApplicationContext(
             doedshendelseJobService,
             { leaderElectionKlient.isLeader() },
             0L,
-            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
+            interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.SECONDS),
         )
     }
 

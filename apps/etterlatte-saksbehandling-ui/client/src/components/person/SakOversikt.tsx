@@ -17,6 +17,7 @@ import { EndreEnhet } from '~components/person/EndreEnhet'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppSelector } from '~store/Store'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
 export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
@@ -87,7 +88,7 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
               <SelectWrapper>
                 <BodyShort>
                   Denne saken tilhører enhet {sakOgBehandlinger.sak.enhet}.
-                  {innloggetSaksbehandler.skriveTilgang && (
+                  {enhetErSkrivbar(sakOgBehandlinger.sak.enhet, innloggetSaksbehandler.skriveEnheter) && (
                     <FlexRow>
                       <EndreEnhet sakId={sakOgBehandlinger.sak.id} />
                       <HelpText strategy="fixed">

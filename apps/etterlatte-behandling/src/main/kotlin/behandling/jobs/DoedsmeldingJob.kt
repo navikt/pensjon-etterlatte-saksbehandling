@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.jobs
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.jobs.LoggerInfo
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
@@ -27,11 +26,7 @@ class DoedsmeldingJob(
             period = interval.toMillis(),
         ) {
             if (erLeader()) {
-                println("DoedsmeldingJob   'runBlocking': I'm working in thread ${Thread.currentThread().name}")
-
-                runBlocking {
-                    doedshendelseService.run()
-                }
+                doedshendelseService.setupKontekst().run()
             }
         }
     }

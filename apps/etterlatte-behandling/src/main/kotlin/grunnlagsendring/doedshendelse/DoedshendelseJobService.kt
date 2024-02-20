@@ -1,8 +1,5 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asContextElement
-import kotlinx.coroutines.withContext
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.Self
@@ -34,21 +31,23 @@ class DoedshendelseJobService(
         jobContext = Context(Self(this::class.java.simpleName), DatabaseContext(dataSource))
     }
 
-    suspend fun run() {
-        withContext(Dispatchers.Default + Kontekst.asContextElement(jobContext)) {
-            println("withContext   'runBlocking': I'm working in thread ${Thread.currentThread().name}")
-            if (true) {
-                inTransaction {
-                    val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
-                    logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
+    fun setupKontekst(): DoedshendelseJobService {
+        Kontekst.set(jobContext)
+        return this
+    }
 
-                    val doedshendelserSomSkalHaanderes = finnGyldigeDoedshendelser(nyeDoedshendelser)
-                    logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
+    fun run() {
+        if (true) {
+            inTransaction {
+                val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
+                logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
 
-                    doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
-                        logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
-                        haandterDoedshendelse(doedshendelse)
-                    }
+                val doedshendelserSomSkalHaanderes = finnGyldigeDoedshendelser(nyeDoedshendelser)
+                logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
+
+                doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
+                    logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
+                    haandterDoedshendelse(doedshendelse)
                 }
             }
         }

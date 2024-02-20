@@ -51,7 +51,7 @@ class SakRepositoryTest {
                 password = postgreSQLContainer.password,
             )
 
-        dataSource.migrate(gcp = false)
+        dataSource.migrate()
     }
 
     val mockBeregning =

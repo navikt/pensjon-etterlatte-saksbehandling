@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.Utfall.IkkeOpphoerSkalIkkeSendeB
 import no.nav.etterlatte.libs.common.behandling.Utfall.IkkeOpphoerSkalSendeBrev
 import no.nav.etterlatte.libs.common.behandling.Utfall.OpphoerMedBrev
 import no.nav.etterlatte.libs.common.behandling.Utfall.OpphoerUtenBrev
-import no.nav.etterlatte.libs.common.clusternavn
+import no.nav.etterlatte.libs.common.clusterNavn
 
 private val SAKTYPE_OMS = listOf(SakType.OMSTILLINGSSTOENAD)
 private val SAKTYPE_BP = listOf(SakType.BARNEPENSJON)
@@ -88,7 +88,7 @@ enum class Revurderingaarsak(
     ;
 
     fun kanBrukesIMiljo(): Boolean =
-        when (clusternavn()) {
+        when (clusterNavn()) {
             null -> true
             GcpEnv.PROD.env -> miljoe.prod
             GcpEnv.DEV.env -> miljoe.dev

@@ -3,6 +3,7 @@ package no.nav.etterlatte.migrering.verifisering
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlag.VurdertBostedsland
 import no.nav.etterlatte.libs.common.logging.samleExceptions
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -183,6 +184,12 @@ internal class Verifiserer(
             }
         }
 
+        val bostedsland = runBlocking { grunnlagKlient.hentBostedsland(request.soeker.value) }
+
+        if (!bostedsland.erNorge()) {
+            utlandSjekker.add(BostedslandErIkkeNorge(bostedsland))
+        }
+
         return utlandSjekker
     }
 
@@ -280,6 +287,11 @@ data object SoekerHarInnflyttingTilNorgeEtter18Aar : Verifiseringsfeil() {
 data object SoekerHarUtflyttingFraNorgeEtter18Aar : Verifiseringsfeil() {
     override val message: String
         get() = "Søker har registrert utflytting fra Norge etter fylte 18 år eller manglende dato"
+}
+
+data class BostedslandErIkkeNorge(val land: VurdertBostedsland) : Verifiseringsfeil() {
+    override val message: String
+        get() = "Bostedsland er ikke Norge, men $land"
 }
 
 data object SoekerHarFlereAvdoede : Verifiseringsfeil() {

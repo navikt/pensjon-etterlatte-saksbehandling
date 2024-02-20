@@ -141,7 +141,7 @@ sealed class Behandling {
         } else {
             logger.error(
                 "Ugyldig operasjon på behandling ($id) med status $status, prøver å endre til status ${endreTilStatus.name}." +
-                    " Forventet statuser er ${behandlingStatuser.joinToString { " ," }}",
+                    " Forventet statuser er ${behandlingStatuser.joinToString(",")}",
             )
             throw TilstandException.UgyldigTilstand
         }

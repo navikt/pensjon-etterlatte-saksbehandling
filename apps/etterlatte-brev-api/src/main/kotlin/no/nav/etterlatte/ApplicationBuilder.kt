@@ -246,6 +246,7 @@ class ApplicationBuilder {
                     this,
                     varselbrevService,
                     ferdigstillJournalfoerOgDistribuerBrev,
+                    behandlingKlient,
                 )
                 FiksEnkeltbrevRiver(this, vedtaksvurderingService)
                     .also { fiksEnkeltbrev() }

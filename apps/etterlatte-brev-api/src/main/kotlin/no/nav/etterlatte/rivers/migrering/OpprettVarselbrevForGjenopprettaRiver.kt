@@ -3,6 +3,7 @@ package no.nav.etterlatte.rivers.migrering
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
@@ -16,6 +17,7 @@ import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
+import no.nav.etterlatte.rapidsandrivers.oppgaveId
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.etterlatte.rivers.FerdigstillJournalfoerOgDistribuerBrev
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -31,6 +33,7 @@ internal class OpprettVarselbrevForGjenopprettaRiver(
     rapidsConnection: RapidsConnection,
     private val service: VarselbrevService,
     private val ferdigstillJournalfoerOgDistribuerBrev: FerdigstillJournalfoerOgDistribuerBrev,
+    private val behandlingKlient: BehandlingKlient,
 ) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -53,7 +56,9 @@ internal class OpprettVarselbrevForGjenopprettaRiver(
         val brukerTokenInfo = Systembruker.migrering
         runBlocking {
             opprettOgSendUtBrev(sakId, behandlingId, brukerTokenInfo)
-            // Her skal vi sette på vent
+            retryOgPakkUt {
+                behandlingKlient.settOppgavePaaVent(packet.oppgaveId, brukerTokenInfo, "Varselbrev er sendt ut")
+            }
         }
     }
 

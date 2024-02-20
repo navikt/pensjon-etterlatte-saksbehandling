@@ -70,6 +70,7 @@ export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
   visAlle: 'Vis alle',
   NY: 'Ny',
   UNDER_BEHANDLING: 'Under behandling',
+  PAA_VENT: 'På Vent',
   FERDIGSTILT: 'Ferdigstilt',
   FEILREGISTRERT: 'Feilregistrert',
   AVBRUTT: 'Avbrutt',

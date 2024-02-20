@@ -74,6 +74,8 @@ export const formaterOppgaveStatus = (status: Oppgavestatus): string => {
       return 'Ny'
     case 'UNDER_BEHANDLING':
       return 'Under behandling'
+    case 'PAA_VENT':
+      return 'På Vent'
     case 'FERDIGSTILT':
       return 'Ferdigstilt'
     case 'FEILREGISTRERT':

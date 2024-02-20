@@ -499,6 +499,26 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     }
 
     @Test
+    fun `kan sette og fjerne oppgave paa vent`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
+        oppgaveService.settPaaVent(nyOppgave.id, "test", nyOppgave.status)
+        val oppgavePaaVent = oppgaveService.hentOppgave(nyOppgave.id)
+        assertEquals(Status.PAA_VENT, oppgavePaaVent?.status)
+        oppgaveService.settPaaVent(oppgavePaaVent!!.id, "test", oppgavePaaVent.status)
+        val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
+        assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent?.status)
+    }
+
+    @Test
     fun `kan ikke redigere frist tilbake i tid`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val nyOppgave =

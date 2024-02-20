@@ -115,6 +115,8 @@ enum class Journalposttype {
     N,
 }
 
+// https://confluence.adeo.no/display/BOA/Enum%3A+Journalstatus
+@Suppress("unused")
 enum class Journalstatus {
     MOTTATT,
     JOURNALFOERT,
@@ -146,6 +148,8 @@ data class Dokumentvariant(
     val saksbehandlerHarTilgang: Boolean,
 )
 
+// https://confluence.adeo.no/display/BOA/Enum%3A+Variantformat
+@Suppress("unused")
 enum class Variantformat {
     ARKIV,
     ORIGINAL,

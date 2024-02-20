@@ -8,24 +8,6 @@ import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 
 class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclosing) {
-    fun hentSaksbehandlerNavnForidenter(identer: List<String>): List<SaksbehandlerInfo> {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
-                val statement =
-                    prepareStatement(
-                        """
-                        SELECT * FROM saksbehandler_info
-                        WHERE id = ANY(?)
-                        """.trimIndent(),
-                    )
-                statement.setArray(1, createArrayOf("text", identer.toTypedArray()))
-                statement.executeQuery().toList {
-                    SaksbehandlerInfo(getString("id"), getString("navn"))
-                }
-            }
-        }
-    }
-
     fun hentSaksbehandlerNavn(ident: String): String? {
         return connectionAutoclosing.hentConnection {
             with(it) {

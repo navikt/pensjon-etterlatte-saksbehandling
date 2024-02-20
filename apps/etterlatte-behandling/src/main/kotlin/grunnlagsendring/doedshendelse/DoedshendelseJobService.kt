@@ -2,9 +2,7 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.Self
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
-import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
@@ -14,7 +12,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDateTime
-import javax.sql.DataSource
 
 class DoedshendelseJobService(
     private val doedshendelseDao: DoedshendelseDao,
@@ -22,21 +19,15 @@ class DoedshendelseJobService(
     private val featureToggleService: FeatureToggleService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val dagerGamleHendelserSomSkalKjoeres: Int,
-    dataSource: DataSource,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private var jobContext: Context
 
-    init {
-        jobContext = Context(Self(this::class.java.simpleName), DatabaseContext(dataSource))
+    fun setupKontekstAndRun(context: Context) {
+        Kontekst.set(context)
+        run()
     }
 
-    fun setupKontekst(): DoedshendelseJobService {
-        Kontekst.set(jobContext)
-        return this
-    }
-
-    fun run() {
+    private fun run() {
         if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)) {
             inTransaction {
                 val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()

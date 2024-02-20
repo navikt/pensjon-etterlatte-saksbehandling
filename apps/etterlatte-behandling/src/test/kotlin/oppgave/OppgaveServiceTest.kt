@@ -501,10 +501,10 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
                 null,
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
-        oppgaveService.settPaaVent(nyOppgave.id, "test", nyOppgave.status)
+        oppgaveService.oppdaterStatusOgMerknad(nyOppgave.id, "test", nyOppgave.status)
         val oppgavePaaVent = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(Status.PAA_VENT, oppgavePaaVent?.status)
-        oppgaveService.settPaaVent(oppgavePaaVent!!.id, "test", oppgavePaaVent.status)
+        oppgaveService.oppdaterStatusOgMerknad(oppgavePaaVent!!.id, "test", oppgavePaaVent.status)
         val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
         assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent?.status)
     }

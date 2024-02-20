@@ -58,10 +58,10 @@ interface OppgaveDao {
         frist: Tidspunkt,
     )
 
-    fun settPaaVent(
+    fun oppdaterStatusOgMerknad(
         oppgaveId: UUID,
         merknad: String,
-        status: Status,
+        oppgaveStatus: Status,
     )
 }
 
@@ -340,10 +340,10 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
         }
     }
 
-    override fun settPaaVent(
+    override fun oppdaterStatusOgMerknad(
         oppgaveId: UUID,
         merknad: String,
-        status: Status,
+        oppgaveStatus: Status,
     ) {
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -356,7 +356,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                         """.trimIndent(),
                     )
                 statement.setString(1, merknad)
-                statement.setString(2, status.name)
+                statement.setString(2, oppgaveStatus.name)
                 statement.setObject(3, oppgaveId)
 
                 statement.executeUpdate()

@@ -228,7 +228,7 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)
         oppgaveDao.opprettOppgave(oppgaveNy)
-        oppgaveDao.settPaaVent(oppgaveNy.id, "merknad", Status.PAA_VENT)
+        oppgaveDao.oppdaterStatusOgMerknad(oppgaveNy.id, "merknad", Status.PAA_VENT)
         val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
         assertEquals(Status.PAA_VENT, hentetOppgave?.status)
     }

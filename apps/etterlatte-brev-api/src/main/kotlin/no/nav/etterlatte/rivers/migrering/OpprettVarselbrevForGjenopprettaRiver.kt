@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.OPPGAVE_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
@@ -37,6 +38,7 @@ internal class OpprettVarselbrevForGjenopprettaRiver(
         initialiserRiver(rapidsConnection, Migreringshendelser.BEREGNET_FERDIG) {
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(BEHANDLING_ID_KEY) }
+            validate { it.requireKey(OPPGAVE_KEY) }
             validate { it.requireValue(KILDE_KEY, Vedtaksloesning.GJENOPPRETTA.name) }
         }
     }

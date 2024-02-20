@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
+import no.nav.etterlatte.libs.common.behandling.MigreringRespons
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -137,7 +138,11 @@ class MigreringService(
                         behandling.toStatistikkBehandling(request.opprettPersongalleri(), pesysId = request.pesysId.id),
                         BehandlingHendelseType.OPPRETTET,
                     )
-                    behandling
+                    MigreringRespons(
+                        behandlingId = behandling.id,
+                        sakId = behandling.sak.id,
+                        oppgaveId = nyopprettaOppgave.id,
+                    )
                 }
             }
         }

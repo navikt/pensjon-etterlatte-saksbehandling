@@ -5,6 +5,7 @@ import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeri
 import { useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import FerdigstillOppgaveModal from '~components/person/journalfoeringsoppgave/ferdigstilloppgave/FerdigstillOppgaveModal'
+import { Journalstatus } from '~shared/types/Journalpost'
 
 export default function FerdigstillOppgave() {
   const { journalpost, oppgave } = useJournalfoeringOppgave()
@@ -15,7 +16,12 @@ export default function FerdigstillOppgave() {
 
   if (!oppgave || !journalpost) return null
 
-  const journalpostErFerdigstilt = ['FERDIGSTILT', 'JOURNALFOERT', 'FEILREGISTRERT'].includes(journalpost.journalstatus)
+  const journalpostErFerdigstilt = [
+    Journalstatus.FERDIGSTILT,
+    Journalstatus.JOURNALFOERT,
+    Journalstatus.FEILREGISTRERT,
+  ].includes(journalpost.journalstatus)
+
   const journalpostTilhoererAnnetTema = !['EYO', 'EYB'].includes(journalpost.tema)
   const kanFerdigstilleOppgaven = journalpostErFerdigstilt || journalpostTilhoererAnnetTema
 

@@ -435,7 +435,7 @@ internal class ApplicationContext(
             saksbehandlerJobService = saksbehandlerJobService,
             { leaderElectionKlient.isLeader() },
             0L,
-            interval = if (isProd()) Duration.of(2, ChronoUnit.HOURS) else Duration.of(30, ChronoUnit.SECONDS),
+            interval = if (isProd()) Duration.of(2, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.HOURS),
         )
     }
 

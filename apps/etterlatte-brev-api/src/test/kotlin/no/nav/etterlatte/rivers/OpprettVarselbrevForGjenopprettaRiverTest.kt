@@ -7,6 +7,7 @@ import io.mockk.confirmVerified
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -41,8 +42,17 @@ internal class OpprettVarselbrevForGjenopprettaRiverTest {
 
     private val brevhaandterer = mockk<FerdigstillJournalfoerOgDistribuerBrev>()
 
+    private val behandlingKlient = mockk<BehandlingKlient>()
+
     private val opprettBrevRapid =
-        TestRapid().apply { OpprettVarselbrevForGjenopprettaRiver(this, varselbrevService, brevhaandterer) }
+        TestRapid().apply {
+            OpprettVarselbrevForGjenopprettaRiver(
+                this,
+                varselbrevService,
+                brevhaandterer,
+                behandlingKlient,
+            )
+        }
 
     private val behandlingId = UUID.randomUUID()
 

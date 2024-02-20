@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev.model
 
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 
 data class BrevkodeRequest(
@@ -30,7 +31,10 @@ class BrevKodeMapperVedtak {
                     VedtakType.OPPHOER -> Brevkoder.BP_OPPHOER
                     VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
                     VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE
-                    null -> throw IllegalStateException("Skal ikke kunne komme hit med manglande vedtakstype, for request $request")
+                    null -> throw UgyldigForespoerselException(
+                        "MANGLENDE_VEDTAKSTYPE_VEDTAKSBREV",
+                        "Skal ikke kunne komme hit med manglande vedtakstype, for request $request",
+                    )
                 }
             }
 
@@ -42,7 +46,10 @@ class BrevKodeMapperVedtak {
                     VedtakType.OPPHOER -> Brevkoder.OMS_OPPHOER
                     VedtakType.TILBAKEKREVING -> Brevkoder.TILBAKEKREVING
                     VedtakType.AVVIST_KLAGE -> Brevkoder.AVVIST_KLAGE
-                    null -> throw IllegalStateException("Skal ikke kunne komme hit med manglande vedtakstype, for request $request")
+                    null -> throw UgyldigForespoerselException(
+                        "MANGLENDE_VEDTAKSTYPE_VEDTAKSBREV",
+                        "Skal ikke kunne komme hit med manglande vedtakstype, for request $request",
+                    )
                 }
             }
         }

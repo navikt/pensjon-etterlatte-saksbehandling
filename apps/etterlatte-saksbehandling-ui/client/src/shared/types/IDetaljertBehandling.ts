@@ -28,9 +28,9 @@ export interface IDetaljertBehandling {
 }
 
 export interface NyBehandlingRequest {
-  sakType: SakType
-  persongalleri: Persongalleri
-  mottattDato: string
+  sakType?: SakType
+  persongalleri?: Persongalleri
+  mottattDato?: string
   spraak?: Spraak
   kilde?: string
   pesysId?: number

@@ -29,69 +29,76 @@ export default function OppsummeringOppgavebehandling() {
     return <Alert variant="error">Noe data i journalføringen eller behandlingen er feil</Alert>
   }
 
-  const { spraak, mottattDato, persongalleri } = nyBehandlingRequest
+  const { spraak, mottattDato, persongalleri } = nyBehandlingRequest!
 
   return (
     <FormWrapper column>
-      <Heading size="medium" spacing>
-        Opprett behandling fra oppgave
-      </Heading>
+      {/* fjerne denne sjekken når RHF har blitt introdusert i Manuell behandling*/}
+      {persongalleri ? (
+        <>
+          <Heading size="medium" spacing>
+            Opprett behandling fra oppgave
+          </Heading>
 
-      <InfoList>
-        <div>
-          <Tag variant="success" size="medium">
-            {formaterSakstype(oppgave.sakType)}
-          </Tag>
-        </div>
+          <InfoList>
+            <div>
+              <Tag variant="success" size="medium">
+                {formaterSakstype(oppgave.sakType)}
+              </Tag>
+            </div>
 
-        <Info label="Språk" tekst={formaterSpraak(spraak!)} />
-        <Info label="Mottatt dato" tekst={formaterStringDato(mottattDato)} />
+            <Info label="Språk" tekst={formaterSpraak(spraak!)} />
+            <Info label="Mottatt dato" tekst={formaterStringDato(mottattDato!)} />
 
-        <Info label="Søker" tekst={persongalleri.soeker} />
-        <Info label="Innsender" tekst={persongalleri.innsender || <Detail>Ikke oppgitt</Detail>} />
+            <Info label="Søker" tekst={persongalleri.soeker} />
+            <Info label="Innsender" tekst={persongalleri.innsender || <Detail>Ikke oppgitt</Detail>} />
 
-        {oppgave.sakType === SakType.BARNEPENSJON && persongalleri.gjenlevende?.length ? (
-          persongalleri.gjenlevende?.map((gjenlevende) => (
-            <Info key={gjenlevende} label="Gjenlevende" tekst={gjenlevende || ''} />
-          ))
-        ) : (
-          <Info label="Gjenlevende" tekst={<Detail>Ikke oppgitt</Detail>} />
-        )}
+            {oppgave.sakType === SakType.BARNEPENSJON && persongalleri.gjenlevende?.length ? (
+              persongalleri.gjenlevende?.map((gjenlevende) => (
+                <Info key={gjenlevende} label="Gjenlevende" tekst={gjenlevende || ''} />
+              ))
+            ) : (
+              <Info label="Gjenlevende" tekst={<Detail>Ikke oppgitt</Detail>} />
+            )}
 
-        {persongalleri.avdoed?.length ? (
-          persongalleri.avdoed?.map((avdoed) => <Info key={avdoed} label="Avdød" tekst={avdoed} />)
-        ) : (
-          <Info label="Avdød" tekst={<Detail>Ikke oppgitt</Detail>} />
-        )}
+            {persongalleri.avdoed?.length ? (
+              persongalleri.avdoed?.map((avdoed) => <Info key={avdoed} label="Avdød" tekst={avdoed} />)
+            ) : (
+              <Info label="Avdød" tekst={<Detail>Ikke oppgitt</Detail>} />
+            )}
 
-        {persongalleri.soesken?.map((soeskenEllerBarn) => (
-          <Info
-            key={soeskenEllerBarn}
-            label={oppgave?.sakType === SakType.BARNEPENSJON ? 'Søsken' : 'Barn'}
-            tekst={soeskenEllerBarn || ''}
-          />
-        )) || <Info label="Innsender" tekst={<Detail>Ikke oppgitt</Detail>} />}
-      </InfoList>
+            {persongalleri.soesken?.map((soeskenEllerBarn) => (
+              <Info
+                key={soeskenEllerBarn}
+                label={oppgave?.sakType === SakType.BARNEPENSJON ? 'Søsken' : 'Barn'}
+                tekst={soeskenEllerBarn || ''}
+              />
+            )) || <Info label="Innsender" tekst={<Detail>Ikke oppgitt</Detail>} />}
+          </InfoList>
 
-      {!persongalleri.avdoed?.length && (
-        <Alert variant="warning" size="small">
-          Avdød er påkrevd ved innvilgelse. Det anbefales derfor å legge til (hvis mulig) for å slippe oppdatering av
-          persongalleriet på et senere tidspunkt.
-        </Alert>
+          {!persongalleri.avdoed?.length && (
+            <Alert variant="warning" size="small">
+              Avdød er påkrevd ved innvilgelse. Det anbefales derfor å legge til (hvis mulig) for å slippe oppdatering
+              av persongalleriet på et senere tidspunkt.
+            </Alert>
+          )}
+
+          <div>
+            <FlexRow justify="center" $spacing>
+              <Button variant="secondary" onClick={tilbake}>
+                Tilbake
+              </Button>
+
+              <FullfoerOppgaveModal oppgave={oppgave} behandlingBehov={nyBehandlingRequest} />
+            </FlexRow>
+            <FlexRow justify="center">
+              <AvbrytBehandleJournalfoeringOppgave />
+            </FlexRow>
+          </div>
+        </>
+      ) : (
+        <Alert variant="error">Kunne ikke hente persongalleri</Alert>
       )}
-
-      <div>
-        <FlexRow justify="center" $spacing>
-          <Button variant="secondary" onClick={tilbake}>
-            Tilbake
-          </Button>
-
-          <FullfoerOppgaveModal oppgave={oppgave} behandlingBehov={nyBehandlingRequest} />
-        </FlexRow>
-        <FlexRow justify="center">
-          <AvbrytBehandleJournalfoeringOppgave />
-        </FlexRow>
-      </div>
     </FormWrapper>
   )
 }

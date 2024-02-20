@@ -38,7 +38,7 @@ export default function ManuellBehandling() {
   const [overstyrTrygdetid, setOverstyrTrygdetid] = useState<boolean>(false)
 
   const [pesysId, setPesysId] = useState<number | undefined>(undefined)
-  const [fnrFraOppgave, setFnr] = useState<string | undefined>(undefined)
+  const [, setFnr] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     if (oppgaveId) {
@@ -198,7 +198,7 @@ export default function ManuellBehandling() {
         Søker har en sak for uføretrygd løpende eller under behandling.
       </Checkbox>
 
-      <PersongalleriBarnepensjon erManuellMigrering={true} fnrFraOppgave={fnrFraOppgave} />
+      <PersongalleriBarnepensjon erManuellMigrering={true} />
 
       <Knapp>
         <Button

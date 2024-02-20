@@ -26,7 +26,7 @@ class ConnectionAutoclosingTest(val dataSource: DataSource) : ConnectionAutoclos
                 block(it)
             }
         } else {
-            val activeTx = databaseContext().activeTx()
+            val activeTx = DatabaseContextTest(dataSource).activeTx()
             block(activeTx).also { activeTx.close() }
         }
     }

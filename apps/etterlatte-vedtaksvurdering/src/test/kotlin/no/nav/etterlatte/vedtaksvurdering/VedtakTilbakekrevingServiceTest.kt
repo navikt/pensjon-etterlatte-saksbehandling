@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 class VedtakTilbakekrevingServiceTest {
@@ -198,6 +199,30 @@ class VedtakTilbakekrevingServiceTest {
         every { repo.hentVedtak(dto.tilbakekrevingId) } returns vedtak(status = VedtakStatus.ATTESTERT)
 
         assertThrows<VedtakTilstandException> {
+            service.attesterVedtak(dto, saksbehandler)
+        }
+        verify { repo.hentVedtak(dto.tilbakekrevingId) }
+    }
+
+    @Test
+    fun `attesterVedtak skal ikke attestere hvis fattet av samme saksbehandler`() {
+        val dto =
+            TilbakekrevingFattEllerAttesterVedtakDto(
+                tilbakekrevingId = UUID.randomUUID(),
+                enhet = "enhet",
+            )
+        every { repo.hentVedtak(dto.tilbakekrevingId) } returns
+            vedtak(
+                status = VedtakStatus.FATTET_VEDTAK,
+                vedtakFattet =
+                    VedtakFattet(
+                        saksbehandler.ident,
+                        "enhet",
+                        Tidspunkt.now().minus(1, ChronoUnit.DAYS),
+                    ),
+            )
+
+        assertThrows<UgyldigAttestantException> {
             service.attesterVedtak(dto, saksbehandler)
         }
         verify { repo.hentVedtak(dto.tilbakekrevingId) }

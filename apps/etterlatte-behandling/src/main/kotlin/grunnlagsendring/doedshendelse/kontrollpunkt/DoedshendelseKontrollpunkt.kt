@@ -33,4 +33,18 @@ sealed class DoedshendelseKontrollpunkt {
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
     }
+
+    data object AnnenForelderIkkeFunnet : DoedshendelseKontrollpunkt() {
+        override val beskrivelse: String = "Klarer ikke finne den andre forelderen automatisk"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+    }
+
+    data object SamtidigDoedsfall : DoedshendelseKontrollpunkt() {
+        override val beskrivelse: String = "Personen har mistet begge foreldrene samtidig"
+        override val sendBrev: Boolean = true
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+    }
 }

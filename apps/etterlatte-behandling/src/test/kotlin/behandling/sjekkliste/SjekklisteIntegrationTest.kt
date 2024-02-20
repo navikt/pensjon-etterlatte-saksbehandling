@@ -5,9 +5,10 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingService
@@ -20,7 +21,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.extension.ExtendWith
-import java.sql.Connection
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -38,11 +38,14 @@ class SjekklisteIntegrationTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun setup() {
-        val connection = dataSource.connection
+        Kontekst.set(
+            Context(
+                user,
+                DatabaseContextTest(dataSource),
+            ),
+        )
         sjekklisteDao = SjekklisteDao(ConnectionAutoclosingTest(dataSource))
         sjekklisteService = SjekklisteService(sjekklisteDao, behandlingService, oppgaveService)
-
-        settOppKontekst(user)
 
         every { user.name() } returns "Sak B. Handlersen"
         every {
@@ -133,21 +136,4 @@ class SjekklisteIntegrationTest(val dataSource: DataSource) {
             this.versjon shouldBe 2
         }
     }
-}
-
-internal fun settOppKontekst(user: SaksbehandlerMedEnheterOgRoller) {
-    Kontekst.set(
-        Context(
-            user,
-            object : DatabaseKontekst {
-                override fun activeTx(): Connection {
-                    throw IllegalArgumentException()
-                }
-
-                override fun <T> inTransaction(block: () -> T): T {
-                    return block()
-                }
-            },
-        ),
-    )
 }

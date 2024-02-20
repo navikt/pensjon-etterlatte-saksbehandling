@@ -41,13 +41,14 @@ internal class BehandlingDaoReguleringTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
-            BehandlingDao(KommerBarnetTilGodeDaoprivate
+            BehandlingDao(
+                KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
+            )
 
-        connectionAutoclosing: ConnectionAutoclosing, RevurderingDao(ConnectionAutoclosingTest(dataSource)))
-        (ConnectionAutoclosingTest(dataSource))
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
         Kontekst.set(
             Context(

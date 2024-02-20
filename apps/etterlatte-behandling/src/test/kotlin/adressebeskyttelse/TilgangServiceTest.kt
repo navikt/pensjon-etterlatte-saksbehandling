@@ -57,18 +57,16 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
 
         sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService)
         behandlingRepo =
             BehandlingDao(
-                KommerBarnetTilGodeDao {
-                    connection
-                },
+                KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
                 RevurderingDao(ConnectionAutoclosingTest(dataSource)),
-            )(ConnectionAutoclosingTest(dataSource))
+                (ConnectionAutoclosingTest(dataSource)),
+            )
         klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
         Kontekst.set(

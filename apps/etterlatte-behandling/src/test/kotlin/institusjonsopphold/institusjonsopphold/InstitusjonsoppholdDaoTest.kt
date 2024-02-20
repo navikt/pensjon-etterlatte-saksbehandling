@@ -1,5 +1,6 @@
 package no.nav.etterlatte.institusjonsopphold.institusjonsopphold
 
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdBegrunnelse
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
@@ -21,7 +22,6 @@ internal class InstitusjonsoppholdDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
         institusjonsoppholdDao = InstitusjonsoppholdDao(ConnectionAutoclosingTest(dataSource))
     }
 

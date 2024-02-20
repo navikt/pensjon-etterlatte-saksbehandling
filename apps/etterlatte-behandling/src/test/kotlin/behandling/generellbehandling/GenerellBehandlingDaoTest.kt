@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
@@ -23,7 +24,6 @@ internal class GenerellBehandlingDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
         dao = GenerellBehandlingDao(ConnectionAutoclosingTest(dataSource))
     }
 

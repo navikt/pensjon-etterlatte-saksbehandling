@@ -50,7 +50,6 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun setup() {
-        val connection = dataSource.connection
         sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
         tilbakekrevingDao = TilbakekrevingDao(ConnectionAutoclosingTest(dataSource))
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()

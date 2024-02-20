@@ -56,8 +56,6 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =

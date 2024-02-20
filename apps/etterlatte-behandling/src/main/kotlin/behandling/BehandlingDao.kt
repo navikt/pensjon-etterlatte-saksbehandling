@@ -114,8 +114,8 @@ class BehandlingDao(
     }
 
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): SakIDListe {
-        return connectionAutoclosing.hentConnection {
-            with(it) {
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
                 val stmt =
                     prepareStatement(
                         """

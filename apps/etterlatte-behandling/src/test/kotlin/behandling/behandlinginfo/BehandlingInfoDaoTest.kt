@@ -46,13 +46,13 @@ internal class BehandlingInfoDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun setup() {
-        val connection = dataSource.connection
         sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
         behandlingDao =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
                 RevurderingDao(ConnectionAutoclosingTest(dataSource)),
-            )(ConnectionAutoclosingTest(dataSource))
+                ConnectionAutoclosingTest(dataSource),
+            )
 
         dao = BehandlingInfoDao(ConnectionAutoclosingTest(dataSource))
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()

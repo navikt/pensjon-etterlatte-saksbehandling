@@ -50,14 +50,13 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
                 DatabaseContextTest(ds),
             ),
         )
-        val connection = ds.connection
 
         sakRepo = SakDao(ConnectionAutoclosingTest(ds))
         behandlingRepo =
             BehandlingDao(
                 kommerBarnetTilGodeDao = mockk(),
                 revurderingDao = mockk(),
-                connection = (ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(ds),
             )
 
         opprettBehandlinger()

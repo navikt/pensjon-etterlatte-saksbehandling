@@ -54,13 +54,13 @@ internal class GrunnlagsendringshendelseDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
                 RevurderingDao(ConnectionAutoclosingTest(dataSource)),
-            )(ConnectionAutoclosingTest(dataSource))
+                (ConnectionAutoclosingTest(dataSource)),
+            )
         grunnlagsendringshendelsesRepo = GrunnlagsendringshendelseDao(ConnectionAutoclosingTest(dataSource))
         val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 

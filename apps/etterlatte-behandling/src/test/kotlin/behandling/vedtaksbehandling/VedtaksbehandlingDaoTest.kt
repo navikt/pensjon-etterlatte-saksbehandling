@@ -49,7 +49,6 @@ internal class VedtaksbehandlingDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
         val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         val revurderingDao = RevurderingDao(ConnectionAutoclosingTest(dataSource))
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))

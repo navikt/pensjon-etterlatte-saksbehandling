@@ -5,9 +5,6 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
@@ -15,10 +12,8 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.personOpplysning
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.sql.Connection
 import java.time.LocalDate
 import java.util.UUID
 
@@ -50,24 +45,6 @@ internal class DoedshendelseServiceTest {
                     personOpplysning(foedselsdato = LocalDate.of(2020, 9, 15)),
                 ),
         )
-
-    @BeforeEach
-    fun before() {
-        Kontekst.set(
-            Context(
-                mockk(),
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            ),
-        )
-    }
 
     @Test
     fun `Skal oppdatere doedshendelse med barna som kan ha rett paa barnepensjon ved doedsfall`() {

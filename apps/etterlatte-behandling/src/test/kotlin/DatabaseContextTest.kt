@@ -27,7 +27,7 @@ class ConnectionAutoclosingTest(val dataSource: DataSource) : ConnectionAutoclos
             }
         } else {
             val activeTx = databaseContext().activeTx()
-            block(activeTx).also { activeTx.close() } // TODO: trådsikker?
+            block(activeTx).also { activeTx.close() }
         }
     }
 

@@ -1,15 +1,17 @@
 import React, { ReactNode } from 'react'
-import { Control, useFieldArray } from 'react-hook-form'
-import { Button } from '@navikt/ds-react'
-import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+import { ArrayPath, FieldValues, Path, useFieldArray, useFormContext } from 'react-hook-form'
+import { Button, TextField } from '@navikt/ds-react'
+import {
+  InputList,
+  InputRow,
+  NyBehandlingSkjema,
+} from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
-import { ControlledTekstFelt } from '~shared/components/tekstFelt/ControlledTekstFelt'
 
 export const ControlledListMedTekstFelter = ({
   name,
   label,
   description,
-  control,
   validate,
   addButtonLabel,
   maxLength,
@@ -17,24 +19,29 @@ export const ControlledListMedTekstFelter = ({
   name: string
   label: string
   description?: string | ReactNode
-  control: Control
   validate: (input: string) => string | undefined
   addButtonLabel: string
   maxLength?: number
 }): ReactNode => {
-  const { fields, append, remove } = useFieldArray({ name, control })
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<NyBehandlingSkjema>()
+
+  const { fields, append, remove } = useFieldArray({ name })
+
+  console.log(errors)
 
   return (
     <InputList>
       {fields.map((field, index) => (
         <InputRow key={index}>
-          <ControlledTekstFelt
+          <TextField
+            {...register(`${name}.${index}.value`, { validate: validate })}
             key={field.id}
-            name={`${name}.${index}.value`}
-            control={control}
             label={label}
             description={description}
-            validate={validate}
+            error={errors?.persongalleri?.[name]?.[index].error.message}
           />
           <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => remove(index)} />
         </InputRow>

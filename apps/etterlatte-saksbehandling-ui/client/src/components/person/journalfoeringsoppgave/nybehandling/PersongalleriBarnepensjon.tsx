@@ -1,40 +1,22 @@
 import React from 'react'
-import { BodyShort, Heading, Panel } from '@navikt/ds-react'
-import { InputRow } from './OpprettNyBehandling'
-import { Control } from 'react-hook-form'
+import { BodyShort, Heading, Panel, TextField } from '@navikt/ds-react'
+import { InputRow, NyBehandlingSkjema } from './OpprettNyBehandling'
+import { Control, useFormContext } from 'react-hook-form'
 import { ControlledTekstFelt } from '~shared/components/tekstFelt/ControlledTekstFelt'
 import { ControlledListMedTekstFelter } from '~shared/components/tekstFelt/ControlledListMedTekstFelter'
+import {
+  validateFnrObligatorisk,
+  validerFnrValgfri,
+} from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 
-export default function PersongalleriBarnepensjon({
-  erManuellMigrering = false,
-  control,
-}: {
-  erManuellMigrering?: boolean
-  control: Control
-}) {
-  const validerFnrValgfri = (fnr: string): string | undefined => {
-    if (fnr && !new RegExp(/[0-9]{11}/).test(fnr)) {
-      return 'Fødselsnummer er på ugyldig format'
-    }
-    return undefined
-  }
-
-  const validateFnrObligatorisk = (fnr: string): string | undefined => {
-    if (!fnr) {
-      return 'Fødselsnummer må være satt'
-    } else if (!new RegExp(/[0-9]{11}/).test(fnr)) {
-      return 'Fødselsnummer er på ugyldig format'
-    }
-    return undefined
-  }
+export default function PersongalleriBarnepensjon({ erManuellMigrering = false }: { erManuellMigrering?: boolean }) {
+  const { register } = useFormContext()
 
   return (
     <>
       <InputRow>
-        <ControlledTekstFelt
-          name="persongalleri.soeker"
-          control={control}
-          validate={validateFnrObligatorisk}
+        <TextField
+          {...register('persongalleri.soeker', { validate: validateFnrObligatorisk })}
           label="Søker (barnet)"
           description={
             erManuellMigrering ? 'Oppgi søker sitt fødselsnummer' : 'Fødselsnummeret er automatisk hentet fra oppgaven'
@@ -44,10 +26,8 @@ export default function PersongalleriBarnepensjon({
       </InputRow>
 
       <InputRow>
-        <ControlledTekstFelt
-          name="persongalleri.innsender"
-          control={control}
-          validate={validerFnrValgfri}
+        <TextField
+          {...register('persongalleri.innsender', { validate: validerFnrValgfri })}
           label="Innsender"
           description="Oppgi innsenderen sitt fødselsnummer (dersom det er tilgjengelig)"
         />
@@ -63,8 +43,7 @@ export default function PersongalleriBarnepensjon({
           name="persongalleri.gjenlevende"
           label="Gjenlevende forelder"
           description="Oppgi fødselsnummer"
-          control={control}
-          validate={validerFnrValgfri}
+          validate={validateFnrObligatorisk}
           addButtonLabel="Legg til gjenlevende"
           maxLength={2}
         />
@@ -79,8 +58,7 @@ export default function PersongalleriBarnepensjon({
         <ControlledListMedTekstFelter
           name="persongalleri.avdoed"
           label="Avdød forelder"
-          control={control}
-          validate={validerFnrValgfri}
+          validate={validateFnrObligatorisk}
           addButtonLabel="Legg til avdød"
           maxLength={2}
         />
@@ -96,8 +74,7 @@ export default function PersongalleriBarnepensjon({
           name="persongalleri.soesken"
           label="Søsken"
           description="Oppgi fødselsnummer"
-          control={control}
-          validate={validerFnrValgfri}
+          validate={validateFnrObligatorisk}
           addButtonLabel="Legg til søsken"
         />
       </Panel>

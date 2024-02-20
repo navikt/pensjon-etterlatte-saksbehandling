@@ -11,7 +11,7 @@ import styled from 'styled-components'
 import { FlexRow } from '~shared/styled'
 import React from 'react'
 import { Spraak } from '~shared/types/Brev'
-import { useForm } from 'react-hook-form'
+import { FormProvider, useForm } from 'react-hook-form'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { useAppDispatch } from '~store/Store'
@@ -20,6 +20,18 @@ import { formatDateToLocalDateTimeOrEmptyString } from '~shared/components/datoV
 
 interface PersonISkjema {
   value: string
+}
+
+export interface NyBehandlingSkjema {
+  spraak: Spraak | null
+  mottattDato: string
+  persongalleri: {
+    soeker: string
+    innsender?: string
+    gjenlevende?: Array<{ value: string }>
+    avdoed?: Array<{ value: string }>
+    soesken?: Array<{ value: string }>
+  }
 }
 
 export default function OpprettNyBehandling() {
@@ -36,38 +48,42 @@ export default function OpprettNyBehandling() {
   const neste = () => navigate('oppsummering', { relative: 'path' })
   const tilbake = () => navigate('../', { relative: 'path' })
 
+  const methods = useForm<NyBehandlingSkjema>({
+    defaultValues: {
+      persongalleri: { soeker: nyBehandlingRequest?.persongalleri?.soeker },
+    },
+  })
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<NyBehandlingRequest>({
-    defaultValues: nyBehandlingRequest,
-  })
+  } = methods
 
-  const onSubmit = (data: NyBehandlingRequest) => {
-    const gjenlevende: string[] = (data.persongalleri?.gjenlevende as unknown as PersonISkjema[]).map(
-      (val: PersonISkjema) => val.value
-    )
-    const avdoed: string[] = (data.persongalleri?.avdoed as unknown as PersonISkjema[]).map(
-      (val: PersonISkjema) => val.value
-    )
-    const soesken: string[] = (data.persongalleri?.soesken as unknown as PersonISkjema[]).map(
-      (val: PersonISkjema) => val.value
-    )
+  const onSubmit = (data: NyBehandlingSkjema) => {
+    // TODO gjøre switch på om det er barnepensjon eller omstillingstønad
+    // const gjenlevende: string[] = (data.persongalleri?.gjenlevende as unknown as PersonISkjema[]).map(
+    //   (val: PersonISkjema) => val.value
+    // )
+    // const avdoed: string[] = (data.persongalleri?.avdoed as unknown as PersonISkjema[]).map(
+    //   (val: PersonISkjema) => val.value
+    // )
+    // const soesken: string[] = (data.persongalleri?.soesken as unknown as PersonISkjema[]).map(
+    //   (val: PersonISkjema) => val.value
+    // )
 
-    dispatch(
-      settNyBehandlingRequest({
-        ...data,
-        mottattDato: formatDateToLocalDateTimeOrEmptyString(new Date(data.mottattDato!)),
-        persongalleri: {
-          ...data.persongalleri,
-          gjenlevende,
-          avdoed,
-          soesken,
-        },
-      })
-    )
+    // dispatch(
+    //   settNyBehandlingRequest({
+    //     ...data,
+    //     mottattDato: formatDateToLocalDateTimeOrEmptyString(new Date(data.mottattDato!)),
+    //     persongalleri: {
+    //       ...data.persongalleri,
+    //       gjenlevende,
+    //       avdoed,
+    //       soesken,
+    //     },
+    //   })
+    // )
 
     neste()
   }
@@ -80,52 +96,54 @@ export default function OpprettNyBehandling() {
           {formaterSakstype(sakType)}
         </Tag>
       </Heading>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Select
-          {...register('spraak', {
-            required: { value: true, message: 'Du må velge språk/målform for behandlingen' },
-          })}
-          label="Hva skal språket/målform være?"
-          error={errors.spraak?.message}
-        >
-          <option value="">Velg ...</option>
-          <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
-          <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
-          <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
-        </Select>
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Select
+            {...register('spraak', {
+              required: { value: true, message: 'Du må velge språk/målform for behandlingen' },
+            })}
+            label="Hva skal språket/målform være?"
+            error={errors.spraak?.message}
+          >
+            <option value="">Velg ...</option>
+            <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
+            <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
+            <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
+          </Select>
 
-        <ControlledDatoVelger
-          name="mottattDato"
-          label="Mottatt dato"
-          description="Datoen søknaden ble mottatt"
-          control={control}
-          errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
-        />
+          <ControlledDatoVelger
+            name="mottattDato"
+            label="Mottatt dato"
+            description="Datoen søknaden ble mottatt"
+            control={control}
+            errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
+          />
 
-        <hr />
+          <hr />
 
-        <Heading size="medium" spacing>
-          Persongalleri
-        </Heading>
+          <Heading size="medium" spacing>
+            Persongalleri
+          </Heading>
 
-        {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
-        {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon control={control} />}
+          {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad control={control} />}
+          {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
 
-        <div>
-          <FlexRow justify="center" $spacing>
-            <Button variant="secondary" onClick={tilbake}>
-              Tilbake
-            </Button>
+          <div>
+            <FlexRow justify="center" $spacing>
+              <Button variant="secondary" onClick={tilbake} type="button">
+                Tilbake
+              </Button>
 
-            <Button variant="primary" type="submit">
-              Neste
-            </Button>
-          </FlexRow>
-          <FlexRow justify="center">
-            <AvbrytBehandleJournalfoeringOppgave />
-          </FlexRow>
-        </div>
-      </form>
+              <Button variant="primary" type="submit">
+                Neste
+              </Button>
+            </FlexRow>
+            <FlexRow justify="center">
+              <AvbrytBehandleJournalfoeringOppgave />
+            </FlexRow>
+          </div>
+        </form>
+      </FormProvider>
     </FormWrapper>
   )
 }

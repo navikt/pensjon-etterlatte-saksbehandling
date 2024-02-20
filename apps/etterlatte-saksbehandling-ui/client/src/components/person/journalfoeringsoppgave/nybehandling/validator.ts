@@ -20,3 +20,19 @@ const gyldigPersongalleri = (request: NyBehandlingRequest) => {
 
   return fnrErGyldig(persongalleri.soeker) && gyldigAvdoed && gyldigInnsender
 }
+
+export const validerFnrValgfri = (fnr: string): string | undefined => {
+  if (fnr && !new RegExp(/[0-9]{11}/).test(fnr)) {
+    return 'Fødselsnummer er på ugyldig format'
+  }
+  return undefined
+}
+
+export const validateFnrObligatorisk = (fnr: string): string | undefined => {
+  if (!fnr) {
+    return 'Fødselsnummer må være satt'
+  } else if (!new RegExp(/[0-9]{11}/).test(fnr)) {
+    return 'Fødselsnummer er på ugyldig format'
+  }
+  return undefined
+}

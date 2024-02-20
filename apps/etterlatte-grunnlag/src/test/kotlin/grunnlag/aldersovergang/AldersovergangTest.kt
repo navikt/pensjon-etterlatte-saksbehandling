@@ -11,6 +11,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.mockk
+import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
@@ -20,9 +21,6 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.serialize
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.HELSOESKEN_FOEDSELSNUMMER
@@ -33,31 +31,17 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AldersovergangTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-    private lateinit var dataSource: DataSource
+@ExtendWith(GrunnlagDbExtension::class)
+class AldersovergangTest(private val dataSource: DataSource) {
     private val server = MockOAuth2Server()
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).also { it.migrate() }
-
         server.start()
     }
 

@@ -162,18 +162,21 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           <Tekst>{kommentarFraAttestant}</Tekst>
         </div>
       )}
-      <FlexRow align="center">
+      <FlexRow align="center" $spacing={true}>
         <Info>Sakid:</Info>
         <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
       </FlexRow>
+
       {settPaaVent && (
-        <TextField
-          label="Merknad for venting"
-          size="medium"
-          type="text"
-          value={merknad}
-          onChange={(e) => setMerknad(e.target.value)}
-        />
+        <>
+          <TextField
+            label="Merknad for venting"
+            size="medium"
+            type="text"
+            value={merknad}
+            onChange={(e) => setMerknad(e.target.value)}
+          />
+        </>
       )}
 
       {settPaaVent &&
@@ -181,8 +184,10 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         oppgavenTilBehandlingen &&
         oppgavenTilBehandlingen.status !== 'PAA_VENT' && (
           <>
-            <FlexRow>Frist</FlexRow>
-            <FlexRow>
+            <FlexRow align="center">
+              <b>Frist</b>
+            </FlexRow>
+            <FlexRow align="center">
               <FristHandlinger
                 orginalFrist={oppgavenTilBehandlingen.frist}
                 oppgaveId={oppgavenTilBehandlingen.id}
@@ -227,20 +232,27 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         isSuccess(oppgaveForBehandlingenStatus) &&
         oppgavenTilBehandlingen &&
         oppgavenTilBehandlingen.status == 'PAA_VENT' && (
-          <FlexRow>
-            <Button
-              variant="primary"
-              onClick={() =>
-                lagreVent({
-                  merknad: merknad,
-                  versjon: null,
-                  status: oppgavenTilBehandlingen.status,
-                } as SettPaaVentRequest)
-              }
-            >
-              Bekreft fjerning av Vent
-            </Button>
-          </FlexRow>
+          <>
+            <FlexRow>
+              <Button
+                variant="primary"
+                onClick={() =>
+                  lagreVent({
+                    merknad: merknad,
+                    versjon: null,
+                    status: oppgavenTilBehandlingen.status,
+                  } as SettPaaVentRequest)
+                }
+              >
+                Bekreft fjerning av Vent
+              </Button>
+            </FlexRow>
+            <FlexRow>
+              <Button variant="tertiary" onClick={() => setVisPaaVent(false)}>
+                Avbryt
+              </Button>
+            </FlexRow>
+          </>
         )}
       {!settPaaVent && oppgavenTilBehandlingen?.status !== 'PAA_VENT' && (
         <Button variant="primary" onClick={() => setVisPaaVent(true)}>
@@ -250,7 +262,12 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       {!settPaaVent && oppgavenTilBehandlingen?.status === 'PAA_VENT' && (
         <>
           <Alert variant="warning">
-            Oppgaven er satt på vent med følgende merknad: {oppgavenTilBehandlingen.merknad}{' '}
+            <b>Oppgaven er satt på vent.</b> <br></br>
+            <b>Merknad: </b>
+            {oppgavenTilBehandlingen.merknad}
+            <br></br>
+            <b>Ny frist: </b>
+            {formaterStringDato(oppgavenTilBehandlingen.frist)}
           </Alert>
           <Button variant="primary" onClick={() => setVisPaaVent(true)}>
             Ta av vent

@@ -12,6 +12,7 @@ import {
 } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Saksbehandler } from '~shared/types/saksbehandler'
+import { enhetErSkrivbar } from '~components/behandling/felles/utils'
 
 interface Props {
   saksbehandlereIEnhet: Array<Saksbehandler>
@@ -29,10 +30,10 @@ const mapSaksbehandler = (oppgave: OppgaveDTO): Saksbehandler | undefined =>
 
 export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, oppgave }: Props): ReactNode => {
   const { sakId, id: oppgaveId, type, versjon, status } = oppgave
-  const erRedigerbar = erOppgaveRedigerbar(status)
-  const saksbehandler = mapSaksbehandler(oppgave)
-
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const erRedigerbar =
+    erOppgaveRedigerbar(status) && enhetErSkrivbar(oppgave.enhet, innloggetSaksbehandler.skriveEnheter)
+  const saksbehandler = mapSaksbehandler(oppgave)
 
   const [openDropdown, setOpenDropdown] = useState<boolean>(false)
 

@@ -23,7 +23,9 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
+import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
 import no.nav.etterlatte.behandling.klage.KlageServiceImpl
@@ -406,6 +408,10 @@ internal class ApplicationContext(
             tilbakekrevinghendelser = tilbakekreving,
         )
 
+    val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient)
+
+    // Jobs
+
     val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
             BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao),
@@ -421,6 +427,15 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             0L,
             interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
+        )
+    }
+
+    val saksbehandlerJob: SaksbehandlerJob by lazy {
+        SaksbehandlerJob(
+            saksbehandlerJobService = saksbehandlerJobService,
+            { leaderElectionKlient.isLeader() },
+            0L,
+            interval = if (isProd()) Duration.of(2, ChronoUnit.HOURS) else Duration.of(30, ChronoUnit.SECONDS),
         )
     }
 

@@ -50,14 +50,6 @@ export const OppgaverTableRow = ({
     <Table.DataCell>{oppgave.enhet}</Table.DataCell>
     <Table.DataCell>
       <VelgSaksbehandler
-        saksbehandler={
-          oppgave.saksbehandlerIdent && oppgave.saksbehandlerNavn
-            ? {
-                ident: oppgave.saksbehandlerIdent,
-                navn: oppgave.saksbehandlerNavn,
-              }
-            : undefined
-        }
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         oppdaterTildeling={oppdaterTildeling}
         oppgave={oppgave}

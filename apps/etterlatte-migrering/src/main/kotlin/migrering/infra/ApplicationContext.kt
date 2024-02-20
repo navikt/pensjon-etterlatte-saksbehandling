@@ -61,6 +61,7 @@ internal class ApplicationContext {
             personHenter = personHenter,
             featureToggleService = featureToggleService,
             grunnlagKlient = grunnlagKlient,
+            penKlient = penklient,
         )
 
     val krrKlient =

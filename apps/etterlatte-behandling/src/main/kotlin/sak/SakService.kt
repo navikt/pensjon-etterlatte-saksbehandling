@@ -1,6 +1,8 @@
 package no.nav.etterlatte.sak
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.common.Enheter
@@ -104,7 +106,7 @@ class SakServiceImpl(
     }
 
     override fun hentSaker(): List<Sak> {
-        return dao.hentSaker()
+        return dao.hentSaker().filterForEnheter()
     }
 
     private fun finnSakerForPerson(person: String) = dao.finnSaker(person)
@@ -117,7 +119,7 @@ class SakServiceImpl(
     }
 
     override fun finnSaker(person: String): List<Sak> {
-        return finnSakerForPerson(person)
+        return finnSakerForPerson(person).filterForEnheter()
     }
 
     override fun markerSakerMedSkjerming(
@@ -208,12 +210,27 @@ class SakServiceImpl(
         person: String,
         type: SakType,
     ): Sak? {
-        return finnSakerForPersonOgType(person, type)
+        return finnSakerForPersonOgType(person, type).sjekkEnhet()
     }
 
     override fun finnSak(id: Long): Sak? {
-        return dao.hentSak(id)
+        return dao.hentSak(id).sjekkEnhet()
     }
 
-    override fun finnFlyktningForSak(id: Long): Flyktning? = dao.hentSak(id)?.let { dao.finnFlyktningForSak(id) }
+    override fun finnFlyktningForSak(id: Long): Flyktning? = dao.hentSak(id).sjekkEnhet()?.let { dao.finnFlyktningForSak(id) }
+
+    private fun List<Sak>.filterForEnheter() =
+        this.filterSakerForEnheter(
+            Kontekst.get().AppUser,
+        )
+
+    private fun Sak?.sjekkEnhet() =
+        this?.let { sak ->
+            listOf(sak).filterForEnheter().firstOrNull()
+        }
 }
+
+fun List<Sak>.filterSakerForEnheter(user: User) =
+    this.filterForEnheter(user) { item, enheter ->
+        enheter.contains(item.enhet)
+    }

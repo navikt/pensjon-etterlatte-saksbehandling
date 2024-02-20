@@ -37,7 +37,7 @@ class DoedshendelseJobService(
     }
 
     fun run() {
-        if (true) {
+        if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)) {
             inTransaction {
                 val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
                 logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")

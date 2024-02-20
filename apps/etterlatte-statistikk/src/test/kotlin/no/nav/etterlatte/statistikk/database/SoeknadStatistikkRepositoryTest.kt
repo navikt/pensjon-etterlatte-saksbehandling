@@ -34,7 +34,7 @@ class SoeknadStatistikkRepositoryTest {
                 password = postgreSQLContainer.password,
             )
 
-        dataSource.migrate(gcp = false)
+        dataSource.migrate()
     }
 
     @AfterEach

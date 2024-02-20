@@ -1,6 +1,12 @@
 package no.nav.etterlatte.oppgave
 
+import io.mockk.mockk
+import no.nav.etterlatte.ConnectionAutoclosingTest
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -30,10 +36,16 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-        oppgaveDao = OppgaveDaoImpl { connection }
-        sakDao = SakDao { connection }
+        oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
+        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
         saktilgangDao = SakTilgangDao(dataSource)
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+        Kontekst.set(
+            Context(
+                user,
+                DatabaseContextTest(dataSource),
+            ),
+        )
     }
 
     @AfterEach

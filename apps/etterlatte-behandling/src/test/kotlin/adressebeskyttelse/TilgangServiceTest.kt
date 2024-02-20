@@ -2,6 +2,7 @@ package no.nav.etterlatte.adressebeskyttelse
 
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.mockk
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BrukerService
@@ -52,19 +53,17 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
-        sakRepo = SakDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
 
         sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService)
         behandlingRepo =
             BehandlingDao(
-                KommerBarnetTilGodeDao {
-                    connection
-                },
-                RevurderingDao { connection },
-            ) { connection }
-        klageDao = KlageDaoImpl { connection }
+                KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                (ConnectionAutoclosingTest(dataSource)),
+            )
+        klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))
     }
 
     @Test

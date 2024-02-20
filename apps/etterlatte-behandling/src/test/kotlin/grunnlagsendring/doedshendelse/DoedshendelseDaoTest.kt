@@ -3,8 +3,8 @@ package grunnlagsendring.doedshendelse
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Doedshendelse
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
@@ -24,7 +24,7 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun setup() {
-        doedshendelseDao = DoedshendelseDao(ConnectionAutoclosing(dataSource))
+        doedshendelseDao = DoedshendelseDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @Test

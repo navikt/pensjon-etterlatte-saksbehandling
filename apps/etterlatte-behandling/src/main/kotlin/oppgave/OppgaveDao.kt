@@ -366,20 +366,22 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
         merknad: String,
         status: Status,
     ) {
-        with(connection()) {
-            val statement =
-                prepareStatement(
-                    """
-                    UPDATE oppgave
-                    SET merknad = ?, status = ?
-                    where id = ?::UUID
-                    """.trimIndent(),
-                )
-            statement.setString(1, merknad)
-            statement.setString(2, status.name)
-            statement.setObject(3, oppgaveId)
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        UPDATE oppgave
+                        SET merknad = ?, status = ?
+                        where id = ?::UUID
+                        """.trimIndent(),
+                    )
+                statement.setString(1, merknad)
+                statement.setString(2, status.name)
+                statement.setObject(3, oppgaveId)
 
-            statement.executeUpdate()
+                statement.executeUpdate()
+            }
         }
     }
 

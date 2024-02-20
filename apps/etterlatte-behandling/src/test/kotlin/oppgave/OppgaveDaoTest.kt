@@ -212,6 +212,16 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
     }
 
     @Test
+    fun `kan sette oppgave paa vent`() {
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDao.opprettOppgave(oppgaveNy)
+        oppgaveDao.settPaaVent(oppgaveNy.id, "merknad", Status.PAA_VENT)
+        val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
+        assertEquals(Status.PAA_VENT, hentetOppgave?.status)
+    }
+
+    @Test
     fun `Skal ikke kunne hente adressebeskyttede oppgaver fra vanlig hentoppgaver`() {
         val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgaveNy = lagNyOppgave(sakAalesund)

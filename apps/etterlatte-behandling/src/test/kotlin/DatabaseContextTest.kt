@@ -19,7 +19,7 @@ class DatabaseContextTest(private val ds: DataSource) : DatabaseKontekst {
     }
 }
 
-class ConnectionAutoclosingTest(val dataSource: DataSource) : ConnectionAutoclosing {
+class ConnectionAutoclosingTest(val dataSource: DataSource) : ConnectionAutoclosing() {
     override fun <T> hentConnection(block: (connection: Connection) -> T): T {
         return if (manglerKontekst()) {
             dataSource.connection.use {
@@ -28,14 +28,6 @@ class ConnectionAutoclosingTest(val dataSource: DataSource) : ConnectionAutoclos
         } else {
             val activeTx = DatabaseContextTest(dataSource).activeTx()
             block(activeTx).also { activeTx.close() }
-        }
-    }
-
-    override fun manglerKontekst(): Boolean {
-        val kontekst = Kontekst.get()
-        return when (kontekst) {
-            null -> true
-            else -> false
         }
     }
 }

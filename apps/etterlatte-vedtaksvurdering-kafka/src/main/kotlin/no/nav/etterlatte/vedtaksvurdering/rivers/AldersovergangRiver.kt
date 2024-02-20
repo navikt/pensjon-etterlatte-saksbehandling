@@ -66,6 +66,9 @@ class AldersovergangRiver(
                 val loependeYtelse = vedtakService.harLoependeYtelserFra(sakId, behandlingsdato)
                 logger.info("Sak $sakId, behandlingsmåned=$behandlingsdato har løpende ytelse: ${loependeYtelse.erLoepende}")
                 hendelseData["loependeYtelse"] = loependeYtelse.erLoepende
+                loependeYtelse.behandlingId?.let {
+                    hendelseData["loependeYtelse_behandlingId"] = it.toString()
+                }
 
                 if (loependeYtelse.erLoepende && type == "AO_BP20") {
                     val loependeYtelsePerJanuar2024 = vedtakService.harLoependeYtelserFra(sakId, ikrafttredenEtterlattereformen)

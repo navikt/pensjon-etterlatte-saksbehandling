@@ -49,7 +49,6 @@ import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
@@ -71,6 +70,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
     private lateinit var behandlingRepo: BehandlingDao
     val grunnlagKlient = mockk<GrunnlagKlient>()
     val behandlingService = mockk<BehandlingService>()
+    val user = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     @BeforeAll
     fun beforeAll() {
@@ -90,6 +90,13 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
                 sakRepo,
             )
         service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient, hendelseDao)
+
+        Kontekst.set(
+            Context(
+                user,
+                DatabaseContextTest(dataSource),
+            ),
+        )
     }
 
     @AfterEach
@@ -97,18 +104,6 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE generellbehandling CASCADE; TRUNCATE oppgave CASCADE").execute()
         }
-    }
-
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-
-    @BeforeEach
-    fun beforeEach() {
-        Kontekst.set(
-            Context(
-                user,
-                DatabaseContextTest(dataSource),
-            ),
-        )
     }
 
     @Test

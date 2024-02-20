@@ -2,13 +2,8 @@ package no.nav.etterlatte.behandling
 
 import io.kotest.inspectors.forExactly
 import io.kotest.matchers.shouldBe
-import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Revurdering
@@ -64,13 +59,6 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
                 RevurderingDao(ConnectionAutoclosingTest(dataSource)),
                 ConnectionAutoclosingTest(dataSource),
             )
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-        Kontekst.set(
-            Context(
-                user,
-                DatabaseContextTest(dataSource),
-            ),
-        )
     }
 
     @AfterEach

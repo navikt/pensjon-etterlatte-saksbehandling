@@ -3,11 +3,7 @@ package no.nav.etterlatte.adressebeskyttelse
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.klage.KlageDao
@@ -68,13 +64,6 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
                 (ConnectionAutoclosingTest(dataSource)),
             )
         klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-        Kontekst.set(
-            Context(
-                user,
-                DatabaseContextTest(dataSource),
-            ),
-        )
     }
 
     @Test

@@ -1,12 +1,7 @@
 package no.nav.etterlatte.sak
 
-import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.Flyktning
@@ -30,13 +25,6 @@ internal class SakDaoTest(val dataSource: DataSource) {
     fun beforeAll() {
         sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-        Kontekst.set(
-            Context(
-                user,
-                DatabaseContextTest(dataSource),
-            ),
-        )
     }
 
     @Test

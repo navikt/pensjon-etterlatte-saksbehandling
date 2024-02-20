@@ -2,13 +2,8 @@ package no.nav.etterlatte.behandling.behandlinginfo
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import io.mockk.mockk
 import no.nav.etterlatte.ConnectionAutoclosingTest
-import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -55,14 +50,6 @@ internal class BehandlingInfoDaoTest(val dataSource: DataSource) {
             )
 
         dao = BehandlingInfoDao(ConnectionAutoclosingTest(dataSource))
-        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-
-        Kontekst.set(
-            Context(
-                user,
-                DatabaseContextTest(dataSource),
-            ),
-        )
     }
 
     @BeforeEach

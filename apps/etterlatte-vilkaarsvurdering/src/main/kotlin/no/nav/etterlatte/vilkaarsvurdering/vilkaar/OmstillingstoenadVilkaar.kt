@@ -347,7 +347,7 @@ object OmstillingstoenadVilkaar {
         Vilkaar(
             hovedvilkaar =
                 Delvilkaar(
-                    type = VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING,
+                    type = VilkaarType.OMS_AKTIVITET_ETTER_6_MND,
                     tittel = "Krav til aktivitet etter 6 måneder",
                     beskrivelse =
                         """

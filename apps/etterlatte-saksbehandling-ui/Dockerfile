@@ -14,6 +14,7 @@ FROM gcr.io/distroless/nodejs20-debian12 as prod
 COPY --from=base /app /app
 
 USER nonroot
+ENV NODE_ENV="production"
 
 WORKDIR /app
 EXPOSE 4000

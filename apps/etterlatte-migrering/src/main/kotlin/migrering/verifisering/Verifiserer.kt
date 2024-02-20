@@ -204,10 +204,6 @@ internal class Verifiserer(
             utlandSjekker.add(BrukerManglerAdresse)
         }
 
-        if (adresseland.filter { it.verdi.land != null }.none { erGyldigNaaEllerFramover(it) }) {
-            utlandSjekker.add(BrukerManglerAdresseMedLand)
-        }
-
         person.utland?.verdi?.let { utland ->
             val foedselsdato = person.foedselsdato?.verdi ?: request.soeker.getBirthDate()
             val datoFylte18 = foedselsdato.plusYears(18)
@@ -369,11 +365,6 @@ data object UkjentForelder : Verifiseringsfeil() {
 data object BrukerManglerAdresse : Verifiseringsfeil() {
     override val message: String
         get() = "Bruker mangler adresse i PDL"
-}
-
-data object BrukerManglerAdresseMedLand : Verifiseringsfeil() {
-    override val message: String
-        get() = "Bruker mangler adresse med definert land i PDL"
 }
 
 data object BeregningsmetodeIkkeNasjonal : Verifiseringsfeil() {

@@ -31,7 +31,7 @@ export interface NyBehandlingRequest {
   sakType: SakType
   persongalleri: Persongalleri
   mottattDato: string
-  spraak: Spraak
+  spraak?: Spraak
   kilde?: string
   pesysId?: number
   enhet?: String

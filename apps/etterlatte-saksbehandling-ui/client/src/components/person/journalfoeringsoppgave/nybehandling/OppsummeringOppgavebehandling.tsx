@@ -44,7 +44,7 @@ export default function OppsummeringOppgavebehandling() {
           </Tag>
         </div>
 
-        <Info label="Språk" tekst={formaterSpraak(spraak)} />
+        <Info label="Språk" tekst={formaterSpraak(spraak!)} />
         <Info label="Mottatt dato" tekst={formaterStringDato(mottattDato)} />
 
         <Info label="Søker" tekst={persongalleri.soeker} />

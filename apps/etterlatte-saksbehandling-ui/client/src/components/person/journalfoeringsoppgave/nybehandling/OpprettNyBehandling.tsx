@@ -12,22 +12,17 @@ import { FlexRow } from '~shared/styled'
 import React from 'react'
 import { Spraak } from '~shared/types/Brev'
 import { FormProvider, useForm } from 'react-hook-form'
-import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { useAppDispatch } from '~store/Store'
 import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { formatDateToLocalDateTimeOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
-
-interface PersonISkjema {
-  value: string
-}
 
 export interface NyBehandlingSkjema {
   spraak: Spraak | null
   mottattDato: string
   persongalleri: {
     soeker: string
-    innsender?: string
+    innsender: string
     gjenlevende?: Array<{ value: string }>
     avdoed?: Array<{ value: string }>
     soesken?: Array<{ value: string }>
@@ -50,7 +45,10 @@ export default function OpprettNyBehandling() {
 
   const methods = useForm<NyBehandlingSkjema>({
     defaultValues: {
-      persongalleri: { soeker: nyBehandlingRequest?.persongalleri?.soeker },
+      persongalleri: {
+        soeker: nyBehandlingRequest?.persongalleri?.soeker,
+        avdoed: sakType === SakType.OMSTILLINGSSTOENAD ? [{ value: '' }] : [],
+      },
     },
   })
   const {
@@ -61,29 +59,21 @@ export default function OpprettNyBehandling() {
   } = methods
 
   const onSubmit = (data: NyBehandlingSkjema) => {
-    // TODO gjøre switch på om det er barnepensjon eller omstillingstønad
-    // const gjenlevende: string[] = (data.persongalleri?.gjenlevende as unknown as PersonISkjema[]).map(
-    //   (val: PersonISkjema) => val.value
-    // )
-    // const avdoed: string[] = (data.persongalleri?.avdoed as unknown as PersonISkjema[]).map(
-    //   (val: PersonISkjema) => val.value
-    // )
-    // const soesken: string[] = (data.persongalleri?.soesken as unknown as PersonISkjema[]).map(
-    //   (val: PersonISkjema) => val.value
-    // )
-
-    // dispatch(
-    //   settNyBehandlingRequest({
-    //     ...data,
-    //     mottattDato: formatDateToLocalDateTimeOrEmptyString(new Date(data.mottattDato!)),
-    //     persongalleri: {
-    //       ...data.persongalleri,
-    //       gjenlevende,
-    //       avdoed,
-    //       soesken,
-    //     },
-    //   })
-    // )
+    let avdoed: string[] | undefined = data.persongalleri.avdoed?.map((val) => val.value)
+    if (sakType === SakType.OMSTILLINGSSTOENAD && avdoed && avdoed[0].length === 0) avdoed = undefined
+    dispatch(
+      settNyBehandlingRequest({
+        sakType,
+        spraak: data.spraak!,
+        mottattDato: formatDateToLocalDateTimeOrEmptyString(new Date(data.mottattDato)),
+        persongalleri: {
+          ...data.persongalleri,
+          gjenlevende: data.persongalleri.gjenlevende?.map((val) => val.value),
+          avdoed,
+          soesken: data.persongalleri.soesken?.map((val) => val.value),
+        },
+      })
+    )
 
     neste()
   }
@@ -125,7 +115,7 @@ export default function OpprettNyBehandling() {
             Persongalleri
           </Heading>
 
-          {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad control={control} />}
+          {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
           {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
 
           <div>

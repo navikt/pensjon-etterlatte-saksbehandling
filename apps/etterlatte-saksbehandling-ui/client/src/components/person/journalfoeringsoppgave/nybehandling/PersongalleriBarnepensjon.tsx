@@ -1,16 +1,22 @@
 import React from 'react'
-import { BodyShort, Heading, Panel, TextField } from '@navikt/ds-react'
-import { InputRow, NyBehandlingSkjema } from './OpprettNyBehandling'
-import { Control, useFormContext } from 'react-hook-form'
-import { ControlledTekstFelt } from '~shared/components/tekstFelt/ControlledTekstFelt'
-import { ControlledListMedTekstFelter } from '~shared/components/tekstFelt/ControlledListMedTekstFelter'
+import { BodyShort, Button, Heading, Panel, TextField } from '@navikt/ds-react'
+import { InputList, InputRow, NyBehandlingSkjema } from './OpprettNyBehandling'
+import { useFieldArray, useFormContext } from 'react-hook-form'
 import {
   validateFnrObligatorisk,
   validerFnrValgfri,
 } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
+import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 
 export default function PersongalleriBarnepensjon({ erManuellMigrering = false }: { erManuellMigrering?: boolean }) {
-  const { register } = useFormContext()
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<NyBehandlingSkjema>()
+
+  const gjenlevendeFormArray = useFieldArray<NyBehandlingSkjema>({ name: 'persongalleri.gjenlevende' })
+  const avdoedFormArray = useFieldArray<NyBehandlingSkjema>({ name: 'persongalleri.avdoed' })
+  const soeskenFormArray = useFieldArray<NyBehandlingSkjema>({ name: 'persongalleri.soesken' })
 
   return (
     <>
@@ -39,14 +45,32 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           <BodyShort textColor="subtle">Legg til gjenlevende hvis tilgjengelig</BodyShort>
         </Heading>
 
-        <ControlledListMedTekstFelter
-          name="persongalleri.gjenlevende"
-          label="Gjenlevende forelder"
-          description="Oppgi fødselsnummer"
-          validate={validateFnrObligatorisk}
-          addButtonLabel="Legg til gjenlevende"
-          maxLength={2}
-        />
+        <InputList>
+          {gjenlevendeFormArray.fields.map((field, index) => (
+            <InputRow key={index}>
+              <TextField
+                {...register(`persongalleri.gjenlevende.${index}.value`, { validate: validateFnrObligatorisk })}
+                key={field.id}
+                label="Gjenlevende forelder"
+                description="Oppgi fødselsnummer"
+                error={errors?.persongalleri?.gjenlevende?.[index]?.value?.message}
+              />
+              <Button
+                icon={<XMarkIcon aria-hidden />}
+                variant="tertiary"
+                onClick={() => gjenlevendeFormArray.remove(index)}
+              />
+            </InputRow>
+          ))}
+          <Button
+            icon={<PlusIcon aria-hidden />}
+            onClick={() => gjenlevendeFormArray.append({ value: '' })}
+            disabled={gjenlevendeFormArray.fields.length >= 2}
+            type="button"
+          >
+            Legg til gjenlevende
+          </Button>
+        </InputList>
       </Panel>
 
       <Panel border>
@@ -55,13 +79,32 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           <BodyShort textColor="subtle">Legg til avdød hvis tilgjengelig</BodyShort>
         </Heading>
 
-        <ControlledListMedTekstFelter
-          name="persongalleri.avdoed"
-          label="Avdød forelder"
-          validate={validateFnrObligatorisk}
-          addButtonLabel="Legg til avdød"
-          maxLength={2}
-        />
+        <InputList>
+          {avdoedFormArray.fields.map((field, index) => (
+            <InputRow key={index}>
+              <TextField
+                {...register(`persongalleri.avdoed.${index}.value`, { validate: validateFnrObligatorisk })}
+                key={field.id}
+                label="Avdød forelder"
+                description="Oppgi fødselsnummer"
+                error={errors?.persongalleri?.avdoed?.[index]?.value?.message}
+              />
+              <Button
+                icon={<XMarkIcon aria-hidden />}
+                variant="tertiary"
+                onClick={() => avdoedFormArray.remove(index)}
+              />
+            </InputRow>
+          ))}
+          <Button
+            icon={<PlusIcon aria-hidden />}
+            onClick={() => avdoedFormArray.append({ value: '' })}
+            disabled={avdoedFormArray.fields.length >= 2}
+            type="button"
+          >
+            Legg til avdød
+          </Button>
+        </InputList>
       </Panel>
 
       <Panel border>
@@ -69,14 +112,27 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           Søsken
           <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>
         </Heading>
-
-        <ControlledListMedTekstFelter
-          name="persongalleri.soesken"
-          label="Søsken"
-          description="Oppgi fødselsnummer"
-          validate={validateFnrObligatorisk}
-          addButtonLabel="Legg til søsken"
-        />
+        <InputList>
+          {soeskenFormArray.fields.map((field, index) => (
+            <InputRow key={index}>
+              <TextField
+                {...register(`persongalleri.soesken.${index}.value`, { validate: validateFnrObligatorisk })}
+                key={field.id}
+                label="Søsken"
+                description="Oppgi fødselsnummer"
+                error={errors?.persongalleri?.soesken?.[index]?.value?.message}
+              />
+              <Button
+                icon={<XMarkIcon aria-hidden />}
+                variant="tertiary"
+                onClick={() => soeskenFormArray.remove(index)}
+              />
+            </InputRow>
+          ))}
+          <Button icon={<PlusIcon aria-hidden />} onClick={() => soeskenFormArray.append({ value: '' })} type="button">
+            Legg til søsken
+          </Button>
+        </InputList>
       </Panel>
     </>
   )

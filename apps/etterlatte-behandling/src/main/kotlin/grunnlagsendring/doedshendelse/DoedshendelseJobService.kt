@@ -1,9 +1,12 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import org.slf4j.LoggerFactory
@@ -19,17 +22,27 @@ class DoedshendelseJobService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun run() {
+    fun setupKontekstAndRun(context: Context) {
+        Kontekst.set(context)
+        run()
+    }
+
+    private fun run() {
         if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)) {
-            val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
-            logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
+            val doedshendelserSomSkalHaanderes =
+                inTransaction {
+                    val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
+                    logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
 
-            val doedshendelserSomSkalHaanderes = finnGyldigeDoedshendelser(nyeDoedshendelser)
-            logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
-
+                    val doedshendelserSomSkalHaanderes = finnGyldigeDoedshendelser(nyeDoedshendelser)
+                    logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
+                    doedshendelserSomSkalHaanderes
+                }
             doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
-                logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
-                haandterDoedshendelse(doedshendelse)
+                inTransaction {
+                    logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
+                    haandterDoedshendelse(doedshendelse)
+                }
             }
         }
     }

@@ -355,7 +355,7 @@ class RevurderingService(
         if (omgjoeringsoppgave.sakId != sakId) {
             throw FeilIOmgjoering.OppgaveOgSakErForskjellig(sakId, omgjoeringsoppgave)
         }
-        if (omgjoeringsoppgave.saksbehandlerIdent != saksbehandler.ident) {
+        if (omgjoeringsoppgave.saksbehandler?.ident != saksbehandler.ident) {
             throw FeilIOmgjoering.SaksbehandlerHarIkkeOppgaven(saksbehandler, omgjoeringsoppgave)
         }
 
@@ -435,7 +435,7 @@ sealed class FeilIOmgjoering {
         UgyldigForespoerselException(
             "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
             "Saksbehandler med ident=${saksbehandler.ident} er ikke saksbehandler i oppgaven med " +
-                "id=$omgjoeringsoppgave (saksbehandler i oppgaven er ${omgjoeringsoppgave.saksbehandlerIdent}).",
+                "id=$omgjoeringsoppgave (saksbehandler i oppgaven er ${omgjoeringsoppgave.saksbehandler?.ident}).",
         )
 
     class ManglerBehandlingForOmgjoering(klage: Klage) : InternfeilException(

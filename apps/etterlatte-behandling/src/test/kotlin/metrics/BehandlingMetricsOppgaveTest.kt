@@ -9,6 +9,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -121,11 +122,11 @@ internal class BehandlingMetricsOppgaveTest(private val ds: DataSource) {
     fun lagNyOppgave(
         sak: Sak,
         status: Status,
-        saksbehandler: String,
+        ident: String,
     ) = OppgaveIntern(
         id = UUID.randomUUID(),
         status = status,
-        saksbehandlerIdent = saksbehandler,
+        saksbehandler = OppgaveSaksbehandler(ident),
         enhet = sak.enhet,
         sakId = sak.id,
         kilde = OppgaveKilde.BEHANDLING,

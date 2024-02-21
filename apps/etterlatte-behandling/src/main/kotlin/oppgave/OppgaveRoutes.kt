@@ -124,8 +124,11 @@ internal fun Route.oppgaveRoutes(
 
             get("/ikkeattestert/{referanse}") {
                 kunSaksbehandler {
-                    val saksbehandler = inTransaction { service.hentSisteSaksbehandlerIkkeAttestertOppgave(referanse) }
-                    call.respond(saksbehandler)
+                    val saksbehandler =
+                        inTransaction {
+                            service.hentSisteSaksbehandlerIkkeAttestertOppgave(referanse)
+                        }
+                    call.respond(saksbehandler ?: HttpStatusCode.NoContent)
                 }
             }
             get("/ikkeattestertOppgave/{referanse}") {

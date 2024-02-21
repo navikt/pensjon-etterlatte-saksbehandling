@@ -43,6 +43,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
@@ -68,9 +69,11 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
     private lateinit var service: GenerellBehandlingService
     private lateinit var behandlingRepo: BehandlingDao
-    val grunnlagKlient = mockk<GrunnlagKlient>()
-    val behandlingService = mockk<BehandlingService>()
-    val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val saksbehandlerInfoDao = mockk<SaksbehandlerInfoDao>()
+    private val saksbehandlerNavn = "Ola Nordmann"
 
     @BeforeAll
     fun beforeAll() {
@@ -82,14 +85,16 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
                 RevurderingDao(ConnectionAutoclosingTest(dataSource)),
-                (ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
             )
         oppgaveService =
             OppgaveService(
                 OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),
                 sakRepo,
             )
-        service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient, hendelseDao)
+
+        every { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) } returns saksbehandlerNavn
+        service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient, hendelseDao, saksbehandlerInfoDao)
 
         Kontekst.set(
             Context(
@@ -300,6 +305,10 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
             oppgave.status.shouldBe(Status.FERDIGSTILT)
         }
+
+        val attesteringsoppgave = behandlingsOppgaverFattetOgAttestering.filter { it.type == OppgaveType.ATTESTERING }
+        Assertions.assertEquals(1, attesteringsoppgave.size)
+        Assertions.assertTrue(attesteringsoppgave[0].merknad?.contains(saksbehandlerNavn) ?: false)
 
         verify {
             hendelseDao.generellBehandlingHendelse(

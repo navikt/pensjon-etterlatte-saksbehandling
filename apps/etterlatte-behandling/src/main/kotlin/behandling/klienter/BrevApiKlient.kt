@@ -10,6 +10,7 @@ import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -77,7 +78,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
             post(
                 url = "$resourceUrl/api/brev/sak/$sakId",
                 onSuccess = { resource ->
-                    resource.response?.let { objectMapper.readValue(it.toString()) }
+                    resource.response?.let { objectMapper.readValue(it.toJson()) }
                         ?: throw RuntimeException("Fikk ikke en riktig respons fra oppretting av brev")
                 },
                 brukerTokenInfo = brukerTokenInfo,
@@ -102,7 +103,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     ): OpprettetBrevDto {
         return post(
             url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak?sakId=$sakId",
-            onSuccess = { resource -> deserialize(resource.response.toString()) },
+            onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
     }
@@ -126,7 +127,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     ): JournalpostIdDto {
         return post(
             url = "$resourceUrl/api/brev/$brevId/journalfoer?sakId=$sakId",
-            onSuccess = { resource -> deserialize(resource.response.toString()) },
+            onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
     }
@@ -138,7 +139,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     ): BestillingsIdDto {
         return post(
             url = "$resourceUrl/api/brev/$brevId/distribuer?sakId=$sakId",
-            onSuccess = { resource -> deserialize(resource.response.toString()) },
+            onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
     }
@@ -150,7 +151,7 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
     ): OpprettetBrevDto {
         return get(
             url = "$resourceUrl/api/brev/$brevId?sakId=$sakId",
-            onSuccess = { resource -> deserialize(resource.response.toString()) },
+            onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
     }

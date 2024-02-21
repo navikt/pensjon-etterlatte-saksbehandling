@@ -13,6 +13,8 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
+import no.nav.etterlatte.libs.common.behandling.MigreringRespons
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
@@ -25,7 +27,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
-import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
@@ -35,6 +36,8 @@ import java.util.UUID
 
 interface BehandlingService {
     fun sendDoedshendelse(doedshendelse: Doedshendelse)
+
+    fun oppdaterDoedshendelseBrevDistribuert(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert)
 
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
 
@@ -56,7 +59,7 @@ interface BehandlingService {
 
     fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe
 
-    fun migrer(hendelse: MigreringRequest): BehandlingOgSak
+    fun migrer(hendelse: MigreringRequest): MigreringRespons
 
     fun opprettOppgaveManuellGjenoppretting(hendelse: MigreringRequest)
 
@@ -89,6 +92,15 @@ class BehandlingServiceImpl(
             behandlingKlient.post("$url/grunnlagsendringshendelse/doedshendelse") {
                 contentType(ContentType.Application.Json)
                 setBody(doedshendelse)
+            }
+        }
+    }
+
+    override fun oppdaterDoedshendelseBrevDistribuert(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) {
+        runBlocking {
+            behandlingKlient.post("$url/doedshendelse/brevdistribuert") {
+                contentType(ContentType.Application.Json)
+                setBody(doedshendelseBrevDistribuert)
             }
         }
     }
@@ -174,7 +186,7 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun migrer(hendelse: MigreringRequest): BehandlingOgSak =
+    override fun migrer(hendelse: MigreringRequest): MigreringRespons =
         runBlocking {
             behandlingKlient.post("$url/migrering") {
                 contentType(ContentType.Application.Json)

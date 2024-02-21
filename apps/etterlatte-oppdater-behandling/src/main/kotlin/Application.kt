@@ -22,5 +22,6 @@ fun main() {
         AvbrytBehandlingHvisMigreringFeilaRiver(rapidsConnection, behandlingservice)
         OpprettBrevRiver(rapidsConnection, behandlingservice, appBuilder.featureToggleService)
         TidshendelseRiver(rapidsConnection, behandlingservice)
+        OppdaterDoedshendelseBrevDistribuert(rapidsConnection, behandlingservice)
     }.start()
 }

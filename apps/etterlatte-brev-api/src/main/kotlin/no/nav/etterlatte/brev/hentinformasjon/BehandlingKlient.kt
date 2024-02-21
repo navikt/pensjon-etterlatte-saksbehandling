@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev.behandlingklient
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
@@ -10,8 +9,10 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.oppgave.SettPaaVentRequest
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.retry
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
@@ -30,122 +31,113 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Sak {
-        try {
-            return downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$resourceUrl/saker/$sakId",
-                        ),
-                    brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
-                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
-        } catch (e: Exception) {
-            throw BehandlingKlientException("Sjekking av tilgang for behandling feilet", e)
-        }
+        return get(
+            url = "$resourceUrl/saker/$sakId",
+            onSuccess = { deserialize(it.response!!.toString()) },
+            errorMessage = { "Sjekking av tilgang for behandling med id =$sakId feilet" },
+            brukerTokenInfo = brukerTokenInfo,
+        )
     }
 
     internal suspend fun hentSisteIverksatteBehandling(
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): SisteIverksatteBehandling {
-        return retry<SisteIverksatteBehandling> {
-            downstreamResourceClient
-                .get(
-                    resource =
-                        Resource(
-                            clientId = clientId,
-                            url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte",
-                        ),
-                    brukerTokenInfo = brukerTokenInfo,
-                )
-                .mapBoth(
-                    success = { deserialize(it.response.toString()) },
-                    failure = { throwableErrorMessage -> throw throwableErrorMessage },
-                )
-        }.let {
-            when (it) {
-                is RetryResult.Success -> it.content
-                is RetryResult.Failure -> {
-                    throw BehandlingKlientException(
-                        "Klarte ikke hente siste iverksatte behandling på sak med id=$sakId",
-                        it.samlaExceptions(),
-                    )
-                }
-            }
-        }
+        return get(
+            url = "$resourceUrl/saker/$sakId/behandlinger/sisteIverksatte",
+            onSuccess = { deserialize(it.response!!.toString()) },
+            errorMessage = { "Klarte ikke hente siste iverksatte behandling på sak med id=$sakId" },
+            brukerTokenInfo = brukerTokenInfo,
+        )
     }
 
     internal suspend fun hentBrevutfall(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevutfallDto? {
-        try {
-            return downstreamResourceClient.get(
-                resource =
-                    Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/behandling/$behandlingId/info/brevutfall",
-                    ),
-                brukerTokenInfo = brukerTokenInfo,
-            ).mapBoth(
-                success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
-                failure = { throwableErrorMessage -> throw throwableErrorMessage },
-            )
-        } catch (e: Exception) {
-            throw BehandlingKlientException("Henting av brevutfall feilet", e)
-        }
+        return get(
+            url = "$resourceUrl/api/behandling/$behandlingId/info/brevutfall",
+            onSuccess = { it.response?.toString()?.let(::deserialize) },
+            brukerTokenInfo = brukerTokenInfo,
+            errorMessage = { "Henting av brevutfall for behandling med id=$behandlingId feilet" },
+        )
     }
 
     internal suspend fun hentEtterbetaling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): EtterbetalingDTO? {
-        try {
-            return downstreamResourceClient.get(
-                resource =
-                    Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/behandling/$behandlingId/info/etterbetaling",
-                    ),
-                brukerTokenInfo = brukerTokenInfo,
-            ).mapBoth(
-                success = { resource -> resource.response?.let { objectMapper.readValue(it.toString()) } },
-                failure = { throwableErrorMessage -> throw throwableErrorMessage },
-            )
-        } catch (e: Exception) {
-            throw BehandlingKlientException("Henting av etterbetaling feilet", e)
-        }
+        return get(
+            url = "$resourceUrl/api/behandling/$behandlingId/info/etterbetaling",
+            onSuccess = { it.response?.toString()?.let(::deserialize) },
+            errorMessage = { "Henting av etterbetaling for behandling med id=$behandlingId feilet" },
+            brukerTokenInfo = brukerTokenInfo,
+        )
     }
 
     internal suspend fun hentBehandling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): DetaljertBehandling {
+        return get(
+            url = "$resourceUrl/behandlinger/$behandlingId",
+            onSuccess = { deserialize(it.response!!.toString()) },
+            errorMessage = { "Klarte ikke hente behandling med id=$behandlingId" },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
+    internal suspend fun settOppgavePaaVent(
+        oppgaveId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+        merknad: String,
+    ) = retryOgPakkUt {
+        downstreamResourceClient.post(
+            resource = Resource(clientId = clientId, url = "$resourceUrl/api/oppgaver/$oppgaveId/sett-paa-vent"),
+            brukerTokenInfo = brukerTokenInfo,
+            postBody =
+                SettPaaVentRequest(
+                    merknad = merknad,
+                    status = Status.UNDER_BEHANDLING,
+                ),
+        )
+    }
+
+    internal suspend fun hentVedtaksbehandlingKanRedigeres(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
+        return get(
+            url = "$resourceUrl/vedtaksbehandling/$behandlingId/redigerbar",
+            onSuccess = { deserialize(it.response!!.toString()) },
+            errorMessage = { "Klarte ikke hente svar på om generisk behandling med id=$behandlingId kan redigeres" },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
+    private suspend fun <T> get(
+        url: String,
+        onSuccess: (Resource) -> T,
+        errorMessage: () -> String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): T {
         return retry {
             try {
                 downstreamResourceClient.get(
-                    resource = Resource(clientId = clientId, url = "$resourceUrl/behandlinger/$behandlingId"),
+                    resource = Resource(clientId = clientId, url = url),
                     brukerTokenInfo = brukerTokenInfo,
                 ).mapBoth(
-                    success = { resource -> resource.response!!.let { objectMapper.readValue<DetaljertBehandling>(it.toString()) } },
+                    success = onSuccess,
                     failure = { throwableErrorMessage -> throw throwableErrorMessage },
                 )
             } catch (e: Exception) {
-                throw BehandlingKlientException("Henting av behandling med id=$behandlingId for å finne vedtaksløsning feilet")
+                throw e
             }
         }.let {
             when (it) {
                 is RetryResult.Success -> it.content
                 is RetryResult.Failure -> {
-                    throw BehandlingKlientException(
-                        "Klarte ikke hente kilde for behandling $behandlingId",
-                        it.samlaExceptions(),
-                    )
+                    throw BehandlingKlientException(errorMessage(), it.samlaExceptions())
                 }
             }
         }

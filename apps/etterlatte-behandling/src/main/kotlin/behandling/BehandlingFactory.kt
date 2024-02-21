@@ -2,7 +2,6 @@ package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
@@ -32,6 +31,7 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.PersonIdent
@@ -43,7 +43,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.rapidsandrivers.migrering.GJENOPPRETTELSE_OPPGAVE
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -169,9 +168,10 @@ class BehandlingFactory(
                     request.kilde ?: Vedtaksloesning.GJENNY,
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
-                        oppgaveService.hentOppgaverForSak(sak.id).find { it.referanse == GJENOPPRETTELSE_OPPGAVE }?.let {
-                            oppgaveService.hentOgFerdigstillOppgaveById(it.id, brukerTokenInfo)
-                        }
+                        oppgaveService.hentOppgaverForSak(sak.id)
+                            .find { it.type == OppgaveType.GJENOPPRETTING_ALDERSOVERGANG }?.let {
+                                oppgaveService.hentOgFerdigstillOppgaveById(it.id, brukerTokenInfo)
+                            }
                     }
                 } ?: throw IllegalStateException("Kunne ikke opprette behandling")
             }.behandling
@@ -244,7 +244,7 @@ class BehandlingFactory(
                 mottattDato = mottattDato,
                 kilde = kilde,
                 revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
-            )?.oppdater()?.let { BehandlingOgOppgave(it, null) }
+            ).oppdater().let { BehandlingOgOppgave(it, null) }
         } else {
             val harBehandlingUnderbehandling =
                 harBehandlingerForSak.filter { behandling ->
@@ -297,16 +297,9 @@ class BehandlingFactory(
 
             logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
-            behandlingDao.hentBehandling(opprettBehandling.id)?.sjekkEnhet()
+            behandlingDao.hentBehandling(opprettBehandling.id)
         }
     }
-
-    private fun Behandling?.sjekkEnhet() =
-        this?.let { behandling ->
-            listOf(behandling).filterBehandlingerForEnheter(
-                Kontekst.get().AppUser,
-            ).firstOrNull()
-        }
 }
 
 data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveIntern?)

@@ -32,6 +32,8 @@ data class Hendelse(
 enum class JobbType(val beskrivelse: String) {
     AO_BP18("Aldersovergang barnepensjon ved 18 år"),
     AO_BP20("Aldersovergang barnepensjon ved 20 år"),
+    AO_BP21("Aldersovergang barnepensjon ved 21 år"),
+    AO_OMS67("Aldersovergang omstillingsstønad ved 67 år"),
 }
 
 enum class JobbStatus {

@@ -12,7 +12,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.routing
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.ktor.healthApi
-import no.nav.etterlatte.libs.ktor.metricsModule
+import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktor.restModule
 
 fun initEmbeddedServer(
@@ -33,7 +33,7 @@ fun initEmbeddedServerUtenRest(
     routing {
         healthApi()
     }
-    metricsModule()
+    metricsRoute()
 }
 
 private fun settOppEmbeddedServer(

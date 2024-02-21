@@ -27,7 +27,7 @@ import { SakType } from '~shared/types/sak'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
+import { forrigeSteg, kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -175,15 +175,6 @@ export function EndeligVurdering(props: { klage: Klage }) {
       </form>
     </>
   )
-}
-
-function kanSeBrev(valgtUtfall: Utfall | null) {
-  switch (valgtUtfall) {
-    case 'DELVIS_OMGJOERING':
-    case 'STADFESTE_VEDTAK':
-      return true
-  }
-  return false
 }
 
 function nesteSteg(valgtUtfall: Utfall | null, klageId: string) {

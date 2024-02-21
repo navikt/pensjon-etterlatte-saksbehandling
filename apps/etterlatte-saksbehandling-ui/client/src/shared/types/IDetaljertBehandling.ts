@@ -24,6 +24,7 @@ export interface IDetaljertBehandling {
   revurderingsaarsak: Revurderingaarsak | null
   revurderinginfo: RevurderingMedBegrunnelse | null
   begrunnelse: string | null
+  kilde: Vedtaksloesning
 }
 
 export interface NyBehandlingRequest {
@@ -118,4 +119,10 @@ export interface Virkningstidspunkt {
   kilde: KildeSaksbehandler
   begrunnelse: string
   kravdato: string | null
+}
+
+export enum Vedtaksloesning {
+  GJENNY = 'GJENNY',
+  PESYS = 'PESYS',
+  GJENOPPRETTA = 'GJENOPPRETTA',
 }

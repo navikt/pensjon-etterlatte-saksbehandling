@@ -12,8 +12,9 @@ fun toFeilutbetalingType(feilutbetalingValg: FeilutbetalingValg) =
 fun vedleggHvisFeilutbetaling(
     feilutbetaling: FeilutbetalingType,
     innholdMedVedlegg: InnholdMedVedlegg,
+    brevVedleggKey: BrevVedleggKey,
 ) = if (feilutbetaling == FeilutbetalingType.FEILUTBETALING_MED_VARSEL) {
-    innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING)
+    innholdMedVedlegg.finnVedlegg(brevVedleggKey)
 } else {
     emptyList()
 }

@@ -44,10 +44,10 @@ class AldersovergangerIntegrationTest(dataSource: DataSource) {
 
     @Test
     fun `skal hente saker som skal vurderes og lagre hendelser for hver enkelt`() {
-        val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
-        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
+        val behandlingsmaaned = YearMonth.of(2025, Month.MARCH)
+        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP21, behandlingsmaaned)
 
-        every { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(20)) } returns listOf(1, 2, 3)
+        every { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(21)) } returns listOf(1, 2, 3)
 
         aldersovergangerService.execute(jobb)
 

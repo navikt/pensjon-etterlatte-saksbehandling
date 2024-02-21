@@ -1,9 +1,10 @@
 import React, { ReactNode, useState } from 'react'
 import { SortState, Table } from '@navikt/ds-react'
 import { OppgaverTableHeader } from '~components/oppgavebenk/oppgaverTable/OppgaverTableHeader'
-import { OppgaveDTO, Saksbehandler } from '~shared/api/oppgaver'
+import { OppgaveDTO } from '~shared/api/oppgaver'
 import { OppgaverTableRow } from '~components/oppgavebenk/oppgaverTable/OppgaverTableRow'
 import { leggTilSorteringILocalStorage, OppgaveSortering } from '~components/oppgavebenk/oppgaverTable/oppgavesortering'
+import { Saksbehandler } from '~shared/types/saksbehandler'
 
 export enum SortKey {
   FRIST = 'frist',
@@ -17,8 +18,7 @@ interface SorteringsState extends Omit<SortState, 'direction'> {
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
-  erMinOppgaveliste: boolean
-  oppdaterFrist: (id: string, nyfrist: string, versjon: number | null) => void
+  oppdaterFrist?: (id: string, nyfrist: string, versjon: number | null) => void
   saksbehandlereIEnhet: Array<Saksbehandler>
   setSortering: (nySortering: OppgaveSortering) => void
 }
@@ -26,7 +26,6 @@ interface Props {
 export const OppgaverTable = ({
   oppgaver,
   oppdaterTildeling,
-  erMinOppgaveliste,
   oppdaterFrist,
   saksbehandlereIEnhet,
   setSortering,
@@ -64,6 +63,7 @@ export const OppgaverTable = ({
 
   return (
     <Table
+      size="small"
       sort={sort && sort.direction !== 'no-order' ? { direction: sort.direction, orderBy: sort.orderBy } : undefined}
       onSortChange={(sortKey) => handleSort(sortKey as SortKey)}
     >
@@ -77,7 +77,6 @@ export const OppgaverTable = ({
                 oppgave={oppgave}
                 saksbehandlereIEnhet={saksbehandlereIEnhet}
                 oppdaterTildeling={oppdaterTildeling}
-                erMinOppgaveListe={erMinOppgaveliste}
                 oppdaterFrist={oppdaterFrist}
               />
             )

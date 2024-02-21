@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.RevurderingInfo
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
@@ -34,6 +35,7 @@ data class Vedtak(
     val soeker: Folkeregisteridentifikator,
     val sakId: Long,
     val sakType: SakType,
+    /** kan være ID-en til en behandling, klage eller tilbakekreving */
     val behandlingId: UUID,
     val status: VedtakStatus,
     val type: VedtakType,
@@ -101,4 +103,10 @@ sealed interface VedtakInnhold {
     ) : VedtakInnhold
 }
 
-data class LoependeYtelse(val erLoepende: Boolean, val dato: LocalDate)
+data class LoependeYtelse(val erLoepende: Boolean, val dato: LocalDate, val behandlingId: UUID? = null)
+
+class UgyldigAttestantException(ident: String) :
+    IkkeTillattException(
+        code = "ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON",
+        detail = "Saksbehandler og attestant må være to forskjellige personer (ident=$ident)",
+    )

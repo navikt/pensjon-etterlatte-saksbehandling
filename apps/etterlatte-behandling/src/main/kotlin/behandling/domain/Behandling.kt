@@ -1,8 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingSammendrag
-import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -141,7 +139,7 @@ sealed class Behandling {
         } else {
             logger.error(
                 "Ugyldig operasjon på behandling ($id) med status $status, prøver å endre til status ${endreTilStatus.name}." +
-                    " Forventet statuser er ${behandlingStatuser.joinToString { " ," }}",
+                    " Forventet statuser er ${behandlingStatuser.joinToString(",")}",
             )
             throw TilstandException.UgyldigTilstand
         }
@@ -200,13 +198,6 @@ sealed class Behandling {
         message: String = "Behandlingen støtter ikke statusendringen til status $behandlingStatus",
     ) : Exception(message)
 }
-
-fun <T : Behandling> T?.sjekkEnhet() =
-    this?.let { behandling ->
-        listOf(behandling).filterBehandlingerForEnheter(
-            Kontekst.get().AppUser,
-        ).firstOrNull()
-    }
 
 internal fun Behandling.toStatistikkBehandling(
     persongalleri: Persongalleri,

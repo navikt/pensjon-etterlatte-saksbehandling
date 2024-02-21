@@ -147,7 +147,7 @@ class OppgaveService(
                 ?: throw OppgaveIkkeFunnet(oppgaveId)
 
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (hentetOppgave.saksbehandlerIdent != null) {
+        if (!hentetOppgave.saksbehandlerIdent.isNullOrEmpty()) {
             oppgaveDao.fjernSaksbehandler(oppgaveId)
         } else {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
@@ -175,10 +175,31 @@ class OppgaveService(
                     meta = mapOf("oppgaveId" to oppgaveId),
                 )
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (hentetOppgave.saksbehandlerIdent != null) {
-            oppgaveDao.redigerFrist(oppgaveId, frist)
-        } else {
+        if (hentetOppgave.saksbehandlerIdent.isNullOrEmpty()) {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
+        } else {
+            oppgaveDao.redigerFrist(oppgaveId, frist)
+        }
+    }
+
+    fun oppdaterStatusOgMerknad(
+        oppgaveId: UUID,
+        merknad: String,
+        status: Status,
+    ) {
+        val nyStatus = if (status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId)
+                ?: throw IkkeFunnetException(
+                    code = "OPPGAVE_IKKE_FUNNET",
+                    detail = "Oppgaven finnes ikke",
+                    meta = mapOf("oppgaveId" to oppgaveId),
+                )
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        if (hentetOppgave.saksbehandlerIdent.isNullOrEmpty()) {
+            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
+        } else {
+            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, nyStatus)
         }
     }
 
@@ -391,6 +412,20 @@ class OppgaveService(
             throw ManglerSaksbehandlerException("Fant ingen saksbehandler for oppgave uten attesteringstype med referanse $referanse")
         } else {
             return sortedByDescending[0].toSaksbehandler()
+        }
+    }
+
+    fun hentSisteIkkeAttestertOppgave(referanse: String): OppgaveIntern {
+        val oppgaverForBehandlingUtenAttesterting =
+            oppgaveDao.hentOppgaverForReferanse(referanse)
+                .filter {
+                    it.type !== OppgaveType.ATTESTERING
+                }
+        val sortedByDescending = oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }
+        if (sortedByDescending.isEmpty()) {
+            throw ManglerSaksbehandlerException("Fant ingen oppgave uten attesteringstype med referanse $referanse")
+        } else {
+            return sortedByDescending[0]
         }
     }
 

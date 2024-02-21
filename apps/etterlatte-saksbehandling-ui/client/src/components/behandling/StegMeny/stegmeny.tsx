@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import { NavLenke } from '~components/behandling/StegMeny/NavLenke'
 import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import {
@@ -24,7 +24,9 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
 
   const [fetchVilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
 
-  const lagVarselbrev = useFeatureEnabledMedDefault(FEATURE_TOGGLE_LAG_VARSELBREV, false)
+  const lagVarselbrev =
+    behandling.kilde === Vedtaksloesning.GJENOPPRETTA &&
+    useFeatureEnabledMedDefault(FEATURE_TOGGLE_LAG_VARSELBREV, false)
   const soeknadRoutes_ = soeknadRoutes(behandling, lagVarselbrev)
   const revurderingRoutes_ = revurderingRoutes(behandling, lagVarselbrev)
   const erSisteRoute = (index: number, list: BehandlingRouteTypes[]) => index != list.length - 1

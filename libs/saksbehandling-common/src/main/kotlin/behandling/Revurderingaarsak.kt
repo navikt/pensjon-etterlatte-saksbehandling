@@ -7,7 +7,7 @@ import no.nav.etterlatte.libs.common.behandling.Utfall.IkkeOpphoerSkalIkkeSendeB
 import no.nav.etterlatte.libs.common.behandling.Utfall.IkkeOpphoerSkalSendeBrev
 import no.nav.etterlatte.libs.common.behandling.Utfall.OpphoerMedBrev
 import no.nav.etterlatte.libs.common.behandling.Utfall.OpphoerUtenBrev
-import no.nav.etterlatte.libs.common.clusternavn
+import no.nav.etterlatte.libs.common.clusterNavn
 
 private val SAKTYPE_OMS = listOf(SakType.OMSTILLINGSSTOENAD)
 private val SAKTYPE_BP = listOf(SakType.BARNEPENSJON)
@@ -72,9 +72,9 @@ enum class Revurderingaarsak(
     REGULERING(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalIkkeSendeBrev),
     DOEDSFALL(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
     INNTEKTSENDRING(SAKTYPE_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
-    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, KunIDev, OpphoerMedBrev),
-    ADOPSJON(SAKTYPE_BP, KunIDev, OpphoerMedBrev),
-    SIVILSTAND(SAKTYPE_OMS, KunIDev, OpphoerMedBrev),
+    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),
+    ADOPSJON(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),
+    SIVILSTAND(SAKTYPE_OMS, DevOgProd, OpphoerMedBrev),
     FENGSELSOPPHOLD(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev),
     UT_AV_FENGSEL(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev),
     NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
@@ -88,7 +88,7 @@ enum class Revurderingaarsak(
     ;
 
     fun kanBrukesIMiljo(): Boolean =
-        when (clusternavn()) {
+        when (clusterNavn()) {
             null -> true
             GcpEnv.PROD.env -> miljoe.prod
             GcpEnv.DEV.env -> miljoe.dev

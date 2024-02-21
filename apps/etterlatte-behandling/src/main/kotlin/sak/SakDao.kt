@@ -2,6 +2,7 @@ package no.nav.etterlatte.sak
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -11,7 +12,6 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import java.sql.Connection
 import java.sql.ResultSet
 
 data class SakMedUtlandstilknytning(
@@ -35,34 +35,38 @@ data class SakMedUtlandstilknytning(
     }
 }
 
-class SakDao(private val connection: () -> Connection) {
+class SakDao(private val connectionAutoclosing: ConnectionAutoclosing) {
     fun oppdaterFlyktning(
         sakId: Long,
         flyktning: Flyktning,
     ) {
-        with(connection()) {
-            val statement =
-                prepareStatement(
-                    "UPDATE sak set flyktning = ? where id = ?",
-                )
-            statement.setJsonb(1, flyktning)
-            statement.setLong(2, sakId)
-            statement.executeUpdate()
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        "UPDATE sak set flyktning = ? where id = ?",
+                    )
+                statement.setJsonb(1, flyktning)
+                statement.setLong(2, sakId)
+                statement.executeUpdate()
+            }
         }
     }
 
     fun finnSakerMedGraderingOgSkjerming(sakIder: List<Long>): List<SakMedGradering> {
-        with(connection()) {
-            val statement =
-                prepareStatement(
-                    "SELECT id, adressebeskyttelse from sak where id = any(?)",
-                )
-            statement.setArray(1, createArrayOf("bigint", sakIder.toTypedArray()))
-            return statement.executeQuery().toList {
-                SakMedGradering(
-                    id = getLong(1),
-                    adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
-                )
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val statement =
+                    prepareStatement(
+                        "SELECT id, adressebeskyttelse from sak where id = any(?)",
+                    )
+                statement.setArray(1, createArrayOf("bigint", sakIder.toTypedArray()))
+                statement.executeQuery().toList {
+                    SakMedGradering(
+                        id = getLong(1),
+                        adressebeskyttelseGradering = getString(2)?.let { AdressebeskyttelseGradering.valueOf(it) },
+                    )
+                }
             }
         }
     }
@@ -71,31 +75,43 @@ class SakDao(private val connection: () -> Connection) {
         sakId: Long,
         adressebeskyttelseGradering: AdressebeskyttelseGradering,
     ): Int {
-        with(connection()) {
-            val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
-            statement.setString(1, adressebeskyttelseGradering.toString())
-            statement.setLong(2, sakId)
-            return statement.executeUpdate().also { require(it == 1) }
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val statement = prepareStatement("UPDATE sak SET adressebeskyttelse = ? where id = ?")
+                statement.setString(1, adressebeskyttelseGradering.toString())
+                statement.setLong(2, sakId)
+                statement.executeUpdate().also { require(it == 1) }
+            }
         }
     }
 
     fun hentSaker(): List<Sak> {
-        val statement = connection().prepareStatement("SELECT id, sakType, fnr, enhet from sak")
-        return statement.executeQuery().toList { this.toSak() }
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak")
+                statement.executeQuery().toList { this.toSak() }
+            }
+        }
     }
 
     fun hentSak(id: Long): Sak? {
-        val statement = connection().prepareStatement("SELECT id, sakType, fnr, enhet from sak where id = ?")
-        statement.setLong(1, id)
-        return statement.executeQuery().singleOrNull { this.toSak() }
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak where id = ?")
+                statement.setLong(1, id)
+                statement.executeQuery().singleOrNull { this.toSak() }
+            }
+        }
     }
 
     fun finnFlyktningForSak(id: Long): Flyktning? {
-        return with(connection()) {
-            val statement = prepareStatement("SELECT flyktning from sak where id = ?")
-            statement.setLong(1, id)
-            statement.executeQuery().singleOrNull {
-                this.getString("flyktning")?.let { objectMapper.readValue(it) }
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val statement = prepareStatement("SELECT flyktning from sak where id = ?")
+                statement.setLong(1, id)
+                statement.executeQuery().singleOrNull {
+                    this.getString("flyktning")?.let { objectMapper.readValue(it) }
+                }
             }
         }
     }
@@ -105,59 +121,71 @@ class SakDao(private val connection: () -> Connection) {
         type: SakType,
         enhet: String,
     ): Sak {
-        val statement =
-            connection().prepareStatement(
-                "INSERT INTO sak(sakType, fnr, enhet) VALUES(?, ?, ?) RETURNING id, sakType, fnr, enhet",
-            )
-        statement.setString(1, type.name)
-        statement.setString(2, fnr)
-        statement.setString(3, enhet)
-        return requireNotNull(
-            statement.executeQuery().singleOrNull { this.toSak() },
-        ) { "Kunne ikke opprette sak for fnr: $fnr" }
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val statement =
+                    prepareStatement(
+                        "INSERT INTO sak(sakType, fnr, enhet) VALUES(?, ?, ?) RETURNING id, sakType, fnr, enhet",
+                    )
+                statement.setString(1, type.name)
+                statement.setString(2, fnr)
+                statement.setString(3, enhet)
+                requireNotNull(
+                    statement.executeQuery().singleOrNull { this.toSak() },
+                ) { "Kunne ikke opprette sak for fnr: $fnr" }
+            }
+        }
     }
 
     fun oppdaterEnheterPaaSaker(saker: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
-        with(connection()) {
-            val statement =
-                prepareStatement(
-                    """
-                    UPDATE sak 
-                    set enhet = ? 
-                    where id = ?
-                    """.trimIndent(),
-                )
-            saker.forEach {
-                statement.setString(1, it.enhet)
-                statement.setLong(2, it.id)
-                statement.addBatch()
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val statement =
+                    prepareStatement(
+                        """
+                        UPDATE sak 
+                        set enhet = ? 
+                        where id = ?
+                        """.trimIndent(),
+                    )
+                saker.forEach {
+                    statement.setString(1, it.enhet)
+                    statement.setLong(2, it.id)
+                    statement.addBatch()
+                }
+                statement.executeBatch()
             }
-            statement.executeBatch()
         }
     }
 
     fun finnSaker(fnr: String): List<Sak> {
-        val statement = connection().prepareStatement("SELECT id, sakType, fnr, enhet from sak where fnr = ?")
-        statement.setString(1, fnr)
-        return statement.executeQuery().toList { this.toSak() }
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val statement = prepareStatement("SELECT id, sakType, fnr, enhet from sak where fnr = ?")
+                statement.setString(1, fnr)
+                statement.executeQuery().toList { this.toSak() }
+            }
+        }
     }
 
     fun markerSakerMedSkjerming(
         sakIder: List<Long>,
         skjermet: Boolean,
     ): Int {
-        return with(connection()) {
-            val statement =
-                prepareStatement(
-                    """
-                    UPDATE sak 
-                    set erSkjermet = ? 
-                    where id = any(?)
-                    """.trimIndent(),
-                )
-            statement.setBoolean(1, skjermet)
-            statement.setArray(2, createArrayOf("bigint", sakIder.toTypedArray()))
-            statement.executeUpdate()
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        UPDATE sak 
+                        set erSkjermet = ? 
+                        where id = any(?)
+                        """.trimIndent(),
+                    )
+                statement.setBoolean(1, skjermet)
+                statement.setArray(2, createArrayOf("bigint", sakIder.toTypedArray()))
+                statement.executeUpdate()
+            }
         }
     }
 

@@ -102,7 +102,7 @@ fun Application.restModule(
     }
 
     if (withMetrics) {
-        metricsModule(additionalMetrics)
+        metricsRoute(additionalMetrics)
     }
 }
 

@@ -130,6 +130,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
             requireNotNull(grunnbeloep.await()),
             generellBrevData.utlandstilknytning?.type,
             requireNotNull(brevutfall.await()),
+            generellBrevData.revurderingsaarsak,
         )
     }
 
@@ -191,6 +192,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
 
         BarnepensjonOpphoer.fra(
             innholdMedVedlegg,
+            generellBrevData,
             generellBrevData.utlandstilknytning?.type,
             requireNotNull(brevutfall.await()),
         )
@@ -226,8 +228,8 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
     ) = coroutineScope {
         val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
         val utbetalingsinfo = async { fetcher.hentUtbetaling() }
-        val forrigeUtbetalingsinfo = async { fetcher.hentForrigeUtbetaling() }
         val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
+        val forrigeAvkortingsinfo = async { fetcher.hentForrigeAvkortinginfo() }
         val trygdetid = async { fetcher.hentTrygdetid() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
         val brevutfall = async { fetcher.hentBrevutfall() }
@@ -236,7 +238,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
             innholdMedVedlegg,
             requireNotNull(avkortingsinfo.await()),
             utbetalingsinfo.await(),
-            forrigeUtbetalingsinfo.await(),
+            forrigeAvkortingsinfo.await(),
             etterbetaling.await(),
             requireNotNull(trygdetid.await()),
             requireNotNull(brevutfall.await()),
@@ -254,6 +256,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
 
         OmstillingsstoenadOpphoer.fra(
             innholdMedVedlegg,
+            generellBrevData,
             generellBrevData.utlandstilknytning,
             requireNotNull(brevutfall.await()),
         )

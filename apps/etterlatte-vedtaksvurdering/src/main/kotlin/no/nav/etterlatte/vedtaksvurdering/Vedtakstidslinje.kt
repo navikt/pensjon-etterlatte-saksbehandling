@@ -14,11 +14,12 @@ class Vedtakstidslinje(private val vedtak: List<Vedtak>) {
     fun erLoependePaa(dato: LocalDate): LoependeYtelse {
         if (iverksatteVedtak.isEmpty()) return LoependeYtelse(false, dato)
 
-        val erLoepende =
-            hentSenesteVedtakPaaDato(dato)?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING)
+        val senesteVedtakPaaDato = hentSenesteVedtakPaaDato(dato)
+        val erLoepende = senesteVedtakPaaDato?.type in listOf(VedtakType.INNVILGELSE, VedtakType.ENDRING)
         return LoependeYtelse(
             erLoepende = erLoepende,
             dato = if (erLoepende) foersteMuligeVedtaksdag(dato) else dato,
+            behandlingId = if (erLoepende) senesteVedtakPaaDato!!.behandlingId else null,
         )
     }
 

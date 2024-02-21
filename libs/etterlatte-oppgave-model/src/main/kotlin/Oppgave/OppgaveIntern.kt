@@ -19,8 +19,8 @@ abstract class Oppgave {
 }
 
 data class OppgaveSaksbehandler(
-    val saksbehandlerIdent: String? = null,
-    val saksbehandlerNavn: String? = null,
+    val ident: String? = null,
+    val navn: String? = null,
 )
 
 data class OppgaveIntern(
@@ -76,6 +76,7 @@ data class GosysOppgave(
 enum class Status {
     NY,
     UNDER_BEHANDLING,
+    PAA_VENT,
     FERDIGSTILT,
     FEILREGISTRERT,
     AVBRUTT,
@@ -85,6 +86,7 @@ enum class Status {
         return when (this) {
             NY,
             UNDER_BEHANDLING,
+            PAA_VENT,
             -> false
 
             FERDIGSTILT,
@@ -118,6 +120,7 @@ enum class OppgaveType {
     TILBAKEKREVING,
     OMGJOERING,
     JOURNALFOERING,
+    GJENOPPRETTING_ALDERSOVERGANG, // Saker som ble opphørt i Pesys etter 18 år gammel regelverk
 }
 
 data class SaksbehandlerEndringDto(
@@ -131,6 +134,11 @@ data class SaksbehandlerEndringGosysDto(
 
 data class RedigerFristRequest(
     val frist: Tidspunkt,
+)
+
+data class SettPaaVentRequest(
+    val merknad: String,
+    val status: Status,
 )
 
 data class RedigerFristGosysRequest(

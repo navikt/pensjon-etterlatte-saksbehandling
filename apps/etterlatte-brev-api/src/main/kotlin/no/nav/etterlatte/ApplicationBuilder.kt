@@ -29,7 +29,8 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.dokument.SafClient
+import no.nav.etterlatte.brev.dokument.SafKlient
+import no.nav.etterlatte.brev.dokument.SafService
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -45,7 +46,7 @@ import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.notatRoute
-import no.nav.etterlatte.brev.varselbrev.BrevDataMapperVarsel
+import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
@@ -185,10 +186,10 @@ class ApplicationBuilder {
             brevDataMapperRedigerbartUtfallVedtak,
             brevDataMapperFerdigstilling,
         )
-    private val brevDataMapperVarsel = BrevDataMapperVarsel(beregningService, trygdetidService)
+    private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService)
 
     private val varselbrevService =
-        VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator, brevDataMapperVarsel)
+        VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator, brevDataMapperFerdigstillVarsel)
 
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 
@@ -204,8 +205,10 @@ class ApplicationBuilder {
     private val virusScanService = VirusScanService(clamAvClient)
     private val pdfService = PDFService(db, virusScanService)
 
-    private val journalpostService =
-        SafClient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE"))
+    private val safService =
+        SafService(
+            SafKlient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE")),
+        )
 
     private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagKlient, dokarkivKlient)
 
@@ -217,7 +220,7 @@ class ApplicationBuilder {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
-                    dokumentRoute(journalpostService, dokarkivService, tilgangssjekker)
+                    dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)
                     notatRoute(notatService, tilgangssjekker)
                 }
@@ -248,10 +251,16 @@ class ApplicationBuilder {
                     this,
                     varselbrevService,
                     ferdigstillJournalfoerOgDistribuerBrev,
+                    behandlingKlient,
                 )
                 FiksEnkeltbrevRiver(this, vedtaksvurderingService)
                     .also { fiksEnkeltbrev() }
-                OpprettJournalfoerOgDistribuerRiver(this, brevoppretter, ferdigstillJournalfoerOgDistribuerBrev)
+                OpprettJournalfoerOgDistribuerRiver(
+                    this,
+                    brevdataFacade,
+                    brevoppretter,
+                    ferdigstillJournalfoerOgDistribuerBrev,
+                )
 
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)

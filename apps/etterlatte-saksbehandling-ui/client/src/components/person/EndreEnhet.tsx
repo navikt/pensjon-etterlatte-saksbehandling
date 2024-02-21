@@ -28,7 +28,7 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
   }
 
   return (
-    <OpprettRevurderingWrapper>
+    <MarginTopWrapper>
       <>
         <Button size="small" variant="secondary" onClick={() => setOpen(true)}>
           Endre Enhet
@@ -66,11 +66,11 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
           </Modal.Body>
         </Modal>
       </>
-    </OpprettRevurderingWrapper>
+    </MarginTopWrapper>
   )
 }
 
-const OpprettRevurderingWrapper = styled.div`
+const MarginTopWrapper = styled.div`
   margin-top: 0;
 `
 

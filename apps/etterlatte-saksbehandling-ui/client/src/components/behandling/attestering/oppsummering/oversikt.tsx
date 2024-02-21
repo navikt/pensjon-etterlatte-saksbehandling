@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import {
   formaterBehandlingstype,
   formaterDatoMedKlokkeslett,
@@ -8,35 +8,57 @@ import {
   formaterStringDato,
 } from '~utils/formattering'
 import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo'
-import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
+import { Alert, BodyShort, Button, Heading, Tag, TextField } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert, OppgaveSaksbehandler } from '~shared/api/oppgaver'
+import {
+  erOppgaveRedigerbar,
+  hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave,
+  OppgaveDTO,
+  settOppgavePaaVentApi,
+  SettPaaVentRequest,
+} from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-
-import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
+import { isInitial, isPending, isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { FlexRow } from '~shared/styled'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
+import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
+import { oppdaterFrist } from '~components/oppgavebenk/utils/oppgaveutils'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
-  const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<OppgaveSaksbehandler | null>(null)
-  const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(
-    hentOppgaveForBehandlingUnderBehandlingIkkeattestert
+  const [oppgavenTilBehandlingen, setOppgave] = useState<OppgaveDTO | null>(null)
+
+  const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandlingEkte] = useApiCall(
+    hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
   )
+  const [lagreSettPaaVentStatus, requestSettPaaVent] = useApiCall(settOppgavePaaVentApi)
+  const [settPaaVent, setVisPaaVent] = useState(false)
+  const [merknad, setMerknad] = useState<string>('')
+  const [minOppgavelisteOppgaver, setMinOppgavelisteOppgaver] = useState<Array<OppgaveDTO>>([])
+
   useEffect(() => {
-    requesthentOppgaveForBehandling(
+    requesthentOppgaveForBehandlingEkte(
       { referanse: behandlingsInfo.behandlingId, sakId: behandlingsInfo.sakId },
-      (saksbehandler) => {
-        setSaksbehandlerPaaOppgave(saksbehandler)
+      (oppgave) => {
+        setOppgave(oppgave)
+        setMerknad(oppgave.merknad || '')
       }
     )
-  }, [])
+  }, [lagreSettPaaVentStatus])
 
+  const lagreVent = (data: SettPaaVentRequest) => {
+    if (!oppgavenTilBehandlingen) throw new Error('Mangler oppgave')
+    requestSettPaaVent({
+      oppgaveId: oppgavenTilBehandlingen.id,
+      settPaaVentRequest: data,
+    })
+    setVisPaaVent(false)
+  }
   const hentStatus = () => {
     switch (behandlingsInfo.status) {
       case IBehandlingStatus.FATTET_VEDTAK:
@@ -60,14 +82,24 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
     }
   }
 
-  if (isInitial(oppgaveForBehandlingStatus) || isPending(oppgaveForBehandlingStatus)) {
-    return <Spinner visible={true} label="Henter saksbehandler" />
+  if (isInitial(oppgaveForBehandlingenStatus) || isPending(oppgaveForBehandlingenStatus)) {
+    return <Spinner visible={true} label="Henter oppgave" />
+  }
+  if (isPending(lagreSettPaaVentStatus)) {
+    return <Spinner visible={true} label="Lagrer oppgave" />
   }
 
   return (
     <SidebarPanel border>
       <Heading size="small">
-        {formaterBehandlingstype(behandlingsInfo.type)} <EessiPensjonLenke />
+        {formaterBehandlingstype(behandlingsInfo.type)}
+        {behandlingsInfo.nasjonalEllerUtland !== UtlandstilknytningType.NASJONAL && (
+          <EessiPensjonLenke
+            sakId={behandlingsInfo.sakId}
+            behandlingId={behandlingsInfo.behandlingId}
+            sakType={behandlingsInfo.sakType}
+          />
+        )}
       </Heading>
 
       <Heading size="xsmall" spacing>
@@ -95,14 +127,14 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       <div className="info">
         <Info>Saksbehandler</Info>
         {mapApiResult(
-          oppgaveForBehandlingStatus,
-          <Spinner visible={true} label="Henter saksbehandler" />,
+          oppgaveForBehandlingenStatus,
+          <Spinner visible={true} label="Henter oppgave" />,
           () => (
             <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
           ),
           () =>
-            saksbehandlerPaaOppgave ? (
-              <Tekst>{saksbehandlerPaaOppgave.saksbehandlerNavn || saksbehandlerPaaOppgave.saksbehandlerIdent}</Tekst>
+            oppgavenTilBehandlingen ? (
+              <Tekst>{oppgavenTilBehandlingen.saksbehandlerNavn || oppgavenTilBehandlingen.saksbehandlerIdent}</Tekst>
             ) : (
               <Alert size="small" variant="warning">
                 Ingen saksbehandler har tatt denne oppgaven
@@ -130,10 +162,118 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           <Tekst>{kommentarFraAttestant}</Tekst>
         </div>
       )}
-      <FlexRow align="center">
+      <FlexRow align="center" $spacing={true}>
         <Info>Sakid:</Info>
         <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
       </FlexRow>
+
+      {settPaaVent && (
+        <>
+          <TextField
+            label="Merknad for venting"
+            size="medium"
+            type="text"
+            value={merknad}
+            onChange={(e) => setMerknad(e.target.value)}
+          />
+        </>
+      )}
+
+      {settPaaVent &&
+        isSuccess(oppgaveForBehandlingenStatus) &&
+        oppgavenTilBehandlingen &&
+        oppgavenTilBehandlingen.status !== 'PAA_VENT' && (
+          <>
+            <FlexRow align="center">
+              <b>Frist</b>
+            </FlexRow>
+            <FlexRow align="center">
+              <FristHandlinger
+                orginalFrist={oppgavenTilBehandlingen.frist}
+                oppgaveId={oppgavenTilBehandlingen.id}
+                oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
+                  oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
+                }
+                erRedigerbar={erOppgaveRedigerbar(oppgavenTilBehandlingen.status)}
+                oppgaveVersjon={oppgavenTilBehandlingen.versjon}
+                type={oppgavenTilBehandlingen.type}
+              />
+            </FlexRow>
+          </>
+        )}
+
+      {settPaaVent &&
+        isSuccess(oppgaveForBehandlingenStatus) &&
+        oppgavenTilBehandlingen &&
+        oppgavenTilBehandlingen.status !== 'PAA_VENT' && (
+          <>
+            <FlexRow>
+              <Button
+                variant="primary"
+                onClick={() =>
+                  lagreVent({
+                    merknad: merknad,
+                    versjon: null,
+                    status: oppgavenTilBehandlingen.status,
+                  } as SettPaaVentRequest)
+                }
+              >
+                Bekreft Vent
+              </Button>
+            </FlexRow>
+            <FlexRow>
+              <Button variant="tertiary" onClick={() => setVisPaaVent(false)}>
+                Avbryt
+              </Button>
+            </FlexRow>
+          </>
+        )}
+      {settPaaVent &&
+        isSuccess(oppgaveForBehandlingenStatus) &&
+        oppgavenTilBehandlingen &&
+        oppgavenTilBehandlingen.status == 'PAA_VENT' && (
+          <>
+            <FlexRow>
+              <Button
+                variant="primary"
+                onClick={() =>
+                  lagreVent({
+                    merknad: merknad,
+                    versjon: null,
+                    status: oppgavenTilBehandlingen.status,
+                  } as SettPaaVentRequest)
+                }
+              >
+                Bekreft fjerning av Vent
+              </Button>
+            </FlexRow>
+            <FlexRow>
+              <Button variant="tertiary" onClick={() => setVisPaaVent(false)}>
+                Avbryt
+              </Button>
+            </FlexRow>
+          </>
+        )}
+      {!settPaaVent && oppgavenTilBehandlingen?.status !== 'PAA_VENT' && (
+        <Button variant="primary" onClick={() => setVisPaaVent(true)}>
+          Sett på vent
+        </Button>
+      )}
+      {!settPaaVent && oppgavenTilBehandlingen?.status === 'PAA_VENT' && (
+        <>
+          <Alert variant="warning">
+            <b>Oppgaven er satt på vent.</b> <br></br>
+            <b>Merknad: </b>
+            {oppgavenTilBehandlingen.merknad}
+            <br></br>
+            <b>Ny frist: </b>
+            {formaterStringDato(oppgavenTilBehandlingen.frist)}
+          </Alert>
+          <Button variant="primary" onClick={() => setVisPaaVent(true)}>
+            Ta av vent
+          </Button>
+        </>
+      )}
     </SidebarPanel>
   )
 }

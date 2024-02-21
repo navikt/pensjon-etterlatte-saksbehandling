@@ -30,10 +30,12 @@ import no.nav.etterlatte.behandling.sjekklisteRoute
 import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
+import no.nav.etterlatte.behandling.vedtaksbehandling.vedtaksbehandlingRoutes
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
@@ -85,6 +87,8 @@ private class Server(private val context: ApplicationContext) {
 
 internal fun Application.moduleOnServerReady(context: ApplicationContext) {
     environment.monitor.subscribe(ServerReady) {
+        context.metrikkerJob.schedule().also { addShutdownHook(it) }
+        context.doedsmeldingerJob.schedule().also { addShutdownHook(it) }
         populerSaksbehandlereMedNavn(context)
     }
 }
@@ -125,6 +129,7 @@ internal fun Application.module(context: ApplicationContext) {
                 generellBehandlingService = generellBehandlingService,
                 sakService = sakService,
             )
+            vedtaksbehandlingRoutes(vedtaksbehandlingService = vedtaksbehandlingService)
             revurderingRoutes(revurderingService = revurderingService, featureToggleService = featureToggleService)
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)
@@ -141,16 +146,15 @@ internal fun Application.module(context: ApplicationContext) {
                 gosysOppgaveService = gosysOppgaveService,
             )
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
+            doedshendelseRoute(doedshendelseService = doedshendelseService)
             egenAnsattRoute(
                 egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, enhetService),
                 requestLogger = behandlingRequestLogger,
             )
             institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))
-            saksbehandlerRoutes(saksbehandlerService = SaksbehandlerService(context.saksbehandlerInfoDaoTrans))
+            saksbehandlerRoutes(saksbehandlerService = SaksbehandlerService(context.saksbehandlerInfoDao))
 
             tilgangRoutes(tilgangService)
-
-            context.metrikkerJob.schedule().also { addShutdownHook(it) }
 
             install(adressebeskyttelsePlugin) {
                 saksbehandlerGroupIdsByKey = context.saksbehandlerGroupIdsByKey

@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-samordning-vedtak/src/**
       - apps/etterlatte-samordning-vedtak/*.kts
       - apps/etterlatte-samordning-vedtak/.nais/**
+      - '!apps/etterlatte-samordning-vedtak/**.md'
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
@@ -30,6 +31,7 @@ on:
       - apps/etterlatte-samordning-vedtak/src/**
       - apps/etterlatte-samordning-vedtak/*.kts
       - apps/etterlatte-samordning-vedtak/.nais/**
+      - '!apps/etterlatte-samordning-vedtak/**.md'
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**

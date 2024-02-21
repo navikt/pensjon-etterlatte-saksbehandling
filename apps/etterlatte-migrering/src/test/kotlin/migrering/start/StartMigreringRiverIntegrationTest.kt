@@ -122,7 +122,6 @@ internal class StartMigreringRiverIntegrationTest {
                                 mockk<PenKlient>()
                                     .also {
                                         every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN
-                                        every { runBlocking { it.sakMedUfoere(any()) } } returns emptyList()
                                     },
                             pesysRepository = repository,
                             featureToggleService = featureToggleService,
@@ -136,6 +135,16 @@ internal class StartMigreringRiverIntegrationTest {
                                     personHenter,
                                     featureToggleService,
                                     grunnlagKlient = mockk(),
+                                    penKlient =
+                                        mockk<PenKlient>().also {
+                                            every {
+                                                runBlocking {
+                                                    it.sakMedUfoere(
+                                                        any(),
+                                                    )
+                                                }
+                                            } returns emptyList()
+                                        },
                                 ),
                             krrKlient =
                                 mockk<KrrKlient>().also {
@@ -233,6 +242,16 @@ internal class StartMigreringRiverIntegrationTest {
                                     personHenter,
                                     featureToggleService,
                                     grunnlagKlient = mockk(),
+                                    penKlient =
+                                        mockk<PenKlient>().also {
+                                            every {
+                                                runBlocking {
+                                                    it.sakMedUfoere(
+                                                        any(),
+                                                    )
+                                                }
+                                            } returns emptyList()
+                                        },
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -360,6 +379,16 @@ internal class StartMigreringRiverIntegrationTest {
                                     personHenter,
                                     featureToggleService,
                                     grunnlagKlient = mockk(),
+                                    penKlient =
+                                        mockk<PenKlient>().also {
+                                            every {
+                                                runBlocking {
+                                                    it.sakMedUfoere(
+                                                        any(),
+                                                    )
+                                                }
+                                            } returns emptyList()
+                                        },
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -478,6 +507,16 @@ internal class StartMigreringRiverIntegrationTest {
                                     personHenter,
                                     featureToggleService,
                                     grunnlagKlient = mockk(),
+                                    penKlient =
+                                        mockk<PenKlient>().also {
+                                            every {
+                                                runBlocking {
+                                                    it.sakMedUfoere(
+                                                        any(),
+                                                    )
+                                                }
+                                            } returns emptyList()
+                                        },
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -547,13 +586,6 @@ internal class StartMigreringRiverIntegrationTest {
                                     .also {
                                         every { runBlocking { it.hentSak(any(), any()) } } returns responsFraPEN
                                         every { runBlocking { it.opphoerSak(any()) } } just runs
-                                        every { runBlocking { it.sakMedUfoere(any()) } } returns
-                                            listOf(
-                                                SakSammendragResponse(
-                                                    sakType = SakSammendragResponse.UFORE_SAKTYPE,
-                                                    sakStatus = SakSammendragResponse.Status.LOPENDE,
-                                                ),
-                                            )
                                     },
                             pesysRepository = repository,
                             featureToggleService = featureToggleService,
@@ -565,6 +597,16 @@ internal class StartMigreringRiverIntegrationTest {
                                     personHenter,
                                     featureToggleService,
                                     grunnlagKlient = mockk(),
+                                    penKlient =
+                                        mockk<PenKlient>().also {
+                                            every { runBlocking { it.sakMedUfoere(any()) } } returns
+                                                listOf(
+                                                    SakSammendragResponse(
+                                                        sakType = SakSammendragResponse.UFORE_SAKTYPE,
+                                                        sakStatus = SakSammendragResponse.Status.LOPENDE,
+                                                    ),
+                                                )
+                                        },
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -639,6 +681,16 @@ internal class StartMigreringRiverIntegrationTest {
                                     personHenter,
                                     featureToggleService,
                                     grunnlagKlient = mockk(),
+                                    penKlient =
+                                        mockk<PenKlient>().also {
+                                            every {
+                                                runBlocking {
+                                                    it.sakMedUfoere(
+                                                        any(),
+                                                    )
+                                                }
+                                            } returns emptyList()
+                                        },
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )
@@ -711,6 +763,16 @@ internal class StartMigreringRiverIntegrationTest {
                                     personHenter,
                                     featureToggleService,
                                     grunnlagKlient = mockk(),
+                                    penKlient =
+                                        mockk<PenKlient>().also {
+                                            every {
+                                                runBlocking {
+                                                    it.sakMedUfoere(
+                                                        any(),
+                                                    )
+                                                }
+                                            } returns emptyList()
+                                        },
                                 ),
                             krrKlient = mockk<KrrKlient>().also { coEvery { it.hentDigitalKontaktinformasjon(any()) } returns null },
                         )

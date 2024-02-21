@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
@@ -48,11 +49,14 @@ internal class GrunnlagsendringshendelseDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-        sakRepo = SakDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
-            BehandlingDao(KommerBarnetTilGodeDao { connection }, RevurderingDao { connection }) { connection }
-        grunnlagsendringshendelsesRepo = GrunnlagsendringshendelseDao { connection }
+            BehandlingDao(
+                KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                (ConnectionAutoclosingTest(dataSource)),
+            )
+        grunnlagsendringshendelsesRepo = GrunnlagsendringshendelseDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @AfterEach

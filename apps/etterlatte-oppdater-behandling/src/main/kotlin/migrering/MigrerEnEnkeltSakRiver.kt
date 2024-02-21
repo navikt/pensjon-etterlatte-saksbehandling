@@ -19,6 +19,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
 import no.nav.etterlatte.rapidsandrivers.migrering.PERSONGALLERI_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.ROLLE_KEY
+import no.nav.etterlatte.rapidsandrivers.oppgaveId
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -52,10 +53,11 @@ internal class MigrerEnEnkeltSakRiver(
             return
         }
 
-        val (behandlingId, sakId) = behandlinger.migrer(hendelse)
+        val migreringRespons = behandlinger.migrer(hendelse)
 
-        packet.behandlingId = behandlingId
-        packet.sakId = sakId
+        packet.behandlingId = migreringRespons.behandlingId
+        packet.sakId = migreringRespons.sakId
+        packet.oppgaveId = migreringRespons.oppgaveId
 
         packet[SAK_TYPE_KEY] = SakType.BARNEPENSJON
         packet[ROLLE_KEY] = PersonRolle.AVDOED

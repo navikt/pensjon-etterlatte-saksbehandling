@@ -195,7 +195,8 @@ object InnsendtSoeknadTestData {
                             loennsinntekt = null,
                             naeringsinntekt = null,
                             pensjonEllerUfoere = null,
-                            annenInntekt = null,
+                            inntektViaYtelserFraNAV = null,
+                            ingenInntekt = null,
                             ytelserNAV =
                                 YtelserNav(
                                     soektOmYtelse =

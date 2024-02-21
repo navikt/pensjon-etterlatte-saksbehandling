@@ -1,8 +1,6 @@
 package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
@@ -40,7 +38,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
@@ -165,10 +162,10 @@ internal class BehandlingServiceImpl(
 
     private fun hentBehandlingForId(id: UUID) =
         behandlingDao.hentBehandling(id)?.let { behandling ->
-            listOf(behandling).filterForEnheter().firstOrNull()
+            listOf(behandling).firstOrNull()
         }
 
-    private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.alleBehandlingerISak(sakId).filterForEnheter()
+    private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.alleBehandlingerISak(sakId)
 
     override fun hentBehandling(behandlingId: UUID): Behandling? {
         return hentBehandlingForId(behandlingId)
@@ -432,6 +429,7 @@ internal class BehandlingServiceImpl(
             revurderingsaarsak = behandling.revurderingsaarsak(),
             revurderinginfo = behandling.revurderingInfo(),
             begrunnelse = behandling.begrunnelse(),
+            kilde = behandling.kilde,
         )
     }
 
@@ -537,17 +535,7 @@ internal class BehandlingServiceImpl(
             }
     }
 
-    private fun List<Behandling>.filterForEnheter() =
-        this.filterBehandlingerForEnheter(
-            user = Kontekst.get().AppUser,
-        )
-
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)
             ?: throw BehandlingNotFoundException(behandlingId)
 }
-
-fun <T : Behandling> List<T>.filterBehandlingerForEnheter(user: User) =
-    this.filterForEnheter(user) { item, enheter ->
-        enheter.contains(item.sak.enhet)
-    }

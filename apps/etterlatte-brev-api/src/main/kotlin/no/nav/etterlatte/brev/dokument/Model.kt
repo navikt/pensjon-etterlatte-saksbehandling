@@ -1,32 +1,22 @@
 package no.nav.etterlatte.brev.dokument
 
-import io.ktor.http.HttpStatusCode
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 
-data class HentDokumentoversiktBrukerResult(
-    val journalposter: List<Journalpost> = emptyList(),
-    val error: Error? = null,
+data class HentUtsendingsinfoResponse(
+    val data: ResponseData? = null,
+    val errors: List<Error>? = null,
 ) {
-    data class Error(
-        val statusCode: HttpStatusCode = HttpStatusCode.InternalServerError,
-        val message: String,
-    )
-}
-
-data class HentJournalpostResult(
-    val journalpost: Journalpost? = null,
-    val error: Error? = null,
-) {
-    data class Error(
-        val statusCode: HttpStatusCode = HttpStatusCode.InternalServerError,
-        val message: String,
+    data class ResponseData(
+        val journalpost: JournalpostUtsendingsinfo? = null,
     )
 }
 
 data class JournalpostResponse(
     val data: ResponseData? = null,
-    val errors: List<JournalpostResponseError>? = null,
+    val errors: List<Error>? = null,
 ) {
     data class ResponseData(
         val journalpost: Journalpost? = null,
@@ -35,7 +25,7 @@ data class JournalpostResponse(
 
 data class DokumentoversiktBrukerResponse(
     val data: DokumentoversiktBruker? = null,
-    val errors: List<JournalpostResponseError>? = null,
+    val errors: List<Error>? = null,
 )
 
 data class DokumentoversiktBruker(
@@ -46,23 +36,32 @@ data class Journalposter(
     val journalposter: List<Journalpost>,
 )
 
-data class JournalpostResponseError(
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Error(
     val message: String?,
-    val locations: List<PdlErrorLocation>? = null,
-    val path: List<String>? = null,
-    val extensions: PdlErrorExtension? = null,
-)
+    val path: List<String> = emptyList(),
+    val extensions: Extensions?,
+) {
+    data class Extensions(
+        val code: Code?,
+        val classification: String?,
+    )
 
-data class PdlErrorLocation(
-    val line: String?,
-    val column: String?,
-)
+    enum class Code {
+        FORBIDDEN,
+        NOT_FOUND,
+        BAD_REQUEST,
+        SERVER_ERROR,
+        ;
 
-data class PdlErrorExtension(
-    val code: String?,
-    val details: String?,
-    val classification: String?,
-)
+        // SAF sender feilkoder i lowercase
+        companion object {
+            @JvmStatic
+            @JsonCreator
+            fun of(value: String?) = entries.firstOrNull { it.name.equals(value, ignoreCase = true) }
+        }
+    }
+}
 
 data class GraphqlRequest(
     val query: String,
@@ -91,13 +90,33 @@ data class Journalpost(
     val tittel: String?,
     val tema: String?,
     val journalposttype: String,
-    val journalstatus: String,
+    val journalstatus: Journalstatus,
     val dokumenter: List<DokumentInfo>,
     val avsenderMottaker: AvsenderMottaker,
     val kanal: String?,
     val bruker: Bruker?,
     val sak: JournalpostSak?,
     val datoOpprettet: String,
+)
+
+enum class Journalstatus {
+    MOTTATT,
+    JOURNALFOERT,
+    FERDIGSTILT,
+    EKSPEDERT,
+    UNDER_ARBEID,
+    FEILREGISTRERT,
+    UTGAAR,
+    AVBRUTT,
+    UKJENT_BRUKER,
+    RESERVERT,
+    OPPLASTING_DOKUMENT,
+    UKJENT,
+}
+
+data class JournalpostUtsendingsinfo(
+    val journalpostId: String,
+    val utsendingsinfo: Utsendingsinfo?,
 )
 
 data class DokumentInfo(
@@ -134,10 +153,10 @@ data class AvsenderMottaker(
 )
 
 // https://confluence.adeo.no/display/BOA/Type%3A+Utsendingsinfo
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Utsendingsinfo(
     val fysiskpostSendt: FysiskpostSendt?,
     val digitalpostSendt: DigitalpostSendt?,
-    val varselSendt: VarselSendt?,
 ) {
     // Mappes hvis Journalpost.utsendingskanal er S (sentral utskrift)
     data class FysiskpostSendt(
@@ -147,13 +166,5 @@ data class Utsendingsinfo(
     // Mappes hvis Journalpost.utsendingskanal er SDP (sikker digital postkasse)
     data class DigitalpostSendt(
         val adresse: String?,
-    )
-
-    data class VarselSendt(
-        val type: String?,
-        val adresse: String?,
-        val tittel: String?,
-        val tekst: String?,
-        val tidspunkt: String?,
     )
 }

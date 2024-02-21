@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.behandlinginfo
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
@@ -40,15 +41,15 @@ internal class BehandlingInfoDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun setup() {
-        val connection = dataSource.connection
-        sakDao = SakDao { connection }
+        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
         behandlingDao =
             BehandlingDao(
-                KommerBarnetTilGodeDao { connection },
-                RevurderingDao { connection },
-            ) { connection }
+                KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
+            )
 
-        dao = BehandlingInfoDao { connection }
+        dao = BehandlingInfoDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @BeforeEach

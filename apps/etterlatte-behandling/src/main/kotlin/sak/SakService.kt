@@ -1,8 +1,6 @@
 package no.nav.etterlatte.sak
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.BrukerService
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.common.Enheter
@@ -11,9 +9,9 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import org.slf4j.LoggerFactory
 
 interface SakService {
@@ -62,6 +60,12 @@ interface SakService {
     suspend fun finnNavkontorForPerson(fnr: String): Navkontor
 }
 
+class ManglerTilgangTilEnhet(enheter: List<String>) :
+    UgyldigForespoerselException(
+        code = "MANGLER_TILGANG_TIL_ENHET",
+        detail = "Mangler tilgang til enhet $enheter",
+    )
+
 class SakServiceImpl(
     private val dao: SakDao,
     private val skjermingKlient: SkjermingKlient,
@@ -77,9 +81,12 @@ class SakServiceImpl(
     }
 
     override fun hentEnkeltSakForPerson(fnr: String): Sak {
-        return this.finnSaker(
-            fnr,
-        ).firstOrNull() ?: throw PersonManglerSak("Personen har ikke sak")
+        val saker = finnSakerForPerson(fnr)
+
+        if (saker.isEmpty()) throw PersonManglerSak()
+
+        return saker.firstOrNull()
+            ?: throw ManglerTilgangTilEnhet(saker.map { it.enhet })
     }
 
     override suspend fun finnNavkontorForPerson(fnr: String): Navkontor {
@@ -91,7 +98,7 @@ class SakServiceImpl(
     }
 
     override fun hentSaker(): List<Sak> {
-        return dao.hentSaker().filterForEnheter()
+        return dao.hentSaker()
     }
 
     private fun finnSakerForPerson(person: String) = dao.finnSaker(person)
@@ -104,7 +111,7 @@ class SakServiceImpl(
     }
 
     override fun finnSaker(person: String): List<Sak> {
-        return finnSakerForPerson(person).filterForEnheter()
+        return finnSakerForPerson(person)
     }
 
     override fun markerSakerMedSkjerming(
@@ -187,27 +194,12 @@ class SakServiceImpl(
         person: String,
         type: SakType,
     ): Sak? {
-        return finnSakerForPersonOgType(person, type).sjekkEnhet()
+        return finnSakerForPersonOgType(person, type)
     }
 
     override fun finnSak(id: Long): Sak? {
-        return dao.hentSak(id).sjekkEnhet()
+        return dao.hentSak(id)
     }
 
-    override fun finnFlyktningForSak(id: Long): Flyktning? = dao.hentSak(id).sjekkEnhet()?.let { dao.finnFlyktningForSak(id) }
-
-    private fun List<Sak>.filterForEnheter() =
-        this.filterSakerForEnheter(
-            Kontekst.get().AppUser,
-        )
-
-    private fun Sak?.sjekkEnhet() =
-        this?.let { sak ->
-            listOf(sak).filterForEnheter().firstOrNull()
-        }
+    override fun finnFlyktningForSak(id: Long): Flyktning? = dao.hentSak(id)?.let { dao.finnFlyktningForSak(id) }
 }
-
-fun List<Sak>.filterSakerForEnheter(user: User) =
-    this.filterForEnheter(user) { item, enheter ->
-        enheter.contains(item.enhet)
-    }

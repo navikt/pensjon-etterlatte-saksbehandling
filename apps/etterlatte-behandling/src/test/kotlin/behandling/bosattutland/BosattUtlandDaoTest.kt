@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling.bosattutland
 
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import no.nav.etterlatte.behandling.utland.MottattDokument
@@ -19,8 +20,7 @@ internal class BosattUtlandDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-        bosattUtlandDao = BosattUtlandDao { connection }
+        bosattUtlandDao = BosattUtlandDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @Test

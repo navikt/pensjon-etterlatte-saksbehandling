@@ -5,7 +5,4 @@ data class InnholdMedVedlegg(
     val innholdVedlegg: () -> List<BrevInnholdVedlegg>,
 ) {
     fun finnVedlegg(key: BrevVedleggKey): List<Slate.Element> = innholdVedlegg().find { vedlegg -> vedlegg.key == key }?.payload!!.elements
-
-    fun finnVedlegg(keys: List<BrevVedleggKey>): List<Slate.Element> =
-        innholdVedlegg().find { vedlegg -> vedlegg.key in keys }?.payload!!.elements
 }

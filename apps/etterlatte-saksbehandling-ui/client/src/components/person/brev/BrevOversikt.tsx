@@ -3,7 +3,7 @@ import { hentBrevForSak, opprettBrevForSak, slettBrev } from '~shared/api/brev'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BodyShort, Button, Modal, Table, Tag } from '@navikt/ds-react'
-import { BrevStatus, IBrev, Mottaker } from '~shared/types/Brev'
+import { BrevStatus, formaterBrevtype, IBrev, Mottaker } from '~shared/types/Brev'
 import { DocPencilIcon, ExternalLinkIcon, TrashIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
 import { Container, FlexRow } from '~shared/styled'
@@ -124,7 +124,7 @@ export default function BrevOversikt({ sakStatus }: { sakStatus: Result<SakMedBe
                       {mapStatus(b.status)}
                     </Tag>
                   </Table.DataCell>
-                  <Table.DataCell>{b.behandlingId ? 'Vedtaksbrev' : 'Annet'}</Table.DataCell>
+                  <Table.DataCell>{formaterBrevtype(b.brevtype)}</Table.DataCell>
                   <Table.DataCell>{b.mottaker.navn}</Table.DataCell>
                   <Table.DataCell>{mapAdresse(b.mottaker)}</Table.DataCell>
                   <Table.DataCell>

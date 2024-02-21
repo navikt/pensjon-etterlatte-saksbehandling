@@ -1,5 +1,5 @@
-import { IBrev } from '~shared/types/Brev'
-import { Alert, Heading, Panel } from '@navikt/ds-react'
+import { AdresseType, IBrev } from '~shared/types/Brev'
+import { Alert, Heading, Panel, Tag } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getVergeadresseForPerson } from '~shared/api/grunnlag'
@@ -31,7 +31,12 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
       )}
       <FlexRow justify="space-between">
         <Heading spacing level="2" size="medium">
-          Mottaker
+          Mottaker{' '}
+          {mottaker.adresse.adresseType === AdresseType.UTENLANDSKPOSTADRESSE && (
+            <Tag variant="alt1" size="small">
+              Utenlandsk adresse
+            </Tag>
+          )}
         </Heading>
         <div>
           {kanRedigeres && <BrevMottakerModal brev={brevState} setBrev={setBrevState} vergeadresse={vergeadresse} />}
@@ -77,7 +82,9 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
           wide
           label="Postnummer-/sted"
           tekst={
-            !adresse?.postnummer && !adresse?.poststed ? (
+            mottaker.adresse.adresseType !== AdresseType.UTENLANDSKPOSTADRESSE &&
+            !adresse?.postnummer &&
+            !adresse?.poststed ? (
               <Alert variant="warning" size="small" inline>
                 Postnummer og -sted mangler
               </Alert>

@@ -4,9 +4,10 @@ import com.nimbusds.jwt.JWTClaimsSet
 import io.ktor.server.plugins.BadRequestException
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
@@ -41,7 +42,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import java.sql.Connection
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -61,11 +61,10 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
         featureToggleService = DummyFeatureToggleService()
-        sakDao = SakDao { connection }
-        oppgaveDao = OppgaveDaoImpl { connection }
-        oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDao) { connection }
+        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
+        oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
+        oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
         oppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao)
         saktilgangDao = SakTilgangDao(dataSource)
     }
@@ -90,15 +89,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         Kontekst.set(
             Context(
                 userMock,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
+                DatabaseContextTest(dataSource),
             ),
         )
     }
@@ -113,7 +104,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     @BeforeEach
     fun beforeEach() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.enheter() } returns Enheter.enheterMedLesetilgang().toList()
         every { saksbehandler.name() } returns "ident"
         every { saksbehandler.erSuperbruker() } returns false
 
@@ -496,6 +487,26 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         oppgaveService.redigerFrist(nyOppgave.id, nyFrist)
         val oppgaveMedNyFrist = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(nyFrist, oppgaveMedNyFrist?.frist)
+    }
+
+    @Test
+    fun `kan sette og fjerne oppgave paa vent`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
+        oppgaveService.oppdaterStatusOgMerknad(nyOppgave.id, "test", nyOppgave.status)
+        val oppgavePaaVent = oppgaveService.hentOppgave(nyOppgave.id)
+        assertEquals(Status.PAA_VENT, oppgavePaaVent?.status)
+        oppgaveService.oppdaterStatusOgMerknad(oppgavePaaVent!!.id, "test", oppgavePaaVent.status)
+        val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
+        assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent?.status)
     }
 
     @Test
@@ -949,15 +960,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         Kontekst.set(
             Context(
                 saksbehandler,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
+                DatabaseContextTest(dataSource),
             ),
         )
 
@@ -1017,7 +1020,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        assertEquals(saksbehandlerIdent, saksbehandlerHentet.saksbehandlerIdent)
+        assertEquals(saksbehandlerIdent, saksbehandlerHentet.ident)
     }
 
     @Test
@@ -1059,7 +1062,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(revurderingId)
 
-        assertEquals(saksbehandlerIdent, saksbehandlerHentet.saksbehandlerIdent)
+        assertEquals(saksbehandlerIdent, saksbehandlerHentet.ident)
     }
 
     @Test
@@ -1095,7 +1098,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        assertEquals(saksbehandler.ident, saksbehandlerHentet.saksbehandlerIdent)
+        assertEquals(saksbehandler.ident, saksbehandlerHentet.ident)
     }
 
     @Test
@@ -1112,6 +1115,6 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        Assertions.assertNull(saksbehandlerHentet.saksbehandlerIdent)
+        Assertions.assertNull(saksbehandlerHentet.ident)
     }
 }

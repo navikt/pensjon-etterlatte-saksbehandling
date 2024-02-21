@@ -40,7 +40,7 @@ export const GyldigFramsattBarnepensjon = ({
   const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const [personGalleriSoeknad, getPersonGalleriSoeknad] = useApiCall(getPersongalleriFraSoeknad)
   useEffect(() => {
-    getPersonGalleriSoeknad({ sakId: behandling.sakId, behandlingId: behandling.id })
+    getPersonGalleriSoeknad({ behandlingId: behandling.id })
   }, [behandling.sakId, behandling.id])
   const manuellVurdering = finnVurdering(gyldigFramsatt, GyldigFramsattType.MANUELL_VURDERING)?.basertPaaOpplysninger
   const harKildePesys = manuellVurdering?.kilde?.ident == 'PESYS'

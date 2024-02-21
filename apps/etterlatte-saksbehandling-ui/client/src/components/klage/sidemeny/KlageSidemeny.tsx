@@ -52,9 +52,7 @@ export function KlageSidemeny() {
           () => (
             <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>
           ),
-          (vedtak) => (
-            <BodyShort>TODO {vedtak?.id}</BodyShort>
-          )
+          (vedtak) => vedtak && <BodyShort>Vedtak er opprettet: {vedtak.vedtakType}</BodyShort>
         )}
 
         {klage.kabalStatus && (

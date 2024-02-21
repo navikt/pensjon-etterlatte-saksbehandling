@@ -31,6 +31,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Felles
+import org.slf4j.LoggerFactory
 import java.util.Base64
 
 class NotatService(
@@ -40,6 +41,8 @@ class NotatService(
     private val grunnlagKlient: GrunnlagKlient,
     private val dokarkivKlient: DokarkivKlient,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     suspend fun journalfoerNotatISak(
         sakId: Long,
         notatData: StrukturertBrev,
@@ -76,10 +79,24 @@ class NotatService(
                         brevtype = Brevtype.NOTAT,
                     ),
             )
-
-        val notatPdf = genererPdfBrevbaker(notatData, notat.id, bruker)
-        brevRepository.lagrePdfOgFerdigstillBrev(notat.id, notatPdf)
-        return journalfoerInterntNotat(notat, notatData.sak)
+        try {
+            val notatPdf = genererPdfBrevbaker(notatData, notat.id, bruker)
+            brevRepository.lagrePdfOgFerdigstillBrev(notat.id, notatPdf)
+            return journalfoerInterntNotat(notat, notatData.sak)
+        } catch (e: Exception) {
+            try {
+                brevRepository.settBrevSlettet(notat.id, bruker)
+            } catch (inner: Exception) {
+                logger.error(
+                    "Fikk en feil i opprydding etter feil med generering / journalføring av notat i sak" +
+                        "med id=$sakId. Kunne ikke sette notat med id=${notat.id} til slettet, så det vil henge " +
+                        "igjen. Se annen feilmelding for hva som gikk galt før opprydding",
+                    inner,
+                )
+            }
+            logger.error("Kunne ikke generere og journalføre notat i sak=$sakId på grunn av feil: ", e)
+            throw e
+        }
     }
 
     private suspend fun genererPdfBrevbaker(

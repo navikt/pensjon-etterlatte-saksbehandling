@@ -71,7 +71,7 @@ enum class Revurderingaarsak(
     VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
     REGULERING(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalIkkeSendeBrev),
     DOEDSFALL(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
-    INNTEKTSENDRING(SAKTYPE_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     OMGJOERING_AV_FARSKAP(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),
     ADOPSJON(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),
     SIVILSTAND(SAKTYPE_OMS, DevOgProd, OpphoerMedBrev),

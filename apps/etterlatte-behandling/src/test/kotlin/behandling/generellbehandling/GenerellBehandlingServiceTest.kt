@@ -69,10 +69,11 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
     private lateinit var service: GenerellBehandlingService
     private lateinit var behandlingRepo: BehandlingDao
-    val grunnlagKlient = mockk<GrunnlagKlient>()
-    val behandlingService = mockk<BehandlingService>()
-    val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-    val saksbehandlerInfoDao = mockk<SaksbehandlerInfoDao>()
+    private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val saksbehandlerInfoDao = mockk<SaksbehandlerInfoDao>()
+    private val saksbehandlerNavn = "Ola Nordmann"
 
     @BeforeAll
     fun beforeAll() {
@@ -91,7 +92,8 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
                 OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),
                 sakRepo,
             )
-        every { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) } returns "Ola Nordmann"
+
+        every { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) } returns saksbehandlerNavn
         service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient, hendelseDao, saksbehandlerInfoDao)
 
         Kontekst.set(
@@ -303,6 +305,10 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
             oppgave.status.shouldBe(Status.FERDIGSTILT)
         }
+
+        val attesteringsoppgave = behandlingsOppgaverFattetOgAttestering.filter { it.type == OppgaveType.ATTESTERING }
+        Assertions.assertEquals(1, attesteringsoppgave.size)
+        Assertions.assertTrue(attesteringsoppgave[0].merknad?.contains(saksbehandlerNavn) ?: false)
 
         verify {
             hendelseDao.generellBehandlingHendelse(

@@ -13,14 +13,19 @@ import {
   behandlingSkalSendeBrev,
   sisteBehandlingHendelse,
 } from '~components/behandling/felles/utils'
-import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import {
+  IBehandlingStatus,
+  IBehandlingsType,
+  IDetaljertBehandling,
+  Vedtaksloesning,
+} from '~shared/types/IDetaljertBehandling'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
 import { BrevProsessType, IBrev } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 
-import { fattVedtak } from '~shared/api/vedtaksvurdering'
+import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { SjekklisteValideringErrorSummary } from '~components/behandling/sjekkliste/SjekklisteValideringErrorSummary'
 import { IHendelse } from '~shared/types/IHendelse'
 import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
@@ -81,24 +86,45 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     }
   }, [vedtaksbrev])
 
+  const hentBrevPaaNytt = () => {
+    if (behandlingId) {
+      hentBrev(behandlingId, (brev, statusCode) => {
+        if (statusCode === 200) {
+          setVedtaksbrev(brev)
+        } else if (statusCode === 204) {
+          opprettNyttVedtaksbrev({ sakId, behandlingId }, (nyttBrev) => {
+            setVedtaksbrev(nyttBrev)
+          })
+        }
+      })
+    }
+  }
+
   useEffect(() => {
     if (
       !behandlingId ||
       !sakId ||
-      !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak)
+      !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak) ||
+      behandling?.kilde === Vedtaksloesning.GJENOPPRETTA
     )
       return
 
-    hentBrev(behandlingId, (brev, statusCode) => {
-      if (statusCode === 200) {
-        setVedtaksbrev(brev)
-      } else if (statusCode === 204) {
-        opprettNyttVedtaksbrev({ sakId, behandlingId }, (nyttBrev) => {
-          setVedtaksbrev(nyttBrev)
-        })
-      }
-    })
+    hentBrevPaaNytt()
   }, [behandlingId, sakId])
+
+  const [, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
+
+  useEffect(() => {
+    if (behandlingId) {
+      fetchBehandling(behandlingId, (behandling) => {
+        if (behandling.kilde === Vedtaksloesning.GJENOPPRETTA) {
+          oppdaterVedtakRequest(behandling.id, () => {
+            hentBrevPaaNytt()
+          })
+        }
+      })
+    }
+  }, [behandlingId])
 
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner visible label="Henter brev ..." />

@@ -55,6 +55,14 @@ export default function OpprettNyBehandling() {
     return !!rhfArray ? rhfArray.map((val) => val.value) : []
   }
 
+  const konverterAvdoedForOmstillingstoenad = (avdoed?: string[]): Array<{ value: string }> => {
+    if (avdoed && avdoed[0]) {
+      return [{ value: avdoed[0] }]
+    } else {
+      return [{ value: '' }]
+    }
+  }
+
   const methods = useForm<NyBehandlingSkjema>({
     defaultValues: {
       ...nyBehandlingRequest,
@@ -65,7 +73,7 @@ export default function OpprettNyBehandling() {
         soesken: mapStringArrayToRHFArray(nyBehandlingRequest?.persongalleri?.soesken),
         avdoed:
           sakType === SakType.OMSTILLINGSSTOENAD
-            ? [{ value: '' }]
+            ? konverterAvdoedForOmstillingstoenad(nyBehandlingRequest?.persongalleri?.avdoed)
             : mapStringArrayToRHFArray(nyBehandlingRequest?.persongalleri?.avdoed),
       },
     },

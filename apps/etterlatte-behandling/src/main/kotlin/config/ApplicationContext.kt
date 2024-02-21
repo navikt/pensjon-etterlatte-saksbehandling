@@ -281,6 +281,7 @@ internal class ApplicationContext(
             behandlingService,
             grunnlagKlientObo,
             hendelseDao,
+            saksbehandlerInfoDao,
         )
     val vedtaksbehandlingService =
         VedtaksbehandlingService(

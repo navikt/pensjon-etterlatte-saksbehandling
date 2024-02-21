@@ -43,6 +43,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
@@ -71,6 +72,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
     val grunnlagKlient = mockk<GrunnlagKlient>()
     val behandlingService = mockk<BehandlingService>()
     val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    val saksbehandlerInfoDao = mockk<SaksbehandlerInfoDao>()
 
     @BeforeAll
     fun beforeAll() {
@@ -82,14 +84,15 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
             BehandlingDao(
                 KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
                 RevurderingDao(ConnectionAutoclosingTest(dataSource)),
-                (ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
             )
         oppgaveService =
             OppgaveService(
                 OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),
                 sakRepo,
             )
-        service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient, hendelseDao)
+        every { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) } returns "Ola Nordmann"
+        service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient, hendelseDao, saksbehandlerInfoDao)
 
         Kontekst.set(
             Context(

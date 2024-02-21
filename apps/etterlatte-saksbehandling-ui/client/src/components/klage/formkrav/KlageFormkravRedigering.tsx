@@ -233,17 +233,15 @@ export function KlageFormkravRedigering() {
                   Endre vurdering
                 </Button>
               </FlexRow>
-              <VurderingWrapper>
-                {kanVurdereUtfall(klage) ? (
-                  <FlexRow justify="center">
-                    <Button as="a" href={nesteSteg(klage, 'formkrav')}>
-                      Neste side
-                    </Button>
-                  </FlexRow>
-                ) : (
-                  <BeOmInfoFraKlager klage={klage} />
-                )}
-              </VurderingWrapper>
+              {kanVurdereUtfall(klage) ? (
+                <FlexRow justify="center">
+                  <Button as="a" href={nesteSteg(klage, 'formkrav')}>
+                    Neste side
+                  </Button>
+                </FlexRow>
+              ) : (
+                <BeOmInfoFraKlager klage={klage} />
+              )}
             </>
           )}
           {isFailureHandler({
@@ -261,24 +259,26 @@ export function KlageFormkravRedigering() {
     const klage = props.klage
 
     return (
-      <Alert variant="info">
-        <Heading level="2" size="small">
-          Hent informasjon fra klager
-        </Heading>
-        <BodyLong $spacing>
-          Du må innhente mer informasjon fra klager for å avgjøre om formkravene kan oppfylles. Sett klagebehandlingen
-          på vent og opprett et nytt brev til klager.
-        </BodyLong>
-        <Button
-          as="a"
-          variant="primary"
-          icon={<EnvelopeClosedIcon />}
-          href={`/person/${klage.sak.ident}?fane=BREV`}
-          target="_blank"
-        >
-          Opprett brev
-        </Button>
-      </Alert>
+      <VurderingWrapper>
+        <Alert variant="info">
+          <Heading level="2" size="small">
+            Hent informasjon fra klager
+          </Heading>
+          <BodyLong $spacing>
+            Du må innhente mer informasjon fra klager for å avgjøre om formkravene kan oppfylles. Sett klagebehandlingen
+            på vent og opprett et nytt brev til klager.
+          </BodyLong>
+          <Button
+            as="a"
+            variant="primary"
+            icon={<EnvelopeClosedIcon />}
+            href={`/person/${klage.sak.ident}?fane=BREV`}
+            target="_blank"
+          >
+            Opprett brev
+          </Button>
+        </Alert>
+      </VurderingWrapper>
     )
   }
 

@@ -1,5 +1,5 @@
 import { useKlage } from '~components/klage/useKlage'
-import { Heading, Tag } from '@navikt/ds-react'
+import { BodyShort, Heading, Tag } from '@navikt/ds-react'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
 import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
 import { teksterKabalstatus, teksterKlagestatus } from '~shared/types/Klage'
@@ -7,9 +7,28 @@ import { tagColors, TagList } from '~shared/Tags'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'
 import { Info, Tekst } from '~components/behandling/attestering/styled'
 import AvsluttKlage from '~components/klage/AvsluttKlage'
+import React, { useEffect } from 'react'
+import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
+import { useAppDispatch } from '~store/Store'
+import { mapApiResult } from '~shared/api/apiUtils'
+import Spinner from '~shared/Spinner'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
 export function KlageSidemeny() {
   const klage = useKlage()
+  const dispatch = useAppDispatch()
+  const [fetchVedtakStatus, fetchVedtakSammendrag] = useApiCall(hentVedtakSammendrag)
+
+  useEffect(() => {
+    if (!klage?.id) return
+    fetchVedtakSammendrag(klage.id, (vedtakSammendrag, statusCode) => {
+      if (statusCode === 200) {
+        dispatch(updateVedtakSammendrag(vedtakSammendrag))
+      }
+    })
+  }, [klage?.id])
 
   if (!klage) {
     return (
@@ -26,6 +45,15 @@ export function KlageSidemeny() {
         <Heading size="xsmall" spacing>
           {teksterKlagestatus[klage.status]}
         </Heading>
+
+        {mapApiResult(
+          fetchVedtakStatus,
+          <Spinner label="Henter vedtaksdetaljer" visible />,
+          () => (
+            <ApiErrorAlert>Kunne ikke hente vedtak</ApiErrorAlert>
+          ),
+          (vedtak) => vedtak && <BodyShort>Vedtak er opprettet: {vedtak.vedtakType}</BodyShort>
+        )}
 
         {klage.kabalStatus && (
           <>

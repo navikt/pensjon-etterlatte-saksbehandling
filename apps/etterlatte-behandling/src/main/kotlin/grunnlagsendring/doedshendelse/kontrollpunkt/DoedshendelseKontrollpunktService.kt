@@ -59,7 +59,7 @@ class DoedshendelseKontrollpunktService(
         val utflytting = avdoed.utland?.verdi?.utflyttingFraNorge
         val innflytting = avdoed.utland?.verdi?.innflyttingTilNorge
 
-        if (utflytting != null) {
+        if (!utflytting.isNullOrEmpty()) {
             if (utflytting.any { it.dato == null }) {
                 // Hvis vi ikke har noen dato så regner vi personen som utvandret på nåværende tidspunkt uansett
                 return DoedshendelseKontrollpunkt.AvdoedHarUtvandret

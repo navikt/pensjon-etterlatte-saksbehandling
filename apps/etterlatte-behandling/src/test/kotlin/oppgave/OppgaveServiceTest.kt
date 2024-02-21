@@ -30,6 +30,7 @@ import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.AfterEach
@@ -40,6 +41,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
@@ -136,6 +138,27 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
 
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandlerIdent)
+    }
+
+    @Test
+    fun `skal kunne tildele seg oppgave som er tildelt systembruker`() {
+        val systemBruker = mockk<SystemUser> { every { name() } returns Fagsaksystem.EY.navn }
+        setNewKontekstWithMockUser(systemBruker)
+
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+
+        val bruker = Saksbehandler("", "ident1", null)
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, Fagsaksystem.EY.navn)
+        assertDoesNotThrow { oppgaveService.tildelSaksbehandler(nyOppgave.id, bruker.ident()) }
     }
 
     @Test

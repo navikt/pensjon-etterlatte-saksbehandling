@@ -29,14 +29,17 @@ class DoedshendelseJobService(
 
     private fun run() {
         if (featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)) {
-            inTransaction {
-                val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
-                logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
+            val doedshendelserSomSkalHaanderes =
+                inTransaction {
+                    val nyeDoedshendelser = hentAlleNyeDoedsmeldinger()
+                    logger.info("Antall nye dødsmeldinger ${nyeDoedshendelser.size}")
 
-                val doedshendelserSomSkalHaanderes = finnGyldigeDoedshendelser(nyeDoedshendelser)
-                logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
-
-                doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
+                    val doedshendelserSomSkalHaanderes = finnGyldigeDoedshendelser(nyeDoedshendelser)
+                    logger.info("Antall dødsmeldinger plukket ut for kjøring: ${doedshendelserSomSkalHaanderes.size}")
+                    doedshendelserSomSkalHaanderes
+                }
+            doedshendelserSomSkalHaanderes.forEach { doedshendelse ->
+                inTransaction {
                     logger.info("Starter håndtering av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()}")
                     haandterDoedshendelse(doedshendelse)
                 }

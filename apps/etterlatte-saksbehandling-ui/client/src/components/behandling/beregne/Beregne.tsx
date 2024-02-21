@@ -12,7 +12,7 @@ import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, Heading } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
@@ -67,15 +67,23 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
     }
     setManglerbrevutfall(false)
 
-    oppdaterVedtakRequest(behandling.id, () => {
-      const nyStatus = erBarnepensjon ? IBehandlingStatus.BEREGNET : IBehandlingStatus.AVKORTET
-      dispatch(oppdaterBehandlingsstatus(nyStatus))
-      if (skalSendeBrev) {
-        next()
-      } else {
-        setVisAttesteringsmodal(true)
-      }
-    })
+    if (behandling.kilde === Vedtaksloesning.GJENOPPRETTA) {
+      oppdaterStatus(erBarnepensjon, skalSendeBrev)
+    } else {
+      oppdaterVedtakRequest(behandling.id, () => {
+        oppdaterStatus(erBarnepensjon, skalSendeBrev)
+      })
+    }
+  }
+
+  const oppdaterStatus = (erBarnepensjon: boolean, skalSendeBrev: boolean) => {
+    const nyStatus = erBarnepensjon ? IBehandlingStatus.BEREGNET : IBehandlingStatus.AVKORTET
+    dispatch(oppdaterBehandlingsstatus(nyStatus))
+    if (skalSendeBrev) {
+      next()
+    } else {
+      setVisAttesteringsmodal(true)
+    }
   }
 
   return (

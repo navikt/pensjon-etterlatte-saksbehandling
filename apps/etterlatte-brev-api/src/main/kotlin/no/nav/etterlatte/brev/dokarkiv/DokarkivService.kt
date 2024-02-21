@@ -24,6 +24,8 @@ interface DokarkivService {
         enhet: String,
     ): Boolean
 
+    suspend fun journalfoerNotat(): OpprettJournalpostResponse
+
     suspend fun feilregistrerSakstilknytning(journalpostId: String)
 
     suspend fun opphevFeilregistrertSakstilknytning(journalpostId: String)
@@ -78,6 +80,10 @@ internal class DokarkivServiceImpl(
         journalpostId: String,
         enhet: String,
     ) = client.ferdigstillJournalpost(journalpostId, enhet)
+
+    override suspend fun journalfoerNotat(): OpprettJournalpostResponse {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun feilregistrerSakstilknytning(journalpostId: String) {
         client.feilregistrerSakstilknytning(journalpostId)

@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
@@ -26,6 +27,9 @@ class JournalfoerBrevService(
         bruker: BrukerTokenInfo,
     ): String {
         val brev = db.hentBrev(id)
+        if (brev.brevtype == Brevtype.NOTAT) {
+            throw IllegalArgumentException("Kan ikke journalføre et notat som et brev (id = $id).")
+        }
         val sak = sakService.hentSak(brev.sakId, bruker)
 
         return journalfoer(

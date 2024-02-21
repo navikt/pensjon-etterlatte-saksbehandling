@@ -21,7 +21,7 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
     private val logger = LoggerFactory.getLogger(DokarkivKlient::class.java)
 
     internal suspend fun opprettJournalpost(
-        request: OpprettJournalpostRequest,
+        request: OpprettJournalpost,
         ferdigstill: Boolean,
     ): OpprettJournalpostResponse {
         val response =

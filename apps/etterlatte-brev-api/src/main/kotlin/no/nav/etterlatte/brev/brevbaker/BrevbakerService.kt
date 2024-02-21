@@ -15,7 +15,7 @@ class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun genererPdf(
-        brevID: BrevID,
+        brevID: BrevID?,
         brevRequest: BrevbakerRequest,
     ): Pdf {
         val brevbakerResponse = brevbakerKlient.genererPdf(brevRequest)

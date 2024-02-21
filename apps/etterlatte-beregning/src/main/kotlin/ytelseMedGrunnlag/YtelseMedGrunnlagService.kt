@@ -47,6 +47,7 @@ class YtelseMedGrunnlagService(
                     fratrekkInnAar = avkortingsgrunnlagIPeriode.grunnlag.fratrekkInnAar,
                     grunnbelop = beregningIPeriode.grunnbelop,
                     grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
+                    beregningsMetode = beregningIPeriode.beregningsMetode,
                 )
             }
 

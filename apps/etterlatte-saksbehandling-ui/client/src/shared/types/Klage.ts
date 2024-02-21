@@ -190,7 +190,6 @@ export type KlageUtfallUtenBrev =
     }
   | {
       utfall: 'AVVIST'
-      vedtak: KlageVedtakAvvisning
     }
   | {
       utfall: 'AVVIST_MED_OMGJOERING'

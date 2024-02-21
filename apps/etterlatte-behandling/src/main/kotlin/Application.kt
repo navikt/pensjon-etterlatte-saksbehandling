@@ -21,7 +21,6 @@ import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
-import no.nav.etterlatte.behandling.job.populerSaksbehandlereMedNavn
 import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
 import no.nav.etterlatte.behandling.omregning.omregningRoutes
@@ -89,7 +88,7 @@ internal fun Application.moduleOnServerReady(context: ApplicationContext) {
     environment.monitor.subscribe(ServerReady) {
         context.metrikkerJob.schedule().also { addShutdownHook(it) }
         context.doedsmeldingerJob.schedule().also { addShutdownHook(it) }
-        populerSaksbehandlereMedNavn(context)
+        context.saksbehandlerJob.schedule().also { addShutdownHook(it) }
     }
 }
 

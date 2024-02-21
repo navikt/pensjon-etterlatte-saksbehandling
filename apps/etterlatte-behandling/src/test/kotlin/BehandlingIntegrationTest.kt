@@ -13,6 +13,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
+import io.mockk.spyk
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
@@ -126,7 +127,7 @@ abstract class BehandlingIntegrationTest {
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
                 grunnlagKlientObo = GrunnlagKlientTest(),
-                vedtakKlient = VedtakKlientTest(),
+                vedtakKlient = spyk(VedtakKlientTest()),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiHttpClient = BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
@@ -468,18 +469,7 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
-        return OpprettetBrevDto(
-            id = brevId++,
-            status = BrevStatus.OPPRETTET,
-            mottaker =
-                Mottaker(
-                    navn = "Mottaker mottakersen",
-                    foedselsnummer = Mottakerident("19448310410"),
-                    orgnummer = null,
-                ),
-            journalpostId = null,
-            bestillingsID = null,
-        )
+        return opprettetBrevDto(brevId++)
     }
 
     override suspend fun opprettVedtaksbrev(
@@ -487,7 +477,7 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
-        TODO("Not yet implemented")
+        return opprettetBrevDto(brevId++)
     }
 
     override suspend fun ferdigstillBrev(
@@ -518,7 +508,11 @@ class BrevApiKlientTest : BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
-        return OpprettetBrevDto(
+        return opprettetBrevDto(brevId)
+    }
+
+    private fun opprettetBrevDto(brevId: Long) =
+        OpprettetBrevDto(
             id = brevId,
             status = BrevStatus.OPPRETTET,
             mottaker =
@@ -530,7 +524,6 @@ class BrevApiKlientTest : BrevApiKlient {
             journalpostId = null,
             bestillingsID = null,
         )
-    }
 }
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {

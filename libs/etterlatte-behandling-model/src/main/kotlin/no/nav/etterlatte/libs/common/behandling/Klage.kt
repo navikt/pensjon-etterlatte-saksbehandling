@@ -115,7 +115,7 @@ enum class KlageUtfall {
     AVVIST_MED_OMGJOERING,
 }
 
-data class Klage internal constructor(
+data class Klage(
     val id: UUID,
     val sak: Sak,
     val opprettet: Tidspunkt,

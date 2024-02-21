@@ -116,13 +116,11 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
   useEffect(() => {
     if (behandlingId) {
-      fetchBehandling(behandlingId, (behandling) => {
-        if (behandling.kilde === Vedtaksloesning.GJENOPPRETTA) {
-          oppdaterVedtakRequest(behandling.id, () => {
-            hentBrevPaaNytt()
-          })
-        }
-      })
+      if (props.behandling.kilde === Vedtaksloesning.GJENOPPRETTA) {
+        oppdaterVedtakRequest(props.behandling.id, () => {
+          hentBrevPaaNytt()
+        })
+      }
     }
   }, [behandlingId])
 

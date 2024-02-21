@@ -13,8 +13,7 @@ import React from 'react'
 import { Spraak } from '~shared/types/Brev'
 import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { useAppDispatch } from '~store/Store'
-import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
+import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 
 export interface NyBehandlingSkjema {
   spraak: Spraak | null
@@ -30,7 +29,6 @@ export interface NyBehandlingSkjema {
 
 export default function OpprettNyBehandling() {
   const { oppgave, nyBehandlingRequest } = useJournalfoeringOppgave()
-  const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
   if (!oppgave) {
@@ -39,7 +37,6 @@ export default function OpprettNyBehandling() {
 
   const { sakType } = oppgave
 
-  const neste = () => navigate('oppsummering', { relative: 'path' })
   const tilbake = () => navigate('../', { relative: 'path' })
 
   const methods = useForm<NyBehandlingSkjema>({
@@ -58,21 +55,19 @@ export default function OpprettNyBehandling() {
   } = methods
 
   const onSubmit = (data: NyBehandlingSkjema) => {
-    dispatch(
-      settNyBehandlingRequest({
-        sakType,
-        spraak: data.spraak!,
-        mottattDato: new Date(data.mottattDato).toISOString(),
-        persongalleri: {
-          ...data.persongalleri,
-          gjenlevende: data.persongalleri.gjenlevende?.map((val) => val.value),
-          avdoed: data.persongalleri.avdoed?.map((val) => val.value).filter((val) => val !== ''),
-          soesken: data.persongalleri.soesken?.map((val) => val.value),
-        },
-      })
-    )
+    const state: NyBehandlingRequest = {
+      sakType,
+      spraak: data.spraak!,
+      mottattDato: new Date(data.mottattDato).toISOString(),
+      persongalleri: {
+        ...data.persongalleri,
+        gjenlevende: data.persongalleri.gjenlevende?.map((val) => val.value),
+        avdoed: data.persongalleri.avdoed?.map((val) => val.value).filter((val) => val !== ''),
+        soesken: data.persongalleri.soesken?.map((val) => val.value),
+      },
+    }
 
-    neste()
+    navigate('oppsummering', { relative: 'path', state })
   }
 
   return (

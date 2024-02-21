@@ -1,7 +1,7 @@
 import { Alert, Button, Detail, Heading, Tag } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { SakType } from '~shared/types/sak'
 import { formaterSakstype, formaterSpraak, formaterStringDato } from '~utils/formattering'
@@ -11,11 +11,14 @@ import FullfoerOppgaveModal from '~components/person/journalfoeringsoppgave/nybe
 import { FlexRow } from '~shared/styled'
 import { gyldigBehandlingRequest } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import React from 'react'
+import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 
 export default function OppsummeringOppgavebehandling() {
-  const { journalpost, nyBehandlingRequest, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
+  const { journalpost, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
 
   const navigate = useNavigate()
+  const { state } = useLocation()
+  const nyBehandlingRequest: NyBehandlingRequest = state
 
   const tilbake = () => navigate('../', { relative: 'path' })
 

@@ -2,7 +2,6 @@ import { Alert, Button, Checkbox, Select, TextField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
-import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import styled from 'styled-components'
 import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
@@ -13,14 +12,35 @@ import { opprettOverstyrBeregning } from '~shared/api/beregning'
 import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { Spraak } from '~shared/types/Brev'
 import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
-
 import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~components/person/EndreEnhet'
 import { useParams } from 'react-router-dom'
 import { hentOppgave } from '~shared/api/oppgaver'
+import OLD_PersongalleriBarnepensjon from '~components/manuelbehandling/OLD_PersongalleriBarnepensjon'
+import { PersonUtenIdent } from '~shared/types/Person'
 
+export interface OLD_NyBehandlingRequest {
+  sakType?: SakType
+  persongalleri?: OLD_Persongalleri
+  mottattDato?: string
+  spraak?: Spraak
+  kilde?: string
+  pesysId?: number
+  enhet?: String
+  foreldreloes?: boolean
+  ufoere?: boolean
+  gradering?: string
+}
+export interface OLD_Persongalleri {
+  soeker?: string
+  innsender?: string
+  soesken?: string[]
+  avdoed?: string[]
+  gjenlevende?: string[]
+  personerUtenIdent?: PersonUtenIdent[] | null
+}
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
   const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
@@ -38,7 +58,7 @@ export default function ManuellBehandling() {
   const [overstyrTrygdetid, setOverstyrTrygdetid] = useState<boolean>(false)
 
   const [pesysId, setPesysId] = useState<number | undefined>(undefined)
-  const [, setFnr] = useState<string | undefined>(undefined)
+  const [fnrFraOppgave, setFnr] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     if (oppgaveId) {
@@ -198,7 +218,7 @@ export default function ManuellBehandling() {
         Søker har en sak for uføretrygd løpende eller under behandling.
       </Checkbox>
 
-      <PersongalleriBarnepensjon erManuellMigrering={true} />
+      <OLD_PersongalleriBarnepensjon erManuellMigrering={true} fnrFraOppgave={fnrFraOppgave} />
 
       <Knapp>
         <Button

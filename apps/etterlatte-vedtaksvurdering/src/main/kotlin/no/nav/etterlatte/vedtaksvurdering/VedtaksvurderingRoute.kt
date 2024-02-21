@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.KlageFattVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.KlageVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
@@ -287,8 +288,16 @@ fun Route.klagevedtakRoute(
         post("/lagre-vedtak") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<KlageVedtakDto>()
-                logger.info("Oppretter vedtak for klage=${dto.klageId}")
-                call.respond(service.opprettEllerOppdaterVedtakOmAvvisning(dto))
+                logger.info("Oppretter vedtak for klage med id=$behandlingId")
+                call.respond(service.opprettEllerOppdaterVedtakOmAvvisning(behandlingId, dto))
+            }
+        }
+
+        post("/fatt-vedtak") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                val dto = call.receive<KlageFattVedtakDto>()
+                logger.info("Oppretter vedtak for klage med id=$behandlingId")
+                call.respond(service.fattVedtak(behandlingId, dto, brukerTokenInfo))
             }
         }
     }

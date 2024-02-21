@@ -30,6 +30,7 @@ enum class KlageStatus {
     FORMKRAV_OPPFYLT, //
     FORMKRAV_IKKE_OPPFYLT,
     UTFALL_VURDERT,
+    FATTET_VEDTAK,
 
     // potensielt en status for å markere oversendingen til Kabal
     FERDIGSTILT, // klagen er ferdig fra gjenny sin side

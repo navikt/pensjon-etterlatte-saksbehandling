@@ -1,22 +1,31 @@
 package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering
 
+import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vedtak.KlageFattVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.KlageVedtakDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.OpprettVedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilstandException
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class VedtakKlageService(
     private val repository: VedtaksvurderingRepository,
 ) {
     private val logger = LoggerFactory.getLogger(VedtakKlageService::class.java)
 
-    fun opprettEllerOppdaterVedtakOmAvvisning(klageVedtakDto: KlageVedtakDto): Long {
-        logger.info("Oppretter eller oppdaterer vedtak for klage=${klageVedtakDto.klageId}")
-        val eksisterendeVedtak = repository.hentVedtak(klageVedtakDto.klageId)
+    fun opprettEllerOppdaterVedtakOmAvvisning(
+        klageId: UUID,
+        klageVedtakDto: KlageVedtakDto,
+    ): Long {
+        logger.info("Oppretter eller oppdaterer vedtak for klage med id=$klageId")
+        val eksisterendeVedtak = repository.hentVedtak(klageId)
         val vedtak =
             if (eksisterendeVedtak == null) {
                 repository.opprettVedtak(
@@ -24,7 +33,7 @@ class VedtakKlageService(
                         soeker = klageVedtakDto.soeker,
                         sakId = klageVedtakDto.sakId,
                         sakType = klageVedtakDto.sakType,
-                        behandlingId = klageVedtakDto.klageId,
+                        behandlingId = klageId,
                         type = VedtakType.AVVIST_KLAGE,
                         innhold = VedtakInnhold.Klage(klageVedtakDto.klage),
                     ),
@@ -46,6 +55,29 @@ class VedtakKlageService(
                 )
             }
         return vedtak.id
+    }
+
+    fun fattVedtak(
+        klageId: UUID,
+        klageFattVedtakDto: KlageFattVedtakDto,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        logger.info("Fatter vedtak for klage=$klageFattVedtakDto.klageId")
+        val eksisterendeVedtak =
+            repository.hentVedtak(klageId)
+                ?: throw NotFoundException("Fant ikke vedtak for klage med id=$klageId")
+
+        verifiserGyldigVedtakStatus(eksisterendeVedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
+
+        return repository.fattVedtak(
+            klageId,
+            VedtakFattet(
+                ansvarligSaksbehandler = brukerTokenInfo.ident(),
+                ansvarligEnhet = klageFattVedtakDto.enhet,
+                // Blir ikke brukt fordi egen now() brukes i db..
+                tidspunkt = Tidspunkt.now(),
+            ),
+        ).id
     }
 
     private fun verifiserGyldigVedtakStatus(

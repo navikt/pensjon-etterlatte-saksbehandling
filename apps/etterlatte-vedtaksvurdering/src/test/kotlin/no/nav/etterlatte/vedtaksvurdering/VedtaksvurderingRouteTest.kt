@@ -678,7 +678,8 @@ internal class VedtaksvurderingRouteTest {
     @Test
     fun `skal opprette vedtak for avvist klage`() {
         val vedtakKlage = vedtakKlage()
-        coEvery { vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(any()) } returns vedtakKlage.id
+        val klageId = UUID.randomUUID()
+        coEvery { vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klageId, any()) } returns vedtakKlage.id
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns vedtakKlage
 
         testApplication {
@@ -694,10 +695,8 @@ internal class VedtaksvurderingRouteTest {
                     behandlingKlient,
                 )
             }
-            val klageId = UUID.randomUUID()
             val klageVedtakDto =
                 KlageVedtakDto(
-                    klageId = klageId,
                     sakId = vedtakKlage.sakId,
                     sakType = vedtakKlage.sakType,
                     soeker = Folkeregisteridentifikator.of("04417103428"),
@@ -718,7 +717,7 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-                vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klageVedtakDto)
+                vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klageId, klageVedtakDto)
             }
         }
     }

@@ -150,10 +150,13 @@ data class TilbakekrevingVedtakLagretDto(
 )
 
 data class KlageVedtakDto(
-    val klageId: UUID,
     val sakId: Long,
     val sakType: SakType,
     val soeker: Folkeregisteridentifikator,
     val klage: ObjectNode,
+    val enhet: String,
+)
+
+data class KlageFattVedtakDto(
     val enhet: String,
 )

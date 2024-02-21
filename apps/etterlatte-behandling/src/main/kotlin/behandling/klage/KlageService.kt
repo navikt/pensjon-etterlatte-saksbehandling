@@ -3,11 +3,13 @@ package no.nav.etterlatte.behandling.klage
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.KlageKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.FeatureIkkeStoettetException
+import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
@@ -20,6 +22,7 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
 import no.nav.etterlatte.libs.common.behandling.KlageUtfall
+import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.KlageVedtak
@@ -38,6 +41,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -87,6 +91,11 @@ interface KlageService {
         aarsak: AarsakTilAvbrytelse,
         kommentar: String,
         saksbehandler: Saksbehandler,
+    )
+
+    fun fattVedtak(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
     )
 }
 
@@ -444,6 +453,32 @@ class KlageServiceImpl(
             StatistikkKlage(avbruttKlage.id, avbruttKlage, Tidspunkt.now(), saksbehandler.ident),
             KlageHendelseType.AVBRUTT,
         )
+    }
+
+    override fun fattVedtak(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        inTransaction {
+            val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+
+            val vedtakId =
+                runBlocking {
+                    vedtakKlient.fattVedtakKlage(klage.id, brukerTokenInfo, klage.sak.enhet)
+                }
+            klageDao.lagreKlage(klage.copy(status = KlageStatus.FATTET_VEDTAK))
+
+            hendelseDao.vedtakHendelse(
+                behandlingId = klage.id,
+                sakId = klage.sak.id,
+                vedtakId = vedtakId,
+                hendelse = HendelseType.FATTET,
+                inntruffet = Tidspunkt.now(),
+                saksbehandler = brukerTokenInfo.ident(),
+                kommentar = null,
+                begrunnelse = null,
+            )
+        }
     }
 
     private fun ferdigstillInnstilling(

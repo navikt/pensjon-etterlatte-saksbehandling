@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.klageId
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
@@ -93,7 +94,11 @@ internal fun Route.klageRoutes(
                         medBody<InitieltUtfallMedBegrunnelseDto> { utfallMedBegrunnelse ->
                             val oppdatertKlage =
                                 inTransaction {
-                                    klageService.lagreInitieltUtfallMedBegrunnelseAvKlage(klageId, utfallMedBegrunnelse, saksbehandler)
+                                    klageService.lagreInitieltUtfallMedBegrunnelseAvKlage(
+                                        klageId,
+                                        utfallMedBegrunnelse,
+                                        saksbehandler,
+                                    )
                                 }
                             call.respond(oppdatertKlage)
                         }
@@ -153,6 +158,17 @@ internal fun Route.klageRoutes(
                                     saksbehandler,
                                 )
                             }
+                        }
+                        call.respond(HttpStatusCode.OK)
+                    }
+                }
+            }
+
+            route("vedtak") {
+                post("fatt") {
+                    kunSkrivetilgang {
+                        inTransaction {
+                            klageService.fattVedtak(klageId, brukerTokenInfo)
                         }
                         call.respond(HttpStatusCode.OK)
                     }

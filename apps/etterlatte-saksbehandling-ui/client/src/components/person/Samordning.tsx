@@ -113,6 +113,8 @@ export const SamordningModal = ({ behandlingId }: { behandlingId: string }) => {
                 </Table>
               </div>
             ))}
+
+          {!isPending(hentet) && samordningsdata?.length === 0 && <BodyShort>Ingen data.</BodyShort>}
         </Modal.Body>
       </Modal>
     </>

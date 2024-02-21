@@ -51,7 +51,8 @@ export type Oppgavetype =
   | 'JOURNALFOERING'
   | 'GJENOPPRETTING_ALDERSOVERGANG'
 
-export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
+export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean =>
+  ['NY', 'UNDER_BEHANDLING', 'PAA_VENT'].includes(status)
 
 export const hentOppgaverMedStatus = async (args: {
   oppgavestatusFilter: Array<string>

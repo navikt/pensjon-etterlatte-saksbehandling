@@ -201,7 +201,7 @@ class UgyldigStatusKanIkkeFerdigstilles(id: BrevID, status: Status) : UgyldigFor
 
 class UgyldigMottakerKanIkkeFerdigstilles(id: BrevID) : UgyldigForespoerselException(
     code = "UGYLDIG_MOTTAKER_BREV",
-    detail = "Brevet har ugyldig mottaker og kan ikke ferdigstilles",
+    detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse",
     meta =
         mapOf(
             "id" to id,

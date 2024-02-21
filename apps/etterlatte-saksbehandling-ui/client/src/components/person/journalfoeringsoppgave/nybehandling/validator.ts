@@ -22,7 +22,7 @@ const gyldigPersongalleri = (request: NyBehandlingRequest) => {
 }
 
 export const validerFnrValgfri = (fnr: string): string | undefined => {
-  if (fnr && !new RegExp(/[0-9]{11}/).test(fnr)) {
+  if (fnr && !fnrErGyldig(fnr)) {
     return 'Fødselsnummer er på ugyldig format'
   }
   return undefined
@@ -31,7 +31,7 @@ export const validerFnrValgfri = (fnr: string): string | undefined => {
 export const validateFnrObligatorisk = (fnr: string): string | undefined => {
   if (!fnr) {
     return 'Fødselsnummer må være satt'
-  } else if (!new RegExp(/[0-9]{11}/).test(fnr)) {
+  } else if (!fnrErGyldig(fnr)) {
     return 'Fødselsnummer er på ugyldig format'
   }
   return undefined

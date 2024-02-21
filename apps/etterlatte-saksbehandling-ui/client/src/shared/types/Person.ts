@@ -107,7 +107,7 @@ export function formaterNavn(person: PersonNavn): string {
 }
 
 export interface Persongalleri {
-  soeker: string
+  soeker?: string
   innsender?: string
   soesken?: string[]
   avdoed?: string[]

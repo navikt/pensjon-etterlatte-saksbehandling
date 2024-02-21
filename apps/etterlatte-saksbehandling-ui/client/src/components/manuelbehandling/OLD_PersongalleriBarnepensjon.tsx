@@ -6,7 +6,6 @@ import { InputList, InputRow } from '../person/journalfoeringsoppgave/nybehandli
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
-import { OLD_Persongalleri } from '~components/manuelbehandling/ManuellBehandling'
 
 type PersonArray = keyof Omit<Persongalleri, 'soeker' | 'innsender'>
 
@@ -22,7 +21,7 @@ export default function OLD_PersongalleriBarnepensjon({
 
   const persongalleri = nyBehandlingRequest?.persongalleri
 
-  const oppdaterPersongalleri = (persongalleri: OLD_Persongalleri) => {
+  const oppdaterPersongalleri = (persongalleri: Persongalleri) => {
     dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, persongalleri }))
   }
 

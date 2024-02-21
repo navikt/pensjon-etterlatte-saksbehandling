@@ -18,6 +18,8 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
   const avdoedFormArray = useFieldArray<NyBehandlingSkjema>({ name: 'persongalleri.avdoed' })
   const soeskenFormArray = useFieldArray<NyBehandlingSkjema>({ name: 'persongalleri.soesken' })
 
+  const kanLeggeTil: boolean = (gjenlevendeFormArray.fields.length || 0) + (avdoedFormArray.fields.length || 0) < 2
+
   return (
     <>
       <InputRow>
@@ -36,6 +38,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           {...register('persongalleri.innsender', { validate: validerFnrValgfri })}
           label="Innsender"
           description="Oppgi innsenderen sitt fødselsnummer (dersom det er tilgjengelig)"
+          error={errors.persongalleri?.innsender?.message}
         />
       </InputRow>
 
@@ -65,7 +68,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           <Button
             icon={<PlusIcon aria-hidden />}
             onClick={() => gjenlevendeFormArray.append({ value: '' })}
-            disabled={gjenlevendeFormArray.fields.length >= 2}
+            disabled={!kanLeggeTil}
             type="button"
           >
             Legg til gjenlevende
@@ -99,7 +102,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           <Button
             icon={<PlusIcon aria-hidden />}
             onClick={() => avdoedFormArray.append({ value: '' })}
-            disabled={avdoedFormArray.fields.length >= 2}
+            disabled={!kanLeggeTil}
             type="button"
           >
             Legg til avdød

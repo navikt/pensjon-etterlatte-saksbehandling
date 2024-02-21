@@ -13,7 +13,8 @@ import React from 'react'
 import { Spraak } from '~shared/types/Brev'
 import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
+import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
+import { useAppDispatch } from '~store/Store'
 
 export interface NyBehandlingSkjema {
   spraak: Spraak | null
@@ -29,6 +30,7 @@ export interface NyBehandlingSkjema {
 
 export default function OpprettNyBehandling() {
   const { oppgave, nyBehandlingRequest } = useJournalfoeringOppgave()
+  const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
   if (!oppgave) {
@@ -37,13 +39,34 @@ export default function OpprettNyBehandling() {
 
   const { sakType } = oppgave
 
+  const neste = () => navigate('oppsummering', { relative: 'path' })
+
   const tilbake = () => navigate('../', { relative: 'path' })
+
+  const mapStringArrayToRHFArray = (stringArray?: string[]): Array<{ value: string }> => {
+    return !!stringArray
+      ? stringArray.map((value) => {
+          return { value }
+        })
+      : []
+  }
+
+  const mapRHFArrayToStringArray = (rhfArray?: Array<{ value: string }>): string[] => {
+    return !!rhfArray ? rhfArray.map((val) => val.value) : []
+  }
 
   const methods = useForm<NyBehandlingSkjema>({
     defaultValues: {
+      ...nyBehandlingRequest,
       persongalleri: {
+        innsender: nyBehandlingRequest?.persongalleri?.innsender,
         soeker: nyBehandlingRequest?.persongalleri?.soeker,
-        avdoed: sakType === SakType.OMSTILLINGSSTOENAD ? [{ value: '' }] : [],
+        gjenlevende: mapStringArrayToRHFArray(nyBehandlingRequest?.persongalleri?.gjenlevende),
+        soesken: mapStringArrayToRHFArray(nyBehandlingRequest?.persongalleri?.soesken),
+        avdoed:
+          sakType === SakType.OMSTILLINGSSTOENAD
+            ? [{ value: '' }]
+            : mapStringArrayToRHFArray(nyBehandlingRequest?.persongalleri?.avdoed),
       },
     },
   })
@@ -52,22 +75,25 @@ export default function OpprettNyBehandling() {
     handleSubmit,
     control,
     formState: { errors },
+    getValues,
   } = methods
 
   const onSubmit = (data: NyBehandlingSkjema) => {
-    const state: NyBehandlingRequest = {
-      sakType,
-      spraak: data.spraak!,
-      mottattDato: new Date(data.mottattDato).toISOString(),
-      persongalleri: {
-        ...data.persongalleri,
-        gjenlevende: data.persongalleri.gjenlevende?.map((val) => val.value),
-        avdoed: data.persongalleri.avdoed?.map((val) => val.value).filter((val) => val !== ''),
-        soesken: data.persongalleri.soesken?.map((val) => val.value),
-      },
-    }
+    dispatch(
+      settNyBehandlingRequest({
+        sakType,
+        spraak: data.spraak!,
+        mottattDato: new Date(data.mottattDato).toISOString(),
+        persongalleri: {
+          ...data.persongalleri,
+          gjenlevende: mapRHFArrayToStringArray(data.persongalleri.gjenlevende),
+          avdoed: mapRHFArrayToStringArray(data.persongalleri.avdoed).filter((val) => val !== ''),
+          soesken: mapRHFArrayToStringArray(data.persongalleri.soesken),
+        },
+      })
+    )
 
-    navigate('oppsummering', { relative: 'path', state })
+    neste()
   }
 
   return (
@@ -99,6 +125,7 @@ export default function OpprettNyBehandling() {
             description="Datoen søknaden ble mottatt"
             control={control}
             errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
+            defaultValue={getValues().mottattDato}
           />
 
           <hr />

@@ -19,28 +19,7 @@ import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~components/person/Endre
 import { useParams } from 'react-router-dom'
 import { hentOppgave } from '~shared/api/oppgaver'
 import OLD_PersongalleriBarnepensjon from '~components/manuelbehandling/OLD_PersongalleriBarnepensjon'
-import { PersonUtenIdent } from '~shared/types/Person'
 
-export interface OLD_NyBehandlingRequest {
-  sakType?: SakType
-  persongalleri?: OLD_Persongalleri
-  mottattDato?: string
-  spraak?: Spraak
-  kilde?: string
-  pesysId?: number
-  enhet?: String
-  foreldreloes?: boolean
-  ufoere?: boolean
-  gradering?: string
-}
-export interface OLD_Persongalleri {
-  soeker?: string
-  innsender?: string
-  soesken?: string[]
-  avdoed?: string[]
-  gjenlevende?: string[]
-  personerUtenIdent?: PersonUtenIdent[] | null
-}
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
   const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)

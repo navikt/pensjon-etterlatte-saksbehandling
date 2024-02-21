@@ -4,6 +4,7 @@ import {
   IGyldighetResultat,
   IKommerBarnetTilgode,
   IUtlandstilknytning,
+  NyBehandlingRequest,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { apiClient, ApiResponse } from './apiClient'
@@ -16,7 +17,6 @@ import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
 import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 import { RedigertFamilieforhold } from '~shared/types/grunnlag'
-import { OLD_NyBehandlingRequest } from '~components/manuelbehandling/ManuellBehandling'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
@@ -32,7 +32,7 @@ export const hentBehandling = async (id: string): Promise<ApiResponse<IDetaljert
   return apiClient.get(`/behandling/${id}`)
 }
 
-export const opprettBehandling = async (nyBehandlingRequest: OLD_NyBehandlingRequest): Promise<ApiResponse<string>> =>
+export const opprettBehandling = async (nyBehandlingRequest: NyBehandlingRequest): Promise<ApiResponse<string>> =>
   apiClient.post(`/behandling`, { ...nyBehandlingRequest })
 
 export const avbrytBehandling = async (id: string): Promise<ApiResponse<unknown>> => {

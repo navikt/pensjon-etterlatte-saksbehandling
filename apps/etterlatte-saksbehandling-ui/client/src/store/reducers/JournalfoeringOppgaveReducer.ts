@@ -3,14 +3,14 @@ import { OppgaveDTO } from '~shared/api/oppgaver'
 import { Journalpost } from '~shared/types/Journalpost'
 import { SakMedBehandlinger } from '~components/person/typer'
 import { NyKlageRequestUtfylling } from '~shared/types/Klage'
-import { OLD_NyBehandlingRequest } from '~components/manuelbehandling/ManuellBehandling'
+import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 
 export const settBruker = createAction<string>('behandling/bruker/sett')
 export const settOppgave = createAction<OppgaveDTO>('behandling/oppgave/sett')
 export const settSak = createAction<SakMedBehandlinger>('behandling/sak/sett')
 export const settJournalpost = createAction<Journalpost>('behandling/journalpost/sett')
 export const settOppgaveHandling = createAction<OppgaveHandling>('oppgave/oppgavehandling/sett')
-export const settNyBehandlingRequest = createAction<OLD_NyBehandlingRequest>('behandling/behandlingbehov/sett')
+export const settNyBehandlingRequest = createAction<NyBehandlingRequest>('behandling/behandlingbehov/sett')
 export const settNyKlageRequest = createAction<Partial<NyKlageRequestUtfylling>>('klage/klagebehandling/sett')
 
 export interface IJournalfoeringOppgaveReducer {
@@ -19,7 +19,7 @@ export interface IJournalfoeringOppgaveReducer {
   sakMedBehandlinger?: SakMedBehandlinger
   journalpost?: Journalpost
   oppgaveHandling?: OppgaveHandling
-  nyBehandlingRequest?: OLD_NyBehandlingRequest
+  nyBehandlingRequest?: NyBehandlingRequest
   nyKlageRequest?: Partial<NyKlageRequestUtfylling>
 }
 

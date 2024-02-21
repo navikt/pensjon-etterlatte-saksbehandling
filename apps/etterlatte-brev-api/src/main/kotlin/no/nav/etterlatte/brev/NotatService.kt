@@ -119,7 +119,9 @@ class NotatService(
         sak: Sak,
     ): OpprettJournalpostResponse {
         val pdf =
-            brevRepository.hentPdf(notat.id) ?: throw IllegalStateException("Kan ikke journalføre hvis vi ikke har en pdf")
+            checkNotNull(brevRepository.hentPdf(notat.id)) {
+                "Kan ikke journalføre hvis vi ikke har en pdf"
+            }
         val tittel = notat.tittel ?: "Internt notat"
 
         val journalpostRequest =
@@ -155,7 +157,8 @@ class NotatService(
                 tema = sak.sakType.tema,
                 tittel = tittel,
             )
-        val opprettJournalpostResponse = dokarkivKlient.opprettJournalpost(request = journalpostRequest, ferdigstill = true)
+        val opprettJournalpostResponse =
+            dokarkivKlient.opprettJournalpost(request = journalpostRequest, ferdigstill = true)
         brevRepository.settBrevJournalfoert(notat.id, opprettJournalpostResponse)
         return opprettJournalpostResponse
     }
@@ -187,7 +190,8 @@ class NotatService(
     }
 
     fun hentPdf(notatId: BrevID): Pdf {
-        return brevRepository.hentPdf(notatId)
-            ?: throw IllegalStateException("Fant ikke generert pdf for notat med id=$notatId")
+        return checkNotNull(brevRepository.hentPdf(notatId)) {
+            "Fant ikke generert pdf for notat med id=$notatId"
+        }
     }
 }

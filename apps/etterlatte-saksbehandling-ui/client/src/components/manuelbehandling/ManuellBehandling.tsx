@@ -18,7 +18,7 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~components/person/EndreEnhet'
 import { useParams } from 'react-router-dom'
 import { hentOppgave } from '~shared/api/oppgaver'
-import OLD_PersongalleriBarnepensjon from '~components/manuelbehandling/OLD_PersongalleriBarnepensjon'
+import ManuellPersongalleriBarnepensjon from '~components/manuelbehandling/ManuellPersongalleriBarnepensjon'
 
 export default function ManuellBehandling() {
   const dispatch = useAppDispatch()
@@ -197,7 +197,7 @@ export default function ManuellBehandling() {
         Søker har en sak for uføretrygd løpende eller under behandling.
       </Checkbox>
 
-      <OLD_PersongalleriBarnepensjon erManuellMigrering={true} fnrFraOppgave={fnrFraOppgave} />
+      <ManuellPersongalleriBarnepensjon erManuellMigrering={true} fnrFraOppgave={fnrFraOppgave} />
 
       <Knapp>
         <Button

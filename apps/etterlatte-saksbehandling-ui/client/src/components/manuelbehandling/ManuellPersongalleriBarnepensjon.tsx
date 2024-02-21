@@ -9,7 +9,7 @@ import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveRe
 
 type PersonArray = keyof Omit<Persongalleri, 'soeker' | 'innsender'>
 
-export default function OLD_PersongalleriBarnepensjon({
+export default function ManuellPersongalleriBarnepensjon({
   erManuellMigrering = false,
   fnrFraOppgave = undefined,
 }: {

@@ -12,11 +12,14 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import org.slf4j.LoggerFactory
 
 class DoedshendelseKontrollpunktService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val pesysKlient: PesysKlient,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun identifiserKontrollerpunkter(hendelse: Doedshendelse): List<DoedshendelseKontrollpunkt> {
         val avdoed = pdlTjenesterKlient.hentPdlModell(hendelse.avdoedFnr, PersonRolle.AVDOED, SakType.BARNEPENSJON)
 
@@ -25,6 +28,7 @@ class DoedshendelseKontrollpunktService(
             kontrollerKryssendeYtelse(hendelse),
             kontrollerDNummer(avdoed),
             kontrollerUtvandring(avdoed),
+            kontrollerSamtidigDoedsfall(avdoed, hendelse),
         )
     }
 
@@ -77,4 +81,37 @@ class DoedshendelseKontrollpunktService(
 
         return null
     }
+
+    private fun kontrollerSamtidigDoedsfall(
+        avdoed: PersonDTO,
+        hendelse: Doedshendelse,
+    ): DoedshendelseKontrollpunkt? =
+        try {
+            avdoed.doedsdato?.verdi?.let { avdoedDoedsdato ->
+                val annenForelderFnr =
+                    pdlTjenesterKlient.hentPdlModell(
+                        foedselsnummer = hendelse.beroertFnr,
+                        rolle = PersonRolle.BARN,
+                        saktype = SakType.BARNEPENSJON,
+                    ).familieRelasjon?.verdi?.foreldre
+                        ?.map { it.value }
+                        ?.firstOrNull { it != hendelse.avdoedFnr }
+
+                if (annenForelderFnr == null) {
+                    DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
+                } else {
+                    pdlTjenesterKlient.hentPdlModell(annenForelderFnr, PersonRolle.GJENLEVENDE, SakType.BARNEPENSJON)
+                        .doedsdato?.verdi?.let { annenForelderDoedsdato ->
+                            if (annenForelderDoedsdato == avdoedDoedsdato) {
+                                DoedshendelseKontrollpunkt.SamtidigDoedsfall
+                            } else {
+                                null
+                            }
+                        }
+                }
+            }
+        } catch (e: Exception) {
+            logger.error("Feil ved uthenting av annen forelder", e)
+            DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
+        }
 }

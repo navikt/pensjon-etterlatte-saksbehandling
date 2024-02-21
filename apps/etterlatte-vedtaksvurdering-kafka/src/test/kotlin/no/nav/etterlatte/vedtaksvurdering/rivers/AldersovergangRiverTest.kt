@@ -36,7 +36,8 @@ class AldersovergangRiverTest {
 
     @Test
     fun `skal lese melding og sjekke loepende ytelse`() {
-        every { vedtakService.harLoependeYtelserFra(sakId, datoFom) } returns LoependeYtelseDTO(true, datoFom, behandlingId)
+        every { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1)) } returns
+            LoependeYtelseDTO(true, datoFom, behandlingId)
         every {
             vedtakService.harLoependeYtelserFra(
                 sakId,
@@ -68,13 +69,14 @@ class AldersovergangRiverTest {
             field(0, DRYRUN).asBoolean() shouldBe false
         }
 
-        verify { vedtakService.harLoependeYtelserFra(sakId, datoFom) }
+        verify { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1)) }
         verify { vedtakService.harLoependeYtelserFra(sakId, datoFomJanuar2024) }
     }
 
     @Test
     fun `skal lese melding og returnere negativt svar for loepende ytelse`() {
-        every { vedtakService.harLoependeYtelserFra(sakId, datoFom) } returns LoependeYtelseDTO(false, datoFom)
+        every { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1)) } returns
+            LoependeYtelseDTO(false, datoFom)
 
         val melding =
             JsonMessage.newMessage(
@@ -99,6 +101,6 @@ class AldersovergangRiverTest {
             field(0, DRYRUN).asBoolean() shouldBe true
         }
 
-        verify { vedtakService.harLoependeYtelserFra(sakId, datoFom) }
+        verify { vedtakService.harLoependeYtelserFra(sakId, datoFom.plusMonths(1)) }
     }
 }

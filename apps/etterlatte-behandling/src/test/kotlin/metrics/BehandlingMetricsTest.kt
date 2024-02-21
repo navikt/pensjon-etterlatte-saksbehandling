@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import io.prometheus.client.CollectorRegistry
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.common.Enheter
@@ -37,14 +38,12 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = ds.connection
-
-        sakRepo = SakDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(ds))
         behandlingRepo =
             BehandlingDao(
                 kommerBarnetTilGodeDao = mockk(),
                 revurderingDao = mockk(),
-                connection = { connection },
+                ConnectionAutoclosingTest(ds),
             )
 
         opprettBehandlinger()

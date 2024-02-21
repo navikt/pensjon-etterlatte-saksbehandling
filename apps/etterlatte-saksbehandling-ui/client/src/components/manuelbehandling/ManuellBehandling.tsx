@@ -205,7 +205,7 @@ export default function ManuellBehandling() {
           onClick={ferdigstill}
           loading={isPending(status) || isPending(overstyrBeregningStatus) || isPending(overstyrTrygdetidStatus)}
         >
-          Send inn
+          Opprett behandling
         </Button>
       </Knapp>
       {error && <Alert variant="error">Alle påkrevde felter er ikke fylt ut</Alert>}

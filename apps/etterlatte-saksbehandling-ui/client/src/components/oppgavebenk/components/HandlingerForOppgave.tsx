@@ -8,10 +8,9 @@ import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/Omgjoer
 export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const innloggetsaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const { id, type, kilde, fnr, saksbehandlerIdent, referanse } = oppgave
-  const erInnloggetSaksbehandlerOppgave = saksbehandlerIdent
-    ? saksbehandlerIdent === innloggetsaksbehandler.ident
-    : false
+  const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
+  const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
+
   if (kilde === 'GENERELL_BEHANDLING') {
     switch (type) {
       case 'UNDERKJENT':
@@ -93,9 +92,14 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
     case 'MANUELT_OPPHOER':
       return (
         <>
-          {erInnloggetSaksbehandlerOppgave && (
+          {erInnloggetSaksbehandlerOppgave && referanse && (
             <Button size="small" href={`/behandling/${referanse}`} as="a">
               Gå til opphør
+            </Button>
+          )}
+          {erInnloggetSaksbehandlerOppgave && !referanse && (
+            <Button size="small" href={`/person/${fnr}`} as="a">
+              Gå til sak
             </Button>
           )}
         </>

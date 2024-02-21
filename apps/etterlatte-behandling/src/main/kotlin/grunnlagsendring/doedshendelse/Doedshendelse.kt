@@ -12,7 +12,7 @@ data class Doedshendelse internal constructor(
     val relasjon: Relasjon,
     val opprettet: Tidspunkt,
     val endret: Tidspunkt,
-    val status: DoedshendelseStatus,
+    val status: Status,
     val utfall: Utfall? = null,
     val oppgaveId: UUID? = null,
     val brevId: Long? = null,
@@ -29,14 +29,23 @@ data class Doedshendelse internal constructor(
             avdoedDoedsdato = avdoedDoedsdato,
             beroertFnr = beroertFnr,
             relasjon = relasjon,
-            status = DoedshendelseStatus.NY,
+            status = Status.NY,
             opprettet = Tidspunkt.now(),
+            endret = Tidspunkt.now(),
+        )
+    }
+
+    fun tilAvbrutt(sakId: Long? = null): Doedshendelse {
+        return copy(
+            sakId = sakId,
+            status = Status.FERDIG,
+            utfall = Utfall.AVBRUTT,
             endret = Tidspunkt.now(),
         )
     }
 }
 
-enum class DoedshendelseStatus {
+enum class Status {
     NY,
     OPPDATERT,
     FERDIG,

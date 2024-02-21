@@ -24,6 +24,7 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-brev-model/**
+      - libs/etterlatte-oppgave-model/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -38,6 +39,7 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - libs/etterlatte-brev-model/**
+      - libs/etterlatte-oppgave-model/**
       - gradle/libs.versions.toml
 
 permissions:

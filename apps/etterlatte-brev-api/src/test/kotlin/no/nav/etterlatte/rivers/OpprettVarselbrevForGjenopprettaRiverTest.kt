@@ -7,6 +7,7 @@ import io.mockk.confirmVerified
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -21,6 +22,7 @@ import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.OPPGAVE_KEY
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Migreringshendelser
@@ -40,8 +42,17 @@ internal class OpprettVarselbrevForGjenopprettaRiverTest {
 
     private val brevhaandterer = mockk<FerdigstillJournalfoerOgDistribuerBrev>()
 
+    private val behandlingKlient = mockk<BehandlingKlient>()
+
     private val opprettBrevRapid =
-        TestRapid().apply { OpprettVarselbrevForGjenopprettaRiver(this, varselbrevService, brevhaandterer) }
+        TestRapid().apply {
+            OpprettVarselbrevForGjenopprettaRiver(
+                this,
+                varselbrevService,
+                brevhaandterer,
+                behandlingKlient,
+            )
+        }
 
     private val behandlingId = UUID.randomUUID()
 
@@ -100,6 +111,7 @@ internal class OpprettVarselbrevForGjenopprettaRiverTest {
                 KILDE_KEY to kilde,
                 SAK_ID_KEY to saksnr,
                 BEHANDLING_ID_KEY to behandlingId,
+                OPPGAVE_KEY to UUID.randomUUID(),
             ),
         )
 }

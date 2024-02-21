@@ -37,6 +37,7 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
+import no.nav.etterlatte.tilgangsstyring.withLesetilgang
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -118,12 +119,6 @@ class PersonManglerSak() :
         detail = "Personen har ingen saker i Gjenny",
     )
 
-class ManglerTilgangTilEnhet(enheter: List<String>) :
-    UgyldigForespoerselException(
-        code = "MANGLER_TILGANG_TIL_ENHET",
-        detail = "Mangler tilgang til enhet $enheter",
-    )
-
 class SakIkkeFunnetException(message: String) :
     UgyldigForespoerselException(
         code = "FANT_INGEN_SAK",
@@ -143,11 +138,13 @@ internal fun Route.sakWebRoutes(
     route("/api") {
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get {
-                val sak =
-                    inTransaction {
-                        sakService.finnSak(sakId)
-                    }
-                call.respond(sak ?: HttpStatusCode.NotFound)
+                withLesetilgang {
+                    val sak =
+                        inTransaction {
+                            sakService.finnSak(sakId)
+                        }
+                    call.respond(sak ?: HttpStatusCode.NotFound)
+                }
             }
 
             get("/grunnlagsendringshendelser") {
@@ -186,7 +183,7 @@ internal fun Route.sakWebRoutes(
                             sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
                             for (oppgaveIntern in oppgaveService.hentOppgaverForSak(sakId)) {
-                                if (oppgaveIntern.saksbehandlerIdent != null &&
+                                if (oppgaveIntern.saksbehandler != null &&
                                     oppgaveIntern.status == Status.UNDER_BEHANDLING
                                 ) {
                                     oppgaveService.fjernSaksbehandler(
@@ -208,15 +205,19 @@ internal fun Route.sakWebRoutes(
             }
 
             get("flyktning") {
-                val flyktning = inTransaction { sakService.finnFlyktningForSak(sakId) }
-                call.respond(flyktning ?: HttpStatusCode.NoContent)
+                withLesetilgang {
+                    val flyktning = inTransaction { sakService.finnFlyktningForSak(sakId) }
+                    call.respond(flyktning ?: HttpStatusCode.NoContent)
+                }
             }
 
             get("/behandlinger/foerstevirk") {
-                logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
-                when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
+                withLesetilgang {
+                    logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
+                    when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {
+                        null -> call.respond(HttpStatusCode.NotFound)
+                        else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
+                    }
                 }
             }
         }

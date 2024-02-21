@@ -1,5 +1,6 @@
 package no.nav.etterlatte.saksbehandler
 
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
@@ -13,14 +14,13 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 internal class SaksbehandlerInfoDaoTransTest(val dataSource: DataSource) {
-    private lateinit var saksbehandlerInfoDaoTrans: SaksbehandlerInfoDaoTrans
+    private lateinit var saksbehandlerInfoDaoTrans: SaksbehandlerInfoDao
     private lateinit var saksbehandlerInfoDao: SaksbehandlerInfoDao
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-        saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans { connection }
-        saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
+        saksbehandlerInfoDaoTrans = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
+        saksbehandlerInfoDao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @Test

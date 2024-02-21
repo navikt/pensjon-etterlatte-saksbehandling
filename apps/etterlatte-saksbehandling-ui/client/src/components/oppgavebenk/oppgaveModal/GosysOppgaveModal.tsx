@@ -24,7 +24,7 @@ const InfoGrid = styled.div`
 
 export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const [open, setOpen] = useState(false)
-  const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandlerIdent, beskrivelse, sakType } = oppgave
+  const { opprettet, frist, status, fnr, gjelder, enhet, saksbehandler, beskrivelse, sakType } = oppgave
 
   const configContext = useContext(ConfigContext)
 
@@ -71,7 +71,7 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
             </div>
             <div>
               <Label>Saksbehandler</Label>
-              <BodyShort>{hyphenIfNull(saksbehandlerIdent)}</BodyShort>
+              <BodyShort>{saksbehandler?.ident || '-'}</BodyShort>
             </div>
           </InfoGrid>
           <div>
@@ -99,5 +99,3 @@ export const GosysOppgaveModal = ({ oppgave }: { oppgave: OppgaveDTO }) => {
     </>
   )
 }
-
-const hyphenIfNull = (inputString: string | null) => (inputString ? inputString : '-')

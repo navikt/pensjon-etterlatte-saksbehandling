@@ -98,7 +98,11 @@ class BrevdataFacade(
                 vedtak?.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
             val behandling =
-                if (behandlingId != null && vedtak?.type in listOf(VedtakType.INNVILGELSE, VedtakType.AVSLAG)) {
+                if (behandlingId != null && vedtak?.type in
+                    listOf(
+                        VedtakType.INNVILGELSE, VedtakType.AVSLAG, VedtakType.OPPHOER, VedtakType.ENDRING,
+                    )
+                ) {
                     behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 } else {
                     null
@@ -252,15 +256,31 @@ class BrevdataFacade(
         )
     }
 
+    suspend fun finnForrigeAvkortingsinfo(
+        sakId: Long,
+        sakType: SakType,
+        virkningstidspunkt: YearMonth,
+        vedtakType: VedtakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Avkortingsinfo? {
+        return finnAvkortingsinfo(
+            behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
+            sakType,
+            virkningstidspunkt,
+            vedtakType,
+            brukerTokenInfo,
+        )
+    }
+
     suspend fun finnTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) = trygdetidService.finnTrygdetid(behandlingId, brukerTokenInfo)
 
-    suspend fun hentBehandling(
+    suspend fun hentVedtaksbehandlingKanRedigeres(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+    ) = behandlingKlient.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
 }
 
 fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> {

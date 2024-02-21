@@ -246,10 +246,16 @@ class ApplicationBuilder {
                     this,
                     varselbrevService,
                     ferdigstillJournalfoerOgDistribuerBrev,
+                    behandlingKlient,
                 )
                 FiksEnkeltbrevRiver(this, vedtaksvurderingService)
                     .also { fiksEnkeltbrev() }
-                OpprettJournalfoerOgDistribuerRiver(this, brevoppretter, ferdigstillJournalfoerOgDistribuerBrev)
+                OpprettJournalfoerOgDistribuerRiver(
+                    this,
+                    brevdataFacade,
+                    brevoppretter,
+                    ferdigstillJournalfoerOgDistribuerBrev,
+                )
 
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)

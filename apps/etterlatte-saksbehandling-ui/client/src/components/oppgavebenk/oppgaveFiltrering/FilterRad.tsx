@@ -17,16 +17,18 @@ import {
 } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
-import { OppgaveDTO } from '~shared/api/oppgaver'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
+import { Saksbehandler } from '~shared/types/saksbehandler'
+import { OppgaveDTO } from '~shared/api/oppgaver'
 
 interface Props {
   hentAlleOppgaver: () => void
   hentOppgaverStatus: (oppgavestatusFilter: Array<string>) => void
   filter: Filter
   setFilter: (filter: Filter) => void
-  alleOppgaver: OppgaveDTO[]
+  alleOppgaver: Array<OppgaveDTO>
+  saksbehandlereIEnhet: Array<Saksbehandler>
 }
 
 export const FilterRad = ({
@@ -36,8 +38,8 @@ export const FilterRad = ({
   setFilter,
   alleOppgaver,
 }: Props): ReactNode => {
-  const saksbehandlere = new Set(
-    alleOppgaver.map((oppgave) => oppgave.saksbehandlerIdent).filter((s): s is Exclude<typeof s, null> => s !== null)
+  const saksbehandlere: Set<string> = new Set(
+    alleOppgaver.map((oppgave) => oppgave.saksbehandler?.ident || '').filter((ident) => !!ident)
   )
   const [saksbehandlerFilterLokal, setSaksbehandlerFilterLokal] = useState<string>(filter.saksbehandlerFilter)
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
@@ -70,6 +72,8 @@ export const FilterRad = ({
               </option>
             ))}
         </Select>
+
+        {/* TODO: Burde være en liste over navn, ikke identer. Burde også KUN vise de som tilhører enhet */}
         <UNSAFE_Combobox
           label="Saksbehandler"
           value={saksbehandlerFilterLokal}

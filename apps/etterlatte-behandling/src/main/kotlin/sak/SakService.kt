@@ -11,6 +11,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
@@ -61,6 +62,12 @@ interface SakService {
 
     suspend fun finnNavkontorForPerson(fnr: String): Navkontor
 }
+
+class ManglerTilgangTilEnhet(enheter: List<String>) :
+    UgyldigForespoerselException(
+        code = "MANGLER_TILGANG_TIL_ENHET",
+        detail = "Mangler tilgang til enhet $enheter",
+    )
 
 class SakServiceImpl(
     private val dao: SakDao,

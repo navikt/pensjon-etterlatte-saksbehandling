@@ -14,7 +14,7 @@ import { addKlage } from '~store/reducers/KlageReducer'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
+import { forrigeSteg, kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
 import { erSkjemaUtfylt, KlageOmgjoering } from '~components/klage/vurdering/KlageVurderingForms'
 import styled from 'styled-components'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
@@ -130,15 +130,6 @@ export function KlageAvvisning(props: { klage: Klage }) {
       </form>
     </Content>
   )
-}
-
-function kanSeBrev(valgtUtfall: Utfall | null) {
-  switch (valgtUtfall) {
-    case 'DELVIS_OMGJOERING':
-    case 'STADFESTE_VEDTAK':
-      return true
-  }
-  return false
 }
 
 function nesteSteg(valgtUtfall: Utfall | null, klageId: string) {

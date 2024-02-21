@@ -18,22 +18,22 @@ class SafService(
     suspend fun hentDokumentPDF(
         journalpostId: String,
         dokumentInfoId: String,
-        accessToken: String,
+        bruker: BrukerTokenInfo,
     ): ByteArray {
         logger.info("Henter dokument (journalpostId=$journalpostId, dokumentInfoId=$dokumentInfoId)")
 
-        return safKlient.hentDokumentPDF(journalpostId, dokumentInfoId, accessToken)
+        return safKlient.hentDokumentPDF(journalpostId, dokumentInfoId, bruker)
     }
 
     suspend fun hentDokumenter(
         ident: String,
         visTemaPen: Boolean,
         idType: BrukerIdType,
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
     ): List<Journalpost> {
         logger.info("Henter alle journalposter for ident=${ident.maskerFnr()} (visTemaPen=$visTemaPen)")
 
-        val response = safKlient.hentDokumenter(ident, visTemaPen, idType, brukerTokenInfo)
+        val response = safKlient.hentDokumenter(ident, visTemaPen, idType, bruker)
 
         return if (response.errors.isNullOrEmpty()) {
             response.data?.dokumentoversiktBruker?.journalposter ?: emptyList()
@@ -44,11 +44,26 @@ class SafService(
 
     suspend fun hentJournalpost(
         journalpostId: String,
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
     ): Journalpost? {
         logger.info("Henter journalpost (id=$journalpostId)")
 
-        val response = safKlient.hentJournalpost(journalpostId, brukerTokenInfo)
+        val response = safKlient.hentJournalpost(journalpostId, bruker)
+
+        return if (response.errors.isNullOrEmpty()) {
+            response.data?.journalpost
+        } else {
+            throw konverterTilForespoerselException(response.errors)
+        }
+    }
+
+    suspend fun hentUtsendingsinfo(
+        journalpostId: String,
+        bruker: BrukerTokenInfo,
+    ): JournalpostUtsendingsinfo? {
+        logger.info("Henter utsendingsinfo fra journalpost (id=$journalpostId)")
+
+        val response = safKlient.hentUtsendingsInfo(journalpostId, bruker)
 
         return if (response.errors.isNullOrEmpty()) {
             response.data?.journalpost

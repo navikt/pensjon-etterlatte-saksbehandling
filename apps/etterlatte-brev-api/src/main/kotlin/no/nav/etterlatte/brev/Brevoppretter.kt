@@ -21,7 +21,6 @@ import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Spraak
-import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -54,10 +53,9 @@ class Brevoppretter(
         }
 
         if (brukerTokenInfo is Saksbehandler) {
-            brevdataFacade.hentBehandling(behandlingId, brukerTokenInfo).status.let { status ->
-                if (!status.kanEndres()) {
-                    throw KanIkkeOppretteVedtaksbrev(behandlingId, status)
-                }
+            val kanRedigeres = brevdataFacade.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
+            if (!kanRedigeres) {
+                throw KanIkkeOppretteVedtaksbrev(behandlingId)
             }
         }
 
@@ -240,8 +238,8 @@ fun Vergemaal.toMottaker(): Mottaker {
         .copy(navn = if (mottaker.navn.isNullOrBlank()) "N/A" else mottaker.navn!!)
 }
 
-class KanIkkeOppretteVedtaksbrev(behandlingId: UUID, status: BehandlingStatus) : UgyldigForespoerselException(
+class KanIkkeOppretteVedtaksbrev(behandlingId: UUID) : UgyldigForespoerselException(
     code = "KAN_IKKE_ENDRE_VEDTAKSBREV",
-    detail = "Kan ikke opprette vedtaksbrev når behandlingen har status $status",
+    detail = "Statusen til behandlingen tillater ikke at det opprettes vedtaksbrev",
     meta = mapOf("behandlingId" to behandlingId),
 )

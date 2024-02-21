@@ -2,6 +2,7 @@ package behandling.klage
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.common.Enheter
@@ -36,9 +37,8 @@ internal class KlageDaoImplTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun setup() {
-        val connection = dataSource.connection
-        sakRepo = SakDao { connection }
-        klageDao = KlageDaoImpl { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))
     }
 
     @BeforeEach

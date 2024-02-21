@@ -1,6 +1,12 @@
 package no.nav.etterlatte.oppgave
 
+import io.mockk.mockk
+import no.nav.etterlatte.ConnectionAutoclosingTest
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -30,10 +36,16 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-        oppgaveDao = OppgaveDaoImpl { connection }
-        sakDao = SakDao { connection }
+        oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
+        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
         saktilgangDao = SakTilgangDao(dataSource)
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+        Kontekst.set(
+            Context(
+                user,
+                DatabaseContextTest(dataSource),
+            ),
+        )
     }
 
     @AfterEach
@@ -82,7 +94,7 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
                 saksbehandlerIdent,
             )
         assertEquals(1, oppgaverKunForSaksbehandler.size)
-        assertEquals(saksbehandlerIdent, oppgaverKunForSaksbehandler[0].saksbehandlerIdent)
+        assertEquals(saksbehandlerIdent, oppgaverKunForSaksbehandler[0].saksbehandler?.ident)
         assertEquals(oppgaveForIdentFiltrering.id, oppgaverKunForSaksbehandler[0].id)
 
         val alleOppgaver =
@@ -207,8 +219,18 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         val nySaksbehandler = "nysaksbehandler"
         oppgaveDao.settNySaksbehandler(oppgaveNy.id, nySaksbehandler)
         val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
-        assertEquals(nySaksbehandler, hentetOppgave?.saksbehandlerIdent)
+        assertEquals(nySaksbehandler, hentetOppgave?.saksbehandler?.ident)
         assertEquals(Status.UNDER_BEHANDLING, hentetOppgave?.status)
+    }
+
+    @Test
+    fun `kan sette oppgave paa vent`() {
+        val sakAalesund = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgaveNy = lagNyOppgave(sakAalesund)
+        oppgaveDao.opprettOppgave(oppgaveNy)
+        oppgaveDao.oppdaterStatusOgMerknad(oppgaveNy.id, "merknad", Status.PAA_VENT)
+        val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
+        assertEquals(Status.PAA_VENT, hentetOppgave?.status)
     }
 
     @Test

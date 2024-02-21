@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
+import no.nav.etterlatte.tilgangsstyring.withLesetilgang
 
 internal fun Route.generellbehandlingRoutes(
     generellBehandlingService: GenerellBehandlingService,
@@ -112,7 +113,9 @@ internal fun Route.generellbehandlingRoutes(
 
     get("/api/generellbehandling/kravpakkeForSak/{$SAKID_CALL_PARAMETER}") {
         kunSaksbehandler {
-            call.respond(generellBehandlingService.hentKravpakkeForSak(sakId, brukerTokenInfo))
+            withLesetilgang {
+                call.respond(generellBehandlingService.hentKravpakkeForSak(sakId, brukerTokenInfo))
+            }
         }
     }
 }

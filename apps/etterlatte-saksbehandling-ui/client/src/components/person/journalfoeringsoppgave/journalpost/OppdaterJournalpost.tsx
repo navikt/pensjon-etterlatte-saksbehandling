@@ -7,7 +7,7 @@ import { Journalpost } from '~shared/types/Journalpost'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { ISak } from '~shared/types/sak'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterJournalpostStatus, formaterStringDato } from '~utils/formattering'
 import styled from 'styled-components'
 import { EndreTema } from '~components/person/journalfoeringsoppgave/journalpost/EndreTema'
 import { EndreBruker } from '~components/person/journalfoeringsoppgave/journalpost/EndreBruker'
@@ -45,7 +45,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
           label="Registrert dato"
           tekst={journalpost.datoOpprettet ? formaterStringDato(journalpost.datoOpprettet) : 'Mangler opprettelsesdato'}
         />
-        <Info label="Status" tekst={journalpost.journalstatus} />
+        <Info label="Status" tekst={formaterJournalpostStatus(journalpost.journalstatus)} />
       </InfoWrapper>
 
       <br />

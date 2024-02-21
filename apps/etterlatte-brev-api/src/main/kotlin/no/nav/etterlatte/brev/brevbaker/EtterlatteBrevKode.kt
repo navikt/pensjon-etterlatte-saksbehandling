@@ -25,6 +25,7 @@ enum class EtterlatteBrevKode(val brevtype: Brevtype, val tittel: String? = null
     BARNEPENSJON_VEDTAK_OMREGNING_FERDIG(VEDTAK, "Vedtak - endring av barnepensjon"),
     BARNEPENSJON_VEDLEGG_BEREGNING_TRYGDETID_UTFALL(VEDLEGG, "Trygdetid i vedlegg beregning av barnepensjon"),
     BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL(VEDLEGG, "Utfall ved forhåndsvarsel av feilutbetaling"),
+    BARNEPENSJON_INFORMASJON_DOEDSFALL(INFORMASJON, "Informasjon om barnepensjon"),
 
     OMSTILLINGSSTOENAD_AVSLAG(VEDTAK, "Vedtak om avslått omstillingsstønad"),
     OMSTILLINGSSTOENAD_AVSLAG_UTFALL(VEDTAK, "Vedtak om avslått omstillingsstønad"),

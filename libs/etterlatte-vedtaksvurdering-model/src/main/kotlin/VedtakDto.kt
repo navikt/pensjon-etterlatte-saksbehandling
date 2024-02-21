@@ -139,7 +139,6 @@ data class TilbakekrevingVedtakDto(
 
 data class TilbakekrevingFattEllerAttesterVedtakDto(
     val tilbakekrevingId: UUID,
-    val saksbehandler: String,
     val enhet: String,
 )
 

@@ -23,7 +23,9 @@ import no.nav.etterlatte.behandling.bosattutland.BosattUtlandService
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingDao
 import no.nav.etterlatte.behandling.generellbehandling.GenerellBehandlingService
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.behandling.jobs.DoedsmeldingJob
+import no.nav.etterlatte.behandling.jobs.SaksbehandlerJob
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.klage.KlageHendelserServiceImpl
 import no.nav.etterlatte.behandling.klage.KlageServiceImpl
@@ -52,12 +54,13 @@ import no.nav.etterlatte.behandling.sjekkliste.SjekklisteService
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingDao
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingHendelserServiceImpl
 import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingService
-import no.nav.etterlatte.common.ConnectionAutoclosing
+import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingDao
+import no.nav.etterlatte.behandling.vedtaksbehandling.VedtaksbehandlingService
+import no.nav.etterlatte.common.ConnectionAutoclosingImpl
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.PesysKlientImpl
 import no.nav.etterlatte.common.klienter.SkjermingKlient
-import no.nav.etterlatte.databaseContext
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
@@ -65,6 +68,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
 import no.nav.etterlatte.jobs.MetrikkerJob
@@ -94,7 +98,6 @@ import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
-import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDaoTrans
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.token.Fagsaksystem
 import java.time.Duration
@@ -213,27 +216,32 @@ internal class ApplicationContext(
     val dataSource = DataSourceBuilder.createDataSource(env.props)
 
     // Dao
-    val hendelseDao = HendelseDao { databaseContext().activeTx() }
-    val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { databaseContext().activeTx() }
-    val aktivitetspliktDao = AktivitetspliktDao { databaseContext().activeTx() }
-    val sjekklisteDao = SjekklisteDao { databaseContext().activeTx() }
-    val revurderingDao = RevurderingDao { databaseContext().activeTx() }
-    val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao) { databaseContext().activeTx() }
-    val generellbehandlingDao = GenerellBehandlingDao { databaseContext().activeTx() }
-    val oppgaveDaoNy = OppgaveDaoImpl { databaseContext().activeTx() }
-    val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy) { databaseContext().activeTx() }
-    val sakDao = SakDao { databaseContext().activeTx() }
-    val grunnlagsendringshendelseDao = GrunnlagsendringshendelseDao { databaseContext().activeTx() }
-    val institusjonsoppholdDao = InstitusjonsoppholdDao { databaseContext().activeTx() }
+    val autoClosingDatabase = ConnectionAutoclosingImpl(dataSource)
+
+    val hendelseDao = HendelseDao(autoClosingDatabase)
+    val kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(autoClosingDatabase)
+    val aktivitetspliktDao = AktivitetspliktDao(autoClosingDatabase)
+    val sjekklisteDao = SjekklisteDao(autoClosingDatabase)
+    val revurderingDao = RevurderingDao(autoClosingDatabase)
+    val behandlingDao = BehandlingDao(kommerBarnetTilGodeDao, revurderingDao, autoClosingDatabase)
+    val generellbehandlingDao = GenerellBehandlingDao(autoClosingDatabase)
+    val vedtaksbehandlingDao = VedtaksbehandlingDao(autoClosingDatabase)
+    val oppgaveDaoNy = OppgaveDaoImpl(autoClosingDatabase)
+    val oppgaveDaoEndringer = OppgaveDaoMedEndringssporingImpl(oppgaveDaoNy, autoClosingDatabase)
+    val sakDao = SakDao(autoClosingDatabase)
+    val grunnlagsendringshendelseDao =
+        GrunnlagsendringshendelseDao(
+            autoClosingDatabase,
+        )
+    val institusjonsoppholdDao = InstitusjonsoppholdDao(autoClosingDatabase)
     val oppgaveMetrikkerDao = OppgaveMetrikkerDao(dataSource)
     val behandlingMetrikkerDao = BehandlingMetrikkerDao(dataSource)
-    val klageDao = KlageDaoImpl { databaseContext().activeTx() }
-    val tilbakekrevingDao = TilbakekrevingDao { databaseContext().activeTx() }
-    val behandlingInfoDao = BehandlingInfoDao { databaseContext().activeTx() }
-    val bosattUtlandDao = BosattUtlandDao { databaseContext().activeTx() }
-    val saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
-    val saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans { databaseContext().activeTx() }
-    val doedshendelseDao = DoedshendelseDao(ConnectionAutoclosing(dataSource))
+    val klageDao = KlageDaoImpl(autoClosingDatabase)
+    val tilbakekrevingDao = TilbakekrevingDao(autoClosingDatabase)
+    val behandlingInfoDao = BehandlingInfoDao(autoClosingDatabase)
+    val bosattUtlandDao = BosattUtlandDao(autoClosingDatabase)
+    val saksbehandlerInfoDao = SaksbehandlerInfoDao(autoClosingDatabase)
+    val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
 
     // Klient
     val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
@@ -273,6 +281,10 @@ internal class ApplicationContext(
             behandlingService,
             grunnlagKlientObo,
             hendelseDao,
+        )
+    val vedtaksbehandlingService =
+        VedtaksbehandlingService(
+            vedtaksbehandlingDao,
         )
     val kommerBarnetTilGodeService =
         KommerBarnetTilGodeService(kommerBarnetTilGodeDao, behandlingDao)
@@ -340,7 +352,13 @@ internal class ApplicationContext(
         )
 
     val doedshendelseJobService =
-        DoedshendelseJobService(doedshendelseDao, featureToggleService, grunnlagsendringshendelseService, if (isProd()) 2 else 0)
+        DoedshendelseJobService(
+            doedshendelseDao = doedshendelseDao,
+            doedshendelseKontrollpunktService = DoedshendelseKontrollpunktService(pdlKlient, pesysKlient),
+            featureToggleService = featureToggleService,
+            grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+            dagerGamleHendelserSomSkalKjoeres = if (isProd()) 2 else 0,
+        )
 
     val behandlingsStatusService =
         BehandlingStatusServiceImpl(
@@ -390,6 +408,10 @@ internal class ApplicationContext(
             tilbakekrevinghendelser = tilbakekreving,
         )
 
+    val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient)
+
+    // Jobs
+
     val metrikkerJob: MetrikkerJob by lazy {
         MetrikkerJob(
             BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao),
@@ -405,6 +427,16 @@ internal class ApplicationContext(
             { leaderElectionKlient.isLeader() },
             0L,
             interval = if (isProd()) Duration.of(1, ChronoUnit.HOURS) else Duration.of(1, ChronoUnit.MINUTES),
+            dataSource = dataSource,
+        )
+    }
+
+    val saksbehandlerJob: SaksbehandlerJob by lazy {
+        SaksbehandlerJob(
+            saksbehandlerJobService = saksbehandlerJobService,
+            { leaderElectionKlient.isLeader() },
+            initialDelay = Duration.of(2, ChronoUnit.MINUTES).toMillis(),
+            interval = Duration.of(1, ChronoUnit.HOURS),
         )
     }
 

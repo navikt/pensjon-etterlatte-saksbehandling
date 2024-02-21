@@ -6,8 +6,11 @@ import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.BrevRequestHendelseType
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.brevbaker.Brevkoder
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevData
+import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_KODE
@@ -23,6 +26,7 @@ import org.slf4j.LoggerFactory
 
 class OpprettJournalfoerOgDistribuerRiver(
     private val rapidsConnection: RapidsConnection,
+    private val brevdataFacade: BrevdataFacade,
     private val brevoppretter: Brevoppretter,
     private val ferdigstillJournalfoerOgDistribuerBrev: FerdigstillJournalfoerOgDistribuerBrev,
 ) : ListenerMedLoggingOgFeilhaandtering() {
@@ -60,7 +64,12 @@ class OpprettJournalfoerOgDistribuerRiver(
                     bruker = brukerTokenInfo,
                     brevKode = { brevKode.redigering },
                     brevtype = brevKode.redigering.brevtype,
-                ) { ManueltBrevData() }
+                ) {
+                    when (brevKode.redigering) {
+                        EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL -> opprettBarnepensjonInformasjonDoedsfall(sakId)
+                        else -> ManueltBrevData()
+                    }
+                }
             }
         val brevID =
             ferdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
@@ -97,4 +106,14 @@ class OpprettJournalfoerOgDistribuerRiver(
             ).toJson(),
         )
     }
+
+    private suspend fun opprettBarnepensjonInformasjonDoedsfall(sakId: Long) =
+        BarnepensjonInformasjonDoedsfall.fra(
+            generellBrevData =
+                brevdataFacade.hentGenerellBrevData(
+                    sakId = sakId,
+                    behandlingId = null,
+                    brukerTokenInfo = Systembruker.brev,
+                ),
+        )
 }

@@ -3,11 +3,13 @@ package no.nav.etterlatte.metrics
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.prometheus.client.CollectorRegistry
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -36,16 +38,14 @@ internal class BehandlingMetricsOppgaveTest(private val ds: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = ds.connection
-        oppgaveDao = OppgaveDaoImpl { connection }
-        sakDao = SakDao { connection }
-
-        opprettOppgaver()
+        oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
+        sakDao = SakDao(ConnectionAutoclosingTest(ds))
 
         behandlingMetrikkerDao = BehandlingMetrikkerDao(ds)
         oppgaveMetrikkerDao = OppgaveMetrikkerDao(ds)
         behandlingMetrics = BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, testreg)
 
+        opprettOppgaver()
         behandlingMetrics.run()
     }
 
@@ -122,11 +122,11 @@ internal class BehandlingMetricsOppgaveTest(private val ds: DataSource) {
     fun lagNyOppgave(
         sak: Sak,
         status: Status,
-        saksbehandler: String,
+        ident: String,
     ) = OppgaveIntern(
         id = UUID.randomUUID(),
         status = status,
-        saksbehandlerIdent = saksbehandler,
+        saksbehandler = OppgaveSaksbehandler(ident),
         enhet = sak.enhet,
         sakId = sak.id,
         kilde = OppgaveKilde.BEHANDLING,

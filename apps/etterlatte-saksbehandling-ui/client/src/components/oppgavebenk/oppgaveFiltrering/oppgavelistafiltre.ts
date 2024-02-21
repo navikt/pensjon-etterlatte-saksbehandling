@@ -51,11 +51,11 @@ function filtrerSaksbehandler(saksbehandlerFilter: string, oppgaver: OppgaveDTO[
   } else {
     return oppgaver.filter((o) => {
       if (saksbehandlerFilter === SAKSBEHANDLERFILTER.Tildelt) {
-        return o.saksbehandlerIdent !== null
+        return !!o.saksbehandler?.ident
       } else if (saksbehandlerFilter === SAKSBEHANDLERFILTER.IkkeTildelt) {
-        return o.saksbehandlerIdent === null
+        return !o.saksbehandler?.ident
       } else if (saksbehandlerFilter && saksbehandlerFilter !== '') {
-        return o.saksbehandlerIdent === saksbehandlerFilter
+        return o.saksbehandler?.ident === saksbehandlerFilter
       } else {
         return true
       }
@@ -70,6 +70,7 @@ export const OPPGAVESTATUSFILTER: Record<OppgavestatusFilterKeys, string> = {
   visAlle: 'Vis alle',
   NY: 'Ny',
   UNDER_BEHANDLING: 'Under behandling',
+  PAA_VENT: 'På Vent',
   FERDIGSTILT: 'Ferdigstilt',
   FEILREGISTRERT: 'Feilregistrert',
   AVBRUTT: 'Avbrutt',

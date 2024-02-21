@@ -14,29 +14,32 @@ export const SkalViseBosattUtland = (props: { behandling: IDetaljertBehandling; 
   return (
     <>
       {behandling.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND && (
-        <HentBosattutland behandlingId={behandling.id} redigerbar={redigerbar} />
+        <HentBosattutland behandling={behandling} redigerbar={redigerbar} />
       )}
     </>
   )
 }
 
-const HentBosattutland = ({ behandlingId, redigerbar }: { behandlingId: string; redigerbar: boolean }) => {
+const HentBosattutland = ({ behandling, redigerbar }: { behandling: IDetaljertBehandling; redigerbar: boolean }) => {
   const [hentBosattUtlandStatus, hentBosattUtlandApi] = useApiCall(hentBosattutland)
+
   useEffect(() => {
-    hentBosattUtlandApi(behandlingId)
+    hentBosattUtlandApi(behandling.id)
   }, [])
+
   return (
     <>
       <Heading level="2" size="medium" style={{ marginTop: '2rem' }} spacing>
-        Mottatt krav fra utland <EessiPensjonLenke />
+        Mottatt krav fra utland{' '}
+        <EessiPensjonLenke sakId={behandling.sakId} behandlingId={behandling.id} sakType={behandling.sakType} />
       </Heading>
 
       {isPending(hentBosattUtlandStatus) && <Spinner visible={true} label="Henter bosatt utland info" />}
       {isFailureWithCode(hentBosattUtlandStatus, 404) && (
-        <BosattUtland behandlingId={behandlingId} bosattutland={null} redigerbar={redigerbar} />
+        <BosattUtland behandlingId={behandling.id} bosattutland={null} redigerbar={redigerbar} />
       )}
       {isSuccess(hentBosattUtlandStatus) && (
-        <BosattUtland behandlingId={behandlingId} bosattutland={hentBosattUtlandStatus.data} redigerbar={redigerbar} />
+        <BosattUtland behandlingId={behandling.id} bosattutland={hentBosattUtlandStatus.data} redigerbar={redigerbar} />
       )}
       {isFailure(hentBosattUtlandStatus) && !isFailureWithCode(hentBosattUtlandStatus, 404) && (
         <Alert variant="warning">Vi klarte ikke å hente lagret data for bosatt utland</Alert>

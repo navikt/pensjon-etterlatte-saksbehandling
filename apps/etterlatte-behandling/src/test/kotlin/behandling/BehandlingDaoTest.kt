@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling
 
 import io.kotest.inspectors.forExactly
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.ManueltOpphoer
@@ -50,17 +51,13 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-
-        sakRepo = SakDao { connection }
-        kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
             BehandlingDao(
                 kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
-                RevurderingDao {
-                    connection
-                },
-                connection = { connection },
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
             )
     }
 

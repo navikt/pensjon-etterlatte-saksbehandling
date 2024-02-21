@@ -11,7 +11,7 @@ abstract class Oppgave {
     abstract val status: Status
     abstract val type: OppgaveType
     abstract val enhet: String
-    abstract val saksbehandlerIdent: String?
+    abstract val saksbehandler: OppgaveSaksbehandler?
     abstract val opprettet: Tidspunkt
     abstract val sakType: SakType
     abstract val fnr: String?
@@ -19,7 +19,7 @@ abstract class Oppgave {
 }
 
 data class OppgaveSaksbehandler(
-    val ident: String? = null,
+    val ident: String,
     val navn: String? = null,
 )
 
@@ -30,8 +30,7 @@ data class OppgaveIntern(
     val sakId: Long,
     val kilde: OppgaveKilde? = null,
     override val type: OppgaveType,
-    override val saksbehandlerIdent: String? = null,
-    val saksbehandlerNavn: String? = null,
+    override val saksbehandler: OppgaveSaksbehandler? = null,
     val referanse: String,
     val merknad: String? = null,
     override val opprettet: Tidspunkt,
@@ -39,10 +38,8 @@ data class OppgaveIntern(
     override val fnr: String? = null,
     override val frist: Tidspunkt?,
 ) : Oppgave() {
-    fun toSaksbehandler() = OppgaveSaksbehandler(saksbehandlerIdent, saksbehandlerNavn)
-
     fun manglerSaksbehandler(): Boolean {
-        return saksbehandlerIdent == null
+        return saksbehandler == null
     }
 
     fun erAvsluttet(): Boolean = status.erAvsluttet()
@@ -60,7 +57,7 @@ data class GosysOppgave(
     val id: Long,
     val versjon: Long,
     override val status: Status,
-    override val saksbehandlerIdent: String?,
+    override val saksbehandler: OppgaveSaksbehandler?,
     override val enhet: String,
     override val opprettet: Tidspunkt,
     override val frist: Tidspunkt?,
@@ -76,6 +73,7 @@ data class GosysOppgave(
 enum class Status {
     NY,
     UNDER_BEHANDLING,
+    PAA_VENT,
     FERDIGSTILT,
     FEILREGISTRERT,
     AVBRUTT,
@@ -85,6 +83,7 @@ enum class Status {
         return when (this) {
             NY,
             UNDER_BEHANDLING,
+            PAA_VENT,
             -> false
 
             FERDIGSTILT,
@@ -134,6 +133,11 @@ data class RedigerFristRequest(
     val frist: Tidspunkt,
 )
 
+data class SettPaaVentRequest(
+    val merknad: String,
+    val status: Status,
+)
+
 data class RedigerFristGosysRequest(
     val frist: Tidspunkt,
     val versjon: Long,
@@ -172,7 +176,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
         enhet = sak.enhet,
         sakId = sak.id,
         kilde = oppgaveKilde,
-        saksbehandlerIdent = null,
+        saksbehandler = null,
         referanse = referanse,
         merknad = merknad,
         opprettet = Tidspunkt.now(),

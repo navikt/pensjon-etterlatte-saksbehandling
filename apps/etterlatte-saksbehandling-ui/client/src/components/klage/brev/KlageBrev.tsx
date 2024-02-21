@@ -20,13 +20,13 @@ import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 
-function hentBrevIdForInnstilling(klage: Klage | null): number | null {
-  // TODO håndter avvist klage?
-
+function hentBrevId(klage: Klage | null): number | null {
   switch (klage?.utfall?.utfall) {
     case 'DELVIS_OMGJOERING':
     case 'STADFESTE_VEDTAK':
       return klage.utfall.innstilling.brev.brevId
+    case 'AVVIST':
+      return klage.utfall.brev.brevId
     default:
       return null
   }
@@ -36,7 +36,7 @@ export function KlageBrev() {
   const navigate = useNavigate()
   const klage = useKlage()
 
-  const brevId = hentBrevIdForInnstilling(klage)
+  const brevId = hentBrevId(klage)
   const sakId = klage?.sak?.id
   const [hentetBrev, apiHentBrev] = useApiCall(hentBrev)
 
@@ -62,12 +62,12 @@ export function KlageBrev() {
               </Heading>
             </HeadingWrapper>
           </ContentHeader>
-          {klage.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.JA ? (
+          {klage.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.JA ? (
             <Innhold>
-              <BodyShort>Skriv oversendelsesbrevet til KA, som også sendes til mottakeren</BodyShort>
+              <BodyShort>Skriv oversendelsesbrevet til klager</BodyShort>
             </Innhold>
           ) : (
-            <BodyShort>TODO håndter avslagsbrev her</BodyShort>
+            <BodyShort>Skriv avvisningsbrev her</BodyShort>
           )}
           {/* TODO lar være å bytte ut med ny brevmottaker komponent her, siden dette virker å være ganske wip */}
           {isSuccess(hentetBrev) && (

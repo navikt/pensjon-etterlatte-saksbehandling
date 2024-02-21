@@ -367,7 +367,8 @@ sealed class KlageUtfallMedData {
     @JsonTypeName("AVVIST")
     data class Avvist(
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-        val vedtakId: Long,
+        val vedtak: KlageVedtak,
+        val brev: KlageVedtaksbrev,
     ) : KlageUtfallMedData()
 
     @JsonTypeName("AVVIST_MED_OMGJOERING")
@@ -535,6 +536,10 @@ class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: Strin
 }
 
 data class KlageBrevInnstilling(val brevId: Long)
+
+data class KlageVedtaksbrev(val brevId: Long)
+
+data class KlageVedtak(val vedtakId: Long)
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "utfall")
 sealed class KlageUtfallUtenBrev {

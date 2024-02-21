@@ -354,7 +354,7 @@ internal class AutomatiskBehandlingRoutesKtTest {
             sakId = 1,
             kilde = null,
             type = OppgaveType.ATTESTERING,
-            saksbehandlerIdent = null,
+            saksbehandler = null,
             referanse = referanse.toString(),
             merknad = null,
             sakType = SakType.BARNEPENSJON,

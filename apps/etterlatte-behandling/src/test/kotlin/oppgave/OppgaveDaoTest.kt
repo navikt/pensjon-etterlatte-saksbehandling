@@ -94,7 +94,7 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
                 saksbehandlerIdent,
             )
         assertEquals(1, oppgaverKunForSaksbehandler.size)
-        assertEquals(saksbehandlerIdent, oppgaverKunForSaksbehandler[0].saksbehandlerIdent)
+        assertEquals(saksbehandlerIdent, oppgaverKunForSaksbehandler[0].saksbehandler?.ident)
         assertEquals(oppgaveForIdentFiltrering.id, oppgaverKunForSaksbehandler[0].id)
 
         val alleOppgaver =
@@ -219,7 +219,7 @@ internal class OppgaveDaoTest(val dataSource: DataSource) {
         val nySaksbehandler = "nysaksbehandler"
         oppgaveDao.settNySaksbehandler(oppgaveNy.id, nySaksbehandler)
         val hentetOppgave = oppgaveDao.hentOppgave(oppgaveNy.id)
-        assertEquals(nySaksbehandler, hentetOppgave?.saksbehandlerIdent)
+        assertEquals(nySaksbehandler, hentetOppgave?.saksbehandler?.ident)
         assertEquals(Status.UNDER_BEHANDLING, hentetOppgave?.status)
     }
 

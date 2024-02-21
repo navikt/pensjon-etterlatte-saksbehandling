@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
 import { Table } from '@navikt/ds-react'
-import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
+import { erOppgaveRedigerbar, OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import { formaterStringDato } from '~utils/formattering'
 import { FristWrapper } from '~components/oppgavebenk/frist/FristWrapper'
 import SaksoversiktLenke from '~components/oppgavebenk/components/SaksoversiktLenke'
@@ -14,7 +14,7 @@ import { Saksbehandler } from '~shared/types/saksbehandler'
 interface Props {
   oppgave: OppgaveDTO
   saksbehandlereIEnhet: Array<Saksbehandler>
-  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: string | null, versjon: number | null) => void
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
   oppdaterFrist?: (id: string, nyfrist: string, versjon: number | null) => void
 }
 

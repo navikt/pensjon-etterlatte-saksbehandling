@@ -16,15 +16,17 @@ export interface OppgaveDTO {
   sakType: SakType
   fnr: string | null
   frist: string
-  saksbehandlerIdent: string | null
-
-  //Oppgaveliste spesifikt
-  saksbehandlerNavn: string | null
+  saksbehandler: OppgaveSaksbehandler | null
 
   // GOSYS-spesifikt
   beskrivelse: string | null
   gjelder: string | null
   versjon: number | null
+}
+
+export interface OppgaveSaksbehandler {
+  ident: string
+  navn?: string
 }
 
 export interface NyOppgaveDto {

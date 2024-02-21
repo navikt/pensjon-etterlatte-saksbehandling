@@ -25,8 +25,8 @@ fun main() {
                 object : RapidsConnection.StatusListener {
                     override fun onStartup(rapidsConnection: RapidsConnection) {
                         appContext.dataSource.migrate()
-                        timers.add(appContext.jobbPollerTask.start())
-                        timers.add(appContext.hendelsePollerTask.start())
+                        timers.add(appContext.jobbPollerTask.schedule())
+                        timers.add(appContext.hendelsePollerTask.schedule())
                     }
 
                     override fun onShutdownSignal(rapidsConnection: RapidsConnection) {

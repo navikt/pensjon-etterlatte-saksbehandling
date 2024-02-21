@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
 import no.nav.etterlatte.jobs.LoggerInfo
+import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.tidspunkt.norskKlokke
 import no.nav.etterlatte.libs.jobs.LeaderElection
@@ -20,11 +21,11 @@ class KonsistensavstemmingJob(
     private val periode: Duration,
     private val clock: Clock,
     private val saktype: Saktype,
-) {
+) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
 
-    fun schedule(): Timer {
+    override fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med periode $periode")
 
         return fixedRateCancellableTimer(

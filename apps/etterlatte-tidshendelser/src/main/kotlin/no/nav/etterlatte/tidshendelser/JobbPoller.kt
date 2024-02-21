@@ -1,6 +1,7 @@
 package no.nav.etterlatte.tidshendelser
 
 import no.nav.etterlatte.jobs.LoggerInfo
+import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import org.slf4j.LoggerFactory
 import java.time.Clock
@@ -13,10 +14,10 @@ class JobbPollerTask(
     private val klokke: Clock,
     private val openingHours: OpeningHours,
     private val jobbPoller: JobbPoller,
-) {
+) : TimerJob {
     private val logger = LoggerFactory.getLogger(JobbPollerTask::class.java)
 
-    fun start(): Timer {
+    override fun schedule(): Timer {
         logger.info("Starter polling av jobber pr $periode")
 
         return fixedRateCancellableTimer(

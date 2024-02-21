@@ -1,6 +1,7 @@
 package no.nav.etterlatte.tidshendelser
 
 import no.nav.etterlatte.jobs.LoggerInfo
+import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.logging.withLogContext
@@ -13,10 +14,10 @@ class HendelsePollerTask(
     private val periode: Duration,
     private val hendelsePoller: HendelsePoller,
     private val maxAntallHendelsePerPoll: Int = 5,
-) {
+) : TimerJob {
     private val logger = LoggerFactory.getLogger(HendelsePollerTask::class.java)
 
-    fun start(): Timer {
+    override fun schedule(): Timer {
         logger.info("Starter polling av nye hendelser pr $periode")
 
         return fixedRateCancellableTimer(

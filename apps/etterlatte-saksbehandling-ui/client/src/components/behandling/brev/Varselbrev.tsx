@@ -10,7 +10,7 @@ import styled from 'styled-components'
 import { behandlingErRedigerbar, behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import Spinner from '~shared/Spinner'
-import { IBrev } from '~shared/types/Brev'
+import { BrevStatus, IBrev } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
@@ -61,7 +61,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
       requestSettPaaVent({
         oppgaveId: oppgave.id,
         settPaaVentRequest: {
-          merknad: oppgave.merknad || '',
+          merknad: 'Manuelt: Varselbrev er sendt ut' + oppgave.merknad || '',
           versjon: null,
           status: oppgave.status,
         },
@@ -80,6 +80,9 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
         },
         () => dispatch(resetBehandling())
       )
+      if ([BrevStatus.DISTRIBUERT, BrevStatus.JOURNALFOERT, BrevStatus.FERDIGSTILT].includes(varselbrev.status)) {
+        setKanRedigeres(false)
+      }
     }
   }, [varselbrev])
 

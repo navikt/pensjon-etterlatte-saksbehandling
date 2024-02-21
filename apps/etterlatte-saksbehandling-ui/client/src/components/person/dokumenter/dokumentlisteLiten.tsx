@@ -2,7 +2,7 @@ import { BodyShort, Detail, Heading, Link } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
-import { Journalpost } from '~shared/types/Journalpost'
+import { Journalpost, Journalposttype } from '~shared/types/Journalpost'
 
 import { isPending, isSuccess, Result } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
@@ -29,7 +29,13 @@ export const DokumentlisteLiten = ({ dokumenter }: { dokumenter: Result<Journalp
                 <ExternalLinkIcon title={dokument.tittel} />
               </Link>
               <Detail>
-                {dokument.journalposttype === 'I' ? 'Avsender' : 'Mottaker'}:{' '}
+                {
+                  {
+                    [Journalposttype.I]: 'Avsender: ',
+                    [Journalposttype.U]: 'Mottaker: ',
+                    [Journalposttype.N]: 'Notat',
+                  }[dokument.journalposttype]
+                }
                 {dokument.avsenderMottaker.navn || 'Ukjent'} ({formaterStringDato(dokument.datoOpprettet)})
               </Detail>
             </BodyShort>

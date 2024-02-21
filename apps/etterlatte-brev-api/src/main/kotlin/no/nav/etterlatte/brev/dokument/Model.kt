@@ -5,11 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.JournalpostSak
 
-data class HentJournalpostResult(
-    val journalpost: Journalpost? = null,
-    val error: Error? = null,
-)
-
 data class HentUtsendingsinfoResponse(
     val data: ResponseData? = null,
     val errors: List<Error>? = null,
@@ -95,7 +90,7 @@ data class Journalpost(
     val tittel: String?,
     val tema: String?,
     val journalposttype: String,
-    val journalstatus: String,
+    val journalstatus: Journalstatus,
     val dokumenter: List<DokumentInfo>,
     val avsenderMottaker: AvsenderMottaker,
     val kanal: String?,
@@ -103,6 +98,21 @@ data class Journalpost(
     val sak: JournalpostSak?,
     val datoOpprettet: String,
 )
+
+enum class Journalstatus {
+    MOTTATT,
+    JOURNALFOERT,
+    FERDIGSTILT,
+    EKSPEDERT,
+    UNDER_ARBEID,
+    FEILREGISTRERT,
+    UTGAAR,
+    AVBRUTT,
+    UKJENT_BRUKER,
+    RESERVERT,
+    OPPLASTING_DOKUMENT,
+    UKJENT,
+}
 
 data class JournalpostUtsendingsinfo(
     val journalpostId: String,

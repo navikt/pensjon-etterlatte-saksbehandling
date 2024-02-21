@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import { Button, Detail, Heading, Table } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
-import { formaterJournalpostType, formaterStringDato } from '~utils/formattering'
+import { formaterJournalpostStatus, formaterJournalpostType, formaterStringDato } from '~utils/formattering'
 import { useAppDispatch } from '~store/Store'
 import { settJournalpost } from '~store/reducers/JournalfoeringOppgaveReducer'
 import Spinner from '~shared/Spinner'
@@ -115,7 +115,7 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
                     <Table.DataCell>{journalpost.tittel}</Table.DataCell>
                     <Table.DataCell>{journalpost.avsenderMottaker.navn || 'Ukjent'}</Table.DataCell>
                     <Table.DataCell>{formaterStringDato(journalpost.datoOpprettet)}</Table.DataCell>
-                    <Table.DataCell>{journalpost.journalstatus}</Table.DataCell>
+                    <Table.DataCell>{formaterJournalpostStatus(journalpost.journalstatus)}</Table.DataCell>
                     <Table.DataCell>{formaterJournalpostType(journalpost.journalposttype)}</Table.DataCell>
                     <Table.DataCell>
                       <FlexRow>

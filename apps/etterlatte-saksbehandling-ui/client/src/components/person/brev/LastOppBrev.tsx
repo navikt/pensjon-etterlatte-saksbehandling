@@ -5,7 +5,7 @@ import { opprettBrevFraPDF } from '~shared/api/brev'
 import { useNavigate } from 'react-router-dom'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { FlexRow } from '~shared/styled'
-import { PdfVisning } from '~shared/brev/pdf-visning'
+import { DokumentVisningModal, PdfVisning } from '~shared/brev/pdf-visning'
 import { isPending } from '~shared/api/apiUtils'
 import { ISak } from '~shared/types/sak'
 
@@ -57,7 +57,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
         Last opp fil
       </Button>
 
-      <Modal open={isOpen} onClose={avbryt} width="720px">
+      <DokumentVisningModal open={isOpen} onClose={avbryt}>
         <Modal.Header>
           <Heading size="medium" spacing>
             Last opp fil
@@ -86,7 +86,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
           <br />
           <br />
 
-          {filURL && <PdfVisning fileUrl={filURL} />}
+          <PdfVisning fileUrl={filURL} />
 
           <FlexRow justify="right">
             <Button variant="secondary" onClick={avbryt} disabled={isPending(lastOppStatus)}>
@@ -98,7 +98,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
             </Button>
           </FlexRow>
         </Modal.Body>
-      </Modal>
+      </DokumentVisningModal>
     </>
   )
 }

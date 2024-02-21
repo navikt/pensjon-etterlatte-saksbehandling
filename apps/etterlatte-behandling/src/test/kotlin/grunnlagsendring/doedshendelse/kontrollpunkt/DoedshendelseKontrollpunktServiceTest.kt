@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.JOVIAL_LAMA
+import no.nav.etterlatte.KONTANT_FOT
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
@@ -13,11 +15,13 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
+import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.mockPerson
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -27,15 +31,59 @@ class DoedshendelseKontrollpunktServiceTest {
     private val kontrollpunktService = DoedshendelseKontrollpunktService(pdlTjenesterKlient, pesysKlient)
     private val doedshendelse =
         Doedshendelse.nyHendelse(
-            avdoedFnr = "12345678901",
+            avdoedFnr = KONTANT_FOT.value,
             avdoedDoedsdato = LocalDate.now(),
-            beroertFnr = "109987654321",
+            beroertFnr = JOVIAL_LAMA.value,
             relasjon = Relasjon.BARN,
         )
 
+    @BeforeEach
+    fun oppsett() {
+        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr) } returns emptyList()
+
+        every {
+            pdlTjenesterKlient.hentPdlModell(
+                foedselsnummer = doedshendelse.avdoedFnr,
+                rolle = PersonRolle.AVDOED,
+                saktype = any(),
+            )
+        } returns
+            mockPerson().copy(
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelse.avdoedFnr), null),
+                doedsdato = OpplysningDTO(doedshendelse.avdoedDoedsdato, null),
+            )
+        every {
+            pdlTjenesterKlient.hentPdlModell(
+                foedselsnummer = any(),
+                rolle = PersonRolle.BARN,
+                saktype = any(),
+            )
+        } returns
+            mockPerson().copy(
+                familieRelasjon =
+                    OpplysningDTO(
+                        FamilieRelasjon(
+                            ansvarligeForeldre = emptyList(),
+                            foreldre = listOf(KONTANT_FOT, JOVIAL_LAMA),
+                            barn = emptyList(),
+                        ),
+                        null,
+                    ),
+            )
+        every {
+            pdlTjenesterKlient.hentPdlModell(
+                foedselsnummer = doedshendelse.beroertFnr,
+                rolle = PersonRolle.GJENLEVENDE,
+                saktype = any(),
+            )
+        } returns
+            mockPerson().copy(
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelse.beroertFnr), null),
+            )
+    }
+
     @Test
     fun `Skal returnere kontrollpunkt hvis avdoed ikke har doedsdato i PDL`() {
-        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr) } returns emptyList()
         every {
             pdlTjenesterKlient.hentPdlModell(
                 foedselsnummer = doedshendelse.avdoedFnr,
@@ -51,17 +99,6 @@ class DoedshendelseKontrollpunktServiceTest {
 
     @Test
     fun `Skal returnere kontrollpunkt hvis den beroerte har ufoeretrygd`() {
-        every {
-            pdlTjenesterKlient.hentPdlModell(
-                foedselsnummer = doedshendelse.avdoedFnr,
-                rolle = PersonRolle.AVDOED,
-                saktype = any(),
-            )
-        } returns
-            mockPerson().copy(
-                doedsdato = OpplysningDTO(doedshendelse.avdoedDoedsdato, null),
-            )
-
         coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr) } returns
             listOf(
                 SakSammendragResponse(
@@ -95,8 +132,6 @@ class DoedshendelseKontrollpunktServiceTest {
                 doedsdato = OpplysningDTO(doedshendelse.avdoedDoedsdato, null),
             )
 
-        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr) } returns emptyList()
-
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarUtvandret)
@@ -116,27 +151,58 @@ class DoedshendelseKontrollpunktServiceTest {
                 foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of("69057949961"), null),
             )
 
-        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr) } returns emptyList()
-
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarDNummer)
     }
 
     @Test
-    fun `Skal ikke opprette kontrollpunkt hvis alle sjekker er OK`() {
-        coEvery { pesysKlient.hentSaker(doedshendelse.beroertFnr) } returns emptyList()
+    fun `Skal opprette kontrollpunkt ved samtidig doedsfall`() {
         every {
             pdlTjenesterKlient.hentPdlModell(
-                foedselsnummer = doedshendelse.avdoedFnr,
-                rolle = PersonRolle.AVDOED,
+                foedselsnummer = doedshendelse.beroertFnr,
+                rolle = PersonRolle.GJENLEVENDE,
                 saktype = any(),
             )
         } returns
             mockPerson().copy(
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelse.beroertFnr), null),
                 doedsdato = OpplysningDTO(doedshendelse.avdoedDoedsdato, null),
             )
 
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.SamtidigDoedsfall)
+    }
+
+    @Test
+    fun `Skal opprette kontrollpunkt dersom vi ikke finner den andre forelderen`() {
+        every {
+            pdlTjenesterKlient.hentPdlModell(
+                foedselsnummer = any(),
+                rolle = PersonRolle.BARN,
+                saktype = any(),
+            )
+        } returns
+            mockPerson().copy(
+                familieRelasjon =
+                    OpplysningDTO(
+                        FamilieRelasjon(
+                            ansvarligeForeldre = emptyList(),
+                            foreldre = listOf(KONTANT_FOT),
+                            barn = emptyList(),
+                        ),
+                        null,
+                    ),
+            )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet)
+    }
+
+    @Test
+    fun `Skal ikke opprette kontrollpunkt hvis alle sjekker er OK`() {
         kontrollpunktService.identifiserKontrollerpunkter(doedshendelse) shouldBe emptyList()
     }
 }

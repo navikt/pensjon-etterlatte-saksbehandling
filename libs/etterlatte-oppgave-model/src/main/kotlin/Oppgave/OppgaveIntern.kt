@@ -38,8 +38,6 @@ data class OppgaveIntern(
     override val fnr: String? = null,
     override val frist: Tidspunkt?,
 ) : Oppgave() {
-//    fun toSaksbehandler() = OppgaveSaksbehandler(saksbehandlerIdent, saksbehandlerNavn)
-
     fun manglerSaksbehandler(): Boolean {
         return saksbehandler == null
     }

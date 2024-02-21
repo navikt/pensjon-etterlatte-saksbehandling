@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Fagsaksystem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -122,10 +123,11 @@ class OppgaveService(
 
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         hentetOppgave.erAttestering() && sjekkOmkanTildeleAttestantOppgave()
-        if (hentetOppgave.saksbehandlerIdent.isNullOrEmpty()) {
+        val eksisterendeSaksbehandler = hentetOppgave.saksbehandlerIdent
+        if (eksisterendeSaksbehandler.isNullOrEmpty() || eksisterendeSaksbehandler == Fagsaksystem.EY.navn) {
             oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
         } else {
-            throw OppgaveAlleredeTildeltSaksbehandler(oppgaveId, hentetOppgave.saksbehandlerIdent)
+            throw OppgaveAlleredeTildeltSaksbehandler(oppgaveId, eksisterendeSaksbehandler)
         }
     }
 

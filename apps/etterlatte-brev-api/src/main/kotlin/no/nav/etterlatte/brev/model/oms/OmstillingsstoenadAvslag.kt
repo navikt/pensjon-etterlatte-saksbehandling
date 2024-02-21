@@ -26,7 +26,9 @@ data class OmstillingsstoenadAvslagRedigerbartUtfall(val avdoedNavn: String) : B
     companion object {
         fun fra(generellBrevData: GenerellBrevData) =
             OmstillingsstoenadAvslagRedigerbartUtfall(
-                avdoedNavn = generellBrevData.personerISak.avdoede.first().navn,
+                avdoedNavn =
+                    generellBrevData.personerISak.avdoede.firstOrNull()?.navn
+                        ?: "<Klarte ikke å finne navn automatisk, du må sette inn her>",
             )
     }
 }

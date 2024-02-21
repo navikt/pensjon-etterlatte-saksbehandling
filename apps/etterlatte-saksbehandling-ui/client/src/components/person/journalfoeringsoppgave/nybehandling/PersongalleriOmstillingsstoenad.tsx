@@ -11,6 +11,7 @@ import {
   validateFnrObligatorisk,
   validerFnrValgfri,
 } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
+import { SpaceChildren } from '~shared/styled'
 
 export default function PersongalleriOmstillingsstoenad() {
   const {
@@ -22,7 +23,7 @@ export default function PersongalleriOmstillingsstoenad() {
   const soeskenFormArray = useFieldArray<NyBehandlingSkjema>({ name: 'persongalleri.soesken' })
 
   return (
-    <>
+    <SpaceChildren>
       <InputRow>
         <TextField
           {...register('persongalleri.soeker')}
@@ -77,6 +78,6 @@ export default function PersongalleriOmstillingsstoenad() {
           </Button>
         </InputList>
       </Panel>
-    </>
+    </SpaceChildren>
   )
 }

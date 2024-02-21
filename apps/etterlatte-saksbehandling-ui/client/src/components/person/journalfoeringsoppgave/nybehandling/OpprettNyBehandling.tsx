@@ -8,7 +8,7 @@ import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeri
 import { Navigate, useNavigate } from 'react-router-dom'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import styled from 'styled-components'
-import { FlexRow } from '~shared/styled'
+import { FlexRow, SpaceChildren } from '~shared/styled'
 import React from 'react'
 import { Spraak } from '~shared/types/Brev'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -98,59 +98,60 @@ export default function OpprettNyBehandling() {
 
   return (
     <FormWrapper column>
-      <Heading size="medium" spacing>
-        Opprett behandling{' '}
-        <Tag variant="success" size="medium">
-          {formaterSakstype(sakType)}
-        </Tag>
-      </Heading>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Select
-            {...register('spraak', {
-              required: { value: true, message: 'Du må velge språk/målform for behandlingen' },
-            })}
-            label="Hva skal språket/målform være?"
-            error={errors.spraak?.message}
-          >
-            <option value="">Velg ...</option>
-            <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
-            <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
-            <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
-          </Select>
+          <SpaceChildren>
+            <Heading size="medium" spacing>
+              Opprett behandling{' '}
+              <Tag variant="success" size="medium">
+                {formaterSakstype(sakType)}
+              </Tag>
+            </Heading>
 
-          <ControlledDatoVelger
-            name="mottattDato"
-            label="Mottatt dato"
-            description="Datoen søknaden ble mottatt"
-            control={control}
-            errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
-            defaultValue={getValues().mottattDato}
-          />
+            <Select
+              {...register('spraak', {
+                required: { value: true, message: 'Du må velge språk/målform for behandlingen' },
+              })}
+              label="Hva skal språket/målform være?"
+              error={errors.spraak?.message}
+            >
+              <option value="">Velg ...</option>
+              <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
+              <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
+              <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
+            </Select>
 
-          <hr />
+            <ControlledDatoVelger
+              name="mottattDato"
+              label="Mottatt dato"
+              description="Datoen søknaden ble mottatt"
+              control={control}
+              errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
+              defaultValue={getValues().mottattDato}
+            />
 
-          <Heading size="medium" spacing>
-            Persongalleri
-          </Heading>
+            <PersongalleriHeading size="medium" spacing>
+              Persongalleri
+            </PersongalleriHeading>
 
-          {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
-          {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
+            {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
+            {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
 
-          <div>
-            <FlexRow justify="center" $spacing>
-              <Button variant="secondary" onClick={tilbake} type="button">
-                Tilbake
-              </Button>
+            <div>
+              <FlexRow justify="center" $spacing>
+                <Button variant="secondary" onClick={tilbake} type="button">
+                  Tilbake
+                </Button>
 
-              <Button variant="primary" type="submit">
-                Neste
-              </Button>
-            </FlexRow>
-            <FlexRow justify="center">
-              <AvbrytBehandleJournalfoeringOppgave />
-            </FlexRow>
-          </div>
+                <Button variant="primary" type="submit">
+                  Neste
+                </Button>
+              </FlexRow>
+              <FlexRow justify="center">
+                <AvbrytBehandleJournalfoeringOppgave />
+              </FlexRow>
+            </div>
+          </SpaceChildren>
         </form>
       </FormProvider>
     </FormWrapper>
@@ -175,4 +176,8 @@ export const InputRow = styled.div`
   button {
     align-self: flex-end;
   }
+`
+
+const PersongalleriHeading = styled(Heading)`
+  margin-top: 1.5rem;
 `

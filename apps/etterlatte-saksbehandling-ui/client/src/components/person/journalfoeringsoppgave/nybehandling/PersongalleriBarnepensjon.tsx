@@ -7,6 +7,7 @@ import {
   validerFnrValgfri,
 } from '~components/person/journalfoeringsoppgave/nybehandling/validator'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
+import { SpaceChildren } from '~shared/styled'
 
 export default function PersongalleriBarnepensjon({ erManuellMigrering = false }: { erManuellMigrering?: boolean }) {
   const {
@@ -21,7 +22,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
   const kanLeggeTil: boolean = (gjenlevendeFormArray.fields.length || 0) + (avdoedFormArray.fields.length || 0) < 2
 
   return (
-    <>
+    <SpaceChildren>
       <InputRow>
         <TextField
           {...register('persongalleri.soeker', { validate: validateFnrObligatorisk })}
@@ -137,6 +138,6 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
           </Button>
         </InputList>
       </Panel>
-    </>
+    </SpaceChildren>
   )
 }

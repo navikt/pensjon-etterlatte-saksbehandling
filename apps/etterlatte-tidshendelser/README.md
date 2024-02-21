@@ -9,6 +9,8 @@ Denne appen styrer jobber som kjører med jevne mellomrom for å håndtere netto
     - Unntak: utvidet aldersgrense til 21 år dersom yrkesskadefordel før 01.01.2024 (Reformtidspunkt)
   - `AO_BP21` Opphør barnepensjon ved fylte 21 år
   - `AO_OMS67` Opphør omstillingsstønad ved fylte 67 år
+- Omstillingsstønad
+  - `OMS_DOED_3AAR` Opphør omstillingsstønad 3 år etter dødsfall
 
 ## Oversikt
 
@@ -32,13 +34,21 @@ end
 kt{{kafka-etterlatte}}:::kafka-topic
 
 subgraph grunnlag
-    grunnlag_sjekk["Saker hvor bruker \n fyller n år"]
+    grunnlag_sjekk["
+    Saker hvor bruker 
+      fyller n år
+      "]
 end
 subgraph vedtaksvurdering
     vedtak_sjekk["Sjekke løpende ytelse"]
 end
 subgraph vilkaarsvurdering
-    vilkaar_sjekk["Sjekke yrkesskadefordel \n pr reformtidspunkt"]
+    vilkaar_sjekk["
+    - Sjekke yrkesskadefordel 
+         pr reformtidspunkt 
+    - Sjekke rett 
+         uten tidsbegrensning
+    "]
 end
 subgraph behandling
     behandle["Opprette oppgave"]

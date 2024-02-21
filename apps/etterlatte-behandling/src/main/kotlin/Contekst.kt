@@ -65,11 +65,11 @@ class SaksbehandlerMedEnheterOgRoller(
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
     }
 
+    private fun harKjentEnhet() = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
+
     fun enheterMedSkrivetilgang() =
         saksbehandlersEnheter
             .filter { Enheter.saksbehandlendeEnheter().contains(it) }
-
-    private fun harKjentEnhet() = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
 
     // TODO - EY-3441 - lesetilgang for forvaltningsutviklere
     fun enheterMedLesetilgang() =

@@ -24,7 +24,7 @@ class SaksbehandlerService(private val dao: SaksbehandlerInfoDao) {
             enheter = innloggetSaksbehandler.enheter(),
             kanAttestere = innloggetSaksbehandler.saksbehandlerMedRoller.harRolleAttestant(),
             skriveEnheter = innloggetSaksbehandler.enheterMedSkrivetilgang(),
-            kanSeOppgaveliste = innloggetSaksbehandler.enheterMedSkrivetilgang().isNotEmpty(),
+            kanSeOppgaveliste = innloggetSaksbehandler.kanSeOppgaveBenken(),
         )
     }
 

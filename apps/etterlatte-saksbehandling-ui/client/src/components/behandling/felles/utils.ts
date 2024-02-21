@@ -52,7 +52,7 @@ export const enhetErSkrivbar = (enhetId: string, enheter: Array<string>): boolea
 
 export const behandlingErRedigerbar = (status: IBehandlingStatus, enhetId: string, enheter: Array<string>): boolean => {
   return (
-    enheter.includes(enhetId) &&
+    enhetErSkrivbar(enhetId, enheter) &&
     (status === IBehandlingStatus.OPPRETTET ||
       status === IBehandlingStatus.VILKAARSVURDERT ||
       status === IBehandlingStatus.TRYGDETID_OPPDATERT ||

@@ -67,6 +67,11 @@ class SaksbehandlerMedEnheterOgRoller(
 
     private fun harKjentEnhet() = Enheter.kjenteEnheter().intersect(saksbehandlersEnheter).isNotEmpty()
 
+    fun kanSeOppgaveBenken() =
+        saksbehandlersEnheter.any { enhetNr ->
+            Enheter.entries.first { it.enhetNr == enhetNr }.harTilgangTilOppgavebenken
+        }
+
     fun enheterMedSkrivetilgang() =
         saksbehandlersEnheter
             .filter { Enheter.saksbehandlendeEnheter().contains(it) }

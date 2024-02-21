@@ -16,7 +16,7 @@ export interface OppgaveDTO {
   sakType: SakType
   fnr: string | null
   frist: string
-  saksbehandler?: OppgaveSaksbehandler
+  saksbehandler: OppgaveSaksbehandler | null
 
   // GOSYS-spesifikt
   beskrivelse: string | null

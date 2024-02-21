@@ -34,7 +34,7 @@ class SaksbehandlerJobService(
     fun run() {
         val subCoroutineExceptionHandler =
             CoroutineExceptionHandler { _, exception ->
-                logger.error("Saksbehandlerdatanavn feilet se exception $exception")
+                logger.error("Saksbehandlerdatanavn feilet se exception", exception)
             }
         newSingleThreadContext("saksbehandlernavnjob").use { ctx ->
             Runtime.getRuntime().addShutdownHook(Thread { ctx.close() })

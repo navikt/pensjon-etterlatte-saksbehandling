@@ -19,6 +19,7 @@ import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_O
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.BARNEPENSJON_VEDTAK_OMREGNING_FERDIG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_AVSLAG_UTFALL
+import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_INNVILGELSE_UTFALL
 import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode.OMSTILLINGSSTOENAD_OPPHOER
@@ -62,6 +63,8 @@ enum class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: Ett
     BP_REVURDERING(BARNEPENSJON_REVURDERING_UTFALL, BARNEPENSJON_REVURDERING),
     BP_VARSEL(BARNEPENSJON_VARSEL_UTFALL, BARNEPENSJON_VARSEL),
     BP_INFORMASJON_DOEDSFALL(BARNEPENSJON_INFORMASJON_DOEDSFALL, TOM_MAL_INFORMASJONSBREV),
+
+    OMS_INFORMASJON_DOEDSFALL(OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL, TOM_MAL_INFORMASJONSBREV),
     OMS_AVSLAG(
         OMSTILLINGSSTOENAD_AVSLAG_UTFALL,
         OMSTILLINGSSTOENAD_AVSLAG,

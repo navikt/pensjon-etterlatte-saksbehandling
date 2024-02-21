@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
+import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
@@ -57,7 +58,7 @@ internal class DistribuerBrevRiverTest {
                 mapOf(
                     BrevHendelseType.JOURNALFOERT.lagParMedEventNameKey(),
                     CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                    "brevId" to brevId,
+                    BREV_ID_KEY to brevId,
                     "journalpostId" to journalpostId,
                     "distribusjonType" to DistribusjonsType.VEDTAK.toString(),
                     "mottakerAdresse" to adresse,

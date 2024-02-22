@@ -365,6 +365,7 @@ class OppgaveService(
     fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
         referanse: String,
         sakId: Long,
+        oppgaveKilde: OppgaveKilde = OppgaveKilde.BEHANDLING,
         merknad: String? = null,
     ): OppgaveIntern {
         val oppgaverForBehandling = oppgaveDao.hentOppgaverForReferanse(referanse)
@@ -376,7 +377,7 @@ class OppgaveService(
         return opprettNyOppgaveMedSakOgReferanse(
             referanse = referanse,
             sakId = sakId,
-            oppgaveKilde = OppgaveKilde.BEHANDLING,
+            oppgaveKilde = oppgaveKilde,
             oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
             merknad = merknad,
         )

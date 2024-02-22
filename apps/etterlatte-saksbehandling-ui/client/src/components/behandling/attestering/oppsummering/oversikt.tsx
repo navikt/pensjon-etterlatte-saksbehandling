@@ -168,15 +168,13 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       </FlexRow>
 
       {settPaaVent && (
-        <>
-          <TextField
-            label="Merknad for venting"
-            size="medium"
-            type="text"
-            value={merknad}
-            onChange={(e) => setMerknad(e.target.value)}
-          />
-        </>
+        <TextField
+          label="Merknad for venting"
+          size="medium"
+          type="text"
+          value={merknad}
+          onChange={(e) => setMerknad(e.target.value)}
+        />
       )}
 
       {settPaaVent &&
@@ -184,10 +182,10 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         oppgaveForBehandling &&
         oppgaveForBehandling.status !== 'PAA_VENT' && (
           <>
-            <FlexRow align="center">
+            <FlexRow style={{ marginTop: '1rem' }} align="center">
               <b>Frist</b>
             </FlexRow>
-            <FlexRow align="center">
+            <FlexRow style={{ marginBottom: '1rem' }} align="center">
               <FristHandlinger
                 orginalFrist={oppgaveForBehandling.frist}
                 oppgaveId={oppgaveForBehandling.id}

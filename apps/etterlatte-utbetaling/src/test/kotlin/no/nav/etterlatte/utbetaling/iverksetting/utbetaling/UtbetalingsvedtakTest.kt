@@ -18,7 +18,7 @@ internal class UtbetalingsvedtakTest {
                 "sakType": "BARNEPENSJON"
               },
               "behandling": {
-                "type": "FOERSTEGANGSBEHANDLING",
+                "type": "FØRSTEGANGSBEHANDLING",
                 "id": "7b555144-0ea8-481a-8075-a0faa7a87876"
               },
               "pensjonTilUtbetaling": [
@@ -58,7 +58,7 @@ internal class UtbetalingsvedtakTest {
                 "sakType": "OMSTILLINGSSTOENAD"
               },
               "behandling": {
-                "type": "FOERSTEGANGSBEHANDLING",
+                "type": "FØRSTEGANGSBEHANDLING",
                 "id": "7b555144-0ea8-481a-8075-a0faa7a87876"
               },
               "pensjonTilUtbetaling": [

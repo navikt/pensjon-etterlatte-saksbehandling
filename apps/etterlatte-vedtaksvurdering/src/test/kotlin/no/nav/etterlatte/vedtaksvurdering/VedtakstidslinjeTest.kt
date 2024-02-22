@@ -451,7 +451,7 @@ internal class VedtakstidslinjeTest {
 private fun lagVedtak(
     id: Long,
     virkningsDato: LocalDate,
-    behandlingType: BehandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
+    behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     vedtakStatus: VedtakStatus,
     datoAttestert: Tidspunkt = Tidspunkt.now(),
     vedtakType: VedtakType = VedtakType.INNVILGELSE,
@@ -494,7 +494,7 @@ private fun lagVedtak(
 private fun lagStandardVedtakMedEnAapenUtbetalingsperiode(
     id: Long,
     virkningFom: YearMonth,
-    behandlingType: BehandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
+    behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     vedtakFattetDato: Tidspunkt = Tidspunkt.ofNorskTidssone(virkningFom.atDay(1), tid = LocalTime.NOON),
 ) = lagVedtak(
     id = id,

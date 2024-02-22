@@ -163,7 +163,7 @@ internal class BehandlingInfoDaoTest(val dataSource: DataSource) {
 
     private fun opprettBehandlingForTest(sak: Sak) =
         OpprettBehandling(
-            type = BehandlingType.FOERSTEGANGSBEHANDLING,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
             sakId = sak.id,
             status = BehandlingStatus.OPPRETTET,
             kilde = Vedtaksloesning.GJENNY,

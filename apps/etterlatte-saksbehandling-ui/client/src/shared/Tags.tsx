@@ -16,7 +16,7 @@ export enum Variants {
 }
 
 export const tagColors: Record<SakType | IBehandlingsType | UtlandstilknytningType, Variants> = {
-  [IBehandlingsType.FOERSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
+  [IBehandlingsType.FØRSTEGANGSBEHANDLING]: Variants.ALT3_FILLED,
   [IBehandlingsType.REVURDERING]: Variants.ALT3_FILLED,
   [SakType.BARNEPENSJON]: Variants.INFO,
   [SakType.OMSTILLINGSSTOENAD]: Variants.NEUTRAL,

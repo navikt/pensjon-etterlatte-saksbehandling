@@ -91,7 +91,7 @@ class BeregnBarnepensjonService(
         logger.info("Beregner barnepensjon for behandlingId=${behandling.id} med behandlingType=$behandlingType")
 
         return when (behandlingType) {
-            BehandlingType.FOERSTEGANGSBEHANDLING ->
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
                 beregnBarnepensjon(
                     behandling.id,
                     grunnlag,

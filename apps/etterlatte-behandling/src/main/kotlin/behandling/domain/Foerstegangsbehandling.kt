@@ -31,7 +31,7 @@ data class Foerstegangsbehandling(
     override val prosesstype: Prosesstype = Prosesstype.MANUELL,
     override val kilde: Vedtaksloesning,
 ) : Behandling() {
-    override val type: BehandlingType = BehandlingType.FOERSTEGANGSBEHANDLING
+    override val type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
 
     private fun erFyltUt(): Boolean =
         when (sak.sakType) {

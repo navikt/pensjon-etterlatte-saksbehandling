@@ -4,7 +4,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -379,7 +378,7 @@ class StatistikkService(
                 registrertTidspunkt = statistikkBehandling.behandlingOpprettet.toTidspunkt(),
                 ferdigbehandletTidspunkt = null,
                 vedtakTidspunkt = null,
-                type = mapBehandlingType(statistikkBehandling.behandlingType),
+                type = statistikkBehandling.behandlingType.name,
                 status = behandlingHendelse.name,
                 resultat = null,
                 resultatBegrunnelse = null,
@@ -474,13 +473,6 @@ class StatistikkService(
             raderRegistrert,
         )
     }
-
-    private fun mapBehandlingType(type: BehandlingType) =
-        when (type) {
-            BehandlingType.FOERSTEGANGSBEHANDLING -> "FØRSTEGANGSBEHANDLING"
-            BehandlingType.REVURDERING -> "REVURDERING"
-            BehandlingType.MANUELT_OPPHOER -> "MANUELT_OPPHOER"
-        }
 }
 
 internal fun hentSakYtelsesgruppe(

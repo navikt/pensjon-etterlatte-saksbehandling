@@ -121,7 +121,7 @@ class MigreringHendelserRiverTest {
                 innhold =
                     VedtakInnholdDto.VedtakBehandlingDto(
                         YearMonth.now(),
-                        Behandling(BehandlingType.FOERSTEGANGSBEHANDLING, UUID.fromString(behandlingId)),
+                        Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, UUID.fromString(behandlingId)),
                         listOf(),
                     ),
             )
@@ -141,7 +141,7 @@ class MigreringHendelserRiverTest {
                             null,
                             VedtakInnholdDto.VedtakBehandlingDto(
                                 YearMonth.now(),
-                                Behandling(BehandlingType.FOERSTEGANGSBEHANDLING, UUID.fromString(behandlingId)),
+                                Behandling(BehandlingType.FØRSTEGANGSBEHANDLING, UUID.fromString(behandlingId)),
                                 listOf(),
                             ),
                         ),

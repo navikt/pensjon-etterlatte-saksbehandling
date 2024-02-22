@@ -56,7 +56,7 @@ internal class AvkortingServiceTest {
             val behandling =
                 behandling(
                     id = behandlingId,
-                    behandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     status = BehandlingStatus.BEREGNET,
                 )
             every { avkortingRepository.hentAvkorting(behandlingId) } returns null
@@ -79,7 +79,7 @@ internal class AvkortingServiceTest {
             val behandling =
                 behandling(
                     id = behandlingId,
-                    behandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     status = BehandlingStatus.AVKORTET,
                 )
             val avkorting = mockk<Avkorting>()
@@ -104,7 +104,7 @@ internal class AvkortingServiceTest {
             val behandling =
                 behandling(
                     id = behandlingId,
-                    behandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     status = BehandlingStatus.BEREGNET,
                 )
             val eksisterendeAvkorting = mockk<Avkorting>()
@@ -333,7 +333,7 @@ internal class AvkortingServiceTest {
             val behandling =
                 behandling(
                     id = behandlingId,
-                    behandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
                 )
 

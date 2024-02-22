@@ -38,7 +38,7 @@ fun vedtak(
     behandling: Behandling =
         Behandling(
             id = UUID.randomUUID(),
-            type = BehandlingType.FOERSTEGANGSBEHANDLING,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
         ),
     saktype: SakType = SakType.BARNEPENSJON,
 ) = VedtakDto(
@@ -77,7 +77,7 @@ fun ugyldigVedtakTilUtbetaling(
     behandling: Behandling =
         Behandling(
             id = UUID.randomUUID(),
-            type = BehandlingType.FOERSTEGANGSBEHANDLING,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
         ),
     saktype: SakType = SakType.BARNEPENSJON,
 ) = VedtakDto(

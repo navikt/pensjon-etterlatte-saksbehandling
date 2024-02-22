@@ -120,7 +120,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
-                every { behandlingType } returns BehandlingType.FOERSTEGANGSBEHANDLING
+                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             }
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val forventetFoedselsdato = grunnlag.hentAvdoede().first().hentFoedselsdato()!!.verdi
@@ -1311,7 +1311,7 @@ internal class TrygdetidServiceTest {
             mockk<DetaljertBehandling>().apply {
                 every { id } returns behandlingId
                 every { sak } returns sakId
-                every { behandlingType } returns BehandlingType.FOERSTEGANGSBEHANDLING
+                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
             }
         val grunnlag =
             GrunnlagTestData(opplysningsmapAvdoedOverrides = eldreAvdoedTestopplysningerMap).hentOpplysningsgrunnlag()

@@ -201,7 +201,7 @@ const opprettBehandling = (
     boddEllerArbeidetUtlandet,
     status: IBehandlingStatus.OPPRETTET,
     hendelser: [],
-    behandlingType: IBehandlingsType.FOERSTEGANGSBEHANDLING,
+    behandlingType: IBehandlingsType.FØRSTEGANGSBEHANDLING,
     revurderingsaarsak: null,
     revurderinginfo: null,
     begrunnelse: null,

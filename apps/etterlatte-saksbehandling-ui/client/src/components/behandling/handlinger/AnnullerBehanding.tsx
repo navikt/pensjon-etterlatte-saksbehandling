@@ -21,7 +21,7 @@ export default function AnnullerBehandling() {
 
   const behandling = useBehandling()
   const soeker = usePersonopplysninger()?.soeker?.opplysning
-  const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FOERSTEGANGSBEHANDLING
+  const erFoerstegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
   const behandles = behandlingErRedigerbar(behandling?.status ?? IBehandlingStatus.IVERKSATT)
   if (!behandles) {

@@ -65,7 +65,7 @@ export function behandlingStatusTilLesbartnavn(status: IBehandlingStatus) {
 
 export const lenkeTilBehandling = (behandlingSammendrag: IBehandlingsammendrag): string => {
   switch (behandlingSammendrag.behandlingType) {
-    case IBehandlingsType.FOERSTEGANGSBEHANDLING:
+    case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return `/behandling/${behandlingSammendrag.id}/soeknadsoversikt`
     case IBehandlingsType.REVURDERING:
       return `/behandling/${behandlingSammendrag.id}/revurderingsoversikt`

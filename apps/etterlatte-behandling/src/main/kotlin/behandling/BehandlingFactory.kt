@@ -285,7 +285,7 @@ class BehandlingFactory(
         }
 
         return OpprettBehandling(
-            type = BehandlingType.FOERSTEGANGSBEHANDLING,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
             sakId = sak.id,
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },

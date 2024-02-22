@@ -147,7 +147,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
         )
     }
 
-    private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FOERSTEGANGSBEHANDLING): VedtakDto {
+    private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING): VedtakDto {
         val behandlingId = UUID.randomUUID()
         return VedtakDto(
             id = 1L,

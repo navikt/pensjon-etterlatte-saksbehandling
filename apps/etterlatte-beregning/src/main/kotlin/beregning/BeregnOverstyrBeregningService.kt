@@ -65,7 +65,7 @@ class BeregnOverstyrBeregningService(
             )
 
         return when (behandlingType) {
-            BehandlingType.FOERSTEGANGSBEHANDLING ->
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
                 beregnOverstyr(
                     behandlingId = behandling.id,
                     beregningsType = beregningsType,

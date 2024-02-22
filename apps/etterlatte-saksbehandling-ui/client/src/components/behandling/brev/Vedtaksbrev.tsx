@@ -131,7 +131,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   }
 
   const kanSendeTilAttestering = (): boolean => {
-    const erForestegangsbehandling = behandling?.behandlingType === IBehandlingsType.FOERSTEGANGSBEHANDLING
+    const erForestegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
     if (erForestegangsbehandling) {
       const sjekklisteErBekreftet = sjekkliste !== null && sjekkliste.bekreftet
       if (!sjekklisteErBekreftet) {

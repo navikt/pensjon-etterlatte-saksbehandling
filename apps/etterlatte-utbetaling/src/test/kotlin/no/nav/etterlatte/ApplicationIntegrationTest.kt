@@ -84,7 +84,7 @@ class ApplicationIntegrationTest {
                     behandling =
                         Behandling(
                             id = behandlingId,
-                            type = BehandlingType.FOERSTEGANGSBEHANDLING,
+                            type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         ),
                 ),
             ),
@@ -135,7 +135,7 @@ class ApplicationIntegrationTest {
                     behandling =
                         Behandling(
                             id = behandlingIdForste,
-                            type = BehandlingType.FOERSTEGANGSBEHANDLING,
+                            type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         ),
                 ),
             ),
@@ -146,7 +146,7 @@ class ApplicationIntegrationTest {
                     behandling =
                         Behandling(
                             id = behandlingIdAndre,
-                            type = BehandlingType.FOERSTEGANGSBEHANDLING,
+                            type = BehandlingType.FØRSTEGANGSBEHANDLING,
                         ),
                 ),
             ),
@@ -185,7 +185,7 @@ class ApplicationIntegrationTest {
                     vedtakId = 2,
                     behandling =
                         Behandling(
-                            BehandlingType.FOERSTEGANGSBEHANDLING,
+                            BehandlingType.FØRSTEGANGSBEHANDLING,
                             behandlingId,
                         ),
                 ),
@@ -217,7 +217,7 @@ class ApplicationIntegrationTest {
                 vedtak(
                     behandling =
                         Behandling(
-                            BehandlingType.FOERSTEGANGSBEHANDLING,
+                            BehandlingType.FØRSTEGANGSBEHANDLING,
                             behandlingId,
                         ),
                 ),
@@ -267,7 +267,7 @@ class ApplicationIntegrationTest {
                 vedtak(
                     behandling =
                         Behandling(
-                            BehandlingType.FOERSTEGANGSBEHANDLING,
+                            BehandlingType.FØRSTEGANGSBEHANDLING,
                             behandlingId,
                         ),
                 ),
@@ -301,7 +301,7 @@ class ApplicationIntegrationTest {
                 vedtak(
                     behandling =
                         Behandling(
-                            BehandlingType.FOERSTEGANGSBEHANDLING,
+                            BehandlingType.FØRSTEGANGSBEHANDLING,
                             behandlingId,
                         ),
                 ),

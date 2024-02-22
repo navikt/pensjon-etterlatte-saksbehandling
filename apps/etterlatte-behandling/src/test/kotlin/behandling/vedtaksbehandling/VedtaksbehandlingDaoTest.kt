@@ -71,7 +71,7 @@ internal class VedtaksbehandlingDaoTest(val dataSource: DataSource) {
 
         val behandling: Foerstegangsbehandling =
             opprettBehandling(
-                type = BehandlingType.FOERSTEGANGSBEHANDLING,
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
                 sakId = sak1,
             ).also { behandlingDao.opprettBehandling(it) }
                 .let { requireNotNull(behandlingDao.hentBehandling(it.id)) as Foerstegangsbehandling }

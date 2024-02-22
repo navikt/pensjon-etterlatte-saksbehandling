@@ -60,7 +60,7 @@ data class Avkorting(
         nyttGrunnlag: AvkortingGrunnlag,
         behandlingstype: BehandlingType,
         beregning: Beregning,
-    ) = if (behandlingstype == BehandlingType.FOERSTEGANGSBEHANDLING) {
+    ) = if (behandlingstype == BehandlingType.FØRSTEGANGSBEHANDLING) {
         oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkortingForstegangs(beregning)
     } else {
         oppdaterMedInntektsgrunnlag(nyttGrunnlag).beregnAvkortingRevurdering(beregning)

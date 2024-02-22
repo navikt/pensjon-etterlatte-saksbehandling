@@ -233,7 +233,7 @@ class BehandlingStatusServiceImpl(
     }
 
     private fun haandterUtland(behandling: Behandling) {
-        if (behandling.type == BehandlingType.FOERSTEGANGSBEHANDLING) {
+        if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
             if (behandling.boddEllerArbeidetUtlandet?.skalSendeKravpakke == true) {
                 generellBehandlingService.opprettBehandling(
                     GenerellBehandling.opprettUtland(

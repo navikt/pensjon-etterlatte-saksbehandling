@@ -24,7 +24,7 @@
       "type": "BEHANDLING",
       "virkningstidspunkt": "2022-01",
       "behandling": {
-        "type": "FOERSTEGANGSBEHANDLING",
+        "type": "FØRSTEGANGSBEHANDLING",
         "id": "e89c6e25-4f22-48b3-b975-4c868d830913"
       },
       "utbetalingsperioder": [

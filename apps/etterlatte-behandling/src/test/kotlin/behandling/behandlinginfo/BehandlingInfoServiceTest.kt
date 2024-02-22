@@ -68,7 +68,7 @@ internal class BehandlingInfoServiceTest {
         every { behandlingService.hentBehandling(any()) } returns
             behandling(
                 behandlingId,
-                BehandlingType.FOERSTEGANGSBEHANDLING,
+                BehandlingType.FØRSTEGANGSBEHANDLING,
                 SakType.OMSTILLINGSSTOENAD,
                 BehandlingStatus.AVKORTET,
             )
@@ -219,7 +219,7 @@ internal class BehandlingInfoServiceTest {
 
     private fun behandling(
         behandlingId: UUID,
-        behandlingType: BehandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
+        behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         sakType: SakType = SakType.BARNEPENSJON,
         behandlingStatus: BehandlingStatus = BehandlingStatus.BEREGNET,
         revurderingaarsak: Revurderingaarsak? = null,

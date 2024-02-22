@@ -15,9 +15,9 @@ export function useVedtaksResultat(): VedtakResultat | null {
 
   switch (vilkaarsresultat) {
     case VilkaarsvurderingResultat.OPPFYLT:
-      return behandlingType === IBehandlingsType.FOERSTEGANGSBEHANDLING ? 'innvilget' : 'endring'
+      return behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? 'innvilget' : 'endring'
     case VilkaarsvurderingResultat.IKKE_OPPFYLT:
-      return behandlingType === IBehandlingsType.FOERSTEGANGSBEHANDLING ? 'avslag' : 'opphoer'
+      return behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING ? 'avslag' : 'opphoer'
     default:
       return null
   }

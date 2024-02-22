@@ -35,7 +35,7 @@ fun behandling(
     sakType = SakType.BARNEPENSJON,
     soeker = "",
     status = behandlingStatus,
-    behandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
+    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
     virkningstidspunkt = null,
     boddEllerArbeidetUtlandet = null,
     utlandstilknytning = null,

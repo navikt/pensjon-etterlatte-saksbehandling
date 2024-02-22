@@ -133,7 +133,7 @@ internal class OpprettVedtaksbrevForMigreringRiverTest {
         return JsonMessage.newMessage(messageKeys + mapOf(HENDELSE_DATA_KEY to migreringRequest))
     }
 
-    private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FOERSTEGANGSBEHANDLING) =
+    private fun opprettVedtak(behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING) =
         VedtakDto(
             id = 1L,
             status = VedtakStatus.ATTESTERT,

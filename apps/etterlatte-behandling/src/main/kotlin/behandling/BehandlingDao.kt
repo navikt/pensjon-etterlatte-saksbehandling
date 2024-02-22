@@ -299,7 +299,7 @@ class BehandlingDao(
 
     private fun ResultSet.tilBehandling(key: String?) =
         when (key) {
-            BehandlingType.FOERSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
+            BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
             BehandlingType.REVURDERING.name -> asRevurdering(this)
             BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
             else -> null

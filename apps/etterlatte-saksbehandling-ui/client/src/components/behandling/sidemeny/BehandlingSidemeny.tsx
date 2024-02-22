@@ -94,7 +94,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
     )
   }, [behandling.id])
 
-  const erFoerstegangsbehandling = behandling.behandlingType === IBehandlingsType.FOERSTEGANGSBEHANDLING
+  const erFoerstegangsbehandling = behandling.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
 
   const [hentSjekklisteResult, hentSjekklisteForBehandling, resetSjekklisteResult] = useApiCall(hentSjekkliste)
   const [opprettSjekklisteResult, opprettSjekklisteForBehandling, resetOpprettSjekkliste] =

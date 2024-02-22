@@ -168,7 +168,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, varselbrevAkt
       return behandlingRoutes(behandling).filter((route) =>
         manueltOpphoerRoutes.map((pathinfo) => pathinfo.path).includes(route.path)
       )
-    case IBehandlingsType.FOERSTEGANGSBEHANDLING:
+    case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return behandlingRoutes(behandling).filter((route) =>
         soeknadRoutes(behandling, lagVarselbrev)
           .map((pathinfo) => pathinfo.path)

@@ -34,7 +34,7 @@ class DetaljertBehandlingTest {
             sakType = SakType.BARNEPENSJON,
             soeker = "123",
             status = BehandlingStatus.OPPRETTET,
-            behandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
+            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             virkningstidspunkt = null,
             boddEllerArbeidetUtlandet = null,
             utlandstilknytning = null,

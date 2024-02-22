@@ -67,7 +67,7 @@ internal class VedtaksvurderingRepositoryTest(private val dataSource: DataSource
             type shouldBe VedtakType.INNVILGELSE
             innhold should beInstanceOf<VedtakInnhold.Behandling>()
             (innhold as VedtakInnhold.Behandling).let {
-                it.behandlingType shouldBe BehandlingType.FOERSTEGANGSBEHANDLING
+                it.behandlingType shouldBe BehandlingType.FØRSTEGANGSBEHANDLING
                 it.virkningstidspunkt shouldBe YearMonth.of(2023, Month.JANUARY)
                 it.vilkaarsvurdering shouldBe objectMapper.createObjectNode()
                 it.beregning shouldBe objectMapper.createObjectNode()

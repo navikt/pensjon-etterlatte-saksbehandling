@@ -72,7 +72,7 @@ class BeregnOmstillingsstoenadService(
                 beregningsgrunnlag,
             )
         return when (behandlingType) {
-            BehandlingType.FOERSTEGANGSBEHANDLING ->
+            BehandlingType.FØRSTEGANGSBEHANDLING ->
                 beregnOmstillingsstoenad(behandling.id, grunnlag, omstillingstoenadGrunnlag, virkningstidspunkt)
 
             BehandlingType.REVURDERING -> {

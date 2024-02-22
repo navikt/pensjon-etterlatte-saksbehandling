@@ -22,7 +22,7 @@ import no.nav.etterlatte.kafka.LocalKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.lesHendelserFraLeesah
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
 import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.toJson
@@ -95,7 +95,7 @@ class IntegrationTest {
                 eventName = PdlHendelserKeys.PERSONHENDELSE.lagEventnameForType(),
                 hendelse = LeesahOpplysningstype.DOEDSFALL_V1,
                 hendelse_data =
-                    Doedshendelse(
+                    DoedshendelsePdl(
                         hendelseId = personHendelse.hendelseId,
                         endringstype = OPPRETTET,
                         fnr = personHendelse.personidenter.first(),
@@ -111,7 +111,7 @@ class IntegrationTest {
             rapidsKafkaProducer.publiser(
                 any(),
                 match {
-                    val hendelse: MeldingSendtPaaRapid<Doedshendelse> = objectMapper.readValue(it.toJson())
+                    val hendelse: MeldingSendtPaaRapid<DoedshendelsePdl> = objectMapper.readValue(it.toJson())
                     hendelse == forventetMeldingPaaRapid
                 },
             )

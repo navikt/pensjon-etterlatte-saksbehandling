@@ -47,22 +47,22 @@ class DoedshendelseJobService(
         }
     }
 
-    private fun haandterDoedshendelse(doedshendelse: Doedshendelse) {
-        val kontrollpunkter = doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
+    private fun haandterDoedshendelse(doedshendelseInternal: DoedshendelseInternal) {
+        val kontrollpunkter = doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternal)
 
         when (kontrollpunkter.any { it.avbryt }) {
             true -> {
                 logger.info(
-                    "Avbryter behandling av dødshendelse for person ${doedshendelse.avdoedFnr.maskerFnr()} med avdød " +
-                        "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkt: " +
+                    "Avbryter behandling av dødshendelse for person ${doedshendelseInternal.avdoedFnr.maskerFnr()} med avdød " +
+                        "${doedshendelseInternal.avdoedFnr.maskerFnr()} grunnet kontrollpunkt: " +
                         kontrollpunkter.joinToString(","),
                 )
-                doedshendelseDao.oppdaterDoedshendelse(doedshendelse.tilAvbrutt())
+                doedshendelseDao.oppdaterDoedshendelse(doedshendelseInternal.tilAvbrutt())
             }
 
             false -> {
                 grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(
-                    fnr = doedshendelse.avdoedFnr,
+                    fnr = doedshendelseInternal.avdoedFnr,
                     grunnlagendringType = GrunnlagsendringsType.DOEDSFALL,
                 )
                 // todo: EY-3539 - lukk etter oppgave er opprettet
@@ -70,7 +70,7 @@ class DoedshendelseJobService(
         }
     }
 
-    private fun finnGyldigeDoedshendelser(hendelser: List<Doedshendelse>): List<Doedshendelse> {
+    private fun finnGyldigeDoedshendelser(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {
         val idag = LocalDateTime.now()
         return hendelser.filter {
             Duration.between(it.endret, idag.toTidspunkt()).toDays() >= dagerGamleHendelserSomSkalKjoeres

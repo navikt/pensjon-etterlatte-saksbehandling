@@ -15,6 +15,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedHarUtvandret
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedLeverIPDL
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
@@ -26,7 +27,7 @@ import java.time.LocalDateTime
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DoedshendelseJobServiceTest {
+class DoedshendelseInternalPdlJobServiceTest {
     private val dao = mockk<DoedshendelseDao>()
     private val kontrollpunktService = mockk<DoedshendelseKontrollpunktService>()
     private val toggle =
@@ -53,17 +54,18 @@ class DoedshendelseJobServiceTest {
 
     @Test
     fun `skal kjoere 1 ny gyldig hendelse som er 2 dager gammel og droppe 1`() {
-        val doedshendelse =
-            Doedshendelse.nyHendelse(
+        val doedshendelseInternal =
+            DoedshendelseInternal.nyHendelse(
                 avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
                 avdoedDoedsdato = LocalDate.now(),
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
+                endringstype = Endringstype.OPPRETTET,
             )
         val doedshendelser =
             listOf(
-                doedshendelse,
-                doedshendelse.copy(
+                doedshendelseInternal,
+                doedshendelseInternal.copy(
                     avdoedFnr = AVDOED_FOEDSELSNUMMER.value,
                     endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt(),
                 ),
@@ -79,38 +81,40 @@ class DoedshendelseJobServiceTest {
 
     @Test
     fun `skal avbryte hendelse hvis avdoed er ikke er registert doed i PDL`() {
-        val doedshendelse =
-            Doedshendelse.nyHendelse(
+        val doedshendelseInternal =
+            DoedshendelseInternal.nyHendelse(
                 avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
                 avdoedDoedsdato = LocalDate.now(),
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
+                endringstype = Endringstype.OPPRETTET,
             ).copy(endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt())
 
-        every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelse)
+        every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns listOf(AvdoedLeverIPDL)
-        val doedshendelseCapture = slot<Doedshendelse>()
+        val doedshendelseInternalCapture = slot<DoedshendelseInternal>()
 
         service.setupKontekstAndRun(kontekst)
 
-        verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
+        verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseInternalCapture)) }
         verify(exactly = 0) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
-        doedshendelseCapture.captured.status shouldBe Status.FERDIG
-        doedshendelseCapture.captured.utfall shouldBe Utfall.AVBRUTT
+        doedshendelseInternalCapture.captured.status shouldBe Status.FERDIG
+        doedshendelseInternalCapture.captured.utfall shouldBe Utfall.AVBRUTT
     }
 
     @Test
     fun `skal ikke avbryte gyldige hendelser dersom kontrollpunktene skal foere til oppgave`() {
-        val doedshendelse =
-            Doedshendelse.nyHendelse(
+        val doedshendelseInternal =
+            DoedshendelseInternal.nyHendelse(
                 avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
                 avdoedDoedsdato = LocalDate.now(),
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
+                endringstype = Endringstype.OPPRETTET,
             ).copy(endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt())
 
-        every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelse)
+        every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
             listOf(AvdoedHarUtvandret, AvdoedHarDNummer)

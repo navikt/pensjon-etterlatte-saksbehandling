@@ -8,12 +8,14 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse as PdlDoedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl as PdlDoedshendelse
 
 enum class DoedshendelseFeatureToggle(private val key: String) : FeatureToggle {
     KanLagreDoedshendelse("pensjon-etterlatte.kan-lage-doedhendelse"),
@@ -34,6 +36,24 @@ class DoedshendelseService(
 
     fun kanBrukeDeodshendelserJob() = featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)
 
+    private fun DoedshendelseInternal.erUlikPdlDoedshendelse(doedshendelse: PdlDoedshendelse): Boolean {
+        return this.endringstype != doedshendelse.endringstype ||
+            this.avdoedDoedsdato != doedshendelse.doedsdato
+    }
+
+    internal fun skalLagreDoedshendelse(
+        avdoedFnr: String,
+        doedshendelse: PdlDoedshendelse,
+    ): Boolean {
+        val doedshendelserForAvdoed = inTransaction { doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) }
+        val hendelseErUlikEksisterende =
+            doedshendelserForAvdoed.filter {
+                it.status !== Status.FERDIG
+            }.any { it.erUlikPdlDoedshendelse(doedshendelse) }
+        return doedshendelserForAvdoed.isEmpty() ||
+            hendelseErUlikEksisterende
+    }
+
     fun opprettDoedshendelseForBeroertePersoner(doedshendelse: PdlDoedshendelse) {
         logger.info("Mottok dødsmelding fra PDL, finner berørte personer og lagrer ned dødsmelding.")
 
@@ -44,25 +64,31 @@ class DoedshendelseService(
             logger.info("Mottok dødshendelse fra PDL for en levende person. Avbryter. Se sikkerlogg for detaljer.")
             return
         }
-
-        val beroerte = finnBeroerteBarn(avdoed)
-        sikkerLogg.info("Fant ${beroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")
-        inTransaction {
-            lagreDoedshendelse(beroerte, avdoed)
+        if (skalLagreDoedshendelse(avdoed.foedselsnummer.verdi.value, doedshendelse)) {
+            val beroerte = finnBeroerteBarn(avdoed)
+            sikkerLogg.info("Fant ${beroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")
+            inTransaction {
+                lagreDoedshendelser(beroerte, avdoed, doedshendelse.endringstype)
+            }
+        } else {
+            logger.info("Lagrer ikke duplikat doedshendelse for person ${avdoed.foedselsnummer.verdi.value.maskerFnr()}")
+            sikkerLogg.info("Mottok dødshendelse for ${avdoed.foedselsnummer}, er duplikat og lagrer det ikke")
         }
     }
 
-    private fun lagreDoedshendelse(
+    private fun lagreDoedshendelser(
         beroerte: List<Person>,
         avdoed: PersonDTO,
+        endringstype: Endringstype,
     ) {
         beroerte.forEach { barn ->
             doedshendelseDao.opprettDoedshendelse(
-                Doedshendelse.nyHendelse(
+                DoedshendelseInternal.nyHendelse(
                     avdoedFnr = avdoed.foedselsnummer.verdi.value,
                     avdoedDoedsdato = avdoed.doedsdato!!.verdi,
                     beroertFnr = barn.foedselsnummer.value,
                     relasjon = Relasjon.BARN,
+                    endringstype = endringstype,
                 ),
             )
         }

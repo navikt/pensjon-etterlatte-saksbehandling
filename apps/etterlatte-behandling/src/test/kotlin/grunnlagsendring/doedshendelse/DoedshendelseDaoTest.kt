@@ -5,11 +5,13 @@ import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.Doedshendelse
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Status
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Utfall
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -27,32 +29,59 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
         doedshendelseDao = DoedshendelseDao(ConnectionAutoclosingTest(dataSource))
     }
 
+    @AfterEach
+    fun afterEach() {
+        dataSource.connection.use {
+            it.prepareStatement("TRUNCATE doedshendelse CASCADE;").execute()
+        }
+    }
+
+    @Test
+    fun `Kan hente doedshendelser for avdoed basert på fnr`() {
+        val avdoedFnr = "12345678902"
+        val doedshendelseInternal =
+            DoedshendelseInternal.nyHendelse(
+                avdoedFnr = avdoedFnr,
+                avdoedDoedsdato = LocalDate.now(),
+                beroertFnr = "12345678901",
+                relasjon = Relasjon.BARN,
+                endringstype = Endringstype.OPPRETTET,
+            )
+
+        doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
+        doedshendelseDao.hentDoedshendelserMedStatus(Status.NY) shouldBe listOf(doedshendelseInternal)
+        doedshendelseDao.hentDoedshendelserMedStatus(Status.OPPDATERT) shouldBe emptyList()
+        doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) shouldBe listOf(doedshendelseInternal)
+    }
+
     @Test
     fun `Skal opprette ny doedshendelse og hente ut basert paa status`() {
-        val doedshendelse =
-            Doedshendelse.nyHendelse(
+        val doedshendelseInternal =
+            DoedshendelseInternal.nyHendelse(
                 avdoedFnr = "12345678901",
                 avdoedDoedsdato = LocalDate.now(),
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
+                endringstype = Endringstype.OPPRETTET,
             )
 
-        doedshendelseDao.opprettDoedshendelse(doedshendelse)
-        doedshendelseDao.hentDoedshendelserMedStatus(Status.NY) shouldBe listOf(doedshendelse)
+        doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
+        doedshendelseDao.hentDoedshendelserMedStatus(Status.NY) shouldBe listOf(doedshendelseInternal)
         doedshendelseDao.hentDoedshendelserMedStatus(Status.OPPDATERT) shouldBe emptyList()
     }
 
     @Test
     fun `Skal oppdatere avbrutt doedshendelse`() {
-        val doedshendelse =
-            Doedshendelse.nyHendelse(
+        val doedshendelseInternal =
+            DoedshendelseInternal.nyHendelse(
                 avdoedFnr = "12345678901",
                 avdoedDoedsdato = LocalDate.now(),
                 beroertFnr = "12345678901",
                 relasjon = Relasjon.BARN,
+                endringstype = Endringstype.OPPRETTET,
             )
-        doedshendelseDao.opprettDoedshendelse(doedshendelse)
-        val avbruttHendelse = doedshendelse.tilAvbrutt(5L)
+        doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
+        val avbruttHendelse = doedshendelseInternal.tilAvbrutt(5L)
 
         doedshendelseDao.oppdaterDoedshendelse(avbruttHendelse)
 

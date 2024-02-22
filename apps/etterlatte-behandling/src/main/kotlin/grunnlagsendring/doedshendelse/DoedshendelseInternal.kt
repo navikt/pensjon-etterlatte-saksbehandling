@@ -1,10 +1,11 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
 import java.util.UUID
 
-data class Doedshendelse internal constructor(
+data class DoedshendelseInternal internal constructor(
     val id: UUID = UUID.randomUUID(),
     val avdoedFnr: String,
     val avdoedDoedsdato: LocalDate,
@@ -13,6 +14,7 @@ data class Doedshendelse internal constructor(
     val opprettet: Tidspunkt,
     val endret: Tidspunkt,
     val status: Status,
+    val endringstype: Endringstype? = null,
     val utfall: Utfall? = null,
     val oppgaveId: UUID? = null,
     val brevId: Long? = null,
@@ -24,18 +26,20 @@ data class Doedshendelse internal constructor(
             avdoedDoedsdato: LocalDate,
             beroertFnr: String,
             relasjon: Relasjon,
-        ) = Doedshendelse(
+            endringstype: Endringstype,
+        ) = DoedshendelseInternal(
             avdoedFnr = avdoedFnr,
             avdoedDoedsdato = avdoedDoedsdato,
             beroertFnr = beroertFnr,
             relasjon = relasjon,
             status = Status.NY,
+            endringstype = endringstype,
             opprettet = Tidspunkt.now(),
             endret = Tidspunkt.now(),
         )
     }
 
-    fun tilAvbrutt(sakId: Long? = null): Doedshendelse {
+    fun tilAvbrutt(sakId: Long? = null): DoedshendelseInternal {
         return copy(
             sakId = sakId,
             status = Status.FERDIG,

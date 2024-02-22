@@ -1,23 +1,30 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
-import io.mockk.coVerify
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.verify
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseKontekst
+import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.personOpplysning
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.sql.Connection
 import java.time.LocalDate
 import java.util.UUID
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class DoedshendelseServiceTest {
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val dao = mockk<DoedshendelseDao>()
@@ -46,13 +53,32 @@ internal class DoedshendelseServiceTest {
                 ),
         )
 
+    @BeforeAll
+    fun beforeAll() {
+        Kontekst.set(
+            Context(
+                mockk(),
+                object : DatabaseKontekst {
+                    override fun activeTx(): Connection {
+                        throw IllegalArgumentException()
+                    }
+
+                    override fun <T> inTransaction(block: () -> T): T {
+                        return block()
+                    }
+                },
+            ),
+        )
+    }
+
     @Test
     fun `Skal oppdatere doedshendelse med barna som kan ha rett paa barnepensjon ved doedsfall`() {
         every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
         every { dao.opprettDoedshendelse(any()) } just runs
+        every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
 
         service.opprettDoedshendelseForBeroertePersoner(
-            Doedshendelse(
+            DoedshendelsePdl(
                 UUID.randomUUID().toString(),
                 Endringstype.OPPRETTET,
                 fnr = avdoed.foedselsnummer.verdi.value,
@@ -60,9 +86,101 @@ internal class DoedshendelseServiceTest {
             ),
         )
 
-        coVerify(exactly = 3) {
+        verify(exactly = 3) {
             dao.opprettDoedshendelse(any())
         }
+    }
+
+    @Test
+    fun `Skal ikke lagre ned duplikat hendelse`() {
+        every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
+        every { dao.opprettDoedshendelse(any()) } just runs
+        every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
+
+        val doedshendelseOpprettet =
+            DoedshendelsePdl(
+                UUID.randomUUID().toString(),
+                Endringstype.OPPRETTET,
+                fnr = avdoed.foedselsnummer.verdi.value,
+                doedsdato = avdoed.doedsdato!!.verdi,
+            )
+        service.opprettDoedshendelseForBeroertePersoner(
+            doedshendelseOpprettet,
+        )
+
+        every { dao.hentDoedshendelserForPerson(any()) } returns
+            listOf(
+                DoedshendelseInternal.nyHendelse(
+                    doedshendelseOpprettet.fnr,
+                    avdoedDoedsdato = avdoed.doedsdato!!.verdi,
+                    beroertFnr = SOEKER_FOEDSELSNUMMER.value,
+                    relasjon = Relasjon.BARN,
+                    Endringstype.OPPRETTET,
+                ),
+            )
+
+        val duplikatPdlDoedshendelse =
+            DoedshendelsePdl(
+                UUID.randomUUID().toString(),
+                Endringstype.OPPRETTET,
+                fnr = avdoed.foedselsnummer.verdi.value,
+                doedsdato = avdoed.doedsdato!!.verdi,
+            )
+        service.opprettDoedshendelseForBeroertePersoner(
+            duplikatPdlDoedshendelse,
+        )
+
+        verify(exactly = 3) {
+            dao.opprettDoedshendelse(any())
+        }
+        verify(exactly = 2) { dao.hentDoedshendelserForPerson(any()) }
+        confirmVerified(dao)
+    }
+
+    @Test
+    fun `Skal ikke lagre ned endret hendelse`() {
+        every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
+        every { dao.opprettDoedshendelse(any()) } just runs
+        every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
+
+        val doedshendelseOpprettet =
+            DoedshendelsePdl(
+                UUID.randomUUID().toString(),
+                Endringstype.OPPRETTET,
+                fnr = avdoed.foedselsnummer.verdi.value,
+                doedsdato = avdoed.doedsdato!!.verdi,
+            )
+        service.opprettDoedshendelseForBeroertePersoner(
+            doedshendelseOpprettet,
+        )
+
+        every { dao.hentDoedshendelserForPerson(any()) } returns
+            listOf(
+                DoedshendelseInternal.nyHendelse(
+                    doedshendelseOpprettet.fnr,
+                    avdoedDoedsdato = avdoed.doedsdato!!.verdi,
+                    beroertFnr = SOEKER_FOEDSELSNUMMER.value,
+                    relasjon = Relasjon.BARN,
+                    Endringstype.OPPRETTET,
+                ),
+            )
+
+        val duplikatPdlDoedshendelse =
+            DoedshendelsePdl(
+                UUID.randomUUID().toString(),
+                Endringstype.KORRIGERT,
+                fnr = avdoed.foedselsnummer.verdi.value,
+                doedsdato = avdoed.doedsdato!!.verdi,
+            )
+        service.opprettDoedshendelseForBeroertePersoner(
+            duplikatPdlDoedshendelse,
+        )
+
+        verify(exactly = 6) {
+            dao.opprettDoedshendelse(any())
+        }
+        verify(exactly = 2) { dao.hentDoedshendelserForPerson(any()) }
+        confirmVerified(dao)
     }
 
     @Test
@@ -72,7 +190,7 @@ internal class DoedshendelseServiceTest {
         every { dao.opprettDoedshendelse(any()) } just runs
 
         service.opprettDoedshendelseForBeroertePersoner(
-            Doedshendelse(
+            DoedshendelsePdl(
                 UUID.randomUUID().toString(),
                 Endringstype.OPPRETTET,
                 fnr = avdoed.foedselsnummer.verdi.value,
@@ -80,7 +198,7 @@ internal class DoedshendelseServiceTest {
             ),
         )
 
-        coVerify(exactly = 0) {
+        verify(exactly = 0) {
             dao.opprettDoedshendelse(any())
         }
     }

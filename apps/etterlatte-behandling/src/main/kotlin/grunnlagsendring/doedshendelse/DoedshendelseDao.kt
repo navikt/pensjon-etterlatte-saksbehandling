@@ -3,6 +3,7 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 import no.nav.etterlatte.behandling.hendelse.setLong
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
+import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.toList
@@ -28,29 +29,30 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
         }
     }
 
-    fun opprettDoedshendelse(doedshendelse: Doedshendelse) {
+    fun opprettDoedshendelse(doedshendelseInternal: DoedshendelseInternal) {
         connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
-                    INSERT INTO doedshendelse (id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO doedshendelse (id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, endringstype)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                 ).apply {
-                    setString(1, doedshendelse.id.toString())
-                    setString(2, doedshendelse.avdoedFnr)
-                    setDate(3, java.sql.Date.valueOf(doedshendelse.avdoedDoedsdato))
-                    setString(4, doedshendelse.beroertFnr)
-                    setString(5, doedshendelse.relasjon.name)
-                    setTidspunkt(6, doedshendelse.opprettet)
-                    setTidspunkt(7, doedshendelse.endret)
-                    setString(8, doedshendelse.status.name)
+                    setString(1, doedshendelseInternal.id.toString())
+                    setString(2, doedshendelseInternal.avdoedFnr)
+                    setDate(3, java.sql.Date.valueOf(doedshendelseInternal.avdoedDoedsdato))
+                    setString(4, doedshendelseInternal.beroertFnr)
+                    setString(5, doedshendelseInternal.relasjon.name)
+                    setTidspunkt(6, doedshendelseInternal.opprettet)
+                    setTidspunkt(7, doedshendelseInternal.endret)
+                    setString(8, doedshendelseInternal.status.name)
+                    setString(9, doedshendelseInternal.endringstype?.name)
                 }.executeUpdate()
             }
         }
     }
 
-    fun oppdaterDoedshendelse(doedshendelse: Doedshendelse) {
+    fun oppdaterDoedshendelse(doedshendelseInternal: DoedshendelseInternal) {
         connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
@@ -60,22 +62,22 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                     WHERE id = ?
                     """.trimIndent(),
                 ).apply {
-                    setLong(1, doedshendelse.sakId)
-                    setString(2, doedshendelse.status.name)
-                    setString(3, doedshendelse.utfall?.name)
-                    setTidspunkt(4, doedshendelse.endret)
-                    setString(5, doedshendelse.id.toString())
+                    setLong(1, doedshendelseInternal.sakId)
+                    setString(2, doedshendelseInternal.status.name)
+                    setString(3, doedshendelseInternal.utfall?.name)
+                    setTidspunkt(4, doedshendelseInternal.endret)
+                    setString(5, doedshendelseInternal.id.toString())
                 }.executeUpdate()
             }
         }
     }
 
-    fun hentDoedshendelserMedStatus(status: Status): List<Doedshendelse> {
+    fun hentDoedshendelserMedStatus(status: Status): List<DoedshendelseInternal> {
         return connectionAutoclosing.hentConnection {
             with(it) {
                 prepareStatement(
                     """
-                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id
+                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype
                     FROM doedshendelse
                     WHERE status = ?
                     """.trimIndent(),
@@ -85,10 +87,26 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
             }
         }
     }
+
+    fun hentDoedshendelserForPerson(avdoedFnr: String): List<DoedshendelseInternal> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                prepareStatement(
+                    """
+                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype
+                    FROM doedshendelse
+                    WHERE avdoed_fnr = ?
+                    """.trimIndent(),
+                ).apply {
+                    setString(1, avdoedFnr)
+                }.executeQuery().toList { asDoedshendelse() }
+            }
+        }
+    }
 }
 
-private fun ResultSet.asDoedshendelse(): Doedshendelse =
-    Doedshendelse(
+private fun ResultSet.asDoedshendelse(): DoedshendelseInternal =
+    DoedshendelseInternal(
         id = getString("id").toUUID(),
         avdoedFnr = getString("avdoed_fnr"),
         avdoedDoedsdato = getDate("avdoed_doedsdato").toLocalDate(),
@@ -101,4 +119,5 @@ private fun ResultSet.asDoedshendelse(): Doedshendelse =
         oppgaveId = getString("oppgave_id")?.toUUID(),
         brevId = getString("brev_id")?.toLong(),
         sakId = getString("sak_id")?.toLong(),
+        endringstype = getString("endringstype")?.let { Endringstype.valueOf(it) },
     )

@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.brevbaker
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Brevtype.INFORMASJON
 import no.nav.etterlatte.brev.model.Brevtype.MANUELT
+import no.nav.etterlatte.brev.model.Brevtype.NOTAT
 import no.nav.etterlatte.brev.model.Brevtype.VARSEL
 import no.nav.etterlatte.brev.model.Brevtype.VEDLEGG
 import no.nav.etterlatte.brev.model.Brevtype.VEDTAK
@@ -27,6 +28,7 @@ enum class EtterlatteBrevKode(val brevtype: Brevtype, val tittel: String? = null
     BARNEPENSJON_VEDLEGG_FORHAANDSVARSEL_UTFALL(VEDLEGG, "Utfall ved forhåndsvarsel av feilutbetaling"),
     BARNEPENSJON_INFORMASJON_DOEDSFALL(INFORMASJON, "Informasjon om barnepensjon"),
 
+    OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL(INFORMASJON, "Informasjon om omstillingsstønad"),
     OMSTILLINGSSTOENAD_AVSLAG(VEDTAK, "Vedtak om avslått omstillingsstønad"),
     OMSTILLINGSSTOENAD_AVSLAG_UTFALL(VEDTAK, "Vedtak om avslått omstillingsstønad"),
     OMSTILLINGSSTOENAD_INNVILGELSE(VEDTAK, "Vedtak om innvilget omstillingsstønad"),
@@ -49,4 +51,6 @@ enum class EtterlatteBrevKode(val brevtype: Brevtype, val tittel: String? = null
     TOM_MAL_INFORMASJONSBREV(INFORMASJON, "Informasjonsbrev"),
     TOM_MAL(MANUELT),
     UTSATT_KLAGEFRIST(INFORMASJON, "Informasjon om barnepensjon fra 1. januar 2024"),
+
+    KLAGE_OVERSENDELSE(NOTAT, "Oversendelse til KA"),
 }

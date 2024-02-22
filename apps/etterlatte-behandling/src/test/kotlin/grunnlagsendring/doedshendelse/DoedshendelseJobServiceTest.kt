@@ -6,6 +6,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
+import no.nav.etterlatte.Self
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedHarDNummer
@@ -20,6 +23,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DoedshendelseJobServiceTest {
@@ -30,9 +34,17 @@ class DoedshendelseJobServiceTest {
             every { isEnabled(any(), any()) } returns true
         }
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
+    private val dataSource = mockk<DataSource>()
+    private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource))
     private val todagergammel = 2
     private val service =
-        DoedshendelseJobService(dao, kontrollpunktService, toggle, grunnlagsendringshendelseService, todagergammel)
+        DoedshendelseJobService(
+            dao,
+            kontrollpunktService,
+            toggle,
+            grunnlagsendringshendelseService,
+            todagergammel,
+        )
 
     @AfterEach
     fun afterEach() {
@@ -60,7 +72,7 @@ class DoedshendelseJobServiceTest {
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
         every { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) } returns emptyList()
 
-        service.run()
+        service.setupKontekstAndRun(kontekst)
 
         verify(exactly = 1) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
     }
@@ -80,7 +92,7 @@ class DoedshendelseJobServiceTest {
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns listOf(AvdoedLeverIPDL)
         val doedshendelseCapture = slot<Doedshendelse>()
 
-        service.run()
+        service.setupKontekstAndRun(kontekst)
 
         verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
         verify(exactly = 0) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
@@ -104,7 +116,7 @@ class DoedshendelseJobServiceTest {
             listOf(AvdoedHarUtvandret, AvdoedHarDNummer)
         every { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) } returns emptyList()
 
-        service.run()
+        service.setupKontekstAndRun(kontekst)
 
         verify(exactly = 0) { dao.oppdaterDoedshendelse(any()) }
         verify(exactly = 1) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }

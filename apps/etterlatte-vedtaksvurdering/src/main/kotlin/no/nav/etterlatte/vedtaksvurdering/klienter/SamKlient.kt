@@ -12,6 +12,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
@@ -78,10 +79,10 @@ class SamKlientImpl(
                     parameter("vedtakId", "${vedtak.id}")
                 }
 
-            if (response.status.isSuccess()) {
-                return response.body<List<Samordningsvedtak>>()
-            } else {
-                throw ResponseException(response, "Kunne ikke hente samordningsdata")
+            return when (response.status) {
+                HttpStatusCode.OK -> response.body<List<Samordningsvedtak>>()
+                HttpStatusCode.NoContent -> emptyList()
+                else -> throw ResponseException(response, "Kunne ikke hente samordningsdata")
             }
         } catch (e: Exception) {
             throw SamordneVedtakGenerellException("Kunne ikke hente samordningsdata", e)

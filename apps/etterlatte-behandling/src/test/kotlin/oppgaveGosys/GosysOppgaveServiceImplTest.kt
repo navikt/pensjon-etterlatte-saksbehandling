@@ -75,7 +75,7 @@ class GosysOppgaveServiceImplTest {
     @BeforeEach
     fun beforeEach() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.enheter() } returns Enheter.enheterMedLesetilgang().toList()
 
         setNewKontekstWithMockUser(saksbehandler)
 
@@ -85,7 +85,7 @@ class GosysOppgaveServiceImplTest {
     @Test
     fun `skal hente oppgaver og deretter folkeregisterIdent for unike identer`() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.enheter() } returns Enheter.enheterMedLesetilgang().toList()
         every { saksbehandler.name() } returns "ident"
 
         setNewKontekstWithMockUser(saksbehandler)

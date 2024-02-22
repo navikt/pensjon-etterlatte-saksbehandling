@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling
 
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
@@ -38,7 +37,7 @@ class GyldighetsproevingServiceImpl(
     private val logger = LoggerFactory.getLogger(GyldighetsproevingServiceImpl::class.java)
 
     internal fun hentFoerstegangsbehandling(id: UUID): Foerstegangsbehandling? =
-        (behandlingDao.hentBehandling(id) as? Foerstegangsbehandling)?.sjekkEnhet()
+        (behandlingDao.hentBehandling(id) as? Foerstegangsbehandling)
 
     override fun lagreGyldighetsproeving(
         behandlingId: UUID,
@@ -92,11 +91,4 @@ class GyldighetsproevingServiceImpl(
                 logger.info("behandling ${it.id} i sak: ${it.sak.id} er gyldighetsprøvd. Saktype: ${it.sak.sakType}")
             }
     }
-
-    private fun Foerstegangsbehandling?.sjekkEnhet() =
-        this?.let { behandling ->
-            listOf(behandling).filterBehandlingerForEnheter(
-                Kontekst.get().AppUser,
-            ).firstOrNull()
-        }
 }

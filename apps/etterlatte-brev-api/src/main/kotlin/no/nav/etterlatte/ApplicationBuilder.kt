@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.MigreringBrevDataService
+import no.nav.etterlatte.brev.NotatService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.PDFService
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
@@ -44,6 +45,7 @@ import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
+import no.nav.etterlatte.brev.notatRoute
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
@@ -208,6 +210,8 @@ class ApplicationBuilder {
             SafKlient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE")),
         )
 
+    private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagKlient, dokarkivKlient)
+
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
     private val rapidsConnection: RapidsConnection =
@@ -218,6 +222,7 @@ class ApplicationBuilder {
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
                     dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)
+                    notatRoute(notatService, tilgangssjekker)
                 }
             }
             .build()

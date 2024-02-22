@@ -12,7 +12,13 @@ import {
   leggFilterILocalStorage,
 } from '~components/oppgavebenk/oppgaveFiltrering/filterLocalStorage'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentGosysOppgaver, hentOppgaverMedStatus, OppgaveDTO, saksbehandlereIEnhetApi } from '~shared/api/oppgaver'
+import {
+  hentGosysOppgaver,
+  hentOppgaverMedStatus,
+  OppgaveDTO,
+  OppgaveSaksbehandler,
+  saksbehandlereIEnhetApi,
+} from '~shared/api/oppgaver'
 import { isSuccess } from '~shared/api/apiUtils'
 import {
   finnOgOppdaterSaksbehandlerTildeling,
@@ -85,19 +91,19 @@ export const ToggleMinOppgaveliste = () => {
   }
 
   const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
-    return oppgaver.filter((o) => o.saksbehandlerIdent === innloggetSaksbehandler.ident)
+    return oppgaver.filter((o) => o.saksbehandler?.ident === innloggetSaksbehandler.ident)
   }
 
   const oppdaterSaksbehandlerTildeling = (
     oppgave: OppgaveDTO,
-    saksbehandler: string | null,
+    saksbehandler: OppgaveSaksbehandler | null,
     versjon: number | null
   ) => {
     setTimeout(() => {
       setOppgavelistaOppgaver(
         finnOgOppdaterSaksbehandlerTildeling(oppgavelistaOppgaver, oppgave.id, saksbehandler, versjon)
       )
-      if (innloggetSaksbehandler.ident === saksbehandler) {
+      if (innloggetSaksbehandler.ident === saksbehandler?.ident) {
         setMinOppgavelisteOppgaver(leggTilOppgavenIMinliste(minOppgavelisteOppgaver, oppgave, saksbehandler, versjon))
       } else {
         setMinOppgavelisteOppgaver(
@@ -118,7 +124,7 @@ export const ToggleMinOppgaveliste = () => {
   }, [location.pathname])
 
   useEffect(() => {
-    leggFilterILocalStorage(oppgavelistaFilter)
+    leggFilterILocalStorage({ ...oppgavelistaFilter, fnrFilter: '' })
   }, [oppgavelistaFilter])
 
   useEffect(() => {
@@ -214,6 +220,7 @@ export const ToggleMinOppgaveliste = () => {
             filter={oppgavelistaFilter}
             setFilter={setOppgavelistaFilter}
             alleOppgaver={oppgavelistaOppgaver}
+            saksbehandlereIEnhet={saksbehandlereIEnheter}
           />
 
           <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult} gosysOppgaver={gosysOppgaverResult}>

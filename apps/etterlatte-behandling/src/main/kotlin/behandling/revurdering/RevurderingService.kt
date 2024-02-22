@@ -10,7 +10,6 @@ import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.domain.sjekkEnhet
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -85,7 +84,7 @@ class RevurderingService(
 ) {
     private val logger = LoggerFactory.getLogger(RevurderingService::class.java)
 
-    fun hentBehandling(id: UUID): Revurdering? = (behandlingDao.hentBehandling(id) as? Revurdering)?.sjekkEnhet()
+    fun hentBehandling(id: UUID): Revurdering? = (behandlingDao.hentBehandling(id) as? Revurdering)
 
     fun hentRevurderingsinfoForSakMedAarsak(
         sakId: Long,
@@ -197,7 +196,7 @@ class RevurderingService(
         fritekstAarsak: String?,
         saksbehandler: Saksbehandler,
     ): Revurdering? =
-        forrigeBehandling.sjekkEnhet()?.let {
+        forrigeBehandling.let {
             val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
 
             opprettRevurdering(
@@ -238,7 +237,8 @@ class RevurderingService(
         }
 
     private fun behandlingErAvTypenRevurderingOgKanEndres(behandlingId: UUID) {
-        val behandling = hentBehandling(behandlingId)
+        val behandling =
+            hentBehandling(behandlingId)
         if (behandling?.type != BehandlingType.REVURDERING) {
             throw UgyldigBehandlingTypeForRevurdering()
         }
@@ -355,7 +355,7 @@ class RevurderingService(
         if (omgjoeringsoppgave.sakId != sakId) {
             throw FeilIOmgjoering.OppgaveOgSakErForskjellig(sakId, omgjoeringsoppgave)
         }
-        if (omgjoeringsoppgave.saksbehandlerIdent != saksbehandler.ident) {
+        if (omgjoeringsoppgave.saksbehandler?.ident != saksbehandler.ident) {
             throw FeilIOmgjoering.SaksbehandlerHarIkkeOppgaven(saksbehandler, omgjoeringsoppgave)
         }
 
@@ -435,7 +435,7 @@ sealed class FeilIOmgjoering {
         UgyldigForespoerselException(
             "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
             "Saksbehandler med ident=${saksbehandler.ident} er ikke saksbehandler i oppgaven med " +
-                "id=$omgjoeringsoppgave (saksbehandler i oppgaven er ${omgjoeringsoppgave.saksbehandlerIdent}).",
+                "id=$omgjoeringsoppgave (saksbehandler i oppgaven er ${omgjoeringsoppgave.saksbehandler?.ident}).",
         )
 
     class ManglerBehandlingForOmgjoering(klage: Klage) : InternfeilException(

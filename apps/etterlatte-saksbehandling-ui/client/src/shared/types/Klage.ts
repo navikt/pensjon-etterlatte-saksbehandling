@@ -165,6 +165,8 @@ export type KlageUtfall =
   | {
       utfall: 'AVVIST'
       saksbehandler: KildeSaksbehandler
+      vedtak: KlageVedtakAvvisning
+      brev: KlageBrevAvvisning
     }
   | {
       utfall: 'AVVIST_MED_OMGJOERING'
@@ -210,6 +212,14 @@ export const teksterAarsakTilAvslutting: Record<AarsakTilAvslutting, string> = {
 
 interface KlageBrevInnstilling {
   brevId: number
+}
+
+interface KlageBrevAvvisning {
+  brevId: number
+}
+
+interface KlageVedtakAvvisning {
+  vedtakId: number
 }
 
 export interface InnstillingTilKabal {

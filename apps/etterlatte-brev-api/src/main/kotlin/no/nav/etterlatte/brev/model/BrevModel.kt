@@ -179,4 +179,5 @@ enum class Brevtype {
     OPPLASTET_PDF,
     MANUELT,
     VEDLEGG,
+    NOTAT,
 }

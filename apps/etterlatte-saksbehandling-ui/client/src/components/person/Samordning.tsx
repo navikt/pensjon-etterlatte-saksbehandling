@@ -3,7 +3,7 @@ import { BodyShort, Heading, Label, Link, Modal, Table } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentSamordningsdata } from '~shared/api/vedtaksvurdering'
 import { Samordningsvedtak } from '~components/vedtak/typer'
-import { isPending } from '~shared/api/apiUtils'
+import { isPending, isSuccess } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import styled from 'styled-components'
@@ -113,6 +113,8 @@ export const SamordningModal = ({ behandlingId }: { behandlingId: string }) => {
                 </Table>
               </div>
             ))}
+
+          {isSuccess(hentet) && samordningsdata?.length === 0 && <BodyShort>Ingen data.</BodyShort>}
         </Modal.Body>
       </Modal>
     </>

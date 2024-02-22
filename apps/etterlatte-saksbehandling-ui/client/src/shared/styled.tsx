@@ -79,3 +79,9 @@ export const FlexRow = styled.div<{
       margin-bottom: 1rem;
     `}
 `
+
+export const SpaceChildren = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`

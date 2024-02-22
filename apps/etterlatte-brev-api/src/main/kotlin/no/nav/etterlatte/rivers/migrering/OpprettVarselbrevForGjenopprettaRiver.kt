@@ -57,7 +57,11 @@ internal class OpprettVarselbrevForGjenopprettaRiver(
         runBlocking {
             opprettOgSendUtBrev(sakId, behandlingId, brukerTokenInfo)
             retryOgPakkUt {
-                behandlingKlient.settOppgavePaaVent(packet.oppgaveId, brukerTokenInfo, "Varselbrev er sendt ut")
+                behandlingKlient.settOppgavePaaVent(
+                    packet.oppgaveId,
+                    brukerTokenInfo,
+                    "Automatisk: Varselbrev er sendt ut",
+                )
             }
         }
     }

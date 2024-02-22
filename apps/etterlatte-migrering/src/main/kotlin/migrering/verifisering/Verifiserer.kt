@@ -36,46 +36,44 @@ internal class Verifiserer(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun verifiserRequest(request: MigreringRequest): MigreringRequest {
-        val patchedRequest = gjenlevendeForelderPatcher.patchGjenlevendeHvisIkkeOppgitt(request)
+        val patchedRequestResult = gjenlevendeForelderPatcher.patchGjenlevendeHvisIkkeOppgitt(request)
 
         val feilSomAvbryter = mutableListOf<Exception>()
         val feilSomMedfoererManuell = mutableListOf<Exception>()
 
-        patchedRequest.onFailure { feilen ->
+        patchedRequestResult.onFailure { feilen ->
             feilSomMedfoererManuell.add(PDLException(feilen).also { it.addSuppressed(feilen) })
         }
-        patchedRequest.onSuccess {
-            if (request.enhet.nr == Enheter.STRENGT_FORTROLIG.enhetNr) {
+        patchedRequestResult.onSuccess { patchedRequest ->
+            if (patchedRequest.enhet.nr == Enheter.STRENGT_FORTROLIG.enhetNr) {
                 // Vi kjører strengt fortrolig til sist.
                 feilSomAvbryter.add(StrengtFortroligPesys)
             }
-            val finnesIPdlFeil = pesonerFinnesIPdlEllerSoekerErDoed(it)
+            val finnesIPdlFeil = pesonerFinnesIPdlEllerSoekerErDoed(patchedRequest)
             feilSomAvbryter.addAll(finnesIPdlFeil)
 
-            val soeker = personHenter.hentPerson(PersonRolle.BARN, request.soeker).getOrNull()
+            val soeker = personHenter.hentPerson(PersonRolle.BARN, patchedRequest.soeker).getOrNull()
 
             if (soeker != null) {
                 if (soeker.adressebeskyttelse?.verdi?.erStrengtFortrolig() == true) {
                     // Vi kjører strengt fortrolig til sist. Hvis saker har blitt strengt fortrolig etter opphør avbryter vi.
                     feilSomAvbryter.add(StrengtFortroligPDL)
                 }
-                feilSomMedfoererManuell.addAll(sjekkAtSoekerHarRelevantVerge(request, soeker))
-                if (!request.erUnder18) {
-                    feilSomMedfoererManuell.addAll(sjekkOmSoekerHaddeFlyktningerfordel(request))
-                    feilSomMedfoererManuell.addAll(sjekkAdresseOgUtlandsopphold(request.pesysId.id, soeker, request))
-                    feilSomMedfoererManuell.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(request))
-                    feilSomMedfoererManuell.addAll(sjekkOmForandringIForeldreforhold(request, soeker))
+                feilSomMedfoererManuell.addAll(sjekkAtSoekerHarRelevantVerge(patchedRequest, soeker))
+                if (!patchedRequest.erUnder18) {
+                    feilSomMedfoererManuell.addAll(sjekkOmSoekerHaddeFlyktningerfordel(patchedRequest))
+                    feilSomMedfoererManuell.addAll(sjekkAdresseOgUtlandsopphold(patchedRequest.pesysId.id, soeker, patchedRequest))
+                    feilSomMedfoererManuell.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(patchedRequest, soeker))
+                    feilSomMedfoererManuell.addAll(sjekkOmForandringIForeldreforhold(patchedRequest, soeker))
                     // Trolig unødvendig da ukjente foreldre alltid er utlandsaker
-                    feilSomMedfoererManuell.addAll(sjekkOmUkjentForelder(request))
+                    feilSomMedfoererManuell.addAll(sjekkOmUkjentForelder(patchedRequest))
                 }
             }
+            if (patchedRequest.beregning.meta?.beregningsMetodeType != "FOLKETRYGD") {
+                feilSomMedfoererManuell.add(BeregningsmetodeIkkeNasjonal)
+            }
+            feilSomMedfoererManuell.addAll(verifiserUfoere(patchedRequest))
         }
-
-        if (request.beregning.meta?.beregningsMetodeType != "FOLKETRYGD") {
-            feilSomMedfoererManuell.add(BeregningsmetodeIkkeNasjonal)
-        }
-
-        feilSomMedfoererManuell.addAll(verifiserUfoere(request))
 
         val alleFeil = feilSomAvbryter + feilSomMedfoererManuell
         if (alleFeil.isNotEmpty()) {
@@ -84,7 +82,7 @@ internal class Verifiserer(
                     "Kan ikke migrere. Se sikkerlogg for detaljer",
             )
             repository.lagreFeilkjoering(
-                request.toJson(),
+                patchedRequestResult.getOrNull()?.toJson() ?: request.toJson(),
                 feilendeSteg = Migreringshendelser.VERIFISER.lagEventnameForType(),
                 feil = alleFeil.map { it.message }.toJson(),
                 pesysId = request.pesysId,
@@ -94,7 +92,7 @@ internal class Verifiserer(
                 throw samleExceptions(feilSomAvbryter)
             }
         }
-        return patchedRequest.getOrThrow().copy(
+        return patchedRequestResult.getOrThrow().copy(
             utlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request),
             kanAutomatiskGjenopprettes = feilSomMedfoererManuell.isEmpty(),
         )
@@ -204,10 +202,6 @@ internal class Verifiserer(
             utlandSjekker.add(BrukerManglerAdresse)
         }
 
-        if (adresseland.filter { it.verdi.land != null }.none { erGyldigNaaEllerFramover(it) }) {
-            utlandSjekker.add(BrukerManglerAdresseMedLand)
-        }
-
         person.utland?.verdi?.let { utland ->
             val foedselsdato = person.foedselsdato?.verdi ?: request.soeker.getBirthDate()
             val datoFylte18 = foedselsdato.plusYears(18)
@@ -232,7 +226,10 @@ internal class Verifiserer(
     private fun erGyldigNaaEllerFramover(opplysning: OpplysningDTO<Adresse>) =
         opplysning.verdi.gyldigTilOgMed.let { tilOgMed -> tilOgMed == null || tilOgMed > LocalDateTime.now() }
 
-    private fun sjekkOmSoekerHarFlereAvoedeForeldre(request: MigreringRequest): List<Verifiseringsfeil> {
+    private fun sjekkOmSoekerHarFlereAvoedeForeldre(
+        request: MigreringRequest,
+        soeker: PersonDTO,
+    ): List<Verifiseringsfeil> {
         if (request.avdoedForelder.size > 1) {
             return listOf(SoekerHarFlereAvdoede)
         }
@@ -369,11 +366,6 @@ data object UkjentForelder : Verifiseringsfeil() {
 data object BrukerManglerAdresse : Verifiseringsfeil() {
     override val message: String
         get() = "Bruker mangler adresse i PDL"
-}
-
-data object BrukerManglerAdresseMedLand : Verifiseringsfeil() {
-    override val message: String
-        get() = "Bruker mangler adresse med definert land i PDL"
 }
 
 data object BeregningsmetodeIkkeNasjonal : Verifiseringsfeil() {

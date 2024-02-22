@@ -16,15 +16,17 @@ export interface OppgaveDTO {
   sakType: SakType
   fnr: string | null
   frist: string
-  saksbehandlerIdent: string | null
-
-  //Oppgaveliste spesifikt
-  saksbehandlerNavn: string | null
+  saksbehandler: OppgaveSaksbehandler | null
 
   // GOSYS-spesifikt
   beskrivelse: string | null
   gjelder: string | null
   versjon: number | null
+}
+
+export interface OppgaveSaksbehandler {
+  ident: string
+  navn?: string
 }
 
 export interface NyOppgaveDto {
@@ -51,7 +53,8 @@ export type Oppgavetype =
   | 'JOURNALFOERING'
   | 'GJENOPPRETTING_ALDERSOVERGANG'
 
-export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
+export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean =>
+  ['NY', 'UNDER_BEHANDLING', 'PAA_VENT'].includes(status)
 
 export const hentOppgaverMedStatus = async (args: {
   oppgavestatusFilter: Array<string>

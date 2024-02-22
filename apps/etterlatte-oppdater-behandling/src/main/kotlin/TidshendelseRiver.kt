@@ -11,7 +11,7 @@ import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.DRYRUN
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -25,7 +25,7 @@ import java.time.YearMonth
 class TidshendelseRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
-) : ListenerMedLoggingOgFeilhaandtering() {
+) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
@@ -73,7 +73,7 @@ class TidshendelseRiver(
                         behandlingService.opprettOppgave(
                             sakId,
                             OppgaveType.MANUELT_OPPHOER,
-                            merknad = "Aldersovergang",
+                            merknad = generateMerknad(type),
                             frist = frist,
                         )
                     hendelseData["opprettetOppgaveId"] = oppgaveId
@@ -88,5 +88,17 @@ class TidshendelseRiver(
             packet[HENDELSE_DATA_KEY] = hendelseData
             context.publish(packet.toJson())
         }
+    }
+
+    private fun generateMerknad(type: String): String {
+        val argument =
+            when (type) {
+                "AO_BP20" -> "20"
+                "AO_BP21" -> "21"
+                "AO_OMS67" -> "67"
+                else -> throw IllegalArgumentException("Ikke-støttet type: $type")
+            }
+
+        return "Aldersovergang v/$argument år"
     }
 }

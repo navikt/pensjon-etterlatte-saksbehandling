@@ -134,7 +134,9 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           ),
           () =>
             oppgavenTilBehandlingen ? (
-              <Tekst>{oppgavenTilBehandlingen.saksbehandlerNavn || oppgavenTilBehandlingen.saksbehandlerIdent}</Tekst>
+              <Tekst>
+                {oppgavenTilBehandlingen.saksbehandler?.navn || oppgavenTilBehandlingen.saksbehandler?.ident}
+              </Tekst>
             ) : (
               <Alert size="small" variant="warning">
                 Ingen saksbehandler har tatt denne oppgaven

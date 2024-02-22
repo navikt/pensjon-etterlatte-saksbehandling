@@ -35,6 +35,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
@@ -96,7 +97,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
 
         val actualMessage = inspektoer.message(0)
         assertEquals(BrevHendelseType.JOURNALFOERT.lagEventnameForType(), actualMessage.get(EVENT_NAME_KEY).asText())
-        assertEquals(brev.id, actualMessage.get("brevId").asLong())
+        assertEquals(brev.id, actualMessage.get(BREV_ID_KEY).asLong())
         assertEquals(response.journalpostId, actualMessage.get("journalpostId").asText())
         assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asText())
     }

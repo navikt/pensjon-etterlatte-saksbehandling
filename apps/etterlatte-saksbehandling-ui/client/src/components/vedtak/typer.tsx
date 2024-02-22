@@ -13,7 +13,8 @@ export enum VedtakType {
   OPPHOER = 'OPPHOER',
   AVSLAG = 'AVSLAG',
   ENDRING = 'ENDRING',
-  TILBAKEKREVING = 'TILBAKEKREVING ',
+  TILBAKEKREVING = 'TILBAKEKREVING',
+  AVVIST_KLAGE = 'AVVIST_KLAGE',
 }
 
 export interface Samordningsvedtak {

@@ -41,7 +41,7 @@ class DoedshendelseService(
             this.avdoedDoedsdato != doedshendelse.doedsdato
     }
 
-    internal fun skalLagreDoedshendelse(
+    private fun skalLagreDoedshendelse(
         avdoedFnr: String,
         doedshendelse: PdlDoedshendelse,
     ): Boolean {

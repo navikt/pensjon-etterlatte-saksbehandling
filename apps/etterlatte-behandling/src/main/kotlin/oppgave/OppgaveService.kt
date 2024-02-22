@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -494,6 +495,8 @@ class OppgaveService(
             throw FantIkkeSakException("Fant ikke sakid $sakId")
         }
     }
+
+    fun hentFristGaarUt(request: VentefristGaarUtRequest) = oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde)
 }
 
 class FantIkkeSakException(msg: String) : Exception(msg)

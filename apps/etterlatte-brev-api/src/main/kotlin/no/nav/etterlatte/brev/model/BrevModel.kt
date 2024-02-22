@@ -29,7 +29,19 @@ data class Adresse(
     val poststed: String? = null,
     val landkode: String,
     val land: String,
-)
+) {
+    fun erGyldig(): Boolean {
+        return if (adresseType.isBlank() || landkode.isBlank() || land.isBlank()) {
+            false
+        } else if (adresseType == "NORSKPOSTADRESSE") {
+            !(postnummer.isNullOrBlank() || poststed.isNullOrBlank())
+        } else if (adresseType == "UTENLANDSKPOSTADRESSE") {
+            !adresselinje1.isNullOrBlank()
+        } else {
+            true
+        }
+    }
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Mottaker(
@@ -43,14 +55,8 @@ data class Mottaker(
             false
         } else if ((foedselsnummer == null || foedselsnummer.value.isBlank()) && orgnummer.isNullOrBlank()) {
             false
-        } else if (adresse.landkode.isBlank() || adresse.land.isBlank()) {
-            false
-        } else if (adresse.adresseType == "NORSKPOSTADRESSE") {
-            !(adresse.postnummer.isNullOrBlank() || adresse.poststed.isNullOrBlank())
-        } else if (adresse.adresseType == "UTENLANDSKPOSTADRESSE") {
-            !adresse.adresselinje1.isNullOrBlank()
         } else {
-            true
+            adresse.erGyldig()
         }
     }
 

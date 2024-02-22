@@ -1,6 +1,7 @@
 package no.nav.etterlatte.utbetaling.avstemming
 
 import no.nav.etterlatte.jobs.LoggerInfo
+import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import no.nav.etterlatte.libs.jobs.LeaderElection
 import no.nav.etterlatte.sikkerLogg
@@ -16,11 +17,11 @@ class GrensesnittsavstemmingJob(
     private val starttidspunkt: Date,
     private val periode: Duration,
     private val saktype: Saktype,
-) {
+) : TimerJob {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
 
-    fun schedule(): Timer {
+    override fun schedule(): Timer {
         log.info("$jobbNavn er satt til å starte $starttidspunkt med periode $periode")
 
         return fixedRateCancellableTimer(

@@ -1,8 +1,8 @@
-import { Dokumentliste } from './dokumentliste'
+import { Dokumentliste } from './Dokumentliste'
 import { useEffect } from 'react'
 import { hentDokumenter } from '~shared/api/dokument'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { DokumentlisteLiten } from './dokumentlisteLiten'
+import { DokumentlisteLiten } from './DokumentlisteLiten'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Container } from '~shared/styled'
 

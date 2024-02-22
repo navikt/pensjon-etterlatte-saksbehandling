@@ -1,6 +1,6 @@
 import { Behandlingsoppsummering } from '~components/behandling/attestering/oppsummering/oppsummering'
 import { AttesteringEllerUnderkjenning } from '~components/behandling/attestering/attestering/attesteringEllerUnderkjenning'
-import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
+import { Dokumentoversikt } from '~components/person/dokumenter/Dokumentoversikt'
 import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
 import React, { useEffect, useState } from 'react'
 import { IBeslutning } from '~components/behandling/attestering/types'

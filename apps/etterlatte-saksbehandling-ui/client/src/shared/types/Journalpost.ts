@@ -61,6 +61,7 @@ export interface DokumentVariant {
   filtype?: string
   fysiskDokument?: string
   variantformat?: string
+  saksbehandlerHarTilgang?: boolean
 }
 
 export interface Bruker {

@@ -1,7 +1,7 @@
 import { useKlage } from '~components/klage/useKlage'
 import { BodyShort, Heading, Tag } from '@navikt/ds-react'
 import { Sidebar, SidebarPanel } from '~shared/components/Sidebar'
-import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
+import { Dokumentoversikt } from '~components/person/dokumenter/Dokumentoversikt'
 import { teksterKabalstatus, teksterKlagestatus } from '~shared/types/Klage'
 import { tagColors, TagList } from '~shared/Tags'
 import { formaterSakstype, formaterStringDato } from '~utils/formattering'

@@ -1,6 +1,6 @@
 import { Button, Detail, Heading, Modal, Table } from '@navikt/ds-react'
 import { formaterJournalpostStatus, formaterJournalpostType, formaterStringDato } from '~utils/formattering'
-import DokumentModal from './dokumentModal'
+import DokumentModal from './DokumentModal'
 import Spinner from '~shared/Spinner'
 import { Journalpost, Journalposttype } from '~shared/types/Journalpost'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -55,26 +55,28 @@ export const Dokumentliste = ({ dokumenter }: { dokumenter: Result<Journalpost[]
             ) : (
               <>
                 {dokumentListe.map((dokument, i) => (
-                  <Table.Row key={i} shadeOnHover={false}>
-                    <Table.DataCell>{dokument.journalpostId}</Table.DataCell>
-                    <Table.DataCell>{dokument.tittel}</Table.DataCell>
-                    <Table.DataCell>{dokument.avsenderMottaker.navn || 'Ukjent'}</Table.DataCell>
-                    <Table.DataCell>{formaterStringDato(dokument.datoOpprettet)}</Table.DataCell>
-                    <Table.DataCell>
-                      {dokument?.sak ? `${dokument.sak.fagsaksystem}: ${dokument.sak.fagsakId || '-'}` : '-'}
-                    </Table.DataCell>
-                    <Table.DataCell>{formaterJournalpostStatus(dokument.journalstatus)}</Table.DataCell>
-                    <Table.DataCell>{formaterJournalpostType(dokument.journalposttype)}</Table.DataCell>
-                    <Table.DataCell>
-                      <FlexRow justify="right">
-                        {dokument.journalposttype === Journalposttype.U && (
-                          <UtsendingsinfoModal journalpost={dokument} />
-                        )}
+                  <>
+                    <Table.Row key={i} shadeOnHover={false}>
+                      <Table.DataCell>{dokument.journalpostId}</Table.DataCell>
+                      <Table.DataCell>{dokument.tittel}</Table.DataCell>
+                      <Table.DataCell>{dokument.avsenderMottaker.navn || 'Ukjent'}</Table.DataCell>
+                      <Table.DataCell>{formaterStringDato(dokument.datoOpprettet)}</Table.DataCell>
+                      <Table.DataCell>
+                        {dokument?.sak ? `${dokument.sak.fagsaksystem}: ${dokument.sak.fagsakId || '-'}` : '-'}
+                      </Table.DataCell>
+                      <Table.DataCell>{formaterJournalpostStatus(dokument.journalstatus)}</Table.DataCell>
+                      <Table.DataCell>{formaterJournalpostType(dokument.journalposttype)}</Table.DataCell>
+                      <Table.DataCell>
+                        <FlexRow justify="right">
+                          {dokument.journalposttype === Journalposttype.U && (
+                            <UtsendingsinfoModal journalpost={dokument} />
+                          )}
 
-                        <DokumentModal journalpost={dokument} />
-                      </FlexRow>
-                    </Table.DataCell>
-                  </Table.Row>
+                          <DokumentModal journalpost={dokument} />
+                        </FlexRow>
+                      </Table.DataCell>
+                    </Table.Row>
+                  </>
                 ))}
               </>
             )

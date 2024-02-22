@@ -64,17 +64,13 @@ enum class Revurderingaarsak(
     private val miljoe: KanBrukesIMiljoe,
     val utfall: Utfall,
 ) {
+    // Endring
     NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     SOESKENJUSTERING(SAKTYPE_BP, DevOgProd, IkkeOpphoerSkalSendeBrev),
     REGULERING(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalIkkeSendeBrev),
     INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-
-    // Både opphør og endring
-    EKSPORT(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
-    IMPORT(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
-    ANNEN(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
 
     // Opphør
     ALDERSOVERGANG(SAKTYPE_BP, DevOgProd, OpphoerUtenBrev),
@@ -84,13 +80,18 @@ enum class Revurderingaarsak(
     SIVILSTAND(SAKTYPE_OMS, DevOgProd, OpphoerMedBrev),
     OMGJOERING_AV_FARSKAP(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),
 
+    // Opphør og endring
+    EKSPORT(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    IMPORT(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    ANNEN(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+
     // TODO vurdere disse
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
     SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
-    FENGSELSOPPHOLD(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev),
-    UT_AV_FENGSEL(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev),
 
     // TODO ikke i noe miljø ennå
+    FENGSELSOPPHOLD(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
+    UT_AV_FENGSEL(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
     UTLAND(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
     BARN(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
     ANSVARLIGE_FORELDRE(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),

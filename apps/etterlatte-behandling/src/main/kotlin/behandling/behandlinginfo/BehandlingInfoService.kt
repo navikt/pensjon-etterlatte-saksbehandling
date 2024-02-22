@@ -74,7 +74,11 @@ class BehandlingInfoService(
             when (behandling.sak.sakType) {
                 SakType.BARNEPENSJON -> {
                     if (behandling.revurderingMedOpphoer()) {
-                        behandling.status == BehandlingStatus.VILKAARSVURDERT
+                        behandling.status in
+                            listOf(
+                                BehandlingStatus.VILKAARSVURDERT,
+                                BehandlingStatus.RETURNERT,
+                            )
                     } else {
                         behandling.status in
                             listOf(
@@ -86,7 +90,11 @@ class BehandlingInfoService(
 
                 SakType.OMSTILLINGSSTOENAD ->
                     if (behandling.revurderingMedOpphoer()) {
-                        behandling.status == BehandlingStatus.VILKAARSVURDERT
+                        behandling.status in
+                            listOf(
+                                BehandlingStatus.VILKAARSVURDERT,
+                                BehandlingStatus.RETURNERT,
+                            )
                     } else {
                         behandling.status in
                             listOf(
@@ -162,6 +170,8 @@ class BehandlingInfoService(
         }
     }
 
-    // TODO denne tilnærmingen er ikke bra - men ønsker ikke å bruke infoen i RevurderingAarsak da noen kan være både opphør og endring
+    // TODO ønsker ikke å se på revurderingsårsaker for om det er opphør da dette ikke vil stemme for feks eksport / import / annen
+    //  siden de kan være både opphør og endring. Dersom denne blir kalt etter vilkårsvurderingen kan vi anta at det er opphør, siden alternativet
+    //  ville vært etter beregnet. Det riktige her blir nok å bruke vilkårsvurdering for å se om det er opphør.
     private fun Behandling.revurderingMedOpphoer(): Boolean = revurderingsaarsak() != null && status == BehandlingStatus.VILKAARSVURDERT
 }

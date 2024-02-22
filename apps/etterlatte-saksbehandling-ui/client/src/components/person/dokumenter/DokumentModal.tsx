@@ -1,4 +1,4 @@
-import { Button, Dropdown, Heading, Modal } from '@navikt/ds-react'
+import { Alert, Button, Dropdown, Heading, Modal } from '@navikt/ds-react'
 import { useState } from 'react'
 import { hentDokumentPDF } from '~shared/api/dokument'
 import Spinner from '~shared/Spinner'
@@ -44,7 +44,16 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
               <Dropdown.Menu.GroupedList.Heading>Velg dokument</Dropdown.Menu.GroupedList.Heading>
               <Dropdown.Menu.Divider />
               {dokumenter.map((dok) => (
-                <Dropdown.Menu.GroupedList.Item key={dok.dokumentInfoId} onClick={() => open(dok.dokumentInfoId)}>
+                <Dropdown.Menu.GroupedList.Item
+                  key={dok.dokumentInfoId}
+                  onClick={() => open(dok.dokumentInfoId)}
+                  disabled={!dok.dokumentvarianter[0].saksbehandlerHarTilgang}
+                >
+                  {!dok.dokumentvarianter[0].saksbehandlerHarTilgang && (
+                    <Alert variant="warning" size="small">
+                      Ingen tilgang
+                    </Alert>
+                  )}
                   {dok.tittel}
                 </Dropdown.Menu.GroupedList.Item>
               ))}
@@ -52,9 +61,21 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
           </DropdownMenu>
         </Dropdown>
       ) : dokumenter.length === 1 ? (
-        <Button variant="secondary" size="small" onClick={() => open(dokumenter[0].dokumentInfoId)}>
-          Åpne
-        </Button>
+        <>
+          {!dokumenter[0].dokumentvarianter[0].saksbehandlerHarTilgang && (
+            <Alert variant="warning" size="small">
+              Ingen tilgang
+            </Alert>
+          )}
+          <Button
+            variant="secondary"
+            size="small"
+            onClick={() => open(dokumenter[0].dokumentInfoId)}
+            disabled={!dokumenter[0].dokumentvarianter[0].saksbehandlerHarTilgang}
+          >
+            Åpne
+          </Button>
+        </>
       ) : null}
 
       <DokumentVisningModal open={isOpen} onClose={() => setIsOpen(false)}>

@@ -75,7 +75,11 @@ export const FristHandlinger = (props: {
                 fromDate={generateFromDate()}
                 toDate={generateToDate()}
               />
-              {isSuccess(redigerfristSvar) && <Alert variant="success">Frist er endret</Alert>}
+              {isSuccess(redigerfristSvar) && (
+                <Alert style={{ marginBottom: '1rem' }} variant="success">
+                  Frist er endret
+                </Alert>
+              )}
               {isFailureHandler({
                 apiResult: redigerfristSvar,
                 errorMessage: 'Kunne ikke lagre ny frist',

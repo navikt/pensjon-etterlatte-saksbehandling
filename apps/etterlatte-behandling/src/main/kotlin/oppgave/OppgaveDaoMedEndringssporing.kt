@@ -171,7 +171,9 @@ class OppgaveDaoMedEndringssporingImpl(
         merknad: String,
         oppgaveStatus: Status,
     ) {
-        oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, oppgaveStatus)
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, oppgaveStatus)
+        }
     }
 
     override fun hentFristGaarUt(

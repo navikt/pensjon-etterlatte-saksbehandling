@@ -3,7 +3,6 @@ import { Alert, BodyLong, Heading } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentBrevutfallOgEtterbetalingApi } from '~shared/api/behandling'
-import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { behandlingErRedigerbar } from '~components/behandling/felles/utils'
 import { BrevutfallSkjema } from '~components/behandling/brevutfall/BrevutfallSkjema'
 import { BrevutfallVisning } from '~components/behandling/brevutfall/BrevutfallVisning'
@@ -11,8 +10,7 @@ import Spinner from '~shared/Spinner'
 import { MapApiResult } from '~shared/components/MapApiResult'
 import { SakType } from '~shared/types/sak'
 import { useAppDispatch, useAppSelector } from '~store/Store'
-import { updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
-import { erOpphoer } from '~shared/types/Revurderingaarsak'
+import { IBehandlingReducer, updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 
 export interface BrevutfallOgEtterbetaling {
   etterbetaling?: Etterbetaling | null
@@ -70,9 +68,13 @@ const initialBrevutfallOgEtterbetaling = (saktype: SakType, opphoer: boolean) =>
   }
 }
 
-export const Brevutfall = (props: { behandling: IDetaljertBehandling; resetBrevutfallvalidering: () => void }) => {
+export const Brevutfall = (props: {
+  behandling: IBehandlingReducer
+  erOpphoer: boolean
+  resetBrevutfallvalidering: () => void
+}) => {
   const behandling = props.behandling
-  const behandlingErOpphoer = behandling.revurderingsaarsak != null && erOpphoer(behandling.revurderingsaarsak)
+  const behandlingErOpphoer = props.erOpphoer
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const dispatch = useAppDispatch()
   const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang

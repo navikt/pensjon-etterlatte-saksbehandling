@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.girOpphoer
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.UUID
@@ -163,5 +162,6 @@ class BehandlingInfoService(
         }
     }
 
-    private fun Behandling.revurderingMedOpphoer(): Boolean = revurderingsaarsak()?.let { it.girOpphoer() } ?: false
+    // TODO denne tilnærmingen er ikke bra - men ønsker ikke å bruke infoen i RevurderingAarsak da noen kan være både opphør og endring
+    private fun Behandling.revurderingMedOpphoer(): Boolean = revurderingsaarsak() != null && status == BehandlingStatus.VILKAARSVURDERT
 }

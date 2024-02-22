@@ -71,7 +71,7 @@ enum class Revurderingaarsak(
     INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
 
-    // Både opphør og ikke opphør
+    // Både opphør og endring
     EKSPORT(SAKTYPE_BP_OMS, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
     IMPORT(SAKTYPE_BP_OMS, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
     ANNEN(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),

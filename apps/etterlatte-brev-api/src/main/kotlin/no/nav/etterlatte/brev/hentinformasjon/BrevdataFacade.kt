@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev.hentinformasjon
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
@@ -29,7 +28,6 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregningsperiode
@@ -231,31 +229,13 @@ class BrevdataFacade(
         virkningstidspunkt: YearMonth,
         vedtakType: VedtakType,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Avkortingsinfo? {
-        if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
-
-        val ytelseMedGrunnlag = beregningService.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
-
-        val beregningsperioder =
-            ytelseMedGrunnlag.perioder.map {
-                AvkortetBeregningsperiode(
-                    datoFOM = it.periode.fom.atDay(1),
-                    datoTOM = it.periode.tom?.atEndOfMonth(),
-                    inntekt = Kroner(it.aarsinntekt - it.fratrekkInnAar),
-                    ytelseFoerAvkorting = Kroner(it.ytelseFoerAvkorting),
-                    utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),
-                    trygdetid = it.trygdetid,
-                )
-            }
-
-        val aarsInntekt = ytelseMedGrunnlag.perioder.first().aarsinntekt
-        val grunnbeloep = ytelseMedGrunnlag.perioder.first().grunnbelop
-
-        return Avkortingsinfo(
-            grunnbeloep = Kroner(grunnbeloep),
-            inntekt = Kroner(aarsInntekt),
-            virkningsdato = virkningstidspunkt.atDay(1),
-            beregningsperioder,
+    ): Avkortingsinfo {
+        return beregningService.finnAvkortingsinfo(
+            behandlingId,
+            sakType,
+            virkningstidspunkt,
+            vedtakType,
+            brukerTokenInfo,
         )
     }
 
@@ -266,8 +246,9 @@ class BrevdataFacade(
         vedtakType: VedtakType,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkortingsinfo? {
-        return finnAvkortingsinfo(
-            behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
+        val forrigeIverksatteBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id
+        return beregningService.finnAvkortingsinfoNullable(
+            forrigeIverksatteBehandlingId,
             sakType,
             virkningstidspunkt,
             vedtakType,

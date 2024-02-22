@@ -102,6 +102,8 @@ data class AvkortetBeregningsperiode(
     val ytelseFoerAvkorting: Kroner,
     val trygdetid: Int,
     val utbetaltBeloep: Kroner,
+    val beregningsMetodeAnvendt: BeregningsMetode,
+    val beregningsMetodeFraGrunnlag: BeregningsMetode,
 )
 
 data class Beregningsperiode(

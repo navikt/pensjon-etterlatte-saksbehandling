@@ -33,7 +33,6 @@ data class OmstillingsstoenadInnvilgelse(
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
             generellBrevData: GenerellBrevData,
-            utbetalingsinfo: Utbetalingsinfo,
             avkortingsinfo: Avkortingsinfo,
             etterbetaling: EtterbetalingDTO?,
             trygdetid: Trygdetid,
@@ -71,8 +70,8 @@ data class OmstillingsstoenadInnvilgelse(
                                 beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
                                 prorataBroek = trygdetid.prorataBroek,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
-                                beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
+                                beregningsMetodeFraGrunnlag = avkortingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
+                                beregningsMetodeAnvendt = avkortingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
                             ),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =

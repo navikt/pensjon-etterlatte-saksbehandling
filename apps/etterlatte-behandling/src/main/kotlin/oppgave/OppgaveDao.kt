@@ -1,5 +1,6 @@
 package no.nav.etterlatte.oppgave
 
+import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -12,10 +13,13 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunktOrNull
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
+import java.time.LocalDate
+import java.time.LocalTime
 import java.util.UUID
 
 interface OppgaveDao {
@@ -64,6 +68,12 @@ interface OppgaveDao {
         merknad: String,
         oppgaveStatus: Status,
     )
+
+    fun hentFristGaarUt(
+        dato: LocalDate,
+        type: OppgaveType,
+        kilde: OppgaveKilde,
+    ): List<UUID>
 }
 
 class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : OppgaveDao {
@@ -364,6 +374,34 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
             }
         }
     }
+
+    override fun hentFristGaarUt(
+        dato: LocalDate,
+        type: OppgaveType,
+        kilde: OppgaveKilde,
+    ): List<UUID> =
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT o.id
+                        FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
+                        WHERE o.frist <= ?
+                        and type = ?
+                        and kilde = ?
+                        """.trimIndent(),
+                    )
+                statement.setTidspunkt(1, dato.atTime(LocalTime.NOON).toTidspunkt())
+                statement.setString(2, type.name)
+                statement.setString(3, kilde.name)
+                statement.executeQuery().toList {
+                    getUUID("id")
+                }.also { utgaatte ->
+                    logger.info("Hentet ${utgaatte.size} oppgaver der fristen går ut for dato $dato og type $type")
+                }
+            }
+        }
 
     private fun ResultSet.asOppgave(): OppgaveIntern {
         return OppgaveIntern(

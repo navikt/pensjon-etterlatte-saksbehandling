@@ -121,7 +121,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
                 Varselbrev
               </Heading>
             </HeadingWrapper>
-            <Soeknadsdato mottattDato={soeknadMottattDato} />
+            {soeknadMottattDato && <Soeknadsdato mottattDato={soeknadMottattDato} />}
 
             {varselbrev && (
               <>

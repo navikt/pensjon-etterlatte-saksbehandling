@@ -38,9 +38,11 @@ export const oppdaterFrist = (
   setTimeout(() => {
     const oppdatertOppgaveState = [...hentedeOppgaver]
     const index = oppdatertOppgaveState.findIndex((o) => o.id === id)
-    oppdatertOppgaveState[index].frist = frist
-    oppdatertOppgaveState[index].versjon = versjon
-    setHentedeOppgaver(oppdatertOppgaveState)
+    if (index > -1) {
+      oppdatertOppgaveState[index].frist = frist
+      oppdatertOppgaveState[index].versjon = versjon
+      setHentedeOppgaver(oppdatertOppgaveState)
+    }
   }, 2000)
 }
 

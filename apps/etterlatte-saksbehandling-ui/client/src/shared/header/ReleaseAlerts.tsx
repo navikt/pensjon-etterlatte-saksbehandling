@@ -24,7 +24,7 @@ const hentLesteIder = (): number[] => {
 export const ReleaseAlerts = () => {
   const [status, hentReleases] = useApiCall(hentUtgivelser)
 
-  const [utvigelser, setUtgivelser] = useState<Release[]>([])
+  const [utgivelser, setUtgivelser] = useState<Release[]>([])
   const [antallUlest, setAntallUlest] = useState(0)
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export const ReleaseAlerts = () => {
 
   const open = (isOpen: boolean) => {
     if (isOpen && isSuccess(status)) {
-      const lesteUtgivelser = utvigelser.map((u) => u.id)
+      const lesteUtgivelser = utgivelser.map((u) => u.id)
       lagreLesteIder(lesteUtgivelser)
       setAntallUlest(0)
     }
@@ -62,7 +62,7 @@ export const ReleaseAlerts = () => {
           () => (
             <ApiErrorAlert>Kunne ikke hente siste utgivelser</ApiErrorAlert>
           ),
-          (utgivelser) => (
+          () => (
             <>
               <Heading size="small">Hva er nytt i Gjenny?</Heading>
 

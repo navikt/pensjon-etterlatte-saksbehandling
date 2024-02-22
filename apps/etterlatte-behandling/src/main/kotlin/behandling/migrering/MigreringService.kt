@@ -153,7 +153,7 @@ class MigreringService(
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
                 referanse = request.pesysId.id.toString(),
                 sakId = sak.id,
-                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                oppgaveKilde = OppgaveKilde.GJENOPPRETTING,
                 oppgaveType = OppgaveType.GJENOPPRETTING_ALDERSOVERGANG,
                 merknad =
                     "Opprettelse av manuell behandling for gjenoppretting av opphørt sak i Pesys id=${request.pesysId.id}",

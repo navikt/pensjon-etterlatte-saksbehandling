@@ -191,7 +191,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
                 oppgaveId={oppgaveForBehandling.id}
                 oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
                   oppdaterFrist(
-                    (oppgaveMedNyFrist) => setOppgaveForBehandling(oppgaveMedNyFrist[0]),
+                    () => setOppgaveForBehandling({ ...oppgaveForBehandling, frist: nyfrist }),
                     [oppgaveForBehandling],
                     id,
                     nyfrist,

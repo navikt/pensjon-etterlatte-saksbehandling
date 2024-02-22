@@ -33,6 +33,7 @@ enum class KlageFeatureToggle(private val key: String) : FeatureToggle {
     KanBrukeKlageToggle("pensjon-etterlatte.kan-bruke-klage"),
     KanFerdigstilleKlageToggle("pensjon-etterlatte.kan-ferdigstille-klage"),
     KanOppretteVedtakAvvisningToggle("pensjon-etterlatte.kan-opprette-vedtak-avvist-klage"),
+    StoetterUtfallDelvisOmgjoering("pensjon-etterlatte.klage-delvis-omgjoering"),
     ;
 
     override fun key(): String = key

@@ -8,6 +8,23 @@ import { isPending } from '~shared/api/apiUtils'
 import { updateInitieltUtfall } from '~store/reducers/KlageReducer'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { InitiellVurderingVisningContent } from '~components/klage/vurdering/InitiellVurderingVisning'
+import { VurderingWrapper } from '~components/klage/styled'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+
+const getTextFromutfall = (utfall: Utfall): string => {
+  switch (utfall) {
+    case Utfall.AVVIST:
+      return 'Hvorfor avvises det?'
+    case Utfall.AVVIST_MED_OMGJOERING:
+      return 'Hvorfor avvises det med omgjøring?'
+    case Utfall.OMGJOERING:
+      return 'Hvorfor skal det omgjøres?'
+    case Utfall.DELVIS_OMGJOERING:
+      return 'Hvorfor skal det delvis omgjøres?'
+    case Utfall.STADFESTE_VEDTAK:
+      return 'Hvorfor står vedtaket seg?'
+  }
+}
 
 export const InitiellVurdering = (props: { klage: Klage }) => {
   const klage = props.klage
@@ -24,69 +41,60 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
   const [lagreInitiellStatus, lagreInitiellKlageUtfall] = useApiCall(oppdaterInitieltUtfallForKlage)
   const redigeringsModus = redigerbar || harIkkeInitieltUtfall
 
-  const getTextFromutfall = (utfall: Utfall): string => {
-    switch (utfall) {
-      case Utfall.AVVIST:
-        return 'Hvorfor avvises det?'
-      case Utfall.AVVIST_MED_OMGJOERING:
-        return 'Hvorfor avvises det med omgjøring?'
-      case Utfall.OMGJOERING:
-        return 'Hvorfor skal det omgjøres?'
-      case Utfall.DELVIS_OMGJOERING:
-        return 'Hvorfor skal det delvis omgjøres?'
-      case Utfall.STADFESTE_VEDTAK:
-        return 'Hvorfor står vedtaket seg?'
-    }
-  }
+  const stoetterDelvisOmgjoering = useFeatureEnabledMedDefault('pensjon-etterlatte.klage-delvis-omgjoering', false)
 
   return (
     <>
       <Heading level="2" size="medium">
-        Første vurdering av utfall saksbehandler
+        Første vurdering
       </Heading>
       <>
         {redigeringsModus ? (
           <>
             <RadioGroup legend="" onChange={(e) => setUtfall(e as Utfall)}>
               <Radio value={Utfall.OMGJOERING}>Omgjøring av vedtak</Radio>
-              <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>
+              {stoetterDelvisOmgjoering && <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>}
               <Radio value={Utfall.STADFESTE_VEDTAK}>Stadfeste vedtaket</Radio>
             </RadioGroup>
 
             {utfall && (
               <>
-                <Textarea
-                  size="medium"
-                  label={getTextFromutfall(utfall)}
-                  value={begrunnelse}
-                  onChange={(e) => setBegrunnelse(e.target.value)}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  loading={isPending(lagreInitiellStatus)}
-                  onClick={() => {
-                    const utfallMedBegrunnelse = { utfall: utfall, begrunnelse: begrunnelse }
-                    lagreInitiellKlageUtfall(
-                      {
-                        klageId: klage?.id,
-                        utfallMedBegrunnelse,
-                      },
-                      () => {
-                        dispatch(
-                          updateInitieltUtfall({
-                            utfallMedBegrunnelse: utfallMedBegrunnelse,
-                            saksbehandler: innloggetSaksbehandler.ident,
-                            tidspunkt: Date().toString(),
-                          })
-                        )
-                        setRedigerbar(false)
-                      }
-                    )
-                  }}
-                >
-                  Lagre
-                </Button>
+                <VurderingWrapper>
+                  <Textarea
+                    size="medium"
+                    label={getTextFromutfall(utfall)}
+                    value={begrunnelse}
+                    onChange={(e) => setBegrunnelse(e.target.value)}
+                  />
+                </VurderingWrapper>
+                <VurderingWrapper>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    loading={isPending(lagreInitiellStatus)}
+                    onClick={() => {
+                      const utfallMedBegrunnelse = { utfall: utfall, begrunnelse: begrunnelse }
+                      lagreInitiellKlageUtfall(
+                        {
+                          klageId: klage?.id,
+                          utfallMedBegrunnelse,
+                        },
+                        () => {
+                          dispatch(
+                            updateInitieltUtfall({
+                              utfallMedBegrunnelse: utfallMedBegrunnelse,
+                              saksbehandler: innloggetSaksbehandler.ident,
+                              tidspunkt: Date().toString(),
+                            })
+                          )
+                          setRedigerbar(false)
+                        }
+                      )
+                    }}
+                  >
+                    Lagre
+                  </Button>
+                </VurderingWrapper>
                 {isFailureHandler({
                   apiResult: lagreInitiellStatus,
                   errorMessage:

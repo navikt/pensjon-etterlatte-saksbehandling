@@ -225,6 +225,7 @@ interface KlageVedtakAvvisning {
 export interface InnstillingTilKabal {
   lovhjemmel: LovhjemmelFelles
   internKommentar: string | null
+  innstillingTekst: string
   brev: KlageBrevInnstilling
 }
 

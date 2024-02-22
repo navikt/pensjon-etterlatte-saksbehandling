@@ -6,6 +6,8 @@ import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.KlageKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.FeatureIkkeStoettetException
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
@@ -17,6 +19,7 @@ import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
+import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.KlageVedtak
@@ -101,6 +104,7 @@ class KlageServiceImpl(
     private val klageKlient: KlageKlient,
     private val klageHendelser: IKlageHendelserService,
     private val vedtakKlient: VedtakKlient,
+    private val featureToggleService: FeatureToggleService,
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -176,6 +180,14 @@ class KlageServiceImpl(
         utfall: InitieltUtfallMedBegrunnelseDto,
         saksbehandler: Saksbehandler,
     ): Klage {
+        if (utfall.utfall == KlageUtfall.DELVIS_OMGJOERING &&
+            !featureToggleService.isEnabled(
+                KlageFeatureToggle.StoetterUtfallDelvisOmgjoering,
+                false,
+            )
+        ) {
+            throw FeatureIkkeStoettetException()
+        }
         val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
         val oppdatertKlage = klage.oppdaterIntieltUtfallMedBegrunnelse(utfall, saksbehandler.ident)
         klageDao.lagreKlage(oppdatertKlage)
@@ -187,8 +199,16 @@ class KlageServiceImpl(
         utfall: KlageUtfallUtenBrev,
         saksbehandler: Saksbehandler,
     ): Klage {
-        val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
+        if (utfall is KlageUtfallUtenBrev.DelvisOmgjoering &&
+            !featureToggleService.isEnabled(
+                KlageFeatureToggle.StoetterUtfallDelvisOmgjoering,
+                false,
+            )
+        ) {
+            throw FeatureIkkeStoettetException()
+        }
 
+        val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
         val utfallMedBrev =
             when (utfall) {
                 // Vurder å slette brev hvis det finnes her? Så vi ikke polluter med hengende brev
@@ -205,6 +225,7 @@ class KlageServiceImpl(
                             InnstillingTilKabal(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
                                 internKommentar = utfall.innstilling.internKommentar,
+                                innstillingTekst = utfall.innstilling.innstillingTekst,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
@@ -216,6 +237,7 @@ class KlageServiceImpl(
                             InnstillingTilKabal(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
                                 internKommentar = utfall.innstilling.internKommentar,
+                                innstillingTekst = utfall.innstilling.innstillingTekst,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),

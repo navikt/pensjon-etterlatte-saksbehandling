@@ -53,6 +53,7 @@ internal class KlageServiceTest {
                 klageKlient = mockk(),
                 klageHendelser = klageHendelserServiceMock,
                 vedtakKlient = vedtakKlient,
+                featureToggleService = mockk(),
             )
         every { hendelseDaoMock.klageHendelse(any(), any(), any(), any(), any(), any(), any()) } returns Unit
         every { klageHendelserServiceMock.sendKlageHendelseRapids(any(), any()) } returns Unit

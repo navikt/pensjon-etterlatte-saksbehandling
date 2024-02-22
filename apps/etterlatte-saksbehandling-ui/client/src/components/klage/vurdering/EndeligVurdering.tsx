@@ -1,7 +1,7 @@
 import { Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import React from 'react'
 import { FlexRow } from '~shared/styled'
-import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
+import { BredVurderingWrapper, Feilmelding, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { useKlage } from '~components/klage/useKlage'
 import {
@@ -17,7 +17,7 @@ import {
   teksterKlageutfall,
   Utfall,
 } from '~shared/types/Klage'
-import { Control, Controller, useForm } from 'react-hook-form'
+import { Control, Controller, useForm, UseFormRegister } from 'react-hook-form'
 import { FieldOrNull } from '~shared/types/util'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterUtfallForKlage } from '~shared/api/klage'
@@ -28,6 +28,7 @@ import { SakType } from '~shared/types/sak'
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { forrigeSteg, kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -92,10 +93,12 @@ export function EndeligVurdering(props: { klage: Klage }) {
   const navigate = useNavigate()
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)
   const dispatch = useAppDispatch()
+  const stoetterDelvisOmgjoering = useFeatureEnabledMedDefault('pensjon-etterlatte.klage-delvis-omgjoering', false)
 
   const {
     control,
     handleSubmit,
+    register,
     watch,
     formState: { isDirty },
   } = useForm<FormdataVurdering>({
@@ -127,7 +130,7 @@ export function EndeligVurdering(props: { klage: Klage }) {
   return (
     <>
       <Heading level="2" size="medium">
-        Ta stilling til klagen
+        Endelig vurdering
       </Heading>
 
       <form onSubmit={handleSubmit(sendInnVurdering)}>
@@ -142,7 +145,9 @@ export function EndeligVurdering(props: { klage: Klage }) {
               <>
                 <RadioGroup legend="Velg utfall" {...field}>
                   <Radio value={Utfall.OMGJOERING}> {teksterKlageutfall[Utfall.OMGJOERING]}</Radio>
-                  <Radio value={Utfall.DELVIS_OMGJOERING}>{teksterKlageutfall[Utfall.DELVIS_OMGJOERING]}</Radio>
+                  {stoetterDelvisOmgjoering && (
+                    <Radio value={Utfall.DELVIS_OMGJOERING}>{teksterKlageutfall[Utfall.DELVIS_OMGJOERING]}</Radio>
+                  )}
                   <Radio value={Utfall.STADFESTE_VEDTAK}> {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]}</Radio>
                 </RadioGroup>
                 {fieldState.error ? <Feilmelding>Du må velge et utfall for klagen.</Feilmelding> : null}
@@ -152,11 +157,11 @@ export function EndeligVurdering(props: { klage: Klage }) {
         </VurderingWrapper>
 
         {valgtUtfall === Utfall.STADFESTE_VEDTAK || valgtUtfall === Utfall.DELVIS_OMGJOERING ? (
-          <KlageInnstilling control={control} />
+          <KlageInnstilling control={control} register={register} />
         ) : null}
 
         {valgtUtfall === Utfall.OMGJOERING || valgtUtfall === Utfall.DELVIS_OMGJOERING ? (
-          <KlageOmgjoering control={control} />
+          <KlageOmgjoering control={control} register={register} />
         ) : null}
 
         {isFailureHandler({
@@ -181,8 +186,8 @@ function nesteSteg(valgtUtfall: Utfall | null, klageId: string) {
   return kanSeBrev(valgtUtfall) ? `/klage/${klageId}/brev` : `/klage/${klageId}/oppsummering`
 }
 
-function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) {
-  const { control } = props
+function KlageOmgjoering(props: { control: Control<FormdataVurdering>; register: UseFormRegister<FormdataVurdering> }) {
+  const { control, register } = props
 
   return (
     <>
@@ -217,32 +222,26 @@ function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) {
         />
       </VurderingWrapper>
 
-      <VurderingWrapper>
-        <Controller
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
-          name="omgjoering.begrunnelse"
-          control={control}
-          render={({ field, fieldState }) => {
-            const { value, ...rest } = field
-            return (
-              <>
-                <Textarea label="Begrunnelse" value={value ?? ''} {...rest} />
-
-                {fieldState.error ? <Feilmelding>Du må gi en begrunnelse for omgjøringen.</Feilmelding> : null}
-              </>
-            )
-          }}
+      <BredVurderingWrapper>
+        <Textarea
+          {...register('omgjoering.begrunnelse', {
+            required: {
+              value: true,
+              message: 'Du må gi en begrunnelse for omgjøringen',
+            },
+          })}
+          label="Begrunnelse"
         />
-      </VurderingWrapper>
+      </BredVurderingWrapper>
     </>
   )
 }
 
-function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
-  const { control } = props
+function KlageInnstilling(props: {
+  control: Control<FormdataVurdering>
+  register: UseFormRegister<FormdataVurdering>
+}) {
+  const { control, register } = props
 
   const klage = useKlage()
   const aktuelleHjemler = klage?.sak.sakType === SakType.BARNEPENSJON ? LOVHJEMLER_BP : LOVHJEMLER_OMS
@@ -269,7 +268,7 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
                   label="Hjemmel"
                   value={value ?? ''}
                   {...rest}
-                  description="Angi hvilken hjemmel klagen hovedsakelig knytter seg til"
+                  description="Velg hvilken hjemmel klagen knytter seg til"
                 >
                   <option value="">Velg hjemmel</option>
                   {aktuelleHjemler.map((hjemmel) => (
@@ -287,20 +286,26 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
         />
       </VurderingWrapper>
 
-      <VurderingWrapper>
-        <Controller
-          name="innstilling.internKommentar"
-          control={control}
-          render={({ field }) => {
-            const { value, ...rest } = field
-            return (
-              <>
-                <Textarea label="Intern kommentar til KA" value={value ?? ''} {...rest} />
-              </>
-            )
-          }}
+      <BredVurderingWrapper>
+        <Textarea
+          {...register('innstilling.innstillingTekst', {
+            required: {
+              value: true,
+              message: 'Du må skrive en innstillingstekst som begrunner hvorfor klagen står seg.',
+            },
+          })}
+          label="Innstilling"
+          description="Innstillingen blir med i brev til klager og til KA"
         />
-      </VurderingWrapper>
+      </BredVurderingWrapper>
+
+      <BredVurderingWrapper>
+        <Textarea
+          {...register('innstilling.internKommentar')}
+          label="Intern kommentar til KA"
+          description="Kommentaren blir ikke synlig for bruker"
+        />
+      </BredVurderingWrapper>
     </>
   )
 }

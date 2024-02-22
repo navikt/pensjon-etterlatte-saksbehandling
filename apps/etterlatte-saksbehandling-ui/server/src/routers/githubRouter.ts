@@ -25,11 +25,16 @@ githubRouter.get('/releases', async (_: Request, res: Response) => {
       `https://api.github.com/repos/navikt/pensjon-etterlatte-saksbehandling/releases?per_page=10`
     ).then((response) => response.json())
 
-    const releases = data.map(({ id, name, published_at, body }) => ({ id, name, published_at, body }))
+    if (Array.isArray(data)) {
+      const releases = data.map(({ id, name, published_at, body }) => ({ id, name, published_at, body }))
 
-    if (releases.length) cache.set(RELEASE_CACHE_KEY, releases)
+      if (releases.length) cache.set(RELEASE_CACHE_KEY, releases)
 
-    return res.json(releases)
+      return res.json(releases)
+    } else {
+      logger.warn(`Respons fra GH releases er ikke en array: ${data}`)
+      return res.json([])
+    }
   } catch (e) {
     logger.error('Feil oppsto ved henting av releases fra Github: ', e)
     return res.sendStatus(500)

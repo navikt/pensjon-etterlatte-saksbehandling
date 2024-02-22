@@ -46,12 +46,19 @@ const Virkningstidspunkt = (props: {
   )
 
   const [errorTekst, setErrorTekst] = useState<string>('')
+  function getSoeknadMottattDato() {
+    return erBosattUtland
+      ? subYears(new Date(), 20)
+      : behandling.soeknadMottattDato
+        ? new Date(behandling.soeknadMottattDato)
+        : new Date(2024, 0, 1)
+    // For saker migrert fra Pesys har vi ikke tatt med søknad mottatt-dato
+    // Disse kan ha tidligste virkningstidspunkt i Gjenny 1.1.24, altså da etterlattereformen tredde i kraft
+    // Denne siste fallbacken er altså tenkt for disse sakene
+  }
 
   const { monthpickerProps, inputProps } = useMonthpicker({
-    fromDate: hentMinimumsVirkningstidspunkt(
-      avdoede?.opplysning?.doedsdato,
-      erBosattUtland ? subYears(new Date(), 20) : new Date(behandling.soeknadMottattDato)
-    ),
+    fromDate: hentMinimumsVirkningstidspunkt(avdoede?.opplysning?.doedsdato, getSoeknadMottattDato()),
     toDate: addMonths(new Date(), 4),
     onMonthChange: (date: Date) => setVirkningstidspunkt(date),
     inputFormat: 'dd.MM.yyyy',

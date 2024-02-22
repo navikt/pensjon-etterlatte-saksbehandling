@@ -157,7 +157,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 Vedtaksbrev
               </Heading>
             </HeadingWrapper>
-            <Soeknadsdato mottattDato={soeknadMottattDato} />
+            {soeknadMottattDato && <Soeknadsdato mottattDato={soeknadMottattDato} />}
 
             <br />
             {behandling?.status === IBehandlingStatus.FATTET_VEDTAK && (

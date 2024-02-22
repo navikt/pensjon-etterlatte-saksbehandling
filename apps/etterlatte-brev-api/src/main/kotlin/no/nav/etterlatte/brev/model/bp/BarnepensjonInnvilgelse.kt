@@ -121,6 +121,8 @@ internal fun barnepensjonBeregning(
     grunnbeloep: Grunnbeloep,
     beregningsperioder: List<BarnepensjonBeregningsperiode>,
     trygdetid: Trygdetid,
+    erForeldreloes: Boolean = false,
+    bruktAvdoed: String? = null,
 ) = BarnepensjonBeregning(
     innhold = innhold.finnVedlegg(BrevVedleggKey.BP_BEREGNING_TRYGDETID),
     antallBarn = utbetalingsinfo.antallBarn,
@@ -138,6 +140,8 @@ internal fun barnepensjonBeregning(
             beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
             beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
         ),
+    erForeldreloes = erForeldreloes,
+    bruktAvdoed = bruktAvdoed,
 )
 
 internal fun barnepensjonBeregningsperioder(utbetalingsinfo: Utbetalingsinfo) =

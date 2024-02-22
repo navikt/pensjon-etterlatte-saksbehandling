@@ -52,6 +52,9 @@ const Virkningstidspunkt = (props: {
       : behandling.soeknadMottattDato
         ? new Date(behandling.soeknadMottattDato)
         : new Date(2024, 0, 1)
+    // For saker migrert fra Pesys har vi ikke tatt med søknad mottatt-dato
+    // Disse kan ha tidligste virkningstidspunkt i Gjenny 1.1.24, altså da etterlattereformen tredde i kraft
+    // Denne siste fallbacken er altså tenkt for disse sakene
   }
 
   const { monthpickerProps, inputProps } = useMonthpicker({

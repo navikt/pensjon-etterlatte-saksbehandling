@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -117,7 +118,7 @@ class DoedshendelseJobServiceTest {
     }
 
     @Test
-    fun `skal ikke avbryte gyldige hendelser dersom kontrollpunktene skal foere til oppgave`() {
+    fun `skal ferdigstille doedshendelse med status ferdig og sette oppgaveId`() {
         val doedshendelse =
             Doedshendelse.nyHendelse(
                 avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
@@ -128,13 +129,21 @@ class DoedshendelseJobServiceTest {
 
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelse)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
-        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns null
+        val oppgaveId = UUID.randomUUID()
+        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
+            mockk {
+                every { id } returns oppgaveId
+            }
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
             listOf(AvdoedHarUtvandret, AvdoedHarDNummer)
+        val doedshendelseCapture = slot<Doedshendelse>()
 
         service.setupKontekstAndRun(kontekst)
 
-        verify(exactly = 1) { dao.oppdaterDoedshendelse(any()) }
+        verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
         verify(exactly = 1) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
+        doedshendelseCapture.captured.status shouldBe Status.FERDIG
+        doedshendelseCapture.captured.utfall shouldBe Utfall.OPPGAVE
+        doedshendelseCapture.captured.oppgaveId shouldBe oppgaveId
     }
 }

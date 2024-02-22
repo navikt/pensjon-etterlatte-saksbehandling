@@ -87,7 +87,7 @@ class DoedshendelseJobService(
             }
         val sak = sakService.finnEllerOpprettSak(doedshendelse.beroertFnr, sakType)
 
-        val opprettetGrunnlagshendelse =
+        val oppgave =
             grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
                 Grunnlagsendringshendelse(
                     id = UUID.randomUUID(),
@@ -103,7 +103,7 @@ class DoedshendelseJobService(
             doedshendelse.tilBehandlet(
                 utfall = Utfall.OPPGAVE,
                 sakId = sak.id,
-                oppgaveId = opprettetGrunnlagshendelse?.id,
+                oppgaveId = oppgave?.id,
             ),
         )
     }

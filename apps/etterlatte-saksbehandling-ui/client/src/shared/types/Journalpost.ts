@@ -113,3 +113,9 @@ export enum Journalposttype {
   U = 'U', // Utgående
   N = 'N', // Notat
 }
+
+export enum Tema {
+  EYB = 'EYB',
+  EYO = 'EYO',
+  PEN = 'PEN',
+}

@@ -1,6 +1,5 @@
 import { Behandlingsoppsummering } from '~components/behandling/attestering/oppsummering/oppsummering'
 import { AttesteringEllerUnderkjenning } from '~components/behandling/attestering/attestering/attesteringEllerUnderkjenning'
-import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
 import AnnullerBehandling from '~components/behandling/handlinger/AnnullerBehanding'
 import React, { useEffect, useState } from 'react'
 import { IBeslutning } from '~components/behandling/attestering/types'
@@ -34,6 +33,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { DokumentlisteLiten } from '~components/person/dokumenter/dokumentlisteLiten'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {
@@ -166,7 +166,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
             />
           </Tabs.List>
           <Tabs.Panel value={BehandlingFane.DOKUMENTER}>
-            {soeker?.foedselsnummer && <Dokumentoversikt fnr={soeker.foedselsnummer} liten />}
+            {soeker?.foedselsnummer && <DokumentlisteLiten fnr={soeker.foedselsnummer} />}
           </Tabs.Panel>
           <Tabs.Panel value={BehandlingFane.SJEKKLISTE}>
             <>
@@ -182,7 +182,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
           </Tabs.Panel>
         </Tabs>
       )}
-      {!erFoerstegangsbehandling && soeker?.foedselsnummer && <Dokumentoversikt fnr={soeker.foedselsnummer} liten />}
+      {!erFoerstegangsbehandling && soeker?.foedselsnummer && <DokumentlisteLiten fnr={soeker.foedselsnummer} />}
       <AnnullerBehandling />
     </Sidebar>
   )

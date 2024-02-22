@@ -5,7 +5,6 @@ import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -26,14 +25,21 @@ class SafService(
     }
 
     suspend fun hentDokumenter(
-        ident: String,
-        visTemaPen: Boolean,
-        idType: BrukerIdType,
+        request: HentDokumenterRequest,
         bruker: BrukerTokenInfo,
     ): List<Journalpost> {
-        logger.info("Henter alle journalposter for ident=${ident.maskerFnr()} (visTemaPen=$visTemaPen)")
+        logger.info("Henter journalposter for ident=${request.foedselsnummer}")
 
-        val response = safKlient.hentDokumenter(ident, visTemaPen, idType, bruker)
+        val graphqlVariables =
+            DokumentOversiktBrukerVariables(
+                brukerId = BrukerId(request.foedselsnummer.value, BrukerIdType.FNR),
+                tema = request.tema,
+                journalposttyper = request.journalposttyper,
+                journalstatuser = request.journalstatuser,
+                foerste = request.foerste,
+            )
+
+        val response = safKlient.hentDokumenter(graphqlVariables, bruker)
 
         return if (response.errors.isNullOrEmpty()) {
             response.data?.dokumentoversiktBruker?.journalposter ?: emptyList()

@@ -16,7 +16,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
@@ -73,29 +72,14 @@ class SafKlient(
             }
         }
 
-    // TODO: Fjerne param [visTemaPen] når gjenlevendepensjon er borte
     suspend fun hentDokumenter(
-        fnr: String,
-        visTemaPen: Boolean,
-        idType: BrukerIdType,
+        requestVariables: DokumentOversiktBrukerVariables,
         bruker: BrukerTokenInfo,
     ): DokumentoversiktBrukerResponse {
-        logger.info("VisTemaPen=$visTemaPen")
-
         val request =
             GraphqlRequest(
                 query = getQuery("/graphql/dokumentoversiktBruker.graphql"),
-                variables =
-                    DokumentOversiktBrukerVariables(
-                        brukerId =
-                            BrukerId(
-                                id = fnr,
-                                type = idType,
-                            ),
-                        tema = if (visTemaPen) listOf("EYO", "EYB", "PEN") else listOf("EYO", "EYB"),
-                        // TODO: EY-3521
-                        foerste = 50,
-                    ),
+                variables = requestVariables,
             )
 
         return retry {

@@ -4,7 +4,6 @@ import { BodyShort, Button } from '@navikt/ds-react'
 import { ChevronLeftDoubleIcon, ChevronRightDoubleIcon } from '@navikt/aksel-icons'
 import { useTilbakekreving } from '~components/tilbakekreving/useTilbakekreving'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import { Dokumentoversikt } from '~components/person/dokumenter/dokumentoversikt'
 import { useAppDispatch, useAppSelector } from '~store/Store'
 import { TilbakekrevingStatus } from '~shared/types/Tilbakekreving'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -16,6 +15,7 @@ import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
 
 import { mapApiResult } from '~shared/api/apiUtils'
+import { DokumentlisteLiten } from '~components/person/dokumenter/dokumentlisteLiten'
 
 export function TilbakekrevingSidemeny() {
   const tilbakekreving = useTilbakekreving()
@@ -72,7 +72,7 @@ export function TilbakekrevingSidemeny() {
         </>
       )}
 
-      {tilbakekreving?.sak.ident ? <Dokumentoversikt fnr={tilbakekreving.sak.ident} liten /> : null}
+      {tilbakekreving?.sak.ident && <DokumentlisteLiten fnr={tilbakekreving.sak.ident} />}
     </CollapsibleSidebar>
   )
 }

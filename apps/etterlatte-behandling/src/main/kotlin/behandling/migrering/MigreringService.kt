@@ -181,8 +181,7 @@ class MigreringService(
         sakService.finnEllerOpprettSak(
             request.soeker.value,
             SakType.BARNEPENSJON,
-            request.enhet.nr,
-            sjekkEnhetMotNorg = false,
+            gradering = request.gradering,
         )
 
     fun avbrytBehandling(

@@ -11,6 +11,7 @@ import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
+import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_KODE
@@ -67,6 +68,7 @@ class OpprettJournalfoerOgDistribuerRiver(
                 ) {
                     when (brevKode.redigering) {
                         EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL -> opprettBarnepensjonInformasjonDoedsfall(sakId)
+                        EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL -> opprettOmstillingsstoenadInformasjonDoedsfall(sakId)
                         else -> ManueltBrevData()
                     }
                 }
@@ -109,6 +111,16 @@ class OpprettJournalfoerOgDistribuerRiver(
 
     private suspend fun opprettBarnepensjonInformasjonDoedsfall(sakId: Long) =
         BarnepensjonInformasjonDoedsfall.fra(
+            generellBrevData =
+                brevdataFacade.hentGenerellBrevData(
+                    sakId = sakId,
+                    behandlingId = null,
+                    brukerTokenInfo = Systembruker.brev,
+                ),
+        )
+
+    private suspend fun opprettOmstillingsstoenadInformasjonDoedsfall(sakId: Long) =
+        OmstillingsstoenadInformasjonDoedsfall.fra(
             generellBrevData =
                 brevdataFacade.hentGenerellBrevData(
                     sakId = sakId,

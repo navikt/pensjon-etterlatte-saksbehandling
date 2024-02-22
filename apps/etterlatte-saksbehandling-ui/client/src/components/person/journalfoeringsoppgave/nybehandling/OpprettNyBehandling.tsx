@@ -107,60 +107,58 @@ export default function OpprettNyBehandling() {
   return (
     <FormWrapper column>
       <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <SpaceChildren>
-            <Heading size="medium" spacing>
-              Opprett behandling{' '}
-              <Tag variant="success" size="medium">
-                {formaterSakstype(sakType)}
-              </Tag>
-            </Heading>
+        <SpaceChildren>
+          <Heading size="medium" spacing>
+            Opprett behandling{' '}
+            <Tag variant="success" size="medium">
+              {formaterSakstype(sakType)}
+            </Tag>
+          </Heading>
 
-            <Select
-              {...register('spraak', {
-                required: { value: true, message: 'Du må velge språk/målform for behandlingen' },
-              })}
-              label="Hva skal språket/målform være?"
-              error={errors.spraak?.message}
-            >
-              <option value="">Velg ...</option>
-              <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
-              <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
-              <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
-            </Select>
+          <Select
+            {...register('spraak', {
+              required: { value: true, message: 'Du må velge språk/målform for behandlingen' },
+            })}
+            label="Hva skal språket/målform være?"
+            error={errors.spraak?.message}
+          >
+            <option value="">Velg ...</option>
+            <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
+            <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
+            <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
+          </Select>
 
-            <ControlledDatoVelger
-              name="mottattDato"
-              label="Mottatt dato"
-              description="Datoen søknaden ble mottatt"
-              control={control}
-              errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
-              defaultValue={getValues().mottattDato}
-            />
+          <ControlledDatoVelger
+            name="mottattDato"
+            label="Mottatt dato"
+            description="Datoen søknaden ble mottatt"
+            control={control}
+            errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
+            defaultValue={getValues().mottattDato}
+          />
 
-            <PersongalleriHeading size="medium" spacing>
-              Persongalleri
-            </PersongalleriHeading>
+          <PersongalleriHeading size="medium" spacing>
+            Persongalleri
+          </PersongalleriHeading>
 
-            {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
-            {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
+          {sakType === SakType.OMSTILLINGSSTOENAD && <PersongalleriOmstillingsstoenad />}
+          {sakType === SakType.BARNEPENSJON && <PersongalleriBarnepensjon />}
 
-            <div>
-              <FlexRow justify="center" $spacing>
-                <Button variant="secondary" onClick={tilbake} type="button">
-                  Tilbake
-                </Button>
+          <div>
+            <FlexRow justify="center" $spacing>
+              <Button variant="secondary" onClick={tilbake} type="button">
+                Tilbake
+              </Button>
 
-                <Button variant="primary" type="submit">
-                  Neste
-                </Button>
-              </FlexRow>
-              <FlexRow justify="center">
-                <AvbrytBehandleJournalfoeringOppgave />
-              </FlexRow>
-            </div>
-          </SpaceChildren>
-        </form>
+              <Button variant="primary" type="submit" onClick={handleSubmit(onSubmit)}>
+                Neste
+              </Button>
+            </FlexRow>
+            <FlexRow justify="center">
+              <AvbrytBehandleJournalfoeringOppgave />
+            </FlexRow>
+          </div>
+        </SpaceChildren>
       </FormProvider>
     </FormWrapper>
   )

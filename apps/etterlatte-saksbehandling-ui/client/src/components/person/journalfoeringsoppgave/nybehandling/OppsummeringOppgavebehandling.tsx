@@ -13,7 +13,7 @@ import { gyldigBehandlingRequest } from '~components/person/journalfoeringsoppga
 import React from 'react'
 
 export default function OppsummeringOppgavebehandling() {
-  const { journalpost, nyBehandlingRequest, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
+  const { journalpost, oppgave, nyBehandlingRequest, sakMedBehandlinger } = useJournalfoeringOppgave()
 
   const navigate = useNavigate()
 
@@ -26,12 +26,13 @@ export default function OppsummeringOppgavebehandling() {
     !sakMedBehandlinger ||
     !gyldigBehandlingRequest(nyBehandlingRequest)
   ) {
-    return null
+    return <Alert variant="error">Noe data i journalføringen eller behandlingen er feil</Alert>
   }
 
-  const { spraak, mottattDato, persongalleri } = nyBehandlingRequest
-  if (!spraak || !mottattDato || !persongalleri) {
-    return null
+  const { spraak, mottattDato, persongalleri } = nyBehandlingRequest!
+
+  if (!persongalleri || !mottattDato || !spraak) {
+    return <Alert variant="error">Kunne ikke hente persongalleri, mottat dato eller språk</Alert>
   }
 
   return (

@@ -358,6 +358,7 @@ internal class ApplicationContext(
             doedshendelseKontrollpunktService = DoedshendelseKontrollpunktService(pdlKlient, pesysKlient),
             featureToggleService = featureToggleService,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+            sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = if (isProd()) 2 else 0,
         )
 

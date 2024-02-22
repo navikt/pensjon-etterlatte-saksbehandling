@@ -15,9 +15,12 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedHarUtvandret
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedLeverIPDL
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -36,14 +39,25 @@ class DoedshendelseJobServiceTest {
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
     private val dataSource = mockk<DataSource>()
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource))
+    private val sakService =
+        mockk<SakService> {
+            every { finnEllerOpprettSak(any(), any()) } returns
+                Sak(
+                    ident = "12345678901",
+                    sakType = SakType.BARNEPENSJON,
+                    id = 1L,
+                    enhet = "0000",
+                )
+        }
     private val todagergammel = 2
     private val service =
         DoedshendelseJobService(
-            dao,
-            kontrollpunktService,
-            toggle,
-            grunnlagsendringshendelseService,
-            todagergammel,
+            doedshendelseDao = dao,
+            doedshendelseKontrollpunktService = kontrollpunktService,
+            featureToggleService = toggle,
+            grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+            sakService = sakService,
+            dagerGamleHendelserSomSkalKjoeres = todagergammel,
         )
 
     @AfterEach
@@ -70,11 +84,13 @@ class DoedshendelseJobServiceTest {
             )
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns emptyList()
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
-        every { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) } returns emptyList()
+        every { dao.oppdaterDoedshendelse(any()) } returns Unit
+        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns null
 
         service.setupKontekstAndRun(kontekst)
 
-        verify(exactly = 1) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
+        verify(exactly = 1) { dao.oppdaterDoedshendelse(any()) }
+        verify(exactly = 1) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
     }
 
     @Test
@@ -95,7 +111,7 @@ class DoedshendelseJobServiceTest {
         service.setupKontekstAndRun(kontekst)
 
         verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
-        verify(exactly = 0) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
+        verify(exactly = 0) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
         doedshendelseCapture.captured.status shouldBe Status.FERDIG
         doedshendelseCapture.captured.utfall shouldBe Utfall.AVBRUTT
     }
@@ -112,13 +128,13 @@ class DoedshendelseJobServiceTest {
 
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelse)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
+        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns null
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
             listOf(AvdoedHarUtvandret, AvdoedHarDNummer)
-        every { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) } returns emptyList()
 
         service.setupKontekstAndRun(kontekst)
 
-        verify(exactly = 0) { dao.oppdaterDoedshendelse(any()) }
-        verify(exactly = 1) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
+        verify(exactly = 1) { dao.oppdaterDoedshendelse(any()) }
+        verify(exactly = 1) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
     }
 }

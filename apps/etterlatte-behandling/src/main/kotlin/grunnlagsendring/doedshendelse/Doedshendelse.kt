@@ -43,6 +43,22 @@ data class Doedshendelse internal constructor(
             endret = Tidspunkt.now(),
         )
     }
+
+    fun tilBehandlet(
+        utfall: Utfall,
+        sakId: Long,
+        oppgaveId: UUID? = null,
+        brevId: Long? = null,
+    ): Doedshendelse {
+        return copy(
+            status = Status.FERDIG,
+            utfall = utfall,
+            sakId = sakId,
+            oppgaveId = oppgaveId,
+            brevId = brevId,
+            endret = Tidspunkt.now(),
+        )
+    }
 }
 
 enum class Status {
@@ -55,6 +71,7 @@ enum class Status {
 enum class Utfall {
     BREV,
     OPPGAVE,
+    BREV_OG_OPPGAVE,
     AVBRUTT,
 }
 

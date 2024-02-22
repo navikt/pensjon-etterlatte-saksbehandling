@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
@@ -333,6 +334,30 @@ class GrunnlagsendringshendelseService(
             }.map { it.first }
     }
 
+    fun opprettDoedshendelseForPerson(grunnlagsendringshendelse: Grunnlagsendringshendelse): OppgaveIntern? {
+        val eksisterendeHendelser =
+            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                grunnlagsendringshendelse.sakId,
+                listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+            ).firstOrNull {
+                it.gjelderPerson == grunnlagsendringshendelse.gjelderPerson && it.type == grunnlagsendringshendelse.type
+            }
+
+        // Vi bryr oss ikke om det samsvarer eller ikke, men underliggende tjenester krever det.
+        val samsvarMellomKildeOgGrunnlag = SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(null, null, false)
+        if (eksisterendeHendelser != null) {
+            logger.info(
+                "Det finens allede en grunnlagsendringshendelse ${grunnlagsendringshendelse.type} med id " +
+                    "${grunnlagsendringshendelse.id} fra før, forsøker å returnere relevant oppgave.",
+            )
+            return oppgaveService.hentOppgaverForSak(grunnlagsendringshendelse.sakId)
+                .find { it.referanse == eksisterendeHendelser.id.toString() }
+        } else {
+            grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(grunnlagsendringshendelse)
+            return oppdaterGrunnlagsEndringOgOpprettOppgave(grunnlagsendringshendelse, samsvarMellomKildeOgGrunnlag)
+        }
+    }
+
     private fun opprettHendelseAvTypeForSak(
         sakId: Long,
         grunnlagendringType: GrunnlagsendringsType,
@@ -406,21 +431,28 @@ class GrunnlagsendringshendelseService(
                     "og informasjonen i pdl og grunnlag samsvarer ikke. " +
                     "Hendelsen vises derfor til saksbehandler.",
             )
-            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
-                hendelseId = hendelse.id,
-                foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
-                etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
-            )
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = hendelse.id.toString(),
-                sakId = hendelse.sakId,
-                oppgaveKilde = OppgaveKilde.HENDELSE,
-                oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                merknad = hendelse.beskrivelse(),
-            ).also {
-                logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
-            }
+            oppdaterGrunnlagsEndringOgOpprettOppgave(hendelse, samsvarMellomKildeOgGrunnlag)
+        }
+    }
+
+    private fun oppdaterGrunnlagsEndringOgOpprettOppgave(
+        hendelse: Grunnlagsendringshendelse,
+        samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
+    ): OppgaveIntern {
+        grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
+            hendelseId = hendelse.id,
+            foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+            etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+            samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
+        )
+        return oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            referanse = hendelse.id.toString(),
+            sakId = hendelse.sakId,
+            oppgaveKilde = OppgaveKilde.HENDELSE,
+            oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+            merknad = hendelse.beskrivelse(),
+        ).also {
+            logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
         }
     }
 

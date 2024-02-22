@@ -2,22 +2,31 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.UUID
 
 class DoedshendelseJobService(
     private val doedshendelseDao: DoedshendelseDao,
     private val doedshendelseKontrollpunktService: DoedshendelseKontrollpunktService,
     private val featureToggleService: FeatureToggleService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
+    private val sakService: SakService,
     private val dagerGamleHendelserSomSkalKjoeres: Int,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -53,7 +62,7 @@ class DoedshendelseJobService(
         when (kontrollpunkter.any { it.avbryt }) {
             true -> {
                 logger.info(
-                    "Avbryter behandling av dødshendelse for person ${doedshendelse.avdoedFnr.maskerFnr()} med avdød " +
+                    "Avbryter behandling av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()} med avdød " +
                         "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkt: " +
                         kontrollpunkter.joinToString(","),
                 )
@@ -61,13 +70,42 @@ class DoedshendelseJobService(
             }
 
             false -> {
-                grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(
-                    fnr = doedshendelse.avdoedFnr,
-                    grunnlagendringType = GrunnlagsendringsType.DOEDSFALL,
+                logger.info(
+                    "Oppretter grunnlagshendelse for person ${doedshendelse.beroertFnr.maskerFnr()} " +
+                        "med avdød ${doedshendelse.avdoedFnr.maskerFnr()}",
                 )
-                // todo: EY-3539 - lukk etter oppgave er opprettet
+                opprettGrunnlagshendelse(doedshendelse)
             }
         }
+    }
+
+    private fun opprettGrunnlagshendelse(doedshendelse: Doedshendelse) {
+        val sakType =
+            when (doedshendelse.relasjon) {
+                Relasjon.BARN -> SakType.BARNEPENSJON
+                Relasjon.EPS -> SakType.OMSTILLINGSSTOENAD
+            }
+        val sak = sakService.finnEllerOpprettSak(doedshendelse.beroertFnr, sakType)
+
+        val opprettetGrunnlagshendelse =
+            grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
+                Grunnlagsendringshendelse(
+                    id = UUID.randomUUID(),
+                    sakId = sak.id,
+                    status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                    type = GrunnlagsendringsType.DOEDSFALL,
+                    opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                    hendelseGjelderRolle = Saksrolle.SOEKER,
+                    gjelderPerson = doedshendelse.beroertFnr,
+                ),
+            )
+        doedshendelseDao.oppdaterDoedshendelse(
+            doedshendelse.tilBehandlet(
+                utfall = Utfall.OPPGAVE,
+                sakId = sak.id,
+                oppgaveId = opprettetGrunnlagshendelse?.id,
+            ),
+        )
     }
 
     private fun finnGyldigeDoedshendelser(hendelser: List<Doedshendelse>): List<Doedshendelse> {

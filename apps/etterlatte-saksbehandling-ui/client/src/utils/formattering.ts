@@ -36,7 +36,7 @@ export const formaterDatoMedKlokkeslett = (dato: Date | string) =>
 
 export const formaterBehandlingstype = (behandlingstype: IBehandlingsType): string => {
   switch (behandlingstype) {
-    case IBehandlingsType.FØRSTEGANGSBEHANDLING:
+    case IBehandlingsType.FOERSTEGANGSBEHANDLING:
       return 'Førstegangsbehandling'
     case IBehandlingsType.REVURDERING:
       return 'Revurdering'

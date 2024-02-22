@@ -79,7 +79,7 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
 
         val opprettBehandling =
             opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                type = BehandlingType.FOERSTEGANGSBEHANDLING,
                 sakId = sakId,
             )
         behandlingRepo.opprettBehandling(opprettBehandling)
@@ -156,7 +156,7 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
 
         val opprettBehandling =
             opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                type = BehandlingType.FOERSTEGANGSBEHANDLING,
                 sakId = sakId,
             )
         behandlingRepo.opprettBehandling(opprettBehandling)
@@ -196,7 +196,7 @@ internal class TilgangServiceTest(val dataSource: DataSource) {
 
         val opprettBehandling =
             opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                type = BehandlingType.FOERSTEGANGSBEHANDLING,
                 sakId = sakId,
             )
         behandlingRepo.opprettBehandling(opprettBehandling)

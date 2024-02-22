@@ -632,7 +632,7 @@ internal class BeregningsGrunnlagServiceTest {
 
         coEvery {
             behandlingKlient.hentBehandling(any(), any())
-        } returns mockBehandling(SakType.BARNEPENSJON, randomUUID(), BehandlingType.FØRSTEGANGSBEHANDLING, 3L)
+        } returns mockBehandling(SakType.BARNEPENSJON, randomUUID(), BehandlingType.FOERSTEGANGSBEHANDLING, 3L)
 
         every {
             beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
@@ -687,7 +687,7 @@ internal class BeregningsGrunnlagServiceTest {
     private fun mockBehandling(
         type: SakType,
         uuid: UUID,
-        behandlingstype: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        behandlingstype: BehandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
         sakId: Long = 1L,
         virkningstidspunktdato: YearMonth = REFORM_TIDSPUNKT_BP,
     ): DetaljertBehandling =

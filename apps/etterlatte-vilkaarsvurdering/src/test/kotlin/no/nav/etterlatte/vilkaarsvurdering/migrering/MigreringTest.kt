@@ -98,7 +98,7 @@ class MigreringTest {
             every { id } returns behandlingId
             every { sak } returns 1L
             every { sakType } returns SakType.BARNEPENSJON
-            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            every { behandlingType } returns BehandlingType.FOERSTEGANGSBEHANDLING
             every { soeker } returns "10095512345"
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1))
             every { revurderingsaarsak } returns null

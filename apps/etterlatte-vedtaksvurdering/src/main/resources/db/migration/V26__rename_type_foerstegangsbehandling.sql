@@ -1,0 +1,3 @@
+UPDATE vedtak
+SET behandlingtype = 'FOERSTEGANGSBEHANDLING'
+WHERE behandlingtype = 'FØRSTEGANGSBEHANDLING';

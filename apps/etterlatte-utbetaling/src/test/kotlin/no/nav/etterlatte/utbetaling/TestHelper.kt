@@ -65,7 +65,7 @@ fun utbetalingsvedtak(
     behandling =
         Behandling(
             id = UUID.randomUUID(),
-            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+            type = BehandlingType.FOERSTEGANGSBEHANDLING,
             revurderingsaarsak = null,
         ),
     sak =

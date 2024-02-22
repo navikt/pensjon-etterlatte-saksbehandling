@@ -74,7 +74,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                behandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
                 virkningstidspunkt = null,
                 revurderingsaarsak = null,
                 prosesstype = Prosesstype.MANUELL,
@@ -261,7 +261,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                behandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
                 virkningstidspunkt =
                     Virkningstidspunkt(
                         REFORM_TIDSPUNKT_BP,
@@ -316,7 +316,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                behandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
                 virkningstidspunkt =
                     Virkningstidspunkt(
                         REFORM_TIDSPUNKT_BP,
@@ -585,7 +585,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 sakType = SakType.BARNEPENSJON,
                 soeker = "diam",
                 status = BehandlingStatus.TRYGDETID_OPPDATERT,
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                behandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
                 virkningstidspunkt = null,
                 revurderingsaarsak = null,
                 prosesstype = Prosesstype.MANUELL,

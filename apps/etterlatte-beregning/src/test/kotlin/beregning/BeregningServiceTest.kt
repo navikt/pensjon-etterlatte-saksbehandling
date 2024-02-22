@@ -271,7 +271,7 @@ internal class BeregningServiceTest {
             every { id } returns randomUUID()
             every { sak } returns 1
             every { sakType } returns type
-            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            every { behandlingType } returns BehandlingType.FOERSTEGANGSBEHANDLING
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))
         }
 }

@@ -74,7 +74,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
 
         val opprettBehandlingMedPersongalleri =
             opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                type = BehandlingType.FOERSTEGANGSBEHANDLING,
                 sakId = sak1,
             )
 
@@ -154,7 +154,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
 
         val opprettBehandling =
             opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                type = BehandlingType.FOERSTEGANGSBEHANDLING,
                 sakId = sak1,
             )
 
@@ -197,7 +197,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
 
         val opprettBehandling =
             opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                type = BehandlingType.FOERSTEGANGSBEHANDLING,
                 sakId = sak1,
             )
 
@@ -232,7 +232,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
     fun `avbryte sak`() {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         listOf(
-            opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak1),
+            opprettBehandling(type = BehandlingType.FOERSTEGANGSBEHANDLING, sakId = sak1),
         ).forEach { b ->
             behandlingRepo.opprettBehandling(b)
         }
@@ -253,7 +253,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
         val opprettBehandling =
-            opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak1).also {
+            opprettBehandling(type = BehandlingType.FOERSTEGANGSBEHANDLING, sakId = sak1).also {
                 behandlingRepo.opprettBehandling(it)
             }
 
@@ -315,7 +315,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
         repeat(2) {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    type = BehandlingType.FOERSTEGANGSBEHANDLING,
                     sakId = sak1,
                 ),
             )
@@ -347,7 +347,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
         repeat(2) {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    type = BehandlingType.FOERSTEGANGSBEHANDLING,
                     sakId = sak1,
                 ),
             )
@@ -355,7 +355,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
 
         val foerstegangsbehandlinger =
             behandlingRepo.alleBehandlingerISak(sak1).filter {
-                it.type == BehandlingType.FØRSTEGANGSBEHANDLING
+                it.type == BehandlingType.FOERSTEGANGSBEHANDLING
             }
         val revurderinger = behandlingRepo.alleBehandlingerISak(sak1).filter { it.type == BehandlingType.REVURDERING }
         assertAll(
@@ -374,7 +374,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
         val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
 
         val opprettBehandling =
-            opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak1).also {
+            opprettBehandling(type = BehandlingType.FOERSTEGANGSBEHANDLING, sakId = sak1).also {
                 behandlingRepo.opprettBehandling(it)
             }
 
@@ -405,7 +405,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
         ).forEach {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    type = BehandlingType.FOERSTEGANGSBEHANDLING,
                     sakId = sak1,
                     status = it,
                 ),
@@ -424,7 +424,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val opprettBehandling =
             opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                type = BehandlingType.FOERSTEGANGSBEHANDLING,
                 sakId = sak,
                 status = BehandlingStatus.OPPRETTET,
             )
@@ -453,7 +453,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val opprettBehandling =
             opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                type = BehandlingType.FOERSTEGANGSBEHANDLING,
                 sakId = sak,
                 status = BehandlingStatus.OPPRETTET,
             )
@@ -482,7 +482,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val opprettBehandling =
             opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                type = BehandlingType.FOERSTEGANGSBEHANDLING,
                 sakId = sak,
                 status = BehandlingStatus.OPPRETTET,
             )
@@ -511,7 +511,7 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
         val opprettBehandling =
             opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                type = BehandlingType.FOERSTEGANGSBEHANDLING,
                 sakId = sak,
             )
         behandlingRepo.opprettBehandling(opprettBehandling)

@@ -78,7 +78,7 @@ export const behandlingSkalSendeBrev = (
   revurderingsaarsak: Revurderingaarsak | null
 ): boolean => {
   switch (behandlingType) {
-    case IBehandlingsType.FØRSTEGANGSBEHANDLING:
+    case IBehandlingsType.FOERSTEGANGSBEHANDLING:
       return true
     case IBehandlingsType.MANUELT_OPPHOER:
       return false

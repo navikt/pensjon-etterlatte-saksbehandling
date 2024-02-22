@@ -744,7 +744,7 @@ internal class AvkortingTest {
                             fratrekkInnAar = 50000,
                             relevanteMaanederInnAar = 10,
                         ),
-                    behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    behandlingstype = BehandlingType.FOERSTEGANGSBEHANDLING,
                     beregning =
                         beregning(
                             beregninger =

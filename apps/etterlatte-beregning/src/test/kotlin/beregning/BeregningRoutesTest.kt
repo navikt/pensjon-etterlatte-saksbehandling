@@ -250,7 +250,7 @@ internal class BeregningRoutesTest {
     private fun mockBehandling(): DetaljertBehandling =
         mockk<DetaljertBehandling>().apply {
             every { id } returns randomUUID()
-            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            every { behandlingType } returns BehandlingType.FOERSTEGANGSBEHANDLING
             every { sak } returns 1
             every { sakType } returns SakType.BARNEPENSJON
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2023, 1))

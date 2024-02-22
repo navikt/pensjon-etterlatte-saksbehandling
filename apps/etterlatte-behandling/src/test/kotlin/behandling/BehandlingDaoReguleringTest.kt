@@ -59,7 +59,7 @@ internal class BehandlingDaoReguleringTest(val dataSource: DataSource) {
     fun `behandlinger som er beregnet maa beregnes paa nytt`(status: BehandlingStatus) {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
         val opprettBehandling =
-            opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id, status = status)
+            opprettBehandling(type = BehandlingType.FOERSTEGANGSBEHANDLING, sakId = sak.id, status = status)
         behandlingRepo.opprettBehandling(opprettBehandling)
 
         val trengerNyBeregning =
@@ -82,7 +82,7 @@ internal class BehandlingDaoReguleringTest(val dataSource: DataSource) {
             listOf(relevantSak, ikkeRelevantSak).map {
                 val opprettBehandling =
                     opprettBehandling(
-                        type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                        type = BehandlingType.FOERSTEGANGSBEHANDLING,
                         sakId = it.id,
                         status = BehandlingStatus.BEREGNET,
                     )
@@ -115,7 +115,7 @@ internal class BehandlingDaoReguleringTest(val dataSource: DataSource) {
     fun `irrelevante behandlinger skal ikke endre status ved migrering`(status: BehandlingStatus) {
         val sak = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
         val opprettBehandling =
-            opprettBehandling(type = BehandlingType.FØRSTEGANGSBEHANDLING, sakId = sak.id, status = status)
+            opprettBehandling(type = BehandlingType.FOERSTEGANGSBEHANDLING, sakId = sak.id, status = status)
         behandlingRepo.opprettBehandling(opprettBehandling)
 
         behandlingRepo.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(Saker(listOf(sak)))

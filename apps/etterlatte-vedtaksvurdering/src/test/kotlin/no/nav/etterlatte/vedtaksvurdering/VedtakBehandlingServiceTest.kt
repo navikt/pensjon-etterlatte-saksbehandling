@@ -1204,7 +1204,7 @@ internal class VedtakBehandlingServiceTest(private val dataSource: DataSource) {
             status = BehandlingStatus.OPPRETTET,
             behandlingType =
                 if (revurderingAarsak == null) {
-                    BehandlingType.FØRSTEGANGSBEHANDLING
+                    BehandlingType.FOERSTEGANGSBEHANDLING
                 } else {
                     BehandlingType.REVURDERING
                 },

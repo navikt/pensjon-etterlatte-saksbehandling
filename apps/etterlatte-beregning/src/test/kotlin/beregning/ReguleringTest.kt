@@ -200,7 +200,7 @@ class ReguleringTest {
     ) = mockk<DetaljertBehandling>().apply {
         every { id } returns UUID.randomUUID()
         every { sak } returns 1
-        every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+        every { behandlingType } returns BehandlingType.FOERSTEGANGSBEHANDLING
         every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         every { kilde } returns vedtaksloesning
         every { revurderingsaarsak } returns Revurderingaarsak.REGULERING

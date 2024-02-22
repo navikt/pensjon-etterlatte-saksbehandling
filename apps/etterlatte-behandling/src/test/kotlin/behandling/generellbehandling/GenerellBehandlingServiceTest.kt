@@ -131,7 +131,7 @@ class GenerellBehandlingServiceTest(val dataSource: DataSource) {
         val sak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val foerstegangsbehandling =
             opprettBehandling(
-                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                type = BehandlingType.FOERSTEGANGSBEHANDLING,
                 sakId = sak.id,
             )
         behandlingRepo.opprettBehandling(foerstegangsbehandling)

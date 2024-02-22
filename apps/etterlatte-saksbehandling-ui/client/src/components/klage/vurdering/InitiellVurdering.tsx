@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '~store/Store'
 import { InitiellVurderingVisningContent } from '~components/klage/vurdering/InitiellVurderingVisning'
 import { VurderingWrapper } from '~components/klage/styled'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { PencilIcon } from '@navikt/aksel-icons'
 
 const getTextFromutfall = (utfall: Utfall): string => {
   switch (utfall) {
@@ -51,12 +52,13 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
       <>
         {redigeringsModus ? (
           <>
-            <RadioGroup legend="" onChange={(e) => setUtfall(e as Utfall)}>
-              <Radio value={Utfall.OMGJOERING}>Omgjøring av vedtak</Radio>
-              {stoetterDelvisOmgjoering && <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>}
-              <Radio value={Utfall.STADFESTE_VEDTAK}>Stadfeste vedtaket</Radio>
-            </RadioGroup>
-
+            <VurderingWrapper>
+              <RadioGroup legend="" onChange={(e) => setUtfall(e as Utfall)}>
+                <Radio value={Utfall.OMGJOERING}>Omgjøring av vedtak</Radio>
+                {stoetterDelvisOmgjoering && <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>}
+                <Radio value={Utfall.STADFESTE_VEDTAK}>Stadfeste vedtaket</Radio>
+              </RadioGroup>
+            </VurderingWrapper>
             {utfall && (
               <>
                 <VurderingWrapper>
@@ -70,7 +72,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
                 <VurderingWrapper>
                   <Button
                     type="button"
-                    variant="secondary"
+                    variant="primary"
                     loading={isPending(lagreInitiellStatus)}
                     onClick={() => {
                       const utfallMedBegrunnelse = { utfall: utfall, begrunnelse: begrunnelse }
@@ -92,7 +94,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
                       )
                     }}
                   >
-                    Lagre
+                    Lagre vurdering
                   </Button>
                 </VurderingWrapper>
                 {isFailureHandler({
@@ -109,6 +111,8 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
             <Button
               style={{ marginBottom: '3em' }}
               type="button"
+              size="small"
+              icon={<PencilIcon />}
               variant="secondary"
               onClick={() => setRedigerbar(true)}
             >

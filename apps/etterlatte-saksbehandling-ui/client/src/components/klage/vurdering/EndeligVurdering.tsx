@@ -129,7 +129,7 @@ export function EndeligVurdering(props: { klage: Klage }) {
 
   return (
     <>
-      <Heading level="2" size="medium">
+      <Heading level="2" size="medium" spacing>
         Endelig vurdering
       </Heading>
 
@@ -191,7 +191,7 @@ function KlageOmgjoering(props: { control: Control<FormdataVurdering>; register:
 
   return (
     <>
-      <Heading level="3" size="medium">
+      <Heading level="3" size="medium" spacing>
         Omgjøring
       </Heading>
 

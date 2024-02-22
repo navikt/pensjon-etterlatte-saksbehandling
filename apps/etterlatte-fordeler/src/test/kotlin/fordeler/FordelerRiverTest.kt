@@ -12,10 +12,15 @@ import no.nav.etterlatte.fordeler.FordelerKriterie.BARN_ER_FOR_GAMMELT
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_KRITERIER_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.GYLDIG_FOR_BEHANDLING_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.SOEKNAD_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.readFile
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
@@ -35,7 +40,10 @@ internal class FordelerRiverTest {
         every { fordelerMetricLogger.logMetricFordelt() } just runs
         val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
 
-        assertEquals("soeknad_innsendt", inspector.message(0).get(EVENT_NAME_KEY).asText())
+        assertEquals(
+            SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT.lagEventnameForType(),
+            inspector.message(0).get(EVENT_NAME_KEY).asText(),
+        )
         assertEquals(1337L, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).longValue())
         assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asText())
 
@@ -92,26 +100,6 @@ internal class FordelerRiverTest {
     }
 
     @Test
-    fun `skal fordele med trengerManuellJournalfoering hvis feil ved henting av personer fra pdl`() {
-        every { fordelerService.sjekkGyldighetForBehandling(any()) } returns
-            FordelerResultat.TrengerManuellJournalfoering("foo")
-        every { fordelerMetricLogger.logMetricFordelt() } just runs
-        every { fordelerService.hentSakId(any(), any<SakType>(), any<AdressebeskyttelseGradering>()) } returns 14L
-        every { fordelerService.opprettOppgave(any()) } just runs
-        val inspector = inspector.apply { sendTestMessage(BARNEPENSJON_SOKNAD) }.inspektør
-
-        assertEquals("soeknad_innsendt", inspector.message(0).get(EVENT_NAME_KEY).asText())
-        assertEquals(14, inspector.message(0).get(GyldigSoeknadVurdert.sakIdKey).intValue())
-        assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadFordeltKey).asText())
-        assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadTrengerManuellJournalfoering).asText())
-
-        verify { fordelerService.opprettOppgave(14) }
-        assertEquals("true", inspector.message(0).get(FordelerFordelt.soeknadTrengerManuellJournalfoering).asText())
-
-        verify { fordelerMetricLogger.logMetricFordelt() }
-    }
-
-    @Test
     fun `skal ikke sjekke soknad av annen type enn barnepensjon`() {
         val inspector = inspector.apply { sendTestMessage(GJENLEVENDE_SOKNAD) }.inspektør
 
@@ -146,11 +134,11 @@ internal class FordelerRiverTest {
         assertJsonEquals(
             """
                {
-                    "@correlation_id": "korrelasjonsid",
-                    "@event_name": "FORDELER:STATISTIKK",
-                    "sak_type": "BARNEPENSJON",
-                    "soeknad_id": 1337,
-                    "gyldig_for_behandling": true
+                    "$CORRELATION_ID_KEY": "korrelasjonsid",
+                    "$EVENT_NAME_KEY": "${EventNames.FORDELER_STATISTIKK.lagEventnameForType()}",
+                    "$SAK_TYPE_KEY": "BARNEPENSJON",
+                    "$SOEKNAD_ID_KEY": 1337,
+                    "$GYLDIG_FOR_BEHANDLING_KEY": true
                } 
             """,
             statistikkMeldingGyldig,
@@ -171,12 +159,12 @@ internal class FordelerRiverTest {
         assertJsonEquals(
             """
                 {
-                    "@correlation_id": "korrelasjonsid",
-                    "@event_name": "FORDELER:STATISTIKK",
-                    "soeknad_id": 1337,
-                    "sak_type": "BARNEPENSJON",
-                    "gyldig_for_behandling": false,
-                    "feilende_kriterier": [
+                    "$CORRELATION_ID_KEY": "korrelasjonsid",
+                    "$EVENT_NAME_KEY": "${EventNames.FORDELER_STATISTIKK.lagEventnameForType()}",
+                    "$SOEKNAD_ID_KEY": 1337,
+                    "$SAK_TYPE_KEY": "BARNEPENSJON",
+                    "$GYLDIG_FOR_BEHANDLING_KEY": false,
+                    "$FEILENDE_KRITERIER_KEY": [
                         "BARN_ER_IKKE_BOSATT_I_NORGE"
                     ]
                 }

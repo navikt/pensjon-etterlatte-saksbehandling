@@ -31,7 +31,7 @@ class DownstreamResourceClient(
     suspend fun get(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Result<Resource, ThrowableErrorMessage> {
+    ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { oboAccessToken ->
@@ -60,7 +60,7 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         postBody: Any,
-    ): Result<Resource, ThrowableErrorMessage> {
+    ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { token ->
@@ -75,7 +75,7 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         postBody: String,
-    ): Result<Resource, ThrowableErrorMessage> {
+    ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { oboAccessToken ->
@@ -90,7 +90,7 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         patchBody: String,
-    ): Result<Resource, ThrowableErrorMessage> {
+    ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { oboAccessToken ->
@@ -104,7 +104,7 @@ class DownstreamResourceClient(
     private suspend fun fetchFromDownstreamApi(
         resource: Resource,
         oboAccessToken: AccessToken,
-    ): Result<JsonNode?, ThrowableErrorMessage> =
+    ): Result<JsonNode?, Throwable> =
 
         runCatching {
             httpClient.get(resource.url) {
@@ -117,7 +117,7 @@ class DownstreamResourceClient(
                     when {
                         response.status == HttpStatusCode.NoContent -> Ok(null)
                         response.status.isSuccess() -> Ok(response.body())
-                        else -> response.toErr()
+                        else -> response.toResponseException()
                     }
                 },
                 onFailure = { error ->
@@ -129,7 +129,7 @@ class DownstreamResourceClient(
         resource: Resource,
         oboAccessToken: AccessToken,
         postBody: Any,
-    ): Result<Any, ThrowableErrorMessage> =
+    ): Result<Any, Throwable> =
 
         runCatching {
             httpClient.post(resource.url) {
@@ -149,7 +149,7 @@ class DownstreamResourceClient(
                                 Ok(response.status)
                             }
                         }
-                        else -> response.toErr()
+                        else -> response.toResponseException()
                     }
                 },
                 onFailure = { error ->
@@ -161,7 +161,7 @@ class DownstreamResourceClient(
         resource: Resource,
         oboAccessToken: AccessToken,
         postBody: String,
-    ): Result<JsonNode, ThrowableErrorMessage> =
+    ): Result<JsonNode, Throwable> =
 
         runCatching {
             httpClient.delete(resource.url) {
@@ -174,7 +174,7 @@ class DownstreamResourceClient(
                 onSuccess = { response ->
                     when {
                         response.status.isSuccess() -> Ok(response.body())
-                        else -> response.toErr()
+                        else -> response.toResponseException()
                     }
                 },
                 onFailure = { error ->
@@ -186,7 +186,7 @@ class DownstreamResourceClient(
         resource: Resource,
         oboAccessToken: AccessToken,
         patchBody: String,
-    ): Result<JsonNode, ThrowableErrorMessage> =
+    ): Result<JsonNode, Throwable> =
         runCatching {
             httpClient.patch(resource.url) {
                 header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
@@ -198,7 +198,7 @@ class DownstreamResourceClient(
                 onSuccess = { response ->
                     when {
                         response.status.isSuccess() -> Ok(response.body())
-                        else -> response.toErr()
+                        else -> response.toResponseException()
                     }
                 },
                 onFailure = { error ->

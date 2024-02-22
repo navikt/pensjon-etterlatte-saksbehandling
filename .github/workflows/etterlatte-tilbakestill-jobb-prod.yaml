@@ -13,3 +13,6 @@ jobs:
     uses: ./.github/workflows/.deploy-jobb-main-prod.yaml
     with:
       applikasjon: ${{ matrix.applikasjon }}
+    permissions:
+      contents: read
+      id-token: write

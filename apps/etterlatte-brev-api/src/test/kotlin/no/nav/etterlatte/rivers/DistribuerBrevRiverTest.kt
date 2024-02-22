@@ -5,14 +5,15 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.VedtaksbrevService
-import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
-import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
+import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
@@ -22,9 +23,9 @@ import java.util.UUID
 
 internal class DistribuerBrevRiverTest {
     private val brevService = mockk<VedtaksbrevService>()
-    private val distribusjonService = mockk<DistribusjonServiceImpl>(relaxed = true)
+    private val brevdistribuerer = mockk<Brevdistribuerer>(relaxed = true)
 
-    private val inspector = TestRapid().apply { DistribuerBrevRiver(this, brevService, distribusjonService) }
+    private val inspector = TestRapid().apply { DistribuerBrevRiver(this, brevdistribuerer) }
 
     private val brevId = 100L
     private val journalpostId = "11111"
@@ -42,7 +43,7 @@ internal class DistribuerBrevRiverTest {
     fun before() = clearAllMocks()
 
     @AfterEach
-    fun after() = confirmVerified(distribusjonService, brevService)
+    fun after() = confirmVerified(brevdistribuerer, brevService)
 
     @Test
     fun `Gyldig melding skal sende journalpost til distribusjon`() {
@@ -55,9 +56,9 @@ internal class DistribuerBrevRiverTest {
         val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    EVENT_NAME_KEY to BrevEventTypes.JOURNALFOERT.toString(),
+                    BrevHendelseType.JOURNALFOERT.lagParMedEventNameKey(),
                     CORRELATION_ID_KEY to UUID.randomUUID().toString(),
-                    "brevId" to brevId,
+                    BREV_ID_KEY to brevId,
                     "journalpostId" to journalpostId,
                     "distribusjonType" to DistribusjonsType.VEDTAK.toString(),
                     "mottakerAdresse" to adresse,
@@ -67,15 +68,7 @@ internal class DistribuerBrevRiverTest {
         inspector.apply { sendTestMessage(melding.toJson()) }.inspektør
 
         verify(exactly = 1) {
-            brevService.hentBrev(brevId)
-
-            distribusjonService.distribuerJournalpost(
-                brevId,
-                journalpostId,
-                DistribusjonsType.VEDTAK,
-                DistribusjonsTidspunktType.KJERNETID,
-                adresse,
-            )
+            brevdistribuerer.distribuer(brevId, DistribusjonsType.VEDTAK, journalpostId)
         }
     }
 }

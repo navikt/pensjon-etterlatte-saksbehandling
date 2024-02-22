@@ -1,7 +1,7 @@
 import React, { ReactNode, useState } from 'react'
 import { Heading } from '@navikt/ds-react'
 import { ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
-import AnimateHeight from '@navikt/ds-react/esm/util/AnimateHeight'
+import AnimateHeight from '@navikt/ds-react/esm/table/AnimateHeight'
 import styled from 'styled-components'
 
 const defaultAccordionProps = {

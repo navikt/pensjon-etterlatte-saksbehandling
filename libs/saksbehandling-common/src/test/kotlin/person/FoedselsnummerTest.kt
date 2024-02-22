@@ -4,6 +4,7 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.InvalidFoedselsnummerException
 import no.nav.etterlatte.libs.common.person.firesifretAarstallFraTosifret
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
@@ -92,6 +93,11 @@ internal class FoedselsnummerTest {
     fun `Sjekk diverse ugyldige tekst verdier`() {
         assertThrows<InvalidFoedselsnummerException> { Folkeregisteridentifikator.of("") }
         assertThrows<InvalidFoedselsnummerException> { Folkeregisteridentifikator.of("hei") }
+    }
+
+    @Test
+    fun `Null er ikke gyldig`() {
+        assertFalse(Folkeregisteridentifikator.isValid(null))
     }
 
     @Test

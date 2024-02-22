@@ -1,6 +1,6 @@
 rootProject.name = "pensjon-etterlatte-saksbehandling"
 plugins {
-    kotlin("jvm") version "1.8.21" apply false
+    kotlin("jvm") version "1.9.22" apply false
 }
 include(
     "apps:etterlatte-fordeler",
@@ -28,12 +28,14 @@ include(
     "apps:etterlatte-statistikk",
     "apps:etterlatte-vilkaarsvurdering",
     "apps:etterlatte-vilkaarsvurdering-kafka",
+    "apps:etterlatte-tidshendelser",
     "apps:etterlatte-trygdetid",
     "apps:etterlatte-trygdetid-kafka",
     "apps:etterlatte-samordning-vedtak",
     "libs:saksbehandling-common",
     "libs:rapidsandrivers-extras",
     "libs:etterlatte-behandling-model",
+    "libs:etterlatte-brev-model",
     "libs:etterlatte-oppgave-model",
     "libs:etterlatte-beregning-model",
     "libs:etterlatte-database",

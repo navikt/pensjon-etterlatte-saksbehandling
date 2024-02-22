@@ -5,20 +5,30 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.KlageKlient
+import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
+import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
+import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
-import no.nav.etterlatte.libs.common.behandling.KlageHendelseType
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
-import no.nav.etterlatte.libs.common.behandling.KlageUtfall
+import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
+import no.nav.etterlatte.libs.common.behandling.KlageVedtak
+import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
 import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
+import no.nav.etterlatte.libs.common.klage.KlageHendelseType
+import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
@@ -32,7 +42,10 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 interface KlageService {
-    fun opprettKlage(sakId: Long): Klage
+    fun opprettKlage(
+        sakId: Long,
+        innkommendeKlage: InnkommendeKlage,
+    ): Klage
 
     fun hentKlage(id: UUID): Klage?
 
@@ -50,6 +63,12 @@ interface KlageService {
         saksbehandler: Saksbehandler,
     ): Klage
 
+    fun lagreInitieltUtfallMedBegrunnelseAvKlage(
+        klageId: UUID,
+        utfall: InitieltUtfallMedBegrunnelseDto,
+        saksbehandler: Saksbehandler,
+    ): Klage
+
     fun haandterKabalrespons(
         klageId: UUID,
         kabalrespons: Kabalrespons,
@@ -59,7 +78,19 @@ interface KlageService {
         klageId: UUID,
         saksbehandler: Saksbehandler,
     ): Klage
+
+    fun avbrytKlage(
+        klageId: UUID,
+        aarsak: AarsakTilAvbrytelse,
+        kommentar: String,
+        saksbehandler: Saksbehandler,
+    )
 }
+
+class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
+    code = "MANGLER_SAKSBEHANDLER_PAA_OPPGAVE",
+    detail = msg,
+)
 
 class KlageServiceImpl(
     private val klageDao: KlageDao,
@@ -68,13 +99,18 @@ class KlageServiceImpl(
     private val oppgaveService: OppgaveService,
     private val brevApiKlient: BrevApiKlient,
     private val klageKlient: KlageKlient,
+    private val klageHendelser: IKlageHendelserService,
+    private val vedtakKlient: VedtakKlient,
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun opprettKlage(sakId: Long): Klage {
+    override fun opprettKlage(
+        sakId: Long,
+        innkommendeKlage: InnkommendeKlage,
+    ): Klage {
         val sak = sakDao.hentSak(sakId) ?: throw NotFoundException("Fant ikke sak med id=$sakId")
 
-        val klage = Klage.ny(sak)
+        val klage = Klage.ny(sak, innkommendeKlage)
         logger.info("Oppretter klage med id=${klage.id} på sak med id=$sakId")
 
         klageDao.lagreKlage(klage)
@@ -95,6 +131,11 @@ class KlageServiceImpl(
             saksbehandler = null,
             kommentar = null,
             begrunnelse = null,
+        )
+
+        klageHendelser.sendKlageHendelseRapids(
+            StatistikkKlage(klage.id, klage, Tidspunkt.now()),
+            KlageHendelseType.OPPRETTET,
         )
 
         return klage
@@ -130,42 +171,68 @@ class KlageServiceImpl(
         return oppdatertKlage
     }
 
+    override fun lagreInitieltUtfallMedBegrunnelseAvKlage(
+        klageId: UUID,
+        utfall: InitieltUtfallMedBegrunnelseDto,
+        saksbehandler: Saksbehandler,
+    ): Klage {
+        val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
+        val oppdatertKlage = klage.oppdaterIntieltUtfallMedBegrunnelse(utfall, saksbehandler.ident)
+        klageDao.lagreKlage(oppdatertKlage)
+        return oppdatertKlage
+    }
+
     override fun lagreUtfallAvKlage(
         klageId: UUID,
         utfall: KlageUtfallUtenBrev,
         saksbehandler: Saksbehandler,
     ): Klage {
-        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Fant ikke klage med id=$klageId")
+        val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
 
         val utfallMedBrev =
             when (utfall) {
                 // Vurder å slette brev hvis det finnes her? Så vi ikke polluter med hengende brev
                 is KlageUtfallUtenBrev.Omgjoering ->
-                    KlageUtfall.Omgjoering(
+                    KlageUtfallMedData.Omgjoering(
                         omgjoering = utfall.omgjoering,
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
 
                 is KlageUtfallUtenBrev.DelvisOmgjoering ->
-                    KlageUtfall.DelvisOmgjoering(
+                    KlageUtfallMedData.DelvisOmgjoering(
                         omgjoering = utfall.omgjoering,
                         innstilling =
                             InnstillingTilKabal(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
-                                tekst = utfall.innstilling.tekst,
+                                internKommentar = utfall.innstilling.internKommentar,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
 
                 is KlageUtfallUtenBrev.StadfesteVedtak ->
-                    KlageUtfall.StadfesteVedtak(
+                    KlageUtfallMedData.StadfesteVedtak(
                         innstilling =
                             InnstillingTilKabal(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
-                                tekst = utfall.innstilling.tekst,
+                                internKommentar = utfall.innstilling.internKommentar,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
+                        saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
+                    )
+
+                is KlageUtfallUtenBrev.Avvist -> {
+                    val (vedtak, brev) = opprettVedtakOgBrev(klage, saksbehandler)
+                    KlageUtfallMedData.Avvist(
+                        saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
+                        vedtak = vedtak,
+                        brev = brev,
+                    )
+                }
+
+                is KlageUtfallUtenBrev.AvvistMedOmgjoering ->
+                    KlageUtfallMedData.AvvistMedOmgjoering(
+                        omgjoering = utfall.omgjoering,
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
             }
@@ -176,18 +243,50 @@ class KlageServiceImpl(
         return klageMedOppdatertUtfall
     }
 
+    private fun opprettVedtakOgBrev(
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): Pair<KlageVedtak, KlageVedtaksbrev> {
+        return when (val utfall = klage.utfall) {
+            is KlageUtfallMedData.Avvist -> Pair(utfall.vedtak, utfall.brev)
+            else -> {
+                return runBlocking {
+                    val vedtakId = lagreVedtakForAvvisning(klage, saksbehandler)
+                    val vedtaksbrevId = opprettVedtaksbrevForAvvisning(klage, saksbehandler)
+                    Pair(vedtakId, vedtaksbrevId)
+                }
+            }
+        }
+    }
+
     private fun brevForInnstilling(
         klage: Klage,
         saksbehandler: Saksbehandler,
     ): KlageBrevInnstilling {
         return when (val utfall = klage.utfall) {
-            is KlageUtfall.DelvisOmgjoering -> utfall.innstilling.brev
-            is KlageUtfall.StadfesteVedtak -> utfall.innstilling.brev
+            is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling.brev
+            is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling.brev
             else -> {
                 val brev = runBlocking { brevApiKlient.opprettKlageInnstillingsbrevISak(klage.sak.id, saksbehandler) }
                 KlageBrevInnstilling(brev.id)
             }
         }
+    }
+
+    private fun opprettVedtaksbrevForAvvisning(
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): KlageVedtaksbrev {
+        val brevDto = runBlocking { brevApiKlient.opprettVedtaksbrev(klage.id, klage.sak.id, saksbehandler) }
+        return KlageVedtaksbrev(brevDto.id)
+    }
+
+    private fun lagreVedtakForAvvisning(
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): KlageVedtak {
+        val vedtakId = runBlocking { vedtakKlient.lagreVedtakKlage(klage, saksbehandler) }
+        return KlageVedtak(vedtakId)
     }
 
     override fun haandterKabalrespons(
@@ -211,6 +310,16 @@ class KlageServiceImpl(
             }
         }
 
+        hendelseDao.klageHendelse(
+            klageId = opprinneligKlage.id,
+            sakId = opprinneligKlage.sak.id,
+            hendelse = KlageHendelseType.KABAL_HENDELSE,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = null,
+            kommentar = "Mottok status=${kabalrespons.kabalStatus} fra kabal, med resultat=${kabalrespons.resultat}",
+            begrunnelse = null,
+        )
+
         klageDao.oppdaterKabalStatus(klageId, kabalrespons)
     }
 
@@ -218,25 +327,35 @@ class KlageServiceImpl(
         klageId: UUID,
         saksbehandler: Saksbehandler,
     ): Klage {
-        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Kunne ikke finne klage med id=$klageId")
+        val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
 
         if (!klage.kanFerdigstille()) {
-            throw IllegalStateException("Klagen med id=$klageId kan ikke ferdigstilles siden den har feil status / tilstand")
+            throw UgyldigForespoerselException(
+                code = "KLAGE_KAN_IKKE_FERDIGSTILLES",
+                detail = "Klagen med id=$klageId kan ikke ferdigstilles siden den har feil status / tilstand",
+            )
         }
 
-        val saksbehandlerForKlageOppgave = oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(klageId.toString())
-        if (saksbehandlerForKlageOppgave != saksbehandler.ident) {
-            throw IllegalArgumentException(
-                "Saksbehandler er ikke ansvarlig på oppgaven til klagen med id=$klageId, " +
-                    "og kan derfor ikke ferdigstille behandlingen",
+        val saksbehandlerForKlageOppgave =
+            oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(klageId.toString())
+                ?: throw ManglerSaksbehandlerException("Fant ingen saksbehandler på oppgave relatert til klageid $klageId")
+
+        if (saksbehandlerForKlageOppgave.ident != saksbehandler.ident) {
+            throw UgyldigForespoerselException(
+                code = "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
+                detail =
+                    "Saksbehandler er ikke ansvarlig på oppgaven til klagen med id=$klageId, " +
+                        "og kan derfor ikke ferdigstille behandlingen",
             )
         }
 
         val (innstilling, omgjoering) =
             when (val utfall = klage.utfall) {
-                is KlageUtfall.StadfesteVedtak -> utfall.innstilling to null
-                is KlageUtfall.DelvisOmgjoering -> utfall.innstilling to utfall.omgjoering
-                is KlageUtfall.Omgjoering -> null to utfall.omgjoering
+                is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling to null
+                is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling to utfall.omgjoering
+                is KlageUtfallMedData.Omgjoering -> null to utfall.omgjoering
+                is KlageUtfallMedData.Avvist -> null to null
+                is KlageUtfallMedData.AvvistMedOmgjoering -> null to utfall.omgjoering
                 null -> null to null
             }
 
@@ -262,7 +381,47 @@ class KlageServiceImpl(
             begrunnelse = null,
         )
 
+        klageHendelser.sendKlageHendelseRapids(
+            StatistikkKlage(klage.id, klage, Tidspunkt.now(), saksbehandler.ident),
+            KlageHendelseType.FERDIGSTILT,
+        )
+
         return klageMedOppdatertResultat
+    }
+
+    override fun avbrytKlage(
+        klageId: UUID,
+        aarsak: AarsakTilAvbrytelse,
+        kommentar: String,
+        saksbehandler: Saksbehandler,
+    ) {
+        val klage =
+            hentKlage(klageId)
+                ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+        if (!klage.kanAvbryte()) {
+            throw IkkeTillattException("KLAGE_KAN_IKKE_AVBRYTES", "Klage med id=$klageId kan ikke avbrytes")
+        }
+
+        val avbruttKlage = klage.avbryt(aarsak)
+
+        klageDao.lagreKlage(avbruttKlage).also {
+            oppgaveService.avbrytOppgaveUnderBehandling(klageId.toString(), saksbehandler)
+
+            hendelseDao.klageHendelse(
+                klageId = avbruttKlage.id,
+                sakId = avbruttKlage.sak.id,
+                hendelse = KlageHendelseType.AVBRUTT,
+                inntruffet = Tidspunkt.now(),
+                saksbehandler = saksbehandler.ident(),
+                kommentar = kommentar,
+                begrunnelse = aarsak.name,
+            )
+        }
+
+        klageHendelser.sendKlageHendelseRapids(
+            StatistikkKlage(avbruttKlage.id, avbruttKlage, Tidspunkt.now(), saksbehandler.ident),
+            KlageHendelseType.AVBRUTT,
+        )
     }
 
     private fun ferdigstillInnstilling(
@@ -293,11 +452,14 @@ class KlageServiceImpl(
                 ekstradataInnstilling =
                     EkstradataInnstilling(
                         mottakerInnstilling = brev.mottaker,
-                        vergeEllerFullmektig = null, // TODO: Håndter verge
+                        // TODO: Håndter verge
+                        vergeEllerFullmektig = null,
                         journalpostInnstillingsbrev = journalpostId,
-                        journalpostKlage = null, // TODO: koble på når vi har inngang til klage
-                        journalpostSoeknad = null, // TODO: koble på når vi har journalpost soeknad inn
-                        journalpostVedtak = null, // TODO: hent ut vedtaksbrev for vedtaket
+                        journalpostKlage = klage.innkommendeDokument?.journalpostId,
+                        // TODO: koble på når vi har journalpost soeknad inn
+                        journalpostSoeknad = null,
+                        // TODO: hent ut vedtaksbrev for vedtaket
+                        journalpostVedtak = null,
                     ),
             )
         }
@@ -332,18 +494,49 @@ class KlageServiceImpl(
         brevId: Long,
         saksbehandler: Saksbehandler,
     ): Pair<Tidspunkt, String> {
-        // TODO: Her bør vi ha noe error recovery: Hent status på brevet, og forsøk en resume fra der.
-        brevApiKlient.ferdigstillBrev(sakId, brevId, saksbehandler)
-        val journalpostIdJournalfoering = brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler).journalpostId
+        val eksisterendeInnstillingsbrev = brevApiKlient.hentBrev(sakId, brevId, saksbehandler)
+        if (eksisterendeInnstillingsbrev.status.ikkeFerdigstilt()) {
+            brevApiKlient.ferdigstillBrev(sakId, brevId, saksbehandler)
+        } else {
+            logger.info("Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede ferdigstilt")
+        }
+
+        val journalpostIdJournalfoering =
+            if (eksisterendeInnstillingsbrev.status.ikkeJournalfoert()) {
+                brevApiKlient.journalfoerBrev(sakId, brevId, saksbehandler).journalpostId
+            } else {
+                logger.info(
+                    "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
+                        "journalført på journalpostId=${eksisterendeInnstillingsbrev.journalpostId}",
+                )
+                requireNotNull(eksisterendeInnstillingsbrev.journalpostId) {
+                    "Har et brev med id=$brevId med status=${eksisterendeInnstillingsbrev.status} som mangler journalpostId"
+                }
+            }
         val tidspunktJournalfoert = Tidspunkt.now()
-        val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId
-        logger.info(
-            "Distribusjon av innstillingsbrevet med id=$brevId bestilt til klagen i sak med sakId=$sakId, " +
-                "med bestillingsId $bestillingsIdDistribuering",
-        )
+
+        if (eksisterendeInnstillingsbrev.status.ikkeDistribuert()) {
+            val bestillingsIdDistribuering = brevApiKlient.distribuerBrev(sakId, brevId, saksbehandler).bestillingsId
+            logger.info(
+                "Distribusjon av innstillingsbrevet med id=$brevId bestilt til klagen i sak med sakId=$sakId, " +
+                    "med bestillingsId $bestillingsIdDistribuering",
+            )
+        } else {
+            logger.info(
+                "Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede " +
+                    "distribuert med bestillingsid=${eksisterendeInnstillingsbrev.bestillingsID}",
+            )
+        }
+
         return tidspunktJournalfoert to journalpostIdJournalfoering
     }
 }
 
 class OmgjoeringMaaGjeldeEtVedtakException(klage: Klage) :
-    Exception("Klagen med id=${klage.id} skal resultere i en omgjøring, men mangler et vedtak som klagen gjelder")
+    UgyldigForespoerselException(
+        code = "OMGJOERING_MAA_GJELDE_ET_VEDTAK",
+        detail = "Klagen med id=${klage.id} skal resultere i en omgjøring, men mangler et vedtak som klagen gjelder",
+    )
+
+class KlageIkkeFunnetException(klageId: UUID) :
+    IkkeFunnetException(code = "KLAGE_IKKE_FUNNET", detail = "Kunne ikke finne klage med id=$klageId")

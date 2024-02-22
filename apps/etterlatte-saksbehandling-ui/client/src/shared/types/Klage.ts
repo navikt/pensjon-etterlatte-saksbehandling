@@ -19,6 +19,22 @@ export const teksterKabalUtfall: Record<KabalResultat, string> = {
   MEDHOLD: 'Medhold',
 }
 
+export interface NyKlageRequestUtfylling {
+  mottattDato: string
+}
+
+export interface NyKlageRequest extends NyKlageRequestUtfylling {
+  sakId: number
+  journalpostId: string
+  innsender?: string
+}
+
+export interface AvsluttKlageRequest {
+  klageId: string
+  aarsakTilAvbrytelse: AarsakTilAvslutting
+  kommentar: string
+}
+
 export interface Klage {
   id: string
   sak: ISak
@@ -26,8 +42,16 @@ export interface Klage {
   status: KlageStatus
   kabalStatus?: KabalStatus
   formkrav?: FormkravMedSaksbehandler
+  initieltUtfall?: InitieltUtfallMedBegrunnelseOgMeta
   utfall?: KlageUtfall
   kabalResultat?: KabalResultat
+  innkommendeDokument?: InnkommendeKlage
+}
+
+export interface InnkommendeKlage {
+  mottattDato: string
+  journalpostId: string
+  innsender?: string
 }
 
 export enum KlageStatus {
@@ -36,6 +60,7 @@ export enum KlageStatus {
   FORMKRAV_IKKE_OPPFYLT = 'FORMKRAV_IKKE_OPPFYLT',
   UTFALL_VURDERT = 'UTFALL_VURDERT',
   FERDIGSTILT = 'FERDIGSTILT',
+  AVBRUTT = 'AVBRUTT',
 }
 
 export const teksterKlagestatus: Record<KlageStatus, string> = {
@@ -44,10 +69,17 @@ export const teksterKlagestatus: Record<KlageStatus, string> = {
   FORMKRAV_IKKE_OPPFYLT: 'Formkrav vurdert ikke oppfylt',
   UTFALL_VURDERT: 'Utfall av klagen vurdert',
   FERDIGSTILT: 'Klagen ferdigstilt i Gjenny',
+  AVBRUTT: 'Klagen avsluttet',
 }
 
 export const erKlageRedigerbar = (klage: Klage) => {
-  return klage.status !== KlageStatus.FERDIGSTILT
+  const redigerbareStatuser = [
+    KlageStatus.OPPRETTET,
+    KlageStatus.FORMKRAV_IKKE_OPPFYLT,
+    KlageStatus.FORMKRAV_OPPFYLT,
+    KlageStatus.UTFALL_VURDERT,
+  ]
+  return redigerbareStatuser.includes(klage.status)
 }
 
 export const enum KabalStatus {
@@ -78,6 +110,7 @@ export interface Formkrav {
   gjelderKlagenNoeKonkretIVedtaket: JaNei
   erKlagenFramsattInnenFrist: JaNei
   erFormkraveneOppfylt: JaNei
+  begrunnelse: string | null
 }
 
 export interface FormkravMedSaksbehandler {
@@ -89,12 +122,27 @@ export enum Utfall {
   OMGJOERING = 'OMGJOERING',
   DELVIS_OMGJOERING = 'DELVIS_OMGJOERING',
   STADFESTE_VEDTAK = 'STADFESTE_VEDTAK',
+  AVVIST = 'AVVIST',
+  AVVIST_MED_OMGJOERING = 'AVVIST_MED_OMGJOERING',
+}
+
+export interface InitieltUtfallMedBegrunnelseOgMeta {
+  utfallMedBegrunnelse: IniteltUtfallMedBegrunnelseDto
+  saksbehandler: string
+  tidspunkt: string
+}
+
+export interface IniteltUtfallMedBegrunnelseDto {
+  utfall: Utfall
+  begrunnelse: string
 }
 
 export const teksterKlageutfall: Record<Utfall, string> = {
   OMGJOERING: 'Omgjøring',
   DELVIS_OMGJOERING: 'Delvis omgjøring',
   STADFESTE_VEDTAK: 'Stadfeste vedtak',
+  AVVIST: 'Avvise klage med brev',
+  AVVIST_MED_OMGJOERING: 'Avvise klage',
 } as const
 
 export type KlageUtfall =
@@ -114,6 +162,17 @@ export type KlageUtfall =
       innstilling: InnstillingTilKabal
       saksbehandler: KildeSaksbehandler
     }
+  | {
+      utfall: 'AVVIST'
+      saksbehandler: KildeSaksbehandler
+      vedtak: KlageVedtakAvvisning
+      brev: KlageBrevAvvisning
+    }
+  | {
+      utfall: 'AVVIST_MED_OMGJOERING'
+      omgjoering: Omgjoering
+      saksbehandler: KildeSaksbehandler
+    }
 
 export type KlageUtfallUtenBrev =
   | {
@@ -129,14 +188,43 @@ export type KlageUtfallUtenBrev =
       utfall: 'STADFESTE_VEDTAK'
       innstilling: InnstillingTilKabalUtenBrev
     }
+  | {
+      utfall: 'AVVIST'
+    }
+  | {
+      utfall: 'AVVIST_MED_OMGJOERING'
+      omgjoering: Omgjoering
+    }
+
+export enum AarsakTilAvslutting {
+  BRUKER_HAR_TRUKKET_KLAGEN = 'BRUKER_HAR_TRUKKET_KLAGEN',
+  FEILREGISTRERT = 'FEILREGISTRERT',
+  ALLEREDE_LOEST = 'ALLEREDE_LOEST',
+  ANNET = 'ANNET',
+}
+
+export const teksterAarsakTilAvslutting: Record<AarsakTilAvslutting, string> = {
+  BRUKER_HAR_TRUKKET_KLAGEN: 'Klagen er blitt trukket av søker',
+  FEILREGISTRERT: 'Opprettet ved en feil',
+  ALLEREDE_LOEST: 'Saken er allerede blitt løst',
+  ANNET: 'Ingen av alternativene passer',
+}
 
 interface KlageBrevInnstilling {
   brevId: number
 }
 
+interface KlageBrevAvvisning {
+  brevId: number
+}
+
+interface KlageVedtakAvvisning {
+  vedtakId: number
+}
+
 export interface InnstillingTilKabal {
   lovhjemmel: LovhjemmelFelles
-  tekst: string
+  internKommentar: string | null
   brev: KlageBrevInnstilling
 }
 

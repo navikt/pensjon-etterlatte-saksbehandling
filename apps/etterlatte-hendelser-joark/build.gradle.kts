@@ -29,7 +29,11 @@ dependencies {
     implementation(libs.jackson.datatypejsr310)
 
     implementation(libs.kafka.clients)
-    implementation(libs.kafka.avro)
+    implementation(libs.kafka.avro) {
+        exclude("org.apache.commons", "commons-compress")
+    }
+    implementation(libs.commons.compress)
+
     implementation(libs.kafka.avroserializer)
 
     implementation(libs.teamdokumenthandtering.avroschemas)

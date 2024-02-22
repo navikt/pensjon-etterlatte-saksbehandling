@@ -13,7 +13,7 @@ data class MaanedStoenadRad(
     val fnrForeldre: List<String>,
     val fnrSoesken: List<String>,
     val anvendtTrygdetid: String,
-    val nettoYtelse: String,
+    val nettoYtelse: String?,
     val avkortingsbeloep: String,
     val aarsinntekt: String,
     val beregningType: String,
@@ -53,15 +53,17 @@ class MaanedStatistikk(val maaned: YearMonth, stoenadRader: List<StoenadRad>) {
                     }
                 val nettoYtelse =
                     aktuellBeregnetYtelse?.utbetaltBeloep
-                        ?: sisteVedtak.nettoYtelse.toInt() // TODO nettoYtelse til skal utbedres?
+                        ?: sisteVedtak.nettoYtelse?.toInt() // TODO nettoYtelse til skal utbedres?
+                        ?: 0
 
                 val (avkortingsbeloep, aarsinntekt) =
                     sisteVedtak.avkorting?.let { avkorting ->
                         val aktuellAvkorting =
                             avkorting.avkortetYtelse.find { it.fom <= maaned && (it.tom ?: maaned) >= maaned }
-                        val aktuellAarsinntekt =
+                        val avkortingGrunnlag =
                             avkorting.avkortingGrunnlag.find { it.fom <= maaned && (it.tom ?: maaned) >= maaned }
-                        Pair(aktuellAvkorting?.avkortingsbeloep, aktuellAarsinntekt?.aarsinntekt)
+                        val aarsinntekt = avkortingGrunnlag?.let { it.aarsinntekt - it.fratrekkInnAar }
+                        Pair(aktuellAvkorting?.avkortingsbeloep, aarsinntekt)
                     } ?: Pair(null, null)
 
                 val erOpphoer =

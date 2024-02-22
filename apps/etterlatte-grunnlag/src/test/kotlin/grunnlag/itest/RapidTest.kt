@@ -1,60 +1,46 @@
-package grunnlag.itest
+package no.nav.etterlatte.grunnlag.itest
 
 import com.fasterxml.jackson.databind.JsonNode
 import io.mockk.mockk
-import no.nav.etterlatte.grunnlag.GrunnlagHendelserRiver
+import no.nav.etterlatte.grunnlag.GrunnlagDbExtension
 import no.nav.etterlatte.grunnlag.OpplysningDao
 import no.nav.etterlatte.grunnlag.RealGrunnlagService
 import no.nav.etterlatte.grunnlag.klienter.PdlTjenesterKlientImpl
+import no.nav.etterlatte.grunnlag.rivers.GrunnlagHendelserRiver
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.objectMapper
+import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.FNR_KEY
+import no.nav.etterlatte.rapidsandrivers.NY_OPPLYSNING_KEY
+import no.nav.etterlatte.rapidsandrivers.OPPLYSNING_KEY
+import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.FNR_KEY
-import rapidsandrivers.OPPLYSNING_KEY
-import rapidsandrivers.SAK_ID_KEY
+import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class RapidTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
+@ExtendWith(GrunnlagDbExtension::class)
+internal class RapidTest(private val dataSource: DataSource) {
     private lateinit var opplysningRepo: OpplysningDao
     private lateinit var grunnlagService: RealGrunnlagService
     private lateinit var inspector: TestRapid
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        val dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            )
-        dataSource.migrate()
-
         opplysningRepo = OpplysningDao(dataSource)
         val pdlTjenesterKlientImpl = mockk<PdlTjenesterKlientImpl>()
         grunnlagService = RealGrunnlagService(pdlTjenesterKlientImpl, opplysningRepo, mockk(), mockk(), mockk())
@@ -62,11 +48,6 @@ internal class RapidTest {
             TestRapid().apply {
                 GrunnlagHendelserRiver(this, grunnlagService)
             }
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     private val fnr = AVDOED_FOEDSELSNUMMER
@@ -88,7 +69,7 @@ internal class RapidTest {
         private val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    "@event_name" to "OPPLYSNING:NY",
+                    EVENT_NAME_KEY to NY_OPPLYSNING_KEY,
                     OPPLYSNING_KEY to listOf(nyOpplysning),
                     FNR_KEY to fnr,
                     SAK_ID_KEY to 1,
@@ -107,7 +88,7 @@ internal class RapidTest {
         private val melding =
             JsonMessage.newMessage(
                 mapOf(
-                    "@behov" to Opplysningstype.SOEKER_PDL_V1,
+                    BEHOV_NAME_KEY to Opplysningstype.SOEKER_PDL_V1,
                     OPPLYSNING_KEY to listOf(nyOpplysning),
                     FNR_KEY to fnr,
                     SAK_ID_KEY to 1,

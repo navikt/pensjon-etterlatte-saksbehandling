@@ -1,6 +1,8 @@
 package no.nav.etterlatte.behandling
 
 import io.kotest.matchers.collections.shouldContainExactly
+import no.nav.etterlatte.ConnectionAutoclosingTest
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
@@ -10,64 +12,45 @@ import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Saker
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BehandlingDaoReguleringTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
+internal class BehandlingDaoReguleringTest(val dataSource: DataSource) {
+    companion object {
+        @RegisterExtension
+        private val dbExtension = DatabaseExtension()
+    }
 
-    private lateinit var dataSource: DataSource
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingRepo: BehandlingDao
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
-        val connection = dataSource.connection
-        sakRepo = SakDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
-            BehandlingDao(KommerBarnetTilGodeDao { connection }, RevurderingDao { connection }) { connection }
+            BehandlingDao(
+                KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
+            )
     }
 
     @AfterEach
     fun afterEach() {
-        dataSource.connection.use {
-            it.prepareStatement("TRUNCATE behandling CASCADE;").execute()
-        }
+        dbExtension.resetDb()
     }
 
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
-    }
-
-    private fun hentMigrerbareStatuses() = BehandlingStatus.values().toList() - BehandlingStatus.skalIkkeOmregnesVedGRegulering().toSet()
+    private fun hentMigrerbareStatuses() = BehandlingStatus.entries - BehandlingStatus.skalIkkeOmregnesVedGRegulering().toSet()
 
     @ParameterizedTest(
         name = "behandling med status {0} skal endres til aa vaere VILKAARSVURDERT",

@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   liveness:
     initialDelay: 5
@@ -43,6 +43,10 @@ spec:
         databases:
           - name: fordeling
             envVarPrefix: DB
+  resources:
+    requests:
+      cpu: 10m
+      memory: 320Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -69,7 +73,6 @@ spec:
     outbound:
       rules:
         - application: etterlatte-pdltjenester
-        - application: etterlatte-gyldig-soeknad
         - application: etterlatte-behandling
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

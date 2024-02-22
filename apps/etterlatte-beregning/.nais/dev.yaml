@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   ingresses:
     - "https://etterlatte-beregning.intern.dev.nav.no"
@@ -21,6 +21,10 @@ spec:
     path: /metrics
   secureLogs:
     enabled: true
+  resources:
+    requests:
+      cpu: 25m
+      memory: 384Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 2
@@ -81,9 +85,8 @@ spec:
     inbound:
       rules:
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
         - application: etterlatte-brev-api
         - application: etterlatte-vedtaksvurdering
-        - application: etterlatte-behandling
         - application: etterlatte-statistikk
         - application: etterlatte-beregning-kafka

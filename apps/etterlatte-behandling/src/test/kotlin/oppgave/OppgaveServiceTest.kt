@@ -2,11 +2,12 @@ package no.nav.etterlatte.oppgave
 
 import com.nimbusds.jwt.JWTClaimsSet
 import io.ktor.server.plugins.BadRequestException
-import io.ktor.server.plugins.NotFoundException
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
+import no.nav.etterlatte.DatabaseContextTest
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
@@ -24,33 +25,31 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
-import java.sql.Connection
+import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class OppgaveServiceTest {
-    private lateinit var dataSource: DataSource
+@ExtendWith(DatabaseExtension::class)
+internal class OppgaveServiceTest(val dataSource: DataSource) {
     private lateinit var sakDao: SakDao
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var oppgaveService: OppgaveService
@@ -62,27 +61,12 @@ internal class OppgaveServiceTest {
     private val attestantRolleDev = "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
-        val connection = dataSource.connection
         featureToggleService = DummyFeatureToggleService()
-        sakDao = SakDao { connection }
-        oppgaveDao = OppgaveDaoImpl { connection }
-        oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDao) { connection }
+        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
+        oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
+        oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
         oppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao)
         saktilgangDao = SakTilgangDao(dataSource)
     }
@@ -107,15 +91,7 @@ internal class OppgaveServiceTest {
         Kontekst.set(
             Context(
                 userMock,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
+                DatabaseContextTest(dataSource),
             ),
         )
     }
@@ -130,8 +106,9 @@ internal class OppgaveServiceTest {
     @BeforeEach
     fun beforeEach() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.enheter() } returns Enheter.enheterMedLesetilgang().toList()
         every { saksbehandler.name() } returns "ident"
+        every { saksbehandler.erSuperbruker() } returns false
 
         setNewKontekstWithMockUser(saksbehandler)
 
@@ -143,11 +120,6 @@ internal class OppgaveServiceTest {
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE oppgave CASCADE;").execute()
         }
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Test
@@ -165,7 +137,28 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
+        assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler?.ident)
+    }
+
+    @Test
+    fun `skal kunne tildele seg oppgave som er tildelt systembruker`() {
+        val systemBruker = mockk<SystemUser> { every { name() } returns Fagsaksystem.EY.navn }
+        setNewKontekstWithMockUser(systemBruker)
+
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val referanse = "referanse"
+        val nyOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                referanse,
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+
+        val bruker = Saksbehandler("", "ident1", null)
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, Fagsaksystem.EY.navn)
+        assertDoesNotThrow { oppgaveService.tildelSaksbehandler(nyOppgave.id, bruker.ident()) }
     }
 
     @Test
@@ -198,7 +191,7 @@ internal class OppgaveServiceTest {
 
         oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, systembruker)
         val systembrukerOppgave = oppgaveService.hentOppgave(sakIdOgReferanse.id)
-        Assertions.assertEquals(systembruker, systembrukerOppgave?.saksbehandler!!)
+        assertEquals(systembruker, systembrukerOppgave?.saksbehandler!!.ident)
     }
 
     @Test
@@ -232,7 +225,7 @@ internal class OppgaveServiceTest {
 
         oppgaveService.tildelSaksbehandler(sakIdOgReferanse.id, attestantmedRoller.saksbehandler.ident)
         val attestantTildeltOppgave = oppgaveService.hentOppgave(sakIdOgReferanse.id)
-        Assertions.assertEquals(attestantmedRoller.saksbehandler.ident, attestantTildeltOppgave?.saksbehandler!!)
+        assertEquals(attestantmedRoller.saksbehandler.ident, attestantTildeltOppgave?.saksbehandler!!.ident)
     }
 
     @Test
@@ -282,21 +275,19 @@ internal class OppgaveServiceTest {
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
-        val err =
-            assertThrows<BadRequestException> {
-                oppgaveService.tildelSaksbehandler(nyOppgave.id, "enda en")
-            }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven har allerede en saksbehandler"))
+        assertThrows<OppgaveAlleredeTildeltSaksbehandler> {
+            oppgaveService.tildelSaksbehandler(nyOppgave.id, "enda en")
+        }
     }
 
     @Test
     fun `skal ikke kunne tildele hvis oppgaven ikke finnes`() {
         val nysaksbehandler = "nysaksbehandler"
         val err =
-            assertThrows<NotFoundException> {
+            assertThrows<OppgaveIkkeFunnet> {
                 oppgaveService.tildelSaksbehandler(UUID.randomUUID(), nysaksbehandler)
             }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
+        assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
@@ -312,7 +303,7 @@ internal class OppgaveServiceTest {
             )
         oppgaveDao.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
-        assertThrows<IllegalStateException> {
+        assertThrows<OppgaveKanIkkeEndres> {
             oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
         }
     }
@@ -342,8 +333,8 @@ internal class OppgaveServiceTest {
         val oppgaveBehandlingEtterAvbryt = oppgaveService.hentOppgave(oppgaveBehandling.id)
         val oppgaveAttesteringEtterAvbryt = oppgaveService.hentOppgave(oppgaveAttestering.id)
 
-        Assertions.assertEquals(Status.AVBRUTT, oppgaveBehandlingEtterAvbryt?.status)
-        Assertions.assertEquals(Status.AVBRUTT, oppgaveAttesteringEtterAvbryt?.status)
+        assertEquals(Status.AVBRUTT, oppgaveBehandlingEtterAvbryt?.status)
+        assertEquals(Status.AVBRUTT, oppgaveAttesteringEtterAvbryt?.status)
     }
 
     @Test
@@ -392,8 +383,8 @@ internal class OppgaveServiceTest {
 
         val oppgaveFerdigstiltEtterAvbryt = oppgaveService.hentOppgave(oppgaveFerdigstilt.id)
         val oppgaveUnderBehandlingEtterAvbryt = oppgaveService.hentOppgave(oppgaveUnderBehandlingAnnenBehandling.id)
-        Assertions.assertEquals(Status.FERDIGSTILT, oppgaveFerdigstiltEtterAvbryt?.status)
-        Assertions.assertEquals(Status.UNDER_BEHANDLING, oppgaveUnderBehandlingEtterAvbryt?.status)
+        assertEquals(Status.FERDIGSTILT, oppgaveFerdigstiltEtterAvbryt?.status)
+        assertEquals(Status.UNDER_BEHANDLING, oppgaveUnderBehandlingEtterAvbryt?.status)
     }
 
     @Test
@@ -411,7 +402,7 @@ internal class OppgaveServiceTest {
         oppgaveService.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
+        assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler?.ident)
     }
 
     @Test
@@ -427,21 +418,21 @@ internal class OppgaveServiceTest {
             )
         oppgaveDao.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
         val nysaksbehandler = "nysaksbehandler"
-        assertThrows<IllegalStateException> {
+        assertThrows<OppgaveKanIkkeEndres> {
             oppgaveService.byttSaksbehandler(nyOppgave.id, nysaksbehandler)
         }
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        Assertions.assertEquals(nyOppgave.saksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
+        assertEquals(nyOppgave.saksbehandler, oppgaveMedNySaksbehandler?.saksbehandler?.ident)
     }
 
     @Test
     fun `skal ikke kunne bytte saksbehandler på en ikke eksisterende sak`() {
         val nysaksbehandler = "nysaksbehandler"
         val err =
-            assertThrows<NotFoundException> {
+            assertThrows<OppgaveIkkeFunnet> {
                 oppgaveService.byttSaksbehandler(UUID.randomUUID(), nysaksbehandler)
             }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
+        assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
@@ -461,7 +452,7 @@ internal class OppgaveServiceTest {
         val oppgaveUtenSaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
         Assertions.assertNotNull(oppgaveUtenSaksbehandler?.id)
         Assertions.assertNull(oppgaveUtenSaksbehandler?.saksbehandler)
-        Assertions.assertEquals(Status.NY, oppgaveUtenSaksbehandler?.status)
+        assertEquals(Status.NY, oppgaveUtenSaksbehandler?.status)
     }
 
     @Test
@@ -475,11 +466,10 @@ internal class OppgaveServiceTest {
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
             )
-        val err =
-            assertThrows<BadRequestException> {
-                oppgaveService.fjernSaksbehandler(nyOppgave.id)
-            }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven har ingen saksbehandler"))
+
+        assertThrows<OppgaveIkkeTildeltSaksbehandler> {
+            oppgaveService.fjernSaksbehandler(nyOppgave.id)
+        }
     }
 
     @Test
@@ -496,12 +486,12 @@ internal class OppgaveServiceTest {
         val saksbehandler = "saksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler)
         oppgaveDao.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
-        assertThrows<IllegalStateException> {
+        assertThrows<OppgaveKanIkkeEndres> {
             oppgaveService.fjernSaksbehandler(nyOppgave.id)
         }
         val lagretOppgave = oppgaveService.hentOppgave(nyOppgave.id)
 
-        Assertions.assertEquals(lagretOppgave?.saksbehandler, saksbehandler)
+        assertEquals(lagretOppgave?.saksbehandler?.ident, saksbehandler)
     }
 
     @Test
@@ -519,7 +509,27 @@ internal class OppgaveServiceTest {
         val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(4L).toTidspunkt()
         oppgaveService.redigerFrist(nyOppgave.id, nyFrist)
         val oppgaveMedNyFrist = oppgaveService.hentOppgave(nyOppgave.id)
-        Assertions.assertEquals(nyFrist, oppgaveMedNyFrist?.frist)
+        assertEquals(nyFrist, oppgaveMedNyFrist?.frist)
+    }
+
+    @Test
+    fun `kan sette og fjerne oppgave paa vent`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val nyOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                opprettetSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.FOERSTEGANGSBEHANDLING,
+                null,
+            )
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
+        oppgaveService.oppdaterStatusOgMerknad(nyOppgave.id, "test", nyOppgave.status)
+        val oppgavePaaVent = oppgaveService.hentOppgave(nyOppgave.id)
+        assertEquals(Status.PAA_VENT, oppgavePaaVent?.status)
+        oppgaveService.oppdaterStatusOgMerknad(oppgavePaaVent!!.id, "test", oppgavePaaVent.status)
+        val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
+        assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent?.status)
     }
 
     @Test
@@ -536,12 +546,9 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
         val nyFrist = Tidspunkt.now().toLocalDatetimeUTC().minusMonths(1L).toTidspunkt()
 
-        val err =
-            assertThrows<BadRequestException> {
-                oppgaveService.redigerFrist(nyOppgave.id, nyFrist)
-            }
-
-        Assertions.assertTrue(err.message!!.startsWith("Tidspunkt tilbake i tid id: "))
+        assertThrows<FristTilbakeITid> {
+            oppgaveService.redigerFrist(nyOppgave.id, nyFrist)
+        }
     }
 
     @Test
@@ -557,14 +564,14 @@ internal class OppgaveServiceTest {
             )
 
         oppgaveDao.endreStatusPaaOppgave(nyOppgave.id, Status.FERDIGSTILT)
-        assertThrows<IllegalStateException> {
+        assertThrows<OppgaveKanIkkeEndres> {
             oppgaveService.redigerFrist(
                 oppgaveId = nyOppgave.id,
                 frist = Tidspunkt.now().toLocalDatetimeUTC().plusMonths(1L).toTidspunkt(),
             )
         }
         val lagretOppgave = oppgaveService.hentOppgave(nyOppgave.id)
-        Assertions.assertEquals(nyOppgave.frist, lagretOppgave?.frist)
+        assertEquals(nyOppgave.frist, lagretOppgave?.frist)
     }
 
     @Test
@@ -592,9 +599,9 @@ internal class OppgaveServiceTest {
             )
 
         val saksbehandlerOppgave = oppgaveService.hentOppgave(nyOppgave.id)
-        Assertions.assertEquals(Status.FERDIGSTILT, saksbehandlerOppgave?.status)
-        Assertions.assertEquals(OppgaveType.ATTESTERING, sakIdOgReferanse.type)
-        Assertions.assertEquals(referanse, sakIdOgReferanse.referanse)
+        assertEquals(Status.FERDIGSTILT, saksbehandlerOppgave?.status)
+        assertEquals(OppgaveType.ATTESTERING, sakIdOgReferanse.type)
+        assertEquals(referanse, sakIdOgReferanse.referanse)
     }
 
     @Test
@@ -612,7 +619,7 @@ internal class OppgaveServiceTest {
 
         val saksbehandler1 = "saksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler1)
-        assertThrows<OppgaveService.FeilSaksbehandlerPaaOppgaveException> {
+        assertThrows<OppgaveTilhoererAnnenSaksbehandler> {
             oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
                 SakIdOgReferanse(opprettetSak.id, referanse),
                 OppgaveType.ATTESTERING,
@@ -644,7 +651,7 @@ internal class OppgaveServiceTest {
                 )
             }
 
-        Assertions.assertTrue(
+        assertTrue(
             err.message!!.startsWith("Det må finnes en oppgave under behandling, gjelder behandling:"),
         )
     }
@@ -664,7 +671,7 @@ internal class OppgaveServiceTest {
                 )
             }
 
-        Assertions.assertEquals(
+        assertEquals(
             "Må ha en oppgave for å kunne lage attesteringsoppgave",
             err.message!!,
         )
@@ -705,7 +712,7 @@ internal class OppgaveServiceTest {
                 )
             }
 
-        Assertions.assertTrue(
+        assertTrue(
             err.message!!.startsWith("Skal kun ha en oppgave under behandling, gjelder behandling:"),
         )
     }
@@ -713,10 +720,10 @@ internal class OppgaveServiceTest {
     @Test
     fun `kan ikke fjerne saksbehandler hvis oppgaven ikke finnes`() {
         val err =
-            assertThrows<NotFoundException> {
+            assertThrows<OppgaveIkkeFunnet> {
                 oppgaveService.fjernSaksbehandler(UUID.randomUUID())
             }
-        Assertions.assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
+        assertTrue(err.message!!.startsWith("Oppgaven finnes ikke"))
     }
 
     @Test
@@ -743,12 +750,14 @@ internal class OppgaveServiceTest {
         sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
 
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
 
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandlerRoller)
-        Assertions.assertEquals(1, oppgaver.size)
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        assertEquals(1, oppgaver.size)
         val oppgaveUtenbeskyttelse = oppgaver[0]
-        Assertions.assertEquals(nyOppgave.id, oppgaveUtenbeskyttelse.id)
-        Assertions.assertEquals(nyOppgave.sakId, opprettetSak.id)
+        assertEquals(nyOppgave.id, oppgaveUtenbeskyttelse.id)
+        assertEquals(nyOppgave.sakId, opprettetSak.id)
     }
 
     @Test
@@ -763,17 +772,20 @@ internal class OppgaveServiceTest {
         )
 
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRoller)
-        Assertions.assertEquals(1, oppgaverUtenEndring.size)
-        Assertions.assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr, Enheter.STEINKJER.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
+
+        val oppgaverUtenEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        assertEquals(1, oppgaverUtenEndring.size)
+        assertEquals(Enheter.AALESUND.enhetNr, oppgaverUtenEndring[0].enhet)
 
         oppgaveService.oppdaterEnhetForRelaterteOppgaver(
             listOf(GrunnlagsendringshendelseService.SakMedEnhet(oppgaverUtenEndring[0].sakId, Enheter.STEINKJER.enhetNr)),
         )
-        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRoller)
+        val oppgaverMedEndring = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
 
-        Assertions.assertEquals(1, oppgaverMedEndring.size)
-        Assertions.assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
+        assertEquals(1, oppgaverMedEndring.size)
+        assertEquals(Enheter.STEINKJER.enhetNr, oppgaverMedEndring[0].enhet)
     }
 
     @Test
@@ -799,11 +811,14 @@ internal class OppgaveServiceTest {
 
         sakDao.oppdaterAdresseBeskyttelse(adressebeskyttetSak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
         val saksbehandlerMedRollerStrengtFortrolig = generateSaksbehandlerMedRoller(AzureGroup.STRENGT_FORTROLIG)
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRollerStrengtFortrolig)
-        Assertions.assertEquals(1, oppgaver.size)
+        every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerStrengtFortrolig
+
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        assertEquals(1, oppgaver.size)
         val strengtFortroligOppgave = oppgaver[0]
-        Assertions.assertEquals(adressebeskyttetOppgave.id, strengtFortroligOppgave.id)
-        Assertions.assertEquals(adressebeskyttetOppgave.sakId, adressebeskyttetSak.id)
+        assertEquals(adressebeskyttetOppgave.id, strengtFortroligOppgave.id)
+        assertEquals(adressebeskyttetOppgave.sakId, adressebeskyttetSak.id)
     }
 
     @Test
@@ -828,11 +843,48 @@ internal class OppgaveServiceTest {
             )
 
         val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
-        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRollerAttestant)
-        Assertions.assertEquals(1, oppgaver.size)
-        val strengtFortroligOppgave = oppgaver[0]
-        Assertions.assertEquals(attestantOppgave.id, strengtFortroligOppgave.id)
-        Assertions.assertEquals(attestantOppgave.sakId, attestantSak.id)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
+
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        assertEquals(1, oppgaver.size)
+        val attesteringsoppgave = oppgaver[0]
+        assertEquals(attestantOppgave.id, attesteringsoppgave.id)
+        assertEquals(attestantOppgave.sakId, attestantSak.id)
+    }
+
+    @Test
+    fun `Superbruker kan se oppgave på en annen enhet unntatt strengt fortrolig`() {
+        val randomenhet = "1111"
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
+        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            "referanse",
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.FOERSTEGANGSBEHANDLING,
+            null,
+        )
+
+        val attestantSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, randomenhet)
+        val attestantOppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                "referanse",
+                attestantSak.id,
+                OppgaveKilde.BEHANDLING,
+                OppgaveType.ATTESTERING,
+                null,
+            )
+
+        val saksbehandlerMedRollerAttestant = generateSaksbehandlerMedRoller(AzureGroup.ATTESTANT)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr) // må ikke endres
+        every { saksbehandler.erSuperbruker() } returns true
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRollerAttestant
+
+        val oppgaver = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+        assertEquals(1, oppgaver.size)
+        val attesteringsoppgave = oppgaver[0]
+        assertEquals(attestantOppgave.id, attesteringsoppgave.id)
+        assertEquals(attestantOppgave.sakId, attestantSak.id)
     }
 
     @Test
@@ -850,15 +902,15 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
 
         val oppgaveMedNySaksbehandler = oppgaveService.hentOppgave(nyOppgave.id)
-        Assertions.assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler)
+        assertEquals(nysaksbehandler, oppgaveMedNySaksbehandler?.saksbehandler?.ident)
 
         val hentEndringerForOppgave = oppgaveDaoMedEndringssporing.hentEndringerForOppgave(nyOppgave.id)
-        Assertions.assertEquals(1, hentEndringerForOppgave.size)
+        assertEquals(1, hentEndringerForOppgave.size)
         val endringPaaOppgave = hentEndringerForOppgave[0]
         Assertions.assertNull(endringPaaOppgave.oppgaveFoer.saksbehandler)
-        Assertions.assertEquals("nysaksbehandler", endringPaaOppgave.oppgaveEtter.saksbehandler)
-        Assertions.assertEquals(Status.NY, endringPaaOppgave.oppgaveFoer.status)
-        Assertions.assertEquals(Status.UNDER_BEHANDLING, endringPaaOppgave.oppgaveEtter.status)
+        assertEquals("nysaksbehandler", endringPaaOppgave.oppgaveEtter.saksbehandler?.ident)
+        assertEquals(Status.NY, endringPaaOppgave.oppgaveFoer.status)
+        assertEquals(Status.UNDER_BEHANDLING, endringPaaOppgave.oppgaveEtter.status)
     }
 
     @Test
@@ -878,7 +930,7 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler1.ident)
         oppgaveService.ferdigStillOppgaveUnderBehandling(behandlingsref, saksbehandler1)
         val ferdigstiltOppgave = oppgaveService.hentOppgave(oppgave.id)
-        Assertions.assertEquals(Status.FERDIGSTILT, ferdigstiltOppgave?.status)
+        assertEquals(Status.FERDIGSTILT, ferdigstiltOppgave?.status)
     }
 
     @Test
@@ -896,7 +948,7 @@ internal class OppgaveServiceTest {
 
         val saksbehandler1 = "saksbehandler01"
         oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler1)
-        assertThrows<OppgaveService.FeilSaksbehandlerPaaOppgaveException> {
+        assertThrows<OppgaveTilhoererAnnenSaksbehandler> {
             oppgaveService.ferdigStillOppgaveUnderBehandling(
                 behandlingsref,
                 Saksbehandler("", "feilSaksbehandler", null),
@@ -921,26 +973,17 @@ internal class OppgaveServiceTest {
         oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(behandlingsref, opprettetSak.id)
 
         val alleOppgaver = oppgaveDao.hentOppgaverForReferanse(behandlingsref)
-        Assertions.assertEquals(2, alleOppgaver.size)
+        assertEquals(2, alleOppgaver.size)
         val avbruttOppgave = oppgaveDao.hentOppgave(oppgaveSomSkalBliAvbrutt.id)!!
-        Assertions.assertEquals(avbruttOppgave.status, Status.AVBRUTT)
+        assertEquals(avbruttOppgave.status, Status.AVBRUTT)
     }
 
     @Test
     fun `Skal filtrere bort oppgaver med annen enhet`() {
-        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
         Kontekst.set(
             Context(
                 saksbehandler,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
+                DatabaseContextTest(dataSource),
             ),
         )
 
@@ -971,11 +1014,14 @@ internal class OppgaveServiceTest {
         oppgaveService.tildelSaksbehandler(oppgavesteinskjer.id, saksbehandlerid)
 
         val saksbehandlerMedRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        val finnOppgaverForBruker = oppgaveService.finnOppgaverForBruker(saksbehandlerMedRoller)
+        every { saksbehandler.enheter() } returns listOf(Enheter.AALESUND.enhetNr)
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerMedRoller
 
-        Assertions.assertEquals(1, finnOppgaverForBruker.size)
+        val finnOppgaverForBruker = oppgaveService.finnOppgaverForBruker(saksbehandler, Status.entries.map { it.name })
+
+        assertEquals(1, finnOppgaverForBruker.size)
         val aalesundfunnetOppgave = finnOppgaverForBruker[0]
-        Assertions.assertEquals(Enheter.AALESUND.enhetNr, aalesundfunnetOppgave.enhet)
+        assertEquals(Enheter.AALESUND.enhetNr, aalesundfunnetOppgave.enhet)
     }
 
     @Test
@@ -990,14 +1036,34 @@ internal class OppgaveServiceTest {
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
             )
-        val saksbehandler = "saksbehandler"
+        val saksbehandlerIdent = "saksbehandler"
 
-        oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler)
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandlerIdent)
 
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        Assertions.assertEquals(saksbehandler, saksbehandlerHentet)
+        assertEquals(saksbehandlerIdent, saksbehandlerHentet!!.ident)
+    }
+
+    @Test
+    fun `Skal kaste om ingen oppgave som ikke er attestering finnes`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val behandlingId = UUID.randomUUID().toString()
+        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            behandlingId,
+            opprettetSak.id,
+            OppgaveKilde.BEHANDLING,
+            OppgaveType.ATTESTERING,
+            null,
+        )
+
+        assertThrows<ManglerSaksbehandlerException> {
+            oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
+        }
+
+        val attestertoppgave = oppgaveService.hentOppgaverForReferanse(behandlingId)
+        assertEquals(1, attestertoppgave.size)
     }
 
     @Test
@@ -1012,14 +1078,14 @@ internal class OppgaveServiceTest {
                 OppgaveType.REVURDERING,
                 null,
             )
-        val saksbehandler = "saksbehandler"
+        val saksbehandlerIdent = "saksbehandler"
 
-        oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandler)
+        oppgaveService.tildelSaksbehandler(nyOppgave.id, saksbehandlerIdent)
 
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(revurderingId)
 
-        Assertions.assertEquals(saksbehandler, saksbehandlerHentet)
+        assertEquals(saksbehandlerIdent, saksbehandlerHentet!!.ident)
     }
 
     @Test
@@ -1055,7 +1121,7 @@ internal class OppgaveServiceTest {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        Assertions.assertEquals(saksbehandler.ident, saksbehandlerHentet)
+        assertEquals(saksbehandler.ident, saksbehandlerHentet!!.ident)
     }
 
     @Test
@@ -1072,6 +1138,6 @@ internal class OppgaveServiceTest {
         val saksbehandlerHentet =
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
-        Assertions.assertNull(saksbehandlerHentet)
+        Assertions.assertNull(saksbehandlerHentet?.ident)
     }
 }

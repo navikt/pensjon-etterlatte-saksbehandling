@@ -1,4 +1,4 @@
-package soeknad
+package no.nav.etterlatte.soeknad
 
 import no.nav.etterlatte.libs.common.innsendtsoeknad.ArbeidOgUtdanningOMS
 import no.nav.etterlatte.libs.common.innsendtsoeknad.BankkontoType
@@ -195,7 +195,8 @@ object InnsendtSoeknadTestData {
                             loennsinntekt = null,
                             naeringsinntekt = null,
                             pensjonEllerUfoere = null,
-                            annenInntekt = null,
+                            inntektViaYtelserFraNAV = null,
+                            ingenInntekt = null,
                             ytelserNAV =
                                 YtelserNav(
                                     soektOmYtelse =

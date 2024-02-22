@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.db.BrevRepository.Queries.HENT_BREV_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_INNHOLD_PAYLOAD_VEDLEGG
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_MOTTAKER_QUERY
+import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_SPRAAK_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPDATER_TITTEL_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_BREV_QUERY
 import no.nav.etterlatte.brev.db.BrevRepository.Queries.OPPRETT_ELLER_OPPDATER_PDF_QUERY
@@ -27,6 +28,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -39,6 +41,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTimestamp
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.database.tidspunkt
 import no.nav.etterlatte.libs.database.transaction
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import java.util.UUID
 import javax.sql.DataSource
@@ -69,9 +72,12 @@ class BrevRepository(private val ds: DataSource) {
             it.run(queryOf("SELECT payload_vedlegg FROM innhold WHERE brev_id = ?", id).map(tilPayloadVedlegg).asSingle)
         }
 
-    fun hentBrevForBehandling(behandlingId: UUID): Brev? =
+    fun hentBrevForBehandling(
+        behandlingId: UUID,
+        type: Brevtype,
+    ): List<Brev> =
         using(sessionOf(ds)) {
-            it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId).map(tilBrev).asSingle)
+            it.run(queryOf(HENT_BREV_FOR_BEHANDLING_QUERY, behandlingId, type.name).map(tilBrev).asList)
         }
 
     fun hentBrevForSak(sakId: Long): List<Brev> =
@@ -126,8 +132,8 @@ class BrevRepository(private val ds: DataSource) {
                 OPPDATER_MOTTAKER_QUERY,
                 mapOf(
                     "brev_id" to id,
-                    "foedselsnummer" to mottaker.foedselsnummer?.value,
-                    "orgnummer" to mottaker.orgnummer,
+                    "foedselsnummer" to mottaker.foedselsnummer?.value?.let { it.ifBlank { null } },
+                    "orgnummer" to mottaker.orgnummer?.let { it.ifBlank { null } },
                     "navn" to mottaker.navn,
                     "adressetype" to mottaker.adresse.adresseType,
                     "adresselinje1" to mottaker.adresse.adresselinje1,
@@ -160,6 +166,24 @@ class BrevRepository(private val ds: DataSource) {
         ).also { require(it == 1) }
 
         tx.lagreHendelse(id, Status.OPPDATERT, tittel.toJson())
+            .also { require(it == 1) }
+    }
+
+    fun oppdaterSpraak(
+        id: BrevID,
+        spraak: Spraak,
+    ) = ds.transaction { tx ->
+        tx.run(
+            queryOf(
+                OPPDATER_SPRAAK_QUERY,
+                mapOf(
+                    "brev_id" to id,
+                    "spraak" to spraak.name,
+                ),
+            ).asUpdate,
+        ).also { require(it == 1) }
+
+        tx.lagreHendelse(id, Status.OPPDATERT, spraak.toJson())
             .also { require(it == 1) }
     }
 
@@ -225,6 +249,7 @@ class BrevRepository(private val ds: DataSource) {
                             "prosess_type" to ulagretBrev.prosessType.name,
                             "soeker_fnr" to ulagretBrev.soekerFnr,
                             "opprettet" to ulagretBrev.opprettet.toTimestamp(),
+                            "brevtype" to ulagretBrev.brevtype.name,
                         ),
                     ).asUpdateAndReturnGeneratedKey,
                 )
@@ -310,6 +335,14 @@ class BrevRepository(private val ds: DataSource) {
             tx.lagreHendelse(brevId, Status.DISTRIBUERT, distResponse.toJson()) > 0
         }
 
+    fun settBrevSlettet(
+        brevId: BrevID,
+        bruker: BrukerTokenInfo,
+    ): Boolean =
+        ds.transaction { tx ->
+            tx.lagreHendelse(brevId, Status.SLETTET, bruker.ident()) > 0
+        }
+
     private fun Session.lagreHendelse(
         brevId: BrevID,
         status: Status,
@@ -340,6 +373,7 @@ class BrevRepository(private val ds: DataSource) {
             behandlingId = row.uuidOrNull("behandling_id"),
             soekerFnr = row.string("soeker_fnr"),
             tittel = row.stringOrNull("tittel"),
+            spraak = Spraak.valueOf(row.string("spraak")),
             prosessType = BrevProsessType.valueOf(row.string("prosess_type")),
             status = row.string("status_id").let { Status.valueOf(it) },
             statusEndret = row.tidspunkt("hendelse_opprettet"),
@@ -361,6 +395,7 @@ class BrevRepository(private val ds: DataSource) {
                             land = row.string("land"),
                         ),
                 ),
+            brevtype = row.string("brevtype").let { Brevtype.valueOf(it) },
         )
     }
 
@@ -388,7 +423,7 @@ class BrevRepository(private val ds: DataSource) {
         const val HENT_BREV_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, b.opprettet, h.status_id, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel
+                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, b.brevtype
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
@@ -404,12 +439,14 @@ class BrevRepository(private val ds: DataSource) {
         const val HENT_BREV_FOR_BEHANDLING_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel
+                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, b.brevtype
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
             INNER JOIN innhold i on b.id = i.brev_id
             WHERE b.behandling_id = ?
+            AND b.brevtype = ?
+            AND h.status_id != 'SLETTET'
             AND h.id IN (
                 SELECT DISTINCT ON (brev_id) id
                 FROM hendelse
@@ -420,12 +457,13 @@ class BrevRepository(private val ds: DataSource) {
         const val HENT_BREV_FOR_SAK_QUERY = """
             SELECT 
                 b.id, b.sak_id, b.behandling_id, b.prosess_type, b.soeker_fnr, h.status_id, b.opprettet, 
-                h.opprettet as hendelse_opprettet, m.*, i.tittel
+                h.opprettet as hendelse_opprettet, m.*, i.tittel, i.spraak, b.journalpost_id, b.bestilling_id, b.brevtype
             FROM brev b
             INNER JOIN mottaker m on b.id = m.brev_id
             INNER JOIN hendelse h on b.id = h.brev_id
             INNER JOIN innhold i on b.id = i.brev_id
             WHERE b.sak_id = ?
+            AND h.status_id != 'SLETTET'
             AND h.id IN (
                 SELECT DISTINCT ON (brev_id) id
                 FROM hendelse
@@ -434,8 +472,8 @@ class BrevRepository(private val ds: DataSource) {
         """
 
         const val OPPRETT_BREV_QUERY = """
-            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet) 
-            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet) 
+            INSERT INTO brev (sak_id, behandling_id, prosess_type, soeker_fnr, opprettet, brevtype) 
+            VALUES (:sak_id, :behandling_id, :prosess_type, :soeker_fnr, :opprettet, :brevtype) 
             ON CONFLICT DO NOTHING;
         """
 
@@ -469,6 +507,12 @@ class BrevRepository(private val ds: DataSource) {
         const val OPPDATER_TITTEL_QUERY = """
             UPDATE innhold 
             SET tittel = :tittel
+            WHERE brev_id = :brev_id
+        """
+
+        const val OPPDATER_SPRAAK_QUERY = """
+            UPDATE innhold 
+            SET spraak = :spraak
             WHERE brev_id = :brev_id
         """
 

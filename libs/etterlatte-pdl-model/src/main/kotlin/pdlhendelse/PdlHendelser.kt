@@ -1,5 +1,6 @@
 package no.nav.etterlatte.libs.common.pdlhendelse
 
+import no.nav.etterlatte.libs.common.event.EventnameHendelseType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import java.time.LocalDate
 
@@ -70,4 +71,11 @@ enum class Endringstype {
     KORRIGERT,
     ANNULLERT,
     OPPHOERT,
+}
+
+enum class PdlHendelserKeys : EventnameHendelseType {
+    PERSONHENDELSE,
+    ;
+
+    override fun lagEventnameForType(): String = "PDL:${this.name}"
 }

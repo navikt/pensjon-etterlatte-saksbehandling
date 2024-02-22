@@ -1,19 +1,26 @@
 package no.nav.etterlatte.brev
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.readAllParts
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
+import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
+import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -21,7 +28,6 @@ import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
 const val BREV_ID_CALL_PARAMETER = "id"
@@ -31,9 +37,10 @@ inline val PipelineContext<*, ApplicationCall>.brevId: Long
             "Brev id er ikke i path params",
         )
 
-@OptIn(ExperimentalTime::class)
 fun Route.brevRoute(
     service: BrevService,
+    pdfService: PDFService,
+    distribuerer: Brevdistribuerer,
     tilgangssjekker: Tilgangssjekker,
 ) {
     val logger = LoggerFactory.getLogger("no.nav.etterlatte.brev.BrevRoute")
@@ -61,7 +68,7 @@ fun Route.brevRoute(
         }
 
         post("mottaker") {
-            withSakId(tilgangssjekker) {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
                 val body = call.receive<OppdaterMottakerRequest>()
 
                 val mottaker = service.oppdaterMottaker(brevId, body.mottaker)
@@ -71,10 +78,20 @@ fun Route.brevRoute(
         }
 
         post("tittel") {
-            withSakId(tilgangssjekker) {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
                 val request = call.receive<OppdaterTittelRequest>()
 
                 service.oppdaterTittel(brevId, request.tittel)
+
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+
+        post("spraak") {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
+                val request = call.receive<OppdaterSpraakRequest>()
+
+                service.oppdaterSpraak(brevId, request.spraak)
 
                 call.respond(HttpStatusCode.OK)
             }
@@ -88,7 +105,7 @@ fun Route.brevRoute(
             }
 
             post {
-                withSakId(tilgangssjekker) {
+                withSakId(tilgangssjekker, skrivetilgang = true) {
                     val brevId = brevId
                     val body = call.receive<OppdaterPayloadRequest>()
 
@@ -100,7 +117,7 @@ fun Route.brevRoute(
         }
 
         post("ferdigstill") {
-            withSakId(tilgangssjekker) {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
                 service.ferdigstill(brevId, brukerTokenInfo)
 
                 call.respond(HttpStatusCode.OK)
@@ -108,7 +125,7 @@ fun Route.brevRoute(
         }
 
         post("journalfoer") {
-            withSakId(tilgangssjekker) {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
                 val journalpostId = service.journalfoer(brevId, brukerTokenInfo)
 
                 call.respond(JournalpostIdDto(journalpostId))
@@ -116,10 +133,16 @@ fun Route.brevRoute(
         }
 
         post("distribuer") {
-            withSakId(tilgangssjekker) {
-                val bestillingsId = service.distribuer(brevId)
+            withSakId(tilgangssjekker, skrivetilgang = true) {
+                val bestillingsId = distribuerer.distribuer(brevId)
 
                 call.respond(BestillingsIdDto(bestillingsId))
+            }
+        }
+
+        delete {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
+                call.respond(service.slett(brevId, brukerTokenInfo))
             }
         }
     }
@@ -139,14 +162,35 @@ fun Route.brevRoute(
         }
 
         post {
-            withSakId(tilgangssjekker) { sakId ->
+            withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
                 logger.info("Oppretter nytt brev på sak=$sakId)")
 
                 measureTimedValue {
-                    service.opprettBrev(sakId, brukerTokenInfo)
+                    service.opprettBrev(
+                        sakId,
+                        brukerTokenInfo,
+                        Brevkoder.TOMT_INFORMASJONSBREV,
+                    ) { ManueltBrevData() }
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(HttpStatusCode.Created, brev)
+                }
+            }
+        }
+
+        post("pdf") {
+            withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
+                try {
+                    val brev = pdfService.lagreOpplastaPDF(sakId, call.receiveMultipart().readAllParts())
+                    brev.onSuccess {
+                        call.respond(brev)
+                    }
+                    brev.onFailure {
+                        call.respond(HttpStatusCode.UnprocessableEntity)
+                    }
+                } catch (e: Exception) {
+                    logger.error("Getting multipart error", e)
+                    call.respond(HttpStatusCode.BadRequest)
                 }
             }
         }
@@ -164,4 +208,8 @@ data class OppdaterMottakerRequest(
 
 data class OppdaterTittelRequest(
     val tittel: String,
+)
+
+data class OppdaterSpraakRequest(
+    val spraak: Spraak,
 )

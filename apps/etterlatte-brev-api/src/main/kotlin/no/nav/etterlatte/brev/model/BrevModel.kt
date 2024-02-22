@@ -2,17 +2,10 @@ package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
-import no.nav.etterlatte.brev.behandling.Beregningsperiode
-import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
-import no.nav.pensjon.brevbaker.api.model.Kroner
-import org.apache.pdfbox.Loader
-import org.apache.pdfbox.multipdf.PDFMergerUtility
-import java.io.ByteArrayOutputStream
 import java.time.LocalDate
-import java.time.YearMonth
 import java.util.UUID
 
 typealias BrevID = Long
@@ -45,12 +38,19 @@ data class Mottaker(
     val orgnummer: String? = null,
     val adresse: Adresse,
 ) {
-    init {
-        require(foedselsnummer != null || orgnummer != null) {
-            "Fødselsnummer eller orgnummer må være spesifisert"
-        }
-        require(navn.isNotBlank()) {
-            "Navn på mottaker må være satt"
+    fun erGyldig(): Boolean {
+        return if (navn.isBlank()) {
+            false
+        } else if ((foedselsnummer == null || foedselsnummer.value.isBlank()) && orgnummer.isNullOrBlank()) {
+            false
+        } else if (adresse.landkode.isBlank() || adresse.land.isBlank()) {
+            false
+        } else if (adresse.adresseType == "NORSKPOSTADRESSE") {
+            !(adresse.postnummer.isNullOrBlank() || adresse.poststed.isNullOrBlank())
+        } else if (adresse.adresseType == "UTENLANDSKPOSTADRESSE") {
+            !adresse.adresselinje1.isNullOrBlank()
+        } else {
+            true
         }
     }
 
@@ -73,6 +73,18 @@ data class Mottaker(
                     land = regoppslag.adresse.land,
                 ),
         )
+
+        fun tom(fnr: Folkeregisteridentifikator) =
+            Mottaker(
+                navn = "N/A",
+                foedselsnummer = Foedselsnummer(fnr.value),
+                adresse =
+                    Adresse(
+                        adresseType = "",
+                        landkode = "",
+                        land = "",
+                    ),
+            )
     }
 }
 
@@ -81,12 +93,14 @@ data class Brev(
     val sakId: Long,
     val behandlingId: UUID?,
     val tittel: String?,
+    val spraak: Spraak,
     val prosessType: BrevProsessType,
     val soekerFnr: String,
     val status: Status,
     val statusEndret: Tidspunkt,
     val opprettet: Tidspunkt,
     val mottaker: Mottaker,
+    val brevtype: Brevtype,
 ) {
     fun kanEndres() = status in listOf(Status.OPPRETTET, Status.OPPDATERT)
 
@@ -99,27 +113,19 @@ data class Brev(
             sakId = opprettNyttBrev.sakId,
             behandlingId = opprettNyttBrev.behandlingId,
             tittel = opprettNyttBrev.innhold.tittel,
+            spraak = opprettNyttBrev.innhold.spraak,
             prosessType = opprettNyttBrev.prosessType,
             soekerFnr = opprettNyttBrev.soekerFnr,
             status = opprettNyttBrev.status,
             statusEndret = opprettNyttBrev.opprettet,
             mottaker = opprettNyttBrev.mottaker,
             opprettet = opprettNyttBrev.opprettet,
+            brevtype = opprettNyttBrev.brevtype,
         )
     }
 }
 
-class Pdf(val bytes: ByteArray) {
-    fun medPdfAppended(pdf: Pdf): Pdf {
-        val foerstePdf = Loader.loadPDF(this.bytes)
-        val andrePdf = Loader.loadPDF(pdf.bytes)
-        PDFMergerUtility().appendDocument(foerstePdf, andrePdf)
-
-        val out = ByteArrayOutputStream()
-        foerstePdf.save(out)
-        return Pdf(out.toByteArray())
-    }
-}
+class Pdf(val bytes: ByteArray)
 
 data class BrevInnhold(
     val tittel: String,
@@ -134,8 +140,10 @@ data class BrevInnholdVedlegg(
 )
 
 enum class BrevVedleggKey {
-    BEREGNING_INNHOLD,
+    OMS_BEREGNING,
+    OMS_FORHAANDSVARSEL_FEILUTBETALING,
     BP_BEREGNING_TRYGDETID,
+    BP_FORHAANDSVARSEL_FEILUTBETALING,
 }
 
 data class OpprettNyttBrev(
@@ -147,6 +155,7 @@ data class OpprettNyttBrev(
     val opprettet: Tidspunkt,
     val innhold: BrevInnhold,
     val innholdVedlegg: List<BrevInnholdVedlegg>?,
+    val brevtype: Brevtype,
 ) {
     val status: Status = Status.OPPRETTET
 }
@@ -155,44 +164,20 @@ enum class BrevProsessType {
     MANUELL,
     REDIGERBAR,
     AUTOMATISK,
+    OPPLASTET_PDF,
 }
 
 data class EtterbetalingDTO(
-    val fraDato: LocalDate,
-    val tilDato: LocalDate,
+    val datoFom: LocalDate,
+    val datoTom: LocalDate,
 )
 
-data class Beregningsinfo(
-    val innhold: List<Slate.Element>,
-    val grunnbeloep: Kroner,
-    val beregningsperioder: List<NyBeregningsperiode>,
-    val trygdetidsperioder: List<Trygdetidsperiode>,
-)
-
-data class NyBeregningsperiode(
-    val inntekt: Kroner,
-    val trygdetid: Int,
-    val stoenadFoerReduksjon: Kroner,
-    var utbetaltBeloep: Kroner,
-)
-
-data class EtterbetalingBrev(
-    val fraDato: LocalDate,
-    val tilDato: LocalDate,
-    val etterbetalingsperioder: List<Beregningsperiode>,
-) {
-    companion object {
-        fun fra(
-            dto: EtterbetalingDTO?,
-            perioder: List<Beregningsperiode>,
-        ) = if (dto == null) {
-            null
-        } else {
-            EtterbetalingBrev(
-                fraDato = dto.fraDato,
-                tilDato = dto.tilDato,
-                etterbetalingsperioder = perioder.filter { YearMonth.from(it.datoFOM) <= YearMonth.from(dto.tilDato) },
-            )
-        }
-    }
+enum class Brevtype {
+    VEDTAK,
+    VARSEL,
+    INFORMASJON,
+    OPPLASTET_PDF,
+    MANUELT,
+    VEDLEGG,
+    NOTAT,
 }

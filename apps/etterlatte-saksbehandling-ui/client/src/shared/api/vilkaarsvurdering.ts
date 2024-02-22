@@ -52,6 +52,7 @@ export interface IVilkaarsvurdering {
   resultat?: VilkaarsvurderingVurdertResultat
   virkningstidspunkt: string
   isYrkesskade: boolean
+  isGrunnlagUtdatert?: boolean | null
 }
 
 export interface Vilkaar {
@@ -81,7 +82,7 @@ export interface Delvilkaar {
   tittel: string
   beskrivelse: string
   spoersmaal?: string
-  lovreferanse: Paragraf
+  lovreferanse: Lovreferanse
   resultat?: VurderingsResultat | null
 }
 
@@ -91,8 +92,10 @@ export interface VurdertResultat {
   saksbehandler: string
 }
 
-export interface Paragraf {
+export interface Lovreferanse {
   paragraf: string
+  ledd?: number
+  bokstav?: string
   lenke: string
 }
 

@@ -4,6 +4,7 @@ import { SakType } from '~shared/types/sak'
 import { VedtakType } from '~components/vedtak/typer'
 import { Oppgavestatus } from '~shared/api/oppgaver'
 import { Spraak } from '~shared/types/Brev'
+import { Journalposttype, Journalstatus } from '~shared/types/Journalpost'
 
 export const capitalize = (s?: string) => {
   if (!s) return ''
@@ -15,8 +16,6 @@ export const formaterEnumTilLesbarString = (string: string): string => {
   return storForbokstav.replace('_', ' ')
 }
 
-export const formaterDatoTilYearMonth = (dato: Date | null) => (dato ? format(dato, 'yyyy-MM').toString() : '')
-
 export const formaterDato = (dato: Date) => format(dato, 'dd.MM.yyyy').toString()
 
 export const formaterStringDato = (dato: string) => format(new Date(dato), 'dd.MM.yyyy').toString()
@@ -26,9 +25,14 @@ export const formaterKanskjeStringDato = (dato?: string): string =>
 export const formaterKanskjeStringDatoMedFallback = (fallback: string, dato?: string): string =>
   dato ? formaterStringDato(dato) : fallback
 
-export const formaterStringTidspunkt = (dato: string) => format(new Date(dato), 'HH:mm').toString()
+export const formaterTidspunktTimeMinutterSekunder = (dato: Date) => format(new Date(dato), 'HH:mm:ss').toString()
+
+export const formaterStringTidspunktTimeMinutter = (dato: string) => format(new Date(dato), 'HH:mm').toString()
 
 export const formaterDatoMedTidspunkt = (dato: Date) => format(new Date(dato), 'dd.MM.yyyy HH:mm').toString()
+
+export const formaterDatoMedKlokkeslett = (dato: Date | string) =>
+  format(new Date(dato), "dd.MM.yyyy 'kl.' HH:mm").toString()
 
 export const formaterBehandlingstype = (behandlingstype: IBehandlingsType): string => {
   switch (behandlingstype) {
@@ -62,6 +66,8 @@ export const formaterVedtakType = (type: VedtakType): string => {
       return 'Endring'
     case VedtakType.TILBAKEKREVING:
       return 'Tilbakekreving'
+    case VedtakType.AVVIST_KLAGE:
+      return 'Avvist klage'
   }
 }
 
@@ -71,6 +77,8 @@ export const formaterOppgaveStatus = (status: Oppgavestatus): string => {
       return 'Ny'
     case 'UNDER_BEHANDLING':
       return 'Under behandling'
+    case 'PAA_VENT':
+      return 'På Vent'
     case 'FERDIGSTILT':
       return 'Ferdigstilt'
     case 'FEILREGISTRERT':
@@ -93,6 +101,48 @@ export const formaterSpraak = (spraak: Spraak) => {
       return 'Nynorsk'
     case Spraak.EN:
       return 'Engelsk'
+  }
+}
+
+export const formaterJournalpostType = (type: Journalposttype) => {
+  switch (type) {
+    case Journalposttype.I:
+      return 'Inngående'
+    case Journalposttype.U:
+      return 'Utgående'
+    case Journalposttype.N:
+      return 'Notat'
+    default:
+      return 'Ukjent'
+  }
+}
+
+export const formaterJournalpostStatus = (status: Journalstatus) => {
+  switch (status) {
+    case Journalstatus.MOTTATT:
+      return 'Mottatt'
+    case Journalstatus.JOURNALFOERT:
+      return 'Journalført'
+    case Journalstatus.FERDIGSTILT:
+      return 'Ferdigstilt'
+    case Journalstatus.EKSPEDERT:
+      return 'Ekspedert'
+    case Journalstatus.UNDER_ARBEID:
+      return 'Under arbeid'
+    case Journalstatus.FEILREGISTRERT:
+      return 'Feilregistrert'
+    case Journalstatus.UTGAAR:
+      return 'Utgår'
+    case Journalstatus.AVBRUTT:
+      return 'Avbrutt'
+    case Journalstatus.UKJENT_BRUKER:
+      return 'Ukjent bruker'
+    case Journalstatus.RESERVERT:
+      return 'Reservert'
+    case Journalstatus.OPPLASTING_DOKUMENT:
+      return 'Opplasting dokument'
+    case Journalstatus.UKJENT:
+      return 'Ukjent'
   }
 }
 

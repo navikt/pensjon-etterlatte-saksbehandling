@@ -13,5 +13,30 @@ export enum VedtakType {
   OPPHOER = 'OPPHOER',
   AVSLAG = 'AVSLAG',
   ENDRING = 'ENDRING',
-  TILBAKEKREVING = 'TILBAKEKREVING ',
+  TILBAKEKREVING = 'TILBAKEKREVING',
+  AVVIST_KLAGE = 'AVVIST_KLAGE',
+}
+
+export interface Samordningsvedtak {
+  samordningVedtakId: string
+  saksId: string
+  saksKode: string
+  vedtakId: string
+  vedtakstatusKode: string
+  etterbetaling: boolean
+  utvidetSamordningsfrist: boolean
+  virkningFom: string
+  virkningTom?: string
+  samordningsmeldinger: Samordningsmelding[]
+}
+
+export interface Samordningsmelding {
+  samId: number
+  meldingstatusKode: string
+  tpNr: string
+  tpNavn: string
+  sendtDato: string
+  svartDato?: string
+  purretDato?: string
+  refusjonskrav: boolean
 }

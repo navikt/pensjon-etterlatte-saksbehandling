@@ -16,7 +16,6 @@ dependencies {
     implementation(libs.ktor2.clientcontentnegotiation)
     implementation(libs.ktor2.clientjackson)
     implementation(libs.kafka.clients)
-    implementation(libs.kafka.avroserializer)
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.kotlinx.coroutinescore)

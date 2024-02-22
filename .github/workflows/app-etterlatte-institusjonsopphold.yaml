@@ -28,6 +28,10 @@ on:
       - libs/etterlatte-institusjonsopphold-model/**
       - gradle/libs.versions.toml
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   test:
     if: github.event_name == 'pull_request'
@@ -38,9 +42,6 @@ jobs:
     if: github.event_name != 'pull_request'
     uses: ./.github/workflows/.build.yaml
     secrets: inherit
-    permissions:
-      contents: 'read'
-      id-token: 'write'
 
   deploy:
     if: github.event_name != 'pull_request'

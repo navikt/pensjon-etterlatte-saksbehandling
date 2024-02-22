@@ -10,8 +10,8 @@ import no.nav.etterlatte.funksjonsbrytere.FeatureToggleProperties
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Miljoevariabler
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
+import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.helse.rapids_rivers.RapidApplication
-import rapidsandrivers.getRapidEnv
 
 val sikkerLogg = sikkerlogger()
 

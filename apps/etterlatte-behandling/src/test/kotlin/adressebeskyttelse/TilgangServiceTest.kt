@@ -2,18 +2,21 @@ package no.nav.etterlatte.adressebeskyttelse
 
 import com.nimbusds.jwt.JWTClaimsSet
 import io.mockk.mockk
+import no.nav.etterlatte.ConnectionAutoclosingTest
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BrukerService
+import no.nav.etterlatte.behandling.klage.KlageDao
+import no.nav.etterlatte.behandling.klage.KlageDaoImpl
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.SkjermingKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
+import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.sak.SakDao
@@ -26,25 +29,22 @@ import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class TilgangServiceTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
-    private lateinit var dataSource: DataSource
+@ExtendWith(DatabaseExtension::class)
+internal class TilgangServiceTest(val dataSource: DataSource) {
     private lateinit var tilgangService: TilgangService
     private lateinit var sakService: SakService
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingRepo: BehandlingDao
+    private lateinit var klageDao: KlageDao
     private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
     private val fortroligDev = "ea930b6b-9397-44d9-b9e6-f4cf527a632a"
     private val egenAnsattDev = "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d"
@@ -53,33 +53,17 @@ internal class TilgangServiceTest {
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
-        sakRepo = SakDao { dataSource.connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
 
         sakService = SakServiceImpl(sakRepo, skjermingKlient, brukerService)
         behandlingRepo =
             BehandlingDao(
-                KommerBarnetTilGodeDao {
-                    dataSource.connection
-                },
-                RevurderingDao { dataSource.connection },
-            ) { dataSource.connection }
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
+                KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                (ConnectionAutoclosingTest(dataSource)),
+            )
+        klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))
     }
 
     @Test
@@ -106,6 +90,55 @@ internal class TilgangServiceTest {
             )
 
         Assertions.assertEquals(false, harTilgangTilBehandling)
+    }
+
+    @Test
+    fun `Skal sjekke tilganger til klager med klageId for behandlingId`() {
+        val fnr = AVDOED_FOEDSELSNUMMER.value
+        val sak = sakRepo.opprettSak(fnr, SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr)
+        val jwtclaims = JWTClaimsSet.Builder().claim("groups", strengtfortroligDev).build()
+
+        val saksbehandlerMedStrengtfortrolig =
+            SaksbehandlerMedRoller(
+                Saksbehandler("", "ident", JwtTokenClaims(jwtclaims)),
+                mapOf(AzureGroup.STRENGT_FORTROLIG to strengtfortroligDev),
+            )
+        sakService.oppdaterAdressebeskyttelse(sak.id, AdressebeskyttelseGradering.STRENGT_FORTROLIG)
+        val klage =
+            Klage.ny(
+                sak,
+                InnkommendeKlage(
+                    mottattDato = LocalDate.of(2024, 2, 1),
+                    journalpostId = "123",
+                    innsender = null,
+                ),
+            )
+        klageDao.lagreKlage(klage)
+
+        val saksbehandlerUtenStrengtFortrolig =
+            SaksbehandlerMedRoller(
+                Saksbehandler("", "annenIdent", JwtTokenClaims(jwtclaims)),
+                mapOf(),
+            )
+        val harTilgangStrengtFortroligBehandling =
+            tilgangService.harTilgangTilBehandling(
+                klage.id.toString(),
+                saksbehandlerMedStrengtfortrolig,
+            )
+        val harTilgangStrengtFortroligKlage = tilgangService.harTilgangTilKlage(klage.id.toString(), saksbehandlerMedStrengtfortrolig)
+
+        Assertions.assertTrue(harTilgangStrengtFortroligKlage)
+        Assertions.assertTrue(harTilgangStrengtFortroligBehandling)
+
+        val harTilgangIkkeFortroligBehandling =
+            tilgangService.harTilgangTilBehandling(
+                klage.id.toString(),
+                saksbehandlerUtenStrengtFortrolig,
+            )
+        val harTilgangIkkeFortroligKlage = tilgangService.harTilgangTilKlage(klage.id.toString(), saksbehandlerUtenStrengtFortrolig)
+
+        Assertions.assertFalse(harTilgangIkkeFortroligBehandling)
+        Assertions.assertFalse(harTilgangIkkeFortroligKlage)
     }
 
     @Test

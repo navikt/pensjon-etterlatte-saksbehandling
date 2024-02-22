@@ -2,11 +2,17 @@ package no.nav.etterlatte.brev.dokarkiv
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
-import no.nav.etterlatte.token.Fagsaksystem
 import java.time.LocalDateTime
+
+interface OpprettJournalpost
 
 /**
  * Requestobjekt for å opprette ny Journalpost
+ *
+ * Tema:
+ *  https://confluence.adeo.no/display/BOA/Tema
+ * Kanal:
+ *  https://confluence.adeo.no/display/BOA/Utsendingskanal
  **/
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 data class OpprettJournalpostRequest(
@@ -24,34 +30,62 @@ data class OpprettJournalpostRequest(
     val tema: String,
     val tilleggsopplysninger: Map<String, String> = emptyMap(),
     val tittel: String,
-)
+) : OpprettJournalpost
+
+/**
+ * Requestobjekt for å opprette journalpost av typen NOTAT
+ *
+ * Det er en del felter som *ikke* skal settes, kontra en journalpost med type INNGAAENDE / UTGAAENDE:
+ *  - avsenderMottaker skal ikke settes
+ *  - datoMottatt skal ikke settes
+ *  - kanal skal ikke settes
+ *  - journalposttypen skal være NOTAT
+ *
+ *  Derfor en egen type for opprettingen av notater.
+ */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+data class OpprettNotatJournalpostRequest(
+    val behandlingstema: String,
+    val bruker: Bruker,
+    val dokumenter: List<JournalpostDokument>,
+    val datoDokument: LocalDateTime? = null,
+    val eksternReferanseId: String,
+    val journalfoerendeEnhet: String,
+    val sak: JournalpostSak,
+    val tema: String,
+    val tilleggsopplysninger: Map<String, String> = emptyMap(),
+    val tittel: String,
+) : OpprettJournalpost {
+    val journalposttype: String = "NOTAT"
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettJournalpostResponse(
     val journalpostId: String,
     val journalpostferdigstilt: Boolean,
     val dokumenter: List<DokumentInfo> = emptyList(),
-)
-
-/**
- * Requestobjekt for å oppdatere eksisterende Journalpost.
- * Setter [JsonInclude.Include.NON_EMPTY] siden Dokakiv ignorerer verdier som mangler eller er null.
- **/
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
-data class OppdaterJournalpostRequest(
-    val avsenderMottaker: AvsenderMottaker?,
-    val behandlingstema: String?,
-    val bruker: Bruker?,
-    val datoDokument: LocalDateTime?,
-    val dokumenter: List<JournalpostDokument>?,
-    val sak: JournalpostSak?,
-    val tema: String?,
-    val tilleggsopplysninger: Map<String, String>?,
-    val tittel: String?,
-)
+) {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class DokumentInfo(
+        val dokumentInfoId: String,
+    )
+}
 
 data class OppdaterJournalpostResponse(
     val journalpostId: String,
+)
+
+data class KnyttTilAnnenSakRequest(
+    val bruker: Bruker,
+    val fagsakId: String,
+    val fagsaksystem: String,
+    val journalfoerendeEnhet: String,
+    val tema: String,
+    val sakstype: Sakstype,
+)
+
+data class KnyttTilAnnenSakResponse(
+    val nyJournalpostId: String,
 )
 
 data class AvsenderMottaker(
@@ -63,12 +97,7 @@ data class AvsenderMottaker(
 
 data class Bruker(
     val id: String,
-    val idType: String = "FNR",
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class DokumentInfo(
-    val dokumentInfoId: String,
+    val idType: BrukerIdType = BrukerIdType.FNR,
 )
 
 data class JournalpostDokument(
@@ -81,8 +110,14 @@ data class JournalpostSak(
     val sakstype: Sakstype,
     val fagsakId: String? = null,
     val tema: String? = null,
+    val fagsaksystem: String? = null,
 ) {
-    val fagsaksystem: String = Fagsaksystem.EY.navn
+    init {
+        if (sakstype == Sakstype.FAGSAK) {
+            check(!fagsakId.isNullOrBlank()) { "fagsakId må være satt når sakstype=${Sakstype.FAGSAK}" }
+            check(!fagsaksystem.isNullOrBlank()) { "fagsaksystem må være satt når sakstype=${Sakstype.FAGSAK}" }
+        }
+    }
 }
 
 enum class Sakstype {

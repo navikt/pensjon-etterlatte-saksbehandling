@@ -1,55 +1,30 @@
 package no.nav.etterlatte.sak
 
-import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.etterlatte.ConnectionAutoclosingTest
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.database.singleOrNull
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class SakDaoTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
-    private lateinit var dataSource: DataSource
+@ExtendWith(DatabaseExtension::class)
+internal class SakDaoTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
     private lateinit var tilgangService: TilgangService
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-        val connection = dataSource.connection
-        sakRepo = SakDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Test
@@ -60,21 +35,21 @@ internal class SakDaoTest {
     }
 
     @Test
-    fun `kan lagre flyktning`() {
+    fun `kan lagre og hente flyktning`() {
         val flyktning = Flyktning(true, LocalDate.of(2024, 1, 1), "Migrert", Grunnlagsopplysning.Pesys.create())
         val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
 
         sakRepo.oppdaterFlyktning(opprettSak.id, flyktning)
-
-        val oppdatertFlyktning: Flyktning? =
-            dataSource.connection.use {
-                it.prepareStatement("SELECT * FROM sak WHERE id = ${opprettSak.id}")
-                    .executeQuery().singleOrNull {
-                        objectMapper.readValue(getString("flyktning"))
-                    }
-            }
+        val oppdatertFlyktning = sakRepo.finnFlyktningForSak(opprettSak.id)
 
         Assertions.assertEquals(flyktning, oppdatertFlyktning)
+    }
+
+    @Test
+    fun `Returnerer null dersom flyktning ikke finnes`() {
+        val opprettSak = sakRepo.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.PORSGRUNN.enhetNr)
+
+        Assertions.assertEquals(sakRepo.finnFlyktningForSak(opprettSak.id), null)
     }
 
     @Test

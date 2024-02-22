@@ -51,19 +51,19 @@ Det må foreligge et tjenestepensjonsforhold i Tjenestepensjonsregisteret som gj
 
 ## Integrasjon
 
-### API Gateway (beta, men vil etterhvert bli gjeldende for eksterne)
+| Miljø | Ingress                                                 |
+|:------|:--------------------------------------------------------|
+| dev   | https://etterlatte-samordning-vedtak.ekstern.dev.nav.no |
+| prod  | https://etterlatte-samordning-vedtak.nav.no             |    
+
+### API Gateway (beta) 
+
+**NB! Denne vil likevel ikke bli standarden, bruk direkte URLer over!**
 
 | Miljø | Ingress                                  | Path               |
 |:------|:-----------------------------------------|--------------------|
 | dev   | https://etterlatte-gw.ekstern.dev.nav.no | /samordning/vedtak |
 | prod  | https://etterlatte-gw.nav.no             | /samordning/vedtak |
-
-### Direkte (vil etterhvert skrus av for eksterne)
-
-| Miljø | Ingress                                                 |
-|:------|:--------------------------------------------------------|
-| dev   | https://etterlatte-samordning-vedtak.ekstern.dev.nav.no |
-| prod  | https://etterlatte-samordning-vedtak.nav.no             |    
 
 ## Feilkoder
 

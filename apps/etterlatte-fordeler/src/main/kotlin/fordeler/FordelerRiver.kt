@@ -7,25 +7,26 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.event.FordelerFordelt
 import no.nav.etterlatte.libs.common.event.GyldigSoeknadVurdert
 import no.nav.etterlatte.libs.common.event.SoeknadInnsendt
+import no.nav.etterlatte.libs.common.event.SoeknadInnsendtHendelseType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_KRITERIER_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.GYLDIG_FOR_BEHANDLING_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SOEKNAD_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.correlationId
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.sikkerLogg
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.migrering.ListenerMedLogging
 import java.time.OffsetDateTime
 
 data class FordelerEvent(
@@ -42,7 +43,7 @@ internal class FordelerRiver(
     private val logger = LoggerFactory.getLogger(FordelerRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, SoeknadInnsendt.eventNameInnsendt) {
+        initialiserRiver(rapidsConnection, SoeknadInnsendtHendelseType.EVENT_NAME_INNSENDT) {
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoTypeKey, "BARNEPENSJON") }
             validate { it.demandValue(SoeknadInnsendt.skjemaInfoVersjonKey, "2") }
             validate { it.requireKey(SoeknadInnsendt.skjemaInfoKey) }
@@ -82,23 +83,6 @@ internal class FordelerRiver(
                     logger.info("Avbrutt fordeling: ${resultat.ikkeOppfylteKriterier}")
                     context.publish(packet.leggPaaFordeltStatus(false).toJson())
                     fordelerMetricLogger.logMetricIkkeFordelt(resultat)
-                    lagStatistikkMelding(packet, resultat, SakType.BARNEPENSJON)
-                        ?.let { context.publish(it) }
-                }
-
-                is FordelerResultat.TrengerManuellJournalfoering -> {
-                    logger.warn("Trenger manuell journalføring: ${resultat.melding}")
-                    hentSakId(packet, AdressebeskyttelseGradering.UGRADERT)?.let { sakIdForSoeknad ->
-                        fordelerService.opprettOppgave(sakIdForSoeknad)
-                        context.publish(
-                            packet
-                                .leggPaaSakId(sakIdForSoeknad)
-                                .leggPaaFordeltStatus(true)
-                                .leggPaaTrengerManuellJournalfoering(true).toJson(),
-                        )
-                    }
-
-                    fordelerMetricLogger.logMetricFordelt()
                     lagStatistikkMelding(packet, resultat, SakType.BARNEPENSJON)
                         ?.let { context.publish(it) }
                 }
@@ -153,7 +137,6 @@ internal class FordelerRiver(
         val (resultat, ikkeOppfylteKriterier) =
             when (fordelerResultat) {
                 is FordelerResultat.GyldigForBehandling -> true to null
-                is FordelerResultat.TrengerManuellJournalfoering -> true to null
                 is FordelerResultat.IkkeGyldigForBehandling ->
                     // Sjekker eksplisitt opp mot ikkeOppfylteKriterier for om det er gyldig for behandling,
                     // siden det er logikk for å begrense hvor mange saker vi tar inn i pilot
@@ -167,7 +150,7 @@ internal class FordelerRiver(
         val meldingsinnhold: MutableMap<String, Any?> =
             mutableMapOf(
                 CORRELATION_ID_KEY to packet.correlationId,
-                EVENT_NAME_KEY to EventNames.FORDELER_STATISTIKK,
+                EventNames.FORDELER_STATISTIKK.lagParMedEventNameKey(),
                 SAK_TYPE_KEY to sakType,
                 SOEKNAD_ID_KEY to packet.soeknadId(),
                 GYLDIG_FOR_BEHANDLING_KEY to resultat,
@@ -180,12 +163,6 @@ internal class FordelerRiver(
 
     private fun JsonMessage.leggPaaFordeltStatus(fordelt: Boolean): JsonMessage {
         this[FordelerFordelt.soeknadFordeltKey] = fordelt
-        correlationId = getCorrelationId()
-        return this
-    }
-
-    private fun JsonMessage.leggPaaTrengerManuellJournalfoering(value: Boolean): JsonMessage {
-        this[FordelerFordelt.soeknadTrengerManuellJournalfoering] = value
         correlationId = getCorrelationId()
         return this
     }

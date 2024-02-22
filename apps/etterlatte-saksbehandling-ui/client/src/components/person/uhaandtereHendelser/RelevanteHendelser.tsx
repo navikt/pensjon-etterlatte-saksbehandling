@@ -9,7 +9,7 @@ import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
 import VurderHendelseModal from '~components/person/VurderHendelseModal'
 import UhaandtertHendelse from '~components/person/uhaandtereHendelser/UhaandtertHendelse'
 import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
-import { erFerdigBehandlet } from '~components/behandling/felles/utils'
+import { behandlingErIverksattEllerSamordnet, erFerdigBehandlet } from '~components/behandling/felles/utils'
 import { hentGrunnlagsendringshendelserForSak } from '~shared/api/behandling'
 import Spinner from '~shared/Spinner'
 import { ISak } from '~shared/types/sak'
@@ -64,6 +64,9 @@ export default function RelevanteHendelser(props: Props) {
       .filter((behandling) => behandling.behandlingType === IBehandlingsType.REVURDERING)
       .filter((behandling) => !erFerdigBehandlet(behandling.status)).length > 0
 
+  const revurderingKanOpprettes =
+    behandlingliste.filter((behandling) => behandlingErIverksattEllerSamordnet(behandling.status)).length > 0
+
   return (
     <>
       <FnrTilNavnMapContext.Provider value={navneMap}>
@@ -92,6 +95,7 @@ export default function RelevanteHendelser(props: Props) {
                     {relevanteHendelser.map((hendelse) => (
                       <UhaandtertHendelse
                         key={hendelse.id}
+                        sakType={sak.sakType}
                         hendelse={hendelse}
                         harAapenRevurdering={harAapenRevurdering}
                         startRevurdering={startRevurdering}
@@ -133,7 +137,9 @@ export default function RelevanteHendelser(props: Props) {
                   revurderinger={muligeRevurderingAarsakerStatus}
                 />
               )}
-              <OpprettNyRevurdering revurderinger={muligeRevurderingAarsakerStatus} sakId={sak.id} />
+              {revurderingKanOpprettes && (
+                <OpprettNyRevurdering revurderinger={muligeRevurderingAarsakerStatus} sakId={sak.id} />
+              )}
             </>
           ) : (
             <></>

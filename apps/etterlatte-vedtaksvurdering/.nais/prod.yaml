@@ -8,7 +8,7 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   gcp:
     sqlInstances:
@@ -31,10 +31,11 @@ spec:
             envVarPrefix: DB
   liveness:
     initialDelay: 5
-    path: /isalive
+    path: /health/isalive
   readiness:
     initialDelay: 5
-    path: /isready
+    path: /health/isready
+  leaderElection: true
   prometheus:
     enabled: true
     path: /metrics
@@ -55,10 +56,16 @@ spec:
           - NAVident
   kafka:
     pool: nav-prod
+  resources:
+    limits:
+      memory: 640Mi
+    requests:
+      cpu: 20m
+      memory: 384Mi
   replicas:
     cpuThresholdPercentage: 90
-    max: 1
-    min: 1
+    max: 4
+    min: 2
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser
@@ -80,6 +87,10 @@ spec:
       value: https://sam.prod-fss-pub.nais.io
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://prod-fss.pensjonsamhandling.sam/.default
+    - name: ETTERLATTE_TRYGDETID_URL
+      value: http://etterlatte-trygdetid
+    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
+      value: prod-gcp.etterlatte.etterlatte-trygdetid
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -87,7 +98,6 @@ spec:
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-behandling
         - application: etterlatte-samordning-vedtak
           permissions:
@@ -102,6 +112,7 @@ spec:
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-beregning
         - application: etterlatte-behandling
+        - application: etterlatte-trygdetid
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: sam.prod-fss-pub.nais.io

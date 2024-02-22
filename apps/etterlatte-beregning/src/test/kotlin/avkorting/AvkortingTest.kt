@@ -1,18 +1,10 @@
-package avkorting
+package no.nav.etterlatte.avkorting
 
 import io.kotest.assertions.asClue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.equality.shouldBeEqualToIgnoringFields
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import no.nav.etterlatte.avkorting.Aarsoppgjoer
-import no.nav.etterlatte.avkorting.AvkortetYtelse
-import no.nav.etterlatte.avkorting.AvkortetYtelseType
-import no.nav.etterlatte.avkorting.Avkorting
-import no.nav.etterlatte.avkorting.AvkortingGrunnlag
-import no.nav.etterlatte.avkorting.Inntektsavkorting
-import no.nav.etterlatte.avkorting.Restanse
-import no.nav.etterlatte.avkorting.YtelseFoerAvkorting
 import no.nav.etterlatte.beregning.regler.avkortetYtelse
 import no.nav.etterlatte.beregning.regler.avkorting
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag

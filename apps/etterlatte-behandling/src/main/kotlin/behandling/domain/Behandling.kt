@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.ATTESTERT
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVKORTET
+import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.AVSLAG
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.BEREGNET
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.FATTET_VEDTAK
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus.OPPRETTET
@@ -47,6 +48,8 @@ sealed class Behandling {
     abstract val utlandstilknytning: Utlandstilknytning?
     abstract val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
     abstract val kilde: Vedtaksloesning
+
+    open val relatertBehandlingId: String? = null
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
 
     protected val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
@@ -112,24 +115,32 @@ sealed class Behandling {
 
     protected fun <T : Behandling> hvisTilstandEr(
         behandlingStatus: BehandlingStatus,
-        block: () -> T,
+        endreTilStatus: BehandlingStatus,
+        block: (endreTilStatus: BehandlingStatus) -> T,
     ): T {
         if (status == behandlingStatus) {
-            return block()
+            return block(endreTilStatus)
         } else {
-            logger.info("Ugyldig operasjon på behandling ($id) med status $status")
+            logger.error(
+                "Ugyldig operasjon på behandling ($id) med status $status, prøver å endre til status ${endreTilStatus.name}." +
+                    " Forventet status er ${behandlingStatus.name}",
+            )
             throw TilstandException.UgyldigTilstand
         }
     }
 
     protected fun <T : Behandling> hvisTilstandEr(
         behandlingStatuser: List<BehandlingStatus>,
-        block: () -> T,
+        endreTilStatus: BehandlingStatus,
+        block: (endreTilStatus: BehandlingStatus) -> T,
     ): T {
         if (status in behandlingStatuser) {
-            return block()
+            return block(endreTilStatus)
         } else {
-            logger.info("Ugyldig operasjon på behandling ($id) med status $status")
+            logger.error(
+                "Ugyldig operasjon på behandling ($id) med status $status, prøver å endre til status ${endreTilStatus.name}." +
+                    " Forventet statuser er ${behandlingStatuser.joinToString(",")}",
+            )
             throw TilstandException.UgyldigTilstand
         }
     }
@@ -160,6 +171,10 @@ sealed class Behandling {
 
     open fun tilAttestert(): Behandling {
         throw BehandlingStoetterIkkeStatusEndringException(ATTESTERT)
+    }
+
+    open fun tilAvslag(): Behandling {
+        throw BehandlingStoetterIkkeStatusEndringException(AVSLAG)
     }
 
     open fun tilReturnert(): Behandling {
@@ -209,6 +224,7 @@ internal fun Behandling.toStatistikkBehandling(
         enhet = sak.enhet,
         kilde = kilde,
         pesysId = pesysId,
+        relatertBehandlingId = relatertBehandlingId,
     )
 }
 

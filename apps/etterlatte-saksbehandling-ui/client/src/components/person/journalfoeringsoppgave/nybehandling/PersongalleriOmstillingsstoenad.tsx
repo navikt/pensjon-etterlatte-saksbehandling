@@ -1,102 +1,83 @@
-import { Button, Heading, Panel, TextField } from '@navikt/ds-react'
+import { BodyShort, Button, Heading, Panel, TextField } from '@navikt/ds-react'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
-import { Persongalleri } from '~shared/types/Person'
-import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
-import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
-import { useAppDispatch } from '~store/Store'
-import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
+import {
+  InputList,
+  InputRow,
+  NyBehandlingSkjema,
+} from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+import React from 'react'
+import { useFieldArray, useFormContext } from 'react-hook-form'
+import {
+  validateFnrObligatorisk,
+  validerFnrValgfri,
+} from '~components/person/journalfoeringsoppgave/nybehandling/validator'
+import { SpaceChildren } from '~shared/styled'
 
 export default function PersongalleriOmstillingsstoenad() {
-  const { nyBehandlingRequest } = useJournalfoeringOppgave()
-  const dispatch = useAppDispatch()
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<NyBehandlingSkjema>()
 
-  const persongalleri = nyBehandlingRequest?.persongalleri
-
-  const oppdaterPersongalleri = (persongalleri: Persongalleri) => {
-    dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, persongalleri }))
-  }
-
-  const oppdater = (fnr: string, index: number) => {
-    const nyState = persongalleri ? [...(persongalleri?.soesken || [])] : []
-    nyState[index] = fnr
-    oppdaterPersongalleri({ ...persongalleri, soesken: nyState })
-  }
-
-  const leggTil = () => {
-    const nyState = persongalleri ? [...(persongalleri?.soesken || []), ''] : ['']
-
-    oppdaterPersongalleri({
-      ...persongalleri,
-      soesken: nyState,
-    })
-  }
-
-  const fjern = (index: number) => {
-    const nyState = persongalleri ? [...(persongalleri?.soesken || [])] : []
-    nyState.splice(index, 1)
-    oppdaterPersongalleri({ ...persongalleri, soesken: nyState })
-  }
+  const avdoedFormArray = useFieldArray<NyBehandlingSkjema>({ name: 'persongalleri.avdoed' })
+  const soeskenFormArray = useFieldArray<NyBehandlingSkjema>({ name: 'persongalleri.soesken' })
 
   return (
-    <>
+    <SpaceChildren>
       <InputRow>
         <TextField
+          {...register('persongalleri.soeker')}
           label="Søker (gjenlevende)"
-          value={persongalleri?.soeker || ''}
-          pattern="[0-9]{11}"
-          maxLength={11}
-          onChange={(e) => oppdaterPersongalleri({ ...persongalleri, soeker: e.target.value })}
           description="Fødselsnummeret er automatisk hentet fra oppgaven"
           readOnly
         />
       </InputRow>
-
       <InputRow>
         <TextField
+          {...register('persongalleri.innsender', { validate: validerFnrValgfri })}
           label="Innsender"
-          description="Oppgi innsenderen sitt fødselsnummer dersom det er tilgjengelig"
-          value={persongalleri?.innsender || ''}
-          pattern="[0-9]{11}"
-          maxLength={11}
-          onChange={(e) => oppdaterPersongalleri({ ...persongalleri, innsender: e.target.value })}
+          description="Oppgi innsenderen sitt fødselsnummer (dersom det er tilgjengelig)"
+          error={errors.persongalleri?.innsender?.message}
         />
       </InputRow>
-
-      <InputRow>
-        <TextField
-          label="Avdød"
-          description="Oppgi fødselsnummer"
-          value={persongalleri?.avdoed ? persongalleri?.avdoed[0] : ''}
-          pattern="[0-9]{11}"
-          maxLength={11}
-          onChange={(e) => oppdaterPersongalleri({ ...persongalleri, avdoed: [e.target.value] })}
-        />
-      </InputRow>
-
+      {avdoedFormArray.fields.map((field, index) => (
+        <InputRow key={index}>
+          <TextField
+            {...register(`persongalleri.avdoed.${index}.value`, { validate: validerFnrValgfri })}
+            key={field.id}
+            label="Avdød"
+            description="Oppgi fødselsnummer (dersom det er tilgjengelig)"
+            error={errors?.persongalleri?.avdoed?.[index]?.value?.message}
+          />
+        </InputRow>
+      ))}
       <Panel border>
         <Heading size="small" spacing>
           Barn
+          <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>
         </Heading>
 
         <InputList>
-          {persongalleri?.soesken?.map((barn, index) => (
+          {soeskenFormArray.fields.map((field, index) => (
             <InputRow key={index}>
               <TextField
-                label={`Barn ${persongalleri!!.soesken!!.length > 1 ? index + 1 : ''}`}
-                description="Oppgi fødselsnummer"
-                value={barn}
-                pattern="[0-9]{11}"
-                maxLength={11}
-                onChange={(e) => oppdater(e.target.value, index)}
+                {...register(`persongalleri.soesken.${index}.value`, { validate: validateFnrObligatorisk })}
+                key={field.id}
+                label="Barn"
+                error={errors?.persongalleri?.soesken?.[index]?.value?.message}
               />
-              <Button icon={<XMarkIcon />} variant="tertiary" onClick={() => fjern(index)} />
+              <Button
+                icon={<XMarkIcon aria-hidden />}
+                variant="tertiary"
+                onClick={() => soeskenFormArray.remove(index)}
+              />
             </InputRow>
           ))}
-          <Button icon={<PlusIcon />} onClick={leggTil}>
+          <Button icon={<PlusIcon aria-hidden />} onClick={() => soeskenFormArray.append({ value: '' })} type="button">
             Legg til barn
           </Button>
         </InputList>
       </Panel>
-    </>
+    </SpaceChildren>
   )
 }

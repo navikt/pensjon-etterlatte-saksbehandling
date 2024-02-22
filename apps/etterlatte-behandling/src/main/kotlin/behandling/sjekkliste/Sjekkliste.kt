@@ -46,6 +46,7 @@ internal val defaultSjekklisteItemsBP =
         "Bosatt Norge: Innhenter EØS og bank-opplysninger",
         "Bosatt Norge: Sendt brev til bruker om krav til avtaleland",
         "Bosatt Norge: Opprettet oppfølgingsoppgave på sluttbehandling i Gosys",
+        "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
     )
 
 internal val defaultSjekklisteItemsOMS =
@@ -54,10 +55,11 @@ internal val defaultSjekklisteItemsOMS =
         "Ikke søkt om, men kan ha rett på stønad til barnetilsyn - informert søker",
         "Mulighet for, og ikke søkt om (utvidet) barnetrygd. Oppgave til barnetrygd sendt",
         "Gjenlevende har gradert uføretrygd. Oppgave til NAY sendt.",
+        "Opprettet oppgave i Gosys for videre oppfølging av aktivitetsplikt",
         "Ikke registrert/feil kontonummer i saken - opprettet oppgave til NØP",
         "Refusjonskrav (annen NAV-ytelse) i etterbetaling av OMS - opprettet oppgave til NØP",
-        "Samordning - løst opp pga ingen refusjon, se eget notat",
         "Bosatt Norge: Innhenter EØS og bank-opplysninger",
         "Bosatt Norge: Sendt brev til bruker om krav til avtaleland",
         "Bosatt Norge: Opprettet oppfølgingsoppgave på sluttbehandling i Gosys",
+        "Bosatt utland: Nødvendige SED er opprettet og klar for utsendelse. P6000 må opprettes etter attestering",
     )

@@ -8,6 +8,7 @@ enum class BehandlingStatus {
     AVKORTET,
     FATTET_VEDTAK,
     ATTESTERT,
+    AVSLAG,
     RETURNERT,
     TIL_SAMORDNING,
     SAMORDNET,
@@ -39,11 +40,10 @@ enum class BehandlingStatus {
                 SAMORDNET,
                 TIL_SAMORDNING,
                 ATTESTERT,
+                AVSLAG,
             )
 
         fun kanEndres() = underBehandling() - FATTET_VEDTAK
-
-        fun ikkeAvbrutt() = iverksattEllerAttestert() + underBehandling()
 
         fun skalIkkeOmregnesVedGRegulering() =
             listOf(
@@ -55,6 +55,7 @@ enum class BehandlingStatus {
                 OPPRETTET,
                 VILKAARSVURDERT,
                 TRYGDETID_OPPDATERT,
+                AVSLAG,
             )
     }
 }

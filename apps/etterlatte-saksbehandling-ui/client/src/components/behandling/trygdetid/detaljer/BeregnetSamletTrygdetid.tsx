@@ -6,7 +6,7 @@ import { TrygdetidTabell } from '~components/behandling/trygdetid/detaljer/Trygd
 type Props = {
   beregnetTrygdetid: IDetaljertBeregnetTrygdetidResultat
 }
-export const BeregnetSamletTrygdetid: React.FC<Props> = ({ beregnetTrygdetid }) => (
+export const BeregnetSamletTrygdetid = ({ beregnetTrygdetid }: Props) => (
   <TrygdetidTabell>
     <Table size="small">
       <Table.Header>

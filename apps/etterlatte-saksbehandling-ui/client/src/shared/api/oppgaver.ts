@@ -1,5 +1,7 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { SakType } from '~shared/types/sak'
+import { konverterFilterValuesTilKeys } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
+import { Saksbehandler } from '~shared/types/saksbehandler'
 
 export interface OppgaveDTO {
   id: string
@@ -8,21 +10,33 @@ export interface OppgaveDTO {
   sakId: number
   type: Oppgavetype
   kilde: OppgaveKilde
-  saksbehandler: string | null
   referanse: string | null
   merknad: string | null
   opprettet: string
   sakType: SakType
-  fnr: string
+  fnr: string | null
   frist: string
+  saksbehandler: OppgaveSaksbehandler | null
 
   // GOSYS-spesifikt
   beskrivelse: string | null
   gjelder: string | null
-  versjon: string | null
+  versjon: number | null
 }
 
-export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'FERDIGSTILT' | 'FEILREGISTRERT' | 'AVBRUTT'
+export interface OppgaveSaksbehandler {
+  ident: string
+  navn?: string
+}
+
+export interface NyOppgaveDto {
+  oppgaveKilde?: OppgaveKilde
+  oppgaveType: Oppgavetype
+  merknad?: string
+  referanse?: string
+}
+
+export type Oppgavestatus = 'NY' | 'UNDER_BEHANDLING' | 'PAA_VENT' | 'FERDIGSTILT' | 'FEILREGISTRERT' | 'AVBRUTT'
 export type OppgaveKilde = 'HENDELSE' | 'BEHANDLING' | 'EKSTERN' | 'GENERELL_BEHANDLING' | 'TILBAKEKREVING'
 export type Oppgavetype =
   | 'FOERSTEGANGSBEHANDLING'
@@ -36,28 +50,57 @@ export type Oppgavetype =
   | 'KLAGE'
   | 'TILBAKEKREVING'
   | 'OMGJOERING'
-  | 'MANUELL_JOURNALFOERING'
   | 'JOURNALFOERING'
+  | 'GJENOPPRETTING_ALDERSOVERGANG'
 
-export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean => ['NY', 'UNDER_BEHANDLING'].includes(status)
+export const erOppgaveRedigerbar = (status: Oppgavestatus): boolean =>
+  ['NY', 'UNDER_BEHANDLING', 'PAA_VENT'].includes(status)
 
-export const hentOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver')
+export const hentOppgaverMedStatus = async (args: {
+  oppgavestatusFilter: Array<string>
+  minOppgavelisteIdent?: boolean
+}): Promise<ApiResponse<OppgaveDTO[]>> => {
+  const konverterteFiltre = konverterFilterValuesTilKeys(args.oppgavestatusFilter)
+
+  const queryParams = konverterteFiltre
+    .map((i) => `oppgaveStatus=${i}&`)
+    .join('')
+    .slice(0, -1)
+
+  const identfilterGenerator = () => {
+    if (args.minOppgavelisteIdent) {
+      return `&kunInnloggetOppgaver=${args.minOppgavelisteIdent}`
+    }
+    return ''
+  }
+  return apiClient.get(`/oppgaver?${queryParams}${identfilterGenerator()}`)
+}
+
 export const hentOppgave = async (id: string): Promise<ApiResponse<OppgaveDTO>> => apiClient.get(`/oppgaver/${id}`)
 export const hentGosysOppgaver = async (): Promise<ApiResponse<OppgaveDTO[]>> => apiClient.get('/oppgaver/gosys')
+
+export const opprettOppgave = async (args: {
+  sakId: number
+  request: NyOppgaveDto
+}): Promise<ApiResponse<OppgaveDTO>> => apiClient.post(`/oppgaver/sak/${args.sakId}/opprett`, { ...args.request })
 
 export const ferdigstillOppgave = async (id: string): Promise<ApiResponse<any>> =>
   apiClient.put(`/oppgaver/${id}/ferdigstill`, {})
 
+export interface OppdatertOppgaveversjonResponseDto {
+  versjon: number | null
+}
+
 export interface SaksbehandlerEndringDto {
   saksbehandler: string
-  versjon: string | null
+  versjon: number | null
 }
 
 export const tildelSaksbehandlerApi = async (args: {
   oppgaveId: string
   type: string
   nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<void>> => {
+}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
   if (args.type == 'GOSYS') {
     return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
   } else {
@@ -65,11 +108,17 @@ export const tildelSaksbehandlerApi = async (args: {
   }
 }
 
+export const saksbehandlereIEnhetApi = async (args: {
+  enheter: string[]
+}): Promise<ApiResponse<Array<Saksbehandler>>> => {
+  return apiClient.get(`/saksbehandlere?enheter=${args.enheter}`)
+}
+
 export const byttSaksbehandlerApi = async (args: {
   oppgaveId: string
   type: string
   nysaksbehandler: SaksbehandlerEndringDto
-}): Promise<ApiResponse<void>> => {
+}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
   if (args.type == 'GOSYS') {
     return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, { ...args.nysaksbehandler })
   } else {
@@ -81,8 +130,8 @@ export const fjernSaksbehandlerApi = async (args: {
   oppgaveId: string
   sakId: number
   type: string
-  versjon: string | null
-}): Promise<ApiResponse<void>> => {
+  versjon: number | null
+}): Promise<ApiResponse<OppdatertOppgaveversjonResponseDto>> => {
   if (args.type == 'GOSYS') {
     return apiClient.post(`/oppgaver/gosys/${args.oppgaveId}/tildel-saksbehandler`, {
       saksbehandler: '',
@@ -95,8 +144,15 @@ export const fjernSaksbehandlerApi = async (args: {
 
 export interface RedigerFristRequest {
   frist: Date
-  versjon: string | null
+  versjon: number | null
 }
+
+export interface SettPaaVentRequest {
+  merknad: String
+  status: Oppgavestatus
+  versjon: number | null
+}
+
 export const redigerFristApi = async (args: {
   oppgaveId: string
   type: string
@@ -109,19 +165,26 @@ export const redigerFristApi = async (args: {
   }
 }
 
+export const settOppgavePaaVentApi = async (args: {
+  oppgaveId: string
+  settPaaVentRequest: SettPaaVentRequest
+}): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/oppgaver/${args.oppgaveId}/sett-paa-vent`, { ...args.settPaaVentRequest })
+}
+
 export const hentOppgaveForBehandlingUnderBehandlingIkkeattestert = async (args: {
   referanse: string
   sakId: number
-}): Promise<ApiResponse<string>> => apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestert/${args.referanse}`)
+}): Promise<ApiResponse<Saksbehandler>> => apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestert/${args.referanse}`)
+
+export const hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave = async (args: {
+  referanse: string
+  sakId: number
+}): Promise<ApiResponse<OppgaveDTO>> =>
+  apiClient.get(`/oppgaver/sak/${args.sakId}/ikkeattestertOppgave/${args.referanse}`)
 
 export const hentSaksbehandlerForReferanseOppgaveUnderArbeid = async (args: {
   referanse: string
   sakId: number
-}): Promise<ApiResponse<string | null>> =>
+}): Promise<ApiResponse<Saksbehandler>> =>
   apiClient.get(`/oppgaver/sak/${args.sakId}/oppgaveunderbehandling/${args.referanse}`)
-
-export const hentFerdigstiltAtteseringsoppgaveForReferanse = async (args: {
-  referanse: string
-  sakId: number
-}): Promise<ApiResponse<string | null>> =>
-  apiClient.get(`/oppgaver/sak/${args.sakId}/ferdigstiltogattestert/${args.referanse}`)

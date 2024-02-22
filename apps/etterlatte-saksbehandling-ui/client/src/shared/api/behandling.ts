@@ -1,7 +1,6 @@
 import {
   IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
-  IEtterbetaling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
   IUtlandstilknytning,
@@ -16,6 +15,8 @@ import { FoersteVirk, ISak } from '~shared/types/sak'
 import { InstitusjonsoppholdMedKilde } from '~components/person/uhaandtereHendelser/HistoriskeHendelser'
 import { format } from 'date-fns'
 import { DatoFormat } from '~utils/formattering'
+import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
+import { RedigertFamilieforhold } from '~shared/types/grunnlag'
 
 export const hentGrunnlagsendringshendelserForSak = async (
   sakId: number
@@ -23,7 +24,7 @@ export const hentGrunnlagsendringshendelserForSak = async (
   return apiClient.get(`/sak/${sakId}/grunnlagsendringshendelser`)
 }
 
-export const lukkGrunnlagshendelse = async (hendelse: Grunnlagsendringshendelse): Promise<ApiResponse<any>> => {
+export const lukkGrunnlagshendelse = async (hendelse: Grunnlagsendringshendelse): Promise<ApiResponse<void>> => {
   return apiClient.post(`/personer/lukkgrunnlagsendringshendelse`, { ...hendelse })
 }
 
@@ -142,19 +143,28 @@ export const hentSak = async (sakId: string): Promise<ApiResponse<ISak>> => {
 export const hentFoersteVirk = async (args: { sakId: number }) =>
   apiClient.get<FoersteVirk>(`/sak/${args.sakId}/behandlinger/foerstevirk`)
 
-export const lagreEtterbetaling = async (args: {
-  behandlingId: string
-  etterbetaling: IEtterbetaling
-}): Promise<ApiResponse<void>> => {
-  return apiClient.put(`/behandling/${args.behandlingId}/etterbetaling `, {
-    fraDato: args.etterbetaling.fra,
-    tilDato: args.etterbetaling.til,
-  })
-}
-export const slettEtterbetaling = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
-  return apiClient.delete(`/behandling/${args.behandlingId}/etterbetaling`)
-}
-
 export const oppdaterGrunnlag = async (args: { behandlingId: string }): Promise<ApiResponse<void>> => {
   return apiClient.post(`/behandling/${args.behandlingId}/oppdater-grunnlag`, {})
+}
+
+export const redigerFamilieforhold = async (args: {
+  behandlingId: string
+  redigert: RedigertFamilieforhold
+}): Promise<ApiResponse<void>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/rediger-familieforhold`, {
+    ...args.redigert,
+  })
+}
+
+export const lagreBrevutfallApi = async (args: {
+  behandlingId: string
+  brevutfall: BrevutfallOgEtterbetaling
+}): Promise<ApiResponse<BrevutfallOgEtterbetaling>> => {
+  return apiClient.post(`/behandling/${args.behandlingId}/info/brevutfall`, { ...args.brevutfall })
+}
+
+export const hentBrevutfallOgEtterbetalingApi = async (
+  behandlingId: string
+): Promise<ApiResponse<BrevutfallOgEtterbetaling | null>> => {
+  return apiClient.get(`/behandling/${behandlingId}/info/brevutfallogetterbetaling`)
 }

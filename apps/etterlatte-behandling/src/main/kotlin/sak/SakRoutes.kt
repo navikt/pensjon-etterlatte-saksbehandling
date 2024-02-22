@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
@@ -24,17 +25,19 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
-import no.nav.etterlatte.libs.common.hentNavidentFraToken
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerAndGradering
 import no.nav.etterlatte.tilgangsstyring.withFoedselsnummerInternal
+import no.nav.etterlatte.tilgangsstyring.withLesetilgang
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
@@ -89,7 +92,8 @@ internal fun Route.sakSystemRoutes(
 
     post("personer/saker/{type}") {
         withFoedselsnummerAndGradering(tilgangService) { fnr, gradering ->
-            val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
+            val type: SakType =
+                enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne eller opprette sak" })
             val message = inTransaction { sakService.finnEllerOpprettSak(fnr = fnr.value, type, gradering = gradering) }
             requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/saker")
             call.respond(message)
@@ -98,7 +102,8 @@ internal fun Route.sakSystemRoutes(
 
     post("personer/getsak/{type}") {
         withFoedselsnummerInternal(tilgangService) { fnr ->
-            val type: SakType = enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne sak" })
+            val type: SakType =
+                enumValueOf(requireNotNull(call.parameters["type"]) { "Må ha en Saktype for å finne sak" })
             val sak =
                 inTransaction { sakService.finnSak(fnr.value, type) }.also {
                     requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak")
@@ -108,9 +113,15 @@ internal fun Route.sakSystemRoutes(
     }
 }
 
-class PersonManglerSak(message: String) :
+class PersonManglerSak() :
     UgyldigForespoerselException(
         code = "PERSON_MANGLER_SAK",
+        detail = "Personen har ingen saker i Gjenny",
+    )
+
+class SakIkkeFunnetException(message: String) :
+    UgyldigForespoerselException(
+        code = "FANT_INGEN_SAK",
         detail = message,
     )
 
@@ -127,43 +138,86 @@ internal fun Route.sakWebRoutes(
     route("/api") {
         route("/sak/{$SAKID_CALL_PARAMETER}") {
             get {
-                val sak =
-                    inTransaction {
-                        sakService.finnSak(sakId)
-                    }
-                call.respond(sak ?: HttpStatusCode.NotFound)
+                withLesetilgang {
+                    val sak =
+                        inTransaction {
+                            sakService.finnSak(sakId)
+                        }
+                    call.respond(sak ?: HttpStatusCode.NotFound)
+                }
             }
 
             get("/grunnlagsendringshendelser") {
-                call.respond(inTransaction { GrunnlagsendringsListe(grunnlagsendringshendelseService.hentAlleHendelserForSak(sakId)) })
+                call.respond(
+                    inTransaction {
+                        GrunnlagsendringsListe(
+                            grunnlagsendringshendelseService.hentAlleHendelserForSak(
+                                sakId,
+                            ),
+                        )
+                    },
+                )
             }
 
             post("/endre_enhet") {
-                hentNavidentFraToken { navIdent ->
+                kunSaksbehandlerMedSkrivetilgang { navIdent ->
                     val enhetrequest = call.receive<EnhetRequest>()
                     try {
+                        if (enhetrequest.enhet !in Enheter.entries.map { it.enhetNr }) {
+                            throw UgyldigForespoerselException(
+                                code = "ENHET IKKE GYLDIG",
+                                detail = "enhet ${enhetrequest.enhet} er ikke i listen over gyldige enheter",
+                            )
+                        }
+
+                        inTransaction { sakService.finnSak(sakId) }
+                            ?: throw SakIkkeFunnetException("Fant ingen sak å endre enhet på sakid: $sakId")
+
                         val sakMedEnhet =
                             GrunnlagsendringshendelseService.SakMedEnhet(
                                 enhet = enhetrequest.enhet,
                                 id = sakId,
                             )
+
                         inTransaction {
                             sakService.oppdaterEnhetForSaker(listOf(sakMedEnhet))
                             oppgaveService.oppdaterEnhetForRelaterteOppgaver(listOf(sakMedEnhet))
+                            for (oppgaveIntern in oppgaveService.hentOppgaverForSak(sakId)) {
+                                if (oppgaveIntern.saksbehandler != null &&
+                                    oppgaveIntern.status == Status.UNDER_BEHANDLING
+                                ) {
+                                    oppgaveService.fjernSaksbehandler(
+                                        oppgaveIntern.id,
+                                    )
+                                }
+                            }
                         }
-                        logger.info("Endret enhet på sak: $sakId  og tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}")
-                        call.respond(sakMedEnhet)
+
+                        logger.info(
+                            "Saksbehandler ${navIdent.ident} endret enhet på sak: $sakId og " +
+                                "tilhørende oppgaver til enhet: ${sakMedEnhet.enhet}",
+                        )
+                        call.respond(HttpStatusCode.OK)
                     } catch (e: TilstandException.UgyldigTilstand) {
                         call.respond(HttpStatusCode.BadRequest, "Kan ikke endre enhet på sak og oppgaver")
                     }
                 }
             }
 
+            get("flyktning") {
+                withLesetilgang {
+                    val flyktning = inTransaction { sakService.finnFlyktningForSak(sakId) }
+                    call.respond(flyktning ?: HttpStatusCode.NoContent)
+                }
+            }
+
             get("/behandlinger/foerstevirk") {
-                logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
-                when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {
-                    null -> call.respond(HttpStatusCode.NotFound)
-                    else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
+                withLesetilgang {
+                    logger.info("Henter første virkningstidspunkt på en iverksatt behandling i sak med id $sakId")
+                    when (val foersteVirk = inTransaction { behandlingService.hentFoersteVirk(sakId) }) {
+                        null -> call.respond(HttpStatusCode.NotFound)
+                        else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
+                    }
                 }
             }
         }
@@ -200,14 +254,21 @@ internal fun Route.sakWebRoutes(
 
             post("sak/{type}") {
                 withFoedselsnummerInternal(tilgangService) { fnr ->
+                    val opprettHvisIkkeFinnes = call.request.queryParameters["opprettHvisIkkeFinnes"].toBoolean()
+
                     val type: SakType =
                         requireNotNull(call.parameters["type"]) {
                             "Mangler påkrevd parameter {type} for å hente sak på bruker"
                         }.let { enumValueOf(it) }
 
                     val sak =
-                        inTransaction { sakService.finnSak(fnr.value, type) }
-                            .also { requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak/type") }
+                        inTransaction {
+                            if (opprettHvisIkkeFinnes) {
+                                sakService.finnEllerOpprettSak(fnr.value, type)
+                            } else {
+                                sakService.finnSak(fnr.value, type)
+                            }
+                        }.also { requestLogger.loggRequest(brukerTokenInfo, fnr, "personer/sak/type") }
                     call.respond(sak ?: HttpStatusCode.NoContent)
                 }
             }

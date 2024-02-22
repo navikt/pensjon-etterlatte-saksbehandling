@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   gcp:
     sqlInstances:
@@ -65,6 +65,10 @@ spec:
           - NAVident
   kafka:
     pool: nav-prod
+  resources:
+    requests:
+      cpu: 50m
+      memory: 384Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 4
@@ -100,7 +104,7 @@ spec:
         - application: etterlatte-migrering
         - application: etterlatte-trygdetid
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-tidshendelser
     outbound:
       rules:
         - application: etterlatte-behandling

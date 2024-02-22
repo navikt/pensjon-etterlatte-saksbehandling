@@ -22,7 +22,6 @@ object BarnekullMapper {
         ppsKlient: ParallelleSannheterKlient,
         forelder: PdlHentPerson,
         saktype: SakType,
-        aksepterPersonerUtenIdent: Boolean = false,
     ): Barnekull? {
         val barnFnr =
             forelder.forelderBarnRelasjon
@@ -57,7 +56,6 @@ object BarnekullMapper {
                         PersonRolle.TILKNYTTET_BARN,
                         it.person!!,
                         saktype,
-                        aksepterPersonerUtenIdent,
                     )
                 }
             }

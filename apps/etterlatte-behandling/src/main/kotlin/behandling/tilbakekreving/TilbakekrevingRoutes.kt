@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
 internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
     route("/api/tilbakekreving/{$BEHANDLINGID_CALL_PARAMETER}") {
@@ -27,55 +28,69 @@ internal fun Route.tilbakekrevingRoutes(service: TilbakekrevingService) {
             }
         }
         put("/vurdering") {
-            val vurdering = call.receive<TilbakekrevingVurdering>()
-            try {
-                call.respond(service.lagreVurdering(behandlingId, vurdering))
-            } catch (e: TilbakekrevingFinnesIkkeException) {
-                call.respond(HttpStatusCode.NotFound)
+            kunSkrivetilgang {
+                val vurdering = call.receive<TilbakekrevingVurdering>()
+                try {
+                    call.respond(service.lagreVurdering(behandlingId, vurdering))
+                } catch (e: TilbakekrevingFinnesIkkeException) {
+                    call.respond(HttpStatusCode.NotFound)
+                }
             }
         }
         put("/perioder") {
-            val request = call.receive<TilbakekrevingLagreRequest>()
-            try {
-                call.respond(service.lagrePerioder(behandlingId, request.perioder))
-            } catch (e: TilbakekrevingFinnesIkkeException) {
-                call.respond(HttpStatusCode.NotFound)
+            kunSkrivetilgang {
+                val request = call.receive<TilbakekrevingLagreRequest>()
+                try {
+                    call.respond(service.lagrePerioder(behandlingId, request.perioder))
+                } catch (e: TilbakekrevingFinnesIkkeException) {
+                    call.respond(HttpStatusCode.NotFound)
+                }
             }
         }
 
         route("vedtak") {
             post("opprett") {
-                service.opprettVedtak(behandlingId, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
+                kunSkrivetilgang {
+                    service.opprettVedtak(behandlingId, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
             post("fatt") {
-                service.fattVedtak(behandlingId, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
+                kunSkrivetilgang {
+                    service.fattVedtak(behandlingId, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
             post("attester") {
-                val (kommentar) = call.receive<TilbakekrevingAttesterRequest>()
-                service.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
+                kunSkrivetilgang {
+                    val (kommentar) = call.receive<TilbakekrevingAttesterRequest>()
+                    service.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
             post("underkjenn") {
-                val (kommentar, valgtBegrunnelse) = call.receive<TilbakekrevingUnderkjennRequest>()
-                service.underkjennVedtak(behandlingId, kommentar, valgtBegrunnelse, brukerTokenInfo)
-                call.respond(HttpStatusCode.OK)
+                kunSkrivetilgang {
+                    val (kommentar, valgtBegrunnelse) = call.receive<TilbakekrevingUnderkjennRequest>()
+                    service.underkjennVedtak(behandlingId, kommentar, valgtBegrunnelse, brukerTokenInfo)
+                    call.respond(HttpStatusCode.OK)
+                }
             }
         }
     }
 
     route("/tilbakekreving") {
         post {
-            medBody<Kravgrunnlag> {
-                try {
-                    service.opprettTilbakekreving(it)
-                    call.respond(HttpStatusCode.OK)
-                } catch (e: TilbakekrevingHarMangelException) {
-                    call.respond(
-                        HttpStatusCode.NotFound,
-                        "Eksisterer ikke sak=${it.sakId.value} for kravgrunnlag=${it.kravgrunnlagId}",
-                    )
+            kunSkrivetilgang {
+                medBody<Kravgrunnlag> {
+                    try {
+                        service.opprettTilbakekreving(it)
+                        call.respond(HttpStatusCode.OK)
+                    } catch (e: TilbakekrevingHarMangelException) {
+                        call.respond(
+                            HttpStatusCode.NotFound,
+                            "Eksisterer ikke sak=${it.sakId.value} for kravgrunnlag=${it.kravgrunnlagId}",
+                        )
+                    }
                 }
             }
         }

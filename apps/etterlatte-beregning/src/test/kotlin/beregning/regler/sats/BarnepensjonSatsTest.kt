@@ -1,4 +1,4 @@
-package beregning.regler.sats
+package no.nav.etterlatte.beregning.regler.sats
 
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.ints.shouldBeExactly

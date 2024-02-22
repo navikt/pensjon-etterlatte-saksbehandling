@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.libs.common.behandling.PersonUtenIdent
 import no.nav.etterlatte.libs.common.innsendtsoeknad.OppholdUtlandType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.JaNeiVetIkke
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -140,6 +141,7 @@ data class VergeEllerFullmektig(
     val navn: String?,
     val tjenesteomraade: String?,
     val omfangetErInnenPersonligOmraade: Boolean?,
+    val omfang: String? = null,
 )
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
@@ -185,16 +187,16 @@ data class GeografiskTilknytning(
 }
 
 interface Verge {
-    fun navn(): String
+    fun navn(): String?
 }
 
 data class Vergemaal(val mottaker: BrevMottaker) : Verge {
-    override fun navn(): String {
-        return mottaker.navn!!
+    override fun navn(): String? {
+        return mottaker.navn
     }
 }
 
-data class ForelderVerge(val navn: String) : Verge {
+data class ForelderVerge(val foedselsnummer: Folkeregisteridentifikator, val navn: String) : Verge {
     override fun navn(): String {
         return navn
     }
@@ -204,7 +206,7 @@ data class ForelderVerge(val navn: String) : Verge {
 data class BrevMottaker(
     val navn: String?,
     val foedselsnummer: MottakerFoedselsnummer?,
-    val adresse: MottakerAdresse,
+    val adresse: MottakerAdresse?,
     val adresseTypeIKilde: String? = null,
 )
 
@@ -250,30 +252,89 @@ enum class AdressebeskyttelseGradering {
     fun erGradert(): Boolean {
         return this == STRENGT_FORTROLIG_UTLAND || this == STRENGT_FORTROLIG || this == FORTROLIG
     }
+
+    fun erStrengtFortrolig(): Boolean {
+        return this == STRENGT_FORTROLIG_UTLAND || this == STRENGT_FORTROLIG
+    }
+}
+
+fun finnHoyestGradering(graderinger: List<AdressebeskyttelseGradering>): AdressebeskyttelseGradering {
+    val strengtFortroligGradering =
+        graderinger.find {
+            it in
+                listOf(
+                    AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                    AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND,
+                )
+        }
+
+    if (strengtFortroligGradering != null) {
+        return strengtFortroligGradering
+    }
+
+    val fortrolig = graderinger.find { it == AdressebeskyttelseGradering.FORTROLIG }
+
+    if (fortrolig != null) {
+        return fortrolig
+    }
+
+    return AdressebeskyttelseGradering.UGRADERT
+}
+
+fun finnHoyesteGradering(
+    graderingEn: AdressebeskyttelseGradering,
+    graderingTo: AdressebeskyttelseGradering,
+): AdressebeskyttelseGradering {
+    if (graderingEn in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)) {
+        return graderingEn
+    }
+
+    if (graderingTo in listOf(AdressebeskyttelseGradering.STRENGT_FORTROLIG, AdressebeskyttelseGradering.STRENGT_FORTROLIG_UTLAND)) {
+        return graderingTo
+    }
+
+    if (graderingEn == AdressebeskyttelseGradering.FORTROLIG) {
+        return graderingEn
+    }
+
+    if (graderingTo == AdressebeskyttelseGradering.FORTROLIG) {
+        return graderingTo
+    }
+
+    return graderingEn
 }
 
 fun List<AdressebeskyttelseGradering?>.hentPrioritertGradering() = this.filterNotNull().minOrNull() ?: AdressebeskyttelseGradering.UGRADERT
 
-fun hentRelevantVerge(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): VergemaalEllerFremtidsfullmakt? {
+fun hentRelevantVerge(
+    vergeListe: List<VergemaalEllerFremtidsfullmakt>?,
+    soekersFnr: Folkeregisteridentifikator?,
+): VergemaalEllerFremtidsfullmakt? {
     val oekonomisk =
-        vergeListe?.firstOrNull {
-            it.vergeEllerFullmektig.tjenesteomraade in alleVergeOmfangMedOekonomiskeInteresser
+        vergeListe?.firstOrNull { vergemaal ->
+            vergemaal.vergeEllerFullmektig.tjenesteomraade in alleVergeOmfangMedOekonomiskeInteresser &&
+                harVergensFnr(vergemaal, soekersFnr)
         }
-    return oekonomisk ?: vergeListe?.firstOrNull()
-}
 
-fun flereVergerMedOekonomiskInteresse(vergeListe: List<VergemaalEllerFremtidsfullmakt>?): Boolean {
-    val verger =
-        vergeListe?.filter {
-            it.vergeEllerFullmektig.tjenesteomraade in alleVergeOmfangMedOekonomiskeInteresser
-        } ?: emptyList()
-    return verger.size > 1
-}
-
-fun finnesVergeMedUkjentOmfang(vergeListe: List<VergemaalEllerFremtidsfullmakt>?) =
-    vergeListe.orEmpty().any {
-        it.vergeEllerFullmektig.tjenesteomraade !in alleKjenteVergeOmfang
+    return oekonomisk ?: vergeListe?.firstOrNull { vergemaal ->
+        harVergensFnr(vergemaal, soekersFnr)
     }
+}
+
+private fun harVergensFnr(
+    vergemaal: VergemaalEllerFremtidsfullmakt,
+    soekersFnr: Folkeregisteridentifikator?,
+): Boolean {
+    val manglerFnr = vergemaal.vergeEllerFullmektig.motpartsPersonident == null
+    if (manglerFnr) {
+        sikkerlogger()
+            .error(
+                "Et vergemål for person '${soekersFnr?.value}' i PDL mangler vergens fødselsnummer. " +
+                    "Vergens navn: ${vergemaal.vergeEllerFullmektig.navn}.",
+            )
+    }
+    return !manglerFnr
+}
 
 private val alleVergeOmfangMedOekonomiskeInteresser =
     listOf(
@@ -281,6 +342,3 @@ private val alleVergeOmfangMedOekonomiskeInteresser =
         "personligeOgOekonomiskeInteresser",
         "oekonomiskeInteresser",
     )
-
-private val alleKjenteVergeOmfang =
-    alleVergeOmfangMedOekonomiskeInteresser + listOf("personligeInteresser")

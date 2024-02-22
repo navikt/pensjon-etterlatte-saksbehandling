@@ -8,7 +8,7 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   ingresses:
     - "https://etterlatte-vedtaksvurdering.intern.dev.nav.no"
@@ -21,10 +21,11 @@ spec:
             envVarPrefix: DB
   liveness:
     initialDelay: 5
-    path: /isalive
+    path: /health/isalive
   readiness:
     initialDelay: 5
-    path: /isready
+    path: /health/isready
+  leaderElection: true
   prometheus:
     enabled: true
     path: /metrics
@@ -45,6 +46,12 @@ spec:
           - NAVident
   kafka:
     pool: nav-dev
+  resources:
+    limits:
+      memory: 640Mi
+    requests:
+      cpu: 20m
+      memory: 384Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -70,6 +77,10 @@ spec:
       value: https://sam-q1.dev-fss-pub.nais.io
     - name: SAMORDNEVEDTAK_AZURE_SCOPE
       value: api://dev-fss.pensjonsamhandling.sam-q1/.default
+    - name: ETTERLATTE_TRYGDETID_URL
+      value: http://etterlatte-trygdetid
+    - name: ETTERLATTE_TRYGDETID_CLIENT_ID
+      value: dev-gcp.etterlatte.etterlatte-trygdetid
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -77,7 +88,7 @@ spec:
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
         - application: etterlatte-behandling
         - application: etterlatte-samordning-vedtak
           permissions:
@@ -87,11 +98,15 @@ spec:
           permissions:
             roles:
               - samordning-write
+        - application: azure-token-generator
+          namespace: aura
+          cluster: dev-gcp
     outbound:
       rules:
         - application: etterlatte-vilkaarsvurdering
         - application: etterlatte-beregning
         - application: etterlatte-behandling
+        - application: etterlatte-trygdetid
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
         - host: sam-q1.dev-fss-pub.nais.io

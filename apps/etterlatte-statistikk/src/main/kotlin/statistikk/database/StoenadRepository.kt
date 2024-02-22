@@ -227,6 +227,7 @@ private fun PreparedStatement.setStoenadRad(stoenadsrad: StoenadRad): PreparedSt
         setJsonb(2, stoenadsrad.fnrForeldre)
         setJsonb(3, stoenadsrad.fnrSoesken)
         setString(4, stoenadsrad.anvendtTrygdetid)
+        stoenadsrad.nettoYtelse?.let { setString(5, it) } ?: setNull(5, Types.CHAR)
         setString(5, stoenadsrad.nettoYtelse)
         setString(6, stoenadsrad.beregningType)
         setString(7, stoenadsrad.anvendtSats)

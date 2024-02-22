@@ -1,17 +1,20 @@
 package no.nav.etterlatte.oppgave
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.plugins.BadRequestException
-import io.ktor.server.plugins.NotFoundException
 import no.nav.etterlatte.ExternalUser
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.Self
 import no.nav.etterlatte.SystemUser
-import no.nav.etterlatte.User
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.Status
@@ -21,13 +24,31 @@ import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.sak.SakDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
-import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Fagsaksystem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class BrukerManglerAttestantRolleException(msg: String) : Exception(msg)
+class BrukerManglerAttestantRolleException(ident: String) : UgyldigForespoerselException(
+    code = "BRUKER_ER_IKKE_ATTESTANT",
+    detail = "Bruker $ident mangler attestant rolle for tildeling",
+)
+
+class ManglerOppgaveUnderBehandling(msg: String) : UgyldigForespoerselException(
+    code = "MANGLER_OPPGAVE_UNDER_BEHANDLING",
+    detail = msg,
+)
+
+class ForMangeOppgaverUnderBehandling(msg: String) : UgyldigForespoerselException(
+    code = "FOR_MANGE_OPPGAVER_UNDER_BEHANDLING",
+    detail = msg,
+)
+
+class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
+    code = "MANGLER_SAKSBEHANDLER_PAA_OPPGAVE",
+    detail = msg,
+)
 
 class OppgaveService(
     private val oppgaveDao: OppgaveDaoMedEndringssporing,
@@ -35,25 +56,33 @@ class OppgaveService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    fun finnOppgaverForBruker(bruker: SaksbehandlerMedRoller): List<OppgaveIntern> {
-        val rollerSomBrukerHar = finnAktuelleRoller(bruker)
+    fun finnOppgaverForBruker(
+        bruker: SaksbehandlerMedEnheterOgRoller,
+        oppgaveStatuser: List<String>,
+        minOppgavelisteIdentFilter: String? = null,
+    ): List<OppgaveIntern> {
+        val rollerSomBrukerHar = finnAktuelleRoller(bruker.saksbehandlerMedRoller)
         val aktuelleOppgavetyperForRoller = aktuelleOppgavetyperForRolleTilSaksbehandler(rollerSomBrukerHar)
 
-        return if (bruker.harRolleStrengtFortrolig()) {
+        return if (bruker.saksbehandlerMedRoller.harRolleStrengtFortrolig()) {
             oppgaveDao.finnOppgaverForStrengtFortroligOgStrengtFortroligUtland(aktuelleOppgavetyperForRoller)
         } else {
-            oppgaveDao.hentOppgaver(aktuelleOppgavetyperForRoller).sortedByDescending { it.opprettet }
-        }.filterForEnheter(Kontekst.get().AppUser)
+            oppgaveDao.hentOppgaver(
+                aktuelleOppgavetyperForRoller,
+                bruker.enheter(),
+                bruker.erSuperbruker(),
+                oppgaveStatuser,
+                minOppgavelisteIdentFilter,
+            ).sortedByDescending { it.opprettet }
+        }
     }
-
-    private fun List<OppgaveIntern>.filterForEnheter(bruker: User) = this.filterOppgaverForEnheter(bruker)
 
     private fun aktuelleOppgavetyperForRolleTilSaksbehandler(roller: List<Rolle>) =
         roller.flatMap {
             when (it) {
-                Rolle.SAKSBEHANDLER -> OppgaveType.values().toList() - OppgaveType.ATTESTERING
+                Rolle.SAKSBEHANDLER -> OppgaveType.entries - OppgaveType.ATTESTERING
                 Rolle.ATTESTANT -> listOf(OppgaveType.ATTESTERING)
-                Rolle.STRENGT_FORTROLIG -> OppgaveType.values().toList()
+                Rolle.STRENGT_FORTROLIG -> OppgaveType.entries
             }.distinct()
         }
 
@@ -74,10 +103,7 @@ class OppgaveService(
                 if (saksbehandlerMedRoller.harRolleAttestant()) {
                     return true
                 } else {
-                    throw BrukerManglerAttestantRolleException(
-                        "Bruker ${saksbehandlerMedRoller.saksbehandler.ident} " +
-                            "mangler attestant rolle for tildeling",
-                    )
+                    throw BrukerManglerAttestantRolleException(saksbehandlerMedRoller.saksbehandler.ident)
                 }
             }
             is ExternalUser -> throw IllegalArgumentException("ExternalUser er ikke støttet for å tildele oppgave")
@@ -93,16 +119,15 @@ class OppgaveService(
     ) {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+                ?: throw OppgaveIkkeFunnet(oppgaveId)
 
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
         hentetOppgave.erAttestering() && sjekkOmkanTildeleAttestantOppgave()
-        if (hentetOppgave.saksbehandler.isNullOrEmpty()) {
+        val eksisterendeSaksbehandler = hentetOppgave.saksbehandler?.ident
+        if (eksisterendeSaksbehandler.isNullOrEmpty() || eksisterendeSaksbehandler == Fagsaksystem.EY.navn) {
             oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
         } else {
-            throw BadRequestException(
-                "Oppgaven har allerede en saksbehandler, id: $oppgaveId",
-            )
+            throw OppgaveAlleredeTildeltSaksbehandler(oppgaveId, eksisterendeSaksbehandler)
         }
     }
 
@@ -110,36 +135,30 @@ class OppgaveService(
         oppgaveId: UUID,
         saksbehandler: String,
     ) {
-        val hentetOppgave = oppgaveDao.hentOppgave(oppgaveId)
-        if (hentetOppgave != null) {
-            sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-            oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
-        } else {
-            throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
-        }
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId)
+                ?: throw OppgaveIkkeFunnet(oppgaveId)
+
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        oppgaveDao.settNySaksbehandler(oppgaveId, saksbehandler)
     }
 
     fun fjernSaksbehandler(oppgaveId: UUID) {
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+                ?: throw OppgaveIkkeFunnet(oppgaveId)
 
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (hentetOppgave.saksbehandler != null) {
+        if (!hentetOppgave.saksbehandler?.ident.isNullOrBlank()) {
             oppgaveDao.fjernSaksbehandler(oppgaveId)
         } else {
-            throw BadRequestException(
-                "Oppgaven har ingen saksbehandler, id: $oppgaveId",
-            )
+            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
         }
     }
 
     private fun sikreAtOppgaveIkkeErAvsluttet(oppgave: OppgaveIntern) {
         if (oppgave.erAvsluttet()) {
-            throw IllegalStateException(
-                "Oppgave med id ${oppgave.id} kan ikke endres siden den har " +
-                    "status ${oppgave.status}",
-            )
+            throw OppgaveKanIkkeEndres(oppgave.id, oppgave.status)
         }
     }
 
@@ -148,18 +167,41 @@ class OppgaveService(
         frist: Tidspunkt,
     ) {
         if (frist.isBefore(Tidspunkt.now())) {
-            throw BadRequestException("Tidspunkt tilbake i tid id: $oppgaveId")
+            throw FristTilbakeITid(oppgaveId)
         }
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId)
-                ?: throw NotFoundException("Oppgaven finnes ikke, id: $oppgaveId")
+                ?: throw IkkeFunnetException(
+                    code = "OPPGAVE_IKKE_FUNNET",
+                    detail = "Oppgaven finnes ikke",
+                    meta = mapOf("oppgaveId" to oppgaveId),
+                )
         sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
-        if (hentetOppgave.saksbehandler != null) {
-            oppgaveDao.redigerFrist(oppgaveId, frist)
+        if (hentetOppgave.saksbehandler?.ident.isNullOrBlank()) {
+            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
         } else {
-            throw BadRequestException(
-                "Oppgaven har ingen saksbehandler, id: $oppgaveId",
-            )
+            oppgaveDao.redigerFrist(oppgaveId, frist)
+        }
+    }
+
+    fun oppdaterStatusOgMerknad(
+        oppgaveId: UUID,
+        merknad: String,
+        status: Status,
+    ) {
+        val nyStatus = if (status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId)
+                ?: throw IkkeFunnetException(
+                    code = "OPPGAVE_IKKE_FUNNET",
+                    detail = "Oppgaven finnes ikke",
+                    meta = mapOf("oppgaveId" to oppgaveId),
+                )
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        if (hentetOppgave.saksbehandler?.ident.isNullOrEmpty()) {
+            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
+        } else {
+            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, nyStatus)
         }
     }
 
@@ -254,15 +296,10 @@ class OppgaveService(
         oppgaveUnderBehandling: OppgaveIntern,
         saksbehandler: BrukerTokenInfo,
     ) {
-        if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandler)) {
-            throw FeilSaksbehandlerPaaOppgaveException(
-                "Kan ikke lukke oppgave for en annen saksbehandler oppgave:" +
-                    " ${oppgaveUnderBehandling.id}",
-            )
+        if (!saksbehandler.kanEndreOppgaverFor(oppgaveUnderBehandling.saksbehandler?.ident)) {
+            throw OppgaveTilhoererAnnenSaksbehandler(oppgaveUnderBehandling.id)
         }
     }
-
-    class FeilSaksbehandlerPaaOppgaveException(message: String) : Exception(message)
 
     fun oppdaterEnhetForRelaterteOppgaver(sakerMedNyEnhet: List<GrunnlagsendringshendelseService.SakMedEnhet>) {
         sakerMedNyEnhet.forEach {
@@ -313,16 +350,14 @@ class OppgaveService(
                 "Oppgaven vi akkurat avbrøt kunne ikke hentes ut"
             }
         } catch (e: NoSuchElementException) {
-            throw BadRequestException(
+            throw ManglerOppgaveUnderBehandling(
                 "Det må finnes en oppgave under behandling, gjelder behandling / hendelse med ID:" +
                     " $behandlingEllerHendelseId}",
-                e,
             )
         } catch (e: IllegalArgumentException) {
-            throw BadRequestException(
+            throw ForMangeOppgaverUnderBehandling(
                 "Skal kun ha en oppgave under behandling, gjelder behandling / hendelse med ID:" +
                     " $behandlingEllerHendelseId",
-                e,
             )
         }
     }
@@ -330,6 +365,7 @@ class OppgaveService(
     fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
         referanse: String,
         sakId: Long,
+        merknad: String? = null,
     ): OppgaveIntern {
         val oppgaverForBehandling = oppgaveDao.hentOppgaverForReferanse(referanse)
         val oppgaverSomKanLukkes = oppgaverForBehandling.filter { !it.erAvsluttet() }
@@ -342,7 +378,7 @@ class OppgaveService(
             sakId = sakId,
             oppgaveKilde = OppgaveKilde.BEHANDLING,
             oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
-            merknad = null,
+            merknad = merknad,
         )
     }
 
@@ -355,7 +391,7 @@ class OppgaveService(
         frist: Tidspunkt? = null,
     ): OppgaveIntern {
         val sak = sakDao.hentSak(sakId)!!
-        return opprettOppave(
+        return opprettOppgave(
             opprettNyOppgaveMedReferanseOgSak(
                 referanse = referanse,
                 sak = sak,
@@ -367,23 +403,32 @@ class OppgaveService(
         )
     }
 
-    fun hentFerdigstiltAttesteringsOppgave(referanse: String): String? {
-        val oppgaverForBehandlingUtenAttesterting =
-            oppgaveDao.hentOppgaverForReferanse(referanse)
-                .filter {
-                    it.type === OppgaveType.ATTESTERING &&
-                        it.erFerdigstilt()
-                }
-        return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
-    }
-
-    fun hentSisteSaksbehandlerIkkeAttestertOppgave(referanse: String): String? {
+    fun hentSisteSaksbehandlerIkkeAttestertOppgave(referanse: String): OppgaveSaksbehandler? {
         val oppgaverForBehandlingUtenAttesterting =
             oppgaveDao.hentOppgaverForReferanse(referanse)
                 .filter {
                     it.type !== OppgaveType.ATTESTERING
                 }
-        return oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }[0].saksbehandler
+        val sortedByDescending = oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }
+        if (sortedByDescending.isEmpty()) {
+            throw ManglerSaksbehandlerException("Fant ingen saksbehandler for oppgave uten attesteringstype med referanse $referanse")
+        } else {
+            return sortedByDescending[0].saksbehandler
+        }
+    }
+
+    fun hentSisteIkkeAttestertOppgave(referanse: String): OppgaveIntern {
+        val oppgaverForBehandlingUtenAttesterting =
+            oppgaveDao.hentOppgaverForReferanse(referanse)
+                .filter {
+                    it.type !== OppgaveType.ATTESTERING
+                }
+        val sortedByDescending = oppgaverForBehandlingUtenAttesterting.sortedByDescending { it.opprettet }
+        if (sortedByDescending.isEmpty()) {
+            throw ManglerSaksbehandlerException("Fant ingen oppgave uten attesteringstype med referanse $referanse")
+        } else {
+            return sortedByDescending[0]
+        }
     }
 
     fun hentOppgaveForSaksbehandlerFraFoerstegangsbehandling(behandlingId: UUID): OppgaveIntern? {
@@ -394,11 +439,10 @@ class OppgaveService(
         return oppgaverForBehandlingFoerstegangs.maxByOrNull { it.opprettet }
     }
 
-    fun hentSaksbehandlerForOppgaveUnderArbeidByReferanse(referanse: String): String? {
+    fun hentSaksbehandlerForOppgaveUnderArbeidByReferanse(referanse: String): OppgaveSaksbehandler? {
         val oppgaverforBehandling = oppgaveDao.hentOppgaverForReferanse(referanse)
         return try {
-            val oppgaveUnderbehandling = oppgaverforBehandling.single { it.status == Status.UNDER_BEHANDLING }
-            oppgaveUnderbehandling.saksbehandler
+            oppgaverforBehandling.single { it.status == Status.UNDER_BEHANDLING }.saksbehandler
         } catch (e: NoSuchElementException) {
             logger.info("Det må finnes en oppgave under behandling, gjelder referanse: $referanse")
             return null
@@ -408,7 +452,7 @@ class OppgaveService(
         }
     }
 
-    private fun opprettOppave(oppgaveIntern: OppgaveIntern): OppgaveIntern {
+    private fun opprettOppgave(oppgaveIntern: OppgaveIntern): OppgaveIntern {
         var oppgaveLagres = oppgaveIntern
         if (oppgaveIntern.frist === null) {
             val enMaanedFrem = oppgaveIntern.opprettet.toLocalDatetimeUTC().plusMonths(1L).toTidspunkt()
@@ -433,6 +477,14 @@ class OppgaveService(
             }
     }
 
+    fun avbrytAapneOppgaverMedReferanse(referanse: String) {
+        logger.info("Avbryter åpne oppgaver med referanse=$referanse")
+
+        oppgaveDao.hentOppgaverForReferanse(referanse)
+            .filterNot(OppgaveIntern::erAvsluttet)
+            .forEach { oppgaveDao.endreStatusPaaOppgave(it.id, Status.AVBRUTT) }
+    }
+
     fun hentSakOgOppgaverForSak(sakId: Long): OppgaveListe {
         val sak = sakDao.hentSak(sakId)
         if (sak != null) {
@@ -445,12 +497,42 @@ class OppgaveService(
 
 class FantIkkeSakException(msg: String) : Exception(msg)
 
-fun List<OppgaveIntern>.filterOppgaverForEnheter(user: User) =
-    this.filterForEnheter(
-        user,
-    ) { item, enheter ->
-        enheter.contains(item.enhet)
-    }
+class OppgaveTilhoererAnnenSaksbehandler(oppgaveId: UUID) : UgyldigForespoerselException(
+    code = "OPPGAVE_TILHOERER_ANNEN_SAKSBEHANDLER",
+    detail = "Kan ikke lukke oppgave som tilhører en annen saksbehandler",
+    meta = mapOf("oppgaveId" to oppgaveId),
+)
+
+class OppgaveIkkeTildeltSaksbehandler(oppgaveId: UUID) : UgyldigForespoerselException(
+    code = "OPPGAVE_IKKE_TILDELT_SAKSBEHANDLER",
+    detail = "Oppgaven er ikke tildelt en saksbehandler",
+    meta = mapOf("oppgaveId" to oppgaveId),
+)
+
+class OppgaveKanIkkeEndres(oppgaveId: UUID, status: Status) : UgyldigForespoerselException(
+    code = "OPPGAVE_KAN_IKKE_ENDRES",
+    detail = "Oppgaven kan ikke endres siden den har status $status",
+    meta = mapOf("oppgaveId" to oppgaveId),
+)
+
+class FristTilbakeITid(oppgaveId: UUID) : UgyldigForespoerselException(
+    code = "FRIST_TILBAKE_I_TID",
+    detail = "Frist kan ikke settes tilbake i tid",
+    meta = mapOf("oppgaveId" to oppgaveId),
+)
+
+class OppgaveAlleredeTildeltSaksbehandler(oppgaveId: UUID, saksbehandler: String?) : ForespoerselException(
+    status = HttpStatusCode.Conflict.value,
+    code = "OPPGAVE_ALLEREDE_TILDELT_SAKSBEHANDLER",
+    detail = "Oppgaven er allerede tildelt saksbehandler $saksbehandler",
+    meta = mapOf("oppgaveId" to oppgaveId),
+)
+
+class OppgaveIkkeFunnet(oppgaveId: UUID) : IkkeFunnetException(
+    code = "OPPGAVE_IKKE_FUNNET",
+    detail = "Oppgaven finnes ikke",
+    meta = mapOf("oppgaveId" to oppgaveId),
+)
 
 enum class Rolle {
     SAKSBEHANDLER,

@@ -1,12 +1,15 @@
 {
+  "license": "MIT",
   "scripts": {
     "postinstall": "yarn --cwd server install && yarn --cwd client install",
     "prepare": "cd ../../ && husky install .husky"
   },
   "devDependencies": {
-    "eslint": "8.54.0",
-    "husky": "~8.0.1",
-    "lint-staged": "~15.1.0",
-    "prettier": "^3.1.0"
+    "@typescript-eslint/eslint-plugin": "~6.20.0",
+    "@typescript-eslint/parser": "~6.20.0",
+    "eslint": "8.56.0",
+    "husky": "~9.0.9",
+    "lint-staged": "~15.2.1",
+    "prettier": "^3.2.4"
   }
 }

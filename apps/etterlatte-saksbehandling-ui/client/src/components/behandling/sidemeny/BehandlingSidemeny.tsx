@@ -77,18 +77,20 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
     behandling && innloggetSaksbehandler.kanAttestere && behandlingsinfo?.status === IBehandlingStatus.FATTET_VEDTAK
 
   useEffect(() => {
-    fetchVedtakSammendrag(behandling.id, (vedtakSammendrag, statusCode) => {
-      if (statusCode === 200) {
-        dispatch(updateVedtakSammendrag(vedtakSammendrag))
-      }
+    fetchVedtakSammendrag(behandling.id, (vedtakSammendrag) => {
+      dispatch(updateVedtakSammendrag(vedtakSammendrag))
     })
   }, [])
 
   useEffect(() => {
     hentSaksbehandlerForOppgave(
       { referanse: behandling.id, sakId: behandling.sakId },
-      (saksbehandler) => dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler)),
-      () => dispatch(resetSaksbehandlerGjeldendeOppgave)
+      (saksbehandler, statusCode) => {
+        if (statusCode === 200) {
+          dispatch(setSaksbehandlerGjeldendeOppgave(saksbehandler.ident))
+        }
+      },
+      () => dispatch(resetSaksbehandlerGjeldendeOppgave())
     )
   }, [behandling.id])
 
@@ -168,7 +170,7 @@ export const BehandlingSidemeny = ({ behandling }: { behandling: IBehandlingRedu
           </Tabs.Panel>
           <Tabs.Panel value={BehandlingFane.SJEKKLISTE}>
             <>
-              {soeker?.foedselsnummer && <Sjekkliste behandling={behandling} />}
+              <Sjekkliste behandling={behandling} />
               {isPending(hentSjekklisteResult) && <Spinner label="Henter sjekkliste ..." visible />}
               {erFoerstegangsbehandling &&
                 !erFerdigBehandlet(behandling.status) &&

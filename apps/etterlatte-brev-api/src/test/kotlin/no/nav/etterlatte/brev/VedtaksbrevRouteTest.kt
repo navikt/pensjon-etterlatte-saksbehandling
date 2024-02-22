@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -11,9 +10,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
@@ -28,12 +24,14 @@ import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -43,22 +41,18 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import java.util.UUID
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class VedtaksbrevRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val vedtaksbrevService = mockk<VedtaksbrevService>()
     private val tilgangssjekker = mockk<Tilgangssjekker>()
 
     @BeforeAll
     fun before() {
         mockOAuth2Server.start()
-        val httpServer = mockOAuth2Server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -74,7 +68,7 @@ internal class VedtaksbrevRouteTest {
     @Test
     fun `Endepunkt for henting av vedtaksbrev - brev finnes`() {
         coEvery { vedtaksbrevService.hentVedtaksbrev(any()) } returns opprettBrev()
-        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -94,7 +88,7 @@ internal class VedtaksbrevRouteTest {
     @Test
     fun `Endepunkt for henting av vedtaksbrev - brev finnes ikke`() {
         coEvery { vedtaksbrevService.hentVedtaksbrev(any()) } returns null
-        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -110,14 +104,14 @@ internal class VedtaksbrevRouteTest {
 
         coVerify {
             vedtaksbrevService.hentVedtaksbrev(BEHANDLING_ID)
-            tilgangssjekker.harTilgangTilBehandling(any(), any())
+            tilgangssjekker.harTilgangTilBehandling(any(), any(), any())
         }
     }
 
     @Test
     fun `Endepunkt for oppretting av vedtaksbrev`() {
         coEvery { vedtaksbrevService.opprettVedtaksbrev(any(), any(), any()) } returns opprettBrev()
-        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -134,7 +128,7 @@ internal class VedtaksbrevRouteTest {
 
         coVerify(exactly = 1) {
             vedtaksbrevService.opprettVedtaksbrev(SAK_ID, BEHANDLING_ID, any())
-            tilgangssjekker.harTilgangTilBehandling(any(), any())
+            tilgangssjekker.harTilgangTilBehandling(any(), any(), any())
         }
     }
 
@@ -144,7 +138,7 @@ internal class VedtaksbrevRouteTest {
         val pdf = Pdf("Hello world".toByteArray())
 
         coEvery { vedtaksbrevService.genererPdf(any(), any()) } returns pdf
-        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -162,14 +156,14 @@ internal class VedtaksbrevRouteTest {
 
         coVerify(exactly = 1) {
             vedtaksbrevService.genererPdf(brevId, any())
-            tilgangssjekker.harTilgangTilBehandling(any(), any())
+            tilgangssjekker.harTilgangTilBehandling(any(), any(), any())
         }
     }
 
     @Test
     fun `Endepunkt for ferdigstilling av vedtaksbrev`() {
         coEvery { vedtaksbrevService.ferdigstillVedtaksbrev(any(), any()) } just Runs
-        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -185,13 +179,13 @@ internal class VedtaksbrevRouteTest {
 
         coVerify(exactly = 1) {
             vedtaksbrevService.ferdigstillVedtaksbrev(BEHANDLING_ID, any())
-            tilgangssjekker.harTilgangTilBehandling(any(), any())
+            tilgangssjekker.harTilgangTilBehandling(any(), any(), any())
         }
     }
 
     @Test
     fun `Endepunkt som ikke finnes`() {
-        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilBehandling(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -213,16 +207,11 @@ internal class VedtaksbrevRouteTest {
     @Test
     fun `Mangler auth header`() {
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
-            application {
-                restModule(this.log, routePrefix = "api") {
-                    vedtaksbrevRoute(
-                        vedtaksbrevService,
-                        tilgangssjekker,
-                    )
-                }
+            runServer(mockOAuth2Server, "api") {
+                vedtaksbrevRoute(
+                    vedtaksbrevService,
+                    tilgangssjekker,
+                )
             }
 
             val response = client.post("/api/brev/behandling/${UUID.randomUUID()}/vedtak")
@@ -236,17 +225,7 @@ internal class VedtaksbrevRouteTest {
         }
     }
 
-    private val accessToken: String by lazy {
-        mockOAuth2Server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "Test Veiledersen",
-                    "NAVident" to "S123456",
-                ),
-        ).serialize()
-    }
+    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
     private fun opprettBrev() =
         Brev(
@@ -254,6 +233,7 @@ internal class VedtaksbrevRouteTest {
             41,
             BEHANDLING_ID,
             "tittel",
+            Spraak.NB,
             BrevProsessType.AUTOMATISK,
             "soeker_fnr",
             Status.OPPRETTET,
@@ -265,30 +245,18 @@ internal class VedtaksbrevRouteTest {
                 null,
                 Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
             ),
+            brevtype = Brevtype.INFORMASJON,
         )
 
-    private fun ApplicationTestBuilder.httpClient(): HttpClient {
-        environment {
-            config = hoconApplicationConfig
+    private fun ApplicationTestBuilder.httpClient(): HttpClient =
+        runServer(mockOAuth2Server, "api") {
+            vedtaksbrevRoute(
+                vedtaksbrevService,
+                tilgangssjekker,
+            )
         }
-        application {
-            restModule(this.log, routePrefix = "api") {
-                vedtaksbrevRoute(
-                    vedtaksbrevService,
-                    tilgangssjekker,
-                )
-            }
-        }
-
-        return createClient {
-            install(ContentNegotiation) {
-                jackson()
-            }
-        }
-    }
 
     companion object {
-        private const val CLIENT_ID = "mock-client-id"
         private val STOR_SNERK = Foedselsnummer("11057523044")
         private val BEHANDLING_ID = UUID.randomUUID()
         private val SAK_ID = Random.nextLong(1000)

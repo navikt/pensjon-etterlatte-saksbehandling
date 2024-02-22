@@ -4,6 +4,7 @@ import { VergemaalEllerFremtidsfullmakt } from '~components/person/typer'
 import { SakType } from '~shared/types/sak'
 
 export interface Familieforhold {
+  soeker: Personopplysning | undefined
   avdoede: Personopplysning[]
   gjenlevende: Personopplysning[]
 }
@@ -38,6 +39,8 @@ export interface IPdlPerson {
   oppholdsadresse?: IAdresse[]
   avdoedesBarn?: IPdlPerson[]
   utland?: Utland
+  statsborgerskap?: string
+  pdlStatsborgerskap?: Statsborgerskap[]
   familieRelasjon?: IFamilieRelasjon
   sivilstatus?: Sivilstatus
   sivilstand?: Sivilstand[]
@@ -53,6 +56,12 @@ export interface Utland {
     fraflyttingsland?: string
     dato?: string
   }[]
+}
+
+export interface Statsborgerskap {
+  land: string
+  gyldigFraOgMed?: string
+  gyldigTilOgMed?: string
 }
 
 export interface Sivilstand {
@@ -93,8 +102,8 @@ export enum PersonRolle {
   GJENLEVENDE = 'GJENLEVENDE',
 }
 
-export function formaterNavn(person: IPdlPerson): string {
-  return [person.fornavn, person.mellomnavn, person.etternavn].join(' ')
+export function formaterNavn(person: PersonNavn): string {
+  return [person.fornavn, person.mellomnavn, person.etternavn].filter((navn) => !!navn).join(' ')
 }
 
 export interface Persongalleri {

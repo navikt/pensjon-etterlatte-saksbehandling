@@ -21,5 +21,4 @@ fun ApplicationCall.firstValidTokenClaims(): JwtTokenClaims? =
         .principal<TokenValidationContextPrincipal>()
         ?.context
         ?.firstValidToken
-        ?.get()
         ?.jwtTokenClaims

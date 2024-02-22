@@ -1,5 +1,4 @@
 import { fnrErGyldig } from '~utils/fnr'
-import { SakType } from '~shared/types/sak'
 import { NyBehandlingRequest } from '~shared/types/IDetaljertBehandling'
 
 export const gyldigBehandlingRequest = (request?: NyBehandlingRequest) => {
@@ -9,25 +8,31 @@ export const gyldigBehandlingRequest = (request?: NyBehandlingRequest) => {
 }
 
 const gyldigPersongalleri = (request: NyBehandlingRequest) => {
-  const sakType = request.sakType
   const persongalleri = request?.persongalleri
 
   if (!persongalleri) {
     return false
   }
 
-  const avdoede = persongalleri.avdoed?.filter((fnr) => fnrErGyldig(fnr)) || []
-  const gjenlevende = persongalleri.gjenlevende?.filter((fnr) => fnrErGyldig(fnr)) || []
-  const antallGjenlevOgAvdoed = avdoede.length + gjenlevende.length
-
-  let gyldigGjenlevOgAvdoed = false
-  if (sakType === SakType.BARNEPENSJON) {
-    gyldigGjenlevOgAvdoed = antallGjenlevOgAvdoed === 2
-  } else if (sakType === SakType.OMSTILLINGSSTOENAD) {
-    gyldigGjenlevOgAvdoed = antallGjenlevOgAvdoed === 1
-  }
+  const gyldigAvdoed = !persongalleri.avdoed?.length || persongalleri.avdoed.every((fnr) => fnrErGyldig(fnr))
 
   const gyldigInnsender = !persongalleri.innsender || fnrErGyldig(persongalleri.innsender)
 
-  return fnrErGyldig(persongalleri.soeker) && gyldigGjenlevOgAvdoed && gyldigInnsender
+  return fnrErGyldig(persongalleri.soeker) && gyldigAvdoed && gyldigInnsender
+}
+
+export const validerFnrValgfri = (fnr: string): string | undefined => {
+  if (fnr && !fnrErGyldig(fnr)) {
+    return 'Fødselsnummer er på ugyldig format'
+  }
+  return undefined
+}
+
+export const validateFnrObligatorisk = (fnr: string): string | undefined => {
+  if (!fnr) {
+    return 'Fødselsnummer må være satt'
+  } else if (!fnrErGyldig(fnr)) {
+    return 'Fødselsnummer er på ugyldig format'
+  }
+  return undefined
 }

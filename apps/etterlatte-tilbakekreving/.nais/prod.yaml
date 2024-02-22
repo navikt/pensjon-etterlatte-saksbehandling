@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   liveness:
     initialDelay: 5
@@ -44,6 +44,9 @@ spec:
   envFrom:
     - secret: etterlatte-secrets
     - secret: my-application-unleash-api-token
+  resources:
+    requests:
+      cpu: 20m
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -68,6 +71,9 @@ spec:
     - name: ETTERLATTE_PROXY_SCOPE
       value: api://prod-fss.etterlatte.etterlatte-proxy/.default
   accessPolicy:
+    inbound:
+      rules:
+        - application: etterlatte-behandling
     outbound:
       rules:
         - application: etterlatte-behandling

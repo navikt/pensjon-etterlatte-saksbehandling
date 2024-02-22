@@ -14,31 +14,28 @@ import no.nav.pensjon.brevbaker.api.model.LetterMetadata
 import no.nav.pensjon.brevbaker.api.model.RenderedJsonLetter
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
 class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String) {
     private val logger = LoggerFactory.getLogger(BrevbakerKlient::class.java)
     private val sikkerlogg = sikkerlogger()
 
-    @OptIn(ExperimentalTime::class)
     suspend fun genererPdf(brevRequest: BrevbakerRequest): BrevbakerPdfResponse =
         try {
             measureTimedValue {
                 client.post("$apiUrl/etterlatte/pdf") {
                     contentType(ContentType.Application.Json)
-                    setBody(brevRequest.toJsonNode())
+                    setBody(brevRequest)
                 }.body<BrevbakerPdfResponse>()
             }.let { (result, duration) ->
                 logger.info("Fullført brevbaker pdf OK (${duration.toString(DurationUnit.SECONDS, 2)})")
                 result
             }
         } catch (ex: Exception) {
-            sikkerlogg.error("Feila ved generer pdf-kall mot brevbakeren. Requesten var $brevRequest", ex)
-            throw BrevbakerException("Feil ved kall til brevbaker", ex)
+            sikkerlogg.error("Brevbaker pdfgen feilet. Request body: ${brevRequest.toJson()}", ex)
+            throw BrevbakerException("Feil ved kall til brevbaker (se sikkerlogg)", ex)
         }
 
-    @OptIn(ExperimentalTime::class)
     suspend fun genererHTML(brevRequest: BrevbakerRequest): BrevbakerHTMLResponse =
         try {
             measureTimedValue {
@@ -55,7 +52,6 @@ class BrevbakerKlient(private val client: HttpClient, private val apiUrl: String
             throw BrevbakerException("Feil ved kall til brevbaker", ex)
         }
 
-    @OptIn(ExperimentalTime::class)
     suspend fun genererJSON(brevRequest: BrevbakerRequest): RenderedJsonLetter =
         try {
             measureTimedValue {

@@ -2,16 +2,26 @@ package no.nav.etterlatte.brev.hentinformasjon
 
 import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Trygdetidsperiode
-import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.trygdetid.TrygdetidType
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
+class TrygdetidService(private val trygdetidKlient: TrygdetidKlient, private val beregningKlient: BeregningKlient) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    suspend fun finnTrygdetid(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Trygdetid? {
+        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)!!
+
+        return finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
+    }
 
     suspend fun finnTrygdetidsgrunnlag(
         behandlingId: UUID,
@@ -38,7 +48,7 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
         val trygdetidgrunnlagForAnvendtTrygdetid =
             trygdetiderIBehandling.find { it.ident == foersteBeregningsperiode.trygdetidForIdent }
                 ?: trygdetiderIBehandling.first().also {
-                    logger.error(
+                    logger.warn(
                         "Fant ikke riktig trygdetid for identen som er brukt i beregning, benytter den" +
                             " første av den vi fant i brevet, med id=${it.id} for behandlingId=${it.behandlingId}." +
                             " Vi fant total ${trygdetiderIBehandling.size} trygdetider for behandlingen",
@@ -49,53 +59,64 @@ class TrygdetidService(private val trygdetidKlient: TrygdetidKlient) {
             // vi har en overstyrt trygdetid fra pesys, og vi kan dermed ikke gi ut noe detaljert grunnlag på hvordan
             // vi har kommet frem til trygdetiden
             return Trygdetid(
+                ident = trygdetidgrunnlagForAnvendtTrygdetid.ident,
                 aarTrygdetid = anvendtTrygdetid,
                 prorataBroek = prorataBroek,
                 maanederTrygdetid = 0,
                 perioder = listOf(),
                 overstyrt = true,
+                mindreEnnFireFemtedelerAvOpptjeningstiden =
+                    trygdetidgrunnlagForAnvendtTrygdetid.beregnetTrygdetid
+                        ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
             )
         }
 
         val trygdetidsperioder =
             finnTrygdetidsperioderForTabell(
                 trygdetidgrunnlagForAnvendtTrygdetid.trygdetidGrunnlag,
-                anvendtTrygdetid,
-                prorataBroek,
+                foersteBeregningsperiode.beregningsMetode,
             )
 
         return Trygdetid(
+            ident = trygdetidgrunnlagForAnvendtTrygdetid.ident,
             aarTrygdetid = anvendtTrygdetid,
             maanederTrygdetid = 0,
             prorataBroek = prorataBroek,
             perioder = trygdetidsperioder,
             overstyrt = false,
+            mindreEnnFireFemtedelerAvOpptjeningstiden =
+                trygdetidgrunnlagForAnvendtTrygdetid.beregnetTrygdetid
+                    ?.resultat?.fremtidigTrygdetidNorge?.mindreEnnFireFemtedelerAvOpptjeningstiden ?: false,
         )
     }
 
     private fun finnTrygdetidsperioderForTabell(
         trygdetidsgrunnlag: List<TrygdetidGrunnlagDto>,
-        anvendtTrygdetid: Int,
-        prorataBroek: IntBroek?,
+        beregningsMetode: BeregningsMetode?,
     ): List<Trygdetidsperiode> {
-        val harKunNorskeTrygdetidsperioder = trygdetidsgrunnlag.all { !it.prorata || it.bosted == "NOR" }
-
-        // Vi skal kun vise tabell hvis den har relevante perioder for bruker, dvs. vi har med avtaleland utenfor Norge
-        // eller vi har anvendt trygdetid < 40 og eller prorataberegning.
-        // Hvis ikke (kun norske og anvendt trygdetid = 40 uten prorata) er det unødvendig
-        if (harKunNorskeTrygdetidsperioder && anvendtTrygdetid == 40 && prorataBroek == null) {
-            return emptyList()
-        }
-
-        return trygdetidsgrunnlag
-            .filter { it.prorata } // Vi skal kun ha med de som er avtaleland, dvs. er med i prorata
-            .map { grunnlag ->
-                Trygdetidsperiode(
-                    datoFOM = grunnlag.periodeFra,
-                    datoTOM = grunnlag.periodeTil,
-                    land = grunnlag.bosted,
-                    opptjeningsperiode = grunnlag.beregnet,
-                )
+        return when (beregningsMetode) {
+            BeregningsMetode.NASJONAL -> {
+                // Kun ta med nasjonale perioder
+                trygdetidsgrunnlag
+                    .filter { it.bosted == "NOR" }
+                    .map(::toTrygdetidsperiode)
             }
+            BeregningsMetode.PRORATA -> {
+                // Kun ta med de som er avtaleland
+                trygdetidsgrunnlag
+                    .filter { it.prorata }
+                    .map(::toTrygdetidsperiode)
+            }
+            else -> throw IllegalArgumentException("$beregningsMetode er ikke en gyldig beregningsmetode")
+        }
     }
+
+    private fun toTrygdetidsperiode(grunnlag: TrygdetidGrunnlagDto) =
+        Trygdetidsperiode(
+            datoFOM = grunnlag.periodeFra,
+            datoTOM = grunnlag.periodeTil,
+            land = grunnlag.bosted,
+            opptjeningsperiode = grunnlag.beregnet,
+            type = TrygdetidType.valueOf(grunnlag.type),
+        )
 }

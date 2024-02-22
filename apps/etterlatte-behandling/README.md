@@ -63,16 +63,6 @@ endepunktet `/grunnlagsendringshendelse/{hendelsetype}` hvor `{hendelsetype}` er
 Her sjekkes det om det finnes en sak tilhørende personen man har mottatt en hendelse for. På nåværende tidspunkt
 lyttes det kun til hendelser om dødsfall hos søker.
 
-### Jobb for dødshendelser
-
-For å unngå å agere på dødshendelser med en gang, i tilfelle korreksjoner skal komme på pdl-topicen (Livet er en
-strøm av hendelser) lagres mottatte dødshendelser ned uten å agere på de. Det kjøres da en jobb med frekvens som
-definert i miljøvariabel `HENDELSE_JOB_FREKVENS` som sjekker om hendelser som er `HENDELSE_MINUTTER_GAMLE_HENDELSER` (
-miljøvariabel) minutter gamle fortsatt er korrekte. Hvis opplysningene i hendelsen fortsatt stemmer opprettes en
-revurdering automatisk, dersom det ikke finnes en åpen behandling på saken. Dersom det finnes en åpen behandling, gjøres
-informasjonen tilgjengelig under endepunktet `/grunnlagsendringshendelse/{sak}/allehendelser` - hvor {sak} er
-saksnummer.
-
 ## Kom i gang
 
 ### Hvordan kjøre lokalt mot dev-gcp

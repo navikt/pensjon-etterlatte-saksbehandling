@@ -46,6 +46,7 @@ enum class GrunnlagsendringsType {
     }
 }
 
+// TODO: kanskje rename disse
 enum class GrunnlagsendringStatus {
     VENTER_PAA_JOBB, // naar hendelsen registreres // FØR: IKKE_VURDERT
     SJEKKET_AV_JOBB, // FØR: MED_I_BEHANDLING

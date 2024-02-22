@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.statistikk.domain.BehandlingMetode
-import no.nav.etterlatte.statistikk.domain.BehandlingResultat
 import no.nav.etterlatte.statistikk.domain.SakRad
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
@@ -40,8 +39,8 @@ class SakRepository(private val datasource: DataSource) {
                         opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse, 
                         vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, 
                         sak_utland, beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting,
-                        kilde, pesysid 
-                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        kilde, pesysid, relatert_til
+                    ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                     Statement.RETURN_GENERATED_KEYS,
                 ).apply {
@@ -64,15 +63,15 @@ class SakRepository(private val datasource: DataSource) {
     private fun ResultSet.tilSakRad(): SakRad =
         SakRad(
             id = getLong("id"),
-            behandlingId = getObject("behandling_id") as UUID,
+            referanseId = getObject("behandling_id") as UUID,
             sakId = getLong("sak_id"),
             mottattTidspunkt = getTimestamp("mottatt_tid").toTidspunkt(),
             registrertTidspunkt = getTimestamp("registrert_tid").toTidspunkt(),
             ferdigbehandletTidspunkt = getTimestamp("ferdigbehandlet_tid")?.toTidspunkt(),
             vedtakTidspunkt = getTimestamp("vedtak_tid")?.toTidspunkt(),
-            behandlingType = enumValueOf(getString("behandling_type")),
-            behandlingStatus = getString("behandling_status"),
-            behandlingResultat = getString("behandling_resultat")?.let { enumValueOf<BehandlingResultat>(it) },
+            type = getString("behandling_type"),
+            status = getString("behandling_status"),
+            resultat = getString("behandling_resultat"),
             resultatBegrunnelse = getString("resultat_begrunnelse"),
             behandlingMetode = getString("behandling_metode")?.let { enumValueOf<BehandlingMetode>(it) },
             opprettetAv = getString("opprettet_av"),
@@ -94,6 +93,7 @@ class SakRepository(private val datasource: DataSource) {
             avkorting = getString("avkorting")?.let { objectMapper.readValue(it) },
             kilde = getString("kilde").let { Vedtaksloesning.valueOf(it) },
             pesysId = getLong("pesysid"),
+            relatertTil = getString("relatert_til"),
         )
 
     fun hentRader(): List<SakRad> {
@@ -104,7 +104,8 @@ class SakRepository(private val datasource: DataSource) {
                     behandling_type, behandling_status, behandling_resultat, resultat_begrunnelse, behandling_metode,
                     opprettet_av, ansvarlig_beslutter, aktor_id, dato_foerste_utbetaling, teknisk_tid, sak_ytelse,
                     vedtak_loepende_fom, vedtak_loepende_tom, saksbehandler, ansvarlig_enhet, soeknad_format, sak_utland,
-                    beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting, kilde, pesysid
+                    beregning, sak_ytelsesgruppe, avdoede_foreldre, revurdering_aarsak, avkorting, kilde, pesysid,
+                    relatert_til
                 FROM sak
                 """.trimIndent(),
             )
@@ -114,15 +115,15 @@ class SakRepository(private val datasource: DataSource) {
 
 private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement =
     this.apply {
-        setObject(1, sakRad.behandlingId)
+        setObject(1, sakRad.referanseId)
         setLong(2, sakRad.sakId)
         setTidspunkt(3, sakRad.mottattTidspunkt)
         setTidspunkt(4, sakRad.registrertTidspunkt)
         setTidspunkt(5, sakRad.ferdigbehandletTidspunkt)
         setTidspunkt(6, sakRad.vedtakTidspunkt)
-        setString(7, sakRad.behandlingType.name)
-        setString(8, sakRad.behandlingStatus)
-        setString(9, sakRad.behandlingResultat?.name)
+        setString(7, sakRad.type)
+        setString(8, sakRad.status)
+        setString(9, sakRad.resultat)
         setString(10, sakRad.resultatBegrunnelse)
         setString(11, sakRad.behandlingMetode?.name)
         setString(12, sakRad.opprettetAv)
@@ -144,4 +145,5 @@ private fun PreparedStatement.setSakRad(sakRad: SakRad): PreparedStatement =
         setJsonb(28, sakRad.avkorting)
         setString(29, sakRad.kilde.name)
         sakRad.pesysId?.let { setLong(30, it) } ?: setNull(30, Types.BIGINT)
+        sakRad.relatertTil?.let { setString(31, it) } ?: setNull(31, Types.CHAR)
     }

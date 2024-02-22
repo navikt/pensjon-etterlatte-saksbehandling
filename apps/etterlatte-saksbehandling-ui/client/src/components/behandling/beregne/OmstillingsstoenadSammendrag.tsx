@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { compareDesc, lastDayOfMonth } from 'date-fns'
 import { formaterDato, formaterStringDato, NOK } from '~utils/formattering'
 import { Beregning } from '~shared/types/Beregning'
-import { OmstillingsstoenadToolTip } from '~components/behandling/beregne/OmstillingsstoenadToolTip'
+import { ToolTip } from '~components/behandling/felles/ToolTip'
 import { ProrataBroek } from '~components/behandling/beregne/ProrataBroek'
 
 interface Props {
@@ -49,12 +49,12 @@ export const OmstillingsstoenadSammendrag = ({ beregning }: Props) => {
               <Table.DataCell>{NOK(beregningsperiode.grunnbelop)}</Table.DataCell>
               <Table.DataCell>
                 {NOK(beregningsperiode.utbetaltBeloep)}{' '}
-                <OmstillingsstoenadToolTip title="Få mer informasjon om beregningsgrunnlaget">
+                <ToolTip title="Få mer informasjon om beregningsgrunnlaget">
                   <strong>Folketrygdloven § 17-6</strong> Full årlig omstillingsstønad utgjør 2,25 ganger grunnbeløpet
                   (G), forutsatt at den avdøde hadde 40 års (full) trygdetid (folketrygdloven §§ 3-5 og 3-7). Dersom
                   trygdetiden er kortere, reduseres omstillingsstønaden forholdsmessig. Eks. på månedlig utbetaling ved
                   30 års trygdetid: 2,25 G * 30/40 /12 mnd.
-                </OmstillingsstoenadToolTip>
+                </ToolTip>
               </Table.DataCell>
             </Table.Row>
           ))}

@@ -24,7 +24,7 @@ export interface IDetaljertBehandling {
   revurderingsaarsak: Revurderingaarsak | null
   revurderinginfo: RevurderingMedBegrunnelse | null
   begrunnelse: string | null
-  etterbetaling: IEtterbetaling | null
+  kilde: Vedtaksloesning
 }
 
 export interface NyBehandlingRequest {
@@ -34,6 +34,10 @@ export interface NyBehandlingRequest {
   spraak?: Spraak
   kilde?: string
   pesysId?: number
+  enhet?: String
+  foreldreloes?: boolean
+  ufoere?: boolean
+  gradering?: string
 }
 
 export enum IBehandlingsType {
@@ -55,6 +59,7 @@ export enum IBehandlingStatus {
   SAMORDNET = 'SAMORDNET',
   IVERKSATT = 'IVERKSATT',
   AVBRUTT = 'AVBRUTT',
+  AVSLAG = 'AVSLAG',
 }
 
 export enum UtlandstilknytningType {
@@ -116,7 +121,8 @@ export interface Virkningstidspunkt {
   kravdato: string | null
 }
 
-export interface IEtterbetaling {
-  fra?: Date | null
-  til?: Date | null
+export enum Vedtaksloesning {
+  GJENNY = 'GJENNY',
+  PESYS = 'PESYS',
+  GJENOPPRETTA = 'GJENOPPRETTA',
 }

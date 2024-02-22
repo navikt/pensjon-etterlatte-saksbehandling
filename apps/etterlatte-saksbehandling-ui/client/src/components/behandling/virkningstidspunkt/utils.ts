@@ -77,10 +77,13 @@ export const BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER: Array<Hjemmel> = B
 )
 
 export const BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE =
-  'Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for opptil tre år før søknaden er satt frem. \n\nHvis bosatt utland: bruk kravdato i bostedslandet, eventuelt landet søker sist var medlem.'
+  'Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for opptil tre år før den måneden søknaden er satt fram. \n\nHvis bosatt utland: bruk kravdato i bostedslandet, eventuelt landet søker sist var medlem.'
 
 export const BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE =
-  'Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for opptil tre år før søknaden er satt frem.'
+  'Barnepensjon kan tidligst innvilges fra og med den første i måneden etter dødsfallet og den kan gis for opptil tre år før den måneden søknaden er satt fram.'
+
+export const BP_FORELDRELOES_PAA_GAMMELT_REGELVERK_BEHANDLES_I_PESYS_BESKRIVELSE =
+  '\n\nGammelt regelverk for foreldreløs kan ikke behandles i Gjenny. Skal det innvilges barnepensjon før 01.01.2024, skal saken først behandles i Pesys frem til og med 31.12.2023. Så innvilges i Gjenny fra 01.01.2024.'
 
 export const BP_REVURDERING_BESKRIVELSE =
   'Barnepensjonen blir satt opp fra og med den måneden vilkårene for dette er oppfylt, og satt ned fra og med måneden etter den måneden vilkårene for dette er oppfylt. Barnepensjonen stanses ved utgangen av den måneden retten til ytelsen faller bort.'
@@ -117,8 +120,8 @@ export const OMS_INST_HJEMLER_VIRK: Array<Hjemmel> = [
 
 export const OMS_INNTEKTSENDRING_HJEMLER: Array<Hjemmel> = [
   {
-    lenke: 'https://lovdata.no/lov/(finnes ikke)',
-    tittel: 'Folketrygdloven § 17-9, jf. utkast til forskrift § 10 (er ikke vedtatt enda)',
+    lenke: 'https://lovdata.no/pro/#document/NL/lov/1997-02-28-19/§17-9',
+    tittel: 'Folketrygdloven § 17-9, jf. utkast til forskrift § 10',
   },
 ]
 

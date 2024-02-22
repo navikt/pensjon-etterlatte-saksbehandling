@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.dokument
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -9,11 +10,12 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
+import no.nav.etterlatte.brev.dokarkiv.KnyttTilAnnenSakRequest
 import no.nav.etterlatte.brev.dokarkiv.OppdaterJournalpostRequest
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.withFoedselsnummer
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 
@@ -24,28 +26,25 @@ fun Route.dokumentRoute(
 ) {
     route("dokumenter") {
         post {
-            withFoedselsnummer(tilgangssjekker) { foedselsnummer ->
-                val result = safService.hentDokumenter(foedselsnummer.value, BrukerIdType.FNR, brukerTokenInfo)
+            withFoedselsnummer(tilgangssjekker, skrivetilgang = true) { foedselsnummer ->
+                val visTemaPen = call.request.queryParameters["visTemaPen"]?.toBoolean() ?: false
 
-                if (result.error == null) {
-                    call.respond(result.journalposter)
-                } else {
-                    call.respond(result.error.statusCode, result.error.message)
-                }
+                val dokumenter =
+                    safService.hentDokumenter(foedselsnummer.value, visTemaPen, BrukerIdType.FNR, brukerTokenInfo)
+
+                call.respond(dokumenter)
             }
         }
 
         route("{journalpostId}") {
             get {
-                val journalpostId = call.parameters["journalpostId"]!!
-                val result = safService.hentJournalpost(journalpostId, brukerTokenInfo)
+                val journalpost = safService.hentJournalpost(journalpostId, brukerTokenInfo)
 
-                call.respond(result.journalpost ?: HttpStatusCode.NotFound)
+                call.respond(journalpost ?: HttpStatusCode.NotFound)
             }
 
             put {
-                val journalpostId = call.parameters["journalpostId"]!!
-                val forsoekFerdistill = call.request.queryParameters["forsoekFerdigstill"]?.toBoolean() ?: false
+                val forsoekFerdistill = call.request.queryParameters["forsoekFerdigstill"].toBoolean()
                 val journalfoerendeEnhet = call.request.queryParameters["journalfoerendeEnhet"]
 
                 val request = call.receive<OppdaterJournalpostRequest>()
@@ -55,32 +54,39 @@ fun Route.dokumentRoute(
                 call.respond(response)
             }
 
-            post("/ferdigstill") {
-                val sak = call.receive<Sak>()
-                val journalpostId =
-                    requireNotNull(call.parameters["journalpostId"]) {
-                        "JournalpostID er påkrevd for å kunne ferdigstille journalposten"
-                    }
+            put("/knyttTilAnnenSak") {
+                val request = call.receive<KnyttTilAnnenSakRequest>()
 
-                dokarkivService.ferdigstill(journalpostId, sak)
+                call.respond(dokarkivService.knyttTilAnnenSak(journalpostId, request))
+            }
+
+            put("/feilregistrerSakstilknytning") {
+                dokarkivService.feilregistrerSakstilknytning(journalpostId)
                 call.respond(HttpStatusCode.OK)
             }
 
-            put("/tema/{nyttTema}") {
-                val journalpostId = call.parameters["journalpostId"]!!
-                val nyttTema = call.parameters["nyttTema"]!!
-
-                dokarkivService.endreTema(journalpostId, nyttTema)
+            put("/opphevFeilregistrertSakstilknytning") {
+                dokarkivService.opphevFeilregistrertSakstilknytning(journalpostId)
                 call.respond(HttpStatusCode.OK)
+            }
+
+            get("/utsendingsinfo") {
+                val utsendingsinfo = safService.hentUtsendingsinfo(journalpostId, brukerTokenInfo)
+                call.respond(utsendingsinfo ?: HttpStatusCode.NoContent)
             }
 
             get("/{dokumentInfoId}") {
-                val journalpostId = call.parameters["journalpostId"]!!
                 val dokumentInfoId = call.parameters["dokumentInfoId"]!!
-                val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, brukerTokenInfo.accessToken())
+                val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, brukerTokenInfo)
 
                 call.respond(innhold)
             }
         }
     }
 }
+
+private inline val PipelineContext<*, ApplicationCall>.journalpostId: String
+    get() =
+        requireNotNull(call.parameters["journalpostId"]) {
+            "JournalpostID mangler i requesten"
+        }

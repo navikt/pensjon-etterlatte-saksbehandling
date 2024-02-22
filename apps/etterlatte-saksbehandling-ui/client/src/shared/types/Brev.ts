@@ -2,6 +2,7 @@ export interface IBrev {
   id: number
   sakId: number
   tittel: string
+  spraak: Spraak
   behandlingId: string
   prosessType: BrevProsessType
   soekerFnr: string
@@ -9,6 +10,7 @@ export interface IBrev {
   statusEndret: string
   mottaker: Mottaker
   opprettet: string
+  brevtype: Brevtype
 }
 
 export interface Mottaker {
@@ -21,7 +23,7 @@ export interface Mottaker {
 }
 
 export interface Adresse {
-  adresseType?: string
+  adresseType?: AdresseType
   adresselinje1?: string
   adresselinje2?: string
   adresselinje3?: string
@@ -29,6 +31,11 @@ export interface Adresse {
   poststed?: string
   landkode?: string
   land?: string
+}
+
+export enum AdresseType {
+  NORSKPOSTADRESSE = 'NORSKPOSTADRESSE',
+  UTENLANDSKPOSTADRESSE = 'UTENLANDSKPOSTADRESSE',
 }
 
 export enum BrevStatus {
@@ -48,10 +55,35 @@ export enum BrevProsessType {
   AUTOMATISK = 'AUTOMATISK',
   REDIGERBAR = 'REDIGERBAR',
   MANUELL = 'MANUELL',
+  OPPLASTET_PDF = 'OPPLASTET_PDF',
 }
 
 export enum Spraak {
   NB = 'nb',
   NN = 'nn',
   EN = 'en',
+}
+
+export enum Brevtype {
+  VEDTAK = 'VEDTAK',
+  VARSEL = 'VARSEL',
+  INFORMASJON = 'INFORMASJON',
+  OPPLASTET_PDF = 'OPPLASTET_PDF',
+  MANUELT = 'MANUELT',
+  VEDLEGG = 'VEDLEGG',
+}
+
+export function formaterBrevtype(brevtype: Brevtype) {
+  switch (brevtype) {
+    case Brevtype.INFORMASJON:
+      return 'Informasjonsbrev'
+    case Brevtype.MANUELT:
+      return 'Manuelt brev'
+    case Brevtype.VARSEL:
+      return 'Varselbrev'
+    case Brevtype.VEDTAK:
+      return 'Vedtaksbrev'
+    case Brevtype.OPPLASTET_PDF:
+      return 'Opplastet PDF'
+  }
 }

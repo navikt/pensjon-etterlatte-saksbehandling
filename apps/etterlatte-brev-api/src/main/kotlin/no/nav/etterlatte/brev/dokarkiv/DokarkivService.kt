@@ -5,21 +5,12 @@ import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder.Companion.BREV_KODE
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
-import no.nav.etterlatte.libs.common.sak.Sak
-import no.nav.etterlatte.rivers.VedtakTilJournalfoering
+import no.nav.etterlatte.libs.common.behandling.SakType
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
 interface DokarkivService {
-    suspend fun journalfoer(
-        brevId: BrevID,
-        vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostResponse
-
-    suspend fun journalfoer(
-        brev: Brev,
-        sak: Sak,
-    ): OpprettJournalpostResponse
+    suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse
 
     suspend fun oppdater(
         journalpostId: String,
@@ -28,52 +19,32 @@ interface DokarkivService {
         request: OppdaterJournalpostRequest,
     ): OppdaterJournalpostResponse
 
-    suspend fun ferdigstill(
+    suspend fun ferdigstillJournalpost(
         journalpostId: String,
-        sak: Sak,
-    )
+        enhet: String,
+    ): Boolean
 
-    suspend fun endreTema(
+    suspend fun journalfoerNotat(): OpprettJournalpostResponse
+
+    suspend fun feilregistrerSakstilknytning(journalpostId: String)
+
+    suspend fun opphevFeilregistrertSakstilknytning(journalpostId: String)
+
+    suspend fun knyttTilAnnenSak(
         journalpostId: String,
-        nyttTema: String,
-    )
+        request: KnyttTilAnnenSakRequest,
+    ): KnyttTilAnnenSakResponse
 }
 
-class DokarkivServiceImpl(
+internal class DokarkivServiceImpl(
     private val client: DokarkivKlient,
     private val db: BrevRepository,
 ) : DokarkivService {
     private val logger = LoggerFactory.getLogger(DokarkivService::class.java)
 
-    override suspend fun journalfoer(
-        brevId: BrevID,
-        vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostResponse {
-        logger.info("Oppretter journalpost for brev med id=$brevId")
-
-        val request = mapTilJournalpostRequest(brevId, vedtak)
-
-        return client.opprettJournalpost(request, true).also {
-            logger.info(
-                "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
-            )
-        }
-    }
-
-    override suspend fun journalfoer(
-        brev: Brev,
-        sak: Sak,
-    ): OpprettJournalpostResponse {
-        logger.info("Oppretter journalpost for brev med id=${brev.id}")
-
-        val request = mapTilJournalpostRequest(brev, sak)
-
-        return client.opprettJournalpost(request, true)
-            .also {
-                logger.info(
-                    "Journalpost opprettet (journalpostId=${it.journalpostId}, ferdigstilt=${it.journalpostferdigstilt})",
-                )
-            }
+    override suspend fun journalfoer(request: JournalfoeringsMappingRequest): OpprettJournalpostResponse {
+        logger.info("Oppretter journalpost for brev med id=${request.brevId}")
+        return client.opprettJournalpost(mapTilJournalpostRequest(request), ferdigstill = true)
     }
 
     override suspend fun oppdater(
@@ -82,7 +53,14 @@ class DokarkivServiceImpl(
         journalfoerendeEnhet: String?,
         request: OppdaterJournalpostRequest,
     ): OppdaterJournalpostResponse {
-        val response = client.oppdaterJournalpost(journalpostId, request)
+        // Hack for å unngå feil mot dokarkiv. Alle generelle saker i dokarkiv får fagsaksystem FS22, men vi kan ikke
+        // returnere det samme tilbake ved oppdatering. Må derfor tømme saksobjektet og sette sakstype til GENERELL_SAK
+        val response =
+            if (request.sak?.fagsaksystem == "FS22") {
+                client.oppdaterJournalpost(journalpostId, request.copy(sak = JournalpostSak(Sakstype.GENERELL_SAK)))
+            } else {
+                client.oppdaterJournalpost(journalpostId, request)
+            }
 
         logger.info("Journalpost med id=$journalpostId oppdatert OK!")
 
@@ -90,82 +68,54 @@ class DokarkivServiceImpl(
             if (journalfoerendeEnhet.isNullOrBlank()) {
                 logger.error("Kan ikke ferdigstille journalpost=$journalpostId når enhet mangler")
             } else {
-                client.ferdigstillJournalpost(journalpostId, journalfoerendeEnhet)
+                val ferdigstilt = client.ferdigstillJournalpost(journalpostId, journalfoerendeEnhet)
+                logger.info("journalpostId=$journalpostId, ferdigstillrespons='$ferdigstilt'")
             }
         }
 
         return response
     }
 
-    override suspend fun ferdigstill(
+    override suspend fun ferdigstillJournalpost(
         journalpostId: String,
-        sak: Sak,
-    ) {
-        val request =
-            OppdaterJournalpostSakRequest(
-                tema = sak.sakType.tema,
-                bruker = Bruker(id = sak.ident),
-                sak =
-                    JournalpostSak(
-                        sakstype = Sakstype.FAGSAK,
-                        fagsakId = sak.id.toString(),
-                        tema = sak.sakType.tema,
-                    ),
-            )
+        enhet: String,
+    ) = client.ferdigstillJournalpost(journalpostId, enhet)
 
-        client.oppdaterFagsak(journalpostId, request)
-        client.ferdigstillJournalpost(journalpostId, sak.enhet)
-
-        logger.info("Journalpost med id=$journalpostId ferdigstilt")
+    override suspend fun journalfoerNotat(): OpprettJournalpostResponse {
+        TODO("Not yet implemented")
     }
 
-    override suspend fun endreTema(
-        journalpostId: String,
-        nyttTema: String,
-    ) {
-        client.endreTema(journalpostId, nyttTema)
+    override suspend fun feilregistrerSakstilknytning(journalpostId: String) {
+        client.feilregistrerSakstilknytning(journalpostId)
     }
 
-    private fun mapTilJournalpostRequest(
-        brevId: BrevID,
-        vedtak: VedtakTilJournalfoering,
-    ): OpprettJournalpostRequest {
-        val innhold = requireNotNull(db.hentBrevInnhold(brevId))
-        val pdf = requireNotNull(db.hentPdf(brevId))
-        val brev = requireNotNull(db.hentBrev(brevId))
+    override suspend fun opphevFeilregistrertSakstilknytning(journalpostId: String) {
+        client.opphevFeilregistrertSakstilknytning(journalpostId)
+    }
 
+    override suspend fun knyttTilAnnenSak(
+        journalpostId: String,
+        request: KnyttTilAnnenSakRequest,
+    ): KnyttTilAnnenSakResponse {
+        return client.knyttTilAnnenSak(journalpostId, request).also {
+            logger.info("Journalpost knyttet til annen sak (nyJournalpostId=${it.nyJournalpostId})\n$request")
+        }
+    }
+
+    private fun mapTilJournalpostRequest(request: JournalfoeringsMappingRequest): OpprettJournalpostRequest {
+        val innhold = requireNotNull(db.hentBrevInnhold(request.brevId))
+        val pdf = requireNotNull(db.hentPdf(request.brevId))
         return OpprettJournalpostRequest(
             tittel = innhold.tittel,
             journalposttype = JournalPostType.UTGAAENDE,
-            avsenderMottaker = AvsenderMottaker(mottakerIdent(brev)),
-            bruker = Bruker(vedtak.sak.ident),
-            eksternReferanseId = "${vedtak.behandlingId}.$brevId",
-            sak = JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString()),
+            avsenderMottaker = request.avsenderMottaker(),
+            bruker = Bruker(request.brukerident),
+            eksternReferanseId = "${request.eksternReferansePrefiks}.${request.brevId}",
+            sak = JournalpostSak(Sakstype.FAGSAK, request.sakId.toString(), request.sakType.tema, "EY"),
             dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
-            tema = vedtak.sak.sakType.tema, // https://confluence.adeo.no/display/BOA/Tema
-            kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
-            journalfoerendeEnhet = vedtak.ansvarligEnhet,
-        )
-    }
-
-    private fun mapTilJournalpostRequest(
-        brev: Brev,
-        sak: Sak,
-    ): OpprettJournalpostRequest {
-        val innhold = requireNotNull(db.hentBrevInnhold(brev.id))
-        val pdf = requireNotNull(db.hentPdf(brev.id))
-
-        return OpprettJournalpostRequest(
-            tittel = innhold.tittel,
-            journalposttype = JournalPostType.UTGAAENDE,
-            avsenderMottaker = AvsenderMottaker(mottakerIdent(brev)),
-            bruker = Bruker(brev.soekerFnr),
-            eksternReferanseId = "${brev.sakId}.${brev.id}",
-            sak = JournalpostSak(Sakstype.FAGSAK, brev.sakId.toString()),
-            dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
-            tema = sak.sakType.tema, // https://confluence.adeo.no/display/BOA/Tema
-            kanal = "S", // https://confluence.adeo.no/display/BOA/Utsendingskanal
-            journalfoerendeEnhet = sak.enhet,
+            tema = request.sakType.tema,
+            kanal = "S",
+            journalfoerendeEnhet = request.journalfoerendeEnhet,
         )
     }
 
@@ -175,9 +125,28 @@ class DokarkivServiceImpl(
             brevkode = BREV_KODE,
             dokumentvarianter = listOf(DokumentVariant.ArkivPDF(Base64.getEncoder().encodeToString(bytes))),
         )
+}
 
-    private fun mottakerIdent(brev: Brev) =
-        requireNotNull(brev.mottaker.foedselsnummer?.value ?: brev.mottaker.orgnummer) {
-            "Mottaker mangler både fnr. og orgnr. i brev med id=${brev.id}"
+data class JournalfoeringsMappingRequest(
+    val brevId: BrevID,
+    val brev: Brev,
+    val brukerident: String,
+    val eksternReferansePrefiks: Any,
+    val sakId: Long,
+    val sakType: SakType,
+    val journalfoerendeEnhet: String,
+) {
+    fun avsenderMottaker() =
+        with(brev.mottaker) {
+            AvsenderMottaker(
+                id = foedselsnummer?.value ?: orgnummer,
+                idType =
+                    when {
+                        foedselsnummer != null -> "FNR"
+                        orgnummer != null -> "ORGNR"
+                        else -> "UKJENT"
+                    },
+                navn = navn,
+            )
         }
 }

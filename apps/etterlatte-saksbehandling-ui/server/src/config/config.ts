@@ -63,7 +63,7 @@ const LOKAL_API_CONFIG = () => {
   }
 }
 
-function requireEnvValue(key: string): string {
+export function requireEnvValue(key: string): string {
   const envValue = process.env[key]
   if (envValue) {
     return envValue
@@ -108,6 +108,7 @@ export const ApiConfig = hentApiConfigFraEnv()
 
 export const ClientConfig = {
   gosysUrl: requireEnvValue('GOSYS_URL'),
+  eessiPensjonUrl: requireEnvValue('EESSI_PENSJON_URL'),
   cachebuster: requireEnvValue('APP_VERSION'),
   rinaUrl: requireEnvValue('RINA_URL'),
 }

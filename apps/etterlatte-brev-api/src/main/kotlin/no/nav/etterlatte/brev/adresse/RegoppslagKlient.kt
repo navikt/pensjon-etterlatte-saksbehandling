@@ -5,8 +5,15 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ResponseException
-import io.ktor.client.request.get
-import io.ktor.http.isSuccess
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Behandlingsnummer
+import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseKlient.Companion.HEADER_BEHANDLINGSNUMMER
 import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -22,7 +29,10 @@ class RegoppslagKlient(
             .expireAfterWrite(Duration.ofMinutes(15))
             .build<String, RegoppslagResponseDTO>()
 
-    suspend fun hentMottakerAdresse(ident: String): RegoppslagResponseDTO =
+    suspend fun hentMottakerAdresse(
+        sakType: SakType,
+        ident: String,
+    ): RegoppslagResponseDTO? =
         try {
             val regoppslagCache = cache.getIfPresent(ident)
 
@@ -32,22 +42,33 @@ class RegoppslagKlient(
             } else {
                 logger.info("Ingen cachet mottakeradresse funnet. Henter fra regoppslag")
 
-                val response = client.get("$url/regoppslag/$ident")
-
-                if (response.status.isSuccess()) {
-                    response.body<RegoppslagResponseDTO>()
-                        .also {
-                            sikkerLogg.info("Respons fra regoppslag: $it")
-                            cache.put(ident, it)
-                        }
-                } else {
-                    throw ResponseException(response, "Ukjent feil fra navansatt api")
+                client.post("$url/rest/postadresse") {
+                    header(HEADER_BEHANDLINGSNUMMER, Behandlingsnummer.BARNEPENSJON.behandlingsnummer)
+                    contentType(ContentType.Application.Json)
+                    setBody(RegoppslagRequest(ident))
                 }
+                    .body<RegoppslagResponseDTO>()
+                    .also {
+                        sikkerLogg.info("Respons fra regoppslag: $it")
+                        cache.put(ident, it)
+                    }
+            }
+        } catch (re: ResponseException) {
+            if (re.response.status == HttpStatusCode.NotFound) {
+                null
+            } else {
+                throw re
             }
         } catch (exception: Exception) {
             throw AdresseException("Feil i kall mot Regoppslag", exception)
         }
 }
+
+data class RegoppslagRequest(
+    val ident: String,
+    // Todo: mulig bytte tema til et av de nye
+    val tema: String = "PEN",
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class RegoppslagResponseDTO(

@@ -85,6 +85,7 @@ class SamordningVedtakService(
             VedtakType.ENDRING -> SamordningVedtakType.ENDRING
             VedtakType.AVSLAG -> throw IllegalArgumentException("Vedtak om avslag støttes ikke")
             VedtakType.TILBAKEKREVING -> throw IllegalArgumentException("Ikke relevant")
+            VedtakType.AVVIST_KLAGE -> throw IllegalArgumentException("Skal ikke ha noe med samordning å gjøre")
         }
     }
 

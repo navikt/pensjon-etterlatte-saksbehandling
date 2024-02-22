@@ -3,6 +3,7 @@ package no.nav.etterlatte.libs.common.person
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -17,21 +18,26 @@ import java.time.temporal.ChronoUnit
 class Folkeregisteridentifikator private constructor(
     @JsonValue val value: String,
 ) {
-    init {
-        require(FolkeregisteridentifikatorValidator.isValid(value))
-    }
-
     companion object {
         @JvmStatic
         @JsonCreator
-        fun of(fnr: String?): Folkeregisteridentifikator =
-            try {
-                Folkeregisteridentifikator(fnr!!.replace(Regex("[^0-9]"), ""))
-            } catch (e: Exception) {
-                throw InvalidFoedselsnummerException(fnr, e)
+        fun of(fnr: String?): Folkeregisteridentifikator {
+            if (fnr.isNullOrEmpty()) {
+                throw InvalidFoedselsnummerException("Fødselsnummer er tomt")
+            } else {
+                val fnrMedGyldigeTall = fnr.replace(Regex("[^0-9]"), "")
+                if (FolkeregisteridentifikatorValidator.isValid(fnrMedGyldigeTall)) {
+                    return Folkeregisteridentifikator(fnrMedGyldigeTall)
+                } else {
+                    sikkerlogger().error("Ugyldig fødselsnummer: $fnr")
+                    throw InvalidFoedselsnummerException("Fødselsnummeret er ugyldig")
+                }
             }
+        }
 
-        fun isValid(fnr: String?): Boolean = FolkeregisteridentifikatorValidator.isValid(fnr!!.replace(Regex("[^0-9]"), ""))
+        fun isValid(fnr: String?): Boolean =
+            fnr != null &&
+                FolkeregisteridentifikatorValidator.isValid(fnr.replace(Regex("[^0-9]"), ""))
     }
 
     /**
@@ -137,8 +143,7 @@ internal fun firesifretAarstallFraTosifret(
     }
 }
 
-class InvalidFoedselsnummerException(value: String?, cause: Throwable) : UgyldigForespoerselException(
+class InvalidFoedselsnummerException(details: String) : UgyldigForespoerselException(
     code = "UGYLDIG_FNR",
-    detail = "Ugyldig fødselsnummer $value",
-    cause = cause,
+    detail = details,
 )

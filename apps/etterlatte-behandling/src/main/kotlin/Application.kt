@@ -2,6 +2,7 @@ package no.nav.etterlatte
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.ServerReady
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.auth.principal
@@ -16,9 +17,9 @@ import kotlinx.coroutines.asContextElement
 import kotlinx.coroutines.withContext
 import no.nav.etterlatte.behandling.behandlingRoutes
 import no.nav.etterlatte.behandling.behandlingVedtakRoute
+import no.nav.etterlatte.behandling.behandlinginfo.behandlingInfoRoutes
 import no.nav.etterlatte.behandling.behandlingsstatusRoutes
 import no.nav.etterlatte.behandling.bosattutland.bosattUtlandRoutes
-import no.nav.etterlatte.behandling.etterbetaling.etterbetalingRoutes
 import no.nav.etterlatte.behandling.generellbehandling.generellbehandlingRoutes
 import no.nav.etterlatte.behandling.klage.klageRoutes
 import no.nav.etterlatte.behandling.omregning.migreringRoutes
@@ -28,10 +29,12 @@ import no.nav.etterlatte.behandling.sjekklisteRoute
 import no.nav.etterlatte.behandling.statistikk.statistikkRoutes
 import no.nav.etterlatte.behandling.tilbakekreving.tilbakekrevingRoutes
 import no.nav.etterlatte.behandling.tilgang.tilgangRoutes
+import no.nav.etterlatte.behandling.vedtaksbehandling.vedtaksbehandlingRoutes
 import no.nav.etterlatte.common.DatabaseContext
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.egenansatt.EgenAnsattService
 import no.nav.etterlatte.egenansatt.egenAnsattRoute
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.doedshendelseRoute
 import no.nav.etterlatte.grunnlagsendring.grunnlagsendringshendelseRoute
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdService
 import no.nav.etterlatte.institusjonsopphold.institusjonsoppholdRoute
@@ -45,6 +48,8 @@ import no.nav.etterlatte.libs.ktor.setReady
 import no.nav.etterlatte.oppgave.oppgaveRoutes
 import no.nav.etterlatte.sak.sakSystemRoutes
 import no.nav.etterlatte.sak.sakWebRoutes
+import no.nav.etterlatte.saksbehandler.SaksbehandlerService
+import no.nav.etterlatte.saksbehandler.saksbehandlerRoutes
 import no.nav.etterlatte.tilgangsstyring.adressebeskyttelsePlugin
 import org.slf4j.Logger
 import javax.sql.DataSource
@@ -67,6 +72,7 @@ private class Server(private val context: ApplicationContext) {
                 applicationEngineEnvironment {
                     config = HoconApplicationConfig(context.config)
                     module { module(context) }
+                    module { moduleOnServerReady(context) }
                     connector { port = context.httpPort }
                 },
         )
@@ -74,9 +80,16 @@ private class Server(private val context: ApplicationContext) {
     fun run() =
         with(context) {
             dataSource.migrate()
-            grunnlagsendringshendelseJob.schedule().also { addShutdownHook(it) }
             setReady().also { engine.start(true) }
         }
+}
+
+internal fun Application.moduleOnServerReady(context: ApplicationContext) {
+    environment.monitor.subscribe(ServerReady) {
+        context.metrikkerJob.schedule().also { addShutdownHook(it) }
+        context.doedsmeldingerJob.schedule().also { addShutdownHook(it) }
+        context.saksbehandlerJob.schedule().also { addShutdownHook(it) }
+    }
 }
 
 internal fun Application.module(context: ApplicationContext) {
@@ -84,7 +97,6 @@ internal fun Application.module(context: ApplicationContext) {
         restModule(
             sikkerLogg,
             withMetrics = true,
-            additionalMetrics = listOf(oppgaveMetrikker),
         ) {
             attachContekst(dataSource, context)
             sakSystemRoutes(
@@ -116,7 +128,8 @@ internal fun Application.module(context: ApplicationContext) {
                 generellBehandlingService = generellBehandlingService,
                 sakService = sakService,
             )
-            revurderingRoutes(revurderingService = revurderingService)
+            vedtaksbehandlingRoutes(vedtaksbehandlingService = vedtaksbehandlingService)
+            revurderingRoutes(revurderingService = revurderingService, featureToggleService = featureToggleService)
             omregningRoutes(omregningService = omregningService)
             migreringRoutes(migreringService = migreringService)
             bosattUtlandRoutes(bosattUtlandService = bosattUtlandService)
@@ -126,17 +139,20 @@ internal fun Application.module(context: ApplicationContext) {
                 oppgaveService = oppgaveService,
                 behandlingService = behandlingService,
             )
-            etterbetalingRoutes(etterbetalingService)
+            behandlingInfoRoutes(behandlingInfoService)
             oppgaveRoutes(
                 service = oppgaveService,
                 gosysOppgaveService = gosysOppgaveService,
             )
             grunnlagsendringshendelseRoute(grunnlagsendringshendelseService = grunnlagsendringshendelseService)
+            doedshendelseRoute(doedshendelseService = doedshendelseService)
             egenAnsattRoute(
                 egenAnsattService = EgenAnsattService(sakService, oppgaveService, sikkerLogg, enhetService),
                 requestLogger = behandlingRequestLogger,
             )
             institusjonsoppholdRoute(institusjonsoppholdService = InstitusjonsoppholdService(institusjonsoppholdDao))
+            saksbehandlerRoutes(saksbehandlerService = SaksbehandlerService(context.saksbehandlerInfoDao))
+
             tilgangRoutes(tilgangService)
 
             install(adressebeskyttelsePlugin) {

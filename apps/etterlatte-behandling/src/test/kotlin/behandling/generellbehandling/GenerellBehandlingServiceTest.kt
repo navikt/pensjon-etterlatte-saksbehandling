@@ -8,8 +8,10 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.Context
-import no.nav.etterlatte.DatabaseKontekst
+import no.nav.etterlatte.DatabaseContextTest
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -34,9 +36,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.oppgave.OppgaveDao
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
@@ -44,31 +43,25 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
-import java.sql.Connection
+import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID.randomUUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GenerellBehandlingServiceTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
-    private lateinit var dataSource: DataSource
+@ExtendWith(DatabaseExtension::class)
+class GenerellBehandlingServiceTest(val dataSource: DataSource) {
     private lateinit var dao: GenerellBehandlingDao
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var hendelseDao: HendelseDao
@@ -76,35 +69,39 @@ class GenerellBehandlingServiceTest {
     private lateinit var sakRepo: SakDao
     private lateinit var service: GenerellBehandlingService
     private lateinit var behandlingRepo: BehandlingDao
-    val grunnlagKlient = mockk<GrunnlagKlient>()
-    val behandlingService = mockk<BehandlingService>()
+    private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val saksbehandlerInfoDao = mockk<SaksbehandlerInfoDao>()
+    private val saksbehandlerNavn = "Ola Nordmann"
 
     @BeforeAll
     fun beforeAll() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
-        val connection = dataSource.connection
-        dao = GenerellBehandlingDao { connection }
-        oppgaveDao = OppgaveDaoImpl { connection }
-        sakRepo = SakDao { connection }
-        hendelseDao = spyk(HendelseDao { connection })
+        dao = GenerellBehandlingDao(ConnectionAutoclosingTest(dataSource))
+        oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        hendelseDao = spyk(HendelseDao(ConnectionAutoclosingTest(dataSource)))
         behandlingRepo =
-            BehandlingDao(KommerBarnetTilGodeDao { connection }, RevurderingDao { connection }) { connection }
+            BehandlingDao(
+                KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
+            )
         oppgaveService =
             OppgaveService(
-                OppgaveDaoMedEndringssporingImpl(oppgaveDao) { connection },
+                OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),
                 sakRepo,
             )
-        service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient, hendelseDao)
+
+        every { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) } returns saksbehandlerNavn
+        service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient, hendelseDao, saksbehandlerInfoDao)
+
+        Kontekst.set(
+            Context(
+                user,
+                DatabaseContextTest(dataSource),
+            ),
+        )
     }
 
     @AfterEach
@@ -112,31 +109,6 @@ class GenerellBehandlingServiceTest {
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE generellbehandling CASCADE; TRUNCATE oppgave CASCADE").execute()
         }
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
-    }
-
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-
-    @BeforeEach
-    fun beforeEach() {
-        Kontekst.set(
-            Context(
-                user,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            ),
-        )
     }
 
     @Test
@@ -333,6 +305,10 @@ class GenerellBehandlingServiceTest {
         behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
             oppgave.status.shouldBe(Status.FERDIGSTILT)
         }
+
+        val attesteringsoppgave = behandlingsOppgaverFattetOgAttestering.filter { it.type == OppgaveType.ATTESTERING }
+        Assertions.assertEquals(1, attesteringsoppgave.size)
+        Assertions.assertTrue(attesteringsoppgave[0].merknad?.contains(saksbehandlerNavn) ?: false)
 
         verify {
             hendelseDao.generellBehandlingHendelse(

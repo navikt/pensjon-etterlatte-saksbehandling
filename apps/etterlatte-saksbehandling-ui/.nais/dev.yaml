@@ -8,7 +8,7 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 spec:
-  image: {{ image }}
+  image: "{{image}}"
   port: 8080
   replicas:
     max: 2
@@ -30,6 +30,8 @@ spec:
           - id: 5ef775f2-61f8-4283-bf3d-8d03f428aa14 # 0000-GA-Strengt_Fortrolig_Adresse
           - id: ea930b6b-9397-44d9-b9e6-f4cf527a632a #0000-GA-Fortrolig_Adresse
           - id: dbe4ad45-320b-4e9a-aaa1-73cca4ee124d # 0000-GA-Egne_ansatte
+          - id: 753805ea-65a7-4855-bdc3-e6130348df9f # 0000-GA-PENSJON_NASJONAL_M_LOGG
+          - id: ea7411eb-8b48-41a0-bc56-7b521fbf0c25 # 0000-GA-PENSJON_NASJONAL_U_LOGG
         extra:
           - NAVident
     sidecar:
@@ -51,11 +53,10 @@ spec:
     path: /metrics
   resources:
     limits:
-      cpu: 500m
       memory: 512Mi
     requests:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 50m
+      memory: 128Mi
   env:
     - name: BREV_API_URL
       value: http://etterlatte-brev-api
@@ -87,10 +88,14 @@ spec:
       value: api://dev-gcp.etterlatte.etterlatte-trygdetid/.default
     - name: GOSYS_URL
       value: https://gosys-q2.dev.intern.nav.no/gosys
+    - name: EESSI_PENSJON_URL
+      value: https://pensjon-utland-q2.intern.dev.nav.no/gjenny
     - name: RINA_URL
       value: https://rina-ss3-q.adeo.no
+    - name: NORG2_URL
+      value: https://norg2.dev-fss-pub.nais.io
     - name: APP_VERSION
-      value: {{ image }}
+      value: "{{ image }}"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -100,6 +105,7 @@ spec:
         - host: login.microsoftonline.com
         - host: graph.microsoft.com
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: norg2.dev-fss-pub.nais.io
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-vilkaarsvurdering
@@ -107,5 +113,4 @@ spec:
         - application: etterlatte-beregning
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-grunnlag
-        - application: etterlatte-pdltjenester
         - application: etterlatte-trygdetid

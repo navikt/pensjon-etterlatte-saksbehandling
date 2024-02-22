@@ -10,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.sakId
@@ -17,10 +18,8 @@ import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
-@OptIn(ExperimentalTime::class)
 fun Route.vedtaksbrevRoute(
     service: VedtaksbrevService,
     tilgangssjekker: Tilgangssjekker,
@@ -42,7 +41,7 @@ fun Route.vedtaksbrevRoute(
         }
 
         post("vedtak") {
-            withBehandlingId(tilgangssjekker) { behandlingId ->
+            withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                 val sakId = sakId
 
                 logger.info("Oppretter vedtaksbrev for behandling (sakId=$sakId, behandlingId=$behandlingId)")
@@ -72,7 +71,7 @@ fun Route.vedtaksbrevRoute(
         }
 
         post("vedtak/ferdigstill") {
-            withBehandlingId(tilgangssjekker) { behandlingId ->
+            withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                 logger.info("Ferdigstiller vedtaksbrev for behandling (id=$behandlingId)")
 
                 measureTimedValue {
@@ -85,7 +84,7 @@ fun Route.vedtaksbrevRoute(
         }
 
         put("payload/tilbakestill") {
-            withBehandlingId(tilgangssjekker) {
+            withBehandlingId(tilgangssjekker, skrivetilgang = true) {
                 val body = call.receive<ResetPayloadRequest>()
                 val brevId = body.brevId
                 val sakId = body.sakId
@@ -93,7 +92,7 @@ fun Route.vedtaksbrevRoute(
                 logger.info("Tilbakestiller payload for vedtaksbrev (id=$brevId)")
 
                 measureTimedValue {
-                    service.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo)
+                    service.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo, body.brevtype)
                 }.let { (brevPayload, varighet) ->
                     logger.info(
                         "Oppretting av nytt innhold til brev (id=$brevId) tok ${varighet.toString(
@@ -111,4 +110,5 @@ fun Route.vedtaksbrevRoute(
 data class ResetPayloadRequest(
     val brevId: Long,
     val sakId: Long,
+    val brevtype: Brevtype,
 )

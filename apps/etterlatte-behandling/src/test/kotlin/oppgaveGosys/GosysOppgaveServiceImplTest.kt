@@ -12,7 +12,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
@@ -21,16 +21,18 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class GosysOppgaveServiceImplTest {
     private val gosysOppgaveKlient = mockk<GosysOppgaveKlient>()
-    private val pdlKlient = mockk<PdlKlient>()
+    private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
     private val brukerTokenInfo = mockk<BrukerTokenInfo>()
 
-    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient)
+    private val service = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdltjenesterKlient)
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
     private fun setNewKontekstWithMockUser(userMock: User) {
@@ -73,7 +75,7 @@ class GosysOppgaveServiceImplTest {
     @BeforeEach
     fun beforeEach() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.enheter() } returns Enheter.enheterMedLesetilgang().toList()
 
         setNewKontekstWithMockUser(saksbehandler)
 
@@ -82,6 +84,14 @@ class GosysOppgaveServiceImplTest {
 
     @Test
     fun `skal hente oppgaver og deretter folkeregisterIdent for unike identer`() {
+        val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
+        every { saksbehandler.enheter() } returns Enheter.enheterMedLesetilgang().toList()
+        every { saksbehandler.name() } returns "ident"
+
+        setNewKontekstWithMockUser(saksbehandler)
+
+        every { saksbehandler.saksbehandlerMedRoller } returns saksbehandlerRoller
+
         coEvery { gosysOppgaveKlient.hentOppgaver(any(), brukerTokenInfo) } returns
             GosysOppgaver(
                 antallTreffTotalt = 3,
@@ -131,7 +141,7 @@ class GosysOppgaveServiceImplTest {
                         ),
                     ),
             )
-        every { pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf("53771238272763", "78324720383742")) } returns
+        every { pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf("53771238272763", "78324720383742")) } returns
             mapOf(
                 "53771238272763" to "01010812345",
                 "78324720383742" to "29048012345",
@@ -158,7 +168,8 @@ class GosysOppgaveServiceImplTest {
     @Test
     fun `skal kun returnere vikafossen enhetsnummer relaterte oppgaver for ad-rolle strengt fortrolige`() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.STRENGT_FORTROLIG)
-        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.enheter() } returns listOf(Enheter.STRENGT_FORTROLIG.enhetNr)
+        every { saksbehandler.name() } returns "ident"
 
         setNewKontekstWithMockUser(saksbehandler)
 
@@ -213,7 +224,7 @@ class GosysOppgaveServiceImplTest {
                 ),
             )
 
-        every { pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf("78324720383742")) } returns
+        every { pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf("78324720383742")) } returns
             mapOf(
                 "78324720383742" to "29048012345",
             )
@@ -232,9 +243,26 @@ class GosysOppgaveServiceImplTest {
     fun `kalle gosys-klient med riktige params`() {
         coEvery {
             gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(
-                oppgaveId = "123", oppgaveVersjon = 2L, tildeles = "A012345", brukerTokenInfo,
+                oppgaveId = "123",
+                oppgaveVersjon = 2L,
+                tildeles = "A012345",
+                brukerTokenInfo,
             )
-        } returns Unit
+        } returns
+            GosysApiOppgave(
+                id = 123,
+                versjon = 2,
+                tema = "EYO",
+                behandlingstema = "",
+                oppgavetype = "",
+                opprettetTidspunkt = Tidspunkt.now().minus(3L, ChronoUnit.DAYS),
+                tildeltEnhetsnr = Enheter.STEINKJER.enhetNr,
+                tilordnetRessurs = "A012345",
+                aktoerId = "78324720383742",
+                beskrivelse = "Omstillingsstønad oppgavebeskrivelse",
+                status = "NY",
+                fristFerdigstillelse = LocalDate.now().plusDays(4),
+            )
 
         runBlocking {
             service.tildelOppgaveTilSaksbehandler(oppgaveId = "123", oppgaveVersjon = 2L, "A012345", brukerTokenInfo)

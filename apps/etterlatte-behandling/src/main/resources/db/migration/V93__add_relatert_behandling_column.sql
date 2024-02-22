@@ -1,0 +1,1 @@
+alter table behandling add column relatert_behandling text;

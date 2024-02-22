@@ -5,7 +5,6 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.generellbehandling.Attestant
 import no.nav.etterlatte.libs.common.generellbehandling.Behandler
@@ -22,6 +21,7 @@ import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
@@ -74,6 +74,7 @@ class GenerellBehandlingService(
     private val behandlingService: BehandlingService,
     private val grunnlagKlient: GrunnlagKlient,
     private val hendelseDao: HendelseDao,
+    private val saksbehandlerInfoDao: SaksbehandlerInfoDao,
 ) {
     private val logger = LoggerFactory.getLogger(GenerellBehandlingService::class.java)
 
@@ -107,7 +108,7 @@ class GenerellBehandlingService(
             if (kanskjeOppgaveMedSaksbehandler != null) {
                 val saksbehandler = kanskjeOppgaveMedSaksbehandler.saksbehandler
                 if (saksbehandler != null) {
-                    oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler)
+                    oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandler.ident)
                     logger.info(
                         "Opprettet generell behandling for utland for sak: ${generellBehandling.sakId} " +
                             "og behandling: ${generellBehandling.tilknyttetBehandling}. Gjelder oppgave: ${oppgave.id}",
@@ -134,12 +135,14 @@ class GenerellBehandlingService(
 
         oppgaveService.ferdigStillOppgaveUnderBehandling(generellBehandling.id.toString(), saksbehandler)
         val trettiDagerFremITid = Tidspunkt.now().plus(30L, ChronoUnit.DAYS)
+
+        val saksbehandlerNavn = saksbehandlerInfoDao.hentSaksbehandlerNavn(saksbehandler.ident)
         oppgaveService.opprettNyOppgaveMedSakOgReferanse(
             generellBehandling.id.toString(),
             generellBehandling.sakId,
             OppgaveKilde.GENERELL_BEHANDLING,
             OppgaveType.ATTESTERING,
-            merknad = "Attestering av ${generellBehandling.type.name}",
+            merknad = "Attestering av ${generellBehandling.type.name}, behandlet av ${saksbehandlerNavn ?: saksbehandler.ident}.",
             frist = trettiDagerFremITid,
         )
 
@@ -345,22 +348,19 @@ class GenerellBehandlingService(
 }
 
 class FantIkkeAvdoedException(msg: String) :
-    ForespoerselException(
-        status = 400,
+    UgyldigForespoerselException(
         code = "FANT_IKKE_AVDOED",
         detail = msg,
     )
 
 class FantIkkeFoerstegangsbehandlingForKravpakkeOgSak(msg: String) :
-    ForespoerselException(
-        status = 400,
+    UgyldigForespoerselException(
         code = "FANT_IKKE_FOERSTEGANGSBEHANDLING_FOR_KRAVPAKKE",
         detail = msg,
     )
 
 class FantIkkeKravpakkeForFoerstegangsbehandling(msg: String) :
-    ForespoerselException(
-        status = 400,
+    UgyldigForespoerselException(
         code = "FANT_IKKE_KRAVPAKKE_FOR_FOERSTEGANGSBEHANDLING",
         detail = msg,
     )

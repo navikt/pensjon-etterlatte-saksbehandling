@@ -3,10 +3,12 @@ package no.nav.etterlatte
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.libs.ktor.hentTokenClaims
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
+import no.nav.etterlatte.tilgangsstyring.saksbehandlereMedTilgangTilAlleEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
@@ -29,6 +31,10 @@ interface User {
     fun name(): String
 
     fun kanSetteKilde(): Boolean = false
+
+    fun harSkrivetilgang(): Boolean = false
+
+    fun harLesetilgang(): Boolean = false
 }
 
 abstract class ExternalUser(val identifiedBy: TokenValidationContext) : User
@@ -49,7 +55,14 @@ class SystemUser(identifiedBy: TokenValidationContext) : ExternalUser(identified
     override fun kanSetteKilde(): Boolean {
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.containsClaim("roles", "kan-sette-kilde")
     }
+
+    override fun harSkrivetilgang(): Boolean = true
+
+    override fun harLesetilgang(): Boolean = true
 }
+
+class HentEnhetException(override val detail: String, override val cause: Throwable?) :
+    InternfeilException(detail, cause)
 
 class SaksbehandlerMedEnheterOgRoller(
     identifiedBy: TokenValidationContext,
@@ -60,14 +73,32 @@ class SaksbehandlerMedEnheterOgRoller(
         return identifiedBy.hentTokenClaims(AZURE_ISSUER)!!.getStringClaim("NAVident")
     }
 
+    fun erSuperbruker() = name() in (saksbehandlereMedTilgangTilAlleEnheter)
+
     fun enheter() =
         if (saksbehandlerMedRoller.harRolleNasjonalTilgang()) {
             Enheter.nasjonalTilgangEnheter()
         } else {
-            runBlocking {
-                navAnsattKlient.hentEnhetForSaksbehandler(name()).map { it.id }
+            try {
+                runBlocking {
+                    navAnsattKlient.hentEnheterForSaksbehandler(name()).map { it.id }
+                }
+            } catch (e: Exception) {
+                throw HentEnhetException("Henting av enheter feilet. Sjekk on-prem status(fss)", e)
             }
         }
+
+    override fun harSkrivetilgang(): Boolean {
+        val enheter = enheter()
+        val skrivetilgangEnhetsnummere = Enheter.enheterMedSkrivetilgang()
+        return enheter.any { skrivetilgangEnhetsnummere.contains(it) }
+    }
+
+    override fun harLesetilgang(): Boolean {
+        val enheter = enheter()
+        val lesetilgangEnheter = Enheter.enheterMedLesetilgang()
+        return enheter.any { lesetilgangEnheter.contains(it) }
+    }
 }
 
 fun decideUser(

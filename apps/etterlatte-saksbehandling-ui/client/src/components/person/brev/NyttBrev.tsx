@@ -7,17 +7,19 @@ import { Column, GridContainer } from '~shared/styled'
 import { StatusBar } from '~shared/statusbar/Statusbar'
 import { getPerson } from '~shared/api/grunnlag'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
-import { BrevStatus } from '~shared/types/Brev'
+import { BrevProsessType, BrevStatus } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import styled from 'styled-components'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
 import BrevStatusPanel from '~components/person/brev/BrevStatusPanel'
-import NyttBrevMottaker from '~components/person/brev/NyttBrevMottaker'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 import { mapApiResult } from '~shared/api/apiUtils'
+import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
+import { Heading, Panel } from '@navikt/ds-react'
+import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 
 export default function NyttBrev() {
   const { brevId, sakId, fnr } = useParams()
@@ -55,12 +57,17 @@ export default function NyttBrev() {
           <GridContainer>
             <Column>
               <div style={{ margin: '1rem' }}>
-                <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} />
+                <BrevTittel brevId={brev.id} sakId={brev.sakId} tittel={brev.tittel} kanRedigeres={kanRedigeres} />
               </div>
-              <NyttBrevMottaker brev={brev} />
+              <div style={{ margin: '1rem' }}>
+                <BrevSpraak brev={brev} kanRedigeres={kanRedigeres} />
+              </div>
+              <div style={{ margin: '1rem' }}>
+                <BrevMottaker brev={brev} kanRedigeres={kanRedigeres} />
+              </div>
             </Column>
             <Column>
-              {brev.status === BrevStatus.DISTRIBUERT ? (
+              {brev.prosessType === BrevProsessType.OPPLASTET_PDF || brev.status === BrevStatus.DISTRIBUERT ? (
                 <PanelWrapper>
                   <ForhaandsvisningBrev brev={brev} />
                 </PanelWrapper>
@@ -70,7 +77,12 @@ export default function NyttBrev() {
             </Column>
             <Column>
               <BrevStatusPanel brev={brev} />
-              <NyttBrevHandlingerPanel brev={brev} setKanRedigeres={setKanRedigeres} />
+              <Panel>
+                <Heading spacing level="2" size="medium">
+                  Handlinger
+                </Heading>
+                <NyttBrevHandlingerPanel brev={brev} setKanRedigeres={setKanRedigeres} />
+              </Panel>
             </Column>
           </GridContainer>
         )

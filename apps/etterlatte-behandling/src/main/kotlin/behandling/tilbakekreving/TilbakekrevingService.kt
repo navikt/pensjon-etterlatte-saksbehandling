@@ -12,8 +12,12 @@ import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tilbakekreving.FattetVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.Kravgrunnlag
+import no.nav.etterlatte.libs.common.tilbakekreving.StatistikkTilbakekrevingDto
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHendelseType
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriode
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingPeriodeVedtak
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVedtak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -30,10 +34,11 @@ class TilbakekrevingService(
     private val oppgaveService: OppgaveService,
     private val vedtakKlient: VedtakKlient,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
+    private val tilbakekrevinghendelser: ITilbakekrevingHendelserService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag) =
+    fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag): UUID =
         inTransaction {
             logger.info("Oppretter tilbakekreving=${kravgrunnlag.kravgrunnlagId} på sak=${kravgrunnlag.sakId}")
 
@@ -58,6 +63,16 @@ class TilbakekrevingService(
                 tilbakekrevingId = tilbakekrevingBehandling.id,
                 sakId = tilbakekrevingBehandling.sak.id,
             )
+
+            val statistikkTilbakekrevingDto =
+                StatistikkTilbakekrevingDto(
+                    tilbakekrevingBehandling.id,
+                    tilbakekrevingBehandling,
+                    Tidspunkt.now(),
+                )
+            tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.OPPRETTET)
+
+            tilbakekrevingBehandling.id
         }
 
     fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling =
@@ -156,6 +171,14 @@ class TilbakekrevingService(
             begrunnelse = null,
         )
 
+        val statistikkTilbakekrevingDto =
+            StatistikkTilbakekrevingDto(
+                tilbakekreving.id,
+                tilbakekreving,
+                Tidspunkt.now(),
+            )
+        tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.ATTESTERT)
+
         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
             fattetoppgaveReferanseOgSak =
                 SakIdOgReferanse(
@@ -187,6 +210,7 @@ class TilbakekrevingService(
                     enhet = behandling.sak.enhet,
                 )
             }
+
         tilbakekrevingDao.lagreTilbakekreving(behandling.copy(status = TilbakekrevingStatus.ATTESTERT))
 
         hendelseDao.vedtakHendelse(

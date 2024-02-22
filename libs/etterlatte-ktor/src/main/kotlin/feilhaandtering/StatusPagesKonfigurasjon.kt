@@ -7,13 +7,14 @@ import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.plugins.statuspages.StatusPagesConfig
 import io.ktor.server.request.uri
 import io.ktor.server.response.respond
-import isProd
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilLoggerException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.isProd
 import no.nav.etterlatte.libs.ktor.erDeserialiseringsException
 import org.slf4j.Logger
 
@@ -95,7 +96,7 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
 
         status(*statusCodes5xx) { call, code ->
             val feil =
-                ForespoerselException(
+                InternfeilLoggerException(
                     status = code.value,
                     detail = call.request.uri,
                     code = "5XX_FEIL",
@@ -134,8 +135,8 @@ class StatusPagesKonfigurasjon(private val sikkerLogg: Logger) {
                     "Feilen fikk status ${internfeil.status} til frontend.",
             )
         }
-        // Logger ikke meta, siden det kan inneholde identiferende informasjon
-        this.info("En forespørselsfeil oppstod i et endepunkt", internfeil.cause ?: internfeil.noMeta())
+
+        this.info("En forespørselsfeil oppstod i et endepunkt, detaljer: ${internfeil.detail}", internfeil.cause ?: internfeil)
     }
 
     private suspend fun ApplicationCall.respond(feil: ForespoerselException) {

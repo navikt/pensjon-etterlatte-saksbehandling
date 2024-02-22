@@ -9,7 +9,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingResponseDto
 import no.nav.etterlatte.libs.common.utbetaling.UtbetalingStatusDto
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
@@ -17,8 +17,8 @@ import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.start.MigreringFeatureToggle
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.migrering.PesysId
-import no.nav.etterlatte.utbetaling.common.EVENT_NAME_OPPDATERT
 import no.nav.etterlatte.utbetaling.common.UTBETALING_RESPONSE
+import no.nav.etterlatte.utbetaling.common.UtbetalinghendelseType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
@@ -54,6 +54,7 @@ class LyttPaaIverksattVedtakRiverTest {
                         Pesyskopling(
                             behandlingId = behandlingId,
                             pesysId = pesysid,
+                            sakId = 321L,
                         )
                 }
 
@@ -70,7 +71,7 @@ class LyttPaaIverksattVedtakRiverTest {
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
-                            EVENT_NAME_KEY to EVENT_NAME_OPPDATERT,
+                            UtbetalinghendelseType.OPPDATERT.lagParMedEventNameKey(),
                             UTBETALING_RESPONSE to
                                 UtbetalingResponseDto(
                                     status = UtbetalingStatusDto.GODKJENT,
@@ -95,6 +96,7 @@ class LyttPaaIverksattVedtakRiverTest {
                         Pesyskopling(
                             behandlingId = behandlingId,
                             pesysId = pesysid,
+                            sakId = 321L,
                         )
                 }
 
@@ -111,7 +113,7 @@ class LyttPaaIverksattVedtakRiverTest {
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
-                            EVENT_NAME_KEY to EVENT_NAME_OPPDATERT,
+                            UtbetalinghendelseType.OPPDATERT.lagParMedEventNameKey(),
                             UTBETALING_RESPONSE to
                                 UtbetalingResponseDto(
                                     status = UtbetalingStatusDto.AVVIST,

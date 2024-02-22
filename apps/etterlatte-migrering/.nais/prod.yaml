@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   liveness:
     initialDelay: 5
@@ -44,6 +44,10 @@ spec:
           - NAVident
   secureLogs:
     enabled: true
+  resources:
+    requests:
+      cpu: 20m
+      memory: 320Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1

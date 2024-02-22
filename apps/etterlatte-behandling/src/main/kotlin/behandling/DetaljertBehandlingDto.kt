@@ -2,10 +2,10 @@ package no.nav.etterlatte.behandling
 
 import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
+import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
-import no.nav.etterlatte.libs.common.behandling.Etterbetaling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -34,5 +34,5 @@ data class DetaljertBehandlingDto(
     val revurderingsaarsak: Revurderingaarsak?,
     val revurderinginfo: RevurderingInfoMedBegrunnelse?,
     val begrunnelse: String?,
-    val etterbetaling: Etterbetaling?,
+    val kilde: Vedtaksloesning,
 )

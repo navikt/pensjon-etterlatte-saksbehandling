@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/java17
+FROM gcr.io/distroless/java21
 ENV TZ="Europe/Oslo"
 WORKDIR /app
 COPY build/libs/*.jar ./

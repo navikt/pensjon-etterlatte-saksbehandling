@@ -6,7 +6,7 @@ import { Alert } from '@navikt/ds-react'
 import { Link } from 'react-router-dom'
 
 type Props = {
-  children: JSX.Element
+  children: React.JSX.Element
 }
 
 class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
@@ -31,12 +31,10 @@ class ErrorBoundary extends React.Component<Props, { hasError: boolean }> {
           error: JSON.stringify(error),
         })
       } catch (e) {
-        const errorobj = { err: error, errorInfo: errorInfo }
-        logger.generalError(JSON.stringify(errorobj))
+        logger.generalError({ err: error, errorInfo })
       }
     } else {
-      const errorobj = { err: error, errorInfo: errorInfo }
-      logger.generalError(JSON.stringify(errorobj))
+      logger.generalError({ err: error, errorInfo })
     }
   }
 

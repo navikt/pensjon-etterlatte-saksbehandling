@@ -3,24 +3,19 @@ package no.nav.etterlatte.brev.brevbaker
 import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.model.BrevDataMapper
+import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
-class BrevbakerService(
-    private val brevbakerKlient: BrevbakerKlient,
-    private val adresseService: AdresseService,
-    private val brevDataMapper: BrevDataMapper,
-) {
+class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val adresseService: AdresseService) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun genererPdf(
-        brevID: BrevID,
+        brevID: BrevID?,
         brevRequest: BrevbakerRequest,
     ): Pdf {
         val brevbakerResponse = brevbakerKlient.genererPdf(brevRequest)
@@ -32,16 +27,19 @@ class BrevbakerService(
 
     suspend fun hentRedigerbarTekstFraBrevbakeren(redigerbarTekstRequest: RedigerbarTekstRequest): Slate {
         val request =
-            BrevbakerRequest.fra(
-                brevDataMapper.brevKode(
-                    redigerbarTekstRequest.generellBrevData,
-                    BrevProsessType.REDIGERBAR,
-                    erOmregningNyRegel = redigerbarTekstRequest.migrering?.erOmregningGjenny ?: false,
-                ).redigering,
-                brevDataMapper.brevData(redigerbarTekstRequest),
-                redigerbarTekstRequest.generellBrevData,
-                adresseService.hentAvsender(redigerbarTekstRequest.generellBrevData.forenkletVedtak),
-            )
+            with(redigerbarTekstRequest) {
+                BrevbakerRequest.fra(
+                    brevkode,
+                    brevdata(this),
+                    adresseService.hentAvsender(
+                        generellBrevData.avsenderRequest(brukerTokenInfo),
+                    ),
+                    generellBrevData.personerISak.soekerOgEventuellVerge(),
+                    generellBrevData.sak.id,
+                    generellBrevData.spraak,
+                    generellBrevData.sak.sakType,
+                )
+            }
         val brevbakerResponse = brevbakerKlient.genererJSON(request)
         return BlockTilSlateKonverterer.konverter(brevbakerResponse)
     }
@@ -50,8 +48,7 @@ class BrevbakerService(
 data class RedigerbarTekstRequest(
     val generellBrevData: GenerellBrevData,
     val brukerTokenInfo: BrukerTokenInfo,
-    val prosessType: BrevProsessType,
+    val brevkode: EtterlatteBrevKode,
     val migrering: MigreringBrevRequest? = null,
-) {
-    fun vedtakstype() = generellBrevData.forenkletVedtak.type.name.lowercase()
-}
+    val brevdata: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
+)

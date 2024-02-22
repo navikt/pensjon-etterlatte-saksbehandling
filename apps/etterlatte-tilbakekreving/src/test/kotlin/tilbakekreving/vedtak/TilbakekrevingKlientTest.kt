@@ -1,4 +1,4 @@
-package tilbakekreving.vedtak
+package no.nav.etterlatte.tilbakekreving.vedtak
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -16,7 +16,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.tilbakekreving.hendelse.TilbakekrevingHendelseRepository
 import no.nav.etterlatte.tilbakekreving.tilbakekrevingsvedtak
-import no.nav.etterlatte.tilbakekreving.vedtak.TilbakekrevingKlient
 import no.nav.okonomi.tilbakekrevingservice.TilbakekrevingsvedtakResponse
 import no.nav.tilbakekreving.typer.v1.MmelDto
 import org.junit.jupiter.api.Test

@@ -15,6 +15,7 @@ data class TrygdetidDto(
     val trygdetidGrunnlag: List<TrygdetidGrunnlagDto>,
     val opplysninger: GrunnlagOpplysningerDto,
     val overstyrtNorskPoengaar: Int?,
+    val opplysningerDifferanse: OpplysningerDifferanse,
 )
 
 const val UKJENT_AVDOED = "UKJENT_AVDOED"
@@ -30,7 +31,17 @@ data class GrunnlagOpplysningerDto(
     val avdoedFoedselsdato: OpplysningsgrunnlagDto?,
     val avdoedFylteSeksten: OpplysningsgrunnlagDto?,
     val avdoedFyllerSeksti: OpplysningsgrunnlagDto?,
-)
+) {
+    companion object {
+        fun tomt() =
+            GrunnlagOpplysningerDto(
+                null,
+                null,
+                null,
+                null,
+            )
+    }
+}
 
 data class OpplysningsgrunnlagDto(
     val opplysning: JsonNode,
@@ -128,4 +139,9 @@ data class FremtidigTrygdetid(
     val antallMaaneder: Long,
     val opptjeningstidIMaaneder: Long,
     val mindreEnnFireFemtedelerAvOpptjeningstiden: Boolean,
+)
+
+data class OpplysningerDifferanse(
+    val differanse: Boolean,
+    val oppdaterteGrunnlagsopplysninger: GrunnlagOpplysningerDto,
 )

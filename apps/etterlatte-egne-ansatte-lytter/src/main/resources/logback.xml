@@ -16,4 +16,5 @@
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
     <include resource="logback-sporing.xml"/>
+    <include resource="logback-secure.xml"/>
 </configuration>

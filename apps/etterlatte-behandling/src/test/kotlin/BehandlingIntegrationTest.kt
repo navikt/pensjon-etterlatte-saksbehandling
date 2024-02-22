@@ -13,30 +13,36 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.config.HoconApplicationConfig
+import io.mockk.spyk
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.domain.SaksbehandlerTema
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
+import no.nav.etterlatte.behandling.klienter.BrevStatus
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
+import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
-import no.nav.etterlatte.behandling.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PesysKlient
+import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.issueSystembrukerToken
 import no.nav.etterlatte.libs.common.Miljoevariabler
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.behandling.Mottakerident
 import no.nav.etterlatte.libs.common.behandling.PersonMedSakerOgRoller
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
-import no.nav.etterlatte.libs.common.behandling.SakOgRolle
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
@@ -47,43 +53,34 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.GeografiskTilknytning
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.etterlatte.token.Claims
-import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
-import testsupport.buildTestApplicationConfigurationForOauth
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.util.UUID
 
 abstract class BehandlingIntegrationTest {
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-    private val server: MockOAuth2Server = MockOAuth2Server()
+    companion object {
+        @RegisterExtension
+        private val dbExtension = DatabaseExtension()
+    }
+
+    private val postgreSQLContainer = GenerellDatabaseExtension.postgreSQLContainer
+    protected val server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
-    protected lateinit var hoconApplicationConfig: HoconApplicationConfig
 
     protected fun startServer(
         norg2Klient: Norg2Klient? = null,
         featureToggleService: FeatureToggleService = DummyFeatureToggleService(),
     ) {
         server.start()
-
-        val httpServer = server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
 
         applicationContext =
             ApplicationContext(
@@ -102,13 +99,12 @@ abstract class BehandlingIntegrationTest {
                         put("AZUREAD_FORTROLIG_GROUPID", "ea930b6b-9397-44d9-b9e6-f4cf527a632a")
                         put("AZUREAD_NASJONAL_TILGANG_UTEN_LOGG_GROUPID", "753805ea-65a7-4855-bdc3-e6130348df9f")
                         put("AZUREAD_NASJONAL_TILGANG_MED_LOGG_GROUPID", "ea7411eb-8b48-41a0-bc56-7b521fbf0c25")
-                        put("HENDELSE_JOB_FREKVENS", "1")
-                        put("HENDELSE_MINUTTER_GAMLE_HENDELSER", "1")
                         put("NORG2_URL", "http://localhost")
-                        put("ELECTOR_PATH", "http://localhost")
                         put("NAVANSATT_URL", "http://localhost")
                         put("SKJERMING_URL", "http://localhost")
                         put("OPPGAVE_URL", "http://localhost")
+                        put("PEN_URL", "http://localhost")
+                        put("PEN_CLIENT_ID", "ddd52335-cfe8-4ee9-9e68-416a5ab26efa")
                         put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
                         put("ETTERLATTE_TILBAKEKREVING_URL", "http://localhost")
                         put("ETTERLATTE_MIGRERING_URL", "http://localhost")
@@ -116,12 +112,11 @@ abstract class BehandlingIntegrationTest {
                     }.let { Miljoevariabler(it) },
                 config =
                     ConfigFactory.parseMap(
-                        hoconApplicationConfig.toMap() +
-                            mapOf(
-                                "pdltjenester.url" to "http://localhost",
-                                "grunnlag.resource.url" to "http://localhost",
-                                "vedtak.resource.url" to "http://localhost",
-                            ),
+                        mapOf(
+                            "pdltjenester.url" to "http://localhost",
+                            "grunnlag.resource.url" to "http://localhost",
+                            "vedtak.resource.url" to "http://localhost",
+                        ),
                     ),
                 rapid = TestProdusent(),
                 featureToggleService = featureToggleService,
@@ -132,15 +127,14 @@ abstract class BehandlingIntegrationTest {
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
                 grunnlagKlientObo = GrunnlagKlientTest(),
-                vedtakKlient = VedtakKlientTest(),
+                vedtakKlient = spyk(VedtakKlientTest()),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiHttpClient = BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
                 tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
                 migreringHttpClient = migreringHttpClientTest(),
-            ).also {
-                it.dataSource.migrate()
-            }
+                pesysKlient = PesysKlientTest(),
+            )
     }
 
     fun skjermingHttpClient(): HttpClient =
@@ -174,6 +168,10 @@ abstract class BehandlingIntegrationTest {
                     } else if (request.url.fullPath.contains("folkeregisteridenter")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         val json = emptyMap<String, String>().toJson()
+                        respond(json, headers = headers)
+                    } else if (request.url.fullPath.contains("person/v2")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        val json = mockPerson().toJson()
                         respond(json, headers = headers)
                     } else if (request.url.fullPath.startsWith("/")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
@@ -222,13 +220,19 @@ abstract class BehandlingIntegrationTest {
                     } else if (request.url.fullPath.endsWith("/roller")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(
-                            PersonMedSakerOgRoller("08071272487", listOf(SakOgRolle(1, Saksrolle.SOEKER))).toJson(),
+                            PersonMedSakerOgRoller("08071272487", listOf(SakidOgRolle(1, Saksrolle.SOEKER))).toJson(),
                             headers = headers,
                         )
                     } else if (request.url.fullPath.endsWith("/saker")) {
                         val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
                         respond(
                             setOf(1).toJson(),
+                            headers = headers,
+                        )
+                    } else if (request.url.fullPath.contains("/grunnlag/sak")) {
+                        val headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString()))
+                        respond(
+                            Grunnlag.empty().toJson(),
                             headers = headers,
                         )
                     } else if (request.url.fullPath.endsWith("/oppdater-grunnlag")) {
@@ -307,25 +311,12 @@ abstract class BehandlingIntegrationTest {
         }
 
     fun resetDatabase() {
-        applicationContext.dataSource.connection.use {
-            it.prepareStatement(
-                """
-                TRUNCATE behandling CASCADE;
-                TRUNCATE behandlinghendelse CASCADE;
-                TRUNCATE grunnlagsendringshendelse CASCADE;
-                TRUNCATE sak CASCADE;
-                TRUNCATE oppgave CASCADE;
-                
-                ALTER SEQUENCE behandlinghendelse_id_seq RESTART WITH 1;
-                ALTER SEQUENCE sak_id_seq RESTART WITH 1;
-                """.trimIndent(),
-            ).execute()
-        }
+        dbExtension.resetDb()
     }
 
     protected fun afterAll() {
+        applicationContext.close()
         server.shutdown()
-        postgreSQLContainer.stop()
     }
 
     private val azureAdStrengtFortroligClaim: String by lazy {
@@ -349,100 +340,50 @@ abstract class BehandlingIntegrationTest {
     }
 
     protected val tokenSaksbehandler: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "John Doe",
-                Claims.NAVident.toString() to "Saksbehandler01",
-                "groups" to listOf(azureAdSaksbehandlerClaim),
-            ),
-        )
+        server.issueSaksbehandlerToken(navn = "John Doe", navIdent = "Saksbehandler01", groups = listOf(azureAdSaksbehandlerClaim))
     }
 
     protected val tokenSaksbehandler2: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "Jane Doe",
-                Claims.NAVident.toString() to "Saksbehandler02",
-                "groups" to listOf(azureAdSaksbehandlerClaim),
-            ),
-        )
+        server.issueSaksbehandlerToken(navn = "Jane Doe", navIdent = "Saksbehandler02", groups = listOf(azureAdSaksbehandlerClaim))
     }
 
-    protected val fagsystemTokenEY: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "fagsystem",
-                Claims.NAVident.toString() to Fagsaksystem.EY.navn,
-                "groups" to listOf(azureAdSaksbehandlerClaim, azureAdAttestantClaim),
-            ),
-        )
-    }
+    protected val fagsystemTokenEY: String by lazy { server.issueSystembrukerToken() }
 
     protected val tokenAttestant: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "John Doe",
-                Claims.NAVident.toString() to "Saksbehandler02",
-                "groups" to
-                    listOf(
-                        azureAdAttestantClaim,
-                        azureAdSaksbehandlerClaim,
-                    ),
-            ),
+        server.issueSaksbehandlerToken(
+            navn = "John Doe",
+            navIdent = "Saksbehandler02",
+            groups = listOf(azureAdAttestantClaim, azureAdSaksbehandlerClaim),
         )
     }
 
     protected val tokenSaksbehandlerMedStrengtFortrolig: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "John Doe",
-                Claims.NAVident.toString() to "saksebehandlerstrengtfortrolig",
-                "groups" to
-                    listOf(
-                        azureAdAttestantClaim,
-                        azureAdSaksbehandlerClaim,
-                        azureAdStrengtFortroligClaim,
-                    ),
-            ),
+        server.issueSaksbehandlerToken(
+            navn = "John Doe",
+            navIdent = "saksebehandlerstrengtfortrolig",
+            groups =
+                listOf(
+                    azureAdAttestantClaim,
+                    azureAdSaksbehandlerClaim,
+                    azureAdStrengtFortroligClaim,
+                ),
         )
     }
 
     protected val tokenSaksbehandlerMedEgenAnsattTilgang: String by lazy {
-        issueToken(
-            mapOf(
-                "navn" to "John Doe",
-                Claims.NAVident.toString() to "saksbehandlerskjermet",
-                "groups" to
-                    listOf(
-                        azureAdSaksbehandlerClaim,
-                        azureAdEgenAnsattClaim,
-                        azureAdAttestantClaim,
-                    ),
-            ),
+        server.issueSaksbehandlerToken(
+            navn = "John Doe",
+            navIdent = "saksbehandlerskjermet",
+            groups =
+                listOf(
+                    azureAdSaksbehandlerClaim,
+                    azureAdEgenAnsattClaim,
+                    azureAdAttestantClaim,
+                ),
         )
     }
 
-    protected val systemBruker: String by lazy {
-        val mittsystem = UUID.randomUUID().toString()
-        issueToken(
-            mapOf(
-                "sub" to mittsystem,
-                "oid" to mittsystem,
-                "azp_name" to mittsystem,
-            ),
-        )
-    }
-
-    private fun issueToken(claims: Map<String, Any>) =
-        server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims = claims,
-        ).serialize()
-
-    private companion object {
-        const val CLIENT_ID = "mock-client-id"
-    }
+    protected val systemBruker: String by lazy { server.issueSystembrukerToken() }
 }
 
 class GrunnlagKlientTest : GrunnlagKlient {
@@ -512,6 +453,13 @@ class VedtakKlientTest : VedtakKlient {
     ): Long {
         return 123L
     }
+
+    override suspend fun lagreVedtakKlage(
+        klage: Klage,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        return 123L
+    }
 }
 
 class BrevApiKlientTest : BrevApiKlient {
@@ -521,15 +469,15 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
-        return OpprettetBrevDto(
-            brevId++,
-            mottaker =
-                Mottaker(
-                    navn = "Mottaker mottakersen",
-                    foedselsnummer = Mottakerident("19448310410"),
-                    orgnummer = null,
-                ),
-        )
+        return opprettetBrevDto(brevId++)
+    }
+
+    override suspend fun opprettVedtaksbrev(
+        behandlingId: UUID,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return opprettetBrevDto(brevId++)
     }
 
     override suspend fun ferdigstillBrev(
@@ -560,16 +508,22 @@ class BrevApiKlientTest : BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
-        return OpprettetBrevDto(
+        return opprettetBrevDto(brevId)
+    }
+
+    private fun opprettetBrevDto(brevId: Long) =
+        OpprettetBrevDto(
             id = brevId,
+            status = BrevStatus.OPPRETTET,
             mottaker =
                 Mottaker(
                     navn = "Mottaker mottakersen",
                     foedselsnummer = Mottakerident("19448310410"),
                     orgnummer = null,
                 ),
+            journalpostId = null,
+            bestillingsID = null,
         )
-    }
 }
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {
@@ -584,6 +538,10 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave {
+        return gosysApiOppgave()
+    }
+
+    private fun gosysApiOppgave(): GosysApiOppgave {
         return GosysApiOppgave(
             1,
             2,
@@ -605,8 +563,8 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         oppgaveVersjon: Long,
         tildeles: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        // NO-OP
+    ): GosysApiOppgave {
+        return gosysApiOppgave()
     }
 
     override suspend fun endreFrist(
@@ -614,8 +572,8 @@ class GosysOppgaveKlientTest : GosysOppgaveKlient {
         oppgaveVersjon: Long,
         nyFrist: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        // NO-OP
+    ): GosysApiOppgave {
+        return gosysApiOppgave()
     }
 }
 
@@ -633,7 +591,7 @@ class Norg2KlientTest : Norg2Klient {
 }
 
 class NavAnsattKlientTest : NavAnsattKlient {
-    override suspend fun hentEnhetForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
+    override suspend fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
         return listOf(
             SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
             SaksbehandlerEnhet(Enheter.STEINKJER.enhetNr, Enheter.STEINKJER.navn),
@@ -642,5 +600,15 @@ class NavAnsattKlientTest : NavAnsattKlient {
 
     override suspend fun hentTemaForSaksbehandler(ident: String): List<SaksbehandlerTema> {
         return listOf(SaksbehandlerTema(SakType.BARNEPENSJON.name), SaksbehandlerTema(SakType.OMSTILLINGSSTOENAD.name))
+    }
+
+    override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? {
+        return SaksbehandlerInfo("ident", "Max Manus")
+    }
+}
+
+class PesysKlientTest : PesysKlient {
+    override suspend fun hentSaker(fnr: String): List<SakSammendragResponse> {
+        return emptyList()
     }
 }

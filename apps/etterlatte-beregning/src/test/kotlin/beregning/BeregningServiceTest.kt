@@ -8,10 +8,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.BehandlingKlientImpl
-import no.nav.etterlatte.klienter.TrygdetidKlient
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -29,8 +27,6 @@ internal class BeregningServiceTest {
     private val beregnBarnepensjonService = mockk<BeregnBarnepensjonService>()
     private val beregnOmstillingsstoenadService = mockk<BeregnOmstillingsstoenadService>()
     private val beregnOverstyrBeregningService = mockk<BeregnOverstyrBeregningService>()
-    private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
-    private val trygdetidKlient = mockk<TrygdetidKlient>()
     private val beregningService: BeregningService =
         BeregningService(
             beregningRepository = beregningRepository,
@@ -38,8 +34,6 @@ internal class BeregningServiceTest {
             beregnBarnepensjonService = beregnBarnepensjonService,
             beregnOmstillingsstoenadService = beregnOmstillingsstoenadService,
             beregnOverstyrBeregningService = beregnOverstyrBeregningService,
-            beregningsGrunnlagService = beregningsGrunnlagService,
-            trygdetidKlient = trygdetidKlient,
         )
 
     @Test

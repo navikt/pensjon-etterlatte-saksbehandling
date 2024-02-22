@@ -1,4 +1,9 @@
-import { IVilkaarsvurdering, VilkaarsvurderingResultat, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
+import {
+  IVilkaarsvurdering,
+  Lovreferanse,
+  VilkaarsvurderingResultat,
+  VurderingsResultat,
+} from '~shared/api/vilkaarsvurdering'
 import { ISvar } from '~shared/types/ISvar'
 import { KildeType } from '~shared/types/kilde'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
@@ -60,4 +65,19 @@ export function behandlingGjelderBarnepensjonPaaNyttRegelverk(behandling: IDetal
     behandling.sakType === SakType.BARNEPENSJON &&
     new Date(behandling.virkningstidspunkt!!.dato) >= new Date('2024-01-01')
   )
+}
+
+export const formatertLovreferanse = (lovreferanse: Lovreferanse) => {
+  let formatertStr = lovreferanse.paragraf
+
+  if (lovreferanse.ledd) {
+    const leddSomTekst = ['første', 'andre', 'tredje', 'fjerde', 'femte', 'sjette']
+    formatertStr += ` ${leddSomTekst[lovreferanse.ledd - 1]} ledd`
+  }
+
+  if (lovreferanse.bokstav) {
+    // TODO vi har en bug i vilkårsvurdering hvor paragraf har blitt lagret som bokstav - må fikses før dette kan vises
+    // formatertStr += ` bokstav ${lovreferanse.bokstav}`
+  }
+  return formatertStr
 }

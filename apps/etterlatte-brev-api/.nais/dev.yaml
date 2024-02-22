@@ -8,7 +8,7 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   ingresses:
     - "https://etterlatte-brev-api.intern.dev.nav.no"
@@ -44,6 +44,12 @@ spec:
           - NAVident
   kafka:
     pool: nav-dev
+  resources:
+    limits:
+      memory: 640Mi
+    requests:
+      cpu: 20m
+      memory: 384Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -73,14 +79,14 @@ spec:
       value: https://navansatt.dev-fss-pub.nais.io
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.dodsmelding
-    - name: ETTERLATTE_PROXY_URL
-      value: https://etterlatte-proxy.dev-fss-pub.nais.io/aad
-    - name: ETTERLATTE_PROXY_AUDIENCE
-      value: dev-fss:etterlatte:etterlatte-proxy
-    - name: ETTERLATTE_PROXY_OUTBOUND_SCOPE
-      value: api://dev-fss.etterlatte.etterlatte-proxy/.default
+    - name: REGOPPSLAG_SCOPE
+      value: api://dev-fss.teamdokumenthandtering.regoppslag/.default
+    - name: REGOPPSLAG_URL
+      value: https://regoppslag.dev-fss-pub.nais.io
     - name: NAVANSATT_OUTBOUND_SCOPE
       value: api://dev-fss.teampensjon.navansatt/.default
+    - name: CLAMAV_ENDPOINT_URL
+      value: http://clamav.nais-system.svc.cluster.local
     - name: ETTERLATTE_VEDTAK_CLIENT_ID
       value: 069b1b2c-0a06-4cc9-8418-f100b8ff71be
     - name: ETTERLATTE_VEDTAK_URL
@@ -106,16 +112,17 @@ spec:
   accessPolicy:
     outbound:
       rules:
-        - application: etterlatte-pdl-proxy
         - application: etterlatte-vedtaksvurdering
         - application: etterlatte-grunnlag
         - application: etterlatte-beregning
         - application: etterlatte-behandling
         - application: etterlatte-trygdetid
+        - application: clamav
+          namespace: nais-system
       external:
-        - host: etterlatte-proxy.dev-fss-pub.nais.io
         - host: norg2.dev-fss-pub.nais.io
         - host: saf-q2.dev-fss-pub.nais.io
+        - host: regoppslag.dev-fss-pub.nais.io
         - host: dokarkiv-q2.dev-fss-pub.nais.io
         - host: dokdistfordeling.dev-fss-pub.nais.io
         - host: data.brreg.no
@@ -124,6 +131,6 @@ spec:
         - host: etterlatte-unleash-api.nav.cloud.nais.io
     inbound:
       rules:
-        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-behandling

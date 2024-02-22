@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   ingresses:
     - https://etterlatte-grunnlag.intern.dev.nav.no
@@ -50,6 +50,10 @@ spec:
           - NAVident
   kafka:
     pool: nav-dev
+  resources:
+    requests:
+      cpu: 50m
+      memory: 384Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 2
@@ -86,7 +90,8 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-migrering
         - application: etterlatte-saksbehandling-ui
-        - application: etterlatte-saksbehandling-ui-lokal
+        - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml
+        - application: etterlatte-tidshendelser
     outbound:
       rules:
         - application: etterlatte-behandling

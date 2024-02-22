@@ -198,6 +198,12 @@ export const Resultat = (props: Props) => {
       <Border />
       {redigerbar ? (
         <>
+          {vilkaarsvurdering.isGrunnlagUtdatert && (
+            <WarningAlert>
+              OBS! Grunnlaget for vilkårsvurderingen har blitt oppdatert siden sist. <br />
+              Du må se over vurderingene og sjekke at de fortsatt er riktige.
+            </WarningAlert>
+          )}
           {vilkaarsvurdering.resultat && virkningstidspunktSamsvarer && (
             <VilkaarsvurderingKnapper behandlingId={behandlingId} />
           )}

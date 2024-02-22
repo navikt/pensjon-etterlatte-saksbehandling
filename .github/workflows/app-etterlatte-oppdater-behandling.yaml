@@ -18,9 +18,11 @@ on:
       - apps/etterlatte-oppdater-behandling/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
+      - libs/etterlatte-vedtaksvurdering-model/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -29,10 +31,16 @@ on:
       - apps/etterlatte-oppdater-behandling/**
       - libs/saksbehandling-common/**
       - libs/etterlatte-behandling-model/**
+      - libs/etterlatte-oppgave-model/**
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-pdl-model/**
+      - libs/etterlatte-vedtaksvurdering-model/**
       - gradle/libs.versions.toml
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   test:
@@ -44,9 +52,6 @@ jobs:
     if: github.event_name != 'pull_request'
     uses: ./.github/workflows/.build.yaml
     secrets: inherit
-    permissions:
-      contents: 'read'
-      id-token: 'write'
 
   deploy:
     if: github.event_name != 'pull_request'

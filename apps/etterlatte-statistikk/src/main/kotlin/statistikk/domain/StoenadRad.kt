@@ -13,7 +13,7 @@ data class StoenadRad(
     val fnrForeldre: List<String>,
     val fnrSoesken: List<String>,
     val anvendtTrygdetid: String,
-    val nettoYtelse: String,
+    val nettoYtelse: String?,
     val beregningType: String,
     val anvendtSats: String,
     val behandlingId: UUID,

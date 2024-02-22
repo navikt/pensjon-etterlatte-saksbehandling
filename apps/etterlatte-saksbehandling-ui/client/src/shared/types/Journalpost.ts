@@ -1,43 +1,115 @@
-import { ISak } from '~shared/types/sak'
-
 export interface Journalpost {
   journalpostId: string
   tittel: string
   tema: string
-  journalposttype: string
-  journalstatus: string
-  dokumenter: Dokument[]
-  avsenderMottaker: {
-    id?: string
-    navn?: string
-  }
+  journalposttype: Journalposttype
+  journalstatus: Journalstatus
+  dokumenter: DokumentInfo[]
+  bruker: Bruker
+  avsenderMottaker: AvsenderMottaker
   kanal: string
-  sak?: {
-    sakstype?: string
-    fagsakId?: string
-    fagsaksystem?: string
-  }
+  sak?: JournalpostSak
   datoOpprettet: string
+  utsendingsinfo?: object
 }
 
-interface Dokument {
+export interface JournalpostUtsendingsinfo {
+  journalpostId: string
+  utsendingsinfo?: {
+    fysiskpostSendt?: {
+      adressetekstKonvolutt?: string
+    }
+    digitalpostSendt?: {
+      adresse?: string
+    }
+  }
+}
+
+export interface OppdaterJournalpostRequest {
+  journalpostId: string
+  tittel?: string
+  tema?: string
+  dokumenter?: DokumentInfo[]
+  bruker?: Bruker
+  avsenderMottaker?: AvsenderMottaker
+  sak?: JournalpostSak
+}
+
+export interface KnyttTilAnnenSakRequest {
+  bruker: {
+    id: string
+    idType: string
+  }
+  fagsakId: string
+  fagsaksystem: string
+  journalfoerendeEnhet: string
+  sakstype: string
+  tema: string
+}
+
+export interface KnyttTilAnnenSakResponse {
+  nyJournalpostId: string
+}
+
+export interface DokumentInfo {
   dokumentInfoId: string
   tittel: string
-  dokumentvarianter: {
-    saksbehandlerHarTilgang: boolean
-  }[]
+  dokumentvarianter: DokumentVariant[]
 }
 
-export enum JournalpostVariant {
-  NY_SOEKNAD = 'NY_SOEKNAD',
-  NYTT_VEDLEGG = 'NYTT_VEDLEGG',
-  FEIL_TEMA = 'FEIL_TEMA',
+export interface DokumentVariant {
+  filtype?: string
+  fysiskDokument?: string
+  variantformat?: string
 }
 
-export interface OppdaterJournalpostTemaRequest {
-  nyttTema?: string
+export interface Bruker {
+  id?: string
+  type?: BrukerIdType
 }
 
-export interface FerdigstillJournalpostRequest {
-  sak?: ISak
+export enum BrukerIdType {
+  ORGNR = 'ORGNR',
+  AKTOERID = 'AKTOERID',
+  FNR = 'FNR',
+}
+
+export interface AvsenderMottaker {
+  id?: string
+  idType?: string
+  navn?: string
+  land?: string
+}
+
+export interface JournalpostSak {
+  sakstype?: Sakstype
+  fagsakId?: string
+  fagsaksystem?: string
+  tema?: string
+}
+
+export enum Sakstype {
+  FAGSAK = 'FAGSAK',
+  GENERELL_SAK = 'GENERELL_SAK',
+}
+
+export enum Journalstatus {
+  MOTTATT = 'MOTTATT',
+  JOURNALFOERT = 'JOURNALFOERT',
+  FERDIGSTILT = 'FERDIGSTILT',
+  EKSPEDERT = 'EKSPEDERT',
+  UNDER_ARBEID = 'UNDER_ARBEID',
+  FEILREGISTRERT = 'FEILREGISTRERT',
+  UTGAAR = 'UTGAAR',
+  AVBRUTT = 'AVBRUTT',
+  UKJENT_BRUKER = 'UKJENT_BRUKER',
+  RESERVERT = 'RESERVERT',
+  OPPLASTING_DOKUMENT = 'OPPLASTING_DOKUMENT',
+  UKJENT = 'UKJENT',
+}
+
+export enum Journalposttype {
+  I = 'I', // Inngående
+  U = 'U', // Utgående
+  N = 'N', // Notat
 }

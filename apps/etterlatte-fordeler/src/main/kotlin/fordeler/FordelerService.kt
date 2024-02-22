@@ -1,6 +1,5 @@
 package no.nav.etterlatte.fordeler
 
-import fordeler.FordelerFeatureToggle
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingKlient
 import no.nav.etterlatte.fordeler.FordelerResultat.GyldigForBehandling
@@ -11,18 +10,16 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.innsendtsoeknad.barnepensjon.Barnepensjon
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.PersonType
-import no.nav.etterlatte.libs.common.pdl.AkseptererIkkePersonerUtenIdentException
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Foedselsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
-import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.finnHoyestGradering
 import no.nav.etterlatte.libs.common.tidspunkt.utcKlokke
 import no.nav.etterlatte.pdltjenester.PdlTjenesterKlient
 import no.nav.etterlatte.pdltjenester.PersonFinnesIkkeException
-import no.nav.etterlatte.sikkerLogg
 import org.slf4j.LoggerFactory
 import java.time.Clock
 import java.time.OffsetDateTime
@@ -41,8 +38,6 @@ sealed class FordelerResultat {
     class UgyldigHendelse(val message: String) : FordelerResultat()
 
     class IkkeGyldigForBehandling(val ikkeOppfylteKriterier: List<FordelerKriterie>) : FordelerResultat()
-
-    class TrengerManuellJournalfoering(val melding: String) : FordelerResultat()
 }
 
 class FordelerService(
@@ -69,19 +64,8 @@ class FordelerService(
                 when (it.fordeltTil) {
                     Vedtaksloesning.GJENNY -> GyldigForBehandling(it.gradering)
                     Vedtaksloesning.PESYS -> IkkeGyldigForBehandling(it.kriterier)
+                    Vedtaksloesning.GJENOPPRETTA -> throw RuntimeException("Gjenoppretta er ikke relevant for fordeling")
                 }
-            }
-        } catch (e: AkseptererIkkePersonerUtenIdentException) {
-            logger.warn(
-                "Fikk en familierelasjon som mangler ident fra PDL. Disse tilfellene støtter vi ikke per nå." +
-                    " Se sikkerlogg for detaljer",
-            )
-            sikkerLogg.info("Søknad ${event.soeknadId} har en familierelasjon som mangler ident", e)
-
-            if (featureToggleService.isEnabled(FordelerFeatureToggle.ManuellJournalfoering, false)) {
-                FordelerResultat.TrengerManuellJournalfoering(e.detail)
-            } else {
-                IkkeGyldigForBehandling(listOf(FordelerKriterie.FAMILIERELASJON_MANGLER_IDENT))
             }
         } catch (e: PersonFinnesIkkeException) {
             UgyldigHendelse("Person fra søknaden med fnr=${e.fnr} finnes ikke i PDL")
@@ -147,13 +131,15 @@ class FordelerService(
                 if ((it.kandidat || tillatAlleScenarier) &&
                     fordelerRepository.antallFordeltTil(Vedtaksloesning.GJENNY.name) < maxFordelingTilGjenny
                 ) {
-                    val adressebeskyttetPerson =
-                        finnAdressebeskyttetPerson(listOfNotNull(barn, avdoed, gjenlevende))
+                    val hoyesteGradering =
+                        finnHoyestGradering(
+                            listOfNotNull(barn.adressebeskyttelse, avdoed.adressebeskyttelse, gjenlevende?.adressebeskyttelse),
+                        )
                     Fordeling(
                         event.soeknadId,
                         Vedtaksloesning.GJENNY,
                         emptyList(),
-                        adressebeskyttetPerson?.adressebeskyttelse,
+                        hoyesteGradering,
                     )
                 } else {
                     Fordeling(event.soeknadId, Vedtaksloesning.PESYS, it.forklaring)
@@ -163,12 +149,6 @@ class FordelerService(
 
     private fun alleScenarierTillates(featureToggleService: FeatureToggleService) =
         featureToggleService.isEnabled(FordelerFeatureToggle.TillatAlleScenarier, false)
-
-    private fun finnAdressebeskyttetPerson(personer: List<Person>): Person? {
-        return personer.firstOrNull {
-            it.adressebeskyttelse != AdressebeskyttelseGradering.UGRADERT
-        }
-    }
 
     private fun ugyldigHendelse(event: FordelerEvent) = event.hendelseGyldigTil.isBefore(OffsetDateTime.now(klokke))
 
@@ -214,10 +194,6 @@ class FordelerService(
         return runBlocking {
             behandlingKlient.hentSak(fnr, barnepensjon, gradering)
         }
-    }
-
-    fun opprettOppgave(sakId: Long) {
-        return runBlocking { behandlingKlient.opprettOppgave(sakId) }
     }
 }
 

@@ -1,6 +1,8 @@
 plugins {
     kotlin("jvm")
     id("etterlatte.libs")
+    id("java-library")
+    id("java-test-fixtures")
 }
 
 repositories {
@@ -49,6 +51,9 @@ dependencies {
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(libs.test.mockk)
     testImplementation(libs.test.wiremock)
+
+    testFixturesImplementation(libs.navfelles.mockoauth2server)
+    testFixturesImplementation(libs.ktor2.servertests)
 
     tasks {
         withType<Test> {

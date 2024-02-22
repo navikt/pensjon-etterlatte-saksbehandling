@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   liveness:
     initialDelay: 5
@@ -19,6 +19,9 @@ spec:
     path: /metrics
   kafka:
     pool: nav-dev
+  resources:
+    requests:
+      cpu: 25m
   replicas:
     cpuThresholdPercentage: 90
     max: 1

@@ -15,18 +15,7 @@ ui sin rot, eller i [client](./client) og [server](./server) individuelt.
 Kjøres fra mappen `client` og/eller `server`. \
 Prosjektet bruker [Vite](https://vitejs.dev/).
 
-Det finnes to måter å kjøre opp frontend:
-
-### Alternativ 1: Med lokal mock
-
-Med ren mock vil frontend bruke lokale mockfiler for å simulere backend APIer. 
-
-Kjøres opp med: 
-1. `yarn dev` i både [client](./client) og [server](./server).
-2. Frontend er nå tilgjengelig på [localhost:5173](http://localhost:5173)
-
-
-### Alternativ 2: Med APIer i dev-gcp
+### Sett opp kobling mot APIer i dev-gcp
 
 #### Docker host
 

@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   liveness:
     initialDelay: 5
@@ -35,6 +35,10 @@ spec:
   envFrom:
     - secret: etterlatte-secrets
     - secret: my-application-unleash-api-token
+  resources:
+    requests:
+      cpu: 40m
+      memory: 384Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1

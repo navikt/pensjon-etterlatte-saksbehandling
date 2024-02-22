@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   liveness:
     initialDelay: 5
@@ -54,7 +54,12 @@ spec:
           - id: e750ceb5-b70b-4d94-b4fa-9d22467b786b # 0000-GA-Egne_ansatte
         extra:
           - NAVident
-
+  resources:
+    requests:
+      cpu: 25m
+      memory: 320Mi
+    limits:
+      memory: 640Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 4
@@ -73,11 +78,9 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: etterlatte-saksbehandling-ui-lokal
         - application: etterlatte-saksbehandling-ui
         - application: etterlatte-beregning
         - application: etterlatte-vedtaksvurdering
-        - application: etterlatte-behandling
         - application: etterlatte-vilkaarsvurdering-kafka
         - application: etterlatte-trygdetid
     outbound:

@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.sak.Saker
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunAttestant
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 
 internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingStatusService) {
@@ -30,9 +31,11 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         }
         post("/opprett") {
             // Kalles kun av vilkårsvurdering når total-vurdering slettes
-            haandterStatusEndring(call) {
-                inTransaction {
-                    behandlingsstatusService.settOpprettet(behandlingId, brukerTokenInfo, false)
+            kunSkrivetilgang {
+                haandterStatusEndring(call) {
+                    inTransaction {
+                        behandlingsstatusService.settOpprettet(behandlingId, brukerTokenInfo, false)
+                    }
                 }
             }
         }
@@ -45,9 +48,11 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             }
         }
         post("/vilkaarsvurder") {
-            haandterStatusEndring(call) {
-                inTransaction {
-                    behandlingsstatusService.settVilkaarsvurdert(behandlingId, brukerTokenInfo, false)
+            kunSkrivetilgang {
+                haandterStatusEndring(call) {
+                    inTransaction {
+                        behandlingsstatusService.settVilkaarsvurdert(behandlingId, brukerTokenInfo, false)
+                    }
                 }
             }
         }
@@ -60,9 +65,11 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
             }
         }
         post("/oppdaterTrygdetid") {
-            haandterStatusEndring(call) {
-                inTransaction {
-                    behandlingsstatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, false)
+            kunSkrivetilgang {
+                haandterStatusEndring(call) {
+                    inTransaction {
+                        behandlingsstatusService.settTrygdetidOppdatert(behandlingId, brukerTokenInfo, false)
+                    }
                 }
             }
         }
@@ -76,9 +83,11 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         }
 
         post("/beregn") {
-            haandterStatusEndring(call) {
-                inTransaction {
-                    behandlingsstatusService.settBeregnet(behandlingId, brukerTokenInfo, false)
+            kunSkrivetilgang {
+                haandterStatusEndring(call) {
+                    inTransaction {
+                        behandlingsstatusService.settBeregnet(behandlingId, brukerTokenInfo, false)
+                    }
                 }
             }
         }
@@ -92,9 +101,11 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         }
 
         post("/avkort") {
-            haandterStatusEndring(call) {
-                inTransaction {
-                    behandlingsstatusService.settAvkortet(behandlingId, brukerTokenInfo, false)
+            kunSkrivetilgang {
+                haandterStatusEndring(call) {
+                    inTransaction {
+                        behandlingsstatusService.settAvkortet(behandlingId, brukerTokenInfo, false)
+                    }
                 }
             }
         }
@@ -125,28 +136,34 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
         }
 
         post("/tilsamordning") {
-            val vedtakHendelse = call.receive<VedtakHendelse>()
-            haandterStatusEndring(call) {
-                inTransaction {
-                    behandlingsstatusService.settTilSamordnetVedtak(behandlingId, vedtakHendelse)
+            kunSkrivetilgang {
+                val vedtakHendelse = call.receive<VedtakHendelse>()
+                haandterStatusEndring(call) {
+                    inTransaction {
+                        behandlingsstatusService.settTilSamordnetVedtak(behandlingId, vedtakHendelse)
+                    }
                 }
             }
         }
 
         post("/samordnet") {
-            val vedtakHendelse = call.receive<VedtakHendelse>()
-            haandterStatusEndring(call) {
-                inTransaction {
-                    behandlingsstatusService.settSamordnetVedtak(behandlingId, vedtakHendelse)
+            kunSkrivetilgang {
+                val vedtakHendelse = call.receive<VedtakHendelse>()
+                haandterStatusEndring(call) {
+                    inTransaction {
+                        behandlingsstatusService.settSamordnetVedtak(behandlingId, vedtakHendelse)
+                    }
                 }
             }
         }
 
         post("/iverksett") {
-            val vedtakHendelse = call.receive<VedtakHendelse>()
-            haandterStatusEndring(call) {
-                inTransaction {
-                    behandlingsstatusService.settIverksattVedtak(behandlingId, vedtakHendelse)
+            kunSkrivetilgang {
+                val vedtakHendelse = call.receive<VedtakHendelse>()
+                haandterStatusEndring(call) {
+                    inTransaction {
+                        behandlingsstatusService.settIverksattVedtak(behandlingId, vedtakHendelse)
+                    }
                 }
             }
         }
@@ -154,10 +171,12 @@ internal fun Route.behandlingsstatusRoutes(behandlingsstatusService: BehandlingS
 
     route("/behandlinger") {
         post("/settTilbakeTilTrygdetidOppdatert") {
-            val saker = call.receive<Saker>()
-            val tilbakestilteBehandlinger =
-                behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker)
-            call.respond(tilbakestilteBehandlinger)
+            kunSkrivetilgang {
+                val saker = call.receive<Saker>()
+                val tilbakestilteBehandlinger =
+                    behandlingsstatusService.migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker)
+                call.respond(tilbakestilteBehandlinger)
+            }
         }
     }
 }

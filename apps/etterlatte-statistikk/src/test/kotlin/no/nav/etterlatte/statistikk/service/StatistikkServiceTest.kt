@@ -7,7 +7,9 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
@@ -23,10 +25,10 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.Behandling
 import no.nav.etterlatte.libs.common.vedtak.Utbetalingsperiode
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.libs.common.vedtak.VedtakNyDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.statistikk.clients.BehandlingKlient
@@ -42,7 +44,6 @@ import no.nav.etterlatte.statistikk.domain.Beregningstype
 import no.nav.etterlatte.statistikk.domain.MaanedStatistikk
 import no.nav.etterlatte.statistikk.domain.SakUtland
 import no.nav.etterlatte.statistikk.domain.SakYtelsesgruppe
-import no.nav.etterlatte.statistikk.river.BehandlingHendelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -93,6 +94,7 @@ class StatistikkServiceTest {
                 kilde = Vedtaksloesning.GJENNY,
                 sistEndret = LocalDateTime.now(),
                 pesysId = 123L,
+                relatertBehandlingId = null,
             )
         every { stoenadRepo.lagreStoenadsrad(any()) } returnsArgument 0
         every { sakRepo.lagreRad(any()) } returnsArgument 0
@@ -124,7 +126,7 @@ class StatistikkServiceTest {
                         attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
                         virk = virkningstidspunkt,
                     ),
-                vedtakKafkaHendelseType = VedtakKafkaHendelseType.IVERKSATT,
+                vedtakKafkaHendelseType = VedtakKafkaHendelseHendelseType.IVERKSATT,
                 tekniskTid = tekniskTidForHendelse,
             )
 
@@ -133,7 +135,7 @@ class StatistikkServiceTest {
             registrertSak.sakId shouldBe sakId
             registrertSak.sakYtelse shouldBe SakType.BARNEPENSJON.name
             registrertSak.sakUtland shouldBe SakUtland.NASJONAL
-            registrertSak.behandlingId shouldBe behandlingId
+            registrertSak.referanseId shouldBe behandlingId
             registrertSak.tekniskTid shouldBe tekniskTidForHendelse.toTidspunkt()
             registrertSak.ansvarligEnhet shouldBe "attestantEnhet"
             registrertSak.ansvarligBeslutter shouldBe "Attestant"
@@ -228,6 +230,7 @@ class StatistikkServiceTest {
                 kilde = Vedtaksloesning.GJENNY,
                 sistEndret = LocalDateTime.now(),
                 pesysId = 123L,
+                relatertBehandlingId = null,
             )
 
         val (registrertSakRad, registrertStoenadRad) =
@@ -241,7 +244,7 @@ class StatistikkServiceTest {
                         attestasjon = Attestasjon("Attestant", "attestantEnhet", fattetTidspunkt),
                         virk = virkningstidspunkt,
                     ),
-                vedtakKafkaHendelseType = VedtakKafkaHendelseType.IVERKSATT,
+                vedtakKafkaHendelseType = VedtakKafkaHendelseHendelseType.IVERKSATT,
                 tekniskTid = LocalDateTime.of(2023, 2, 1, 8, 30),
             )
 
@@ -270,14 +273,14 @@ class StatistikkServiceTest {
         val registrertStatistikk =
             service.registrerStatistikkForBehandlinghendelse(
                 statistikkBehandling = behandling(id = behandlingId, sakId = sakId, avdoed = listOf("etfnr")),
-                hendelse = BehandlingHendelse.OPPRETTET,
+                hendelse = BehandlingHendelseType.OPPRETTET,
                 tekniskTid = tekniskTidForHendelse,
             ) ?: throw NullPointerException("Fikk ikke registrert statistikk")
 
         assertEquals(registrertStatistikk.sakId, sakId)
         assertEquals(registrertStatistikk.sakYtelse, "BARNEPENSJON")
         assertEquals(registrertStatistikk.sakUtland, SakUtland.NASJONAL)
-        assertEquals(registrertStatistikk.behandlingId, behandlingId)
+        assertEquals(registrertStatistikk.referanseId, behandlingId)
         assertEquals(registrertStatistikk.sakYtelsesgruppe, SakYtelsesgruppe.EN_AVDOED_FORELDER)
         assertEquals(registrertStatistikk.tekniskTid, tekniskTidForHendelse.toTidspunkt())
         assertEquals(registrertStatistikk.behandlingMetode, BehandlingMetode.MANUELL)
@@ -315,7 +318,7 @@ fun vedtak(
     pensjonTilUtbetaling: List<Utbetalingsperiode>? = null,
     vedtakFattet: VedtakFattet? = null,
     attestasjon: Attestasjon? = null,
-) = VedtakNyDto(
+) = VedtakDto(
     id = vedtakId,
     behandlingId = behandlingId,
     status = VedtakStatus.ATTESTERT,
@@ -343,7 +346,7 @@ fun behandling(
     avdoed: List<String>? = null,
 ) = StatistikkBehandling(
     id = id,
-    sak = Sak(soeker, sakType, sakId, "4808"),
+    sak = Sak(soeker, sakType, sakId, Enheter.defaultEnhet.enhetNr),
     behandlingOpprettet = behandlingOpprettet,
     sistEndret = sistEndret,
     status = status,
@@ -356,10 +359,11 @@ fun behandling(
     soeker = "soeker",
     soesken = null,
     virkningstidspunkt = Virkningstidspunkt.create(YearMonth.now(), "ident", "begrunnelse"),
-    enhet = "4808",
+    enhet = Enheter.defaultEnhet.enhetNr,
     revurderingsaarsak = null,
     revurderingInfo = null,
     prosesstype = Prosesstype.MANUELL,
     kilde = Vedtaksloesning.GJENNY,
     pesysId = 123L,
+    relatertBehandlingId = null,
 )

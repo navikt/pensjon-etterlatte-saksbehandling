@@ -18,27 +18,27 @@ fun Route.personRoute(
     grunnlagService: GrunnlagService,
     behandlingKlient: BehandlingKlient,
 ) {
-    route("person") {
-        post("saker") {
-            withFoedselsnummer(behandlingKlient) { fnr ->
+    route("/person") {
+        post("/saker") {
+            withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
                 val saksliste = grunnlagService.hentAlleSakerForFnr(fnr)
                 call.respond(saksliste)
             }
         }
 
-        post("roller") {
+        post("/roller") {
             kunSystembruker {
-                withFoedselsnummer(behandlingKlient) { fnr ->
+                withFoedselsnummer(behandlingKlient, skrivetilgang = false) { fnr ->
                     val personMedSakOgRoller = grunnlagService.hentSakerOgRoller(fnr)
                     call.respond(personMedSakOgRoller)
                 }
             }
         }
 
-        post("navn") {
+        post("/navn") {
             hentNavidentFraToken { navIdent ->
                 try {
-                    withFoedselsnummer(behandlingKlient) { foedselsnummer ->
+                    withFoedselsnummer(behandlingKlient, skrivetilgang = false) { foedselsnummer ->
                         val opplysning =
                             grunnlagService.hentOpplysningstypeNavnFraFnr(
                                 foedselsnummer,

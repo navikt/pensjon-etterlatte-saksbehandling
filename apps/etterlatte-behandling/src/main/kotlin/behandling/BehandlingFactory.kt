@@ -1,21 +1,28 @@
 package no.nav.etterlatte.behandling
 
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.toBehandlingOpprettet
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.behandling.klienter.MigreringKlient
-import no.nav.etterlatte.behandling.revurdering.RevurderingService
+import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
+import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.NyBehandlingRequest
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
+import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.lagOpplysning
@@ -24,6 +31,12 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
+import no.nav.etterlatte.libs.common.person.PersonIdent
+import no.nav.etterlatte.libs.common.person.finnHoyestGradering
+import no.nav.etterlatte.libs.common.person.finnHoyesteGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -31,43 +44,136 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.sikkerLogg
+import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 
 class BehandlingFactory(
     private val oppgaveService: OppgaveService,
     private val grunnlagService: GrunnlagService,
-    private val revurderingService: RevurderingService,
+    private val revurderingService: AutomatiskRevurderingService,
     private val gyldighetsproevingService: GyldighetsproevingService,
     private val sakService: SakService,
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val migreringKlient: MigreringKlient,
+    private val pdltjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    private suspend fun finnHoyesteGraderingForPersongalleri(
+        persongalleri: Persongalleri,
+        sakType: SakType,
+    ): AdressebeskyttelseGradering {
+        val graderinger =
+            coroutineScope {
+                val soeker =
+                    async {
+                        pdltjenesterKlient.hentAdressebeskyttelseForPerson(
+                            HentAdressebeskyttelseRequest(
+                                PersonIdent(persongalleri.soeker),
+                                sakType,
+                            ),
+                        )
+                    }
+                val avdoed =
+                    async {
+                        persongalleri.avdoed.map {
+                            pdltjenesterKlient.hentAdressebeskyttelseForPerson(
+                                HentAdressebeskyttelseRequest(
+                                    PersonIdent(it),
+                                    sakType,
+                                ),
+                            )
+                        }
+                    }
+
+                val gjenlevende =
+                    async {
+                        persongalleri.gjenlevende.map {
+                            pdltjenesterKlient.hentAdressebeskyttelseForPerson(
+                                HentAdressebeskyttelseRequest(
+                                    PersonIdent(persongalleri.soeker),
+                                    sakType,
+                                ),
+                            )
+                        }
+                    }
+
+                listOf(soeker.await()).plus(avdoed.await()).plus(gjenlevende.await())
+            }
+
+        return finnHoyestGradering(graderinger)
+    }
 
     /*
      * Brukes av frontend for å kunne opprette sak og behandling for en Gosys-oppgave.
      */
-    suspend fun opprettSakOgBehandlingForOppgave(request: NyBehandlingRequest): Behandling {
+    suspend fun opprettSakOgBehandlingForOppgave(
+        request: NyBehandlingRequest,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Behandling {
+        sikkerLogg.info("Oppretter sak og behandling for: $request")
+        logger.info("Oppretter sak og behandling for persongalleri: ${request.persongalleri}, saktype ${request.sakType}")
         val soeker = request.persongalleri.soeker
+        val hoyesteGradering = finnHoyesteGraderingForPersongalleri(request.persongalleri, request.sakType)
 
-        val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType) }
+        val gradering: AdressebeskyttelseGradering =
+            if (request.gradering != null) {
+                finnHoyesteGradering(request.gradering!!, hoyesteGradering)
+            } else {
+                hoyesteGradering
+            }
+
+        val sak = inTransaction { sakService.finnEllerOpprettSak(soeker, request.sakType, gradering = gradering) }
+
+        if (
+            sak.enhet != request.enhet &&
+            sak.enhet != Enheter.STRENGT_FORTROLIG.enhetNr &&
+            sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
+        ) {
+            request.enhet?.let {
+                inTransaction {
+                    sakService.oppdaterEnhetForSaker(
+                        listOf(
+                            GrunnlagsendringshendelseService.SakMedEnhet(
+                                enhet = it,
+                                id = sak.id,
+                            ),
+                        ),
+                    )
+                }
+            }
+        }
 
         val persongalleri =
-            when (request.kilde) {
-                Vedtaksloesning.PESYS ->
-                    request.persongalleri.copy(
-                        innsender = Vedtaksloesning.PESYS.name,
-                    )
-                else -> request.persongalleri
+            with(request) {
+                if (kilde?.foerstOpprettaIPesys() == true) {
+                    persongalleri.copy(innsender = kilde!!.name)
+                } else if (persongalleri.innsender == null) {
+                    persongalleri.copy(innsender = brukerTokenInfo.ident())
+                } else {
+                    persongalleri
+                }
             }
+
         val behandling =
             inTransaction {
                 opprettBehandling(
-                    sak.id, persongalleri, request.mottattDato, request.kilde ?: Vedtaksloesning.GJENNY,
-                ) ?: throw IllegalStateException("Kunne ikke opprette behandling")
+                    sak.id,
+                    persongalleri,
+                    request.mottattDato,
+                    request.kilde ?: Vedtaksloesning.GJENNY,
+                ).also {
+                    if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
+                        oppgaveService.hentOppgaverForSak(sak.id)
+                            .find { it.type == OppgaveType.GJENOPPRETTING_ALDERSOVERGANG }?.let {
+                                oppgaveService.hentOgFerdigstillOppgaveById(it.id, brukerTokenInfo)
+                            }
+                    }
+                } ?: throw IllegalStateException("Kunne ikke opprette behandling")
             }.behandling
 
         val gyldighetsvurdering =
@@ -83,7 +189,7 @@ class BehandlingFactory(
         val kilde = Grunnlagsopplysning.Privatperson(soeker, mottattDato.toTidspunkt())
 
         val opplysninger =
-            listOf(
+            mutableListOf(
                 lagOpplysning(Opplysningstype.SPRAAK, kilde, request.spraak.toJsonNode()),
                 lagOpplysning(
                     Opplysningstype.SOEKNAD_MOTTATT_DATO,
@@ -91,13 +197,17 @@ class BehandlingFactory(
                     SoeknadMottattDato(mottattDato).toJsonNode(),
                 ),
             )
+        if (request.kilde?.foerstOpprettaIPesys() == true) {
+            opplysninger.add(lagOpplysning(Opplysningstype.FORELDRELOES, kilde, request.foreldreloes.toJsonNode()))
+            opplysninger.add(lagOpplysning(Opplysningstype.UFOERE, kilde, request.ufoere.toJsonNode()))
+        }
 
         grunnlagService.leggTilNyeOpplysninger(behandling.id, NyeSaksopplysninger(sak.id, opplysninger))
 
         if (request.kilde == Vedtaksloesning.PESYS) {
             coroutineScope {
                 val pesysId = requireNotNull(request.pesysId) { "Manuell migrering må ha pesysid til sak som migreres" }
-                migreringKlient.opprettManuellMigrering(behandlingId = behandling.id, pesysId = pesysId)
+                migreringKlient.opprettManuellMigrering(behandlingId = behandling.id, pesysId = pesysId, sakId = sak.id)
             }
         }
 
@@ -109,13 +219,11 @@ class BehandlingFactory(
         persongalleri: Persongalleri,
         mottattDato: String?,
         kilde: Vedtaksloesning,
+        prosessType: Prosesstype = Prosesstype.MANUELL,
     ): BehandlingOgOppgave? {
         logger.info("Starter behandling i sak $sakId")
 
-        val sak =
-            sakService.finnSak(sakId).let {
-                requireNotNull(it) { "Fant ingen sak med id=$sakId!" }
-            }
+        val sak = requireNotNull(sakService.finnSak(sakId)) { "Fant ingen sak med id=$sakId!" }
         val harBehandlingerForSak =
             behandlingDao.alleBehandlingerISak(sak.id)
 
@@ -125,6 +233,9 @@ class BehandlingFactory(
             }
 
         return if (harIverksattEllerAttestertBehandling.isNotEmpty()) {
+            if (kilde == Vedtaksloesning.PESYS || kilde == Vedtaksloesning.GJENOPPRETTA) {
+                throw ManuellMigreringHarEksisterendeIverksattBehandling()
+            }
             val forrigeBehandling = harIverksattEllerAttestertBehandling.maxBy { it.behandlingOpprettet }
             revurderingService.opprettAutomatiskRevurdering(
                 sakId = sakId,
@@ -133,19 +244,25 @@ class BehandlingFactory(
                 mottattDato = mottattDato,
                 kilde = kilde,
                 revurderingAarsak = Revurderingaarsak.NY_SOEKNAD,
-            )?.let { BehandlingOgOppgave(it, null) }
+            ).oppdater().let { BehandlingOgOppgave(it, null) }
         } else {
             val harBehandlingUnderbehandling =
                 harBehandlingerForSak.filter { behandling ->
                     BehandlingStatus.underBehandling().find { it == behandling.status } != null
                 }
             val behandling =
-                opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, mottattDato, kilde) ?: return null
+                opprettFoerstegangsbehandling(harBehandlingUnderbehandling, sak, mottattDato, kilde, prosessType)
+                    ?: return null
             grunnlagService.leggInnNyttGrunnlag(behandling, persongalleri)
             val oppgave =
                 oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
                     referanse = behandling.id.toString(),
                     sakId = sak.id,
+                    merknad =
+                        when (kilde) {
+                            Vedtaksloesning.GJENOPPRETTA -> "Manuell gjenopprettelse av opphørt sak i Pesys"
+                            else -> null
+                        },
                 )
             behandlingHendelser.sendMeldingForHendelseMedDetaljertBehandling(
                 behandling.toStatistikkBehandling(persongalleri),
@@ -160,6 +277,7 @@ class BehandlingFactory(
         sak: Sak,
         mottattDato: String?,
         kilde: Vedtaksloesning,
+        prosessType: Prosesstype,
     ): Behandling? {
         harBehandlingUnderbehandling.forEach {
             behandlingDao.lagreStatus(it.id, BehandlingStatus.AVBRUTT, LocalDateTime.now())
@@ -172,22 +290,23 @@ class BehandlingFactory(
             status = BehandlingStatus.OPPRETTET,
             soeknadMottattDato = mottattDato?.let { LocalDateTime.parse(it) },
             kilde = kilde,
+            prosesstype = prosessType,
         ).let { opprettBehandling ->
             behandlingDao.opprettBehandling(opprettBehandling)
             hendelseDao.behandlingOpprettet(opprettBehandling.toBehandlingOpprettet())
 
             logger.info("Opprettet behandling ${opprettBehandling.id} i sak ${opprettBehandling.sakId}")
 
-            behandlingDao.hentBehandling(opprettBehandling.id)?.sjekkEnhet()
+            behandlingDao.hentBehandling(opprettBehandling.id)
         }
     }
-
-    private fun Behandling?.sjekkEnhet() =
-        this?.let { behandling ->
-            listOf(behandling).filterBehandlingerForEnheter(
-                Kontekst.get().AppUser,
-            ).firstOrNull()
-        }
 }
 
 data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveIntern?)
+
+class ManuellMigreringHarEksisterendeIverksattBehandling : UgyldigForespoerselException(
+    code = "MANUELL_MIGRERING_EKSISTERENDE_IVERKSATT",
+    detail = "Det eksisterer allerede en sak med en iverksatt behandling for angitt søker",
+)
+
+fun Vedtaksloesning.foerstOpprettaIPesys() = this == Vedtaksloesning.PESYS || this == Vedtaksloesning.GJENOPPRETTA

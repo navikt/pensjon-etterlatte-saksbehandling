@@ -1,4 +1,4 @@
-package grunnlag
+package no.nav.etterlatte.grunnlag
 
 data class VurdertBostedsland(val landkode: String) {
     fun erNorge() = landkode == Bostedsland.NOR.name

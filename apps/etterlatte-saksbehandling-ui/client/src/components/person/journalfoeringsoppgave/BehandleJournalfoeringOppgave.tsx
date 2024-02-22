@@ -1,5 +1,5 @@
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { Route, Routes, useParams } from 'react-router-dom'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
@@ -9,22 +9,28 @@ import styled from 'styled-components'
 import { settBruker, settNyBehandlingRequest, settOppgave, settSak } from '~store/reducers/JournalfoeringOppgaveReducer'
 import { hentOppgave } from '~shared/api/oppgaver'
 import { useAppDispatch } from '~store/Store'
+import Spinner from '~shared/Spinner'
+import { hentSakMedBehandlnger } from '~shared/api/sak'
+import { isPending, isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
+import { OppdaterJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
+import { InnholdJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/InnholdJournalpost'
 import StartOppgavebehandling from '~components/person/journalfoeringsoppgave/handling/StartOppgavebehandling'
 import OpprettNyBehandling from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import OppsummeringOppgavebehandling from '~components/person/journalfoeringsoppgave/nybehandling/OppsummeringOppgavebehandling'
-import Spinner from '~shared/Spinner'
-import EndreJournalpostTema from '~components/person/journalfoeringsoppgave/endretema/EndreJournalpostTema'
-import FerdigstillJournalpost from '~components/person/journalfoeringsoppgave/ferdigstilljournalpost/FerdigstillJournalpost'
-import { hentSakForPerson } from '~shared/api/sak'
-
-import { isPending, isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
+import FerdigstillOppgave from '~components/person/journalfoeringsoppgave/ferdigstilloppgave/FerdigstillOppgave'
+import { kanEndreJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/validering'
+import OpprettKlagebehandling from '~components/person/journalfoeringsoppgave/oppretteklage/OpprettKlagebehandling'
+import OppsummeringKlagebehandling from '~components/person/journalfoeringsoppgave/oppretteklage/OppsummeringKlagebehandling'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 
 export default function BehandleJournalfoeringOppgave() {
-  const { nyBehandlingRequest, oppgave } = useJournalfoeringOppgave()
+  const { nyBehandlingRequest, journalpost, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
   const dispatch = useAppDispatch()
 
   const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
-  const [sakStatus, apiHentSak] = useApiCall(hentSakForPerson)
+  const [sakStatus, apiHentSak] = useApiCall(hentSakMedBehandlnger)
+  const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   const { id: oppgaveId } = useParams()
 
@@ -32,15 +38,17 @@ export default function BehandleJournalfoeringOppgave() {
     if (!oppgave && oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
         dispatch(settOppgave(oppgave))
-        dispatch(settBruker(oppgave.fnr))
+        dispatch(settBruker(oppgave.fnr!!))
         dispatch(
           settNyBehandlingRequest({
             ...nyBehandlingRequest,
             sakType: oppgave.sakType,
-            persongalleri: { ...nyBehandlingRequest?.persongalleri, soeker: oppgave.fnr },
+            spraak: undefined,
+            mottattDato: '',
+            persongalleri: { ...nyBehandlingRequest?.persongalleri, soeker: oppgave.fnr!! },
           })
         )
-        apiHentSak({ fnr: oppgave.fnr, type: oppgave.sakType }, (sak) => {
+        apiHentSak(oppgave.fnr!!, (sak) => {
           dispatch(settSak(sak))
         })
       })
@@ -58,26 +66,46 @@ export default function BehandleJournalfoeringOppgave() {
       <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
 
       <GridContainer>
-        <Column style={{ width: '50rem' }}>
+        <Column style={{ width: '40%' }}>
           <Container>
-            <Routes>
-              <Route index element={<StartOppgavebehandling />} />
+            {!!journalpost && !!sakMedBehandlinger ? (
+              kanEndreJournalpost(journalpost) ? (
+                <OppdaterJournalpost
+                  initialJournalpost={journalpost}
+                  sak={sakMedBehandlinger.sak}
+                  oppgaveId={oppgaveId!!}
+                />
+              ) : (
+                <Routes>
+                  <Route
+                    index
+                    element={<StartOppgavebehandling antallBehandlinger={sakMedBehandlinger.behandlinger.length} />}
+                  />
 
-              <Route path="nybehandling">
-                <Route index element={<OpprettNyBehandling />} />
-                <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
-              </Route>
+                  <Route path="nybehandling">
+                    <Route index element={<OpprettNyBehandling />} />
+                    <Route path="oppsummering" element={<OppsummeringOppgavebehandling />} />
+                  </Route>
+                  {kanBrukeKlage && (
+                    <Route path="oppretteklage">
+                      <Route index element={<OpprettKlagebehandling />} />
+                      <Route path="oppsummering" element={<OppsummeringKlagebehandling />} />
+                    </Route>
+                  )}
 
-              <Route path="ferdigstill" element={<FerdigstillJournalpost />} />
-
-              <Route path="endretema" element={<EndreJournalpostTema />} />
-            </Routes>
+                  <Route path="ferdigstill" element={<FerdigstillOppgave />} />
+                </Routes>
+              )
+            ) : (
+              <Spinner visible label="" />
+            )}
           </Container>
         </Column>
 
         <Column>
           <Container>
             {isSuccess(oppgaveStatus) && <VelgJournalpost journalpostId={oppgave?.referanse || null} />}
+            {!!journalpost && !kanEndreJournalpost(journalpost) && <InnholdJournalpost journalpost={journalpost} />}
           </Container>
         </Column>
       </GridContainer>
@@ -88,5 +116,5 @@ export default function BehandleJournalfoeringOppgave() {
 export const FormWrapper = styled.div<{ column?: boolean }>`
   display: flex;
   flex-direction: ${(props) => (!!props.column ? 'column' : 'row')};
-  gap: 2rem;
+  gap: 1rem;
 `

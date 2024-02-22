@@ -18,6 +18,7 @@ on:
       - apps/etterlatte-samordning-vedtak/src/**
       - apps/etterlatte-samordning-vedtak/*.kts
       - apps/etterlatte-samordning-vedtak/.nais/**
+      - '!apps/etterlatte-samordning-vedtak/**.md'
       - libs/etterlatte-beregning-model/**
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
@@ -30,10 +31,15 @@ on:
       - apps/etterlatte-samordning-vedtak/src/**
       - apps/etterlatte-samordning-vedtak/*.kts
       - apps/etterlatte-samordning-vedtak/.nais/**
+      - '!apps/etterlatte-samordning-vedtak/**.md'
       - libs/etterlatte-ktor/**
       - libs/etterlatte-sporingslogg/**
       - libs/etterlatte-vedtaksvurdering-model/**
       - gradle/libs.versions.toml
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   test:
@@ -45,9 +51,6 @@ jobs:
     if: github.event_name != 'pull_request'
     uses: ./.github/workflows/.build.yaml
     secrets: inherit
-    permissions:
-      contents: 'read'
-      id-token: 'write'
 
   deploy:
     if: github.event_name != 'pull_request'
@@ -66,9 +69,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Deploy krakend ApiEndpoints
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: apps/etterlatte-samordning-vedtak/.nais/apiendpoints.yaml
           PRINT_PAYLOAD: true
@@ -83,9 +85,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Deploy krakend ApiEndpoints
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: apps/${{ github.workflow }}/.nais/apiendpoints.yaml
           PRINT_PAYLOAD: true

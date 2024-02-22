@@ -1,8 +1,6 @@
 package no.nav.etterlatte
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -12,7 +10,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
 import io.ktor.server.testing.testApplication
 import io.mockk.every
 import io.mockk.mockk
@@ -27,12 +24,14 @@ import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FellesFeatureToggle
 import no.nav.etterlatte.kafka.TestProdusent
+import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingsBehov
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
+import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabalUtenBrev
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
@@ -49,6 +48,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsTyper
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurdertGyldighet
+import no.nav.etterlatte.libs.common.klage.KlageHendelseType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -59,6 +59,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
+import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
@@ -100,16 +101,10 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
         var behandlingOpprettet: UUID? = null
 
         testApplication {
-            environment {
-                config = hoconApplicationConfig
-            }
             val client =
-                createClient {
-                    install(ContentNegotiation) {
-                        jackson { registerModule(JavaTimeModule()) }
-                    }
+                runServerWithModule(server) {
+                    module(applicationContext)
                 }
-            application { module(applicationContext) }
 
             assertTrue(applicationContext.featureToggleService.isEnabled(FellesFeatureToggle.NoOperationToggle, false))
 
@@ -168,6 +163,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 }.also {
                     assertEquals(HttpStatusCode.OK, it.status)
                 }.body()
+
             val oppgaverforbehandling = oppgaver.filter { it.referanse == behandlingId.toString() }
             client.post("/api/oppgaver/${oppgaverforbehandling[0].id}/tildel-saksbehandler/") {
                 addAuthToken(tokenSaksbehandler)
@@ -243,17 +239,18 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
+            val dataSource = applicationContext.dataSource
+
             client.get("/behandlinger/$behandlingId/vilkaarsvurder") {
                 addAuthToken(tokenSaksbehandler)
             }.also {
-                applicationContext.dataSource.connection.use {
-                    val actual =
-                        BehandlingDao(
-                            KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it },
-                        ) { it }.hentBehandling(behandlingId)!!
-                    assertEquals(BehandlingStatus.OPPRETTET, actual.status)
-                }
+                val actual =
+                    BehandlingDao(
+                        KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                        RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                        ConnectionAutoclosingTest(dataSource),
+                    ).hentBehandling(behandlingId)!!
+                assertEquals(BehandlingStatus.OPPRETTET, actual.status)
 
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -263,14 +260,13 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody("{}")
             }.also {
-                applicationContext.dataSource.connection.use {
-                    val actual =
-                        BehandlingDao(
-                            KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it },
-                        ) { it }.hentBehandling(behandlingId)!!
-                    assertEquals(BehandlingStatus.VILKAARSVURDERT, actual.status)
-                }
+                val actual =
+                    BehandlingDao(
+                        KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                        RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                        ConnectionAutoclosingTest(dataSource),
+                    ).hentBehandling(behandlingId)!!
+                assertEquals(BehandlingStatus.VILKAARSVURDERT, actual.status)
 
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -280,14 +276,13 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody("{}")
             }.also {
-                applicationContext.dataSource.connection.use {
-                    val actual =
-                        BehandlingDao(
-                            KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it },
-                        ) { it }.hentBehandling(behandlingId)!!
-                    assertEquals(BehandlingStatus.TRYGDETID_OPPDATERT, actual.status)
-                }
+                val actual =
+                    BehandlingDao(
+                        KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                        RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                        ConnectionAutoclosingTest(dataSource),
+                    ).hentBehandling(behandlingId)!!
+                assertEquals(BehandlingStatus.TRYGDETID_OPPDATERT, actual.status)
 
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -295,14 +290,13 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             client.post("/behandlinger/$behandlingId/beregn") {
                 addAuthToken(tokenSaksbehandler)
             }.also {
-                applicationContext.dataSource.connection.use {
-                    val actual =
-                        BehandlingDao(
-                            KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it },
-                        ) { it }.hentBehandling(behandlingId)!!
-                    assertEquals(BehandlingStatus.BEREGNET, actual.status)
-                }
+                val actual =
+                    BehandlingDao(
+                        KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                        RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                        ConnectionAutoclosingTest(dataSource),
+                    ).hentBehandling(behandlingId)!!
+                assertEquals(BehandlingStatus.BEREGNET, actual.status)
 
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -318,17 +312,17 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                 referanse = behandlingId.toString(),
                             ),
                         vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), "Saksbehandler01", null),
+                        vedtakType = VedtakType.INNVILGELSE,
                     ),
                 )
             }.also {
-                applicationContext.dataSource.connection.use {
-                    val actual =
-                        BehandlingDao(
-                            KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it },
-                        ) { it }.hentBehandling(behandlingId)!!
-                    assertEquals(BehandlingStatus.FATTET_VEDTAK, actual.status)
-                }
+                val actual =
+                    BehandlingDao(
+                        KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                        RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                        ConnectionAutoclosingTest(dataSource),
+                    ).hentBehandling(behandlingId)!!
+                assertEquals(BehandlingStatus.FATTET_VEDTAK, actual.status)
 
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -361,17 +355,17 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                 referanse = behandlingId.toString(),
                             ),
                         vedtakHendelse = VedtakHendelse(123L, Tidspunkt.now(), saksbehandler02, null, null),
+                        vedtakType = VedtakType.INNVILGELSE,
                     ),
                 )
             }.also {
-                applicationContext.dataSource.connection.use {
-                    val actual =
-                        BehandlingDao(
-                            KommerBarnetTilGodeDao { it },
-                            RevurderingDao { it },
-                        ) { it }.hentBehandling(behandlingId)!!
-                    assertEquals(BehandlingStatus.ATTESTERT, actual.status)
-                }
+                val actual =
+                    BehandlingDao(
+                        KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                        RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                        ConnectionAutoclosingTest(dataSource),
+                    ).hentBehandling(behandlingId)!!
+                assertEquals(BehandlingStatus.ATTESTERT, actual.status)
 
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -406,6 +400,8 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             val klage: Klage =
                 client.post("/api/klage/opprett/${sak.id}") {
                     addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(InnkommendeKlage(mottattDato = LocalDate.now(), journalpostId = "123546", innsender = "en innsender"))
                 }.body()
             val medOppdatertFormkrav: Klage =
                 client.put("/api/klage/${klage.id}/formkrav") {
@@ -445,7 +441,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                 innstilling =
                                     InnstillingTilKabalUtenBrev(
                                         lovhjemmel = KabalHjemmel.FTRL_3_5_TRYGDETID.name,
-                                        tekst = "En tekst",
+                                        internKommentar = "En tekst",
                                     ),
                             ),
                         ),
@@ -574,21 +570,29 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
         kotlin.runCatching { sleep(3000) }
         assertNotNull(behandlingOpprettet)
         val rapid = applicationContext.rapid as TestProdusent
-        assertEquals(3, rapid.publiserteMeldinger.size)
+        assertEquals(5, rapid.publiserteMeldinger.size)
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)["@event_name"].textValue(),
+            objectMapper.readTree(rapid.publiserteMeldinger.first().verdi)[EVENT_NAME_KEY].textValue(),
+        )
+        assertEquals(
+            "KLAGE:${KlageHendelseType.OPPRETTET}",
+            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)[EVENT_NAME_KEY].textValue(),
+        )
+        assertEquals(
+            "KLAGE:${KlageHendelseType.FERDIGSTILT}",
+            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)[EVENT_NAME_KEY].textValue(),
         )
         assertEquals(
             "BEHANDLING:OPPRETTET",
-            objectMapper.readTree(rapid.publiserteMeldinger[1].verdi)["@event_name"].textValue(),
+            objectMapper.readTree(rapid.publiserteMeldinger[3].verdi)[EVENT_NAME_KEY].textValue(),
         )
         assertEquals(
             "BEHANDLING:AVBRUTT",
-            objectMapper.readTree(rapid.publiserteMeldinger[2].verdi)["@event_name"].textValue(),
+            objectMapper.readTree(rapid.publiserteMeldinger[4].verdi)[EVENT_NAME_KEY].textValue(),
         )
-        applicationContext.dataSource.connection.use {
-            HendelseDao { it }.finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
-        }
+        HendelseDao(
+            ConnectionAutoclosingTest(applicationContext.dataSource),
+        ).finnHendelserIBehandling(behandlingOpprettet!!).also { println(it) }
     }
 }

@@ -1,12 +1,9 @@
 package no.nav.etterlatte.beregning
 
-import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.klienter.BehandlingKlient
-import no.nav.etterlatte.klienter.TrygdetidKlient
-import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.girOpphoer
 import no.nav.etterlatte.libs.common.beregning.OverstyrBeregningDTO
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -18,8 +15,6 @@ class BeregningService(
     private val beregnBarnepensjonService: BeregnBarnepensjonService,
     private val beregnOmstillingsstoenadService: BeregnOmstillingsstoenadService,
     private val beregnOverstyrBeregningService: BeregnOverstyrBeregningService,
-    private val beregningsGrunnlagService: BeregningsGrunnlagService,
-    private val trygdetidKlient: TrygdetidKlient,
 ) {
     private val logger = LoggerFactory.getLogger(BeregningService::class.java)
 
@@ -65,27 +60,6 @@ class BeregningService(
         }
     }
 
-    suspend fun opprettForOpphoer(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        val kanBeregneYtelse = behandlingKlient.kanBeregnes(behandlingId, brukerTokenInfo, commit = false)
-        if (kanBeregneYtelse) {
-            val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
-            if (behandling.revurderingsaarsak.girOpphoer()) {
-                if (behandling.sakType == SakType.BARNEPENSJON) {
-                    kopierBeregningsgrunnlagOgOpprettBeregningBarnepensjon(behandling, brukerTokenInfo, behandlingId)
-                } else {
-                    kopierBeregningsgrunnlagOgTrygdetidOgOpprettBeregningOmstillingsstoenad(
-                        behandling,
-                        brukerTokenInfo,
-                        behandlingId,
-                    )
-                }
-            }
-        }
-    }
-
     suspend fun hentOverstyrBeregning(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -120,45 +94,24 @@ class BeregningService(
 
     private suspend fun Beregning?.berikMedOverstyrBeregning(brukerTokenInfo: BrukerTokenInfo) =
         this?.copy(overstyrBeregning = hentOverstyrBeregning(behandlingId, brukerTokenInfo))
-
-    private suspend fun kopierBeregningsgrunnlagOgOpprettBeregningBarnepensjon(
-        behandling: DetaljertBehandling,
-        brukerTokenInfo: BrukerTokenInfo,
-        behandlingId: UUID,
-    ) {
-        val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
-        val grunnlagDenneBehandlinga =
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(behandlingId, brukerTokenInfo)
-
-        if (grunnlagDenneBehandlinga == null || grunnlagDenneBehandlinga.behandlingId != behandlingId) {
-            logger.info("Kopierer beregningsgrunnlag og oppretter beregning for $behandlingId")
-            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(behandlingId, sisteIverksatteBehandling.id)
-            opprettBeregning(behandlingId, brukerTokenInfo)
-        }
-    }
-
-    private suspend fun kopierBeregningsgrunnlagOgTrygdetidOgOpprettBeregningOmstillingsstoenad(
-        behandling: DetaljertBehandling,
-        brukerTokenInfo: BrukerTokenInfo,
-        behandlingId: UUID,
-    ) {
-        val sisteIverksatteBehandling = behandlingKlient.hentSisteIverksatteBehandling(behandling.sak, brukerTokenInfo)
-        val grunnlagDenneBehandlinga =
-            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(behandlingId, brukerTokenInfo)
-        val trygdetidForBehandling = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
-        if ((grunnlagDenneBehandlinga == null || grunnlagDenneBehandlinga.behandlingId != behandlingId) && trygdetidForBehandling == null) {
-            logger.info("Kopierer beregningsgrunnlag og trygdetid og oppretter beregning for $behandlingId")
-            beregningsGrunnlagService.dupliserBeregningsGrunnlagOMS(behandlingId, sisteIverksatteBehandling.id)
-            trygdetidKlient.kopierTrygdetid(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo)
-            opprettBeregning(behandlingId, brukerTokenInfo)
-        } else if (grunnlagDenneBehandlinga == null || grunnlagDenneBehandlinga.behandlingId != behandlingId) {
-            logger.info("Kopierer beregningsgrunnlag og oppretter beregning for $behandlingId")
-            beregningsGrunnlagService.dupliserBeregningsGrunnlagOMS(behandlingId, sisteIverksatteBehandling.id)
-            opprettBeregning(behandlingId, brukerTokenInfo)
-        } else if (trygdetidForBehandling == null) {
-            logger.info("Kopierer trygdetid og oppretter beregning for $behandlingId")
-            trygdetidKlient.kopierTrygdetid(behandlingId, sisteIverksatteBehandling.id, brukerTokenInfo)
-            opprettBeregning(behandlingId, brukerTokenInfo)
-        }
-    }
 }
+
+class TrygdetidMangler(behandlingId: UUID) : UgyldigForespoerselException(
+    code = "TRYGDETID_MANGLER",
+    detail = "Trygdetid ikke satt for behandling $behandlingId",
+)
+
+class BeregningsgrunnlagMangler(behandlingId: UUID) : UgyldigForespoerselException(
+    code = "BEREGNINGSGRUNNLAG_MANGLER",
+    detail = "Behandling med id: $behandlingId mangler beregningsgrunnlag oms",
+)
+
+class AnvendtGrunnbeloepIkkeFunnet : UgyldigForespoerselException(
+    code = "ANVENDT_GRUNNBELOEP_IKKE_FUNNET",
+    detail = "Anvendt grunnbeløp ikke funnet for perioden",
+)
+
+class AnvendtTrygdetidIkkeFunnet : UgyldigForespoerselException(
+    code = "ANVENDT_TRYGDETID_IKKE_FUNNET",
+    detail = "Anvendt trygdetid ikke funnet for perioden",
+)

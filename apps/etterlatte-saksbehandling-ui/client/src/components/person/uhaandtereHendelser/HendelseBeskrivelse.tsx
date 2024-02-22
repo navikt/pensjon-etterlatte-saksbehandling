@@ -3,9 +3,9 @@ import {
   FnrTilNavnMapContext,
   formaterFoedselsnummerMedNavn,
   formaterLandList,
+  formaterRolle,
   grunnlagsendringsBeskrivelse,
   grunnlagsendringsKilde,
-  rolletekst,
 } from '~components/person/uhaandtereHendelser/utils'
 import {
   AdresseSamsvar,
@@ -25,6 +25,7 @@ import styled from 'styled-components'
 import { BodyShort } from '@navikt/ds-react'
 import { institusjonstype } from '~components/behandling/beregningsgrunnlag/Insthendelser'
 import { Adressevisning } from '~components/behandling/felles/Adressevisning'
+import { SakType } from '~shared/types/sak'
 
 const AnsvarligeForeldreSamsvar = (props: { samsvar: AnsvarligeForeldreSamsvar }) => {
   const navneMap = useContext(FnrTilNavnMapContext)
@@ -241,77 +242,75 @@ const Vergemaal = (props: { samsvar: VergemaalEllerFremtidsfullmaktForholdSamsva
   )
 }
 
-const HendelseDetaljer = (props: { hendelse: Grunnlagsendringshendelse }) => {
+const HendelseDetaljer = (props: { hendelse: Grunnlagsendringshendelse; sakType: SakType }) => {
   const navneMap = useContext(FnrTilNavnMapContext)
   return (
     <DetaljerWrapper>
       <BodySmall>
-        {`
-        ${rolletekst[props.hendelse.hendelseGjelderRolle]}
-        ${formaterFoedselsnummerMedNavn(navneMap, props.hendelse.gjelderPerson)} har
-        ${grunnlagsendringsBeskrivelse[props.hendelse.samsvarMellomKildeOgGrunnlag.type]}
-          `}
+        {formaterRolle(props.sakType, props.hendelse.hendelseGjelderRolle)}{' '}
+        {formaterFoedselsnummerMedNavn(navneMap, props.hendelse.gjelderPerson)} har{' '}
+        {grunnlagsendringsBeskrivelse[props.hendelse.samsvarMellomKildeOgGrunnlag.type]}
       </BodySmall>
     </DetaljerWrapper>
   )
 }
 
-export const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse }) => {
-  const { hendelse } = props
+export const HendelseBeskrivelse = (props: { hendelse: Grunnlagsendringshendelse; sakType: SakType }) => {
+  const { sakType, hendelse } = props
   switch (hendelse.samsvarMellomKildeOgGrunnlag.type) {
     case 'UTLAND':
       return (
         <Header>
-          <HendelseDetaljer hendelse={hendelse} />
+          <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <UtlandSamsvarVisning samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
     case 'ANSVARLIGE_FORELDRE':
       return (
         <Header>
-          <HendelseDetaljer hendelse={hendelse} />
+          <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <AnsvarligeForeldreSamsvar samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
     case 'DOEDSDATO':
       return (
         <Header>
-          <HendelseDetaljer hendelse={hendelse} />
+          <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Doedsdato samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
     case 'ADRESSE':
       return (
         <Header>
-          <HendelseDetaljer hendelse={hendelse} />
+          <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Adresse adresse={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
     case 'BARN':
       return (
         <Header>
-          <HendelseDetaljer hendelse={hendelse} />
+          <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Barn samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
     case 'SIVILSTAND':
       return (
         <Header>
-          <HendelseDetaljer hendelse={hendelse} />
+          <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Sivilstand samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
     case 'INSTITUSJONSOPPHOLD':
       return (
         <Header>
-          <HendelseDetaljer hendelse={hendelse} />
+          <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Institusjonsopphold samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )
     case 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT':
       return (
         <Header>
-          <HendelseDetaljer hendelse={hendelse} />
+          <HendelseDetaljer sakType={sakType} hendelse={hendelse} />
           <Vergemaal samsvar={hendelse.samsvarMellomKildeOgGrunnlag} />
         </Header>
       )

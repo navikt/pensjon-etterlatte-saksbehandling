@@ -30,7 +30,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     }
 
     fun hentTrygdetid(behandlingId: UUID): Trygdetid? {
-        return hentTrygdetiderForBehandling(behandlingId).firstOrNull()
+        return hentTrygdetiderForBehandling(behandlingId).minByOrNull { it.ident }
     }
 
     fun hentTrygdetiderForBehandling(behandlingId: UUID): List<Trygdetid> =
@@ -126,6 +126,9 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 .filter { oppdatertTrygdetid.trygdetidGrunnlag.find { tg -> tg.id == it.id } == null }
                 .forEach { slettTrygdetidGrunnlag(it.id, tx) }
 
+            // overskriv opplysningsgrunnlag
+            oppdaterOpplysningsgrunnlag(oppdatertTrygdetid.id, oppdatertTrygdetid.opplysninger, tx)
+
             if (oppdatertTrygdetid.beregnetTrygdetid != null) {
                 oppdaterBeregnetTrygdetid(
                     oppdatertTrygdetid.behandlingId,
@@ -137,6 +140,22 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 nullstillBeregnetTrygdetid(oppdatertTrygdetid.behandlingId, tx)
             }
         }.let { hentTrygdetidMedIdNotNull(oppdatertTrygdetid.behandlingId, oppdatertTrygdetid.id) }
+
+    fun slettTrygdetid(trygdetidId: UUID) =
+        dataSource.transaction { tx ->
+            queryOf(
+                statement =
+                    """
+                    DELETE FROM trygdetid CASCADE WHERE id = :id
+                    """.trimIndent(),
+                paramMap =
+                    mapOf(
+                        "id" to trygdetidId,
+                    ),
+            ).let { query ->
+                tx.update(query)
+            }
+        }
 
     private fun opprettTrygdetid(
         trygdetid: Trygdetid,
@@ -175,6 +194,26 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                     "kilde" to opplysningsgrunnlag.kilde.toJson(),
                 ),
         ).let { query -> tx.update(query) }
+    }
+
+    private fun oppdaterOpplysningsgrunnlag(
+        trygdetidId: UUID?,
+        opplysninger: List<Opplysningsgrunnlag>,
+        tx: TransactionalSession,
+    ) {
+        queryOf(
+            statement =
+                """
+                DELETE FROM opplysningsgrunnlag
+                WHERE trygdetid_id = :trygdetidId
+                """.trimIndent(),
+            paramMap =
+                mapOf(
+                    "trygdetidId" to trygdetidId,
+                ),
+        ).let { query -> tx.update(query) }
+
+        opprettOpplysningsgrunnlag(trygdetidId, opplysninger, tx)
     }
 
     private fun opprettTrygdetidGrunnlag(

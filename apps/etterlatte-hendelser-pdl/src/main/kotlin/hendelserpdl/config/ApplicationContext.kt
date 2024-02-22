@@ -3,7 +3,7 @@ package no.nav.etterlatte.hendelserpdl.config
 import com.fasterxml.jackson.databind.SerializationFeature
 import no.nav.etterlatte.hendelserpdl.PersonHendelseFordeler
 import no.nav.etterlatte.hendelserpdl.common.PersonhendelseKonsument
-import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
+import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.GcpKafkaConfig
 import no.nav.etterlatte.kafka.rapidsAndRiversProducer
 import no.nav.etterlatte.libs.common.requireEnvValue
@@ -11,8 +11,8 @@ import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
 class ApplicationContext(
     private val env: Map<String, String> = System.getenv(),
-    private val pdlKlient: PdlKlient =
-        PdlKlient(
+    private val pdlTjenesterKlient: PdlTjenesterKlient =
+        PdlTjenesterKlient(
             httpClient =
                 httpClientClientCredentials(
                     azureAppClientId = env.requireEnvValue("AZURE_APP_CLIENT_ID"),
@@ -26,7 +26,7 @@ class ApplicationContext(
     private val personHendelseFordeler: PersonHendelseFordeler =
         PersonHendelseFordeler(
             kafkaProduser = GcpKafkaConfig.fromEnv(env).rapidsAndRiversProducer(env.getValue("KAFKA_RAPID_TOPIC")),
-            pdlKlient = pdlKlient,
+            pdlTjenesterKlient = pdlTjenesterKlient,
         ),
     val leesahKonsument: PersonhendelseKonsument =
         PersonhendelseKonsument(

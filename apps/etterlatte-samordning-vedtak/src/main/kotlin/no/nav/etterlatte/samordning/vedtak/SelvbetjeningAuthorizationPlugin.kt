@@ -1,12 +1,11 @@
 package no.nav.etterlatte.samordning.vedtak
 
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.createRouteScopedPlugin
 import io.ktor.server.application.log
 import io.ktor.server.auth.AuthenticationChecked
 import io.ktor.server.auth.principal
-import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.logging.getCorrelationId
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -25,13 +24,12 @@ val SelvbetjeningAuthorizationPlugin =
                 // If no principal, probably not passed authentication (expired token etc)
                 val principal = call.principal<TokenValidationContextPrincipal>() ?: return@on
 
-                if (principal.context.issuers?.contains(issuer) == true) {
-                    val subject = principal.context.getClaims(pluginConfig.issuer)?.subject
+                if (principal.context.issuers.contains(issuer)) {
+                    val subject = principal.context.getClaims(pluginConfig.issuer).subject
 
-                    if (!validator.invoke(call, Folkeregisteridentifikator.of(subject!!))) {
+                    if (!validator.invoke(call, Folkeregisteridentifikator.of(subject))) {
                         application.log.info("Request avslått pga mismatch mellom subject og etterspurt fnr")
-                        throw ForespoerselException(
-                            status = HttpStatusCode.Forbidden.value,
+                        throw IkkeTillattException(
                             code = "GE-VALIDATE-ACCESS-FNR",
                             detail = "Kan kun etterspørre egne data",
                             meta =
@@ -48,5 +46,5 @@ val SelvbetjeningAuthorizationPlugin =
 
 class PluginConfiguration {
     var issuer: String = "tokenx"
-    var validator: (ApplicationCall, Folkeregisteridentifikator) -> Boolean = { call, borgerIdent -> false }
+    var validator: (ApplicationCall, Folkeregisteridentifikator) -> Boolean = { _, _ -> false }
 }

@@ -1,7 +1,8 @@
-package behandling
+package no.nav.etterlatte.behandling
 
 import io.mockk.Runs
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
@@ -14,24 +15,20 @@ import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
-import no.nav.etterlatte.behandling.BehandlingDao
-import no.nav.etterlatte.behandling.BehandlingFactory
-import no.nav.etterlatte.behandling.BehandlingHendelseType
-import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
-import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.GrunnlagService
-import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klage.KlageService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingService
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -44,12 +41,17 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
+import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.GJENLEVENDE_FOEDSELSNUMMER
+import no.nav.etterlatte.libs.testdata.grunnlag.INNSENDER_FOEDSELSNUMMER
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.revurdering
 import no.nav.etterlatte.sak.SakService
+import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -64,13 +66,14 @@ class BehandlingFactoryTest {
     private val behandlingDaoMock = mockk<BehandlingDao>(relaxUnitFun = true)
     private val hendelseDaoMock = mockk<HendelseDao>(relaxUnitFun = true)
     private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>(relaxUnitFun = true)
-    private val featureToggleService = mockk<FeatureToggleService>()
     private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
     private val grunnlagService = mockk<GrunnlagService>(relaxUnitFun = true)
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>()
     private val sakServiceMock = mockk<SakService>()
+    private val klageService = mockk<KlageService>()
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>(relaxUnitFun = true)
+    private val pdlTjenesterKlientMock = mockk<PdlTjenesterKlient>()
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "behandling",
@@ -85,17 +88,19 @@ class BehandlingFactoryTest {
         }
     private val revurderingDao = mockk<RevurderingDao>()
     private val revurderingService =
-        RevurderingService(
-            oppgaveService,
-            grunnlagService,
-            behandlingHendelserKafkaProducerMock,
-            featureToggleService,
-            behandlingDaoMock,
-            hendelseDaoMock,
-            grunnlagsendringshendelseDao,
-            kommerBarnetTilGodeService,
-            revurderingDao,
-            behandlingService,
+        AutomatiskRevurderingService(
+            RevurderingService(
+                oppgaveService,
+                grunnlagService,
+                behandlingHendelserKafkaProducerMock,
+                behandlingDaoMock,
+                hendelseDaoMock,
+                grunnlagsendringshendelseDao,
+                kommerBarnetTilGodeService,
+                revurderingDao,
+                klageService,
+                behandlingService,
+            ),
         )
     private val behandlingFactory =
         BehandlingFactory(
@@ -108,6 +113,7 @@ class BehandlingFactoryTest {
             hendelseDaoMock,
             behandlingHendelserKafkaProducerMock,
             mockk(),
+            pdlTjenesterKlientMock,
         )
 
     @BeforeEach
@@ -574,10 +580,10 @@ class BehandlingFactoryTest {
         val persongalleri =
             Persongalleri(
                 "11057523044",
-                "Innsender",
+                INNSENDER_FOEDSELSNUMMER.value,
                 emptyList(),
-                listOf("Avdoed"),
-                listOf("Gjenlevende"),
+                listOf(AVDOED_FOEDSELSNUMMER.value),
+                listOf(GJENLEVENDE_FOEDSELSNUMMER.value),
             )
 
         val sak = Sak(persongalleri.soeker, SakType.BARNEPENSJON, 1, Enheter.defaultEnhet.enhetNr)
@@ -603,7 +609,7 @@ class BehandlingFactoryTest {
                 kilde = Vedtaksloesning.GJENNY,
             )
 
-        every { sakServiceMock.finnEllerOpprettSak(any(), any()) } returns sak
+        every { sakServiceMock.finnEllerOpprettSak(any(), any(), gradering = any()) } returns sak
         every { sakServiceMock.finnSak(any<Long>()) } returns sak
         every { behandlingDaoMock.opprettBehandling(capture(behandlingOpprettes)) } just Runs
         every { behandlingDaoMock.hentBehandling(capture(behandlingHentes)) } returns opprettetBehandling
@@ -611,6 +617,8 @@ class BehandlingFactoryTest {
         every {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
+
+        coEvery { pdlTjenesterKlientMock.hentAdressebeskyttelseForPerson(any()) } returns AdressebeskyttelseGradering.UGRADERT
 
         val resultat =
             runBlocking {
@@ -622,7 +630,9 @@ class BehandlingFactoryTest {
                         "nb",
                         Vedtaksloesning.GJENNY,
                         null,
+                        null,
                     ),
+                    Saksbehandler("token", "Z123456", null),
                 )
             }
 
@@ -634,7 +644,7 @@ class BehandlingFactoryTest {
         Assertions.assertEquals(behandlingHentes.captured, behandlingOpprettes.captured.id)
 
         verify(exactly = 1) {
-            sakServiceMock.finnEllerOpprettSak(persongalleri.soeker, SakType.BARNEPENSJON)
+            sakServiceMock.finnEllerOpprettSak(persongalleri.soeker, SakType.BARNEPENSJON, gradering = any())
             sakServiceMock.finnSak(sak.id)
             behandlingDaoMock.opprettBehandling(any())
             hendelseDaoMock.behandlingOpprettet(any())

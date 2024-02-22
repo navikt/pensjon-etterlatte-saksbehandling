@@ -63,6 +63,7 @@ open class Grunnlagsopplysning<T>(
         JsonSubTypes.Type(value = Persondata::class, name = "persondata"),
         JsonSubTypes.Type(value = RegelKilde::class, name = "regel"),
         JsonSubTypes.Type(value = Pesys::class, name = "pesys"),
+        JsonSubTypes.Type(value = UkjentInnsender::class, name = "ukjentinnsender"),
     )
     sealed class Kilde(val type: String) {
         fun toJson() = objectMapperKilde.writeValueAsString(this)
@@ -118,6 +119,14 @@ open class Grunnlagsopplysning<T>(
         override fun toString(): String {
             return "beregningsregel  $navn"
         }
+    }
+
+    data class UkjentInnsender(val tidspunkt: Tidspunkt) : Kilde("ukjentinnsender") {
+        companion object {
+            fun create() = UkjentInnsender(Tidspunkt.now())
+        }
+
+        override fun toString(): String = this.type
     }
 }
 

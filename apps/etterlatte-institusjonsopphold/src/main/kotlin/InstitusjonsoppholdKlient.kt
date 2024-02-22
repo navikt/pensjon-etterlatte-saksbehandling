@@ -6,18 +6,32 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.logging.NAV_CONSUMER_ID
+import no.nav.etterlatte.libs.common.retry
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class InstitusjonsoppholdKlient(val institusjonsoppholdHttpKlient: HttpClient, val proxyUrl: String) {
-    fun hentDataForHendelse(oppholdId: Long) =
-        runBlocking {
-            institusjonsoppholdHttpKlient.get(proxyUrl.plus("/inst2/$oppholdId?Med-Institusjonsinformasjon=true")) {
+class InstitusjonsoppholdKlient(
+    private val httpKlient: HttpClient,
+    private val url: String,
+) {
+    suspend fun hentDataForHendelse(oppholdId: Long) =
+        retry<Institusjonsopphold> {
+            httpKlient.get("$url/api/v1/person/institusjonsopphold/$oppholdId?Med-Institusjonsinformasjon=true") {
                 contentType(ContentType.Application.Json)
                 header(NAV_CONSUMER_ID, "etterlatte-institusjonsopphold")
-            }.body<Institusjonsopphold>()
+            }.body()
+        }.let {
+            when (it) {
+                is RetryResult.Success -> it.content
+                is RetryResult.Failure -> {
+                    throw RuntimeException(
+                        "Feil oppsto ved henting av institusjonsopphold (id=$oppholdId)",
+                        it.samlaExceptions(),
+                    )
+                }
+            }
         }
 }
 

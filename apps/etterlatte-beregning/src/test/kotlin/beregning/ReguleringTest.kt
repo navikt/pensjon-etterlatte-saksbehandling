@@ -9,7 +9,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.beregning.BeregnBarnepensjonService
-import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceFeatureToggle
 import no.nav.etterlatte.beregning.BeregnBarnepensjonServiceTest
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
@@ -19,7 +18,6 @@ import no.nav.etterlatte.beregning.grunnlag.Reduksjon
 import no.nav.etterlatte.beregning.regler.MAKS_TRYGDETID
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.beregning.regler.toGrunnlag
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnbeloep.GrunnbeloepRepository.hentGjeldendeGrunnbeloep
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.klienter.TrygdetidKlient
@@ -55,21 +53,16 @@ class ReguleringTest {
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
     private val trygdetidKlient = mockk<TrygdetidKlient>()
-    private val featureToggleService = mockk<FeatureToggleService>()
     private lateinit var beregnBarnepensjonService: BeregnBarnepensjonService
 
     @BeforeEach
     fun setup() {
-        every {
-            featureToggleService.isEnabled(BeregnBarnepensjonServiceFeatureToggle.BrukNyttRegelverkIBeregning, false)
-        } returns true
         beregnBarnepensjonService =
             BeregnBarnepensjonService(
                 grunnlagKlient = grunnlagKlient,
                 vilkaarsvurderingKlient = vilkaarsvurderingKlient,
                 beregningsGrunnlagService = beregningsGrunnlagService,
                 trygdetidKlient = trygdetidKlient,
-                featureToggleService = featureToggleService,
             )
     }
 

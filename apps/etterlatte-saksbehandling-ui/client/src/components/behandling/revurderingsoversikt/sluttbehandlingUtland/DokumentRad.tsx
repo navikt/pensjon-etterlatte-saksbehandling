@@ -1,5 +1,6 @@
 import { Button, HStack, TextField } from '@navikt/ds-react'
-import { DatoVelger, formatDateToLocaleDateOrEmptyString } from '~shared/DatoVelger'
+import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
+import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
 import React from 'react'
 import { XMarkIcon } from '@navikt/aksel-icons'
 import { MottattDokument } from '~shared/types/RevurderingInfo'

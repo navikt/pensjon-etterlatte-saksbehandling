@@ -1,8 +1,5 @@
-package behandling.domain
+package no.nav.etterlatte.behandling.domain
 
-import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.domain.Revurdering
-import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.kommerBarnetTilGodeVurdering
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -46,6 +43,7 @@ internal class RevurderingTest {
             kilde = Vedtaksloesning.GJENNY,
             revurderingInfo = null,
             begrunnelse = null,
+            relatertBehandlingId = null,
         ).tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet()
             .tilVilkaarsvurdert().tilTrygdetidOppdatert().tilBeregnet().tilFattetVedtak().tilAttestert()
             .tilIverksatt()
@@ -211,5 +209,6 @@ private fun opprettetRevurdering(prosesstype: Prosesstype): Revurdering {
         kilde = Vedtaksloesning.GJENNY,
         revurderingInfo = null,
         begrunnelse = null,
+        relatertBehandlingId = null,
     )
 }

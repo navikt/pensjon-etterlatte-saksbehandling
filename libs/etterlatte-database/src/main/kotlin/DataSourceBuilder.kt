@@ -2,28 +2,24 @@ package no.nav.etterlatte.libs.database
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import no.nav.etterlatte.libs.common.requireEnvValue
+import no.nav.etterlatte.libs.common.appIsInGCP
+import no.nav.etterlatte.libs.common.isProd
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
+import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
 object DataSourceBuilder {
     private const val MAX_POOL_SIZE = 10
 
-    fun createDataSource(
-        env: Map<String, String>,
-        maxPoolSize: Int = MAX_POOL_SIZE,
-    ): DataSource {
-        val jdbcUrl =
-            jdbcUrl(
-                host = env.requireEnvValue("DB_HOST"),
-                port = env.requireEnvValue("DB_PORT").toInt(),
-                databaseName = env.requireEnvValue("DB_DATABASE"),
-            )
-        val username = env.requireEnvValue("DB_USERNAME")
-        val password = env.requireEnvValue("DB_PASSWORD")
-        return createDataSource(jdbcUrl, username, password, maxPoolSize)
-    }
+    fun createDataSource(env: Map<String, String>): DataSource = createDataSource(ApplicationProperties.fromEnv(env))
+
+    fun createDataSource(properties: ApplicationProperties) =
+        createDataSource(
+            jdbcUrl = properties.jdbcUrl,
+            username = properties.dbUsername,
+            password = properties.dbPassword,
+        )
 
     fun createDataSource(
         jdbcUrl: String,
@@ -45,17 +41,26 @@ object DataSourceBuilder {
     }
 }
 
-fun DataSource.migrate(gcp: Boolean = true): MigrateResult =
-    Flyway.configure()
-        .dataSource(this)
-        .apply {
-            // Kjør GCP-spesifikke migrasjoner kun hvis vi er i GCP
-            if (gcp) {
-                locations("db/migration", "db/gcp")
+fun DataSource.migrate(): MigrateResult =
+    try {
+        Flyway.configure()
+            .dataSource(this)
+            .apply {
+                val dblocationsMiljoe = mutableListOf("db/migration")
+                if (appIsInGCP()) {
+                    dblocationsMiljoe.add("db/gcp")
+                }
+                if (isProd()) {
+                    dblocationsMiljoe.add("db/prod")
+                }
+                locations(*dblocationsMiljoe.toTypedArray())
             }
-        }
-        .load()
-        .migrate()
+            .load()
+            .migrate()
+    } catch (e: Exception) {
+        LoggerFactory.getLogger(this::class.java).error("Fikk feil under Flyway-migrering", e)
+        throw e
+    }
 
 fun jdbcUrl(
     host: String,

@@ -1,0 +1,1 @@
+alter table doedshendelse ADD COLUMN sak_id BIGINT DEFAULT NULL;

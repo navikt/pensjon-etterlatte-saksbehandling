@@ -9,7 +9,6 @@ import com.github.michaelbull.result.get
 import com.github.mustachejava.DefaultMustacheFactory
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import dolly.TestnavClient
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.jackson.jackson
@@ -46,19 +45,20 @@ import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.libs.ktor.httpClient
-import no.nav.etterlatte.libs.ktor.metricsModule
+import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.testdata.dolly.DollyClientImpl
 import no.nav.etterlatte.testdata.dolly.DollyService
+import no.nav.etterlatte.testdata.dolly.TestnavClient
 import no.nav.etterlatte.testdata.features.dolly.DollyFeature
 import no.nav.etterlatte.testdata.features.egendefinert.EgendefinertMeldingFeature
 import no.nav.etterlatte.testdata.features.index.IndexFeature
+import no.nav.etterlatte.testdata.features.samordning.SamordningMottattFeature
 import no.nav.etterlatte.testdata.features.soeknad.OpprettSoeknadFeature
 import no.nav.etterlatte.testdata.features.standardmelding.StandardMeldingFeature
 import no.nav.security.token.support.v2.tokenValidationSupport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import testdata.features.samordning.SamordningMottattFeature
 
 private val env = System.getenv()
 
@@ -137,7 +137,7 @@ fun main() {
                             api()
                         }
                     }
-                    metricsModule()
+                    metricsRoute()
                 }
             }
             connector { port = 8080 }
@@ -169,7 +169,7 @@ private fun Route.api() {
 
 fun PipelineContext<Unit, ApplicationCall>.navIdentFraToken() = call.firstValidTokenClaims()?.get("NAVident")?.toString()
 
-fun PipelineContext<Unit, ApplicationCall>.usernameFraToken() = call.firstValidTokenClaims()?.get("preferred_username")?.toString()
+fun PipelineContext<Unit, ApplicationCall>.brukerIdFraToken() = call.firstValidTokenClaims()?.get("oid")?.toString()
 
 fun getDollyAccessToken(): String =
     runBlocking {

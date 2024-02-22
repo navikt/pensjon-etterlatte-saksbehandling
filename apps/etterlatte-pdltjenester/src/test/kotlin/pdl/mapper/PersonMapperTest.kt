@@ -1,4 +1,4 @@
-package pdl.mapper
+package no.nav.etterlatte.pdl.mapper
 
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -12,7 +12,6 @@ import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlMetadata
 import no.nav.etterlatte.pdl.PdlNavn
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
-import no.nav.etterlatte.pdl.mapper.PersonMapper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -55,7 +54,6 @@ class PersonMapperTest {
                 personRolle = PersonRolle.BARN,
                 hentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl),
                 saktype = SakType.BARNEPENSJON,
-                aksepterPersonerUtenIdent = true,
             )
         Assertions.assertNull(person.statsborgerskap)
         Assertions.assertEquals(2, person.pdlStatsborgerskap?.size)
@@ -104,7 +102,6 @@ class PersonMapperTest {
                 personRolle = PersonRolle.BARN,
                 hentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl),
                 saktype = SakType.BARNEPENSJON,
-                aksepterPersonerUtenIdent = true,
             )
         Assertions.assertEquals("Norge", person.statsborgerskap)
         Assertions.assertNull(person.pdlStatsborgerskap)
@@ -132,7 +129,6 @@ class PersonMapperTest {
                 personRolle = PersonRolle.BARN,
                 hentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl),
                 saktype = SakType.BARNEPENSJON,
-                aksepterPersonerUtenIdent = true,
             )
         Assertions.assertNull(person.pdlStatsborgerskap)
         Assertions.assertNull(person.statsborgerskap)

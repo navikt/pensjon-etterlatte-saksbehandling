@@ -1,7 +1,5 @@
 package no.nav.etterlatte.kafka
 
-import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig
-import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.config.SslConfigs
@@ -47,7 +45,7 @@ abstract class Kafkakonfigurasjon<T>(
             put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer::class.java)
             put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, deserializerClass)
 
-            put(AbstractKafkaSchemaSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO")
+            put(Avrokonstanter.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO")
 
             put(
                 userInfoConfigKey,
@@ -60,6 +58,6 @@ abstract class Kafkakonfigurasjon<T>(
             )
 
             isolationLevelConfig?.let { this.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, it) }
-            specificAvroReaderConfig?.let { this.put(KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG, it) }
+            specificAvroReaderConfig?.let { this.put(Avrokonstanter.SPECIFIC_AVRO_READER_CONFIG, it) }
         }
 }

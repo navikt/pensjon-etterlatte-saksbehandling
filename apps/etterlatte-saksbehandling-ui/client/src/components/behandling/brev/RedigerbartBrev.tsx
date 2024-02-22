@@ -1,18 +1,17 @@
-import { Accordion, Button, Detail, Tabs } from '@navikt/ds-react'
+import { Accordion, Tabs } from '@navikt/ds-react'
 import SlateEditor from '~components/behandling/brev/SlateEditor'
 import React, { useEffect, useState } from 'react'
-import { FilePdfIcon, FileResetIcon, FloppydiskIcon, PencilIcon } from '@navikt/aksel-icons'
+import { FilePdfIcon, PencilIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { IBrev } from '~shared/types/Brev'
-import { format } from 'date-fns'
 import { hentManuellPayload, lagreManuellPayload, tilbakestillManuellPayload } from '~shared/api/brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import Spinner from '~shared/Spinner'
-import { GeneriskModal } from '~shared/modal/modal'
-
 import { isPending, isPendingOrInitial, isSuccess, isSuccessOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { TilbakestillOgLagreRad } from '~components/behandling/brev/TilbakestillOgLagreRad'
+import { formaterTidspunktTimeMinutterSekunder } from '~utils/formattering'
 
 enum ManueltBrevFane {
   REDIGER = 'REDIGER',
@@ -20,12 +19,10 @@ enum ManueltBrevFane {
   FORHAANDSVIS = 'FORHAANDSVIS',
 }
 
-interface LagretStatus {
+export interface LagretStatus {
   lagret: boolean
   beskrivelse?: string
 }
-
-const formaterTidspunkt = (dato: Date) => format(new Date(dato), 'HH:mm:ss').toString()
 
 interface RedigerbartBrevProps {
   brev: IBrev
@@ -54,18 +51,21 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
 
   const lagre = () => {
     apiLagreManuellPayload({ brevId: brev.id, sakId: brev.sakId, payload: content, payload_vedlegg: vedlegg }, () => {
-      setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunkt(new Date())}` })
+      setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunktTimeMinutterSekunder(new Date())}` })
       if (lukkAdvarselBehandlingEndret) lukkAdvarselBehandlingEndret()
     })
   }
 
   const tilbakestill = () => {
     apiTilbakestillManuellPayload(
-      { brevId: brev.id, sakId: brev.sakId, behandlingId: brev.behandlingId },
+      { brevId: brev.id, sakId: brev.sakId, behandlingId: brev.behandlingId, brevtype: brev.brevtype },
       (payload: any) => {
         setContent(payload.hoveddel)
         setVedlegg(payload.vedlegg)
-        setLagretStatus({ lagret: true, beskrivelse: `Lagret kl. ${formaterTidspunkt(new Date())}` })
+        setLagretStatus({
+          lagret: true,
+          beskrivelse: `Lagret kl. ${formaterTidspunktTimeMinutterSekunder(new Date())}`,
+        })
         if (lukkAdvarselBehandlingEndret) lukkAdvarselBehandlingEndret()
       }
     )
@@ -74,7 +74,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
   const onChange = (value: any[]) => {
     setLagretStatus({
       lagret: false,
-      beskrivelse: `Sist endret kl. ${formaterTidspunkt(new Date())} (ikke lagret)`,
+      beskrivelse: `Sist endret kl. ${formaterTidspunktTimeMinutterSekunder(new Date())} (ikke lagret)`,
     })
     setContent(value)
   }
@@ -83,7 +83,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
     if (!key) return
     setLagretStatus({
       lagret: false,
-      beskrivelse: `Sist endret kl. ${formaterTidspunkt(new Date())} (ikke lagret)`,
+      beskrivelse: `Sist endret kl. ${formaterTidspunktTimeMinutterSekunder(new Date())} (ikke lagret)`,
     })
     const oppdatertVedlegg = vedlegg.map((ved) => {
       if (ved.key === key) return { ...ved, payload: value }
@@ -93,25 +93,25 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
   }
 
   return (
-    <Container forhaandsvisning={fane === ManueltBrevFane.FORHAANDSVIS}>
+    <Container>
       <Tabs value={fane} onChange={setFane}>
         <Tabs.List>
           <Tabs.Tab
             value={ManueltBrevFane.REDIGER}
             label={kanRedigeres ? 'Rediger' : 'Innhold'}
-            icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+            icon={<PencilIcon fontSize="1.5rem" aria-hidden />}
           />
-          {vedlegg && (
+          {vedlegg?.length > 0 && (
             <Tabs.Tab
               value={ManueltBrevFane.REDIGER_VEDLEGG}
               label={kanRedigeres ? 'Rediger vedlegg' : 'Innhold vedlegg'}
-              icon={<PencilIcon title="a11y-title" fontSize="1.5rem" />}
+              icon={<PencilIcon fontSize="1.5rem" aria-hidden />}
             />
           )}
           <Tabs.Tab
             value={ManueltBrevFane.FORHAANDSVIS}
             label="Forhåndsvisning"
-            icon={<FilePdfIcon title="a11y-title" fontSize="1.5rem" />}
+            icon={<FilePdfIcon fontSize="1.5rem" aria-hidden />}
           />
         </Tabs.List>
 
@@ -120,7 +120,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
             <Spinner visible label="Henter brevinnhold ..." />
           )}
           {isSuccess(hentManuellPayloadStatus) && isSuccessOrInitial(tilbakestillManuellPayloadStatus) && (
-            <PanelWrapper>
+            <>
               <SlateEditor value={content} onChange={onChange} readonly={!kanRedigeres} />
 
               {kanRedigeres && (
@@ -130,9 +130,10 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
                   tilbakestill={tilbakestill}
                   tilbakestillManuellPayloadStatus={isPending(tilbakestillManuellPayloadStatus)}
                   lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
+                  tilbakestillSynlig={!!brev.behandlingId}
                 />
               )}
-            </PanelWrapper>
+            </>
           )}
           {isFailureHandler({
             apiResult: tilbakestillManuellPayloadStatus,
@@ -145,34 +146,33 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
             (isPending(tilbakestillManuellPayloadStatus) && <Spinner visible label="Henter brevinnhold ..." />)}
           {isSuccess(hentManuellPayloadStatus) && isSuccessOrInitial(tilbakestillManuellPayloadStatus) && (
             <>
-              <PanelWrapper>
-                <Accordion>
-                  {vedlegg &&
-                    vedlegg.map((brevVedlegg) => (
-                      <Accordion.Item key={brevVedlegg.key}>
-                        <Accordion.Header>{brevVedlegg.tittel}</Accordion.Header>
-                        <Accordion.Content>
-                          <SlateEditor
-                            value={brevVedlegg.payload}
-                            onChange={onChangeVedlegg}
-                            readonly={!kanRedigeres}
-                            editKey={brevVedlegg.key}
-                          />
-                        </Accordion.Content>
-                      </Accordion.Item>
-                    ))}
-                </Accordion>
+              <Accordion indent={false}>
+                {vedlegg?.length > 0 &&
+                  vedlegg.map((brevVedlegg) => (
+                    <Accordion.Item key={brevVedlegg.key}>
+                      <Accordion.Header>{brevVedlegg.tittel}</Accordion.Header>
+                      <Accordion.Content>
+                        <SlateEditor
+                          value={brevVedlegg.payload}
+                          onChange={onChangeVedlegg}
+                          readonly={!kanRedigeres}
+                          editKey={brevVedlegg.key}
+                        />
+                      </Accordion.Content>
+                    </Accordion.Item>
+                  ))}
+              </Accordion>
 
-                {kanRedigeres && (
-                  <TilbakestillOgLagreRad
-                    lagretStatus={lagretStatus}
-                    lagre={lagre}
-                    tilbakestill={tilbakestill}
-                    tilbakestillManuellPayloadStatus={isPending(tilbakestillManuellPayloadStatus)}
-                    lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
-                  />
-                )}
-              </PanelWrapper>
+              {kanRedigeres && (
+                <TilbakestillOgLagreRad
+                  lagretStatus={lagretStatus}
+                  lagre={lagre}
+                  tilbakestill={tilbakestill}
+                  tilbakestillManuellPayloadStatus={isPending(tilbakestillManuellPayloadStatus)}
+                  lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
+                  tilbakestillSynlig={!!brev.behandlingId}
+                />
+              )}
             </>
           )}
           {isFailureHandler({
@@ -182,105 +182,13 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
         </Tabs.Panel>
 
         <Tabs.Panel value={ManueltBrevFane.FORHAANDSVIS}>
-          <PanelWrapper forhaandsvisning>
-            <ForhaandsvisningBrev brev={brev} />
-          </PanelWrapper>
+          <ForhaandsvisningBrev brev={brev} />
         </Tabs.Panel>
       </Tabs>
     </Container>
   )
 }
 
-interface TilbakestillOgLagreRadProps {
-  lagretStatus: LagretStatus
-  lagre: () => void
-  tilbakestill: () => void
-  tilbakestillManuellPayloadStatus: boolean
-  lagreManuellPayloadStatus: boolean
-}
-const TilbakestillOgLagreRad = ({
-  lagretStatus,
-  lagre,
-  tilbakestill,
-  tilbakestillManuellPayloadStatus,
-  lagreManuellPayloadStatus,
-}: TilbakestillOgLagreRadProps) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-
-  return (
-    <>
-      <ButtonRow>
-        <Button
-          icon={<FileResetIcon title="a11y-title" />}
-          variant="secondary"
-          onClick={() => setIsOpen(true)}
-          disabled={!lagretStatus}
-          loading={tilbakestillManuellPayloadStatus}
-        >
-          Tilbakestill brev
-        </Button>
-        <div>
-          {lagretStatus.beskrivelse && <Detail as="span">{lagretStatus.beskrivelse}</Detail>}
-          <Button
-            icon={<FloppydiskIcon title="a11y-title" />}
-            variant="primary"
-            onClick={lagre}
-            disabled={!lagretStatus}
-            loading={lagreManuellPayloadStatus}
-          >
-            Lagre endringer
-          </Button>
-        </div>
-      </ButtonRow>
-      <GeneriskModal
-        tittel="Tilbakestill brevet"
-        beskrivelse="Ønsker du å tilbakestille brevet og hente inn ny informasjon? Dette vil slette tidligere endringer, så husk å kopiere tekst du vil beholde først."
-        tekstKnappJa="Ja, hent alt innhold på nytt"
-        tekstKnappNei="Nei"
-        onYesClick={tilbakestill}
-        setModalisOpen={setIsOpen}
-        open={isOpen}
-      />
-    </>
-  )
-}
-
-const ButtonRow = styled.div`
-  padding: 1rem;
-  text-align: right;
-  position: absolute;
-  bottom: 0;
-  right: 0;
+const Container = styled.div`
   width: 100%;
-  z-index: 9999;
-  display: flex;
-  justify-content: space-between;
-
-  & > div > button {
-    margin-left: 10px;
-  }
-`
-
-interface StyledProps {
-  forhaandsvisning?: boolean
-}
-
-const Container = styled.div<StyledProps>`
-  margin: auto;
-  height: 100%;
-  width: 100%;
-  position: relative;
-  .navds-tabs,
-  .navds-tabs__tabpanel {
-    height: inherit;
-    width: inherit;
-    max-height: ${(p) => (p.forhaandsvisning ? '75vh' : 'calc(75vh - 8rem)')};
-  }
-`
-
-const PanelWrapper = styled.div<StyledProps>`
-  height: 100%;
-  width: 100%;
-  max-height: ${(p) => (p.forhaandsvisning ? 'calc(75vh - 3rem)' : 'calc(75vh - 5rem)')};
-  overflow: auto;
 `

@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   gcp:
     sqlInstances:
@@ -27,6 +27,9 @@ spec:
         databases:
           - name: statistikk
             envVarPrefix: DB
+        flags:
+          - name: max_connections
+            value: "100"
   liveness:
     initialDelay: 5
     path: /isalive
@@ -39,6 +42,10 @@ spec:
   leaderElection: true
   kafka:
     pool: nav-prod
+  resources:
+    requests:
+      cpu: 25m
+      memory: 384Mi
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -46,6 +53,8 @@ spec:
   azure:
     application:
       enabled: true
+  secureLogs:
+    enabled: true
   env:
     - name: KAFKA_RAPID_TOPIC
       value: etterlatte.etterlatteytelser

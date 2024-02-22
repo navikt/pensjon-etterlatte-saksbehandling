@@ -14,7 +14,7 @@ type Props = {
   valgtBegrunnelse: string
 }
 
-export const UnderkjennTilbakekreving: React.FC<Props> = ({ tilbakekreving, kommentar, valgtBegrunnelse }) => {
+export const UnderkjennTilbakekreving = ({ tilbakekreving, kommentar, valgtBegrunnelse }: Props) => {
   const [modalisOpen, setModalisOpen] = useState(false)
   const navigate = useNavigate()
 

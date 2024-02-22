@@ -9,6 +9,8 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
@@ -17,28 +19,42 @@ import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.hentNavidentFraToken
-import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
+import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
+import java.util.UUID
 
-internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
+enum class RevurderingRoutesFeatureToggle(private val key: String) : FeatureToggle {
+    VisRevurderingsaarsakOpphoerUtenBrev("pensjon-etterlatte.vis-opphoer-uten-brev"),
+    ;
+
+    override fun key() = key
+}
+
+internal fun Route.revurderingRoutes(
+    revurderingService: RevurderingService,
+    featureToggleService: FeatureToggleService,
+) {
     val logger = application.log
 
     route("/api/revurdering") {
         route("{$BEHANDLINGID_CALL_PARAMETER}") {
             route("revurderinginfo") {
                 post {
-                    hentNavidentFraToken { navIdent ->
-                        logger.info("Lagrer revurderinginfo på behandling $behandlingId")
-                        medBody<RevurderingInfoDto> {
-                            inTransaction {
-                                revurderingService.lagreRevurderingInfo(
-                                    behandlingId,
-                                    RevurderingInfoMedBegrunnelse(it.info, it.begrunnelse),
-                                    navIdent,
-                                )
+                    kunSkrivetilgang {
+                        hentNavidentFraToken { navIdent ->
+                            logger.info("Lagrer revurderinginfo på behandling $behandlingId")
+                            medBody<RevurderingInfoDto> {
+                                inTransaction {
+                                    revurderingService.lagreRevurderingInfo(
+                                        behandlingId,
+                                        RevurderingInfoMedBegrunnelse(it.info, it.begrunnelse),
+                                        navIdent,
+                                    )
+                                }
+                                call.respond(HttpStatusCode.NoContent)
                             }
-                            call.respond(HttpStatusCode.NoContent)
                         }
                     }
                 }
@@ -47,7 +63,7 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
 
         route("/{$SAKID_CALL_PARAMETER}") {
             post {
-                kunSaksbehandler { saksbehandler ->
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                     logger.info("Oppretter ny revurdering på sak $sakId")
                     medBody<OpprettRevurderingRequest> { opprettRevurderingRequest ->
 
@@ -70,6 +86,23 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                     }
                 }
             }
+
+            post("omgjoering-klage") {
+                kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
+                    medBody<OpprettOmgjoeringKlageRequest> {
+                        val revurdering =
+                            inTransaction {
+                                revurderingService.opprettOmgjoeringKlage(
+                                    sakId,
+                                    it.oppgaveIdOmgjoering,
+                                    saksbehandler,
+                                )
+                            }
+                        call.respond(revurdering)
+                    }
+                }
+            }
+
             get("/{revurderingsaarsak}") {
                 val revurderingsaarsak =
                     call.parameters["revurderingsaarsak"]?.let { Revurderingaarsak.valueOf(it) }
@@ -85,11 +118,28 @@ internal fun Route.revurderingRoutes(revurderingService: RevurderingService) {
                 call.parameters["saktype"]?.let { SakType.valueOf(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
-            val stoettedeRevurderinger = Revurderingaarsak.values().filter { it.erStoettaRevurdering(sakType) }
+            val stoettedeRevurderinger =
+                Revurderingaarsak.entries
+                    .filter { it.erStoettaRevurdering(sakType) }
+                    .filter {
+                        if (it == Revurderingaarsak.OPPHOER_UTEN_BREV) {
+                            featureToggleService.isEnabled(
+                                RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev,
+                                false,
+                            )
+                        } else {
+                            true
+                        }
+                    }
+
             call.respond(stoettedeRevurderinger)
         }
     }
 }
+
+data class OpprettOmgjoeringKlageRequest(
+    val oppgaveIdOmgjoering: UUID,
+)
 
 data class OpprettRevurderingRequest(
     val aarsak: Revurderingaarsak,

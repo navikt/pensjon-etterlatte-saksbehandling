@@ -92,4 +92,5 @@ data class YtelseMedGrunnlagPeriodisertDto(
     val trygdetid: Int,
     val grunnbelop: Int,
     val grunnbelopMnd: Int,
+    val beregningsMetode: BeregningsMetode?,
 )

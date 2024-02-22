@@ -5,7 +5,6 @@ plugins {
 
 dependencies {
     implementation(project(":libs:saksbehandling-common"))
-
     testImplementation(libs.test.jupiter.api)
     testRuntimeOnly(libs.test.jupiter.engine)
     testImplementation(libs.test.kotest.assertionscore)

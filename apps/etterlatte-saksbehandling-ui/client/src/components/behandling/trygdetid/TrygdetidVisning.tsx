@@ -12,12 +12,11 @@ import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import React, { useEffect, useState } from 'react'
-import YrkesskadeTrygdetidBP from '~components/behandling/trygdetid/YrkesskadeTrygdetidBP'
-import YrkesskadeTrygdetidOMS from '~components/behandling/trygdetid/YrkesskadeTrygdetidOMS'
+import YrkesskadeTrygdetid from '~components/behandling/trygdetid/YrkesskadeTrygdetid'
 import { Trygdetid } from '~components/behandling/trygdetid/Trygdetid'
 import { oppdaterStatus } from '~shared/api/trygdetid'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
-import { useAppDispatch } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { handlinger } from '~components/behandling/handlinger/typer'
 import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat'
 
@@ -27,7 +26,9 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
   const dispatch = useAppDispatch()
-  const redigerbar = behandlingErRedigerbar(behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+
+  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const { next } = useBehandlingRoutes()
   const [vilkaarsvurdering, getVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [yrkesskadeTrygdetid, setYrkesskadeTrygdetid] = useState<boolean>(false)
@@ -73,8 +74,24 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
       {isSuccess(vilkaarsvurdering) &&
         (yrkesskadeTrygdetid ? (
           {
-            [SakType.BARNEPENSJON]: <YrkesskadeTrygdetidBP status={behandling.status} />,
-            [SakType.OMSTILLINGSSTOENAD]: <YrkesskadeTrygdetidOMS status={behandling.status} />,
+            [SakType.BARNEPENSJON]: (
+              <YrkesskadeTrygdetid
+                status={behandling.status}
+                hjemmel={{
+                  tittel: '§ 18-11.Barnepensjon etter dødsfall som skyldes yrkesskade',
+                  lenke: 'https://lovdata.no/lov/1997-02-28-19/§18-11',
+                }}
+              />
+            ),
+            [SakType.OMSTILLINGSSTOENAD]: (
+              <YrkesskadeTrygdetid
+                status={behandling.status}
+                hjemmel={{
+                  tittel: '§ 17-12.Pensjon etter dødsfall som skyldes yrkesskade',
+                  lenke: 'https://lovdata.no/lov/1997-02-28-19/§17-12',
+                }}
+              />
+            ),
           }[behandling.sakType]
         ) : (
           <Trygdetid

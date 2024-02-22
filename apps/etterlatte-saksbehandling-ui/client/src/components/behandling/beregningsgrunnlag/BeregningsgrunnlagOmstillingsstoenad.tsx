@@ -3,7 +3,7 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { useBehandlingRoutes } from '../BehandlingRoutes'
 import { behandlingErRedigerbar } from '../felles/utils'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { useAppDispatch } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import {
   hentBeregningsGrunnlagOMS,
   lagreBeregningsGrunnlagOMS,
@@ -39,7 +39,9 @@ const BeregningsgrunnlagOmstillingsstoenad = (props: { behandling: IBehandlingRe
   const { behandling } = props
   const { next } = useBehandlingRoutes()
   const dispatch = useAppDispatch()
-  const redigerbar = behandlingErRedigerbar(behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+
+  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const [beregningsgrunnlag, fetchBeregningsgrunnlag] = useApiCall(hentBeregningsGrunnlagOMS)
   const [lagreBeregningsgrunnlagOMS, postBeregningsgrunnlag] = useApiCall(lagreBeregningsGrunnlagOMS)
   const [endreBeregning, postOpprettEllerEndreBeregning] = useApiCall(opprettEllerEndreBeregning)

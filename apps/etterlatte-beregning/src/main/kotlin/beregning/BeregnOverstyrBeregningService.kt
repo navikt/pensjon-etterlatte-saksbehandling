@@ -1,10 +1,10 @@
 package no.nav.etterlatte.beregning
 
-import beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
+import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
 import no.nav.etterlatte.beregning.regler.overstyr.PeriodisertOverstyrGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.beregnOverstyrRegel
 import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloep

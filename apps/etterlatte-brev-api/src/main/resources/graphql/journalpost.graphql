@@ -15,11 +15,13 @@ query(
             fagsakId
             fagsaksystem
             sakstype
+            tema
         }
         dokumenter {
             dokumentInfoId
             tittel
             dokumentvarianter {
+                variantformat
                 saksbehandlerHarTilgang
             }
         }

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlag.klienter
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import grunnlag.VurdertBostedsland
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
@@ -14,6 +13,7 @@ import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.grunnlag.VurdertBostedsland
 import no.nav.etterlatte.grunnlag.adresse.PersondataAdresse
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.objectMapper
@@ -24,27 +24,6 @@ import org.slf4j.LoggerFactory
 
 class PersondataKlient(private val httpClient: HttpClient, private val apiUrl: String) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    fun hentVergeadresseGittVergehaversFnr(vergehaverFnr: String): PersondataAdresse? {
-        try {
-            val kontaktadresse = hentKontaktadresse(vergehaverFnr, seEtterVerge = true)
-
-            return if (erVergesAdresse(kontaktadresse)) {
-                kontaktadresse
-            } else {
-                null
-            }
-        } catch (e: ClientRequestException) {
-            if (e.response.status == HttpStatusCode.NotFound) {
-                return null
-            }
-            logger.error("Feil i henting av vergeadresse", e)
-            return null
-        } catch (e: Exception) {
-            logger.error("Feil i henting av vergeadresse", e)
-            return null
-        }
-    }
 
     fun hentAdresseGittFnr(foedselsnummer: String): PersondataAdresse? {
         try {

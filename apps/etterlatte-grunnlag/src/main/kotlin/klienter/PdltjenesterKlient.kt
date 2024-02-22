@@ -7,7 +7,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
@@ -77,7 +76,7 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
                     saktype = sakType,
                     innsender =
                         innsender
-                            ?.takeIf { it != Vedtaksloesning.PESYS.name }
+                            ?.takeIf { Folkeregisteridentifikator.isValid(it) }
                             ?.let { Folkeregisteridentifikator.of(it) },
                 )
             pdl.post("$url/galleri") {

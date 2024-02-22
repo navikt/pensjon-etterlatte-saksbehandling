@@ -13,6 +13,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
@@ -36,7 +37,6 @@ import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
 import no.nav.etterlatte.libs.database.toListPassesRsToBlock
-import java.sql.Connection
 import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.util.UUID
@@ -44,7 +44,7 @@ import java.util.UUID
 class BehandlingDao(
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val revurderingDao: RevurderingDao,
-    private val connection: () -> Connection,
+    private val connectionAutoclosing: ConnectionAutoclosing,
 ) {
     private val alleBehandlingerMedSak =
         """
@@ -54,73 +54,83 @@ class BehandlingDao(
         """.trimIndent()
 
     fun hentBehandling(id: UUID): Behandling? {
-        val stmt =
-            connection().prepareStatement(
-                """
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
                     $alleBehandlingerMedSak
                     WHERE b.id = ?::UUID
                     """,
-            )
-        stmt.setObject(1, id)
+                    )
+                stmt.setObject(1, id)
 
-        return stmt.executeQuery().singleOrNull {
-            behandlingAvRettType()
+                stmt.executeQuery().singleOrNull {
+                    behandlingAvRettType()
+                }
+            }
         }
     }
 
     fun alleBehandlingerISak(sakid: Long): List<Behandling> {
-        val stmt =
-            connection().prepareStatement(
-                """
-                $alleBehandlingerMedSak
-                WHERE sak_id = ?
-                """.trimIndent(),
-            )
-        stmt.setLong(1, sakid)
-        return stmt.executeQuery().behandlingsListe()
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        $alleBehandlingerMedSak
+                        WHERE sak_id = ?
+                        """.trimIndent(),
+                    )
+
+                stmt.setLong(1, sakid)
+                stmt.executeQuery().behandlingsListe()
+            }
+        }
     }
 
     fun hentAlleRevurderingerISakMedAarsak(
         sakid: Long,
         revurderingaarsak: Revurderingaarsak,
     ): List<Revurdering> {
-        val stmt =
-            connection().prepareStatement(
-                """
-                SELECT b.*, s.sakType, s.enhet, s.fnr 
-                FROM behandling b
-                INNER JOIN sak s ON b.sak_id = s.id
-                WHERE sak_id = ? AND behandlingstype = 'REVURDERING'
-                AND revurdering_aarsak = ?
-                """.trimIndent(),
-            )
-        stmt.setLong(1, sakid)
-        stmt.setString(2, revurderingaarsak.name)
-        return stmt.executeQuery().toListPassesRsToBlock { rs -> asRevurdering(rs) }
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        SELECT b.*, s.sakType, s.enhet, s.fnr 
+                        FROM behandling b
+                        INNER JOIN sak s ON b.sak_id = s.id
+                        WHERE sak_id = ? AND behandlingstype = 'REVURDERING'
+                        AND revurdering_aarsak = ?
+                        """.trimIndent(),
+                    )
+
+                stmt.setLong(1, sakid)
+                stmt.setString(2, revurderingaarsak.name)
+                stmt.executeQuery().toListPassesRsToBlock { rs -> asRevurdering(rs) }
+            }
+        }
     }
 
-    private fun ResultSet.asRevurderingExtension() =
-        revurderingDao.asRevurdering(
-            this,
-            mapSak(this),
-        ) { i: UUID -> kommerBarnetTilGodeDao.hentKommerBarnetTilGode(i) }
-
     fun migrerStatusPaaAlleBehandlingerSomTrengerNyBeregning(saker: Saker): SakIDListe {
-        with(connection()) {
-            val stmt =
-                prepareStatement(
-                    """
-                    UPDATE behandling
-                    SET status = '${BehandlingStatus.TRYGDETID_OPPDATERT}'
-                    WHERE status <> ALL (?)
-                        AND sak_id = ANY (?)
-                    RETURNING id, sak_id
-                    """.trimIndent(),
-                )
-            stmt.setArray(1, createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()))
-            stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        UPDATE behandling
+                        SET status = '${BehandlingStatus.TRYGDETID_OPPDATERT}'
+                        WHERE status <> ALL (?)
+                            AND sak_id = ANY (?)
+                        RETURNING id, sak_id
+                        """.trimIndent(),
+                    )
+                stmt.setArray(1, createArrayOf("text", BehandlingStatus.skalIkkeOmregnesVedGRegulering().toTypedArray()))
+                stmt.setArray(2, createArrayOf("bigint", saker.saker.map { it.id }.toTypedArray()))
 
-            return SakIDListe(stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) })
+                SakIDListe(stmt.executeQuery().toList { BehandlingOgSak(getUUID("id"), getLong("sak_id")) })
+            }
         }
     }
 
@@ -179,49 +189,60 @@ class BehandlingDao(
         )
 
     fun opprettBehandling(behandling: OpprettBehandling) {
-        val stmt =
-            connection().prepareStatement(
-                """
-                INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
-                soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
-                revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, begrunnelse)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """.trimIndent(),
-            )
-        with(behandling) {
-            stmt.setObject(1, id)
-            stmt.setLong(2, sakId)
-            stmt.setTidspunkt(3, opprettet)
-            stmt.setTidspunkt(4, opprettet)
-            stmt.setString(5, status.name)
-            stmt.setString(6, type.name)
-            stmt.setTidspunkt(7, soeknadMottattDato?.toTidspunkt())
-            stmt.setString(8, virkningstidspunkt?.toJson())
-            stmt.setJsonb(9, utlandstilknytning)
-            stmt.setString(10, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
-            stmt.setString(11, revurderingsAarsak?.name)
-            stmt.setString(12, opphoerAarsaker?.toJson())
-            stmt.setString(13, fritekstAarsak)
-            stmt.setString(14, prosesstype.toString())
-            stmt.setString(15, kilde.toString())
-            stmt.setString(16, begrunnelse)
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        INSERT INTO behandling(id, sak_id, behandling_opprettet, sist_endret, status, behandlingstype, 
+                        soeknad_mottatt_dato, virkningstidspunkt, utlandstilknytning, bodd_eller_arbeidet_utlandet, 
+                        revurdering_aarsak, opphoer_aarsaker, fritekst_aarsak, prosesstype, kilde, begrunnelse, relatert_behandling)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """.trimIndent(),
+                    )
+
+                with(behandling) {
+                    stmt.setObject(1, id)
+                    stmt.setLong(2, sakId)
+                    stmt.setTidspunkt(3, opprettet)
+                    stmt.setTidspunkt(4, opprettet)
+                    stmt.setString(5, status.name)
+                    stmt.setString(6, type.name)
+                    stmt.setTidspunkt(7, soeknadMottattDato?.toTidspunkt())
+                    stmt.setString(8, virkningstidspunkt?.toJson())
+                    stmt.setJsonb(9, utlandstilknytning)
+                    stmt.setString(10, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
+                    stmt.setString(11, revurderingsAarsak?.name)
+                    stmt.setString(12, opphoerAarsaker?.toJson())
+                    stmt.setString(13, fritekstAarsak)
+                    stmt.setString(14, prosesstype.toString())
+                    stmt.setString(15, kilde.toString())
+                    stmt.setString(16, begrunnelse)
+                    stmt.setString(17, relatertBehandlingId)
+                }
+                require(stmt.executeUpdate() == 1)
+            }
         }
-        require(stmt.executeUpdate() == 1)
     }
 
     fun lagreGyldighetsproving(behandling: Foerstegangsbehandling) {
-        val stmt =
-            connection().prepareStatement(
-                """
-                UPDATE behandling SET gyldighetssproving = ?, status = ?, sist_endret = ?
-                WHERE id = ?
-                """.trimIndent(),
-            )
-        stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
-        stmt.setString(2, behandling.status.name)
-        stmt.setTidspunkt(3, behandling.sistEndret.toTidspunkt())
-        stmt.setObject(4, behandling.id)
-        require(stmt.executeUpdate() == 1)
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                        UPDATE behandling SET gyldighetssproving = ?, status = ?, sist_endret = ?
+                        WHERE id = ?
+                        """.trimIndent(),
+                    )
+
+                stmt.setObject(1, objectMapper.writeValueAsString(behandling.gyldighetsproeving))
+                stmt.setString(2, behandling.status.name)
+                stmt.setTidspunkt(3, behandling.sistEndret.toTidspunkt())
+                stmt.setObject(4, behandling.id)
+                require(stmt.executeUpdate() == 1)
+            }
+        }
     }
 
     fun lagreStatus(lagretBehandling: Behandling) {
@@ -233,34 +254,45 @@ class BehandlingDao(
         status: BehandlingStatus,
         sistEndret: LocalDateTime,
     ) {
-        val stmt =
-            connection().prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ?")
-        stmt.setString(1, status.name)
-        stmt.setTidspunkt(2, sistEndret.toTidspunkt())
-        stmt.setObject(3, behandlingId)
-        require(stmt.executeUpdate() == 1)
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt = prepareStatement("UPDATE behandling SET status = ?, sist_endret = ? WHERE id = ?")
+
+                stmt.setString(1, status.name)
+                stmt.setTidspunkt(2, sistEndret.toTidspunkt())
+                stmt.setObject(3, behandlingId)
+                require(stmt.executeUpdate() == 1)
+            }
+        }
     }
 
     fun lagreBoddEllerArbeidetUtlandet(
         behandlingId: UUID,
         boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet,
     ) {
-        val stmt =
-            connection().prepareStatement("UPDATE behandling SET bodd_eller_arbeidet_utlandet = ? WHERE id = ?")
-        stmt.setString(1, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
-        stmt.setObject(2, behandlingId)
-        require(stmt.executeUpdate() == 1)
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt = prepareStatement("UPDATE behandling SET bodd_eller_arbeidet_utlandet = ? WHERE id = ?")
+
+                stmt.setString(1, objectMapper.writeValueAsString(boddEllerArbeidetUtlandet))
+                stmt.setObject(2, behandlingId)
+                require(stmt.executeUpdate() == 1)
+            }
+        }
     }
 
     fun lagreUtlandstilknytning(
         behandlingId: UUID,
         utlandstilknytning: Utlandstilknytning,
     ) {
-        val statement =
-            connection().prepareStatement("UPDATE behandling set utlandstilknytning = ? where id = ?")
-        statement.setJsonb(1, utlandstilknytning)
-        statement.setObject(2, behandlingId)
-        require(statement.executeUpdate() == 1)
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement = prepareStatement("UPDATE behandling set utlandstilknytning = ? where id = ?")
+                statement.setJsonb(1, utlandstilknytning)
+                statement.setObject(2, behandlingId)
+                require(statement.executeUpdate() == 1)
+            }
+        }
     }
 
     private fun ResultSet.behandlingsListe(): List<Behandling> = toList { tilBehandling(getString("behandlingstype")) }.filterNotNull()
@@ -286,10 +318,14 @@ class BehandlingDao(
         behandlingId: UUID,
         virkningstidspunkt: Virkningstidspunkt,
     ) {
-        val statement = connection().prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
-        statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
-        statement.setObject(2, behandlingId)
-        statement.executeUpdate()
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement = prepareStatement("UPDATE behandling SET virkningstidspunkt = ? where id = ?")
+                statement.setString(1, objectMapper.writeValueAsString(virkningstidspunkt))
+                statement.setObject(2, behandlingId)
+                statement.executeUpdate()
+            }
+        }
     }
 }
 
@@ -297,5 +333,3 @@ fun ResultSet.somLocalDateTimeUTC(kolonne: String) = getTidspunkt(kolonne).toLoc
 
 val objectMapper: ObjectMapper =
     jacksonObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-class BehandlingNotFoundException(override val message: String) : RuntimeException(message)

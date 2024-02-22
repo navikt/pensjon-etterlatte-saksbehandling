@@ -27,21 +27,7 @@ data class VedtakSammendragDto(
     val datoAttestert: ZonedDateTime?,
 )
 
-@Deprecated("VedtakDto skal ersttates av VedtakNyDto")
 data class VedtakDto(
-    val vedtakId: Long,
-    val status: VedtakStatus,
-    val virkningstidspunkt: YearMonth,
-    val sak: VedtakSak,
-    val behandling: Behandling,
-    val type: VedtakType,
-    val vedtakFattet: VedtakFattet?,
-    val attestasjon: Attestasjon?,
-    val utbetalingsperioder: List<Utbetalingsperiode>,
-)
-
-// TODO Rename til VedtakDto når gammel dto er faset ut
-data class VedtakNyDto(
     val id: Long,
     val behandlingId: UUID,
     val status: VedtakStatus,
@@ -65,6 +51,9 @@ sealed class VedtakInnholdDto {
     data class VedtakTilbakekrevingDto(
         val tilbakekreving: ObjectNode,
     ) : VedtakInnholdDto()
+
+    @JsonTypeName("KLAGE")
+    data class Klage(val klage: ObjectNode) : VedtakInnholdDto()
 }
 
 enum class VedtakStatus {
@@ -150,7 +139,6 @@ data class TilbakekrevingVedtakDto(
 
 data class TilbakekrevingFattEllerAttesterVedtakDto(
     val tilbakekrevingId: UUID,
-    val saksbehandler: String,
     val enhet: String,
 )
 
@@ -159,4 +147,13 @@ data class TilbakekrevingVedtakLagretDto(
     val fattetAv: String,
     val enhet: String,
     val dato: LocalDate,
+)
+
+data class KlageVedtakDto(
+    val klageId: UUID,
+    val sakId: Long,
+    val sakType: SakType,
+    val soeker: Folkeregisteridentifikator,
+    val klage: ObjectNode,
+    val enhet: String,
 )

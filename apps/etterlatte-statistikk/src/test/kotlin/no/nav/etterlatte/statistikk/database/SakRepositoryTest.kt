@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldNotBe
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.database.DataSourceBuilder
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.database.migrate
@@ -51,7 +51,7 @@ class SakRepositoryTest {
                 password = postgreSQLContainer.password,
             )
 
-        dataSource.migrate(gcp = false)
+        dataSource.migrate()
     }
 
     val mockBeregning =
@@ -103,19 +103,21 @@ class SakRepositoryTest {
     @Test
     fun testSakRepo() {
         val repo = SakRepository.using(dataSource)
+        val relatertId = UUID.randomUUID().toString()
+
         val lagretRad =
             repo.lagreRad(
                 SakRad(
                     id = -2,
-                    behandlingId = UUID.randomUUID(),
+                    referanseId = UUID.randomUUID(),
                     sakId = 1337,
                     mottattTidspunkt = Tidspunkt.now(),
                     registrertTidspunkt = Tidspunkt.now(),
                     ferdigbehandletTidspunkt = null,
                     vedtakTidspunkt = null,
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    behandlingStatus = VedtakKafkaHendelseType.IVERKSATT.name,
-                    behandlingResultat = null,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING.name,
+                    status = VedtakKafkaHendelseHendelseType.IVERKSATT.name,
+                    resultat = null,
                     resultatBegrunnelse = "for en begrunnelse",
                     behandlingMetode = BehandlingMetode.MANUELL,
                     opprettetAv = "test",
@@ -137,6 +139,7 @@ class SakRepositoryTest {
                     revurderingAarsak = "MIGRERING",
                     kilde = Vedtaksloesning.GJENNY,
                     pesysId = 123L,
+                    relatertTil = relatertId,
                 ),
             )
 
@@ -145,6 +148,7 @@ class SakRepositoryTest {
             rad shouldBe repo.hentRader()[0]
             rad.beregning shouldBe mockBeregning
             rad.avkorting shouldBe mockAvkorting
+            rad.relatertTil shouldBe relatertId
         }
     }
 
@@ -155,15 +159,15 @@ class SakRepositoryTest {
             repo.lagreRad(
                 SakRad(
                     id = -2,
-                    behandlingId = UUID.randomUUID(),
+                    referanseId = UUID.randomUUID(),
                     sakId = 1337,
                     mottattTidspunkt = Tidspunkt.now(),
                     registrertTidspunkt = Tidspunkt.now(),
                     ferdigbehandletTidspunkt = null,
                     vedtakTidspunkt = null,
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    behandlingStatus = VedtakKafkaHendelseType.IVERKSATT.name,
-                    behandlingResultat = null,
+                    type = BehandlingType.FØRSTEGANGSBEHANDLING.name,
+                    status = VedtakKafkaHendelseHendelseType.IVERKSATT.name,
+                    resultat = null,
                     resultatBegrunnelse = "for en begrunnelse",
                     behandlingMetode = BehandlingMetode.MANUELL,
                     opprettetAv = "test",
@@ -185,17 +189,20 @@ class SakRepositoryTest {
                     revurderingAarsak = "MIGRERING",
                     kilde = Vedtaksloesning.GJENNY,
                     pesysId = 123L,
+                    relatertTil = null,
                 ),
             )
         lagretRad shouldNotBe null
         lagretRad?.asClue { rad ->
             rad.beregning shouldBe null
             rad.avkorting shouldBe null
+            rad.relatertTil shouldBe null
         }
         repo.hentRader().asClue { rader ->
             rader[0] shouldNotBe null
             rader[0].beregning shouldBe null
             rader[0].avkorting shouldBe null
+            rader[0].relatertTil shouldBe null
         }
     }
 }

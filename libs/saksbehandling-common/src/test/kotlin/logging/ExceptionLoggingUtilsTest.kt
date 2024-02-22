@@ -1,4 +1,4 @@
-package logging
+package no.nav.etterlatte.logging
 
 import no.nav.etterlatte.libs.common.logging.samleExceptions
 import org.junit.jupiter.api.Assertions

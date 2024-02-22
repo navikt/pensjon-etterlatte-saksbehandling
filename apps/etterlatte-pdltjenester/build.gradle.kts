@@ -30,6 +30,7 @@ dependencies {
     implementation(libs.ktor2.auth)
 
     implementation(libs.bundles.jackson)
+    implementation(libs.etterlatte.common)
 
     implementation(libs.navfelles.tokenclientcore)
     implementation(libs.navfelles.tokenvalidationktor2)
@@ -40,4 +41,5 @@ dependencies {
     testImplementation(libs.navfelles.mockoauth2server)
     testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:testdata"))
+    testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
 }

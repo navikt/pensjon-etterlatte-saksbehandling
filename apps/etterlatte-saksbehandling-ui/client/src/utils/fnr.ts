@@ -42,6 +42,6 @@ export const fnrErGyldig = (input: string | undefined): boolean => {
 /**
  * Forenklet validering som kun sjekker om fnr. har gyldig format (11 siffer, ikke tom, undefined, e.l.)
  **/
-export const fnrHarGyldigFormat = (input: string | undefined): boolean => {
+export const fnrHarGyldigFormat = (input: string | undefined | null): boolean => {
   return !!input && /^\d{11}$/.test(input)
 }

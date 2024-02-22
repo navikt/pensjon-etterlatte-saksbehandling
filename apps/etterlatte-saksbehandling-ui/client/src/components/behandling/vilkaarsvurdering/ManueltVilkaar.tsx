@@ -12,10 +12,10 @@ import {
 import { IVilkaarsvurdering, Vilkaar, VurderingsResultat } from '~shared/api/vilkaarsvurdering'
 import { Vurdering } from './Vurdering'
 import { StatusIcon, StatusIconProps } from '~shared/icons/statusIcon'
-import { VilkaarGrunnlagsStoette } from './vilkaar/VilkaarGrunnlagsStoette'
 import { Link } from '@navikt/ds-react'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
 import { Border } from '~components/behandling/soeknadsoversikt/styled'
+import { formatertLovreferanse } from '~components/behandling/vilkaarsvurdering/utils'
 
 export interface VilkaarProps {
   vilkaar: Vilkaar
@@ -65,7 +65,7 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
               </Title>
               {vilkaar.hovedvilkaar.lovreferanse.lenke ? (
                 <Link href={vilkaar.hovedvilkaar.lovreferanse.lenke} target="_blank" rel="noopener noreferrer">
-                  {`${paragrafType(vilkaar)} ${vilkaar.hovedvilkaar.lovreferanse.paragraf}`}
+                  {`${paragrafType(vilkaar)} ${formatertLovreferanse(vilkaar.hovedvilkaar.lovreferanse)}`}
                   <ExternalLinkIcon title={vilkaar.hovedvilkaar.tittel} />
                 </Link>
               ) : (
@@ -73,7 +73,6 @@ export const ManueltVilkaar = (props: VilkaarProps) => {
               )}
               <VilkaarBeskrivelse>{vilkaar.hovedvilkaar.beskrivelse}</VilkaarBeskrivelse>
             </VilkaarColumn>
-            <VilkaarGrunnlagsStoette vilkaar={vilkaar} />
           </VilkaarInfobokser>
           <VilkaarVurderingColumn>
             <VilkaarVurderingContainer>

@@ -306,7 +306,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
         runBlocking {
-            assertThrows<IllegalArgumentException> {
+            assertThrows<TrygdetidMangler> {
                 beregnOmstillingsstoenadService.beregn(behandling, bruker)
             }
         }
@@ -327,7 +327,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
         } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
 
         runBlocking {
-            assertThrows<Exception> {
+            assertThrows<TrygdetidMangler> {
                 beregnOmstillingsstoenadService.beregn(behandling, bruker)
             }
         }

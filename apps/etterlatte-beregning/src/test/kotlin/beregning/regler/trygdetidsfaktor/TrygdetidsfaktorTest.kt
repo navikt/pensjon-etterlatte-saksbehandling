@@ -1,4 +1,4 @@
-package beregning.regler.trygdetidsfaktor
+package no.nav.etterlatte.beregning.regler.trygdetidsfaktor
 
 import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.beregning.regler.AnvendtTrygdetid

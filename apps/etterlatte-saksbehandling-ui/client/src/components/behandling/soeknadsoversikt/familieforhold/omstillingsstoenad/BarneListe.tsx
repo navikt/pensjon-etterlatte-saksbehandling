@@ -63,8 +63,8 @@ const BarnRow = ({ barn, familieforhold }: { barn: IPdlPerson; familieforhold: F
   const erDoed = !!barn.doedsdato
   const barnetsFnr = barn.foedselsnummer
 
-  const erGjenlevendesBarn =
-    familieforhold.gjenlevende.flatMap((it) => it.opplysning.familieRelasjon?.barn).includes(barnetsFnr) ?? false
+  // Søker er alltid gjenlevende for OMS
+  const erGjenlevendesBarn = familieforhold.soeker?.opplysning.familieRelasjon?.barn?.includes(barnetsFnr) ?? false
 
   if (erDoed) {
     const navn = `${barn.fornavn} ${barn.etternavn} '(død)'}`

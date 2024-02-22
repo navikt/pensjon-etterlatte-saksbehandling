@@ -13,13 +13,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
-import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlientImpl
-import no.nav.etterlatte.behandling.klienter.Norg2Klient
-import no.nav.etterlatte.common.klienter.PdlKlient
 import no.nav.etterlatte.libs.common.toJson
 import org.junit.jupiter.api.Test
 
@@ -44,15 +41,12 @@ class BrukerServiceTest {
             "",
         )
 
-    private val pdlKlient = mockk<PdlKlient>()
-    private val norg2Klient = mockk<Norg2Klient>()
-
     @Test
     fun `hent enheter skal returnere en liste av enheter`() {
         val service = klient()
 
         runBlocking {
-            val resultat = service.hentEnhetForSaksbehandler(testNavIdent)
+            val resultat = service.hentEnheterForSaksbehandler(testNavIdent)
 
             resultat.size shouldBeExactly 3
 
@@ -70,7 +64,7 @@ class BrukerServiceTest {
         val service = klient()
 
         runBlocking {
-            val resultat = harTilgangTilEnhet(service.hentEnhetForSaksbehandler(testNavIdent), "id1")
+            val resultat = harTilgangTilEnhet(service.hentEnheterForSaksbehandler(testNavIdent), "id1")
 
             resultat shouldBe true
         }
@@ -81,7 +75,7 @@ class BrukerServiceTest {
         val service = klient()
 
         runBlocking {
-            val resultat = harTilgangTilEnhet(service.hentEnhetForSaksbehandler(testNavIdent), "id4")
+            val resultat = harTilgangTilEnhet(service.hentEnheterForSaksbehandler(testNavIdent), "id4")
 
             resultat shouldBe false
         }

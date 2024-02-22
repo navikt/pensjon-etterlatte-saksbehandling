@@ -17,7 +17,7 @@ import { BodyShort, Heading } from '@navikt/ds-react'
 import { Grunnlagopplysninger } from '~components/behandling/trygdetid/Grunnlagopplysninger'
 import { TrygdetidGrunnlagListe } from '~components/behandling/trygdetid/TrygdetidGrunnlagListe'
 import { TrygdeAvtale } from './avtaler/TrygdeAvtale'
-import { IBehandlingStatus, IDetaljertBehandling, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { oppdaterBehandlingsstatus } from '~store/reducers/BehandlingReducer'
 import { useAppDispatch } from '~store/Store'
 import { TrygdetidDetaljer } from '~components/behandling/trygdetid/detaljer/TrygdetidDetaljer'
@@ -146,13 +146,20 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
       </LovtekstMedLenke>
       {trygdetid && landListe && (
         <>
-          <Grunnlagopplysninger opplysninger={trygdetid.opplysninger} />
+          <Grunnlagopplysninger trygdetid={trygdetid} onOppdatert={oppdaterTrygdetid} redigerbar={redigerbar} />
 
           <TrygdetidGrunnlagListe
             trygdetid={trygdetid}
             setTrygdetid={oppdaterTrygdetid}
             landListe={landListe}
             trygdetidGrunnlagType={ITrygdetidGrunnlagType.FAKTISK}
+            redigerbar={redigerbar}
+          />
+          <TrygdetidGrunnlagListe
+            trygdetid={trygdetid}
+            setTrygdetid={oppdaterTrygdetid}
+            landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
+            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
             redigerbar={redigerbar}
           />
           <OverstyrtTrygdetid
@@ -163,13 +170,6 @@ export const Trygdetid = ({ redigerbar, behandling, virkningstidspunktEtterNyReg
             virkningstidspunktEtterNyRegelDato={virkningstidspunktEtterNyRegelDato}
           />
           {isPending(overstyrTrygdetidRequest) && <Spinner visible={true} label="Oppdatere poengår" />}
-          <TrygdetidGrunnlagListe
-            trygdetid={trygdetid}
-            setTrygdetid={oppdaterTrygdetid}
-            landListe={landListe.filter((land) => land.isoLandkode == 'NOR')}
-            trygdetidGrunnlagType={ITrygdetidGrunnlagType.FREMTIDIG}
-            redigerbar={redigerbar}
-          />
           {trygdetid.beregnetTrygdetid && (
             <TrygdetidDetaljer beregnetTrygdetid={trygdetid.beregnetTrygdetid.resultat} />
           )}

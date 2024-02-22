@@ -10,6 +10,8 @@ dependencies {
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-pdl-model"))
     implementation(project(":libs:etterlatte-migrering-model"))
+    implementation(project(":libs:etterlatte-brev-model"))
+    implementation(project(":libs:etterlatte-oppgave-model"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.clientcore)
@@ -20,4 +22,6 @@ dependencies {
 
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.test.kotest.assertionscore)
+    testImplementation(project(":libs:testdata"))
 }

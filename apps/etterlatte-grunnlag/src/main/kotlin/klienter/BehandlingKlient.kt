@@ -75,6 +75,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient, private val h
 
     override suspend fun harTilgangTilBehandling(
         behandlingId: UUID,
+        skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean {
         try {
@@ -83,7 +84,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient, private val h
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilgang/behandling/$behandlingId",
+                            url = "$resourceUrl/tilgang/behandling/$behandlingId?skrivetilgang=$skrivetilgang",
                         ),
                     brukerTokenInfo = bruker,
                 )
@@ -98,6 +99,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient, private val h
 
     override suspend fun harTilgangTilSak(
         sakId: Long,
+        skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean {
         try {
@@ -106,7 +108,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient, private val h
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilgang/sak/$sakId",
+                            url = "$resourceUrl/tilgang/sak/$sakId?skrivetilgang=$skrivetilgang",
                         ),
                     brukerTokenInfo = bruker,
                 )
@@ -121,6 +123,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient, private val h
 
     override suspend fun harTilgangTilPerson(
         foedselsnummer: Folkeregisteridentifikator,
+        skrivetilgang: Boolean,
         bruker: Saksbehandler,
     ): Boolean {
         try {
@@ -129,7 +132,7 @@ class BehandlingKlientImpl(config: Config, httpClient: HttpClient, private val h
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilgang/person",
+                            url = "$resourceUrl/tilgang/person?skrivetilgang=$skrivetilgang",
                         ),
                     brukerTokenInfo = bruker,
                     postBody = foedselsnummer.value,

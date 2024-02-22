@@ -9,7 +9,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.micrometer.core.instrument.Clock
 import io.micrometer.core.instrument.binder.MeterBinder
+import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics
 import io.micrometer.core.instrument.binder.logging.LogbackMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.core.instrument.binder.system.UptimeMetrics
@@ -17,12 +19,14 @@ import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import io.prometheus.client.CollectorRegistry
 
-fun Application.metricsModule(additionalMetrics: List<MeterBinder> = emptyList()) {
+fun Application.metricsRoute(additionalMetrics: List<MeterBinder> = emptyList()) {
     install(MicrometerMetrics) {
         registry = Metrikker.registrySaksbehandling
         meterBinders = listOf(
             LogbackMetrics(),
+            JvmGcMetrics(),
             JvmMemoryMetrics(),
+            JvmThreadMetrics(),
             ProcessorMetrics(),
             UptimeMetrics(),
         ) + additionalMetrics

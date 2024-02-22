@@ -2,7 +2,6 @@ package no.nav.etterlatte
 
 import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.HoconApplicationConfig
-import migrering.migreringRoute
 import no.nav.etterlatte.libs.common.logging.sikkerLoggOppstartOgAvslutning
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.database.migrate
@@ -10,13 +9,16 @@ import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.etterlatte.migrering.ApplicationContext
 import no.nav.etterlatte.migrering.FeilendeMigreringLytterRiver
 import no.nav.etterlatte.migrering.LagreKoblingRiver
+import no.nav.etterlatte.migrering.LyttPaaDistribuerBrevRiver
 import no.nav.etterlatte.migrering.LyttPaaIverksattVedtakRiver
 import no.nav.etterlatte.migrering.PauseMigreringRiver
+import no.nav.etterlatte.migrering.migreringRoute
 import no.nav.etterlatte.migrering.start.MigrerSpesifikkSakRiver
-import no.nav.etterlatte.migrering.start.MigreringRiver
 import no.nav.etterlatte.migrering.start.StartMigrering
+import no.nav.etterlatte.migrering.start.StartMigreringRiver
+import no.nav.etterlatte.migrering.verge.SjekkVergeadresserJobb
+import no.nav.etterlatte.rapidsandrivers.getRapidEnv
 import no.nav.helse.rapids_rivers.RapidApplication
-import rapidsandrivers.getRapidEnv
 
 fun main() = ApplicationContext().let { Server(it).run() }
 
@@ -41,7 +43,7 @@ internal class Server(private val context: ApplicationContext) {
                 }
                 .build()
                 .also { rapidsConnection ->
-                    MigreringRiver(rapidsConnection)
+                    StartMigreringRiver(rapidsConnection)
                     MigrerSpesifikkSakRiver(
                         rapidsConnection,
                         penklient,
@@ -53,8 +55,15 @@ internal class Server(private val context: ApplicationContext) {
                     LagreKoblingRiver(rapidsConnection, pesysRepository)
                     PauseMigreringRiver(rapidsConnection, pesysRepository)
                     LyttPaaIverksattVedtakRiver(rapidsConnection, pesysRepository, penklient, featureToggleService)
+                    LyttPaaDistribuerBrevRiver(rapidsConnection, pesysRepository)
                     FeilendeMigreringLytterRiver(rapidsConnection, pesysRepository)
                     StartMigrering(startMigreringRepository, rapidsConnection, featureToggleService)
+                    SjekkVergeadresserJobb(
+                        pdlTjenesterKlient,
+                        pesysRepository,
+                        vergeRepository,
+                        grunnlagKlient,
+                    )
                 }.start()
         }
 }

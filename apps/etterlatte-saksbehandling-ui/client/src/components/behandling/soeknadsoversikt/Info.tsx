@@ -15,7 +15,7 @@ export const Info = ({ label, tekst, undertekst, wide }: InfoProps) => {
       <Label size="small" as="p">
         {label}
       </Label>
-      <BodyShort>{tekst}</BodyShort>
+      <BodyShort as="div">{tekst}</BodyShort>
       {undertekst && <Detail>{undertekst}</Detail>}
     </InfoElement>
   )

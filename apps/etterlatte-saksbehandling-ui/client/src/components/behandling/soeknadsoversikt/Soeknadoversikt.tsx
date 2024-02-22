@@ -5,7 +5,7 @@ import { Heading } from '@navikt/ds-react'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
 import { Soeknadsdato } from './Soeknadsdato'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
-import { behandlingErRedigerbar, behandlingErUtfylt } from '../felles/utils'
+import { behandlingErRedigerbar, soeknadsoversiktErFerdigUtfylt } from '../felles/utils'
 import { VurderingsResultat } from '~shared/types/VurderingsResultat'
 import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/gyldigFramsattSoeknad/OversiktGyldigFramsatt'
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
@@ -21,25 +21,25 @@ import {
   BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE,
   BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER,
   BP_FOERSTEGANGSBEHANDLING_HJEMLER,
+  BP_FORELDRELOES_PAA_GAMMELT_REGELVERK_BEHANDLES_I_PESYS_BESKRIVELSE,
   OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE,
   OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE,
   OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_HJEMLER,
   OMS_FOERSTEGANGSBEHANDLING_HJEMLER,
 } from '~components/behandling/virkningstidspunkt/utils'
 import Virkningstidspunkt from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
-import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { formaterStringDato } from '~utils/formattering'
-import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
+import { useAppSelector } from '~store/Store'
+import { GrunnlagForVirkningstidspunkt } from '~components/behandling/soeknadsoversikt/GrunnlagForVirkningstidspunkt'
 
 export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const redigerbar = behandlingErRedigerbar(behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const erGyldigFremsatt = behandling.gyldighetsprøving?.resultat === VurderingsResultat.OPPFYLT
   const personopplysninger = usePersonopplysninger()
-  const avdoede = personopplysninger?.avdoede?.find((po) => po)
-  const avdoedDoedsdato = avdoede?.opplysning?.doedsdato
   const erBosattUtland = behandling.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND
+  const erForeldreloes = (personopplysninger?.avdoede || []).length >= 2
 
   const hjemlerVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
     switch (sakType) {
@@ -50,17 +50,26 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
     }
   }
 
-  const beskrivelseVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean) => {
+  const beskrivelseVirkningstidspunkt = (sakType: SakType, erBosattUtland: boolean, erForeldreloes: boolean) => {
     switch (sakType) {
       case SakType.BARNEPENSJON:
-        return erBosattUtland
-          ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
-          : BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE
+        return bpBeskrivelseVirkningstidspunkt(erBosattUtland, erForeldreloes)
       case SakType.OMSTILLINGSSTOENAD:
-        return erBosattUtland
-          ? OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
-          : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
+        return omsBeskrivelseVirkningstidspunkt(erBosattUtland)
     }
+  }
+
+  function bpBeskrivelseVirkningstidspunkt(erBosattUtland: boolean, erForeldreloes: boolean) {
+    const standard = erBosattUtland
+      ? BP_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
+      : BP_FOERSTEGANGSBEHANDLING_BESKRIVELSE
+    return erForeldreloes ? standard + BP_FORELDRELOES_PAA_GAMMELT_REGELVERK_BEHANDLES_I_PESYS_BESKRIVELSE : standard
+  }
+
+  function omsBeskrivelseVirkningstidspunkt(erBosattUtland: boolean) {
+    return erBosattUtland
+      ? OMS_FOERSTEGANGSBEHANDLING_BOSATT_UTLAND_BESKRIVELSE
+      : OMS_FOERSTEGANGSBEHANDLING_BESKRIVELSE
   }
 
   return (
@@ -95,22 +104,9 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
               redigerbar={redigerbar}
               behandling={behandling}
               hjemler={hjemlerVirkningstidspunkt(behandling.sakType, erBosattUtland)}
-              beskrivelse={beskrivelseVirkningstidspunkt(behandling.sakType, erBosattUtland)}
+              beskrivelse={beskrivelseVirkningstidspunkt(behandling.sakType, erBosattUtland, erForeldreloes)}
             >
-              {{
-                info: (
-                  <>
-                    <Info
-                      label="Dødsdato"
-                      tekst={avdoedDoedsdato ? formaterStringDato(avdoedDoedsdato) : 'Ikke registrert!'}
-                      undertekst={formaterGrunnlagKilde(avdoede?.kilde)}
-                    />
-                    {behandling.soeknadMottattDato && (
-                      <Info label="Søknad mottatt" tekst={formaterStringDato(behandling.soeknadMottattDato)} />
-                    )}
-                  </>
-                ),
-              }}
+              {{ info: <GrunnlagForVirkningstidspunkt /> }}
             </Virkningstidspunkt>{' '}
             <BoddEllerArbeidetUtlandet behandling={behandling} redigerbar={redigerbar} />
           </>
@@ -121,7 +117,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
       <Familieforhold behandling={behandling} personopplysninger={personopplysninger} />
       {redigerbar ? (
         <BehandlingHandlingKnapper>
-          {behandlingErUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}
+          {soeknadsoversiktErFerdigUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}
         </BehandlingHandlingKnapper>
       ) : (
         <NesteOgTilbake />

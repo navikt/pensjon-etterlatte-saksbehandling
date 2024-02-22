@@ -19,5 +19,6 @@ dependencies {
     testImplementation(libs.test.jupiter.root)
     testImplementation(libs.ktor2.clientmock)
     testImplementation(libs.kotlinx.coroutinescore)
+    testImplementation(libs.test.kotest.assertionscore)
     testImplementation(project(":libs:testdata"))
 }

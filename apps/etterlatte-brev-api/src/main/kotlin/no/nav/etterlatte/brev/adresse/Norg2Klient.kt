@@ -75,8 +75,15 @@ data class Norg2Kontaktinfo(
     val telefonnummer: String? = null,
     val telefonnummerKommentar: String? = null,
     val faksnummer: String? = null,
-    val epost: String? = null,
+    val epost: Norg2Epost? = null,
     val postadresse: Postadresse? = null,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Norg2Epost(
+    val adresse: String? = null,
+    val kommentar: String? = null,
+    val kunIntern: Boolean = false,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

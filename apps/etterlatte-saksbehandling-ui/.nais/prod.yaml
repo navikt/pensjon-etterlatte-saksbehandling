@@ -8,7 +8,7 @@ metadata:
   annotations:
     reloader.stakater.com/match: "true"
 spec:
-  image: {{ image }}
+  image: "{{image}}"
   port: 8080
   replicas:
     max: 4
@@ -30,6 +30,8 @@ spec:
           - id: ad7b87a6-9180-467c-affc-20a566b0fec0 # 0000-GA-Strengt_Fortrolig_Adresse
           - id: 9ec6487d-f37a-4aad-a027-cd221c1ac32b #0000-GA-Fortrolig_Adresse
           - id: e750ceb5-b70b-4d94-b4fa-9d22467b786b # 0000-GA-Egne_ansatte
+          - id: baf0a4b6-71ca-45dd-9731-9f3469627c38 # 0000-GA-PENSJON_NASJONAL_M_LOGG
+          - id: f8ceac75-30fe-4f0f-aec6-db706986caf0 # 0000-GA-PENSJON_NASJONAL_U_LOGG
         extra:
           - NAVident
     sidecar:
@@ -51,11 +53,10 @@ spec:
     path: /metrics
   resources:
     limits:
-      cpu: 500m
       memory: 512Mi
     requests:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 50m
+      memory: 128Mi
   env:
     - name: BREV_API_URL
       value: http://etterlatte-brev-api
@@ -87,10 +88,14 @@ spec:
       value: api://prod-gcp.etterlatte.etterlatte-trygdetid/.default
     - name: GOSYS_URL
       value: https://gosys.intern.nav.no/gosys
+    - name: EESSI_PENSJON_URL
+      value: https://pensjon-utland.intern.nav.no/gjenny
     - name: RINA_URL
       value: http://rina-ss1.adeo.no
+    - name: NORG2_URL
+      value: https://norg2.prod-fss-pub.nais.io
     - name: APP_VERSION
-      value: {{ image }}
+      value: "{{ image }}"
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
@@ -100,6 +105,7 @@ spec:
         - host: login.microsoftonline.com
         - host: graph.microsoft.com
         - host: etterlatte-unleash-api.nav.cloud.nais.io
+        - host: norg2.prod-fss-pub.nais.io
       rules:
         - application: etterlatte-brev-api
         - application: etterlatte-vilkaarsvurdering

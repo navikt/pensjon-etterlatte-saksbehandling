@@ -2,12 +2,15 @@ package no.nav.etterlatte.oppgaveGosys
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.common.klienter.PdlKlient
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.GosysOppgave
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.time.Duration
 import java.time.LocalTime
@@ -25,19 +28,19 @@ interface GosysOppgaveService {
         oppgaveVersjon: Long,
         tilordnes: String,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): Long
 
     suspend fun endreFrist(
         oppgaveId: String,
         oppgaveVersjon: Long,
         nyFrist: Tidspunkt,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): Long
 }
 
 class GosysOppgaveServiceImpl(
     private val gosysOppgaveKlient: GosysOppgaveKlient,
-    private val pdlKlient: PdlKlient,
+    private val pdltjenesterKlient: PdlTjenesterKlient,
 ) : GosysOppgaveService {
     private val cache =
         Caffeine.newBuilder()
@@ -59,20 +62,28 @@ class GosysOppgaveServiceImpl(
                 emptyMap<String, String>()
             } else {
                 val aktoerIds = gosysOppgaver.oppgaver.mapNotNull { it.aktoerId }.toSet()
-                pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
+                pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(aktoerIds)
             }
 
         return gosysOppgaver.oppgaver
-            .filter { it.aktoerId != null }
-            .map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }
+            .map { it.fraGosysOppgaveTilNy(fnrByAktoerId) }.filterForEnheter(Kontekst.get().AppUser)
     }
+
+    private fun List<GosysOppgave>.filterForEnheter(bruker: User) = this.filterOppgaverForEnheter(bruker)
+
+    private fun List<GosysOppgave>.filterOppgaverForEnheter(user: User) =
+        this.filterForEnheter(
+            user,
+        ) { item, enheter ->
+            enheter.contains(item.enhet)
+        }
 
     override suspend fun hentOppgave(
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysOppgave {
         return cache.getIfPresent(id) ?: gosysOppgaveKlient.hentOppgave(id, brukerTokenInfo).let {
-            it.fraGosysOppgaveTilNy(pdlKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId!!)))
+            it.fraGosysOppgaveTilNy(pdltjenesterKlient.hentFolkeregisterIdenterForAktoerIdBolk(setOf(it.aktoerId!!)))
         }.also { cache.put(id, it) }
     }
 
@@ -81,8 +92,13 @@ class GosysOppgaveServiceImpl(
         oppgaveVersjon: Long,
         tilordnes: String,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(oppgaveId, oppgaveVersjon, tilordnes, brukerTokenInfo)
+    ): Long {
+        return gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(
+            oppgaveId,
+            oppgaveVersjon,
+            tilordnes,
+            brukerTokenInfo,
+        ).versjon
     }
 
     override suspend fun endreFrist(
@@ -90,8 +106,8 @@ class GosysOppgaveServiceImpl(
         oppgaveVersjon: Long,
         nyFrist: Tidspunkt,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo)
+    ): Long {
+        return gosysOppgaveKlient.endreFrist(oppgaveId, oppgaveVersjon, nyFrist.toLocalDate(), brukerTokenInfo).versjon
     }
 
     companion object {
@@ -108,11 +124,14 @@ class GosysOppgaveServiceImpl(
                 versjon = this.versjon,
                 status = Status.NY,
                 opprettet = this.opprettetTidspunkt,
-                frist = Tidspunkt.ofNorskTidssone(dato = this.fristFerdigstillelse, tid = LocalTime.MIDNIGHT),
-                fnr = fnrByAktoerId[this.aktoerId]!!,
+                frist =
+                    this.fristFerdigstillelse?.let { frist ->
+                        Tidspunkt.ofNorskTidssone(frist, LocalTime.MIDNIGHT)
+                    },
+                fnr = fnrByAktoerId[this.aktoerId],
                 gjelder = temaTilSakType[this.tema]!!.name,
                 enhet = this.tildeltEnhetsnr,
-                saksbehandler = this.tilordnetRessurs,
+                saksbehandler = this.tilordnetRessurs?.let { OppgaveSaksbehandler(it) },
                 beskrivelse = this.beskrivelse,
                 sakType = temaTilSakType[this.tema]!!,
             )

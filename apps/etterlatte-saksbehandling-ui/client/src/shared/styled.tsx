@@ -65,15 +65,23 @@ export const ContentHeader = styled.div`
 `
 
 export const FlexRow = styled.div<{
-  justify?: 'left' | 'center' | 'right'
+  justify?: 'left' | 'center' | 'right' | 'space-between'
+  align?: 'start' | 'center' | 'end'
   $spacing?: boolean
 }>`
   display: flex;
   justify-content: ${(props) => props.justify ?? 'left'};
+  align-items: ${(props) => props.align ?? 'normal'};
   gap: 1rem;
   ${(props) =>
     props.$spacing &&
     css`
       margin-bottom: 1rem;
     `}
+`
+
+export const SpaceChildren = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 `

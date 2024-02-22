@@ -23,6 +23,7 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-utbetaling-model/**
+      - libs/etterlatte-brev-model/**
       - gradle/libs.versions.toml
   pull_request:
     branches:
@@ -36,7 +37,12 @@ on:
       - libs/etterlatte-migrering-model/**
       - libs/etterlatte-pdl-model/**
       - libs/etterlatte-utbetaling-model/**
+      - libs/etterlatte-brev-model/**
       - gradle/libs.versions.toml
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   test:
@@ -48,9 +54,6 @@ jobs:
     if: github.event_name != 'pull_request'
     uses: ./.github/workflows/.build.yaml
     secrets: inherit
-    permissions:
-      contents: 'read'
-      id-token: 'write'
 
   deploy:
     if: github.event_name != 'pull_request'

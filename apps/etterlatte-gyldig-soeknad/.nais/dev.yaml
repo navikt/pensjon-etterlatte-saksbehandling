@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   azure:
     application:
@@ -21,6 +21,9 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
+  resources:
+    requests:
+      cpu: 25m
   replicas:
     cpuThresholdPercentage: 90
     max: 1
@@ -35,14 +38,11 @@ spec:
       value: latest
     - name: BEHANDLING_AZURE_SCOPE
       value: api://dev-gcp.etterlatte.etterlatte-behandling/.default
-    - name: PDLTJENESTER_AZURE_SCOPE
-      value: api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default
   envFrom:
     - secret: my-application-unleash-api-token
   accessPolicy:
     outbound:
       rules:
         - application: etterlatte-behandling
-        - application: etterlatte-pdltjenester
       external:
         - host: etterlatte-unleash-api.nav.cloud.nais.io

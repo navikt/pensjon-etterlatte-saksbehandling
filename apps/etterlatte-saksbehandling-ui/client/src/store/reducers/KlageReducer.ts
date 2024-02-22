@@ -1,8 +1,9 @@
 import { createAction, createReducer } from '@reduxjs/toolkit'
-import { erKlageRedigerbar, Klage } from '~/shared/types/Klage'
+import { erKlageRedigerbar, InitieltUtfallMedBegrunnelseOgMeta, Klage } from '~/shared/types/Klage'
 
 export const addKlage = createAction<Klage>('klage/add')
 export const resetKlage = createAction('klage/reset')
+export const updateInitieltUtfall = createAction<InitieltUtfallMedBegrunnelseOgMeta>('klage/update/initieltutfall')
 
 const initialState: { klage: Klage | null; redigerbar: boolean } = {
   klage: null,
@@ -16,5 +17,13 @@ export const klageReducer = createReducer(initialState, (builder) => {
   builder.addCase(resetKlage, (state) => {
     state.klage = null
     state.redigerbar = true
+  })
+  builder.addCase(updateInitieltUtfall, (state, action) => {
+    if (state.klage) {
+      state.klage = {
+        ...state.klage,
+        initieltUtfall: action.payload,
+      }
+    }
   })
 })

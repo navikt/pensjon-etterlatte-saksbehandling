@@ -11,6 +11,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
+import java.time.Duration
 import java.util.Properties
 
 class ApplicationTest {
@@ -46,7 +47,7 @@ class ApplicationTest {
 
         val offset = kafkaProducer.publiser("nøkkel", "verdi")
 
-        consumer.poll(2000).also { assertFalse(it.isEmpty) }.forEach {
+        consumer.poll(Duration.ofMillis(2000)).also { assertFalse(it.isEmpty) }.forEach {
             assertEquals("nøkkel", it.key())
             assertEquals("verdi", it.value())
             assertEquals(offset.second, it.offset())

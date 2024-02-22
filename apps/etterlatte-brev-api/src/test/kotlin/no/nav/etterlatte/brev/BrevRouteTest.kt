@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -12,9 +11,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.log
-import io.ktor.server.config.HoconApplicationConfig
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.Called
@@ -24,18 +20,21 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.etterlatte.brev.BrevService.BrevPayload
+import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.ktor.issueSaksbehandlerToken
+import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.ktor.AZURE_ISSUER
-import no.nav.etterlatte.libs.ktor.restModule
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.junit.jupiter.api.AfterAll
@@ -45,21 +44,19 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import testsupport.buildTestApplicationConfigurationForOauth
 import kotlin.random.Random
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class BrevRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
-    private lateinit var hoconApplicationConfig: HoconApplicationConfig
     private val brevService = mockk<BrevService>()
+    private val pdfService = mockk<PDFService>()
+    private val brevdistribuerer = mockk<Brevdistribuerer>()
     private val tilgangssjekker = mockk<Tilgangssjekker>()
 
     @BeforeAll
     fun before() {
         mockOAuth2Server.start()
-        val httpServer = mockOAuth2Server.config.httpServer
-        hoconApplicationConfig = buildTestApplicationConfigurationForOauth(httpServer.port(), AZURE_ISSUER, CLIENT_ID)
     }
 
     @AfterEach
@@ -77,7 +74,7 @@ internal class BrevRouteTest {
         val brevId = Random.nextLong()
 
         coEvery { brevService.hentBrev(any()) } returns opprettBrev(brevId)
-        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -101,7 +98,7 @@ internal class BrevRouteTest {
         val pdf = Pdf("Hello world".toByteArray())
 
         coEvery { brevService.genererPdf(any(), any()) } returns pdf
-        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -119,7 +116,7 @@ internal class BrevRouteTest {
 
         coVerify(exactly = 1) {
             brevService.genererPdf(brevId, any())
-            tilgangssjekker.harTilgangTilSak(any(), any())
+            tilgangssjekker.harTilgangTilSak(any(), any(), any())
         }
     }
 
@@ -128,7 +125,7 @@ internal class BrevRouteTest {
         val brevId = Random.nextLong()
 
         coEvery { brevService.hentBrevPayload(any()) } returns BrevPayload(Slate(), null)
-        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -145,7 +142,7 @@ internal class BrevRouteTest {
 
         coVerify(exactly = 1) {
             brevService.hentBrevPayload(brevId)
-            tilgangssjekker.harTilgangTilSak(any(), any())
+            tilgangssjekker.harTilgangTilSak(any(), any(), any())
         }
     }
 
@@ -154,7 +151,7 @@ internal class BrevRouteTest {
         val brevId = Random.nextLong()
         coEvery { brevService.lagreBrevPayload(any(), any()) } returns 1
         coEvery { brevService.lagreBrevPayloadVedlegg(any(), any()) } returns 1
-        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -172,13 +169,13 @@ internal class BrevRouteTest {
 
         coVerify(exactly = 1) {
             brevService.lagreBrevPayload(brevId, any())
-            tilgangssjekker.harTilgangTilSak(any(), any())
+            tilgangssjekker.harTilgangTilSak(any(), any(), any())
         }
     }
 
     @Test
     fun `Endepunkt som ikke finnes`() {
-        coEvery { tilgangssjekker.harTilgangTilSak(any(), any()) } returns true
+        coEvery { tilgangssjekker.harTilgangTilSak(any(), any(), any()) } returns true
 
         testApplication {
             val client = httpClient()
@@ -213,17 +210,7 @@ internal class BrevRouteTest {
         }
     }
 
-    private val accessToken: String by lazy {
-        mockOAuth2Server.issueToken(
-            issuerId = AZURE_ISSUER,
-            audience = CLIENT_ID,
-            claims =
-                mapOf(
-                    "navn" to "Test Veiledersen",
-                    "NAVident" to "S123456",
-                ),
-        ).serialize()
-    }
+    private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }
 
     private fun opprettBrev(id: BrevID) =
         Brev(
@@ -231,6 +218,7 @@ internal class BrevRouteTest {
             sakId = 41,
             behandlingId = null,
             tittel = null,
+            spraak = Spraak.NB,
             prosessType = BrevProsessType.AUTOMATISK,
             soekerFnr = "soeker_fnr",
             status = Status.OPPRETTET,
@@ -241,32 +229,29 @@ internal class BrevRouteTest {
                     "Stor Snerk",
                     STOR_SNERK,
                     null,
-                    Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
+                    Adresse(
+                        adresseType = "NORSKPOSTADRESSE",
+                        "Testgaten 13",
+                        "1234",
+                        "OSLO",
+                        land = "Norge",
+                        landkode = "NOR",
+                    ),
                 ),
+            brevtype = Brevtype.INFORMASJON,
         )
 
-    private fun ApplicationTestBuilder.httpClient(): HttpClient {
-        environment {
-            config = hoconApplicationConfig
+    private fun ApplicationTestBuilder.httpClient(): HttpClient =
+        runServer(mockOAuth2Server, "api") {
+            brevRoute(
+                brevService,
+                pdfService,
+                brevdistribuerer,
+                tilgangssjekker,
+            )
         }
-        application {
-            restModule(this.log, routePrefix = "api") {
-                brevRoute(
-                    brevService,
-                    tilgangssjekker,
-                )
-            }
-        }
-
-        return createClient {
-            install(ContentNegotiation) {
-                jackson()
-            }
-        }
-    }
 
     companion object {
-        private const val CLIENT_ID = "mock-client-id"
         private val STOR_SNERK = Foedselsnummer("11057523044")
         private val SAK_ID = Random.nextLong(1000)
     }

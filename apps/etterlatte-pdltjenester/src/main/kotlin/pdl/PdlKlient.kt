@@ -10,7 +10,7 @@ import io.ktor.http.ContentType.Application.Json
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.person.Behandlingsnummer
+import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Behandlingsnummer
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
@@ -63,8 +63,11 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
                 variables = PdlAdressebeskyttelseVariables(hentAdressebeskyttelseRequest.ident.value),
             )
 
+        val behandlingsnummer = findBehandlingsnummerFromSaktype(hentAdressebeskyttelseRequest.saktype)
+
         return retry<PdlAdressebeskyttelseResponse>(times = 3) {
             httpClient.post(apiUrl) {
+                header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.behandlingsnummer)
                 header(HEADER_TEMA, HEADER_TEMA_VALUE)
                 accept(Json)
                 contentType(Json)

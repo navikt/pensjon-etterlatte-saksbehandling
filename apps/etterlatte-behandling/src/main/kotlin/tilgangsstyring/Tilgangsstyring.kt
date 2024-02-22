@@ -22,8 +22,10 @@ import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.token.Saksbehandler
@@ -138,6 +140,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
     val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
     when (brukerTokenInfo) {
         is Saksbehandler -> {
+            val harLesetilgang = Kontekst.get().AppUser.harLesetilgang()
             val harTilgang =
                 inTransaction {
                     tilgangService.harTilgangTilPerson(
@@ -145,7 +148,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
                         Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
                     )
                 }
-            if (harTilgang) {
+            if (harTilgang && harLesetilgang) {
                 onSuccess(foedselsnummer)
             } else {
                 call.respond(HttpStatusCode.NotFound)
@@ -153,6 +156,25 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
         }
 
         else -> onSuccess(foedselsnummer)
+    }
+}
+
+class ManglerLesetilgang(sakId: Long) :
+    UgyldigForespoerselException(
+        code = "MANGLER_LESETILGANG",
+        detail = "Mangler lesetilgang til sak id: $sakId",
+    )
+
+inline fun PipelineContext<*, ApplicationCall>.withLesetilgang(onSuccess: () -> Unit) {
+    when (brukerTokenInfo) {
+        is Saksbehandler -> {
+            if (Kontekst.get().AppUser.harLesetilgang()) {
+                onSuccess()
+            } else {
+                throw ManglerLesetilgang(sakId)
+            }
+        }
+        is Systembruker -> onSuccess()
     }
 }
 
@@ -182,6 +204,28 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerAndGrad
     }
 }
 
+suspend inline fun PipelineContext<*, ApplicationCall>.kunSkrivetilgang(onSuccess: () -> Unit) {
+    val harSkrivetilgang = Kontekst.get().AppUser.harSkrivetilgang()
+    when (harSkrivetilgang) {
+        true -> onSuccess()
+        false -> call.respond(HttpStatusCode.Forbidden)
+    }
+}
+
+suspend inline fun PipelineContext<*, ApplicationCall>.kunSaksbehandlerMedSkrivetilgang(onSuccess: (Saksbehandler) -> Unit) {
+    when (val token = brukerTokenInfo) {
+        is Saksbehandler -> {
+            val harSkrivetilgang = Kontekst.get().appUserAsSaksbehandler().harSkrivetilgang()
+            when (harSkrivetilgang) {
+                true -> onSuccess(token)
+                false -> call.respond(HttpStatusCode.Forbidden)
+            }
+        }
+
+        else -> call.respond(HttpStatusCode.Forbidden)
+    }
+}
+
 suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: () -> Unit) {
     when (brukerTokenInfo) {
         is Saksbehandler -> {
@@ -198,7 +242,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.kunAttestant(onSuccess: (
     }
 }
 
-private val saksbehandlereMedTilgangTilAlleEnheter = listOf("S128848", "K105085", "O113803")
+val saksbehandlereMedTilgangTilAlleEnheter = listOf("S128848", "K105085", "O113803")
 
 fun <T> List<T>.filterForEnheter(
     user: User,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { behandlingErUtfylt, behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
+import { behandlingSkalSendeBrev, soeknadsoversiktErFerdigUtfylt } from '~components/behandling/felles/utils'
 import {
   IBehandlingStatus,
   IBehandlingsType,
@@ -7,6 +7,7 @@ import {
   IDetaljertBehandling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
+  Vedtaksloesning,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { SakType } from '~shared/types/sak'
@@ -25,7 +26,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeTruthy()
   })
@@ -39,7 +40,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -53,7 +54,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -67,7 +68,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -81,7 +82,7 @@ describe('BARNEPENSJON: utfylt søknad er gyldig', () => {
       undefined
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -97,7 +98,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeTruthy()
   })
@@ -111,7 +112,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -125,7 +126,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
       undefined
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -139,7 +140,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -153,7 +154,7 @@ describe('OMSTILLINGSSTOENAD: utfylt søknad er gyldig', () => {
       mockGyldighetsprøving()
     )
 
-    const utfylt = behandlingErUtfylt(behandling)
+    const utfylt = soeknadsoversiktErFerdigUtfylt(behandling)
 
     expect(utfylt).toBeFalsy()
   })
@@ -166,7 +167,6 @@ describe('behandlingSkalSendeBrev', () => {
     behandlingType: IBehandlingsType.REVURDERING,
     revurderingsaarsak: Revurderingaarsak.SOESKENJUSTERING,
   }
-  /* TODO EY-3232 Fjern utkommentering
   const regulering = {
     ...revurdering,
     revurderingsaarsak: Revurderingaarsak.REGULERING,
@@ -176,7 +176,6 @@ describe('behandlingSkalSendeBrev', () => {
     expect(behandlingSkalSendeBrev(regulering.behandlingType, regulering.revurderingsaarsak)).toBeFalsy()
     expect(behandlingSkalSendeBrev(manueltopphoer.behandlingType, manueltopphoer.revurderingsaarsak)).toBeFalsy()
   })
-*/
 
   it('skal gi true for foerstegangsbehandling og revurderinger som ikke er regulering', () => {
     expect(behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)).toBeTruthy()
@@ -206,8 +205,8 @@ const opprettBehandling = (
     revurderingsaarsak: null,
     revurderinginfo: null,
     begrunnelse: null,
-    etterbetaling: null,
     utlandstilknytning: null,
+    kilde: Vedtaksloesning.GJENNY,
   }
 }
 

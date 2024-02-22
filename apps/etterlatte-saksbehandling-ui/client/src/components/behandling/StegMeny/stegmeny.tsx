@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingsType, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import { NavLenke } from '~components/behandling/StegMeny/NavLenke'
 import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
 import {
@@ -14,6 +14,8 @@ import { useEffect } from 'react'
 import { useAppDispatch } from '~store/Store'
 
 import { isSuccess } from '~shared/api/apiUtils'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { FEATURE_TOGGLE_LAG_VARSELBREV } from '~components/behandling/brev/Varselbrev'
 
 export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const dispatch = useAppDispatch()
@@ -21,8 +23,12 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   const { id, behandlingType } = behandling
 
   const [fetchVilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
-  const soeknadRoutes_ = soeknadRoutes(behandling)
-  const revurderingRoutes_ = revurderingRoutes(behandling)
+
+  const lagVarselbrev =
+    behandling.kilde === Vedtaksloesning.GJENOPPRETTA &&
+    useFeatureEnabledMedDefault(FEATURE_TOGGLE_LAG_VARSELBREV, false)
+  const soeknadRoutes_ = soeknadRoutes(behandling, lagVarselbrev)
+  const revurderingRoutes_ = revurderingRoutes(behandling, lagVarselbrev)
   const erSisteRoute = (index: number, list: BehandlingRouteTypes[]) => index != list.length - 1
 
   // Trenger vilkårsvurdering for å kunne vise riktig routes etter at vv i en behandling er utført

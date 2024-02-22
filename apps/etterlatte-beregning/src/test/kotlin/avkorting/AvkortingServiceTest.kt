@@ -1,4 +1,4 @@
-package avkorting
+package no.nav.etterlatte.avkorting
 
 import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
@@ -8,10 +8,6 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.avkorting.Avkorting
-import no.nav.etterlatte.avkorting.AvkortingGrunnlag
-import no.nav.etterlatte.avkorting.AvkortingRepository
-import no.nav.etterlatte.avkorting.AvkortingService
 import no.nav.etterlatte.beregning.Beregning
 import no.nav.etterlatte.beregning.BeregningService
 import no.nav.etterlatte.beregning.regler.avkortinggrunnlag

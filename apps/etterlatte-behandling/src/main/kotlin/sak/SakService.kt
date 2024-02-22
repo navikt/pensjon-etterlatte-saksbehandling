@@ -11,6 +11,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
@@ -36,6 +37,8 @@ interface SakService {
 
     fun finnSak(id: Long): Sak?
 
+    fun finnFlyktningForSak(id: Long): Flyktning?
+
     fun markerSakerMedSkjerming(
         sakIder: List<Long>,
         skjermet: Boolean,
@@ -60,6 +63,12 @@ interface SakService {
     suspend fun finnNavkontorForPerson(fnr: String): Navkontor
 }
 
+class ManglerTilgangTilEnhet(enheter: List<String>) :
+    UgyldigForespoerselException(
+        code = "MANGLER_TILGANG_TIL_ENHET",
+        detail = "Mangler tilgang til enhet $enheter",
+    )
+
 class SakServiceImpl(
     private val dao: SakDao,
     private val skjermingKlient: SkjermingKlient,
@@ -75,13 +84,19 @@ class SakServiceImpl(
     }
 
     override fun hentEnkeltSakForPerson(fnr: String): Sak {
-        return this.finnSaker(
-            fnr,
-        ).firstOrNull() ?: throw PersonManglerSak("Personen har ikke sak")
+        val saker = finnSakerForPerson(fnr)
+
+        if (saker.isEmpty()) throw PersonManglerSak()
+
+        return saker.filterForEnheter().firstOrNull()
+            ?: throw ManglerTilgangTilEnhet(saker.map { it.enhet })
     }
 
     override suspend fun finnNavkontorForPerson(fnr: String): Navkontor {
-        val sak = inTransaction { hentEnkeltSakForPerson(fnr) }
+        val sak =
+            inTransaction {
+                hentEnkeltSakForPerson(fnr)
+            }
         return brukerService.finnNavkontorForPerson(fnr, sak.sakType)
     }
 
@@ -116,13 +131,17 @@ class SakServiceImpl(
         gradering: AdressebeskyttelseGradering?,
         sjekkEnhetMotNorg: Boolean,
     ): Sak {
-        val enhet =
-            if (sjekkEnhetMotNorg) {
-                sjekkEnhet(fnr, type, overstyrendeEnhet)
-            } else {
-                overstyrendeEnhet!!
-            }
-        val sak = finnSakerForPersonOgType(fnr, type) ?: dao.opprettSak(fnr, type, enhet)
+        var sak = finnSakerForPersonOgType(fnr, type)
+        if (sak == null) {
+            val enhet =
+                if (sjekkEnhetMotNorg) {
+                    sjekkEnhet(fnr, type, overstyrendeEnhet)
+                } else {
+                    overstyrendeEnhet!!
+                }
+            sak = dao.opprettSak(fnr, type, enhet)
+        }
+
         sjekkSkjerming(fnr = fnr, sakId = sak.id)
         gradering?.let {
             oppdaterAdressebeskyttelse(sak.id, it)
@@ -184,6 +203,8 @@ class SakServiceImpl(
     override fun finnSak(id: Long): Sak? {
         return dao.hentSak(id).sjekkEnhet()
     }
+
+    override fun finnFlyktningForSak(id: Long): Flyktning? = dao.hentSak(id).sjekkEnhet()?.let { dao.finnFlyktningForSak(id) }
 
     private fun List<Sak>.filterForEnheter() =
         this.filterSakerForEnheter(

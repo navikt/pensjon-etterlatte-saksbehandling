@@ -28,12 +28,15 @@ data class MigreringRequest(
     val flyktningStatus: Boolean = false,
     val spraak: Spraak,
     val utlandstilknytningType: UtlandstilknytningType? = null,
+    val erUnder18: Boolean = true,
+    val kanAutomatiskGjenopprettes: Boolean = false,
 ) {
     fun opprettPersongalleri() =
         Persongalleri(
             soeker = this.soeker.value,
             avdoed = this.avdoedForelder.map { it.ident.value },
             gjenlevende = listOfNotNull(this.gjenlevendeForelder?.value),
+            // TODO Endre?
             innsender = Vedtaksloesning.PESYS.name,
         )
 

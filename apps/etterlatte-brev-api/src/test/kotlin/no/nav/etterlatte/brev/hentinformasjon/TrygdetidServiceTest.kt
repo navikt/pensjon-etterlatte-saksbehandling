@@ -12,9 +12,11 @@ import no.nav.etterlatte.libs.common.trygdetid.BeregnetTrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.GrunnlagOpplysningerDto
+import no.nav.etterlatte.libs.common.trygdetid.OpplysningerDifferanse
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.trygdetid.TrygdetidType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -23,10 +25,11 @@ import java.util.UUID
 
 internal class TrygdetidServiceTest {
     private val trygdetidKlient = mockk<TrygdetidKlient>()
+    private val beregningKlient = mockk<BeregningKlient>()
 
     @Test
     fun `henter trygdetid nasjonal beregning`() {
-        val service = TrygdetidService(trygdetidKlient)
+        val service = TrygdetidService(trygdetidKlient, beregningKlient)
         val behandlingId = UUID.randomUUID()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetidDto(behandlingId))
 
@@ -49,7 +52,7 @@ internal class TrygdetidServiceTest {
 
     @Test
     fun `henter ut prorata riktig`() {
-        val service = TrygdetidService(trygdetidKlient)
+        val service = TrygdetidService(trygdetidKlient, beregningKlient)
         val behandlingId = UUID.randomUUID()
         coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns listOf(trygdetidDto(behandlingId))
 
@@ -96,8 +99,8 @@ internal class TrygdetidServiceTest {
                 listOf(
                     TrygdetidGrunnlagDto(
                         id = UUID.randomUUID(),
-                        type = "",
-                        bosted = "Danmark",
+                        type = TrygdetidType.FAKTISK.name,
+                        bosted = "NOR",
                         periodeFra = LocalDate.of(2020, Month.MARCH, 5),
                         periodeTil = LocalDate.of(2023, Month.JANUARY, 1),
                         kilde = null,
@@ -122,5 +125,6 @@ internal class TrygdetidServiceTest {
                 ),
             overstyrtNorskPoengaar = null,
             ident = AVDOED_FOEDSELSNUMMER.value,
+            opplysningerDifferanse = OpplysningerDifferanse(false, mockk<GrunnlagOpplysningerDto>()),
         )
 }

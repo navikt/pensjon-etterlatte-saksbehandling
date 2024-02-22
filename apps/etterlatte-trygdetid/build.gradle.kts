@@ -28,4 +28,5 @@ dependencies {
     testImplementation(project(":libs:testdata"))
     testImplementation(libs.ktor2.jackson)
     testImplementation(libs.ktor2.clientcontentnegotiation)
+    testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
 }

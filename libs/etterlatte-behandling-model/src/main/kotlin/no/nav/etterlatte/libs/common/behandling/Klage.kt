@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
+import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.person.VergeEllerFullmektig
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -32,6 +34,8 @@ enum class KlageStatus {
     // potensielt en status for å markere oversendingen til Kabal
     FERDIGSTILT, // klagen er ferdig fra gjenny sin side
 
+    AVBRUTT,
+
     ;
 
     companion object {
@@ -41,6 +45,14 @@ enum class KlageStatus {
 
         fun kanOppdatereUtfall(status: KlageStatus): Boolean {
             return status === FORMKRAV_OPPFYLT || status === UTFALL_VURDERT
+        }
+
+        fun kanAvbryte(status: KlageStatus): Boolean {
+            return status !in listOf(FERDIGSTILT, AVBRUTT)
+        }
+
+        fun kanEndres(status: KlageStatus): Boolean {
+            return status in listOf(OPPRETTET, FORMKRAV_OPPFYLT, UTFALL_VURDERT)
         }
     }
 }
@@ -77,6 +89,32 @@ data class KlageResultat(
     val sendtInnstillingsbrev: SendtInnstillingsbrev?,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class InnkommendeKlage(
+    val mottattDato: LocalDate,
+    val journalpostId: String,
+    val innsender: String?,
+)
+
+data class InitieltUtfallMedBegrunnelseOgSaksbehandler(
+    val utfallMedBegrunnelse: InitieltUtfallMedBegrunnelseDto,
+    val saksbehandler: String,
+    val tidspunkt: Tidspunkt,
+)
+
+data class InitieltUtfallMedBegrunnelseDto(
+    val utfall: KlageUtfall,
+    val begrunnelse: String,
+)
+
+enum class KlageUtfall {
+    OMGJOERING,
+    DELVIS_OMGJOERING,
+    STADFESTE_VEDTAK,
+    AVVIST,
+    AVVIST_MED_OMGJOERING,
+}
+
 data class Klage(
     val id: UUID,
     val sak: Sak,
@@ -84,9 +122,12 @@ data class Klage(
     val status: KlageStatus,
     val kabalStatus: KabalStatus?,
     val formkrav: FormkravMedBeslutter?,
-    val utfall: KlageUtfall?,
+    val initieltUtfall: InitieltUtfallMedBegrunnelseOgSaksbehandler?,
+    val utfall: KlageUtfallMedData?,
     val resultat: KlageResultat?,
     val kabalResultat: BehandlingResultat?,
+    val innkommendeDokument: InnkommendeKlage?,
+    val aarsakTilAvbrytelse: AarsakTilAvbrytelse?,
 ) {
     fun oppdaterFormkrav(
         formkrav: Formkrav,
@@ -109,10 +150,15 @@ data class Klage(
                     JaNei.JA -> KlageStatus.FORMKRAV_OPPFYLT
                     JaNei.NEI -> KlageStatus.FORMKRAV_IKKE_OPPFYLT
                 },
+            utfall =
+                when (formkrav.erFormkraveneOppfylt) {
+                    JaNei.JA -> this.utfall
+                    JaNei.NEI -> null
+                },
         )
     }
 
-    fun oppdaterUtfall(utfallMedBrev: KlageUtfall): Klage {
+    fun oppdaterUtfall(utfallMedBrev: KlageUtfallMedData): Klage {
         if (!this.kanOppdatereUtfall()) {
             throw IllegalStateException(
                 "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen" +
@@ -121,9 +167,11 @@ data class Klage(
         }
         val hjemmel =
             when (utfallMedBrev) {
-                is KlageUtfall.StadfesteVedtak -> utfallMedBrev.innstilling.lovhjemmel
-                is KlageUtfall.DelvisOmgjoering -> utfallMedBrev.innstilling.lovhjemmel
-                is KlageUtfall.Omgjoering -> null
+                is KlageUtfallMedData.StadfesteVedtak -> utfallMedBrev.innstilling.lovhjemmel
+                is KlageUtfallMedData.DelvisOmgjoering -> utfallMedBrev.innstilling.lovhjemmel
+                is KlageUtfallMedData.Omgjoering -> null
+                is KlageUtfallMedData.Avvist -> null
+                is KlageUtfallMedData.AvvistMedOmgjoering -> null
             }
         hjemmel?.let {
             require(it.kanBrukesForSaktype(this.sak.sakType)) {
@@ -135,6 +183,20 @@ data class Klage(
             utfall = utfallMedBrev,
             status = KlageStatus.UTFALL_VURDERT,
         )
+    }
+
+    fun oppdaterIntieltUtfallMedBegrunnelse(
+        utfall: InitieltUtfallMedBegrunnelseDto,
+        saksbehandlerIdent: String,
+    ): Klage {
+        if (!this.kanOppdatereUtfall()) {
+            throw IllegalStateException(
+                "Kan ikke oppdatere utfallet i klagen med id=${this.id} på grunn av statusen" +
+                    "til klagen (${this.status})",
+            )
+        } else {
+            return this.copy(initieltUtfall = InitieltUtfallMedBegrunnelseOgSaksbehandler(utfall, saksbehandlerIdent, Tidspunkt.now()))
+        }
     }
 
     fun ferdigstill(resultat: KlageResultat): Klage {
@@ -150,6 +212,19 @@ data class Klage(
             resultat = resultat,
             status = KlageStatus.FERDIGSTILT,
             kabalStatus = KabalStatus.OPPRETTET.takeIf { harSendtTilKabal },
+        )
+    }
+
+    fun avbryt(aarsak: AarsakTilAvbrytelse): Klage {
+        if (!this.kanAvbryte()) {
+            throw IllegalStateException(
+                "Kan ikke avbryte klagen med id=${this.id} " +
+                    "på grunn av status til klagen (${this.status})",
+            )
+        }
+        return this.copy(
+            status = KlageStatus.AVBRUTT,
+            aarsakTilAvbrytelse = aarsak,
         )
     }
 
@@ -176,11 +251,51 @@ data class Klage(
         }
     }
 
-    fun tilKabalForsendelse() {
+    fun kanAvbryte(): Boolean {
+        return KlageStatus.kanAvbryte(this.status)
+    }
+
+    fun tilBrevbakerBlankett(): BrevbakerBlankettDTO {
+        if (this.utfall !is KlageUtfallMedData.StadfesteVedtak) {
+            throw IllegalStateException("Kan ikke lage en oversendelsesblankett for noe som ikke er innstilling")
+        }
+        val innstilling = this.utfall.innstilling
+        val formkrav =
+            this.formkrav?.formkrav ?: throw IllegalStateException(
+                "Fant ikke definerte formkrav for det vi skal lage blankett for",
+            )
+
+        return BrevbakerBlankettDTO(
+            formkrav =
+                FormkravBrevbaker(
+                    vedtaketKlagenGjelder =
+                        VedtakKlagenGjelderBrevbaker(
+                            datoAttestert = formkrav.vedtaketKlagenGjelder!!.datoAttestert!!.toLocalDate(),
+                            vedtakType = formkrav.vedtaketKlagenGjelder.vedtakType!!,
+                        ),
+                    erKlagenSignert = formkrav.erKlagenSignert == JaNei.JA,
+                    gjelderKlagenNoeKonkretIVedtaket = formkrav.gjelderKlagenNoeKonkretIVedtaket == JaNei.JA,
+                    erKlagerPartISaken = formkrav.gjelderKlagenNoeKonkretIVedtaket == JaNei.JA,
+                    erKlagenFramsattInnenFrist = formkrav.erKlagenFramsattInnenFrist == JaNei.JA,
+                    erFormkraveneOppfylt = formkrav.erFormkraveneOppfylt == JaNei.JA,
+                    begrunnelse = formkrav.begrunnelse,
+                ),
+            // TODO: mennesklig lesbart navn her
+            hjemmel = innstilling.lovhjemmel.name,
+            sakType = this.sak.sakType,
+            internKommentar = innstilling.internKommentar,
+            // TODO: Kommer i oppdatering av innstillingsobjektet
+            ovesendelseTekst = "",
+            klager = this.innkommendeDokument?.innsender ?: "",
+            klageDato = this.innkommendeDokument?.mottattDato ?: this.opprettet.toLocalDate(),
+        )
     }
 
     companion object {
-        fun ny(sak: Sak): Klage {
+        fun ny(
+            sak: Sak,
+            innkommendeDokument: InnkommendeKlage?,
+        ): Klage {
             return Klage(
                 id = UUID.randomUUID(),
                 sak = sak,
@@ -191,33 +306,76 @@ data class Klage(
                 utfall = null,
                 resultat = null,
                 kabalResultat = null,
+                innkommendeDokument = innkommendeDokument,
+                aarsakTilAvbrytelse = null,
+                initieltUtfall = null,
             )
         }
     }
 }
 
+data class BrevbakerBlankettDTO(
+    val formkrav: FormkravBrevbaker,
+    val hjemmel: String,
+    val sakType: SakType,
+    val internKommentar: String?,
+    val ovesendelseTekst: String,
+    val klager: String,
+    val klageDato: LocalDate,
+) {
+    val innhold: List<String> = emptyList()
+}
+
+data class FormkravBrevbaker(
+    val vedtaketKlagenGjelder: VedtakKlagenGjelderBrevbaker,
+    val erKlagenSignert: Boolean,
+    val gjelderKlagenNoeKonkretIVedtaket: Boolean,
+    val erKlagerPartISaken: Boolean,
+    val erKlagenFramsattInnenFrist: Boolean,
+    val erFormkraveneOppfylt: Boolean,
+    val begrunnelse: String?,
+)
+
+data class VedtakKlagenGjelderBrevbaker(
+    val datoAttestert: LocalDate,
+    val vedtakType: VedtakType,
+)
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "utfall")
-sealed class KlageUtfall {
+sealed class KlageUtfallMedData {
     abstract val saksbehandler: Grunnlagsopplysning.Saksbehandler
 
     @JsonTypeName("OMGJOERING")
     data class Omgjoering(
         val omgjoering: KlageOmgjoering,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfall()
+    ) : KlageUtfallMedData()
 
     @JsonTypeName("DELVIS_OMGJOERING")
     data class DelvisOmgjoering(
         val omgjoering: KlageOmgjoering,
         val innstilling: InnstillingTilKabal,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfall()
+    ) : KlageUtfallMedData()
 
     @JsonTypeName("STADFESTE_VEDTAK")
     data class StadfesteVedtak(
         val innstilling: InnstillingTilKabal,
         override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
-    ) : KlageUtfall()
+    ) : KlageUtfallMedData()
+
+    @JsonTypeName("AVVIST")
+    data class Avvist(
+        override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
+        val vedtak: KlageVedtak,
+        val brev: KlageVedtaksbrev,
+    ) : KlageUtfallMedData()
+
+    @JsonTypeName("AVVIST_MED_OMGJOERING")
+    data class AvvistMedOmgjoering(
+        val omgjoering: KlageOmgjoering,
+        override val saksbehandler: Grunnlagsopplysning.Saksbehandler,
+    ) : KlageUtfallMedData()
 }
 
 sealed class GyldigForYtelse {
@@ -231,23 +389,23 @@ sealed class GyldigForYtelse {
         }
     }
 
-    object OmsOgBp : GyldigForYtelse() {
+    data object OmsOgBp : GyldigForYtelse() {
         override val gyldigForBarnepensjon = true
         override val gyldigForOmstillingsstoenad = true
     }
 
-    object KunOms : GyldigForYtelse() {
+    data object KunOms : GyldigForYtelse() {
         override val gyldigForBarnepensjon = false
         override val gyldigForOmstillingsstoenad = true
     }
 
-    object KunBp : GyldigForYtelse() {
+    data object KunBp : GyldigForYtelse() {
         override val gyldigForBarnepensjon = true
         override val gyldigForOmstillingsstoenad = false
     }
 }
 
-enum class KabalHjemmel(val gyldigForYtelse: GyldigForYtelse) {
+enum class KabalHjemmel(private val gyldigForYtelse: GyldigForYtelse) {
     FTRL_1_3(GyldigForYtelse.OmsOgBp),
     FTRL_1_3_A(GyldigForYtelse.OmsOgBp),
     FTRL_1_3_B(GyldigForYtelse.OmsOgBp),
@@ -366,11 +524,22 @@ enum class GrunnForOmgjoering {
 
 data class KlageOmgjoering(val grunnForOmgjoering: GrunnForOmgjoering, val begrunnelse: String)
 
-class InnstillingTilKabal(val lovhjemmel: KabalHjemmel, val tekst: String, val brev: KlageBrevInnstilling)
+class InnstillingTilKabal(
+    val lovhjemmel: KabalHjemmel,
+    val internKommentar: String?,
+    val brev: KlageBrevInnstilling,
+)
 
-data class InnstillingTilKabalUtenBrev(val lovhjemmel: String, val tekst: String)
+class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: String?) {
+    val internKommentar: String? = internKommentar
+        get() = if (field.isNullOrBlank()) null else field
+}
 
 data class KlageBrevInnstilling(val brevId: Long)
+
+data class KlageVedtaksbrev(val brevId: Long)
+
+data class KlageVedtak(val vedtakId: Long)
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "utfall")
 sealed class KlageUtfallUtenBrev {
@@ -389,6 +558,14 @@ sealed class KlageUtfallUtenBrev {
     data class StadfesteVedtak(
         val innstilling: InnstillingTilKabalUtenBrev,
     ) : KlageUtfallUtenBrev()
+
+    @JsonTypeName("AVVIST")
+    class Avvist() : KlageUtfallUtenBrev()
+
+    @JsonTypeName("AVVIST_MED_OMGJOERING")
+    data class AvvistMedOmgjoering(
+        val omgjoering: KlageOmgjoering,
+    ) : KlageUtfallUtenBrev()
 }
 
 data class Formkrav(
@@ -398,6 +575,7 @@ data class Formkrav(
     val gjelderKlagenNoeKonkretIVedtaket: JaNei,
     val erKlagenFramsattInnenFrist: JaNei,
     val erFormkraveneOppfylt: JaNei,
+    val begrunnelse: String? = null,
 ) {
     companion object {
         fun erFormkravKonsistente(formkrav: Formkrav): Boolean {
@@ -429,11 +607,6 @@ data class FormkravMedBeslutter(
     val formkrav: Formkrav,
     val saksbehandler: Grunnlagsopplysning.Saksbehandler,
 )
-
-enum class KlageHendelseType {
-    OPPRETTET,
-    FERDIGSTILT,
-}
 
 data class KlageOversendelseDto(val klage: Klage, val ekstraData: EkstradataInnstilling)
 

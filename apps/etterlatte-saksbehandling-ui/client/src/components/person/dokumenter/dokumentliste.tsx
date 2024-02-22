@@ -1,11 +1,17 @@
-import { Detail, Heading, Table } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { Button, Detail, Heading, Modal, Table } from '@navikt/ds-react'
+import { formaterJournalpostStatus, formaterJournalpostType, formaterStringDato } from '~utils/formattering'
 import DokumentModal from './dokumentModal'
 import Spinner from '~shared/Spinner'
-import { Journalpost } from '~shared/types/Journalpost'
+import { Journalpost, Journalposttype } from '~shared/types/Journalpost'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 import { mapApiResult, Result } from '~shared/api/apiUtils'
+import { InformationSquareIcon } from '@navikt/aksel-icons'
+import { FlexRow } from '~shared/styled'
+import { useState } from 'react'
+import { hentUtsendingsinfo } from '~shared/api/dokument'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { Info } from '~components/behandling/soeknadsoversikt/Info'
 
 const colonner = ['ID', 'Tittel', 'Avsender/Mottaker', 'Dato', 'Sak', 'Status', 'Type', '']
 
@@ -57,14 +63,16 @@ export const Dokumentliste = ({ dokumenter }: { dokumenter: Result<Journalpost[]
                     <Table.DataCell>
                       {dokument?.sak ? `${dokument.sak.fagsaksystem}: ${dokument.sak.fagsakId || '-'}` : '-'}
                     </Table.DataCell>
-                    <Table.DataCell>{dokument.journalstatus}</Table.DataCell>
-                    <Table.DataCell>{dokument.journalposttype === 'I' ? 'Inngående' : 'Utgående'}</Table.DataCell>
+                    <Table.DataCell>{formaterJournalpostStatus(dokument.journalstatus)}</Table.DataCell>
+                    <Table.DataCell>{formaterJournalpostType(dokument.journalposttype)}</Table.DataCell>
                     <Table.DataCell>
-                      <DokumentModal
-                        tittel={dokument.tittel}
-                        journalpostId={dokument.journalpostId}
-                        dokumentInfoId={dokument.dokumenter[0].dokumentInfoId}
-                      />
+                      <FlexRow justify="right">
+                        {dokument.journalposttype === Journalposttype.U && (
+                          <UtsendingsinfoModal journalpost={dokument} />
+                        )}
+
+                        <DokumentModal journalpost={dokument} />
+                      </FlexRow>
                     </Table.DataCell>
                   </Table.Row>
                 ))}
@@ -75,3 +83,61 @@ export const Dokumentliste = ({ dokumenter }: { dokumenter: Result<Journalpost[]
     </Table>
   </>
 )
+
+const UtsendingsinfoModal = ({ journalpost }: { journalpost: Journalpost }) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const [status, apiHentUtsendingsinfo] = useApiCall(hentUtsendingsinfo)
+
+  const open = () => {
+    setIsOpen(true)
+    apiHentUtsendingsinfo({ journalpostId: journalpost.journalpostId })
+  }
+
+  return (
+    <>
+      <Button variant="tertiary" title="Utsendingsinfo" size="small" icon={<InformationSquareIcon />} onClick={open} />
+
+      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
+        <Modal.Header>
+          <Heading size="medium">Utsendingsinfo</Heading>
+        </Modal.Header>
+
+        <Modal.Body>
+          {mapApiResult(
+            status,
+            <Spinner visible label="Henter utsendingsinfo" />,
+            (error) => (
+              <ApiErrorAlert>{error.detail || 'Feil ved henting av utsendingsinfo'}</ApiErrorAlert>
+            ),
+            (result) => (
+              <>
+                {!result.utsendingsinfo && <i>Ingen utsendingsinformasjon på journalposten</i>}
+
+                {result.utsendingsinfo?.fysiskpostSendt?.adressetekstKonvolutt && (
+                  <Info
+                    label="Adressetekst konvolutt"
+                    tekst={
+                      <div style={{ whiteSpace: 'pre-wrap' }}>
+                        {result.utsendingsinfo?.fysiskpostSendt?.adressetekstKonvolutt}
+                      </div>
+                    }
+                  />
+                )}
+
+                {result.utsendingsinfo?.digitalpostSendt?.adresse && (
+                  <Info
+                    label="Adressetekst konvolutt"
+                    tekst={
+                      <div style={{ whiteSpace: 'pre-wrap' }}>{result.utsendingsinfo?.digitalpostSendt?.adresse}</div>
+                    }
+                  />
+                )}
+              </>
+            )
+          )}
+        </Modal.Body>
+      </Modal>
+    </>
+  )
+}

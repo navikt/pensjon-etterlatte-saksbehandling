@@ -7,32 +7,31 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.AvkortingDto
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.BEREGN
-import no.nav.etterlatte.rapidsandrivers.ReguleringEvents.OPPRETT_VEDTAK
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
+import no.nav.etterlatte.rapidsandrivers.AVKORTING_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
+import no.nav.etterlatte.rapidsandrivers.BEREGNING_KEY
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.ReguleringHendelseType
+import no.nav.etterlatte.rapidsandrivers.SAK_TYPE
+import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
-import rapidsandrivers.AVKORTING_KEY
-import rapidsandrivers.BEHANDLING_ID_KEY
-import rapidsandrivers.BEHANDLING_VI_OMREGNER_FRA_KEY
-import rapidsandrivers.BEREGNING_KEY
-import rapidsandrivers.HENDELSE_DATA_KEY
-import rapidsandrivers.SAK_TYPE
-import rapidsandrivers.behandlingId
-import rapidsandrivers.migrering.ListenerMedLoggingOgFeilhaandtering
 
 internal class OmregningHendelserRiver(
     rapidsConnection: RapidsConnection,
     private val beregningService: BeregningService,
     private val trygdetidService: TrygdetidService,
-) : ListenerMedLoggingOgFeilhaandtering(BEREGN) {
+) : ListenerMedLoggingOgFeilhaandtering() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, hendelsestype) {
+        initialiserRiver(rapidsConnection, ReguleringHendelseType.BEREGN) {
             validate { it.requireKey(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_TYPE) }
             validate { it.rejectKey(BEREGNING_KEY) }
@@ -63,7 +62,7 @@ internal class OmregningHendelserRiver(
                         .body<AvkortingDto>()
                 packet[AVKORTING_KEY] = avkorting
             }
-            packet[EVENT_NAME_KEY] = OPPRETT_VEDTAK
+            packet.setEventNameForHendelseType(ReguleringHendelseType.OPPRETT_VEDTAK)
             context.publish(packet.toJson())
         }
         logger.info("Publiserte oppdatert omregningshendelse")

@@ -25,15 +25,15 @@ dependencies {
 
 tasks {
     withType<Wrapper> {
-        gradleVersion = "8.0"
+        gradleVersion = "8.5"
     }
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
+        kotlinOptions.jvmTarget = JavaVersion.VERSION_21.toString()
     }
     java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     withType<AnalyzeDependenciesTask> {
         warnUsedUndeclared = true

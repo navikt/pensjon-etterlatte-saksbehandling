@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   liveness:
     initialDelay: 5
@@ -14,6 +14,11 @@ spec:
   readiness:
     initialDelay: 5
     path: /health/isready
+  prometheus:
+    enabled: true
+    path: /metrics
+  secureLogs:
+    enabled: true
   strategy:
     type: Recreate
   kafka:
@@ -21,6 +26,9 @@ spec:
   azure:
     application:
       enabled: true
+  resources:
+    requests:
+      cpu: 25m
   replicas:
     cpuThresholdPercentage: 90
     max: 1

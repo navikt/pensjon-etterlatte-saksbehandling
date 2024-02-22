@@ -1,0 +1,1 @@
+update stoenad set nettoytelse = null where nettoytelse = 'null';

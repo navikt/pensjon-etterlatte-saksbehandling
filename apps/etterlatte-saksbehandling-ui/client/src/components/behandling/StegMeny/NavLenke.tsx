@@ -13,9 +13,10 @@ export const NavLenke = (props: {
 }) => {
   const { pathInfo, separator } = props
   const { status } = props.behandling
+
   const routeErDisabled =
     pathInfo.kreverBehandlingsstatus &&
-    !hentGyldigeNavigeringsStatuser(status).includes(pathInfo.kreverBehandlingsstatus)
+    !hentGyldigeNavigeringsStatuser(status).includes(pathInfo.kreverBehandlingsstatus(props.behandling))
 
   return (
     <>

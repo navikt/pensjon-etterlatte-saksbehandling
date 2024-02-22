@@ -14,7 +14,7 @@ import { VurderingsboksWrapper } from '~components/vurderingsboks/Vurderingsboks
 import { SoeknadsoversiktTextArea } from '~components/behandling/soeknadsoversikt/SoeknadsoversiktTextArea'
 import { hentMinimumsVirkningstidspunkt } from '~components/behandling/virkningstidspunkt/utils'
 import { UseMonthPickerOptions } from '@navikt/ds-react/esm/date/hooks/useMonthPicker'
-import { DatoVelger } from '~shared/DatoVelger'
+import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
 import styled from 'styled-components'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
@@ -36,7 +36,7 @@ const Virkningstidspunkt = (props: {
   const dispatch = useAppDispatch()
   const [, fastsettVirkningstidspunktRequest, resetToInitial] = useApiCall(fastsettVirkningstidspunkt)
 
-  const [vurdert, setVurdert] = useState(behandling.virkningstidspunkt !== null)
+  const [vurdert, setVurdert] = useState<boolean>(behandling.virkningstidspunkt !== null)
   const [virkningstidspunkt, setVirkningstidspunkt] = useState<Date | null>(
     behandling.virkningstidspunkt ? new Date(behandling.virkningstidspunkt.dato) : null
   )
@@ -46,9 +46,6 @@ const Virkningstidspunkt = (props: {
   )
 
   const [errorTekst, setErrorTekst] = useState<string>('')
-
-  const avdoedDoedsdato = avdoede?.opplysning?.doedsdato
-  const tittel = 'Hva er virkningstidspunkt for behandlingen?'
 
   function finnMinimumvirkningstidspunkt() {
     if (erBosattUtland) {
@@ -61,8 +58,8 @@ const Virkningstidspunkt = (props: {
   }
 
   const { monthpickerProps, inputProps } = useMonthpicker({
-    fromDate: hentMinimumsVirkningstidspunkt(avdoedDoedsdato, finnMinimumvirkningstidspunkt()),
-    toDate: addMonths(new Date(), 1),
+    fromDate: hentMinimumsVirkningstidspunkt(avdoede?.opplysning?.doedsdato, finnMinimumvirkningstidspunkt()),
+    toDate: addMonths(new Date(), 4),
     onMonthChange: (date: Date) => setVirkningstidspunkt(date),
     inputFormat: 'dd.MM.yyyy',
     onValidate: (val) => {
@@ -96,9 +93,11 @@ const Virkningstidspunkt = (props: {
         dispatch(oppdaterBehandlingsstatus(IBehandlingStatus.OPPRETTET))
         onSuccess?.()
       },
-      () =>
+      (error) =>
         setErrorTekst(
-          'Kunne ikke sette virkningstidspunkt. Last siden på nytt og prøv igjen, meld sak hvis problemet vedvarer'
+          `Kunne ikke sette virkningstidspunkt. ${
+            error.detail ? error.detail : 'Last siden på nytt og prøv igjen, meld sak hvis problemet vedvarer'
+          }`
         )
     )
   }
@@ -132,7 +131,7 @@ const Virkningstidspunkt = (props: {
             <LeggTilVurderingButton onClick={() => setVurdert(true)}>Legg til vurdering</LeggTilVurderingButton>
           ) : (
             <VurderingsboksWrapper
-              tittel={tittel}
+              tittel="Hva er virkningstidspunkt for behandlingen?"
               subtittelKomponent={
                 <VStack gap="4">
                   {erBosattUtland && (
@@ -177,7 +176,7 @@ const Virkningstidspunkt = (props: {
               defaultRediger={behandling.virkningstidspunkt === null}
             >
               <VStack gap="4">
-                <VurderingsTitle title={tittel} />
+                <VurderingsTitle title="Hva er virkningstidspunkt for behandlingen?" />
 
                 {erBosattUtland && (
                   <DatoVelger

@@ -6,4 +6,6 @@ enum class VedtakType {
     AVSLAG,
     ENDRING,
     TILBAKEKREVING,
+    AVVIST_KLAGE,
 }
+// TODO Flytte slik at pakkestruktur er riktig

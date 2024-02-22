@@ -72,8 +72,8 @@ fun Application.restModule(
             call.request.header("Authorization")?.let {
                 val token = JwtToken(it.substringAfterLast("Bearer "))
                 val jwtTokenClaims = token.jwtTokenClaims
-                jwtTokenClaims?.get("NAVident") as? String // human
-                    ?: token.jwtTokenClaims?.get("azp_name") as? String // system/app-user
+                jwtTokenClaims.get("NAVident") as? String // human
+                    ?: token.jwtTokenClaims.get("azp_name") as? String // system/app-user
             }
         }
     }
@@ -102,7 +102,7 @@ fun Application.restModule(
     }
 
     if (withMetrics) {
-        metricsModule(additionalMetrics)
+        metricsRoute(additionalMetrics)
     }
 }
 

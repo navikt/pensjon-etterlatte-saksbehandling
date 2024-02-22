@@ -4,7 +4,9 @@ import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.grunnbeloep.Grunnbeloep
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
+import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
 import no.nav.etterlatte.libs.common.beregning.YtelseMedGrunnlagDto
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
@@ -42,6 +44,35 @@ class BeregningKlient(config: Config, httpClient: HttpClient) {
         } catch (e: Exception) {
             logger.error(
                 "Henting av beregning for behandling med behandlingId=$behandlingId feilet",
+                e,
+            )
+            return null
+        }
+    }
+
+    internal suspend fun hentBeregningsGrunnlag(
+        behandlingId: UUID,
+        sakType: SakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): BeregningsGrunnlagFellesDto? {
+        try {
+            logger.info("Henter beregningsgrunnlag (behandlingId: $behandlingId)")
+
+            val endepunkt =
+                when (sakType) {
+                    SakType.BARNEPENSJON -> "barnepensjon"
+                    SakType.OMSTILLINGSSTOENAD -> "omstillingstoenad"
+                }
+            return downstreamResourceClient.get(
+                Resource(clientId, "$resourceUrl/api/beregning/beregningsgrunnlag/$behandlingId/$endepunkt"),
+                brukerTokenInfo,
+            ).mapBoth(
+                success = { resource -> deserialize(resource.response.toString()) },
+                failure = { errorResponse -> throw errorResponse },
+            )
+        } catch (e: Exception) {
+            logger.error(
+                "Henting av beregningsgrunnlag for behandling med behandlingId=$behandlingId feilet",
                 e,
             )
             return null

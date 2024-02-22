@@ -1,6 +1,13 @@
 package no.nav.etterlatte.behandling.tilbakekreving
 
 import io.kotest.matchers.shouldBe
+import io.mockk.mockk
+import no.nav.etterlatte.ConnectionAutoclosingTest
+import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
+import no.nav.etterlatte.DatabaseExtension
+import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tilbakekreving.Grunnlagsbeloep
@@ -16,53 +23,42 @@ import no.nav.etterlatte.libs.common.tilbakekreving.Periode
 import no.nav.etterlatte.libs.common.tilbakekreving.SakId
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAarsak
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingAktsomhet
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingHjemmel
+import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingStatus
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurdering
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingVurderingUaktsomhet
 import no.nav.etterlatte.libs.common.tilbakekreving.UUID30
 import no.nav.etterlatte.libs.common.tilbakekreving.VedtakId
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
 import no.nav.etterlatte.sak.SakDao
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.YearMonth
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TilbakekrevingDaoTest {
-    private lateinit var dataSource: DataSource
+@ExtendWith(DatabaseExtension::class)
+class TilbakekrevingDaoTest(val dataSource: DataSource) {
     private lateinit var sakDao: SakDao
     private lateinit var tilbakekrevingDao: TilbakekrevingDao
 
     private lateinit var sak: Sak
 
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
     @BeforeAll
     fun setup() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
-        val connection = dataSource.connection
-        sakDao = SakDao { connection }
-        tilbakekrevingDao = TilbakekrevingDao { connection }
+        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
+        tilbakekrevingDao = TilbakekrevingDao(ConnectionAutoclosingTest(dataSource))
+        val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+        Kontekst.set(
+            Context(
+                user,
+                DatabaseContextTest(dataSource),
+            ),
+        )
     }
 
     @BeforeEach
@@ -74,11 +70,6 @@ class TilbakekrevingDaoTest {
         dataSource.connection.prepareStatement("""TRUNCATE TABLE sak CASCADE """)
             .executeUpdate()
         sak = sakDao.opprettSak(fnr = "en bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "1337")
-    }
-
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
     }
 
     @Test

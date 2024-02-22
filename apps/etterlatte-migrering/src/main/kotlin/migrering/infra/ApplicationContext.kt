@@ -12,19 +12,14 @@ import no.nav.etterlatte.migrering.grunnlag.Utenlandstilknytningsjekker
 import no.nav.etterlatte.migrering.pen.PenKlient
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.migrering.start.StartMigreringRepository
+import no.nav.etterlatte.migrering.verge.VergeRepository
 import no.nav.etterlatte.migrering.verifisering.GjenlevendeForelderPatcher
-import no.nav.etterlatte.migrering.verifisering.PDLKlient
+import no.nav.etterlatte.migrering.verifisering.PdlTjenesterKlient
 import no.nav.etterlatte.migrering.verifisering.PersonHenter
 import no.nav.etterlatte.migrering.verifisering.Verifiserer
 
 internal class ApplicationContext {
-    private val properties: ApplicationProperties = ApplicationProperties.fromEnv(System.getenv())
-    val dataSource =
-        DataSourceBuilder.createDataSource(
-            jdbcUrl = properties.jdbcUrl,
-            username = properties.dbUsername,
-            password = properties.dbPassword,
-        )
+    val dataSource = DataSourceBuilder.createDataSource(System.getenv())
 
     private val config = ConfigFactory.load()
     val penklient = PenKlient(config, httpClient())
@@ -32,9 +27,10 @@ internal class ApplicationContext {
     val featureToggleService: FeatureToggleService =
         FeatureToggleService.initialiser(featureToggleProperties(ConfigFactory.load()))
     val pesysRepository = PesysRepository(dataSource)
+    val vergeRepository = VergeRepository(dataSource)
 
-    val pdlKlient =
-        PDLKlient(
+    val pdlTjenesterKlient =
+        PdlTjenesterKlient(
             config,
             httpClientClientCredentials(
                 azureAppClientId = config.getString("azure.app.client.id"),
@@ -43,8 +39,8 @@ internal class ApplicationContext {
                 azureAppScope = config.getString("pdl.azure.scope"),
             ),
         )
-    val personHenter = PersonHenter(pdlKlient, featureToggleService)
-    val gjenlevendeForelderPatcher = GjenlevendeForelderPatcher(pdlKlient = pdlKlient, personHenter)
+    val personHenter = PersonHenter(pdlTjenesterKlient)
+    val gjenlevendeForelderPatcher = GjenlevendeForelderPatcher(pdlTjenesterKlient = pdlTjenesterKlient, personHenter)
     val grunnlagKlient =
         GrunnlagKlient(
             config,
@@ -64,6 +60,8 @@ internal class ApplicationContext {
             utenlandstilknytningsjekker = utenlandstilknytningsjekker,
             personHenter = personHenter,
             featureToggleService = featureToggleService,
+            grunnlagKlient = grunnlagKlient,
+            penKlient = penklient,
         )
 
     val krrKlient =

@@ -1,6 +1,5 @@
 package no.nav.etterlatte.pdl.mapper
 
-import no.nav.etterlatte.libs.common.pdl.AkseptererIkkePersonerUtenIdentException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.pdl.ForeldreansvarPeriode
 import no.nav.etterlatte.pdl.HistorikkForeldreansvar
@@ -9,12 +8,6 @@ import no.nav.etterlatte.pdl.PdlHistorikkForeldreansvar
 
 object ForeldreansvarHistorikkMapper {
     fun mapForeldreAnsvar(pdlData: PdlHistorikkForeldreansvar): HistorikkForeldreansvar {
-        if (pdlData.foreldreansvar.any { it.ansvarligUtenIdentifikator != null }) {
-            throw AkseptererIkkePersonerUtenIdentException(
-                "Har en ansvarlig forelder som mangler ident i historikken for foreldreansvar.",
-            )
-        }
-
         val foreldreansvar =
             pdlData.foreldreansvar.filter {
                 it.ansvarlig != null
@@ -33,9 +26,11 @@ object ForeldreansvarHistorikkMapper {
                 .filter { it.relatertPersonsRolle != PdlForelderBarnRelasjonRolle.BARN }
                 .groupBy { it.relatertPersonsIdent }
                 .mapValues { it.value.maxByOrNull { fbr -> fbr.metadata.sisteRegistrertDato() } }
-                .map {
-                    it.value?.relatertPersonsIdent?.let { Folkeregisteridentifikator.of(it) }
-                        ?: throw AkseptererIkkePersonerUtenIdentException("${it.value} mangler ident")
+                .map { it.value }
+                .mapNotNull {
+                    it?.relatertPersonsIdent?.let { ident ->
+                        Folkeregisteridentifikator.of(ident)
+                    }
                 }
         return HistorikkForeldreansvar(
             ansvarligeForeldre = foreldreansvar,

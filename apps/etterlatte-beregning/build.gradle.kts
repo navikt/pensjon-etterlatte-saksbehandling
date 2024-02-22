@@ -39,4 +39,5 @@ dependencies {
         exclude("org.slf4j", "slf4j-api")
     }
     testImplementation(project(":libs:testdata"))
+    testImplementation(testFixtures((project(":libs:etterlatte-ktor"))))
 }

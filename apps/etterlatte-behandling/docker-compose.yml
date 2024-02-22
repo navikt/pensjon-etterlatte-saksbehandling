@@ -8,11 +8,3 @@ services:
       - '5439:5432'
     environment:
       - POSTGRES_HOST_AUTH_METHOD=trust
-
-  wiremock:
-    container_name: wiremock
-    image: wiremock/wiremock
-    ports:
-      - "9094:8080"
-    volumes:
-      - ./stubs:/home/wiremock

@@ -53,7 +53,7 @@ class StoenadRepositoryTest {
                 password = postgreSQLContainer.password,
             )
 
-        dataSource.migrate(gcp = false)
+        dataSource.migrate()
     }
 
     val mockBeregning =
@@ -387,6 +387,9 @@ class StoenadRepositoryTest {
         assertNull(lagretRad?.beregning)
         assertNull(repo.hentStoenadRader()[0].beregning)
         assertNull(repo.hentStoenadRader()[0].vedtakType)
+
+        val nyLagretRad = repo.lagreStoenadsrad(lagretRad!!.copy(nettoYtelse = null))
+        assertNull(nyLagretRad!!.nettoYtelse)
     }
 
     @Test

@@ -26,7 +26,6 @@ const defaultContext = {
   url: sanitizeUrlPossibleFnr(window.location.href),
   userAgent: window.navigator.userAgent,
   userDeviceInfo: browser.parsedResult,
-  appName: 'etterlatte-saksbehandling-ui-client',
 }
 
 const loggFunc = (data: any) => apiClient.post('/logg', data, true, true)
@@ -55,7 +54,7 @@ export const logger = {
         console.error('Unable to log error message: ', data, ' err: ', err)
       })
   },
-  generalInfo: (info: string) => {
+  generalInfo: (info: object) => {
     const data = { type: 'info', data: info, jsonContent: { ...defaultContext } }
     loggFunc(data)
       .then(() => store.dispatch(loggInfo(data)))
@@ -63,7 +62,7 @@ export const logger = {
         console.error('Unable to log info message: ', data, ' err: ', err)
       })
   },
-  generalError: (info: string) => {
+  generalError: (info: object) => {
     const data = { type: 'error', data: info, jsonContent: { ...defaultContext } }
     loggFunc(data)
       .then(() => store.dispatch(loggError(data)))
@@ -75,12 +74,15 @@ export const logger = {
 
 export const setupWindowOnError = () => {
   addEventListener('error', (event) => {
-    const { error, lineno, colno, message } = event
+    const { error: kanskjeError, lineno, colno, message } = event
 
+    const error = kanskjeError || {}
     if (import.meta.env.MODE === 'development') {
       console.error(error.message, error.stack)
     } else {
-      logger.error({ lineno, columnno: colno, message, error: JSON.stringify(error) })
+      if (message !== 'ResizeObserver loop completed with undelivered notifications.') {
+        logger.error({ lineno, columnno: colno, message, error: JSON.stringify(error) })
+      }
 
       if (error.stack && error.stack?.indexOf('invokeGuardedCallbackDev') >= 0 && !error.alreadySeen) {
         error.alreadySeen = true

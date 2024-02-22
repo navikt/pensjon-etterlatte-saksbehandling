@@ -4,7 +4,7 @@ type Props = {
   fnr: string | undefined
 }
 
-export const PersonInfoFnr: React.FC<Props> = ({ fnr }) => {
+export const PersonInfoFnr = ({ fnr }: Props) => {
   return (
     <PersonDetailWrapper adresse={false}>
       <div>

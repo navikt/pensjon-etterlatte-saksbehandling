@@ -31,15 +31,14 @@ import { SakType } from '~shared/types/sak'
 import { erOpphoer, Revurderingaarsak, tekstRevurderingsaarsak } from '~shared/types/Revurderingaarsak'
 import styled from 'styled-components'
 import { GrunnForSoeskenjustering } from '~components/behandling/revurderingsoversikt/GrunnForSoeskenjustering'
-import { AdoptertAv } from '~components/behandling/revurderingsoversikt/AdoptertAv'
 import { GrunnlagForVirkningstidspunkt } from '~components/behandling/revurderingsoversikt/GrunnlagForVirkningstidspunkt'
-import { OmgjoeringAvFarskap } from '~components/behandling/revurderingsoversikt/OmgjoeringAvFarskap'
 import { RevurderingAnnen } from '~components/behandling/revurderingsoversikt/RevurderingAnnen'
 import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/sluttbehandlingUtland/SluttbehandlingUtland'
 import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
 import { format } from 'date-fns'
+import { useAppSelector } from '~store/Store'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
   tekstRevurderingsaarsak[revurderingsaarsak]
@@ -88,7 +87,8 @@ const hjemlerOgBeskrivelseBarnepensjon = (revurderingsaarsak: Revurderingaarsak)
 
 export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }) => {
   const { behandling } = props
-  const redigerbar = behandlingErRedigerbar(behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const revurderingsaarsak = requireNotNull(
     behandling.revurderingsaarsak,
     'Kan ikke starte en revurdering uten en revurderingsårsak'
@@ -133,10 +133,6 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
         )}
         {behandling.revurderingsaarsak === Revurderingaarsak.SOESKENJUSTERING && (
           <GrunnForSoeskenjustering behandling={behandling} />
-        )}
-        {behandling.revurderingsaarsak === Revurderingaarsak.ADOPSJON && <AdoptertAv behandling={behandling} />}
-        {behandling.revurderingsaarsak === Revurderingaarsak.OMGJOERING_AV_FARSKAP && (
-          <OmgjoeringAvFarskap behandling={behandling} />
         )}
         {behandling.revurderingsaarsak === Revurderingaarsak.ANNEN && <RevurderingAnnen behandling={behandling} />}
 

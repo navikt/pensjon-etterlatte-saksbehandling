@@ -1,33 +1,34 @@
 package no.nav.etterlatte.rivers
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.etterlatte.brev.VedtaksbrevService
+import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.BrevHendelseType
+import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
+import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.toJson
-import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseType
-import no.nav.etterlatte.token.Fagsaksystem
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
-import rapidsandrivers.migrering.ListenerMedLogging
 import java.util.UUID
 
 internal class JournalfoerVedtaksbrevRiver(
     private val rapidsConnection: RapidsConnection,
-    private val service: VedtaksbrevService,
+    private val journalfoerBrevService: JournalfoerBrevService,
 ) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(JournalfoerVedtaksbrevRiver::class.java)
 
     init {
-        initialiserRiver(rapidsConnection, VedtakKafkaHendelseType.ATTESTERT.toString()) {
+        initialiserRiver(rapidsConnection, VedtakKafkaHendelseHendelseType.ATTESTERT) {
             validate { it.requireKey("vedtak") }
             validate { it.requireKey("vedtak.id") }
             validate { it.requireKey("vedtak.behandlingId") }
@@ -56,55 +57,16 @@ internal class JournalfoerVedtaksbrevRiver(
                     behandlingId = hentBehandling(packet),
                     ansvarligEnhet = packet["vedtak.vedtakFattet.ansvarligEnhet"].asText(),
                 )
-            logger.info("Nytt vedtak med id ${vedtak.vedtakId} er attestert. Ferdigstiller vedtaksbrev.")
-            val behandlingId = vedtak.behandlingId
 
-            val vedtaksbrev =
-                service.hentVedtaksbrev(behandlingId)
-                    ?: throw NoSuchElementException("Ingen vedtaksbrev funnet på behandlingId=$behandlingId")
-
-            // TODO: Forbedre denne "fiksen". Gjøres nå for å lappe sammen
-            if (vedtaksbrev.status in listOf(Status.JOURNALFOERT, Status.DISTRIBUERT, Status.SLETTET)) {
-                logger.warn("Vedtaksbrev (id=${vedtaksbrev.id}) er allerede ${vedtaksbrev.status}.")
-                return
-            }
-
-            val response =
-                try {
-                    service.journalfoerVedtaksbrev(vedtaksbrev, vedtak)
-                } catch (e: Exception) {
-                    val saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText()
-                    if (saksbehandler == Fagsaksystem.EY.navn) {
-                        logger.error(
-                            "Feila på å journalføre brev ${vedtaksbrev.id}. " +
-                                "Dette må følges opp manuelt av migreringsutviklerne.",
-                        )
-                        return
-                    } else {
-                        logger.error("Feila på å journalføre brev ${vedtaksbrev.id}")
-                        throw e
-                    }
-                }
-
-            logger.info("Vedtaksbrev for vedtak med id ${vedtak.vedtakId} er journalfoert OK")
-
+            val response = runBlocking { journalfoerBrevService.journalfoerVedtaksbrev(vedtak) } ?: return
             rapidsConnection.svarSuksess(
                 packet,
-                vedtaksbrev.id,
-                response.journalpostId,
+                response.second,
+                response.first.journalpostId,
             )
         } catch (e: Exception) {
-            val saksbehandler = packet["vedtak.vedtakFattet.ansvarligSaksbehandler"].asText()
-            if (saksbehandler == Fagsaksystem.EY.navn) {
-                logger.error(
-                    "Feila på å journalføre brev for behandling ${hentBehandling(packet)}. " +
-                        "Dette må følges opp manuelt av migreringsutviklerne.",
-                )
-                return
-            } else {
-                logger.error("Feil ved ferdigstilling av vedtaksbrev: ", e)
-                throw e
-            }
+            logger.error("Feil ved journalføring av vedtaksbrev: ", e)
+            throw e
         }
     }
 
@@ -116,9 +78,8 @@ internal class JournalfoerVedtaksbrevRiver(
         journalpostId: String,
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
-
-        packet[EVENT_NAME_KEY] = BrevEventTypes.JOURNALFOERT.toString()
-        packet["brevId"] = brevId
+        packet.setEventNameForHendelseType(BrevHendelseType.JOURNALFOERT)
+        packet[BREV_ID_KEY] = brevId
         packet["journalpostId"] = journalpostId
         packet["distribusjonType"] = DistribusjonsType.VEDTAK.toString()
 

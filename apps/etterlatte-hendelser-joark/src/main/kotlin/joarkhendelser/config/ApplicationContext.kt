@@ -2,12 +2,13 @@ package no.nav.etterlatte.joarkhendelser.config
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import joarkhendelser.behandling.BehandlingKlient
-import joarkhendelser.joark.SafKlient
-import joarkhendelser.pdl.PdlKlient
 import no.nav.etterlatte.joarkhendelser.JoarkHendelseHandler
+import no.nav.etterlatte.joarkhendelser.behandling.BehandlingKlient
 import no.nav.etterlatte.joarkhendelser.behandling.BehandlingService
 import no.nav.etterlatte.joarkhendelser.common.JoarkhendelseKonsument
+import no.nav.etterlatte.joarkhendelser.joark.SafKlient
+import no.nav.etterlatte.joarkhendelser.oppgave.OppgaveKlient
+import no.nav.etterlatte.joarkhendelser.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.requireEnvValue
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 
@@ -26,17 +27,24 @@ class ApplicationContext(env: Map<String, String> = System.getenv()) {
             config.getString("saf.base.url"),
         )
 
-    private val pdlKlient =
-        PdlKlient(
+    private val pdlTjenesterKlient =
+        PdlTjenesterKlient(
             httpClientCredentials(config.getString("pdl.azure.scope")),
             config.getString("pdl.base.url"),
         )
 
+    private val oppgaveKlient =
+        OppgaveKlient(
+            httpClientCredentials(config.getString("oppgave.azure.scope")),
+            config.getString("oppgave.base.url"),
+        )
+
     private val joarkHendelseHandler =
         JoarkHendelseHandler(
-            BehandlingService(behandlingKlient, pdlKlient),
+            BehandlingService(behandlingKlient, pdlTjenesterKlient),
             safKlient,
-            pdlKlient,
+            oppgaveKlient,
+            pdlTjenesterKlient,
         )
 
     val joarkKonsument =

@@ -1,6 +1,6 @@
 package no.nav.etterlatte.behandling.bosattutland
 
-import behandling.utland.LandMedDokumenter
+import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import java.util.UUID
 
 class BosattUtlandService(val bosattUtlandDao: BosattUtlandDao) {

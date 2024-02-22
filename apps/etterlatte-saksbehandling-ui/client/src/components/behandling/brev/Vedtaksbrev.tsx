@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { Alert, Heading } from '@navikt/ds-react'
 import { Border, HeadingWrapper } from '../soeknadsoversikt/styled'
 import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapper'
-import { getData, hentVedtaksbrev, isSuccessOrNotFound, opprettVedtaksbrev } from '~shared/api/brev'
+import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
 import { useParams } from 'react-router-dom'
 import { Soeknadsdato } from '../soeknadsoversikt/Soeknadsdato'
 import styled from 'styled-components'
@@ -13,42 +13,48 @@ import {
   behandlingSkalSendeBrev,
   sisteBehandlingHendelse,
 } from '~components/behandling/felles/utils'
-import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
-import MottakerPanel from '~components/behandling/brev/detaljer/MottakerPanel'
+import {
+  IBehandlingStatus,
+  IBehandlingsType,
+  IDetaljertBehandling,
+  Vedtaksloesning,
+} from '~shared/types/IDetaljertBehandling'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
 import { BrevProsessType, IBrev } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 
-import { fattVedtak } from '~shared/api/vedtaksvurdering'
+import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { SjekklisteValideringErrorSummary } from '~components/behandling/sjekkliste/SjekklisteValideringErrorSummary'
 import { IHendelse } from '~shared/types/IHendelse'
 import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
 import { hentBehandling } from '~shared/api/behandling'
-import { useAppDispatch } from '~store/Store'
-import { getVergeadresseFraGrunnlag } from '~shared/api/grunnlag'
-import { VergeFeilhaandtering } from '~components/person/VergeFeilhaandtering'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useSjekkliste, useSjekklisteValideringsfeil } from '~components/behandling/sjekkliste/useSjekkliste'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { addValideringsfeil, Valideringsfeilkoder } from '~store/reducers/SjekklisteReducer'
 import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
+import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
+import BrevTittel from '~components/person/brev/tittel/BrevTittel'
+import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
   const { sakId, soeknadMottattDato } = props.behandling
-  const redigerbar = behandlingErRedigerbar(props.behandling.status)
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
-  const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
+  const redigerbar = behandlingErRedigerbar(props.behandling.status) && innloggetSaksbehandler.skriveTilgang
+
+  const [vedtaksbrev, setVedtaksbrev] = useState<IBrev>()
   const [visAdvarselBehandlingEndret, setVisAdvarselBehandlingEndret] = useState(false)
 
   const [hentBrevStatus, hentBrev] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
-  const [vergeadresse, getVergeadresse] = useApiCall(getVergeadresseFraGrunnlag)
 
   const sjekkliste = useSjekkliste()
   const valideringsfeil = useSjekklisteValideringsfeil()
@@ -80,30 +86,43 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     }
   }, [vedtaksbrev])
 
-  useEffect(() => {
+  const hentBrevPaaNytt = () => {
     if (behandlingId) {
-      getVergeadresse(behandlingId)
+      hentBrev(behandlingId, (brev, statusCode) => {
+        if (statusCode === 200) {
+          setVedtaksbrev(brev)
+        } else if (statusCode === 204) {
+          opprettNyttVedtaksbrev({ sakId, behandlingId }, (nyttBrev) => {
+            setVedtaksbrev(nyttBrev)
+          })
+        }
+      })
     }
-  }, [vedtaksbrev])
+  }
 
   useEffect(() => {
     if (
       !behandlingId ||
       !sakId ||
-      !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak)
+      !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak) ||
+      behandling?.kilde === Vedtaksloesning.GJENOPPRETTA
     )
       return
 
-    hentBrev(behandlingId, (brev, statusCode) => {
-      if (statusCode === 200) {
-        setVedtaksbrev(brev)
-      } else if (statusCode === 204) {
-        opprettNyttVedtaksbrev({ sakId, behandlingId }, (nyttBrev) => {
-          setVedtaksbrev(nyttBrev)
+    hentBrevPaaNytt()
+  }, [behandlingId, sakId])
+
+  const [, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
+
+  useEffect(() => {
+    if (behandlingId) {
+      if (props.behandling.kilde === Vedtaksloesning.GJENOPPRETTA) {
+        oppdaterVedtakRequest(props.behandling.id, () => {
+          hentBrevPaaNytt()
         })
       }
-    })
-  }, [behandlingId, sakId])
+    }
+  }, [behandlingId])
 
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner visible label="Henter brev ..." />
@@ -112,20 +131,20 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   }
 
   const kanSendeTilAttestering = (): boolean => {
-    const kanSende =
-      behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
-      sjekkliste !== null &&
-      sjekkliste.bekreftet
-
-    if (!kanSende) {
-      const fant = valideringsfeil.find((e) => e === Valideringsfeilkoder.MAA_HUKES_AV)
-      if (!fant) {
-        dispatch(addValideringsfeil(Valideringsfeilkoder.MAA_HUKES_AV))
+    const erForestegangsbehandling = behandling?.behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING
+    if (erForestegangsbehandling) {
+      const sjekklisteErBekreftet = sjekkliste !== null && sjekkliste.bekreftet
+      if (!sjekklisteErBekreftet) {
+        const fant = valideringsfeil.find((e) => e === Valideringsfeilkoder.MAA_HUKES_AV)
+        if (!fant) {
+          dispatch(addValideringsfeil(Valideringsfeilkoder.MAA_HUKES_AV))
+        }
+        dispatch(visSjekkliste())
       }
-      dispatch(visSjekkliste())
+      return sjekklisteErBekreftet
+    } else {
+      return true
     }
-
-    return kanSende
   }
 
   return (
@@ -141,28 +160,30 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
             {soeknadMottattDato && <Soeknadsdato mottattDato={soeknadMottattDato} />}
 
             <br />
-            {(vedtaksbrev?.prosessType === BrevProsessType.MANUELL ||
-              vedtaksbrev?.prosessType === BrevProsessType.REDIGERBAR) && (
-              <WarningAlert>
-                {redigerbar
-                  ? 'Kan ikke generere brev automatisk. Du må selv redigere innholdet.'
-                  : 'Dette er et manuelt opprettet brev. Kontroller innholdet nøye før attestering.'}
-              </WarningAlert>
+            {behandling?.status === IBehandlingStatus.FATTET_VEDTAK && (
+              <WarningAlert>Kontroller innholdet nøye før attestering!</WarningAlert>
             )}
+
             {visAdvarselBehandlingEndret && (
               <WarningAlert>
                 Behandling er redigert etter brevet ble opprettet. Gå gjennom brevet og vurder om det bør tilbakestilles
                 for å få oppdaterte verdier fra behandlingen.
               </WarningAlert>
             )}
-            <br />
-            {vedtaksbrev && isSuccessOrNotFound(vergeadresse) && (
-              <MottakerPanel
-                vedtaksbrev={vedtaksbrev}
-                oppdater={(val) => setVedtaksbrev({ ...vedtaksbrev, mottaker: val })}
-                vergeadresse={getData(vergeadresse)}
-                redigerbar={redigerbar}
-              />
+
+            {vedtaksbrev && (
+              <>
+                <BrevTittel
+                  brevId={vedtaksbrev.id}
+                  sakId={vedtaksbrev.sakId}
+                  tittel={vedtaksbrev.tittel}
+                  kanRedigeres={redigerbar}
+                />
+                <br />
+                <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
+                <br />
+                <BrevMottaker brev={vedtaksbrev} kanRedigeres={redigerbar} />
+              </>
             )}
           </ContentHeader>
         </Sidebar>
@@ -180,7 +201,6 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
         {isFailureHandler({ apiResult: hentBrevStatus, errorMessage: 'Feil ved henting av brev' })}
         {isFailureHandler({ apiResult: opprettBrevStatus, errorMessage: 'Kunne ikke opprette brev' })}
-        {VergeFeilhaandtering(vergeadresse)}
       </BrevContent>
 
       <Border />
@@ -203,8 +223,6 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
 const BrevContent = styled.div`
   display: flex;
-  height: 75vh;
-  max-height: 75vh;
 `
 
 const Sidebar = styled.div`

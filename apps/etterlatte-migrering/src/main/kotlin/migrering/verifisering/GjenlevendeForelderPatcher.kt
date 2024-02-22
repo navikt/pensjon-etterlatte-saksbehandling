@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import org.slf4j.LoggerFactory
 
-internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient, private val personHenter: PersonHenter) {
+internal class GjenlevendeForelderPatcher(val pdlTjenesterKlient: PdlTjenesterKlient, private val personHenter: PersonHenter) {
     private val sikkerlogg = sikkerlogger()
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -68,7 +68,7 @@ internal class GjenlevendeForelderPatcher(val pdlKlient: PDLKlient, private val 
 
     private fun hentPersongalleri(soeker: Folkeregisteridentifikator): Persongalleri? {
         return try {
-            pdlKlient.hentPersongalleri(soeker)
+            pdlTjenesterKlient.hentPersongalleri(soeker)
         } catch (e: Exception) {
             logger.info("Persongalleriet ble hentet med feil, returnerer null i stedet")
             null

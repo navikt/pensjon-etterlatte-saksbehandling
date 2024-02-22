@@ -6,6 +6,7 @@ dependencies {
     implementation(project(":libs:saksbehandling-common"))
     implementation(project(":libs:etterlatte-ktor"))
     implementation(project(":libs:etterlatte-kafka"))
+    implementation(project(":libs:etterlatte-vedtaksvurdering-model"))
 
     implementation(libs.ktor2.okhttp)
     implementation(libs.ktor2.servercio)
@@ -18,8 +19,10 @@ dependencies {
     implementation(libs.jackson.datatypejsr310)
 
     implementation(libs.kafka.clients)
-    implementation(libs.kafka.avro)
-    implementation(libs.kafka.avroserializer)
+    implementation(libs.kafka.avro) {
+        exclude("org.apache.commons", "commons-compress")
+    }
+    implementation(libs.commons.compress)
 
     testImplementation(libs.kafka.embeddedenv)
     testImplementation(libs.el.api)

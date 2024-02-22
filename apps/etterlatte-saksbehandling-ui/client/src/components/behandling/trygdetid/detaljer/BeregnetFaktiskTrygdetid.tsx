@@ -6,7 +6,7 @@ import { formaterBeregnetTrygdetid, TrygdetidTabell } from '~components/behandli
 type Props = {
   beregnetTrygdetid: IDetaljertBeregnetTrygdetidResultat
 }
-export const BeregnetFaktiskTrygdetid: React.FC<Props> = ({ beregnetTrygdetid }) => (
+export const BeregnetFaktiskTrygdetid = ({ beregnetTrygdetid }: Props) => (
   <TrygdetidTabell>
     <Table size="small">
       <Table.Header>

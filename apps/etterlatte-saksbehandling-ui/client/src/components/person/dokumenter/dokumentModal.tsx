@@ -1,52 +1,63 @@
-import { Button, Heading, Modal } from '@navikt/ds-react'
+import { Button, Dropdown, Heading, Modal } from '@navikt/ds-react'
 import { useState } from 'react'
 import { hentDokumentPDF } from '~shared/api/dokument'
 import Spinner from '~shared/Spinner'
-import { PdfVisning } from '~shared/brev/pdf-visning'
+import { DokumentVisningModal, PdfVisning } from '~shared/brev/pdf-visning'
 import { FlexRow } from '~shared/styled'
+import { Journalpost } from '~shared/types/Journalpost'
+import styled from 'styled-components'
+import { useApiCall } from '~shared/hooks/useApiCall'
+import { mapApiResult } from '~shared/api/apiUtils'
+import { ApiErrorAlert } from '~ErrorBoundary'
 
-export default function DokumentModal({
-  tittel,
-  journalpostId,
-  dokumentInfoId,
-}: {
-  tittel: string
-  journalpostId: string
-  dokumentInfoId: string
-}) {
-  const [error, setError] = useState<string>()
+export default function DokumentModal({ journalpost }: { journalpost: Journalpost }) {
+  const { tittel, journalpostId, dokumenter } = journalpost
+
   const [fileURL, setFileURL] = useState<string>('')
   const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [hasLoaded, setHasLoaded] = useState<boolean>(false)
 
-  const open = async (journalpostId: string, dokumentInfoId: string) => {
+  const [pdfStatus, hentPdf] = useApiCall(hentDokumentPDF)
+
+  const open = async (dokumentInfoId: string) => {
     setIsOpen(true)
 
-    hentDokumentPDF({ journalpostId, dokumentInfoId })
-      .then((res) => {
-        if (res.ok) {
-          return new Blob([res.data], { type: 'application/pdf' })
-        } else {
-          throw Error(res.detail)
-        }
-      })
-      .then((file) => URL.createObjectURL(file!!))
-      .then((url) => setFileURL(url))
-      .catch((e) => setError(e.message))
-      .finally(() => {
-        if (fileURL) URL.revokeObjectURL(fileURL)
+    hentPdf({ journalpostId, dokumentInfoId }, (res: Blob) => {
+      const url = URL.createObjectURL(new Blob([res], { type: 'application/pdf' }))
 
-        setHasLoaded(true)
-      })
+      setFileURL(url)
+
+      setTimeout(() => {
+        if (fileURL) URL.revokeObjectURL(fileURL)
+      }, 1000)
+    })
   }
 
   return (
     <>
-      <Button variant="secondary" size="small" onClick={() => open(journalpostId, dokumentInfoId)}>
-        Åpne dokument
-      </Button>
+      {dokumenter.length > 1 ? (
+        <Dropdown>
+          <Button variant="secondary" size="small" as={Dropdown.Toggle}>
+            Åpne
+          </Button>
+          <DropdownMenu>
+            <Dropdown.Menu.GroupedList>
+              <Dropdown.Menu.GroupedList.Heading>Velg dokument</Dropdown.Menu.GroupedList.Heading>
+              <Dropdown.Menu.Divider />
+              {dokumenter.map((dok) => (
+                <Dropdown.Menu.GroupedList.Item key={dok.dokumentInfoId} onClick={() => open(dok.dokumentInfoId)}>
+                  {dok.tittel}
+                </Dropdown.Menu.GroupedList.Item>
+              ))}
+            </Dropdown.Menu.GroupedList>
+          </DropdownMenu>
+        </Dropdown>
+      ) : dokumenter.length === 1 ? (
+        <Button variant="secondary" size="small" onClick={() => open(dokumenter[0].dokumentInfoId)}>
+          Åpne
+        </Button>
+      ) : null}
 
-      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
+      <DokumentVisningModal open={isOpen} onClose={() => setIsOpen(false)}>
         <Modal.Header>
           <Heading spacing level="2" size="medium">
             {tittel}
@@ -54,16 +65,30 @@ export default function DokumentModal({
         </Modal.Header>
 
         <Modal.Body>
-          <PdfVisning fileUrl={fileURL} error={error} />
-          <Spinner visible={!hasLoaded} label="Laster inn PDF" />
+          {mapApiResult(
+            pdfStatus,
+            <Spinner visible label="Laster inn PDF" />,
+            (error) => (
+              <ApiErrorAlert>{error.detail || 'Feil oppsto ved visning av dokument'}</ApiErrorAlert>
+            ),
+            () => (
+              <PdfVisning fileUrl={fileURL} />
+            )
+          )}
+        </Modal.Body>
 
+        <Modal.Footer>
           <FlexRow justify="right">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>
               Lukk
             </Button>
           </FlexRow>
-        </Modal.Body>
-      </Modal>
+        </Modal.Footer>
+      </DokumentVisningModal>
     </>
   )
 }
+
+const DropdownMenu = styled(Dropdown.Menu)`
+  width: 50ch;
+`

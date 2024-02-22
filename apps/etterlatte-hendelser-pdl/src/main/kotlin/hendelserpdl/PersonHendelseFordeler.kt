@@ -7,7 +7,7 @@ import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.FORELDERBARNRELASJON
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.SIVILSTAND_V1
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.UTFLYTTING_FRA_NORGE
 import no.nav.etterlatte.hendelserpdl.LeesahOpplysningstype.VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1
-import no.nav.etterlatte.hendelserpdl.pdl.PdlKlient
+import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
@@ -41,7 +42,7 @@ enum class LeesahOpplysningstype {
 
 class PersonHendelseFordeler(
     private val kafkaProduser: KafkaProdusent<String, JsonMessage>,
-    private val pdlKlient: PdlKlient,
+    private val pdlTjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(PersonHendelseFordeler::class.java)
     private val sikkerLogg: Logger = sikkerlogger()
@@ -54,7 +55,7 @@ class PersonHendelseFordeler(
 
         val ident =
             hendelse.personidenter.firstOrNull()?.let {
-                pdlKlient.hentPdlIdentifikator(it)
+                pdlTjenesterKlient.hentPdlIdentifikator(it)
             }
 
         try {
@@ -68,13 +69,36 @@ class PersonHendelseFordeler(
                 is PdlIdentifikator.Npid -> loggIgnorererNpid(hendelse.hendelseId)
                 is PdlIdentifikator.FolkeregisterIdent -> {
                     when (LeesahOpplysningstype.valueOf(hendelse.opplysningstype)) {
-                        VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1 -> haandterVergemaal(hendelse, ident)
-                        ADRESSEBESKYTTELSE_V1 -> haandterAdressebeskyttelse(hendelse, ident)
-                        FORELDERBARNRELASJON_V1 -> haandterForelderBarnRelasjon(hendelse, ident)
-                        DOEDSFALL_V1 -> haandterDoedsHendelse(hendelse, ident)
-                        UTFLYTTING_FRA_NORGE -> haandterUtflyttingFraNorge(hendelse, ident)
-                        SIVILSTAND_V1 -> haandterSivilstand(hendelse, ident)
-                        BOSTEDSADRESSE_V1 -> haandterBostedsadresse(hendelse, ident)
+                        VERGEMAAL_ELLER_FREMTIDSFULLMAKT_V1 ->
+                            haandterVergemaal(hendelse, ident).also {
+                                logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
+                            }
+                        ADRESSEBESKYTTELSE_V1 ->
+                            haandterAdressebeskyttelse(hendelse, ident).also {
+                                logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
+                            }
+                        FORELDERBARNRELASJON_V1 ->
+                            haandterForelderBarnRelasjon(hendelse, ident).also {
+                                logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
+                            }
+                        DOEDSFALL_V1 ->
+                            haandterDoedsHendelse(
+                                hendelse,
+                                ident,
+                            ).also { logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})") }
+                        UTFLYTTING_FRA_NORGE ->
+                            haandterUtflyttingFraNorge(hendelse, ident).also {
+                                logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
+                            }
+                        SIVILSTAND_V1 ->
+                            haandterSivilstand(
+                                hendelse,
+                                ident,
+                            ).also { logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})") }
+                        BOSTEDSADRESSE_V1 ->
+                            haandterBostedsadresse(hendelse, ident).also {
+                                logger.info("Mottok en PDL hendelse (hendelseId=${hendelse.hendelseId})")
+                            }
                     }
                 }
             }
@@ -227,19 +251,22 @@ class PersonHendelseFordeler(
         )
     }
 
-    private fun opplysningstyperSomHaandteres() = LeesahOpplysningstype.values().map { it.toString() }
+    private fun opplysningstyperSomHaandteres() = LeesahOpplysningstype.entries.map { it.toString() }
 
     private fun publiserPaaRapid(
         opplysningstype: LeesahOpplysningstype,
         hendelse: PdlHendelse,
     ) {
-        logger.info("Publiserer at en person med fnr=${hendelse.fnr.maskerFnr()} har mottatt hendelse $opplysningstype")
+        logger.info(
+            "Publiserer at en person med fnr=${hendelse.fnr.maskerFnr()} har mottatt hendelse " +
+                "med id=${hendelse.hendelseId}, endringstype=${hendelse.endringstype} og type=$opplysningstype",
+        )
 
         kafkaProduser.publiser(
             noekkel = UUID.randomUUID().toString(),
             verdi =
                 JsonMessage.newMessage(
-                    eventName = "PDL:PERSONHENDELSE",
+                    eventName = PdlHendelserKeys.PERSONHENDELSE.lagEventnameForType(),
                     map =
                         mapOf(
                             "hendelse" to opplysningstype.toString(),
@@ -252,7 +279,7 @@ class PersonHendelseFordeler(
     private fun Personhendelse.endringstype() = Endringstype.valueOf(this.endringstype.name)
 
     private fun loggIgnorererNpid(hendelseId: String) =
-        logger.info("Ignorerer en hendelse med id=$hendelseId om en person som kun har NPID som identifikator")
+        logger.warn("Ignorerer en hendelse med id=$hendelseId om en person som kun har NPID som identifikator")
 
     private fun loggFeilVedHaandteringAvHendelse(
         hendelseId: String,

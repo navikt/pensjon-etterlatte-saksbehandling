@@ -27,7 +27,6 @@ object PersonMapper {
         personRolle: PersonRolle,
         hentPerson: PdlHentPerson,
         saktype: SakType,
-        aksepterPersonerUtenIdent: Boolean = false,
     ): Person =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
@@ -47,7 +46,6 @@ object PersonMapper {
                         ppsKlient,
                         hentPerson,
                         saktype,
-                        aksepterPersonerUtenIdent,
                     )
                 } else {
                     null
@@ -83,7 +81,6 @@ object PersonMapper {
                     FamilieRelasjonMapper.mapFamilieRelasjon(
                         hentPerson,
                         personRolle,
-                        aksepterPersonerUtenIdent,
                     ),
                 avdoedesBarn = barnekull?.barn,
                 avdoedesBarnUtenIdent = barnekull?.barnUtenIdent,
@@ -101,7 +98,6 @@ object PersonMapper {
         pdlKlient: PdlKlient,
         request: HentPersonRequest,
         hentPerson: PdlHentPerson,
-        aksepterPersonerUtenIdent: Boolean = false,
     ): PersonDTO =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
@@ -121,7 +117,6 @@ object PersonMapper {
                         ppsKlient,
                         hentPerson,
                         request.saktype,
-                        aksepterPersonerUtenIdent,
                     )
                 } else {
                     null
@@ -171,7 +166,7 @@ object PersonMapper {
                 utland = OpplysningDTO(UtlandMapper.mapUtland(hentPerson), null),
                 familieRelasjon =
                     OpplysningDTO(
-                        FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, request.rolle, aksepterPersonerUtenIdent),
+                        FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, request.rolle),
                         null,
                     ), // TODO ai: tre opplysninger i en
                 avdoedesBarn = barnekull?.barn,

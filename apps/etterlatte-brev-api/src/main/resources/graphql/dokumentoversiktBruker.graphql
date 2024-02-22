@@ -1,12 +1,12 @@
 query(
-   $brukerId: BrukerIdInput!,
-   $foerste: Int!,
+    $brukerId: BrukerIdInput!,
+    $tema: [Tema!]!,
+    $foerste: Int!,
 ) {
     dokumentoversiktBruker(
         brukerId: $brukerId,
         foerste: $foerste,
-        tema: [EYO, EYB],
-        journalposttyper: [I, U],
+        tema: $tema,
         journalstatuser:[]
     ) {
         journalposter {
@@ -24,6 +24,7 @@ query(
                 dokumentInfoId
                 tittel
                 dokumentvarianter {
+                    variantformat
                     saksbehandlerHarTilgang
                 }
             }

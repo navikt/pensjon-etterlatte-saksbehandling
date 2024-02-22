@@ -10,13 +10,13 @@ import {
   IBehandlingStatus,
   IBoddEllerArbeidetUtlandet,
   IDetaljertBehandling,
-  IEtterbetaling,
   IGyldighetResultat,
   IKommerBarnetTilgode,
   IUtlandstilknytning,
   Virkningstidspunkt,
 } from '~shared/types/IDetaljertBehandling'
 import { RevurderingInfo } from '~shared/types/RevurderingInfo'
+import { BrevutfallOgEtterbetaling } from '~components/behandling/brevutfall/Brevutfall'
 
 export const setBehandling = createAction<IDetaljertBehandling>('behandling/set')
 export const resetBehandling = createAction('behandling/reset')
@@ -26,6 +26,10 @@ export const oppdaterVirkningstidspunkt = createAction<Virkningstidspunkt>('beha
 export const updateVilkaarsvurdering = createAction<IVilkaarsvurdering | undefined>(
   'behandling/update_vilkaarsvurdering'
 )
+
+export const updateBrevutfallOgEtterbetaling = createAction<BrevutfallOgEtterbetaling | undefined>(
+  'behandling/update_brevutfallogetterbetaling'
+)
 export const oppdaterKommerBarnetTilgode = createAction<IKommerBarnetTilgode>('behandling/kommerBarnetTilgode')
 
 export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidetUtlandet>(
@@ -34,7 +38,6 @@ export const oppdaterBoddEllerArbeidetUtlandet = createAction<IBoddEllerArbeidet
 export const oppdaterBeregning = createAction<Beregning>('behandling/beregning')
 export const oppdaterBehandlingsstatus = createAction<IBehandlingStatus>('behandling/status')
 export const oppdaterUtlandstilknytning = createAction<IUtlandstilknytning>('behandling/utlandstilknytning')
-export const oppdaterEtterbetaling = createAction<IEtterbetaling | null>('behandling/etterbetaling')
 export const oppdaterBeregingsGrunnlag = createAction<BeregningsGrunnlagPostDto>('behandling/beregningsgrunnlag')
 export const oppdaterBeregingsGrunnlagOMS = createAction<BeregningsGrunnlagOMSPostDto>(
   'behandling/beregningsgrunnlagOMS'
@@ -52,6 +55,7 @@ export interface IBehandlingReducer extends IDetaljertBehandling {
   overstyrBeregning?: OverstyrBeregningGrunnlagPostDTO
   beregning?: Beregning
   vilkårsprøving?: IVilkaarsvurdering
+  brevutfallOgEtterbetaling?: BrevutfallOgEtterbetaling
 }
 
 const initialState: { behandling: IBehandlingReducer | null } = {
@@ -68,6 +72,9 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   builder.addCase(updateVilkaarsvurdering, (state, action) => {
     state.behandling!!.vilkårsprøving = action.payload
   })
+  builder.addCase(updateBrevutfallOgEtterbetaling, (state, action) => {
+    state.behandling!!.brevutfallOgEtterbetaling = action.payload
+  })
   builder.addCase(resetBehandling, (state) => {
     state.behandling = null
   })
@@ -82,9 +89,6 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
   })
   builder.addCase(oppdaterBoddEllerArbeidetUtlandet, (state, action) => {
     state.behandling!!.boddEllerArbeidetUtlandet = action.payload
-  })
-  builder.addCase(oppdaterEtterbetaling, (state, action) => {
-    state.behandling!!.etterbetaling = action.payload
   })
   builder.addCase(oppdaterBeregning, (state, action) => {
     state.behandling!!.beregning = action.payload

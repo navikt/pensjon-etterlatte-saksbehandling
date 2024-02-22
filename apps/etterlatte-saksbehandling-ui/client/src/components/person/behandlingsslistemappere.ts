@@ -54,6 +54,8 @@ export function behandlingStatusTilLesbartnavn(status: IBehandlingStatus) {
       return 'Til samordning'
     case IBehandlingStatus.SAMORDNET:
       return 'Samordnet'
+    case IBehandlingStatus.AVSLAG:
+      return 'Avslag'
     case IBehandlingStatus.IVERKSATT:
       return 'Iverksatt'
     default:

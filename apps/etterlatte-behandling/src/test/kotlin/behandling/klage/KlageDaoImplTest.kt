@@ -1,54 +1,44 @@
 package behandling.klage
 
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.ConnectionAutoclosingTest
+import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klage.KlageDaoImpl
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.FormkravMedBeslutter
+import no.nav.etterlatte.libs.common.behandling.InitieltUtfallMedBegrunnelseDto
+import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
+import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
-import no.nav.etterlatte.libs.database.DataSourceBuilder
-import no.nav.etterlatte.libs.database.POSTGRES_VERSION
-import no.nav.etterlatte.libs.database.migrate
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.sak.SakDao
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class KlageDaoImplTest {
-    private lateinit var dataSource: DataSource
+@ExtendWith(DatabaseExtension::class)
+internal class KlageDaoImplTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
     private lateinit var klageDao: KlageDaoImpl
 
-    @Container
-    private val postgreSQLContainer = PostgreSQLContainer<Nothing>("postgres:$POSTGRES_VERSION")
-
     @BeforeAll
     fun setup() {
-        postgreSQLContainer.start()
-        postgreSQLContainer.withUrlParam("user", postgreSQLContainer.username)
-        postgreSQLContainer.withUrlParam("password", postgreSQLContainer.password)
-
-        dataSource =
-            DataSourceBuilder.createDataSource(
-                jdbcUrl = postgreSQLContainer.jdbcUrl,
-                username = postgreSQLContainer.username,
-                password = postgreSQLContainer.password,
-            ).apply { migrate() }
-
-        val connection = dataSource.connection
-        sakRepo = SakDao { connection }
-        klageDao = KlageDaoImpl { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        klageDao = KlageDaoImpl(ConnectionAutoclosingTest(dataSource))
     }
 
     @BeforeEach
@@ -59,15 +49,10 @@ internal class KlageDaoImplTest {
             .executeUpdate()
     }
 
-    @AfterAll
-    fun afterAll() {
-        postgreSQLContainer.stop()
-    }
-
     @Test
     fun `lagreKlage oppdaterer status og formkrav hvis klagen allerede eksisterer`() {
         val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = "1337")
-        val klage = Klage.ny(sak)
+        val klage = Klage.ny(sak, null)
         klageDao.lagreKlage(klage)
 
         val foersteHentedeKlage = klageDao.hentKlage(klage.id)
@@ -109,7 +94,7 @@ internal class KlageDaoImplTest {
     fun `lagreKlage oppdaterer ikke opprettet tidspunkt eller saken hvis klagen allerede eksisterer`() {
         val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = "1337")
         val sak2 = sakRepo.opprettSak(fnr = "en annen bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "3137")
-        val klage = Klage.ny(sak)
+        val klage = Klage.ny(sak, null)
         klageDao.lagreKlage(klage)
 
         val foersteHentedeKlage = klageDao.hentKlage(klage.id)
@@ -122,5 +107,45 @@ internal class KlageDaoImplTest {
         Assertions.assertEquals(foersteHentedeKlage, andreHentedeKlage)
         Assertions.assertNotEquals(foersteHentedeKlage?.sak, klageMedEndretSakOgOpprettet.sak)
         Assertions.assertNotEquals(foersteHentedeKlage?.opprettet, klageMedEndretSakOgOpprettet.opprettet)
+    }
+
+    @Test
+    fun `hentKlager henter alle klager på en sak`() {
+        val sak1 = sakRepo.opprettSak(fnr = "Tom", type = SakType.BARNEPENSJON, enhet = "1337")
+        val sak2 = sakRepo.opprettSak(fnr = "Mary", type = SakType.OMSTILLINGSSTOENAD, enhet = "3137")
+        val sak3 = sakRepo.opprettSak(fnr = "Jill", type = SakType.OMSTILLINGSSTOENAD, enhet = "3137")
+        lagreKlage(sak1, InnkommendeKlage(LocalDate.now(), "JP-1", null))
+        lagreKlage(sak1, InnkommendeKlage(LocalDate.now(), "JP-3", null))
+        lagreKlage(sak2, InnkommendeKlage(LocalDate.now(), "JP-2", null))
+
+        val klager: Map<Sak, List<Klage>> = listOf(sak1, sak2, sak3).associateWith { klageDao.hentKlagerISak(it.id) }
+        klager[sak1]?.map { it.innkommendeDokument?.journalpostId } shouldContainExactlyInAnyOrder listOf("JP-1", "JP-3")
+        klager[sak2]?.map { it.innkommendeDokument?.journalpostId } shouldContainExactlyInAnyOrder listOf("JP-2")
+        klager[sak3] shouldBe emptyList()
+    }
+
+    @Test
+    fun `Lagre initielt utfall og hent det ut`() {
+        val sak = sakRepo.opprettSak(fnr = "en bruker", type = SakType.BARNEPENSJON, enhet = Enheter.AALESUND.enhetNr)
+        val klage = Klage.ny(sak, null).copy(status = KlageStatus.FORMKRAV_OPPFYLT)
+
+        klageDao.lagreKlage(klage)
+        val utfalldto = InitieltUtfallMedBegrunnelseDto(KlageUtfall.OMGJOERING, "begrunnelse")
+        val saksbehandlerIdent = "z123456"
+        val oppdatertKlage = klage.oppdaterIntieltUtfallMedBegrunnelse(utfalldto, saksbehandlerIdent)
+        klageDao.lagreKlage(oppdatertKlage)
+
+        val hentetKlage = klageDao.hentKlage(klage.id)
+
+        Assertions.assertEquals(utfalldto.utfall, hentetKlage?.initieltUtfall?.utfallMedBegrunnelse?.utfall)
+        Assertions.assertEquals(utfalldto.begrunnelse, hentetKlage?.initieltUtfall?.utfallMedBegrunnelse?.begrunnelse)
+        Assertions.assertEquals(saksbehandlerIdent, hentetKlage?.initieltUtfall?.saksbehandler)
+    }
+
+    private fun lagreKlage(
+        sak1: Sak,
+        innkommendeKlage: InnkommendeKlage,
+    ) {
+        klageDao.lagreKlage(Klage.ny(sak1, innkommendeKlage))
     }
 }

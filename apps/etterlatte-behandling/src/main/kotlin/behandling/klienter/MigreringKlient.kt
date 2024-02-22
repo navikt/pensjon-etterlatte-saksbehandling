@@ -14,9 +14,10 @@ class MigreringKlient(private val httpClient: HttpClient, private val apiUrl: St
     suspend fun opprettManuellMigrering(
         behandlingId: UUID,
         pesysId: Long,
+        sakId: Long,
     ) {
         retry {
-            httpClient.post("$apiUrl/migrering/$behandlingId") {
+            httpClient.post("$apiUrl/migrering/$sakId/$behandlingId") {
                 contentType(ContentType.Application.Json)
                 setBody(pesysId)
             }

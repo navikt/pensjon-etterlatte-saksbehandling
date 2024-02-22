@@ -6,7 +6,7 @@ metadata:
   labels:
     team: etterlatte
 spec:
-  image: {{image}}
+  image: "{{image}}"
   port: 8080
   ingresses:
     - "https://etterlatte-samordning-vedtak.ekstern.dev.nav.no"  # Skru av etterhvert, skal nås via etterlatte-gw
@@ -28,10 +28,10 @@ spec:
     enabled: true
   resources:
     limits:
-      memory: 256Mi
+      memory: 640Mi
     requests:
       cpu: 10m
-      memory: 192Mi
+      memory: 320Mi
   replicas:
     min: 1
     max: 2
@@ -96,7 +96,6 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: etterlatte-krakend
         - application: pensjon-pen-q0
           namespace: pensjon-q0
           cluster: dev-fss
@@ -122,6 +121,12 @@ spec:
             roles:
               - les-oms-vedtak
         - application: pensjon-selvbetjening-soknad-alder-backend
+          namespace: pensjonselvbetjening
+          cluster: dev-gcp
+          permissions:
+            roles:
+              - les-oms-vedtak
+        - application: alderspensjon-endringssoknad-backend-q2
           namespace: pensjonselvbetjening
           cluster: dev-gcp
           permissions:

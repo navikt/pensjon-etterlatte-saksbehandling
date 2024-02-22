@@ -15,6 +15,8 @@
       <env name="ETTERLATTE_BEREGNING_URL" value="https://etterlatte-beregning.intern.dev.nav.no" />
       <env name="ETTERLATTE_VILKAARSVURDERING_CLIENT_ID" value="dev-gcp.etterlatte.etterlatte-vilkaarsvurdering" />
       <env name="ETTERLATTE_VILKAARSVURDERING_URL" value="https://etterlatte-vilkaarsvurdering.intern.dev.nav.no" />
+      <env name="ETTERLATTE_TRYGDETID_CLIENT_ID" value="8385435e-f3d7-45ec-be59-ebd1c71df735" />
+      <env name="ETTERLATTE_TRYGDETID_URL" value="https://etterlatte-trygdetid.intern.dev.nav.no" />
       <env name="BEHANDLING_AZURE_SCOPE" value="api://dev-gcp.etterlatte.etterlatte-behandling/.default" />
       <env name="SAMORDNEVEDTAK_URL" value="https://sam-q2.dev-fss-pub.nais.io" />
       <env name="SAMORDNEVEDTAK_AZURE_SCOPE" value="api://dev-fss.pensjonsamhandling.sam-q2/.default" />

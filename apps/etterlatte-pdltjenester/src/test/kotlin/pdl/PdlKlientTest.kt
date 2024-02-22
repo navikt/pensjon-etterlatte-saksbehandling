@@ -144,7 +144,7 @@ internal class PdlKlientTest {
         runBlocking {
             val response =
                 pdlKlient.hentAdressebeskyttelse(
-                    HentAdressebeskyttelseRequest(PersonIdent(STOR_SNERK.value)),
+                    HentAdressebeskyttelseRequest(PersonIdent(STOR_SNERK.value), SakType.BARNEPENSJON),
                 )
 
             assertEquals(PdlGradering.FORTROLIG, response.data?.hentPerson?.adressebeskyttelse?.single()?.gradering)

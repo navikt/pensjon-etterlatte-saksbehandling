@@ -12,11 +12,12 @@ import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.kunSaksbehandler
+import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 
 internal fun Route.bosattUtlandRoutes(bosattUtlandService: BosattUtlandService) {
     route("api/bosattutland/{$BEHANDLINGID_CALL_PARAMETER}") {
         post {
-            kunSaksbehandler {
+            kunSaksbehandlerMedSkrivetilgang {
                 val request = call.receive<BosattUtland>()
                 val bosattUtland = inTransaction { bosattUtlandService.lagreBosattUtland(request) }
                 call.respond(bosattUtland)

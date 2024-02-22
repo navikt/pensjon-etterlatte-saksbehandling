@@ -3,8 +3,6 @@ package no.nav.etterlatte.brev
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
@@ -16,22 +14,15 @@ import no.nav.etterlatte.brev.brevbaker.BrevbakerKlient
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
-import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
-import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
-import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.hentinformasjon.SakService
-import no.nav.etterlatte.brev.hentinformasjon.SoekerService
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevDataMapper
 import no.nav.etterlatte.brev.model.BrevProsessType
+import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
-import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
@@ -49,22 +40,22 @@ internal class BrevServiceTest {
     private val db = mockk<BrevRepository>(relaxed = true)
     private val brevbaker = mockk<BrevbakerKlient>()
     private val sakOgBehandlingService = mockk<BrevdataFacade>()
-    private val sakService = mockk<SakService>()
-    private val soekerService = mockk<SoekerService>()
     private val adresseService = mockk<AdresseService>()
-    private val dokarkivService = mockk<DokarkivServiceImpl>()
+    private val journalfoerBrevService = mockk<JournalfoerBrevService>()
     private val distribusjonService = mockk<DistribusjonServiceImpl>()
-    private val brevDataMapper = mockk<BrevDataMapper>()
+    private val brevDataFacade = mockk<BrevdataFacade>()
+    private val pdfGenerator = mockk<PDFGenerator>()
+    private val brevbakerService = mockk<BrevbakerService>()
+    private val redigerbartVedleggHenter = RedigerbartVedleggHenter(brevbakerService, brevDataFacade)
+    private val brevoppretter =
+        Brevoppretter(adresseService, db, brevDataFacade, brevbakerService, redigerbartVedleggHenter)
 
     private val brevService =
         BrevService(
             db,
-            sakService,
-            soekerService,
-            adresseService,
-            dokarkivService,
-            distribusjonService,
-            BrevbakerService(brevbaker, adresseService, brevDataMapper),
+            brevoppretter,
+            journalfoerBrevService,
+            pdfGenerator,
         )
 
     private val bruker = BrukerTokenInfo.of(UUID.randomUUID().toString(), "Z123456", null, null, null)
@@ -76,7 +67,7 @@ internal class BrevServiceTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(db, sakOgBehandlingService, adresseService, dokarkivService, distribusjonService, brevbaker)
+        confirmVerified(db, sakOgBehandlingService, adresseService, journalfoerBrevService, distribusjonService, brevbaker)
     }
 
     @Nested
@@ -158,123 +149,6 @@ internal class BrevServiceTest {
     }
 
     @Nested
-    inner class JournalfoeringAvBrev {
-        @Test
-        fun `Journalfoering fungerer som forventet`() {
-            val brev = opprettBrev(Status.FERDIGSTILT, BrevProsessType.MANUELL)
-            val sak = Sak("ident", SakType.BARNEPENSJON, brev.sakId, "1234")
-            val journalpostResponse = OpprettJournalpostResponse("444", journalpostferdigstilt = true)
-
-            coEvery { sakService.hentSak(any(), any()) } returns sak
-            coEvery { dokarkivService.journalfoer(any<Brev>(), any()) } returns journalpostResponse
-            every { db.hentBrev(any()) } returns brev
-            every { db.settBrevJournalfoert(any(), any()) } returns true
-
-            val faktiskJournalpostId =
-                runBlocking {
-                    brevService.journalfoer(brev.id, bruker)
-                }
-
-            faktiskJournalpostId shouldBe journalpostResponse.journalpostId
-
-            verify {
-                db.hentBrev(brev.id)
-                db.settBrevJournalfoert(brev.id, journalpostResponse)
-            }
-            coVerify {
-                sakService.hentSak(sak.id, bruker)
-                dokarkivService.journalfoer(brev, sak)
-            }
-        }
-
-        @ParameterizedTest
-        @EnumSource(
-            Status::class,
-            mode = EnumSource.Mode.EXCLUDE,
-            names = ["FERDIGSTILT"],
-        )
-        fun `Journalfoering feiler hvis status er feil`(status: Status) {
-            val brev = opprettBrev(status, BrevProsessType.MANUELL)
-            every { db.hentBrev(any()) } returns brev
-
-            runBlocking {
-                assertThrows<IllegalStateException> {
-                    brevService.journalfoer(brev.id, bruker)
-                }
-            }
-
-            verify {
-                db.hentBrev(brev.id)
-            }
-        }
-    }
-
-    @Nested
-    inner class DistribusjonAvBrev {
-        @Test
-        fun `Distribusjon fungerer som forventet`() {
-            val brev = opprettBrev(Status.JOURNALFOERT, BrevProsessType.MANUELL)
-            val journalpostId = "1"
-
-            every { db.hentBrev(any()) } returns brev
-            every { db.hentJournalpostId(any()) } returns journalpostId
-            every { distribusjonService.distribuerJournalpost(any(), any(), any(), any(), any()) } returns "123"
-
-            val bestillingsID = brevService.distribuer(brev.id)
-            bestillingsID shouldBe "123"
-
-            verify {
-                db.hentBrev(brev.id)
-                db.hentJournalpostId(brev.id)
-                distribusjonService.distribuerJournalpost(
-                    brev.id,
-                    journalpostId,
-                    DistribusjonsType.ANNET,
-                    DistribusjonsTidspunktType.KJERNETID,
-                    brev.mottaker!!.adresse,
-                )
-            }
-        }
-
-        @Test
-        fun `Distribusjon avbrytes hvis journalpostId mangler`() {
-            val brev = opprettBrev(Status.JOURNALFOERT, BrevProsessType.MANUELL)
-
-            every { db.hentBrev(any()) } returns brev
-            every { db.hentJournalpostId(any()) } returns null
-
-            assertThrows<IllegalArgumentException> {
-                brevService.distribuer(brev.id)
-            }
-
-            verify {
-                db.hentBrev(brev.id)
-                db.hentJournalpostId(brev.id)
-            }
-        }
-
-        @ParameterizedTest
-        @EnumSource(
-            Status::class,
-            mode = EnumSource.Mode.EXCLUDE,
-            names = ["JOURNALFOERT"],
-        )
-        fun `Distribusjon avbrytes ved feil status`(status: Status) {
-            val brev = opprettBrev(status, BrevProsessType.MANUELL)
-
-            every { db.hentBrev(any()) } returns brev
-
-            assertThrows<IllegalStateException> {
-                brevService.distribuer(brev.id)
-            }
-
-            verify {
-                db.hentBrev(brev.id)
-            }
-        }
-    }
-
-    @Nested
     inner class OppdateringAvBrev {
         @ParameterizedTest
         @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
@@ -299,8 +173,62 @@ internal class BrevServiceTest {
 
             every { db.hentBrev(any()) } returns brev
 
-            assertThrows<IllegalStateException> {
+            assertThrows<BrevKanIkkeEndres> {
                 brevService.oppdaterTittel(brev.id, "Ny tittel skal feile")
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+        }
+    }
+
+    @Nested
+    inner class SlettingAvBrev {
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.INCLUDE)
+        fun `Sletting av brev som er under arbeid skal virke`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+
+            every { db.hentBrev(any()) } returns brev
+
+            brevService.slett(brev.id, bruker)
+
+            verify {
+                db.hentBrev(brev.id)
+                db.settBrevSlettet(brev.id, bruker)
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class, names = ["OPPRETTET", "OPPDATERT"], mode = EnumSource.Mode.EXCLUDE)
+        fun `Brev som ikke lenger er under arbeid skal IKKE kunne slettes`(status: Status) {
+            val brev = opprettBrev(status, BrevProsessType.MANUELL)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<BrevKanIkkeEndres> {
+                brevService.slett(brev.id, bruker)
+            }
+
+            verify {
+                db.hentBrev(brev.id)
+            }
+            verify(exactly = 0) {
+                db.settBrevSlettet(any(), any())
+            }
+        }
+
+        @ParameterizedTest
+        @EnumSource(Status::class)
+        fun `Skal ikke kunne slette vedtaksbrev, uavhengig av status`(status: Status) {
+            val behandlingId = UUID.randomUUID()
+            val brev = opprettBrev(status, BrevProsessType.MANUELL, behandlingId)
+
+            every { db.hentBrev(any()) } returns brev
+
+            assertThrows<Exception> {
+                brevService.slett(brev.id, bruker)
             }
 
             verify {
@@ -312,17 +240,20 @@ internal class BrevServiceTest {
     private fun opprettBrev(
         status: Status,
         prosessType: BrevProsessType,
+        behandlingId: UUID? = null,
     ) = Brev(
         id = Random.nextLong(10000),
         sakId = Random.nextLong(10000),
-        behandlingId = null,
+        behandlingId = behandlingId,
         tittel = null,
+        spraak = Spraak.NB,
         prosessType = prosessType,
         soekerFnr = "fnr",
         status = status,
         statusEndret = Tidspunkt.now(),
         opprettet = Tidspunkt.now(),
         mottaker = opprettMottaker(),
+        brevtype = Brevtype.INFORMASJON,
     )
 
     private fun opprettMottaker() =

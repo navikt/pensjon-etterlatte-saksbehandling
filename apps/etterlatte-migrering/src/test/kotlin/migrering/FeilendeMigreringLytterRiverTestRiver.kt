@@ -5,14 +5,15 @@ import io.mockk.every
 import io.mockk.spyk
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.Vedtaksloesning
-import no.nav.etterlatte.libs.common.rapidsandrivers.EVENT_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILENDE_STEG
 import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
+import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.database.POSTGRES_VERSION
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.opprettInMemoryDatabase
 import no.nav.etterlatte.rapidsandrivers.EventNames
+import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Beregning
 import no.nav.etterlatte.rapidsandrivers.migrering.Enhet
 import no.nav.etterlatte.rapidsandrivers.migrering.KILDE_KEY
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import rapidsandrivers.HENDELSE_DATA_KEY
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -58,6 +58,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                         Pesyskopling(
                             behandlingId = behandlingId,
                             pesysId = pesysid,
+                            sakId = 321L,
                         )
                 }
             val pesyssak =
@@ -83,7 +84,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                     spraak = Spraak.NN,
                 )
             repository.lagrePesyssak(pesyssak)
-            repository.lagreKoplingTilBehandling(behandlingId, pesysid)
+            repository.lagreKoplingTilBehandling(behandlingId, pesysid, 123L)
 
             TestRapid()
                 .apply {
@@ -91,12 +92,12 @@ class FeilendeMigreringLytterRiverTestRiver {
                 }.sendTestMessage(
                     JsonMessage.newMessage(
                         mapOf(
-                            EVENT_NAME_KEY to EventNames.FEILA,
+                            EventNames.FEILA.lagParMedEventNameKey(),
                             KILDE_KEY to Vedtaksloesning.PESYS,
                             PESYS_ID_KEY to pesysid,
                             HENDELSE_DATA_KEY to pesyssak.tilMigreringsrequest(),
                             FEILMELDING_KEY to IllegalStateException("her feiler det"),
-                            FEILENDE_STEG to Migreringshendelser.TRYGDETID,
+                            FEILENDE_STEG to Migreringshendelser.TRYGDETID.lagEventnameForType(),
                         ),
                     ).toJson(),
                 )
@@ -117,6 +118,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                         Pesyskopling(
                             behandlingId = behandlingId,
                             pesysId = pesysid,
+                            sakId = 321L,
                         )
                 }
             val pesyssak =
@@ -142,7 +144,7 @@ class FeilendeMigreringLytterRiverTestRiver {
                     spraak = Spraak.NN,
                 )
             repository.lagrePesyssak(pesyssak)
-            repository.lagreKoplingTilBehandling(behandlingId, pesysid)
+            repository.lagreKoplingTilBehandling(behandlingId, pesysid, 123L)
 
             TestRapid().apply {
                 FeilendeMigreringLytterRiver(rapidsConnection = this, repository = repository)

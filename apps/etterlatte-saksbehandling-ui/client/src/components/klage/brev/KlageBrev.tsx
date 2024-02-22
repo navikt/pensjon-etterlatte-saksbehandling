@@ -7,7 +7,6 @@ import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { Klage } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import NyttBrevMottaker from '~components/person/brev/NyttBrevMottaker'
 import { BrevStatus, kanBrevRedigeres } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
@@ -16,16 +15,18 @@ import styled from 'styled-components'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { JaNei } from '~shared/types/ISvar'
 import { Innhold } from '~components/klage/styled'
-
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import BrevTittel from '~components/person/brev/tittel/BrevTittel'
+import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
+import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 
-function hentBrevIdForInnstilling(klage: Klage | null): number | null {
-  // TODO håndter avvist klage?
-
+function hentBrevId(klage: Klage | null): number | null {
   switch (klage?.utfall?.utfall) {
     case 'DELVIS_OMGJOERING':
     case 'STADFESTE_VEDTAK':
       return klage.utfall.innstilling.brev.brevId
+    case 'AVVIST':
+      return klage.utfall.brev.brevId
     default:
       return null
   }
@@ -35,7 +36,7 @@ export function KlageBrev() {
   const navigate = useNavigate()
   const klage = useKlage()
 
-  const brevId = hentBrevIdForInnstilling(klage)
+  const brevId = hentBrevId(klage)
   const sakId = klage?.sak?.id
   const [hentetBrev, apiHentBrev] = useApiCall(hentBrev)
 
@@ -61,15 +62,25 @@ export function KlageBrev() {
               </Heading>
             </HeadingWrapper>
           </ContentHeader>
-          {klage.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.JA ? (
+          {klage.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.JA ? (
             <Innhold>
-              <BodyShort>Skriv innstillingsbrevet til KA, som også sendes til mottakeren</BodyShort>
+              <BodyShort>Skriv oversendelsesbrevet til klager</BodyShort>
             </Innhold>
           ) : (
-            <BodyShort>TODO håndter avslagsbrev her</BodyShort>
+            <BodyShort>Skriv avvisningsbrev her</BodyShort>
           )}
-
-          {isSuccess(hentetBrev) && <NyttBrevMottaker brev={hentetBrev.data} />}
+          {/* TODO lar være å bytte ut med ny brevmottaker komponent her, siden dette virker å være ganske wip */}
+          {isSuccess(hentetBrev) && (
+            <>
+              <BrevTittel
+                brevId={hentetBrev.data.id}
+                sakId={hentetBrev.data.sakId}
+                tittel={hentetBrev.data.tittel}
+                kanRedigeres={true}
+              />
+              <BrevMottaker brev={hentetBrev.data} kanRedigeres={true} />
+            </>
+          )}
         </Sidebar>
 
         {mapApiResult(
@@ -94,10 +105,10 @@ export function KlageBrev() {
 
       <div>
         <FlexRow justify="center" $spacing>
-          <Button className="button" variant="secondary" onClick={() => navigate(`/klage/${klage?.id}/vurdering`)}>
+          <Button className="button" variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'brev'))}>
             Gå tilbake
           </Button>
-          <Button className="button" variant="primary" onClick={() => navigate(`/klage/${klage?.id}/oppsummering`)}>
+          <Button className="button" variant="primary" onClick={() => navigate(`/klage/${klage.id}/oppsummering`)}>
             Se oppsummering
           </Button>
         </FlexRow>

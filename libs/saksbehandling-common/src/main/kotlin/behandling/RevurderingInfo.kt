@@ -1,8 +1,8 @@
 package no.nav.etterlatte.libs.common.behandling
 
-import behandling.utland.LandMedDokumenter
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
+import no.nav.etterlatte.behandling.utland.LandMedDokumenter
 import java.time.LocalDate
 import java.util.UUID
 
@@ -26,18 +26,6 @@ sealed class RevurderingInfo {
     @JsonTypeName("SOESKENJUSTERING")
     data class Soeskenjustering(
         val grunnForSoeskenjustering: BarnepensjonSoeskenjusteringGrunn,
-    ) : RevurderingInfo()
-
-    @JsonTypeName("ADOPSJON")
-    data class Adopsjon(
-        val adoptertAv1: Navn,
-        val adoptertAv2: Navn? = null,
-    ) : RevurderingInfo()
-
-    @JsonTypeName("OMGJOERING_AV_FARSKAP")
-    data class OmgjoeringAvFarskap(
-        val naavaerendeFar: Navn,
-        val forrigeFar: Navn,
     ) : RevurderingInfo()
 
     @JsonTypeName("FENGSELSOPPHOLD")

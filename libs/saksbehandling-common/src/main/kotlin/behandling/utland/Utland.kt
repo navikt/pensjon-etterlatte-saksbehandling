@@ -1,4 +1,4 @@
-package behandling.utland
+package no.nav.etterlatte.behandling.utland
 
 import java.time.LocalDate
 

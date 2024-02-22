@@ -1,8 +1,5 @@
-package beregning.grunnlag
+package no.nav.etterlatte.beregning.grunnlag
 
-import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
-import no.nav.etterlatte.beregning.grunnlag.PeriodiseringAvGrunnlagFeil
-import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow

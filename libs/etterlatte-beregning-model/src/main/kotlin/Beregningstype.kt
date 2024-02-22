@@ -29,3 +29,8 @@ data class SamletTrygdetidMedBeregningsMetode(
 ) {
     fun broek() = Beregningstall(this.prorataBroek?.let { it.teller.toDouble() / it.nevner.toDouble() } ?: 1.0)
 }
+
+// Må kun inneholde felter som er felles for BP og OMS
+data class BeregningsGrunnlagFellesDto(
+    val beregningsMetode: BeregningsMetodeBeregningsgrunnlag,
+)

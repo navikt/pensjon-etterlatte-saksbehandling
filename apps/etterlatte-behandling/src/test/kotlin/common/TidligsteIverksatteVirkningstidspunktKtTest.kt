@@ -1,9 +1,8 @@
-package common
+package no.nav.etterlatte.common
 
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.common.tidligsteIverksatteVirkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import org.junit.jupiter.api.Assertions

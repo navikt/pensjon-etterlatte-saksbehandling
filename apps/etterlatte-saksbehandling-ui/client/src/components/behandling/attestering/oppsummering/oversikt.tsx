@@ -36,7 +36,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
     hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
   )
 
-  const [oppgaveForBehandling, setOppgavenForBehandling] = useState<OppgaveDTO | null>(null)
+  const [oppgaveForBehandling, setOppgaveForBehandling] = useState<OppgaveDTO | null>(null)
   const [merknad, setMerknad] = useState<string>('')
   const [lagreSettPaaVentStatus, requestSettPaaVent] = useApiCall(settOppgavePaaVentApi)
   const [settPaaVent, setVisPaaVent] = useState(false)
@@ -45,7 +45,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
     requesthentOppgaveForBehandlingEkte(
       { referanse: behandlingsInfo.behandlingId, sakId: behandlingsInfo.sakId },
       (oppgave) => {
-        setOppgavenForBehandling(oppgave)
+        setOppgaveForBehandling(oppgave)
         setMerknad(oppgave.merknad || '')
       }
     )
@@ -191,7 +191,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
                 oppgaveId={oppgaveForBehandling.id}
                 oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
                   oppdaterFrist(
-                    (oppgaveMedNyFrist) => setOppgavenForBehandling(oppgaveMedNyFrist[0]),
+                    (oppgaveMedNyFrist) => setOppgaveForBehandling(oppgaveMedNyFrist[0]),
                     [oppgaveForBehandling],
                     id,
                     nyfrist,

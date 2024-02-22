@@ -88,7 +88,7 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
         vedtakType: VedtakType,
         brukerTokenInfo: BrukerTokenInfo,
     ): Avkortingsinfo =
-        requireNotNull(finnAvkortingsinfoNullable(behandlingId, sakType, virkningstidspunkt, vedtakType, brukerTokenInfo)) {
+        checkNotNull(finnAvkortingsinfoNullable(behandlingId, sakType, virkningstidspunkt, vedtakType, brukerTokenInfo)) {
             "Avkortingsinfo er nødvendig, men mangler"
         }
 

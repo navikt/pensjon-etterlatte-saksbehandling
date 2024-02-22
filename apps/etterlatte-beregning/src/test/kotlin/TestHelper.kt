@@ -282,7 +282,7 @@ fun behandling(
     id: UUID = UUID.randomUUID(),
     sak: Long = 123,
     sakType: SakType = SakType.OMSTILLINGSSTOENAD,
-    behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+    behandlingType: BehandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
     virkningstidspunkt: Virkningstidspunkt = VirkningstidspunktTestData.virkningstidsunkt(YearMonth.of(2024, 1)),
     status: BehandlingStatus = BehandlingStatus.BEREGNET,
 ) = DetaljertBehandling(

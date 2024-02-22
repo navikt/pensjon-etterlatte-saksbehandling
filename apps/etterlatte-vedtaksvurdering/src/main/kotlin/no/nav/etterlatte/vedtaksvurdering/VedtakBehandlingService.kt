@@ -502,7 +502,7 @@ class VedtakBehandlingService(
         vilkaarsvurdering: VilkaarsvurderingDto?,
     ): VedtakType {
         return when (behandlingType) {
-            BehandlingType.FØRSTEGANGSBEHANDLING -> {
+            BehandlingType.FOERSTEGANGSBEHANDLING -> {
                 when (vilkaarsvurderingUtfallNonNull(vilkaarsvurdering?.resultat?.utfall)) {
                     VilkaarsvurderingUtfall.OPPFYLT -> VedtakType.INNVILGELSE
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakType.AVSLAG
@@ -591,7 +591,7 @@ class VedtakBehandlingService(
             when (behandling.behandlingType) {
                 BehandlingType.MANUELT_OPPHOER -> VedtakData(behandling, null, null, sak, trygdetid)
 
-                BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
+                BehandlingType.FOERSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                     val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
                     when (vilkaarsvurdering?.resultat?.utfall) {
                         VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakData(behandling, vilkaarsvurdering, null, sak, trygdetid)

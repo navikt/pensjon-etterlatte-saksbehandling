@@ -64,7 +64,7 @@ class MigreringService(
 
                 opprettSakOgBehandling(request, sak)?.let { behandlingOgOppgave ->
                     val behandling = behandlingOgOppgave.behandling
-                    if (behandling.type != BehandlingType.FØRSTEGANGSBEHANDLING) {
+                    if (behandling.type != BehandlingType.FOERSTEGANGSBEHANDLING) {
                         throw IllegalArgumentException(
                             "Finnes allerede behandling for sak=${behandling.sak.id}. Stopper migrering for pesysId=${request.pesysId}",
                         )

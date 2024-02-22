@@ -800,7 +800,7 @@ internal class VilkaarsvurderingRoutesTest {
             every { sak } returns 1L
             every { sakType } returns SakType.BARNEPENSJON
             every { status } returns BehandlingStatus.OPPRETTET
-            every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            every { behandlingType } returns BehandlingType.FOERSTEGANGSBEHANDLING
             every { soeker } returns "10095512345"
             every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
             every { revurderingsaarsak } returns null

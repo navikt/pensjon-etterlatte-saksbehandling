@@ -178,7 +178,7 @@ internal class BehandlingInfoRoutesTest {
 
     private fun behandling(behandlingId: UUID): Behandling =
         mockk {
-            every { type } returns BehandlingType.FØRSTEGANGSBEHANDLING
+            every { type } returns BehandlingType.FOERSTEGANGSBEHANDLING
             every { id } returns behandlingId
             every { sak } returns
                 mockk {

@@ -74,7 +74,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - nasjonal`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -113,7 +113,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - prorata`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -152,7 +152,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ingen soesken - best`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -191,7 +191,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ett soesken`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -227,7 +227,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - to soesken`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -403,7 +403,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ett soesken - med nytt regelverk`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -462,7 +462,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - med flere avdoede foreldre og nytt regelverk`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING)
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns
             grunnlagMedEkstraAvdoedForelder(LocalDate.of(2023, 11, 12))
         coEvery {
@@ -501,7 +501,7 @@ internal class BeregnBarnepensjonServiceTest {
 
     @Test
     fun `beregne foerstegangsbehandling med ukjent avdød`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, virk = YearMonth.of(2024, Month.JANUARY))
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING, virk = YearMonth.of(2024, Month.JANUARY))
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns GrunnlagTestData().hentGrunnlagMedUkjentAvdoed()
 
         coEvery {

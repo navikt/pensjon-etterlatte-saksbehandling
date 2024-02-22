@@ -175,7 +175,7 @@ class VilkaarsvurderingService(
             )
 
             when (behandling.behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                BehandlingType.FOERSTEGANGSBEHANDLING -> {
                     opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId)
                 }
 
@@ -243,7 +243,7 @@ class VilkaarsvurderingService(
         when (sakType) {
             SakType.BARNEPENSJON ->
                 when (behandlingType) {
-                    BehandlingType.FØRSTEGANGSBEHANDLING,
+                    BehandlingType.FOERSTEGANGSBEHANDLING,
                     BehandlingType.REVURDERING,
                     ->
                         if (virkningstidspunkt.erPaaNyttRegelverk()) {
@@ -259,7 +259,7 @@ class VilkaarsvurderingService(
 
             SakType.OMSTILLINGSSTOENAD ->
                 when (behandlingType) {
-                    BehandlingType.FØRSTEGANGSBEHANDLING ->
+                    BehandlingType.FOERSTEGANGSBEHANDLING ->
                         OmstillingstoenadVilkaar.inngangsvilkaar()
 
                     BehandlingType.REVURDERING,

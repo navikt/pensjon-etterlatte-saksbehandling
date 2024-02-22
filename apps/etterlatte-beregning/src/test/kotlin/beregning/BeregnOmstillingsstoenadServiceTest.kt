@@ -57,7 +57,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
     @Test
     fun `skal beregne omstillingsstoenad foerstegangsbehandling - nasjonal`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
@@ -96,7 +96,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
     @Test
     fun `skal beregne omstillingsstoenad foerstegangsbehandling - prorata`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
@@ -135,7 +135,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
     @Test
     fun `skal beregne omstillingsstoenad foerstegangsbehandling - best`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetid(behandling.id)
 
@@ -292,7 +292,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
     @Test
     fun `skal feile hvis trygdetid ikke inneholder beregnet trygdetid`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
         val trygdetid = mockTrygdetidUtenBeregnetTrygdetid(behandling.id)
 
@@ -314,7 +314,7 @@ internal class BeregnOmstillingsstoenadServiceTest {
 
     @Test
     fun `skal feile hvis trygdetid ikke finnes`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag

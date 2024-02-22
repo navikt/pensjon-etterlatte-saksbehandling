@@ -45,7 +45,7 @@ internal class BeregnOverstyrServiceTest {
 
     @Test
     fun `skal beregne overstyrt foerstegangsbehandling`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, YearMonth.of(2019, 11))
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING, YearMonth.of(2019, 11))
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
@@ -120,7 +120,7 @@ internal class BeregnOverstyrServiceTest {
 
     @Test
     fun `skal beregne overstyrt foerstegangsbehandling med prorata`() {
-        val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING, YearMonth.of(2019, 11))
+        val behandling = mockBehandling(BehandlingType.FOERSTEGANGSBEHANDLING, YearMonth.of(2019, 11))
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag

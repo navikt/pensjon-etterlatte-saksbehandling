@@ -300,7 +300,7 @@ class TrygdetidServiceImpl(
             val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
 
             when (behandling.behandlingType) {
-                BehandlingType.FØRSTEGANGSBEHANDLING -> {
+                BehandlingType.FOERSTEGANGSBEHANDLING -> {
                     logger.info("Oppretter trygdetid for behandling $behandlingId")
                     opprettTrygdetiderForBehandling(behandling, brukerTokenInfo)
                 }

@@ -50,7 +50,7 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
               separator={erSisteRoute(index, manueltOpphoerRoutes)}
             />
           ))}
-        {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
+        {behandlingType === IBehandlingsType.FOERSTEGANGSBEHANDLING &&
           soeknadRoutes_.map((pathInfo, index) => (
             <NavLenke
               key={pathInfo.path}

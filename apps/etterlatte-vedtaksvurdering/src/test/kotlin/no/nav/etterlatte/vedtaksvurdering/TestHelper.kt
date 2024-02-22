@@ -50,7 +50,7 @@ fun opprettVedtak(
     status = status,
     innhold =
         VedtakInnhold.Behandling(
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
             revurderingAarsak = null,
             virkningstidspunkt = virkningstidspunkt,
             beregning = beregning,
@@ -119,7 +119,7 @@ fun vedtak(
     vedtakFattet = vedtakFattet,
     innhold =
         VedtakInnhold.Behandling(
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+            behandlingType = BehandlingType.FOERSTEGANGSBEHANDLING,
             virkningstidspunkt = virkningstidspunkt,
             beregning = beregning,
             avkorting = avkorting,

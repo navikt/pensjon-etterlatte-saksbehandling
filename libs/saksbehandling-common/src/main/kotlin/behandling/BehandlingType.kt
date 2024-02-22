@@ -1,7 +1,7 @@
 package no.nav.etterlatte.libs.common.behandling
 
 enum class BehandlingType {
-    FØRSTEGANGSBEHANDLING,
+    FOERSTEGANGSBEHANDLING,
     REVURDERING,
     @Suppress("ktlint")
     MANUELT_OPPHOER,

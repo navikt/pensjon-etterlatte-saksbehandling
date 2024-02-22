@@ -51,7 +51,7 @@
     "innhold": {
       "type": "BEHANDLING",
       "behandling": {
-        "type": "FØRSTEGANGSBEHANDLING",
+        "type": "FOERSTEGANGSBEHANDLING",
         "id": "989d8e2d-633c-4a10-942c-36c0ca2cc17a"
       },
       "virkningstidspunkt": "2022-09",

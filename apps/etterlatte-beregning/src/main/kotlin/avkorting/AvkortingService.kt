@@ -27,7 +27,7 @@ class AvkortingService(
         val behandling = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
         val eksisterendeAvkorting = avkortingRepository.hentAvkorting(behandling.id)
 
-        if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+        if (behandling.behandlingType == BehandlingType.FOERSTEGANGSBEHANDLING) {
             return eksisterendeAvkorting?.let {
                 if (behandling.status == BehandlingStatus.BEREGNET) {
                     val reberegnetAvkorting =
@@ -71,7 +71,7 @@ class AvkortingService(
 
         avkortingRepository.lagreAvkorting(behandlingId, beregnetAvkorting)
         val lagretAvkorting =
-            if (behandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING) {
+            if (behandling.behandlingType == BehandlingType.FOERSTEGANGSBEHANDLING) {
                 avkortingMedTillegg(hentAvkortingNonNull(behandling.id), behandling)
             } else {
                 val forrigeAvkorting = hentAvkortingForrigeBehandling(behandling.sak, brukerTokenInfo)

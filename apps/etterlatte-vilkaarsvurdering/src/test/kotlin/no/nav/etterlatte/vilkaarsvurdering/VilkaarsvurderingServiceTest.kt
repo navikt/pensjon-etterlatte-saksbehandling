@@ -91,7 +91,7 @@ internal class VilkaarsvurderingServiceTest {
                 every { id } returns UUID.randomUUID()
                 every { sak } returns 1L
                 every { sakType } returns SakType.BARNEPENSJON
-                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { behandlingType } returns BehandlingType.FOERSTEGANGSBEHANDLING
                 every { soeker } returns "10095512345"
                 every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
                 every { revurderingsaarsak } returns null
@@ -152,7 +152,7 @@ internal class VilkaarsvurderingServiceTest {
                 every { id } returns UUID.randomUUID()
                 every { sak } returns 1L
                 every { sakType } returns SakType.BARNEPENSJON
-                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { behandlingType } returns BehandlingType.FOERSTEGANGSBEHANDLING
                 every { soeker } returns "10095512345"
                 every { virkningstidspunkt } returns
                     VirkningstidspunktTestData.virkningstidsunkt()
@@ -197,7 +197,7 @@ internal class VilkaarsvurderingServiceTest {
                 every { id } returns UUID.randomUUID()
                 every { sak } returns 2L
                 every { sakType } returns SakType.OMSTILLINGSSTOENAD
-                every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+                every { behandlingType } returns BehandlingType.FOERSTEGANGSBEHANDLING
                 every { soeker } returns "10095512345"
                 every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt()
                 every { revurderingsaarsak } returns null
@@ -660,7 +660,7 @@ internal class VilkaarsvurderingServiceTest {
         every { sak } returns 1L
         every { sakType } returns SakType.BARNEPENSJON
         every { status } returns behandlingStatus
-        every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+        every { behandlingType } returns BehandlingType.FOERSTEGANGSBEHANDLING
         every { soeker } returns "10095512345"
         every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
         every { revurderingsaarsak } returns null

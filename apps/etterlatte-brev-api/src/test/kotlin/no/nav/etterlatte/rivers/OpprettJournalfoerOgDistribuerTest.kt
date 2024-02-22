@@ -181,7 +181,7 @@ internal class OpprettJournalfoerOgDistribuer {
                     virkningstidspunkt = YearMonth.now(),
                     behandling =
                         Behandling(
-                            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                            type = BehandlingType.FOERSTEGANGSBEHANDLING,
                             id = behandlingId,
                             revurderingsaarsak = null,
                             revurderingInfo = null,

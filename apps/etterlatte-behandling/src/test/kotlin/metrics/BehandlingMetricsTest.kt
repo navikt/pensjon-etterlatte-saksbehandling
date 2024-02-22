@@ -85,7 +85,7 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
     @Test
     fun `Henter riktig antall for behandlingstyper`() {
         val metrikker = behandlingMetrics.behandlinger.collect().first().samples
-        metrikker.filter { it.labelValues[1] == BehandlingType.FØRSTEGANGSBEHANDLING.name }.size shouldBe 4
+        metrikker.filter { it.labelValues[1] == BehandlingType.FOERSTEGANGSBEHANDLING.name }.size shouldBe 4
         metrikker.filter { it.labelValues[1] == BehandlingType.REVURDERING.name }.size shouldBe 1
     }
 
@@ -121,7 +121,7 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
         sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).let {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    type = BehandlingType.FOERSTEGANGSBEHANDLING,
                     status = BehandlingStatus.IVERKSATT,
                     sakId = it.id,
                 ),
@@ -138,7 +138,7 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
         sakRepo.opprettSak("321", SakType.OMSTILLINGSSTOENAD, Enheter.defaultEnhet.enhetNr).let {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    type = BehandlingType.FOERSTEGANGSBEHANDLING,
                     sakId = it.id,
                 ),
             )
@@ -148,7 +148,7 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
         sakRepo.opprettSak("111", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).let {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    type = BehandlingType.FOERSTEGANGSBEHANDLING,
                     status = BehandlingStatus.IVERKSATT,
                     kilde = Vedtaksloesning.PESYS,
                     virkningstidspunkt =
@@ -166,7 +166,7 @@ internal class BehandlingMetricsTest(private val ds: DataSource) {
         sakRepo.opprettSak("222", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).let {
             behandlingRepo.opprettBehandling(
                 opprettBehandling(
-                    type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    type = BehandlingType.FOERSTEGANGSBEHANDLING,
                     status = BehandlingStatus.OPPRETTET,
                     kilde = Vedtaksloesning.PESYS,
                     virkningstidspunkt =

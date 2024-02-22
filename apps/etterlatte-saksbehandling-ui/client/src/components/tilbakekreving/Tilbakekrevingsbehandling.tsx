@@ -51,7 +51,7 @@ export function Tilbakekrevingsbehandling() {
       {!!tilbakekreving && viHarLastetRiktigTilbakekreving && (
         <GridContainer>
           <MainContent>
-            <TilbakekrevingStegmeny />
+            <TilbakekrevingStegmeny behandling={tilbakekreving} />
             <Routes>
               <Route path="vurdering" element={<TilbakekrevingVurdering behandling={tilbakekreving} />} />
               <Route path="brev" element={<TilbakekrevingBrev tilbakekreving={tilbakekreving} />} />

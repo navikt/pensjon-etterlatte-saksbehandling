@@ -31,8 +31,8 @@ export default function OppsummeringOppgavebehandling() {
 
   const { spraak, mottattDato, persongalleri } = nyBehandlingRequest!
 
-  if (!persongalleri) {
-    return <Alert variant="error">Kunne ikke hente persongalleri</Alert>
+  if (!persongalleri || !mottattDato || !spraak) {
+    return <Alert variant="error">Kunne ikke hente persongalleri, mottat dato eller språk</Alert>
   }
 
   return (
@@ -48,8 +48,8 @@ export default function OppsummeringOppgavebehandling() {
           </Tag>
         </div>
 
-        <Info label="Språk" tekst={formaterSpraak(spraak!)} />
-        <Info label="Mottatt dato" tekst={formaterStringDato(mottattDato!)} />
+        <Info label="Språk" tekst={formaterSpraak(spraak)} />
+        <Info label="Mottatt dato" tekst={formaterStringDato(mottattDato)} />
 
         <Info label="Søker" tekst={persongalleri.soeker} />
         <Info label="Innsender" tekst={persongalleri.innsender || <Detail>Ikke oppgitt</Detail>} />

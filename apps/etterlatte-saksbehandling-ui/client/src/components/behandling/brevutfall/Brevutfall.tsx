@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '~store/Store'
 import { IBehandlingReducer, updateBrevutfallOgEtterbetaling } from '~store/reducers/BehandlingReducer'
 
 export interface BrevutfallOgEtterbetaling {
+  opphoer?: boolean | null
   etterbetaling?: Etterbetaling | null
   brevutfall: Brevutfall
 }

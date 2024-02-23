@@ -19,6 +19,7 @@ class BehandlingInfoService(
     fun lagreBrevutfallOgEtterbetaling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        opphoer: Boolean,
         brevutfall: Brevutfall,
         etterbetaling: Etterbetaling?,
     ): Pair<Brevutfall, Etterbetaling?> {
@@ -26,22 +27,23 @@ class BehandlingInfoService(
             behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
 
-        sjekkBehandlingKanEndres(behandling)
+        sjekkBehandlingKanEndres(behandling, opphoer)
 
-        val lagretBrevutfall = lagreBrevutfall(behandling, brevutfall)
+        val lagretBrevutfall = lagreBrevutfall(behandling, opphoer, brevutfall)
         val lagretEtterbetaling = lagreEtterbetaling(behandling, etterbetaling)
 
-        oppdaterBehandlingStatus(behandling, brukerTokenInfo)
+        oppdaterBehandlingStatus(behandling, opphoer, brukerTokenInfo)
 
         return Pair(lagretBrevutfall, lagretEtterbetaling)
     }
 
     private fun lagreBrevutfall(
         behandling: Behandling,
+        opphoer: Boolean,
         brevutfall: Brevutfall,
     ): Brevutfall {
         sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
-        sjekkLavEllerIngenInntektSattVedOmstillingsstoenad(behandling, brevutfall)
+        sjekkLavEllerIngenInntektSattVedOmstillingsstoenad(behandling, opphoer, brevutfall)
         sjekkFeilutbetalingErSatt(behandling, brevutfall)
         return behandlingInfoDao.lagreBrevutfall(brevutfall)
     }
@@ -69,11 +71,14 @@ class BehandlingInfoService(
         return behandlingInfoDao.hentEtterbetaling(behandlingId)
     }
 
-    private fun sjekkBehandlingKanEndres(behandling: Behandling) {
+    private fun sjekkBehandlingKanEndres(
+        behandling: Behandling,
+        opphoer: Boolean,
+    ) {
         val kanEndres =
             when (behandling.sak.sakType) {
                 SakType.BARNEPENSJON -> {
-                    if (behandling.revurderingMedOpphoer()) {
+                    if (opphoer) {
                         behandling.status in
                             listOf(
                                 BehandlingStatus.VILKAARSVURDERT,
@@ -89,7 +94,7 @@ class BehandlingInfoService(
                 }
 
                 SakType.OMSTILLINGSSTOENAD ->
-                    if (behandling.revurderingMedOpphoer()) {
+                    if (opphoer) {
                         behandling.status in
                             listOf(
                                 BehandlingStatus.VILKAARSVURDERT,
@@ -135,10 +140,11 @@ class BehandlingInfoService(
 
     private fun sjekkLavEllerIngenInntektSattVedOmstillingsstoenad(
         behandling: Behandling,
+        opphoer: Boolean,
         brevutfall: Brevutfall,
     ) {
         if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD &&
-            !behandling.revurderingMedOpphoer() &&
+            !opphoer &&
             brevutfall.lavEllerIngenInntekt == null
         ) {
             throw BrevutfallException.LavEllerIngenInntektIkkeSatt()
@@ -158,9 +164,10 @@ class BehandlingInfoService(
 
     private fun oppdaterBehandlingStatus(
         behandling: Behandling,
+        opphoer: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        if (behandling.revurderingMedOpphoer()) {
+        if (opphoer) {
             behandlingsstatusService.settVilkaarsvurdert(behandling.id, brukerTokenInfo, false)
         } else {
             when (behandling.sak.sakType) {
@@ -169,9 +176,4 @@ class BehandlingInfoService(
             }
         }
     }
-
-    // TODO ønsker ikke å se på revurderingsårsaker for om det er opphør da dette ikke vil stemme for feks eksport / import / annen
-    //  siden de kan være både opphør og endring. Dersom denne blir kalt etter vilkårsvurderingen kan vi anta at det er opphør, siden alternativet
-    //  ville vært etter beregnet. Det riktige her blir nok å bruke vilkårsvurdering for å se om det er opphør.
-    private fun Behandling.revurderingMedOpphoer(): Boolean = revurderingsaarsak() != null && status == BehandlingStatus.VILKAARSVURDERT
 }

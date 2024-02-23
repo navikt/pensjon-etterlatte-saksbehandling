@@ -1,15 +1,14 @@
 import { Alert, Button, Checkbox, Select, TextField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
-import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
-import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import styled from 'styled-components'
-import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
-import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
 import { opprettOverstyrBeregning } from '~shared/api/beregning'
-import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+import {
+  InputRow,
+  NyBehandlingSkjema,
+} from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { Spraak } from '~shared/types/Brev'
 import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
 import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
@@ -18,14 +17,24 @@ import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~components/person/EndreEnhet'
 import { useParams } from 'react-router-dom'
 import { hentOppgave } from '~shared/api/oppgaver'
-import ManuellPersongalleriBarnepensjon from '~components/manuelbehandling/ManuellPersongalleriBarnepensjon'
+import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
+import { useForm } from 'react-hook-form'
+import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+import { formaterSpraak } from '~utils/formattering'
+
+interface ManuellBehandingSkjema extends NyBehandlingSkjema {
+  kilde: string
+  pesysId: number | undefined
+  enhet: String
+  foreldreloes: boolean
+  ufoere: boolean
+  gradering: boolean
+}
 
 export default function ManuellBehandling() {
-  const dispatch = useAppDispatch()
   const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
   const { '*': oppgaveId } = useParams()
 
-  const { nyBehandlingRequest } = useJournalfoeringOppgave()
   const [status, opprettNyBehandling] = useApiCall(opprettBehandling)
   const [nyBehandlingId, setNyId] = useState('')
   const [vedtaksloesning, setVedtaksloesning] = useState<string>('')
@@ -59,19 +68,44 @@ export default function ManuellBehandling() {
   const [gradering, setGradering] = useState<string>('')
   const [error, setError] = useState<boolean>(false)
 
-  const ferdigstill = () => {
-    if (!gradering || !vedtaksloesning || !nyBehandlingRequest?.mottattDato) {
+  // TODO Felles util?
+  const mapRHFArrayToStringArray = (rhfArray?: Array<{ value: string }>): string[] => {
+    return !!rhfArray ? rhfArray.map((val) => val.value) : []
+  }
+
+  const methods = useForm<ManuellBehandingSkjema>({
+    defaultValues: {
+      persongalleri: {
+        innsender: undefined,
+        soeker: fnrFraOppgave,
+        gjenlevende: [],
+        soesken: [],
+        avdoed: [],
+      },
+    },
+  })
+
+  const ferdigstill = (data: ManuellBehandingSkjema) => {
+    // TODO Bedre validering med react hook form?
+    if (!gradering || !vedtaksloesning || data.mottattDato) {
       setError(true)
       return
     }
+    // TODO kan bruke mer unpacking her?
     opprettNyBehandling(
       {
-        ...nyBehandlingRequest,
+        persongalleri: {
+          ...data.persongalleri,
+          gjenlevende: mapRHFArrayToStringArray(data.persongalleri.gjenlevende),
+          avdoed: mapRHFArrayToStringArray(data.persongalleri.avdoed).filter((val) => val !== ''),
+          soesken: mapRHFArrayToStringArray(data.persongalleri.soesken),
+        },
+        spraak: data.spraak!, // TODO ?
+        mottattDato: new Date(data.mottattDato).toISOString(),
         sakType: SakType.BARNEPENSJON,
-        mottattDato: nyBehandlingRequest!!.mottattDato!!.replace('Z', ''),
         kilde: vedtaksloesning,
         pesysId: pesysId,
-        enhet: enhet === 'VELGENHET' ? undefined : filtrerEnhet(enhet),
+        enhet: enhet === 'VELGENHET' ? undefined : filtrerEnhet(enhet), // TODO ?
         foreldreloes: erForeldreloes,
         ufoere: erUfoere,
         gradering: gradering,
@@ -90,6 +124,14 @@ export default function ManuellBehandling() {
       }
     )
   }
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    getValues,
+  } = methods
 
   if (isPending(oppgaveStatus)) {
     return <div>Henter oppgave</div>
@@ -163,30 +205,25 @@ export default function ManuellBehandling() {
       </Checkbox>
 
       <Select
+        {...register('spraak', {
+          required: { value: true, message: 'Du må velge språk/målform for behandlingen' },
+        })}
         label="Hva skal språket/målform være?"
-        value={nyBehandlingRequest?.spraak || ''}
-        onChange={(e) =>
-          dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, spraak: e.target.value as Spraak }))
-        }
+        error={errors.spraak?.message}
       >
-        <option>Velg ...</option>
-        <option value="nb">Bokmål</option>
-        <option value="nn">Nynorsk</option>
-        <option value="en">Engelsk</option>
+        <option value="">Velg ...</option>
+        <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
+        <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
+        <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
       </Select>
 
-      <DatoVelger
-        label="Mottatt dato (påkrevd)"
+      <ControlledDatoVelger
+        name="mottattDato"
+        label="Mottatt dato"
         description="Datoen søknaden ble mottatt"
-        value={nyBehandlingRequest?.mottattDato ? new Date(nyBehandlingRequest?.mottattDato) : undefined}
-        onChange={(mottattDato) =>
-          dispatch(
-            settNyBehandlingRequest({
-              ...nyBehandlingRequest,
-              mottattDato: mottattDato?.toISOString(),
-            })
-          )
-        }
+        control={control}
+        errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
+        defaultValue={getValues().mottattDato}
       />
 
       <Checkbox checked={erForeldreloes} onChange={() => setErForeldreloes(!erForeldreloes)}>
@@ -197,12 +234,12 @@ export default function ManuellBehandling() {
         Søker har en sak for uføretrygd løpende eller under behandling.
       </Checkbox>
 
-      <ManuellPersongalleriBarnepensjon fnrFraOppgave={fnrFraOppgave} />
+      <PersongalleriBarnepensjon />
 
       <Knapp>
         <Button
           variant="secondary"
-          onClick={ferdigstill}
+          onClick={handleSubmit(ferdigstill)}
           loading={isPending(status) || isPending(overstyrBeregningStatus) || isPending(overstyrTrygdetidStatus)}
         >
           Opprett behandling

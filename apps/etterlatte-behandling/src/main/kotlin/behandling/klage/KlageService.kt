@@ -189,6 +189,11 @@ class KlageServiceImpl(
     ): Klage {
         val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
 
+        if (klage.utfall is KlageUtfallMedData.Avvist) {
+            // Vi må rydde bort det vedtaksbrevet som ble opprettet ved forrige utfall
+            runBlocking { brevApiKlient.slettVedtaksbrev(klageId, saksbehandler) }
+        }
+
         val utfallMedBrev =
             when (utfall) {
                 // Vurder å slette brev hvis det finnes her? Så vi ikke polluter med hengende brev

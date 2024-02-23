@@ -1,10 +1,13 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.common.klienter.PesysKlient
+import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
@@ -26,6 +29,7 @@ class DoedshendelseJobService(
     private val dagerGamleHendelserSomSkalKjoeres: Int,
     private val behandlingService: BehandlingService,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
+    private val pesysKlient: PesysKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -88,9 +92,10 @@ class DoedshendelseJobService(
             val hentSisteIverksatte = behandlingService.hentSisteIverksatte(sak.id)
             val harIkkeBarnepensjon = hentSisteIverksatte == null
             if (harIkkeBarnepensjon) {
-                // TODO: sjekk om har uføretrygd
+                if (harUfoereTrygd(doedshendelse)) {
+                    // ->> send brev
+                }
 
-                // TODO: sjekk om begge foreldre er døde
                 val pdlPerson = pdlTjenesterKlient.hentPdlModell(doedshendelse.beroertFnr, PersonRolle.BARN, sak.sakType)
                 val foreldre = pdlPerson.familieRelasjon?.verdi?.foreldre ?: emptyList()
                 val foreldreMedData =
@@ -102,6 +107,19 @@ class DoedshendelseJobService(
                 // -> må sende brev
             }
         }
+    }
+
+    fun harUfoereTrygd(doedshendelse: Doedshendelse): Boolean {
+        val sakerFraPesys =
+            runBlocking {
+                pesysKlient.hentSaker(doedshendelse.beroertFnr)
+            }
+        return sakerFraPesys.any { it.harUfoeretrygd() }
+    }
+
+    fun SakSammendragResponse.harUfoeretrygd(): Boolean {
+        return this.sakType == SakSammendragResponse.UFORE_SAKTYPE &&
+            this.sakStatus == SakSammendragResponse.Status.LOPENDE
     }
 
     private fun beggeForeldreErDoede(foreldre: List<PersonDTO>): Boolean {

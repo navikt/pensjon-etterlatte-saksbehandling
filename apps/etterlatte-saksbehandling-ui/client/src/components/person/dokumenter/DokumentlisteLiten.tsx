@@ -43,7 +43,7 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
               <div key={dokument.journalpostId}>
                 {dokument.dokumenter.map((dokumentInfo) => (
                   <BodyShort key={dokumentInfo.dokumentInfoId} as="div" size="small" spacing>
-                    {!dokumentInfo.dokumentvarianter[0].saksbehandlerHarTilgang ? (
+                    {dokumentInfo.dokumentvarianter[0].saksbehandlerHarTilgang ? (
                       <>
                         <Link
                           href={`/api/dokumenter/${dokument.journalpostId}/${dokumentInfo.dokumentInfoId}`}

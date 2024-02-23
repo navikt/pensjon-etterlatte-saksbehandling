@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { Button, Dropdown, Label, UNSAFE_Combobox } from '@navikt/ds-react'
 import { PersonCrossIcon, PersonPencilIcon, PersonPlusIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
@@ -38,12 +38,6 @@ export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, opp
   const [openDropdown, setOpenDropdown] = useState<boolean>(false)
 
   const [valgtSaksbehandler, setValgtSaksbehandler] = useState<Saksbehandler | undefined>(saksbehandler)
-
-  useEffect(() => {
-    if (valgtSaksbehandler?.ident !== oppgave.saksbehandler?.ident) {
-      setValgtSaksbehandler(saksbehandler)
-    }
-  }, [oppgave.saksbehandler])
 
   const [tildelSaksbehandlerResult, tildelSaksbehandler] = useApiCall(tildelSaksbehandlerApi)
   const [fjernSaksbehandlerResult, fjernSaksbehandler] = useApiCall(fjernSaksbehandlerApi)

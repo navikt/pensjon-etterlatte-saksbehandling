@@ -7,11 +7,13 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import no.nav.etterlatte.brev.BREV_ID_CALL_PARAMETER
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withBehandlingId
+import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import org.slf4j.LoggerFactory
 import kotlin.time.DurationUnit
@@ -65,6 +67,23 @@ internal fun Route.varselbrevRoute(
                 }.let { (pdf, varighet) ->
                     logger.info("Generering av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(pdf)
+                }
+            }
+        }
+    }
+
+    route("brev/{$BREV_ID_CALL_PARAMETER}/varsel") {
+        post("/ferdigstill") {
+            withSakId(tilgangssjekker) {
+                val brevId = requireNotNull(call.parameters[BREV_ID_CALL_PARAMETER]).toLong()
+
+                logger.info("Genererer og ferdigstiller PDF for varselbrev (id=$brevId)")
+
+                measureTimedValue {
+                    service.ferdigstillOgGenererPDF(brevId, brukerTokenInfo)
+                }.let { (_, varighet) ->
+                    logger.info("Ferdigstilling samt generering av pdf tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
+                    call.respond(HttpStatusCode.OK)
                 }
             }
         }

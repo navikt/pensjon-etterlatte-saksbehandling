@@ -97,8 +97,17 @@ export const lagreManuellPayload = async (props: {
     payload_vedlegg: props.payload_vedlegg,
   })
 
-export const ferdigstillBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<any>> =>
-  apiClient.post(`/brev/${props.brevId}/ferdigstill?sakId=${props.sakId}`, {})
+export const ferdigstillBrev = async (props: {
+  brevId: number
+  sakId: number
+  brevtype: Brevtype
+}): Promise<ApiResponse<any>> => {
+  if (props.brevtype === Brevtype.VARSEL) {
+    return apiClient.post(`/brev/${props.brevId}/varsel/ferdigstill?sakId=${props.sakId}`, {})
+  } else {
+    return apiClient.post(`/brev/${props.brevId}/ferdigstill?sakId=${props.sakId}`, {})
+  }
+}
 
 export const journalfoerBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<any>> =>
   apiClient.post(`/brev/${props.brevId}/journalfoer?sakId=${props.sakId}`, {})

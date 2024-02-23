@@ -29,6 +29,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
         description={
           erManuellMigrering ? 'Oppgi søker sitt fødselsnummer' : 'Fødselsnummeret er automatisk hentet fra oppgaven'
         }
+        error={errors.persongalleri?.soeker?.message}
         readOnly={!erManuellMigrering}
       />
 

@@ -87,11 +87,13 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         {behandling.soeknadMottattDato && <Soeknadsdato mottattDato={behandling.soeknadMottattDato} />}
       </ContentHeader>
       <InnholdPadding>
-        <OppdaterGrunnlagModal
-          behandlingId={behandling.id}
-          behandlingStatus={behandling.status}
-          enhetId={behandling.sakEnhetId}
-        />
+        {redigerbar && (
+          <OppdaterGrunnlagModal
+            behandlingId={behandling.id}
+            behandlingStatus={behandling.status}
+            enhetId={behandling.sakEnhetId}
+          />
+        )}
         <Utlandstilknytning behandling={behandling} redigerbar={redigerbar} />
         {personopplysninger && (
           <OversiktGyldigFramsatt behandling={behandling} personopplysninger={personopplysninger} />
@@ -122,7 +124,7 @@ export const Soeknadsoversikt = (props: { behandling: IDetaljertBehandling }) =>
         <SkalViseBosattUtland behandling={behandling} redigerbar={redigerbar} />
       </InnholdPadding>
       <Border />
-      <Familieforhold behandling={behandling} personopplysninger={personopplysninger} />
+      <Familieforhold behandling={behandling} personopplysninger={personopplysninger} redigerbar={redigerbar} />
       {redigerbar ? (
         <BehandlingHandlingKnapper>
           {soeknadsoversiktErFerdigUtfylt(behandling) && <Start disabled={!erGyldigFremsatt} />}

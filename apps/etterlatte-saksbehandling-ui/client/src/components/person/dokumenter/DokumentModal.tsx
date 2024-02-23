@@ -117,6 +117,5 @@ const DropdownMenu = styled(Dropdown.Menu)`
 `
 
 const IkkeTilgangAlert = styled(Alert)`
-  color: black;
   padding: 0.5rem;
 `

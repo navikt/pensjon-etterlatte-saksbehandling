@@ -51,10 +51,6 @@ internal class Verifiserer(
         feilSomAvbryter.addAll(finnesIPdlFeil)
 
         if (soeker != null) {
-            if (soeker.adressebeskyttelse?.verdi?.erStrengtFortrolig() == true) {
-                // Vi kjører strengt fortrolig til sist. Hvis saker har blitt strengt fortrolig etter opphør avbryter vi.
-                feilSomAvbryter.add(StrengtFortroligPDL)
-            }
             feilSomMedfoererManuell.addAll(sjekkAtSoekerHarRelevantVerge(patchedRequest, soeker))
             if (!patchedRequest.erUnder18) {
                 feilSomMedfoererManuell.addAll(sjekkOmSoekerHaddeFlyktningerfordel(patchedRequest))

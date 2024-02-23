@@ -43,19 +43,21 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
             <Dropdown.Menu.GroupedList>
               <Dropdown.Menu.GroupedList.Heading>Velg dokument</Dropdown.Menu.GroupedList.Heading>
               <Dropdown.Menu.Divider />
-              {dokumenter.map((dok) => (
-                <Dropdown.Menu.GroupedList.Item
-                  key={dok.dokumentInfoId}
-                  onClick={() => open(dok.dokumentInfoId)}
-                  disabled={!dok.dokumentvarianter[0].saksbehandlerHarTilgang}
-                >
+              {dokumenter.map((dok, index) => (
+                <FlexRow key={index}>
+                  <Dropdown.Menu.GroupedList.Item
+                    key={dok.dokumentInfoId}
+                    onClick={() => open(dok.dokumentInfoId)}
+                    disabled={!dok.dokumentvarianter[0].saksbehandlerHarTilgang}
+                  >
+                    {dok.tittel}
+                  </Dropdown.Menu.GroupedList.Item>
                   {!dok.dokumentvarianter[0].saksbehandlerHarTilgang && (
-                    <Alert variant="warning" size="small">
-                      Ingen tilgang
-                    </Alert>
+                    <IkkeTilgangAlert variant="warning" size="small">
+                      Ikke tilgang
+                    </IkkeTilgangAlert>
                   )}
-                  {dok.tittel}
-                </Dropdown.Menu.GroupedList.Item>
+                </FlexRow>
               ))}
             </Dropdown.Menu.GroupedList>
           </DropdownMenu>
@@ -112,4 +114,9 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
 
 const DropdownMenu = styled(Dropdown.Menu)`
   width: 50ch;
+`
+
+const IkkeTilgangAlert = styled(Alert)`
+  color: black;
+  padding: 0.5rem;
 `

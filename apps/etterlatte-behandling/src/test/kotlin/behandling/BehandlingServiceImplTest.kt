@@ -25,11 +25,13 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -52,6 +54,8 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
+import java.time.YearMonth
 import java.util.UUID
 
 class BehandlingServiceImplTest {
@@ -529,20 +533,66 @@ class BehandlingServiceImplTest {
         gyldigVirkningstidspunkt shouldBe false
     }
 
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal gi gyldig virkningstidspunkt for revurdering hvis virkningstidspunkt er paa foerste virk`(sakType: SakType) {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                behandlingType = BehandlingType.REVURDERING,
+                virkningstidspunkt = Tidspunkt.parse("2024-01-01T00:00:00Z"),
+                foersteVirk = YearMonth.of(2024, Month.JANUARY),
+            )
+
+        gyldigVirkningstidspunkt shouldBe true
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal gi gyldig virkningstidspunkt for revurdering hvis virkningstidspunkt er etter foerste virk`(sakType: SakType) {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                behandlingType = BehandlingType.REVURDERING,
+                virkningstidspunkt = Tidspunkt.parse("2024-02-01T00:00:00Z"),
+                foersteVirk = YearMonth.of(2024, Month.JANUARY),
+            )
+
+        gyldigVirkningstidspunkt shouldBe true
+    }
+
+    @ParameterizedTest
+    @EnumSource(SakType::class, names = ["OMSTILLINGSSTOENAD", "BARNEPENSJON"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal gi ugyldig virkningstidspunkt for revurdering hvis virkningstidspunkt er foer foerste virk`(sakType: SakType) {
+        val gyldigVirkningstidspunkt =
+            sjekkOmVirkningstidspunktErGyldig(
+                sakType = sakType,
+                behandlingType = BehandlingType.REVURDERING,
+                virkningstidspunkt = Tidspunkt.parse("2023-12-01T00:00:00Z"),
+                foersteVirk = YearMonth.of(2024, Month.JANUARY),
+            )
+
+        gyldigVirkningstidspunkt shouldBe false
+    }
+
     private fun sjekkOmVirkningstidspunktErGyldig(
         sakType: SakType,
+        behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         utlandstilknytningType: UtlandstilknytningType? = UtlandstilknytningType.NASJONAL,
         virkningstidspunkt: Tidspunkt = Tidspunkt.parse("2016-01-01T00:00:00Z"),
         begrunnelse: String = "en begrunnelse",
         soeknadMottatt: LocalDateTime = LocalDateTime.parse("2020-01-15T00:00:00"),
         doedsdato: LocalDate? = LocalDate.parse("2016-11-30"),
         kravdato: Tidspunkt? = null,
+        foersteVirk: YearMonth? = null,
     ): Boolean {
         val service =
             behandlingServiceMedMocks(
                 sakType = sakType,
+                behandlingType = behandlingType,
                 doedsdato = doedsdato,
                 soeknadMottatt = soeknadMottatt,
+                foersteVirk = foersteVirk,
                 utlandstilknytning =
                     utlandstilknytningType?.let {
                         Utlandstilknytning(
@@ -681,18 +731,55 @@ class BehandlingServiceImplTest {
 
     private fun behandlingServiceMedMocks(
         sakType: SakType = SakType.BARNEPENSJON,
+        behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         doedsdato: LocalDate?,
         soeknadMottatt: LocalDateTime,
+        foersteVirk: YearMonth?,
         utlandstilknytning: Utlandstilknytning? = null,
     ): BehandlingServiceImpl {
-        val behandling =
-            foerstegangsbehandling(
-                id = BEHANDLINGS_ID,
-                sakId = SAK_ID,
-                sakType = sakType,
-                soeknadMottattDato = soeknadMottatt,
-                utlandstilknytning = utlandstilknytning,
-            )
+        val (behandling, tidligereBehandlinger) =
+            when (behandlingType) {
+                BehandlingType.FØRSTEGANGSBEHANDLING ->
+                    Pair(
+                        foerstegangsbehandling(
+                            id = BEHANDLINGS_ID,
+                            sakId = SAK_ID,
+                            sakType = sakType,
+                            soeknadMottattDato = soeknadMottatt,
+                            utlandstilknytning = utlandstilknytning,
+                        ),
+                        emptyList(),
+                    )
+
+                BehandlingType.REVURDERING ->
+                    Pair(
+                        revurdering(
+                            id = BEHANDLINGS_ID,
+                            sakId = SAK_ID,
+                            revurderingAarsak = Revurderingaarsak.ANNEN,
+                            utlandstilknytning = utlandstilknytning,
+                        ),
+                        listOf(
+                            foerstegangsbehandling(
+                                id = BEHANDLINGS_ID,
+                                sakId = SAK_ID,
+                                sakType = sakType,
+                                status = BehandlingStatus.IVERKSATT,
+                                virkningstidspunkt =
+                                    Virkningstidspunkt.create(
+                                        dato = foersteVirk!!,
+                                        ident = "Z123456",
+                                        begrunnelse = "begrunnelse",
+                                    ),
+                                soeknadMottattDato = soeknadMottatt,
+                                utlandstilknytning = utlandstilknytning,
+                            ),
+                        ),
+                    )
+
+                BehandlingType.MANUELT_OPPHOER -> throw Exception("Manuelt opphør ikke støttet")
+            }
+
         val personopplysning = personOpplysning(doedsdato = doedsdato)
         val grunnlagsopplysningMedPersonopplysning = grunnlagsOpplysningMedPersonopplysning(personopplysning)
         val grunnlagKlient =
@@ -709,6 +796,7 @@ class BehandlingServiceImplTest {
                     every {
                         hentBehandling(BEHANDLINGS_ID)
                     } returns behandling
+                    every { alleBehandlingerISak(any()) } returns tidligereBehandlinger
                 },
             grunnlagKlient = grunnlagKlient,
         )

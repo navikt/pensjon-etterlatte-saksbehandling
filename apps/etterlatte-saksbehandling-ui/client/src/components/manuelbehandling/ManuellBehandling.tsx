@@ -197,7 +197,7 @@ export default function ManuellBehandling() {
         Søker har en sak for uføretrygd løpende eller under behandling.
       </Checkbox>
 
-      <ManuellPersongalleriBarnepensjon erManuellMigrering={true} fnrFraOppgave={fnrFraOppgave} />
+      <ManuellPersongalleriBarnepensjon fnrFraOppgave={fnrFraOppgave} />
 
       <Knapp>
         <Button

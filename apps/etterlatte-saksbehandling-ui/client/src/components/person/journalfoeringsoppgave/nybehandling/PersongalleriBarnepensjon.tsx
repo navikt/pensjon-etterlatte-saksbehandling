@@ -9,7 +9,7 @@ import {
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import { SpaceChildren } from '~shared/styled'
 
-export default function PersongalleriBarnepensjon({ erManuellMigrering = false }: { erManuellMigrering?: boolean }) {
+export default function PersongalleriBarnepensjon() {
   const {
     register,
     formState: { errors },
@@ -27,10 +27,8 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
         <TextField
           {...register('persongalleri.soeker', { validate: validateFnrObligatorisk })}
           label="Søker (barnet)"
-          description={
-            erManuellMigrering ? 'Oppgi søker sitt fødselsnummer' : 'Fødselsnummeret er automatisk hentet fra oppgaven'
-          }
-          readOnly={!erManuellMigrering}
+          description="Fødselsnummeret er automatisk hentet fra oppgaven"
+          readOnly
         />
       </InputRow>
 

@@ -10,13 +10,14 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVedtaksbrev, opprettVedtaksbrev } from '~shared/api/brev'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
-import { useVedtak } from '~components/vedtak/useVedtak'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 
 import { isPending, isPendingOrInitial } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppSelector } from '~store/Store'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
+import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
+import { VedtakSammendrag } from '~components/vedtak/typer'
 
 export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: TilbakekrevingBehandling }) {
   const kanAttesteres = [
@@ -24,7 +25,7 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
     TilbakekrevingStatus.UNDER_ARBEID,
     TilbakekrevingStatus.UNDERKJENT,
   ].includes(tilbakekreving.status)
-  const vedtak = useVedtak()
+  const [, hentVedtak] = useApiCall(hentVedtakSammendrag)
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
   const [hentBrevStatus, hentBrevRequest] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
@@ -44,12 +45,14 @@ export function TilbakekrevingBrev({ tilbakekreving }: { tilbakekreving: Tilbake
   }
 
   useEffect(() => {
-    if (vedtak) {
-      hentBrev()
-    } else {
-      opprettVedtak(tilbakekreving.id).then(() => hentBrev())
-    }
-  }, [tilbakekreving, vedtak])
+    hentVedtak(tilbakekreving.id, (vedtak: VedtakSammendrag | null) => {
+      if (vedtak) {
+        hentBrev()
+      } else {
+        opprettVedtak(tilbakekreving.id).then(() => hentBrev())
+      }
+    })
+  }, [tilbakekreving])
 
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner visible label="Henter brev ..." />

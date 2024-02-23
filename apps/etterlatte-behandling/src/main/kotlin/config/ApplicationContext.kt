@@ -244,7 +244,7 @@ internal class ApplicationContext(
     val doedshendelseDao = DoedshendelseDao(autoClosingDatabase)
 
     // Klient
-    val pdlKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
+    val pdlTjenesterKlient = PdlTjenesterKlientImpl(config, pdlHttpClient)
     val skjermingKlient = SkjermingKlient(skjermingHttpKlient, env.getValue("SKJERMING_URL"))
     val grunnlagKlient = GrunnlagKlientImpl(config, grunnlagHttpClient)
     val leaderElectionKlient = LeaderElection(env.maybeEnvValue("ELECTOR_PATH"), leaderElectionHttpClient)
@@ -260,7 +260,7 @@ internal class ApplicationContext(
     // Service
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao)
 
-    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlKlient)
+    val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient)
     val grunnlagsService = GrunnlagService(grunnlagKlient)
     val behandlingService =
         BehandlingServiceImpl(
@@ -332,20 +332,20 @@ internal class ApplicationContext(
         )
 
     val tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
-    val enhetService = BrukerServiceImpl(pdlKlient, norg2Klient)
+    val enhetService = BrukerServiceImpl(pdlTjenesterKlient, norg2Klient)
     val sakService =
         SakServiceImpl(
             sakDao,
             skjermingKlient,
             enhetService,
         )
-    val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlKlient, featureToggleService)
+    val doedshendelseService = DoedshendelseService(doedshendelseDao, pdlTjenesterKlient, featureToggleService)
     val grunnlagsendringshendelseService =
         GrunnlagsendringshendelseService(
             oppgaveService = oppgaveService,
             grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
             behandlingService = behandlingService,
-            pdltjenesterKlient = pdlKlient,
+            pdltjenesterKlient = pdlTjenesterKlient,
             grunnlagKlient = grunnlagKlient,
             sakService = sakService,
             brukerService = enhetService,
@@ -355,10 +355,12 @@ internal class ApplicationContext(
     val doedshendelseJobService =
         DoedshendelseJobService(
             doedshendelseDao = doedshendelseDao,
-            doedshendelseKontrollpunktService = DoedshendelseKontrollpunktService(pdlKlient, pesysKlient),
+            doedshendelseKontrollpunktService = DoedshendelseKontrollpunktService(pdlTjenesterKlient, pesysKlient),
             featureToggleService = featureToggleService,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             dagerGamleHendelserSomSkalKjoeres = if (isProd()) 2 else 0,
+            behandlingService = behandlingService,
+            pdlTjenesterKlient = pdlTjenesterKlient,
         )
 
     val behandlingsStatusService =
@@ -382,7 +384,7 @@ internal class ApplicationContext(
             hendelseDao = hendelseDao,
             behandlingHendelser = behandlingsHendelser,
             migreringKlient = migreringKlient,
-            pdltjenesterKlient = pdlKlient,
+            pdltjenesterKlient = pdlTjenesterKlient,
         )
 
     val migreringService =

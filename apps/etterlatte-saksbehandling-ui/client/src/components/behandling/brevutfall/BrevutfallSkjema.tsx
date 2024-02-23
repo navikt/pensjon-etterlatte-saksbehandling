@@ -67,8 +67,8 @@ export const BrevutfallSkjema = ({
         brevutfallOgEtterbetaling.etterbetaling === undefined
           ? HarEtterbetaling.IKKE_VALGT
           : brevutfallOgEtterbetaling.etterbetaling
-            ? HarEtterbetaling.JA
-            : HarEtterbetaling.NEI,
+          ? HarEtterbetaling.JA
+          : HarEtterbetaling.NEI,
       datoFom: brevutfallOgEtterbetaling.etterbetaling?.datoFom
         ? new Date(brevutfallOgEtterbetaling.etterbetaling?.datoFom)
         : undefined,
@@ -86,6 +86,7 @@ export const BrevutfallSkjema = ({
     lagreBrevutfallReset()
 
     const brevutfall: BrevutfallOgEtterbetaling = {
+      opphoer: behandlingErOpphoer,
       brevutfall: {
         aldersgruppe: data.aldersgruppe,
         lavEllerIngenInntekt: data.lavEllerIngenInntekt,

@@ -29,7 +29,7 @@ interface Props {
 
 export const Oppgavelista = ({ saksbehandlereIEnhet, revurderingsaarsaker }: Props) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-  if (innloggetSaksbehandler.skriveEnheter.length == 0) {
+  if (!innloggetSaksbehandler.skriveEnheter.length) {
     return <Tilgangsmelding />
   }
 

@@ -43,7 +43,7 @@ import { SendtilAttesteringModal } from '~components/generellbehandling/SendtilA
 import { NavigateFunction } from 'react-router/dist/lib/hooks'
 import { GenerellbehandlingSidemeny } from '~components/generellbehandling/GenerellbehandlingSidemeny'
 
-import { isFailure, isPending, isPendingOrInitial, isSuccess, mapApiResult } from '~shared/api/apiUtils'
+import { isPending, isPendingOrInitial, isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppSelector } from '~store/Store'
 import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelger/datoVelgerUtils'
@@ -463,7 +463,10 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
               </Alert>
             )}
             {isPendingOrInitial(gjeldendeSakStatus) && <Spinner visible={true} label="Henter opplysninger om sak" />}
-            {isFailure(gjeldendeSakStatus) && <ApiErrorAlert>Vi klarte ikke å hente gjeldende sak</ApiErrorAlert>}
+            {isFailureHandler({
+              errorMessage: 'Vi klarte ikke å hente gjeldende sak',
+              apiResult: gjeldendeSakStatus,
+            })}
             <ButtonGroup>
               {redigerbar && (
                 <>

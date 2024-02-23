@@ -14,6 +14,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.domain.toBehandlingSammendrag
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringsListe
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -132,6 +133,7 @@ internal fun Route.sakWebRoutes(
     grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     oppgaveService: OppgaveService,
     requestLogger: BehandlingRequestLogger,
+    hendelseDao: HendelseDao,
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -218,6 +220,13 @@ internal fun Route.sakWebRoutes(
                         null -> call.respond(HttpStatusCode.NotFound)
                         else -> call.respond(FoersteVirkDto(foersteVirk.atDay(1), sakId))
                     }
+                }
+            }
+
+            get("hendelser") {
+                withLesetilgang {
+                    logger.info("Henter behandlingshendelser i sak med sakId=$sakId")
+                    call.respond(hendelseDao.hentHendelserISak(sakId))
                 }
             }
         }

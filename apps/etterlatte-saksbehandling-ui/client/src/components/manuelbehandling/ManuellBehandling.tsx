@@ -19,7 +19,7 @@ import { hentOppgave } from '~shared/api/oppgaver'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { formaterSpraak } from '~utils/formattering'
+import { formaterSpraak, mapRHFArrayToStringArray } from '~utils/formattering'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
@@ -57,11 +57,6 @@ export default function ManuellBehandling() {
       })
     }
   }, [oppgaveId])
-
-  // TODO Felles util?
-  const mapRHFArrayToStringArray = (rhfArray?: Array<{ value: string }>): string[] => {
-    return !!rhfArray ? rhfArray.map((val) => val.value) : []
-  }
 
   const methods = useForm<ManuellBehandingSkjema>({
     defaultValues: {

@@ -49,22 +49,20 @@ export const Dokumentliste = ({ dokumenter }: { dokumenter: Result<Journalpost[]
             ) : (
               <>
                 {dokumentListe.map((dokument, i) => (
-                  <>
-                    <Table.Row key={i} shadeOnHover={false}>
-                      <Table.DataCell>{dokument.journalpostId}</Table.DataCell>
-                      <Table.DataCell>{dokument.tittel}</Table.DataCell>
-                      <Table.DataCell>{dokument.avsenderMottaker.navn || 'Ukjent'}</Table.DataCell>
-                      <Table.DataCell>{formaterStringDato(dokument.datoOpprettet)}</Table.DataCell>
-                      <Table.DataCell>
-                        {dokument?.sak ? `${dokument.sak.fagsaksystem}: ${dokument.sak.fagsakId || '-'}` : '-'}
-                      </Table.DataCell>
-                      <Table.DataCell>{formaterJournalpostStatus(dokument.journalstatus)}</Table.DataCell>
-                      <Table.DataCell>{formaterJournalpostType(dokument.journalposttype)}</Table.DataCell>
-                      <Table.DataCell>
-                        <VisDokument dokument={dokument} />
-                      </Table.DataCell>
-                    </Table.Row>
-                  </>
+                  <Table.Row key={i} shadeOnHover={false}>
+                    <Table.DataCell>{dokument.journalpostId}</Table.DataCell>
+                    <Table.DataCell>{dokument.tittel}</Table.DataCell>
+                    <Table.DataCell>{dokument.avsenderMottaker.navn || 'Ukjent'}</Table.DataCell>
+                    <Table.DataCell>{formaterStringDato(dokument.datoOpprettet)}</Table.DataCell>
+                    <Table.DataCell>
+                      {dokument?.sak ? `${dokument.sak.fagsaksystem}: ${dokument.sak.fagsakId || '-'}` : '-'}
+                    </Table.DataCell>
+                    <Table.DataCell>{formaterJournalpostStatus(dokument.journalstatus)}</Table.DataCell>
+                    <Table.DataCell>{formaterJournalpostType(dokument.journalposttype)}</Table.DataCell>
+                    <Table.DataCell>
+                      <VisDokument dokument={dokument} />
+                    </Table.DataCell>
+                  </Table.Row>
                 ))}
               </>
             )

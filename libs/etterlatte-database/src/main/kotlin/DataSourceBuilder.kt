@@ -66,6 +66,21 @@ fun DataSource.migrate(): MigrateResult =
     }
 
 fun validateUniqueMigrationVersions() {
+    val resourceFolder = readResources()
+
+    val files = resourceFolder.listFiles()
+    if (files == null) {
+        throw RuntimeException("Failed to list files in the resources folder")
+    } else {
+        val filerMedPath =
+            files.map { dir ->
+                dir.listFiles()?.toList()?.map { it.path } ?: emptyList()
+            }
+        validateMigrationScriptVersions(filerMedPath)
+    }
+}
+
+private fun readResources(): File {
     val systemClassLoader = ClassLoader.getSystemClassLoader()
     val resourceFolderURL: URL? = systemClassLoader.getResource("db")
 
@@ -75,29 +90,24 @@ fun validateUniqueMigrationVersions() {
 
     // Check if it's a directory
     if (!resourceFolder.isDirectory) {
-        throw RuntimeException("Fant ikke migreringsscript i resourceFolder")
+        throw RuntimeException("Fant ikke migreringsscript i resourceFolder for /db")
     }
+    return resourceFolder
+}
 
-    val files = resourceFolder.listFiles()
-    if (files == null) {
-        System.err.println("Failed to list files in the resources folder")
-    } else {
-        val allMigrationVersions =
-            files.map {
-                it.listFiles()?.toList() ?: emptyList()
-            }.flatten()
-                .map { it.path }
-                .filter { item -> item.toString().endsWith(".sql") }
-                .map { it.substring(it.lastIndexOf("/") + 1) }
-                .map { it.substring(0, it.indexOf("__")) }
-        val migreringerSomListe = allMigrationVersions.toList()
-        val grupperte = migreringerSomListe.groupingBy { it }.eachCount()
-        grupperte.forEach {
-            if (it.value > 1) {
-                throw RuntimeException(
-                    "Kan ikke ha flere migreringer med samme versjon! Sjekk alle mapper under /resources/db. Versjon: ${it.key}",
-                )
-            }
+fun validateMigrationScriptVersions(files: List<List<String>>) {
+    val allMigrationVersions =
+        files.flatten()
+            .filter { item -> item.endsWith(".sql") }
+            .map { it.substring(it.lastIndexOf("/") + 1) }
+            .map { it.substring(0, it.indexOf("__")) }
+    val migreringerSomListe = allMigrationVersions.toList()
+    val grupperte = migreringerSomListe.groupingBy { it }.eachCount()
+    grupperte.forEach {
+        if (it.value > 1) {
+            throw RuntimeException(
+                "Kan ikke ha flere migreringer med samme versjon! Sjekk alle mapper under /resources/db. Versjon: ${it.key}",
+            )
         }
     }
 }

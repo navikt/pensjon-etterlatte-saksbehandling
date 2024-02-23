@@ -134,15 +134,16 @@ export interface InitieltUtfallMedBegrunnelseOgMeta {
 
 export interface IniteltUtfallMedBegrunnelseDto {
   utfall: Utfall
-  begrunnelse: string
+  begrunnelse?: string
 }
 
-export const teksterKlageutfall: Record<Utfall, string> = {
+export const teksterKlageutfall: Record<Utfall | 'UKJENT', string> = {
   OMGJOERING: 'Omgjøring',
   DELVIS_OMGJOERING: 'Delvis omgjøring',
   STADFESTE_VEDTAK: 'Stadfeste vedtak',
   AVVIST: 'Avvise klage med brev',
   AVVIST_MED_OMGJOERING: 'Avvise klage',
+  UKJENT: 'Ukjent',
 } as const
 
 export type KlageUtfall =

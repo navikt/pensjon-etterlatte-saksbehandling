@@ -7,6 +7,9 @@ import no.nav.etterlatte.libs.common.isProd
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 import org.slf4j.LoggerFactory
+import java.io.File
+import java.net.URL
+import java.nio.file.Paths
 import javax.sql.DataSource
 
 object DataSourceBuilder {
@@ -43,6 +46,7 @@ object DataSourceBuilder {
 
 fun DataSource.migrate(): MigrateResult =
     try {
+        validateUniqueMigrationVersions()
         Flyway.configure()
             .dataSource(this)
             .apply {
@@ -61,6 +65,55 @@ fun DataSource.migrate(): MigrateResult =
         LoggerFactory.getLogger(this::class.java).error("Fikk feil under Flyway-migrering", e)
         throw e
     }
+
+fun validate() {
+    validateUniqueMigrationVersions()
+}
+
+fun validateUniqueMigrationVersions() {
+    val projectDirAbsolutePath = Paths.get("").toAbsolutePath().toString()
+    val appName = System.getenv()["NAIS_APP_NAME"]
+
+    val systemClassLoader = ClassLoader.getSystemClassLoader()
+    val classLoader: ClassLoader = DataSource::class.java.getClassLoader()
+    val resourceFolderURL: URL? = systemClassLoader.getResource("db")
+    println("resourceFolderURL: " + resourceFolderURL)
+
+    // Convert URL to file path
+    val resourceFolderPath = resourceFolderURL?.file
+    val resourceFolder = File(resourceFolderPath)
+
+    // Check if it's a directory
+    if (!resourceFolder.isDirectory) {
+        System.err.println("Invalid resources folder")
+        return
+    }
+
+    val files = resourceFolder.listFiles()
+    println("Files: " + files.size)
+    if (files == null) {
+        System.err.println("Failed to list files in the resources folder")
+    } else {
+        val allMigrationVersions =
+            files.map {
+                it.listFiles()?.toList() ?: emptyList()
+            }.flatten()
+                .map { it.path }
+                .filter { item -> item.toString().endsWith(".sql") }
+                .map { it.substring(it.lastIndexOf("/") + 1) }
+                .map { it.substring(0, it.indexOf("__")) }
+        val migreringerSomListe = allMigrationVersions.toList()
+        println(migreringerSomListe.joinToString(","))
+        val grupperte = migreringerSomListe.groupingBy { it }.eachCount()
+        grupperte.forEach {
+            if (it.value > 1) {
+                throw RuntimeException(
+                    "Kan ikke ha flere migrering med samme versjon! Sjekk alle mapper under /resources/db. Versjon: ${it.key}",
+                )
+            }
+        }
+    }
+}
 
 fun jdbcUrl(
     host: String,

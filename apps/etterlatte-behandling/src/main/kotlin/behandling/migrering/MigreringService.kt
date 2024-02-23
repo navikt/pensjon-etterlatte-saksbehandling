@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -182,6 +183,11 @@ class MigreringService(
             request.soeker.value,
             SakType.BARNEPENSJON,
             gradering = request.gradering,
+            overstyrendeEnhet =
+                when (request.gradering?.erStrengtFortrolig()) {
+                    true -> Enheter.STRENGT_FORTROLIG.navn
+                    else -> null
+                },
         )
 
     fun avbrytBehandling(

@@ -273,7 +273,7 @@ internal class BehandlingServiceImpl(
         request: VirkningstidspunktRequest,
     ): Boolean {
         val behandling =
-            requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
+            requireNotNull(hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
 
         return when (behandling.type) {
             BehandlingType.REVURDERING -> erGyldigVirkningstidspunktRevurdering(request, behandling)

@@ -25,11 +25,14 @@ class BehandlinghendelseRiver(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    private val behandlingIdKey = "$BEHANDLING_RIVER_KEY.id"
+
     init {
         initialiserRiverUtenEventName(rapidsConnection) {
             validate { it.demandAny(EVENT_NAME_KEY, behandlingshendelser) }
             validate { it.requireKey(BEHANDLING_RIVER_KEY) }
             validate { it.requireKey(TEKNISK_TID_KEY) }
+            validate { it.interestedIn(behandlingIdKey) }
         }
     }
 
@@ -60,7 +63,7 @@ class BehandlinghendelseRiver(
             """.trimIndent(),
             e,
         )
-        logger.error("Feilet på behandlingid ${packet["behandling.id"]}")
+        logger.error("Feilet på behandlingid ${packet[behandlingIdKey]}")
         throw e
     }
 }

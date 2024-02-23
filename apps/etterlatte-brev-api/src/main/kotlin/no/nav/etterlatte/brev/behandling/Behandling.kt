@@ -45,7 +45,12 @@ data class GenerellBrevData(
 
     fun vedtakstype() = forenkletVedtak?.type?.name?.lowercase()
 
-    fun erForeldreloes() = personerISak.avdoede.size > 1 // TODO må støtte scenariet hvor en avdød er ukjent
+    fun erForeldreloes() =
+        with(personerISak) {
+            // TODO soeker.foreldreloes benyttes nå kun hvis valgt ved manuell behandling. Må også brukes ved ukjent forelder etter søknad
+            soeker.foreldreloes ||
+                avdoede.size > 1
+        }
 }
 
 data class Trygdetid(

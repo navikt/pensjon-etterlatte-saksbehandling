@@ -65,10 +65,6 @@ fun DataSource.migrate(): MigrateResult =
         throw e
     }
 
-fun validate() {
-    validateUniqueMigrationVersions()
-}
-
 fun validateUniqueMigrationVersions() {
     val systemClassLoader = ClassLoader.getSystemClassLoader()
     val resourceFolderURL: URL? = systemClassLoader.getResource("db")
@@ -79,8 +75,7 @@ fun validateUniqueMigrationVersions() {
 
     // Check if it's a directory
     if (!resourceFolder.isDirectory) {
-        System.err.println("Invalid resources folder")
-        return
+        throw RuntimeException("Fant ikke migreringsscript i resourceFolder")
     }
 
     val files = resourceFolder.listFiles()

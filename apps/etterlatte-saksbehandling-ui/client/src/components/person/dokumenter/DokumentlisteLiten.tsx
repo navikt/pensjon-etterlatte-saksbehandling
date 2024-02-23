@@ -1,9 +1,7 @@
-import { Button, BodyShort, Detail, Heading, Link } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { Button, BodyShort, Detail, Heading, Link, Alert } from '@navikt/ds-react'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
-import { Journalposttype, Journalstatus } from '~shared/types/Journalpost'
-
+import { Journalstatus } from '~shared/types/Journalpost'
 import { mapApiResult } from '~shared/api/apiUtils'
 import { SidebarPanel } from '~shared/components/Sidebar'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -11,6 +9,7 @@ import { hentDokumenter } from '~shared/api/dokument'
 import { useEffect } from 'react'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { FlexRow } from '~shared/styled'
+import { DokumentInfoDetail } from '~components/person/dokumenter/DokumentInfoDetail'
 
 export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
   const [status, hentDokumenterForBruker] = useApiCall(hentDokumenter)
@@ -43,24 +42,29 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
               <div key={dokument.journalpostId}>
                 {dokument.dokumenter.map((dokumentInfo) => (
                   <BodyShort key={dokumentInfo.dokumentInfoId} as="div" size="small" spacing>
-                    <Link
-                      href={`/api/dokumenter/${dokument.journalpostId}/${dokumentInfo.dokumentInfoId}`}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                    >
-                      {dokumentInfo.tittel}
-                      <ExternalLinkIcon title={dokument.tittel} />
-                    </Link>
-                    <Detail>
-                      {
-                        {
-                          [Journalposttype.I]: 'Avsender: ',
-                          [Journalposttype.U]: 'Mottaker: ',
-                          [Journalposttype.N]: 'Notat',
-                        }[dokument.journalposttype]
-                      }
-                      {dokument.avsenderMottaker.navn || 'Ukjent'} ({formaterStringDato(dokument.datoOpprettet)})
-                    </Detail>
+                    {dokumentInfo.dokumentvarianter[0].saksbehandlerHarTilgang ? (
+                      <>
+                        <Link
+                          href={`/api/dokumenter/${dokument.journalpostId}/${dokumentInfo.dokumentInfoId}`}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                        >
+                          {dokumentInfo.tittel}
+                          <ExternalLinkIcon aria-hidden title={dokument.tittel} />
+                        </Link>
+                        <DokumentInfoDetail dokument={dokument} />
+                      </>
+                    ) : (
+                      <FlexRow justify="space-between">
+                        <div>
+                          {dokumentInfo.tittel}
+                          <DokumentInfoDetail dokument={dokument} />
+                        </div>
+                        <Alert variant="warning" size="small">
+                          Ingen tilgang
+                        </Alert>
+                      </FlexRow>
+                    )}
                   </BodyShort>
                 ))}
               </div>

@@ -15,7 +15,7 @@ import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { updateVedtakSammendrag } from '~store/reducers/VedtakReducer'
 
 import { mapApiResult } from '~shared/api/apiUtils'
-import { DokumentlisteLiten } from '~components/person/dokumenter/dokumentlisteLiten'
+import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 
 export function TilbakekrevingSidemeny() {
   const tilbakekreving = useTilbakekreving()

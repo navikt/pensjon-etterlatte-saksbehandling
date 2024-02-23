@@ -16,7 +16,7 @@ import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
 
 import { isSuccess, mapAllApiResult, mapApiResult } from '~shared/api/apiUtils'
-import { Dokumentliste } from '~components/person/dokumenter/dokumentliste'
+import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 
 enum Fane {
   SAKER = 'SAKER',

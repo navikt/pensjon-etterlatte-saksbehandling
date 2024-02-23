@@ -33,7 +33,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { DokumentlisteLiten } from '~components/person/dokumenter/dokumentlisteLiten'
+import { DokumentlisteLiten } from '~components/person/dokumenter/DokumentlisteLiten'
 
 const finnUtNasjonalitet = (behandling: IBehandlingReducer): UtlandstilknytningType | null => {
   if (behandling.utlandstilknytning?.type) {

@@ -1,19 +1,16 @@
-import { Button, Detail, Heading, Modal, Table, Tag } from '@navikt/ds-react'
+import { Detail, Heading, Table, Tag } from '@navikt/ds-react'
 import { formaterJournalpostStatus, formaterJournalpostType, formaterStringDato } from '~utils/formattering'
-import DokumentModal from './dokumentModal'
 import Spinner from '~shared/Spinner'
-import { Journalpost, Journalposttype, Tema } from '~shared/types/Journalpost'
+import { Tema } from '~shared/types/Journalpost'
 import { ApiErrorAlert } from '~ErrorBoundary'
-
 import { mapApiResult } from '~shared/api/apiUtils'
-import { InformationSquareIcon } from '@navikt/aksel-icons'
 import { Container, FlexRow } from '~shared/styled'
 import { useEffect, useState } from 'react'
-import { hentDokumenter, hentUtsendingsinfo } from '~shared/api/dokument'
+import { hentDokumenter } from '~shared/api/dokument'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { Info } from '~components/behandling/soeknadsoversikt/Info'
 import { Variants } from '~shared/Tags'
 import { DokumentFilter } from '~components/person/dokumenter/DokumentFilter'
+import { VisDokument } from '~components/person/dokumenter/VisDokument'
 
 const colonner = ['ID', 'Tittel', 'Avsender/Mottaker', 'Dato', 'Sak', 'Status', 'Tema', 'Type', '']
 
@@ -95,11 +92,7 @@ export const Dokumentliste = ({ fnr }: { fnr: string }) => {
                       <Table.DataCell>{formaterJournalpostType(dokument.journalposttype)}</Table.DataCell>
                       <Table.DataCell>
                         <FlexRow justify="right">
-                          {dokument.journalposttype === Journalposttype.U && (
-                            <UtsendingsinfoModal journalpost={dokument} />
-                          )}
-
-                          <DokumentModal journalpost={dokument} />
+                          <VisDokument dokument={dokument} />
                         </FlexRow>
                       </Table.DataCell>
                     </Table.Row>
@@ -110,63 +103,5 @@ export const Dokumentliste = ({ fnr }: { fnr: string }) => {
         </Table.Body>
       </Table>
     </Container>
-  )
-}
-
-const UtsendingsinfoModal = ({ journalpost }: { journalpost: Journalpost }) => {
-  const [isOpen, setIsOpen] = useState(false)
-
-  const [status, apiHentUtsendingsinfo] = useApiCall(hentUtsendingsinfo)
-
-  const open = () => {
-    setIsOpen(true)
-    apiHentUtsendingsinfo({ journalpostId: journalpost.journalpostId })
-  }
-
-  return (
-    <>
-      <Button variant="tertiary" title="Utsendingsinfo" size="small" icon={<InformationSquareIcon />} onClick={open} />
-
-      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-        <Modal.Header>
-          <Heading size="medium">Utsendingsinfo</Heading>
-        </Modal.Header>
-
-        <Modal.Body>
-          {mapApiResult(
-            status,
-            <Spinner visible label="Henter utsendingsinfo" />,
-            (error) => (
-              <ApiErrorAlert>{error.detail || 'Feil ved henting av utsendingsinfo'}</ApiErrorAlert>
-            ),
-            (result) => (
-              <>
-                {!result.utsendingsinfo && <i>Ingen utsendingsinformasjon på journalposten</i>}
-
-                {result.utsendingsinfo?.fysiskpostSendt?.adressetekstKonvolutt && (
-                  <Info
-                    label="Adressetekst konvolutt"
-                    tekst={
-                      <div style={{ whiteSpace: 'pre-wrap' }}>
-                        {result.utsendingsinfo?.fysiskpostSendt?.adressetekstKonvolutt}
-                      </div>
-                    }
-                  />
-                )}
-
-                {result.utsendingsinfo?.digitalpostSendt?.adresse && (
-                  <Info
-                    label="Adressetekst konvolutt"
-                    tekst={
-                      <div style={{ whiteSpace: 'pre-wrap' }}>{result.utsendingsinfo?.digitalpostSendt?.adresse}</div>
-                    }
-                  />
-                )}
-              </>
-            )
-          )}
-        </Modal.Body>
-      </Modal>
-    </>
   )
 }

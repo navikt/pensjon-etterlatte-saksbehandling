@@ -1,4 +1,4 @@
-import { Button, BodyShort, Detail, Heading, Link } from '@navikt/ds-react'
+import { Button, BodyShort, Detail, Heading, Link, Alert } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import Spinner from '~shared/Spinner'
 import { ExternalLinkIcon } from '@navikt/aksel-icons'
@@ -43,24 +43,47 @@ export const DokumentlisteLiten = ({ fnr }: { fnr: string }) => {
               <div key={dokument.journalpostId}>
                 {dokument.dokumenter.map((dokumentInfo) => (
                   <BodyShort key={dokumentInfo.dokumentInfoId} as="div" size="small" spacing>
-                    <Link
-                      href={`/api/dokumenter/${dokument.journalpostId}/${dokumentInfo.dokumentInfoId}`}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                    >
-                      {dokumentInfo.tittel}
-                      <ExternalLinkIcon title={dokument.tittel} />
-                    </Link>
-                    <Detail>
-                      {
-                        {
-                          [Journalposttype.I]: 'Avsender: ',
-                          [Journalposttype.U]: 'Mottaker: ',
-                          [Journalposttype.N]: 'Notat',
-                        }[dokument.journalposttype]
-                      }
-                      {dokument.avsenderMottaker.navn || 'Ukjent'} ({formaterStringDato(dokument.datoOpprettet)})
-                    </Detail>
+                    {!dokumentInfo.dokumentvarianter[0].saksbehandlerHarTilgang ? (
+                      <>
+                        <Link
+                          href={`/api/dokumenter/${dokument.journalpostId}/${dokumentInfo.dokumentInfoId}`}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                        >
+                          {dokumentInfo.tittel}
+                          <ExternalLinkIcon aria-hidden title={dokument.tittel} />
+                        </Link>
+                        <Detail>
+                          {
+                            {
+                              [Journalposttype.I]: 'Avsender: ',
+                              [Journalposttype.U]: 'Mottaker: ',
+                              [Journalposttype.N]: 'Notat',
+                            }[dokument.journalposttype]
+                          }
+                          {dokument.avsenderMottaker.navn || 'Ukjent'} ({formaterStringDato(dokument.datoOpprettet)})
+                        </Detail>
+                      </>
+                    ) : (
+                      <FlexRow justify="space-between">
+                        <div>
+                          {dokumentInfo.tittel}
+                          <Detail>
+                            {
+                              {
+                                [Journalposttype.I]: 'Avsender: ',
+                                [Journalposttype.U]: 'Mottaker: ',
+                                [Journalposttype.N]: 'Notat',
+                              }[dokument.journalposttype]
+                            }
+                            {dokument.avsenderMottaker.navn || 'Ukjent'} ({formaterStringDato(dokument.datoOpprettet)})
+                          </Detail>
+                        </div>
+                        <Alert variant="warning" size="small">
+                          Ingen tilgang
+                        </Alert>
+                      </FlexRow>
+                    )}
                   </BodyShort>
                 ))}
               </div>

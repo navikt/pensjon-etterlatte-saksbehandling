@@ -112,6 +112,7 @@ internal fun Application.module(context: ApplicationContext) {
                 grunnlagsendringshendelseService = grunnlagsendringshendelseService,
                 oppgaveService = oppgaveService,
                 requestLogger = behandlingRequestLogger,
+                hendelseDao = hendelseDao,
             )
             klageRoutes(klageService = klageService, featureToggleService = featureToggleService)
             tilbakekrevingRoutes(service = tilbakekrevingService)

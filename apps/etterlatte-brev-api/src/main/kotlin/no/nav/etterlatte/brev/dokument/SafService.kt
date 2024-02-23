@@ -78,16 +78,12 @@ class SafService(
         }
     }
 
-    private val forventaFeilmeldingVedManglendeTilgang =
-        "Saksbehandler har ikke tilgang til ressurs tilhørende bruker som har kode 6/7 " +
-            "(strengt fortrolig/fortrolig adressesperre), egen ansatt eller utenfor tillatt geografisk område"
-
     private fun konverterTilForespoerselException(errors: List<Error>): ForespoerselException {
         errors.forEach {
-            if (errors.none { err -> err.message?.contains(forventaFeilmeldingVedManglendeTilgang) == true }) {
-                logger.error("${errors.size} feil oppsto ved kall mot saf: ${it.toJson()}")
-            } else {
+            if (errors.all { err -> err.extensions?.code == Error.Code.FORBIDDEN }) {
                 logger.warn("${errors.size} feil oppsto ved kall mot saf, alle var tilgangssjekk: ${it.toJson()}")
+            } else {
+                logger.error("${errors.size} feil oppsto ved kall mot saf: ${it.toJson()}")
             }
         }
 

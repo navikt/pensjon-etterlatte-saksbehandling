@@ -36,9 +36,9 @@ class DoedshendelseService(
 
     fun kanBrukeDeodshendelserJob() = featureToggleService.isEnabled(DoedshendelseFeatureToggle.KanLagreDoedshendelse, false)
 
-    private fun DoedshendelseInternal.erUlikPdlDoedshendelse(doedshendelse: PdlDoedshendelse): Boolean {
-        return this.endringstype != doedshendelse.endringstype ||
-            this.avdoedDoedsdato != doedshendelse.doedsdato
+    private fun DoedshendelseInternal.erLikPdlDoedshendelse(doedshendelse: PdlDoedshendelse): Boolean {
+        return this.endringstype == doedshendelse.endringstype &&
+            this.avdoedDoedsdato == doedshendelse.doedsdato
     }
 
     private fun skalLagreDoedshendelse(
@@ -46,12 +46,11 @@ class DoedshendelseService(
         doedshendelse: PdlDoedshendelse,
     ): Boolean {
         val doedshendelserForAvdoed = inTransaction { doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) }
-        val hendelseErUlikEksisterende =
-            doedshendelserForAvdoed.filter {
-                it.status !== Status.FERDIG
-            }.any { it.erUlikPdlDoedshendelse(doedshendelse) }
+
         return doedshendelserForAvdoed.isEmpty() ||
-            hendelseErUlikEksisterende
+            doedshendelserForAvdoed
+                .filter { it.status !== Status.FERDIG }
+                .none { it.erLikPdlDoedshendelse(doedshendelse) }
     }
 
     fun opprettDoedshendelseForBeroertePersoner(doedshendelse: PdlDoedshendelse) {

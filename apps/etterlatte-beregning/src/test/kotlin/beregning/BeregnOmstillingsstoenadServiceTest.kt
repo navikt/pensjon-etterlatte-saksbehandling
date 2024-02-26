@@ -254,43 +254,6 @@ internal class BeregnOmstillingsstoenadServiceTest {
     }
 
     @Test
-    fun `skal sette beloep til 0 ved manuelt opphoer`() {
-        val behandling = mockBehandling(BehandlingType.MANUELT_OPPHOER)
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-        val trygdetid = mockTrygdetid(behandling.id)
-
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns trygdetid
-        coEvery {
-            beregningsGrunnlagService.hentOmstillingstoenadBeregningsGrunnlag(
-                any(),
-                any(),
-            )
-        } returns omstillingstoenadBeregningsGrunnlag(behandling.id)
-
-        runBlocking {
-            val beregning = beregnOmstillingsstoenadService.beregn(behandling, bruker)
-
-            with(beregning) {
-                beregningId shouldNotBe null
-                behandlingId shouldBe behandling.id
-                type shouldBe Beregningstype.OMS
-                beregnetDato shouldNotBe null
-                grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBe 1
-                with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe 0
-                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe null
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_24
-                    soeskenFlokk shouldBe null
-                    this.trygdetid shouldBe 0
-                }
-            }
-        }
-    }
-
-    @Test
     fun `skal feile hvis trygdetid ikke inneholder beregnet trygdetid`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()

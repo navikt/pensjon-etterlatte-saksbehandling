@@ -10,10 +10,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -34,15 +32,7 @@ import org.junit.jupiter.api.TestInstance
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OppgaveRoutesTest : BehandlingIntegrationTest() {
     @BeforeAll
-    fun start() =
-        startServer(
-            // En enkel mock som skrur på alle toggles for verdikjedetesten
-            // overstyr egne ønskede toggles her om behovet oppstår
-            featureToggleService =
-                mockk<FeatureToggleService> {
-                    every { isEnabled(any(), any()) } returns true
-                },
-        )
+    fun start() = startServer(featureToggleService = DummyFeatureToggleService())
 
     @AfterAll
     fun shutdown() = afterAll()

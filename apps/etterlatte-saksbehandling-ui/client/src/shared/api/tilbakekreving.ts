@@ -5,6 +5,10 @@ export function hentTilbakekreving(tilbakekrevingId: string): Promise<ApiRespons
   return apiClient.get(`/tilbakekreving/${tilbakekrevingId}`)
 }
 
+export function hentTilbakekrevingerISak(sakId: number): Promise<ApiResponse<Array<TilbakekrevingBehandling>>> {
+  return apiClient.get(`/tilbakekreving/sak/${sakId}`)
+}
+
 export function lagreTilbakekrevingsvurdering(args: {
   behandlingsId: string
   vurdering: TilbakekrevingVurdering

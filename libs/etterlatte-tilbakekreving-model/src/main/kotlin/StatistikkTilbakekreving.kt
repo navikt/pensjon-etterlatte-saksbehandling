@@ -12,6 +12,7 @@ data class StatistikkTilbakekrevingDto(
 
 enum class TilbakekrevingHendelseType : EventnameHendelseType {
     OPPRETTET,
+    FATTET_VEDTAK,
     ATTESTERT,
     ;
 

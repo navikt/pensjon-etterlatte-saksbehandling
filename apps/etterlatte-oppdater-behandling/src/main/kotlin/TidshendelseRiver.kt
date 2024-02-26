@@ -75,7 +75,7 @@ class TidshendelseRiver(
                     val oppgaveId =
                         behandlingService.opprettOppgave(
                             sakId,
-                            OppgaveType.MANUELT_OPPHOER,
+                            OppgaveType.REVURDERING,
                             merknad = generateMerknad(type),
                             frist = frist,
                         )

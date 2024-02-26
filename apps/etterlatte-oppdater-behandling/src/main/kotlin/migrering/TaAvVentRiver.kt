@@ -4,9 +4,10 @@ import no.nav.etterlatte.BehandlingService
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
-import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
+import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_FLERE_KEY
 import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.behandlingIdFlere
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.migrering.Ventehendelser
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -17,7 +18,7 @@ internal class TaAvVentRiver(rapidsConnection: RapidsConnection, private val beh
     ListenerMedLoggingOgFeilhaandtering() {
     init {
         initialiserRiver(rapidsConnection, Ventehendelser.TA_AV_VENT) {
-            validate { it.requireKey(BEHANDLING_ID_KEY) }
+            validate { it.interestedIn(BEHANDLING_ID_FLERE_KEY) }
             validate { it.requireKey(DATO_KEY) }
         }
     }
@@ -31,6 +32,7 @@ internal class TaAvVentRiver(rapidsConnection: RapidsConnection, private val beh
                 dato = packet.dato,
                 type = OppgaveType.FOERSTEGANGSBEHANDLING,
                 oppgaveKilde = OppgaveKilde.GJENOPPRETTING,
+                aktuelleBehandlinger = packet.behandlingIdFlere,
             ),
         )
     }

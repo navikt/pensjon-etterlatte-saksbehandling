@@ -52,11 +52,19 @@ fun Route.vilkaarsvurdering(
             }
         }
 
-        get("/{$BEHANDLINGID_CALL_PARAMETER}/migrertYrkesskadefordel") {
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/migrert-yrkesskadefordel") {
             withBehandlingId(behandlingKlient) { behandlingId ->
                 logger.info("Henter vilkårsvurdering for $behandlingId")
                 val result = vilkaarsvurderingService.erMigrertYrkesskadefordel(behandlingId)
                 call.respond(mapOf("migrertYrkesskadefordel" to result))
+            }
+        }
+
+        get("/{$BEHANDLINGID_CALL_PARAMETER}/rett-uten-tidsbegrensning") {
+            withBehandlingId(behandlingKlient) { behandlingId ->
+                logger.info("Henter vilkårsvurdering for $behandlingId")
+                val result = vilkaarsvurderingService.harRettUtenTidsbegrensning(behandlingId)
+                call.respond(mapOf("rettUtenTidsbegrensning" to result))
             }
         }
 

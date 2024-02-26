@@ -22,6 +22,8 @@ export const formaterStringDato = (dato: string) => format(new Date(dato), 'dd.M
 export const formaterKanskjeStringDato = (dato?: string): string =>
   formaterKanskjeStringDatoMedFallback('Ukjent dato', dato)
 
+export const formaterDatoStrengTilLocaleDateTime = (dato: string) => new Date(dato).toISOString().replace('Z', '')
+
 export const formaterKanskjeStringDatoMedFallback = (fallback: string, dato?: string): string =>
   dato ? formaterStringDato(dato) : fallback
 

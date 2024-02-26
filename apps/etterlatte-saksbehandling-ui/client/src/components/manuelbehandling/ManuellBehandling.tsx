@@ -1,4 +1,4 @@
-import { Alert, Button, Checkbox, Select, TextField } from '@navikt/ds-react'
+import { Alert, Button, Checkbox, Heading, Select, TextField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
 import styled from 'styled-components'
@@ -19,7 +19,7 @@ import { hentOppgave } from '~shared/api/oppgaver'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
-import { formaterSpraak, mapRHFArrayToStringArray } from '~utils/formattering'
+import { formaterDatoStrengTilLocaleDateTime, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formattering'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
@@ -83,7 +83,7 @@ export default function ManuellBehandling() {
           soesken: mapRHFArrayToStringArray(data.persongalleri.soesken),
         },
         spraak: data.spraak!,
-        mottattDato: new Date(data.mottattDato).toISOString().replace('Z', ''),
+        mottattDato: formaterDatoStrengTilLocaleDateTime(data.mottattDato),
         kilde: data.kilde,
         pesysId: data.pesysId,
         enhet: data.enhet === 'VELGENHET' ? undefined : filtrerEnhet(data.enhet),
@@ -120,7 +120,7 @@ export default function ManuellBehandling() {
   return (
     <FormWrapper>
       <FormProvider {...methods}>
-        <h1>Manuell behandling</h1>
+        <Heading size="large">Manuell behandling</Heading>
 
         <Select
           {...register('kilde', {

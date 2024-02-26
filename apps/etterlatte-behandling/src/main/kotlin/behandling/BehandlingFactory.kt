@@ -312,6 +312,9 @@ class ManuellMigreringHarEksisterendeIverksattBehandling : UgyldigForespoerselEx
     detail = "Det eksisterer allerede en sak med en iverksatt behandling for angitt søker",
 )
 
-class UgyldigEnhetException : Exception("Enhet brukt i form er matcher ingen gyldig enhet")
+class UgyldigEnhetException : UgyldigForespoerselException(
+    code = "UGYLDIG-ENHET",
+    detail = "Enhet brukt i form er matcher ingen gyldig enhet",
+)
 
 fun Vedtaksloesning.foerstOpprettaIPesys() = this == Vedtaksloesning.PESYS || this == Vedtaksloesning.GJENOPPRETTA

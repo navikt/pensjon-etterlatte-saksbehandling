@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes, useParams } from 'react-router-dom'
 import React, { useEffect } from 'react'
-import { useAppDispatch } from '~store/Store'
+import { useAppDispatch, useAppSelector } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getPerson } from '~shared/api/grunnlag'
 import { StatusBar } from '~shared/statusbar/Statusbar'
@@ -16,6 +16,7 @@ import { TilbakekrevingBrev } from '~components/tilbakekreving/brev/Tilbakekrevi
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { erUnderBehandling } from '~shared/types/Tilbakekreving'
 
 export function Tilbakekrevingsbehandling() {
   const tilbakekreving = useTilbakekreving()
@@ -24,6 +25,9 @@ export function Tilbakekrevingsbehandling() {
   const [fetchTilbakekrevingStatus, fetchTilbakekreving] = useApiCall(hentTilbakekreving)
   const [personStatus, hentPerson] = useApiCall(getPerson)
   const viHarLastetRiktigTilbakekreving = tilbakekrevingId === tilbakekreving?.id.toString()
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
+  const redigerbar =
+    innloggetSaksbehandler.skriveTilgang && (tilbakekreving ? erUnderBehandling(tilbakekreving.status) : false)
 
   useEffect(() => {
     if (!tilbakekrevingId) return
@@ -53,8 +57,11 @@ export function Tilbakekrevingsbehandling() {
           <MainContent>
             <TilbakekrevingStegmeny behandling={tilbakekreving} />
             <Routes>
-              <Route path="vurdering" element={<TilbakekrevingVurdering behandling={tilbakekreving} />} />
-              <Route path="brev" element={<TilbakekrevingBrev tilbakekreving={tilbakekreving} />} />
+              <Route
+                path="vurdering"
+                element={<TilbakekrevingVurdering behandling={tilbakekreving} redigerbar={redigerbar} />}
+              />
+              <Route path="brev" element={<TilbakekrevingBrev behandling={tilbakekreving} redigerbar={redigerbar} />} />
               <Route path="*" element={<Navigate to="vurdering" replace />} />
             </Routes>
           </MainContent>

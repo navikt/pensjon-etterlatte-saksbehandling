@@ -15,7 +15,13 @@ import { useAppDispatch } from '~store/Store'
 
 import { isPending } from '~shared/api/apiUtils'
 
-export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: TilbakekrevingBehandling }) {
+export function TilbakekrevingVurderingOverordnet({
+  behandling,
+  redigerbar,
+}: {
+  behandling: TilbakekrevingBehandling
+  redigerbar: boolean
+}) {
   const dispatch = useAppDispatch()
   const [lagreVurderingStatus, lagreVurderingRequest] = useApiCall(lagreTilbakekrevingsvurdering)
   const [vurdering, setVurdering] = useState<TilbakekrevingVurdering>(behandling.tilbakekreving.vurdering)
@@ -35,6 +41,7 @@ export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: 
           label="Aarsak"
           hideLabel={true}
           value={vurdering.aarsak ?? ''}
+          readOnly={!redigerbar}
           onChange={(e) => {
             if (e.target.value == '') return
             setVurdering({
@@ -50,11 +57,10 @@ export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: 
           <option value={TilbakekrevingAarsak.DODSFALL}>Dødsfall</option>
           <option value={TilbakekrevingAarsak.EKTESKAP}>Eksteskap/Samboer med felles barn</option>
           <option value={TilbakekrevingAarsak.FEILREGEL}>Feil regelbruk</option>
-          <option value={TilbakekrevingAarsak.FEILUFOREG}>TODO - Sanksjoner/opphør</option>
           <option value={TilbakekrevingAarsak.FLYTTUTLAND}>Flyttet utland</option>
           <option value={TilbakekrevingAarsak.IKKESJEKKYTELSE}>Ikke sjekket mot andre ytelse</option>
           <option value={TilbakekrevingAarsak.OVERSETTMLD}>Oversett melding fra bruker</option>
-          <option value={TilbakekrevingAarsak.SAMLIV}>TODO - Samliv</option>
+          <option value={TilbakekrevingAarsak.SAMLIV}>Samliv</option>
           <option value={TilbakekrevingAarsak.UTBFEILMOT}>Utbetaling til feil mottaker</option>
         </Select>
       </>
@@ -65,6 +71,7 @@ export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: 
         </>
         <textarea
           value={vurdering.beskrivelse ?? ''}
+          readOnly={!redigerbar}
           onChange={(e) =>
             setVurdering({
               ...vurdering,
@@ -80,6 +87,7 @@ export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: 
           size="small"
           className="radioGroup"
           value={vurdering.aktsomhet.aktsomhet ?? ''}
+          readOnly={!redigerbar}
           onChange={(e) =>
             setVurdering({
               ...vurdering,
@@ -101,6 +109,7 @@ export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: 
           <Label>Gjør en strafferettslig vurdering (Valgfri)</Label>
           <textarea
             value={vurdering.aktsomhet.strafferettsligVurdering ?? ''}
+            readOnly={!redigerbar}
             onChange={(e) =>
               setVurdering({
                 ...vurdering,
@@ -123,6 +132,7 @@ export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: 
               <BodyShort>Finnes det grunner til å redusere kravet?</BodyShort>
               <textarea
                 value={vurdering.aktsomhet.reduseringAvKravet ?? ''}
+                readOnly={!redigerbar}
                 onChange={(e) =>
                   setVurdering({
                     ...vurdering,
@@ -138,6 +148,7 @@ export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: 
               <Label>Rentevurdering</Label>
               <textarea
                 value={vurdering.aktsomhet.rentevurdering ?? ''}
+                readOnly={!redigerbar}
                 onChange={(e) =>
                   setVurdering({
                     ...vurdering,
@@ -155,6 +166,7 @@ export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: 
         <Label>Konklusjon</Label>
         <textarea
           value={vurdering.konklusjon ?? ''}
+          readOnly={!redigerbar}
           onChange={(e) =>
             setVurdering({
               ...vurdering,
@@ -169,6 +181,7 @@ export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: 
           label="Hjemmel"
           hideLabel={true}
           value={vurdering.hjemmel ?? ''}
+          readOnly={!redigerbar}
           onChange={(e) => {
             if (e.target.value == '') return
             setVurdering({
@@ -192,9 +205,11 @@ export function TilbakekrevingVurderingOverordnet({ behandling }: { behandling: 
         </Select>
       </DropdownWrapper>
 
-      <Button variant="primary" onClick={lagreVurdering} loading={isPending(lagreVurderingStatus)}>
-        Lagre vurdering
-      </Button>
+      {redigerbar && (
+        <Button variant="primary" onClick={lagreVurdering} loading={isPending(lagreVurderingStatus)}>
+          Lagre vurdering
+        </Button>
+      )}
     </InnholdForm>
   )
 }

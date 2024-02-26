@@ -16,7 +16,13 @@ import styled from 'styled-components'
 
 import { isPending } from '~shared/api/apiUtils'
 
-export function TilbakekrevingVurderingPerioder({ behandling }: { behandling: TilbakekrevingBehandling }) {
+export function TilbakekrevingVurderingPerioder({
+  behandling,
+  redigerbar,
+}: {
+  behandling: TilbakekrevingBehandling
+  redigerbar: boolean
+}) {
   const dispatch = useAppDispatch()
   const [lagrePerioderStatus, lagrePerioderRequest] = useApiCall(lagreTilbakekrevingsperioder)
   const [perioder, setPerioder] = useState<TilbakekrevingPeriode[]>(behandling.tilbakekreving.perioder)
@@ -72,6 +78,7 @@ export function TilbakekrevingVurderingPerioder({ behandling }: { behandling: Ti
                     value={beloeper.beregnetFeilutbetaling ?? ''}
                     pattern="[0-9]{11}"
                     maxLength={10}
+                    readOnly={!redigerbar}
                     onChange={(e) =>
                       onChangeNumber(e, (value) => {
                         updateBeloeper(index, {
@@ -89,6 +96,7 @@ export function TilbakekrevingVurderingPerioder({ behandling }: { behandling: Ti
                     placeholder="Brutto tilbakekreving"
                     value={beloeper.bruttoTilbakekreving ?? ''}
                     pattern="[0-9]"
+                    readOnly={!redigerbar}
                     onChange={(e) =>
                       onChangeNumber(e, (value) => {
                         updateBeloeper(index, {
@@ -105,6 +113,7 @@ export function TilbakekrevingVurderingPerioder({ behandling }: { behandling: Ti
                     placeholder="Netto tilbakekreving"
                     value={beloeper.nettoTilbakekreving ?? ''}
                     pattern="[0-9]"
+                    readOnly={!redigerbar}
                     onChange={(e) =>
                       onChangeNumber(e, (value) => {
                         updateBeloeper(index, {
@@ -121,6 +130,7 @@ export function TilbakekrevingVurderingPerioder({ behandling }: { behandling: Ti
                     placeholder="Skatt"
                     value={beloeper.skatt ?? ''}
                     pattern="[0-9]"
+                    readOnly={!redigerbar}
                     onChange={(e) =>
                       onChangeNumber(e, (value) => {
                         updateBeloeper(index, {
@@ -136,6 +146,7 @@ export function TilbakekrevingVurderingPerioder({ behandling }: { behandling: Ti
                     label="Skyld"
                     hideLabel={true}
                     value={beloeper.skyld ?? ''}
+                    readOnly={!redigerbar}
                     onChange={(e) => {
                       if (e.target.value === '') return
                       updateBeloeper(index, {
@@ -156,6 +167,7 @@ export function TilbakekrevingVurderingPerioder({ behandling }: { behandling: Ti
                     label="Resultat"
                     hideLabel={true}
                     value={beloeper.resultat ?? ''}
+                    readOnly={!redigerbar}
                     onChange={(e) => {
                       if (e.target.value === '') return
                       updateBeloeper(index, {
@@ -178,6 +190,7 @@ export function TilbakekrevingVurderingPerioder({ behandling }: { behandling: Ti
                     value={beloeper.tilbakekrevingsprosent ?? ''}
                     pattern="[0-9]"
                     maxLength={3}
+                    readOnly={!redigerbar}
                     onChange={(e) =>
                       onChangeNumber(e, (value) => {
                         updateBeloeper(index, {
@@ -194,6 +207,7 @@ export function TilbakekrevingVurderingPerioder({ behandling }: { behandling: Ti
                     placeholder="Rentetillegg"
                     value={beloeper.rentetillegg ?? ''}
                     pattern="[0-9]"
+                    readOnly={!redigerbar}
                     onChange={(e) =>
                       onChangeNumber(e, (value) => {
                         updateBeloeper(index, {
@@ -209,11 +223,13 @@ export function TilbakekrevingVurderingPerioder({ behandling }: { behandling: Ti
           })}
         </Table.Body>
       </Table>
-      <ButtonWrapper>
-        <Button variant="primary" onClick={lagrePerioder} loading={isPending(lagrePerioderStatus)}>
-          Lagre
-        </Button>
-      </ButtonWrapper>
+      {redigerbar && (
+        <ButtonWrapper>
+          <Button variant="primary" onClick={lagrePerioder} loading={isPending(lagrePerioderStatus)}>
+            Lagre
+          </Button>
+        </ButtonWrapper>
+      )}
     </InnholdPadding>
   )
 }

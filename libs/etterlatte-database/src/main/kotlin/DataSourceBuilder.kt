@@ -97,9 +97,9 @@ private fun readResources(logger: Logger): File {
     // Check if it's a directory
     val isdir = Files.isDirectory(resourceFolder.toPath())
     logger.info("****************** Resourceurl $resourceFolderURL isdir: $isdir")
-    if (!isdir) {
+    /*if (!isdir) {
         throw RuntimeException("Fant ikke migreringsscript i resourceFolder for /db")
-    }
+    }*/
     return resourceFolder
 }
 

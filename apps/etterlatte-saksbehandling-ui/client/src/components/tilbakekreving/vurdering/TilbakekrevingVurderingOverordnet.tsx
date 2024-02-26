@@ -57,11 +57,10 @@ export function TilbakekrevingVurderingOverordnet({
           <option value={TilbakekrevingAarsak.DODSFALL}>Dødsfall</option>
           <option value={TilbakekrevingAarsak.EKTESKAP}>Eksteskap/Samboer med felles barn</option>
           <option value={TilbakekrevingAarsak.FEILREGEL}>Feil regelbruk</option>
-          <option value={TilbakekrevingAarsak.FEILUFOREG}>TODO - Sanksjoner/opphør</option>
           <option value={TilbakekrevingAarsak.FLYTTUTLAND}>Flyttet utland</option>
           <option value={TilbakekrevingAarsak.IKKESJEKKYTELSE}>Ikke sjekket mot andre ytelse</option>
           <option value={TilbakekrevingAarsak.OVERSETTMLD}>Oversett melding fra bruker</option>
-          <option value={TilbakekrevingAarsak.SAMLIV}>TODO - Samliv</option>
+          <option value={TilbakekrevingAarsak.SAMLIV}>Samliv</option>
           <option value={TilbakekrevingAarsak.UTBFEILMOT}>Utbetaling til feil mottaker</option>
         </Select>
       </>

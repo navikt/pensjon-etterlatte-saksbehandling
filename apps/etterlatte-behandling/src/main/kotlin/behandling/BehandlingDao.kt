@@ -7,7 +7,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.getUUID
@@ -163,23 +162,6 @@ class BehandlingDao(
             mapSak(rs),
         ) { i: UUID -> kommerBarnetTilGodeDao.hentKommerBarnetTilGode(i) }
 
-    private fun asManueltOpphoer(rs: ResultSet) =
-        ManueltOpphoer(
-            id = rs.getUUID("id"),
-            sak = mapSak(rs),
-            behandlingOpprettet = rs.somLocalDateTimeUTC("behandling_opprettet"),
-            sistEndret = rs.somLocalDateTimeUTC("sist_endret"),
-            status = rs.getString("status").let { BehandlingStatus.valueOf(it) },
-            virkningstidspunkt = rs.getString("virkningstidspunkt")?.let { objectMapper.readValue(it) },
-            utlandstilknytning =
-                rs.getString("utlandstilknytning")
-                    ?.let { objectMapper.readValue(it) },
-            boddEllerArbeidetUtlandet = rs.getString("bodd_eller_arbeidet_utlandet")?.let { objectMapper.readValue(it) },
-            opphoerAarsaker = rs.getString("opphoer_aarsaker").let { objectMapper.readValue(it) },
-            fritekstAarsak = rs.getString("fritekst_aarsak"),
-            prosesstype = rs.getString("prosesstype").let { Prosesstype.valueOf(it) },
-        )
-
     private fun mapSak(rs: ResultSet) =
         Sak(
             id = rs.getLong("sak_id"),
@@ -301,7 +283,6 @@ class BehandlingDao(
         when (key) {
             BehandlingType.FØRSTEGANGSBEHANDLING.name -> asFoerstegangsbehandling(this)
             BehandlingType.REVURDERING.name -> asRevurdering(this)
-            BehandlingType.MANUELT_OPPHOER.name -> asManueltOpphoer(this)
             else -> null
         }
 

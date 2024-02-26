@@ -40,6 +40,13 @@ data class DoedshendelseInternal internal constructor(
         )
     }
 
+    fun tilOppdatert(): DoedshendelseInternal {
+        return copy(
+            status = Status.OPPDATERT,
+            endret = endret,
+        )
+    }
+
     fun tilAvbrutt(
         sakId: Long? = null,
         oppgaveId: UUID? = null,

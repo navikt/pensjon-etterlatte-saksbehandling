@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
-import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -74,10 +73,7 @@ class DoedshendelseService(
                     if (skalOppdatere) {
                         oppdaterDodshendelser(
                             doedshendelserForAvdoed.map {
-                                it.copy(
-                                    endret = Tidspunkt.now(),
-                                    status = Status.OPPDATERT,
-                                )
+                                it.tilOppdatert()
                             },
                         )
                     }
@@ -87,7 +83,7 @@ class DoedshendelseService(
             Endringstype.ANNULLERT -> {
                 inTransaction {
                     oppdaterDodshendelser(
-                        doedshendelserForAvdoed.map { it.copy(endret = Tidspunkt.now(), status = Status.FERDIG, utfall = Utfall.AVBRUTT) },
+                        doedshendelserForAvdoed.map { it.tilAvbrutt() },
                     )
                 }
             }

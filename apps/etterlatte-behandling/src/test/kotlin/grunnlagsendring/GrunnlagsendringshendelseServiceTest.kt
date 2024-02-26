@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -644,34 +643,8 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val oppgave = grunnlagsendringshendelseService.opprettDoedshendelseForPerson(grunnlagsendringshendelse)
 
-        oppgave?.id shouldBe mockOppgave.id
-        oppgave?.referanse shouldBe grunnlagsendringshendelse.id.toString()
-    }
-
-    @Test
-    fun `Skal ikke opprette doedshendelse for person hvis duplikat eksisterer, men returnere eksisterende oppgave`() {
-        val grunnlagsendringshendelse =
-            Grunnlagsendringshendelse(
-                id = randomUUID(),
-                sakId = 1,
-                type = GrunnlagsendringsType.DOEDSFALL,
-                gjelderPerson = KONTANT_FOT.value,
-                samsvarMellomKildeOgGrunnlag = null,
-                status = GrunnlagsendringStatus.VENTER_PAA_JOBB,
-                hendelseGjelderRolle = Saksrolle.SOEKER,
-                opprettet = LocalDateTime.now(),
-            )
-        val eksisterndeGrunnlagsendringshendelse = grunnlagsendringshendelse.copy(id = randomUUID())
-        every { grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any()) } returns
-            listOf(eksisterndeGrunnlagsendringshendelse)
-        every { oppgaveService.hentOppgaverForSak(grunnlagsendringshendelse.sakId) } returns
-            listOf(mockOppgave.copy(referanse = eksisterndeGrunnlagsendringshendelse.id.toString()))
-
-        val oppgave = grunnlagsendringshendelseService.opprettDoedshendelseForPerson(grunnlagsendringshendelse)
-
-        oppgave?.id shouldBe mockOppgave.id
-        oppgave?.referanse shouldBe eksisterndeGrunnlagsendringshendelse.id.toString()
-        oppgave?.referanse shouldNotBe grunnlagsendringshendelse.id.toString()
+        oppgave.id shouldBe mockOppgave.id
+        oppgave.referanse shouldBe grunnlagsendringshendelse.id.toString()
     }
 
     @Test

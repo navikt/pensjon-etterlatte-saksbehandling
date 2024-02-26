@@ -86,7 +86,10 @@ class DoedshendelseJobServiceTest {
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns emptyList()
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
-        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns null
+        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
+            mockk {
+                every { id } returns UUID.randomUUID()
+            }
 
         service.setupKontekstAndRun(kontekst)
 

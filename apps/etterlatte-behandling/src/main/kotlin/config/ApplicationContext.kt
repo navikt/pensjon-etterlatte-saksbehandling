@@ -355,7 +355,14 @@ internal class ApplicationContext(
     val doedshendelseJobService =
         DoedshendelseJobService(
             doedshendelseDao = doedshendelseDao,
-            doedshendelseKontrollpunktService = DoedshendelseKontrollpunktService(pdlKlient, pesysKlient),
+            doedshendelseKontrollpunktService =
+                DoedshendelseKontrollpunktService(
+                    pdlTjenesterKlient = pdlKlient,
+                    grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
+                    oppgaveService = oppgaveService,
+                    sakService = sakService,
+                    pesysKlient = pesysKlient,
+                ),
             featureToggleService = featureToggleService,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             sakService = sakService,

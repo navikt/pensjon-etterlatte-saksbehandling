@@ -8,10 +8,12 @@ import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnOppgaveId
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnSak
 import no.nav.etterlatte.inTransaction
-import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
@@ -66,47 +68,51 @@ class DoedshendelseJobService(
                         "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkt: " +
                         kontrollpunkter.joinToString(","),
                 )
-                doedshendelseDao.oppdaterDoedshendelse(doedshendelse.tilAvbrutt())
+
+                doedshendelseDao.oppdaterDoedshendelse(
+                    doedshendelse.tilAvbrutt(
+                        sakId = kontrollpunkter.finnSak()?.id,
+                        oppgaveId = kontrollpunkter.finnOppgaveId(),
+                    ),
+                )
             }
 
             false -> {
                 logger.info(
-                    "Oppretter grunnlagshendelse for person ${doedshendelse.beroertFnr.maskerFnr()} " +
+                    "Oppretter grunnlagshendelse og oppgave for person ${doedshendelse.beroertFnr.maskerFnr()} " +
                         "med avdød ${doedshendelse.avdoedFnr.maskerFnr()}",
                 )
-                opprettGrunnlagshendelse(doedshendelse)
+                val sak = // todo: Hvis sak ikke finnes, må vi også opprette persongrunnlag.
+                    kontrollpunkter.finnSak() ?: sakService.finnEllerOpprettSak(
+                        fnr = doedshendelse.beroertFnr,
+                        type = doedshendelse.sakType(),
+                    )
+                val oppgave = opprettOppgave(doedshendelse, sak)
+                doedshendelseDao.oppdaterDoedshendelse(
+                    doedshendelse.tilBehandlet(
+                        utfall = Utfall.OPPGAVE,
+                        sakId = sak.id,
+                        oppgaveId = oppgave.id,
+                    ),
+                )
             }
         }
     }
 
-    private fun opprettGrunnlagshendelse(doedshendelse: Doedshendelse) {
-        val sakType =
-            when (doedshendelse.relasjon) {
-                Relasjon.BARN -> SakType.BARNEPENSJON
-                Relasjon.EPS -> SakType.OMSTILLINGSSTOENAD
-            }
-        val sak = sakService.finnEllerOpprettSak(doedshendelse.beroertFnr, sakType)
-
-        val oppgave =
-            grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
-                Grunnlagsendringshendelse(
-                    id = UUID.randomUUID(),
-                    sakId = sak.id,
-                    status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                    type = GrunnlagsendringsType.DOEDSFALL,
-                    opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                    hendelseGjelderRolle = Saksrolle.SOEKER,
-                    gjelderPerson = doedshendelse.beroertFnr,
-                ),
-            )
-        doedshendelseDao.oppdaterDoedshendelse(
-            doedshendelse.tilBehandlet(
-                utfall = Utfall.OPPGAVE,
-                sakId = sak.id,
-                oppgaveId = oppgave?.id,
-            ),
-        )
-    }
+    private fun opprettOppgave(
+        doedshendelse: Doedshendelse,
+        sak: Sak,
+    ) = grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
+        Grunnlagsendringshendelse(
+            id = UUID.randomUUID(),
+            sakId = sak.id,
+            status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+            type = GrunnlagsendringsType.DOEDSFALL,
+            opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+            hendelseGjelderRolle = Saksrolle.SOEKER,
+            gjelderPerson = doedshendelse.beroertFnr,
+        ),
+    )
 
     private fun finnGyldigeDoedshendelser(hendelser: List<Doedshendelse>): List<Doedshendelse> {
         val idag = LocalDateTime.now()

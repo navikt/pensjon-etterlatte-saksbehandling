@@ -334,28 +334,10 @@ class GrunnlagsendringshendelseService(
             }.map { it.first }
     }
 
-    fun opprettDoedshendelseForPerson(grunnlagsendringshendelse: Grunnlagsendringshendelse): OppgaveIntern? {
-        val eksisterendeHendelse =
-            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
-                grunnlagsendringshendelse.sakId,
-                listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB),
-            ).firstOrNull {
-                it.gjelderPerson == grunnlagsendringshendelse.gjelderPerson && it.type == grunnlagsendringshendelse.type
-            }
-
-        // Vi bryr oss ikke om det samsvarer eller ikke, men underliggende tjenester krever det.
+    fun opprettDoedshendelseForPerson(grunnlagsendringshendelse: Grunnlagsendringshendelse): OppgaveIntern {
         val samsvarMellomKildeOgGrunnlag = SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(null, null, false)
-        if (eksisterendeHendelse != null) {
-            logger.info(
-                "Det finens allede en grunnlagsendringshendelse ${grunnlagsendringshendelse.type} med id " +
-                    "${grunnlagsendringshendelse.id} fra før, forsøker å returnere relevant oppgave.",
-            )
-            return oppgaveService.hentOppgaverForSak(grunnlagsendringshendelse.sakId)
-                .find { it.referanse == eksisterendeHendelse.id.toString() }
-        } else {
-            grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(grunnlagsendringshendelse)
-            return oppdaterGrunnlagsEndringOgOpprettOppgave(grunnlagsendringshendelse, samsvarMellomKildeOgGrunnlag)
-        }
+        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(grunnlagsendringshendelse)
+        return oppdaterGrunnlagsEndringOgOpprettOppgave(grunnlagsendringshendelse, samsvarMellomKildeOgGrunnlag)
     }
 
     private fun opprettHendelseAvTypeForSak(

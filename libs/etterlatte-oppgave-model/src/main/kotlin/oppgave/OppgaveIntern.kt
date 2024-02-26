@@ -37,6 +37,7 @@ data class OppgaveIntern(
     override val sakType: SakType,
     override val fnr: String? = null,
     override val frist: Tidspunkt?,
+    val behandlingId: UUID?,
 ) : Oppgave() {
     fun manglerSaksbehandler(): Boolean {
         return saksbehandler == null
@@ -173,6 +174,7 @@ fun opprettNyOppgaveMedReferanseOgSak(
     oppgaveKilde: OppgaveKilde?,
     oppgaveType: OppgaveType,
     merknad: String?,
+    behandlingId: UUID?,
     frist: Tidspunkt? = null,
 ): OppgaveIntern {
     return OppgaveIntern(
@@ -189,5 +191,6 @@ fun opprettNyOppgaveMedReferanseOgSak(
         fnr = sak.ident,
         frist = frist,
         type = oppgaveType,
+        behandlingId = behandlingId,
     )
 }

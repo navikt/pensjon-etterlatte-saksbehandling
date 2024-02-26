@@ -83,6 +83,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             OppgaveKilde.HENDELSE,
             OppgaveType.VURDER_KONSEKVENS,
             null,
+            behandlingId = null,
         )
 
     private lateinit var grunnlagsendringshendelseService: GrunnlagsendringshendelseService

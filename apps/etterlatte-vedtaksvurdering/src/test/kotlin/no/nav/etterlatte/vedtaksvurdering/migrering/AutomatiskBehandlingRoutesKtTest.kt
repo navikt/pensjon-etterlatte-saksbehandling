@@ -361,5 +361,6 @@ internal class AutomatiskBehandlingRoutesKtTest {
             fnr = null,
             frist = null,
             opprettet = Tidspunkt.now(),
+            behandlingId = null,
         )
 }

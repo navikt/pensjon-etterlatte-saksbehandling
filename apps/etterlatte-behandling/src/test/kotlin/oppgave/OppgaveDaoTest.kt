@@ -285,4 +285,5 @@ fun lagNyOppgave(
     fnr = sak.ident,
     frist = null,
     type = oppgaveType,
+    behandlingId = null,
 )

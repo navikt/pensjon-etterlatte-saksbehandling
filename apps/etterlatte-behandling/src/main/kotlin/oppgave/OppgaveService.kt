@@ -403,6 +403,7 @@ class OppgaveService(
                 oppgaveKilde = oppgaveKilde,
                 oppgaveType = oppgaveType,
                 merknad = merknad,
+                behandlingId = behandlingId,
                 frist = frist,
             ),
         )

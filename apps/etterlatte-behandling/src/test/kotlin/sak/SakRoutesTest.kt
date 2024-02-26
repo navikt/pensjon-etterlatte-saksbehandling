@@ -96,6 +96,7 @@ internal class SakRoutesTest {
                     sakType = SakType.BARNEPENSJON,
                     fnr = "123",
                     frist = null,
+                    behandlingId = null,
                 ),
                 OppgaveIntern(
                     id = UUID.randomUUID(),
@@ -111,6 +112,7 @@ internal class SakRoutesTest {
                     sakType = SakType.BARNEPENSJON,
                     fnr = "123",
                     frist = null,
+                    behandlingId = null,
                 ),
                 OppgaveIntern(
                     id = UUID.randomUUID(),
@@ -126,6 +128,7 @@ internal class SakRoutesTest {
                     sakType = SakType.BARNEPENSJON,
                     fnr = "123",
                     frist = null,
+                    behandlingId = null,
                 ),
             )
         withTestApplication { client ->

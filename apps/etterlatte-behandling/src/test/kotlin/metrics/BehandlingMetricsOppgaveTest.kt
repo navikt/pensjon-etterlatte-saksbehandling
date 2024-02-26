@@ -137,5 +137,6 @@ internal class BehandlingMetricsOppgaveTest(private val ds: DataSource) {
         fnr = sak.ident,
         frist = null,
         type = OppgaveType.FOERSTEGANGSBEHANDLING,
+        behandlingId = null,
     )
 }

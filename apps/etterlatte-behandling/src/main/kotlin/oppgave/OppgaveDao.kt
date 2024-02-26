@@ -1,6 +1,7 @@
 package no.nav.etterlatte.oppgave
 
 import no.nav.etterlatte.behandling.hendelse.getUUID
+import no.nav.etterlatte.behandling.hendelse.getUUIDOrNull
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
@@ -114,7 +115,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.behandling_id, si.navn
                         FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.id = ?::UUID
                         """.trimIndent(),
@@ -133,7 +134,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.behandling_id, si.navn
                         FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.referanse = ?
                         """.trimIndent(),
@@ -154,7 +155,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.behandling_id, si.navn
                         FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.sak_id = ?
                         """.trimIndent(),
@@ -183,7 +184,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.behandling_id, si.navn
                         FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.type = ANY(?)
                         AND (? OR o.status = ANY(?))
@@ -221,7 +222,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, si.navn
+                        SELECT o.id, o.status, o.enhet, o.sak_id, o.type, o.saksbehandler, o.referanse, o.merknad, o.opprettet, o.saktype, o.fnr, o.frist, o.kilde, o.behandling_id, si.navn
                         FROM oppgave o INNER JOIN sak s ON o.sak_id = s.id LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE ((s.adressebeskyttelse = ?) OR (s.adressebeskyttelse = ?))
                         AND o.type = ANY(?)
@@ -421,6 +422,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 getString("saksbehandler")?.let {
                     OppgaveSaksbehandler(getString("saksbehandler"), getString("navn"))
                 },
+            behandlingId = getUUIDOrNull("behandling_id"),
         )
     }
 }

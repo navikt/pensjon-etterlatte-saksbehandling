@@ -276,7 +276,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     OppgaveKilde.BEHANDLING,
                     OppgaveType.REVURDERING,
                     null,
-                    null,
+                    revurdering.id,
                     null,
                 )
                 oppgaveService.tildelSaksbehandler(any(), "saksbehandler")

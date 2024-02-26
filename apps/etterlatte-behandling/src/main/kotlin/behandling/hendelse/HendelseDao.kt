@@ -271,4 +271,14 @@ fun PreparedStatement.setLong(
 
 fun ResultSet.getUUID(name: String) = getObject(name) as UUID
 
+fun ResultSet.getUUIDOrNull(name: String): UUID? =
+    getObject(name)
+        .let {
+            if (wasNull()) {
+                null
+            } else {
+                it as UUID
+            }
+        }
+
 fun ResultSet.getLongOrNull(name: String) = getLong(name).takeUnless { wasNull() }

@@ -81,6 +81,7 @@ class BehandlingFactoryTest {
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING,
             null,
+            behandlingId = null,
         )
     private val kommerBarnetTilGodeService =
         mockk<KommerBarnetTilGodeService>().also {

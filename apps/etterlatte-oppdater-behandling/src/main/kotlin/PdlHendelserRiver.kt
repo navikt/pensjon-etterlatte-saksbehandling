@@ -4,7 +4,7 @@ import com.fasterxml.jackson.module.kotlin.treeToValue
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
@@ -39,7 +39,7 @@ internal class PdlHendelserRiver(
         try {
             when (packet["hendelse"].asText()) {
                 "DOEDSFALL_V1" -> {
-                    val doedshendelse: Doedshendelse = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
+                    val doedshendelse: DoedshendelsePdl = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
                     logger.info("Doedshendelse mottatt for ${doedshendelse.fnr.maskerFnr()}")
                     behandlinger.sendDoedshendelse(doedshendelse)
                 }

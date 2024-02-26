@@ -17,7 +17,7 @@ data class VergeMaalEllerFremtidsfullmakt(
     val vergeIdent: String?,
 ) : PdlHendelse
 
-data class Doedshendelse(
+data class DoedshendelsePdl(
     override val hendelseId: String,
     override val endringstype: Endringstype,
     override val fnr: String,

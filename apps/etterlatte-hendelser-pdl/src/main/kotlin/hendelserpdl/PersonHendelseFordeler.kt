@@ -13,7 +13,7 @@ import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelse
@@ -205,7 +205,7 @@ class PersonHendelseFordeler(
         publiserPaaRapid(
             opplysningstype = DOEDSFALL_V1,
             hendelse =
-                Doedshendelse(
+                DoedshendelsePdl(
                     hendelseId = hendelse.hendelseId,
                     endringstype = hendelse.endringstype(),
                     fnr = personnummer.folkeregisterident.value,

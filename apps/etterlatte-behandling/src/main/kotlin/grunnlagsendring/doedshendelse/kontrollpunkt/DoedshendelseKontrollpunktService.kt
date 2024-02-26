@@ -11,7 +11,7 @@ import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.LOPENDE
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.OPPRETTET
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.TIL_BEHANDLING
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.Doedshendelse
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -29,7 +29,7 @@ class DoedshendelseKontrollpunktService(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun identifiserKontrollerpunkter(hendelse: Doedshendelse): List<DoedshendelseKontrollpunkt> {
+    fun identifiserKontrollerpunkter(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt> {
         val avdoed = pdlTjenesterKlient.hentPdlModell(hendelse.avdoedFnr, PersonRolle.AVDOED, SakType.BARNEPENSJON)
         val sak = sakService.finnSak(hendelse.beroertFnr, hendelse.sakType())
 
@@ -50,7 +50,7 @@ class DoedshendelseKontrollpunktService(
             else -> null
         }
 
-    private fun kontrollerKryssendeYtelse(hendelse: Doedshendelse): DoedshendelseKontrollpunkt? =
+    private fun kontrollerKryssendeYtelse(hendelse: DoedshendelseInternal): DoedshendelseKontrollpunkt? =
         runBlocking {
             val kryssendeYtelser =
                 pesysKlient.hentSaker(hendelse.beroertFnr)
@@ -96,7 +96,7 @@ class DoedshendelseKontrollpunktService(
 
     private fun kontrollerSamtidigDoedsfall(
         avdoed: PersonDTO,
-        hendelse: Doedshendelse,
+        hendelse: DoedshendelseInternal,
     ): DoedshendelseKontrollpunkt? =
         try {
             avdoed.doedsdato?.verdi?.let { avdoedDoedsdato ->
@@ -131,7 +131,7 @@ class DoedshendelseKontrollpunktService(
         sak?.let { return DoedshendelseKontrollpunkt.SakEksistererIGjenny(sak) }
 
     private fun kontrollerEksisterendeHendelser(
-        hendelse: Doedshendelse,
+        hendelse: DoedshendelseInternal,
         sak: Sak?,
     ): DoedshendelseKontrollpunkt? {
         if (sak == null) {

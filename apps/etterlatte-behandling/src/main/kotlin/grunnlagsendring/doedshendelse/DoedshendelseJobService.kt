@@ -59,7 +59,7 @@ class DoedshendelseJobService(
         }
     }
 
-    private fun haandterDoedshendelse(doedshendelse: Doedshendelse) {
+    private fun haandterDoedshendelse(doedshendelse: DoedshendelseInternal) {
         val kontrollpunkter = doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
 
         when (kontrollpunkter.any { it.avbryt }) {
@@ -101,7 +101,7 @@ class DoedshendelseJobService(
     }
 
     private fun opprettOppgave(
-        doedshendelse: Doedshendelse,
+        doedshendelse: DoedshendelseInternal,
         sak: Sak,
     ) = grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
         grunnlagsendringshendelse =
@@ -122,7 +122,7 @@ class DoedshendelseJobService(
             ),
     )
 
-    private fun finnGyldigeDoedshendelser(hendelser: List<Doedshendelse>): List<Doedshendelse> {
+    private fun finnGyldigeDoedshendelser(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {
         val idag = LocalDateTime.now()
         return hendelser.filter {
             Duration.between(it.endret, idag.toTidspunkt()).toDays() >= dagerGamleHendelserSomSkalKjoeres

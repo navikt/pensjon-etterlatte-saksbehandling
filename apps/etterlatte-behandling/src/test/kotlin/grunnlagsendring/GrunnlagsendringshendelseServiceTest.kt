@@ -42,7 +42,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
@@ -295,7 +295,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val lagredeGrunnlagsendringshendelser =
             grunnlagsendringshendelseService.opprettDoedshendelse(
-                Doedshendelse(
+                DoedshendelsePdl(
                     hendelseId = "1",
                     fnr = fnr,
                     doedsdato = LocalDate.of(2022, 1, 1),
@@ -362,7 +362,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns Grunnlag.empty()
         val lagredeGrunnlagsendringshendelser1 =
             grunnlagsendringshendelseService.opprettDoedshendelse(
-                Doedshendelse(
+                DoedshendelsePdl(
                     hendelseId = "1",
                     fnr = fnr,
                     doedsdato = doedsdato,
@@ -382,7 +382,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
 
         grunnlagsendringshendelseService.opprettDoedshendelse(
-            Doedshendelse(
+            DoedshendelsePdl(
                 hendelseId = "1",
                 fnr = fnr,
                 doedsdato = doedsdato,
@@ -444,7 +444,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns Grunnlag.empty()
         val lagredeGrunnlagsendringshendelser1 =
             grunnlagsendringshendelseService.opprettDoedshendelse(
-                Doedshendelse(
+                DoedshendelsePdl(
                     hendelseId = "1",
                     fnr = fnr,
                     doedsdato = doedsdato,
@@ -465,7 +465,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
 
         grunnlagsendringshendelseService.opprettDoedshendelse(
-            Doedshendelse(
+            DoedshendelsePdl(
                 hendelseId = "1",
                 fnr = fnr,
                 doedsdato = nyDoedsdato,
@@ -525,7 +525,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns Grunnlag.empty()
 
         grunnlagsendringshendelseService.opprettDoedshendelse(
-            Doedshendelse(
+            DoedshendelsePdl(
                 hendelseId = "1",
                 fnr = fnr,
                 doedsdato = doedsdato,
@@ -597,7 +597,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns Grunnlag.empty()
 
         grunnlagsendringshendelseService.opprettDoedshendelse(
-            Doedshendelse(
+            DoedshendelsePdl(
                 hendelseId = "1",
                 fnr = fnr,
                 doedsdato = doedsdato,

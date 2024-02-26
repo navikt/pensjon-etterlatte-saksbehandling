@@ -201,8 +201,12 @@ function KlageOmgjoering(props: {
       <VurderingWrapper>
         <Select
           label="Hvorfor skal saken omgjøres?"
+          error={errors.omgjoering?.grunnForOmgjoering?.message}
           {...register('omgjoering.grunnForOmgjoering', {
-            required: true,
+            required: {
+              value: true,
+              message: 'Du må velge en årsak for omgjøringen.',
+            },
           })}
         >
           <option value="">Velg grunn</option>
@@ -212,17 +216,19 @@ function KlageOmgjoering(props: {
             </option>
           ))}
         </Select>
-        {errors.omgjoering?.grunnForOmgjoering && <Feilmelding>Du må velge en årsak for omgjøringen.</Feilmelding>}
       </VurderingWrapper>
 
       <BredVurderingWrapper>
         <Textarea
-          {...register('omgjoering.begrunnelse', {
-            required: true,
-          })}
           label="Begrunnelse"
+          error={errors.omgjoering?.begrunnelse?.message}
+          {...register('omgjoering.begrunnelse', {
+            required: {
+              value: true,
+              message: 'Du må gi en begrunnelse for omgjøringen.',
+            },
+          })}
         />
-        {errors.omgjoering?.begrunnelse && <Feilmelding>Du må gi en begrunnelse for omgjøringen</Feilmelding>}
       </BredVurderingWrapper>
     </>
   )
@@ -266,14 +272,15 @@ function KlageInnstilling(props: {
       <BredVurderingWrapper>
         <Textarea
           {...register('innstilling.innstillingTekst', {
-            required: true,
+            required: {
+              value: true,
+              message: 'Du må skrive en innstillingstekst som begrunner hvorfor klagen står seg.',
+            },
           })}
           label="Innstilling"
           description="Innstillingen blir med i brev til klager og til KA"
+          error={errors.innstilling?.innstillingTekst?.message}
         />
-        {errors.innstilling?.innstillingTekst && (
-          <Feilmelding>Du må skrive en innstillingstekst som begrunner hvorfor klagen står seg.</Feilmelding>
-        )}
       </BredVurderingWrapper>
 
       <BredVurderingWrapper>

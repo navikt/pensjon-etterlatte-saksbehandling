@@ -75,7 +75,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
                     variant="primary"
                     loading={isPending(lagreInitiellStatus)}
                     onClick={() => {
-                      const utfallMedBegrunnelse = { utfall: utfall, begrunnelse: begrunnelse }
+                      const utfallMedBegrunnelse = { utfall, begrunnelse }
                       lagreInitiellKlageUtfall(
                         {
                           klageId: klage?.id,

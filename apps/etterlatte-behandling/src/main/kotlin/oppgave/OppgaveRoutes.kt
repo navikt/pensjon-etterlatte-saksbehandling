@@ -197,7 +197,7 @@ internal fun Route.oppgaveRoutes(
                 }
             }
             put("frist") {
-                kunSaksbehandlerMedSkrivetilgang {
+                kunSkrivetilgang {
                     val redigerFrist = call.receive<RedigerFristRequest>()
                     inTransaction { service.redigerFrist(oppgaveId, redigerFrist.frist) }
                     call.respond(HttpStatusCode.OK)
@@ -290,6 +290,7 @@ internal fun Route.oppgaveRoutes(
                     service.oppdaterStatusOgMerknad(it, "", Status.PAA_VENT)
                 }
             }
+            call.respond(HttpStatusCode.OK)
         }
     }
 }

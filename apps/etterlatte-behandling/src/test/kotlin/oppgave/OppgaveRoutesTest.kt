@@ -22,10 +22,13 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.SettPaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.module
 import org.junit.jupiter.api.AfterAll
@@ -33,6 +36,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OppgaveRoutesTest : BehandlingIntegrationTest() {
@@ -89,6 +94,15 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
 
+            client.put("/api/oppgaver/${oppgave.id}/frist") {
+                val dto = RedigerFristRequest(Tidspunkt.now().plus(28, ChronoUnit.DAYS))
+                addAuthToken(systemBruker)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(dto)
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+
             client.post("/api/oppgaver/${oppgave.id}/sett-paa-vent") {
                 val dto = SettPaaVentRequest("", Status.UNDER_BEHANDLING)
                 addAuthToken(systemBruker)
@@ -97,26 +111,23 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
-
-            client.put("/api/oppgaver/${oppgave.id}/sett-paa-vent") {
-                val dto = SettPaaVentRequest("", Status.UNDER_BEHANDLING)
-                addAuthToken(systemBruker)
-                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(dto)
-            }.also {
-                assertEquals(HttpStatusCode.OK, it.status)
-            }
-
             assertEquals(hentOppgaver(client, sak, fnr).first().status, Status.PAA_VENT)
 
-            client.put("/oppgaver/${oppgave.id}/ventefrist-gaar-ut") {
-                val dto = SettPaaVentRequest("", Status.UNDER_BEHANDLING)
+            client.put("/oppgaver/ventefrist-gaar-ut") {
+                val dto =
+                    VentefristGaarUtRequest(
+                        dato = LocalDate.now().plusMonths(3),
+                        type = OppgaveType.JOURNALFOERING,
+                        oppgaveKilde = OppgaveKilde.EKSTERN,
+                        oppgaver = listOf(),
+                    )
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                 setBody(dto)
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
+            assertEquals(hentOppgaver(client, sak, fnr).first().status, Status.UNDER_BEHANDLING)
         }
     }
 

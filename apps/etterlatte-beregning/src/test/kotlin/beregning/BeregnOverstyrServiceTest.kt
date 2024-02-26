@@ -245,58 +245,6 @@ internal class BeregnOverstyrServiceTest {
         }
     }
 
-    @Test
-    fun `skal ikke beregne overstyrt manuelt opphoer`() {
-        val behandling = mockBehandling(BehandlingType.MANUELT_OPPHOER, YearMonth.of(2019, 11))
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
-            OverstyrBeregningGrunnlag(
-                perioder =
-                    listOf(
-                        GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlagData(
-                                utbetaltBeloep = 123L,
-                                trygdetid = 20L,
-                                prorataBroekTeller = null,
-                                prorataBroekNevner = null,
-                                beskrivelse = "test periode 1",
-                            ),
-                            LocalDate.of(2019, 11, 1),
-                            LocalDate.of(2020, 4, 1),
-                        ),
-                        GrunnlagMedPeriode(
-                            OverstyrBeregningGrunnlagData(
-                                utbetaltBeloep = 456,
-                                trygdetid = 10L,
-                                prorataBroekTeller = null,
-                                prorataBroekNevner = null,
-                                beskrivelse = "test periode 2",
-                            ),
-                            LocalDate.of(2020, 4, 2),
-                            null,
-                        ),
-                    ),
-                kilde =
-                    mockk {
-                        every { ident } returns "Z123456"
-                        every { tidspunkt } returns Tidspunkt.now()
-                        every { type } returns ""
-                    },
-            )
-
-        runBlocking {
-            assertThrows<UnsupportedOperationException> {
-                beregnOverstyrBeregningService.beregn(
-                    behandling,
-                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now()),
-                    bruker,
-                )
-            }
-        }
-    }
-
     private fun mockBehandling(
         type: BehandlingType,
         virk: YearMonth,

@@ -107,6 +107,10 @@ enum class OppgaveKilde {
 enum class OppgaveType {
     FOERSTEGANGSBEHANDLING,
     REVURDERING,
+
+    /*
+     * TODO: Manuelt opphør burde fjernes så fort vi får ryddet bort oppgavene som har dukket opp i produksjon.
+     */
     MANUELT_OPPHOER,
     VURDER_KONSEKVENS,
     ATTESTERING,

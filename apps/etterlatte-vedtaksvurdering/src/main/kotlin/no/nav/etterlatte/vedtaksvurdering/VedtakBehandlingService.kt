@@ -515,8 +515,6 @@ class VedtakBehandlingService(
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakType.OPPHOER
                 }
             }
-
-            BehandlingType.MANUELT_OPPHOER -> VedtakType.OPPHOER
         }
     }
 
@@ -589,8 +587,6 @@ class VedtakBehandlingService(
             val trygdetid = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
             when (behandling.behandlingType) {
-                BehandlingType.MANUELT_OPPHOER -> VedtakData(behandling, null, null, sak, trygdetid)
-
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                     val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
                     when (vilkaarsvurdering?.resultat?.utfall) {

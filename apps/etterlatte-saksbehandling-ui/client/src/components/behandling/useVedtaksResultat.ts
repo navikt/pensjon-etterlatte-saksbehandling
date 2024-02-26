@@ -11,7 +11,7 @@ export type VedtakResultat = 'opphoer' | 'innvilget' | 'avslag' | 'endring'
 export function useVedtaksResultat(): VedtakResultat | null {
   const behandling = useBehandling()
   const behandlingType = behandling?.behandlingType
-  const vilkaarsresultat = behandling?.vilkårsprøving?.resultat?.utfall
+  const vilkaarsresultat = behandling?.vilkaarsvurdering?.resultat?.utfall
 
   switch (vilkaarsresultat) {
     case VilkaarsvurderingResultat.OPPFYLT:

@@ -302,6 +302,7 @@ internal class ApplicationContext(
             klageKlient = klageKlient,
             klageHendelser = klageHendelser,
             vedtakKlient = vedtakKlient,
+            featureToggleService = featureToggleService,
         )
 
     val revurderingService =

@@ -776,8 +776,6 @@ class BehandlingServiceImplTest {
                             ),
                         ),
                     )
-
-                BehandlingType.MANUELT_OPPHOER -> throw Exception("Manuelt opphør ikke støttet")
             }
 
         val personopplysning = personOpplysning(doedsdato = doedsdato)

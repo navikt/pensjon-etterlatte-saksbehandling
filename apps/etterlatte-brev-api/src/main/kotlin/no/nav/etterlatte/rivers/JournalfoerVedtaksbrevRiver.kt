@@ -6,7 +6,6 @@ import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
@@ -39,7 +38,7 @@ internal class JournalfoerVedtaksbrevRiver(
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligSaksbehandler") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
             validate {
-                it.rejectValues("vedtak.innhold.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
+                it.rejectValues("vedtak.innhold.behandling.type", listOf("MANUELT_OPPHOER")) // TODO: Fjerne
             }
             validate { it.rejectValue(SKAL_SENDE_BREV, false) }
         }

@@ -24,6 +24,7 @@ export enum Revurderingaarsak {
   SLUTTBEHANDLING_UTLAND = 'SLUTTBEHANDLING_UTLAND',
   OPPHOER_UTEN_BREV = 'OPPHOER_UTEN_BREV',
   ALDERSOVERGANG = 'ALDERSOVERGANG',
+  RETT_UTEN_TIDSBEGRENSNING = 'RETT_UTEN_TIDSBEGRENSNING',
 }
 
 export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
@@ -50,6 +51,7 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   SLUTTBEHANDLING_UTLAND: 'Sluttbehandling utland',
   OPPHOER_UTEN_BREV: 'Opphør uten å sende brev',
   ALDERSOVERGANG: 'Aldersovergang',
+  RETT_UTEN_TIDSBEGRENSNING: 'Stønad uten tidsbegrensning',
 } as const
 
 export const erOpphoer = (revurderingsaarsak: Revurderingaarsak) =>

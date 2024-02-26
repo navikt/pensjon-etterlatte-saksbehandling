@@ -71,6 +71,7 @@ enum class Revurderingaarsak(
     INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
+    RETT_UTEN_TIDSBEGRENSNING(SAKTYPE_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
 
     // Opphør
     ALDERSOVERGANG(SAKTYPE_BP, DevOgProd, OpphoerUtenBrev),

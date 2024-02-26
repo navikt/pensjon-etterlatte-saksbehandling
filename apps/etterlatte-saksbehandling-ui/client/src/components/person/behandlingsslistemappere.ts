@@ -45,6 +45,8 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Ut av fengsel'
     case Revurderingaarsak.ANNEN:
       return 'Annen'
+    case Revurderingaarsak.RETT_UTEN_TIDSBEGRENSNING:
+      return 'Stønad uten tidsbegrensning'
   }
 }
 

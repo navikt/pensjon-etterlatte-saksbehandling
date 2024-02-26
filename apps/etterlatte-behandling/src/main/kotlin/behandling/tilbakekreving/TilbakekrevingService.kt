@@ -177,7 +177,7 @@ class TilbakekrevingService(
                 tilbakekreving,
                 Tidspunkt.now(),
             )
-        tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.ATTESTERT)
+        tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.FATTET_VEDTAK)
 
         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
             fattetoppgaveReferanseOgSak =
@@ -228,6 +228,14 @@ class TilbakekrevingService(
             referanse = behandling.id.toString(),
             saksbehandler = brukerTokenInfo,
         )
+
+        val statistikkTilbakekrevingDto =
+            StatistikkTilbakekrevingDto(
+                behandling.id,
+                behandling,
+                Tidspunkt.now(),
+            )
+        tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.ATTESTERT)
 
         runBlocking {
             tilbakekrevingKlient.sendTilbakekrevingsvedtak(

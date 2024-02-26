@@ -111,6 +111,11 @@ export const OMS_OPPHOER_HJEMLER: Array<Hjemmel> = [
   },
 ]
 
+export const OMS_ALDERSOVERGANG_HJEMLER: Array<Hjemmel> = [
+  { lenke: 'https://lovdata.no/lov/1997-02-28-19/§17-11', tittel: 'Folketrygdloven § 17-11' },
+  { lenke: 'https://lovdata.no/lov/1997-02-28-19/§22-12', tittel: 'Folketrygdloven § 22-12 sjette ledd' },
+]
+
 export const OMS_INST_HJEMLER_VIRK: Array<Hjemmel> = [
   {
     lenke: 'https://lovdata.no/lov/1997-02-28-19/§17-13',
@@ -141,6 +146,9 @@ export const OMS_REVURDERING_BESKRIVELSE =
 
 export const OMS_OPPHOER_BESKRIVELSE =
   'Omstillingsstønaden stanses ved utgangen av den måneden retten til ytelsen faller bort.'
+
+export const OMS_ALDERSOVERGANG_BESKRIVELSE =
+  'Retten til omstillingsstønad faller bort når bruker fyller 67 år. Den stanses ved utgangen av den måneden retten til ytelsen faller bort.'
 
 export const OMS_INNTEKTSENDRING_BESKRIVELSE =
   'Alle inntektsendringer utenom etteroppgjør skal gjøres fra måneden etter bruker har meldt fra om endringen.'

@@ -73,7 +73,7 @@ enum class Revurderingaarsak(
     YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
 
     // Opphør
-    ALDERSOVERGANG(SAKTYPE_BP, DevOgProd, OpphoerUtenBrev),
+    ALDERSOVERGANG(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
     DOEDSFALL(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
     OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
     ADOPSJON(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),

@@ -143,7 +143,7 @@ class DoedshendelseKontrollpunktService(
                 sakId = sak.id,
                 statuser = listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB),
             ).filter {
-                it.gjelderPerson == hendelse.avdoedFnr && it.type == GrunnlagsendringsType.DOEDSFALL // avdød eller berørt?
+                it.gjelderPerson == hendelse.avdoedFnr && it.type == GrunnlagsendringsType.DOEDSFALL
             }
 
         return when {

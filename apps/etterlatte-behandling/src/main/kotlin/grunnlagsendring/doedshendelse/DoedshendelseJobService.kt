@@ -5,6 +5,7 @@ import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
@@ -82,7 +83,7 @@ class DoedshendelseJobService(
                     "Oppretter grunnlagshendelse og oppgave for person ${doedshendelse.beroertFnr.maskerFnr()} " +
                         "med avdød ${doedshendelse.avdoedFnr.maskerFnr()}",
                 )
-                val sak = // todo: Hvis sak ikke finnes, må vi også opprette persongrunnlag.
+                val sak = // todo - EY-3572: Hvis sak ikke finnes, må vi også opprette persongrunnlag
                     kontrollpunkter.finnSak() ?: sakService.finnEllerOpprettSak(
                         fnr = doedshendelse.beroertFnr,
                         type = doedshendelse.sakType(),
@@ -111,9 +112,14 @@ class DoedshendelseJobService(
                 type = GrunnlagsendringsType.DOEDSFALL,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
                 hendelseGjelderRolle = Saksrolle.SOEKER,
-                gjelderPerson = doedshendelse.beroertFnr,
+                gjelderPerson = doedshendelse.avdoedFnr,
+                samsvarMellomKildeOgGrunnlag =
+                    SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(
+                        fraGrunnlag = null,
+                        fraPdl = doedshendelse.avdoedDoedsdato,
+                        samsvar = false,
+                    ),
             ),
-        doedsdato = doedshendelse.avdoedDoedsdato,
     )
 
     private fun finnGyldigeDoedshendelser(hendelser: List<Doedshendelse>): List<Doedshendelse> {

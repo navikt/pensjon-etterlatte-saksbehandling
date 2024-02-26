@@ -86,7 +86,7 @@ class DoedshendelseJobServiceTest {
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns emptyList()
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
-        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any(), any()) } returns
+        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
             mockk {
                 every { id } returns UUID.randomUUID()
             }
@@ -94,7 +94,7 @@ class DoedshendelseJobServiceTest {
         service.setupKontekstAndRun(kontekst)
 
         verify(exactly = 1) { dao.oppdaterDoedshendelse(any()) }
-        verify(exactly = 1) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any(), doedshendelse.avdoedDoedsdato) }
+        verify(exactly = 1) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
     }
 
     @Test
@@ -115,7 +115,7 @@ class DoedshendelseJobServiceTest {
         service.setupKontekstAndRun(kontekst)
 
         verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
-        verify(exactly = 0) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any(), doedshendelse.avdoedDoedsdato) }
+        verify(exactly = 0) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
         doedshendelseCapture.captured.status shouldBe Status.FERDIG
         doedshendelseCapture.captured.utfall shouldBe Utfall.AVBRUTT
     }
@@ -133,7 +133,7 @@ class DoedshendelseJobServiceTest {
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelse)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
         val oppgaveId = UUID.randomUUID()
-        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any(), doedshendelse.avdoedDoedsdato) } returns
+        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
             mockk {
                 every { id } returns oppgaveId
             }
@@ -144,7 +144,7 @@ class DoedshendelseJobServiceTest {
         service.setupKontekstAndRun(kontekst)
 
         verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
-        verify(exactly = 1) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any(), doedshendelse.avdoedDoedsdato) }
+        verify(exactly = 1) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
         doedshendelseCapture.captured.status shouldBe Status.FERDIG
         doedshendelseCapture.captured.utfall shouldBe Utfall.OPPGAVE
         doedshendelseCapture.captured.oppgaveId shouldBe oppgaveId

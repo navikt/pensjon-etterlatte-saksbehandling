@@ -37,7 +37,6 @@ import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.util.UUID
 
 class KunneIkkeLukkeOppgaveForhendelse(message: String) :
@@ -335,13 +334,9 @@ class GrunnlagsendringshendelseService(
             }.map { it.first }
     }
 
-    fun opprettDoedshendelseForPerson(
-        grunnlagsendringshendelse: Grunnlagsendringshendelse,
-        doedsdato: LocalDate,
-    ): OppgaveIntern {
-        val samsvarMellomKildeOgGrunnlag = SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(null, doedsdato, false)
+    fun opprettDoedshendelseForPerson(grunnlagsendringshendelse: Grunnlagsendringshendelse): OppgaveIntern {
         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(grunnlagsendringshendelse)
-        return oppdaterGrunnlagsEndringOgOpprettOppgave(grunnlagsendringshendelse, samsvarMellomKildeOgGrunnlag)
+        return opprettOppgave(grunnlagsendringshendelse)
     }
 
     private fun opprettHendelseAvTypeForSak(
@@ -417,20 +412,17 @@ class GrunnlagsendringshendelseService(
                     "og informasjonen i pdl og grunnlag samsvarer ikke. " +
                     "Hendelsen vises derfor til saksbehandler.",
             )
-            oppdaterGrunnlagsEndringOgOpprettOppgave(hendelse, samsvarMellomKildeOgGrunnlag)
+            grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
+                hendelseId = hendelse.id,
+                foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+                etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
+            )
+            opprettOppgave(hendelse)
         }
     }
 
-    private fun oppdaterGrunnlagsEndringOgOpprettOppgave(
-        hendelse: Grunnlagsendringshendelse,
-        samsvarMellomKildeOgGrunnlag: SamsvarMellomKildeOgGrunnlag,
-    ): OppgaveIntern {
-        grunnlagsendringshendelseDao.oppdaterGrunnlagsendringStatusOgSamsvar(
-            hendelseId = hendelse.id,
-            foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
-            etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-            samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
-        )
+    private fun opprettOppgave(hendelse: Grunnlagsendringshendelse): OppgaveIntern {
         return oppgaveService.opprettNyOppgaveMedSakOgReferanse(
             referanse = hendelse.id.toString(),
             sakId = hendelse.sakId,

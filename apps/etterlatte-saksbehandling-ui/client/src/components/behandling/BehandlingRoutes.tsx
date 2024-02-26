@@ -184,7 +184,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, varselbrevAkt
 }
 
 export function soeknadRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteTypes> {
-  const avslag = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
+  const avslag = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   const defaultRoutes: Array<BehandlingRouteTypes> = avslag
     ? [routeTypes.soeknadsoversikt, routeTypes.vilkaarsvurdering]
@@ -209,7 +209,7 @@ export function soeknadRoutes(behandling: IBehandlingReducer, lagVarselbrev: boo
 export function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteTypes> {
   const opphoer =
     erOpphoer(behandling.revurderingsaarsak!!) ||
-    behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
+    behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   const defaultRoutes: Array<BehandlingRouteTypes> = opphoer
     ? [routeTypes.revurderingsoversikt, routeTypes.vilkaarsvurdering, routeTypes.beregning]

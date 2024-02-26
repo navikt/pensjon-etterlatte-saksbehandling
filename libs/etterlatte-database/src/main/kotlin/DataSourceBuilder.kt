@@ -73,6 +73,7 @@ fun validateUniqueMigrationVersions(logger: Logger) {
     val resourceFolder = readResources(logger)
 
     val files = resourceFolder.listFiles()
+    println(files)
     if (files == null) {
         throw RuntimeException("Failed to list files in the resources folder")
     } else {
@@ -86,17 +87,15 @@ fun validateUniqueMigrationVersions(logger: Logger) {
 
 private fun readResources(logger: Logger): File {
     val systemClassLoader = ClassLoader.getSystemClassLoader()
-    val resourceFolderURL: URL? = systemClassLoader.getResource("db")
-
-    // Convert URL to file path
-    val resourceFolderPath =
-        resourceFolderURL?.file
-            ?: throw RuntimeException("Fant ikke migreringsscript i resourceFolder for /db")
-    val resourceFolder = File(resourceFolderPath)
+    val resourceFolderURL: URL =
+        systemClassLoader.getResource(
+            "db",
+        ) ?: throw RuntimeException("Fant ikke migreringsscript i resourceFolder for /db")
+    val resourceFolder = File(resourceFolderURL.toExternalForm())
 
     // Check if it's a directory
     val isdir = Files.isDirectory(resourceFolder.toPath())
-    logger.info("****************** Resourceurl $resourceFolderURL isdir: $isdir")
+    logger.info("****************** Resourceurl $resourceFolderURL isdir: $isdir path: ${resourceFolder.toPath()}")
     /*if (!isdir) {
         throw RuntimeException("Fant ikke migreringsscript i resourceFolder for /db")
     }*/

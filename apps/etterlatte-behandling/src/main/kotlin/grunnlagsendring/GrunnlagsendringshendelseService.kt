@@ -82,7 +82,7 @@ class GrunnlagsendringshendelseService(
         hendelse: Grunnlagsendringshendelse,
         saksbehandler: Saksbehandler,
     ) {
-        logger.info("Lukker hendelse med id $hendelse.id")
+        logger.info("Lukker hendelse med id ${hendelse.id}")
 
         inTransaction {
             grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)

@@ -14,7 +14,7 @@ export interface IDetaljertBehandling {
   sakType: SakType
   gyldighetsprøving?: IGyldighetResultat
   kommerBarnetTilgode: IKommerBarnetTilgode | null
-  soeknadMottattDato: string
+  soeknadMottattDato?: string
   virkningstidspunkt: Virkningstidspunkt | null
   utlandstilknytning: IUtlandstilknytning | null
   boddEllerArbeidetUtlandet: IBoddEllerArbeidetUtlandet | null

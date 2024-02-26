@@ -9,7 +9,7 @@ import { useAppDispatch } from '~store/Store'
 import { settJournalpost } from '~store/reducers/JournalfoeringOppgaveReducer'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
-import DokumentModal from '../dokumenter/dokumentModal'
+import DokumentModal from '../dokumenter/DokumentModal'
 import { Journalpost } from '~shared/types/Journalpost'
 import { FlexRow } from '~shared/styled'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -37,7 +37,7 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
           velgJournalpost(journalpost)
         })
       } else {
-        apiHentJournalposter(oppgave!!.fnr!!, (journalposter) => {
+        apiHentJournalposter({ fnr: oppgave!!.fnr!! }, (journalposter) => {
           if (journalposter.length === 1) {
             velgJournalpost(journalposter[0])
           }

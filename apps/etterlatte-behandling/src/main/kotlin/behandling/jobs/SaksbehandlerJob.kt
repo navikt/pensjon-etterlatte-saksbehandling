@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.jobs
 
 import no.nav.etterlatte.behandling.job.SaksbehandlerJobService
 import no.nav.etterlatte.jobs.LoggerInfo
+import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -12,11 +13,11 @@ class SaksbehandlerJob(
     private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val interval: Duration,
-) {
+) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
 
-    fun schedule(): Timer {
+    override fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med periode $interval")
 
         return fixedRateCancellableTimer(

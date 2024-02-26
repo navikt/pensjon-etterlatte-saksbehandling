@@ -64,27 +64,38 @@ enum class Revurderingaarsak(
     private val miljoe: KanBrukesIMiljoe,
     val utfall: Utfall,
 ) {
-    ANSVARLIGE_FORELDRE(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
-    SOESKENJUSTERING(SAKTYPE_BP, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    UTLAND(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
-    BARN(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
-    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
-    REGULERING(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalIkkeSendeBrev),
-    DOEDSFALL(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
-    INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),
-    ADOPSJON(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),
-    SIVILSTAND(SAKTYPE_OMS, DevOgProd, OpphoerMedBrev),
-    FENGSELSOPPHOLD(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev),
-    UT_AV_FENGSEL(SAKTYPE_BP, KunIDev, IkkeOpphoerSkalSendeBrev),
+    // Endring
     NY_SOEKNAD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    ANNEN(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    SOESKENJUSTERING(SAKTYPE_BP, DevOgProd, IkkeOpphoerSkalSendeBrev),
+    REGULERING(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalIkkeSendeBrev),
+    INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
+
+    // Opphør
+    ALDERSOVERGANG(SAKTYPE_BP, DevOgProd, OpphoerUtenBrev),
+    DOEDSFALL(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
+    OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
+    ADOPSJON(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),
+    SIVILSTAND(SAKTYPE_OMS, DevOgProd, OpphoerMedBrev),
+    OMGJOERING_AV_FARSKAP(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),
+
+    // Opphør og endring
+    EKSPORT(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    IMPORT(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    ANNEN(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+
+    // TODO vurdere disse
     OMGJOERING_ETTER_KLAGE(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
     SLUTTBEHANDLING_UTLAND(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
-    OPPHOER_UTEN_BREV(SAKTYPE_BP_OMS, DevOgProd, OpphoerUtenBrev),
-    ALDERSOVERGANG(SAKTYPE_BP, DevOgProd, OpphoerUtenBrev),
+
+    // TODO ikke i noe miljø ennå
+    FENGSELSOPPHOLD(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
+    UT_AV_FENGSEL(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
+    UTLAND(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
+    BARN(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
+    ANSVARLIGE_FORELDRE(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
+    VERGEMAAL_ELLER_FREMTIDSFULLMAKT(SAKTYPE_BP, IngenMiljoe, IkkeOpphoerSkalSendeBrev),
     ;
 
     fun kanBrukesIMiljo(): Boolean =

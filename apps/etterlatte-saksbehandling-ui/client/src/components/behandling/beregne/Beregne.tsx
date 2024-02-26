@@ -100,7 +100,11 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         <BeregningWrapper>
           {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? (
             <>
-              <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+              <Brevutfall
+                behandling={behandling}
+                erOpphoer={erOpphoer}
+                resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
+              />
               {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
             </>
           ) : (
@@ -139,7 +143,11 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                   </InfoAlert>
                 )}
 
-                <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+                <Brevutfall
+                  behandling={behandling}
+                  erOpphoer={erOpphoer}
+                  resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
+                />
                 {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
               </BeregningWrapper>
             )

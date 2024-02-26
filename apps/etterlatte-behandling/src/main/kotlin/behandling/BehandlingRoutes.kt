@@ -12,6 +12,7 @@ import io.ktor.server.routing.application
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
 import no.nav.etterlatte.behandling.domain.TilstandException
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
@@ -121,11 +122,16 @@ internal fun Route.behandlingRoutes(
                     val body = call.receive<VirkningstidspunktRequest>()
 
                     val erGyldigVirkningstidspunkt =
-                        behandlingService.erGyldigVirkningstidspunkt(
-                            behandlingId,
-                            brukerTokenInfo,
-                            body,
-                        )
+                        inTransaction {
+                            runBlocking {
+                                behandlingService.erGyldigVirkningstidspunkt(
+                                    behandlingId,
+                                    brukerTokenInfo,
+                                    body,
+                                )
+                            }
+                        }
+
                     if (!erGyldigVirkningstidspunkt) {
                         return@post call.respond(HttpStatusCode.BadRequest, "Ugyldig virkningstidspunkt")
                     }

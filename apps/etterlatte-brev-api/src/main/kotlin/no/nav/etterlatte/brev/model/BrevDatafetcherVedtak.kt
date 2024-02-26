@@ -57,15 +57,13 @@ internal class BrevDatafetcherVedtak(
         }
 
     suspend fun hentAvkortinginfo() =
-        behandlingId?.let {
-            brevdataFacade.finnAvkortingsinfo(
-                it,
-                sak.sakType,
-                vedtakVirkningstidspunkt,
-                type!!,
-                brukerTokenInfo,
-            )
-        }
+        brevdataFacade.finnAvkortingsinfo(
+            behandlingId!!,
+            sak.sakType,
+            vedtakVirkningstidspunkt,
+            type!!,
+            brukerTokenInfo,
+        )
 
     suspend fun hentForrigeAvkortinginfo() =
         brevdataFacade.finnForrigeAvkortingsinfo(

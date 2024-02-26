@@ -5,6 +5,7 @@ import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.YearMonth
@@ -30,6 +31,7 @@ data class MigreringRequest(
     val utlandstilknytningType: UtlandstilknytningType? = null,
     val erUnder18: Boolean = true,
     val kanAutomatiskGjenopprettes: Boolean = false,
+    val gradering: AdressebeskyttelseGradering? = null,
 ) {
     fun opprettPersongalleri() =
         Persongalleri(

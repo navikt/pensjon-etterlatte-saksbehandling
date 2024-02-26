@@ -216,7 +216,9 @@ class PersonService(
                 hentPerson(
                     request =
                         HentPersonRequest(
-                            foedselsnummer = it, rolle = PersonRolle.GJENLEVENDE, saktype = SakType.BARNEPENSJON,
+                            foedselsnummer = it,
+                            rolle = PersonRolle.GJENLEVENDE,
+                            saktype = SakType.BARNEPENSJON,
                         ),
                 )
             } ?: emptyList()

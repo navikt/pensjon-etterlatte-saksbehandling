@@ -1,9 +1,9 @@
 package no.nav.etterlatte.tidshendelser
 
+import net.logstash.logback.marker.Markers
 import no.nav.etterlatte.jobs.LoggerInfo
+import no.nav.etterlatte.jobs.TimerJob
 import no.nav.etterlatte.jobs.fixedRateCancellableTimer
-import no.nav.etterlatte.libs.common.logging.getCorrelationId
-import no.nav.etterlatte.libs.common.logging.withLogContext
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Timer
@@ -13,10 +13,10 @@ class HendelsePollerTask(
     private val periode: Duration,
     private val hendelsePoller: HendelsePoller,
     private val maxAntallHendelsePerPoll: Int = 5,
-) {
+) : TimerJob {
     private val logger = LoggerFactory.getLogger(HendelsePollerTask::class.java)
 
-    fun start(): Timer {
+    override fun schedule(): Timer {
         logger.info("Starter polling av nye hendelser pr $periode")
 
         return fixedRateCancellableTimer(
@@ -48,21 +48,21 @@ class HendelsePoller(
                     .associateBy { it.id }
 
             hendelser.forEach {
-                withLogContext(
-                    correlationId = getCorrelationId(),
-                    mapOf(
-                        "jobbId" to it.jobbId.toString(),
-                        "hendelseId" to it.id.toString(),
-                        "sakId" to it.sakId.toString(),
-                        "type" to jobsById[it.jobbId]!!.type.toString(),
-                    ),
-                ) {
-                    logger.info("Behandler hendelse: [id=${it.id}, sakId=${it.sakId}]")
+                val markers =
+                    Markers.appendEntries(
+                        mapOf(
+                            "jobbId" to it.jobbId.toString(),
+                            "hendelseId" to it.id.toString(),
+                            "sakId" to it.sakId.toString(),
+                            "type" to jobsById[it.jobbId]!!.type.toString(),
+                        ),
+                    )
 
-                    hendelsePublisher.publish(hendelse = it, jobb = jobsById[it.jobbId]!!)
+                logger.info(markers, "Behandler hendelse: [id=${it.id}, sakId=${it.sakId}]")
 
-                    hendelseDao.oppdaterHendelseStatus(it.id, HendelseStatus.SENDT)
-                }
+                hendelsePublisher.publish(hendelse = it, jobb = jobsById[it.jobbId]!!)
+
+                hendelseDao.oppdaterHendelseStatus(it.id, HendelseStatus.SENDT)
             }
         }
     }

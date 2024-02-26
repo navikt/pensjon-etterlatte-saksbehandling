@@ -16,6 +16,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -271,12 +272,24 @@ internal class BehandlingServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
         request: VirkningstidspunktRequest,
     ): Boolean {
+        val behandling =
+            requireNotNull(hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+
+        return when (behandling.type) {
+            BehandlingType.REVURDERING -> erGyldigVirkningstidspunktRevurdering(request, behandling)
+            BehandlingType.FØRSTEGANGSBEHANDLING -> erGyldigVirkningstidspunktFoerstegangsbehandling(request, behandling, brukerTokenInfo)
+            else -> throw Exception("BehandlingType ${behandling.type} er ikke støttet")
+        }
+    }
+
+    private suspend fun erGyldigVirkningstidspunktFoerstegangsbehandling(
+        request: VirkningstidspunktRequest,
+        behandling: Behandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
         val virkningstidspunkt = request.dato
         val harGyldigFormat = virkningstidspunkt.year in (0..9999) && request.begrunnelse != null
-
-        val behandling =
-            requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
-        val doedsdato = hentDoedsdato(behandlingId, brukerTokenInfo)?.let { YearMonth.from(it) }
+        val doedsdato = hentDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
         // For BP er makstidspunkt 3 år - dette gjelder også unntaksvis for OMS
@@ -311,6 +324,18 @@ internal class BehandlingServiceImpl(
             }
 
         return harGyldigFormat && datoForVirkningstidspunktErGydligInnenforMaksBegrensninger
+    }
+
+    private fun erGyldigVirkningstidspunktRevurdering(
+        request: VirkningstidspunktRequest,
+        behandling: Behandling,
+    ): Boolean {
+        val virkningstidspunkt = request.dato
+        val harGyldigFormat = virkningstidspunkt.year in (0..9999) && request.begrunnelse != null
+        val foersteVirkDato = hentFoersteVirk(behandling.sak.id)
+
+        // Virkningstidspunkt for revurdering kan tidligst være første virkningstidspunkt for saken
+        return harGyldigFormat && virkningstidspunkt.isAfter(foersteVirkDato) || virkningstidspunkt == foersteVirkDato
     }
 
     private suspend fun hentDoedsdato(

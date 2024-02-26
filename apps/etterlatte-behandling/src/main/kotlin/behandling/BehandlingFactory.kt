@@ -135,6 +135,9 @@ class BehandlingFactory(
             sak.enhet != Enheter.STRENGT_FORTROLIG_UTLAND.enhetNr
         ) {
             request.enhet?.let {
+                if (Enheter.entries.none { enhet -> enhet.enhetNr == it }) {
+                    throw UgyldigEnhetException()
+                }
                 inTransaction {
                     sakService.oppdaterEnhetForSaker(
                         listOf(
@@ -307,6 +310,11 @@ data class BehandlingOgOppgave(val behandling: Behandling, val oppgave: OppgaveI
 class ManuellMigreringHarEksisterendeIverksattBehandling : UgyldigForespoerselException(
     code = "MANUELL_MIGRERING_EKSISTERENDE_IVERKSATT",
     detail = "Det eksisterer allerede en sak med en iverksatt behandling for angitt søker",
+)
+
+class UgyldigEnhetException : UgyldigForespoerselException(
+    code = "UGYLDIG-ENHET",
+    detail = "Enhet brukt i form er matcher ingen gyldig enhet",
 )
 
 fun Vedtaksloesning.foerstOpprettaIPesys() = this == Vedtaksloesning.PESYS || this == Vedtaksloesning.GJENOPPRETTA

@@ -23,16 +23,15 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
 
   return (
     <SpaceChildren>
-      <InputRow>
-        <TextField
-          {...register('persongalleri.soeker', { validate: validateFnrObligatorisk })}
-          label="Søker (barnet)"
-          description={
-            erManuellMigrering ? 'Oppgi søker sitt fødselsnummer' : 'Fødselsnummeret er automatisk hentet fra oppgaven'
-          }
-          readOnly={!erManuellMigrering}
-        />
-      </InputRow>
+      <TextField
+        {...register('persongalleri.soeker', { validate: validateFnrObligatorisk })}
+        label="Søker (barnet)"
+        description={
+          erManuellMigrering ? 'Oppgi søker sitt fødselsnummer' : 'Fødselsnummeret er automatisk hentet fra oppgaven'
+        }
+        error={errors.persongalleri?.soeker?.message}
+        readOnly={!erManuellMigrering}
+      />
 
       <InputRow>
         <TextField

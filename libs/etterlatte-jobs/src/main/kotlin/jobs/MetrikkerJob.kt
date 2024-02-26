@@ -13,11 +13,11 @@ class MetrikkerJob(
     private val erLeader: () -> Boolean,
     private val initialDelay: Long,
     private val periode: Duration,
-) {
+) : TimerJob {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val jobbNavn = this::class.simpleName
 
-    fun schedule(): Timer {
+    override fun schedule(): Timer {
         logger.info("$jobbNavn er satt til å kjøre med uthenter=${uthenter::class.simpleName} og periode $periode")
 
         return fixedRateCancellableTimer(

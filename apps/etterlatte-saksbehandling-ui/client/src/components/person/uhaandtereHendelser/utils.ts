@@ -54,7 +54,7 @@ export const grunnlagsendringsKilde = (type: GrunnlagendringshendelseSamsvarType
 const grunnlagsEndringstyperTilRevurderingsAarsaker: Record<GrunnlagsendringsType, Array<string>> = {
   GRUNNBELOEP: [Revurderingaarsak.REGULERING],
   DOEDSFALL: [Revurderingaarsak.DOEDSFALL, Revurderingaarsak.SOESKENJUSTERING],
-  UTFLYTTING: [Revurderingaarsak.UTLAND],
+  UTFLYTTING: [Revurderingaarsak.UTLAND, Revurderingaarsak.EKSPORT],
   FORELDER_BARN_RELASJON: [Revurderingaarsak.ANSVARLIGE_FORELDRE, Revurderingaarsak.BARN, Revurderingaarsak.SIVILSTAND],
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: [Revurderingaarsak.VERGEMAAL_ELLER_FREMTIDSFULLMAKT],
   SIVILSTAND: [Revurderingaarsak.SIVILSTAND],

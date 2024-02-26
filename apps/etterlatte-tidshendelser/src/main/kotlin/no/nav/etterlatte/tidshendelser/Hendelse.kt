@@ -29,11 +29,16 @@ data class Hendelse(
     val info: Any?,
 )
 
-enum class JobbType(val beskrivelse: String) {
-    AO_BP18("Aldersovergang barnepensjon ved 18 år"),
-    AO_BP20("Aldersovergang barnepensjon ved 20 år"),
-    AO_BP21("Aldersovergang barnepensjon ved 21 år"),
-    AO_OMS67("Aldersovergang omstillingsstønad ved 67 år"),
+enum class JobbType(val beskrivelse: String, val kategori: JobbKategori) {
+    AO_BP20("Aldersovergang barnepensjon ved 20 år", JobbKategori.ALDERSOVERGANG),
+    AO_BP21("Aldersovergang barnepensjon ved 21 år", JobbKategori.ALDERSOVERGANG),
+    AO_OMS67("Aldersovergang omstillingsstønad ved 67 år", JobbKategori.ALDERSOVERGANG),
+    OMS_DOED_3AAR("Omstillingsstønad opphør 3 år etter dødsdato", JobbKategori.OMS_DOEDSDATO),
+}
+
+enum class JobbKategori {
+    ALDERSOVERGANG,
+    OMS_DOEDSDATO,
 }
 
 enum class JobbStatus {

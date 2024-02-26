@@ -131,7 +131,9 @@ class BrevService(
     ) {
         val brev = sjekkOmBrevKanEndres(id)
 
-        if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
+        if (!brev.mottaker.erGyldig()) {
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
+        } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
             db.settBrevFerdigstilt(id)
         } else {
             val pdf = genererPdf(id, bruker)

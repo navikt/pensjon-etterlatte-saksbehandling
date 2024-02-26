@@ -31,30 +31,30 @@ import { oppdaterFrist } from '~components/oppgavebenk/utils/oppgaveutils'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
-  const [oppgavenTilBehandlingen, setOppgave] = useState<OppgaveDTO | null>(null)
 
   const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandlingEkte] = useApiCall(
     hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
   )
+
+  const [oppgaveForBehandling, setOppgaveForBehandling] = useState<OppgaveDTO | null>(null)
+  const [merknad, setMerknad] = useState<string>('')
   const [lagreSettPaaVentStatus, requestSettPaaVent] = useApiCall(settOppgavePaaVentApi)
   const [settPaaVent, setVisPaaVent] = useState(false)
-  const [merknad, setMerknad] = useState<string>('')
-  const [minOppgavelisteOppgaver, setMinOppgavelisteOppgaver] = useState<Array<OppgaveDTO>>([])
 
   useEffect(() => {
     requesthentOppgaveForBehandlingEkte(
       { referanse: behandlingsInfo.behandlingId, sakId: behandlingsInfo.sakId },
       (oppgave) => {
-        setOppgave(oppgave)
+        setOppgaveForBehandling(oppgave)
         setMerknad(oppgave.merknad || '')
       }
     )
   }, [lagreSettPaaVentStatus])
 
   const lagreVent = (data: SettPaaVentRequest) => {
-    if (!oppgavenTilBehandlingen) throw new Error('Mangler oppgave')
+    if (!oppgaveForBehandling) throw new Error('Mangler oppgave')
     requestSettPaaVent({
-      oppgaveId: oppgavenTilBehandlingen.id,
+      oppgaveId: oppgaveForBehandling.id,
       settPaaVentRequest: data,
     })
     setVisPaaVent(false)
@@ -133,10 +133,8 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
             <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
           ),
           () =>
-            oppgavenTilBehandlingen ? (
-              <Tekst>
-                {oppgavenTilBehandlingen.saksbehandler?.navn || oppgavenTilBehandlingen.saksbehandler?.ident}
-              </Tekst>
+            oppgaveForBehandling ? (
+              <Tekst>{oppgaveForBehandling.saksbehandler?.navn || oppgaveForBehandling.saksbehandler?.ident}</Tekst>
             ) : (
               <Alert size="small" variant="warning">
                 Ingen saksbehandler har tatt denne oppgaven
@@ -170,35 +168,39 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       </FlexRow>
 
       {settPaaVent && (
-        <>
-          <TextField
-            label="Merknad for venting"
-            size="medium"
-            type="text"
-            value={merknad}
-            onChange={(e) => setMerknad(e.target.value)}
-          />
-        </>
+        <TextField
+          label="Merknad for venting"
+          size="medium"
+          type="text"
+          value={merknad}
+          onChange={(e) => setMerknad(e.target.value)}
+        />
       )}
 
       {settPaaVent &&
         isSuccess(oppgaveForBehandlingenStatus) &&
-        oppgavenTilBehandlingen &&
-        oppgavenTilBehandlingen.status !== 'PAA_VENT' && (
+        oppgaveForBehandling &&
+        oppgaveForBehandling.status !== 'PAA_VENT' && (
           <>
-            <FlexRow align="center">
+            <FlexRow style={{ marginTop: '1rem' }} align="center">
               <b>Frist</b>
             </FlexRow>
-            <FlexRow align="center">
+            <FlexRow style={{ marginBottom: '1rem' }} align="center">
               <FristHandlinger
-                orginalFrist={oppgavenTilBehandlingen.frist}
-                oppgaveId={oppgavenTilBehandlingen.id}
+                orginalFrist={oppgaveForBehandling.frist}
+                oppgaveId={oppgaveForBehandling.id}
                 oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
-                  oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
+                  oppdaterFrist(
+                    (oppgaveMedNyFrist) => setOppgaveForBehandling(oppgaveMedNyFrist[0]),
+                    [oppgaveForBehandling],
+                    id,
+                    nyfrist,
+                    versjon
+                  )
                 }
-                erRedigerbar={erOppgaveRedigerbar(oppgavenTilBehandlingen.status)}
-                oppgaveVersjon={oppgavenTilBehandlingen.versjon}
-                type={oppgavenTilBehandlingen.type}
+                erRedigerbar={erOppgaveRedigerbar(oppgaveForBehandling.status)}
+                oppgaveVersjon={oppgaveForBehandling.versjon}
+                type={oppgaveForBehandling.type}
               />
             </FlexRow>
           </>
@@ -206,8 +208,8 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
 
       {settPaaVent &&
         isSuccess(oppgaveForBehandlingenStatus) &&
-        oppgavenTilBehandlingen &&
-        oppgavenTilBehandlingen.status !== 'PAA_VENT' && (
+        oppgaveForBehandling &&
+        oppgaveForBehandling.status !== 'PAA_VENT' && (
           <>
             <FlexRow>
               <Button
@@ -216,7 +218,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
                   lagreVent({
                     merknad: merknad,
                     versjon: null,
-                    status: oppgavenTilBehandlingen.status,
+                    status: oppgaveForBehandling.status,
                   } as SettPaaVentRequest)
                 }
               >
@@ -232,8 +234,8 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
         )}
       {settPaaVent &&
         isSuccess(oppgaveForBehandlingenStatus) &&
-        oppgavenTilBehandlingen &&
-        oppgavenTilBehandlingen.status == 'PAA_VENT' && (
+        oppgaveForBehandling &&
+        oppgaveForBehandling.status == 'PAA_VENT' && (
           <>
             <FlexRow>
               <Button
@@ -242,7 +244,7 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
                   lagreVent({
                     merknad: merknad,
                     versjon: null,
-                    status: oppgavenTilBehandlingen.status,
+                    status: oppgaveForBehandling.status,
                   } as SettPaaVentRequest)
                 }
               >
@@ -256,20 +258,20 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
             </FlexRow>
           </>
         )}
-      {!settPaaVent && oppgavenTilBehandlingen?.status !== 'PAA_VENT' && (
+      {!settPaaVent && oppgaveForBehandling?.status !== 'PAA_VENT' && (
         <Button variant="primary" onClick={() => setVisPaaVent(true)}>
           Sett på vent
         </Button>
       )}
-      {!settPaaVent && oppgavenTilBehandlingen?.status === 'PAA_VENT' && (
+      {!settPaaVent && oppgaveForBehandling?.status === 'PAA_VENT' && (
         <>
           <Alert variant="warning">
             <b>Oppgaven er satt på vent.</b> <br></br>
             <b>Merknad: </b>
-            {oppgavenTilBehandlingen.merknad}
+            {oppgaveForBehandling.merknad}
             <br></br>
             <b>Ny frist: </b>
-            {formaterStringDato(oppgavenTilBehandlingen.frist)}
+            {formaterStringDato(oppgaveForBehandling.frist)}
           </Alert>
           <Button variant="primary" onClick={() => setVisPaaVent(true)}>
             Ta av vent

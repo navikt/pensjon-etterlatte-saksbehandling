@@ -8,7 +8,6 @@ import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.KlageKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.FeatureIkkeStoettetException
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
@@ -458,34 +457,32 @@ class KlageServiceImpl(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Klage {
-        return inTransaction {
-            val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
 
-            val oppdatertKlage = klage.fattVedtak()
-            val vedtakId =
-                runBlocking {
-                    vedtakKlient.fattVedtakKlage(klage, brukerTokenInfo)
-                }
-            val utfall = klage.utfall as KlageUtfallMedData.Avvist
-            if (vedtakId != utfall.vedtak.vedtakId) {
-                throw IllegalStateException(
-                    "VedtakId=$vedtakId er forskjellig fra det som ligger i utfall=$vedtakId",
-                )
+        val oppdatertKlage = klage.fattVedtak()
+        val vedtakId =
+            runBlocking {
+                vedtakKlient.fattVedtakKlage(klage, brukerTokenInfo)
             }
-            klageDao.lagreKlage(oppdatertKlage)
-
-            hendelseDao.vedtakHendelse(
-                behandlingId = klage.id,
-                sakId = klage.sak.id,
-                vedtakId = vedtakId,
-                hendelse = HendelseType.FATTET,
-                inntruffet = Tidspunkt.now(),
-                saksbehandler = brukerTokenInfo.ident(),
-                kommentar = null,
-                begrunnelse = null,
+        val utfall = klage.utfall as KlageUtfallMedData.Avvist
+        if (vedtakId != utfall.vedtak.vedtakId) {
+            throw IllegalStateException(
+                "VedtakId=$vedtakId er forskjellig fra det som ligger i utfall=$vedtakId",
             )
-            oppdatertKlage
         }
+        klageDao.lagreKlage(oppdatertKlage)
+
+        hendelseDao.vedtakHendelse(
+            behandlingId = klage.id,
+            sakId = klage.sak.id,
+            vedtakId = vedtakId,
+            hendelse = HendelseType.FATTET,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = brukerTokenInfo.ident(),
+            kommentar = null,
+            begrunnelse = null,
+        )
+        return oppdatertKlage
     }
 
     private fun ferdigstillInnstilling(

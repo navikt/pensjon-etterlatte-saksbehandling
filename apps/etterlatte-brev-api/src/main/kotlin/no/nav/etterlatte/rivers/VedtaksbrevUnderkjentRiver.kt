@@ -1,7 +1,6 @@
 package no.nav.etterlatte.rivers
 
 import no.nav.etterlatte.brev.VedtaksbrevService
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -22,7 +21,7 @@ internal class VedtaksbrevUnderkjentRiver(
             validate { it.requireKey("vedtak.id") }
             validate { it.requireKey("vedtak.behandlingId") }
             validate {
-                it.rejectValues("vedtak.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
+                it.rejectValues("vedtak.behandling.type", listOf("MANUELT_OPPHOER")) // TODO: fjerne
             }
         }
     }

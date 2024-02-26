@@ -53,6 +53,8 @@ export const OppgaverTableRow = ({
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         oppdaterTildeling={oppdaterTildeling}
         oppgave={oppgave}
+        key={`${oppgave.id}${oppgave.saksbehandler?.ident}`}
+        // For å trigge unmount og resetting av state når man bytte liste. Se https://react.dev/learn/preserving-and-resetting-state#same-component-at-the-same-position-preserves-state
       />
     </Table.DataCell>
     <Table.DataCell>

@@ -92,8 +92,6 @@ class BeregnOmstillingsstoenadService(
                         opphoer(behandling.id, grunnlag, virkningstidspunkt)
                 }
             }
-
-            BehandlingType.MANUELT_OPPHOER -> opphoer(behandling.id, grunnlag, virkningstidspunkt)
         }
     }
 

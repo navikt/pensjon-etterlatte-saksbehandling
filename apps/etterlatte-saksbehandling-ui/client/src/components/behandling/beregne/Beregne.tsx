@@ -44,7 +44,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
-  const erOpphoer = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
+  const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
   const brevutfallOgEtterbetaling = useAppSelector(
@@ -100,7 +100,11 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
         <BeregningWrapper>
           {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? (
             <>
-              <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+              <Brevutfall
+                behandling={behandling}
+                erOpphoer={erOpphoer}
+                resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
+              />
               {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
             </>
           ) : (
@@ -139,7 +143,11 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                   </InfoAlert>
                 )}
 
-                <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
+                <Brevutfall
+                  behandling={behandling}
+                  erOpphoer={erOpphoer}
+                  resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
+                />
                 {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
               </BeregningWrapper>
             )

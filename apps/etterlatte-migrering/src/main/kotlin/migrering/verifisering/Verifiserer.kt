@@ -1,7 +1,6 @@
 package no.nav.etterlatte.migrering.verifisering
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlag.VurdertBostedsland
 import no.nav.etterlatte.libs.common.logging.samleExceptions
@@ -44,36 +43,28 @@ internal class Verifiserer(
         patchedRequestResult.onFailure { feilen ->
             feilSomMedfoererManuell.add(PDLException(feilen).also { it.addSuppressed(feilen) })
         }
-        patchedRequestResult.onSuccess { patchedRequest ->
-            if (patchedRequest.enhet.nr == Enheter.STRENGT_FORTROLIG.enhetNr) {
-                // Vi kjører strengt fortrolig til sist.
-                feilSomAvbryter.add(StrengtFortroligPesys)
-            }
-            val finnesIPdlFeil = pesonerFinnesIPdlEllerSoekerErDoed(patchedRequest)
-            feilSomAvbryter.addAll(finnesIPdlFeil)
 
-            val soeker = personHenter.hentPerson(PersonRolle.BARN, patchedRequest.soeker).getOrNull()
+        val patchedRequest = patchedRequestResult.getOrThrow()
 
-            if (soeker != null) {
-                if (soeker.adressebeskyttelse?.verdi?.erStrengtFortrolig() == true) {
-                    // Vi kjører strengt fortrolig til sist. Hvis saker har blitt strengt fortrolig etter opphør avbryter vi.
-                    feilSomAvbryter.add(StrengtFortroligPDL)
-                }
-                feilSomMedfoererManuell.addAll(sjekkAtSoekerHarRelevantVerge(patchedRequest, soeker))
-                if (!patchedRequest.erUnder18) {
-                    feilSomMedfoererManuell.addAll(sjekkOmSoekerHaddeFlyktningerfordel(patchedRequest))
-                    feilSomMedfoererManuell.addAll(sjekkAdresseOgUtlandsopphold(patchedRequest.pesysId.id, soeker, patchedRequest))
-                    feilSomMedfoererManuell.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(patchedRequest, soeker))
-                    feilSomMedfoererManuell.addAll(sjekkOmForandringIForeldreforhold(patchedRequest, soeker))
-                    // Trolig unødvendig da ukjente foreldre alltid er utlandsaker
-                    feilSomMedfoererManuell.addAll(sjekkOmUkjentForelder(patchedRequest))
-                }
+        val soeker = personHenter.hentPerson(PersonRolle.BARN, patchedRequest.soeker).getOrNull()
+        val finnesIPdlFeil = pesonerFinnesIPdlEllerSoekerErDoed(patchedRequest)
+        feilSomAvbryter.addAll(finnesIPdlFeil)
+
+        if (soeker != null) {
+            feilSomMedfoererManuell.addAll(sjekkAtSoekerHarRelevantVerge(patchedRequest, soeker))
+            if (!patchedRequest.erUnder18) {
+                feilSomMedfoererManuell.addAll(sjekkOmSoekerHaddeFlyktningerfordel(patchedRequest))
+                feilSomMedfoererManuell.addAll(sjekkAdresseOgUtlandsopphold(patchedRequest.pesysId.id, soeker, patchedRequest))
+                feilSomMedfoererManuell.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(patchedRequest, soeker))
+                feilSomMedfoererManuell.addAll(sjekkOmForandringIForeldreforhold(patchedRequest, soeker))
+                // Trolig unødvendig da ukjente foreldre alltid er utlandsaker
+                feilSomMedfoererManuell.addAll(sjekkOmUkjentForelder(patchedRequest))
             }
-            if (patchedRequest.beregning.meta?.beregningsMetodeType != "FOLKETRYGD") {
-                feilSomMedfoererManuell.add(BeregningsmetodeIkkeNasjonal)
-            }
-            feilSomMedfoererManuell.addAll(verifiserUfoere(patchedRequest))
         }
+        if (patchedRequest.beregning.meta?.beregningsMetodeType != "FOLKETRYGD") {
+            feilSomMedfoererManuell.add(BeregningsmetodeIkkeNasjonal)
+        }
+        feilSomMedfoererManuell.addAll(verifiserUfoere(patchedRequest))
 
         val alleFeil = feilSomAvbryter + feilSomMedfoererManuell
         if (alleFeil.isNotEmpty()) {
@@ -82,7 +73,7 @@ internal class Verifiserer(
                     "Kan ikke migrere. Se sikkerlogg for detaljer",
             )
             repository.lagreFeilkjoering(
-                patchedRequestResult.getOrNull()?.toJson() ?: request.toJson(),
+                patchedRequest.toJson(),
                 feilendeSteg = Migreringshendelser.VERIFISER.lagEventnameForType(),
                 feil = alleFeil.map { it.message }.toJson(),
                 pesysId = request.pesysId,
@@ -92,9 +83,10 @@ internal class Verifiserer(
                 throw samleExceptions(feilSomAvbryter)
             }
         }
-        return patchedRequestResult.getOrThrow().copy(
+        return patchedRequest.copy(
             utlandstilknytningType = utenlandstilknytningsjekker.finnUtenlandstilknytning(request),
             kanAutomatiskGjenopprettes = feilSomMedfoererManuell.isEmpty(),
+            gradering = soeker?.adressebeskyttelse?.verdi,
         )
     }
 

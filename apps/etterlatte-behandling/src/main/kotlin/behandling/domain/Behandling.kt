@@ -259,7 +259,6 @@ fun Behandling.toBehandlingSammendrag() =
             when (this) {
                 is Foerstegangsbehandling -> "SOEKNAD"
                 is Revurdering -> this.revurderingsaarsak?.name ?: "REVURDERING"
-                is ManueltOpphoer -> "MANUELT_OPPHOER"
             },
         virkningstidspunkt = this.virkningstidspunkt,
         boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet,

@@ -46,10 +46,11 @@ internal class BehandlingInfoServiceTest {
         every { behandlingsstatusService.settBeregnet(any(), any(), any()) } returns Unit
 
         behandlingInfoService.lagreBrevutfallOgEtterbetaling(
-            behandlingId,
-            bruker,
-            brevutfall,
-            etterbetaling,
+            behandlingId = behandlingId,
+            brukerTokenInfo = bruker,
+            opphoer = false,
+            brevutfall = brevutfall,
+            etterbetaling = etterbetaling,
         )
 
         verify {
@@ -76,7 +77,13 @@ internal class BehandlingInfoServiceTest {
         every { behandlingInfoDao.lagreEtterbetaling(any()) } returns mockk()
         every { behandlingsstatusService.settAvkortet(any(), any(), any()) } returns Unit
 
-        behandlingInfoService.lagreBrevutfallOgEtterbetaling(behandlingId, bruker, brevutfall, etterbetaling)
+        behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+            behandlingId = behandlingId,
+            brukerTokenInfo = bruker,
+            opphoer = false,
+            brevutfall = brevutfall,
+            etterbetaling = etterbetaling,
+        )
 
         verify {
             behandlingInfoDao.lagreBrevutfall(brevutfall)
@@ -97,9 +104,10 @@ internal class BehandlingInfoServiceTest {
 
         assertThrows<BrevutfallException.BehandlingKanIkkeEndres> {
             behandlingInfoService.lagreBrevutfallOgEtterbetaling(
-                behandlingId,
-                bruker,
-                brevutfall(behandlingId),
+                behandlingId = behandlingId,
+                brukerTokenInfo = bruker,
+                opphoer = false,
+                brevutfall = brevutfall(behandlingId),
                 etterbetaling = null,
             )
         }
@@ -122,10 +130,11 @@ internal class BehandlingInfoServiceTest {
 
         assertThrows<BrevutfallException.FeilutbetalingIkkeSatt> {
             behandlingInfoService.lagreBrevutfallOgEtterbetaling(
-                behandlingId,
-                bruker,
-                brevutfall(behandlingId).copy(feilutbetaling = null),
-                etterbetaling(behandlingId = behandlingId),
+                behandlingId = behandlingId,
+                brukerTokenInfo = bruker,
+                opphoer = false,
+                brevutfall = brevutfall(behandlingId).copy(feilutbetaling = null),
+                etterbetaling = etterbetaling(behandlingId = behandlingId),
             )
         }
     }
@@ -176,10 +185,11 @@ internal class BehandlingInfoServiceTest {
         every { behandlingInfoDao.hentEtterbetaling(any()) } returns null
 
         behandlingInfoService.lagreBrevutfallOgEtterbetaling(
-            behandlingId,
-            bruker,
-            brevutfall(behandlingId).copy(aldersgruppe = null, lavEllerIngenInntekt = null),
-            null,
+            behandlingId = behandlingId,
+            brukerTokenInfo = bruker,
+            opphoer = true,
+            brevutfall = brevutfall(behandlingId).copy(aldersgruppe = null, lavEllerIngenInntekt = null),
+            etterbetaling = null,
         )
 
         verify {
@@ -205,10 +215,11 @@ internal class BehandlingInfoServiceTest {
         every { behandlingInfoDao.hentEtterbetaling(any()) } returns null
 
         behandlingInfoService.lagreBrevutfallOgEtterbetaling(
-            behandlingId,
-            bruker,
-            brevutfall(behandlingId).copy(lavEllerIngenInntekt = null),
-            null,
+            behandlingId = behandlingId,
+            brukerTokenInfo = bruker,
+            opphoer = true,
+            brevutfall = brevutfall(behandlingId).copy(lavEllerIngenInntekt = null),
+            etterbetaling = null,
         )
 
         verify {

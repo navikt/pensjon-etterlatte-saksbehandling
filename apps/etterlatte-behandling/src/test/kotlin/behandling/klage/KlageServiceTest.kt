@@ -53,6 +53,7 @@ internal class KlageServiceTest {
                 klageKlient = mockk(),
                 klageHendelser = klageHendelserServiceMock,
                 vedtakKlient = vedtakKlient,
+                featureToggleService = mockk(),
             )
         every { hendelseDaoMock.klageHendelse(any(), any(), any(), any(), any(), any(), any()) } returns Unit
         every { klageHendelserServiceMock.sendKlageHendelseRapids(any(), any()) } returns Unit
@@ -103,6 +104,7 @@ internal class KlageServiceTest {
             "FORMKRAV_OPPFYLT",
             "FORMKRAV_IKKE_OPPFYLT",
             "UTFALL_VURDERT",
+            "FATTET_VEDTAK",
         ],
         mode = EnumSource.Mode.EXCLUDE,
     )

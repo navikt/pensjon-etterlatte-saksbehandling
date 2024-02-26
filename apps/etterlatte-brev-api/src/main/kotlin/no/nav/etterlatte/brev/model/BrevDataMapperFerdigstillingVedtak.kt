@@ -204,7 +204,6 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
         val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
-        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
         val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
         val trygdetid = async { fetcher.hentTrygdetid() }
         val etterbetaling = async { fetcher.hentEtterbetaling() }
@@ -213,8 +212,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         OmstillingsstoenadInnvilgelse.fra(
             innholdMedVedlegg,
             generellBrevData,
-            utbetalingsinfo.await(),
-            requireNotNull(avkortingsinfo.await()),
+            avkortingsinfo.await(),
             etterbetaling.await(),
             requireNotNull(trygdetid.await()),
             requireNotNull(brevutfall.await()),
@@ -227,7 +225,6 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
         innholdMedVedlegg: InnholdMedVedlegg,
     ) = coroutineScope {
         val fetcher = BrevDatafetcherVedtak(brevdataFacade, brukerTokenInfo, generellBrevData)
-        val utbetalingsinfo = async { fetcher.hentUtbetaling() }
         val avkortingsinfo = async { fetcher.hentAvkortinginfo() }
         val forrigeAvkortingsinfo = async { fetcher.hentForrigeAvkortinginfo() }
         val trygdetid = async { fetcher.hentTrygdetid() }
@@ -236,8 +233,7 @@ class BrevDataMapperFerdigstillingVedtak(private val brevdataFacade: BrevdataFac
 
         OmstillingsstoenadRevurdering.fra(
             innholdMedVedlegg,
-            requireNotNull(avkortingsinfo.await()),
-            utbetalingsinfo.await(),
+            avkortingsinfo.await(),
             forrigeAvkortingsinfo.await(),
             etterbetaling.await(),
             requireNotNull(trygdetid.await()),

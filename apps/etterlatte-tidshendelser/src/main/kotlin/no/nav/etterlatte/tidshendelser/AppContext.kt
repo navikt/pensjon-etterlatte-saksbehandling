@@ -35,12 +35,8 @@ class AppContext(
         )
 
     val hendelseDao = HendelseDao(dataSource)
-
-    private val aldersovergangerService =
-        AldersovergangerService(
-            hendelseDao,
-            grunnlagKlient,
-        )
+    private val aldersovergangerService = AldersovergangerService(hendelseDao, grunnlagKlient)
+    private val omstillingsstoenadService = OmstillingsstoenadService(hendelseDao, grunnlagKlient)
 
     val jobbPollerTask =
         JobbPollerTask(
@@ -48,7 +44,7 @@ class AppContext(
             periode = env.requireEnvValue("JOBB_POLLER_INTERVAL").let { Duration.parse(it) } ?: Duration.ofMinutes(5),
             openingHours = env.requireEnvValue("JOBB_POLLER_OPENING_HOURS").let { OpeningHours.of(it) },
             klokke = norskKlokke(),
-            jobbPoller = JobbPoller(hendelseDao, aldersovergangerService),
+            jobbPoller = JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService),
         )
 
     val hendelsePollerTask =

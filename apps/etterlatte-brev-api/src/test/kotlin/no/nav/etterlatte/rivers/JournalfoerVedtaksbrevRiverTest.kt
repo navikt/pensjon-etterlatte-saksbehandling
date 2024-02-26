@@ -103,23 +103,6 @@ internal class JournalfoerVedtaksbrevRiverTest {
     }
 
     @Test
-    fun `Attestering av sak med behandlingstype MANUELT_OPPHOER`() {
-        val vedtak = opprettVedtak(BehandlingType.MANUELT_OPPHOER)
-
-        val melding =
-            JsonMessage.newMessage(
-                mapOf(
-                    VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
-                    "vedtak" to vedtak,
-                ),
-            )
-
-        testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
-
-        verify { vedtaksbrevService wasNot Called }
-    }
-
-    @Test
     fun `Attestering av sak med brevutsending false skal ikke sende ut brev`() {
         val vedtak = opprettVedtak(BehandlingType.REVURDERING)
 

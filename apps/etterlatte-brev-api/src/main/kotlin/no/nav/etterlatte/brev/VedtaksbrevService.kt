@@ -2,6 +2,7 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
@@ -13,6 +14,7 @@ import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperRedigerbartUtfallVarsel
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -135,7 +137,20 @@ class VedtaksbrevService(
         brevtype: Brevtype,
     ): BrevService.BrevPayload =
         brevoppretter.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo, {
-            brevKodeMapperVedtak.brevKode(it).redigering
+            when (brevtype) {
+                Brevtype.VARSEL ->
+                    if (it.sakType === SakType.BARNEPENSJON) {
+                        Brevkoder.BP_VARSEL.redigering
+                    } else {
+                        Brevkoder.OMS_VARSEL.redigering
+                    }
+
+                Brevtype.VEDTAK -> brevKodeMapperVedtak.brevKode(it).redigering
+                else -> throw UgyldigForespoerselException(
+                    "FEIL_BREVKODE_NYTT_INNHOLD",
+                    "Prøvde å hente brevkode for nytt innhold for brevtype $brevtype, men per nå støtter vi bare vedtak og varsel.",
+                )
+            }
         }) {
             if (brevtype == Brevtype.VARSEL) {
                 BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
@@ -201,7 +216,7 @@ class UgyldigStatusKanIkkeFerdigstilles(id: BrevID, status: Status) : UgyldigFor
 
 class UgyldigMottakerKanIkkeFerdigstilles(id: BrevID) : UgyldigForespoerselException(
     code = "UGYLDIG_MOTTAKER_BREV",
-    detail = "Brevet har ugyldig mottaker og kan ikke ferdigstilles",
+    detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse",
     meta =
         mapOf(
             "id" to id,

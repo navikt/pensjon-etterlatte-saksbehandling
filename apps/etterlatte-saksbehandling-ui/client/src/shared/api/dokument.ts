@@ -7,12 +7,20 @@ import {
 } from '~shared/types/Journalpost'
 import { apiClient, ApiResponse } from './apiClient'
 
-export const hentDokumenter = async (fnr: string): Promise<ApiResponse<Journalpost[]>> =>
-  apiClient.post(`/dokumenter`, { foedselsnummer: fnr })
-
-// Midlertidig for å støtte uthenting av gjenlevendepensjon
-export const hentAlleDokumenterInklPensjon = async (fnr: string): Promise<ApiResponse<Journalpost[]>> =>
-  apiClient.post(`/dokumenter?visTemaPen=true`, { foedselsnummer: fnr })
+export const hentDokumenter = async (args: {
+  fnr: string
+  temaer?: string[]
+  statuser?: string[]
+  typer?: string[]
+  foerste?: number
+}): Promise<ApiResponse<Journalpost[]>> =>
+  apiClient.post(`/dokumenter`, {
+    foedselsnummer: args.fnr,
+    tema: args.temaer,
+    status: args.statuser,
+    type: args.typer,
+    foerste: args.foerste,
+  })
 
 export const feilregistrerSakstilknytning = async (journalpostId: string): Promise<ApiResponse<any>> =>
   apiClient.put(`/dokumenter/${journalpostId}/feilregistrerSakstilknytning`, {})

@@ -30,6 +30,7 @@ enum class KlageStatus {
     FORMKRAV_OPPFYLT, //
     FORMKRAV_IKKE_OPPFYLT,
     UTFALL_VURDERT,
+    FATTET_VEDTAK,
 
     // potensielt en status for å markere oversendingen til Kabal
     FERDIGSTILT, // klagen er ferdig fra gjenny sin side
@@ -44,7 +45,7 @@ enum class KlageStatus {
         }
 
         fun kanOppdatereUtfall(status: KlageStatus): Boolean {
-            return status === FORMKRAV_OPPFYLT || status === UTFALL_VURDERT
+            return status in listOf(FORMKRAV_IKKE_OPPFYLT, FORMKRAV_OPPFYLT, UTFALL_VURDERT)
         }
 
         fun kanAvbryte(status: KlageStatus): Boolean {
@@ -53,6 +54,10 @@ enum class KlageStatus {
 
         fun kanEndres(status: KlageStatus): Boolean {
             return status in listOf(OPPRETTET, FORMKRAV_OPPFYLT, UTFALL_VURDERT)
+        }
+
+        fun kanFatteVedtak(status: KlageStatus): Boolean {
+            return status == UTFALL_VURDERT
         }
     }
 }
@@ -228,11 +233,11 @@ data class Klage(
         )
     }
 
-    fun kanOppdatereFormkrav(): Boolean {
+    private fun kanOppdatereFormkrav(): Boolean {
         return KlageStatus.kanOppdatereFormkrav(this.status)
     }
 
-    fun kanOppdatereUtfall(): Boolean {
+    private fun kanOppdatereUtfall(): Boolean {
         return KlageStatus.kanOppdatereUtfall(this.status)
     }
 
@@ -284,11 +289,20 @@ data class Klage(
             hjemmel = innstilling.lovhjemmel.name,
             sakType = this.sak.sakType,
             internKommentar = innstilling.internKommentar,
-            // TODO: Kommer i oppdatering av innstillingsobjektet
-            ovesendelseTekst = "",
+            ovesendelseTekst = innstilling.innstillingTekst,
             klager = this.innkommendeDokument?.innsender ?: "",
             klageDato = this.innkommendeDokument?.mottattDato ?: this.opprettet.toLocalDate(),
         )
+    }
+
+    fun fattVedtak(): Klage {
+        if (!KlageStatus.kanFatteVedtak(this.status)) {
+            throw IllegalStateException(
+                "Kan ikke fatte vedtak for klagen med id=${this.id} " +
+                    "på grunn av status til klagen (${this.status})",
+            )
+        }
+        return this.copy(status = KlageStatus.FATTET_VEDTAK)
     }
 
     companion object {
@@ -527,10 +541,11 @@ data class KlageOmgjoering(val grunnForOmgjoering: GrunnForOmgjoering, val begru
 class InnstillingTilKabal(
     val lovhjemmel: KabalHjemmel,
     val internKommentar: String?,
+    val innstillingTekst: String,
     val brev: KlageBrevInnstilling,
 )
 
-class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: String?) {
+class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: String?, val innstillingTekst: String) {
     val internKommentar: String? = internKommentar
         get() = if (field.isNullOrBlank()) null else field
 }

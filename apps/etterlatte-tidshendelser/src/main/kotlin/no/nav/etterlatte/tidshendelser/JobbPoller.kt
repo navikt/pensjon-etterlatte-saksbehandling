@@ -36,6 +36,7 @@ class JobbPollerTask(
 class JobbPoller(
     private val hendelseDao: HendelseDao,
     private val aldersovergangerService: AldersovergangerService,
+    private val omstillingsstoenadService: OmstillingsstoenadService,
 ) {
     private val logger = LoggerFactory.getLogger(JobbPoller::class.java)
 
@@ -43,14 +44,19 @@ class JobbPoller(
         logger.info("Sjekker for jobber å starte...")
 
         hendelseDao.finnAktuellJobb().forEach {
-            logger.info("Fant jobb ${it.id} med type ${it.type}, status (${it.status})")
+            logger.info("Fant jobb ${it.id}, type=${it.type}, status=${it.status}")
+            hendelseDao.oppdaterJobbstatusStartet(it)
 
-            when (it.type) {
-                JobbType.AO_BP18 -> logger.warn("Ikke implementert: AO_BP18")
-                JobbType.AO_BP20,
-                JobbType.AO_BP21,
-                JobbType.AO_OMS67,
-                -> aldersovergangerService.execute(it)
+            val saker =
+                when (it.type.kategori) {
+                    JobbKategori.ALDERSOVERGANG -> aldersovergangerService.execute(it)
+                    JobbKategori.OMS_DOEDSDATO -> omstillingsstoenadService.execute(it)
+                }
+
+            if (saker.isEmpty()) {
+                // Nuttin' to do
+                val jobbRefreshed = hendelseDao.hentJobb(it.id)
+                hendelseDao.oppdaterJobbstatusFerdig(jobbRefreshed)
             }
         }
     }

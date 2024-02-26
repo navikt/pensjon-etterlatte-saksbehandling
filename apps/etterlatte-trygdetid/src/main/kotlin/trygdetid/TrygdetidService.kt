@@ -319,8 +319,6 @@ class TrygdetidServiceImpl(
                         kopierSisteTrygdetidberegninger(behandling, forrigeTrygdetider)
                     }
                 }
-
-                BehandlingType.MANUELT_OPPHOER -> throw StoetterIkkeTrygdetidForBehandlingstypen(behandling.behandlingType)
             }
         }.also { behandlingKlient.settBehandlingStatusTrygdetidOppdatert(behandlingId, brukerTokenInfo) }
     }

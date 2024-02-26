@@ -442,6 +442,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                     InnstillingTilKabalUtenBrev(
                                         lovhjemmel = KabalHjemmel.FTRL_3_5_TRYGDETID.name,
                                         internKommentar = "En tekst",
+                                        innstillingTekst = "En ekstra tekst",
                                     ),
                             ),
                         ),

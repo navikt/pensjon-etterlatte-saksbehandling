@@ -1,11 +1,14 @@
 package no.nav.etterlatte.brev.hentinformasjon.beregning
 
+import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
+import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
 import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.hentBenyttetTrygdetidOgProratabroek
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.YearMonth
@@ -24,11 +27,6 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
         sakType: SakType,
         brukerTokenInfo: BrukerTokenInfo,
     ) = beregningKlient.hentBeregningsGrunnlag(behandlingId, sakType, brukerTokenInfo)
-
-    suspend fun hentYtelseMedGrunnlag(
-        behandlingId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
-    ) = beregningKlient.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
 
     suspend fun finnUtbetalingsinfo(
         behandlingId: UUID,
@@ -80,6 +78,57 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
             virkningstidspunkt.atDay(1),
             soeskenjustering,
             beregningsperioder,
+        )
+    }
+
+    suspend fun finnAvkortingsinfo(
+        behandlingId: UUID,
+        sakType: SakType,
+        virkningstidspunkt: YearMonth,
+        vedtakType: VedtakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Avkortingsinfo =
+        checkNotNull(finnAvkortingsinfoNullable(behandlingId, sakType, virkningstidspunkt, vedtakType, brukerTokenInfo)) {
+            "Avkortingsinfo er nødvendig, men mangler"
+        }
+
+    suspend fun finnAvkortingsinfoNullable(
+        behandlingId: UUID,
+        sakType: SakType,
+        virkningstidspunkt: YearMonth,
+        vedtakType: VedtakType,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Avkortingsinfo? {
+        if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
+
+        val ytelseMedGrunnlag = beregningKlient.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
+        val beregningsGrunnlag = hentBeregningsGrunnlag(behandlingId, sakType, brukerTokenInfo)
+
+        val beregningsperioder =
+            ytelseMedGrunnlag.perioder.map {
+                AvkortetBeregningsperiode(
+                    datoFOM = it.periode.fom.atDay(1),
+                    datoTOM = it.periode.tom?.atEndOfMonth(),
+                    inntekt = Kroner(it.aarsinntekt - it.fratrekkInnAar),
+                    ytelseFoerAvkorting = Kroner(it.ytelseFoerAvkorting),
+                    utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),
+                    trygdetid = it.trygdetid,
+                    beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
+                    beregningsMetodeFraGrunnlag =
+                        beregningsGrunnlag?.beregningsMetode?.beregningsMetode
+                            ?: requireNotNull(it.beregningsMetode),
+                    // ved manuelt overstyrt beregning har vi ikke grunnlag
+                )
+            }
+
+        val aarsInntekt = ytelseMedGrunnlag.perioder.first().aarsinntekt
+        val grunnbeloep = ytelseMedGrunnlag.perioder.first().grunnbelop
+
+        return Avkortingsinfo(
+            grunnbeloep = Kroner(grunnbeloep),
+            inntekt = Kroner(aarsInntekt),
+            virkningsdato = virkningstidspunkt.atDay(1),
+            beregningsperioder = beregningsperioder,
         )
     }
 }

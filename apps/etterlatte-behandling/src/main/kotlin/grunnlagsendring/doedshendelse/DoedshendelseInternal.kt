@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import java.time.LocalDate
@@ -39,14 +40,40 @@ data class DoedshendelseInternal internal constructor(
         )
     }
 
-    fun tilAvbrutt(sakId: Long? = null): DoedshendelseInternal {
+    fun tilAvbrutt(
+        sakId: Long? = null,
+        oppgaveId: UUID? = null,
+    ): DoedshendelseInternal {
         return copy(
             sakId = sakId,
+            oppgaveId = oppgaveId,
             status = Status.FERDIG,
             utfall = Utfall.AVBRUTT,
             endret = Tidspunkt.now(),
         )
     }
+
+    fun tilBehandlet(
+        utfall: Utfall,
+        sakId: Long,
+        oppgaveId: UUID? = null,
+        brevId: Long? = null,
+    ): DoedshendelseInternal {
+        return copy(
+            status = Status.FERDIG,
+            utfall = utfall,
+            sakId = sakId,
+            oppgaveId = oppgaveId,
+            brevId = brevId,
+            endret = Tidspunkt.now(),
+        )
+    }
+
+    fun sakType(): SakType =
+        when (relasjon) {
+            Relasjon.BARN -> SakType.BARNEPENSJON
+            Relasjon.EPS -> SakType.OMSTILLINGSSTOENAD
+        }
 }
 
 enum class Status {
@@ -59,6 +86,7 @@ enum class Status {
 enum class Utfall {
     BREV,
     OPPGAVE,
+    BREV_OG_OPPGAVE,
     AVBRUTT,
 }
 

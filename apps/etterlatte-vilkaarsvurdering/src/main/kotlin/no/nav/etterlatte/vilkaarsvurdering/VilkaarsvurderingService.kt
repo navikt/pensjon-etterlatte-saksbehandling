@@ -49,6 +49,13 @@ class VilkaarsvurderingService(
             ?: false
     }
 
+    fun harRettUtenTidsbegrensning(behandlingId: UUID): Boolean {
+        return vilkaarsvurderingRepository.hent(behandlingId)?.vilkaar
+            ?.filter { it.hovedvilkaar.type == VilkaarType.OMS_RETT_UTEN_TIDSBEGRENSNING }
+            ?.any { it.hovedvilkaar.resultat == Utfall.OPPFYLT }
+            ?: false
+    }
+
     suspend fun hentBehandlingensGrunnlag(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
@@ -192,10 +199,6 @@ class VilkaarsvurderingService(
                         opprettNyVilkaarsvurdering(grunnlag, virkningstidspunkt, behandling, behandlingId)
                     }
                 }
-
-                BehandlingType.MANUELT_OPPHOER -> throw RuntimeException(
-                    "Støtter ikke vilkårsvurdering for behandlingType=${behandling.behandlingType}",
-                )
             }
         }
 
@@ -251,10 +254,6 @@ class VilkaarsvurderingService(
                         } else {
                             BarnepensjonVilkaar1967.inngangsvilkaar()
                         }
-
-                    BehandlingType.MANUELT_OPPHOER -> throw IllegalArgumentException(
-                        "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType",
-                    )
                 }
 
             SakType.OMSTILLINGSSTOENAD ->
@@ -263,7 +262,6 @@ class VilkaarsvurderingService(
                         OmstillingstoenadVilkaar.inngangsvilkaar()
 
                     BehandlingType.REVURDERING,
-                    BehandlingType.MANUELT_OPPHOER,
                     -> throw IllegalArgumentException(
                         "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType",
                     )

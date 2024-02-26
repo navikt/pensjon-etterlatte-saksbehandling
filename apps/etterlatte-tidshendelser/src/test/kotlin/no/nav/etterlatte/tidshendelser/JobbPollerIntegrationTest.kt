@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tidshendelser
 
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -21,9 +22,10 @@ class JobbPollerIntegrationTest(dataSource: DataSource) {
     }
 
     private val aldersovergangerService = mockk<AldersovergangerService>()
+    private val omstillingsstoenadService = mockk<OmstillingsstoenadService>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
-    private val jobbPoller = JobbPoller(hendelseDao, aldersovergangerService)
+    private val jobbPoller = JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService)
 
     @AfterEach
     fun afterEach() {
@@ -36,12 +38,28 @@ class JobbPollerIntegrationTest(dataSource: DataSource) {
         val jobb1 = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.of(2024, Month.MARCH), LocalDate.now())
         val jobb2 = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.of(2024, Month.MARCH), LocalDate.now())
 
-        every { aldersovergangerService.execute(jobb1) } returns Unit
+        every { aldersovergangerService.execute(jobb1) } returns emptyList()
 
         jobbPoller.poll()
 
         verify { aldersovergangerService.execute(jobb1) }
         verify(exactly = 0) { aldersovergangerService.execute(jobb2) }
+
+        hendelseDao.hentJobb(jobb1.id).status shouldBe JobbStatus.FERDIG
+        hendelseDao.hentJobb(jobb2.id).status shouldBe JobbStatus.NY
+    }
+
+    @Test
+    fun `skal ikke ferdigstille jobb som har opprettet hendelser`() {
+        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.of(2024, Month.APRIL), LocalDate.now())
+
+        every { aldersovergangerService.execute(jobb) } returns listOf(1)
+
+        jobbPoller.poll()
+
+        verify { aldersovergangerService.execute(jobb) }
+
+        hendelseDao.hentJobb(jobb.id).status shouldBe JobbStatus.STARTET
     }
 
     @Test

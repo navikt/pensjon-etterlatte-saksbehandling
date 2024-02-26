@@ -182,6 +182,26 @@ class HendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
         ),
     )
 
+    fun hentHendelserISak(sakId: Long): List<LagretHendelse> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT id, hendelse, opprettet, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse
+                        FROM behandlinghendelse
+                        where sakid = ?
+                        """.trimIndent(),
+                    )
+
+                statement.setLong(1, sakId)
+                statement.executeQuery().toList {
+                    asHendelse()
+                }
+            }
+        }
+    }
+
     fun finnHendelserIBehandling(behandling: UUID): List<LagretHendelse> {
         return connectionAutoclosing.hentConnection {
             with(it) {
@@ -195,23 +215,26 @@ class HendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
                     )
                 stmt.setObject(1, behandling)
                 stmt.executeQuery().toList {
-                    LagretHendelse(
-                        getLong("id"),
-                        getString("hendelse"),
-                        getTidspunkt("opprettet"),
-                        getTidspunktOrNull("inntruffet"),
-                        getLongOrNull("vedtakid"),
-                        getUUID("behandlingid"),
-                        getLong("sakid"),
-                        getString("ident"),
-                        getString("identType"),
-                        getString("kommentar"),
-                        getString("valgtBegrunnelse"),
-                    )
+                    asHendelse()
                 }
             }
         }
     }
+
+    private fun ResultSet.asHendelse(): LagretHendelse =
+        LagretHendelse(
+            getLong("id"),
+            getString("hendelse"),
+            getTidspunkt("opprettet"),
+            getTidspunktOrNull("inntruffet"),
+            getLongOrNull("vedtakid"),
+            getUUID("behandlingid"),
+            getLong("sakid"),
+            getString("ident"),
+            getString("identType"),
+            getString("kommentar"),
+            getString("valgtBegrunnelse"),
+        )
 
     private fun lagreHendelse(hendelse: UlagretHendelse) {
         return connectionAutoclosing.hentConnection {

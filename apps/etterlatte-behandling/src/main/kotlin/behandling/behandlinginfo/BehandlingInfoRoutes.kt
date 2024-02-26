@@ -16,6 +16,7 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.BrevutfallOgEtterbetalingDto
 import no.nav.etterlatte.libs.common.behandling.EtterbetalingDto
 import no.nav.etterlatte.libs.common.behandlingId
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -38,12 +39,14 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
                                     service.lagreBrevutfallOgEtterbetaling(
                                         behandlingId,
                                         brukerTokenInfo,
+                                        dto.opphoer ?: throw OpphoerIkkeSatt(behandlingId),
                                         dto.toBrevutfall(behandlingId, brukerTokenInfo),
                                         dto.toEtterbetaling(behandlingId, brukerTokenInfo),
                                     )
 
                                 BrevutfallOgEtterbetalingDto(
                                     behandlingId,
+                                    dto.opphoer,
                                     etterbetalingLagret?.toDto(),
                                     brevutfallLagret.toDto(),
                                 )
@@ -74,9 +77,9 @@ internal fun Route.behandlingInfoRoutes(service: BehandlingInfoService) {
                     val etterbetaling = service.hentEtterbetaling(behandlingId)
                     if (brevutfall != null) {
                         BrevutfallOgEtterbetalingDto(
-                            behandlingId,
-                            etterbetaling?.toDto(),
-                            brevutfall.toDto(),
+                            behandlingId = behandlingId,
+                            etterbetaling = etterbetaling?.toDto(),
+                            brevutfall = brevutfall.toDto(),
                         )
                     } else {
                         null
@@ -143,3 +146,8 @@ private fun Etterbetaling.toDto() =
         datoTom = tom.atEndOfMonth(),
         kilde = kilde,
     )
+
+class OpphoerIkkeSatt(behandlingId: UUID) : UgyldigForespoerselException(
+    code = "OPPHOER_IKKE_SATT",
+    detail = "Behandling $behandlingId har ikke angitt om det er opphoer.",
+)

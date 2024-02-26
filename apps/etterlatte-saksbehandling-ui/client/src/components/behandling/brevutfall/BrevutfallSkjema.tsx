@@ -86,6 +86,7 @@ export const BrevutfallSkjema = ({
     lagreBrevutfallReset()
 
     const brevutfall: BrevutfallOgEtterbetaling = {
+      opphoer: behandlingErOpphoer,
       brevutfall: {
         aldersgruppe: data.aldersgruppe,
         lavEllerIngenInntekt: data.lavEllerIngenInntekt,

@@ -10,10 +10,8 @@ import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveRe
 type PersonArray = keyof Omit<Persongalleri, 'soeker' | 'innsender'>
 
 export default function ManuellPersongalleriBarnepensjon({
-  erManuellMigrering = false,
   fnrFraOppgave = undefined,
 }: {
-  erManuellMigrering?: boolean
   fnrFraOppgave?: string | undefined
 }) {
   const { nyBehandlingRequest } = useJournalfoeringOppgave()
@@ -65,10 +63,7 @@ export default function ManuellPersongalleriBarnepensjon({
           pattern="[0-9]{11}"
           maxLength={11}
           onChange={(e) => oppdaterPersongalleri({ ...persongalleri, soeker: e.target.value })}
-          description={
-            erManuellMigrering ? 'Oppgi søker sitt fødselsnummer' : 'Fødselsnummeret er automatisk hentet fra oppgaven'
-          }
-          readOnly={!erManuellMigrering}
+          description="Oppgi søker sitt fødselsnummer"
         />
       </InputRow>
 

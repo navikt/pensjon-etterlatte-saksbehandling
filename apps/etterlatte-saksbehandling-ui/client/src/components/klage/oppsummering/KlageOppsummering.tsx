@@ -9,7 +9,7 @@ import Spinner from '~shared/Spinner'
 import { forrigeSteg, kanSeOppsummering } from '~components/klage/stegmeny/KlageStegmeny'
 import { JaNei } from '~shared/types/ISvar'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ferdigstillKlagebehandling } from '~shared/api/klage'
+import { fattVedtakOmAvvistKlage, ferdigstillKlagebehandling } from '~shared/api/klage'
 import { useAppDispatch } from '~store/Store'
 import { addKlage } from '~store/reducers/KlageReducer'
 
@@ -26,6 +26,7 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
   const navigate = useNavigate()
   const klage = useKlage()
   const [ferdigstillStatus, ferdigstill] = useApiCall(ferdigstillKlagebehandling)
+  const [fattVedtakStatus, fattVedtak] = useApiCall(fattVedtakOmAvvistKlage)
   const dispatch = useAppDispatch()
 
   useEffect(() => {
@@ -39,6 +40,12 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
       dispatch(addKlage(ferdigKlage))
       // Kanskje gi noe eksplisitt feedback? Evt håndtere oppsummering av en ferdig klage forskjellig.
       // Gjelder forsåvidt de andre stegene i behandlingen også, visning for utfylt skjema
+    })
+  }, [klage?.id])
+
+  const fattVedtakKlage = useCallback(() => {
+    fattVedtak(klage!!.id, (ferdigKlage) => {
+      dispatch(addKlage(ferdigKlage))
     })
   }, [klage?.id])
 
@@ -89,11 +96,16 @@ export function KlageOppsummering({ kanRedigere }: { kanRedigere: boolean }) {
         <Button variant="secondary" onClick={() => navigate(forrigeSteg(klage, 'oppsummering'))}>
           Gå tilbake
         </Button>
-        {kanRedigere && (
-          <Button variant="primary" onClick={ferdigstillKlage} loading={isPending(ferdigstillStatus)}>
-            Ferdigstill klagen
-          </Button>
-        )}
+        {kanRedigere &&
+          (utfall?.utfall === 'AVVIST' ? (
+            <Button variant="primary" onClick={fattVedtakKlage} loading={isPending(fattVedtakStatus)}>
+              Send til attestering
+            </Button>
+          ) : (
+            <Button variant="primary" onClick={ferdigstillKlage} loading={isPending(ferdigstillStatus)}>
+              Ferdigstill klagen
+            </Button>
+          ))}
       </FlexRow>
     </Content>
   )

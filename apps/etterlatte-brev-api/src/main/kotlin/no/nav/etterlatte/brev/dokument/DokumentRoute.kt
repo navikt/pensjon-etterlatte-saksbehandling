@@ -11,13 +11,13 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import io.ktor.util.pipeline.PipelineContext
-import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.KnyttTilAnnenSakRequest
 import no.nav.etterlatte.brev.dokarkiv.OppdaterJournalpostRequest
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
-import no.nav.etterlatte.libs.common.withFoedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.token.Saksbehandler
 
 fun Route.dokumentRoute(
     safService: SafService,
@@ -26,13 +26,21 @@ fun Route.dokumentRoute(
 ) {
     route("dokumenter") {
         post {
-            withFoedselsnummer(tilgangssjekker, skrivetilgang = true) { foedselsnummer ->
-                val visTemaPen = call.request.queryParameters["visTemaPen"]?.toBoolean() ?: false
+            val request = call.receive<HentDokumenterRequest>()
 
-                val dokumenter =
-                    safService.hentDokumenter(foedselsnummer.value, visTemaPen, BrukerIdType.FNR, brukerTokenInfo)
+            val harTilgang =
+                tilgangssjekker.harTilgangTilPerson(
+                    foedselsnummer = request.foedselsnummer,
+                    skrivetilgang = true,
+                    bruker = brukerTokenInfo as Saksbehandler,
+                )
+
+            if (harTilgang) {
+                val dokumenter = safService.hentDokumenter(request, brukerTokenInfo)
 
                 call.respond(dokumenter)
+            } else {
+                call.respond(HttpStatusCode.Forbidden)
             }
         }
 
@@ -90,3 +98,11 @@ private inline val PipelineContext<*, ApplicationCall>.journalpostId: String
         requireNotNull(call.parameters["journalpostId"]) {
             "JournalpostID mangler i requesten"
         }
+
+data class HentDokumenterRequest(
+    val foedselsnummer: Folkeregisteridentifikator,
+    val journalstatuser: List<Journalstatus> = emptyList(),
+    val journalposttyper: List<Journalposttype> = emptyList(),
+    val tema: List<String> = emptyList(),
+    val foerste: Int = 50,
+)

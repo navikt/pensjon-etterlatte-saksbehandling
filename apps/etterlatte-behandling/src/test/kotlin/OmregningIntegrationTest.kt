@@ -106,10 +106,10 @@ class OmregningIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `kan opprette omregning paa sak som har iverksatt foerstegangsbehandling`() {
         testApplication {
-                val client =
-                    runServerWithModule(server) {
-                        module(applicationContext)
-                    }
+            val client =
+                runServerWithModule(server) {
+                    module(applicationContext)
+                }
 
             for (i in 1..100) {
                 println(i)

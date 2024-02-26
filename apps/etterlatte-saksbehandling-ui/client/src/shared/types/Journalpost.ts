@@ -61,6 +61,7 @@ export interface DokumentVariant {
   filtype?: string
   fysiskDokument?: string
   variantformat?: string
+  saksbehandlerHarTilgang?: boolean
 }
 
 export interface Bruker {
@@ -112,4 +113,10 @@ export enum Journalposttype {
   I = 'I', // Inngående
   U = 'U', // Utgående
   N = 'N', // Notat
+}
+
+export enum Tema {
+  EYB = 'EYB',
+  EYO = 'EYO',
+  PEN = 'PEN',
 }

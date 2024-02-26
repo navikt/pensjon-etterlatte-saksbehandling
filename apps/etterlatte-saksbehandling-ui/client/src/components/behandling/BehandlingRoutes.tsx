@@ -20,7 +20,7 @@ import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivite
 import { SakType } from '~shared/types/sak'
 import TrygdetidVisning from '~components/behandling/trygdetid/TrygdetidVisning'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
-import { erOpphoer, Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { erOpphoer } from '~shared/types/Revurderingaarsak'
 import { FEATURE_TOGGLE_LAG_VARSELBREV, Varselbrev } from '~components/behandling/brev/Varselbrev'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
@@ -184,7 +184,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, varselbrevAkt
 }
 
 export function soeknadRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteTypes> {
-  const avslag = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
+  const avslag = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   const defaultRoutes: Array<BehandlingRouteTypes> = avslag
     ? [routeTypes.soeknadsoversikt, routeTypes.vilkaarsvurdering]
@@ -209,8 +209,7 @@ export function soeknadRoutes(behandling: IBehandlingReducer, lagVarselbrev: boo
 export function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteTypes> {
   const opphoer =
     erOpphoer(behandling.revurderingsaarsak!!) ||
-    (behandling.revurderingsaarsak == Revurderingaarsak.ANNEN &&
-      behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT)
+    behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   const defaultRoutes: Array<BehandlingRouteTypes> = opphoer
     ? [routeTypes.revurderingsoversikt, routeTypes.vilkaarsvurdering, routeTypes.beregning]

@@ -15,15 +15,19 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedHarUtvandret
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedLeverIPDL
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -37,14 +41,25 @@ class DoedshendelseInternalPdlJobServiceTest {
     private val grunnlagsendringshendelseService = mockk<GrunnlagsendringshendelseService>()
     private val dataSource = mockk<DataSource>()
     private val kontekst = Context(Self(this::class.java.simpleName), DatabaseContextTest(dataSource))
+    private val sakService =
+        mockk<SakService> {
+            every { finnEllerOpprettSak(any(), any()) } returns
+                Sak(
+                    ident = "12345678901",
+                    sakType = SakType.BARNEPENSJON,
+                    id = 1L,
+                    enhet = "0000",
+                )
+        }
     private val todagergammel = 2
     private val service =
         DoedshendelseJobService(
-            dao,
-            kontrollpunktService,
-            toggle,
-            grunnlagsendringshendelseService,
-            todagergammel,
+            doedshendelseDao = dao,
+            doedshendelseKontrollpunktService = kontrollpunktService,
+            featureToggleService = toggle,
+            grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+            sakService = sakService,
+            dagerGamleHendelserSomSkalKjoeres = todagergammel,
         )
 
     @AfterEach
@@ -72,11 +87,16 @@ class DoedshendelseInternalPdlJobServiceTest {
             )
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns emptyList()
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
-        every { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) } returns emptyList()
+        every { dao.oppdaterDoedshendelse(any()) } returns Unit
+        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
+            mockk {
+                every { id } returns UUID.randomUUID()
+            }
 
         service.setupKontekstAndRun(kontekst)
 
-        verify(exactly = 1) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
+        verify(exactly = 1) { dao.oppdaterDoedshendelse(any()) }
+        verify(exactly = 1) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
     }
 
     @Test
@@ -98,13 +118,13 @@ class DoedshendelseInternalPdlJobServiceTest {
         service.setupKontekstAndRun(kontekst)
 
         verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseInternalCapture)) }
-        verify(exactly = 0) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
+        verify(exactly = 0) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
         doedshendelseInternalCapture.captured.status shouldBe Status.FERDIG
         doedshendelseInternalCapture.captured.utfall shouldBe Utfall.AVBRUTT
     }
 
     @Test
-    fun `skal ikke avbryte gyldige hendelser dersom kontrollpunktene skal foere til oppgave`() {
+    fun `skal ferdigstille doedshendelse med status ferdig og sette oppgaveId`() {
         val doedshendelseInternal =
             DoedshendelseInternal.nyHendelse(
                 avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
@@ -116,13 +136,21 @@ class DoedshendelseInternalPdlJobServiceTest {
 
         every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
+        val oppgaveId = UUID.randomUUID()
+        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
+            mockk {
+                every { id } returns oppgaveId
+            }
         every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
             listOf(AvdoedHarUtvandret, AvdoedHarDNummer)
-        every { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) } returns emptyList()
+        val doedshendelseCapture = slot<DoedshendelseInternal>()
 
         service.setupKontekstAndRun(kontekst)
 
-        verify(exactly = 0) { dao.oppdaterDoedshendelse(any()) }
-        verify(exactly = 1) { grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(any(), any()) }
+        verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
+        verify(exactly = 1) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
+        doedshendelseCapture.captured.status shouldBe Status.FERDIG
+        doedshendelseCapture.captured.utfall shouldBe Utfall.OPPGAVE
+        doedshendelseCapture.captured.oppgaveId shouldBe oppgaveId
     }
 }

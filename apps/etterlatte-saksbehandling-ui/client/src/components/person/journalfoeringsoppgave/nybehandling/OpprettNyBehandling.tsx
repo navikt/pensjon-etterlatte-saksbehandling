@@ -2,7 +2,7 @@ import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppg
 import { SakType } from '~shared/types/sak'
 import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
 import PersongalleriOmstillingsstoenad from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriOmstillingsstoenad'
-import { formaterSakstype, formaterSpraak } from '~utils/formattering'
+import { formaterSakstype, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formattering'
 import { Button, Heading, Select, Tag } from '@navikt/ds-react'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { Navigate, useNavigate } from 'react-router-dom'
@@ -49,10 +49,6 @@ export default function OpprettNyBehandling() {
           return { value }
         })
       : []
-  }
-
-  const mapRHFArrayToStringArray = (rhfArray?: Array<{ value: string }>): string[] => {
-    return !!rhfArray ? rhfArray.map((val) => val.value) : []
   }
 
   const konverterAvdoedForOmstillingstoenad = (avdoed?: string[]): Array<{ value: string }> => {

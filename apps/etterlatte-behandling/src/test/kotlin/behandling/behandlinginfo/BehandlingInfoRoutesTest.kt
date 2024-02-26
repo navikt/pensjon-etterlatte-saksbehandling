@@ -210,6 +210,7 @@ internal class BehandlingInfoRoutesTest {
     private fun brevutfallOgEtterbetalingDto(behandlingId: UUID = UUID.randomUUID()) =
         BrevutfallOgEtterbetalingDto(
             behandlingId = UUID.randomUUID(),
+            opphoer = false,
             brevutfall =
                 BrevutfallDto(
                     behandlingId,

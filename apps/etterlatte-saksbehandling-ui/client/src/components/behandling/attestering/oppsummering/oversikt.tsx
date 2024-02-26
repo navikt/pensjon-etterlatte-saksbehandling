@@ -27,7 +27,6 @@ import { isInitial, isPending, isSuccess, mapApiResult } from '~shared/api/apiUt
 import { FlexRow } from '~shared/styled'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
-import { oppdaterFrist } from '~components/oppgavebenk/utils/oppgaveutils'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
@@ -189,14 +188,8 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
               <FristHandlinger
                 orginalFrist={oppgaveForBehandling.frist}
                 oppgaveId={oppgaveForBehandling.id}
-                oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
-                  oppdaterFrist(
-                    () => setOppgaveForBehandling({ ...oppgaveForBehandling, frist: nyfrist }),
-                    [oppgaveForBehandling],
-                    id,
-                    nyfrist,
-                    versjon
-                  )
+                oppdaterFrist={(_, frist: string, versjon: number | null) =>
+                  setOppgaveForBehandling({ ...oppgaveForBehandling, frist, versjon })
                 }
                 erRedigerbar={erOppgaveRedigerbar(oppgaveForBehandling.status)}
                 oppgaveVersjon={oppgaveForBehandling.versjon}

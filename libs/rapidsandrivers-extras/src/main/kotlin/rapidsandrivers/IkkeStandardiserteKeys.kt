@@ -1,5 +1,6 @@
 package no.nav.etterlatte.rapidsandrivers
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.asLocalDate
 import no.nav.helse.rapids_rivers.toUUID
@@ -12,6 +13,7 @@ const val BREV_KODE = "brevKode"
 const val SAK_ID_FLERE_KEY = "sakIdFlere"
 const val SAK_TYPE = "sakType"
 const val BEHANDLING_ID_KEY = "behandlingId"
+const val OPPGAVE_ID_FLERE_KEY = "behandlingIdFlere"
 const val BEREGNING_KEY = "beregning"
 const val AVKORTING_KEY = "avkorting"
 const val DATO_KEY = "dato"
@@ -38,7 +40,7 @@ var JsonMessage.sakIdFlere: List<Long>
     }
 
 var JsonMessage.behandlingId: UUID
-    get() = this[BEHANDLING_ID_KEY].asText().toUUID()
+    get() = this[BEHANDLING_ID_KEY].asUUID()
     set(name) {
         this[BEHANDLING_ID_KEY] = name
     }
@@ -55,7 +57,7 @@ var JsonMessage.dato: LocalDate
         this[DATO_KEY] = name
     }
 var JsonMessage.oppgaveId: UUID
-    get() = this[OPPGAVE_KEY].asText().toUUID()
+    get() = this[OPPGAVE_KEY].asUUID()
     set(name) {
         this[OPPGAVE_KEY] = name
     }
@@ -68,3 +70,5 @@ var JsonMessage.tilbakestilteBehandlinger: List<UUID>
     set(name) {
         this[TILBAKESTILTE_BEHANDLINGER_KEY] = name.joinToString(";") { it.toString() }
     }
+
+fun JsonNode.asUUID() = this.asText().toUUID()

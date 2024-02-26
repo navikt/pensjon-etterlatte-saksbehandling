@@ -102,6 +102,7 @@ enum class OppgaveKilde {
     GENERELL_BEHANDLING,
     EKSTERN,
     TILBAKEKREVING,
+    GJENOPPRETTING,
 }
 
 enum class OppgaveType {

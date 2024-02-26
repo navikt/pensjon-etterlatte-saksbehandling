@@ -26,6 +26,7 @@ import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.SettPaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -110,6 +112,22 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
             assertEquals(hentOppgaver(client, sak, fnr).first().status, Status.PAA_VENT)
+
+            client.put("/oppgaver/ventefrist-gaar-ut") {
+                val dto =
+                    VentefristGaarUtRequest(
+                        dato = LocalDate.now().plusMonths(3),
+                        type = OppgaveType.JOURNALFOERING,
+                        oppgaveKilde = OppgaveKilde.EKSTERN,
+                        oppgaver = listOf(),
+                    )
+                addAuthToken(systemBruker)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                setBody(dto)
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }
+            assertEquals(hentOppgaver(client, sak, fnr).first().status, Status.UNDER_BEHANDLING)
         }
     }
 

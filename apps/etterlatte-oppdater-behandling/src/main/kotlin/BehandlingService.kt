@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
@@ -79,6 +80,8 @@ interface BehandlingService {
         merknad: String? = null,
         frist: Tidspunkt? = null,
     ): UUID
+
+    fun taAvVent(request: VentefristGaarUtRequest)
 }
 
 data class ReguleringFeiletHendelse(val sakId: Long)
@@ -251,6 +254,15 @@ class BehandlingServiceImpl(
                 )
             }.body<ObjectNode>().let {
                 UUID.fromString(it["id"].textValue())
+            }
+        }
+    }
+
+    override fun taAvVent(request: VentefristGaarUtRequest) {
+        runBlocking {
+            behandlingKlient.put("$url/oppgaver/ventefrist-gaar-ut") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
             }
         }
     }

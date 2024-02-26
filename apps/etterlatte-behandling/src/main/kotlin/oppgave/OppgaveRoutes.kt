@@ -106,6 +106,7 @@ internal fun Route.oppgaveRoutes(
                                 nyOppgaveDto.oppgaveKilde,
                                 nyOppgaveDto.oppgaveType,
                                 nyOppgaveDto.merknad,
+                                behandlingId = null,
                             )
                         }
 
@@ -264,6 +265,7 @@ internal fun Route.oppgaveRoutes(
                             nyOppgaveDto.oppgaveKilde,
                             nyOppgaveDto.oppgaveType,
                             nyOppgaveDto.merknad,
+                            behandlingId = null,
                             nyOppgaveDto.frist,
                         )
                     },

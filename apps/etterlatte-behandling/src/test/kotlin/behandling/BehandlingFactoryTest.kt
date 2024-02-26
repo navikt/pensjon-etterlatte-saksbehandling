@@ -487,7 +487,7 @@ class BehandlingFactoryTest {
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
         } returns mockOppgave
         every {
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any(), any())
         } returns mockOppgave
         every {
             oppgaveService.tildelSaksbehandler(any(), any())
@@ -559,7 +559,7 @@ class BehandlingFactoryTest {
         verify {
             grunnlagService.leggInnNyttGrunnlag(any(), any())
             oppgaveService.opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(any(), any())
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any(), any())
         }
         verify(exactly = 2) {
             sakServiceMock.finnSak(any())

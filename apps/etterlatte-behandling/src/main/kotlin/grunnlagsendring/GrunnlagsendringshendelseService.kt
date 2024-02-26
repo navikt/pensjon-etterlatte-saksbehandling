@@ -287,6 +287,7 @@ class GrunnlagsendringshendelseService(
                         oppgaveKilde = OppgaveKilde.HENDELSE,
                         oppgaveType = OppgaveType.VURDER_KONSEKVENS,
                         merknad = hendelse.beskrivelse(),
+                        behandlingId = null,
                     )
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
                 }
@@ -429,6 +430,7 @@ class GrunnlagsendringshendelseService(
             oppgaveKilde = OppgaveKilde.HENDELSE,
             oppgaveType = OppgaveType.VURDER_KONSEKVENS,
             merknad = hendelse.beskrivelse(),
+            behandlingId = hendelse.behandlingId,
         ).also {
             logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
         }

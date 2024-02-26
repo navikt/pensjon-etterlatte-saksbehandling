@@ -205,6 +205,7 @@ internal class BehandlingServiceImpl(
                     oppgaveKilde = OppgaveKilde.HENDELSE,
                     oppgaveType = OppgaveType.VURDER_KONSEKVENS,
                     merknad = hendelse.beskrivelse(),
+                    behandlingId = behandlingId,
                 )
             }
 
@@ -222,6 +223,7 @@ internal class BehandlingServiceImpl(
                     oppgaveKilde = omgjoeringsoppgaveForKlage.kilde,
                     oppgaveType = omgjoeringsoppgaveForKlage.type,
                     merknad = omgjoeringsoppgaveForKlage.merknad,
+                    behandlingId = behandlingId,
                     frist = omgjoeringsoppgaveForKlage.frist,
                 )
             }

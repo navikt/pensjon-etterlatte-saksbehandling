@@ -56,6 +56,7 @@ class TilbakekrevingService(
                 sakId = tilbakekrevingBehandling.sak.id,
                 oppgaveKilde = OppgaveKilde.TILBAKEKREVING,
                 oppgaveType = OppgaveType.TILBAKEKREVING,
+                behandlingId = null,
                 merknad = null,
             )
 

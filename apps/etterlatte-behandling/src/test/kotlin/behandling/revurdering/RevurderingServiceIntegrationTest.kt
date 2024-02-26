@@ -158,6 +158,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.REVURDERING,
                 null,
+                revurdering?.id,
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             inTransaction {
@@ -274,6 +275,8 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     sak.id,
                     OppgaveKilde.BEHANDLING,
                     OppgaveType.REVURDERING,
+                    null,
+                    null,
                     null,
                 )
                 oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
@@ -392,6 +395,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     OppgaveKilde.BEHANDLING,
                     OppgaveType.FOERSTEGANGSBEHANDLING,
                     null,
+                    null,
                 )
             }
             verify {
@@ -408,6 +412,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                     OppgaveKilde.BEHANDLING,
                     OppgaveType.REVURDERING,
                     null,
+                    revurdering.id,
                 )
             }
             verify { oppgaveService.ferdigStillOppgaveUnderBehandling(any(), any()) }
@@ -488,6 +493,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.REVURDERING,
                 null,
+                revurdering?.id,
             )
             oppgaveService.tildelSaksbehandler(any(), "saksbehandler")
             inTransaction {

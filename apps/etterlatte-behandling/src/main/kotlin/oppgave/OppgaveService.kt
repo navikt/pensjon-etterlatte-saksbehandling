@@ -224,6 +224,7 @@ class OppgaveService(
                 sakId = fattetoppgaveReferanseOgSak.sakId,
                 oppgaveKilde = oppgaveUnderbehandling.kilde,
                 oppgaveType = oppgaveType,
+                behandlingId = null,
                 merknad = merknad,
             )
         } catch (e: NoSuchElementException) {
@@ -381,6 +382,7 @@ class OppgaveService(
             oppgaveKilde = oppgaveKilde,
             oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
             merknad = merknad,
+            behandlingId = null,
         )
     }
 
@@ -390,6 +392,7 @@ class OppgaveService(
         oppgaveKilde: OppgaveKilde?,
         oppgaveType: OppgaveType,
         merknad: String?,
+        behandlingId: UUID? = null,
         frist: Tidspunkt? = null,
     ): OppgaveIntern {
         val sak = sakDao.hentSak(sakId)!!

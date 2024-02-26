@@ -324,6 +324,7 @@ class RevurderingService(
                             oppgaveKilde = OppgaveKilde.BEHANDLING,
                             oppgaveType = OppgaveType.REVURDERING,
                             merknad = begrunnelse,
+                            behandlingId = it.id,
                         )
                     oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
                 },

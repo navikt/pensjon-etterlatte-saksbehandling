@@ -132,6 +132,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.FOERSTEGANGSBEHANDLING,
                 null,
+                null,
             )
         val nysaksbehandler = "nysaksbehandler"
         oppgaveService.tildelSaksbehandler(nyOppgave.id, nysaksbehandler)
@@ -1133,6 +1134,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             opprettetSak.id,
             OppgaveKilde.BEHANDLING,
             OppgaveType.FOERSTEGANGSBEHANDLING,
+            null,
             null,
         )
         val saksbehandlerHentet =

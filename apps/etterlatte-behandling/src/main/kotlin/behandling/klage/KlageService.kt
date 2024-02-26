@@ -132,6 +132,7 @@ class KlageServiceImpl(
             oppgaveKilde = OppgaveKilde.EKSTERN,
             oppgaveType = OppgaveType.KLAGE,
             merknad = null,
+            behandlingId = null,
         )
 
         hendelseDao.klageHendelse(
@@ -547,6 +548,7 @@ class KlageServiceImpl(
                     DateTimeFormatter.ISO_LOCAL_DATE,
                 )
             }) skal omgjøres",
+            behandlingId = null,
         )
     }
 

@@ -19,6 +19,10 @@ export function mapAarsak(aarsak: BehandlingOgRevurderingsAarsakerType) {
       return 'Søskenjustering'
     case Revurderingaarsak.UTLAND:
       return 'Ut-/innflytting til Norge'
+    case Revurderingaarsak.EKSPORT:
+      return 'Eksport / Utvandring'
+    case Revurderingaarsak.IMPORT:
+      return 'Import / Innvandring'
     case Revurderingaarsak.BARN:
       return 'Barn'
     case Revurderingaarsak.DOEDSFALL:

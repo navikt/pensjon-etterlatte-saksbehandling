@@ -114,6 +114,18 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
         lagretOppdatert shouldBe oppdatert
     }
 
+    @Test
+    fun `Hente tilbakekrevinger med sakid`() {
+        val tilbakekreving = tilbakekreving(sak)
+        tilbakekrevingDao.lagreTilbakekreving(tilbakekreving)
+        tilbakekrevingDao.lagreTilbakekreving(tilbakekreving)
+        val tilbakekrevinger = tilbakekrevingDao.hentTilbakekrevinger(sak.id)
+        tilbakekrevinger.size shouldBe 2
+        tilbakekrevinger.forEach {
+            it.tilbakekreving.perioder.size shouldBe 1
+        }
+    }
+
     companion object {
         private fun tilbakekreving(sak: Sak) =
             TilbakekrevingBehandling.ny(

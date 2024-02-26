@@ -1,16 +1,18 @@
 import { Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { Klage, Utfall } from '~shared/types/Klage'
+import { IniteltUtfallMedBegrunnelseDto, Klage, Utfall } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterInitieltUtfallForKlage } from '~shared/api/klage'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { isPending } from '~shared/api/apiUtils'
-import { updateInitieltUtfall } from '~store/reducers/KlageReducer'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { addKlage } from '~store/reducers/KlageReducer'
+import { useAppDispatch } from '~store/Store'
 import { InitiellVurderingVisningContent } from '~components/klage/vurdering/InitiellVurderingVisning'
 import { VurderingWrapper } from '~components/klage/styled'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { PencilIcon } from '@navikt/aksel-icons'
+import { FieldOrNull } from '~shared/types/util'
+import { Controller, useForm } from 'react-hook-form'
 
 const getTextFromutfall = (utfall: Utfall): string => {
   switch (utfall) {
@@ -27,19 +29,45 @@ const getTextFromutfall = (utfall: Utfall): string => {
   }
 }
 
+type InitiellVurderingForm = FieldOrNull<IniteltUtfallMedBegrunnelseDto>
+
+function initiellVurderingErUtfylt(formdata: InitiellVurderingForm): formdata is IniteltUtfallMedBegrunnelseDto {
+  return !!formdata.utfall
+}
+
 export const InitiellVurdering = (props: { klage: Klage }) => {
   const klage = props.klage
 
   const dispatch = useAppDispatch()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-
-  const [begrunnelse, setBegrunnelse] = useState<string>('')
-  const [utfall, setUtfall] = useState<Utfall>()
-
   const harIkkeInitieltUtfall = !klage?.initieltUtfall
   const [redigerbar, setRedigerbar] = useState<boolean>(false)
 
   const [lagreInitiellStatus, lagreInitiellKlageUtfall] = useApiCall(oppdaterInitieltUtfallForKlage)
+  const { handleSubmit, control, register, watch } = useForm<InitiellVurderingForm>({
+    defaultValues: klage.initieltUtfall?.utfallMedBegrunnelse ?? { begrunnelse: null, utfall: null },
+  })
+
+  const formUtfall = watch('utfall')
+
+  function lagreInitieltUtfall(formdata: InitiellVurderingForm) {
+    if (!klage) {
+      return
+    }
+    if (!initiellVurderingErUtfylt(formdata)) {
+      return
+    }
+    lagreInitiellKlageUtfall(
+      {
+        klageId: klage.id,
+        utfallMedBegrunnelse: formdata,
+      },
+      (klage) => {
+        dispatch(addKlage(klage))
+        setRedigerbar(false)
+      }
+    )
+  }
+
   const redigeringsModus = redigerbar || harIkkeInitieltUtfall
 
   const stoetterDelvisOmgjoering = useFeatureEnabledMedDefault('pensjon-etterlatte.klage-delvis-omgjoering', false)
@@ -51,49 +79,37 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
       </Heading>
       <>
         {redigeringsModus ? (
-          <>
-            <VurderingWrapper>
-              <RadioGroup legend="" onChange={(e) => setUtfall(e as Utfall)}>
-                <Radio value={Utfall.OMGJOERING}>Omgjøring av vedtak</Radio>
-                {stoetterDelvisOmgjoering && <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>}
-                <Radio value={Utfall.STADFESTE_VEDTAK}>Stadfeste vedtaket</Radio>
-              </RadioGroup>
-            </VurderingWrapper>
-            {utfall && (
+          <form onSubmit={handleSubmit(lagreInitieltUtfall)}>
+            <Controller
+              name="utfall"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                  message: 'Du må velge et initielt utfall.',
+                },
+              }}
+              render={({ field, fieldState }) => {
+                return (
+                  <VurderingWrapper>
+                    <RadioGroup legend="" {...field} error={fieldState.error?.message}>
+                      <Radio value={Utfall.OMGJOERING}>Omgjøring av vedtak</Radio>
+                      {stoetterDelvisOmgjoering && (
+                        <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>
+                      )}
+                      <Radio value={Utfall.STADFESTE_VEDTAK}>Stadfeste vedtaket</Radio>
+                    </RadioGroup>
+                  </VurderingWrapper>
+                )
+              }}
+            />
+            {formUtfall && (
               <>
                 <VurderingWrapper>
-                  <Textarea
-                    size="medium"
-                    label={getTextFromutfall(utfall)}
-                    value={begrunnelse}
-                    onChange={(e) => setBegrunnelse(e.target.value)}
-                  />
+                  <Textarea size="medium" label={getTextFromutfall(formUtfall)} {...register('begrunnelse')} />
                 </VurderingWrapper>
                 <VurderingWrapper>
-                  <Button
-                    type="button"
-                    variant="primary"
-                    loading={isPending(lagreInitiellStatus)}
-                    onClick={() => {
-                      const utfallMedBegrunnelse = { utfall, begrunnelse }
-                      lagreInitiellKlageUtfall(
-                        {
-                          klageId: klage?.id,
-                          utfallMedBegrunnelse,
-                        },
-                        () => {
-                          dispatch(
-                            updateInitieltUtfall({
-                              utfallMedBegrunnelse: utfallMedBegrunnelse,
-                              saksbehandler: innloggetSaksbehandler.ident,
-                              tidspunkt: Date().toString(),
-                            })
-                          )
-                          setRedigerbar(false)
-                        }
-                      )
-                    }}
-                  >
+                  <Button type="submit" variant="primary" loading={isPending(lagreInitiellStatus)}>
                     Lagre vurdering
                   </Button>
                 </VurderingWrapper>
@@ -104,7 +120,7 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
                 })}
               </>
             )}
-          </>
+          </form>
         ) : (
           <>
             <InitiellVurderingVisningContent klage={klage} />

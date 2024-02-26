@@ -167,10 +167,11 @@ internal fun Route.klageRoutes(
             route("vedtak") {
                 post("fatt") {
                     kunSkrivetilgang {
-                        inTransaction {
-                            klageService.fattVedtak(klageId, brukerTokenInfo)
-                        }
-                        call.respond(HttpStatusCode.OK)
+                        val klage =
+                            inTransaction {
+                                klageService.fattVedtak(klageId, brukerTokenInfo)
+                            }
+                        call.respond(HttpStatusCode.OK, klage)
                     }
                 }
             }

@@ -96,7 +96,7 @@ interface KlageService {
     fun fattVedtak(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    )
+    ): Klage
 }
 
 class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
@@ -458,15 +458,22 @@ class KlageServiceImpl(
     override fun fattVedtak(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) {
-        inTransaction {
+    ): Klage {
+        return inTransaction {
             val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
 
+            val oppdatertKlage = klage.fattVedtak()
             val vedtakId =
                 runBlocking {
-                    vedtakKlient.fattVedtakKlage(klage.id, brukerTokenInfo, klage.sak.enhet)
+                    vedtakKlient.fattVedtakKlage(klage, brukerTokenInfo)
                 }
-            klageDao.lagreKlage(klage.copy(status = KlageStatus.FATTET_VEDTAK))
+            val utfall = klage.utfall as KlageUtfallMedData.Avvist
+            if (vedtakId != utfall.vedtak.vedtakId) {
+                throw IllegalStateException(
+                    "VedtakId=$vedtakId er forskjellig fra det som ligger i utfall=$vedtakId",
+                )
+            }
+            klageDao.lagreKlage(oppdatertKlage)
 
             hendelseDao.vedtakHendelse(
                 behandlingId = klage.id,
@@ -478,6 +485,7 @@ class KlageServiceImpl(
                 kommentar = null,
                 begrunnelse = null,
             )
+            oppdatertKlage
         }
     }
 

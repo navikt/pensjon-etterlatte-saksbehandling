@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toObjectNode
-import no.nav.etterlatte.libs.common.vedtak.KlageFattVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.KlageVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
@@ -52,9 +51,8 @@ interface VedtakKlient {
     ): Long
 
     suspend fun fattVedtakKlage(
-        klageId: UUID,
+        klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
     ): Long
 }
 
@@ -236,24 +234,20 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     }
 
     override suspend fun fattVedtakKlage(
-        klageId: UUID,
+        klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
     ): Long {
         try {
-            logger.info("Sender klage som skal fatte vedtak for klage=$klageId til vedtak")
+            logger.info("Sender klage som skal fatte vedtak for klage=${klage.id} til vedtak")
             return downstreamResourceClient
                 .post(
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/vedtak/klage/$klageId/fatt-vedtak",
+                            url = "$resourceUrl/vedtak/klage/${klage.id}/fatt-vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                    postBody =
-                        KlageFattVedtakDto(
-                            enhet = enhet,
-                        ),
+                    postBody = klage,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -261,7 +255,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                 )
         } catch (e: Exception) {
             throw VedtakKlientException(
-                "Fatting av vedtak for klage med id=$klageId feilet",
+                "Fatting av vedtak for klage med id=${klage.id} feilet",
                 e,
             )
         }

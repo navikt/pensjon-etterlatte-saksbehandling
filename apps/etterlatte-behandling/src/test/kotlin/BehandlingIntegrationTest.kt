@@ -462,9 +462,8 @@ class VedtakKlientTest : VedtakKlient {
     }
 
     override suspend fun fattVedtakKlage(
-        klageId: UUID,
+        klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-        enhet: String,
     ): Long {
         return 123L
     }

@@ -1,9 +1,10 @@
 package no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering
 
 import io.ktor.server.plugins.NotFoundException
+import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.vedtak.KlageFattVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.KlageVedtakDto
+import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
@@ -13,29 +14,25 @@ import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilstandException
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 class VedtakKlageService(
     private val repository: VedtaksvurderingRepository,
 ) {
     private val logger = LoggerFactory.getLogger(VedtakKlageService::class.java)
 
-    fun opprettEllerOppdaterVedtakOmAvvisning(
-        klageId: UUID,
-        klageVedtakDto: KlageVedtakDto,
-    ): Long {
-        logger.info("Oppretter eller oppdaterer vedtak for klage med id=$klageId")
-        val eksisterendeVedtak = repository.hentVedtak(klageId)
+    fun opprettEllerOppdaterVedtakOmAvvisning(klage: Klage): Long {
+        logger.info("Oppretter eller oppdaterer vedtak for klage med id=${klage.id}")
+        val eksisterendeVedtak = repository.hentVedtak(klage.id)
         val vedtak =
             if (eksisterendeVedtak == null) {
                 repository.opprettVedtak(
                     OpprettVedtak(
-                        soeker = klageVedtakDto.soeker,
-                        sakId = klageVedtakDto.sakId,
-                        sakType = klageVedtakDto.sakType,
-                        behandlingId = klageId,
+                        soeker = Folkeregisteridentifikator.of(klage.sak.ident),
+                        sakId = klage.sak.id,
+                        sakType = klage.sak.sakType,
+                        behandlingId = klage.id,
                         type = VedtakType.AVVIST_KLAGE,
-                        innhold = VedtakInnhold.Klage(klageVedtakDto.klage),
+                        innhold = VedtakInnhold.Klage(klage.toObjectNode()),
                     ),
                 )
             } else {
@@ -49,7 +46,7 @@ class VedtakKlageService(
                     eksisterendeVedtak.copy(
                         innhold =
                             VedtakInnhold.Klage(
-                                klage = klageVedtakDto.klage,
+                                klage = klage.toObjectNode(),
                             ),
                     ),
                 )
@@ -58,23 +55,27 @@ class VedtakKlageService(
     }
 
     fun fattVedtak(
-        klageId: UUID,
-        klageFattVedtakDto: KlageFattVedtakDto,
+        klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long {
-        logger.info("Fatter vedtak for klage=$klageFattVedtakDto.klageId")
+        logger.info("Fatter vedtak for klage=${klage.id}")
         val eksisterendeVedtak =
-            repository.hentVedtak(klageId)
-                ?: throw NotFoundException("Fant ikke vedtak for klage med id=$klageId")
+            repository.hentVedtak(klage.id)
+                ?: throw NotFoundException("Fant ikke vedtak for klage med id=${klage.id}")
 
         verifiserGyldigVedtakStatus(eksisterendeVedtak.status, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
 
+        repository.oppdaterVedtak(
+            eksisterendeVedtak.copy(
+                innhold = VedtakInnhold.Klage(klage.toObjectNode()),
+            ),
+        )
+
         return repository.fattVedtak(
-            klageId,
+            klage.id,
             VedtakFattet(
                 ansvarligSaksbehandler = brukerTokenInfo.ident(),
-                ansvarligEnhet = klageFattVedtakDto.enhet,
-                // Blir ikke brukt fordi egen now() brukes i db..
+                ansvarligEnhet = klage.sak.enhet,
                 tidspunkt = Tidspunkt.now(),
             ),
         ).id

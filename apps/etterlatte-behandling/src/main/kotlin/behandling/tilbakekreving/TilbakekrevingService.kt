@@ -186,7 +186,7 @@ class TilbakekrevingService(
                     referanse = tilbakekreving.id.toString(),
                 ),
             oppgaveType = OppgaveType.ATTESTERING,
-            merknad = null,
+            merknad = "Tilbakekreving",
             saksbehandler = brukerTokenInfo,
         )
     }

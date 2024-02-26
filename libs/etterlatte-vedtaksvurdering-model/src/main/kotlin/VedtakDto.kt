@@ -148,12 +148,3 @@ data class TilbakekrevingVedtakLagretDto(
     val enhet: String,
     val dato: LocalDate,
 )
-
-data class KlageVedtakDto(
-    val klageId: UUID,
-    val sakId: Long,
-    val sakType: SakType,
-    val soeker: Folkeregisteridentifikator,
-    val klage: ObjectNode,
-    val enhet: String,
-)

@@ -7,8 +7,6 @@ import {
   FRISTFILTER,
   FristFilterKeys,
   initialFilter,
-  OPPGAVEKILDEFILTER,
-  OppgaveKildeFilterKeys,
   oppgavetypefilter,
   OppgavetypeFilterKeys,
   SAKSBEHANDLERFILTER,
@@ -126,22 +124,6 @@ export const FilterRad = ({
           onChange={(e) => setFilter({ ...filter, oppgavetypeFilter: e.target.value as OppgavetypeFilterKeys })}
         >
           {oppgavetypefilter(kanBrukeKlage).map(([type, typebeskrivelse]) => (
-            <option key={type} value={type}>
-              {typebeskrivelse}
-            </option>
-          ))}
-        </Select>
-        <Select
-          label="Kilde"
-          value={filter.oppgavekildeFilter}
-          onChange={(e) =>
-            setFilter({
-              ...filter,
-              oppgavekildeFilter: e.target.value as OppgaveKildeFilterKeys,
-            })
-          }
-        >
-          {Object.entries(OPPGAVEKILDEFILTER).map(([type, typebeskrivelse]) => (
             <option key={type} value={type}>
               {typebeskrivelse}
             </option>

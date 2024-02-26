@@ -41,7 +41,7 @@ class TidshendelseRiverTest {
         every {
             behandlingService.opprettOppgave(
                 sakId,
-                OppgaveType.MANUELT_OPPHOER,
+                OppgaveType.REVURDERING,
                 any(),
                 "Aldersovergang v/20 år",
                 frist,
@@ -59,7 +59,7 @@ class TidshendelseRiverTest {
             field(0, HENDELSE_DATA_KEY)["opprettetOppgaveId"].asText() shouldBe nyOppgaveID.toString()
         }
 
-        verify { behandlingService.opprettOppgave(sakId, OppgaveType.MANUELT_OPPHOER, any(), "Aldersovergang v/20 år", frist) }
+        verify { behandlingService.opprettOppgave(sakId, OppgaveType.REVURDERING, any(), "Aldersovergang v/20 år", frist) }
     }
 
     @Test

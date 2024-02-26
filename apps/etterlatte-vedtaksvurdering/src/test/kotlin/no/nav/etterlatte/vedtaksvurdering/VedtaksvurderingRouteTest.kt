@@ -23,14 +23,15 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
+import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.KlageStatus
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.deserialize
-import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.KlageVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.Periode
 import no.nav.etterlatte.libs.common.vedtak.UtbetalingsperiodeType
@@ -74,6 +75,7 @@ internal class VedtaksvurderingRouteTest {
 
     @BeforeEach
     fun beforeEach() {
+        clearAllMocks()
         coEvery { behandlingKlient.harTilgangTilBehandling(any(), any(), any()) } returns true
     }
 
@@ -452,7 +454,11 @@ internal class VedtaksvurderingRouteTest {
                 status = VedtakStatus.FATTET_VEDTAK,
                 vedtakFattet = VedtakFattet(SAKSBEHANDLER_1, ENHET_1, Tidspunkt.now()),
             )
-        coEvery { vedtakBehandlingService.fattVedtak(any(), any(), any()) } returns VedtakOgRapid(fattetVedtak.toDto(), mockk())
+        coEvery { vedtakBehandlingService.fattVedtak(any(), any(), any()) } returns
+            VedtakOgRapid(
+                fattetVedtak.toDto(),
+                mockk(),
+            )
         coEvery { rapidService.sendToRapid(any()) } just runs
 
         testApplication {
@@ -678,6 +684,7 @@ internal class VedtaksvurderingRouteTest {
     @Test
     fun `skal opprette vedtak for avvist klage`() {
         val vedtakKlage = vedtakKlage()
+        val klage = klage()
         coEvery { vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(any()) } returns vedtakKlage.id
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns vedtakKlage
 
@@ -694,22 +701,11 @@ internal class VedtaksvurderingRouteTest {
                     behandlingKlient,
                 )
             }
-            val klageId = UUID.randomUUID()
-            val klageVedtakDto =
-                KlageVedtakDto(
-                    klageId = klageId,
-                    sakId = vedtakKlage.sakId,
-                    sakType = vedtakKlage.sakType,
-                    soeker = Folkeregisteridentifikator.of("04417103428"),
-                    klage = objectMapper.createObjectNode(),
-                    enhet = "enheten",
-                )
-
             val vedtakId: Long =
-                client.post("/vedtak/klage/$klageId/lagre-vedtak") {
+                client.post("/vedtak/klage/${klage.id}/lagre-vedtak") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
-                    setBody(klageVedtakDto.toJson())
+                    setBody(klage.toJson())
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
                     deserialize<Long>(it.bodyAsText())
@@ -718,10 +714,29 @@ internal class VedtaksvurderingRouteTest {
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any(), any())
-                vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klageVedtakDto)
+                vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(
+                    withArg { it.id shouldBe klage.id },
+                )
             }
         }
     }
 
     private val token: String by lazy { server.issueSaksbehandlerToken(navIdent = SAKSBEHANDLER_1) }
+
+    private fun klage(): Klage {
+        return Klage(
+            UUID.randomUUID(),
+            Sak("ident", SakType.BARNEPENSJON, 1L, "einheit"),
+            Tidspunkt.now(),
+            KlageStatus.OPPRETTET,
+            kabalResultat = null,
+            kabalStatus = null,
+            formkrav = null,
+            innkommendeDokument = null,
+            resultat = null,
+            utfall = null,
+            aarsakTilAvbrytelse = null,
+            initieltUtfall = null,
+        )
+    }
 }

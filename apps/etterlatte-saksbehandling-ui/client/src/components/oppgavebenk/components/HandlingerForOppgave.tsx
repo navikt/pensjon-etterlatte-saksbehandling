@@ -82,9 +82,14 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
     case 'REVURDERING':
       return (
         <>
-          {erInnloggetSaksbehandlerOppgave && (
+          {erInnloggetSaksbehandlerOppgave && referanse && (
             <Button size="small" href={`/behandling/${referanse}`} as="a">
               Gå til revurdering
+            </Button>
+          )}
+          {erInnloggetSaksbehandlerOppgave && !referanse && (
+            <Button size="small" href={`/person/${fnr}`} as="a">
+              Gå til sak
             </Button>
           )}
         </>
@@ -95,11 +100,6 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
           {erInnloggetSaksbehandlerOppgave && referanse && (
             <Button size="small" href={`/behandling/${referanse}`} as="a">
               Gå til opphør
-            </Button>
-          )}
-          {erInnloggetSaksbehandlerOppgave && !referanse && (
-            <Button size="small" href={`/person/${fnr}`} as="a">
-              Gå til sak
             </Button>
           )}
         </>

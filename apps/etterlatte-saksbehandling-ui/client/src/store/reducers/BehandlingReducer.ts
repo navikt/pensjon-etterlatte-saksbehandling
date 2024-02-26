@@ -54,7 +54,7 @@ export interface IBehandlingReducer extends IDetaljertBehandling {
   beregningsGrunnlagOMS?: BeregningsGrunnlagOMSPostDto
   overstyrBeregning?: OverstyrBeregningGrunnlagPostDTO
   beregning?: Beregning
-  vilkårsprøving?: IVilkaarsvurdering
+  vilkaarsvurdering?: IVilkaarsvurdering
   brevutfallOgEtterbetaling?: BrevutfallOgEtterbetaling
 }
 
@@ -70,7 +70,7 @@ export const behandlingReducer = createReducer(initialState, (builder) => {
     state.behandling = { ...state.behandling, ...action.payload }
   })
   builder.addCase(updateVilkaarsvurdering, (state, action) => {
-    state.behandling!!.vilkårsprøving = action.payload
+    state.behandling!!.vilkaarsvurdering = action.payload
   })
   builder.addCase(updateBrevutfallOgEtterbetaling, (state, action) => {
     state.behandling!!.brevutfallOgEtterbetaling = action.payload

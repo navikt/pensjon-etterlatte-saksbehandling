@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.klage
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.KlageKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -38,6 +39,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -88,6 +90,11 @@ interface KlageService {
         kommentar: String,
         saksbehandler: Saksbehandler,
     )
+
+    fun fattVedtak(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage
 }
 
 class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
@@ -444,6 +451,38 @@ class KlageServiceImpl(
             StatistikkKlage(avbruttKlage.id, avbruttKlage, Tidspunkt.now(), saksbehandler.ident),
             KlageHendelseType.AVBRUTT,
         )
+    }
+
+    override fun fattVedtak(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage {
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+
+        val oppdatertKlage = klage.fattVedtak()
+        val vedtakId =
+            runBlocking {
+                vedtakKlient.fattVedtakKlage(klage, brukerTokenInfo)
+            }
+        val utfall = klage.utfall as KlageUtfallMedData.Avvist
+        if (vedtakId != utfall.vedtak.vedtakId) {
+            throw IllegalStateException(
+                "VedtakId=$vedtakId er forskjellig fra det som ligger i utfall=$vedtakId",
+            )
+        }
+        klageDao.lagreKlage(oppdatertKlage)
+
+        hendelseDao.vedtakHendelse(
+            behandlingId = klage.id,
+            sakId = klage.sak.id,
+            vedtakId = vedtakId,
+            hendelse = HendelseType.FATTET,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = brukerTokenInfo.ident(),
+            kommentar = null,
+            begrunnelse = null,
+        )
+        return oppdatertKlage
     }
 
     private fun ferdigstillInnstilling(

@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toObjectNode
-import no.nav.etterlatte.libs.common.vedtak.KlageVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
@@ -215,14 +214,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                             url = "$resourceUrl/vedtak/klage/${klage.id}/lagre-vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                    postBody =
-                        KlageVedtakDto(
-                            sakId = klage.sak.id,
-                            sakType = klage.sak.sakType,
-                            soeker = Folkeregisteridentifikator.of(klage.sak.ident),
-                            klage = klage.toObjectNode(),
-                            enhet = klage.sak.enhet,
-                        ),
+                    postBody = klage,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },

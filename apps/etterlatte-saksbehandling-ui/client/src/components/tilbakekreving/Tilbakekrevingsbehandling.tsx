@@ -61,10 +61,7 @@ export function Tilbakekrevingsbehandling() {
                 path="vurdering"
                 element={<TilbakekrevingVurdering behandling={tilbakekreving} redigerbar={redigerbar} />}
               />
-              <Route
-                path="brev"
-                element={<TilbakekrevingBrev tilbakekreving={tilbakekreving} redigerbar={redigerbar} />}
-              />
+              <Route path="brev" element={<TilbakekrevingBrev behandling={tilbakekreving} redigerbar={redigerbar} />} />
               <Route path="*" element={<Navigate to="vurdering" replace />} />
             </Routes>
           </MainContent>

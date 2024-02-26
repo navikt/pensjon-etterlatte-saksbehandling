@@ -19,24 +19,24 @@ import { hentVedtakSammendrag } from '~shared/api/vedtaksvurdering'
 import { VedtakSammendrag } from '~components/vedtak/typer'
 
 export function TilbakekrevingBrev({
-  tilbakekreving,
+  behandling,
   redigerbar,
 }: {
-  tilbakekreving: TilbakekrevingBehandling
+  behandling: TilbakekrevingBehandling
   redigerbar: boolean
 }) {
-  const kanAttesteres = erUnderBehandling(tilbakekreving.status)
+  const kanAttesteres = erUnderBehandling(behandling.status)
   const [, hentVedtak] = useApiCall(hentVedtakSammendrag)
   const [vedtaksbrev, setVedtaksbrev] = useState<IBrev | undefined>(undefined)
   const [hentBrevStatus, hentBrevRequest] = useApiCall(hentVedtaksbrev)
   const [opprettBrevStatus, opprettNyttVedtaksbrev] = useApiCall(opprettVedtaksbrev)
 
   const hentBrev = () => {
-    hentBrevRequest(tilbakekreving.id, (brev, statusCode) => {
+    hentBrevRequest(behandling.id, (brev, statusCode) => {
       if (statusCode === 200) {
         setVedtaksbrev(brev)
       } else if (statusCode === 204) {
-        opprettNyttVedtaksbrev({ behandlingId: tilbakekreving.id, sakId: tilbakekreving.sak.id }, (nyttBrev) => {
+        opprettNyttVedtaksbrev({ behandlingId: behandling.id, sakId: behandling.sak.id }, (nyttBrev) => {
           setVedtaksbrev(nyttBrev)
         })
       }
@@ -44,14 +44,14 @@ export function TilbakekrevingBrev({
   }
 
   useEffect(() => {
-    hentVedtak(tilbakekreving.id, (vedtak: VedtakSammendrag | null) => {
+    hentVedtak(behandling.id, (vedtak: VedtakSammendrag | null) => {
       if (vedtak) {
         hentBrev()
       } else {
-        opprettVedtak(tilbakekreving.id).then(() => hentBrev())
+        opprettVedtak(behandling.id).then(() => hentBrev())
       }
     })
-  }, [tilbakekreving])
+  }, [behandling])
 
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner visible label="Henter brev ..." />
@@ -92,9 +92,9 @@ export function TilbakekrevingBrev({
       <FlexRow justify="center">
         {kanAttesteres && (
           <SendTilAttesteringModal
-            behandlingId={tilbakekreving.id}
+            behandlingId={behandling.id}
             fattVedtakApi={fattVedtak}
-            sakId={tilbakekreving.sak.id}
+            sakId={behandling.sak.id}
             validerKanSendeTilAttestering={() => true}
           />
         )}

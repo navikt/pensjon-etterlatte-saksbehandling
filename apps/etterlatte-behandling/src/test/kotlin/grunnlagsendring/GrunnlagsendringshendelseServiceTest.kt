@@ -641,7 +641,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
         } returns mockOppgave.copy(referanse = grunnlagsendringshendelse.id.toString())
 
-        val oppgave = grunnlagsendringshendelseService.opprettDoedshendelseForPerson(grunnlagsendringshendelse)
+        val oppgave = grunnlagsendringshendelseService.opprettDoedshendelseForPerson(grunnlagsendringshendelse, LocalDate.now())
 
         oppgave.id shouldBe mockOppgave.id
         oppgave.referanse shouldBe grunnlagsendringshendelse.id.toString()

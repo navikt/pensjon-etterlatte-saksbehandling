@@ -37,6 +37,7 @@ import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.sikkerLogg
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.util.UUID
 
 class KunneIkkeLukkeOppgaveForhendelse(message: String) :
@@ -334,8 +335,11 @@ class GrunnlagsendringshendelseService(
             }.map { it.first }
     }
 
-    fun opprettDoedshendelseForPerson(grunnlagsendringshendelse: Grunnlagsendringshendelse): OppgaveIntern {
-        val samsvarMellomKildeOgGrunnlag = SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(null, null, false)
+    fun opprettDoedshendelseForPerson(
+        grunnlagsendringshendelse: Grunnlagsendringshendelse,
+        doedsdato: LocalDate,
+    ): OppgaveIntern {
+        val samsvarMellomKildeOgGrunnlag = SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(null, doedsdato, false)
         grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(grunnlagsendringshendelse)
         return oppdaterGrunnlagsEndringOgOpprettOppgave(grunnlagsendringshendelse, samsvarMellomKildeOgGrunnlag)
     }

@@ -103,15 +103,17 @@ class DoedshendelseJobService(
         doedshendelse: Doedshendelse,
         sak: Sak,
     ) = grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
-        Grunnlagsendringshendelse(
-            id = UUID.randomUUID(),
-            sakId = sak.id,
-            status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-            type = GrunnlagsendringsType.DOEDSFALL,
-            opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-            hendelseGjelderRolle = Saksrolle.SOEKER,
-            gjelderPerson = doedshendelse.beroertFnr,
-        ),
+        grunnlagsendringshendelse =
+            Grunnlagsendringshendelse(
+                id = UUID.randomUUID(),
+                sakId = sak.id,
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                type = GrunnlagsendringsType.DOEDSFALL,
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                hendelseGjelderRolle = Saksrolle.SOEKER,
+                gjelderPerson = doedshendelse.beroertFnr,
+            ),
+        doedsdato = doedshendelse.avdoedDoedsdato,
     )
 
     private fun finnGyldigeDoedshendelser(hendelser: List<Doedshendelse>): List<Doedshendelse> {

@@ -6,6 +6,7 @@ import no.nav.etterlatte.libs.common.appIsInGCP
 import no.nav.etterlatte.libs.common.isProd
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.net.URL
@@ -43,10 +44,11 @@ object DataSourceBuilder {
     }
 }
 
-fun DataSource.migrate(): MigrateResult =
+fun DataSource.migrate(): MigrateResult {
+    val logger = LoggerFactory.getLogger(this::class.java)
     try {
-        validateUniqueMigrationVersions()
-        Flyway.configure()
+        validateUniqueMigrationVersions(logger)
+        return Flyway.configure()
             .dataSource(this)
             .apply {
                 val dblocationsMiljoe = mutableListOf("db/migration")
@@ -61,12 +63,13 @@ fun DataSource.migrate(): MigrateResult =
             .load()
             .migrate()
     } catch (e: Exception) {
-        LoggerFactory.getLogger(this::class.java).error("Fikk feil under Flyway-migrering", e)
+        logger.error("Fikk feil under Flyway-migrering", e)
         throw e
     }
+}
 
-fun validateUniqueMigrationVersions() {
-    val resourceFolder = readResources()
+fun validateUniqueMigrationVersions(logger: Logger) {
+    val resourceFolder = readResources(logger)
 
     val files = resourceFolder.listFiles()
     if (files == null) {
@@ -80,7 +83,7 @@ fun validateUniqueMigrationVersions() {
     }
 }
 
-private fun readResources(): File {
+private fun readResources(logger: Logger): File {
     val systemClassLoader = ClassLoader.getSystemClassLoader()
     val resourceFolderURL: URL? = systemClassLoader.getResource("db")
 
@@ -90,6 +93,7 @@ private fun readResources(): File {
 
     // Check if it's a directory
     if (!resourceFolder.isDirectory) {
+        logger.error("Resourceurl $resourceFolderURL")
         throw RuntimeException("Fant ikke migreringsscript i resourceFolder for /db")
     }
     return resourceFolder

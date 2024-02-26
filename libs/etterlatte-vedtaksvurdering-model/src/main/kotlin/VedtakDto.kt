@@ -156,7 +156,3 @@ data class KlageVedtakDto(
     val klage: ObjectNode,
     val enhet: String,
 )
-
-data class KlageFattVedtakDto(
-    val enhet: String,
-)

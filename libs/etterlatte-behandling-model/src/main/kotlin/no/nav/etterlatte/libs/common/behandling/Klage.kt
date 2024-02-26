@@ -284,8 +284,7 @@ data class Klage(
             hjemmel = innstilling.lovhjemmel.name,
             sakType = this.sak.sakType,
             internKommentar = innstilling.internKommentar,
-            // TODO: Kommer i oppdatering av innstillingsobjektet
-            ovesendelseTekst = "",
+            ovesendelseTekst = innstilling.innstillingTekst,
             klager = this.innkommendeDokument?.innsender ?: "",
             klageDato = this.innkommendeDokument?.mottattDato ?: this.opprettet.toLocalDate(),
         )
@@ -527,10 +526,11 @@ data class KlageOmgjoering(val grunnForOmgjoering: GrunnForOmgjoering, val begru
 class InnstillingTilKabal(
     val lovhjemmel: KabalHjemmel,
     val internKommentar: String?,
+    val innstillingTekst: String,
     val brev: KlageBrevInnstilling,
 )
 
-class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: String?) {
+class InnstillingTilKabalUtenBrev(val lovhjemmel: String, internKommentar: String?, val innstillingTekst: String) {
     val internKommentar: String? = internKommentar
         get() = if (field.isNullOrBlank()) null else field
 }

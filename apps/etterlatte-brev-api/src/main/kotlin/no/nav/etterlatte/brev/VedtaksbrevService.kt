@@ -17,7 +17,6 @@ import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperRedigerbartUtfallVarsel
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
-import no.nav.etterlatte.libs.common.feilhaandtering.GenerellIkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
@@ -195,7 +194,8 @@ class VedtaksbrevService(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        val brev = db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).singleOrNull() ?: throw GenerellIkkeFunnetException()
+        val brev = db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() ?: return
+
         if (!brev.kanEndres()) {
             throw VedtaksbrevKanIkkeSlettes(brev.id, "Brevet har status (${brev.status})")
         }

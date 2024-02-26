@@ -10,6 +10,7 @@ import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.retryOgPakkUt
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rapidsandrivers.BEHANDLING_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
 import no.nav.etterlatte.rapidsandrivers.OPPGAVE_KEY
@@ -27,6 +28,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 internal class OpprettVarselbrevForGjenopprettaRiver(
@@ -56,13 +58,13 @@ internal class OpprettVarselbrevForGjenopprettaRiver(
         val brukerTokenInfo = Systembruker.migrering
         runBlocking {
             opprettOgSendUtBrev(sakId, behandlingId, brukerTokenInfo)
-            retryOgPakkUt {
-                behandlingKlient.settOppgavePaaVent(
-                    packet.oppgaveId,
-                    brukerTokenInfo,
-                    "Automatisk: Varselbrev er sendt ut",
-                )
-            }
+            behandlingKlient.tildelSaksbehandler(packet.oppgaveId, brukerTokenInfo)
+            behandlingKlient.opprettFrist(packet.oppgaveId, Tidspunkt.now().plus(28, ChronoUnit.DAYS), brukerTokenInfo)
+            behandlingKlient.settOppgavePaaVent(
+                packet.oppgaveId,
+                brukerTokenInfo,
+                "Automatisk: Varselbrev er sendt ut",
+            )
         }
     }
 

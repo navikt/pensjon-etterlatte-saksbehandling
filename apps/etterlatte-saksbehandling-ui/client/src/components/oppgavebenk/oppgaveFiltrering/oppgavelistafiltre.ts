@@ -126,24 +126,6 @@ export function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys,
   }
 }
 
-// export type OppgaveKildeFilterKeys = OppgaveKilde | visAlle
-// export const OPPGAVEKILDEFILTER: Record<OppgaveKildeFilterKeys, string> = {
-//   visAlle: 'Vis alle',
-//   HENDELSE: 'Hendelse',
-//   BEHANDLING: 'Behandling',
-//   EKSTERN: 'Ekstern',
-//   GENERELL_BEHANDLING: 'Generell behandling',
-//   TILBAKEKREVING: 'Tilbakekreving',
-// }
-//
-// function filtrerOppgavekilde(oppgaveKildeFilterKeys: OppgaveKildeFilterKeys, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-//   if (oppgaveKildeFilterKeys === 'visAlle') {
-//     return oppgaver
-//   } else {
-//     return oppgaver.filter((o) => o.kilde === oppgaveKildeFilterKeys)
-//   }
-// }
-
 function finnFnrIOppgaver(fnr: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   if (fnr && fnr.length > 0) {
     return oppgaver.filter((o) => o.fnr?.includes(fnr.trim()))

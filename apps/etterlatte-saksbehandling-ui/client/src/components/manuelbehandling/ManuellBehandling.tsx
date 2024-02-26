@@ -21,12 +21,13 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
 import { formaterDatoStrengTilLocaleDateTime, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formattering'
 import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
+import { GRADERING, GraderingFilterKeys } from '~shared/types/Gradering'
 
 interface ManuellBehandingSkjema extends NyBehandlingSkjema {
   kilde: string
   pesysId: number | undefined
   enhet: EnhetFilterKeys
-  gradering: string | undefined
+  gradering: GraderingFilterKeys
   foreldreloes: boolean
   ufoere: boolean
   overstyrBeregning: boolean
@@ -153,18 +154,11 @@ export default function ManuellBehandling() {
           error={errors.gradering?.message}
         >
           <option value="">Velg ...</option>
-          <option key="STRENGT_FORTROLIG" value="STRENGT_FORTROLIG">
-            Strengt fortrolig
-          </option>
-          <option key="STRENGT_FORTROLIG_UTLAND" value="STRENGT_FORTROLIG_UTLAND">
-            Strengt fortrolig utland
-          </option>
-          <option key="FORTROLIG" value="fortrolig">
-            Fortrolig
-          </option>
-          <option key="UGRADERT" value="UGRADERT">
-            Ugradert
-          </option>
+          {Object.entries(GRADERING).map(([key, beskrivelse]) => (
+            <option key={key} value={key}>
+              {beskrivelse}
+            </option>
+          ))}
         </Select>
 
         <Select {...register('enhet')} label="Overstyre enhet (valgfritt)">

@@ -10,6 +10,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.net.URL
+import java.nio.file.Files
 import javax.sql.DataSource
 
 object DataSourceBuilder {
@@ -88,12 +89,15 @@ private fun readResources(logger: Logger): File {
     val resourceFolderURL: URL? = systemClassLoader.getResource("db")
 
     // Convert URL to file path
-    val resourceFolderPath = resourceFolderURL?.file
+    val resourceFolderPath =
+        resourceFolderURL?.file
+            ?: throw RuntimeException("Fant ikke migreringsscript i resourceFolder for /db")
     val resourceFolder = File(resourceFolderPath)
 
     // Check if it's a directory
-    if (!resourceFolder.isDirectory) {
-        logger.error("Resourceurl $resourceFolderURL")
+    val isdir = Files.isDirectory(resourceFolder.toPath())
+    logger.info("****************** Resourceurl $resourceFolderURL isdir: $isdir")
+    if (!isdir) {
         throw RuntimeException("Fant ikke migreringsscript i resourceFolder for /db")
     }
     return resourceFolder

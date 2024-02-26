@@ -1,5 +1,8 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 
+import no.nav.etterlatte.libs.common.sak.Sak
+import java.util.UUID
+
 sealed class DoedshendelseKontrollpunkt {
     abstract val beskrivelse: String
     abstract val sendBrev: Boolean
@@ -47,4 +50,30 @@ sealed class DoedshendelseKontrollpunkt {
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false
     }
+
+    data class SakEksistererIGjenny(val sak: Sak) : DoedshendelseKontrollpunkt() {
+        override val beskrivelse: String = "Det eksisterer allerede en sak på bruker i Gjenny"
+        override val sendBrev: Boolean = true
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+    }
+
+    data class DuplikatGrunnlagsendringsHendelse(
+        val grunnlagsendringshendelseId: UUID,
+        val oppgaveId: UUID?,
+    ) :
+        DoedshendelseKontrollpunkt() {
+        override val beskrivelse: String = "Det finnes en duplikat grunnlagsendringshendelse"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = true
+    }
+}
+
+fun List<DoedshendelseKontrollpunkt>.finnSak(): Sak? {
+    return this.filterIsInstance<DoedshendelseKontrollpunkt.SakEksistererIGjenny>().firstOrNull()?.sak
+}
+
+fun List<DoedshendelseKontrollpunkt>.finnOppgaveId(): UUID? {
+    return this.filterIsInstance<DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse>().firstOrNull()?.oppgaveId
 }

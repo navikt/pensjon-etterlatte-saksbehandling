@@ -1,4 +1,4 @@
-import { OppgaveDTO, OppgaveKilde, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaver'
+import { OppgaveDTO, Oppgavestatus, Oppgavetype } from '~shared/api/oppgaver'
 import { isBefore } from 'date-fns'
 
 export const ENHETFILTER = {
@@ -126,23 +126,23 @@ export function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys,
   }
 }
 
-export type OppgaveKildeFilterKeys = OppgaveKilde | visAlle
-export const OPPGAVEKILDEFILTER: Record<OppgaveKildeFilterKeys, string> = {
-  visAlle: 'Vis alle',
-  HENDELSE: 'Hendelse',
-  BEHANDLING: 'Behandling',
-  EKSTERN: 'Ekstern',
-  GENERELL_BEHANDLING: 'Generell behandling',
-  TILBAKEKREVING: 'Tilbakekreving',
-}
-
-function filtrerOppgavekilde(oppgaveKildeFilterKeys: OppgaveKildeFilterKeys, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-  if (oppgaveKildeFilterKeys === 'visAlle') {
-    return oppgaver
-  } else {
-    return oppgaver.filter((o) => o.kilde === oppgaveKildeFilterKeys)
-  }
-}
+// export type OppgaveKildeFilterKeys = OppgaveKilde | visAlle
+// export const OPPGAVEKILDEFILTER: Record<OppgaveKildeFilterKeys, string> = {
+//   visAlle: 'Vis alle',
+//   HENDELSE: 'Hendelse',
+//   BEHANDLING: 'Behandling',
+//   EKSTERN: 'Ekstern',
+//   GENERELL_BEHANDLING: 'Generell behandling',
+//   TILBAKEKREVING: 'Tilbakekreving',
+// }
+//
+// function filtrerOppgavekilde(oppgaveKildeFilterKeys: OppgaveKildeFilterKeys, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
+//   if (oppgaveKildeFilterKeys === 'visAlle') {
+//     return oppgaver
+//   } else {
+//     return oppgaver.filter((o) => o.kilde === oppgaveKildeFilterKeys)
+//   }
+// }
 
 function finnFnrIOppgaver(fnr: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   if (fnr && fnr.length > 0) {
@@ -180,7 +180,6 @@ export function filtrerOppgaver(
   ytelseFilter: YtelseFilterKeys,
   oppgavestatusFilter: Array<string>,
   oppgavetypeFilter: OppgavetypeFilterKeys,
-  oppgaveKildeFilterKeys: OppgaveKildeFilterKeys,
   oppgaver: OppgaveDTO[],
   fnr: string
 ): OppgaveDTO[] {
@@ -189,8 +188,7 @@ export function filtrerOppgaver(
   const ytelseFiltrert = filtrerYtelse(ytelseFilter, saksbehandlerFiltrert)
   const oppgaveFiltrert = filtrerOppgaveStatus(oppgavestatusFilter, ytelseFiltrert)
   const oppgaveTypeFiltrert = filtrerOppgaveType(oppgavetypeFilter, oppgaveFiltrert)
-  const oppgaveKildeFiltrert = filtrerOppgavekilde(oppgaveKildeFilterKeys, oppgaveTypeFiltrert)
-  const fristFiltrert = filtrerFrist(fristFilter, oppgaveKildeFiltrert)
+  const fristFiltrert = filtrerFrist(fristFilter, oppgaveTypeFiltrert)
 
   return finnFnrIOppgaver(fnr, fristFiltrert)
 }
@@ -202,7 +200,6 @@ export interface Filter {
   ytelseFilter: YtelseFilterKeys
   oppgavestatusFilter: Array<string>
   oppgavetypeFilter: OppgavetypeFilterKeys
-  oppgavekildeFilter: OppgaveKildeFilterKeys
   fnrFilter: string
 }
 
@@ -214,7 +211,6 @@ export const initialFilter = (): Filter => {
     ytelseFilter: 'visAlle',
     oppgavestatusFilter: [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
     oppgavetypeFilter: 'visAlle',
-    oppgavekildeFilter: 'visAlle',
     fnrFilter: '',
   }
 }
@@ -227,7 +223,6 @@ export const minOppgavelisteFiltre = (): Filter => {
     ytelseFilter: 'visAlle',
     oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
     oppgavetypeFilter: 'visAlle',
-    oppgavekildeFilter: 'visAlle',
     fnrFilter: '',
   }
 }

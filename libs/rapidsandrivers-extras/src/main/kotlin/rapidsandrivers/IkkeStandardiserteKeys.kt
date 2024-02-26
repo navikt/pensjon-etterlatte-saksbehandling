@@ -13,7 +13,7 @@ const val BREV_KODE = "brevKode"
 const val SAK_ID_FLERE_KEY = "sakIdFlere"
 const val SAK_TYPE = "sakType"
 const val BEHANDLING_ID_KEY = "behandlingId"
-const val BEHANDLING_ID_FLERE_KEY = "behandlingIdFlere"
+const val OPPGAVE_ID_FLERE_KEY = "behandlingIdFlere"
 const val BEREGNING_KEY = "beregning"
 const val AVKORTING_KEY = "avkorting"
 const val DATO_KEY = "dato"
@@ -31,12 +31,6 @@ var JsonMessage.sakId: Long
     get() = this[SAK_ID_KEY].asLong()
     set(name) {
         this[SAK_ID_KEY] = name
-    }
-
-var JsonMessage.behandlingIdFlere: List<UUID>
-    get() = this[BEHANDLING_ID_FLERE_KEY].map { it.asUUID() }
-    set(name) {
-        this[BEHANDLING_ID_FLERE_KEY] = name
     }
 
 var JsonMessage.sakIdFlere: List<Long>

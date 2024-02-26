@@ -496,7 +496,10 @@ class OppgaveService(
         }
     }
 
-    fun hentFristGaarUt(request: VentefristGaarUtRequest) = oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde)
+    fun hentFristGaarUt(request: VentefristGaarUtRequest) =
+        request.oppgaver.ifEmpty {
+            oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde)
+        }
 }
 
 class FantIkkeSakException(msg: String) : Exception(msg)

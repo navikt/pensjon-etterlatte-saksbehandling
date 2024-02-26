@@ -7,5 +7,5 @@ data class VentefristGaarUtRequest(
     val dato: LocalDate,
     val type: OppgaveType,
     val oppgaveKilde: OppgaveKilde,
-    val aktuelleBehandlinger: List<UUID>,
+    val oppgaver: List<UUID>,
 )

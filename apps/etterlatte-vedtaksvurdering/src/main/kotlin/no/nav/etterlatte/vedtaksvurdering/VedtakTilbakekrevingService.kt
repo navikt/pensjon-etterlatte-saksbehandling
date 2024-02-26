@@ -19,7 +19,7 @@ class VedtakTilbakekrevingService(
     private val logger = LoggerFactory.getLogger(VedtakTilbakekrevingService::class.java)
 
     fun opprettEllerOppdaterVedtak(tilbakekrevingVedtakData: TilbakekrevingVedtakDto): Long {
-        logger.info("Oppretter eller oppdaterer vedtak for tilbakekreving=$tilbakekrevingVedtakData.tilbakekrevingId")
+        logger.info("Oppretter eller oppdaterer vedtak for tilbakekreving=${tilbakekrevingVedtakData.tilbakekrevingId}")
         val eksisterendeVedtak = repository.hentVedtak(tilbakekrevingVedtakData.tilbakekrevingId)
         val vedtak =
             if (eksisterendeVedtak == null) {
@@ -54,7 +54,7 @@ class VedtakTilbakekrevingService(
         tilbakekrevingVedtakData: TilbakekrevingFattEllerAttesterVedtakDto,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long {
-        logger.info("Fatter vedtak for tilbakekreving=$tilbakekrevingVedtakData.tilbakekrevingId")
+        logger.info("Fatter vedtak for tilbakekreving=${tilbakekrevingVedtakData.tilbakekrevingId}")
         verifiserGyldigVedtakStatus(tilbakekrevingVedtakData.tilbakekrevingId, listOf(VedtakStatus.OPPRETTET, VedtakStatus.RETURNERT))
         return repository.fattVedtak(
             tilbakekrevingVedtakData.tilbakekrevingId,
@@ -71,7 +71,7 @@ class VedtakTilbakekrevingService(
         tilbakekrevingVedtakData: TilbakekrevingFattEllerAttesterVedtakDto,
         brukerTokenInfo: BrukerTokenInfo,
     ): TilbakekrevingVedtakLagretDto {
-        logger.info("Attesterer vedtak for tilbakekreving=$tilbakekrevingVedtakData.tilbakekrevingId")
+        logger.info("Attesterer vedtak for tilbakekreving=${tilbakekrevingVedtakData.tilbakekrevingId}")
         val tilbakekrevingId = tilbakekrevingVedtakData.tilbakekrevingId
         val vedtak =
             requireNotNull(repository.hentVedtak(tilbakekrevingId)) {

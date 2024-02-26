@@ -104,6 +104,7 @@ internal class KlageServiceTest {
             "FORMKRAV_OPPFYLT",
             "FORMKRAV_IKKE_OPPFYLT",
             "UTFALL_VURDERT",
+            "FATTET_VEDTAK",
         ],
         mode = EnumSource.Mode.EXCLUDE,
     )

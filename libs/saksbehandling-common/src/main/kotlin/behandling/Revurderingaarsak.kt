@@ -71,7 +71,7 @@ enum class Revurderingaarsak(
     INNTEKTSENDRING(SAKTYPE_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     INSTITUSJONSOPPHOLD(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     YRKESSKADE(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
-    RETT_UTEN_TIDSBEGRENSNING(SAKTYPE_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    RETT_UTEN_TIDSBEGRENSNING(SAKTYPE_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
 
     // Opphør
     ALDERSOVERGANG(SAKTYPE_BP, DevOgProd, OpphoerUtenBrev),
@@ -82,8 +82,8 @@ enum class Revurderingaarsak(
     OMGJOERING_AV_FARSKAP(SAKTYPE_BP, DevOgProd, OpphoerMedBrev),
 
     // Opphør og endring
-    EKSPORT(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
-    IMPORT(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
+    EKSPORT(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
+    IMPORT(SAKTYPE_BP_OMS, DevOgProd, IkkeOpphoerSkalSendeBrev),
     ANNEN(SAKTYPE_BP_OMS, KunIDev, IkkeOpphoerSkalSendeBrev),
 
     // TODO vurdere disse

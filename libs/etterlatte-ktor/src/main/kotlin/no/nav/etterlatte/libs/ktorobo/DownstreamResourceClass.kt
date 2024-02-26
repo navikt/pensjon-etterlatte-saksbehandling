@@ -11,6 +11,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -65,6 +66,21 @@ class DownstreamResourceClient(
         return hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { token ->
                 postToDownstreamApi(resource, token, postBody)
+            }
+            .andThen { response ->
+                Ok(resource.addResponse(response))
+            }
+    }
+
+    suspend fun put(
+        resource: Resource,
+        brukerTokenInfo: BrukerTokenInfo,
+        putBody: Any,
+    ): Result<Resource, Throwable> {
+        val scopes = listOf("api://${resource.clientId}/.default")
+        return hentTokenFraAD(brukerTokenInfo, scopes)
+            .andThen { token ->
+                putToDownstreamApi(resource, token, putBody)
             }
             .andThen { response ->
                 Ok(resource.addResponse(response))
@@ -136,6 +152,38 @@ class DownstreamResourceClient(
                 header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
                 contentType(ContentType.Application.Json)
                 setBody(postBody)
+            }
+        }
+            .fold(
+                onSuccess = { response ->
+                    when {
+                        response.status.isSuccess() -> {
+                            if (response.harContentType(ContentType.Application.Json)) {
+                                Ok(response.body<JsonNode>())
+                            } else {
+                                logger.info("Mottok content-type: ${response.contentType()} som ikke var JSON")
+                                Ok(response.status)
+                            }
+                        }
+                        else -> response.toResponseException()
+                    }
+                },
+                onFailure = { error ->
+                    error.toErr(resource.url)
+                },
+            )
+
+    private suspend fun putToDownstreamApi(
+        resource: Resource,
+        oboAccessToken: AccessToken,
+        putBody: Any,
+    ): Result<Any, Throwable> =
+
+        runCatching {
+            httpClient.put(resource.url) {
+                header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
+                contentType(ContentType.Application.Json)
+                setBody(putBody)
             }
         }
             .fold(

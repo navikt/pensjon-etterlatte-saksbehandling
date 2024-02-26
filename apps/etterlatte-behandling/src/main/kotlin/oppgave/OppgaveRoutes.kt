@@ -196,7 +196,7 @@ internal fun Route.oppgaveRoutes(
                 }
             }
             put("frist") {
-                kunSaksbehandlerMedSkrivetilgang {
+                kunSkrivetilgang {
                     val redigerFrist = call.receive<RedigerFristRequest>()
                     inTransaction { service.redigerFrist(oppgaveId, redigerFrist.frist) }
                     call.respond(HttpStatusCode.OK)

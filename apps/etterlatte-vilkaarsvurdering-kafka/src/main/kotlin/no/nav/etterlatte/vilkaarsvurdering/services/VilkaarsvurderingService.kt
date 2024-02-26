@@ -62,13 +62,13 @@ class VilkaarsvurderingServiceImpl(private val vilkaarsvurderingKlient: HttpClie
 
     override fun harMigrertYrkesskadefordel(behandlingId: String): Boolean =
         runBlocking {
-            vilkaarsvurderingKlient.get("$url/api/vilkaarsvurdering/$behandlingId/migrertYrkesskadefordel")
+            vilkaarsvurderingKlient.get("$url/api/vilkaarsvurdering/$behandlingId/migrert-yrkesskadefordel")
                 .body<Map<String, Any>>()["migrertYrkesskadefordel"] as Boolean
         }
 
     override fun harRettUtenTidsbegrensning(behandlingId: String): Boolean =
         runBlocking {
-            vilkaarsvurderingKlient.get("$url/api/vilkaarsvurdering/$behandlingId/rettUtenTidsbegrensning")
+            vilkaarsvurderingKlient.get("$url/api/vilkaarsvurdering/$behandlingId/rett-uten-tidsbegrensning")
                 .body<Map<String, Any>>()["rettUtenTidsbegrensning"] as Boolean
         }
 }

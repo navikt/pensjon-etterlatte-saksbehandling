@@ -33,7 +33,7 @@ class DoedshendelserKafkaServiceImpl(
                 SakType.OMSTILLINGSSTOENAD -> Brevkoder.OMS_INFORMASJON_DOEDSFALL.name
             }
         rapid.publiser(
-            correlationId,
+            brevmal,
             JsonMessage.newMessage(
                 BrevRequestHendelseType.OPPRETT_JOURNALFOER_OG_DISTRIBUER.lagEventnameForType(),
                 mapOf(

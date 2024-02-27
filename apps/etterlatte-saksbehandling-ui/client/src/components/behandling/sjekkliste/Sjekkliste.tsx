@@ -128,21 +128,6 @@ export const Sjekkliste = ({ behandling }: { behandling: IBehandlingReducer }) =
             />
 
             <TextField
-              label="Adresse brevet er sendt til"
-              name="AdresseBrevforsendelse"
-              value={sjekkliste.adresseForBrev || ''}
-              onChange={(e) => {
-                const oppdatert = {
-                  ...sjekkliste,
-                  adresseForBrev: e.currentTarget.value,
-                }
-                dispatch(updateSjekkliste(oppdatert))
-                fireOpppdater(oppdatert)
-              }}
-              readOnly={!redigerbar}
-            />
-
-            <TextField
               label="Kontonummer registrert"
               name="KontonummerRegistrert"
               value={sjekkliste.kontonrRegistrert || ''}

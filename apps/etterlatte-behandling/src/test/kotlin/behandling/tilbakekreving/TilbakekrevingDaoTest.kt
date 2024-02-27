@@ -63,12 +63,11 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
 
     @BeforeEach
     fun resetTabell() {
-        dataSource.connection.prepareStatement("""TRUNCATE TABLE tilbakekrevingsperiode""")
-            .executeUpdate()
-        dataSource.connection.prepareStatement("""TRUNCATE TABLE tilbakekreving CASCADE""")
-            .executeUpdate()
-        dataSource.connection.prepareStatement("""TRUNCATE TABLE sak CASCADE """)
-            .executeUpdate()
+        dataSource.connection.use {
+            it.prepareStatement("""TRUNCATE TABLE tilbakekrevingsperiode""").executeUpdate()
+            it.prepareStatement("""TRUNCATE TABLE tilbakekreving CASCADE""").executeUpdate()
+            it.prepareStatement("""TRUNCATE TABLE sak CASCADE """).executeUpdate()
+        }
         sak = sakDao.opprettSak(fnr = "en bruker", type = SakType.OMSTILLINGSSTOENAD, enhet = "1337")
     }
 
@@ -112,6 +111,17 @@ class TilbakekrevingDaoTest(val dataSource: DataSource) {
             )
         val lagretOppdatert = tilbakekrevingDao.lagreTilbakekreving(oppdatert)
         lagretOppdatert shouldBe oppdatert
+    }
+
+    @Test
+    fun `Hente tilbakekrevinger med sakid`() {
+        tilbakekrevingDao.lagreTilbakekreving(tilbakekreving(sak))
+        tilbakekrevingDao.lagreTilbakekreving(tilbakekreving(sak))
+        val tilbakekrevinger = tilbakekrevingDao.hentTilbakekrevinger(sak.id)
+        tilbakekrevinger.size shouldBe 2
+        tilbakekrevinger.forEach {
+            it.tilbakekreving.perioder.size shouldBe 1
+        }
     }
 
     companion object {

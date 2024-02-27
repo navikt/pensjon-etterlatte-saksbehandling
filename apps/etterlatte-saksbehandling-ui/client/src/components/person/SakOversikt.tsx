@@ -17,6 +17,7 @@ import { EndreEnhet } from '~components/person/EndreEnhet'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppSelector } from '~store/Store'
+import { TilbakekrevingListe } from '~components/person/TilbakekrevingListe'
 
 export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
@@ -104,6 +105,7 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
               <Behandlingsliste sakOgBehandlinger={sakOgBehandlinger} />
 
               {kanBrukeKlage ? <KlageListe sakId={sakOgBehandlinger.sak.id} /> : null}
+              <TilbakekrevingListe sakId={sakOgBehandlinger.sak.id} />
             </MainContent>
             <HendelseSidebar>
               <RelevanteHendelser sak={sakOgBehandlinger.sak} behandlingliste={sakOgBehandlinger.behandlinger} />

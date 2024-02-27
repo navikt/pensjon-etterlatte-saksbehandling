@@ -38,6 +38,12 @@ class TilbakekrevingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
+    fun hentTilbakekrevinger(sakId: Long) =
+        inTransaction {
+            logger.info("Henter tilbakekrevinger sak=$sakId")
+            tilbakekrevingDao.hentTilbakekrevinger(sakId)
+        }
+
     fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag): UUID =
         inTransaction {
             logger.info("Oppretter tilbakekreving=${kravgrunnlag.kravgrunnlagId} på sak=${kravgrunnlag.sakId}")

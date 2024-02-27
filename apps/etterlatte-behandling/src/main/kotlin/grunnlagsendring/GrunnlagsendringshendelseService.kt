@@ -287,7 +287,6 @@ class GrunnlagsendringshendelseService(
                         oppgaveKilde = OppgaveKilde.HENDELSE,
                         oppgaveType = OppgaveType.VURDER_KONSEKVENS,
                         merknad = hendelse.beskrivelse(),
-                        behandlingId = null,
                     )
                     grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(hendelse)
                 }

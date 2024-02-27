@@ -158,7 +158,6 @@ class MigreringService(
                 oppgaveType = OppgaveType.GJENOPPRETTING_ALDERSOVERGANG,
                 merknad =
                     "Opprettelse av manuell behandling for gjenoppretting av opphørt sak i Pesys id=${request.pesysId.id}",
-                behandlingId = null,
                 frist = Tidspunkt.now().plus(5, ChronoUnit.DAYS),
             )
         }

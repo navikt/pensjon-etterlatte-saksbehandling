@@ -224,7 +224,6 @@ class OppgaveService(
                 sakId = fattetoppgaveReferanseOgSak.sakId,
                 oppgaveKilde = oppgaveUnderbehandling.kilde,
                 oppgaveType = oppgaveType,
-                behandlingId = null,
                 merknad = merknad,
             )
         } catch (e: NoSuchElementException) {
@@ -382,7 +381,6 @@ class OppgaveService(
             oppgaveKilde = oppgaveKilde,
             oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
             merknad = merknad,
-            behandlingId = null,
         )
     }
 

@@ -86,8 +86,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 val statement =
                     prepareStatement(
                         """
-                        INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde)
-                        VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO oppgave(id, status, enhet, sak_id, type, saksbehandler, referanse, merknad, opprettet, saktype, fnr, frist, kilde, behandling_id)
+                        VALUES(?::UUID, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::UUID)
                         """.trimIndent(),
                     )
                 statement.setObject(1, oppgaveIntern.id)
@@ -103,6 +103,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(11, oppgaveIntern.fnr)
                 statement.setTidspunkt(12, oppgaveIntern.frist)
                 statement.setString(13, oppgaveIntern.kilde?.name)
+                statement.setObject(14, oppgaveIntern.behandlingId)
                 statement.executeUpdate()
                 logger.info("lagret oppgave for ${oppgaveIntern.id} for sakid ${oppgaveIntern.sakId}")
             }

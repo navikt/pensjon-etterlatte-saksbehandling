@@ -10,13 +10,13 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.JournalpostKoder.Companion.BREV_KODE
 import no.nav.etterlatte.brev.model.Adresse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Spraak

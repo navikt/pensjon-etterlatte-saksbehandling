@@ -1,15 +1,15 @@
 package no.nav.etterlatte.brev.varselbrev
 
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
-import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import java.util.UUID

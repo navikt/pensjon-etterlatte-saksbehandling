@@ -1,10 +1,10 @@
 package no.nav.etterlatte.rivers.migrering
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
-import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService

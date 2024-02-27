@@ -11,7 +11,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
-import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.behandlingId
 import no.nav.etterlatte.libs.common.sakId

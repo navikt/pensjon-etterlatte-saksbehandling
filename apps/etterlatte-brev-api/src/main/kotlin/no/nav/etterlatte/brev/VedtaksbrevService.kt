@@ -3,7 +3,6 @@ package no.nav.etterlatte.brev
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
-import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
@@ -11,7 +10,6 @@ import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
-import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperRedigerbartUtfallVarsel

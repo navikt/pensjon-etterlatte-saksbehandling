@@ -16,6 +16,20 @@ sealed class DoedshendelseKontrollpunkt {
         override val avbryt: Boolean = true
     }
 
+    data object BarnHarBarnepensjon : DoedshendelseKontrollpunkt() {
+        override val beskrivelse: String = "Barn har barnepensjon"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = true
+    }
+
+    data object BarnHarUfoereTrygd : DoedshendelseKontrollpunkt() {
+        override val beskrivelse: String = "Barnet har uføretrygd"
+        override val sendBrev: Boolean = true
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = false
+    }
+
     data object KryssendeYtelseIPesys : DoedshendelseKontrollpunkt() {
         override val beskrivelse: String = "Den berørte har uføretrygd eller alderspensjon i Pesys"
         override val sendBrev: Boolean = false
@@ -51,11 +65,11 @@ sealed class DoedshendelseKontrollpunkt {
         override val avbryt: Boolean = false
     }
 
-    data class SakEksistererIGjenny(val sak: Sak) : DoedshendelseKontrollpunkt() {
-        override val beskrivelse: String = "Det eksisterer allerede en sak på bruker i Gjenny"
-        override val sendBrev: Boolean = true
-        override val opprettOppgave: Boolean = true
-        override val avbryt: Boolean = false
+    data class EpsHarSakIGjenny(val sak: Sak) : DoedshendelseKontrollpunkt() {
+        override val beskrivelse: String = "Det eksisterer allerede en sak på EPS i Gjenny"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = true
     }
 
     data class DuplikatGrunnlagsendringsHendelse(
@@ -71,7 +85,7 @@ sealed class DoedshendelseKontrollpunkt {
 }
 
 fun List<DoedshendelseKontrollpunkt>.finnSak(): Sak? {
-    return this.filterIsInstance<DoedshendelseKontrollpunkt.SakEksistererIGjenny>().firstOrNull()?.sak
+    return this.filterIsInstance<DoedshendelseKontrollpunkt.EpsHarSakIGjenny>().firstOrNull()?.sak
 }
 
 fun List<DoedshendelseKontrollpunkt>.finnOppgaveId(): UUID? {

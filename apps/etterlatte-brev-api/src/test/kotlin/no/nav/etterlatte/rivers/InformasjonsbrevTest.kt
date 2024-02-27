@@ -7,10 +7,10 @@ import io.mockk.verify
 import kotliquery.queryOf
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevRequestHendelseType
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.PDFGenerator
-import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.distribusjon.Brevdistribuerer
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade

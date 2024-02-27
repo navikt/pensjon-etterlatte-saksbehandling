@@ -8,6 +8,7 @@ import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnOppgaveId
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnSak
@@ -31,6 +32,7 @@ class DoedshendelseJobService(
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val sakService: SakService,
     private val dagerGamleHendelserSomSkalKjoeres: Int,
+    private val deodshendelserProducer: DoedshendelserKafkaService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -88,15 +90,34 @@ class DoedshendelseJobService(
                         fnr = doedshendelse.beroertFnr,
                         type = doedshendelse.sakType(),
                     )
-                val oppgave = opprettOppgave(doedshendelse, sak)
-                doedshendelseDao.oppdaterDoedshendelse(
-                    doedshendelse.tilBehandlet(
-                        utfall = Utfall.OPPGAVE,
-                        sakId = sak.id,
-                        oppgaveId = oppgave.id,
-                    ),
-                )
+
+                sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
+                val skalOppretteOppgave = kontrollpunkter.any { it.opprettOppgave }
+                if (skalOppretteOppgave) {
+                    val oppgave = opprettOppgave(doedshendelse, sak)
+                    doedshendelseDao.oppdaterDoedshendelse(
+                        doedshendelse.tilBehandlet(
+                            utfall = Utfall.OPPGAVE,
+                            sakId = sak.id,
+                            oppgaveId = oppgave.id,
+                        ),
+                    )
+                }
             }
+        }
+    }
+
+    private fun sendBrevHvisKravOppfylles(
+        doedshendelse: DoedshendelseInternal,
+        sak: Sak,
+        kontrollpunkter: List<DoedshendelseKontrollpunkt>,
+    ) {
+        val skalSendeBrev = kontrollpunkter.none { !it.sendBrev }
+        if (skalSendeBrev) {
+            if (doedshendelse.relasjon == Relasjon.BARN) {
+                deodshendelserProducer.sendBrevRequest(sak)
+            }
+            // TODO: EY-3470 relasjon EPS
         }
     }
 

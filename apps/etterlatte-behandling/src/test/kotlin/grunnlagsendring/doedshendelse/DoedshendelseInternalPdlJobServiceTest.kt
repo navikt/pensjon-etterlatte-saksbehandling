@@ -3,7 +3,9 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 import io.kotest.matchers.shouldBe
 import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.Context
@@ -52,6 +54,10 @@ class DoedshendelseInternalPdlJobServiceTest {
                 )
         }
     private val todagergammel = 2
+    private val doedshendelserProducer =
+        mockk<DoedshendelserKafkaService> {
+            every { sendBrevRequest(any()) } just runs
+        }
     private val service =
         DoedshendelseJobService(
             doedshendelseDao = dao,
@@ -60,6 +66,7 @@ class DoedshendelseInternalPdlJobServiceTest {
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = todagergammel,
+            doedshendelserProducer,
         )
 
     @AfterEach
@@ -85,7 +92,7 @@ class DoedshendelseInternalPdlJobServiceTest {
                     endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt(),
                 ),
             )
-        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns emptyList()
+        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns listOf(AvdoedHarDNummer)
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
         every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns

@@ -49,6 +49,7 @@ class DoedshendelseService(
         val avdoedFnr = avdoed.foedselsnummer.verdi.value
         val doedshendelserForAvdoed = inTransaction { doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) }
         val beroerte = finnBeroerteBarn(avdoed)
+        // TODO: EY-3470
 
         if (doedshendelserForAvdoed.isEmpty()) {
             sikkerLogg.info("Fant ${beroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")

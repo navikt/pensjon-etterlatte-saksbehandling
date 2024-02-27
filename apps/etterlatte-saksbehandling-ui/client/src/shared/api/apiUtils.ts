@@ -25,21 +25,23 @@ export type Mappers<T, R> = {
   error?: (_: ApiError) => R
 }
 
-export const mapResult = <T, R>(result: Result<T>, mappers: Mappers<T, R>): R | null => {
+export const mapResultFallback = <T, R, F>(result: Result<T>, mappers: Mappers<T, R>, fallback: F): R | F => {
   if (isInitial(result)) {
-    return mappers.initial ?? null
+    return mappers.initial !== undefined ? mappers.initial : fallback
   }
   if (isPending(result)) {
-    return mappers.pending ?? null
+    return mappers.pending !== undefined ? mappers.pending : fallback
   }
   if (isFailure(result)) {
-    return mappers.error?.(result.error) ?? null
+    return mappers.error !== undefined ? mappers.error(result.error) : fallback
   }
   if (isSuccess(result)) {
-    return mappers.success?.(result.data) ?? null
+    return mappers.success !== undefined ? mappers.success(result.data) : fallback
   }
   throw new Error(`Ukjent status på result: ${JSON.stringify(result)}`)
 }
+
+export const mapResult = <T, R>(result: Result<T>, mappers: Mappers<T, R>) => mapResultFallback(result, mappers, null)
 
 export const mapApiResult = <T>(
   result: Result<T>,

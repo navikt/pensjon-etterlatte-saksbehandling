@@ -67,6 +67,8 @@ class DoedshendelseInternalPdlJobServiceTest {
             sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = todagergammel,
             doedshendelserProducer,
+            mockk(),
+            mockk(),
         )
 
     @AfterEach

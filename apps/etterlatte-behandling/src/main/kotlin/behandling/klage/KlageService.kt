@@ -95,6 +95,19 @@ interface KlageService {
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Klage
+
+    fun attesterVedtak(
+        klageId: UUID,
+        kommentar: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage
+
+    fun underkjennVedtak(
+        klageId: UUID,
+        kommentar: String,
+        valgtBegrunnelse: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage
 }
 
 class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
@@ -469,12 +482,7 @@ class KlageServiceImpl(
             runBlocking {
                 vedtakKlient.fattVedtakKlage(klage, brukerTokenInfo)
             }
-        val utfall = klage.utfall as KlageUtfallMedData.Avvist
-        if (vedtakId != utfall.vedtak.vedtakId) {
-            throw IllegalStateException(
-                "VedtakId=$vedtakId er forskjellig fra det som ligger i utfall=$vedtakId",
-            )
-        }
+        sjekkVedtakIdLagretIUtfall(klage, vedtakId)
         klageDao.lagreKlage(oppdatertKlage)
 
         hendelseDao.vedtakHendelse(
@@ -486,6 +494,85 @@ class KlageServiceImpl(
             saksbehandler = brukerTokenInfo.ident(),
             kommentar = null,
             begrunnelse = null,
+        )
+        return oppdatertKlage
+    }
+
+    private fun sjekkVedtakIdLagretIUtfall(
+        klage: Klage,
+        vedtakId: Long,
+    ) {
+        val utfall = klage.utfall as KlageUtfallMedData.Avvist
+        if (vedtakId != utfall.vedtak.vedtakId) {
+            throw IllegalStateException(
+                "VedtakId=$vedtakId er forskjellig fra det som ligger i utfall=$vedtakId",
+            )
+        }
+    }
+
+    override fun attesterVedtak(
+        klageId: UUID,
+        kommentar: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage {
+        logger.info("Attesterer vedtak for klage=$klageId")
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+
+        val oppdatertKlage = klage.attesterVedtak()
+
+        val vedtakId =
+            runBlocking {
+                vedtakKlient.attesterVedtakKlage(
+                    klage = klage,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+            }
+        sjekkVedtakIdLagretIUtfall(oppdatertKlage, vedtakId)
+        klageDao.lagreKlage(oppdatertKlage)
+
+        hendelseDao.vedtakHendelse(
+            behandlingId = klageId,
+            sakId = klage.sak.id,
+            vedtakId = vedtakId,
+            hendelse = HendelseType.ATTESTERT,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = brukerTokenInfo.ident(),
+            kommentar = kommentar,
+            begrunnelse = null,
+        )
+        return oppdatertKlage
+    }
+
+    override fun underkjennVedtak(
+        klageId: UUID,
+        kommentar: String,
+        valgtBegrunnelse: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage {
+        logger.info("Underkjenner vedtak for klage=$klageId")
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+
+        val oppdatertKlage = klage.underkjennVedtak()
+
+        val vedtakId =
+            runBlocking {
+                vedtakKlient.underkjennVedtakKlage(
+                    klageId = klageId,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+            }
+
+        klageDao.lagreKlage(oppdatertKlage)
+
+        hendelseDao.vedtakHendelse(
+            behandlingId = klage.id,
+            sakId = klage.sak.id,
+            vedtakId = vedtakId,
+            hendelse = HendelseType.UNDERKJENT,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = brukerTokenInfo.ident(),
+            kommentar = kommentar,
+            begrunnelse = valgtBegrunnelse,
         )
         return oppdatertKlage
     }

@@ -301,8 +301,24 @@ fun Route.klagevedtakRoute(
                 val klage = call.receive<Klage>()
                 if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
 
-                logger.info("Oppretter vedtak for klage med id=$behandlingId")
+                logger.info("Fatter vedtak for klage med id=$behandlingId")
                 call.respond(service.fattVedtak(klage, brukerTokenInfo))
+            }
+        }
+
+        post("/attester-vedtak") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                val klage = call.receive<Klage>()
+                if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
+
+                logger.info("Attesterer vedtak for klage med id=$behandlingId")
+                call.respond(service.attesterVedtak(klage, brukerTokenInfo))
+            }
+        }
+        post("/underkjenn-vedtak") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                logger.info("Underkjenner vedtak for klage=$behandlingId")
+                call.respond(service.underkjennVedtak(behandlingId))
             }
         }
     }

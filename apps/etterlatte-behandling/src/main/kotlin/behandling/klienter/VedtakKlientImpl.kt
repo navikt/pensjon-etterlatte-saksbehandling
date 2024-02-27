@@ -53,6 +53,16 @@ interface VedtakKlient {
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long
+
+    suspend fun attesterVedtakKlage(
+        klage: Klage,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long
+
+    suspend fun underkjennVedtakKlage(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long
 }
 
 class VedtakKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -230,7 +240,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): Long {
         try {
-            logger.info("Sender klage som skal fatte vedtak for klage=${klage.id} til vedtak")
+            logger.info("Sender klage med id=${klage.id} til vedtak for fatting av vedtak")
             return downstreamResourceClient
                 .post(
                     resource =
@@ -248,6 +258,62 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
         } catch (e: Exception) {
             throw VedtakKlientException(
                 "Fatting av vedtak for klage med id=${klage.id} feilet",
+                e,
+            )
+        }
+    }
+
+    override suspend fun attesterVedtakKlage(
+        klage: Klage,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        try {
+            logger.info("Sender klage med id=${klage.id} til vedtak for attestering")
+            return downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/vedtak/klage/${klage.id}/attester-vedtak",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = klage,
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtakKlientException(
+                "Fatting av vedtak for klage med id=${klage.id} feilet",
+                e,
+            )
+        }
+    }
+
+    override suspend fun underkjennVedtakKlage(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        try {
+            logger.info("Ber om underkjennelse for klage=$klageId til vedtak")
+            return downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/tilbakekreving/$klageId/underkjenn-vedtak",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = { },
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtakKlientException(
+                "Underkjennelse av vedtak for klage med id=$klageId feilet",
                 e,
             )
         }

@@ -5,7 +5,7 @@ import { HeadingWrapper } from '~components/behandling/soeknadsoversikt/styled'
 import { Heading } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { Content, ContentHeader } from '~shared/styled'
-import { IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { hentOverstyrBeregning } from '~shared/api/beregning'
 import { useApiCall } from '~shared/hooks/useApiCall'
@@ -21,8 +21,8 @@ const Beregningsgrunnlag = (props: { behandling: IDetaljertBehandling }) => {
 
   const [overstyrBeregning, getOverstyrBeregning] = useApiCall(hentOverstyrBeregning)
   const [overstyrt, setOverstyrt] = useState<OverstyrBeregning | undefined>(undefined)
-  const vedtaksresultat =
-    behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
+  const vedtaksresultat = useVedtaksResultat()
+
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined

@@ -12,7 +12,7 @@ import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, Heading } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { IBehandlingStatus, IBehandlingsType, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
@@ -45,8 +45,8 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
 
   const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
-  const vedtaksresultat =
-    behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
+  const vedtaksresultat = useVedtaksResultat()
+
   const brevutfallOgEtterbetaling = useAppSelector(
     (state) => state.behandlingReducer.behandling?.brevutfallOgEtterbetaling
   )

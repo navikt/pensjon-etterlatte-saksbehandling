@@ -43,7 +43,6 @@ export interface NyBehandlingRequest {
 export enum IBehandlingsType {
   FØRSTEGANGSBEHANDLING = 'FØRSTEGANGSBEHANDLING',
   REVURDERING = 'REVURDERING',
-  MANUELT_OPPHOER = 'MANUELT_OPPHOER',
 }
 
 export enum IBehandlingStatus {

@@ -91,7 +91,7 @@ class DoedshendelseJobService(
                         type = doedshendelse.sakType(),
                     )
 
-                sendBrevHvisKravOppfyllesBP(doedshendelse, sak, kontrollpunkter)
+                sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
                 val oppgave = opprettOppgave(doedshendelse, sak)
                 doedshendelseDao.oppdaterDoedshendelse(
                     doedshendelse.tilBehandlet(
@@ -104,7 +104,7 @@ class DoedshendelseJobService(
         }
     }
 
-    private fun sendBrevHvisKravOppfyllesBP(
+    private fun sendBrevHvisKravOppfylles(
         doedshendelse: DoedshendelseInternal,
         sak: Sak,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,

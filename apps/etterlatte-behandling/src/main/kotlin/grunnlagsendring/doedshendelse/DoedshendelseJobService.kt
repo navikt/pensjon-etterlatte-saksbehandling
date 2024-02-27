@@ -19,6 +19,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -84,6 +85,7 @@ class DoedshendelseJobService(
                     doedshendelse.tilAvbrutt(
                         sakId = kontrollpunkter.finnSak()?.id,
                         oppgaveId = kontrollpunkter.finnOppgaveId(),
+                        kontrollpunkter = kontrollpunkter,
                     ),
                 )
             }
@@ -93,22 +95,28 @@ class DoedshendelseJobService(
                 val sak: Sak =
                     kontrollpunkter.finnSak() ?: opprettSakOgLagGrunnlag(doedshendelse)
 
-                sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
-                val skalOppretteOppgave = kontrollpunkter.any { it.opprettOppgave }
-                if (skalOppretteOppgave) {
-                    logger.info(
-                        "Oppretter grunnlagshendelse og oppgave for person ${doedshendelse.beroertFnr.maskerFnr()} " +
-                            "med avdød ${doedshendelse.avdoedFnr.maskerFnr()}",
-                    )
-                    val oppgave = opprettOppgave(doedshendelse, sak)
-                    doedshendelseDao.oppdaterDoedshendelse(
-                        doedshendelse.tilBehandlet(
-                            utfall = Utfall.OPPGAVE,
-                            sakId = sak.id,
-                            oppgaveId = oppgave.id,
-                        ),
-                    )
-                }
+                val brevSendt = sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
+                val oppgave = opprettOppgaveHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
+                val utfall =
+                    if (brevSendt && oppgave != null) {
+                        Utfall.BREV_OG_OPPGAVE
+                    } else if (brevSendt) {
+                        Utfall.BREV
+                    } else if (oppgave != null) {
+                        Utfall.OPPGAVE
+                    } else {
+                        logger.error("Kan ikke håndtere dødshendelse ${doedshendelse.id}")
+                        throw IllegalStateException("Kan ikke ha utfall uten brev eller oppgave")
+                    }
+
+                doedshendelseDao.oppdaterDoedshendelse(
+                    doedshendelse.tilBehandlet(
+                        utfall = utfall,
+                        sakId = sak.id,
+                        oppgaveId = oppgave?.id,
+                        kontrollpunkter = kontrollpunkter,
+                    ),
+                )
             }
         }
     }
@@ -152,38 +160,48 @@ class DoedshendelseJobService(
         doedshendelse: DoedshendelseInternal,
         sak: Sak,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
-    ) {
+    ): Boolean {
         val skalSendeBrev = kontrollpunkter.none { !it.sendBrev }
         if (skalSendeBrev) {
             if (doedshendelse.relasjon == Relasjon.BARN) {
                 logger.info("Sender brev for ${Relasjon.BARN.name} for sak ${sak.id}")
                 deodshendelserProducer.sendBrevRequest(sak)
             }
+            return true
             // TODO: EY-3470 relasjon EPS
         }
+        return false
     }
 
-    private fun opprettOppgave(
+    private fun opprettOppgaveHvisKravOppfylles(
         doedshendelse: DoedshendelseInternal,
         sak: Sak,
-    ) = grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
-        grunnlagsendringshendelse =
-            Grunnlagsendringshendelse(
-                id = UUID.randomUUID(),
-                sakId = sak.id,
-                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                type = GrunnlagsendringsType.DOEDSFALL,
-                opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                hendelseGjelderRolle = Saksrolle.AVDOED,
-                gjelderPerson = doedshendelse.avdoedFnr,
-                samsvarMellomKildeOgGrunnlag =
-                    SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(
-                        fraGrunnlag = null,
-                        fraPdl = doedshendelse.avdoedDoedsdato,
-                        samsvar = false,
+        kontrollpunkter: List<DoedshendelseKontrollpunkt>,
+    ): OppgaveIntern? {
+        val skalOppretteOppgave = kontrollpunkter.any { it.opprettOppgave }
+        return if (skalOppretteOppgave) {
+            grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
+                grunnlagsendringshendelse =
+                    Grunnlagsendringshendelse(
+                        id = UUID.randomUUID(),
+                        sakId = sak.id,
+                        status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                        type = GrunnlagsendringsType.DOEDSFALL,
+                        opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                        hendelseGjelderRolle = Saksrolle.AVDOED,
+                        gjelderPerson = doedshendelse.avdoedFnr,
+                        samsvarMellomKildeOgGrunnlag =
+                            SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(
+                                fraGrunnlag = null,
+                                fraPdl = doedshendelse.avdoedDoedsdato,
+                                samsvar = false,
+                            ),
                     ),
-            ),
-    )
+            )
+        } else {
+            null
+        }
+    }
 
     private fun finnGyldigeDoedshendelser(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {
         val idag = LocalDateTime.now()

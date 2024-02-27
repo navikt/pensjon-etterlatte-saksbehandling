@@ -1,11 +1,14 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.setLong
+import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
+import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.toList
 import no.nav.helse.rapids_rivers.toUUID
 import java.sql.ResultSet
@@ -58,7 +61,7 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                 prepareStatement(
                     """
                     UPDATE doedshendelse 
-                    SET sak_id = ?, status = ?, utfall = ?, endret = ?, oppgave_id = ?, brev_id = ?
+                    SET sak_id = ?, status = ?, utfall = ?, endret = ?, oppgave_id = ?, brev_id = ?, kontrollpunkter = ?
                     WHERE id = ?
                     """.trimIndent(),
                 ).apply {
@@ -68,7 +71,8 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                     setTidspunkt(4, doedshendelseInternal.endret)
                     setString(5, doedshendelseInternal.oppgaveId?.toString())
                     setLong(6, doedshendelseInternal.brevId)
-                    setString(7, doedshendelseInternal.id.toString())
+                    setJsonb(7, doedshendelseInternal.kontrollpunkter)
+                    setString(8, doedshendelseInternal.id.toString())
                 }.executeUpdate()
             }
         }
@@ -79,7 +83,7 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
             with(it) {
                 prepareStatement(
                     """
-                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype
+                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter
                     FROM doedshendelse
                     WHERE status = ?
                     """.trimIndent(),
@@ -95,7 +99,7 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
             with(it) {
                 prepareStatement(
                     """
-                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype
+                    SELECT id, avdoed_fnr, avdoed_doedsdato, beroert_fnr, relasjon, opprettet, endret, status, utfall, oppgave_id, brev_id, sak_id, endringstype, kontrollpunkter
                     FROM doedshendelse
                     WHERE avdoed_fnr = ?
                     """.trimIndent(),
@@ -122,4 +126,6 @@ private fun ResultSet.asDoedshendelse(): DoedshendelseInternal =
         brevId = getString("brev_id")?.toLong(),
         sakId = getString("sak_id")?.toLong(),
         endringstype = getString("endringstype")?.let { Endringstype.valueOf(it) },
+        kontrollpunkter =
+            getString("kontrollpunkter")?.let { objectMapper.readValue(it) },
     )

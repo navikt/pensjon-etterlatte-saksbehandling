@@ -10,13 +10,13 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.etterlatte.brev.BrevHendelseType
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.VedtaksbrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType

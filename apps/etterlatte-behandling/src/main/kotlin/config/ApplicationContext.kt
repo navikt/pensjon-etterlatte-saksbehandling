@@ -68,6 +68,7 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseJobService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelserKafkaServiceImpl
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlientImpl
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
@@ -256,6 +257,7 @@ internal class ApplicationContext(
     val tilbakekrevingKlient =
         TilbakekrevingKlientImpl(tilbakekrevingHttpClient, resourceUrl = env.getValue("ETTERLATTE_TILBAKEKREVING_URL"))
     val migreringKlient = MigreringKlient(migreringHttpClient, env.getValue("ETTERLATTE_MIGRERING_URL"))
+    val deodshendelserProducer = DoedshendelserKafkaServiceImpl(rapid)
 
     // Service
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao)
@@ -371,6 +373,7 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             pdlTjenesterKlient = pdlTjenesterKlient,
             pesysKlient = pesysKlient,
+            deodshendelserProducer = deodshendelserProducer,
         )
 
     val behandlingsStatusService =

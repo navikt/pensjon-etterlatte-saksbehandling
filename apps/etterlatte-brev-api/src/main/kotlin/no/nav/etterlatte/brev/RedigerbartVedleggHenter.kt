@@ -4,13 +4,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.brevbaker.BrevbakerService
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.BrevDatafetcherVedtak
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevVedleggKey
-import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.SakType

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.model
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.adresse.RegoppslagResponseDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -177,13 +178,3 @@ data class EtterbetalingDTO(
     val datoFom: LocalDate,
     val datoTom: LocalDate,
 )
-
-enum class Brevtype {
-    VEDTAK,
-    VARSEL,
-    INFORMASJON,
-    OPPLASTET_PDF,
-    MANUELT,
-    VEDLEGG,
-    NOTAT,
-}

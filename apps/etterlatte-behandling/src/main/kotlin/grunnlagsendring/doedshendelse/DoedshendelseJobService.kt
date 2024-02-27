@@ -41,6 +41,7 @@ class DoedshendelseJobService(
     private val behandlingService: BehandlingService,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val pesysKlient: PesysKlient,
+    private val deodshendelserProducer: DoedshendelserKafkaService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -98,6 +99,8 @@ class DoedshendelseJobService(
                         fnr = doedshendelse.beroertFnr,
                         type = doedshendelse.sakType(),
                     )
+
+                sendBrevHvisKravOppfyllesBP(doedshendelse, sak)
                 val oppgave = opprettOppgave(doedshendelse, sak)
                 doedshendelseDao.oppdaterDoedshendelse(
                     doedshendelse.tilBehandlet(
@@ -132,19 +135,16 @@ class DoedshendelseJobService(
             ),
     )
 
-    private fun skalSendeBrevBP(
+    private fun sendBrevHvisKravOppfyllesBP(
         doedshendelse: DoedshendelseInternal,
         sak: Sak,
     ) {
         if (doedshendelse.relasjon == Relasjon.BARN) {
-            /*
-              sjekk om har barnepensjon
-             */
             val hentSisteIverksatte = behandlingService.hentSisteIverksatte(sak.id)
             val harIkkeBarnepensjon = hentSisteIverksatte == null
             if (harIkkeBarnepensjon) {
                 if (harUfoereTrygd(doedshendelse)) {
-                    // ->> send brev
+                    deodshendelserProducer.sendBrevRequest(sak)
                 }
 
                 val pdlPerson = pdlTjenesterKlient.hentPdlModell(doedshendelse.beroertFnr, PersonRolle.BARN, sak.sakType)
@@ -154,21 +154,22 @@ class DoedshendelseJobService(
                         val rolle = if (doedshendelse.avdoedFnr == it.value) PersonRolle.AVDOED else PersonRolle.GJENLEVENDE
                         pdlTjenesterKlient.hentPdlModell(it.value, rolle, sak.sakType)
                     }
-                beggeForeldreErDoede(foreldreMedData)
-                // -> må sende brev
+                if (beggeForeldreErDoede(foreldreMedData)) {
+                    deodshendelserProducer.sendBrevRequest(sak)
+                }
             }
         }
     }
 
-    fun harUfoereTrygd(doedshendelse: DoedshendelseInternal): Boolean {
+    private fun harUfoereTrygd(doedshendelse: DoedshendelseInternal): Boolean {
         val sakerFraPesys =
             runBlocking {
                 pesysKlient.hentSaker(doedshendelse.beroertFnr)
             }
-        return sakerFraPesys.any { it.harUfoeretrygd() }
+        return sakerFraPesys.any { it.harLoependeUfoeretrygd() }
     }
 
-    fun SakSammendragResponse.harUfoeretrygd(): Boolean {
+    private fun SakSammendragResponse.harLoependeUfoeretrygd(): Boolean {
         return this.sakType == SakSammendragResponse.UFORE_SAKTYPE &&
             this.sakStatus == SakSammendragResponse.Status.LOPENDE
     }

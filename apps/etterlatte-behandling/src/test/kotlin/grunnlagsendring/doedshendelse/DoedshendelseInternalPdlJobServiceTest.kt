@@ -60,6 +60,9 @@ class DoedshendelseInternalPdlJobServiceTest {
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = todagergammel,
+            mockk(),
+            mockk(),
+            mockk(),
         )
 
     @AfterEach

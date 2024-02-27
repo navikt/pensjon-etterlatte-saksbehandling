@@ -1,7 +1,7 @@
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { formaterKanskjeStringDato, formaterStringDato } from '~utils/formattering'
+import { formaterDato, formaterKanskjeStringDato, formaterStringDato } from '~utils/formattering'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
@@ -14,6 +14,7 @@ import { getHistoriskForeldreansvar } from '~shared/api/grunnlag'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { mapApiResult } from '~shared/api/apiUtils'
+import { SakType } from '~shared/types/sak'
 
 const SoekerDoedsdatoGrunnlag = () => {
   const soeker = usePersonopplysninger()?.soeker?.opplysning
@@ -102,6 +103,22 @@ const AdopsjonGrunnlag = () => {
   )
 }
 
+const BrukersFoedselsdatoGrunnlag = () => {
+  const soeker = usePersonopplysninger()?.soeker?.opplysning
+  return soeker?.foedselsdato && <Info tekst={formaterDato(soeker?.foedselsdato)} label="Fødselsdato" />
+}
+
+const BrukerFyller67AarGrunnlag = () => {
+  const foedselsdato = usePersonopplysninger()?.soeker?.opplysning?.foedselsdato
+  return foedselsdato && <Info tekst={formaterDato(addYears(foedselsdato, 67))} label="Dato bruker fyller 67 år" />
+}
+
+const addYears = (date: Date, years: number) => {
+  const newDate = new Date(date)
+  newDate.setFullYear(date.getFullYear() + years)
+  return newDate
+}
+
 export const GrunnlagForVirkningstidspunkt = () => {
   const behandling = useBehandling()
   switch (behandling?.revurderingsaarsak) {
@@ -112,6 +129,12 @@ export const GrunnlagForVirkningstidspunkt = () => {
       return <FoersteVirkGrunnlag />
     case Revurderingaarsak.ADOPSJON:
       return <AdopsjonGrunnlag />
+    case Revurderingaarsak.ALDERSOVERGANG:
+      return (
+        (behandling.sakType === SakType.BARNEPENSJON && <BrukersFoedselsdatoGrunnlag />) || (
+          <BrukerFyller67AarGrunnlag />
+        )
+      )
   }
   return null
 }

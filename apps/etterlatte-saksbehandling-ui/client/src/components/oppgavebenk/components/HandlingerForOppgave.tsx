@@ -112,6 +112,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
                 <OpprettNyRevurdering
                   revurderinger={muligeRevurderingAarsakerStatus}
                   sakId={oppgave.sakId}
+                  oppgaveId={oppgave.id}
                   litenKnapp={true}
                 />
               )

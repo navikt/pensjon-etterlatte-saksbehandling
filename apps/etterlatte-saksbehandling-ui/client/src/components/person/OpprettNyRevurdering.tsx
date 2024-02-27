@@ -12,10 +12,12 @@ import { isPending } from '~shared/api/apiUtils'
 export const OpprettNyRevurdering = ({
   sakId,
   revurderinger,
+  oppgaveId,
   litenKnapp = false,
 }: {
   sakId: number
   revurderinger: Array<Revurderingaarsak>
+  oppgaveId?: string
   litenKnapp?: boolean
 }) => {
   const [error, setError] = useState<string | null>(null)
@@ -30,7 +32,12 @@ export const OpprettNyRevurdering = ({
       return setError('Du må velge en revurdering')
     }
     opprettRevurdering(
-      { sakId: sakId, aarsak: valgtRevurdering, fritekstAarsak: fritekstgrunn ? fritekstgrunn : null },
+      {
+        sakId: sakId,
+        aarsak: valgtRevurdering,
+        fritekstAarsak: fritekstgrunn ? fritekstgrunn : null,
+        paaGrunnAvOppgaveId: oppgaveId,
+      },
       (behandlingId: string) => {
         navigate(`/behandling/${behandlingId}/`)
       },

@@ -94,14 +94,13 @@ class TidshendelseRiver(
     }
 
     private fun generateMerknad(type: String): String {
-        val argument =
-            when (type) {
-                "AO_BP20" -> "20"
-                "AO_BP21" -> "21"
-                "AO_OMS67" -> "67"
-                else -> throw IllegalArgumentException("Ikke-støttet type: $type")
-            }
-
-        return "Aldersovergang v/$argument år"
+        return when (type) {
+            "AO_BP20" -> "Aldersovergang v/20 år"
+            "AO_BP21" -> "Aldersovergang v/21 år"
+            "AO_OMS67" -> "Aldersovergang v/67 år"
+            "OMS_DOED_3AAR" -> "Opphør OMS etter 3 år"
+            "OMS_DOED_5AAR" -> "Opphør OMS etter 5 år"
+            else -> throw IllegalArgumentException("Ikke-støttet type: $type")
+        }
     }
 }

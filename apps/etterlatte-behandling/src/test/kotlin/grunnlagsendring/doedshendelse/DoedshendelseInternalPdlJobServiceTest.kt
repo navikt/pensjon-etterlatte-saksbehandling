@@ -11,6 +11,7 @@ import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.Self
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedHarDNummer
@@ -58,6 +59,11 @@ class DoedshendelseInternalPdlJobServiceTest {
         mockk<DoedshendelserKafkaService> {
             every { sendBrevRequest(any()) } just runs
         }
+
+    private val grunnlagService =
+        mockk<GrunnlagService> {
+            every { leggInnNyttGrunnlagSak(any(), any()) } just runs
+        }
     private val service =
         DoedshendelseJobService(
             doedshendelseDao = dao,
@@ -67,7 +73,7 @@ class DoedshendelseInternalPdlJobServiceTest {
             sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = todagergammel,
             doedshendelserProducer,
-            mockk(),
+            grunnlagService,
             mockk(),
         )
 

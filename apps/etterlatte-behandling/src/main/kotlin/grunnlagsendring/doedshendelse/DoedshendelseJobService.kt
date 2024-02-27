@@ -1,25 +1,21 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
-import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
-import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnOppgaveId
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnSak
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
-import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -38,7 +34,6 @@ class DoedshendelseJobService(
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val sakService: SakService,
     private val dagerGamleHendelserSomSkalKjoeres: Int,
-    private val behandlingService: BehandlingService,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
     private val pesysKlient: PesysKlient,
     private val deodshendelserProducer: DoedshendelserKafkaService,
@@ -100,7 +95,7 @@ class DoedshendelseJobService(
                         type = doedshendelse.sakType(),
                     )
 
-                sendBrevHvisKravOppfyllesBP(doedshendelse, sak)
+                sendBrevHvisKravOppfyllesBP(doedshendelse, sak, kontrollpunkter)
                 val oppgave = opprettOppgave(doedshendelse, sak)
                 doedshendelseDao.oppdaterDoedshendelse(
                     doedshendelse.tilBehandlet(
@@ -109,6 +104,19 @@ class DoedshendelseJobService(
                         oppgaveId = oppgave.id,
                     ),
                 )
+            }
+        }
+    }
+
+    private fun sendBrevHvisKravOppfyllesBP(
+        doedshendelse: DoedshendelseInternal,
+        sak: Sak,
+        kontrollpunkter: List<DoedshendelseKontrollpunkt>,
+    ) {
+        val skalSendeBrev = kontrollpunkter.none { !it.sendBrev }
+        if (skalSendeBrev) {
+            if (doedshendelse.relasjon == Relasjon.BARN) {
+                deodshendelserProducer.sendBrevRequest(sak)
             }
         }
     }
@@ -134,49 +142,6 @@ class DoedshendelseJobService(
                     ),
             ),
     )
-
-    private fun sendBrevHvisKravOppfyllesBP(
-        doedshendelse: DoedshendelseInternal,
-        sak: Sak,
-    ) {
-        if (doedshendelse.relasjon == Relasjon.BARN) {
-            val hentSisteIverksatte = behandlingService.hentSisteIverksatte(sak.id)
-            val harIkkeBarnepensjon = hentSisteIverksatte == null
-            if (harIkkeBarnepensjon) {
-                if (harUfoereTrygd(doedshendelse)) {
-                    deodshendelserProducer.sendBrevRequest(sak)
-                }
-
-                val pdlPerson = pdlTjenesterKlient.hentPdlModell(doedshendelse.beroertFnr, PersonRolle.BARN, sak.sakType)
-                val foreldre = pdlPerson.familieRelasjon?.verdi?.foreldre ?: emptyList()
-                val foreldreMedData =
-                    foreldre.map {
-                        val rolle = if (doedshendelse.avdoedFnr == it.value) PersonRolle.AVDOED else PersonRolle.GJENLEVENDE
-                        pdlTjenesterKlient.hentPdlModell(it.value, rolle, sak.sakType)
-                    }
-                if (beggeForeldreErDoede(foreldreMedData)) {
-                    deodshendelserProducer.sendBrevRequest(sak)
-                }
-            }
-        }
-    }
-
-    private fun harUfoereTrygd(doedshendelse: DoedshendelseInternal): Boolean {
-        val sakerFraPesys =
-            runBlocking {
-                pesysKlient.hentSaker(doedshendelse.beroertFnr)
-            }
-        return sakerFraPesys.any { it.harLoependeUfoeretrygd() }
-    }
-
-    private fun SakSammendragResponse.harLoependeUfoeretrygd(): Boolean {
-        return this.sakType == SakSammendragResponse.UFORE_SAKTYPE &&
-            this.sakStatus == SakSammendragResponse.Status.LOPENDE
-    }
-
-    private fun beggeForeldreErDoede(foreldre: List<PersonDTO>): Boolean {
-        return foreldre.all { it.doedsdato != null }
-    }
 
     private fun finnGyldigeDoedshendelser(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {
         val idag = LocalDateTime.now()

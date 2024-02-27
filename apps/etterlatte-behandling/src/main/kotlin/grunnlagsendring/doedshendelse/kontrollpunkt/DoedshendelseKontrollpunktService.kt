@@ -1,10 +1,12 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
+import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Companion.ALDER_SAKTYPE
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Companion.UFORE_SAKTYPE
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.LOPENDE
@@ -12,6 +14,7 @@ import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.OPPRETTET
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.TIL_BEHANDLING
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -26,6 +29,7 @@ class DoedshendelseKontrollpunktService(
     private val oppgaveService: OppgaveService,
     private val sakService: SakService,
     private val pesysKlient: PesysKlient,
+    private val behandlingService: BehandlingService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -34,6 +38,8 @@ class DoedshendelseKontrollpunktService(
         val sak = sakService.finnSak(hendelse.beroertFnr, hendelse.sakType())
 
         return listOfNotNull(
+            kontrollerUfoeretrygdBarn(hendelse),
+            kontrollerBarnOgHarBP(hendelse, sak),
             kontrollerAvdoedDoedsdato(avdoed),
             kontrollerKryssendeYtelse(hendelse),
             kontrollerDNummer(avdoed),
@@ -44,14 +50,59 @@ class DoedshendelseKontrollpunktService(
         )
     }
 
+    fun kontrollerUfoeretrygdBarn(doedshendelse: DoedshendelseInternal): DoedshendelseKontrollpunkt.BarnHarUfoereTrygd? {
+        if (doedshendelse.relasjon == Relasjon.BARN) {
+            return when (harUfoereTrygd(doedshendelse)) {
+                true -> DoedshendelseKontrollpunkt.BarnHarUfoereTrygd
+                false -> null
+            }
+        }
+        return null
+    }
+
+    private fun harUfoereTrygd(doedshendelse: DoedshendelseInternal): Boolean {
+        val sakerFraPesys =
+            runBlocking {
+                pesysKlient.hentSaker(doedshendelse.beroertFnr)
+            }
+        return sakerFraPesys.any { it.harLoependeUfoeretrygd() }
+    }
+
+    private fun SakSammendragResponse.harLoependeUfoeretrygd(): Boolean {
+        return this.sakType == SakSammendragResponse.UFORE_SAKTYPE &&
+            this.sakStatus == SakSammendragResponse.Status.LOPENDE
+    }
+
+    fun kontrollerBarnOgHarBP(
+        doedshendelse: DoedshendelseInternal,
+        sak: Sak?,
+    ): DoedshendelseKontrollpunkt.BarnHarBarnepensjon? {
+        if (doedshendelse.relasjon == Relasjon.BARN) {
+            if (sak == null) {
+                return null
+            }
+            val hentSisteIverksatte = behandlingService.hentSisteIverksatte(sak.id)
+            val harIkkeBarnepensjon = hentSisteIverksatte == null
+            if (harIkkeBarnepensjon) {
+                return null
+            } else {
+                return DoedshendelseKontrollpunkt.BarnHarBarnepensjon
+            }
+        }
+        return null
+    }
+
     private fun kontrollerAvdoedDoedsdato(avdoed: PersonDTO): DoedshendelseKontrollpunkt? =
         when (avdoed.doedsdato) {
             null -> DoedshendelseKontrollpunkt.AvdoedLeverIPDL
             else -> null
         }
 
-    private fun kontrollerKryssendeYtelse(hendelse: DoedshendelseInternal): DoedshendelseKontrollpunkt? =
-        runBlocking {
+    private fun kontrollerKryssendeYtelse(hendelse: DoedshendelseInternal): DoedshendelseKontrollpunkt? {
+        if (hendelse.sakType() == SakType.BARNEPENSJON) {
+            return null
+        }
+        return runBlocking {
             val kryssendeYtelser =
                 pesysKlient.hentSaker(hendelse.beroertFnr)
                     .filter { it.sakStatus in listOf(OPPRETTET, TIL_BEHANDLING, LOPENDE) }
@@ -64,6 +115,7 @@ class DoedshendelseKontrollpunktService(
                 false -> null
             }
         }
+    }
 
     private fun kontrollerDNummer(avdoed: PersonDTO): DoedshendelseKontrollpunkt? =
         when (avdoed.foedselsnummer.verdi.isDNumber()) {

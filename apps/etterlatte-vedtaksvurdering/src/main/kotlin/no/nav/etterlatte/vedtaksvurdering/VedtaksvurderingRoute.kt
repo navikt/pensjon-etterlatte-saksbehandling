@@ -82,7 +82,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/upsert") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Oppretter eller oppdaterer vedtak for behandling $behandlingId")
                 val nyttVedtak = vedtakBehandlingService.opprettEllerOppdaterVedtak(behandlingId, brukerTokenInfo)
                 call.respond(nyttVedtak.toDto())
@@ -90,7 +90,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/fattvedtak") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Fatter vedtak for behandling $behandlingId")
                 val fattetVedtak = vedtakBehandlingService.fattVedtak(behandlingId, brukerTokenInfo)
                 rapidService.sendToRapid(fattetVedtak)
@@ -100,7 +100,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/attester") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Attesterer vedtak for behandling $behandlingId")
                 val (kommentar) = call.receive<AttesterVedtakDto>()
                 val attestert = vedtakBehandlingService.attesterVedtak(behandlingId, kommentar, brukerTokenInfo)
@@ -129,7 +129,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/underkjenn") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Underkjenner vedtak for behandling $behandlingId")
                 val begrunnelse = call.receive<UnderkjennVedtakDto>()
                 val underkjentVedtak =
@@ -145,7 +145,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/tilsamordning") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Vedtak er til samordning for behandling $behandlingId")
                 val vedtak = vedtakBehandlingService.tilSamordningVedtak(behandlingId, brukerTokenInfo)
                 rapidService.sendToRapid(vedtak)
@@ -154,7 +154,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/samordnet") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Vedtak ferdig samordning for behandling $behandlingId")
 
                 vedtakBehandlingService.samordnetVedtak(behandlingId, brukerTokenInfo)?.let { vedtak ->
@@ -165,7 +165,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         post("/{$BEHANDLINGID_CALL_PARAMETER}/iverksett") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Iverksetter vedtak for behandling $behandlingId")
                 val vedtak = vedtakBehandlingService.iverksattVedtak(behandlingId, brukerTokenInfo)
                 rapidService.sendToRapid(vedtak)
@@ -187,7 +187,7 @@ fun Route.vedtaksvurderingRoute(
         }
 
         patch("/{$BEHANDLINGID_CALL_PARAMETER}/tilbakestill") {
-            withBehandlingId(behandlingKlient) { behandlingId ->
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 logger.info("Tilbakestiller ikke iverksatte vedtak for behandling $behandlingId")
                 vedtakBehandlingService.tilbakestillIkkeIverksatteVedtak(behandlingId)
                 call.respond(HttpStatusCode.OK)

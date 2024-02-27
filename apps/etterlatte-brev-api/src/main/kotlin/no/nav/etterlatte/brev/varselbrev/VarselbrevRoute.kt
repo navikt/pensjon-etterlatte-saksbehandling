@@ -74,7 +74,7 @@ internal fun Route.varselbrevRoute(
 
     route("brev/{$BREV_ID_CALL_PARAMETER}/varsel") {
         post("/ferdigstill") {
-            withSakId(tilgangssjekker) {
+            withSakId(tilgangssjekker, skrivetilgang = true) {
                 val brevId = requireNotNull(call.parameters[BREV_ID_CALL_PARAMETER]).toLong()
 
                 logger.info("Genererer og ferdigstiller PDF for varselbrev (id=$brevId)")

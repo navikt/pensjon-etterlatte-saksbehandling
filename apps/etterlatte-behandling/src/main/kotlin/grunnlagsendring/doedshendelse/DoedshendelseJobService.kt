@@ -121,8 +121,8 @@ class DoedshendelseJobService(
 
         val gjenlevende =
             when (opprettetSak.sakType) {
-                SakType.BARNEPENSJON -> null
-                SakType.OMSTILLINGSSTOENAD -> hentAnnenForelder(doedshendelse)
+                SakType.BARNEPENSJON -> hentAnnenForelder(doedshendelse)
+                SakType.OMSTILLINGSSTOENAD -> null
             }
         val galleri =
             Persongalleri(

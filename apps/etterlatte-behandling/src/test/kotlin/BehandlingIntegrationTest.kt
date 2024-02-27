@@ -518,6 +518,12 @@ class BrevApiKlientTest : BrevApiKlient {
         return opprettetBrevDto(brevId)
     }
 
+    override suspend fun slettVedtaksbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+    }
+
     private fun opprettetBrevDto(brevId: Long) =
         OpprettetBrevDto(
             id = brevId,

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Tabs } from '@navikt/ds-react'
-import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
+import { Heading, Tabs } from '@navikt/ds-react'
 import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
-import { Container, FlexRow } from '~shared/styled'
+import { FlexRow } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
@@ -27,10 +26,10 @@ import {
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { FilterRad } from '~components/oppgavebenk/oppgaveFiltrering/FilterRad'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/components/OppgaveFeilWrapper'
+import { FiltrerOppgaver } from '~components/oppgavebenk/FiltrerOppgaver'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -168,27 +167,7 @@ export const ToggleMinOppgaveliste = () => {
   }, [gosysOppgaverResult, minOppgavelisteOppgaverResult])
 
   return (
-    <Container>
-      <TabsWidth
-        value={oppgaveListeValg}
-        onChange={(e) => {
-          oppdaterOppgavelisteValg(e as OppgavelisteToggle)
-        }}
-      >
-        <Tabs.List>
-          <Tabs.Tab
-            value="Oppgavelista"
-            label={`Oppgavelisten (${oppgavelistaOppgaver.length})`}
-            icon={<InboxIcon />}
-          />
-          <Tabs.Tab
-            value="MinOppgaveliste"
-            label={`Min oppgaveliste (${minOppgavelisteOppgaver.length})`}
-            icon={<PersonIcon aria-hidden />}
-          />
-        </Tabs.List>
-      </TabsWidth>
-
+    <>
       {oppgaveListeValg === 'MinOppgaveliste' ? (
         <>
           <FlexRow>
@@ -213,31 +192,32 @@ export const ToggleMinOppgaveliste = () => {
           </OppgaveFeilWrapper>
         </>
       ) : (
-        <>
-          <FilterRad
-            hentAlleOppgaver={hentAlleMinOppgavelisteOppgaver}
-            hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => hentOppgavelistaOppgaver(oppgavestatusFilter)}
-            filter={oppgavelistaFilter}
-            setFilter={setOppgavelistaFilter}
-            alleOppgaver={oppgavelistaOppgaver}
-            saksbehandlereIEnhet={saksbehandlereIEnheter}
-          />
+        <FlexRow>
+          <FiltrerOppgaver />
 
-          <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
-            <Oppgaver
-              oppgaver={oppgavelistaOppgaver}
-              oppdaterTildeling={oppdaterSaksbehandlerTildeling}
-              saksbehandlereIEnhet={saksbehandlereIEnheter}
-              filter={oppgavelistaFilter}
-            />
-          </OppgaveFeilWrapper>
-        </>
+          <OppgaveWrapper>
+            <OppgaveHeading size="xlarge">Oppgavelista</OppgaveHeading>
+            <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
+              <Oppgaver
+                oppgaver={oppgavelistaOppgaver}
+                oppdaterTildeling={oppdaterSaksbehandlerTildeling}
+                saksbehandlereIEnhet={saksbehandlereIEnheter}
+                filter={oppgavelistaFilter}
+              />
+            </OppgaveFeilWrapper>
+          </OppgaveWrapper>
+        </FlexRow>
       )}
-    </Container>
+    </>
   )
 }
 
-const TabsWidth = styled(Tabs)`
-  max-width: fit-content;
+const OppgaveWrapper = styled.div`
+  width: 100%;
+  margin-left: 1rem;
+  margin-top: 3rem;
+`
+
+const OppgaveHeading = styled(Heading)`
   margin-bottom: 2rem;
 `

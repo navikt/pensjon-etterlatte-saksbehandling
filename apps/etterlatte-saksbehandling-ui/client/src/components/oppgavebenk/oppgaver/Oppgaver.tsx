@@ -60,11 +60,11 @@ export const Oppgaver = ({
 
   return (
     <>
-      <PagineringsKontroller
-        page={page}
-        setPage={setPage}
-        antallSider={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}
-      />
+      {/*<PagineringsKontroller*/}
+      {/*  page={page}*/}
+      {/*  setPage={setPage}*/}
+      {/*  antallSider={Math.ceil(filtrerteOppgaver.length / rowsPerPage)}*/}
+      {/*/>*/}
 
       <OppgaverTable
         oppgaver={paginerteOppgaver}

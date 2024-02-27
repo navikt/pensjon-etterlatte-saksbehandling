@@ -8,6 +8,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUt
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -16,6 +17,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
+import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -73,7 +75,7 @@ interface OppgaveDao {
         dato: LocalDate,
         type: OppgaveType,
         kilde: OppgaveKilde,
-    ): List<UUID>
+    ): List<VentefristGaarUt>
 }
 
 class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) : OppgaveDao {
@@ -379,13 +381,13 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
         dato: LocalDate,
         type: OppgaveType,
         kilde: OppgaveKilde,
-    ): List<UUID> =
+    ): List<VentefristGaarUt> =
         connectionAutoclosing.hentConnection {
             with(it) {
                 val statement =
                     prepareStatement(
                         """
-                        SELECT o.id
+                        SELECT o.id, o.referanse, o.sak_id
                         FROM oppgave o LEFT JOIN saksbehandler_info si ON o.saksbehandler = si.id
                         WHERE o.frist <= ?
                         and type = ?
@@ -396,7 +398,11 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(2, type.name)
                 statement.setString(3, kilde.name)
                 statement.executeQuery().toList {
-                    getUUID("id")
+                    VentefristGaarUt(
+                        oppgaveID = getUUID("id"),
+                        sakId = getLong("sak_id"),
+                        behandlingId = getString("referanse").toUUID(),
+                    )
                 }.also { utgaatte ->
                     logger.info("Hentet ${utgaatte.size} oppgaver der fristen går ut for dato $dato og type $type")
                 }

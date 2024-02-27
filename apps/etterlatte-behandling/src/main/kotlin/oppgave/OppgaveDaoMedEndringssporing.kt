@@ -180,5 +180,5 @@ class OppgaveDaoMedEndringssporingImpl(
         dato: LocalDate,
         type: OppgaveType,
         kilde: OppgaveKilde,
-    ): List<UUID> = oppgaveDao.hentFristGaarUt(dato, type, kilde)
+    ) = oppgaveDao.hentFristGaarUt(dato, type, kilde)
 }

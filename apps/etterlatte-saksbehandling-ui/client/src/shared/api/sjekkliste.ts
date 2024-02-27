@@ -9,7 +9,6 @@ export const opprettSjekkliste = async (behandlingId: string) =>
 export const oppdaterSjekkliste = async (sjekkliste: ISjekkliste) =>
   apiClient.put<ISjekkliste>(`/sjekkliste/${sjekkliste.id}`, {
     kommentar: sjekkliste.kommentar,
-    adresseForBrev: sjekkliste.adresseForBrev,
     kontonrRegistrert: sjekkliste.kontonrRegistrert,
     onsketSkattetrekk: sjekkliste.onsketSkattetrekk,
     bekreftet: sjekkliste.bekreftet,

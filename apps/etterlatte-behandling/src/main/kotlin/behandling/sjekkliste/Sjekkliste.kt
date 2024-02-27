@@ -5,7 +5,6 @@ import java.util.UUID
 data class Sjekkliste(
     val id: UUID,
     val kommentar: String? = null,
-    val adresseForBrev: String? = null,
     val kontonrRegistrert: String? = null,
     val onsketSkattetrekk: Int? = null,
     val bekreftet: Boolean = false,
@@ -22,7 +21,6 @@ data class SjekklisteItem(
 
 data class OppdatertSjekkliste(
     val kommentar: String? = null,
-    val adresseForBrev: String? = null,
     val kontonrRegistrert: String? = null,
     val onsketSkattetrekk: Int? = null,
     val bekreftet: Boolean = false,

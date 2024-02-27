@@ -35,6 +35,11 @@ const Versioncheck = () => {
     }
   }, [])
 
+  const onAvbryt = () => {
+    setIsOutdated(false)
+    timeoutReloadPage && window.clearTimeout(timeoutReloadPage)
+  }
+
   return (
     <>
       <Modal
@@ -44,6 +49,7 @@ const Versioncheck = () => {
           closeButton: false,
         }}
         open={isOutdated}
+        onClose={onAvbryt}
       >
         <Modal.Body>
           <Alert variant="warning">
@@ -54,13 +60,7 @@ const Versioncheck = () => {
           </Alert>
         </Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setIsOutdated(false)
-              timeoutReloadPage && window.clearTimeout(timeoutReloadPage)
-            }}
-          >
+          <Button variant="secondary" onClick={onAvbryt}>
             Avbryt oppdatering
           </Button>
           <Button variant="primary" onClick={() => window.location.reload()}>

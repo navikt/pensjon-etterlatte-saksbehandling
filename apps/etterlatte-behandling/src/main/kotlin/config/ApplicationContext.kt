@@ -12,7 +12,7 @@ import no.nav.etterlatte.behandling.BehandlingServiceImpl
 import no.nav.etterlatte.behandling.BehandlingStatusServiceImpl
 import no.nav.etterlatte.behandling.BehandlingsHendelserKafkaProducerImpl
 import no.nav.etterlatte.behandling.BrukerServiceImpl
-import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.GyldighetsproevingServiceImpl
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktDao
 import no.nav.etterlatte.behandling.aktivitetsplikt.AktivitetspliktService
@@ -263,7 +263,7 @@ internal class ApplicationContext(
     val oppgaveService = OppgaveService(oppgaveDaoEndringer, sakDao)
 
     val gosysOppgaveService = GosysOppgaveServiceImpl(gosysOppgaveKlient, pdlTjenesterKlient)
-    val grunnlagsService = GrunnlagService(grunnlagKlient)
+    val grunnlagsService = GrunnlagServiceImpl(grunnlagKlient)
     val behandlingService =
         BehandlingServiceImpl(
             behandlingDao = behandlingDao,

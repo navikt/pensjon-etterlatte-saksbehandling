@@ -2,10 +2,12 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
@@ -13,7 +15,11 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnOppgaveId
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnSak
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -33,6 +39,8 @@ class DoedshendelseJobService(
     private val sakService: SakService,
     private val dagerGamleHendelserSomSkalKjoeres: Int,
     private val deodshendelserProducer: DoedshendelserKafkaService,
+    private val grunnlagService: GrunnlagService,
+    private val pdlTjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -86,10 +94,29 @@ class DoedshendelseJobService(
                         "med avdød ${doedshendelse.avdoedFnr.maskerFnr()}",
                 )
                 val sak = // todo - EY-3572: Hvis sak ikke finnes, må vi også opprette persongrunnlag
-                    kontrollpunkter.finnSak() ?: sakService.finnEllerOpprettSak(
-                        fnr = doedshendelse.beroertFnr,
-                        type = doedshendelse.sakType(),
-                    )
+                    kontrollpunkter.finnSak() ?: {
+                        val sak =
+                            sakService.finnEllerOpprettSak(
+                                fnr = doedshendelse.beroertFnr,
+                                type = doedshendelse.sakType(),
+                            )
+
+                        val gjenlevende =
+                            when (sak.sakType) {
+                                SakType.BARNEPENSJON -> null
+                                SakType.OMSTILLINGSSTOENAD -> hentAnnenForelder(doedshendelse)
+                            }
+                        val galleri =
+                            Persongalleri(
+                                soeker = doedshendelse.beroertFnr,
+                                avdoed = listOf(doedshendelse.avdoedFnr),
+                                gjenlevende = listOfNotNull(gjenlevende),
+                                innsender = Vedtaksloesning.GJENNY.name,
+                            )
+
+                        grunnlagService.leggInnNyttGrunnlagSak(sak = sak, galleri)
+                        sak
+                    }
 
                 sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
                 val skalOppretteOppgave = kontrollpunkter.any { it.opprettOppgave }
@@ -105,6 +132,16 @@ class DoedshendelseJobService(
                 }
             }
         }
+    }
+
+    private fun hentAnnenForelder(doedshendelse: DoedshendelseInternal): String? {
+        return pdlTjenesterKlient.hentPdlModell(
+            foedselsnummer = doedshendelse.beroertFnr,
+            rolle = PersonRolle.BARN,
+            saktype = SakType.BARNEPENSJON,
+        ).familieRelasjon?.verdi?.foreldre
+            ?.map { it.value }
+            ?.firstOrNull { it != doedshendelse.avdoedFnr }
     }
 
     private fun sendBrevHvisKravOppfylles(

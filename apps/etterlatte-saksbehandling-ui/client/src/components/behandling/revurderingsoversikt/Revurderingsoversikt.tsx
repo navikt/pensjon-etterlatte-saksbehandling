@@ -18,6 +18,8 @@ import {
   FELLES_REVURDERING_HJEMLER,
   BP_REVURDERING_YRKESSKADE_BESKRIVELSE,
   BP_REVURDERING_YRKESSKADE_HJEMLER,
+  OMS_ALDERSOVERGANG_BESKRIVELSE,
+  OMS_ALDERSOVERGANG_HJEMLER,
   OMS_INNTEKTSENDRING_BESKRIVELSE,
   OMS_INNTEKTSENDRING_HJEMLER,
   OMS_INST_HJEMLER_VIRK,
@@ -53,6 +55,8 @@ const hjemlerOgBeskrivelse = (sakType: SakType, revurderingsaarsak: Revurderinga
 
 const hjemlerOgBeskrivelseOmstillingsstoenad = (revurderingsaarsak: Revurderingaarsak): [Array<Hjemmel>, string] => {
   switch (revurderingsaarsak) {
+    case Revurderingaarsak.ALDERSOVERGANG:
+      return [OMS_ALDERSOVERGANG_HJEMLER, OMS_ALDERSOVERGANG_BESKRIVELSE]
     case Revurderingaarsak.DOEDSFALL:
       return [OMS_OPPHOER_HJEMLER, OMS_OPPHOER_BESKRIVELSE]
     case Revurderingaarsak.INNTEKTSENDRING:

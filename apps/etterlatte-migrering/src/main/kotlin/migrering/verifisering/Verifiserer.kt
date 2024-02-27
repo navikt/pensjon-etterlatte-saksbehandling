@@ -50,6 +50,10 @@ internal class Verifiserer(
         val finnesIPdlFeil = pesonerFinnesIPdlEllerSoekerErDoed(patchedRequest)
         feilSomAvbryter.addAll(finnesIPdlFeil)
 
+        if (patchedRequest.trygdetid.perioder.isEmpty()) {
+            feilSomAvbryter.add(ManglerTrygdetidsperioder)
+        }
+
         if (soeker != null) {
             feilSomMedfoererManuell.addAll(sjekkAtSoekerHarRelevantVerge(patchedRequest, soeker))
             if (!patchedRequest.erUnder18) {
@@ -363,4 +367,9 @@ data object BrukerManglerAdresse : Verifiseringsfeil() {
 data object BeregningsmetodeIkkeNasjonal : Verifiseringsfeil() {
     override val message: String
         get() = "Sak har brukt annen beregningsmetode enn Nasjonal"
+}
+
+data object ManglerTrygdetidsperioder : Verifiseringsfeil() {
+    override val message: String
+        get() = "Mangler trygdetidsperioder"
 }

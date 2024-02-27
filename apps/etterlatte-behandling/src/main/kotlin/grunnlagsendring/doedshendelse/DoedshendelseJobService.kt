@@ -89,16 +89,17 @@ class DoedshendelseJobService(
             }
 
             false -> {
-                logger.info(
-                    "Oppretter grunnlagshendelse og oppgave for person ${doedshendelse.beroertFnr.maskerFnr()} " +
-                        "med avdød ${doedshendelse.avdoedFnr.maskerFnr()}",
-                )
+                logger.info("Skal håndtere dødshendelse")
                 val sak: Sak =
                     kontrollpunkter.finnSak() ?: opprettSakOgLagGrunnlag(doedshendelse)
 
                 sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
                 val skalOppretteOppgave = kontrollpunkter.any { it.opprettOppgave }
                 if (skalOppretteOppgave) {
+                    logger.info(
+                        "Oppretter grunnlagshendelse og oppgave for person ${doedshendelse.beroertFnr.maskerFnr()} " +
+                            "med avdød ${doedshendelse.avdoedFnr.maskerFnr()}",
+                    )
                     val oppgave = opprettOppgave(doedshendelse, sak)
                     doedshendelseDao.oppdaterDoedshendelse(
                         doedshendelse.tilBehandlet(
@@ -113,6 +114,7 @@ class DoedshendelseJobService(
     }
 
     private fun opprettSakOgLagGrunnlag(doedshendelse: DoedshendelseInternal): Sak {
+        logger.info("Oppretter sak for dødshendelse ${doedshendelse.id} avdøed ${doedshendelse.avdoedFnr.maskerFnr()}")
         val opprettetSak =
             sakService.finnEllerOpprettSak(
                 fnr = doedshendelse.beroertFnr,

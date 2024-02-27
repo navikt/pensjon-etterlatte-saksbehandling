@@ -64,8 +64,8 @@ class TidshendelseRiver(
 
             if (type == "AO_BP20" && packet["yrkesskadefordel_pre_20240101"].asBoolean()) {
                 logger.info("Har migrert yrkesskadefordel: utvidet aldersgrense [sak=$sakId]")
-            } else if (type == "OMS_DOED_3AAR" && packet["oms_rett_uten_tidsbegrensning"].asBoolean()) {
-                logger.info("Har omstillingsstønad med rett uten tidsbegrensning, opphører ikke etter 3 år [sak=$sakId]")
+            } else if (type in arrayOf("OMS_DOED_3AAR", "OMS_DOED_5AAR") && packet["oms_rett_uten_tidsbegrensning"].asBoolean()) {
+                logger.info("Har omstillingsstønad med rett uten tidsbegrensning, opphører ikke [sak=$sakId]")
             } else if (packet[HENDELSE_DATA_KEY]["loependeYtelse"]?.asBoolean() == true) {
                 val behandlingsmaaned = packet.dato.let { YearMonth.of(it.year, it.month) }
                 logger.info("Løpende ytelse: opprette oppgave for sak $sakId, behandlingsmåned=$behandlingsmaaned")

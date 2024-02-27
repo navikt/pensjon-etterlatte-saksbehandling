@@ -45,7 +45,7 @@ class DoedshendelseKontrollpunktService(
             kontrollerDNummer(avdoed),
             kontrollerUtvandring(avdoed),
             kontrollerSamtidigDoedsfall(avdoed, hendelse),
-            kontrollerEksisterendeSak(sak),
+            kontrollerEksisterendeSak(hendelse, sak),
             kontrollerEksisterendeHendelser(hendelse, sak),
         )
     }
@@ -179,8 +179,15 @@ class DoedshendelseKontrollpunktService(
             DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
         }
 
-    private fun kontrollerEksisterendeSak(sak: Sak?): DoedshendelseKontrollpunkt? =
-        sak?.let { return DoedshendelseKontrollpunkt.SakEksistererIGjenny(sak) }
+    private fun kontrollerEksisterendeSak(
+        doedshendelse: DoedshendelseInternal,
+        sak: Sak?,
+    ): DoedshendelseKontrollpunkt? {
+        if (doedshendelse.relasjon == Relasjon.EPS) {
+            sak?.let { return DoedshendelseKontrollpunkt.EpsHarSakIGjenny(sak) }
+        }
+        return null
+    }
 
     private fun kontrollerEksisterendeHendelser(
         hendelse: DoedshendelseInternal,

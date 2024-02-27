@@ -147,8 +147,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
         every { behandlingService.hentSisteIverksatte(any()) } returns foerstegangsbehandling(sakId = sakId)
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
-        val sakEksistererIntern = DoedshendelseKontrollpunkt.SakEksistererIGjenny(sak)
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnHarBarnepensjon, sakEksistererIntern)
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnHarBarnepensjon)
     }
 
     @Test
@@ -295,19 +294,19 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
     }
 
     @Test
-    fun `Skal opprette kontrollpunkt dersom det eksisterer en sak fra foer`() {
+    fun `Skal opprette kontrollpunkt dersom det eksisterer en sak fra foer for EPS`() {
         val sak =
             Sak(
-                ident = doedshendelseInternalBP.beroertFnr,
-                sakType = doedshendelseInternalBP.sakType(),
+                ident = doedshendelseInternalOMS.beroertFnr,
+                sakType = doedshendelseInternalOMS.sakType(),
                 id = 1L,
                 enhet = "0000",
             )
         every { sakService.finnSak(any(), any()) } returns sak
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.SakEksistererIGjenny(sak))
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarSakIGjenny(sak))
     }
 
     @Test
@@ -339,7 +338,6 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
 
         kontrollpunkter shouldContainExactly
             listOf(
-                DoedshendelseKontrollpunkt.SakEksistererIGjenny(sak),
                 DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse(
                     grunnlagsendringshendelseId = grunnlagsendringshendelse.id,
                     oppgaveId = oppgaveIntern.id,

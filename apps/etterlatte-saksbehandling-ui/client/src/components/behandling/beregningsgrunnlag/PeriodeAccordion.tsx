@@ -1,7 +1,5 @@
-import React, { ReactNode, useState } from 'react'
-import { Heading } from '@navikt/ds-react'
-import { ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
-import AnimateHeight from '@navikt/ds-react/esm/table/AnimateHeight'
+import React, { ReactNode } from 'react'
+import { Accordion, Heading } from '@navikt/ds-react'
 import styled from 'styled-components'
 
 const defaultAccordionProps = {
@@ -18,63 +16,23 @@ type PeriodeAccordionProps = {
   React.HTMLAttributes<HTMLDivElement>
 
 const PeriodeAccordion = (props: PeriodeAccordionProps) => {
-  const { children, topSummary, title, feilBorder, titleHeadingLevel, defaultOpen, ...rest } = props
-  const [open, setOpen] = useState<boolean>(defaultOpen)
-  const topContent = topSummary instanceof Function ? topSummary(open) : topSummary
+  const { children, title, titleHeadingLevel } = props
   return (
-    <PeriodeAccordionWrapper {...rest} feilBorder={feilBorder}>
-      <PeriodeAccordionHead>
-        <ExpandButton onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-          {open ? <ChevronUpIcon fontSize={20} aria-hidden /> : <ChevronDownIcon fontSize={20} aria-hidden />}
+    <AccordionWrapper>
+      <Accordion.Item>
+        <Accordion.Header>
           <Heading size="small" level={titleHeadingLevel}>
             {title}
           </Heading>
-        </ExpandButton>
-        <div>{topContent}</div>
-      </PeriodeAccordionHead>
-      <AnimateHeight height={open ? 'auto' : 0} duration={250}>
-        <PeriodeAccordionContent>{children}</PeriodeAccordionContent>
-      </AnimateHeight>
-    </PeriodeAccordionWrapper>
+        </Accordion.Header>
+        <Accordion.Content>{children}</Accordion.Content>
+      </Accordion.Item>
+    </AccordionWrapper>
   )
 }
 
-const PeriodeAccordionWrapper = styled.div<{ feilBorder: boolean }>`
-  border: ${(props) => (props.feilBorder ? '2px solid var(--a-border-danger)' : '1px solid')};
-  margin: 0 3em 2em 3em;
-  padding: 1em 0;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`
-
-const PeriodeAccordionHead = styled.div`
-  display: grid;
-  grid-template-columns: calc(350px + 2em) 1fr;
-  padding: 0 3em 0 1em;
-`
-
-const PeriodeAccordionContent = styled.div`
-  padding: 0 3em;
-`
-
-PeriodeAccordion.defaultProps = defaultAccordionProps
-
-const ExpandButton = styled.button.attrs({ type: 'button' })`
-  display: flex;
-  flex-direction: row;
-  background: none;
-  border: none;
-  cursor: pointer;
-
-  &:hover {
-    color: var(--nav-blue);
-  }
-
-  * {
-    margin: auto 0;
-  }
+const AccordionWrapper = styled(Accordion)`
+  margin: 0 3em 0 3em;
 `
 
 export default PeriodeAccordion

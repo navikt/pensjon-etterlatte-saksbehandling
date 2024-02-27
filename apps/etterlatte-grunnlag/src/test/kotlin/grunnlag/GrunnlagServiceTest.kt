@@ -19,8 +19,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.grunnlag.Opplysning
+import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.grunnlag.hentBostedsadresse
 import no.nav.etterlatte.libs.common.grunnlag.hentFoedselsnummer
+import no.nav.etterlatte.libs.common.grunnlag.hentKonstantOpplysning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Navn
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype.BOSTEDSADRESSE
@@ -48,6 +50,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.libs.testdata.grunnlag.statiskUuid
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
@@ -198,6 +201,64 @@ internal class GrunnlagServiceTest {
 
             assertEquals(expected[NAVN], actual.soeker[NAVN])
             assertEquals(expected[FOEDSELSDATO], actual.soeker[FOEDSELSDATO])
+        }
+
+        @Test
+        fun `Skal lagre grunnlaget for kun sak`() {
+            val galleri =
+                Persongalleri(
+                    testData.soeker.foedselsnummer.value,
+                    testData.soeker.foedselsnummer.value,
+                    emptyList(),
+                    listOf(testData.avdoede.first().foedselsnummer.value),
+                    listOf(testData.gjenlevende.foedselsnummer.value),
+                )
+            val sakId = 1L
+            val grunnlagshendelser =
+                listOf(
+                    OpplysningDao.GrunnlagHendelse(
+                        opplysning =
+                            Grunnlagsopplysning(
+                                id = UUID.randomUUID(),
+                                kilde = kilde,
+                                opplysningType = PERSONGALLERI_V1,
+                                meta = objectMapper.createObjectNode(),
+                                opplysning = galleri.toJsonNode(),
+                                attestering = null,
+                                fnr = testData.soeker.foedselsnummer,
+                            ),
+                        sakId = sakId,
+                        hendelseNummer = 1,
+                    ),
+                )
+
+            val opplysningsperson = mockPerson()
+
+            coEvery {
+                grunnlagHenter.hentGrunnlagsdata(any())
+            } returns sampleFetchedGrunnlag(opplysningsperson)
+            every { opplysningDaoMock.finnHendelserIGrunnlag(sakId) } returns emptyList()
+            every { opplysningDaoMock.leggOpplysningTilGrunnlag(any(), any(), any()) } returns sakId
+
+            val opplysningsbehov = Opplysningsbehov(sakId, SakType.BARNEPENSJON, galleri)
+
+            runBlocking { grunnlagService.opprettGrunnlagForSak(sakId, opplysningsbehov) }
+
+            every { opplysningDaoMock.hentAlleGrunnlagForSak(sakId) } returns grunnlagshendelser
+            every { opplysningDaoMock.finnNyesteGrunnlagForSak(sakId, PERSONGALLERI_V1) } returns grunnlagshendelser.first()
+
+            val grunnlag = grunnlagService.hentOpplysningsgrunnlagForSak(sakId)
+            assertNotNull(grunnlag)
+            if (grunnlag != null) {
+                val hentetGalleriPaaSoeker =
+                    grunnlag.soeker.hentKonstantOpplysning<Persongalleri>(
+                        PERSONGALLERI_V1,
+                    )?.verdi ?: throw RuntimeException("failure")
+                assertEquals(testData.soeker.foedselsnummer.value, hentetGalleriPaaSoeker.soeker)
+                assertEquals(testData.soeker.foedselsnummer.value, hentetGalleriPaaSoeker.innsender)
+                assertEquals(testData.avdoede.first().foedselsnummer.value, hentetGalleriPaaSoeker.avdoed.first())
+                assertEquals(testData.gjenlevende.foedselsnummer.value, hentetGalleriPaaSoeker.gjenlevende.first())
+            }
         }
 
         @Test

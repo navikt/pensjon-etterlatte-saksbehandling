@@ -69,7 +69,7 @@ class DoedshendelseKontrollpunktService(
     }
 
     private fun SakSammendragResponse.harLoependeUfoeretrygd(): Boolean {
-        return this.sakType == SakSammendragResponse.UFORE_SAKTYPE &&
+        return this.sakType == UFORE_SAKTYPE &&
             this.sakStatus == SakSammendragResponse.Status.LOPENDE
     }
 

@@ -22,7 +22,7 @@ export type Mappers<T, R> = {
   success?: (_: T) => R
   initial?: R
   pending?: R
-  error?: (_: ApiError) => R
+  error?: ((_: ApiError) => R) | R
 }
 
 export const mapResultFallback = <T, R, F>(result: Result<T>, mappers: Mappers<T, R>, fallback: F): R | F => {
@@ -33,7 +33,14 @@ export const mapResultFallback = <T, R, F>(result: Result<T>, mappers: Mappers<T
     return mappers.pending !== undefined ? mappers.pending : fallback
   }
   if (isFailure(result)) {
-    return mappers.error !== undefined ? mappers.error(result.error) : fallback
+    if (mappers.error === undefined) {
+      return fallback
+    }
+    if (typeof mappers.error === 'function') {
+      return (mappers.error as Function)(result.error)
+    } else {
+      return mappers.error
+    }
   }
   if (isSuccess(result)) {
     return mappers.success !== undefined ? mappers.success(result.data) : fallback

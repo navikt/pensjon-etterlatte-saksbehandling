@@ -23,6 +23,7 @@ export const AttesteringEllerUnderkjenning = ({ setBeslutning, beslutning, vedta
   const [oppgaveErTildeltInnloggetBruker, setOppgaveErTildeltInnloggetBruker] = useState(false)
 
   useEffect(() => {
+    console.log(saksbehandlerForGjeldendeOppgave, innloggetSaksbehandler.ident, beslutning)
     setOppgaveErTildeltInnloggetBruker(saksbehandlerForGjeldendeOppgave === innloggetSaksbehandler.ident)
   }, [saksbehandlerForGjeldendeOppgave, innloggetSaksbehandler.ident, beslutning])
 

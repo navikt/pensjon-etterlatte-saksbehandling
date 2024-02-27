@@ -59,6 +59,7 @@ export enum KlageStatus {
   FORMKRAV_OPPFYLT = 'FORMKRAV_OPPFYLT',
   FORMKRAV_IKKE_OPPFYLT = 'FORMKRAV_IKKE_OPPFYLT',
   UTFALL_VURDERT = 'UTFALL_VURDERT',
+  FATTET_VEDTAK = 'FATTET_VEDTAK',
   FERDIGSTILT = 'FERDIGSTILT',
   AVBRUTT = 'AVBRUTT',
 }
@@ -69,6 +70,7 @@ export const teksterKlagestatus: Record<KlageStatus, string> = {
   FORMKRAV_IKKE_OPPFYLT: 'Formkrav vurdert ikke oppfylt',
   UTFALL_VURDERT: 'Utfall av klagen vurdert',
   FERDIGSTILT: 'Klagen ferdigstilt i Gjenny',
+  FATTET_VEDTAK: 'Fattet vedtak',
   AVBRUTT: 'Klagen avsluttet',
 }
 

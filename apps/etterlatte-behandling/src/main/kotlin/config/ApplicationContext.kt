@@ -361,6 +361,7 @@ internal class ApplicationContext(
             dagerGamleHendelserSomSkalKjoeres = if (isProd()) 2 else 0,
             behandlingService = behandlingService,
             pdlTjenesterKlient = pdlTjenesterKlient,
+            pesysKlient = pesysKlient,
         )
 
     val behandlingsStatusService =

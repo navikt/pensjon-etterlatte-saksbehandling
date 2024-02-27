@@ -2,12 +2,7 @@ import styled from 'styled-components'
 import { IBehandlingsType, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import { NavLenke } from '~components/behandling/StegMeny/NavLenke'
 import { IBehandlingReducer, updateVilkaarsvurdering } from '~store/reducers/BehandlingReducer'
-import {
-  BehandlingRouteTypes,
-  manueltOpphoerRoutes,
-  revurderingRoutes,
-  soeknadRoutes,
-} from '~components/behandling/BehandlingRoutes'
+import { BehandlingRouteTypes, revurderingRoutes, soeknadRoutes } from '~components/behandling/BehandlingRoutes'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { hentVilkaarsvurdering } from '~shared/api/vilkaarsvurdering'
 import { useEffect } from 'react'
@@ -41,15 +36,6 @@ export const StegMeny = (props: { behandling: IBehandlingReducer }) => {
   if (isSuccess(fetchVilkaarsvurderingStatus)) {
     return (
       <StegMenyWrapper role="navigation">
-        {behandlingType === IBehandlingsType.MANUELT_OPPHOER &&
-          manueltOpphoerRoutes.map((pathInfo, index) => (
-            <NavLenke
-              key={pathInfo.path}
-              pathInfo={pathInfo}
-              behandling={props.behandling}
-              separator={erSisteRoute(index, manueltOpphoerRoutes)}
-            />
-          ))}
         {behandlingType === IBehandlingsType.FØRSTEGANGSBEHANDLING &&
           soeknadRoutes_.map((pathInfo, index) => (
             <NavLenke

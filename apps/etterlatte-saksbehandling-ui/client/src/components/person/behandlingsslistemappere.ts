@@ -75,8 +75,6 @@ export const lenkeTilBehandling = (behandlingSammendrag: IBehandlingsammendrag):
       return `/behandling/${behandlingSammendrag.id}/soeknadsoversikt`
     case IBehandlingsType.REVURDERING:
       return `/behandling/${behandlingSammendrag.id}/revurderingsoversikt`
-    case IBehandlingsType.MANUELT_OPPHOER:
-      return `/behandling/${behandlingSammendrag.id}/opphoeroversikt`
   }
 }
 export const generellBehandlingsStatusTilLesbartNavn = (status: Status) => {

@@ -80,8 +80,6 @@ export const behandlingSkalSendeBrev = (
   switch (behandlingType) {
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return true
-    case IBehandlingsType.MANUELT_OPPHOER:
-      return false
     case IBehandlingsType.REVURDERING:
       return !(
         revurderingsaarsak === Revurderingaarsak.REGULERING ||

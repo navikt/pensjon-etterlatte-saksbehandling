@@ -2,10 +2,12 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
@@ -13,7 +15,11 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.Doedshende
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnOppgaveId
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnSak
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.Vedtaksloesning
+import no.nav.etterlatte.libs.common.behandling.Persongalleri
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
+import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -33,6 +39,8 @@ class DoedshendelseJobService(
     private val sakService: SakService,
     private val dagerGamleHendelserSomSkalKjoeres: Int,
     private val deodshendelserProducer: DoedshendelserKafkaService,
+    private val grunnlagService: GrunnlagService,
+    private val pdlTjenesterKlient: PdlTjenesterKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -81,19 +89,17 @@ class DoedshendelseJobService(
             }
 
             false -> {
-                logger.info(
-                    "Oppretter grunnlagshendelse og oppgave for person ${doedshendelse.beroertFnr.maskerFnr()} " +
-                        "med avdød ${doedshendelse.avdoedFnr.maskerFnr()}",
-                )
-                val sak = // todo - EY-3572: Hvis sak ikke finnes, må vi også opprette persongrunnlag
-                    kontrollpunkter.finnSak() ?: sakService.finnEllerOpprettSak(
-                        fnr = doedshendelse.beroertFnr,
-                        type = doedshendelse.sakType(),
-                    )
+                logger.info("Skal håndtere dødshendelse")
+                val sak: Sak =
+                    kontrollpunkter.finnSak() ?: opprettSakOgLagGrunnlag(doedshendelse)
 
                 sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
                 val skalOppretteOppgave = kontrollpunkter.any { it.opprettOppgave }
                 if (skalOppretteOppgave) {
+                    logger.info(
+                        "Oppretter grunnlagshendelse og oppgave for person ${doedshendelse.beroertFnr.maskerFnr()} " +
+                            "med avdød ${doedshendelse.avdoedFnr.maskerFnr()}",
+                    )
                     val oppgave = opprettOppgave(doedshendelse, sak)
                     doedshendelseDao.oppdaterDoedshendelse(
                         doedshendelse.tilBehandlet(
@@ -107,6 +113,41 @@ class DoedshendelseJobService(
         }
     }
 
+    private fun opprettSakOgLagGrunnlag(doedshendelse: DoedshendelseInternal): Sak {
+        logger.info("Oppretter sak for dødshendelse ${doedshendelse.id} avdøed ${doedshendelse.avdoedFnr.maskerFnr()}")
+        val opprettetSak =
+            sakService.finnEllerOpprettSak(
+                fnr = doedshendelse.beroertFnr,
+                type = doedshendelse.sakType(),
+            )
+
+        val gjenlevende =
+            when (opprettetSak.sakType) {
+                SakType.BARNEPENSJON -> hentAnnenForelder(doedshendelse)
+                SakType.OMSTILLINGSSTOENAD -> null
+            }
+        val galleri =
+            Persongalleri(
+                soeker = doedshendelse.beroertFnr,
+                avdoed = listOf(doedshendelse.avdoedFnr),
+                gjenlevende = listOfNotNull(gjenlevende),
+                innsender = Vedtaksloesning.GJENNY.name,
+            )
+
+        grunnlagService.leggInnNyttGrunnlagSak(sak = opprettetSak, galleri)
+        return opprettetSak
+    }
+
+    private fun hentAnnenForelder(doedshendelse: DoedshendelseInternal): String? {
+        return pdlTjenesterKlient.hentPdlModell(
+            foedselsnummer = doedshendelse.beroertFnr,
+            rolle = PersonRolle.BARN,
+            saktype = SakType.BARNEPENSJON,
+        ).familieRelasjon?.verdi?.foreldre
+            ?.map { it.value }
+            ?.firstOrNull { it != doedshendelse.avdoedFnr }
+    }
+
     private fun sendBrevHvisKravOppfylles(
         doedshendelse: DoedshendelseInternal,
         sak: Sak,
@@ -115,6 +156,7 @@ class DoedshendelseJobService(
         val skalSendeBrev = kontrollpunkter.none { !it.sendBrev }
         if (skalSendeBrev) {
             if (doedshendelse.relasjon == Relasjon.BARN) {
+                logger.info("Sender brev for ${Relasjon.BARN.name} for sak ${sak.id}")
                 deodshendelserProducer.sendBrevRequest(sak)
             }
             // TODO: EY-3470 relasjon EPS

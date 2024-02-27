@@ -11,6 +11,8 @@ import io.mockk.verify
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.Self
+import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt.AvdoedHarDNummer
@@ -23,6 +25,7 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -58,6 +61,16 @@ class DoedshendelseInternalPdlJobServiceTest {
         mockk<DoedshendelserKafkaService> {
             every { sendBrevRequest(any()) } just runs
         }
+
+    private val grunnlagService =
+        mockk<GrunnlagService> {
+            every { leggInnNyttGrunnlagSak(any(), any()) } just runs
+        }
+
+    val pdlTjenesterKlient =
+        mockk<PdlTjenesterKlient> {
+            every { hentPdlModell(any(), any(), any()) } returns mockPerson()
+        }
     private val service =
         DoedshendelseJobService(
             doedshendelseDao = dao,
@@ -67,6 +80,8 @@ class DoedshendelseInternalPdlJobServiceTest {
             sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = todagergammel,
             doedshendelserProducer,
+            grunnlagService,
+            pdlTjenesterKlient,
         )
 
     @AfterEach

@@ -45,7 +45,7 @@ import no.nav.etterlatte.kafka.standardProducer
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.libs.ktor.httpClient
-import no.nav.etterlatte.libs.ktor.metricsModule
+import no.nav.etterlatte.libs.ktor.metricsRoute
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.testdata.dolly.DollyClientImpl
 import no.nav.etterlatte.testdata.dolly.DollyService
@@ -137,7 +137,7 @@ fun main() {
                             api()
                         }
                     }
-                    metricsModule()
+                    metricsRoute()
                 }
             }
             connector { port = 8080 }

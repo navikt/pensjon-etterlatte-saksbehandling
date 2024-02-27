@@ -38,7 +38,13 @@ class TilbakekrevingService(
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag) =
+    fun hentTilbakekrevinger(sakId: Long) =
+        inTransaction {
+            logger.info("Henter tilbakekrevinger sak=$sakId")
+            tilbakekrevingDao.hentTilbakekrevinger(sakId)
+        }
+
+    fun opprettTilbakekreving(kravgrunnlag: Kravgrunnlag): UUID =
         inTransaction {
             logger.info("Oppretter tilbakekreving=${kravgrunnlag.kravgrunnlagId} på sak=${kravgrunnlag.sakId}")
 
@@ -71,6 +77,8 @@ class TilbakekrevingService(
                     Tidspunkt.now(),
                 )
             tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.OPPRETTET)
+
+            tilbakekrevingBehandling.id
         }
 
     fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling =
@@ -175,7 +183,7 @@ class TilbakekrevingService(
                 tilbakekreving,
                 Tidspunkt.now(),
             )
-        tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.ATTESTERT)
+        tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.FATTET_VEDTAK)
 
         oppgaveService.ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
             fattetoppgaveReferanseOgSak =
@@ -184,7 +192,7 @@ class TilbakekrevingService(
                     referanse = tilbakekreving.id.toString(),
                 ),
             oppgaveType = OppgaveType.ATTESTERING,
-            merknad = null,
+            merknad = "Tilbakekreving",
             saksbehandler = brukerTokenInfo,
         )
     }
@@ -208,6 +216,7 @@ class TilbakekrevingService(
                     enhet = behandling.sak.enhet,
                 )
             }
+
         tilbakekrevingDao.lagreTilbakekreving(behandling.copy(status = TilbakekrevingStatus.ATTESTERT))
 
         hendelseDao.vedtakHendelse(
@@ -225,6 +234,14 @@ class TilbakekrevingService(
             referanse = behandling.id.toString(),
             saksbehandler = brukerTokenInfo,
         )
+
+        val statistikkTilbakekrevingDto =
+            StatistikkTilbakekrevingDto(
+                behandling.id,
+                behandling,
+                Tidspunkt.now(),
+            )
+        tilbakekrevinghendelser.sendTilbakekreving(statistikkTilbakekrevingDto, TilbakekrevingHendelseType.ATTESTERT)
 
         runBlocking {
             tilbakekrevingKlient.sendTilbakekrevingsvedtak(

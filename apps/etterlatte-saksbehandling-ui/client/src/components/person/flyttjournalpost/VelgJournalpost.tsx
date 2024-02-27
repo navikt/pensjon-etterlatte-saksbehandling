@@ -2,7 +2,7 @@ import { mapAllApiResult, Result } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { Alert, Button, Heading, Table } from '@navikt/ds-react'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterJournalpostStatus, formaterStringDato } from '~utils/formattering'
 import React from 'react'
 import { Journalpost } from '~shared/types/Journalpost'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
@@ -68,7 +68,7 @@ export const VelgJournalpost = ({ valgtJournalpost, setValgtJournalpost, journal
                   {journalpost.datoOpprettet ? formaterStringDato(journalpost.datoOpprettet) : '-'}
                 </Table.DataCell>
                 <Table.DataCell>{journalpost.tema}</Table.DataCell>
-                <Table.DataCell>{journalpost.journalstatus}</Table.DataCell>
+                <Table.DataCell>{formaterJournalpostStatus(journalpost.journalstatus)}</Table.DataCell>
                 <Table.DataCell>
                   {journalpost.journalpostId === valgtJournalpost?.journalpostId ? (
                     <Alert size="small" variant="success" style={{ width: 'fit-content' }}>

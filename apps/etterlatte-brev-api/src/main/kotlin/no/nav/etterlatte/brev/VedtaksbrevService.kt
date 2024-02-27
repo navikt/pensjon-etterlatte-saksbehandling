@@ -2,6 +2,8 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
@@ -12,7 +14,10 @@ import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
+import no.nav.etterlatte.brev.varselbrev.BrevDataMapperRedigerbartUtfallVarsel
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -27,6 +32,7 @@ class VedtaksbrevService(
     private val pdfGenerator: PDFGenerator,
     private val brevDataMapperRedigerbartUtfallVedtak: BrevDataMapperRedigerbartUtfallVedtak,
     private val brevDataMapperFerdigstilling: BrevDataMapperFerdigstillingVedtak,
+    private val behandlingKlient: BehandlingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -131,10 +137,34 @@ class VedtaksbrevService(
         brevId: Long,
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        brevtype: Brevtype,
     ): BrevService.BrevPayload =
         brevoppretter.hentNyttInnhold(sakId, brevId, behandlingId, brukerTokenInfo, {
-            brevKodeMapperVedtak.brevKode(it).redigering
-        }) { brevDataMapperRedigerbartUtfallVedtak.brevData(it) }
+            when (brevtype) {
+                Brevtype.VARSEL ->
+                    if (it.sakType === SakType.BARNEPENSJON) {
+                        Brevkoder.BP_VARSEL.redigering
+                    } else {
+                        Brevkoder.OMS_VARSEL.redigering
+                    }
+
+                Brevtype.VEDTAK -> brevKodeMapperVedtak.brevKode(it).redigering
+                else -> throw UgyldigForespoerselException(
+                    "FEIL_BREVKODE_NYTT_INNHOLD",
+                    "Prøvde å hente brevkode for nytt innhold for brevtype $brevtype, men per nå støtter vi bare vedtak og varsel.",
+                )
+            }
+        }) {
+            if (brevtype == Brevtype.VARSEL) {
+                BrevDataMapperRedigerbartUtfallVarsel.hentBrevDataRedigerbar(
+                    it.generellBrevData.sak.sakType,
+                    brukerTokenInfo,
+                    it.generellBrevData.utlandstilknytning,
+                )
+            } else {
+                brevDataMapperRedigerbartUtfallVedtak.brevData(it)
+            }
+        }
 
     private fun lagrePdfHvisVedtakFattet(
         brevId: BrevID,
@@ -158,6 +188,22 @@ class VedtaksbrevService(
                     " og attestant (${brukerTokenInfo.ident()}) er samme person.",
             )
         }
+    }
+
+    suspend fun settVedtaksbrevTilSlettet(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val brev = db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() ?: return
+
+        if (!brev.kanEndres()) {
+            throw VedtaksbrevKanIkkeSlettes(brev.id, "Brevet har status (${brev.status})")
+        }
+        val behandlingKanEndres = behandlingKlient.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
+        if (!behandlingKanEndres) {
+            throw VedtaksbrevKanIkkeSlettes(brev.id, "Behandlingen til vedtaksbrevet kan ikke endres")
+        }
+        db.settBrevSlettet(brev.id, brukerTokenInfo)
     }
 
     fun fjernFerdigstiltStatusUnderkjentVedtak(
@@ -187,9 +233,18 @@ class UgyldigStatusKanIkkeFerdigstilles(id: BrevID, status: Status) : UgyldigFor
         ),
 )
 
+class VedtaksbrevKanIkkeSlettes(brevId: BrevID, detalj: String) : IkkeTillattException(
+    code = "VEDTAKSBREV_KAN_IKKE_SLETTES",
+    detail = "Vedtaksbrevet kan ikke slettes: $detalj",
+    meta =
+        mapOf(
+            "id" to brevId,
+        ),
+)
+
 class UgyldigMottakerKanIkkeFerdigstilles(id: BrevID) : UgyldigForespoerselException(
     code = "UGYLDIG_MOTTAKER_BREV",
-    detail = "Brevet har ugyldig mottaker og kan ikke ferdigstilles",
+    detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse",
     meta =
         mapOf(
             "id" to id,

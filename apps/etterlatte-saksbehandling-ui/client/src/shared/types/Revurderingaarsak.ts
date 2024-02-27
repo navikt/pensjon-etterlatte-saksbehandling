@@ -5,6 +5,8 @@ export enum Revurderingaarsak {
   ANSVARLIGE_FORELDRE = 'ANSVARLIGE_FORELDRE',
   SOESKENJUSTERING = 'SOESKENJUSTERING',
   UTLAND = 'UTLAND',
+  EKSPORT = 'EKSPORT',
+  IMPORT = 'IMPORT',
   BARN = 'BARN',
   DOEDSFALL = 'DOEDSFALL',
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT = 'VERGEMAAL_ELLER_FREMTIDSFULLMAKT',
@@ -22,6 +24,7 @@ export enum Revurderingaarsak {
   SLUTTBEHANDLING_UTLAND = 'SLUTTBEHANDLING_UTLAND',
   OPPHOER_UTEN_BREV = 'OPPHOER_UTEN_BREV',
   ALDERSOVERGANG = 'ALDERSOVERGANG',
+  RETT_UTEN_TIDSBEGRENSNING = 'RETT_UTEN_TIDSBEGRENSNING',
 }
 
 export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
@@ -29,6 +32,8 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   ANSVARLIGE_FORELDRE: 'Ansvarlige foreldre',
   SOESKENJUSTERING: 'Søskenjustering',
   UTLAND: 'Utland',
+  EKSPORT: 'Eksport / Utvandring',
+  IMPORT: 'Import / Innvandring',
   BARN: 'Barn',
   DOEDSFALL: 'Dødsfall mottaker',
   VERGEMAAL_ELLER_FREMTIDSFULLMAKT: 'Verge / fullmakt',
@@ -46,6 +51,7 @@ export const tekstRevurderingsaarsak: Record<Revurderingaarsak, string> = {
   SLUTTBEHANDLING_UTLAND: 'Sluttbehandling utland',
   OPPHOER_UTEN_BREV: 'Opphør uten å sende brev',
   ALDERSOVERGANG: 'Aldersovergang',
+  RETT_UTEN_TIDSBEGRENSNING: 'Stønad uten tidsbegrensning',
 } as const
 
 export const erOpphoer = (revurderingsaarsak: Revurderingaarsak) =>

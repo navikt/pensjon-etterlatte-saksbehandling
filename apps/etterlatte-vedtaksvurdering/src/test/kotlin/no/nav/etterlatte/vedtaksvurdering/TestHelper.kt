@@ -18,6 +18,7 @@ import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.random.Random
 
 const val FNR_1 = "28098208560"
 const val FNR_2 = "04417103428"
@@ -80,6 +81,20 @@ fun opprettVedtakTilbakekreving(
     behandlingId = behandlingId,
     type = VedtakType.TILBAKEKREVING,
     innhold = VedtakInnhold.Tilbakekreving(tilbakekreving = tilbakekreving),
+)
+
+fun opprettVedtakKlage(
+    soeker: Folkeregisteridentifikator = SOEKER_FOEDSELSNUMMER,
+    sakId: Long = 1L,
+    behandlingId: UUID = UUID.randomUUID(),
+    klage: ObjectNode = objectMapper.createObjectNode(),
+) = OpprettVedtak(
+    soeker = soeker,
+    sakId = sakId,
+    sakType = SakType.BARNEPENSJON,
+    behandlingId = behandlingId,
+    type = VedtakType.AVVIST_KLAGE,
+    innhold = VedtakInnhold.Klage(klage = klage),
 )
 
 fun vedtak(
@@ -149,7 +164,7 @@ fun vedtakKlage(
     status: VedtakStatus = VedtakStatus.OPPRETTET,
     vedtakFattet: VedtakFattet? = null,
 ) = Vedtak(
-    id = 1L,
+    id = Random.nextLong(10_000),
     status = status,
     soeker = SOEKER_FOEDSELSNUMMER,
     sakId = sakId,

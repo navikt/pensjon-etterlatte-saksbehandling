@@ -26,7 +26,9 @@ import no.nav.etterlatte.libs.common.oppgave.RedigerFristGosysRequest
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
+import no.nav.etterlatte.libs.common.oppgave.SettPaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.Status
+import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -123,8 +125,17 @@ internal fun Route.oppgaveRoutes(
 
             get("/ikkeattestert/{referanse}") {
                 kunSaksbehandler {
-                    val saksbehandler = inTransaction { service.hentSisteSaksbehandlerIkkeAttestertOppgave(referanse) }
-                    call.respond(saksbehandler)
+                    val saksbehandler =
+                        inTransaction {
+                            service.hentSisteSaksbehandlerIkkeAttestertOppgave(referanse)
+                        }
+                    call.respond(saksbehandler ?: HttpStatusCode.NoContent)
+                }
+            }
+            get("/ikkeattestertOppgave/{referanse}") {
+                kunSaksbehandler {
+                    val oppgave = inTransaction { service.hentSisteIkkeAttestertOppgave(referanse) }
+                    call.respond(oppgave)
                 }
             }
         }
@@ -143,6 +154,16 @@ internal fun Route.oppgaveRoutes(
                 kunSkrivetilgang {
                     inTransaction {
                         service.hentOgFerdigstillOppgaveById(oppgaveId, brukerTokenInfo)
+                    }
+                    call.respond(HttpStatusCode.OK)
+                }
+            }
+
+            post("sett-paa-vent") {
+                kunSkrivetilgang {
+                    val settPaaVentRequest = call.receive<SettPaaVentRequest>()
+                    inTransaction {
+                        service.oppdaterStatusOgMerknad(oppgaveId, settPaaVentRequest.merknad, settPaaVentRequest.status)
                     }
                     call.respond(HttpStatusCode.OK)
                 }
@@ -176,7 +197,7 @@ internal fun Route.oppgaveRoutes(
                 }
             }
             put("frist") {
-                kunSaksbehandlerMedSkrivetilgang {
+                kunSkrivetilgang {
                     val redigerFrist = call.receive<RedigerFristRequest>()
                     inTransaction { service.redigerFrist(oppgaveId, redigerFrist.frist) }
                     call.respond(HttpStatusCode.OK)
@@ -260,6 +281,16 @@ internal fun Route.oppgaveRoutes(
 
                 call.respond(HttpStatusCode.OK)
             }
+        }
+
+        put("ventefrist-gaar-ut") {
+            val request = call.receive<VentefristGaarUtRequest>()
+            inTransaction {
+                service.hentFristGaarUt(request).forEach {
+                    service.oppdaterStatusOgMerknad(it, "", Status.PAA_VENT)
+                }
+            }
+            call.respond(HttpStatusCode.OK)
         }
     }
 }

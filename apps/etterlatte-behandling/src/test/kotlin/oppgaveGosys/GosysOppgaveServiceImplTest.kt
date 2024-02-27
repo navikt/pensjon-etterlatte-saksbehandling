@@ -21,10 +21,12 @@ import no.nav.etterlatte.token.Saksbehandler
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.sql.Connection
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class GosysOppgaveServiceImplTest {
     private val gosysOppgaveKlient = mockk<GosysOppgaveKlient>()
     private val pdltjenesterKlient = mockk<PdlTjenesterKlient>()
@@ -73,7 +75,7 @@ class GosysOppgaveServiceImplTest {
     @BeforeEach
     fun beforeEach() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.enheter() } returns Enheter.enheterMedLesetilgang().toList()
 
         setNewKontekstWithMockUser(saksbehandler)
 
@@ -83,7 +85,7 @@ class GosysOppgaveServiceImplTest {
     @Test
     fun `skal hente oppgaver og deretter folkeregisterIdent for unike identer`() {
         val saksbehandlerRoller = generateSaksbehandlerMedRoller(AzureGroup.SAKSBEHANDLER)
-        every { saksbehandler.enheter() } returns Enheter.nasjonalTilgangEnheter()
+        every { saksbehandler.enheter() } returns Enheter.enheterMedLesetilgang().toList()
         every { saksbehandler.name() } returns "ident"
 
         setNewKontekstWithMockUser(saksbehandler)
@@ -241,7 +243,10 @@ class GosysOppgaveServiceImplTest {
     fun `kalle gosys-klient med riktige params`() {
         coEvery {
             gosysOppgaveKlient.tildelOppgaveTilSaksbehandler(
-                oppgaveId = "123", oppgaveVersjon = 2L, tildeles = "A012345", brukerTokenInfo,
+                oppgaveId = "123",
+                oppgaveVersjon = 2L,
+                tildeles = "A012345",
+                brukerTokenInfo,
             )
         } returns
             GosysApiOppgave(

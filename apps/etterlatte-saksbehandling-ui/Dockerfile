@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim
+FROM node:20-bookworm-slim as base
 
 WORKDIR /app
 COPY ./client/dist ./client
@@ -9,6 +9,14 @@ ENV NODE_ENV="production"
 
 RUN cd ./server && yarn install --frozen-lockfile
 
+
+FROM gcr.io/distroless/nodejs20-debian12 as prod
+COPY --from=base /app /app
+
+USER nonroot
+ENV NODE_ENV="production"
+
+WORKDIR /app
 EXPOSE 4000
 
-CMD ["node", "./server/index.js"]
+CMD ["./server/index.js"]

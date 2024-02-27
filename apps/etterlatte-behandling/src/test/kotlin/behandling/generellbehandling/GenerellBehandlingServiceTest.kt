@@ -8,9 +8,10 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BehandlingDao
@@ -42,26 +43,25 @@ import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.opprettBehandling
 import no.nav.etterlatte.personOpplysning
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import java.sql.Connection
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID.randomUUID
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-class GenerellBehandlingServiceTest {
-    private val dataSource = DatabaseExtension.dataSource
+class GenerellBehandlingServiceTest(val dataSource: DataSource) {
     private lateinit var dao: GenerellBehandlingDao
     private lateinit var oppgaveDao: OppgaveDao
     private lateinit var hendelseDao: HendelseDao
@@ -69,24 +69,39 @@ class GenerellBehandlingServiceTest {
     private lateinit var sakRepo: SakDao
     private lateinit var service: GenerellBehandlingService
     private lateinit var behandlingRepo: BehandlingDao
-    val grunnlagKlient = mockk<GrunnlagKlient>()
-    val behandlingService = mockk<BehandlingService>()
+    private val grunnlagKlient = mockk<GrunnlagKlient>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
+    private val saksbehandlerInfoDao = mockk<SaksbehandlerInfoDao>()
+    private val saksbehandlerNavn = "Ola Nordmann"
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-        dao = GenerellBehandlingDao { connection }
-        oppgaveDao = OppgaveDaoImpl { connection }
-        sakRepo = SakDao { connection }
-        hendelseDao = spyk(HendelseDao { connection })
+        dao = GenerellBehandlingDao(ConnectionAutoclosingTest(dataSource))
+        oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        hendelseDao = spyk(HendelseDao(ConnectionAutoclosingTest(dataSource)))
         behandlingRepo =
-            BehandlingDao(KommerBarnetTilGodeDao { connection }, RevurderingDao { connection }) { connection }
+            BehandlingDao(
+                KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
+            )
         oppgaveService =
             OppgaveService(
-                OppgaveDaoMedEndringssporingImpl(oppgaveDao) { connection },
+                OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource)),
                 sakRepo,
             )
-        service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient, hendelseDao)
+
+        every { saksbehandlerInfoDao.hentSaksbehandlerNavn(any()) } returns saksbehandlerNavn
+        service = GenerellBehandlingService(dao, oppgaveService, behandlingService, grunnlagKlient, hendelseDao, saksbehandlerInfoDao)
+
+        Kontekst.set(
+            Context(
+                user,
+                DatabaseContextTest(dataSource),
+            ),
+        )
     }
 
     @AfterEach
@@ -94,26 +109,6 @@ class GenerellBehandlingServiceTest {
         dataSource.connection.use {
             it.prepareStatement("TRUNCATE generellbehandling CASCADE; TRUNCATE oppgave CASCADE").execute()
         }
-    }
-
-    private val user = mockk<SaksbehandlerMedEnheterOgRoller>()
-
-    @BeforeEach
-    fun beforeEach() {
-        Kontekst.set(
-            Context(
-                user,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
-            ),
-        )
     }
 
     @Test
@@ -223,7 +218,7 @@ class GenerellBehandlingServiceTest {
         Assertions.assertEquals(OppgaveKilde.GENERELL_BEHANDLING, manuellBehandlingOppgave.kilde)
         Assertions.assertEquals(OppgaveType.KRAVPAKKE_UTLAND, manuellBehandlingOppgave.type)
         Assertions.assertEquals(sak.id, manuellBehandlingOppgave.sakId)
-        Assertions.assertNull(manuellBehandlingOppgave.saksbehandlerIdent)
+        Assertions.assertNull(manuellBehandlingOppgave.saksbehandler)
     }
 
     @Test
@@ -258,7 +253,7 @@ class GenerellBehandlingServiceTest {
         Assertions.assertEquals(OppgaveKilde.GENERELL_BEHANDLING, manuellBehandlingOppgave.kilde)
         Assertions.assertEquals(OppgaveType.KRAVPAKKE_UTLAND, manuellBehandlingOppgave.type)
         Assertions.assertEquals(sak.id, manuellBehandlingOppgave.sakId)
-        Assertions.assertNull(manuellBehandlingOppgave.saksbehandlerIdent)
+        Assertions.assertNull(manuellBehandlingOppgave.saksbehandler)
 
         verify {
             hendelseDao.generellBehandlingHendelse(
@@ -310,6 +305,10 @@ class GenerellBehandlingServiceTest {
         behandlingsOppgaverFattetOgAttestering.forExactly(1) { oppgave ->
             oppgave.status.shouldBe(Status.FERDIGSTILT)
         }
+
+        val attesteringsoppgave = behandlingsOppgaverFattetOgAttestering.filter { it.type == OppgaveType.ATTESTERING }
+        Assertions.assertEquals(1, attesteringsoppgave.size)
+        Assertions.assertTrue(attesteringsoppgave[0].merknad?.contains(saksbehandlerNavn) ?: false)
 
         verify {
             hendelseDao.generellBehandlingHendelse(

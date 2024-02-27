@@ -19,7 +19,7 @@ class AldersovergangDao(private val datasource: DataSource) : Transactions<Alder
     ): List<String> {
         val sql =
             """
-            select g.sak_id as sak_id from grunnlagshendelse g
+            select distinct g.sak_id as sak_id from grunnlagshendelse g
                      inner join grunnlagshendelse g2 on g.sak_id = g2.sak_id and g.fnr = g2.fnr and g.hendelsenummer != g2.hendelsenummer
                      and g.hendelsenummer = (
                         select max(hendelsenummer) from grunnlagshendelse 
@@ -30,6 +30,45 @@ class AldersovergangDao(private val datasource: DataSource) : Transactions<Alder
             where g.opplysning_type = 'FOEDSELSDATO'
             and g2.opplysning_type = 'SOEKER_PDL_V1'
             and TO_DATE(g.opplysning, '\"YYYY-MM-DD\"') BETWEEN :start AND :slutt
+            """.trimIndent()
+
+        return tx.session {
+            hentListe(
+                sql,
+                {
+                    mapOf(
+                        "start" to maaned.atDay(1),
+                        "slutt" to maaned.atEndOfMonth(),
+                    )
+                },
+            ) {
+                it.string("sak_id")
+            }
+        }
+    }
+
+    fun hentSakerHvorDoedsfallForekomIGittMaaned(
+        maaned: YearMonth,
+        tx: TransactionalSession? = null,
+    ): List<String> {
+        val sql =
+            """
+            SELECT DISTINCT g.sak_id
+            FROM grunnlagshendelse g
+            INNER JOIN grunnlagshendelse g2 
+                ON g.sak_id = g2.sak_id 
+                AND g.fnr = g2.fnr 
+                AND g.hendelsenummer != g2.hendelsenummer
+            WHERE g.hendelsenummer = (
+                    SELECT MAX(hendelsenummer) 
+                    FROM grunnlagshendelse
+                    WHERE sak_id = g.sak_id
+                    AND   opplysning_type = 'DOEDSDATO'
+                    AND   fnr = g.fnr
+            )
+            AND g.opplysning_type = 'DOEDSDATO'
+            AND g2.opplysning_type = 'AVDOED_PDL_V1'
+            AND TO_DATE(g.opplysning, '\"YYYY-MM-DD\"') BETWEEN :start AND :slutt;
             """.trimIndent()
 
         return tx.session {

@@ -134,15 +134,16 @@ export interface InitieltUtfallMedBegrunnelseOgMeta {
 
 export interface IniteltUtfallMedBegrunnelseDto {
   utfall: Utfall
-  begrunnelse: string
+  begrunnelse?: string
 }
 
-export const teksterKlageutfall: Record<Utfall, string> = {
+export const teksterKlageutfall: Record<Utfall | 'UKJENT', string> = {
   OMGJOERING: 'Omgjøring',
   DELVIS_OMGJOERING: 'Delvis omgjøring',
   STADFESTE_VEDTAK: 'Stadfeste vedtak',
   AVVIST: 'Avvise klage med brev',
   AVVIST_MED_OMGJOERING: 'Avvise klage',
+  UKJENT: 'Ukjent',
 } as const
 
 export type KlageUtfall =
@@ -165,6 +166,8 @@ export type KlageUtfall =
   | {
       utfall: 'AVVIST'
       saksbehandler: KildeSaksbehandler
+      vedtak: KlageVedtakAvvisning
+      brev: KlageBrevAvvisning
     }
   | {
       utfall: 'AVVIST_MED_OMGJOERING'
@@ -212,9 +215,18 @@ interface KlageBrevInnstilling {
   brevId: number
 }
 
+interface KlageBrevAvvisning {
+  brevId: number
+}
+
+interface KlageVedtakAvvisning {
+  vedtakId: number
+}
+
 export interface InnstillingTilKabal {
   lovhjemmel: LovhjemmelFelles
   internKommentar: string | null
+  innstillingTekst: string
   brev: KlageBrevInnstilling
 }
 

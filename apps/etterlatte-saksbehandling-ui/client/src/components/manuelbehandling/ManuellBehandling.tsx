@@ -1,90 +1,105 @@
-import { Alert, Button, Checkbox, Select, TextField } from '@navikt/ds-react'
+import { Alert, Button, Checkbox, Heading, Select, TextField } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { SakType } from '~shared/types/sak'
-import { DatoVelger } from '~shared/components/datoVelger/DatoVelger'
-import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
-import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import styled from 'styled-components'
-import { settNyBehandlingRequest } from '~store/reducers/JournalfoeringOppgaveReducer'
-import { useAppDispatch } from '~store/Store'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { opprettBehandling } from '~shared/api/behandling'
 import { opprettOverstyrBeregning } from '~shared/api/beregning'
-import { InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
+import {
+  InputRow,
+  NyBehandlingSkjema,
+} from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import { Spraak } from '~shared/types/Brev'
 import { opprettTrygdetidOverstyrtMigrering } from '~shared/api/trygdetid'
-
 import { isPending, isSuccess, mapAllApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~components/person/EndreEnhet'
 import { useParams } from 'react-router-dom'
 import { hentOppgave } from '~shared/api/oppgaver'
+import PersongalleriBarnepensjon from '~components/person/journalfoeringsoppgave/nybehandling/PersongalleriBarnepensjon'
+import { FormProvider, useForm } from 'react-hook-form'
+import { ControlledDatoVelger } from '~shared/components/datoVelger/ControlledDatoVelger'
+import { formaterDatoStrengTilLocaleDateTime, formaterSpraak, mapRHFArrayToStringArray } from '~utils/formattering'
+import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
+import { GRADERING, GraderingFilterKeys } from '~shared/types/Gradering'
+
+interface ManuellBehandingSkjema extends NyBehandlingSkjema {
+  kilde: string
+  pesysId: number | undefined
+  enhet: EnhetFilterKeys
+  gradering: GraderingFilterKeys
+  foreldreloes: boolean
+  ufoere: boolean
+  overstyrBeregning: boolean
+  overstyrTrygdetid: boolean
+}
 
 export default function ManuellBehandling() {
-  const dispatch = useAppDispatch()
+  const [status, opprettNyBehandling] = useApiCall(opprettBehandling)
+  const [nyBehandlingId, setNyId] = useState('')
+  const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
+  const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
+
   const [oppgaveStatus, apiHentOppgave] = useApiCall(hentOppgave)
   const { '*': oppgaveId } = useParams()
 
-  const { nyBehandlingRequest } = useJournalfoeringOppgave()
-  const [status, opprettNyBehandling] = useApiCall(opprettBehandling)
-  const [nyBehandlingId, setNyId] = useState('')
-  const [vedtaksloesning, setVedtaksloesning] = useState<string>('')
-
-  const [overstyrBeregningStatus, opprettOverstyrtBeregningReq] = useApiCall(opprettOverstyrBeregning)
-  const [overstyrBeregning, setOverstyrBeregning] = useState<boolean>(false)
-
-  const [overstyrTrygdetidStatus, opprettOverstyrtTrygdetidReq] = useApiCall(opprettTrygdetidOverstyrtMigrering)
-  const [overstyrTrygdetid, setOverstyrTrygdetid] = useState<boolean>(false)
-
   const [pesysId, setPesysId] = useState<number | undefined>(undefined)
   const [fnrFraOppgave, setFnr] = useState<string | undefined>(undefined)
+  const [vedtaksloesning, setVedtaksloesning] = useState<string>('')
 
   useEffect(() => {
     if (oppgaveId) {
       apiHentOppgave(oppgaveId, (oppgave) => {
-        setFnr(oppgave.fnr!!)
-        if (oppgave.merknad) {
-          const pesysid = oppgave.merknad.split('=')[1]
-          setPesysId(Number(pesysid))
+        oppgave.fnr && setFnr(oppgave.fnr)
+        oppgave.referanse && setPesysId(Number(oppgave.referanse))
+        if (oppgave.type == 'GJENOPPRETTING_ALDERSOVERGANG') {
+          setVedtaksloesning('GJENOPPRETTA')
         }
       })
     }
   }, [oppgaveId])
 
-  const [enhet, setEnhet] = useState<EnhetFilterKeys>('VELGENHET')
+  const methods = useForm<ManuellBehandingSkjema>({
+    defaultValues: {
+      persongalleri: {
+        innsender: undefined,
+        soeker: fnrFraOppgave,
+        gjenlevende: [],
+        soesken: [],
+        avdoed: [],
+      },
+      pesysId: pesysId,
+      kilde: vedtaksloesning,
+    },
+  })
 
-  const [erForeldreloes, setErForeldreloes] = useState<boolean>(false)
-  const [erUfoere, setErUfoere] = useState<boolean>(false)
-
-  const [gradering, setGradering] = useState<string>('')
-  const [error, setError] = useState<boolean>(false)
-
-  const ferdigstill = () => {
-    if (!gradering || !vedtaksloesning || !nyBehandlingRequest?.mottattDato) {
-      setError(true)
-      return
-    }
+  const ferdigstill = (data: ManuellBehandingSkjema) => {
     opprettNyBehandling(
       {
-        ...nyBehandlingRequest,
         sakType: SakType.BARNEPENSJON,
-        mottattDato: nyBehandlingRequest!!.mottattDato!!.replace('Z', ''),
-        kilde: vedtaksloesning,
-        pesysId: pesysId,
-        enhet: enhet === 'VELGENHET' ? undefined : filtrerEnhet(enhet),
-        foreldreloes: erForeldreloes,
-        ufoere: erUfoere,
-        gradering: gradering,
+        persongalleri: {
+          ...data.persongalleri,
+          gjenlevende: mapRHFArrayToStringArray(data.persongalleri.gjenlevende),
+          avdoed: mapRHFArrayToStringArray(data.persongalleri.avdoed).filter((val) => val !== ''),
+          soesken: mapRHFArrayToStringArray(data.persongalleri.soesken),
+        },
+        spraak: data.spraak!,
+        mottattDato: formaterDatoStrengTilLocaleDateTime(data.mottattDato),
+        kilde: data.kilde,
+        pesysId: data.pesysId,
+        enhet: data.enhet === 'VELGENHET' ? undefined : filtrerEnhet(data.enhet),
+        foreldreloes: data.foreldreloes,
+        ufoere: data.ufoere,
+        gradering: data.gradering,
       },
       (nyBehandlingRespons) => {
-        if (overstyrBeregning) {
+        if (data.overstyrBeregning) {
           opprettOverstyrtBeregningReq({
             behandlingId: nyBehandlingRespons,
             beskrivelse: 'Manuell migrering',
           })
         }
-        if (overstyrTrygdetid) {
+        if (data.overstyrTrygdetid) {
           opprettOverstyrtTrygdetidReq({ behandlingId: nyBehandlingRespons })
         }
         setNyId(nyBehandlingRespons)
@@ -92,152 +107,139 @@ export default function ManuellBehandling() {
     )
   }
 
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    getValues,
+  } = methods
+
   if (isPending(oppgaveStatus)) {
     return <div>Henter oppgave</div>
   }
   return (
     <FormWrapper>
-      <h1>Manuell behandling</h1>
+      <FormProvider {...methods}>
+        <Heading size="large">Manuell behandling</Heading>
 
-      <Select
-        label="Er det sak fra Pesys? (påkrevd)"
-        value={vedtaksloesning ?? ''}
-        onChange={(e) => setVedtaksloesning(e.target.value)}
-      >
-        <option>Velg ...</option>
-        <option value="PESYS">Løpende i Pesys</option>
-        <option value="GJENOPPRETTA">Opphørt i Pesys</option>
-        <option value="GJENNY">Nei</option>
-      </Select>
-
-      <InputRow>
-        <TextField
-          label="Sakid Pesys"
-          placeholder="Sakid Pesys"
-          value={pesysId || ''}
-          pattern="[0-9]{11}"
-          maxLength={11}
-          onChange={(e) => setPesysId(Number(e.target.value))}
-        />
-      </InputRow>
-      <Select
-        label="Gradering - Adressebeskyttelse (påkrevd)"
-        value={gradering}
-        onChange={(e) => {
-          setGradering(e.target.value)
-          setError(false)
-        }}
-      >
-        <option>Velg ...</option>
-
-        <option key="STRENGT_FORTROLIG" value="STRENGT_FORTROLIG">
-          Strengt fortrolig
-        </option>
-        <option key="STRENGT_FORTROLIG_UTLAND" value="STRENGT_FORTROLIG_UTLAND">
-          Strengt fortrolig utland
-        </option>
-        <option key="FORTROLIG" value="fortrolig">
-          Fortrolig
-        </option>
-        <option key="UGRADERT" value="UGRADERT">
-          Ugradert
-        </option>
-      </Select>
-      <Select
-        label="Overstyre enhet (valgfritt)"
-        value={enhet}
-        onChange={(e) => setEnhet(e.target.value as EnhetFilterKeys)}
-      >
-        {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
-          <option key={status} value={status}>
-            {statusbeskrivelse}
-          </option>
-        ))}
-      </Select>
-
-      <Checkbox checked={overstyrBeregning} onChange={() => setOverstyrBeregning(!overstyrBeregning)}>
-        Skal bruke manuell beregning
-      </Checkbox>
-
-      <Checkbox checked={overstyrTrygdetid} onChange={() => setOverstyrTrygdetid(!overstyrTrygdetid)}>
-        Skal bruke manuell trygdetid
-      </Checkbox>
-
-      <Select
-        label="Hva skal språket/målform være?"
-        value={nyBehandlingRequest?.spraak || ''}
-        onChange={(e) =>
-          dispatch(settNyBehandlingRequest({ ...nyBehandlingRequest, spraak: e.target.value as Spraak }))
-        }
-      >
-        <option>Velg ...</option>
-        <option value="nb">Bokmål</option>
-        <option value="nn">Nynorsk</option>
-        <option value="en">Engelsk</option>
-      </Select>
-
-      <DatoVelger
-        label="Mottatt dato (påkrevd)"
-        description="Datoen søknaden ble mottatt"
-        value={nyBehandlingRequest?.mottattDato ? new Date(nyBehandlingRequest?.mottattDato) : undefined}
-        onChange={(mottattDato) =>
-          dispatch(
-            settNyBehandlingRequest({
-              ...nyBehandlingRequest,
-              mottattDato: mottattDato?.toISOString(),
-            })
-          )
-        }
-      />
-
-      <Checkbox checked={erForeldreloes} onChange={() => setErForeldreloes(!erForeldreloes)}>
-        Er foreldreløs
-      </Checkbox>
-
-      <Checkbox checked={erUfoere} onChange={() => setErUfoere(!erUfoere)}>
-        Søker har en sak for uføretrygd løpende eller under behandling.
-      </Checkbox>
-
-      <PersongalleriBarnepensjon erManuellMigrering={true} fnrFraOppgave={fnrFraOppgave} />
-
-      <Knapp>
-        <Button
-          variant="secondary"
-          onClick={ferdigstill}
-          loading={isPending(status) || isPending(overstyrBeregningStatus) || isPending(overstyrTrygdetidStatus)}
+        <Select
+          {...register('kilde', {
+            required: { value: true, message: 'Du må spesifisere om det er en sak i fra Pesys' },
+          })}
+          label="Er det sak fra Pesys? (påkrevd)"
+          error={errors.spraak?.message}
         >
-          Send inn
-        </Button>
-      </Knapp>
-      {error && <Alert variant="error">Alle påkrevde felter er ikke fylt ut</Alert>}
-      {isSuccess(status) && <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>}
-      {isFailureHandler({
-        apiResult: status,
-        errorMessage: 'Det oppsto en feil ved oppretting av behandlingen.',
-      })}
+          <option>Velg ...</option>
+          <option value="PESYS">Løpende i Pesys til 1.1.2024</option>
+          <option value="GJENOPPRETTA">Gjenoppretting av opphørt aldersovergang</option>
+          <option value="GJENNY">Nei</option>
+        </Select>
 
-      {mapAllApiResult(
-        overstyrBeregningStatus,
-        <Alert variant="info">Oppretter overstyrt beregning.</Alert>,
-        null,
-        () => (
-          <ApiErrorAlert>Klarte ikke å overstyre beregning.</ApiErrorAlert>
-        ),
-        () => (
-          <Alert variant="success">Overstyrt beregning opprettet!</Alert>
-        )
-      )}
-      {mapAllApiResult(
-        overstyrTrygdetidStatus,
-        <Alert variant="info">Oppretter overstyrt trygdetid.</Alert>,
-        null,
-        () => (
-          <ApiErrorAlert>Klarte ikke å overstyre trygdetid.</ApiErrorAlert>
-        ),
-        () => (
-          <Alert variant="success">Overstyrt trygdetid opprettet!</Alert>
-        )
-      )}
+        <InputRow>
+          <TextField
+            {...register('pesysId')}
+            label="Sakid Pesys"
+            placeholder="Sakid Pesys"
+            pattern="[0-9]{11}"
+            maxLength={11}
+          />
+        </InputRow>
+
+        <Select
+          {...register('gradering', {
+            required: { value: true, message: 'Du må spesifisere gradering' },
+          })}
+          label="Gradering - Adressebeskyttelse (påkrevd)"
+          error={errors.gradering?.message}
+        >
+          <option value="">Velg ...</option>
+          {Object.entries(GRADERING).map(([key, beskrivelse]) => (
+            <option key={key} value={key}>
+              {beskrivelse}
+            </option>
+          ))}
+        </Select>
+
+        <Select {...register('enhet')} label="Overstyre enhet (valgfritt)">
+          {Object.entries(ENHETER).map(([status, statusbeskrivelse]) => (
+            <option key={status} value={status}>
+              {statusbeskrivelse}
+            </option>
+          ))}
+        </Select>
+
+        <Checkbox {...register('overstyrBeregning')}>Skal bruke manuell beregning</Checkbox>
+
+        <Checkbox {...register('overstyrTrygdetid')}>Skal bruke manuell trygdetid</Checkbox>
+
+        <Select
+          {...register('spraak', {
+            required: { value: true, message: 'Du må velge språk/målform for behandlingen' },
+          })}
+          label="Hva skal språket/målform være?"
+          error={errors.spraak?.message}
+        >
+          <option value="">Velg ...</option>
+          <option value={Spraak.NB}>{formaterSpraak(Spraak.NB)}</option>
+          <option value={Spraak.NN}>{formaterSpraak(Spraak.NN)}</option>
+          <option value={Spraak.EN}>{formaterSpraak(Spraak.EN)}</option>
+        </Select>
+
+        <ControlledDatoVelger
+          name="mottattDato"
+          label="Mottatt dato"
+          description="Datoen søknaden ble mottatt"
+          control={control}
+          errorVedTomInput="Du må legge inn datoen søknaden ble mottatt"
+          defaultValue={getValues().mottattDato}
+        />
+
+        <Checkbox {...register('foreldreloes')}>Er foreldreløs</Checkbox>
+
+        <Checkbox {...register('ufoere')}>Søker har en sak for uføretrygd løpende eller under behandling.</Checkbox>
+
+        <PersongalleriBarnepensjon erManuellMigrering />
+
+        <Knapp>
+          <Button
+            variant="secondary"
+            onClick={handleSubmit(ferdigstill)}
+            loading={isPending(status) || isPending(overstyrBeregningStatus) || isPending(overstyrTrygdetidStatus)}
+          >
+            Opprett behandling
+          </Button>
+        </Knapp>
+
+        {isSuccess(status) && <Alert variant="success">Behandling med id {nyBehandlingId} ble opprettet!</Alert>}
+        {isFailureHandler({
+          apiResult: status,
+          errorMessage: 'Det oppsto en feil ved oppretting av behandlingen.',
+        })}
+
+        {mapAllApiResult(
+          overstyrBeregningStatus,
+          <Alert variant="info">Oppretter overstyrt beregning.</Alert>,
+          null,
+          () => (
+            <ApiErrorAlert>Klarte ikke å overstyre beregning.</ApiErrorAlert>
+          ),
+          () => (
+            <Alert variant="success">Overstyrt beregning opprettet!</Alert>
+          )
+        )}
+        {mapAllApiResult(
+          overstyrTrygdetidStatus,
+          <Alert variant="info">Oppretter overstyrt trygdetid.</Alert>,
+          null,
+          () => (
+            <ApiErrorAlert>Klarte ikke å overstyre trygdetid.</ApiErrorAlert>
+          ),
+          () => (
+            <Alert variant="success">Overstyrt trygdetid opprettet!</Alert>
+          )
+        )}
+      </FormProvider>
     </FormWrapper>
   )
 }

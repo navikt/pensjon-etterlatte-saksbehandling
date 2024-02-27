@@ -25,9 +25,12 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Foedselsnummer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.util.Base64
@@ -66,6 +69,7 @@ internal class DokarkivServiceTest {
                 sakId = sakId,
                 behandlingId = null,
                 tittel = null,
+                spraak = Spraak.NB,
                 prosessType = BrevProsessType.AUTOMATISK,
                 soekerFnr = "soeker_fnr",
                 status = Status.OPPRETTET,
@@ -76,7 +80,14 @@ internal class DokarkivServiceTest {
                         "Stor Snerk",
                         Foedselsnummer(forventetBrevMottakerFnr),
                         null,
-                        Adresse(adresseType = "NORSKPOSTADRESSE", "Testgaten 13", "1234", "OSLO", land = "Norge", landkode = "NOR"),
+                        Adresse(
+                            adresseType = "NORSKPOSTADRESSE",
+                            "Testgaten 13",
+                            "1234",
+                            "OSLO",
+                            land = "Norge",
+                            landkode = "NOR",
+                        ),
                     ),
                 brevtype = Brevtype.MANUELT,
             )
@@ -122,7 +133,7 @@ internal class DokarkivServiceTest {
             journalfoerendeEnhet shouldBe vedtak.ansvarligEnhet
             avsenderMottaker shouldBe AvsenderMottaker(forventetBrevMottakerFnr, navn = "Stor Snerk")
             bruker shouldBe Bruker(vedtak.sak.ident)
-            sak shouldBe JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString())
+            sak shouldBe JournalpostSak(Sakstype.FAGSAK, vedtak.sak.id.toString(), vedtak.sak.sakType.tema, "EY")
             eksternReferanseId shouldBe "${vedtak.behandlingId}.$brevId"
 
             with(dokumenter.single()) {
@@ -131,6 +142,67 @@ internal class DokarkivServiceTest {
 
                 val dokument = dokumentvarianter.single()
                 dokument.fysiskDokument shouldBe Base64.getEncoder().encodeToString(forventetPdf.bytes)
+            }
+        }
+    }
+
+    @Nested
+    inner class OppdaterJournalpost {
+        @Test
+        fun `Fagsaksystem FS22 mappes korrekt`() {
+            val journalpostId = "1"
+
+            coEvery { mockKlient.oppdaterJournalpost(any(), any()) } returns OppdaterJournalpostResponse(journalpostId)
+
+            val request =
+                OppdaterJournalpostRequest(
+                    sak = JournalpostSak(fagsaksystem = "FS22", sakstype = Sakstype.GENERELL_SAK, tema = "EYO"),
+                )
+
+            runBlocking {
+                service.oppdater(journalpostId, false, null, request)
+            }
+
+            val requestSlot = slot<OppdaterJournalpostRequest>()
+            coVerify { mockKlient.oppdaterJournalpost(journalpostId, capture(requestSlot)) }
+
+            with(requestSlot.captured) {
+                sak?.fagsakId shouldBe null
+                sak?.fagsaksystem shouldBe null
+                sak?.sakstype shouldBe Sakstype.GENERELL_SAK
+                sak?.tema shouldBe null
+            }
+        }
+
+        @Test
+        fun `Fagsaksystem EY mappes korrekt`() {
+            val journalpostId = "1"
+
+            coEvery { mockKlient.oppdaterJournalpost(any(), any()) } returns OppdaterJournalpostResponse(journalpostId)
+
+            val request =
+                OppdaterJournalpostRequest(
+                    sak =
+                        JournalpostSak(
+                            fagsaksystem = Fagsaksystem.EY.navn,
+                            sakstype = Sakstype.FAGSAK,
+                            tema = "EYO",
+                            fagsakId = "1234",
+                        ),
+                )
+
+            runBlocking {
+                service.oppdater(journalpostId, false, null, request)
+            }
+
+            val requestSlot = slot<OppdaterJournalpostRequest>()
+            coVerify { mockKlient.oppdaterJournalpost(journalpostId, capture(requestSlot)) }
+
+            with(requestSlot.captured) {
+                sak?.fagsakId shouldBe "1234"
+                sak?.fagsaksystem shouldBe "EY"
+                sak?.sakstype shouldBe Sakstype.FAGSAK
+                sak?.tema shouldBe "EYO"
             }
         }
     }

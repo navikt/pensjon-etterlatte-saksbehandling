@@ -4,6 +4,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import io.prometheus.client.CollectorRegistry
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.common.Enheter
@@ -22,11 +23,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.YearMonth
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class BehandlingMetricsTest {
-    private val ds = DatabaseExtension.dataSource
+internal class BehandlingMetricsTest(private val ds: DataSource) {
     private lateinit var behandlingMetrikkerDao: BehandlingMetrikkerDao
     private lateinit var oppgaveDao: OppgaveMetrikkerDao
     private lateinit var behandlingRepo: BehandlingDao
@@ -37,14 +38,12 @@ internal class BehandlingMetricsTest {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = ds.connection
-
-        sakRepo = SakDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(ds))
         behandlingRepo =
             BehandlingDao(
                 kommerBarnetTilGodeDao = mockk(),
                 revurderingDao = mockk(),
-                connection = { connection },
+                ConnectionAutoclosingTest(ds),
             )
 
         opprettBehandlinger()

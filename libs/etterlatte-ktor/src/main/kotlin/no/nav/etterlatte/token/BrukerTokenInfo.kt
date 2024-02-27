@@ -65,6 +65,7 @@ data class Systembruker(
     companion object {
         val migrering = Systembruker(Systembrukere.MIGRERING)
         val brev = Systembruker(Systembrukere.BREV)
+        val doedshendelse = Systembruker(Systembrukere.DOEDSHENDELSE)
     }
 }
 
@@ -100,4 +101,5 @@ enum class Claims {
 enum class Systembrukere(val oid: String) {
     BREV("brev"),
     MIGRERING("migrering"),
+    DOEDSHENDELSE("doedshendelse"),
 }

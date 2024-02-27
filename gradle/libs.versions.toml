@@ -18,7 +18,7 @@ cache-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = 
 database-hikaricp = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
 database-flywaydb = { module = "org.flywaydb:flyway-core", version = "10.7.1" }
 database-flywaydbpostgres = { module = "org.flywaydb:flyway-database-postgresql", version = "10.7.1" }
-database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.1" }
+database-postgresql = { module = "org.postgresql:postgresql", version = "42.7.2" }
 database-kotliquery = { module = "com.github.seratch:kotliquery", version = "1.9.0" }
 
 jackson-datatypejsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson-version" }
@@ -30,8 +30,8 @@ jackson-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xm
 
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version = "3.6.1" }
 kafka-avro = { module = "org.apache.avro:avro", version = "1.11.3" }
-kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.5.1" }
-kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.4" }
+kafka-avroserializer = { module = "io.confluent:kafka-avro-serializer", version = "7.6.0" }
+kafka-embeddedenv = { module = "no.nav:kafka-embedded-env", version = "3.2.5" }
 el-api = { module = "javax.el:javax.el-api", version = "3.0.0"}
 el-impl = { module = "org.glassfish:jakarta.el", version = "3.0.4" }
 
@@ -66,7 +66,7 @@ ktor2-mustache = { module = "io.ktor:ktor-server-mustache", version.ref = "ktor2
 ktor2-clientmock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor2-version" }
 ktor2-servertests = { module = "io.ktor:ktor-server-tests", version.ref = "ktor2-version" }
 
-etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.02.08-12.12.2ed2b049ebb9"}
+etterlatte-common = { module = "pensjon-etterlatte-libs:common", version = "2024.02.20-09.34.d73dc559506b"}
 teamdokumenthandtering-avroschemas = { module = "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas", version = "08c0b2d2" }
 
 logging-slf4japi = { module = "org.slf4j:slf4j-api", version = "2.0.11" }
@@ -99,6 +99,7 @@ test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", vers
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-wiremock = { module = "org.wiremock:wiremock", version = "3.3.1" }
 
+commons-compress = { module = "org.apache.commons:commons-compress", version = "1.26.0"}
 unleash-client = { module = "io.getunleash:unleash-client-java", version = "9.2.0" }
 
 [bundles]

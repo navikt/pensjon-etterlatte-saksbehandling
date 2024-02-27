@@ -436,32 +436,51 @@ val avrundetTrygdetid =
             )
         }
 
+val avrundetBroek =
+    RegelMeta(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Avrunder trygdetid basert på måneder",
+        regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-AVRUNDING"),
+    ) benytter beregnetFaktiskTrygdetid med { faktisk ->
+        if (faktisk.nasjonal?.antallMaaneder != null && faktisk.teoretisk?.antallMaaneder != null &&
+            faktisk.nasjonal.antallMaaneder != faktisk.teoretisk.antallMaaneder
+        ) {
+            IntBroek.fra(
+                Pair(
+                    minOf(faktisk.nasjonal.antallMaaneder.toInt(), 480),
+                    minOf(faktisk.teoretisk.antallMaaneder.toInt(), 480),
+                ),
+            )
+        } else {
+            null
+        }
+    }
+
+val avrundetTrygdetidOgBroek =
+    RegelMeta(
+        gjelderFra = TRYGDETID_DATO,
+        beskrivelse = "Samle avrundet trygdetid og avrundet broek",
+        regelReferanse = RegelReferanse(id = "REGEL-TOTAL-TRYGDETID-AVRUNDING"),
+    ) benytter avrundetTrygdetid og avrundetBroek med { trygdetid, broek ->
+        Pair(trygdetid, broek)
+    }
+
 val beregnDetaljertBeregnetTrygdetid =
     RegelMeta(
         gjelderFra = TRYGDETID_DATO,
         beskrivelse = "Beregn detaljert trygdetid",
         regelReferanse = RegelReferanse(id = "REGEL-TOTAL-DETALJERT-TRYGDETID"),
     ) benytter beregnetFaktiskTrygdetid og
-        beregnetFremtidigTrygdetid og avrundetTrygdetid med { faktisk, fremtidig, avrundet ->
+        beregnetFremtidigTrygdetid og avrundetTrygdetidOgBroek med { faktisk, fremtidig, avrundet ->
 
             DetaljertBeregnetTrygdetidResultat(
                 faktiskTrygdetidNorge = faktisk.nasjonal.takeIf { !it.verdiOrZero().isZero },
                 faktiskTrygdetidTeoretisk = faktisk.teoretisk.takeIf { !it.verdiOrZero().isZero },
                 fremtidigTrygdetidNorge = fremtidig?.nasjonal.takeIf { !it.verdiOrZero().isZero },
                 fremtidigTrygdetidTeoretisk = fremtidig?.teoretisk.takeIf { !it.verdiOrZero().isZero },
-                samletTrygdetidNorge = avrundet.nasjonal.takeIf { it != null && it > 0 },
-                samletTrygdetidTeoretisk = avrundet.teoretisk.takeIf { it != null && it > 0 },
-                prorataBroek =
-                    if (faktisk.nasjonal?.antallMaaneder != faktisk.teoretisk?.antallMaaneder) {
-                        IntBroek.fra(
-                            Pair(
-                                faktisk.nasjonal?.antallMaaneder?.toInt(),
-                                faktisk.teoretisk?.antallMaaneder?.toInt(),
-                            ),
-                        )
-                    } else {
-                        null
-                    },
+                samletTrygdetidNorge = avrundet.first.nasjonal.takeIf { it != null && it > 0 },
+                samletTrygdetidTeoretisk = avrundet.first.teoretisk.takeIf { it != null && it > 0 },
+                prorataBroek = avrundet.second,
                 overstyrt = false,
             )
         }

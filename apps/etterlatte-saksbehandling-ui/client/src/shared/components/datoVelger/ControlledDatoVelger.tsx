@@ -7,12 +7,14 @@ import { formatDateToLocaleDateOrEmptyString } from '~shared/components/datoVelg
 export const ControlledDatoVelger = <T extends FieldValues>({
   name,
   label,
+  description,
   control,
   errorVedTomInput,
   defaultValue,
 }: {
   name: Path<T>
   label: string
+  description?: string
   control: Control<T>
   errorVedTomInput: string
   defaultValue?: string
@@ -47,7 +49,13 @@ export const ControlledDatoVelger = <T extends FieldValues>({
 
   return (
     <DatePicker {...datepickerProps}>
-      <DatePicker.Input {...inputProps} id={field.name} label={label} error={error?.message} />
+      <DatePicker.Input
+        {...inputProps}
+        id={field.name}
+        label={label}
+        description={description}
+        error={error?.message}
+      />
     </DatePicker>
   )
 }

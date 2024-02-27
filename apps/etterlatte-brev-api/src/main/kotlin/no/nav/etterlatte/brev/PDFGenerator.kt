@@ -9,7 +9,7 @@ import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -34,7 +34,7 @@ class PDFGenerator(
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (BrevkodeRequest) -> Brevkoder,
-        brevData: (BrevDataFerdigstillingRequest) -> BrevData,
+        brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         sjekkOmBrevKanEndres(id)
@@ -58,7 +58,7 @@ class PDFGenerator(
         automatiskMigreringRequest: MigreringBrevRequest?,
         avsenderRequest: (BrukerTokenInfo, GenerellBrevData) -> AvsenderRequest,
         brevKode: (BrevkodeRequest) -> Brevkoder,
-        brevData: suspend (BrevDataFerdigstillingRequest) -> BrevData,
+        brevData: suspend (BrevDataFerdigstillingRequest) -> BrevDataFerdigstilling,
         lagrePdfHvisVedtakFattet: (GenerellBrevData, Brev, Pdf) -> Unit = { _, _, _ -> run {} },
     ): Pdf {
         val brev = db.hentBrev(id)
@@ -72,7 +72,7 @@ class PDFGenerator(
         }
 
         val generellBrevData =
-            retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId, bruker) }
+            retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId, brev.spraak, bruker) }
         val avsender = adresseService.hentAvsender(avsenderRequest(bruker, generellBrevData))
 
         val brevkodePar =

@@ -22,8 +22,10 @@ import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.KLAGEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.OPPGAVEID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.sak.TilgangService
 import no.nav.etterlatte.token.Saksbehandler
@@ -138,6 +140,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
     val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
     when (brukerTokenInfo) {
         is Saksbehandler -> {
+            val harLesetilgang = Kontekst.get().AppUser.harLesetilgang()
             val harTilgang =
                 inTransaction {
                     tilgangService.harTilgangTilPerson(
@@ -145,7 +148,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
                         Kontekst.get().appUserAsSaksbehandler().saksbehandlerMedRoller,
                     )
                 }
-            if (harTilgang) {
+            if (harTilgang && harLesetilgang) {
                 onSuccess(foedselsnummer)
             } else {
                 call.respond(HttpStatusCode.NotFound)
@@ -153,6 +156,25 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummerInterna
         }
 
         else -> onSuccess(foedselsnummer)
+    }
+}
+
+class ManglerLesetilgang(sakId: Long) :
+    UgyldigForespoerselException(
+        code = "MANGLER_LESETILGANG",
+        detail = "Mangler lesetilgang til sak id: $sakId",
+    )
+
+inline fun PipelineContext<*, ApplicationCall>.withLesetilgang(onSuccess: () -> Unit) {
+    when (brukerTokenInfo) {
+        is Saksbehandler -> {
+            if (Kontekst.get().AppUser.harLesetilgang()) {
+                onSuccess()
+            } else {
+                throw ManglerLesetilgang(sakId)
+            }
+        }
+        is Systembruker -> onSuccess()
     }
 }
 

@@ -43,6 +43,8 @@ export default function BehandleJournalfoeringOppgave() {
           settNyBehandlingRequest({
             ...nyBehandlingRequest,
             sakType: oppgave.sakType,
+            spraak: undefined,
+            mottattDato: '',
             persongalleri: { ...nyBehandlingRequest?.persongalleri, soeker: oppgave.fnr!! },
           })
         )

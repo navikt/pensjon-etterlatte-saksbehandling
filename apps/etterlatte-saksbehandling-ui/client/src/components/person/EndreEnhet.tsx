@@ -5,6 +5,7 @@ import { useApiCall } from '~shared/hooks/useApiCall'
 import { ButtonGroup } from '~components/person/VurderHendelseModal'
 import { isPending } from '~shared/api/apiUtils'
 import { byttEnhetPaaSak } from '~shared/api/sak'
+import { ENHETER, EnhetFilterKeys, filtrerEnhet } from '~shared/types/Enhet'
 
 export const EndreEnhet = ({ sakId }: { sakId: number }) => {
   const [error, setError] = useState<string | null>(null)
@@ -28,7 +29,7 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
   }
 
   return (
-    <OpprettRevurderingWrapper>
+    <MarginTopWrapper>
       <>
         <Button size="small" variant="secondary" onClick={() => setOpen(true)}>
           Endre Enhet
@@ -66,30 +67,13 @@ export const EndreEnhet = ({ sakId }: { sakId: number }) => {
           </Modal.Body>
         </Modal>
       </>
-    </OpprettRevurderingWrapper>
+    </MarginTopWrapper>
   )
 }
 
-const OpprettRevurderingWrapper = styled.div`
+const MarginTopWrapper = styled.div`
   margin-top: 0;
 `
-
-export const ENHETER = {
-  VELGENHET: 'Velg Enhet',
-  E4815: 'Ålesund - 4815',
-  E4808: 'Porsgrunn - 4808',
-  E4817: 'Steinkjer - 4817',
-  E4862: 'Ålesund utland - 4862',
-  E0001: 'Utland - 0001',
-  E4883: 'Egne ansatte - 4883',
-  E2103: 'Vikafossen - 2103',
-}
-
-export type EnhetFilterKeys = keyof typeof ENHETER
-
-export function filtrerEnhet(enhetsFilter: EnhetFilterKeys): String {
-  return enhetsFilter.substring(1)
-}
 
 const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`
   margin-bottom: 1em;

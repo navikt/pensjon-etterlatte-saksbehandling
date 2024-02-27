@@ -13,10 +13,9 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class HendelsePollerIntegrationTest {
+class HendelsePollerIntegrationTest(dataSource: DataSource) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private val dataSource: DataSource = DatabaseExtension.dataSource
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
     private val hendelsePoller =
@@ -33,7 +32,7 @@ class HendelsePollerIntegrationTest {
     @Test
     fun `poll skal sjekke for hendelser med status NY og starte behandling`() {
         val behandlingsmaaned = YearMonth.of(2024, Month.FEBRUARY)
-        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP18, behandlingsmaaned)
+        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
         hendelseDao.opprettHendelserForSaker(jobb.id, listOf(5, 7, 12, 20, 33, 50), Steg.IDENTIFISERT_SAK)
 
         hendelsePoller.poll(3)

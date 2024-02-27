@@ -5,6 +5,7 @@ import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.getUUID
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.behandling.somLocalDateTimeUTC
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
@@ -14,13 +15,56 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.singleOrNull
-import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
 import java.util.UUID
 
-class RevurderingDao(private val connection: () -> Connection) {
+class RevurderingDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+    fun lagreRevurderingInfo(
+        id: UUID,
+        revurderingInfoMedBegrunnelse: RevurderingInfoMedBegrunnelse,
+        kilde: Grunnlagsopplysning.Kilde,
+    ) {
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                prepareStatement(
+                    """
+                    INSERT INTO revurdering_info(behandling_id, info, kilde, begrunnelse)
+                    VALUES(?, ?, ?, ?) ON CONFLICT(behandling_id) DO UPDATE SET info = excluded.info, kilde = excluded.kilde, begrunnelse = excluded.begrunnelse
+                    """.trimIndent(),
+                ).let { statement ->
+                    statement.setObject(1, id)
+                    statement.setJsonb(2, revurderingInfoMedBegrunnelse.revurderingInfo)
+                    statement.setJsonb(3, kilde)
+                    statement.stringOrNull(4, revurderingInfoMedBegrunnelse.begrunnelse)
+                    statement.executeUpdate()
+                }
+            }
+        }
+    }
+
+    private fun hentRevurderingInfoForBehandling(id: UUID): RevurderingInfoMedBegrunnelse? =
+        connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                prepareStatement(
+                    """
+                    SELECT info, begrunnelse FROM revurdering_info 
+                    WHERE behandling_id = ?
+                    """.trimIndent(),
+                ).let { statement ->
+                    statement.setObject(1, id)
+                    statement.executeQuery()
+                        .singleOrNull {
+                            RevurderingInfoMedBegrunnelse(
+                                getString("info")?.let { objectMapper.readValue(it) },
+                                getString("begrunnelse"),
+                            )
+                        }
+                }
+            }
+        }
+
     fun asRevurdering(
         rs: ResultSet,
         sak: Sak,
@@ -47,44 +91,9 @@ class RevurderingDao(private val connection: () -> Connection) {
             kilde = rs.getString("kilde").let { Vedtaksloesning.valueOf(it) },
             revurderingInfo = revurderingInfo,
             begrunnelse = rs.getString("begrunnelse"),
+            relatertBehandlingId = rs.getString("relatert_behandling"),
         )
     }
-
-    fun lagreRevurderingInfo(
-        id: UUID,
-        revurderingInfoMedBegrunnelse: RevurderingInfoMedBegrunnelse,
-        kilde: Grunnlagsopplysning.Kilde,
-    ) {
-        connection().prepareStatement(
-            """
-            INSERT INTO revurdering_info(behandling_id, info, kilde, begrunnelse)
-            VALUES(?, ?, ?, ?) ON CONFLICT(behandling_id) DO UPDATE SET info = excluded.info, kilde = excluded.kilde, begrunnelse = excluded.begrunnelse
-            """.trimIndent(),
-        ).let { statement ->
-            statement.setObject(1, id)
-            statement.setJsonb(2, revurderingInfoMedBegrunnelse.revurderingInfo)
-            statement.setJsonb(3, kilde)
-            statement.stringOrNull(4, revurderingInfoMedBegrunnelse.begrunnelse)
-            statement.executeUpdate()
-        }
-    }
-
-    private fun hentRevurderingInfoForBehandling(id: UUID): RevurderingInfoMedBegrunnelse? =
-        connection().prepareStatement(
-            """
-            SELECT info, begrunnelse FROM revurdering_info 
-            WHERE behandling_id = ?
-            """.trimIndent(),
-        ).let { statement ->
-            statement.setObject(1, id)
-            statement.executeQuery()
-                .singleOrNull {
-                    RevurderingInfoMedBegrunnelse(
-                        getString("info")?.let { objectMapper.readValue(it) },
-                        getString("begrunnelse"),
-                    )
-                }
-        }
 }
 
 fun PreparedStatement.stringOrNull(

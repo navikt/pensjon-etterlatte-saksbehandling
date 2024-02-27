@@ -72,14 +72,29 @@ export enum TilbakekrevingStatus {
   OPPRETTET = 'OPPRETTET',
   UNDER_ARBEID = 'UNDER_ARBEID',
   FATTET_VEDTAK = 'FATTET_VEDTAK',
+  ATTESTERT = 'ATTESTERT',
   UNDERKJENT = 'UNDERKJENT',
 }
+export const teksterTilbakekrevingStatus: Record<TilbakekrevingStatus, string> = {
+  OPPRETTET: 'Opprettet',
+  UNDER_ARBEID: 'Under arbeid',
+  FATTET_VEDTAK: 'Fattet vedtak',
+  ATTESTERT: 'Attestert',
+  UNDERKJENT: 'Underkjent',
+}
+
+export const erUnderBehandling = (status: TilbakekrevingStatus) =>
+  status === TilbakekrevingStatus.OPPRETTET ||
+  status === TilbakekrevingStatus.UNDER_ARBEID ||
+  status === TilbakekrevingStatus.UNDERKJENT
+
 export enum TilbakekrevingSkyld {
   BRUKER = 'BRUKER',
   IKKE_FORDELT = 'IKKE_FORDELT',
   NAV = 'NAV',
   SKYLDDELING = 'SKYLDDELING',
 }
+
 export enum TilbakekrevingResultat {
   DELVIS_TILBAKEKREV = 'DELVIS_TILBAKEKREV',
   FEILREGISTRERT = 'FEILREGISTRERT',

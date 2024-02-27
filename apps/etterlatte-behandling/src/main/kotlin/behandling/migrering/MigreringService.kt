@@ -6,6 +6,7 @@ import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.GyldighetsproevingService
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
@@ -16,6 +17,7 @@ import no.nav.etterlatte.libs.common.behandling.Flyktning
 import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.JaNeiMedBegrunnelse
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
+import no.nav.etterlatte.libs.common.behandling.MigreringRespons
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -26,7 +28,6 @@ import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.rapidsandrivers.migrering.GJENOPPRETTELSE_OPPGAVE
 import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -138,7 +139,11 @@ class MigreringService(
                         behandling.toStatistikkBehandling(request.opprettPersongalleri(), pesysId = request.pesysId.id),
                         BehandlingHendelseType.OPPRETTET,
                     )
-                    behandling
+                    MigreringRespons(
+                        behandlingId = behandling.id,
+                        sakId = behandling.sak.id,
+                        oppgaveId = nyopprettaOppgave.id,
+                    )
                 }
             }
         }
@@ -147,10 +152,10 @@ class MigreringService(
         inTransaction {
             val sak = finnEllerOpprettSak(request)
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = GJENOPPRETTELSE_OPPGAVE,
+                referanse = request.pesysId.id.toString(),
                 sakId = sak.id,
-                oppgaveKilde = OppgaveKilde.BEHANDLING,
-                oppgaveType = OppgaveType.FOERSTEGANGSBEHANDLING,
+                oppgaveKilde = OppgaveKilde.GJENOPPRETTING,
+                oppgaveType = OppgaveType.GJENOPPRETTING_ALDERSOVERGANG,
                 merknad =
                     "Opprettelse av manuell behandling for gjenoppretting av opphørt sak i Pesys id=${request.pesysId.id}",
                 frist = Tidspunkt.now().plus(5, ChronoUnit.DAYS),
@@ -177,8 +182,12 @@ class MigreringService(
         sakService.finnEllerOpprettSak(
             request.soeker.value,
             SakType.BARNEPENSJON,
-            request.enhet.nr,
-            sjekkEnhetMotNorg = false,
+            gradering = request.gradering,
+            overstyrendeEnhet =
+                when (request.gradering?.erStrengtFortrolig()) {
+                    true -> Enheter.STRENGT_FORTROLIG.navn
+                    else -> null
+                },
         )
 
     fun avbrytBehandling(

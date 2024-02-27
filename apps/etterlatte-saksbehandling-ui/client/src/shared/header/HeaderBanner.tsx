@@ -1,5 +1,6 @@
 import { Search } from './Search'
-import { InternalHeader } from '@navikt/ds-react'
+import { ReleaseAlerts } from './ReleaseAlerts'
+import { InternalHeader, Spacer } from '@navikt/ds-react'
 import { useAppSelector } from '~store/Store'
 
 export const HeaderBanner = () => {
@@ -7,8 +8,9 @@ export const HeaderBanner = () => {
   return (
     <InternalHeader data-theme="light">
       <InternalHeader.Title href="/">Gjenny</InternalHeader.Title>
-      <div style={{ marginLeft: 'auto' }} />
+      <Spacer />
       <Search />
+      <ReleaseAlerts />
       <InternalHeader.User
         data-theme="dark"
         name={innloggetSaksbehandler.navn}

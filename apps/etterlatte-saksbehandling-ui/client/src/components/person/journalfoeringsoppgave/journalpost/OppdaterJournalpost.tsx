@@ -7,14 +7,14 @@ import { Journalpost } from '~shared/types/Journalpost'
 import { FormWrapper } from '~components/person/journalfoeringsoppgave/BehandleJournalfoeringOppgave'
 import AvbrytBehandleJournalfoeringOppgave from '~components/person/journalfoeringsoppgave/AvbrytBehandleJournalfoeringOppgave'
 import { ISak } from '~shared/types/sak'
-import { formaterStringDato } from '~utils/formattering'
+import { formaterJournalpostStatus, formaterStringDato } from '~utils/formattering'
 import styled from 'styled-components'
 import { EndreTema } from '~components/person/journalfoeringsoppgave/journalpost/EndreTema'
 import { EndreBruker } from '~components/person/journalfoeringsoppgave/journalpost/EndreBruker'
 import { EndreAvsenderMottaker } from '~components/person/journalfoeringsoppgave/journalpost/EndreAvsenderMottaker'
 import { EndreSak } from '~components/person/journalfoeringsoppgave/journalpost/EndreSak'
 import { EndreDokumenter } from '~components/person/journalfoeringsoppgave/journalpost/EndreDokumenter'
-import FerdigstillJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/FerdigstillJournalpostModal'
+import JournalfoerJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/JournalfoerJournalpostModal'
 import LagreJournalpostModal from '~components/person/journalfoeringsoppgave/journalpost/modal/LagreJournalpostModal'
 import { EndreTittelJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/EndreTittelJournalpost'
 
@@ -45,7 +45,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
           label="Registrert dato"
           tekst={journalpost.datoOpprettet ? formaterStringDato(journalpost.datoOpprettet) : 'Mangler opprettelsesdato'}
         />
-        <Info label="Status" tekst={journalpost.journalstatus} />
+        <Info label="Status" tekst={formaterJournalpostStatus(journalpost.journalstatus)} />
       </InfoWrapper>
 
       <br />
@@ -85,7 +85,7 @@ export const OppdaterJournalpost = ({ initialJournalpost, oppgaveId, sak }: Prop
           <FlexRow justify="center" $spacing>
             <LagreJournalpostModal journalpost={journalpost} oppgaveId={oppgaveId} />
 
-            <FerdigstillJournalpostModal journalpost={journalpost} sak={sak} />
+            <JournalfoerJournalpostModal journalpost={journalpost} sak={sak} />
           </FlexRow>
           <FlexRow justify="center">
             <AvbrytBehandleJournalfoeringOppgave />

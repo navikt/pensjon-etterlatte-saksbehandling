@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.generellbehandling
 
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.libs.common.generellbehandling.DokumentMedSendtDato
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandling
@@ -18,14 +19,12 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class GenerellBehandlingDaoTest {
-    private val dataSource: DataSource = DatabaseExtension.dataSource
+internal class GenerellBehandlingDaoTest(val dataSource: DataSource) {
     private lateinit var dao: GenerellBehandlingDao
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-        dao = GenerellBehandlingDao { connection }
+        dao = GenerellBehandlingDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @AfterEach

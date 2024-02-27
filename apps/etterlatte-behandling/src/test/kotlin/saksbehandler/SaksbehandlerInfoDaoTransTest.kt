@@ -1,5 +1,6 @@
 package no.nav.etterlatte.saksbehandler
 
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
@@ -8,19 +9,18 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class SaksbehandlerInfoDaoTransTest {
-    private val dataSource = DatabaseExtension.dataSource
-    private lateinit var saksbehandlerInfoDaoTrans: SaksbehandlerInfoDaoTrans
+internal class SaksbehandlerInfoDaoTransTest(val dataSource: DataSource) {
+    private lateinit var saksbehandlerInfoDaoTrans: SaksbehandlerInfoDao
     private lateinit var saksbehandlerInfoDao: SaksbehandlerInfoDao
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-        saksbehandlerInfoDaoTrans = SaksbehandlerInfoDaoTrans { connection }
-        saksbehandlerInfoDao = SaksbehandlerInfoDao(dataSource)
+        saksbehandlerInfoDaoTrans = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
+        saksbehandlerInfoDao = SaksbehandlerInfoDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @Test

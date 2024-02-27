@@ -9,6 +9,7 @@ import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
@@ -17,11 +18,12 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -51,6 +53,7 @@ class GrunnlagsendringshendelseService(
     private val grunnlagKlient: GrunnlagKlient,
     private val sakService: SakService,
     private val brukerService: BrukerService,
+    private val doedshendelseService: DoedshendelseService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -80,7 +83,7 @@ class GrunnlagsendringshendelseService(
         hendelse: Grunnlagsendringshendelse,
         saksbehandler: Saksbehandler,
     ) {
-        logger.info("Lukker hendelse med id $hendelse.id")
+        logger.info("Lukker hendelse med id ${hendelse.id}")
 
         inTransaction {
             grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)
@@ -98,7 +101,9 @@ class GrunnlagsendringshendelseService(
                     "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil",
                     e,
                 )
-                throw KunneIkkeLukkeOppgaveForhendelse(e.message ?: "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil")
+                throw KunneIkkeLukkeOppgaveForhendelse(
+                    e.message ?: "Kunne ikke ferdigstille oppgaven for hendelsen på grunn av feil",
+                )
             }
         }
     }
@@ -107,16 +112,32 @@ class GrunnlagsendringshendelseService(
         grunnlagsendringshendelseDao.oppdaterGrunnlagsendringHistorisk(behandlingId)
     }
 
-    fun opprettBostedhendelse(bostedsadresse: Bostedsadresse): List<Grunnlagsendringshendelse> {
+    private fun opprettBostedhendelse(bostedsadresse: Bostedsadresse): List<Grunnlagsendringshendelse> {
         return inTransaction { opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED) }
     }
 
-    fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
-        return inTransaction { opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL) }
+    fun opprettDoedshendelse(doedshendelse: DoedshendelsePdl): List<Grunnlagsendringshendelse> {
+        if (doedshendelseService.kanBrukeDeodshendelserJob()) {
+            try {
+                doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
+            } catch (e: Exception) {
+                logger.error("Noe gikk galt ved opprettelse av dødshendelse i behandling.", e)
+            }
+            return emptyList()
+        } else {
+            return inTransaction {
+                opprettHendelseAvTypeForPerson(doedshendelse.fnr, GrunnlagsendringsType.DOEDSFALL)
+            }
+        }
     }
 
     fun opprettUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse): List<Grunnlagsendringshendelse> {
-        return inTransaction { opprettHendelseAvTypeForPerson(utflyttingsHendelse.fnr, GrunnlagsendringsType.UTFLYTTING) }
+        return inTransaction {
+            opprettHendelseAvTypeForPerson(
+                utflyttingsHendelse.fnr,
+                GrunnlagsendringsType.UTFLYTTING,
+            )
+        }
     }
 
     fun opprettForelderBarnRelasjonHendelse(forelderBarnRelasjonHendelse: ForelderBarnRelasjonHendelse): List<Grunnlagsendringshendelse> {
@@ -313,6 +334,11 @@ class GrunnlagsendringshendelseService(
             }.map { it.first }
     }
 
+    fun opprettDoedshendelseForPerson(grunnlagsendringshendelse: Grunnlagsendringshendelse): OppgaveIntern {
+        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(grunnlagsendringshendelse)
+        return opprettOppgave(grunnlagsendringshendelse)
+    }
+
     private fun opprettHendelseAvTypeForSak(
         sakId: Long,
         grunnlagendringType: GrunnlagsendringsType,
@@ -340,18 +366,20 @@ class GrunnlagsendringshendelseService(
             }.map { it.first }
     }
 
-    fun verifiserOgHaandterHendelse(
+    private fun verifiserOgHaandterHendelse(
         grunnlagsendringshendelse: Grunnlagsendringshendelse,
         sak: Sak,
     ) {
         val personRolle = grunnlagsendringshendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
-        val pdlData = pdltjenesterKlient.hentPdlModell(grunnlagsendringshendelse.gjelderPerson, personRolle, sak.sakType)
+        val pdlData =
+            pdltjenesterKlient.hentPdlModell(grunnlagsendringshendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag =
             runBlocking {
                 grunnlagKlient.hentGrunnlag(sak.id)
             }
         try {
-            val samsvarMellomPdlOgGrunnlag = finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
+            val samsvarMellomPdlOgGrunnlag =
+                finnSamsvarForHendelse(grunnlagsendringshendelse, pdlData, grunnlag, personRolle, sak.sakType)
             val erDuplikat =
                 erDuplikatHendelse(sak.id, sak.ident, grunnlagsendringshendelse.type, samsvarMellomPdlOgGrunnlag)
 
@@ -365,7 +393,10 @@ class GrunnlagsendringshendelseService(
                 forkastHendelse(grunnlagsendringshendelse.id, samsvarMellomPdlOgGrunnlag)
             }
         } catch (e: GrunnlagRolleException) {
-            forkastHendelse(grunnlagsendringshendelse.id, SamsvarMellomKildeOgGrunnlag.FeilRolle(pdlData, grunnlag, false))
+            forkastHendelse(
+                grunnlagsendringshendelse.id,
+                SamsvarMellomKildeOgGrunnlag.FeilRolle(pdlData, grunnlag, false),
+            )
         }
     }
 
@@ -387,15 +418,19 @@ class GrunnlagsendringshendelseService(
                 etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
             )
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = hendelse.id.toString(),
-                sakId = hendelse.sakId,
-                oppgaveKilde = OppgaveKilde.HENDELSE,
-                oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                merknad = hendelse.beskrivelse(),
-            ).also {
-                logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
-            }
+            opprettOppgave(hendelse)
+        }
+    }
+
+    private fun opprettOppgave(hendelse: Grunnlagsendringshendelse): OppgaveIntern {
+        return oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            referanse = hendelse.id.toString(),
+            sakId = hendelse.sakId,
+            oppgaveKilde = OppgaveKilde.HENDELSE,
+            oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+            merknad = hendelse.beskrivelse(),
+        ).also {
+            logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
         }
     }
 

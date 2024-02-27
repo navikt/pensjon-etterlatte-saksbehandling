@@ -58,7 +58,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
 
   const tilbakestill = () => {
     apiTilbakestillManuellPayload(
-      { brevId: brev.id, sakId: brev.sakId, behandlingId: brev.behandlingId },
+      { brevId: brev.id, sakId: brev.sakId, behandlingId: brev.behandlingId, brevtype: brev.brevtype },
       (payload: any) => {
         setContent(payload.hoveddel)
         setVedlegg(payload.vedlegg)
@@ -93,7 +93,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
   }
 
   return (
-    <Container forhaandsvisning={fane === ManueltBrevFane.FORHAANDSVIS}>
+    <Container>
       <Tabs value={fane} onChange={setFane}>
         <Tabs.List>
           <Tabs.Tab
@@ -101,7 +101,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
             label={kanRedigeres ? 'Rediger' : 'Innhold'}
             icon={<PencilIcon fontSize="1.5rem" aria-hidden />}
           />
-          {vedlegg && (
+          {vedlegg?.length > 0 && (
             <Tabs.Tab
               value={ManueltBrevFane.REDIGER_VEDLEGG}
               label={kanRedigeres ? 'Rediger vedlegg' : 'Innhold vedlegg'}
@@ -120,7 +120,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
             <Spinner visible label="Henter brevinnhold ..." />
           )}
           {isSuccess(hentManuellPayloadStatus) && isSuccessOrInitial(tilbakestillManuellPayloadStatus) && (
-            <PanelWrapper>
+            <>
               <SlateEditor value={content} onChange={onChange} readonly={!kanRedigeres} />
 
               {kanRedigeres && (
@@ -133,7 +133,7 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
                   tilbakestillSynlig={!!brev.behandlingId}
                 />
               )}
-            </PanelWrapper>
+            </>
           )}
           {isFailureHandler({
             apiResult: tilbakestillManuellPayloadStatus,
@@ -146,35 +146,33 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
             (isPending(tilbakestillManuellPayloadStatus) && <Spinner visible label="Henter brevinnhold ..." />)}
           {isSuccess(hentManuellPayloadStatus) && isSuccessOrInitial(tilbakestillManuellPayloadStatus) && (
             <>
-              <PanelWrapper>
-                <Accordion>
-                  {vedlegg &&
-                    vedlegg.map((brevVedlegg) => (
-                      <Accordion.Item key={brevVedlegg.key}>
-                        <Accordion.Header>{brevVedlegg.tittel}</Accordion.Header>
-                        <Accordion.Content>
-                          <SlateEditor
-                            value={brevVedlegg.payload}
-                            onChange={onChangeVedlegg}
-                            readonly={!kanRedigeres}
-                            editKey={brevVedlegg.key}
-                          />
-                        </Accordion.Content>
-                      </Accordion.Item>
-                    ))}
-                </Accordion>
+              <Accordion indent={false}>
+                {vedlegg?.length > 0 &&
+                  vedlegg.map((brevVedlegg) => (
+                    <Accordion.Item key={brevVedlegg.key}>
+                      <Accordion.Header>{brevVedlegg.tittel}</Accordion.Header>
+                      <Accordion.Content>
+                        <SlateEditor
+                          value={brevVedlegg.payload}
+                          onChange={onChangeVedlegg}
+                          readonly={!kanRedigeres}
+                          editKey={brevVedlegg.key}
+                        />
+                      </Accordion.Content>
+                    </Accordion.Item>
+                  ))}
+              </Accordion>
 
-                {kanRedigeres && (
-                  <TilbakestillOgLagreRad
-                    lagretStatus={lagretStatus}
-                    lagre={lagre}
-                    tilbakestill={tilbakestill}
-                    tilbakestillManuellPayloadStatus={isPending(tilbakestillManuellPayloadStatus)}
-                    lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
-                    tilbakestillSynlig={!!brev.behandlingId}
-                  />
-                )}
-              </PanelWrapper>
+              {kanRedigeres && (
+                <TilbakestillOgLagreRad
+                  lagretStatus={lagretStatus}
+                  lagre={lagre}
+                  tilbakestill={tilbakestill}
+                  tilbakestillManuellPayloadStatus={isPending(tilbakestillManuellPayloadStatus)}
+                  lagreManuellPayloadStatus={isPending(lagreManuellPayloadStatus)}
+                  tilbakestillSynlig={!!brev.behandlingId}
+                />
+              )}
             </>
           )}
           {isFailureHandler({
@@ -184,34 +182,13 @@ export default function RedigerbartBrev({ brev, kanRedigeres, lukkAdvarselBehand
         </Tabs.Panel>
 
         <Tabs.Panel value={ManueltBrevFane.FORHAANDSVIS}>
-          <PanelWrapper forhaandsvisning>
-            <ForhaandsvisningBrev brev={brev} />
-          </PanelWrapper>
+          <ForhaandsvisningBrev brev={brev} />
         </Tabs.Panel>
       </Tabs>
     </Container>
   )
 }
 
-interface StyledProps {
-  forhaandsvisning?: boolean
-}
-
-const Container = styled.div<StyledProps>`
-  margin: auto;
-  height: 100%;
+const Container = styled.div`
   width: 100%;
-  position: relative;
-  .navds-tabs,
-  .navds-tabs__tabpanel {
-    height: inherit;
-    width: inherit;
-    max-height: ${(p) => (p.forhaandsvisning ? '75vh' : 'calc(75vh - 8rem)')};
-  }
-`
-
-const PanelWrapper = styled.div<StyledProps>`
-  height: 100%;
-  width: 100%;
-  max-height: ${(p) => (p.forhaandsvisning ? 'calc(75vh - 3rem)' : 'calc(75vh - 5rem)')};
 `

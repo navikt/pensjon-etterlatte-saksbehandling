@@ -17,7 +17,7 @@ import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdHendelseBeriket
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -32,7 +32,7 @@ internal fun Route.grunnlagsendringshendelseRoute(grunnlagsendringshendelseServi
     route("/grunnlagsendringshendelse") {
         post("/doedshendelse") {
             kunSkrivetilgang {
-                val doedshendelse = call.receive<Doedshendelse>()
+                val doedshendelse = call.receive<DoedshendelsePdl>()
                 logger.info("Mottar en doedshendelse fra PDL for ${doedshendelse.fnr}")
                 grunnlagsendringshendelseService.opprettDoedshendelse(doedshendelse)
                 call.respond(HttpStatusCode.OK)

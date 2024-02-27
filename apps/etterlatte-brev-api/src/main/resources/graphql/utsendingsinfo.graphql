@@ -1,0 +1,15 @@
+query(
+   $journalpostId: String!,
+) {
+    journalpost(journalpostId: $journalpostId) {
+        journalpostId
+        utsendingsinfo {
+            fysiskpostSendt {
+                adressetekstKonvolutt
+            }
+            digitalpostSendt {
+                adresse
+            }
+        }
+    }
+}

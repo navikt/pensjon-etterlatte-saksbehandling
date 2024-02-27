@@ -21,7 +21,7 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
     private val logger = LoggerFactory.getLogger(DokarkivKlient::class.java)
 
     internal suspend fun opprettJournalpost(
-        request: OpprettJournalpostRequest,
+        request: OpprettJournalpost,
         ferdigstill: Boolean,
     ): OpprettJournalpostResponse {
         val response =
@@ -42,6 +42,8 @@ class DokarkivKlient(private val client: HttpClient, private val url: String) {
             response.body<OpprettJournalpostResponse>()
                 .also { logger.warn("Konflikt ved lagring av journalpost ${it.journalpostId}") }
         } else {
+            logger.error("Feil oppsto på opprett journalpost: ${response.bodyAsText()}")
+
             throw ForespoerselException(
                 status = response.status.value,
                 code = "UKJENT_FEIL_VED_JOURNALFOERING",

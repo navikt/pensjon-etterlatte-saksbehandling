@@ -3,11 +3,13 @@ package no.nav.etterlatte.metrics
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.prometheus.client.CollectorRegistry
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -20,12 +22,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class BehandlingMetricsOppgaveTest {
-    private val ds = DatabaseExtension.dataSource
-
+internal class BehandlingMetricsOppgaveTest(private val ds: DataSource) {
     private lateinit var oppgaveDao: OppgaveDaoImpl
     private lateinit var sakDao: SakDao
 
@@ -37,16 +38,14 @@ internal class BehandlingMetricsOppgaveTest {
 
     @BeforeAll
     fun beforeAll() {
-        val connection = ds.connection
-        oppgaveDao = OppgaveDaoImpl { connection }
-        sakDao = SakDao { connection }
-
-        opprettOppgaver()
+        oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(ds))
+        sakDao = SakDao(ConnectionAutoclosingTest(ds))
 
         behandlingMetrikkerDao = BehandlingMetrikkerDao(ds)
         oppgaveMetrikkerDao = OppgaveMetrikkerDao(ds)
         behandlingMetrics = BehandlingMetrics(oppgaveMetrikkerDao, behandlingMetrikkerDao, testreg)
 
+        opprettOppgaver()
         behandlingMetrics.run()
     }
 
@@ -123,11 +122,11 @@ internal class BehandlingMetricsOppgaveTest {
     fun lagNyOppgave(
         sak: Sak,
         status: Status,
-        saksbehandler: String,
+        ident: String,
     ) = OppgaveIntern(
         id = UUID.randomUUID(),
         status = status,
-        saksbehandlerIdent = saksbehandler,
+        saksbehandler = OppgaveSaksbehandler(ident),
         enhet = sak.enhet,
         sakId = sak.id,
         kilde = OppgaveKilde.BEHANDLING,

@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.virkningstidspunkt
-import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
@@ -516,8 +515,6 @@ class VedtakBehandlingService(
                     VilkaarsvurderingUtfall.IKKE_OPPFYLT -> VedtakType.OPPHOER
                 }
             }
-
-            BehandlingType.MANUELT_OPPHOER -> VedtakType.OPPHOER
         }
     }
 
@@ -590,8 +587,6 @@ class VedtakBehandlingService(
             val trygdetid = trygdetidKlient.hentTrygdetid(behandlingId, brukerTokenInfo)
 
             when (behandling.behandlingType) {
-                BehandlingType.MANUELT_OPPHOER -> VedtakData(behandling, null, null, sak, trygdetid)
-
                 BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING -> {
                     val vilkaarsvurdering = vilkaarsvurderingKlient.hentVilkaarsvurdering(behandlingId, brukerTokenInfo)
                     when (vilkaarsvurdering?.resultat?.utfall) {
@@ -634,12 +629,6 @@ class OpphoersrevurderingErIkkeOpphoersvedtakException(revurderingAarsak: Revurd
     IllegalStateException(
         "Vedtaket er av type $vedtakType, men dette er " +
             "ikke gyldig for revurderingen med årsak $revurderingAarsak",
-    )
-
-class UgyldigAttestantException(ident: String) :
-    IkkeTillattException(
-        code = "ATTESTANT_OG_SAKSBEHANDLER_ER_SAMME_PERSON",
-        detail = "Saksbehandler og attestant må være to forskjellige personer (ident=$ident)",
     )
 
 class ManglerAvkortetYtelse :

@@ -3,6 +3,7 @@ package no.nav.etterlatte.brev.model.oms
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
+import no.nav.etterlatte.brev.model.BrevVedleggKey
 import no.nav.etterlatte.brev.model.FeilutbetalingType
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
@@ -17,11 +18,13 @@ data class OmstillingsstoenadOpphoer(
     override val innhold: List<Slate.Element>,
     val innholdForhaandsvarsel: List<Slate.Element>,
     val bosattUtland: Boolean,
+    val virkningsdato: LocalDate,
     val feilutbetaling: FeilutbetalingType,
 ) : BrevDataFerdigstilling {
     companion object {
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
+            generellBrevData: GenerellBrevData,
             utlandstilknytning: Utlandstilknytning?,
             brevutfall: BrevutfallDto,
         ): OmstillingsstoenadOpphoer {
@@ -29,8 +32,14 @@ data class OmstillingsstoenadOpphoer(
 
             return OmstillingsstoenadOpphoer(
                 innhold = innholdMedVedlegg.innhold(),
-                innholdForhaandsvarsel = vedleggHvisFeilutbetaling(feilutbetaling, innholdMedVedlegg),
+                innholdForhaandsvarsel =
+                    vedleggHvisFeilutbetaling(
+                        feilutbetaling,
+                        innholdMedVedlegg,
+                        BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                    ),
                 bosattUtland = utlandstilknytning?.type == UtlandstilknytningType.BOSATT_UTLAND,
+                virkningsdato = requireNotNull(generellBrevData.forenkletVedtak?.virkningstidspunkt?.atDay(1)),
                 feilutbetaling = feilutbetaling,
             )
         }
@@ -39,15 +48,10 @@ data class OmstillingsstoenadOpphoer(
 
 data class OmstillingsstoenadOpphoerRedigerbartUtfall(
     val feilutbetaling: FeilutbetalingType,
-    val virkningsdato: LocalDate,
 ) : BrevDataRedigerbar {
     companion object {
-        fun fra(
-            generellBrevData: GenerellBrevData,
-            brevutfall: BrevutfallDto,
-        ): OmstillingsstoenadOpphoerRedigerbartUtfall =
+        fun fra(brevutfall: BrevutfallDto): OmstillingsstoenadOpphoerRedigerbartUtfall =
             OmstillingsstoenadOpphoerRedigerbartUtfall(
-                virkningsdato = requireNotNull(generellBrevData.forenkletVedtak?.virkningstidspunkt?.atDay(1)),
                 feilutbetaling = toFeilutbetalingType(requireNotNull(brevutfall.feilutbetaling?.valg)),
             )
     }

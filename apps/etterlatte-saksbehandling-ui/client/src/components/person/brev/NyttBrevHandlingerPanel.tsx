@@ -29,6 +29,7 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
       {
         brevId: brev.id,
         sakId: brev.sakId,
+        brevtype: brev.brevtype,
       },
       () => journalfoer()
     )

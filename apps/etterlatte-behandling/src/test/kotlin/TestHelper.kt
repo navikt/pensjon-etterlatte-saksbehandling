@@ -36,7 +36,7 @@ import no.nav.etterlatte.libs.common.gyldigSoeknad.GyldighetsResultat
 import no.nav.etterlatte.libs.common.gyldigSoeknad.VurderingsResultat
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -167,6 +167,7 @@ fun revurdering(
     enhet: String = Enheter.defaultEnhet.enhetNr,
     revurderingInfo: RevurderingInfoMedBegrunnelse? = null,
     begrunnelse: String? = null,
+    relatertBehandlingId: String? = null,
 ) = Revurdering.opprett(
     id = id,
     sak =
@@ -188,6 +189,7 @@ fun revurdering(
     kilde = kilde,
     revurderingInfo = revurderingInfo,
     begrunnelse = begrunnelse,
+    relatertBehandlingId = relatertBehandlingId,
 )
 
 fun persongalleri(
@@ -234,7 +236,7 @@ fun grunnlagsinformasjonDoedshendelse(
     avdoedFnr: String = "12345678911",
     doedsdato: LocalDate = LocalDate.of(2022, 1, 1),
     endringstype: Endringstype = Endringstype.OPPRETTET,
-) = Doedshendelse(hendelseId = "1", fnr = avdoedFnr, doedsdato = doedsdato, endringstype = endringstype)
+) = DoedshendelsePdl(hendelseId = "1", fnr = avdoedFnr, doedsdato = doedsdato, endringstype = endringstype)
 
 fun grunnlagsinformasjonUtflyttingshendelse(
     fnr: String = "12345678911",

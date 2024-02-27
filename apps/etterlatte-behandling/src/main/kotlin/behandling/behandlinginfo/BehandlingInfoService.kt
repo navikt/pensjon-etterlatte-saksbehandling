@@ -19,6 +19,7 @@ class BehandlingInfoService(
     fun lagreBrevutfallOgEtterbetaling(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
+        opphoer: Boolean,
         brevutfall: Brevutfall,
         etterbetaling: Etterbetaling?,
     ): Pair<Brevutfall, Etterbetaling?> {
@@ -26,23 +27,24 @@ class BehandlingInfoService(
             behandlingService.hentBehandling(behandlingId)
                 ?: throw GenerellIkkeFunnetException()
 
-        sjekkBehandlingKanEndres(behandling)
+        sjekkBehandlingKanEndres(behandling, opphoer)
 
-        val lagretBrevutfall = lagreBrevutfall(behandling, brevutfall)
+        val lagretBrevutfall = lagreBrevutfall(behandling, opphoer, brevutfall)
         val lagretEtterbetaling = lagreEtterbetaling(behandling, etterbetaling)
 
-        oppdaterBehandlingStatus(behandling, brukerTokenInfo)
+        oppdaterBehandlingStatus(behandling, opphoer, brukerTokenInfo)
 
         return Pair(lagretBrevutfall, lagretEtterbetaling)
     }
 
     private fun lagreBrevutfall(
         behandling: Behandling,
+        opphoer: Boolean,
         brevutfall: Brevutfall,
     ): Brevutfall {
         sjekkAldersgruppeSattVedBarnepensjon(behandling, brevutfall)
-        sjekkLavEllerIngenInntektSattVedOmstillingsstoenad(behandling, brevutfall)
-        sjekkFeilutbetalingSattVedOmstillingsstoenad(behandling, brevutfall)
+        sjekkLavEllerIngenInntektSattVedOmstillingsstoenad(behandling, opphoer, brevutfall)
+        sjekkFeilutbetalingErSatt(behandling, brevutfall)
         return behandlingInfoDao.lagreBrevutfall(brevutfall)
     }
 
@@ -69,22 +71,42 @@ class BehandlingInfoService(
         return behandlingInfoDao.hentEtterbetaling(behandlingId)
     }
 
-    private fun sjekkBehandlingKanEndres(behandling: Behandling) {
+    private fun sjekkBehandlingKanEndres(
+        behandling: Behandling,
+        opphoer: Boolean,
+    ) {
         val kanEndres =
             when (behandling.sak.sakType) {
-                SakType.BARNEPENSJON ->
-                    behandling.status in
-                        listOf(
-                            BehandlingStatus.BEREGNET,
-                            BehandlingStatus.RETURNERT,
-                        )
+                SakType.BARNEPENSJON -> {
+                    if (opphoer) {
+                        behandling.status in
+                            listOf(
+                                BehandlingStatus.VILKAARSVURDERT,
+                                BehandlingStatus.RETURNERT,
+                            )
+                    } else {
+                        behandling.status in
+                            listOf(
+                                BehandlingStatus.BEREGNET,
+                                BehandlingStatus.RETURNERT,
+                            )
+                    }
+                }
 
                 SakType.OMSTILLINGSSTOENAD ->
-                    behandling.status in
-                        listOf(
-                            BehandlingStatus.AVKORTET,
-                            BehandlingStatus.RETURNERT,
-                        )
+                    if (opphoer) {
+                        behandling.status in
+                            listOf(
+                                BehandlingStatus.VILKAARSVURDERT,
+                                BehandlingStatus.RETURNERT,
+                            )
+                    } else {
+                        behandling.status in
+                            listOf(
+                                BehandlingStatus.AVKORTET,
+                                BehandlingStatus.RETURNERT,
+                            )
+                    }
             }
         if (!kanEndres) {
             throw BrevutfallException.BehandlingKanIkkeEndres(
@@ -118,14 +140,18 @@ class BehandlingInfoService(
 
     private fun sjekkLavEllerIngenInntektSattVedOmstillingsstoenad(
         behandling: Behandling,
+        opphoer: Boolean,
         brevutfall: Brevutfall,
     ) {
-        if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD && brevutfall.lavEllerIngenInntekt == null) {
+        if (behandling.sak.sakType == SakType.OMSTILLINGSSTOENAD &&
+            !opphoer &&
+            brevutfall.lavEllerIngenInntekt == null
+        ) {
             throw BrevutfallException.LavEllerIngenInntektIkkeSatt()
         }
     }
 
-    private fun sjekkFeilutbetalingSattVedOmstillingsstoenad(
+    private fun sjekkFeilutbetalingErSatt(
         behandling: Behandling,
         brevutfall: Brevutfall,
     ) {
@@ -138,11 +164,16 @@ class BehandlingInfoService(
 
     private fun oppdaterBehandlingStatus(
         behandling: Behandling,
+        opphoer: Boolean,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        when (behandling.sak.sakType) {
-            SakType.BARNEPENSJON -> behandlingsstatusService.settBeregnet(behandling.id, brukerTokenInfo, false)
-            SakType.OMSTILLINGSSTOENAD -> behandlingsstatusService.settAvkortet(behandling.id, brukerTokenInfo, false)
+        if (opphoer) {
+            behandlingsstatusService.settVilkaarsvurdert(behandling.id, brukerTokenInfo, false)
+        } else {
+            when (behandling.sak.sakType) {
+                SakType.BARNEPENSJON -> behandlingsstatusService.settBeregnet(behandling.id, brukerTokenInfo, false)
+                SakType.OMSTILLINGSSTOENAD -> behandlingsstatusService.settAvkortet(behandling.id, brukerTokenInfo, false)
+            }
         }
     }
 }

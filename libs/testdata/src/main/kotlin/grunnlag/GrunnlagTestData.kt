@@ -67,23 +67,21 @@ data class GrunnlagTestData(
                         randomUUID(),
                         kilde,
                         AvdoedesBarn(
-                            listOf
-                                (
-                                    personTestData
-                                        (
-                                            soeskenTestopplysningerMap +
-                                                mapOf(
-                                                    Opplysningstype.DOEDSDATO
-                                                        to
-                                                        Opplysning.Konstant
-                                                            (
-                                                                randomUUID(), kilde,
-                                                                LocalDateTime.parse("2022-08-17T00:00:00").toJsonNode(),
-                                                            ),
-                                                ) +
-                                                opplysningsmapSoeskenOverrides,
-                                        ),
+                            listOf(
+                                personTestData(
+                                    soeskenTestopplysningerMap +
+                                        mapOf(
+                                            Opplysningstype.DOEDSDATO
+                                                to
+                                                Opplysning.Konstant(
+                                                    randomUUID(),
+                                                    kilde,
+                                                    LocalDateTime.parse("2022-08-17T00:00:00").toJsonNode(),
+                                                ),
+                                        ) +
+                                        opplysningsmapSoeskenOverrides,
                                 ),
+                            ),
                         ).toJsonNode(),
                     ),
             )

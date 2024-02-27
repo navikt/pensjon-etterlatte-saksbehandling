@@ -19,6 +19,7 @@ import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.klage.KlageService
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeService
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
@@ -70,6 +71,7 @@ class BehandlingFactoryTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>()
     private val sakServiceMock = mockk<SakService>()
+    private val klageService = mockk<KlageService>()
     private val gyldighetsproevingService = mockk<GyldighetsproevingService>(relaxUnitFun = true)
     private val pdlTjenesterKlientMock = mockk<PdlTjenesterKlient>()
     private val mockOppgave =
@@ -96,6 +98,7 @@ class BehandlingFactoryTest {
                 grunnlagsendringshendelseDao,
                 kommerBarnetTilGodeService,
                 revurderingDao,
+                klageService,
                 behandlingService,
             ),
         )

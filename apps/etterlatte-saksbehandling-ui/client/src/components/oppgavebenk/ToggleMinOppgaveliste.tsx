@@ -3,23 +3,34 @@ import { Tabs } from '@navikt/ds-react'
 import { InboxIcon, PersonIcon } from '@navikt/aksel-icons'
 import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
-import { Container } from '~shared/styled'
-import { Tilgangsmelding } from '~components/oppgavebenk/Tilgangsmelding'
+import { Container, FlexRow } from '~shared/styled'
+import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/filter/oppgavelistafiltre'
-import { hentFilterFraLocalStorage, leggFilterILocalStorage } from '~components/oppgavebenk/filter/filterLocalStorage'
+import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
+import {
+  hentFilterFraLocalStorage,
+  leggFilterILocalStorage,
+} from '~components/oppgavebenk/oppgaveFiltrering/filterLocalStorage'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   hentGosysOppgaver,
   hentOppgaverMedStatus,
   OppgaveDTO,
-  Saksbehandler,
+  OppgaveSaksbehandler,
   saksbehandlereIEnhetApi,
 } from '~shared/api/oppgaver'
 import { isSuccess } from '~shared/api/apiUtils'
-import { sorterOppgaverEtterOpprettet } from '~components/oppgavebenk/oppgaveutils'
-import { MinOppgaveliste } from '~components/oppgavebenk/MinOppgaveliste'
-import { OppgavelistaWrapper } from '~components/oppgavebenk/OppgavelistaWrapper'
+import {
+  finnOgOppdaterSaksbehandlerTildeling,
+  leggTilOppgavenIMinliste,
+  oppdaterFrist,
+  sorterOppgaverEtterOpprettet,
+} from '~components/oppgavebenk/utils/oppgaveutils'
+import { Saksbehandler } from '~shared/types/saksbehandler'
+import { FilterRad } from '~components/oppgavebenk/oppgaveFiltrering/FilterRad'
+import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
+import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
+import { OppgaveFeilWrapper } from '~components/oppgavebenk/components/OppgaveFeilWrapper'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -28,20 +39,24 @@ export const ToggleMinOppgaveliste = () => {
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />
   }
+
   const [oppgaveListeValg, setOppgaveListeValg] = useState<OppgavelisteToggle>('Oppgavelista')
-  const [, hentSaksbehandlereIEnhet] = useApiCall(saksbehandlereIEnhetApi)
-  const [saksbehandlereForEnhet, setSaksbehandlereForEnhet] = useState<Array<Saksbehandler>>([])
 
   const location = useLocation()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    if (location.pathname.includes('minoppgaveliste')) {
-      if (oppgaveListeValg !== 'MinOppgaveliste') {
-        setOppgaveListeValg('MinOppgaveliste')
-      }
-    }
-  }, [location.pathname])
+  const [oppgavelistaOppgaver, setOppgavelistaOppgaver] = useState<Array<OppgaveDTO>>([])
+  const [minOppgavelisteOppgaver, setMinOppgavelisteOppgaver] = useState<Array<OppgaveDTO>>([])
+
+  const [oppgavelistaFilter, setOppgavelistaFilter] = useState<Filter>(hentFilterFraLocalStorage())
+  const [minOppgavelisteFilter, setMinOppgavelisteFilter] = useState<Filter>(minOppgavelisteFiltre())
+
+  const [oppgavelistaOppgaverResult, hentOppgavelistaOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
+  const [minOppgavelisteOppgaverResult, hentMinOppgavelisteOppgaverFetch] = useApiCall(hentOppgaverMedStatus)
+  const [gosysOppgaverResult, hentGosysOppgaverFetch] = useApiCall(hentGosysOppgaver)
+
+  const [, hentSaksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
+  const [saksbehandlereIEnheter, setSaksbehandlereIEnheter] = useState<Array<Saksbehandler>>([])
 
   const oppdaterOppgavelisteValg = (oppgaveListeValg: OppgavelisteToggle) => {
     setOppgaveListeValg(oppgaveListeValg)
@@ -52,81 +67,105 @@ export const ToggleMinOppgaveliste = () => {
     }
   }
 
-  const [minsideFilter, setMinsideFilter] = useState<Filter>(minOppgavelisteFiltre())
-  const [hovedsideFilter, setHovedsideFilter] = useState<Filter>(hentFilterFraLocalStorage())
-
-  useEffect(() => {
-    leggFilterILocalStorage(hovedsideFilter)
-  }, [hovedsideFilter])
-
-  const [minsideOppgaverResult, hentOppgaverMinside] = useApiCall(hentOppgaverMedStatus)
-  const [hovedsideOppgaverResult, hentAlleOppgaverStatusFetch] = useApiCall(hentOppgaverMedStatus)
-  const [gosysOppgaverResult, hentGosysOppgaverFunc] = useApiCall(hentGosysOppgaver)
-
-  const hentMinsideOppgaver = (oppgavestatusFilter: Array<string> | undefined) =>
-    hentOppgaverMinside({
-      oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : minsideFilter.oppgavestatusFilter,
+  const hentMinOppgavelisteOppgaver = (oppgavestatusFilter?: Array<string>) =>
+    hentMinOppgavelisteOppgaverFetch({
+      oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : minOppgavelisteFilter.oppgavestatusFilter,
       minOppgavelisteIdent: true,
     })
 
-  const hentHovedsideOppgaver = (oppgavestatusFilter: Array<string> | undefined) =>
-    hentAlleOppgaverStatusFetch({
-      oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : hovedsideFilter.oppgavestatusFilter,
+  const hentOppgavelistaOppgaver = (oppgavestatusFilter?: Array<string>) =>
+    hentOppgavelistaOppgaverFetch({
+      oppgavestatusFilter: oppgavestatusFilter ? oppgavestatusFilter : oppgavelistaFilter.oppgavestatusFilter,
       minOppgavelisteIdent: false,
     })
 
-  const hentHovedsideOppgaverAlle = () => {
-    hentMinsideOppgaver(undefined)
-    hentGosysOppgaverFunc({})
+  const hentAlleMinOppgavelisteOppgaver = () => {
+    hentMinOppgavelisteOppgaver()
+    hentGosysOppgaverFetch({})
   }
 
   const hentAlleOppgaver = () => {
-    hentMinsideOppgaver(undefined)
-    hentHovedsideOppgaver(undefined)
-    hentGosysOppgaverFunc({})
+    hentMinOppgavelisteOppgaver()
+    hentOppgavelistaOppgaver()
+    hentGosysOppgaverFetch({})
   }
+
+  const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
+    return oppgaver.filter((o) => o.saksbehandler?.ident === innloggetSaksbehandler.ident)
+  }
+
+  const oppdaterSaksbehandlerTildeling = (
+    oppgave: OppgaveDTO,
+    saksbehandler: OppgaveSaksbehandler | null,
+    versjon: number | null
+  ) => {
+    setTimeout(() => {
+      setOppgavelistaOppgaver(
+        finnOgOppdaterSaksbehandlerTildeling(oppgavelistaOppgaver, oppgave.id, saksbehandler, versjon)
+      )
+      if (innloggetSaksbehandler.ident === saksbehandler?.ident) {
+        setMinOppgavelisteOppgaver(leggTilOppgavenIMinliste(minOppgavelisteOppgaver, oppgave, saksbehandler, versjon))
+      } else {
+        setMinOppgavelisteOppgaver(
+          filtrerKunInnloggetBrukerOppgaver(
+            finnOgOppdaterSaksbehandlerTildeling(minOppgavelisteOppgaver, oppgave.id, saksbehandler, versjon)
+          )
+        )
+      }
+    }, 2000)
+  }
+
+  useEffect(() => {
+    if (location.pathname.includes('minoppgaveliste')) {
+      if (oppgaveListeValg !== 'MinOppgaveliste') {
+        setOppgaveListeValg('MinOppgaveliste')
+      }
+    }
+  }, [location.pathname])
+
+  useEffect(() => {
+    leggFilterILocalStorage({ ...oppgavelistaFilter, fnrFilter: '' })
+  }, [oppgavelistaFilter])
 
   useEffect(() => {
     hentAlleOppgaver()
-    hentSaksbehandlereIEnhet({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
-      setSaksbehandlereForEnhet(saksbehandlere)
-    })
+    if (!!innloggetSaksbehandler.enheter.length) {
+      hentSaksbehandlereIEnheterFetch({ enheter: innloggetSaksbehandler.enheter }, (saksbehandlere) => {
+        setSaksbehandlereIEnheter(saksbehandlere)
+      })
+    }
   }, [])
 
-  const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
-    return oppgaver.filter((o) => o.saksbehandlerIdent === innloggetSaksbehandler.ident)
-  }
-
-  const [hovedsideOppgaver, setHovedsideOppgaver] = useState<Array<OppgaveDTO>>([])
-  const [minsideOppgaver, setMinsideOppgaver] = useState<Array<OppgaveDTO>>([])
-
+  // Denne spaghettien er pga at vi må ha Gosys oppgaver inn i våres oppgave behandling
   useEffect(() => {
-    if (isSuccess(hovedsideOppgaverResult) && isSuccess(gosysOppgaverResult)) {
+    if (isSuccess(oppgavelistaOppgaverResult) && isSuccess(gosysOppgaverResult)) {
       const alleOppgaverMerget = sorterOppgaverEtterOpprettet([
-        ...hovedsideOppgaverResult.data,
+        ...oppgavelistaOppgaverResult.data,
         ...gosysOppgaverResult.data,
       ])
-      setHovedsideOppgaver(alleOppgaverMerget)
-    } else if (isSuccess(hovedsideOppgaverResult) && !isSuccess(gosysOppgaverResult)) {
-      setHovedsideOppgaver(sorterOppgaverEtterOpprettet(hovedsideOppgaverResult.data))
-    } else if (!isSuccess(hovedsideOppgaverResult) && isSuccess(gosysOppgaverResult)) {
-      setHovedsideOppgaver(sorterOppgaverEtterOpprettet(gosysOppgaverResult.data))
+      setOppgavelistaOppgaver(alleOppgaverMerget)
+    } else if (isSuccess(oppgavelistaOppgaverResult) && !isSuccess(gosysOppgaverResult)) {
+      setOppgavelistaOppgaver(sorterOppgaverEtterOpprettet(oppgavelistaOppgaverResult.data))
+    } else if (!isSuccess(oppgavelistaOppgaverResult) && isSuccess(gosysOppgaverResult)) {
+      setOppgavelistaOppgaver(sorterOppgaverEtterOpprettet(gosysOppgaverResult.data))
     }
-  }, [hovedsideOppgaverResult, gosysOppgaverResult])
+  }, [oppgavelistaOppgaverResult, gosysOppgaverResult])
 
   useEffect(() => {
-    if (isSuccess(minsideOppgaverResult) && isSuccess(gosysOppgaverResult)) {
+    if (isSuccess(minOppgavelisteOppgaverResult) && isSuccess(gosysOppgaverResult)) {
       const alleOppgaverMerget = sorterOppgaverEtterOpprettet([
-        ...minsideOppgaverResult.data,
+        ...minOppgavelisteOppgaverResult.data,
         ...filtrerKunInnloggetBrukerOppgaver(gosysOppgaverResult.data),
       ])
-      setMinsideOppgaver(alleOppgaverMerget)
-    } else if (isSuccess(minsideOppgaverResult) && !isSuccess(gosysOppgaverResult)) {
-      setMinsideOppgaver(sorterOppgaverEtterOpprettet(minsideOppgaverResult.data))
-    } else if (!isSuccess(minsideOppgaverResult) && isSuccess(gosysOppgaverResult)) {
-      setMinsideOppgaver(sorterOppgaverEtterOpprettet(filtrerKunInnloggetBrukerOppgaver(gosysOppgaverResult.data)))
+      setMinOppgavelisteOppgaver(alleOppgaverMerget)
+    } else if (isSuccess(minOppgavelisteOppgaverResult) && !isSuccess(gosysOppgaverResult)) {
+      setMinOppgavelisteOppgaver(sorterOppgaverEtterOpprettet(minOppgavelisteOppgaverResult.data))
+    } else if (!isSuccess(minOppgavelisteOppgaverResult) && isSuccess(gosysOppgaverResult)) {
+      setMinOppgavelisteOppgaver(
+        sorterOppgaverEtterOpprettet(filtrerKunInnloggetBrukerOppgaver(gosysOppgaverResult.data))
+      )
     }
-  }, [gosysOppgaverResult, minsideOppgaverResult])
+  }, [gosysOppgaverResult, minOppgavelisteOppgaverResult])
 
   return (
     <Container>
@@ -137,40 +176,62 @@ export const ToggleMinOppgaveliste = () => {
         }}
       >
         <Tabs.List>
-          <Tabs.Tab value="Oppgavelista" label={`Oppgavelisten (${hovedsideOppgaver.length})`} icon={<InboxIcon />} />
+          <Tabs.Tab
+            value="Oppgavelista"
+            label={`Oppgavelisten (${oppgavelistaOppgaver.length})`}
+            icon={<InboxIcon />}
+          />
           <Tabs.Tab
             value="MinOppgaveliste"
-            label={`Min oppgaveliste (${minsideOppgaver.length})`}
+            label={`Min oppgaveliste (${minOppgavelisteOppgaver.length})`}
             icon={<PersonIcon aria-hidden />}
           />
         </Tabs.List>
       </TabsWidth>
+
       {oppgaveListeValg === 'MinOppgaveliste' ? (
-        <MinOppgaveliste
-          minsideOppgaver={minsideOppgaver}
-          minsideOppgaverResult={minsideOppgaverResult}
-          gosysOppgaverResult={gosysOppgaverResult}
-          minsideFilter={minsideFilter}
-          setMinsideFilter={(filter: Filter) => {
-            hentMinsideOppgaver(filter.oppgavestatusFilter)
-            setMinsideFilter(filter)
-          }}
-          setFilter={setMinsideFilter}
-          setMinsideOppgaver={setMinsideOppgaver}
-          saksbehandlereIEnhet={saksbehandlereForEnhet}
-        />
+        <>
+          <FlexRow>
+            <VelgOppgavestatuser
+              value={minOppgavelisteFilter.oppgavestatusFilter}
+              onChange={(oppgavestatusFilter) => {
+                hentMinOppgavelisteOppgaver(oppgavestatusFilter)
+                setMinOppgavelisteFilter({ ...minOppgavelisteFilter, oppgavestatusFilter })
+              }}
+            />
+          </FlexRow>
+
+          <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
+            <Oppgaver
+              oppgaver={minOppgavelisteOppgaver}
+              oppdaterTildeling={oppdaterSaksbehandlerTildeling}
+              oppdaterFrist={(id: string, nyfrist: string, versjon: number | null) =>
+                oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
+              }
+              saksbehandlereIEnhet={saksbehandlereIEnheter}
+            />
+          </OppgaveFeilWrapper>
+        </>
       ) : (
-        <OppgavelistaWrapper
-          saksbehandlereIEnhet={saksbehandlereForEnhet}
-          hovedsideOppgaver={hovedsideOppgaver}
-          hentHovedsideOppgaverAlle={hentHovedsideOppgaverAlle}
-          hovedsideOppgaverResult={hovedsideOppgaverResult}
-          gosysOppgaverResult={gosysOppgaverResult}
-          hentHovedsideOppgaver={hentHovedsideOppgaver}
-          hovedsideFilter={hovedsideFilter}
-          setHovedsideFilter={setHovedsideFilter}
-          setHovedsideOppgaver={setHovedsideOppgaver}
-        />
+        <>
+          <FilterRad
+            hentAlleOppgaver={hentAlleMinOppgavelisteOppgaver}
+            hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => hentOppgavelistaOppgaver(oppgavestatusFilter)}
+            filter={oppgavelistaFilter}
+            setFilter={setOppgavelistaFilter}
+            alleOppgaver={oppgavelistaOppgaver}
+            saksbehandlereIEnhet={saksbehandlereIEnheter}
+          />
+
+          <OppgaveFeilWrapper oppgaver={minOppgavelisteOppgaverResult} gosysOppgaver={gosysOppgaverResult}>
+            <Oppgaver
+              oppgaver={oppgavelistaOppgaver}
+              oppdaterTildeling={oppdaterSaksbehandlerTildeling}
+              saksbehandlereIEnhet={saksbehandlereIEnheter}
+              filter={oppgavelistaFilter}
+            />
+          </OppgaveFeilWrapper>
+        </>
       )}
     </Container>
   )

@@ -4,7 +4,12 @@ import { Beregne } from './beregne/Beregne'
 import { Vilkaarsvurdering } from './vilkaarsvurdering/Vilkaarsvurdering'
 import { Soeknadsoversikt } from './soeknadsoversikt/Soeknadoversikt'
 import Beregningsgrunnlag from './beregningsgrunnlag/Beregningsgrunnlag'
-import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import {
+  IBehandlingStatus,
+  IBehandlingsType,
+  IDetaljertBehandling,
+  Vedtaksloesning,
+} from '~shared/types/IDetaljertBehandling'
 import { Vedtaksbrev } from './brev/Vedtaksbrev'
 import { ManueltOpphoerOversikt } from './manueltopphoeroversikt/ManueltOpphoerOversikt'
 import { IBehandlingReducer } from '~store/reducers/BehandlingReducer'
@@ -15,7 +20,7 @@ import { Aktivitetsplikt } from '~components/behandling/aktivitetsplikt/Aktivite
 import { SakType } from '~shared/types/sak'
 import TrygdetidVisning from '~components/behandling/trygdetid/TrygdetidVisning'
 import { VilkaarsvurderingResultat } from '~shared/api/vilkaarsvurdering'
-import { erOpphoer, Revurderingaarsak } from '~shared/types/Revurderingaarsak'
+import { erOpphoer } from '~shared/types/Revurderingaarsak'
 import { FEATURE_TOGGLE_LAG_VARSELBREV, Varselbrev } from '~components/behandling/brev/Varselbrev'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
@@ -131,8 +136,8 @@ export const useBehandlingRoutes = () => {
   const { currentRoute, goto } = useRouteNavigation()
   const behandling = useBehandling()
 
-  const lagVarselbrev = useFeatureEnabledMedDefault(FEATURE_TOGGLE_LAG_VARSELBREV, false)
-  const aktuelleRoutes = hentAktuelleRoutes(behandling, lagVarselbrev)
+  const varselbrevAktivert = useFeatureEnabledMedDefault(FEATURE_TOGGLE_LAG_VARSELBREV, false)
+  const aktuelleRoutes = hentAktuelleRoutes(behandling, varselbrevAktivert)
 
   const firstPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === 0
   const lastPage = aktuelleRoutes.findIndex((item) => item.path === currentRoute) === aktuelleRoutes.length - 1
@@ -153,8 +158,10 @@ export const useBehandlingRoutes = () => {
   return { next, back, lastPage, firstPage, behandlingRoutes: aktuelleRoutes, currentRoute, goto }
 }
 
-const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, lagVarselbrev: boolean) => {
+const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, varselbrevAktivert: boolean) => {
   if (!behandling) return []
+
+  const lagVarselbrev = varselbrevAktivert && behandling?.kilde === Vedtaksloesning.GJENOPPRETTA
 
   switch (behandling.behandlingType) {
     case IBehandlingsType.MANUELT_OPPHOER:
@@ -177,7 +184,7 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, lagVarselbrev
 }
 
 export function soeknadRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteTypes> {
-  const avslag = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
+  const avslag = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   const defaultRoutes: Array<BehandlingRouteTypes> = avslag
     ? [routeTypes.soeknadsoversikt, routeTypes.vilkaarsvurdering]
@@ -202,8 +209,7 @@ export function soeknadRoutes(behandling: IBehandlingReducer, lagVarselbrev: boo
 export function revurderingRoutes(behandling: IBehandlingReducer, lagVarselbrev: boolean): Array<BehandlingRouteTypes> {
   const opphoer =
     erOpphoer(behandling.revurderingsaarsak!!) ||
-    (behandling.revurderingsaarsak == Revurderingaarsak.ANNEN &&
-      behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT)
+    behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
 
   const defaultRoutes: Array<BehandlingRouteTypes> = opphoer
     ? [routeTypes.revurderingsoversikt, routeTypes.vilkaarsvurdering, routeTypes.beregning]

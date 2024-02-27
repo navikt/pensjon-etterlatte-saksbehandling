@@ -1,29 +1,37 @@
 package no.nav.etterlatte.behandling.klage
 
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
+import no.nav.etterlatte.libs.common.behandling.Formkrav
 import no.nav.etterlatte.libs.common.behandling.InnkommendeKlage
+import no.nav.etterlatte.libs.common.behandling.JaNei
 import no.nav.etterlatte.libs.common.behandling.KabalStatus
 import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
+import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
+import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
 import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
@@ -41,6 +49,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
@@ -50,9 +59,11 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
             featureToggleService =
                 mockk {
                     every { isEnabled(KlageFeatureToggle.KanBrukeKlageToggle, any()) } returns true
+                    every { isEnabled(KlageFeatureToggle.KanOppretteVedtakAvvisningToggle, any()) } returns true
+                    every { isEnabled(KlageFeatureToggle.KanFerdigstilleKlageToggle, any()) } returns true
                 },
         ).also {
-            DatabaseExtension.resetDb()
+            resetDatabase()
         }
 
     @AfterEach
@@ -61,12 +72,11 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `opprettelse av klage går bra og henting gir 404 etter at saken blir skjermet`() {
+    fun `opprettelse av klage gaar bra og henting gir 404 etter at saken blir skjermet`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
 
-            val klage: Klage =
-                opprettKlage(client, sak)
+            val klage: Klage = opprettKlage(client, sak)
             val response =
                 client.get("/api/klage/${klage.id}") {
                     addAuthToken(tokenSaksbehandler)
@@ -99,7 +109,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `opprettelse av klage går bra og henting gjør tilgangskontroll når saken får adressebeskyttelse`() {
+    fun `opprettelse av klage gaar bra og henting gjoer tilgangskontroll naar saken faar adressebeskyttelse`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
             val klage: Klage =
@@ -144,7 +154,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `avbrytelse av klage går bra`() {
+    fun `avbrytelse av klage gaar bra`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
 
@@ -183,7 +193,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `oppdatering av kabalstatus går bra`() {
+    fun `oppdatering av kabalstatus gaar bra`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
 
@@ -205,6 +215,43 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                     assertEquals(oppdatert.id, klage.id)
                     assertEquals(KabalStatus.FERDIGSTILT, oppdatert.kabalStatus)
                 }
+        }
+    }
+
+    @Test
+    fun `lagring av utfall trigger vedtak og brev`() {
+        withTestApplication { client ->
+            val sak: Sak = opprettSak(client)
+            val klage: Klage =
+                vurderFormkrav(
+                    opprettKlage(client, sak),
+                    client,
+                )
+            val response =
+                client.put("/api/klage/${klage.id}/utfall") {
+                    addAuthToken(tokenSaksbehandler)
+                    contentType(ContentType.Application.Json)
+                    setBody(VurdertUtfallDto(KlageUtfallUtenBrev.Avvist()))
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+
+            coVerify {
+                applicationContext.vedtakKlient.lagreVedtakKlage(
+                    klage,
+                    withArg { it.ident() shouldBe "Saksbehandler01" },
+                )
+            }
+
+            val oppdatertKlage =
+                client.get("/api/klage/${klage.id}") {
+                    addAuthToken(tokenSaksbehandler)
+                }.body<Klage>()
+
+            oppdatertKlage.status shouldBe KlageStatus.UTFALL_VURDERT
+            with(oppdatertKlage.utfall as KlageUtfallMedData.Avvist) {
+                brev.brevId shouldNotBe null
+                vedtak.vedtakId shouldNotBe null
+            }
         }
     }
 
@@ -238,6 +285,29 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                 )
             }.body()
         return klage
+    }
+
+    private suspend fun vurderFormkrav(
+        klage: Klage,
+        client: HttpClient,
+    ): Klage {
+        return client.put("/api/klage/${klage.id}/formkrav") {
+            addAuthToken(tokenSaksbehandler)
+            contentType(ContentType.Application.Json)
+            setBody(
+                VurdereFormkravDto(
+                    Formkrav(
+                        begrunnelse = "Begrunnelse",
+                        erFormkraveneOppfylt = JaNei.JA,
+                        erKlagenSignert = JaNei.JA,
+                        erKlagerPartISaken = JaNei.JA,
+                        vedtaketKlagenGjelder = VedtaketKlagenGjelder("12", UUID.randomUUID().toString(), null, null),
+                        gjelderKlagenNoeKonkretIVedtaket = JaNei.JA,
+                        erKlagenFramsattInnenFrist = JaNei.JA,
+                    ),
+                ),
+            )
+        }.body()
     }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {

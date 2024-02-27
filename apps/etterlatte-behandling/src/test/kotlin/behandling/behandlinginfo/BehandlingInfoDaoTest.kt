@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.behandlinginfo
 
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
@@ -31,8 +32,7 @@ import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class BehandlingInfoDaoTest {
-    private val dataSource: DataSource = DatabaseExtension.dataSource
+internal class BehandlingInfoDaoTest(val dataSource: DataSource) {
     private lateinit var behandlingDao: BehandlingDao
     private lateinit var sakDao: SakDao
     private lateinit var dao: BehandlingInfoDao
@@ -41,15 +41,15 @@ internal class BehandlingInfoDaoTest {
 
     @BeforeAll
     fun setup() {
-        val connection = dataSource.connection
-        sakDao = SakDao { connection }
+        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
         behandlingDao =
             BehandlingDao(
-                KommerBarnetTilGodeDao { connection },
-                RevurderingDao { connection },
-            ) { connection }
+                KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
+            )
 
-        dao = BehandlingInfoDao { connection }
+        dao = BehandlingInfoDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @BeforeEach

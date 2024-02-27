@@ -3,21 +3,30 @@ package no.nav.etterlatte.behandling.klienter
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
+import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.libs.common.behandling.Mottaker
 import no.nav.etterlatte.libs.common.brev.BestillingsIdDto
 import no.nav.etterlatte.libs.common.brev.JournalpostIdDto
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 interface BrevApiKlient {
     suspend fun opprettKlageInnstillingsbrevISak(
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto
+
+    suspend fun opprettVedtaksbrev(
+        behandlingId: UUID,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto
@@ -51,6 +60,11 @@ interface BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto
+
+    suspend fun slettVedtaksbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
@@ -67,20 +81,13 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
         val opprettetBrev: OpprettetBrevDto =
-            downstreamResourceClient.post(
-                resource =
-                    Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/brev/sak/$sakId",
-                    ),
-                brukerTokenInfo = brukerTokenInfo,
-                postBody = Unit,
-            ).mapBoth(
-                success = { resource ->
-                    resource.response?.let { objectMapper.readValue(it.toString()) }
+            post(
+                url = "$resourceUrl/api/brev/sak/$sakId",
+                onSuccess = { resource ->
+                    resource.response?.let { objectMapper.readValue(it.toJson()) }
                         ?: throw RuntimeException("Fikk ikke en riktig respons fra oppretting av brev")
                 },
-                failure = { errorResponse -> throw errorResponse },
+                brukerTokenInfo = brukerTokenInfo,
             )
         try {
             settTittelForBrev(sakId, opprettetBrev.id, "Oversendelsesbrev til NAV Klageinstans", brukerTokenInfo)
@@ -95,22 +102,27 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         return opprettetBrev
     }
 
+    override suspend fun opprettVedtaksbrev(
+        behandlingId: UUID,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return post(
+            url = "$resourceUrl/api/brev/behandling/$behandlingId/vedtak?sakId=$sakId",
+            onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
     override suspend fun ferdigstillBrev(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        downstreamResourceClient.post(
-            resource =
-                Resource(
-                    clientId = clientId,
-                    url = "$resourceUrl/api/brev/$brevId/ferdigstill?sakId=$sakId",
-                ),
+        post(
+            url = "$resourceUrl/api/brev/$brevId/ferdigstill?sakId=$sakId",
+            onSuccess = { },
             brukerTokenInfo = brukerTokenInfo,
-            postBody = Unit,
-        ).mapBoth(
-            success = { resource -> resource },
-            failure = { errorResponse -> throw errorResponse },
         )
     }
 
@@ -119,19 +131,10 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): JournalpostIdDto {
-        return downstreamResourceClient.post(
-            resource =
-                Resource(
-                    clientId = clientId,
-                    url = "$resourceUrl/api/brev/$brevId/journalfoer?sakId=$sakId",
-                ),
+        return post(
+            url = "$resourceUrl/api/brev/$brevId/journalfoer?sakId=$sakId",
+            onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
-            postBody = Unit,
-        ).mapBoth(
-            success = { resource ->
-                objectMapper.readValue(resource.response!!.toJson())
-            },
-            failure = { errorResponse -> throw errorResponse },
         )
     }
 
@@ -140,19 +143,10 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): BestillingsIdDto {
-        return downstreamResourceClient.post(
-            resource =
-                Resource(
-                    clientId = clientId,
-                    url = "$resourceUrl/api/brev/$brevId/distribuer?sakId=$sakId",
-                ),
+        return post(
+            url = "$resourceUrl/api/brev/$brevId/distribuer?sakId=$sakId",
+            onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
-            postBody = Unit,
-        ).mapBoth(
-            success = { resource ->
-                objectMapper.readValue(resource.response!!.toJson())
-            },
-            failure = { errorResponse -> throw errorResponse },
         )
     }
 
@@ -161,19 +155,22 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
-        return downstreamResourceClient.get(
-            resource =
-                Resource(
-                    clientId = clientId,
-                    url = "$resourceUrl/api/brev/$brevId?sakId=$sakId",
-                ),
+        return get(
+            url = "$resourceUrl/api/brev/$brevId?sakId=$sakId",
+            onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
-        ).mapBoth(
-            success = { resource ->
-                objectMapper.readValue(resource.response.toString())
-            },
-            failure = { error -> throw error },
         )
+    }
+
+    override suspend fun slettVedtaksbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        downstreamResourceClient.delete(
+            resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/behandling/$klageId/vedtak"),
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = "",
+        ).mapError { error -> throw error }
     }
 
     private suspend fun settTittelForBrev(
@@ -182,15 +179,42 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
         tittel: String,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
-        downstreamResourceClient.post(
-            resource =
-                Resource(
-                    clientId = clientId,
-                    url = "$resourceUrl/api/brev/$brevId/tittel?sakId=$sakId",
-                ),
-            brukerTokenInfo = brukerTokenInfo,
+        post(
+            url = "$resourceUrl/api/brev/$brevId/tittel?sakId=$sakId",
             postBody = OppdaterTittelRequest(tittel),
-        ).mapBoth(success = {}, failure = { error -> throw error })
+            onSuccess = {},
+            brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
+    private suspend fun <T> post(
+        url: String,
+        postBody: Any = Unit,
+        onSuccess: (Resource) -> T,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): T {
+        return downstreamResourceClient.post(
+            resource = Resource(clientId = clientId, url = url),
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = postBody,
+        ).mapBoth(
+            success = onSuccess,
+            failure = { errorResponse -> throw errorResponse },
+        )
+    }
+
+    private suspend fun <T> get(
+        url: String,
+        onSuccess: (Resource) -> T,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): T {
+        return downstreamResourceClient.get(
+            resource = Resource(clientId = clientId, url = url),
+            brukerTokenInfo = brukerTokenInfo,
+        ).mapBoth(
+            success = onSuccess,
+            failure = { throwableErrorMessage -> throw throwableErrorMessage },
+        )
     }
 }
 

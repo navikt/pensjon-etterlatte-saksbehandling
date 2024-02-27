@@ -10,7 +10,7 @@ import styled from 'styled-components'
 import { behandlingErRedigerbar, behandlingSkalSendeBrev } from '~components/behandling/felles/utils'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import Spinner from '~shared/Spinner'
-import { IBrev } from '~shared/types/Brev'
+import { BrevStatus, IBrev } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
@@ -23,6 +23,10 @@ import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
 import { useBehandlingRoutes } from '~components/behandling/BehandlingRoutes'
 import NyttBrevHandlingerPanel from '~components/person/brev/NyttBrevHandlingerPanel'
+import {
+  hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave,
+  settOppgavePaaVentApi,
+} from '~shared/api/oppgaver'
 
 export const FEATURE_TOGGLE_LAG_VARSELBREV = 'lag-varselbrev'
 
@@ -43,12 +47,26 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
   const [opprettBrevStatus, opprettNyttVarselbrev] = useApiCall(opprettVarselbrev)
   const [, fetchBehandling] = useApiCall(hentBehandling)
 
+  const [, requesthentOppgaveForBehandlingEkte] = useApiCall(
+    hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
+  )
+  const [, requestSettPaaVent] = useApiCall(settOppgavePaaVentApi)
+
   const onSubmit = () => {
     next()
   }
 
-  const settPaaVent = () => {
-    // TODO: Her skal det inn kall for å setje på vent fram til xx
+  const settPaaVent = async () => {
+    requesthentOppgaveForBehandlingEkte({ referanse: behandlingId!!, sakId: sakId }, (oppgave) => {
+      requestSettPaaVent({
+        oppgaveId: oppgave.id,
+        settPaaVentRequest: {
+          merknad: 'Manuelt: Varselbrev er sendt ut' + oppgave.merknad || '',
+          versjon: null,
+          status: oppgave.status,
+        },
+      })
+    })
     next()
   }
 
@@ -62,6 +80,9 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
         },
         () => dispatch(resetBehandling())
       )
+      if ([BrevStatus.DISTRIBUERT, BrevStatus.JOURNALFOERT, BrevStatus.FERDIGSTILT].includes(varselbrev.status)) {
+        setKanRedigeres(false)
+      }
     }
   }, [varselbrev])
 
@@ -100,7 +121,7 @@ export const Varselbrev = (props: { behandling: IDetaljertBehandling }) => {
                 Varselbrev
               </Heading>
             </HeadingWrapper>
-            <Soeknadsdato mottattDato={soeknadMottattDato} />
+            {soeknadMottattDato && <Soeknadsdato mottattDato={soeknadMottattDato} />}
 
             {varselbrev && (
               <>

@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.BrevService
 import no.nav.etterlatte.brev.Brevoppretter
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.MigreringBrevDataService
+import no.nav.etterlatte.brev.NotatService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.PDFService
 import no.nav.etterlatte.brev.RedigerbartVedleggHenter
@@ -28,7 +29,8 @@ import no.nav.etterlatte.brev.distribusjon.DistribusjonKlient
 import no.nav.etterlatte.brev.distribusjon.DistribusjonServiceImpl
 import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
 import no.nav.etterlatte.brev.dokarkiv.DokarkivServiceImpl
-import no.nav.etterlatte.brev.dokument.SafClient
+import no.nav.etterlatte.brev.dokument.SafKlient
+import no.nav.etterlatte.brev.dokument.SafService
 import no.nav.etterlatte.brev.dokument.dokumentRoute
 import no.nav.etterlatte.brev.hentinformasjon.BeregningKlient
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
@@ -39,9 +41,12 @@ import no.nav.etterlatte.brev.hentinformasjon.TrygdetidKlient
 import no.nav.etterlatte.brev.hentinformasjon.TrygdetidService
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingKlient
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
+import no.nav.etterlatte.brev.notatRoute
+import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
 import no.nav.etterlatte.brev.vedtaksbrevRoute
@@ -116,29 +121,31 @@ class ApplicationBuilder {
     private val beregningKlient = BeregningKlient(config, httpClient())
     private val behandlingKlient = BehandlingKlient(config, httpClient())
     private val trygdetidKlient = TrygdetidKlient(config, httpClient())
-    private val trygdetidService = TrygdetidService(trygdetidKlient)
+    private val trygdetidService = TrygdetidService(trygdetidKlient, beregningKlient)
 
     private val sakService = SakService(behandlingKlient)
 
+    private val beregningService = BeregningService(beregningKlient)
     private val brevdataFacade =
         BrevdataFacade(
             vedtakKlient,
             grunnlagKlient,
-            beregningKlient,
+            beregningService,
             behandlingKlient,
             sakService,
             trygdetidService,
         )
     private val norg2Klient = Norg2Klient(env.requireEnvValue("NORG2_URL"), httpClient())
     private val datasource = DataSourceBuilder.createDataSource(env)
+
     private val db = BrevRepository(datasource)
 
     private val brevgenereringRepository = StartBrevgenereringRepository(datasource)
 
     private val adresseService = AdresseService(norg2Klient, navansattKlient, regoppslagKlient)
-
     private val dokarkivKlient =
         DokarkivKlient(httpClient("DOKARKIV_SCOPE", false), env.requireEnvValue("DOKARKIV_URL"))
+
     private val dokarkivService = DokarkivServiceImpl(dokarkivKlient, db)
 
     private val distribusjonKlient =
@@ -178,9 +185,12 @@ class ApplicationBuilder {
             pdfGenerator,
             brevDataMapperRedigerbartUtfallVedtak,
             brevDataMapperFerdigstilling,
+            behandlingKlient,
         )
+    private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService)
 
-    private val varselbrevService = VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator)
+    private val varselbrevService =
+        VarselbrevService(db, brevoppretter, behandlingKlient, pdfGenerator, brevDataMapperFerdigstillVarsel)
 
     private val journalfoerBrevService = JournalfoerBrevService(db, sakService, dokarkivService, vedtaksbrevService)
 
@@ -196,8 +206,12 @@ class ApplicationBuilder {
     private val virusScanService = VirusScanService(clamAvClient)
     private val pdfService = PDFService(db, virusScanService)
 
-    private val journalpostService =
-        SafClient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE"))
+    private val safService =
+        SafService(
+            SafKlient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE")),
+        )
+
+    private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagKlient, dokarkivKlient)
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
 
@@ -207,8 +221,9 @@ class ApplicationBuilder {
                 restModule(sikkerLogg, routePrefix = "api", config = HoconApplicationConfig(config)) {
                     brevRoute(brevService, pdfService, brevdistribuerer, tilgangssjekker)
                     vedtaksbrevRoute(vedtaksbrevService, tilgangssjekker)
-                    dokumentRoute(journalpostService, dokarkivService, tilgangssjekker)
+                    dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)
+                    notatRoute(notatService, tilgangssjekker)
                 }
             }
             .build()
@@ -237,10 +252,16 @@ class ApplicationBuilder {
                     this,
                     varselbrevService,
                     ferdigstillJournalfoerOgDistribuerBrev,
+                    behandlingKlient,
                 )
                 FiksEnkeltbrevRiver(this, vedtaksvurderingService)
                     .also { fiksEnkeltbrev() }
-                OpprettJournalfoerOgDistribuerRiver(this, brevoppretter, ferdigstillJournalfoerOgDistribuerBrev)
+                OpprettJournalfoerOgDistribuerRiver(
+                    this,
+                    brevdataFacade,
+                    brevoppretter,
+                    ferdigstillJournalfoerOgDistribuerBrev,
+                )
 
                 JournalfoerVedtaksbrevRiver(this, journalfoerBrevService)
                 VedtaksbrevUnderkjentRiver(this, vedtaksbrevService)

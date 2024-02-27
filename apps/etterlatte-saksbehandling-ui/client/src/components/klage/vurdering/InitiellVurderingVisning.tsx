@@ -20,29 +20,27 @@ export const InitiellVurderingVisningContent = (props: { klage: Klage }) => {
   const klage = props.klage
 
   return (
-    <>
-      {klage.initieltUtfall && (
-        <>
-          <dl>
-            <Heading size="small" spacing>
-              Utfall
-            </Heading>
-            <BodyShort spacing>{teksterKlageutfall[klage.initieltUtfall.utfallMedBegrunnelse.utfall]}</BodyShort>
-            <Heading size="small" spacing>
-              Begrunnelse
-            </Heading>
-            <BodyShort spacing>{klage.initieltUtfall.utfallMedBegrunnelse.begrunnelse || 'Ikke registrert'}</BodyShort>
-            <Heading size="small" spacing>
-              Saksbehandler
-            </Heading>
-            <BodyShort spacing>{klage.initieltUtfall.saksbehandler}</BodyShort>
-            <Heading size="small" spacing>
-              Tidspunkt
-            </Heading>
-            <BodyShort spacing>{formaterStringTidspunktTimeMinutter(klage.initieltUtfall.tidspunkt)}</BodyShort>
-          </dl>
-        </>
-      )}
-    </>
+    <dl>
+      <Heading size="small" spacing>
+        Utfall
+      </Heading>
+      <BodyShort spacing>{teksterKlageutfall[klage.initieltUtfall?.utfallMedBegrunnelse.utfall ?? 'UKJENT']}</BodyShort>
+      <Heading size="small" spacing>
+        Begrunnelse
+      </Heading>
+      <BodyShort spacing>{klage.initieltUtfall?.utfallMedBegrunnelse.begrunnelse || 'Ikke registrert'}</BodyShort>
+      <Heading size="small" spacing>
+        Saksbehandler
+      </Heading>
+      <BodyShort spacing>{klage.initieltUtfall?.saksbehandler ?? 'Ukjent'}</BodyShort>
+      <Heading size="small" spacing>
+        Tidspunkt
+      </Heading>
+      <BodyShort spacing>
+        {klage.initieltUtfall?.tidspunkt
+          ? formaterStringTidspunktTimeMinutter(klage.initieltUtfall.tidspunkt)
+          : 'Ingen tidspunkt'}
+      </BodyShort>
+    </dl>
   )
 }

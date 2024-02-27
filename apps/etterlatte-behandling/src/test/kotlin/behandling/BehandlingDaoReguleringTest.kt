@@ -1,6 +1,7 @@
 package no.nav.etterlatte.behandling
 
 import io.kotest.matchers.collections.shouldContainExactly
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
@@ -18,29 +19,35 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ExtendWith(DatabaseExtension::class)
-internal class BehandlingDaoReguleringTest {
-    private val dataSource: DataSource = DatabaseExtension.dataSource
+internal class BehandlingDaoReguleringTest(val dataSource: DataSource) {
+    companion object {
+        @RegisterExtension
+        private val dbExtension = DatabaseExtension()
+    }
+
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingRepo: BehandlingDao
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-        sakRepo = SakDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
-            BehandlingDao(KommerBarnetTilGodeDao { connection }, RevurderingDao { connection }) { connection }
+            BehandlingDao(
+                KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource)),
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
+            )
     }
 
     @AfterEach
     fun afterEach() {
-        DatabaseExtension.resetDb()
+        dbExtension.resetDb()
     }
 
     private fun hentMigrerbareStatuses() = BehandlingStatus.entries - BehandlingStatus.skalIkkeOmregnesVedGRegulering().toSet()

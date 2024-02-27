@@ -13,19 +13,21 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
+import no.nav.etterlatte.libs.common.behandling.MigreringRespons
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.VergeMaalEllerFremtidsfullmakt
-import no.nav.etterlatte.libs.common.sak.BehandlingOgSak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.sak.SakIDListe
 import no.nav.etterlatte.libs.common.sak.Saker
@@ -34,7 +36,9 @@ import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import java.util.UUID
 
 interface BehandlingService {
-    fun sendDoedshendelse(doedshendelse: Doedshendelse)
+    fun sendDoedshendelse(doedshendelse: DoedshendelsePdl)
+
+    fun oppdaterDoedshendelseBrevDistribuert(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert)
 
     fun sendUtflyttingshendelse(utflyttingsHendelse: UtflyttingsHendelse)
 
@@ -56,7 +60,7 @@ interface BehandlingService {
 
     fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe
 
-    fun migrer(hendelse: MigreringRequest): BehandlingOgSak
+    fun migrer(hendelse: MigreringRequest): MigreringRespons
 
     fun opprettOppgaveManuellGjenoppretting(hendelse: MigreringRequest)
 
@@ -76,6 +80,8 @@ interface BehandlingService {
         merknad: String? = null,
         frist: Tidspunkt? = null,
     ): UUID
+
+    fun taAvVent(request: VentefristGaarUtRequest)
 }
 
 data class ReguleringFeiletHendelse(val sakId: Long)
@@ -84,11 +90,20 @@ class BehandlingServiceImpl(
     private val behandlingKlient: HttpClient,
     private val url: String,
 ) : BehandlingService {
-    override fun sendDoedshendelse(doedshendelse: Doedshendelse) {
+    override fun sendDoedshendelse(doedshendelse: DoedshendelsePdl) {
         runBlocking {
             behandlingKlient.post("$url/grunnlagsendringshendelse/doedshendelse") {
                 contentType(ContentType.Application.Json)
                 setBody(doedshendelse)
+            }
+        }
+    }
+
+    override fun oppdaterDoedshendelseBrevDistribuert(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert) {
+        runBlocking {
+            behandlingKlient.post("$url/doedshendelse/brevdistribuert") {
+                contentType(ContentType.Application.Json)
+                setBody(doedshendelseBrevDistribuert)
             }
         }
     }
@@ -174,7 +189,7 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun migrer(hendelse: MigreringRequest): BehandlingOgSak =
+    override fun migrer(hendelse: MigreringRequest): MigreringRespons =
         runBlocking {
             behandlingKlient.post("$url/migrering") {
                 contentType(ContentType.Application.Json)
@@ -239,6 +254,15 @@ class BehandlingServiceImpl(
                 )
             }.body<ObjectNode>().let {
                 UUID.fromString(it["id"].textValue())
+            }
+        }
+    }
+
+    override fun taAvVent(request: VentefristGaarUtRequest) {
+        runBlocking {
+            behandlingKlient.put("$url/oppgaver/ventefrist-gaar-ut") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
             }
         }
     }

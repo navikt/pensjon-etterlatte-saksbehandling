@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -34,6 +35,7 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
+import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.AfterEach
@@ -63,6 +65,7 @@ internal class JournalfoerVedtaksbrevRiverTest {
                 41,
                 BEHANDLING_ID,
                 "tittel",
+                Spraak.NB,
                 BrevProsessType.AUTOMATISK,
                 "fnr",
                 Status.FERDIGSTILT,
@@ -94,26 +97,9 @@ internal class JournalfoerVedtaksbrevRiverTest {
 
         val actualMessage = inspektoer.message(0)
         assertEquals(BrevHendelseType.JOURNALFOERT.lagEventnameForType(), actualMessage.get(EVENT_NAME_KEY).asText())
-        assertEquals(brev.id, actualMessage.get("brevId").asLong())
+        assertEquals(brev.id, actualMessage.get(BREV_ID_KEY).asLong())
         assertEquals(response.journalpostId, actualMessage.get("journalpostId").asText())
         assertEquals(DistribusjonsType.VEDTAK.toString(), actualMessage.get("distribusjonType").asText())
-    }
-
-    @Test
-    fun `Attestering av sak med behandlingstype MANUELT_OPPHOER`() {
-        val vedtak = opprettVedtak(BehandlingType.MANUELT_OPPHOER)
-
-        val melding =
-            JsonMessage.newMessage(
-                mapOf(
-                    VedtakKafkaHendelseHendelseType.ATTESTERT.lagParMedEventNameKey(),
-                    "vedtak" to vedtak,
-                ),
-            )
-
-        testRapid.apply { sendTestMessage(melding.toJson()) }.inspektør
-
-        verify { vedtaksbrevService wasNot Called }
     }
 
     @Test

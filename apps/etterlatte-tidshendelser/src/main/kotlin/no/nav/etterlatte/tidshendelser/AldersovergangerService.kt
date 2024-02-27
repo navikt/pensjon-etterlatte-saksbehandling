@@ -9,24 +9,26 @@ class AldersovergangerService(
 ) {
     private val logger = LoggerFactory.getLogger(AldersovergangerService::class.java)
 
-    fun execute(jobb: HendelserJobb) {
-        logger.info("Handling jobb ${jobb.id} med type ${jobb.type} (${jobb.type.beskrivelse})")
-        hendelseDao.oppdaterJobbstatusStartet(jobb)
+    fun execute(jobb: HendelserJobb): List<Long> {
+        logger.info("Handling jobb ${jobb.id}, type=${jobb.type} (${jobb.type.beskrivelse})")
 
-        if (jobb.type == JobbType.AO_BP20) {
-            val foedselsmaaned = jobb.behandlingsmaaned.minusYears(20)
-
-            val saker = grunnlagKlient.hentSaker(foedselsmaaned = foedselsmaaned)
-            logger.info("Hentet ${saker.size} saker for brukere født i $foedselsmaaned")
-
-            if (saker.isNotEmpty()) {
-                hendelseDao.opprettHendelserForSaker(jobb.id, saker, Steg.IDENTIFISERT_SAK)
-            } else {
-                // Nuttin' to do
-                hendelseDao.hentJobb(jobb.id).also {
-                    hendelseDao.oppdaterJobbstatusFerdig(it)
-                }
+        val yearsToSubtract =
+            when (jobb.type) {
+                JobbType.AO_BP20 -> 20L
+                JobbType.AO_BP21 -> 21L
+                JobbType.AO_OMS67 -> 67L
+                else -> throw IllegalArgumentException("Ikke-støttet jobbtype: ${jobb.type}")
             }
+
+        val foedselsmaaned = jobb.behandlingsmaaned.minusYears(yearsToSubtract)
+
+        val saker = grunnlagKlient.hentSaker(foedselsmaaned = foedselsmaaned)
+        logger.info("Hentet ${saker.size} saker for brukere født i $foedselsmaaned")
+
+        if (saker.isNotEmpty()) {
+            hendelseDao.opprettHendelserForSaker(jobb.id, saker, Steg.IDENTIFISERT_SAK)
         }
+
+        return saker
     }
 }

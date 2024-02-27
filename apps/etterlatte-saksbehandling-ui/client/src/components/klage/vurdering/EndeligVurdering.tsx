@@ -1,7 +1,7 @@
 import { Button, Heading, Radio, RadioGroup, Select, Textarea } from '@navikt/ds-react'
 import React from 'react'
 import { FlexRow } from '~shared/styled'
-import { Feilmelding, VurderingWrapper } from '~components/klage/styled'
+import { BredVurderingWrapper, Feilmelding, VurderingWrapper } from '~components/klage/styled'
 import { useNavigate } from 'react-router-dom'
 import { useKlage } from '~components/klage/useKlage'
 import {
@@ -17,7 +17,7 @@ import {
   teksterKlageutfall,
   Utfall,
 } from '~shared/types/Klage'
-import { Control, Controller, useForm } from 'react-hook-form'
+import { Controller, FieldErrors, useForm, UseFormRegister } from 'react-hook-form'
 import { FieldOrNull } from '~shared/types/util'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterUtfallForKlage } from '~shared/api/klage'
@@ -27,7 +27,8 @@ import { SakType } from '~shared/types/sak'
 
 import { isPending } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
-import { forrigeSteg } from '~components/klage/stegmeny/KlageStegmeny'
+import { forrigeSteg, kanSeBrev } from '~components/klage/stegmeny/KlageStegmeny'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 
 type FilledFormDataVurdering = {
   utfall: Utfall
@@ -49,7 +50,7 @@ function erSkjemaUtfylt(skjema: FormdataVurdering): skjema is FilledFormDataVurd
   }
   if (skjema.utfall === Utfall.STADFESTE_VEDTAK || skjema.utfall === Utfall.DELVIS_OMGJOERING) {
     const { innstilling } = skjema
-    if (!innstilling || !innstilling.lovhjemmel) {
+    if (!innstilling || !innstilling.lovhjemmel || !innstilling.innstillingTekst) {
       return false
     }
   }
@@ -92,12 +93,14 @@ export function EndeligVurdering(props: { klage: Klage }) {
   const navigate = useNavigate()
   const [lagreUtfallStatus, lagreUtfall] = useApiCall(oppdaterUtfallForKlage)
   const dispatch = useAppDispatch()
+  const stoetterDelvisOmgjoering = useFeatureEnabledMedDefault('pensjon-etterlatte.klage-delvis-omgjoering', false)
 
   const {
     control,
     handleSubmit,
+    register,
     watch,
-    formState: { isDirty },
+    formState: { isDirty, errors },
   } = useForm<FormdataVurdering>({
     defaultValues: mapKlageTilFormdata(klage),
   })
@@ -110,7 +113,7 @@ export function EndeligVurdering(props: { klage: Klage }) {
     }
     if (!erSkjemaUtfylt(skjema)) {
       // Gjør noe bedre håndtering her
-      return
+      throw new Error('Ufullstendig validering av skjemadata i RHF')
     }
     if (!isDirty) {
       // Skjema er fylt ut men med samme innhold som starten => skip lagring og gå videre
@@ -126,8 +129,8 @@ export function EndeligVurdering(props: { klage: Klage }) {
 
   return (
     <>
-      <Heading level="2" size="medium">
-        Ta stilling til klagen
+      <Heading level="2" size="medium" spacing>
+        Endelig vurdering
       </Heading>
 
       <form onSubmit={handleSubmit(sendInnVurdering)}>
@@ -142,7 +145,9 @@ export function EndeligVurdering(props: { klage: Klage }) {
               <>
                 <RadioGroup legend="Velg utfall" {...field}>
                   <Radio value={Utfall.OMGJOERING}> {teksterKlageutfall[Utfall.OMGJOERING]}</Radio>
-                  <Radio value={Utfall.DELVIS_OMGJOERING}>{teksterKlageutfall[Utfall.DELVIS_OMGJOERING]}</Radio>
+                  {stoetterDelvisOmgjoering && (
+                    <Radio value={Utfall.DELVIS_OMGJOERING}>{teksterKlageutfall[Utfall.DELVIS_OMGJOERING]}</Radio>
+                  )}
                   <Radio value={Utfall.STADFESTE_VEDTAK}> {teksterKlageutfall[Utfall.STADFESTE_VEDTAK]}</Radio>
                 </RadioGroup>
                 {fieldState.error ? <Feilmelding>Du må velge et utfall for klagen.</Feilmelding> : null}
@@ -152,11 +157,11 @@ export function EndeligVurdering(props: { klage: Klage }) {
         </VurderingWrapper>
 
         {valgtUtfall === Utfall.STADFESTE_VEDTAK || valgtUtfall === Utfall.DELVIS_OMGJOERING ? (
-          <KlageInnstilling control={control} />
+          <KlageInnstilling register={register} errors={errors} />
         ) : null}
 
         {valgtUtfall === Utfall.OMGJOERING || valgtUtfall === Utfall.DELVIS_OMGJOERING ? (
-          <KlageOmgjoering control={control} />
+          <KlageOmgjoering register={register} errors={errors} />
         ) : null}
 
         {isFailureHandler({
@@ -177,81 +182,63 @@ export function EndeligVurdering(props: { klage: Klage }) {
   )
 }
 
-function kanSeBrev(valgtUtfall: Utfall | null) {
-  switch (valgtUtfall) {
-    case 'DELVIS_OMGJOERING':
-    case 'STADFESTE_VEDTAK':
-      return true
-  }
-  return false
-}
-
 function nesteSteg(valgtUtfall: Utfall | null, klageId: string) {
   return kanSeBrev(valgtUtfall) ? `/klage/${klageId}/brev` : `/klage/${klageId}/oppsummering`
 }
 
-function KlageOmgjoering(props: { control: Control<FormdataVurdering> }) {
-  const { control } = props
+function KlageOmgjoering(props: {
+  register: UseFormRegister<FormdataVurdering>
+  errors: FieldErrors<FormdataVurdering>
+}) {
+  const { register, errors } = props
 
   return (
     <>
-      <Heading level="3" size="medium">
+      <Heading level="3" size="medium" spacing>
         Omgjøring
       </Heading>
 
       <VurderingWrapper>
-        <Controller
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
-          name="omgjoering.grunnForOmgjoering"
-          control={control}
-          render={({ field, fieldState }) => {
-            const { value, ...rest } = field
-            return (
-              <>
-                <Select label="Hvorfor skal saken omgjøres?" value={value ?? ''} {...rest}>
-                  <option value="">Velg grunn</option>
-                  {AARSAKER_OMGJOERING.map((aarsak) => (
-                    <option key={aarsak} value={aarsak}>
-                      {TEKSTER_AARSAK_OMGJOERING[aarsak]}
-                    </option>
-                  ))}
-                </Select>
-                {fieldState.error ? <Feilmelding>Du må velge en årsak for omgjøringen.</Feilmelding> : null}
-              </>
-            )
-          }}
-        />
+        <Select
+          label="Hvorfor skal saken omgjøres?"
+          error={errors.omgjoering?.grunnForOmgjoering?.message}
+          {...register('omgjoering.grunnForOmgjoering', {
+            required: {
+              value: true,
+              message: 'Du må velge en årsak for omgjøringen.',
+            },
+          })}
+        >
+          <option value="">Velg grunn</option>
+          {AARSAKER_OMGJOERING.map((aarsak) => (
+            <option key={aarsak} value={aarsak}>
+              {TEKSTER_AARSAK_OMGJOERING[aarsak]}
+            </option>
+          ))}
+        </Select>
       </VurderingWrapper>
 
-      <VurderingWrapper>
-        <Controller
-          rules={{
-            required: true,
-            minLength: 1,
-          }}
-          name="omgjoering.begrunnelse"
-          control={control}
-          render={({ field, fieldState }) => {
-            const { value, ...rest } = field
-            return (
-              <>
-                <Textarea label="Begrunnelse" value={value ?? ''} {...rest} />
-
-                {fieldState.error ? <Feilmelding>Du må gi en begrunnelse for omgjøringen.</Feilmelding> : null}
-              </>
-            )
-          }}
+      <BredVurderingWrapper>
+        <Textarea
+          label="Begrunnelse"
+          error={errors.omgjoering?.begrunnelse?.message}
+          {...register('omgjoering.begrunnelse', {
+            required: {
+              value: true,
+              message: 'Du må gi en begrunnelse for omgjøringen.',
+            },
+          })}
         />
-      </VurderingWrapper>
+      </BredVurderingWrapper>
     </>
   )
 }
 
-function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
-  const { control } = props
+function KlageInnstilling(props: {
+  register: UseFormRegister<FormdataVurdering>
+  errors: FieldErrors<FormdataVurdering>
+}) {
+  const { register, errors } = props
 
   const klage = useKlage()
   const aktuelleHjemler = klage?.sak.sakType === SakType.BARNEPENSJON ? LOVHJEMLER_BP : LOVHJEMLER_OMS
@@ -263,53 +250,46 @@ function KlageInnstilling(props: { control: Control<FormdataVurdering> }) {
       </Heading>
 
       <VurderingWrapper>
-        <Controller
-          rules={{
+        <Select
+          {...register('innstilling.lovhjemmel', {
             required: true,
-            minLength: 1,
-          }}
-          name="innstilling.lovhjemmel"
-          control={control}
-          render={({ field, fieldState }) => {
-            const { value, ...rest } = field
-            return (
-              <>
-                <Select
-                  label="Hjemmel"
-                  value={value ?? ''}
-                  {...rest}
-                  description="Angi hvilken hjemmel klagen hovedsakelig knytter seg til"
-                >
-                  <option value="">Velg hjemmel</option>
-                  {aktuelleHjemler.map((hjemmel) => (
-                    <option key={hjemmel} value={hjemmel}>
-                      {TEKSTER_LOVHJEMLER[hjemmel]}
-                    </option>
-                  ))}
-                </Select>
-                {fieldState.error ? (
-                  <Feilmelding>Du må angi hjemmelen klagen hovedsakelig knytter seg til.</Feilmelding>
-                ) : null}
-              </>
-            )
-          }}
-        />
+          })}
+          label="Hjemmel"
+          description="Velg hvilken hjemmel klagen knytter seg til"
+        >
+          <option value="">Velg hjemmel</option>
+          {aktuelleHjemler.map((hjemmel) => (
+            <option key={hjemmel} value={hjemmel}>
+              {TEKSTER_LOVHJEMLER[hjemmel]}
+            </option>
+          ))}
+        </Select>
+        {errors.innstilling?.lovhjemmel && (
+          <Feilmelding>Du må angi hjemmelen klagen hovedsakelig knytter seg til.</Feilmelding>
+        )}
       </VurderingWrapper>
 
-      <VurderingWrapper>
-        <Controller
-          name="innstilling.internKommentar"
-          control={control}
-          render={({ field }) => {
-            const { value, ...rest } = field
-            return (
-              <>
-                <Textarea label="Intern kommentar til KA" value={value ?? ''} {...rest} />
-              </>
-            )
-          }}
+      <BredVurderingWrapper>
+        <Textarea
+          {...register('innstilling.innstillingTekst', {
+            required: {
+              value: true,
+              message: 'Du må skrive en innstillingstekst som begrunner hvorfor klagen står seg.',
+            },
+          })}
+          label="Innstilling"
+          description="Innstillingen blir med i brev til klager og til KA"
+          error={errors.innstilling?.innstillingTekst?.message}
         />
-      </VurderingWrapper>
+      </BredVurderingWrapper>
+
+      <BredVurderingWrapper>
+        <Textarea
+          {...register('innstilling.internKommentar')}
+          label="Intern kommentar til KA"
+          description="Kommentaren blir ikke synlig for bruker"
+        />
+      </BredVurderingWrapper>
     </>
   )
 }

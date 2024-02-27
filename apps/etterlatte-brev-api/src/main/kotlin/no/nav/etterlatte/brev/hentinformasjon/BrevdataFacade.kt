@@ -3,22 +3,20 @@ package no.nav.etterlatte.brev.hentinformasjon
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import no.nav.etterlatte.brev.behandling.AvkortetBeregningsperiode
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
-import no.nav.etterlatte.brev.behandling.Beregningsperiode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
 import no.nav.etterlatte.brev.behandling.PersonerISak
-import no.nav.etterlatte.brev.behandling.Trygdetid
 import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
-import no.nav.etterlatte.brev.behandling.hentUtbetaltBeloep
 import no.nav.etterlatte.brev.behandling.mapAvdoede
 import no.nav.etterlatte.brev.behandling.mapInnsender
 import no.nav.etterlatte.brev.behandling.mapSoeker
 import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandling.mapVerge
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.EtterbetalingDTO
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
@@ -30,7 +28,6 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakInnholdDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.pensjon.brevbaker.api.model.Kroner
 import java.time.YearMonth
 import java.util.UUID
 import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregningsperiode
@@ -38,7 +35,7 @@ import no.nav.etterlatte.libs.common.beregning.Beregningsperiode as CommonBeregn
 class BrevdataFacade(
     private val vedtaksvurderingKlient: VedtaksvurderingKlient,
     private val grunnlagKlient: GrunnlagKlient,
-    private val beregningKlient: BeregningKlient,
+    private val beregningService: BeregningService,
     private val behandlingKlient: BehandlingKlient,
     private val sakService: SakService,
     private val trygdetidService: TrygdetidService,
@@ -60,6 +57,7 @@ class BrevdataFacade(
     suspend fun hentGenerellBrevData(
         sakId: Long,
         behandlingId: UUID?,
+        overstyrSpraak: Spraak? = null,
         brukerTokenInfo: BrukerTokenInfo,
     ): GenerellBrevData {
         return coroutineScope {
@@ -98,12 +96,20 @@ class BrevdataFacade(
                 vedtak?.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
             val behandling =
-                if (behandlingId != null && vedtak?.type in listOf(VedtakType.INNVILGELSE, VedtakType.AVSLAG)) {
+                if (behandlingId != null && vedtak?.type in
+                    listOf(
+                        VedtakType.INNVILGELSE,
+                        VedtakType.AVSLAG,
+                        VedtakType.OPPHOER,
+                        VedtakType.ENDRING,
+                    )
+                ) {
                     behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
                 } else {
                     null
                 }
             val systemkilde = behandling?.kilde ?: Vedtaksloesning.GJENNY // Dette kan være en pesys-sak
+            val spraak = overstyrSpraak ?: grunnlag.mapSpraak()
 
             when (vedtak?.type) {
                 VedtakType.INNVILGELSE,
@@ -128,7 +134,7 @@ class BrevdataFacade(
                                     virkningstidspunkt = vedtakInnhold.virkningstidspunkt,
                                     revurderingInfo = vedtakInnhold.behandling.revurderingInfo,
                                 ),
-                            spraak = grunnlag.mapSpraak(),
+                            spraak = spraak,
                             revurderingsaarsak = vedtakInnhold.behandling.revurderingsaarsak,
                             systemkilde = systemkilde,
                             utlandstilknytning = behandling?.utlandstilknytning,
@@ -154,7 +160,7 @@ class BrevdataFacade(
                                         (vedtak.innhold as VedtakInnholdDto.VedtakTilbakekrevingDto).tilbakekreving.toJson(),
                                     ),
                             ),
-                        spraak = grunnlag.mapSpraak(),
+                        spraak = spraak,
                         systemkilde = systemkilde,
                     )
 
@@ -177,7 +183,7 @@ class BrevdataFacade(
                                         (vedtak.innhold as VedtakInnholdDto.Klage).klage.toJson(),
                                     ),
                             ),
-                        spraak = grunnlag.mapSpraak(),
+                        spraak = spraak,
                         systemkilde = systemkilde,
                     )
 
@@ -187,7 +193,7 @@ class BrevdataFacade(
                         personerISak = personerISak,
                         behandlingId = behandlingId,
                         forenkletVedtak = null,
-                        spraak = grunnlag.mapSpraak(),
+                        spraak = spraak,
                         systemkilde = systemkilde,
                         utlandstilknytning = behandling?.utlandstilknytning,
                     )
@@ -201,7 +207,7 @@ class BrevdataFacade(
         brukerTokenInfo: BrukerTokenInfo,
         sakType: SakType,
     ): Utbetalingsinfo? =
-        finnUtbetalingsinfoNullable(
+        beregningService.finnUtbetalingsinfoNullable(
             behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id,
             virkningstidspunkt,
             brukerTokenInfo,
@@ -211,57 +217,11 @@ class BrevdataFacade(
     suspend fun finnUtbetalingsinfo(
         behandlingId: UUID,
         virkningstidspunkt: YearMonth,
-        brukerTokenInfo: BrukerTokenInfo,
+        bruker: BrukerTokenInfo,
         sakType: SakType,
-    ): Utbetalingsinfo =
-        requireNotNull(finnUtbetalingsinfoNullable(behandlingId, virkningstidspunkt, brukerTokenInfo, sakType)) {
-            "Utbetalingsinfo er nødvendig, men mangler"
-        }
+    ): Utbetalingsinfo = beregningService.finnUtbetalingsinfo(behandlingId, virkningstidspunkt, bruker, sakType)
 
-    private suspend fun finnUtbetalingsinfoNullable(
-        behandlingId: UUID,
-        virkningstidspunkt: YearMonth,
-        brukerTokenInfo: BrukerTokenInfo,
-        sakType: SakType,
-    ): Utbetalingsinfo? {
-        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo) ?: return null
-        val beregningsGrunnlag = beregningKlient.hentBeregningsGrunnlag(behandlingId, sakType, brukerTokenInfo)
-
-        val beregningsperioder =
-            beregning.beregningsperioder.map {
-                val (benyttetTrygdetid, prorataBroek) = hentBenyttetTrygdetidOgProratabroek(it)
-
-                Beregningsperiode(
-                    datoFOM = it.datoFOM.atDay(1),
-                    datoTOM = it.datoTOM?.atEndOfMonth(),
-                    grunnbeloep = Kroner(it.grunnbelop),
-                    antallBarn = (it.soeskenFlokk?.size ?: 0) + 1,
-                    // Legger til 1 pga at beregning fjerner soeker
-                    utbetaltBeloep = Kroner(it.utbetaltBeloep),
-                    trygdetid = benyttetTrygdetid,
-                    prorataBroek = prorataBroek,
-                    institusjon = it.institusjonsopphold != null,
-                    beregningsMetodeAnvendt = requireNotNull(it.beregningsMetode),
-                    beregningsMetodeFraGrunnlag =
-                        beregningsGrunnlag?.beregningsMetode?.beregningsMetode
-                            ?: requireNotNull(it.beregningsMetode),
-                    // ved manuelt overstyrt beregning har vi ikke grunnlag
-                )
-            }
-
-        val soeskenjustering = beregning.beregningsperioder.any { !it.soeskenFlokk.isNullOrEmpty() }
-        val antallBarn = if (soeskenjustering) beregningsperioder.last().antallBarn else 1
-
-        return Utbetalingsinfo(
-            antallBarn,
-            Kroner(beregningsperioder.hentUtbetaltBeloep()),
-            virkningstidspunkt.atDay(1),
-            soeskenjustering,
-            beregningsperioder,
-        )
-    }
-
-    suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo) = beregningKlient.hentGrunnbeloep(brukerTokenInfo)
+    suspend fun hentGrunnbeloep(brukerTokenInfo: BrukerTokenInfo) = beregningService.hentGrunnbeloep(brukerTokenInfo)
 
     suspend fun finnAvkortingsinfo(
         behandlingId: UUID,
@@ -269,47 +229,42 @@ class BrevdataFacade(
         virkningstidspunkt: YearMonth,
         vedtakType: VedtakType,
         brukerTokenInfo: BrukerTokenInfo,
+    ): Avkortingsinfo {
+        return beregningService.finnAvkortingsinfo(
+            behandlingId,
+            sakType,
+            virkningstidspunkt,
+            vedtakType,
+            brukerTokenInfo,
+        )
+    }
+
+    suspend fun finnForrigeAvkortingsinfo(
+        sakId: Long,
+        sakType: SakType,
+        virkningstidspunkt: YearMonth,
+        vedtakType: VedtakType,
+        brukerTokenInfo: BrukerTokenInfo,
     ): Avkortingsinfo? {
-        if (sakType == SakType.BARNEPENSJON || vedtakType == VedtakType.OPPHOER) return null
-
-        val ytelseMedGrunnlag = beregningKlient.hentYtelseMedGrunnlag(behandlingId, brukerTokenInfo)
-
-        val beregningsperioder =
-            ytelseMedGrunnlag.perioder.map {
-                AvkortetBeregningsperiode(
-                    datoFOM = it.periode.fom.atDay(1),
-                    datoTOM = it.periode.tom?.atEndOfMonth(),
-                    inntekt = Kroner(it.aarsinntekt - it.fratrekkInnAar),
-                    ytelseFoerAvkorting = Kroner(it.ytelseFoerAvkorting),
-                    utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),
-                    trygdetid = it.trygdetid,
-                )
-            }
-
-        val aarsInntekt = ytelseMedGrunnlag.perioder.first().aarsinntekt
-        val grunnbeloep = ytelseMedGrunnlag.perioder.first().grunnbelop
-
-        return Avkortingsinfo(
-            grunnbeloep = Kroner(grunnbeloep),
-            inntekt = Kroner(aarsInntekt),
-            virkningsdato = virkningstidspunkt.atDay(1),
-            beregningsperioder,
+        val forrigeIverksatteBehandlingId = behandlingKlient.hentSisteIverksatteBehandling(sakId, brukerTokenInfo).id
+        return beregningService.finnAvkortingsinfoNullable(
+            forrigeIverksatteBehandlingId,
+            sakType,
+            virkningstidspunkt,
+            vedtakType,
+            brukerTokenInfo,
         )
     }
 
     suspend fun finnTrygdetid(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Trygdetid? {
-        val beregning = beregningKlient.hentBeregning(behandlingId, brukerTokenInfo)!!
+    ) = trygdetidService.finnTrygdetid(behandlingId, brukerTokenInfo)
 
-        return trygdetidService.finnTrygdetidsgrunnlag(behandlingId, beregning, brukerTokenInfo)
-    }
-
-    suspend fun hentBehandling(
+    suspend fun hentVedtaksbehandlingKanRedigeres(
         behandlingId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ) = behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)
+    ) = behandlingKlient.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
 }
 
 fun hentBenyttetTrygdetidOgProratabroek(beregningsperiode: CommonBeregningsperiode): Pair<Int, IntBroek?> {

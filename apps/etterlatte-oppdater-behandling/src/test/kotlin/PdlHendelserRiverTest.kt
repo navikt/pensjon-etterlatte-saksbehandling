@@ -3,7 +3,7 @@ package no.nav.etterlatte
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -19,7 +19,7 @@ class PdlHendelserRiverTest {
 
     @Test
     fun `skal lytte paa doedshendelse fra pdl og kalle paa behandling`() {
-        val doedshendelse = slot<Doedshendelse>()
+        val doedshendelse = slot<DoedshendelsePdl>()
         every { behandlingService.sendDoedshendelse(capture(doedshendelse)) } returns Unit
         inspector.apply { sendTestMessage(readFile("/doedshendelse.json")) }
 

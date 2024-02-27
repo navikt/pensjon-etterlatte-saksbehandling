@@ -9,8 +9,10 @@ import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.behandling.mapSpraak
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.behandlingklient.BehandlingKlientException
+import no.nav.etterlatte.brev.hentinformasjon.beregning.BeregningService
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.tilbakekreving.tilbakekreving
 import no.nav.etterlatte.libs.common.Vedtaksloesning
@@ -20,7 +22,6 @@ import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
 import no.nav.etterlatte.libs.common.behandling.SakType
-import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.beregning.BeregningDTO
 import no.nav.etterlatte.libs.common.beregning.BeregningsGrunnlagFellesDto
 import no.nav.etterlatte.libs.common.beregning.BeregningsMetode
@@ -43,7 +44,6 @@ import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.SOEKER_FOEDSELSNUMMER
 import no.nav.etterlatte.token.BrukerTokenInfo
-import no.nav.pensjon.brevbaker.api.model.Kroner
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -54,7 +54,7 @@ import java.util.UUID
 internal class BrevdataFacadeImplTest {
     private val vedtaksvurderingKlient = mockk<VedtaksvurderingKlient>()
     private val grunnlagKlient = mockk<GrunnlagKlient>()
-    private val beregningKlient = mockk<BeregningKlient>()
+    private val beregningService = mockk<BeregningService>()
     private val behandlingKlient = mockk<BehandlingKlient>()
     private val sakService = mockk<SakService>()
     private val trygdetidService = mockk<TrygdetidService>()
@@ -63,7 +63,7 @@ internal class BrevdataFacadeImplTest {
         BrevdataFacade(
             vedtaksvurderingKlient,
             grunnlagKlient,
-            beregningKlient,
+            beregningService,
             behandlingKlient,
             sakService,
             trygdetidService,
@@ -76,7 +76,7 @@ internal class BrevdataFacadeImplTest {
 
     @AfterEach
     fun after() {
-        confirmVerified(vedtaksvurderingKlient, grunnlagKlient, beregningKlient)
+        confirmVerified(vedtaksvurderingKlient, grunnlagKlient, beregningService)
     }
 
     @Test
@@ -91,19 +91,20 @@ internal class BrevdataFacadeImplTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns lagBehandling()
         coEvery { behandlingKlient.hentBrevutfall(any(), any()) } returns hentBrevutfall()
         coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns opprettGrunnlag()
-        coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
-        coEvery { beregningKlient.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
+        val grunnlag = opprettGrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(BEHANDLING_ID, BRUKERTokenInfo) } returns grunnlag
+        coEvery { beregningService.hentBeregning(any(), any()) } returns opprettBeregning()
+        coEvery { beregningService.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
         coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns opprettTrygdetid()
 
         val generellBrevData =
             runBlocking {
-                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
+                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, null, BRUKERTokenInfo)
             }
 
         Assertions.assertEquals(SAK_ID, generellBrevData.sak.id)
         Assertions.assertEquals(BEHANDLING_ID, generellBrevData.behandlingId)
-        Assertions.assertEquals(Spraak.NB, generellBrevData.spraak)
+        Assertions.assertEquals(grunnlag.mapSpraak(), generellBrevData.spraak)
         with(generellBrevData.personerISak.soeker) {
             Assertions.assertEquals("Søker", fornavn)
             Assertions.assertEquals("Mellom", mellomnavn)
@@ -132,12 +133,12 @@ internal class BrevdataFacadeImplTest {
 
         val generellBrevData =
             runBlocking {
-                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, BRUKERTokenInfo)
+                service.hentGenerellBrevData(SAK_ID, BEHANDLING_ID, Spraak.EN, BRUKERTokenInfo)
             }
 
         generellBrevData.sak.id shouldBe SAK_ID
         generellBrevData.behandlingId shouldBe BEHANDLING_ID
-        generellBrevData.spraak shouldBe Spraak.NB
+        generellBrevData.spraak shouldBe Spraak.EN
         generellBrevData.personerISak.avdoede.first().navn shouldBe "Død Mellom Far"
         with(generellBrevData.personerISak.soeker) {
             fornavn shouldBe "Søker"
@@ -159,69 +160,6 @@ internal class BrevdataFacadeImplTest {
         }
     }
 
-    @Test
-    fun `FinnUtbetalingsinfo returnerer korrekt informasjon`() {
-        coEvery {
-            sakService.hentSak(any(), any())
-        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
-        coEvery {
-            behandlingKlient.hentSisteIverksatteBehandling(any(), any())
-        } returns SisteIverksatteBehandling(UUID.randomUUID())
-        coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
-        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
-        coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregning()
-        coEvery { beregningKlient.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
-        coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns opprettTrygdetid()
-
-        val utbetalingsinfo =
-            runBlocking {
-                service.finnUtbetalingsinfo(BEHANDLING_ID, YearMonth.now(), BRUKERTokenInfo, SakType.BARNEPENSJON)
-            }
-
-        Assertions.assertEquals(Kroner(3063), utbetalingsinfo.beloep)
-        Assertions.assertEquals(YearMonth.now().atDay(1), utbetalingsinfo.virkningsdato)
-        Assertions.assertEquals(false, utbetalingsinfo.soeskenjustering)
-        Assertions.assertEquals(
-            listOf(BREV_BEREGNINGSPERIODE),
-            utbetalingsinfo.beregningsperioder,
-        )
-
-        coVerify(exactly = 1) {
-            beregningKlient.hentBeregning(BEHANDLING_ID, any())
-            beregningKlient.hentBeregningsGrunnlag(BEHANDLING_ID, any(), any())
-        }
-    }
-
-    @Test
-    fun `FinnUtbetalingsinfo returnerer korrekt antall barn ved soeskenjustering`() {
-        coEvery {
-            sakService.hentSak(any(), any())
-        } returns Sak("ident", SakType.BARNEPENSJON, SAK_ID, ENHET)
-        coEvery {
-            behandlingKlient.hentSisteIverksatteBehandling(any(), any())
-        } returns SisteIverksatteBehandling(UUID.randomUUID())
-        coEvery { behandlingKlient.hentEtterbetaling(any(), any()) } returns null
-        coEvery { vedtaksvurderingKlient.hentVedtak(any(), any()) } returns opprettBehandlingVedtak()
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns opprettGrunnlag()
-        coEvery { beregningKlient.hentBeregning(any(), any()) } returns opprettBeregningSoeskenjustering()
-        coEvery { beregningKlient.hentBeregningsGrunnlag(any(), any(), any()) } returns opprettBeregningsgrunnlag()
-        coEvery { trygdetidService.finnTrygdetidsgrunnlag(any(), any(), any()) } returns opprettTrygdetid()
-
-        val utbetalingsinfo =
-            runBlocking {
-                service.finnUtbetalingsinfo(BEHANDLING_ID, YearMonth.now(), BRUKERTokenInfo, SakType.BARNEPENSJON)
-            }
-
-        Assertions.assertEquals(2, utbetalingsinfo.antallBarn)
-        Assertions.assertTrue(utbetalingsinfo.soeskenjustering)
-
-        coVerify(exactly = 1) {
-            beregningKlient.hentBeregning(any(), any())
-            beregningKlient.hentBeregningsGrunnlag(any(), any(), any())
-        }
-    }
-
     private fun opprettBeregning() =
         mockk<BeregningDTO> {
             every { beregningsperioder } returns
@@ -239,18 +177,6 @@ internal class BrevdataFacadeImplTest {
                 mockk {
                     every { beregningsMetode } returns BeregningsMetode.BEST
                 }
-        }
-
-    private fun opprettBeregningSoeskenjustering() =
-        mockk<BeregningDTO> {
-            every { beregningsperioder } returns
-                listOf(
-                    opprettBeregningsperiode(
-                        YearMonth.now(),
-                        beloep = 3063,
-                        soeskenFlokk = listOf("barn2"),
-                    ),
-                )
         }
 
     private fun opprettBehandlingVedtak() =
@@ -354,18 +280,5 @@ internal class BrevdataFacadeImplTest {
         private val BRUKERTokenInfo = BrukerTokenInfo.of("321", SAKSBEHANDLER_IDENT, null, null, null)
         private const val ATTESTANT_IDENT = "Z54321"
         private const val SAK_ID = 123L
-        private val BREV_BEREGNINGSPERIODE =
-            no.nav.etterlatte.brev.behandling.Beregningsperiode(
-                YearMonth.now().atDay(1),
-                null,
-                Kroner(10000),
-                1,
-                Kroner(3063),
-                10,
-                null,
-                false,
-                BeregningsMetode.NASJONAL,
-                BeregningsMetode.BEST,
-            )
     }
 }

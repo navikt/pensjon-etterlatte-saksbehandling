@@ -32,7 +32,7 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
   const location = useLocation()
   const { behandlingId } = useParams()
   const dispatch = useAppDispatch()
-  const vilkaarsvurdering = behandling.vilkårsprøving
+  const vilkaarsvurdering = behandling.vilkaarsvurdering
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
   const [vilkaarsvurderingStatus, fetchVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)

@@ -2,9 +2,7 @@ package no.nav.etterlatte.libs.common
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.application
 import io.ktor.server.application.call
-import io.ktor.server.application.log
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
@@ -17,6 +15,7 @@ import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.libs.ktor.firstValidTokenClaims
 import no.nav.etterlatte.token.Saksbehandler
 import no.nav.etterlatte.token.Systembruker
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 const val BEHANDLINGID_CALL_PARAMETER = "behandlingId"
@@ -62,6 +61,8 @@ inline val PipelineContext<*, ApplicationCall>.klageId: UUID
             "KlageId er ikke i path params"
         }
 
+val logger = LoggerFactory.getLogger("TilgangsSjekk")
+
 suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
     behandlingTilgangsSjekk: BehandlingTilgangsSjekk,
     skrivetilgang: Boolean = false,
@@ -74,7 +75,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withBehandlingId(
             if (harTilgangTilBehandling) {
                 onSuccess(behandlingId)
             } else {
-                application.log.info("Har ikke tilgang til behandling")
+                logger.info("Har ikke tilgang til behandling")
                 call.respond(HttpStatusCode.NotFound)
             }
         }
@@ -94,7 +95,7 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withSakId(
             if (harTilgangTilSak) {
                 onSuccess(sakId)
             } else {
-                application.log.info("Har ikke tilgang til sak")
+                logger.info("Har ikke tilgang til sak")
                 call.respond(HttpStatusCode.NotFound)
             }
         }
@@ -110,7 +111,6 @@ suspend inline fun PipelineContext<*, ApplicationCall>.withFoedselsnummer(
 ) {
     val foedselsnummerDTO = call.receive<FoedselsnummerDTO>()
     val foedselsnummer = Folkeregisteridentifikator.of(foedselsnummerDTO.foedselsnummer)
-    val logger = application.log
     when (brukerTokenInfo) {
         is Saksbehandler -> {
             val harTilgangTilPerson =
@@ -245,10 +245,12 @@ suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
     if (featureToggleService.isEnabled(toggle, false)) {
         block()
     } else {
-        throw ForespoerselException(
-            code = "NOT_IMPLEMENTED",
-            status = HttpStatusCode.NotImplemented.value,
-            detail = "Funksjonaliteten er ikke tilgjengelig enda.",
-        )
+        throw FeatureIkkeStoettetException()
     }
 }
+
+class FeatureIkkeStoettetException : ForespoerselException(
+    code = "NOT_IMPLEMENTED",
+    status = HttpStatusCode.NotImplemented.value,
+    detail = "Funksjonaliteten er ikke tilgjengelig enda.",
+)

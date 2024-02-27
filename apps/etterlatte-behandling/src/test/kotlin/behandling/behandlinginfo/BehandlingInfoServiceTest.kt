@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.behandling.Brevutfall
 import no.nav.etterlatte.libs.common.behandling.Feilutbetaling
 import no.nav.etterlatte.libs.common.behandling.FeilutbetalingValg
 import no.nav.etterlatte.libs.common.behandling.LavEllerIngenInntekt
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
@@ -45,10 +46,11 @@ internal class BehandlingInfoServiceTest {
         every { behandlingsstatusService.settBeregnet(any(), any(), any()) } returns Unit
 
         behandlingInfoService.lagreBrevutfallOgEtterbetaling(
-            behandlingId,
-            bruker,
-            brevutfall,
-            etterbetaling,
+            behandlingId = behandlingId,
+            brukerTokenInfo = bruker,
+            opphoer = false,
+            brevutfall = brevutfall,
+            etterbetaling = etterbetaling,
         )
 
         verify {
@@ -75,7 +77,13 @@ internal class BehandlingInfoServiceTest {
         every { behandlingInfoDao.lagreEtterbetaling(any()) } returns mockk()
         every { behandlingsstatusService.settAvkortet(any(), any(), any()) } returns Unit
 
-        behandlingInfoService.lagreBrevutfallOgEtterbetaling(behandlingId, bruker, brevutfall, etterbetaling)
+        behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+            behandlingId = behandlingId,
+            brukerTokenInfo = bruker,
+            opphoer = false,
+            brevutfall = brevutfall,
+            etterbetaling = etterbetaling,
+        )
 
         verify {
             behandlingInfoDao.lagreBrevutfall(brevutfall)
@@ -96,9 +104,10 @@ internal class BehandlingInfoServiceTest {
 
         assertThrows<BrevutfallException.BehandlingKanIkkeEndres> {
             behandlingInfoService.lagreBrevutfallOgEtterbetaling(
-                behandlingId,
-                bruker,
-                brevutfall(behandlingId),
+                behandlingId = behandlingId,
+                brukerTokenInfo = bruker,
+                opphoer = false,
+                brevutfall = brevutfall(behandlingId),
                 etterbetaling = null,
             )
         }
@@ -121,10 +130,11 @@ internal class BehandlingInfoServiceTest {
 
         assertThrows<BrevutfallException.FeilutbetalingIkkeSatt> {
             behandlingInfoService.lagreBrevutfallOgEtterbetaling(
-                behandlingId,
-                bruker,
-                brevutfall(behandlingId).copy(feilutbetaling = null),
-                etterbetaling(behandlingId = behandlingId),
+                behandlingId = behandlingId,
+                brukerTokenInfo = bruker,
+                opphoer = false,
+                brevutfall = brevutfall(behandlingId).copy(feilutbetaling = null),
+                etterbetaling = etterbetaling(behandlingId = behandlingId),
             )
         }
     }
@@ -158,11 +168,72 @@ internal class BehandlingInfoServiceTest {
         verify { behandlingInfoDao.slettEtterbetaling(behandlingId) }
     }
 
+    @Test
+    fun `skal lagre brevutfall med kun feilutbetaling ved opphoer av omstillingsstoenad`() {
+        val behandlingId = randomUUID()
+
+        every { behandlingService.hentBehandling(any()) } returns
+            behandling(
+                behandlingId = behandlingId,
+                sakType = SakType.OMSTILLINGSSTOENAD,
+                behandlingType = BehandlingType.REVURDERING,
+                behandlingStatus = BehandlingStatus.VILKAARSVURDERT,
+                revurderingaarsak = Revurderingaarsak.SIVILSTAND,
+            )
+        every { behandlingInfoDao.lagreBrevutfall(any()) } returns mockk()
+        every { behandlingsstatusService.settVilkaarsvurdert(any(), any(), any()) } returns Unit
+        every { behandlingInfoDao.hentEtterbetaling(any()) } returns null
+
+        behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+            behandlingId = behandlingId,
+            brukerTokenInfo = bruker,
+            opphoer = true,
+            brevutfall = brevutfall(behandlingId).copy(aldersgruppe = null, lavEllerIngenInntekt = null),
+            etterbetaling = null,
+        )
+
+        verify {
+            behandlingInfoDao.lagreBrevutfall(any())
+            behandlingsstatusService.settVilkaarsvurdert(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `skal lagre brevutfall med kun feilutbetaling og aldergruppe ved opphoer av barnepensjon`() {
+        val behandlingId = randomUUID()
+
+        every { behandlingService.hentBehandling(any()) } returns
+            behandling(
+                behandlingId = behandlingId,
+                sakType = SakType.BARNEPENSJON,
+                behandlingType = BehandlingType.REVURDERING,
+                behandlingStatus = BehandlingStatus.VILKAARSVURDERT,
+                revurderingaarsak = Revurderingaarsak.ADOPSJON,
+            )
+        every { behandlingInfoDao.lagreBrevutfall(any()) } returns mockk()
+        every { behandlingsstatusService.settVilkaarsvurdert(any(), any(), any()) } returns Unit
+        every { behandlingInfoDao.hentEtterbetaling(any()) } returns null
+
+        behandlingInfoService.lagreBrevutfallOgEtterbetaling(
+            behandlingId = behandlingId,
+            brukerTokenInfo = bruker,
+            opphoer = true,
+            brevutfall = brevutfall(behandlingId).copy(lavEllerIngenInntekt = null),
+            etterbetaling = null,
+        )
+
+        verify {
+            behandlingInfoDao.lagreBrevutfall(any())
+            behandlingsstatusService.settVilkaarsvurdert(any(), any(), any())
+        }
+    }
+
     private fun behandling(
         behandlingId: UUID,
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         sakType: SakType = SakType.BARNEPENSJON,
         behandlingStatus: BehandlingStatus = BehandlingStatus.BEREGNET,
+        revurderingaarsak: Revurderingaarsak? = null,
     ): Behandling =
         mockk {
             every { id } returns behandlingId
@@ -172,6 +243,7 @@ internal class BehandlingInfoServiceTest {
                     every { this@mockk.sakType } returns sakType
                 }
             every { status } returns behandlingStatus
+            every { revurderingsaarsak() } returns revurderingaarsak
             every { virkningstidspunkt } returns
                 Virkningstidspunkt.create(YearMonth.of(2023, 1), "ident", "begrunnelse")
         }

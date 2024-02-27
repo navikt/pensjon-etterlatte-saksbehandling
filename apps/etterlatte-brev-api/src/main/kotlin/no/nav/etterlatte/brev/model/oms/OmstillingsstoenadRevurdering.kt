@@ -2,7 +2,6 @@ package no.nav.etterlatte.brev.model.oms
 
 import no.nav.etterlatte.brev.behandling.Avkortingsinfo
 import no.nav.etterlatte.brev.behandling.Trygdetid
-import no.nav.etterlatte.brev.behandling.Utbetalingsinfo
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevVedleggKey
@@ -39,8 +38,7 @@ data class OmstillingsstoenadRevurdering(
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
             avkortingsinfo: Avkortingsinfo,
-            utbetalingsinfo: Utbetalingsinfo,
-            forrigeUtbetalingsinfo: Utbetalingsinfo?,
+            forrigeAvkortingsinfo: Avkortingsinfo?,
             etterbetalingDTO: EtterbetalingDTO?,
             trygdetid: Trygdetid,
             brevutfall: BrevutfallDto,
@@ -62,8 +60,13 @@ data class OmstillingsstoenadRevurdering(
 
             return OmstillingsstoenadRevurdering(
                 innhold = innholdMedVedlegg.innhold(),
-                innholdForhaandsvarsel = vedleggHvisFeilutbetaling(feilutbetaling, innholdMedVedlegg),
-                erEndret = forrigeUtbetalingsinfo == null || forrigeUtbetalingsinfo.beloep != utbetalingsinfo.beloep,
+                innholdForhaandsvarsel =
+                    vedleggHvisFeilutbetaling(
+                        feilutbetaling,
+                        innholdMedVedlegg,
+                        BrevVedleggKey.OMS_FORHAANDSVARSEL_FEILUTBETALING,
+                    ),
+                erEndret = erEndret(forrigeAvkortingsinfo, avkortingsinfo),
                 erOmgjoering = revurderingaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE,
                 // TODO klage kobler seg på her
                 datoVedtakOmgjoering = null,
@@ -82,8 +85,8 @@ data class OmstillingsstoenadRevurdering(
                                 beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
                                 prorataBroek = trygdetid.prorataBroek,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
-                                beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
+                                beregningsMetodeFraGrunnlag = avkortingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
+                                beregningsMetodeAnvendt = avkortingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
                             ),
                     ),
                 etterbetaling =
@@ -98,6 +101,17 @@ data class OmstillingsstoenadRevurdering(
                 lavEllerIngenInntekt = brevutfall.lavEllerIngenInntekt == LavEllerIngenInntekt.JA,
                 feilutbetaling = feilutbetaling,
             )
+        }
+
+        private fun erEndret(
+            forrigeAvkortingsinfo: Avkortingsinfo?,
+            avkortingsinfo: Avkortingsinfo,
+        ): Boolean {
+            // Sjekker siste periode på forrige iverksatte og gjeldende behandling - mulig dette ikke holder
+            // med litt mer komplekse behandlinger?
+            val beloepForrigeBehandling = forrigeAvkortingsinfo?.beregningsperioder?.maxBy { it.datoFOM }?.utbetaltBeloep
+            val beloepGjeldendeBehandling = avkortingsinfo.beregningsperioder.maxBy { it.datoFOM }.utbetaltBeloep
+            return beloepForrigeBehandling == null || beloepForrigeBehandling != beloepGjeldendeBehandling
         }
     }
 }

@@ -11,6 +11,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -31,7 +32,7 @@ class DownstreamResourceClient(
     suspend fun get(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Result<Resource, ThrowableErrorMessage> {
+    ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { oboAccessToken ->
@@ -60,7 +61,7 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         postBody: Any,
-    ): Result<Resource, ThrowableErrorMessage> {
+    ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { token ->
@@ -71,11 +72,26 @@ class DownstreamResourceClient(
             }
     }
 
+    suspend fun put(
+        resource: Resource,
+        brukerTokenInfo: BrukerTokenInfo,
+        putBody: Any,
+    ): Result<Resource, Throwable> {
+        val scopes = listOf("api://${resource.clientId}/.default")
+        return hentTokenFraAD(brukerTokenInfo, scopes)
+            .andThen { token ->
+                putToDownstreamApi(resource, token, putBody)
+            }
+            .andThen { response ->
+                Ok(resource.addResponse(response))
+            }
+    }
+
     suspend fun delete(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         postBody: String,
-    ): Result<Resource, ThrowableErrorMessage> {
+    ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { oboAccessToken ->
@@ -90,7 +106,7 @@ class DownstreamResourceClient(
         resource: Resource,
         brukerTokenInfo: BrukerTokenInfo,
         patchBody: String,
-    ): Result<Resource, ThrowableErrorMessage> {
+    ): Result<Resource, Throwable> {
         val scopes = listOf("api://${resource.clientId}/.default")
         return hentTokenFraAD(brukerTokenInfo, scopes)
             .andThen { oboAccessToken ->
@@ -104,7 +120,7 @@ class DownstreamResourceClient(
     private suspend fun fetchFromDownstreamApi(
         resource: Resource,
         oboAccessToken: AccessToken,
-    ): Result<JsonNode?, ThrowableErrorMessage> =
+    ): Result<JsonNode?, Throwable> =
 
         runCatching {
             httpClient.get(resource.url) {
@@ -117,7 +133,7 @@ class DownstreamResourceClient(
                     when {
                         response.status == HttpStatusCode.NoContent -> Ok(null)
                         response.status.isSuccess() -> Ok(response.body())
-                        else -> response.toErr()
+                        else -> response.toResponseException()
                     }
                 },
                 onFailure = { error ->
@@ -129,7 +145,7 @@ class DownstreamResourceClient(
         resource: Resource,
         oboAccessToken: AccessToken,
         postBody: Any,
-    ): Result<Any, ThrowableErrorMessage> =
+    ): Result<Any, Throwable> =
 
         runCatching {
             httpClient.post(resource.url) {
@@ -149,7 +165,39 @@ class DownstreamResourceClient(
                                 Ok(response.status)
                             }
                         }
-                        else -> response.toErr()
+                        else -> response.toResponseException()
+                    }
+                },
+                onFailure = { error ->
+                    error.toErr(resource.url)
+                },
+            )
+
+    private suspend fun putToDownstreamApi(
+        resource: Resource,
+        oboAccessToken: AccessToken,
+        putBody: Any,
+    ): Result<Any, Throwable> =
+
+        runCatching {
+            httpClient.put(resource.url) {
+                header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
+                contentType(ContentType.Application.Json)
+                setBody(putBody)
+            }
+        }
+            .fold(
+                onSuccess = { response ->
+                    when {
+                        response.status.isSuccess() -> {
+                            if (response.harContentType(ContentType.Application.Json)) {
+                                Ok(response.body<JsonNode>())
+                            } else {
+                                logger.info("Mottok content-type: ${response.contentType()} som ikke var JSON")
+                                Ok(response.status)
+                            }
+                        }
+                        else -> response.toResponseException()
                     }
                 },
                 onFailure = { error ->
@@ -161,7 +209,7 @@ class DownstreamResourceClient(
         resource: Resource,
         oboAccessToken: AccessToken,
         postBody: String,
-    ): Result<JsonNode, ThrowableErrorMessage> =
+    ): Result<JsonNode, Throwable> =
 
         runCatching {
             httpClient.delete(resource.url) {
@@ -174,7 +222,7 @@ class DownstreamResourceClient(
                 onSuccess = { response ->
                     when {
                         response.status.isSuccess() -> Ok(response.body())
-                        else -> response.toErr()
+                        else -> response.toResponseException()
                     }
                 },
                 onFailure = { error ->
@@ -186,7 +234,7 @@ class DownstreamResourceClient(
         resource: Resource,
         oboAccessToken: AccessToken,
         patchBody: String,
-    ): Result<JsonNode, ThrowableErrorMessage> =
+    ): Result<JsonNode, Throwable> =
         runCatching {
             httpClient.patch(resource.url) {
                 header(HttpHeaders.Authorization, "Bearer ${oboAccessToken.accessToken}")
@@ -198,7 +246,7 @@ class DownstreamResourceClient(
                 onSuccess = { response ->
                     when {
                         response.status.isSuccess() -> Ok(response.body())
-                        else -> response.toErr()
+                        else -> response.toResponseException()
                     }
                 },
                 onFailure = { error ->

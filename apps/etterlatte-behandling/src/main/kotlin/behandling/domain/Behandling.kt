@@ -1,8 +1,6 @@
 package no.nav.etterlatte.behandling.domain
 
-import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingSammendrag
-import no.nav.etterlatte.behandling.filterBehandlingerForEnheter
 import no.nav.etterlatte.behandling.revurdering.RevurderingInfoMedBegrunnelse
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -50,6 +48,8 @@ sealed class Behandling {
     abstract val utlandstilknytning: Utlandstilknytning?
     abstract val boddEllerArbeidetUtlandet: BoddEllerArbeidetUtlandet?
     abstract val kilde: Vedtaksloesning
+
+    open val relatertBehandlingId: String? = null
     open val prosesstype: Prosesstype = Prosesstype.MANUELL
 
     protected val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
@@ -139,7 +139,7 @@ sealed class Behandling {
         } else {
             logger.error(
                 "Ugyldig operasjon på behandling ($id) med status $status, prøver å endre til status ${endreTilStatus.name}." +
-                    " Forventet statuser er ${behandlingStatuser.joinToString { " ," }}",
+                    " Forventet statuser er ${behandlingStatuser.joinToString(",")}",
             )
             throw TilstandException.UgyldigTilstand
         }
@@ -199,13 +199,6 @@ sealed class Behandling {
     ) : Exception(message)
 }
 
-fun <T : Behandling> T?.sjekkEnhet() =
-    this?.let { behandling ->
-        listOf(behandling).filterBehandlingerForEnheter(
-            Kontekst.get().AppUser,
-        ).firstOrNull()
-    }
-
 internal fun Behandling.toStatistikkBehandling(
     persongalleri: Persongalleri,
     pesysId: Long? = null,
@@ -231,6 +224,7 @@ internal fun Behandling.toStatistikkBehandling(
         enhet = sak.enhet,
         kilde = kilde,
         pesysId = pesysId,
+        relatertBehandlingId = relatertBehandlingId,
     )
 }
 
@@ -265,7 +259,6 @@ fun Behandling.toBehandlingSammendrag() =
             when (this) {
                 is Foerstegangsbehandling -> "SOEKNAD"
                 is Revurdering -> this.revurderingsaarsak?.name ?: "REVURDERING"
-                is ManueltOpphoer -> "MANUELT_OPPHOER"
             },
         virkningstidspunkt = this.virkningstidspunkt,
         boddEllerArbeidetUtlandet = this.boddEllerArbeidetUtlandet,

@@ -2,6 +2,7 @@ export interface IBrev {
   id: number
   sakId: number
   tittel: string
+  spraak: Spraak
   behandlingId: string
   prosessType: BrevProsessType
   soekerFnr: string
@@ -70,4 +71,19 @@ export enum Brevtype {
   OPPLASTET_PDF = 'OPPLASTET_PDF',
   MANUELT = 'MANUELT',
   VEDLEGG = 'VEDLEGG',
+}
+
+export function formaterBrevtype(brevtype: Brevtype) {
+  switch (brevtype) {
+    case Brevtype.INFORMASJON:
+      return 'Informasjonsbrev'
+    case Brevtype.MANUELT:
+      return 'Manuelt brev'
+    case Brevtype.VARSEL:
+      return 'Varselbrev'
+    case Brevtype.VEDTAK:
+      return 'Vedtaksbrev'
+    case Brevtype.OPPLASTET_PDF:
+      return 'Opplastet PDF'
+  }
 }

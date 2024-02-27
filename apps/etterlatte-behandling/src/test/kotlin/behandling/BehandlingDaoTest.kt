@@ -2,9 +2,9 @@ package no.nav.etterlatte.behandling
 
 import io.kotest.inspectors.forExactly
 import io.kotest.matchers.shouldBe
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
@@ -39,28 +39,24 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.YearMonth
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class BehandlingDaoTest {
-    private val dataSource = DatabaseExtension.dataSource
+internal class BehandlingDaoTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
     private lateinit var behandlingRepo: BehandlingDao
     private lateinit var kommerBarnetTilGodeDao: KommerBarnetTilGodeDao
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-
-        sakRepo = SakDao { connection }
-        kommerBarnetTilGodeDao = KommerBarnetTilGodeDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        kommerBarnetTilGodeDao = KommerBarnetTilGodeDao(ConnectionAutoclosingTest(dataSource))
         behandlingRepo =
             BehandlingDao(
                 kommerBarnetTilGodeDao = kommerBarnetTilGodeDao,
-                RevurderingDao {
-                    connection
-                },
-                connection = { connection },
+                RevurderingDao(ConnectionAutoclosingTest(dataSource)),
+                ConnectionAutoclosingTest(dataSource),
             )
     }
 
@@ -280,25 +276,6 @@ internal class BehandlingDaoTest {
 
         val behandling = behandlingRepo.hentBehandling(id = opprettBehandling.id)
         assertTrue(behandling is Revurdering)
-    }
-
-    @Test
-    fun `skal returnere behandling av type ManueltOpphoer`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        val opprettBehandling =
-            opprettBehandling(
-                type = BehandlingType.MANUELT_OPPHOER,
-                sakId = sak1,
-                opphoerAarsaker =
-                    listOf(
-                        "SOESKEN_DOED",
-                        "GJENLEVENDE_FORELDER_DOED",
-                    ),
-            ).also {
-                behandlingRepo.opprettBehandling(it)
-            }
-        val behandling = behandlingRepo.hentBehandling(opprettBehandling.id)
-        assertTrue(behandling is ManueltOpphoer)
     }
 
     @Test

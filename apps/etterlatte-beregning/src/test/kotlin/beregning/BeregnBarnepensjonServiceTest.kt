@@ -366,42 +366,6 @@ internal class BeregnBarnepensjonServiceTest {
     }
 
     @Test
-    fun `skal sette beloep til 0 ved manuelt opphoer`() {
-        val behandling = mockBehandling(BehandlingType.MANUELT_OPPHOER)
-        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
-
-        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
-        coEvery {
-            beregningsGrunnlagService.hentBarnepensjonBeregningsGrunnlag(
-                any(),
-                any(),
-            )
-        } returns barnepensjonBeregningsGrunnlag(behandling.id, emptyList())
-        coEvery { trygdetidKlient.hentTrygdetid(any(), any()) } returns mockTrygdetid(behandling.id)
-
-        runBlocking {
-            val beregning = beregnBarnepensjonService().beregn(behandling, bruker)
-
-            with(beregning) {
-                beregningId shouldNotBe null
-                behandlingId shouldBe behandling.id
-                type shouldBe Beregningstype.BP
-                beregnetDato shouldNotBe null
-                grunnlagMetadata shouldBe grunnlag.metadata
-                beregningsperioder.size shouldBeGreaterThanOrEqual 1
-                with(beregningsperioder.first()) {
-                    utbetaltBeloep shouldBe 0
-                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
-                    datoTOM shouldBe null
-                    grunnbelopMnd shouldBe GRUNNBELOEP_JAN_23
-                    soeskenFlokk shouldBe null
-                    trygdetid shouldBe 0
-                }
-            }
-        }
-    }
-
-    @Test
     fun `skal beregne barnepensjon foerstegangsbehandling - ett soesken - med nytt regelverk`() {
         val behandling = mockBehandling(BehandlingType.FØRSTEGANGSBEHANDLING)
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()

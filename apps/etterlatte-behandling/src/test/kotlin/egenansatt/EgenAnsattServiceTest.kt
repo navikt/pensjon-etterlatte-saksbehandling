@@ -5,9 +5,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.Context
+import no.nav.etterlatte.DatabaseContextTest
 import no.nav.etterlatte.DatabaseExtension
-import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.behandling.BrukerServiceImpl
@@ -37,14 +38,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.Logger
-import java.sql.Connection
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class EgenAnsattServiceTest {
-    val sikkerLogg: Logger = sikkerlogger()
+internal class EgenAnsattServiceTest(val dataSource: DataSource) {
+    private val sikkerLogg: Logger = sikkerlogger()
 
-    private val dataSource = DatabaseExtension.dataSource
     private lateinit var sakRepo: SakDao
     private lateinit var oppgaveRepo: OppgaveDaoImpl
     private lateinit var oppgaveRepoMedSporing: OppgaveDaoMedEndringssporingImpl
@@ -59,10 +59,9 @@ internal class EgenAnsattServiceTest {
         val norg2Klient = mockk<Norg2Klient>()
         val featureToggleService = mockk<FeatureToggleService>()
         val skjermingKlient = mockk<SkjermingKlient>()
-        val connection = dataSource.connection
-        sakRepo = SakDao { connection }
-        oppgaveRepo = OppgaveDaoImpl { connection }
-        oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo) { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
+        oppgaveRepo = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
+        oppgaveRepoMedSporing = OppgaveDaoMedEndringssporingImpl(oppgaveRepo, ConnectionAutoclosingTest(dataSource))
         val brukerService = BrukerServiceImpl(pdltjenesterKlient, norg2Klient)
         sakService =
             spyk(
@@ -92,15 +91,7 @@ internal class EgenAnsattServiceTest {
         Kontekst.set(
             Context(
                 user,
-                object : DatabaseKontekst {
-                    override fun activeTx(): Connection {
-                        throw IllegalArgumentException()
-                    }
-
-                    override fun <T> inTransaction(block: () -> T): T {
-                        return block()
-                    }
-                },
+                DatabaseContextTest(dataSource),
             ),
         )
     }

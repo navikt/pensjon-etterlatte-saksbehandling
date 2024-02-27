@@ -2,6 +2,8 @@ package no.nav.etterlatte.libs.database
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import no.nav.etterlatte.libs.common.appIsInGCP
+import no.nav.etterlatte.libs.common.isProd
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 import org.slf4j.LoggerFactory
@@ -39,15 +41,19 @@ object DataSourceBuilder {
     }
 }
 
-fun DataSource.migrate(gcp: Boolean = true): MigrateResult =
+fun DataSource.migrate(): MigrateResult =
     try {
         Flyway.configure()
             .dataSource(this)
             .apply {
-                // Kjør GCP-spesifikke migrasjoner kun hvis vi er i GCP
-                if (gcp) {
-                    locations("db/migration", "db/gcp")
+                val dblocationsMiljoe = mutableListOf("db/migration")
+                if (appIsInGCP()) {
+                    dblocationsMiljoe.add("db/gcp")
                 }
+                if (isProd()) {
+                    dblocationsMiljoe.add("db/prod")
+                }
+                locations(*dblocationsMiljoe.toTypedArray())
             }
             .load()
             .migrate()

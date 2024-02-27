@@ -8,7 +8,13 @@ import { TilbakekrevingVurderingOverordnet } from '~components/tilbakekreving/vu
 import { TilbakekrevingVurderingPerioder } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingPerioder'
 import { TilbakekrevingVurderingOppsummering } from '~components/tilbakekreving/vurdering/TilbakekrevingVurderingOppsummering'
 
-export function TilbakekrevingVurdering({ behandling }: { behandling: TilbakekrevingBehandling }) {
+export function TilbakekrevingVurdering({
+  behandling,
+  redigerbar,
+}: {
+  behandling: TilbakekrevingBehandling
+  redigerbar: boolean
+}) {
   const navigate = useNavigate()
   return (
     <Content>
@@ -19,12 +25,12 @@ export function TilbakekrevingVurdering({ behandling }: { behandling: Tilbakekre
           </Heading>
         </HeadingWrapper>
       </ContentHeader>
-      <TilbakekrevingVurderingOverordnet behandling={behandling} />
-      <TilbakekrevingVurderingPerioder behandling={behandling} />
+      <TilbakekrevingVurderingOverordnet behandling={behandling} redigerbar={redigerbar} />
+      <TilbakekrevingVurderingPerioder behandling={behandling} redigerbar={redigerbar} />
       <TilbakekrevingVurderingOppsummering behandling={behandling} />
       <FlexRow $spacing={true} justify="center">
         <Button variant="primary" onClick={() => navigate(`/tilbakekreving/${behandling?.id}/brev`)}>
-          Opprett vedtak
+          {redigerbar ? 'Lagre vedtak' : 'Gå til vedtak'}
         </Button>
       </FlexRow>
     </Content>

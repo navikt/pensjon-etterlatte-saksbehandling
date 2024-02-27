@@ -10,7 +10,6 @@ import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toObjectNode
-import no.nav.etterlatte.libs.common.vedtak.KlageVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
@@ -46,6 +45,11 @@ interface VedtakKlient {
     ): Long
 
     suspend fun lagreVedtakKlage(
+        klage: Klage,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long
+
+    suspend fun fattVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
     ): Long
@@ -118,7 +122,6 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     postBody =
                         TilbakekrevingFattEllerAttesterVedtakDto(
                             tilbakekrevingId = tilbakekrevingId,
-                            saksbehandler = brukerTokenInfo.ident(),
                             enhet = enhet,
                         ),
                 )
@@ -152,7 +155,6 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     postBody =
                         TilbakekrevingFattEllerAttesterVedtakDto(
                             tilbakekrevingId = tilbakekrevingId,
-                            saksbehandler = brukerTokenInfo.ident(),
                             enhet = enhet,
                         ),
                 )
@@ -209,18 +211,10 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/klage/${klage.id}/lagre-vedtak",
+                            url = "$resourceUrl/vedtak/klage/${klage.id}/lagre-vedtak",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
-                    postBody =
-                        KlageVedtakDto(
-                            klageId = klage.id,
-                            sakId = klage.sak.id,
-                            sakType = klage.sak.sakType,
-                            soeker = Folkeregisteridentifikator.of(klage.sak.ident),
-                            klage = klage.toObjectNode(),
-                            enhet = klage.sak.enhet,
-                        ),
+                    postBody = klage,
                 )
                 .mapBoth(
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
@@ -228,6 +222,34 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                 )
         } catch (e: Exception) {
             throw InternfeilException("Lagre vedtak for klage med id=${klage.id} feilet", e)
+        }
+    }
+
+    override suspend fun fattVedtakKlage(
+        klage: Klage,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        try {
+            logger.info("Sender klage som skal fatte vedtak for klage=${klage.id} til vedtak")
+            return downstreamResourceClient
+                .post(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/vedtak/klage/${klage.id}/fatt-vedtak",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    postBody = klage,
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: Exception) {
+            throw VedtakKlientException(
+                "Fatting av vedtak for klage med id=${klage.id} feilet",
+                e,
+            )
         }
     }
 }

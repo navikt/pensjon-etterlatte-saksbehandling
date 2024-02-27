@@ -18,6 +18,8 @@ import {
   FELLES_REVURDERING_HJEMLER,
   BP_REVURDERING_YRKESSKADE_BESKRIVELSE,
   BP_REVURDERING_YRKESSKADE_HJEMLER,
+  OMS_ALDERSOVERGANG_BESKRIVELSE,
+  OMS_ALDERSOVERGANG_HJEMLER,
   OMS_INNTEKTSENDRING_BESKRIVELSE,
   OMS_INNTEKTSENDRING_HJEMLER,
   OMS_INST_HJEMLER_VIRK,
@@ -37,7 +39,6 @@ import SluttbehandlingUtland from '~components/behandling/revurderingsoversikt/s
 import { SluttbehandlingUtlandInfo } from '~shared/types/RevurderingInfo'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
-import { format } from 'date-fns'
 import { useAppSelector } from '~store/Store'
 
 const revurderingsaarsakTilTekst = (revurderingsaarsak: Revurderingaarsak): string =>
@@ -54,6 +55,8 @@ const hjemlerOgBeskrivelse = (sakType: SakType, revurderingsaarsak: Revurderinga
 
 const hjemlerOgBeskrivelseOmstillingsstoenad = (revurderingsaarsak: Revurderingaarsak): [Array<Hjemmel>, string] => {
   switch (revurderingsaarsak) {
+    case Revurderingaarsak.ALDERSOVERGANG:
+      return [OMS_ALDERSOVERGANG_HJEMLER, OMS_ALDERSOVERGANG_BESKRIVELSE]
     case Revurderingaarsak.DOEDSFALL:
       return [OMS_OPPHOER_HJEMLER, OMS_OPPHOER_BESKRIVELSE]
     case Revurderingaarsak.INNTEKTSENDRING:
@@ -109,10 +112,6 @@ export const Revurderingsoversikt = (props: { behandling: IDetaljertBehandling }
             <Lowercase>{revurderingsaarsakTilTekst(revurderingsaarsak)}</Lowercase>.
           </BodyShort>
         )}
-        <div>
-          <strong>Revurdering opprettet: </strong>
-          {format(new Date(behandling.soeknadMottattDato), 'dd.MM.yyyy')}
-        </div>
       </ContentHeader>
       <InnholdPadding>
         <OppdaterGrunnlagModal behandlingId={behandling.id} behandlingStatus={behandling.status} />

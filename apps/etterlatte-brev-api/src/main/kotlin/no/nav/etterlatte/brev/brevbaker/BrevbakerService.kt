@@ -3,7 +3,7 @@ package no.nav.etterlatte.brev.brevbaker
 import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
@@ -15,7 +15,7 @@ class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     suspend fun genererPdf(
-        brevID: BrevID,
+        brevID: BrevID?,
         brevRequest: BrevbakerRequest,
     ): Pdf {
         val brevbakerResponse = brevbakerKlient.genererPdf(brevRequest)
@@ -50,5 +50,5 @@ data class RedigerbarTekstRequest(
     val brukerTokenInfo: BrukerTokenInfo,
     val brevkode: EtterlatteBrevKode,
     val migrering: MigreringBrevRequest? = null,
-    val brevdata: suspend (RedigerbarTekstRequest) -> BrevData,
+    val brevdata: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
 )

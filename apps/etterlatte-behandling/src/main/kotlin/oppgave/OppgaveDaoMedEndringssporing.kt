@@ -1,9 +1,10 @@
 package no.nav.etterlatte.oppgave
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.objectMapper
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -11,8 +12,8 @@ import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.toList
-import java.sql.Connection
 import java.sql.ResultSet
+import java.time.LocalDate
 import java.util.UUID
 
 interface OppgaveDaoMedEndringssporing : OppgaveDao {
@@ -21,7 +22,7 @@ interface OppgaveDaoMedEndringssporing : OppgaveDao {
 
 class OppgaveDaoMedEndringssporingImpl(
     private val oppgaveDao: OppgaveDao,
-    private val connection: () -> Connection,
+    private val connectionAutoclosing: ConnectionAutoclosing,
 ) : OppgaveDaoMedEndringssporing {
     private fun lagreEndringerPaaOppgave(
         oppgaveId: UUID,
@@ -43,46 +44,45 @@ class OppgaveDaoMedEndringssporingImpl(
         oppgaveFoer: OppgaveIntern,
         oppgaveEtter: OppgaveIntern,
     ) {
-        with(connection()) {
-            val statement =
-                prepareStatement(
-                    """
-                    INSERT INTO oppgaveendringer(id, oppgaveId, oppgaveFoer, oppgaveEtter, tidspunkt)
-                    VALUES(?::UUID, ?::UUID, ?::JSONB, ?::JSONB, ?)
-                    """.trimIndent(),
-                )
-            statement.setObject(1, UUID.randomUUID())
-            statement.setObject(2, oppgaveEtter.id)
-            statement.setJsonb(3, oppgaveFoer)
-            statement.setJsonb(4, oppgaveEtter)
-            statement.setTidspunkt(5, Tidspunkt.now())
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        INSERT INTO oppgaveendringer(id, oppgaveId, oppgaveFoer, oppgaveEtter, tidspunkt)
+                        VALUES(?::UUID, ?::UUID, ?::JSONB, ?::JSONB, ?)
+                        """.trimIndent(),
+                    )
+                statement.setObject(1, UUID.randomUUID())
+                statement.setObject(2, oppgaveEtter.id)
+                statement.setJsonb(3, oppgaveFoer)
+                statement.setJsonb(4, oppgaveEtter)
+                statement.setTidspunkt(5, Tidspunkt.now())
 
-            statement.executeUpdate()
-        }
-    }
-
-    override fun hentEndringerForOppgave(oppgaveId: UUID): List<OppgaveEndring> {
-        with(connection()) {
-            val statement =
-                prepareStatement(
-                    """
-                    SELECT id, oppgaveId, oppgaveFoer, oppgaveEtter, tidspunkt
-                    FROM oppgaveendringer
-                    where oppgaveId = ?::UUID
-                    """.trimIndent(),
-                )
-            statement.setObject(1, oppgaveId)
-
-            return statement.executeQuery().toList {
-                asOppgaveEndring()
+                statement.executeUpdate()
             }
         }
     }
 
-    override fun hentSaksbehandlerNavnForidenter(identer: List<String>): List<SaksbehandlerInfo> =
-        oppgaveDao.hentSaksbehandlerNavnForidenter(
-            identer,
-        )
+    override fun hentEndringerForOppgave(oppgaveId: UUID): List<OppgaveEndring> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT id, oppgaveId, oppgaveFoer, oppgaveEtter, tidspunkt
+                        FROM oppgaveendringer
+                        where oppgaveId = ?::UUID
+                        """.trimIndent(),
+                    )
+                statement.setObject(1, oppgaveId)
+
+                statement.executeQuery().toList {
+                    asOppgaveEndring()
+                }
+            }
+        }
+    }
 
     private fun ResultSet.asOppgaveEndring(): OppgaveEndring {
         return OppgaveEndring(
@@ -165,4 +165,20 @@ class OppgaveDaoMedEndringssporingImpl(
             oppgaveDao.redigerFrist(oppgaveId, frist)
         }
     }
+
+    override fun oppdaterStatusOgMerknad(
+        oppgaveId: UUID,
+        merknad: String,
+        oppgaveStatus: Status,
+    ) {
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, oppgaveStatus)
+        }
+    }
+
+    override fun hentFristGaarUt(
+        dato: LocalDate,
+        type: OppgaveType,
+        kilde: OppgaveKilde,
+    ): List<UUID> = oppgaveDao.hentFristGaarUt(dato, type, kilde)
 }

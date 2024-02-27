@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring
 
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -26,6 +27,7 @@ import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlientImpl
 import no.nav.etterlatte.foerstegangsbehandling
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseService
 import no.nav.etterlatte.grunnlagsendring.klienter.GrunnlagKlient
 import no.nav.etterlatte.grunnlagsendringshendelseMedSamsvar
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
@@ -40,7 +42,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.opprettNyOppgaveMedReferanseOgSak
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Adresse
 import no.nav.etterlatte.libs.common.person.AdresseType
@@ -61,6 +63,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.sql.Connection
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -72,6 +75,7 @@ internal class GrunnlagsendringshendelseServiceTest {
     private val sakService = mockk<SakService>()
     private val oppgaveService = mockk<OppgaveService>()
     private val brukerService = mockk<BrukerService>()
+    private val doedshendelseService = mockk<DoedshendelseService>()
     private val mockOppgave =
         opprettNyOppgaveMedReferanseOgSak(
             "hendelseid",
@@ -110,6 +114,10 @@ internal class GrunnlagsendringshendelseServiceTest {
                     grunnlagKlient,
                     sakService,
                     brukerService,
+                    doedshendelseService.apply {
+                        every { opprettDoedshendelseForBeroertePersoner(any()) } returns Unit
+                        every { kanBrukeDeodshendelserJob() } returns false
+                    },
                 ),
             )
     }
@@ -124,7 +132,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         val sakId = 1L
 
         val adresse =
-            Adresse(type = AdresseType.VEGADRESSE, aktiv = true, kilde = "FREG", postnr = "2040", adresseLinje1 = "Furukollveien 189")
+            Adresse(
+                type = AdresseType.VEGADRESSE,
+                aktiv = true,
+                kilde = "FREG",
+                postnr = "2040",
+                adresseLinje1 = "Furukollveien 189",
+            )
         val samsvarBostedAdresse =
             SamsvarMellomKildeOgGrunnlag.Adresse(
                 samsvar = false,
@@ -225,7 +239,8 @@ internal class GrunnlagsendringshendelseServiceTest {
         } returns grunnlagsendringshendelse
 
         every { pdlService.hentPdlModell(any(), any(), any()) } returns mockPerson()
-        val opprettedeHendelser = grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(fnr, GrunnlagsendringsType.DOEDSFALL)
+        val opprettedeHendelser =
+            grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(fnr, GrunnlagsendringsType.DOEDSFALL)
         assertEquals(6, opprettedeHendelser.size)
     }
 
@@ -249,7 +264,13 @@ internal class GrunnlagsendringshendelseServiceTest {
         val opprettGrunnlagsendringshendelse = slot<Grunnlagsendringshendelse>()
 
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns Grunnlag.empty()
-        every { sakService.finnSak(sakId) } returns Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        every { sakService.finnSak(sakId) } returns
+            Sak(
+                KONTANT_FOT.value,
+                SakType.BARNEPENSJON,
+                sakId,
+                Enheter.defaultEnhet.enhetNr,
+            )
         every {
             grunnlagshendelsesDao.oppdaterGrunnlagsendringStatusOgSamsvar(any(), any(), any(), any())
         } returns Unit
@@ -274,7 +295,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         val lagredeGrunnlagsendringshendelser =
             grunnlagsendringshendelseService.opprettDoedshendelse(
-                Doedshendelse(
+                DoedshendelsePdl(
                     hendelseId = "1",
                     fnr = fnr,
                     doedsdato = LocalDate.of(2022, 1, 1),
@@ -304,7 +325,13 @@ internal class GrunnlagsendringshendelseServiceTest {
                 samsvarMellomKildeOgGrunnlag = null,
             )
 
-        every { sakService.finnSak(sakId) } returns Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        every { sakService.finnSak(sakId) } returns
+            Sak(
+                KONTANT_FOT.value,
+                SakType.BARNEPENSJON,
+                sakId,
+                Enheter.defaultEnhet.enhetNr,
+            )
 
         every {
             grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
@@ -335,7 +362,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns Grunnlag.empty()
         val lagredeGrunnlagsendringshendelser1 =
             grunnlagsendringshendelseService.opprettDoedshendelse(
-                Doedshendelse(
+                DoedshendelsePdl(
                     hendelseId = "1",
                     fnr = fnr,
                     doedsdato = doedsdato,
@@ -355,7 +382,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
 
         grunnlagsendringshendelseService.opprettDoedshendelse(
-            Doedshendelse(
+            DoedshendelsePdl(
                 hendelseId = "1",
                 fnr = fnr,
                 doedsdato = doedsdato,
@@ -380,7 +407,13 @@ internal class GrunnlagsendringshendelseServiceTest {
                 samsvarMellomKildeOgGrunnlag = null,
             )
 
-        every { sakService.finnSak(sakId) } returns Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        every { sakService.finnSak(sakId) } returns
+            Sak(
+                KONTANT_FOT.value,
+                SakType.BARNEPENSJON,
+                sakId,
+                Enheter.defaultEnhet.enhetNr,
+            )
 
         every {
             grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
@@ -411,7 +444,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns Grunnlag.empty()
         val lagredeGrunnlagsendringshendelser1 =
             grunnlagsendringshendelseService.opprettDoedshendelse(
-                Doedshendelse(
+                DoedshendelsePdl(
                     hendelseId = "1",
                     fnr = fnr,
                     doedsdato = doedsdato,
@@ -432,7 +465,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         }
 
         grunnlagsendringshendelseService.opprettDoedshendelse(
-            Doedshendelse(
+            DoedshendelsePdl(
                 hendelseId = "1",
                 fnr = fnr,
                 doedsdato = nyDoedsdato,
@@ -458,7 +491,13 @@ internal class GrunnlagsendringshendelseServiceTest {
                 samsvarMellomKildeOgGrunnlag = null,
             )
 
-        every { sakService.finnSak(sakId) } returns Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        every { sakService.finnSak(sakId) } returns
+            Sak(
+                KONTANT_FOT.value,
+                SakType.BARNEPENSJON,
+                sakId,
+                Enheter.defaultEnhet.enhetNr,
+            )
 
         every {
             grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
@@ -486,7 +525,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns Grunnlag.empty()
 
         grunnlagsendringshendelseService.opprettDoedshendelse(
-            Doedshendelse(
+            DoedshendelsePdl(
                 hendelseId = "1",
                 fnr = fnr,
                 doedsdato = doedsdato,
@@ -520,7 +559,13 @@ internal class GrunnlagsendringshendelseServiceTest {
                 samsvarMellomKildeOgGrunnlag = null,
             )
 
-        every { sakService.finnSak(sakId) } returns Sak(KONTANT_FOT.value, SakType.BARNEPENSJON, sakId, Enheter.defaultEnhet.enhetNr)
+        every { sakService.finnSak(sakId) } returns
+            Sak(
+                KONTANT_FOT.value,
+                SakType.BARNEPENSJON,
+                sakId,
+                Enheter.defaultEnhet.enhetNr,
+            )
 
         every {
             grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any())
@@ -552,7 +597,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns Grunnlag.empty()
 
         grunnlagsendringshendelseService.opprettDoedshendelse(
-            Doedshendelse(
+            DoedshendelsePdl(
                 hendelseId = "1",
                 fnr = fnr,
                 doedsdato = doedsdato,
@@ -561,6 +606,45 @@ internal class GrunnlagsendringshendelseServiceTest {
         )
         verify(exactly = 1) { grunnlagsendringshendelseService.oppdaterHendelseSjekket(any(), any()) }
         verify(exactly = 0) { grunnlagsendringshendelseService.forkastHendelse(any(), any()) }
+    }
+
+    @Test
+    fun `Skal opprette doedshendelse for person og returnere oppgave`() {
+        val grunnlagsendringshendelse =
+            Grunnlagsendringshendelse(
+                id = randomUUID(),
+                sakId = 1,
+                type = GrunnlagsendringsType.DOEDSFALL,
+                gjelderPerson = KONTANT_FOT.value,
+                samsvarMellomKildeOgGrunnlag = null,
+                status = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+                hendelseGjelderRolle = Saksrolle.SOEKER,
+                opprettet = LocalDateTime.now(),
+            )
+        every { grunnlagshendelsesDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any()) } returns emptyList()
+        every { grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(any()) } returns grunnlagsendringshendelse
+        every {
+            grunnlagshendelsesDao.oppdaterGrunnlagsendringStatusOgSamsvar(
+                hendelseId = grunnlagsendringshendelse.id,
+                foerStatus = GrunnlagsendringStatus.VENTER_PAA_JOBB,
+                etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                samsvarMellomKildeOgGrunnlag = any(),
+            )
+        } returns Unit
+        every {
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns mockOppgave.copy(referanse = grunnlagsendringshendelse.id.toString())
+
+        val oppgave = grunnlagsendringshendelseService.opprettDoedshendelseForPerson(grunnlagsendringshendelse)
+
+        oppgave.id shouldBe mockOppgave.id
+        oppgave.referanse shouldBe grunnlagsendringshendelse.id.toString()
     }
 
     @Test

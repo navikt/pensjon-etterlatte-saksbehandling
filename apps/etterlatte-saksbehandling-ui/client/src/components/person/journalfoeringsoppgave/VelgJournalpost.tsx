@@ -4,12 +4,12 @@ import React, { useEffect, useState } from 'react'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import { Button, Detail, Heading, Table } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
-import { formaterJournalpostType, formaterStringDato } from '~utils/formattering'
+import { formaterJournalpostStatus, formaterJournalpostType, formaterStringDato } from '~utils/formattering'
 import { useAppDispatch } from '~store/Store'
 import { settJournalpost } from '~store/reducers/JournalfoeringOppgaveReducer'
 import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
-import DokumentModal from '../dokumenter/dokumentModal'
+import DokumentModal from '../dokumenter/DokumentModal'
 import { Journalpost } from '~shared/types/Journalpost'
 import { FlexRow } from '~shared/styled'
 import { ApiErrorAlert } from '~ErrorBoundary'
@@ -37,7 +37,7 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
           velgJournalpost(journalpost)
         })
       } else {
-        apiHentJournalposter(oppgave!!.fnr!!, (journalposter) => {
+        apiHentJournalposter({ fnr: oppgave!!.fnr!! }, (journalposter) => {
           if (journalposter.length === 1) {
             velgJournalpost(journalposter[0])
           }
@@ -115,15 +115,11 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
                     <Table.DataCell>{journalpost.tittel}</Table.DataCell>
                     <Table.DataCell>{journalpost.avsenderMottaker.navn || 'Ukjent'}</Table.DataCell>
                     <Table.DataCell>{formaterStringDato(journalpost.datoOpprettet)}</Table.DataCell>
-                    <Table.DataCell>{journalpost.journalstatus}</Table.DataCell>
+                    <Table.DataCell>{formaterJournalpostStatus(journalpost.journalstatus)}</Table.DataCell>
                     <Table.DataCell>{formaterJournalpostType(journalpost.journalposttype)}</Table.DataCell>
                     <Table.DataCell>
                       <FlexRow>
-                        <DokumentModal
-                          tittel={journalpost.tittel}
-                          journalpostId={journalpost.journalpostId}
-                          dokumentInfoId={journalpost.dokumenter[0].dokumentInfoId}
-                        />
+                        <DokumentModal journalpost={journalpost} />
 
                         <Button variant="primary" size="small" onClick={() => velgJournalpost(journalpost)}>
                           Velg

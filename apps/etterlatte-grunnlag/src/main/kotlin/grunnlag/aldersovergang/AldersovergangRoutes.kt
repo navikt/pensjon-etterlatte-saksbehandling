@@ -14,4 +14,11 @@ fun Route.aldersovergangRoutes(aldersovergangService: AldersovergangService) {
             call.respond(aldersovergangService.hentSoekereFoedtIEnGittMaaned(yearMonth))
         }
     }
+
+    route("/doedsdato") {
+        get("{yearMonth}") {
+            val behandlingsmaaned = call.parameters["yearMonth"].toString().let { YearMonth.parse(it) }
+            call.respond(aldersovergangService.hentSakerHvorDoedsfallForekomIGittMaaned(behandlingsmaaned))
+        }
+    }
 }

@@ -12,7 +12,7 @@ import Spinner from '~shared/Spinner'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { Alert, Button, Heading } from '@navikt/ds-react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { IBehandlingStatus, IBehandlingsType } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IBehandlingsType, Vedtaksloesning } from '~shared/types/IDetaljertBehandling'
 import styled from 'styled-components'
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { SendTilAttesteringModal } from '~components/behandling/handlinger/sendTilAttesteringModal'
@@ -30,7 +30,6 @@ import { Vilkaarsresultat } from '~components/behandling/felles/Vilkaarsresultat
 import { isPending, mapApiResult } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { Brevutfall } from '~components/behandling/brevutfall/Brevutfall'
-import { MapSakType } from '~shared/components/MapSakType'
 
 export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const { behandling } = props
@@ -45,7 +44,7 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const redigerbar = behandlingErRedigerbar(behandling.status) && innloggetSaksbehandler.skriveTilgang
-  const erOpphoer = behandling.vilkårsprøving?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
+  const erOpphoer = behandling.vilkaarsvurdering?.resultat?.utfall == VilkaarsvurderingResultat.IKKE_OPPFYLT
   const vedtaksresultat =
     behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
   const brevutfallOgEtterbetaling = useAppSelector(
@@ -62,21 +61,29 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
   const opprettEllerOppdaterVedtak = () => {
     const erBarnepensjon = behandling.sakType === SakType.BARNEPENSJON
     const skalSendeBrev = behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak)
-    if (skalSendeBrev && !erOpphoer && !brevutfallOgEtterbetaling?.brevutfall) {
+    if (skalSendeBrev && !brevutfallOgEtterbetaling?.brevutfall) {
       setManglerbrevutfall(true)
       return
     }
     setManglerbrevutfall(false)
 
-    oppdaterVedtakRequest(behandling.id, () => {
-      const nyStatus = erBarnepensjon ? IBehandlingStatus.BEREGNET : IBehandlingStatus.AVKORTET
-      dispatch(oppdaterBehandlingsstatus(nyStatus))
-      if (skalSendeBrev) {
-        next()
-      } else {
-        setVisAttesteringsmodal(true)
-      }
-    })
+    if (behandling.kilde === Vedtaksloesning.GJENOPPRETTA) {
+      oppdaterStatus(erBarnepensjon, skalSendeBrev)
+    } else {
+      oppdaterVedtakRequest(behandling.id, () => {
+        oppdaterStatus(erBarnepensjon, skalSendeBrev)
+      })
+    }
+  }
+
+  const oppdaterStatus = (erBarnepensjon: boolean, skalSendeBrev: boolean) => {
+    const nyStatus = erBarnepensjon ? IBehandlingStatus.BEREGNET : IBehandlingStatus.AVKORTET
+    dispatch(oppdaterBehandlingsstatus(nyStatus))
+    if (skalSendeBrev) {
+      next()
+    } else {
+      setVisAttesteringsmodal(true)
+    }
   }
 
   return (
@@ -91,7 +98,16 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
       </ContentHeader>
       {erOpphoer ? (
         <BeregningWrapper>
-          {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? null : (
+          {behandlingSkalSendeBrev(behandling.behandlingType, behandling.revurderingsaarsak) ? (
+            <>
+              <Brevutfall
+                behandling={behandling}
+                erOpphoer={erOpphoer}
+                resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
+              />
+              {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
+            </>
+          ) : (
             <InfoAlert variant="info" inline>
               Det sendes ikke vedtaksbrev for denne behandlingen.
             </InfoAlert>
@@ -127,18 +143,12 @@ export const Beregne = (props: { behandling: IBehandlingReducer }) => {
                   </InfoAlert>
                 )}
 
-                <Brevutfall behandling={behandling} resetBrevutfallvalidering={() => setManglerbrevutfall(false)} />
-                {manglerBrevutfall && (
-                  <MapSakType
-                    saktype={behandling.sakType}
-                    barnepensjon={
-                      <Alert variant="error">Du må fylle ut om brevet gjelder for person under eller over 18 år</Alert>
-                    }
-                    omstillingsstoenad={
-                      <Alert variant="error">Du må fylle ut om omstillingsstønad skal gis etter unntaksregel</Alert>
-                    }
-                  ></MapSakType>
-                )}
+                <Brevutfall
+                  behandling={behandling}
+                  erOpphoer={erOpphoer}
+                  resetBrevutfallvalidering={() => setManglerbrevutfall(false)}
+                />
+                {manglerBrevutfall && <Alert variant="error">Du må fylle ut utfall i brev</Alert>}
               </BeregningWrapper>
             )
           )}

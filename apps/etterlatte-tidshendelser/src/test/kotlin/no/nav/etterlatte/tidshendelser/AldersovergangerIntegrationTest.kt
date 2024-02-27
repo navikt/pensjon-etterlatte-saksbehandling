@@ -3,7 +3,6 @@ package no.nav.etterlatte.tidshendelser
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -18,8 +17,7 @@ import javax.sql.DataSource
 
 @ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AldersovergangerIntegrationTest {
-    private val dataSource: DataSource = DatabaseExtension.dataSource
+class AldersovergangerIntegrationTest(dataSource: DataSource) {
     private val grunnlagKlient: GrunnlagKlient = mockk<GrunnlagKlient>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
@@ -31,7 +29,7 @@ class AldersovergangerIntegrationTest {
     }
 
     @Test
-    fun `hvis ingen saker for aktuell maaned saa skal jobb ferdigstilles`() {
+    fun `hvis ingen saker for aktuell maaned saa skal ingen hendelser opprettes`() {
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
         val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
 
@@ -40,15 +38,14 @@ class AldersovergangerIntegrationTest {
         aldersovergangerService.execute(jobb)
 
         hendelseDao.hentHendelserForJobb(jobb.id) shouldHaveSize 0
-        hendelseDao.hentJobb(jobb.id).status shouldBe JobbStatus.FERDIG
     }
 
     @Test
     fun `skal hente saker som skal vurderes og lagre hendelser for hver enkelt`() {
-        val behandlingsmaaned = YearMonth.of(2024, Month.MARCH)
-        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
+        val behandlingsmaaned = YearMonth.of(2025, Month.MARCH)
+        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP21, behandlingsmaaned)
 
-        every { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(20)) } returns listOf(1, 2, 3)
+        every { grunnlagKlient.hentSaker(behandlingsmaaned.minusYears(21)) } returns listOf(1, 2, 3)
 
         aldersovergangerService.execute(jobb)
 
@@ -58,10 +55,5 @@ class AldersovergangerIntegrationTest {
         hendelser.map { it.sakId } shouldContainExactlyInAnyOrder listOf(2, 1, 3)
         hendelser.map { it.jobbId } shouldContainOnly setOf(jobb.id)
         hendelser.map { it.status } shouldContainOnly setOf(HendelseStatus.NY)
-
-        with(hendelseDao.hentJobb(jobb.id)) {
-            status shouldBe JobbStatus.STARTET
-            versjon shouldBe 2
-        }
     }
 }

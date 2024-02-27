@@ -1,6 +1,7 @@
 package no.nav.etterlatte.brev.dokument
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -9,13 +10,14 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import no.nav.etterlatte.brev.dokarkiv.BrukerIdType
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.etterlatte.brev.dokarkiv.DokarkivService
 import no.nav.etterlatte.brev.dokarkiv.KnyttTilAnnenSakRequest
 import no.nav.etterlatte.brev.dokarkiv.OppdaterJournalpostRequest
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
-import no.nav.etterlatte.libs.common.withFoedselsnummer
+import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
+import no.nav.etterlatte.token.Saksbehandler
 
 fun Route.dokumentRoute(
     safService: SafService,
@@ -24,30 +26,32 @@ fun Route.dokumentRoute(
 ) {
     route("dokumenter") {
         post {
-            withFoedselsnummer(tilgangssjekker, skrivetilgang = true) { foedselsnummer ->
-                val visTemaPen = call.request.queryParameters["visTemaPen"]?.toBoolean() ?: false
+            val request = call.receive<HentDokumenterRequest>()
 
-                val result =
-                    safService.hentDokumenter(foedselsnummer.value, visTemaPen, BrukerIdType.FNR, brukerTokenInfo)
+            val harTilgang =
+                tilgangssjekker.harTilgangTilPerson(
+                    foedselsnummer = request.foedselsnummer,
+                    skrivetilgang = true,
+                    bruker = brukerTokenInfo as Saksbehandler,
+                )
 
-                if (result.error == null) {
-                    call.respond(result.journalposter)
-                } else {
-                    call.respond(result.error.statusCode, result.error.message)
-                }
+            if (harTilgang) {
+                val dokumenter = safService.hentDokumenter(request, brukerTokenInfo)
+
+                call.respond(dokumenter)
+            } else {
+                call.respond(HttpStatusCode.Forbidden)
             }
         }
 
         route("{journalpostId}") {
             get {
-                val journalpostId = call.parameters["journalpostId"]!!
-                val result = safService.hentJournalpost(journalpostId, brukerTokenInfo)
+                val journalpost = safService.hentJournalpost(journalpostId, brukerTokenInfo)
 
-                call.respond(result.journalpost ?: HttpStatusCode.NotFound)
+                call.respond(journalpost ?: HttpStatusCode.NotFound)
             }
 
             put {
-                val journalpostId = call.parameters["journalpostId"]!!
                 val forsoekFerdistill = call.request.queryParameters["forsoekFerdigstill"].toBoolean()
                 val journalfoerendeEnhet = call.request.queryParameters["journalfoerendeEnhet"]
 
@@ -59,33 +63,46 @@ fun Route.dokumentRoute(
             }
 
             put("/knyttTilAnnenSak") {
-                val journalpostId = call.parameters["journalpostId"]!!
                 val request = call.receive<KnyttTilAnnenSakRequest>()
 
                 call.respond(dokarkivService.knyttTilAnnenSak(journalpostId, request))
             }
 
             put("/feilregistrerSakstilknytning") {
-                val journalpostId = call.parameters["journalpostId"]!!
-
                 dokarkivService.feilregistrerSakstilknytning(journalpostId)
                 call.respond(HttpStatusCode.OK)
             }
 
             put("/opphevFeilregistrertSakstilknytning") {
-                val journalpostId = call.parameters["journalpostId"]!!
-
                 dokarkivService.opphevFeilregistrertSakstilknytning(journalpostId)
                 call.respond(HttpStatusCode.OK)
             }
 
+            get("/utsendingsinfo") {
+                val utsendingsinfo = safService.hentUtsendingsinfo(journalpostId, brukerTokenInfo)
+                call.respond(utsendingsinfo ?: HttpStatusCode.NoContent)
+            }
+
             get("/{dokumentInfoId}") {
-                val journalpostId = call.parameters["journalpostId"]!!
                 val dokumentInfoId = call.parameters["dokumentInfoId"]!!
-                val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, brukerTokenInfo.accessToken())
+                val innhold = safService.hentDokumentPDF(journalpostId, dokumentInfoId, brukerTokenInfo)
 
                 call.respond(innhold)
             }
         }
     }
 }
+
+private inline val PipelineContext<*, ApplicationCall>.journalpostId: String
+    get() =
+        requireNotNull(call.parameters["journalpostId"]) {
+            "JournalpostID mangler i requesten"
+        }
+
+data class HentDokumenterRequest(
+    val foedselsnummer: Folkeregisteridentifikator,
+    val journalstatuser: List<Journalstatus> = emptyList(),
+    val journalposttyper: List<Journalposttype> = emptyList(),
+    val tema: List<String> = emptyList(),
+    val foerste: Int = 50,
+)

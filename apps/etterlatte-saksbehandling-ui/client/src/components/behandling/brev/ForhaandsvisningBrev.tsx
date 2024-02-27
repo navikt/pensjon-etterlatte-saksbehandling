@@ -51,6 +51,6 @@ const PdfViewer = styled.embed`
 
 const Container = styled.div`
   margin: auto;
-  height: 100%;
+  height: 75vh;
   width: 100%;
 `

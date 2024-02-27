@@ -47,6 +47,9 @@ export default function FerdigstillJournalpostModal({ journalpost, oppgaveId }: 
         </Button>
 
         {isSuccess(oppdaterStatus) && <Toast melding="Journalpost oppdatert!" />}
+        {mapFailure(oppdaterStatus, (error) => (
+          <Alert variant="error">{error.detail || 'Det oppsto en feil ved oppdatering av journalposten'}</Alert>
+        ))}
       </>
     )
   } else

@@ -10,13 +10,13 @@ import { getPerson } from '~shared/api/grunnlag'
 import { fnrHarGyldigFormat } from '~utils/fnr'
 import NavigerTilbakeMeny from '~components/person/NavigerTilbakeMeny'
 import { BulletListIcon, EnvelopeClosedIcon, FileTextIcon } from '@navikt/aksel-icons'
-import { Dokumentoversikt } from './dokumenter/dokumentoversikt'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { ApiError } from '~shared/api/apiClient'
 import BrevOversikt from '~components/person/brev/BrevOversikt'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
 
 import { isSuccess, mapAllApiResult, mapApiResult } from '~shared/api/apiUtils'
+import { Dokumentliste } from '~components/person/dokumenter/Dokumentliste'
 
 enum Fane {
   SAKER = 'SAKER',
@@ -99,7 +99,7 @@ export const Person = () => {
               <SakOversikt sakStatus={sakStatus} fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={Fane.DOKUMENTER}>
-              <Dokumentoversikt fnr={person.foedselsnummer} />
+              <Dokumentliste fnr={person.foedselsnummer} />
             </Tabs.Panel>
             <Tabs.Panel value={Fane.BREV}>
               <BrevOversikt sakStatus={sakStatus} />

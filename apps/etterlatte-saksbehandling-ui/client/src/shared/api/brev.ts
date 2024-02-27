@@ -1,5 +1,5 @@
 import { apiClient, ApiResponse } from './apiClient'
-import { Brevtype, IBrev, Mottaker } from '~shared/types/Brev'
+import { Brevtype, IBrev, Mottaker, Spraak } from '~shared/types/Brev'
 
 export const hentBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<IBrev>> =>
   apiClient.get(`/brev/${props.brevId}?sakId=${props.sakId}`)
@@ -39,6 +39,13 @@ export const oppdaterTittel = async (args: {
 }): Promise<ApiResponse<IBrev>> =>
   apiClient.post(`/brev/${args.brevId}/tittel?sakId=${args.sakId}`, { tittel: args.tittel })
 
+export const oppdaterSpraak = async (args: {
+  brevId: number
+  sakId: number
+  spraak: Spraak
+}): Promise<ApiResponse<IBrev>> =>
+  apiClient.post(`/brev/${args.brevId}/spraak?sakId=${args.sakId}`, { spraak: args.spraak })
+
 export const slettBrev = async (args: { brevId: number; sakId: number }): Promise<ApiResponse<IBrev>> =>
   apiClient.delete(`/brev/${args.brevId}?sakId=${args.sakId}`)
 
@@ -70,10 +77,12 @@ export const tilbakestillManuellPayload = async (props: {
   brevId: number
   sakId: number
   behandlingId: string
+  brevtype: Brevtype
 }): Promise<ApiResponse<any>> =>
   apiClient.put(`/brev/behandling/${props.behandlingId}/payload/tilbakestill`, {
     brevId: props.brevId,
     sakId: props.sakId,
+    brevtype: props.brevtype,
   })
 
 export const lagreManuellPayload = async (props: {
@@ -88,8 +97,17 @@ export const lagreManuellPayload = async (props: {
     payload_vedlegg: props.payload_vedlegg,
   })
 
-export const ferdigstillBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<any>> =>
-  apiClient.post(`/brev/${props.brevId}/ferdigstill?sakId=${props.sakId}`, {})
+export const ferdigstillBrev = async (props: {
+  brevId: number
+  sakId: number
+  brevtype: Brevtype
+}): Promise<ApiResponse<any>> => {
+  if (props.brevtype === Brevtype.VARSEL) {
+    return apiClient.post(`/brev/${props.brevId}/varsel/ferdigstill?sakId=${props.sakId}`, {})
+  } else {
+    return apiClient.post(`/brev/${props.brevId}/ferdigstill?sakId=${props.sakId}`, {})
+  }
+}
 
 export const journalfoerBrev = async (props: { brevId: number; sakId: number }): Promise<ApiResponse<any>> =>
   apiClient.post(`/brev/${props.brevId}/journalfoer?sakId=${props.sakId}`, {})

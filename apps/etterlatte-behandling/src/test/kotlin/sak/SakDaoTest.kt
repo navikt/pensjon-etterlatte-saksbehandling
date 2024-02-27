@@ -1,5 +1,6 @@
 package no.nav.etterlatte.sak
 
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
@@ -12,18 +13,17 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class SakDaoTest {
-    private val dataSource = DatabaseExtension.dataSource
+internal class SakDaoTest(val dataSource: DataSource) {
     private lateinit var sakRepo: SakDao
     private lateinit var tilgangService: TilgangService
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-        sakRepo = SakDao { connection }
+        sakRepo = SakDao(ConnectionAutoclosingTest(dataSource))
         tilgangService = TilgangServiceImpl(SakTilgangDao(dataSource))
     }
 

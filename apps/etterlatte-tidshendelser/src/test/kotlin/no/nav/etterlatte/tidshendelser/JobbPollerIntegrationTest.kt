@@ -1,5 +1,6 @@
 package no.nav.etterlatte.tidshendelser
 
+import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -7,25 +8,29 @@ import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 import javax.sql.DataSource
 
-@ExtendWith(DatabaseExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class JobbPollerIntegrationTest {
-    private val dataSource: DataSource = DatabaseExtension.dataSource
+class JobbPollerIntegrationTest(dataSource: DataSource) {
+    companion object {
+        @RegisterExtension
+        private val dbExtension = DatabaseExtension()
+    }
+
     private val aldersovergangerService = mockk<AldersovergangerService>()
+    private val omstillingsstoenadService = mockk<OmstillingsstoenadService>()
     private val hendelseDao = HendelseDao(dataSource)
     private val jobbTestdata = JobbTestdata(dataSource, hendelseDao)
-    private val jobbPoller = JobbPoller(hendelseDao, aldersovergangerService)
+    private val jobbPoller = JobbPoller(hendelseDao, aldersovergangerService, omstillingsstoenadService)
 
     @AfterEach
     fun afterEach() {
         clearAllMocks()
-        DatabaseExtension.resetDb()
+        dbExtension.resetDb()
     }
 
     @Test
@@ -33,12 +38,28 @@ class JobbPollerIntegrationTest {
         val jobb1 = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.of(2024, Month.MARCH), LocalDate.now())
         val jobb2 = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.of(2024, Month.MARCH), LocalDate.now())
 
-        every { aldersovergangerService.execute(jobb1) } returns Unit
+        every { aldersovergangerService.execute(jobb1) } returns emptyList()
 
         jobbPoller.poll()
 
         verify { aldersovergangerService.execute(jobb1) }
         verify(exactly = 0) { aldersovergangerService.execute(jobb2) }
+
+        hendelseDao.hentJobb(jobb1.id).status shouldBe JobbStatus.FERDIG
+        hendelseDao.hentJobb(jobb2.id).status shouldBe JobbStatus.NY
+    }
+
+    @Test
+    fun `skal ikke ferdigstille jobb som har opprettet hendelser`() {
+        val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, YearMonth.of(2024, Month.APRIL), LocalDate.now())
+
+        every { aldersovergangerService.execute(jobb) } returns listOf(1)
+
+        jobbPoller.poll()
+
+        verify { aldersovergangerService.execute(jobb) }
+
+        hendelseDao.hentJobb(jobb.id).status shouldBe JobbStatus.STARTET
     }
 
     @Test

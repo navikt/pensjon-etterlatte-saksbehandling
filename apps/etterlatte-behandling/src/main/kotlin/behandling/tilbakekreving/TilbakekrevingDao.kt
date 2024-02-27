@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.tilbakekreving
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.hendelse.getUUID
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
@@ -29,19 +30,60 @@ import java.sql.Types
 import java.time.YearMonth
 import java.util.UUID
 
-class TilbakekrevingDao(private val connection: () -> Connection) {
+class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+    fun hentTilbakekrevinger(sakId: Long): List<TilbakekrevingBehandling> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val tilbakekrevinger = selectTilbakekrevinger(this, sakId)
+                tilbakekrevinger.map { tilbakekreving ->
+                    tilbakekreving.copy(
+                        tilbakekreving =
+                            tilbakekreving.tilbakekreving.copy(
+                                perioder = selectTilbakekrevingsperioder(this, tilbakekreving.id),
+                            ),
+                    )
+                }
+            }
+        }
+    }
+
+    private fun selectTilbakekrevinger(
+        connection: Connection,
+        sakId: Long,
+    ): List<TilbakekrevingBehandling> =
+        with(connection) {
+            val statement =
+                prepareStatement(
+                    """
+                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag,
+                            vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_hjemmel,
+                            vurdering_aktsomhet, akstomhet_redusering_av_kravet,
+                            aktsomhet_strafferettslig_vurdering, aktsomhet_rentevurdering
+                    FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
+                    WHERE t.sak_id = ?
+                    """.trimIndent(),
+                )
+            statement.setObject(1, sakId)
+            statement.executeQuery().toList { toTilbakekreving() }
+        }
+
     fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling {
-        with(connection()) {
-            val perioder = selectTilbakekrevingsperioder(this, tilbakekrevingId)
-            return selectTilbakekreving(this, tilbakekrevingId, perioder)
-                ?: throw TilbakekrevingFinnesIkkeException("Tilbakekreving med id=$tilbakekrevingId finnes ikke")
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val tilbakekreving = selectTilbakekreving(this, tilbakekrevingId)
+                tilbakekreving?.copy(
+                    tilbakekreving =
+                        tilbakekreving.tilbakekreving.copy(
+                            perioder = selectTilbakekrevingsperioder(this, tilbakekrevingId),
+                        ),
+                ) ?: throw TilbakekrevingFinnesIkkeException("Tilbakekreving med id=$tilbakekrevingId finnes ikke")
+            }
         }
     }
 
     private fun selectTilbakekreving(
         connection: Connection,
         tilbakekrevingId: UUID,
-        perioder: List<TilbakekrevingPeriode>,
     ): TilbakekrevingBehandling? =
         with(connection) {
             val statement =
@@ -56,7 +98,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                     """.trimIndent(),
                 )
             statement.setObject(1, tilbakekrevingId)
-            return statement.executeQuery().singleOrNull { toTilbakekreving(perioder) }
+            statement.executeQuery().singleOrNull { toTilbakekreving() }
         }
 
     private fun selectTilbakekrevingsperioder(
@@ -86,11 +128,13 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
         }
 
     fun lagreTilbakekreving(tilbakekrevingBehandling: TilbakekrevingBehandling): TilbakekrevingBehandling {
-        with(connection()) {
-            insertTilbakekreving(this, tilbakekrevingBehandling)
-            insertTilbakekrevingsperioder(this, tilbakekrevingBehandling)
+        return connectionAutoclosing.hentConnection { connection ->
+            with(connection) {
+                insertTilbakekreving(this, tilbakekrevingBehandling)
+                insertTilbakekrevingsperioder(this, tilbakekrevingBehandling)
+            }
+            hentTilbakekreving(tilbakekrevingBehandling.id)
         }
-        return hentTilbakekreving(tilbakekrevingBehandling.id)
     }
 
     private fun insertTilbakekreving(
@@ -205,7 +249,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
         statement.executeBatch()
     }
 
-    private fun ResultSet.toTilbakekreving(perioder: List<TilbakekrevingPeriode>) =
+    private fun ResultSet.toTilbakekreving() =
         TilbakekrevingBehandling(
             id = getString("id").let { UUID.fromString(it) },
             sak =
@@ -233,7 +277,7 @@ class TilbakekrevingDao(private val connection: () -> Connection) {
                                 ),
                             hjemmel = getString("vurdering_hjemmel")?.let { TilbakekrevingHjemmel.valueOf(it) },
                         ),
-                    perioder = perioder,
+                    perioder = emptyList(),
                     kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },
                 ),
         )

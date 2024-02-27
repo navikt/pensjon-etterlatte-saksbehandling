@@ -1,5 +1,6 @@
 package no.nav.etterlatte.institusjonsopphold.institusjonsopphold
 
+import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdBegrunnelse
 import no.nav.etterlatte.institusjonsopphold.InstitusjonsoppholdDao
@@ -12,17 +13,16 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
-internal class InstitusjonsoppholdDaoTest {
-    private val dataSource = DatabaseExtension.dataSource
+internal class InstitusjonsoppholdDaoTest(val dataSource: DataSource) {
     private lateinit var institusjonsoppholdDao: InstitusjonsoppholdDao
 
     @BeforeAll
     fun beforeAll() {
-        val connection = dataSource.connection
-        institusjonsoppholdDao = InstitusjonsoppholdDao { connection }
+        institusjonsoppholdDao = InstitusjonsoppholdDao(ConnectionAutoclosingTest(dataSource))
     }
 
     @Test

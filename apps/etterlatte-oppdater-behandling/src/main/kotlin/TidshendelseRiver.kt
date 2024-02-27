@@ -11,7 +11,7 @@ import no.nav.etterlatte.rapidsandrivers.DATO_KEY
 import no.nav.etterlatte.rapidsandrivers.DRYRUN
 import no.nav.etterlatte.rapidsandrivers.EventNames
 import no.nav.etterlatte.rapidsandrivers.HENDELSE_DATA_KEY
-import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
+import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.etterlatte.rapidsandrivers.SAK_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.dato
 import no.nav.etterlatte.rapidsandrivers.sakId
@@ -21,23 +21,24 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 import java.time.LocalTime
 import java.time.YearMonth
-import java.util.UUID
 
 class TidshendelseRiver(
     rapidsConnection: RapidsConnection,
     private val behandlingService: BehandlingService,
-) : ListenerMedLoggingOgFeilhaandtering() {
+) : ListenerMedLogging() {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     init {
         initialiserRiver(rapidsConnection, EventNames.ALDERSOVERGANG) {
-            validate { it.requireKey(ALDERSOVERGANG_STEG_KEY) }
+            validate { it.requireValue(ALDERSOVERGANG_STEG_KEY, "VURDERT_LOEPENDE_YTELSE_OG_VILKAAR") }
             validate { it.requireKey(ALDERSOVERGANG_TYPE_KEY) }
             validate { it.requireKey(ALDERSOVERGANG_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
             validate { it.requireKey(DATO_KEY) }
             validate { it.requireKey(DRYRUN) }
-            validate { it.interestedIn(HENDELSE_DATA_KEY) }
+            validate { it.requireKey(HENDELSE_DATA_KEY) }
+            validate { it.interestedIn("yrkesskadefordel_pre_20240101") }
+            validate { it.interestedIn("oms_rett_uten_tidsbegrensning") }
         }
     }
 
@@ -46,7 +47,6 @@ class TidshendelseRiver(
         context: MessageContext,
     ) {
         val type = packet[ALDERSOVERGANG_TYPE_KEY].asText()
-        val step = packet[ALDERSOVERGANG_STEG_KEY].asText()
         val hendelseId = packet[ALDERSOVERGANG_ID_KEY].asText()
         val dryrun = packet[DRYRUN].asBoolean()
         val sakId = packet.sakId
@@ -60,46 +60,48 @@ class TidshendelseRiver(
                 "dryRun" to dryrun.toString(),
             ),
         ) {
-            if (step == "VURDERT_LOEPENDE_YTELSE") {
-                // Opprette ny for å fjerne datanøkkel
-                val kvittering =
-                    JsonMessage.newMessage(
-                        EventNames.ALDERSOVERGANG.lagEventnameForType(),
-                        mapOf(
-                            ALDERSOVERGANG_STEG_KEY to "OPPGAVE_OPPRETTET",
-                            ALDERSOVERGANG_TYPE_KEY to type,
-                            ALDERSOVERGANG_ID_KEY to UUID.fromString(hendelseId),
-                            SAK_ID_KEY to sakId,
-                            DATO_KEY to packet.dato,
-                            DRYRUN to dryrun,
-                        ),
-                    )
+            val hendelseData = mutableMapOf<String, Any>()
 
-                if (packet[HENDELSE_DATA_KEY].asBoolean()) {
-                    val behandlingsmaaned = packet.dato.let { YearMonth.of(it.year, it.month) }
-                    logger.info("Løpende ytelse: opprette oppgave for sak $sakId, behandlingsmåned=$behandlingsmaaned")
+            if (type == "AO_BP20" && packet["yrkesskadefordel_pre_20240101"].asBoolean()) {
+                logger.info("Har migrert yrkesskadefordel: utvidet aldersgrense [sak=$sakId]")
+            } else if (type == "OMS_DOED_3AAR" && packet["oms_rett_uten_tidsbegrensning"].asBoolean()) {
+                logger.info("Har omstillingsstønad med rett uten tidsbegrensning, opphører ikke etter 3 år [sak=$sakId]")
+            } else if (packet[HENDELSE_DATA_KEY]["loependeYtelse"]?.asBoolean() == true) {
+                val behandlingsmaaned = packet.dato.let { YearMonth.of(it.year, it.month) }
+                logger.info("Løpende ytelse: opprette oppgave for sak $sakId, behandlingsmåned=$behandlingsmaaned")
 
-                    if (!dryrun) {
-                        val frist = Tidspunkt.ofNorskTidssone(behandlingsmaaned.atDay(20), LocalTime.NOON)
-                        val oppgaveId =
-                            behandlingService.opprettOppgave(
-                                sakId,
-                                OppgaveType.MANUELT_OPPHOER,
-                                merknad = "Aldersovergang",
-                                frist = frist,
-                            )
-                        kvittering[HENDELSE_DATA_KEY] = oppgaveId
-                    } else {
-                        logger.info("Dry run: skipper oppgave")
-                    }
+                if (!dryrun) {
+                    val frist = Tidspunkt.ofNorskTidssone(behandlingsmaaned.atDay(20), LocalTime.NOON)
+                    val oppgaveId =
+                        behandlingService.opprettOppgave(
+                            sakId,
+                            OppgaveType.REVURDERING,
+                            merknad = generateMerknad(type),
+                            frist = frist,
+                        )
+                    hendelseData["opprettetOppgaveId"] = oppgaveId
                 } else {
-                    logger.info("Ingen løpende ytelse funnet for sak $sakId")
+                    logger.info("Dry run: skipper oppgave")
                 }
-
-                context.publish(kvittering.toJson())
             } else {
-                logger.info("Ikke-støttet steg: $step, ignorerer hendelse")
+                logger.info("Ingen løpende ytelse funnet for sak $sakId")
             }
+
+            packet[ALDERSOVERGANG_STEG_KEY] = "OPPGAVE_OPPRETTET"
+            packet[HENDELSE_DATA_KEY] = hendelseData
+            context.publish(packet.toJson())
         }
+    }
+
+    private fun generateMerknad(type: String): String {
+        val argument =
+            when (type) {
+                "AO_BP20" -> "20"
+                "AO_BP21" -> "21"
+                "AO_OMS67" -> "67"
+                else -> throw IllegalArgumentException("Ikke-støttet type: $type")
+            }
+
+        return "Aldersovergang v/$argument år"
     }
 }

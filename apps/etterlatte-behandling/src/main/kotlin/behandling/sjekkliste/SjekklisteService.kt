@@ -102,7 +102,7 @@ class SjekklisteService(
         return Kontekst.get().AppUser.name() ==
             oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(
                 this.id.toString(),
-            )?.saksbehandlerIdent
+            )?.ident
     }
 }
 

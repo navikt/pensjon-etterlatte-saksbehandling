@@ -27,6 +27,7 @@ import no.nav.etterlatte.brev.model.BrevProsessType
 import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
@@ -232,6 +233,7 @@ internal class VedtaksbrevRouteTest {
             41,
             BEHANDLING_ID,
             "tittel",
+            Spraak.NB,
             BrevProsessType.AUTOMATISK,
             "soeker_fnr",
             Status.OPPRETTET,

@@ -182,6 +182,7 @@ class BehandlingStatusServiceImpl(
     ) {
         if (vedtak.vedtakType == VedtakType.AVSLAG) {
             lagreNyBehandlingStatus(behandling.tilAvslag())
+            haandterUtland(behandling)
         } else {
             lagreNyBehandlingStatus(behandling.tilAttestert())
         }

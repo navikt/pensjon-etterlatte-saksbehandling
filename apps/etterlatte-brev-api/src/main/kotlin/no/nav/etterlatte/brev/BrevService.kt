@@ -4,7 +4,7 @@ import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
-import no.nav.etterlatte.brev.model.BrevData
+import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnholdVedlegg
 import no.nav.etterlatte.brev.model.BrevProsessType
@@ -12,6 +12,7 @@ import no.nav.etterlatte.brev.model.ManueltBrevMedTittelData
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
@@ -36,7 +37,7 @@ class BrevService(
         sakId: Long,
         bruker: BrukerTokenInfo,
         brevkoder: Brevkoder,
-        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevData,
+        brevDataMapping: suspend (RedigerbarTekstRequest) -> BrevDataRedigerbar,
     ): Brev =
         brevoppretter.opprettBrev(
             sakId = sakId,
@@ -101,6 +102,16 @@ class BrevService(
             .also { logger.info("Tittel på brev (id=$id) oppdatert") }
     }
 
+    suspend fun oppdaterSpraak(
+        id: BrevID,
+        spraak: Spraak,
+    ) {
+        sjekkOmBrevKanEndres(id)
+
+        db.oppdaterSpraak(id, spraak)
+            .also { logger.info("Språk i brev (id=$id) endret til $spraak") }
+    }
+
     suspend fun genererPdf(
         id: BrevID,
         bruker: BrukerTokenInfo,
@@ -120,7 +131,9 @@ class BrevService(
     ) {
         val brev = sjekkOmBrevKanEndres(id)
 
-        if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
+        if (!brev.mottaker.erGyldig()) {
+            throw UgyldigMottakerKanIkkeFerdigstilles(brev.id)
+        } else if (brev.prosessType == BrevProsessType.OPPLASTET_PDF) {
             db.settBrevFerdigstilt(id)
         } else {
             val pdf = genererPdf(id, bruker)

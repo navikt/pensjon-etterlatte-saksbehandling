@@ -4,10 +4,16 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import io.ktor.network.sockets.SocketTimeoutException
+import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
+import no.nav.etterlatte.libs.common.logging.sikkerlogger
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -104,8 +110,10 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
                     success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
                     failure = { errorResponse -> throw errorResponse },
                 )
+        } catch (e: SocketTimeoutException) {
+            throw GosysTimeout()
         } catch (e: Exception) {
-            logger.error("Noe feilet mot Gosys [ident=${brukerTokenInfo.ident()}]", e)
+            logger.error("Feil ved henting av oppgaver fra Gosys", e)
             throw e
         }
     }
@@ -114,22 +122,26 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         id: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave {
-        return downstreamResourceClient
-            .get(
-                resource =
-                    Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/v1/oppgaver/$id",
-                    ),
-                brukerTokenInfo = brukerTokenInfo,
-            )
-            .mapBoth(
-                success = { resource -> resource.response.let { objectMapper.readValue(it.toString()) } },
-                failure = { errorResponse ->
-                    logger.error("Feil ved henting av Gosys oppgave med id=$id", errorResponse.cause)
-                    throw errorResponse
-                },
-            )
+        try {
+            return downstreamResourceClient
+                .get(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/v1/oppgaver/$id",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+                .mapBoth(
+                    success = { resource -> deserialize(resource.response.toString()) },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (e: SocketTimeoutException) {
+            throw GosysTimeout()
+        } catch (e: Exception) {
+            logger.error("Feil ved henting av oppgave med id=$id fra Gosys", e)
+            throw e
+        }
     }
 
     override suspend fun tildelOppgaveTilSaksbehandler(
@@ -138,20 +150,13 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         tildeles: String,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave {
-        try {
-            logger.info("Tilordner oppgave $oppgaveId til saksbehandler $tildeles")
+        logger.info("Tilordner oppgave $oppgaveId til saksbehandler $tildeles")
 
-            return patchOppgave(
-                oppgaveId,
-                brukerTokenInfo,
-                body = GosysEndreSaksbehandlerRequest(oppgaveVersjon, tildeles),
-            )
-        } catch (e: GosysKonfliktException) {
-            throw e
-        } catch (e: Exception) {
-            logger.error("Noe feilet mot Gosys, ident=${brukerTokenInfo.ident()}]", e)
-            throw e
-        }
+        return patchOppgave(
+            oppgaveId,
+            brukerTokenInfo,
+            body = GosysEndreSaksbehandlerRequest(oppgaveVersjon, tildeles),
+        )
     }
 
     override suspend fun endreFrist(
@@ -160,20 +165,13 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         nyFrist: LocalDate,
         brukerTokenInfo: BrukerTokenInfo,
     ): GosysApiOppgave {
-        try {
-            logger.info("Endrer frist på oppgave $oppgaveId til $nyFrist")
+        logger.info("Endrer frist på oppgave $oppgaveId til $nyFrist")
 
-            return patchOppgave(
-                oppgaveId,
-                brukerTokenInfo,
-                body = GosysEndreFristRequest(oppgaveVersjon, nyFrist),
-            )
-        } catch (e: GosysKonfliktException) {
-            throw e
-        } catch (e: Exception) {
-            logger.error("Noe feilet mot Gosys, ident=${brukerTokenInfo.ident()}]", e)
-            throw e
-        }
+        return patchOppgave(
+            oppgaveId,
+            brukerTokenInfo,
+            body = GosysEndreFristRequest(oppgaveVersjon, nyFrist),
+        )
     }
 
     private suspend fun patchOppgave(
@@ -181,31 +179,45 @@ class GosysOppgaveKlientImpl(config: Config, httpClient: HttpClient) : GosysOppg
         brukerTokenInfo: BrukerTokenInfo,
         body: Any,
     ): GosysApiOppgave {
-        return downstreamResourceClient
-            .patch(
-                resource =
-                    Resource(
-                        clientId = clientId,
-                        url = "$resourceUrl/api/v1/oppgaver/$oppgaveId",
-                    ),
-                brukerTokenInfo = brukerTokenInfo,
-                patchBody = objectMapper.writeValueAsString(body),
-            )
-            .mapBoth(
-                success = { resource -> resource.response.let { objectMapper.readValue<GosysApiOppgave>(it.toString()) } },
-                failure = { errorResponse ->
-                    if (errorResponse.response?.status == HttpStatusCode.Conflict) {
-                        throw GosysKonfliktException(errorResponse.detail)
-                    } else {
-                        throw errorResponse
-                    }
-                },
-            )
+        try {
+            return downstreamResourceClient
+                .patch(
+                    resource =
+                        Resource(
+                            clientId = clientId,
+                            url = "$resourceUrl/api/v1/oppgaver/$oppgaveId",
+                        ),
+                    brukerTokenInfo = brukerTokenInfo,
+                    patchBody = objectMapper.writeValueAsString(body),
+                )
+                .mapBoth(
+                    success = { resource -> resource.response.let { objectMapper.readValue<GosysApiOppgave>(it.toString()) } },
+                    failure = { errorResponse -> throw errorResponse },
+                )
+        } catch (re: ResponseException) {
+            if (re.response.status == HttpStatusCode.Conflict) {
+                throw GosysKonfliktException(re.response.bodyAsText())
+            } else {
+                throw re
+            }
+        } catch (e: SocketTimeoutException) {
+            throw GosysTimeout()
+        } catch (e: Exception) {
+            logger.error("Ukjent feil oppsto ved patching av oppgave=$oppgaveId (se sikkerlogg for body)", e)
+            sikkerlogger().error("Ukjent feil oppsto ved patching av oppgave=$oppgaveId: \n${body.toJson()}")
+            throw e
+        }
     }
 }
 
+class GosysTimeout : ForespoerselException(
+    status = HttpStatusCode.RequestTimeout.value,
+    code = "GOSYS_TIMEOUT",
+    detail = "Henting av oppgave(er) fra Gosys tok for lang tid. Prøv igjen senere.",
+)
+
 class GosysKonfliktException(detail: String) : ForespoerselException(
-    status = 409,
+    status = HttpStatusCode.Conflict.value,
     code = "GOSYS_OPTIMISTISK_LAAS",
     detail = detail,
 )

@@ -1,7 +1,6 @@
 package no.nav.etterlatte.behandling.revurdering
 
 import no.nav.etterlatte.behandling.domain.Behandling
-import no.nav.etterlatte.behandling.domain.sjekkEnhet
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.Prosesstype
@@ -20,7 +19,7 @@ class AutomatiskRevurderingService(private val revurderingService: RevurderingSe
         persongalleri: Persongalleri,
         mottattDato: String? = null,
         begrunnelse: String? = null,
-    ) = forrigeBehandling.sjekkEnhet()?.let {
+    ) = forrigeBehandling.let {
         revurderingService.opprettRevurdering(
             sakId = sakId,
             persongalleri = persongalleri,

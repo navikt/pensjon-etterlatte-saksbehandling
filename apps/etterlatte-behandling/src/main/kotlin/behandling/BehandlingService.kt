@@ -1,9 +1,8 @@
 package no.nav.etterlatte.behandling
 
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.User
 import no.nav.etterlatte.behandling.domain.Behandling
+import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.domain.toDetaljertBehandlingWithPersongalleri
 import no.nav.etterlatte.behandling.domain.toStatistikkBehandling
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
@@ -17,11 +16,13 @@ import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.BehandlingHendelseType
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
+import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.BoddEllerArbeidetUtlandet
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.KommerBarnetTilgode
 import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.RedigertFamilieforhold
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.StatistikkBehandling
 import no.nav.etterlatte.libs.common.behandling.Utlandstilknytning
@@ -38,7 +39,6 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.toJsonNode
 import no.nav.etterlatte.oppgave.OppgaveService
-import no.nav.etterlatte.tilgangsstyring.filterForEnheter
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.VedtakHendelse
 import org.slf4j.LoggerFactory
@@ -163,10 +163,10 @@ internal class BehandlingServiceImpl(
 
     private fun hentBehandlingForId(id: UUID) =
         behandlingDao.hentBehandling(id)?.let { behandling ->
-            listOf(behandling).filterForEnheter().firstOrNull()
+            listOf(behandling).firstOrNull()
         }
 
-    private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.alleBehandlingerISak(sakId).filterForEnheter()
+    private fun hentBehandlingerForSakId(sakId: Long) = behandlingDao.alleBehandlingerISak(sakId)
 
     override fun hentBehandling(behandlingId: UUID): Behandling? {
         return hentBehandlingForId(behandlingId)
@@ -205,6 +205,24 @@ internal class BehandlingServiceImpl(
                     oppgaveKilde = OppgaveKilde.HENDELSE,
                     oppgaveType = OppgaveType.VURDER_KONSEKVENS,
                     merknad = hendelse.beskrivelse(),
+                )
+            }
+
+            if (behandling is Revurdering && behandling.revurderingsaarsak == Revurderingaarsak.OMGJOERING_ETTER_KLAGE) {
+                val omgjoeringsoppgaveForKlage =
+                    oppgaveService.hentOppgaverForSak(behandling.sak.id)
+                        .find { it.type == OppgaveType.OMGJOERING && it.referanse == behandling.relatertBehandlingId }
+                        ?: throw InternfeilException(
+                            "Kunne ikke finne en omgjøringsoppgave i sak=${behandling.sak.id}, " +
+                                "så vi får ikke gjenopprettet omgjøringen hvis denne behandlingen avbrytes!",
+                        )
+                oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                    referanse = omgjoeringsoppgaveForKlage.referanse,
+                    sakId = omgjoeringsoppgaveForKlage.sakId,
+                    oppgaveKilde = omgjoeringsoppgaveForKlage.kilde,
+                    oppgaveType = omgjoeringsoppgaveForKlage.type,
+                    merknad = omgjoeringsoppgaveForKlage.merknad,
+                    frist = omgjoeringsoppgaveForKlage.frist,
                 )
             }
 
@@ -254,12 +272,24 @@ internal class BehandlingServiceImpl(
         brukerTokenInfo: BrukerTokenInfo,
         request: VirkningstidspunktRequest,
     ): Boolean {
+        val behandling =
+            requireNotNull(hentBehandling(behandlingId)) { "Fant ikke behandling $behandlingId" }
+
+        return when (behandling.type) {
+            BehandlingType.REVURDERING -> erGyldigVirkningstidspunktRevurdering(request, behandling)
+            BehandlingType.FØRSTEGANGSBEHANDLING -> erGyldigVirkningstidspunktFoerstegangsbehandling(request, behandling, brukerTokenInfo)
+            else -> throw Exception("BehandlingType ${behandling.type} er ikke støttet")
+        }
+    }
+
+    private suspend fun erGyldigVirkningstidspunktFoerstegangsbehandling(
+        request: VirkningstidspunktRequest,
+        behandling: Behandling,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Boolean {
         val virkningstidspunkt = request.dato
         val harGyldigFormat = virkningstidspunkt.year in (0..9999) && request.begrunnelse != null
-
-        val behandling =
-            requireNotNull(inTransaction { hentBehandling(behandlingId) }) { "Fant ikke behandling $behandlingId" }
-        val doedsdato = hentDoedsdato(behandlingId, brukerTokenInfo)?.let { YearMonth.from(it) }
+        val doedsdato = hentDoedsdato(behandling.id, brukerTokenInfo)?.let { YearMonth.from(it) }
         val soeknadMottatt = behandling.mottattDato().let { YearMonth.from(it) }
 
         // For BP er makstidspunkt 3 år - dette gjelder også unntaksvis for OMS
@@ -294,6 +324,18 @@ internal class BehandlingServiceImpl(
             }
 
         return harGyldigFormat && datoForVirkningstidspunktErGydligInnenforMaksBegrensninger
+    }
+
+    private fun erGyldigVirkningstidspunktRevurdering(
+        request: VirkningstidspunktRequest,
+        behandling: Behandling,
+    ): Boolean {
+        val virkningstidspunkt = request.dato
+        val harGyldigFormat = virkningstidspunkt.year in (0..9999) && request.begrunnelse != null
+        val foersteVirkDato = hentFoersteVirk(behandling.sak.id)
+
+        // Virkningstidspunkt for revurdering kan tidligst være første virkningstidspunkt for saken
+        return harGyldigFormat && virkningstidspunkt.isAfter(foersteVirkDato) || virkningstidspunkt == foersteVirkDato
     }
 
     private suspend fun hentDoedsdato(
@@ -412,6 +454,7 @@ internal class BehandlingServiceImpl(
             revurderingsaarsak = behandling.revurderingsaarsak(),
             revurderinginfo = behandling.revurderingInfo(),
             begrunnelse = behandling.begrunnelse(),
+            kilde = behandling.kilde,
         )
     }
 
@@ -517,17 +560,7 @@ internal class BehandlingServiceImpl(
             }
     }
 
-    private fun List<Behandling>.filterForEnheter() =
-        this.filterBehandlingerForEnheter(
-            user = Kontekst.get().AppUser,
-        )
-
     private fun hentBehandlingOrThrow(behandlingId: UUID) =
         behandlingDao.hentBehandling(behandlingId)
             ?: throw BehandlingNotFoundException(behandlingId)
 }
-
-fun <T : Behandling> List<T>.filterBehandlingerForEnheter(user: User) =
-    this.filterForEnheter(user) { item, enheter ->
-        enheter.contains(item.sak.enhet)
-    }

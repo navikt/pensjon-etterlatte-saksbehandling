@@ -27,7 +27,7 @@ import org.junit.jupiter.api.TestInstance
 internal class DokumentRouteTest {
     private val mockOAuth2Server = MockOAuth2Server()
     private val tilgangssjekker = mockk<Tilgangssjekker>()
-    private val journalpostService = mockk<SafClient>()
+    private val safService = mockk<SafService>()
     private val dokarkivService = mockk<DokarkivService>()
 
     @BeforeAll
@@ -47,7 +47,7 @@ internal class DokumentRouteTest {
 
     @Test
     fun `Endepunkt for uthenting av bestemt dokument`() {
-        coEvery { journalpostService.hentDokumentPDF(any(), any(), any()) } returns "dokument".toByteArray()
+        coEvery { safService.hentDokumentPDF(any(), any(), any()) } returns "dokument".toByteArray()
 
         val journalpostId = "111"
         val dokumentInfoId = "333"
@@ -55,7 +55,7 @@ internal class DokumentRouteTest {
         testApplication {
             runServer(mockOAuth2Server, "api") {
                 dokumentRoute(
-                    journalpostService,
+                    safService,
                     dokarkivService,
                     tilgangssjekker,
                 )
@@ -69,7 +69,7 @@ internal class DokumentRouteTest {
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
-        coVerify(exactly = 1) { journalpostService.hentDokumentPDF(journalpostId, dokumentInfoId, any()) }
+        coVerify(exactly = 1) { safService.hentDokumentPDF(journalpostId, dokumentInfoId, any()) }
     }
 
     @Test
@@ -77,7 +77,7 @@ internal class DokumentRouteTest {
         testApplication {
             runServer(mockOAuth2Server, "api") {
                 dokumentRoute(
-                    journalpostService,
+                    safService,
                     dokarkivService,
                     tilgangssjekker,
                 )
@@ -91,7 +91,7 @@ internal class DokumentRouteTest {
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
 
-        verify { journalpostService wasNot Called }
+        verify { safService wasNot Called }
     }
 
     private val accessToken: String by lazy { mockOAuth2Server.issueSaksbehandlerToken() }

@@ -5,34 +5,34 @@ import styled from 'styled-components'
 import { useAppSelector } from '~store/Store'
 import {
   byttSaksbehandlerApi,
+  erOppgaveRedigerbar,
   fjernSaksbehandlerApi,
-  Oppgavetype,
-  Saksbehandler,
+  OppgaveDTO,
+  OppgaveSaksbehandler,
   tildelSaksbehandlerApi,
 } from '~shared/api/oppgaver'
 import { useApiCall } from '~shared/hooks/useApiCall'
+import { Saksbehandler } from '~shared/types/saksbehandler'
 
 interface Props {
-  saksbehandler: Saksbehandler
   saksbehandlereIEnhet: Array<Saksbehandler>
-  oppgaveId: string
-  sakId: number
-  oppdaterTildeling: (id: string, saksbehandler: string | null, versjon: number | null) => void
-  erRedigerbar: boolean
-  versjon: number | null
-  type: Oppgavetype
+  oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
+  oppgave: OppgaveDTO
 }
 
-export const VelgSaksbehandler = ({
-  saksbehandler,
-  saksbehandlereIEnhet,
-  erRedigerbar,
-  oppgaveId,
-  sakId,
-  type,
-  versjon,
-  oppdaterTildeling,
-}: Props): ReactNode => {
+const mapSaksbehandler = (oppgave: OppgaveDTO): Saksbehandler | undefined =>
+  oppgave.saksbehandler
+    ? {
+        ident: oppgave.saksbehandler.ident,
+        navn: oppgave.saksbehandler.navn || oppgave.saksbehandler.ident,
+      }
+    : undefined
+
+export const VelgSaksbehandler = ({ saksbehandlereIEnhet, oppdaterTildeling, oppgave }: Props): ReactNode => {
+  const { sakId, id: oppgaveId, type, versjon, status } = oppgave
+  const erRedigerbar = erOppgaveRedigerbar(status)
+  const saksbehandler = mapSaksbehandler(oppgave)
+
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const [openDropdown, setOpenDropdown] = useState<boolean>(false)
@@ -53,7 +53,7 @@ export const VelgSaksbehandler = ({
         byttSaksbehandler(
           { oppgaveId, type, nysaksbehandler: { saksbehandler: selectedSaksbehandler.ident!, versjon } },
           (result) => {
-            oppdaterTildeling(oppgaveId, selectedSaksbehandler.ident, result.versjon)
+            oppdaterTildeling(oppgave, selectedSaksbehandler, result.versjon)
             setValgtSaksbehandler(saksbehandler)
             setOpenDropdown(false)
           },
@@ -67,8 +67,11 @@ export const VelgSaksbehandler = ({
     tildelSaksbehandler(
       { oppgaveId, type, nysaksbehandler: { saksbehandler: innloggetSaksbehandler.ident, versjon } },
       (result) => {
-        oppdaterTildeling(oppgaveId, innloggetSaksbehandler.ident, result.versjon)
-        setValgtSaksbehandler({ navn: innloggetSaksbehandler.navn, ident: innloggetSaksbehandler.ident })
+        oppdaterTildeling(oppgave, innloggetSaksbehandler, result.versjon)
+        setValgtSaksbehandler({
+          ident: innloggetSaksbehandler.ident,
+          navn: innloggetSaksbehandler.navn,
+        })
         setOpenDropdown(false)
       },
       (error) => {
@@ -81,7 +84,7 @@ export const VelgSaksbehandler = ({
     fjernSaksbehandler(
       { oppgaveId, sakId, type, versjon },
       (result) => {
-        oppdaterTildeling(oppgaveId, null, result.versjon)
+        oppdaterTildeling(oppgave, null, result.versjon)
         setValgtSaksbehandler(undefined)
         setOpenDropdown(false)
       },
@@ -103,7 +106,7 @@ export const VelgSaksbehandler = ({
             loading={byttSaksbehandlerResult.status === 'pending'}
           >
             {valgtSaksbehandler?.navn
-              ? `${valgtSaksbehandler.navn} ${valgtSaksbehandler.navn === innloggetSaksbehandler.navn ? '(meg)' : ''}`
+              ? `${valgtSaksbehandler.navn} ${valgtSaksbehandler.ident === innloggetSaksbehandler.ident ? '(meg)' : ''}`
               : 'Ikke tildelt'}
           </Button>
           <DropdownMeny onClose={() => setOpenDropdown(false)}>
@@ -143,7 +146,7 @@ export const VelgSaksbehandler = ({
           </DropdownMeny>
         </Dropdown>
       ) : (
-        <SaksbehandlerWrapper>{saksbehandler.navn}</SaksbehandlerWrapper>
+        <SaksbehandlerWrapper>{saksbehandler ? saksbehandler.navn : 'Navn mangler'}</SaksbehandlerWrapper>
       )}
     </div>
   )

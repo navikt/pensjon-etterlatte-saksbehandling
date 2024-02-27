@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { IBehandlingStatus } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import {
   formaterBehandlingstype,
   formaterDatoMedKlokkeslett,
@@ -11,30 +11,29 @@ import { IBehandlingInfo } from '~components/behandling/sidemeny/IBehandlingInfo
 import { Alert, BodyShort, Heading, Tag } from '@navikt/ds-react'
 import { tagColors, TagList } from '~shared/Tags'
 import { SidebarPanel } from '~shared/components/Sidebar'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentOppgaveForBehandlingUnderBehandlingIkkeattestert, OppgaveSaksbehandler } from '~shared/api/oppgaver'
+import { hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave } from '~shared/api/oppgaver'
 import Spinner from '~shared/Spinner'
 import { ApiErrorAlert } from '~ErrorBoundary'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-
-import { isInitial, isPending, mapApiResult } from '~shared/api/apiUtils'
+import { mapApiResult, mapSuccess } from '~shared/api/apiUtils'
 import { FlexRow } from '~shared/styled'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
+import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
-  const [saksbehandlerPaaOppgave, setSaksbehandlerPaaOppgave] = useState<OppgaveSaksbehandler | null>(null)
-  const [oppgaveForBehandlingStatus, requesthentOppgaveForBehandling] = useApiCall(
-    hentOppgaveForBehandlingUnderBehandlingIkkeattestert
+
+  const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandlingEkte] = useApiCall(
+    hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
   )
+
+  const hentOppgaveForBehandling = () =>
+    requesthentOppgaveForBehandlingEkte({ referanse: behandlingsInfo.behandlingId, sakId: behandlingsInfo.sakId })
+
   useEffect(() => {
-    requesthentOppgaveForBehandling(
-      { referanse: behandlingsInfo.behandlingId, sakId: behandlingsInfo.sakId },
-      (saksbehandler) => {
-        setSaksbehandlerPaaOppgave(saksbehandler)
-      }
-    )
+    hentOppgaveForBehandling()
   }, [])
 
   const hentStatus = () => {
@@ -60,14 +59,17 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
     }
   }
 
-  if (isInitial(oppgaveForBehandlingStatus) || isPending(oppgaveForBehandlingStatus)) {
-    return <Spinner visible={true} label="Henter saksbehandler" />
-  }
-
   return (
     <SidebarPanel border>
       <Heading size="small">
-        {formaterBehandlingstype(behandlingsInfo.type)} <EessiPensjonLenke />
+        {formaterBehandlingstype(behandlingsInfo.type)}
+        {behandlingsInfo.nasjonalEllerUtland !== UtlandstilknytningType.NASJONAL && (
+          <EessiPensjonLenke
+            sakId={behandlingsInfo.sakId}
+            behandlingId={behandlingsInfo.behandlingId}
+            sakType={behandlingsInfo.sakType}
+          />
+        )}
       </Heading>
 
       <Heading size="xsmall" spacing>
@@ -95,14 +97,14 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
       <div className="info">
         <Info>Saksbehandler</Info>
         {mapApiResult(
-          oppgaveForBehandlingStatus,
-          <Spinner visible={true} label="Henter saksbehandler" />,
+          oppgaveForBehandlingenStatus,
+          <Spinner visible={true} label="Henter oppgave" />,
           () => (
             <ApiErrorAlert>Kunne ikke hente saksbehandler fra oppgave</ApiErrorAlert>
           ),
-          () =>
-            saksbehandlerPaaOppgave ? (
-              <Tekst>{saksbehandlerPaaOppgave.saksbehandlerNavn || saksbehandlerPaaOppgave.saksbehandlerIdent}</Tekst>
+          (oppgave) =>
+            !!oppgave?.saksbehandler ? (
+              <Tekst>{oppgave.saksbehandler?.navn || oppgave.saksbehandler?.ident}</Tekst>
             ) : (
               <Alert size="small" variant="warning">
                 Ingen saksbehandler har tatt denne oppgaven
@@ -130,10 +132,14 @@ export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo
           <Tekst>{kommentarFraAttestant}</Tekst>
         </div>
       )}
-      <FlexRow align="center">
+      <FlexRow align="center" $spacing={true}>
         <Info>Sakid:</Info>
         <KopierbarVerdi value={behandlingsInfo.sakId.toString()} />
       </FlexRow>
+
+      {mapSuccess(oppgaveForBehandlingenStatus, (oppgave) => (
+        <SettPaaVent oppgave={oppgave} refreshOppgave={hentOppgaveForBehandling} />
+      ))}
     </SidebarPanel>
   )
 }

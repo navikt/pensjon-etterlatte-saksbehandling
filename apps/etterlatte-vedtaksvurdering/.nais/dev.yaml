@@ -21,10 +21,10 @@ spec:
             envVarPrefix: DB
   liveness:
     initialDelay: 5
-    path: /isalive
+    path: /health/isalive
   readiness:
     initialDelay: 5
-    path: /isready
+    path: /health/isready
   leaderElection: true
   prometheus:
     enabled: true
@@ -42,6 +42,8 @@ spec:
           - id: 5ef775f2-61f8-4283-bf3d-8d03f428aa14 # 0000-GA-Strengt_Fortrolig_Adresse
           - id: ea930b6b-9397-44d9-b9e6-f4cf527a632a #0000-GA-Fortrolig_Adresse
           - id: dbe4ad45-320b-4e9a-aaa1-73cca4ee124d # 0000-GA-Egne_ansatte
+          - id: 753805ea-65a7-4855-bdc3-e6130348df9f # 0000-GA-PENSJON_NASJONAL_M_LOGG
+          - id: ea7411eb-8b48-41a0-bc56-7b521fbf0c25 # 0000-GA-PENSJON_NASJONAL_U_LOGG
         extra:
           - NAVident
   kafka:

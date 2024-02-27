@@ -14,11 +14,12 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandlingId
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.toNorskTid
 import no.nav.etterlatte.libs.common.vedtak.AttesterVedtakDto
-import no.nav.etterlatte.libs.common.vedtak.KlageVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.LoependeYtelseDTO
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
@@ -200,10 +201,11 @@ fun Route.vedtaksvurderingRoute(
                     call.respond(HttpStatusCode.NotFound)
                 }
 
-                vedtakBehandlingService.samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)?.let { samordnetVedtak ->
-                    rapidService.sendToRapid(samordnetVedtak)
-                    call.respond(HttpStatusCode.OK, samordnetVedtak.rapidInfo1.vedtak)
-                } ?: call.respond(vedtak.toDto())
+                vedtakBehandlingService.samordnetVedtak(vedtak!!.behandlingId, brukerTokenInfo)
+                    ?.let { samordnetVedtak ->
+                        rapidService.sendToRapid(samordnetVedtak)
+                        call.respond(HttpStatusCode.OK, samordnetVedtak.rapidInfo1.vedtak)
+                    } ?: call.respond(vedtak.toDto())
             }
         }
     }
@@ -258,14 +260,14 @@ fun Route.tilbakekrevingvedtakRoute(
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Fatter vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.fattVedtak(dto))
+                call.respond(service.fattVedtak(dto, brukerTokenInfo))
             }
         }
         post("/attester-vedtak") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val dto = call.receive<TilbakekrevingFattEllerAttesterVedtakDto>()
                 logger.info("Attesterer vedtak for tilbakekreving=${dto.tilbakekrevingId}")
-                call.respond(service.attesterVedtak(dto))
+                call.respond(service.attesterVedtak(dto, brukerTokenInfo))
             }
         }
         post("/underkjenn-vedtak") {
@@ -285,10 +287,22 @@ fun Route.klagevedtakRoute(
 
     route("/vedtak/klage/{$BEHANDLINGID_CALL_PARAMETER}") {
         post("/lagre-vedtak") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
+                val klage = call.receive<Klage>()
+                if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
+                logger.info("Oppretter vedtak for klage med id=$behandlingId")
+
+                call.respond(service.opprettEllerOppdaterVedtakOmAvvisning(klage))
+            }
+        }
+
+        post("/fatt-vedtak") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
-                val dto = call.receive<KlageVedtakDto>()
-                logger.info("Oppretter vedtak for klage=${dto.klageId}")
-                call.respond(service.opprettEllerOppdaterVedtakOmAvvisning(dto))
+                val klage = call.receive<Klage>()
+                if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
+
+                logger.info("Oppretter vedtak for klage med id=$behandlingId")
+                call.respond(service.fattVedtak(klage, brukerTokenInfo))
             }
         }
     }
@@ -309,6 +323,13 @@ private fun LoependeYtelse.toDto() =
     LoependeYtelseDTO(
         erLoepende = erLoepende,
         dato = dato,
+        behandlingId = behandlingId,
     )
 
 data class UnderkjennVedtakDto(val kommentar: String, val valgtBegrunnelse: String)
+
+private class MismatchingIdException(message: String) : ForespoerselException(
+    HttpStatusCode.BadRequest.value,
+    "ID_MISMATCH_MELLOM_PATH_OG_BODY",
+    message,
+)

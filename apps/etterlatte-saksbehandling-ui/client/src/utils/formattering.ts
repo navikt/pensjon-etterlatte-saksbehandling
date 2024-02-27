@@ -4,6 +4,7 @@ import { SakType } from '~shared/types/sak'
 import { VedtakType } from '~components/vedtak/typer'
 import { Oppgavestatus } from '~shared/api/oppgaver'
 import { Spraak } from '~shared/types/Brev'
+import { Journalposttype, Journalstatus } from '~shared/types/Journalpost'
 
 export const capitalize = (s?: string) => {
   if (!s) return ''
@@ -20,6 +21,8 @@ export const formaterDato = (dato: Date) => format(dato, 'dd.MM.yyyy').toString(
 export const formaterStringDato = (dato: string) => format(new Date(dato), 'dd.MM.yyyy').toString()
 export const formaterKanskjeStringDato = (dato?: string): string =>
   formaterKanskjeStringDatoMedFallback('Ukjent dato', dato)
+
+export const formaterDatoStrengTilLocaleDateTime = (dato: string) => new Date(dato).toISOString().replace('Z', '')
 
 export const formaterKanskjeStringDatoMedFallback = (fallback: string, dato?: string): string =>
   dato ? formaterStringDato(dato) : fallback
@@ -65,6 +68,8 @@ export const formaterVedtakType = (type: VedtakType): string => {
       return 'Endring'
     case VedtakType.TILBAKEKREVING:
       return 'Tilbakekreving'
+    case VedtakType.AVVIST_KLAGE:
+      return 'Avvist klage'
   }
 }
 
@@ -74,6 +79,8 @@ export const formaterOppgaveStatus = (status: Oppgavestatus): string => {
       return 'Ny'
     case 'UNDER_BEHANDLING':
       return 'Under behandling'
+    case 'PAA_VENT':
+      return 'På Vent'
     case 'FERDIGSTILT':
       return 'Ferdigstilt'
     case 'FEILREGISTRERT':
@@ -99,15 +106,44 @@ export const formaterSpraak = (spraak: Spraak) => {
   }
 }
 
-export const formaterJournalpostType = (type: string) => {
+export const formaterJournalpostType = (type: Journalposttype) => {
   switch (type) {
-    case 'I':
+    case Journalposttype.I:
       return 'Inngående'
-    case 'U':
+    case Journalposttype.U:
       return 'Utgående'
-    case 'N':
+    case Journalposttype.N:
       return 'Notat'
     default:
+      return 'Ukjent'
+  }
+}
+
+export const formaterJournalpostStatus = (status: Journalstatus) => {
+  switch (status) {
+    case Journalstatus.MOTTATT:
+      return 'Mottatt'
+    case Journalstatus.JOURNALFOERT:
+      return 'Journalført'
+    case Journalstatus.FERDIGSTILT:
+      return 'Ferdigstilt'
+    case Journalstatus.EKSPEDERT:
+      return 'Ekspedert'
+    case Journalstatus.UNDER_ARBEID:
+      return 'Under arbeid'
+    case Journalstatus.FEILREGISTRERT:
+      return 'Feilregistrert'
+    case Journalstatus.UTGAAR:
+      return 'Utgår'
+    case Journalstatus.AVBRUTT:
+      return 'Avbrutt'
+    case Journalstatus.UKJENT_BRUKER:
+      return 'Ukjent bruker'
+    case Journalstatus.RESERVERT:
+      return 'Reservert'
+    case Journalstatus.OPPLASTING_DOKUMENT:
+      return 'Opplasting dokument'
+    case Journalstatus.UKJENT:
       return 'Ukjent'
   }
 }
@@ -120,3 +156,7 @@ const norskKroneFormat = new Intl.NumberFormat('NO-nb', {
   currency: 'nok',
 })
 export const NOK = (beloep: number | undefined) => (beloep == null ? '' : norskKroneFormat.format(beloep) + ' kr')
+
+export const mapRHFArrayToStringArray = (rhfArray?: Array<{ value: string }>): string[] => {
+  return !!rhfArray ? rhfArray.map((val) => val.value) : []
+}

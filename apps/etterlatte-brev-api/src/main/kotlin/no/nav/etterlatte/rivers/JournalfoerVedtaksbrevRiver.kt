@@ -6,13 +6,13 @@ import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.rapidsandrivers.SKAL_SENDE_BREV
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.sak.VedtakSak
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
+import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -38,7 +38,7 @@ internal class JournalfoerVedtaksbrevRiver(
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligSaksbehandler") }
             validate { it.requireKey("vedtak.vedtakFattet.ansvarligEnhet") }
             validate {
-                it.rejectValues("vedtak.innhold.behandling.type", listOf(BehandlingType.MANUELT_OPPHOER.name))
+                it.rejectValues("vedtak.innhold.behandling.type", listOf("MANUELT_OPPHOER")) // TODO: Fjerne
             }
             validate { it.rejectValue(SKAL_SENDE_BREV, false) }
         }
@@ -78,7 +78,7 @@ internal class JournalfoerVedtaksbrevRiver(
     ) {
         logger.info("Brev har blitt distribuert. Svarer tilbake med bekreftelse.")
         packet.setEventNameForHendelseType(BrevHendelseType.JOURNALFOERT)
-        packet["brevId"] = brevId
+        packet[BREV_ID_KEY] = brevId
         packet["journalpostId"] = journalpostId
         packet["distribusjonType"] = DistribusjonsType.VEDTAK.toString()
 

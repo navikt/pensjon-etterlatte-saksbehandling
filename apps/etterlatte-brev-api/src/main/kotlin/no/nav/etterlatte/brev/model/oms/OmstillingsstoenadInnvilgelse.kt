@@ -33,7 +33,6 @@ data class OmstillingsstoenadInnvilgelse(
         fun fra(
             innholdMedVedlegg: InnholdMedVedlegg,
             generellBrevData: GenerellBrevData,
-            utbetalingsinfo: Utbetalingsinfo,
             avkortingsinfo: Avkortingsinfo,
             etterbetaling: EtterbetalingDTO?,
             trygdetid: Trygdetid,
@@ -58,7 +57,7 @@ data class OmstillingsstoenadInnvilgelse(
                 avdoed = generellBrevData.personerISak.avdoede.minBy { it.doedsdato },
                 beregning =
                     OmstillingsstoenadBeregning(
-                        innhold = innholdMedVedlegg.finnVedlegg(listOf(BrevVedleggKey.OMS_BEREGNING, BrevVedleggKey.BEREGNING_INNHOLD)),
+                        innhold = innholdMedVedlegg.finnVedlegg(BrevVedleggKey.OMS_BEREGNING),
                         virkningsdato = avkortingsinfo.virkningsdato,
                         inntekt = avkortingsinfo.inntekt,
                         grunnbeloep = avkortingsinfo.grunnbeloep,
@@ -71,8 +70,8 @@ data class OmstillingsstoenadInnvilgelse(
                                 beregnetTrygdetidMaaneder = trygdetid.maanederTrygdetid,
                                 prorataBroek = trygdetid.prorataBroek,
                                 mindreEnnFireFemtedelerAvOpptjeningstiden = trygdetid.mindreEnnFireFemtedelerAvOpptjeningstiden,
-                                beregningsMetodeFraGrunnlag = utbetalingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
-                                beregningsMetodeAnvendt = utbetalingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
+                                beregningsMetodeFraGrunnlag = avkortingsinfo.beregningsperioder.first().beregningsMetodeFraGrunnlag,
+                                beregningsMetodeAnvendt = avkortingsinfo.beregningsperioder.first().beregningsMetodeAnvendt,
                             ),
                     ),
                 innvilgetMindreEnnFireMndEtterDoedsfall =

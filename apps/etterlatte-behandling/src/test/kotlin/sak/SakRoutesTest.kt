@@ -20,11 +20,13 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.attachMockContext
 import no.nav.etterlatte.behandling.BehandlingRequestLogger
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.hendelse.HendelseDao
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.ktor.issueSaksbehandlerToken
 import no.nav.etterlatte.ktor.runServer
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -48,6 +50,7 @@ internal class SakRoutesTest {
     private val tilgangService = mockk<TilgangService>(relaxUnitFun = true)
     private val oppgaveService = mockk<OppgaveService>(relaxUnitFun = true)
     private val requestLogger = mockk<BehandlingRequestLogger>()
+    private val hendelseDao = mockk<HendelseDao>()
 
     @BeforeAll
     fun before() {
@@ -86,7 +89,7 @@ internal class SakRoutesTest {
                     sakId = 1,
                     kilde = null,
                     type = OppgaveType.ATTESTERING,
-                    saksbehandlerIdent = "Bjarne",
+                    saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
                     referanse = "hmm",
                     merknad = null,
                     opprettet = Tidspunkt.now(),
@@ -101,7 +104,7 @@ internal class SakRoutesTest {
                     sakId = 1,
                     kilde = null,
                     type = OppgaveType.KLAGE,
-                    saksbehandlerIdent = null,
+                    saksbehandler = null,
                     referanse = "hmm",
                     merknad = null,
                     opprettet = Tidspunkt.now(),
@@ -116,7 +119,7 @@ internal class SakRoutesTest {
                     sakId = 1,
                     kilde = null,
                     type = OppgaveType.KLAGE,
-                    saksbehandlerIdent = "Bjarne",
+                    saksbehandler = OppgaveSaksbehandler("Rask Spaghetti"),
                     referanse = "hmm",
                     merknad = null,
                     opprettet = Tidspunkt.now(),
@@ -228,6 +231,7 @@ internal class SakRoutesTest {
                         grunnlagsendringshendelseService,
                         oppgaveService,
                         requestLogger,
+                        hendelseDao,
                     )
                 }
             block(client)

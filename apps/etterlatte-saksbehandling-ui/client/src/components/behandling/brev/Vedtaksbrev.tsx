@@ -13,14 +13,19 @@ import {
   behandlingSkalSendeBrev,
   sisteBehandlingHendelse,
 } from '~components/behandling/felles/utils'
-import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import {
+  IBehandlingStatus,
+  IBehandlingsType,
+  IDetaljertBehandling,
+  Vedtaksloesning,
+} from '~shared/types/IDetaljertBehandling'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import Spinner from '~shared/Spinner'
 import { BrevProsessType, IBrev } from '~shared/types/Brev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { useApiCall } from '~shared/hooks/useApiCall'
 
-import { fattVedtak } from '~shared/api/vedtaksvurdering'
+import { fattVedtak, upsertVedtak } from '~shared/api/vedtaksvurdering'
 import { SjekklisteValideringErrorSummary } from '~components/behandling/sjekkliste/SjekklisteValideringErrorSummary'
 import { IHendelse } from '~shared/types/IHendelse'
 import { oppdaterBehandling, resetBehandling } from '~store/reducers/BehandlingReducer'
@@ -34,6 +39,7 @@ import { addValideringsfeil, Valideringsfeilkoder } from '~store/reducers/Sjekkl
 import { visSjekkliste } from '~store/reducers/BehandlingSidemenyReducer'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
 import BrevTittel from '~components/person/brev/tittel/BrevTittel'
+import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 
 export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
   const { behandlingId } = useParams()
@@ -80,24 +86,43 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
     }
   }, [vedtaksbrev])
 
+  const hentBrevPaaNytt = () => {
+    if (behandlingId) {
+      hentBrev(behandlingId, (brev, statusCode) => {
+        if (statusCode === 200) {
+          setVedtaksbrev(brev)
+        } else if (statusCode === 204) {
+          opprettNyttVedtaksbrev({ sakId, behandlingId }, (nyttBrev) => {
+            setVedtaksbrev(nyttBrev)
+          })
+        }
+      })
+    }
+  }
+
   useEffect(() => {
     if (
       !behandlingId ||
       !sakId ||
-      !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak)
+      !behandlingSkalSendeBrev(props.behandling.behandlingType, props.behandling.revurderingsaarsak) ||
+      behandling?.kilde === Vedtaksloesning.GJENOPPRETTA
     )
       return
 
-    hentBrev(behandlingId, (brev, statusCode) => {
-      if (statusCode === 200) {
-        setVedtaksbrev(brev)
-      } else if (statusCode === 204) {
-        opprettNyttVedtaksbrev({ sakId, behandlingId }, (nyttBrev) => {
-          setVedtaksbrev(nyttBrev)
+    hentBrevPaaNytt()
+  }, [behandlingId, sakId])
+
+  const [, oppdaterVedtakRequest] = useApiCall(upsertVedtak)
+
+  useEffect(() => {
+    if (behandlingId) {
+      if (props.behandling.kilde === Vedtaksloesning.GJENOPPRETTA) {
+        oppdaterVedtakRequest(props.behandling.id, () => {
+          hentBrevPaaNytt()
         })
       }
-    })
-  }, [behandlingId, sakId])
+    }
+  }, [behandlingId])
 
   if (isPendingOrInitial(hentBrevStatus)) {
     return <Spinner visible label="Henter brev ..." />
@@ -132,7 +157,7 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                 Vedtaksbrev
               </Heading>
             </HeadingWrapper>
-            <Soeknadsdato mottattDato={soeknadMottattDato} />
+            {soeknadMottattDato && <Soeknadsdato mottattDato={soeknadMottattDato} />}
 
             <br />
             {behandling?.status === IBehandlingStatus.FATTET_VEDTAK && (
@@ -154,6 +179,8 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
                   tittel={vedtaksbrev.tittel}
                   kanRedigeres={redigerbar}
                 />
+                <br />
+                <BrevSpraak brev={vedtaksbrev} kanRedigeres={redigerbar} />
                 <br />
                 <BrevMottaker brev={vedtaksbrev} kanRedigeres={redigerbar} />
               </>
@@ -196,8 +223,6 @@ export const Vedtaksbrev = (props: { behandling: IDetaljertBehandling }) => {
 
 const BrevContent = styled.div`
   display: flex;
-  height: 75vh;
-  max-height: 75vh;
 `
 
 const Sidebar = styled.div`

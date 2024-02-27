@@ -2,8 +2,8 @@ export interface Journalpost {
   journalpostId: string
   tittel: string
   tema: string
-  journalposttype: string
-  journalstatus: string
+  journalposttype: Journalposttype
+  journalstatus: Journalstatus
   dokumenter: DokumentInfo[]
   bruker: Bruker
   avsenderMottaker: AvsenderMottaker
@@ -11,6 +11,18 @@ export interface Journalpost {
   sak?: JournalpostSak
   datoOpprettet: string
   utsendingsinfo?: object
+}
+
+export interface JournalpostUtsendingsinfo {
+  journalpostId: string
+  utsendingsinfo?: {
+    fysiskpostSendt?: {
+      adressetekstKonvolutt?: string
+    }
+    digitalpostSendt?: {
+      adresse?: string
+    }
+  }
 }
 
 export interface OppdaterJournalpostRequest {
@@ -49,6 +61,7 @@ export interface DokumentVariant {
   filtype?: string
   fysiskDokument?: string
   variantformat?: string
+  saksbehandlerHarTilgang?: boolean
 }
 
 export interface Bruker {
@@ -79,4 +92,31 @@ export interface JournalpostSak {
 export enum Sakstype {
   FAGSAK = 'FAGSAK',
   GENERELL_SAK = 'GENERELL_SAK',
+}
+
+export enum Journalstatus {
+  MOTTATT = 'MOTTATT',
+  JOURNALFOERT = 'JOURNALFOERT',
+  FERDIGSTILT = 'FERDIGSTILT',
+  EKSPEDERT = 'EKSPEDERT',
+  UNDER_ARBEID = 'UNDER_ARBEID',
+  FEILREGISTRERT = 'FEILREGISTRERT',
+  UTGAAR = 'UTGAAR',
+  AVBRUTT = 'AVBRUTT',
+  UKJENT_BRUKER = 'UKJENT_BRUKER',
+  RESERVERT = 'RESERVERT',
+  OPPLASTING_DOKUMENT = 'OPPLASTING_DOKUMENT',
+  UKJENT = 'UKJENT',
+}
+
+export enum Journalposttype {
+  I = 'I', // Inngående
+  U = 'U', // Utgående
+  N = 'N', // Notat
+}
+
+export enum Tema {
+  EYB = 'EYB',
+  EYO = 'EYO',
+  PEN = 'PEN',
 }

@@ -7,6 +7,7 @@ import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.GosysOppgave
+import no.nav.etterlatte.libs.common.oppgave.OppgaveSaksbehandler
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.tilgangsstyring.filterForEnheter
@@ -130,7 +131,7 @@ class GosysOppgaveServiceImpl(
                 fnr = fnrByAktoerId[this.aktoerId],
                 gjelder = temaTilSakType[this.tema]!!.name,
                 enhet = this.tildeltEnhetsnr,
-                saksbehandlerIdent = this.tilordnetRessurs,
+                saksbehandler = this.tilordnetRessurs?.let { OppgaveSaksbehandler(it) },
                 beskrivelse = this.beskrivelse,
                 sakType = temaTilSakType[this.tema]!!,
             )

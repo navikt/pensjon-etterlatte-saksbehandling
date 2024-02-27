@@ -3,9 +3,12 @@ package no.nav.etterlatte.behandling.klage
 import io.ktor.server.plugins.NotFoundException
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.hendelse.HendelseDao
+import no.nav.etterlatte.behandling.hendelse.HendelseType
 import no.nav.etterlatte.behandling.klienter.BrevApiKlient
 import no.nav.etterlatte.behandling.klienter.KlageKlient
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.FeatureIkkeStoettetException
 import no.nav.etterlatte.libs.common.behandling.BehandlingResultat
 import no.nav.etterlatte.libs.common.behandling.EkstradataInnstilling
 import no.nav.etterlatte.libs.common.behandling.Formkrav
@@ -17,8 +20,11 @@ import no.nav.etterlatte.libs.common.behandling.Kabalrespons
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
 import no.nav.etterlatte.libs.common.behandling.KlageResultat
+import no.nav.etterlatte.libs.common.behandling.KlageUtfall
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
+import no.nav.etterlatte.libs.common.behandling.KlageVedtak
+import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
 import no.nav.etterlatte.libs.common.behandling.SendtInnstillingsbrev
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
@@ -33,6 +39,7 @@ import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
+import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -83,6 +90,11 @@ interface KlageService {
         kommentar: String,
         saksbehandler: Saksbehandler,
     )
+
+    fun fattVedtak(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage
 }
 
 class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
@@ -99,6 +111,7 @@ class KlageServiceImpl(
     private val klageKlient: KlageKlient,
     private val klageHendelser: IKlageHendelserService,
     private val vedtakKlient: VedtakKlient,
+    private val featureToggleService: FeatureToggleService,
 ) : KlageService {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -174,6 +187,14 @@ class KlageServiceImpl(
         utfall: InitieltUtfallMedBegrunnelseDto,
         saksbehandler: Saksbehandler,
     ): Klage {
+        if (utfall.utfall == KlageUtfall.DELVIS_OMGJOERING &&
+            !featureToggleService.isEnabled(
+                KlageFeatureToggle.StoetterUtfallDelvisOmgjoering,
+                false,
+            )
+        ) {
+            throw FeatureIkkeStoettetException()
+        }
         val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
         val oppdatertKlage = klage.oppdaterIntieltUtfallMedBegrunnelse(utfall, saksbehandler.ident)
         klageDao.lagreKlage(oppdatertKlage)
@@ -185,7 +206,20 @@ class KlageServiceImpl(
         utfall: KlageUtfallUtenBrev,
         saksbehandler: Saksbehandler,
     ): Klage {
+        if (utfall is KlageUtfallUtenBrev.DelvisOmgjoering &&
+            !featureToggleService.isEnabled(
+                KlageFeatureToggle.StoetterUtfallDelvisOmgjoering,
+                false,
+            )
+        ) {
+            throw FeatureIkkeStoettetException()
+        }
+
         val klage = klageDao.hentKlage(klageId) ?: throw KlageIkkeFunnetException(klageId)
+        if (klage.utfall is KlageUtfallMedData.Avvist) {
+            // Vi må rydde bort det vedtaksbrevet som ble opprettet ved forrige utfall
+            runBlocking { brevApiKlient.slettVedtaksbrev(klageId, saksbehandler) }
+        }
 
         val utfallMedBrev =
             when (utfall) {
@@ -203,6 +237,7 @@ class KlageServiceImpl(
                             InnstillingTilKabal(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
                                 internKommentar = utfall.innstilling.internKommentar,
+                                innstillingTekst = utfall.innstilling.innstillingTekst,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
@@ -214,16 +249,20 @@ class KlageServiceImpl(
                             InnstillingTilKabal(
                                 lovhjemmel = enumValueOf(utfall.innstilling.lovhjemmel),
                                 internKommentar = utfall.innstilling.internKommentar,
+                                innstillingTekst = utfall.innstilling.innstillingTekst,
                                 brev = brevForInnstilling(klage, saksbehandler),
                             ),
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
                     )
 
-                is KlageUtfallUtenBrev.Avvist ->
+                is KlageUtfallUtenBrev.Avvist -> {
+                    val (vedtak, brev) = opprettVedtakOgBrev(klage, saksbehandler)
                     KlageUtfallMedData.Avvist(
                         saksbehandler = Grunnlagsopplysning.Saksbehandler.create(saksbehandler.ident),
-                        vedtakId = runBlocking { vedtakKlient.lagreVedtakKlage(klage, saksbehandler) },
+                        vedtak = vedtak,
+                        brev = brev,
                     )
+                }
 
                 is KlageUtfallUtenBrev.AvvistMedOmgjoering ->
                     KlageUtfallMedData.AvvistMedOmgjoering(
@@ -238,6 +277,22 @@ class KlageServiceImpl(
         return klageMedOppdatertUtfall
     }
 
+    private fun opprettVedtakOgBrev(
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): Pair<KlageVedtak, KlageVedtaksbrev> {
+        return when (val utfall = klage.utfall) {
+            is KlageUtfallMedData.Avvist -> Pair(utfall.vedtak, utfall.brev)
+            else -> {
+                return runBlocking {
+                    val vedtakId = lagreVedtakForAvvisning(klage, saksbehandler)
+                    val vedtaksbrevId = opprettVedtaksbrevForAvvisning(klage, saksbehandler)
+                    Pair(vedtakId, vedtaksbrevId)
+                }
+            }
+        }
+    }
+
     private fun brevForInnstilling(
         klage: Klage,
         saksbehandler: Saksbehandler,
@@ -250,6 +305,22 @@ class KlageServiceImpl(
                 KlageBrevInnstilling(brev.id)
             }
         }
+    }
+
+    private fun opprettVedtaksbrevForAvvisning(
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): KlageVedtaksbrev {
+        val brevDto = runBlocking { brevApiKlient.opprettVedtaksbrev(klage.id, klage.sak.id, saksbehandler) }
+        return KlageVedtaksbrev(brevDto.id)
+    }
+
+    private fun lagreVedtakForAvvisning(
+        klage: Klage,
+        saksbehandler: Saksbehandler,
+    ): KlageVedtak {
+        val vedtakId = runBlocking { vedtakKlient.lagreVedtakKlage(klage, saksbehandler) }
+        return KlageVedtak(vedtakId)
     }
 
     override fun haandterKabalrespons(
@@ -303,7 +374,7 @@ class KlageServiceImpl(
             oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(klageId.toString())
                 ?: throw ManglerSaksbehandlerException("Fant ingen saksbehandler på oppgave relatert til klageid $klageId")
 
-        if (saksbehandlerForKlageOppgave.saksbehandlerIdent != saksbehandler.ident) {
+        if (saksbehandlerForKlageOppgave.ident != saksbehandler.ident) {
             throw UgyldigForespoerselException(
                 code = "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
                 detail =
@@ -385,6 +456,38 @@ class KlageServiceImpl(
             StatistikkKlage(avbruttKlage.id, avbruttKlage, Tidspunkt.now(), saksbehandler.ident),
             KlageHendelseType.AVBRUTT,
         )
+    }
+
+    override fun fattVedtak(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage {
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+
+        val oppdatertKlage = klage.fattVedtak()
+        val vedtakId =
+            runBlocking {
+                vedtakKlient.fattVedtakKlage(klage, brukerTokenInfo)
+            }
+        val utfall = klage.utfall as KlageUtfallMedData.Avvist
+        if (vedtakId != utfall.vedtak.vedtakId) {
+            throw IllegalStateException(
+                "VedtakId=$vedtakId er forskjellig fra det som ligger i utfall=$vedtakId",
+            )
+        }
+        klageDao.lagreKlage(oppdatertKlage)
+
+        hendelseDao.vedtakHendelse(
+            behandlingId = klage.id,
+            sakId = klage.sak.id,
+            vedtakId = vedtakId,
+            hendelse = HendelseType.FATTET,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = brukerTokenInfo.ident(),
+            kommentar = null,
+            begrunnelse = null,
+        )
+        return oppdatertKlage
     }
 
     private fun ferdigstillInnstilling(

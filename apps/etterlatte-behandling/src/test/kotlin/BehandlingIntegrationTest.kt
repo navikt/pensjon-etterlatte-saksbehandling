@@ -13,6 +13,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
+import io.mockk.spyk
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Navkontor
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
@@ -26,6 +27,8 @@ import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
 import no.nav.etterlatte.common.Enheter
+import no.nav.etterlatte.common.klienter.PesysKlient
+import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.config.ApplicationContext
 import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
@@ -59,13 +62,17 @@ import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.LocalDate
 import java.util.UUID
 
-@ExtendWith(DatabaseExtension::class)
 abstract class BehandlingIntegrationTest {
-    private val postgreSQLContainer = DatabaseExtension.postgreSQLContainer
+    companion object {
+        @RegisterExtension
+        private val dbExtension = DatabaseExtension()
+    }
+
+    private val postgreSQLContainer = GenerellDatabaseExtension.postgreSQLContainer
     protected val server: MockOAuth2Server = MockOAuth2Server()
     internal lateinit var applicationContext: ApplicationContext
 
@@ -96,6 +103,8 @@ abstract class BehandlingIntegrationTest {
                         put("NAVANSATT_URL", "http://localhost")
                         put("SKJERMING_URL", "http://localhost")
                         put("OPPGAVE_URL", "http://localhost")
+                        put("PEN_URL", "http://localhost")
+                        put("PEN_CLIENT_ID", "ddd52335-cfe8-4ee9-9e68-416a5ab26efa")
                         put("ETTERLATTE_KLAGE_API_URL", "http://localhost")
                         put("ETTERLATTE_TILBAKEKREVING_URL", "http://localhost")
                         put("ETTERLATTE_MIGRERING_URL", "http://localhost")
@@ -118,12 +127,13 @@ abstract class BehandlingIntegrationTest {
                 navAnsattKlient = NavAnsattKlientTest(),
                 norg2Klient = norg2Klient ?: Norg2KlientTest(),
                 grunnlagKlientObo = GrunnlagKlientTest(),
-                vedtakKlient = VedtakKlientTest(),
+                vedtakKlient = spyk(VedtakKlientTest()),
                 gosysOppgaveKlient = GosysOppgaveKlientTest(),
                 brevApiHttpClient = BrevApiKlientTest(),
                 klageHttpClient = klageHttpClientTest(),
                 tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
                 migreringHttpClient = migreringHttpClientTest(),
+                pesysKlient = PesysKlientTest(),
             )
     }
 
@@ -301,7 +311,7 @@ abstract class BehandlingIntegrationTest {
         }
 
     fun resetDatabase() {
-        DatabaseExtension.resetDb()
+        dbExtension.resetDb()
     }
 
     protected fun afterAll() {
@@ -450,6 +460,13 @@ class VedtakKlientTest : VedtakKlient {
     ): Long {
         return 123L
     }
+
+    override suspend fun fattVedtakKlage(
+        klage: Klage,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        return 123L
+    }
 }
 
 class BrevApiKlientTest : BrevApiKlient {
@@ -459,18 +476,15 @@ class BrevApiKlientTest : BrevApiKlient {
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
-        return OpprettetBrevDto(
-            id = brevId++,
-            status = BrevStatus.OPPRETTET,
-            mottaker =
-                Mottaker(
-                    navn = "Mottaker mottakersen",
-                    foedselsnummer = Mottakerident("19448310410"),
-                    orgnummer = null,
-                ),
-            journalpostId = null,
-            bestillingsID = null,
-        )
+        return opprettetBrevDto(brevId++)
+    }
+
+    override suspend fun opprettVedtaksbrev(
+        behandlingId: UUID,
+        sakId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): OpprettetBrevDto {
+        return opprettetBrevDto(brevId++)
     }
 
     override suspend fun ferdigstillBrev(
@@ -501,7 +515,17 @@ class BrevApiKlientTest : BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
-        return OpprettetBrevDto(
+        return opprettetBrevDto(brevId)
+    }
+
+    override suspend fun slettVedtaksbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+    }
+
+    private fun opprettetBrevDto(brevId: Long) =
+        OpprettetBrevDto(
             id = brevId,
             status = BrevStatus.OPPRETTET,
             mottaker =
@@ -513,7 +537,6 @@ class BrevApiKlientTest : BrevApiKlient {
             journalpostId = null,
             bestillingsID = null,
         )
-    }
 }
 
 class GosysOppgaveKlientTest : GosysOppgaveKlient {
@@ -594,5 +617,11 @@ class NavAnsattKlientTest : NavAnsattKlient {
 
     override suspend fun hentSaksbehanderNavn(ident: String): SaksbehandlerInfo? {
         return SaksbehandlerInfo("ident", "Max Manus")
+    }
+}
+
+class PesysKlientTest : PesysKlient {
+    override suspend fun hentSaker(fnr: String): List<SakSammendragResponse> {
+        return emptyList()
     }
 }

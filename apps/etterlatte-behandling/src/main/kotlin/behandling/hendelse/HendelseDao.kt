@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.hendelse
 
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.BehandlingOpprettet
+import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.generellbehandling.GenerellBehandlingHendelseType
 import no.nav.etterlatte.libs.common.klage.KlageHendelseType
@@ -12,13 +13,12 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.toList
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
 import java.util.UUID
 
-class HendelseDao(private val connection: () -> Connection) {
+class HendelseDao(private val connectionAutoclosing: ConnectionAutoclosing) {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(HendelseDao::class.java)
     }
@@ -182,54 +182,85 @@ class HendelseDao(private val connection: () -> Connection) {
         ),
     )
 
-    fun finnHendelserIBehandling(behandling: UUID): List<LagretHendelse> {
-        val stmt =
-            connection().prepareStatement(
-                """
-                |SELECT id, hendelse, opprettet, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse 
-                |FROM behandlinghendelse
-                |where behandlingid = ?
-                """.trimMargin(),
-            )
-        stmt.setObject(1, behandling)
-        return stmt.executeQuery().toList {
-            LagretHendelse(
-                getLong("id"),
-                getString("hendelse"),
-                getTidspunkt("opprettet"),
-                getTidspunktOrNull("inntruffet"),
-                getLongOrNull("vedtakid"),
-                getUUID("behandlingid"),
-                getLong("sakid"),
-                getString("ident"),
-                getString("identType"),
-                getString("kommentar"),
-                getString("valgtBegrunnelse"),
-            )
+    fun hentHendelserISak(sakId: Long): List<LagretHendelse> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        SELECT id, hendelse, opprettet, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse
+                        FROM behandlinghendelse
+                        where sakid = ?
+                        """.trimIndent(),
+                    )
+
+                statement.setLong(1, sakId)
+                statement.executeQuery().toList {
+                    asHendelse()
+                }
+            }
         }
     }
 
+    fun finnHendelserIBehandling(behandling: UUID): List<LagretHendelse> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
+                |SELECT id, hendelse, opprettet, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse 
+                |FROM behandlinghendelse
+                |where behandlingid = ?
+                        """.trimMargin(),
+                    )
+                stmt.setObject(1, behandling)
+                stmt.executeQuery().toList {
+                    asHendelse()
+                }
+            }
+        }
+    }
+
+    private fun ResultSet.asHendelse(): LagretHendelse =
+        LagretHendelse(
+            getLong("id"),
+            getString("hendelse"),
+            getTidspunkt("opprettet"),
+            getTidspunktOrNull("inntruffet"),
+            getLongOrNull("vedtakid"),
+            getUUID("behandlingid"),
+            getLong("sakid"),
+            getString("ident"),
+            getString("identType"),
+            getString("kommentar"),
+            getString("valgtBegrunnelse"),
+        )
+
     private fun lagreHendelse(hendelse: UlagretHendelse) {
-        val stmt =
-            connection().prepareStatement(
-                """
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val stmt =
+                    prepareStatement(
+                        """
             |INSERT INTO behandlinghendelse(hendelse, inntruffet, vedtakid, behandlingid, sakid, ident, identtype, kommentar, valgtbegrunnelse) 
             |VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """.trimMargin(),
-            )
-        stmt.setString(1, hendelse.hendelse)
-        stmt.setTidspunkt(2, hendelse.inntruffet)
-        stmt.setLong(3, hendelse.vedtakId)
-        stmt.setObject(4, hendelse.behandlingId)
-        stmt.setLong(5, hendelse.sakId)
-        stmt.setString(6, hendelse.ident)
-        stmt.setString(7, hendelse.identType)
-        stmt.setString(8, hendelse.kommentar)
-        stmt.setString(9, hendelse.valgtBegrunnelse)
+                        """.trimMargin(),
+                    )
+                stmt.setString(1, hendelse.hendelse)
+                stmt.setTidspunkt(2, hendelse.inntruffet)
+                stmt.setLong(3, hendelse.vedtakId)
+                stmt.setObject(4, hendelse.behandlingId)
+                stmt.setLong(5, hendelse.sakId)
+                stmt.setString(6, hendelse.ident)
+                stmt.setString(7, hendelse.identType)
+                stmt.setString(8, hendelse.kommentar)
+                stmt.setString(9, hendelse.valgtBegrunnelse)
 
-        stmt.executeUpdate()
+                stmt.executeUpdate()
 
-        logger.info("lagret hendelse: $hendelse")
+                logger.info("lagret hendelse: $hendelse")
+            }
+        }
     }
 }
 

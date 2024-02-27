@@ -16,11 +16,15 @@ import { ApiErrorAlert } from '~ErrorBoundary'
 import { EndreEnhet } from '~components/person/EndreEnhet'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
+import { useAppSelector } from '~store/Store'
+import { TilbakekrevingListe } from '~components/person/TilbakekrevingListe'
 
 export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
   const [hentNavkontorStatus, hentNavkontor] = useApiCall(hentNavkontorForPerson)
   const [hentFlyktningStatus, hentFlyktning] = useApiCall(hentFlyktningStatusForSak)
+
+  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   useEffect(() => {
     hentNavkontor(fnr)
@@ -84,21 +88,24 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
               <SelectWrapper>
                 <BodyShort>
                   Denne saken tilhører enhet {sakOgBehandlinger.sak.enhet}.
-                  <FlexRow>
-                    <EndreEnhet sakId={sakOgBehandlinger.sak.id} />
-                    <HelpText strategy="fixed">
-                      Om saken tilhører en annen enhet enn den du jobber i, overfører du saken til riktig enhet ved å
-                      klikke på denne knappen. Skriv først i kommentarfeltet i Sjekklisten inne i behandlingen hvilken
-                      enhet saken er overført til og hvorfor. Gå så til saksoversikten, og klikk på knappen &rsquo;Endre
-                      enhet&rsquo;, og overfør til riktig behandlende enhet.
-                    </HelpText>
-                  </FlexRow>
+                  {innloggetSaksbehandler.skriveTilgang && (
+                    <FlexRow>
+                      <EndreEnhet sakId={sakOgBehandlinger.sak.id} />
+                      <HelpText strategy="fixed">
+                        Om saken tilhører en annen enhet enn den du jobber i, overfører du saken til riktig enhet ved å
+                        klikke på denne knappen. Skriv først i kommentarfeltet i Sjekklisten inne i behandlingen hvilken
+                        enhet saken er overført til og hvorfor. Gå så til saksoversikten, og klikk på knappen
+                        &rsquo;Endre enhet&rsquo;, og overfør til riktig behandlende enhet.
+                      </HelpText>
+                    </FlexRow>
+                  )}
                 </BodyShort>
               </SelectWrapper>
               <hr />
-              <Behandlingsliste behandlinger={sakOgBehandlinger.behandlinger} sakId={sakOgBehandlinger.sak.id} />
+              <Behandlingsliste sakOgBehandlinger={sakOgBehandlinger} />
 
               {kanBrukeKlage ? <KlageListe sakId={sakOgBehandlinger.sak.id} /> : null}
+              <TilbakekrevingListe sakId={sakOgBehandlinger.sak.id} />
             </MainContent>
             <HendelseSidebar>
               <RelevanteHendelser sak={sakOgBehandlinger.sak} behandlingliste={sakOgBehandlinger.behandlinger} />

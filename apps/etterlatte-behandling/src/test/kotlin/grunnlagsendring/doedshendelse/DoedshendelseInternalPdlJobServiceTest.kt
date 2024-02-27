@@ -92,7 +92,7 @@ class DoedshendelseInternalPdlJobServiceTest {
                     endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt(),
                 ),
             )
-        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns emptyList()
+        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns listOf(AvdoedHarDNummer)
         every { dao.hentDoedshendelserMedStatus(any()) } returns doedshendelser
         every { dao.oppdaterDoedshendelse(any()) } returns Unit
         every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns

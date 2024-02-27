@@ -75,6 +75,7 @@ interface OppgaveDao {
         dato: LocalDate,
         type: OppgaveType,
         kilde: OppgaveKilde,
+        oppgaver: List<UUID>,
     ): List<VentefristGaarUt>
 }
 
@@ -381,6 +382,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
         dato: LocalDate,
         type: OppgaveType,
         kilde: OppgaveKilde,
+        oppgaver: List<UUID>,
     ): List<VentefristGaarUt> =
         connectionAutoclosing.hentConnection {
             with(it) {
@@ -405,7 +407,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                     )
                 }.also { utgaatte ->
                     logger.info("Hentet ${utgaatte.size} oppgaver der fristen går ut for dato $dato og type $type")
-                }
+                }.filter { oppgave -> oppgaver.isEmpty() || oppgaver.contains(oppgave.oppgaveID) }
             }
         }
 

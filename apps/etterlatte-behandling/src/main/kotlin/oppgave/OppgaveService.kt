@@ -497,12 +497,8 @@ class OppgaveService(
         }
     }
 
-    fun hentFristGaarUt(request: VentefristGaarUtRequest): List<VentefristGaarUt> {
-        if (request.oppgaver.isEmpty()) {
-            return oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde)
-        }
-        return listOf() // TODO
-    }
+    fun hentFristGaarUt(request: VentefristGaarUtRequest): List<VentefristGaarUt> =
+        oppgaveDao.hentFristGaarUt(request.dato, request.type, request.oppgaveKilde, request.oppgaver)
 }
 
 class FantIkkeSakException(msg: String) : Exception(msg)

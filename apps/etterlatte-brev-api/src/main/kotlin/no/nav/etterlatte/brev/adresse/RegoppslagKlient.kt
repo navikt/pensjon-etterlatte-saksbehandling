@@ -8,10 +8,12 @@ import io.ktor.client.plugins.ResponseException
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Behandlingsnummer
 import no.nav.etterlatte.libs.common.pdl.AdressebeskyttelseKlient.Companion.HEADER_BEHANDLINGSNUMMER
 import no.nav.etterlatte.sikkerLogg
@@ -43,7 +45,7 @@ class RegoppslagKlient(
                 logger.info("Ingen cachet mottakeradresse funnet. Henter fra regoppslag")
 
                 client.post("$url/rest/postadresse") {
-                    header(HEADER_BEHANDLINGSNUMMER, Behandlingsnummer.BARNEPENSJON.behandlingsnummer)
+                    header(HEADER_BEHANDLINGSNUMMER, sakType.mapTilBehandlingsnummer())
                     contentType(ContentType.Application.Json)
                     setBody(RegoppslagRequest(ident))
                 }
@@ -56,11 +58,24 @@ class RegoppslagKlient(
         } catch (re: ResponseException) {
             if (re.response.status == HttpStatusCode.NotFound) {
                 null
+            } else if (re.response.status == HttpStatusCode.Gone) {
+                logger.warn(re.response.bodyAsText())
+                null
             } else {
-                throw re
+                logger.error("Uhåndtert feil fra regoppslag: ${re.response.bodyAsText()}")
+
+                throw ForespoerselException(
+                    status = re.response.status.value,
+                    code = "UKJENT_FEIL_REGOPPSLAG",
+                    detail = "Ukjent feil oppsto ved uthenting av mottakers adresse fra regoppslag",
+                )
             }
-        } catch (exception: Exception) {
-            throw AdresseException("Feil i kall mot Regoppslag", exception)
+        }
+
+    private fun SakType.mapTilBehandlingsnummer() =
+        when (this) {
+            SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON.behandlingsnummer
+            SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD.behandlingsnummer
         }
 }
 
@@ -102,5 +117,3 @@ data class RegoppslagResponseDTO(
         ENHETFORRETNINGSADRESSE,
     }
 }
-
-open class AdresseException(msg: String, cause: Throwable) : Exception(msg, cause)

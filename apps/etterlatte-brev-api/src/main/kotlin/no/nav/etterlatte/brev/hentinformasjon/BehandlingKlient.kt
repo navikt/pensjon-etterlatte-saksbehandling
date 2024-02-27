@@ -9,15 +9,19 @@ import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
+import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.SettPaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.retry
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Systembruker
 import java.util.UUID
 
 class BehandlingKlient(config: Config, httpClient: HttpClient) {
@@ -84,6 +88,29 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
             onSuccess = { deserialize(it.response!!.toString()) },
             errorMessage = { "Klarte ikke hente behandling med id=$behandlingId" },
             brukerTokenInfo = brukerTokenInfo,
+        )
+    }
+
+    internal suspend fun tildelSaksbehandler(
+        oppgaveId: UUID,
+        brukerTokenInfo: Systembruker,
+    ) = retryOgPakkUt {
+        downstreamResourceClient.post(
+            resource = Resource(clientId = clientId, url = "$resourceUrl/api/oppgaver/$oppgaveId/tildel-saksbehandler"),
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = SaksbehandlerEndringDto(brukerTokenInfo.ident()),
+        )
+    }
+
+    internal suspend fun opprettFrist(
+        oppgaveId: UUID,
+        frist: Tidspunkt,
+        brukerTokenInfo: Systembruker,
+    ) = retryOgPakkUt {
+        downstreamResourceClient.put(
+            resource = Resource(clientId = clientId, url = "$resourceUrl/api/oppgaver/$oppgaveId/frist"),
+            brukerTokenInfo = brukerTokenInfo,
+            putBody = RedigerFristRequest(frist),
         )
     }
 

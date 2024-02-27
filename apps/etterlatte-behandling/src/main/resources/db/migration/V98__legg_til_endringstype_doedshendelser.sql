@@ -1,0 +1,1 @@
+alter table doedshendelse ADD COLUMN endringstype TEXT DEFAULT NULL;

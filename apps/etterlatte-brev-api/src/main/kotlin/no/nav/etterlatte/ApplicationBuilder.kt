@@ -185,6 +185,7 @@ class ApplicationBuilder {
             pdfGenerator,
             brevDataMapperRedigerbartUtfallVedtak,
             brevDataMapperFerdigstilling,
+            behandlingKlient,
         )
     private val brevDataMapperFerdigstillVarsel = BrevDataMapperFerdigstillVarsel(beregningService, trygdetidService)
 

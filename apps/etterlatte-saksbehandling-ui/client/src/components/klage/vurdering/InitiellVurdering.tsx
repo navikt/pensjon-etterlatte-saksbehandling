@@ -1,92 +1,118 @@
 import { Button, Heading, Radio, RadioGroup, Textarea } from '@navikt/ds-react'
 import React, { useState } from 'react'
-import { Klage, Utfall } from '~shared/types/Klage'
+import { IniteltUtfallMedBegrunnelseDto, Klage, Utfall } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { oppdaterInitieltUtfallForKlage } from '~shared/api/klage'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { isPending } from '~shared/api/apiUtils'
-import { updateInitieltUtfall } from '~store/reducers/KlageReducer'
-import { useAppDispatch, useAppSelector } from '~store/Store'
+import { addKlage } from '~store/reducers/KlageReducer'
+import { useAppDispatch } from '~store/Store'
 import { InitiellVurderingVisningContent } from '~components/klage/vurdering/InitiellVurderingVisning'
+import { VurderingWrapper } from '~components/klage/styled'
+import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
+import { PencilIcon } from '@navikt/aksel-icons'
+import { FieldOrNull } from '~shared/types/util'
+import { Controller, useForm } from 'react-hook-form'
+
+const getTextFromutfall = (utfall: Utfall): string => {
+  switch (utfall) {
+    case Utfall.AVVIST:
+      return 'Hvorfor avvises det?'
+    case Utfall.AVVIST_MED_OMGJOERING:
+      return 'Hvorfor avvises det med omgjøring?'
+    case Utfall.OMGJOERING:
+      return 'Hvorfor skal det omgjøres?'
+    case Utfall.DELVIS_OMGJOERING:
+      return 'Hvorfor skal det delvis omgjøres?'
+    case Utfall.STADFESTE_VEDTAK:
+      return 'Hvorfor står vedtaket seg?'
+  }
+}
+
+type InitiellVurderingForm = FieldOrNull<IniteltUtfallMedBegrunnelseDto>
+
+function initiellVurderingErUtfylt(formdata: InitiellVurderingForm): formdata is IniteltUtfallMedBegrunnelseDto {
+  return !!formdata.utfall
+}
 
 export const InitiellVurdering = (props: { klage: Klage }) => {
   const klage = props.klage
 
   const dispatch = useAppDispatch()
-  const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
-
-  const [begrunnelse, setBegrunnelse] = useState<string>('')
-  const [utfall, setUtfall] = useState<Utfall>()
-
   const harIkkeInitieltUtfall = !klage?.initieltUtfall
   const [redigerbar, setRedigerbar] = useState<boolean>(false)
 
   const [lagreInitiellStatus, lagreInitiellKlageUtfall] = useApiCall(oppdaterInitieltUtfallForKlage)
+  const { handleSubmit, control, register, watch } = useForm<InitiellVurderingForm>({
+    defaultValues: klage.initieltUtfall?.utfallMedBegrunnelse ?? { begrunnelse: null, utfall: null },
+  })
+
+  const formUtfall = watch('utfall')
+
+  function lagreInitieltUtfall(formdata: InitiellVurderingForm) {
+    if (!klage) {
+      return
+    }
+    if (!initiellVurderingErUtfylt(formdata)) {
+      return
+    }
+    lagreInitiellKlageUtfall(
+      {
+        klageId: klage.id,
+        utfallMedBegrunnelse: formdata,
+      },
+      (klage) => {
+        dispatch(addKlage(klage))
+        setRedigerbar(false)
+      }
+    )
+  }
+
   const redigeringsModus = redigerbar || harIkkeInitieltUtfall
 
-  const getTextFromutfall = (utfall: Utfall): string => {
-    switch (utfall) {
-      case Utfall.AVVIST:
-        return 'Hvorfor avvises det?'
-      case Utfall.AVVIST_MED_OMGJOERING:
-        return 'Hvorfor avvises det med omgjøring?'
-      case Utfall.OMGJOERING:
-        return 'Hvorfor skal det omgjøres?'
-      case Utfall.DELVIS_OMGJOERING:
-        return 'Hvorfor skal det delvis omgjøres?'
-      case Utfall.STADFESTE_VEDTAK:
-        return 'Hvorfor står vedtaket seg?'
-    }
-  }
+  const stoetterDelvisOmgjoering = useFeatureEnabledMedDefault('pensjon-etterlatte.klage-delvis-omgjoering', false)
 
   return (
     <>
       <Heading level="2" size="medium">
-        Første vurdering av utfall saksbehandler
+        Første vurdering
       </Heading>
       <>
         {redigeringsModus ? (
-          <>
-            <RadioGroup legend="" onChange={(e) => setUtfall(e as Utfall)}>
-              <Radio value={Utfall.OMGJOERING}>Omgjøring av vedtak</Radio>
-              <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>
-              <Radio value={Utfall.STADFESTE_VEDTAK}>Stadfeste vedtaket</Radio>
-            </RadioGroup>
-
-            {utfall && (
+          <form onSubmit={handleSubmit(lagreInitieltUtfall)}>
+            <Controller
+              name="utfall"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                  message: 'Du må velge et initielt utfall.',
+                },
+              }}
+              render={({ field, fieldState }) => {
+                return (
+                  <VurderingWrapper>
+                    <RadioGroup legend="" {...field} error={fieldState.error?.message}>
+                      <Radio value={Utfall.OMGJOERING}>Omgjøring av vedtak</Radio>
+                      {stoetterDelvisOmgjoering && (
+                        <Radio value={Utfall.DELVIS_OMGJOERING}>Delvis omgjøring av vedtak</Radio>
+                      )}
+                      <Radio value={Utfall.STADFESTE_VEDTAK}>Stadfeste vedtaket</Radio>
+                    </RadioGroup>
+                  </VurderingWrapper>
+                )
+              }}
+            />
+            {formUtfall && (
               <>
-                <Textarea
-                  size="medium"
-                  label={getTextFromutfall(utfall)}
-                  value={begrunnelse}
-                  onChange={(e) => setBegrunnelse(e.target.value)}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  loading={isPending(lagreInitiellStatus)}
-                  onClick={() => {
-                    const utfallMedBegrunnelse = { utfall: utfall, begrunnelse: begrunnelse }
-                    lagreInitiellKlageUtfall(
-                      {
-                        klageId: klage?.id,
-                        utfallMedBegrunnelse,
-                      },
-                      () => {
-                        dispatch(
-                          updateInitieltUtfall({
-                            utfallMedBegrunnelse: utfallMedBegrunnelse,
-                            saksbehandler: innloggetSaksbehandler.ident,
-                            tidspunkt: Date().toString(),
-                          })
-                        )
-                        setRedigerbar(false)
-                      }
-                    )
-                  }}
-                >
-                  Lagre
-                </Button>
+                <VurderingWrapper>
+                  <Textarea size="medium" label={getTextFromutfall(formUtfall)} {...register('begrunnelse')} />
+                </VurderingWrapper>
+                <VurderingWrapper>
+                  <Button type="submit" variant="primary" loading={isPending(lagreInitiellStatus)}>
+                    Lagre vurdering
+                  </Button>
+                </VurderingWrapper>
                 {isFailureHandler({
                   apiResult: lagreInitiellStatus,
                   errorMessage:
@@ -94,13 +120,15 @@ export const InitiellVurdering = (props: { klage: Klage }) => {
                 })}
               </>
             )}
-          </>
+          </form>
         ) : (
           <>
             <InitiellVurderingVisningContent klage={klage} />
             <Button
               style={{ marginBottom: '3em' }}
               type="button"
+              size="small"
+              icon={<PencilIcon />}
               variant="secondary"
               onClick={() => setRedigerbar(true)}
             >

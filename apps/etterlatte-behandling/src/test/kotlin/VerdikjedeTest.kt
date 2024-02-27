@@ -54,7 +54,7 @@ import no.nav.etterlatte.libs.common.oppgave.SakIdOgReferanse
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.oppgave.VedtakEndringDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -442,6 +442,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
                                     InnstillingTilKabalUtenBrev(
                                         lovhjemmel = KabalHjemmel.FTRL_3_5_TRYGDETID.name,
                                         internKommentar = "En tekst",
+                                        innstillingTekst = "En ekstra tekst",
                                     ),
                             ),
                         ),
@@ -475,7 +476,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             client.post("/grunnlagsendringshendelse/doedshendelse") {
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(Doedshendelse("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
+                setBody(DoedshendelsePdl("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }
@@ -483,7 +484,7 @@ class VerdikjedeTest : BehandlingIntegrationTest() {
             client.post("/grunnlagsendringshendelse/doedshendelse") {
                 addAuthToken(systemBruker)
                 header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(Doedshendelse("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
+                setBody(DoedshendelsePdl("1", Endringstype.OPPRETTET, fnr, LocalDate.now()))
             }.also {
                 assertEquals(HttpStatusCode.OK, it.status)
             }

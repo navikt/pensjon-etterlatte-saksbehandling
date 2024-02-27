@@ -18,11 +18,12 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SakidOgRolle
 import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -82,7 +83,7 @@ class GrunnlagsendringshendelseService(
         hendelse: Grunnlagsendringshendelse,
         saksbehandler: Saksbehandler,
     ) {
-        logger.info("Lukker hendelse med id $hendelse.id")
+        logger.info("Lukker hendelse med id ${hendelse.id}")
 
         inTransaction {
             grunnlagsendringshendelseDao.lukkGrunnlagsendringStatus(hendelse = hendelse)
@@ -115,7 +116,7 @@ class GrunnlagsendringshendelseService(
         return inTransaction { opprettHendelseAvTypeForPerson(bostedsadresse.fnr, GrunnlagsendringsType.BOSTED) }
     }
 
-    fun opprettDoedshendelse(doedshendelse: Doedshendelse): List<Grunnlagsendringshendelse> {
+    fun opprettDoedshendelse(doedshendelse: DoedshendelsePdl): List<Grunnlagsendringshendelse> {
         if (doedshendelseService.kanBrukeDeodshendelserJob()) {
             try {
                 doedshendelseService.opprettDoedshendelseForBeroertePersoner(doedshendelse)
@@ -333,6 +334,11 @@ class GrunnlagsendringshendelseService(
             }.map { it.first }
     }
 
+    fun opprettDoedshendelseForPerson(grunnlagsendringshendelse: Grunnlagsendringshendelse): OppgaveIntern {
+        grunnlagsendringshendelseDao.opprettGrunnlagsendringshendelse(grunnlagsendringshendelse)
+        return opprettOppgave(grunnlagsendringshendelse)
+    }
+
     private fun opprettHendelseAvTypeForSak(
         sakId: Long,
         grunnlagendringType: GrunnlagsendringsType,
@@ -412,15 +418,19 @@ class GrunnlagsendringshendelseService(
                 etterStatus = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
                 samsvarMellomKildeOgGrunnlag = samsvarMellomKildeOgGrunnlag,
             )
-            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                referanse = hendelse.id.toString(),
-                sakId = hendelse.sakId,
-                oppgaveKilde = OppgaveKilde.HENDELSE,
-                oppgaveType = OppgaveType.VURDER_KONSEKVENS,
-                merknad = hendelse.beskrivelse(),
-            ).also {
-                logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
-            }
+            opprettOppgave(hendelse)
+        }
+    }
+
+    private fun opprettOppgave(hendelse: Grunnlagsendringshendelse): OppgaveIntern {
+        return oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+            referanse = hendelse.id.toString(),
+            sakId = hendelse.sakId,
+            oppgaveKilde = OppgaveKilde.HENDELSE,
+            oppgaveType = OppgaveType.VURDER_KONSEKVENS,
+            merknad = hendelse.beskrivelse(),
+        ).also {
+            logger.info("Oppgave for hendelsen med id=${hendelse.id} er opprettet med id=${it.id}")
         }
     }
 

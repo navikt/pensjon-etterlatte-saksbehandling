@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
-import no.nav.etterlatte.behandling.domain.ManueltOpphoer
 import no.nav.etterlatte.behandling.domain.Revurdering
 import no.nav.etterlatte.behandling.kommerbarnettilgode.KommerBarnetTilGodeDao
 import no.nav.etterlatte.behandling.revurdering.RevurderingDao
@@ -277,25 +276,6 @@ internal class BehandlingDaoTest(val dataSource: DataSource) {
 
         val behandling = behandlingRepo.hentBehandling(id = opprettBehandling.id)
         assertTrue(behandling is Revurdering)
-    }
-
-    @Test
-    fun `skal returnere behandling av type ManueltOpphoer`() {
-        val sak1 = sakRepo.opprettSak("123", SakType.BARNEPENSJON, Enheter.defaultEnhet.enhetNr).id
-        val opprettBehandling =
-            opprettBehandling(
-                type = BehandlingType.MANUELT_OPPHOER,
-                sakId = sak1,
-                opphoerAarsaker =
-                    listOf(
-                        "SOESKEN_DOED",
-                        "GJENLEVENDE_FORELDER_DOED",
-                    ),
-            ).also {
-                behandlingRepo.opprettBehandling(it)
-            }
-        val behandling = behandlingRepo.hentBehandling(opprettBehandling.id)
-        assertTrue(behandling is ManueltOpphoer)
     }
 
     @Test

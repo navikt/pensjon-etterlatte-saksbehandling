@@ -3,7 +3,6 @@ package no.nav.etterlatte.tidshendelser
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldContainOnly
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
@@ -30,7 +29,7 @@ class AldersovergangerIntegrationTest(dataSource: DataSource) {
     }
 
     @Test
-    fun `hvis ingen saker for aktuell maaned saa skal jobb ferdigstilles`() {
+    fun `hvis ingen saker for aktuell maaned saa skal ingen hendelser opprettes`() {
         val behandlingsmaaned = YearMonth.of(2024, Month.APRIL)
         val jobb = jobbTestdata.opprettJobb(JobbType.AO_BP20, behandlingsmaaned)
 
@@ -39,7 +38,6 @@ class AldersovergangerIntegrationTest(dataSource: DataSource) {
         aldersovergangerService.execute(jobb)
 
         hendelseDao.hentHendelserForJobb(jobb.id) shouldHaveSize 0
-        hendelseDao.hentJobb(jobb.id).status shouldBe JobbStatus.FERDIG
     }
 
     @Test
@@ -57,10 +55,5 @@ class AldersovergangerIntegrationTest(dataSource: DataSource) {
         hendelser.map { it.sakId } shouldContainExactlyInAnyOrder listOf(2, 1, 3)
         hendelser.map { it.jobbId } shouldContainOnly setOf(jobb.id)
         hendelser.map { it.status } shouldContainOnly setOf(HendelseStatus.NY)
-
-        with(hendelseDao.hentJobb(jobb.id)) {
-            status shouldBe JobbStatus.STARTET
-            versjon shouldBe 2
-        }
     }
 }

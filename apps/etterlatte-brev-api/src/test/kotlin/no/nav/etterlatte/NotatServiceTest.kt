@@ -159,6 +159,7 @@ private fun klageForInnstilling(sakId: Long): Klage {
                         lovhjemmel = KabalHjemmel.FTRL_18_4,
                         internKommentar = null,
                         brev = KlageBrevInnstilling(brevId = 123L),
+                        innstillingTekst = "Hello",
                     ),
                 saksbehandler =
                     Grunnlagsopplysning.Saksbehandler(

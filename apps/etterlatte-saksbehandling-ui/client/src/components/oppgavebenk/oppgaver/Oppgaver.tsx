@@ -38,7 +38,6 @@ export const Oppgaver = ({
         filter.ytelseFilter,
         filter.oppgavestatusFilter,
         filter.oppgavetypeFilter,
-        filter.oppgavekildeFilter,
         [...oppgaver],
         filter.fnrFilter
       )

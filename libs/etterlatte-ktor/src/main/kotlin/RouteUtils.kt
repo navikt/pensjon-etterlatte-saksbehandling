@@ -245,10 +245,12 @@ suspend fun PipelineContext<Unit, ApplicationCall>.hvisEnabled(
     if (featureToggleService.isEnabled(toggle, false)) {
         block()
     } else {
-        throw ForespoerselException(
-            code = "NOT_IMPLEMENTED",
-            status = HttpStatusCode.NotImplemented.value,
-            detail = "Funksjonaliteten er ikke tilgjengelig enda.",
-        )
+        throw FeatureIkkeStoettetException()
     }
 }
+
+class FeatureIkkeStoettetException : ForespoerselException(
+    code = "NOT_IMPLEMENTED",
+    status = HttpStatusCode.NotImplemented.value,
+    detail = "Funksjonaliteten er ikke tilgjengelig enda.",
+)

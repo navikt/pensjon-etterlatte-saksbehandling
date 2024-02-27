@@ -1,6 +1,8 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt
 
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Companion.ALDER_SAKTYPE
@@ -8,20 +10,28 @@ import no.nav.etterlatte.common.klienter.SakSammendragResponse.Companion.UFORE_S
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.LOPENDE
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.OPPRETTET
 import no.nav.etterlatte.common.klienter.SakSammendragResponse.Status.TIL_BEHANDLING
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.Doedshendelse
+import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.oppgave.OppgaveService
+import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 
 class DoedshendelseKontrollpunktService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
+    private val grunnlagsendringshendelseDao: GrunnlagsendringshendelseDao,
+    private val oppgaveService: OppgaveService,
+    private val sakService: SakService,
     private val pesysKlient: PesysKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    fun identifiserKontrollerpunkter(hendelse: Doedshendelse): List<DoedshendelseKontrollpunkt> {
+    fun identifiserKontrollerpunkter(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt> {
         val avdoed = pdlTjenesterKlient.hentPdlModell(hendelse.avdoedFnr, PersonRolle.AVDOED, SakType.BARNEPENSJON)
+        val sak = sakService.finnSak(hendelse.beroertFnr, hendelse.sakType())
 
         return listOfNotNull(
             kontrollerAvdoedDoedsdato(avdoed),
@@ -29,6 +39,8 @@ class DoedshendelseKontrollpunktService(
             kontrollerDNummer(avdoed),
             kontrollerUtvandring(avdoed),
             kontrollerSamtidigDoedsfall(avdoed, hendelse),
+            kontrollerEksisterendeSak(sak),
+            kontrollerEksisterendeHendelser(hendelse, sak),
         )
     }
 
@@ -38,7 +50,7 @@ class DoedshendelseKontrollpunktService(
             else -> null
         }
 
-    private fun kontrollerKryssendeYtelse(hendelse: Doedshendelse): DoedshendelseKontrollpunkt? =
+    private fun kontrollerKryssendeYtelse(hendelse: DoedshendelseInternal): DoedshendelseKontrollpunkt? =
         runBlocking {
             val kryssendeYtelser =
                 pesysKlient.hentSaker(hendelse.beroertFnr)
@@ -84,7 +96,7 @@ class DoedshendelseKontrollpunktService(
 
     private fun kontrollerSamtidigDoedsfall(
         avdoed: PersonDTO,
-        hendelse: Doedshendelse,
+        hendelse: DoedshendelseInternal,
     ): DoedshendelseKontrollpunkt? =
         try {
             avdoed.doedsdato?.verdi?.let { avdoedDoedsdato ->
@@ -114,4 +126,36 @@ class DoedshendelseKontrollpunktService(
             logger.error("Feil ved uthenting av annen forelder", e)
             DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
         }
+
+    private fun kontrollerEksisterendeSak(sak: Sak?): DoedshendelseKontrollpunkt? =
+        sak?.let { return DoedshendelseKontrollpunkt.SakEksistererIGjenny(sak) }
+
+    private fun kontrollerEksisterendeHendelser(
+        hendelse: DoedshendelseInternal,
+        sak: Sak?,
+    ): DoedshendelseKontrollpunkt? {
+        if (sak == null) {
+            return null
+        }
+
+        val duplikatHendelse =
+            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(
+                sakId = sak.id,
+                statuser = listOf(GrunnlagsendringStatus.VENTER_PAA_JOBB, GrunnlagsendringStatus.SJEKKET_AV_JOBB),
+            ).filter {
+                it.gjelderPerson == hendelse.avdoedFnr && it.type == GrunnlagsendringsType.DOEDSFALL
+            }
+
+        return when {
+            duplikatHendelse.isNotEmpty() -> {
+                val oppgaver = oppgaveService.hentOppgaverForReferanse(duplikatHendelse.first().id.toString())
+                DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse(
+                    grunnlagsendringshendelseId = duplikatHendelse.first().id,
+                    oppgaveId = oppgaver.firstOrNull()?.id,
+                )
+            }
+
+            else -> null
+        }
+    }
 }

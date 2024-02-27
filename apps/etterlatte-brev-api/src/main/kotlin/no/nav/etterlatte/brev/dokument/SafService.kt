@@ -80,7 +80,11 @@ class SafService(
 
     private fun konverterTilForespoerselException(errors: List<Error>): ForespoerselException {
         errors.forEach {
-            logger.error("${errors.size} feil oppsto ved kall mot saf: ${it.toJson()}")
+            if (errors.all { err -> err.extensions?.code == Error.Code.FORBIDDEN }) {
+                logger.warn("${errors.size} feil oppsto ved kall mot saf, alle var tilgangssjekk: ${it.toJson()}")
+            } else {
+                logger.error("${errors.size} feil oppsto ved kall mot saf: ${it.toJson()}")
+            }
         }
 
         val error = errors.firstOrNull()

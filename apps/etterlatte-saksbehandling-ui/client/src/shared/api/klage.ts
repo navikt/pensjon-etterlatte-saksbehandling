@@ -48,6 +48,10 @@ export function ferdigstillKlagebehandling(klageId: string): Promise<ApiResponse
   return apiClient.post(`/klage/${klageId}/ferdigstill`, {})
 }
 
+export function fattVedtakOmAvvistKlage(klageId: string): Promise<ApiResponse<Klage>> {
+  return apiClient.post(`/klage/${klageId}/vedtak/fatt`, {})
+}
+
 export function avsluttKlage(avsluttKlageRequest: AvsluttKlageRequest): Promise<ApiResponse<void>> {
   return apiClient.post(`/klage/${avsluttKlageRequest.klageId}/avbryt`, { ...avsluttKlageRequest })
 }

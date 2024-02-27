@@ -302,6 +302,7 @@ internal class ApplicationContext(
             klageKlient = klageKlient,
             klageHendelser = klageHendelser,
             vedtakKlient = vedtakKlient,
+            featureToggleService = featureToggleService,
         )
 
     val revurderingService =
@@ -355,9 +356,17 @@ internal class ApplicationContext(
     val doedshendelseJobService =
         DoedshendelseJobService(
             doedshendelseDao = doedshendelseDao,
-            doedshendelseKontrollpunktService = DoedshendelseKontrollpunktService(pdlTjenesterKlient, pesysKlient),
+            doedshendelseKontrollpunktService =
+                DoedshendelseKontrollpunktService(
+                    pdlTjenesterKlient = pdlTjenesterKlient,
+                    grunnlagsendringshendelseDao = grunnlagsendringshendelseDao,
+                    oppgaveService = oppgaveService,
+                    sakService = sakService,
+                    pesysKlient = pesysKlient,
+                ),
             featureToggleService = featureToggleService,
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
+            sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = if (isProd()) 2 else 0,
             behandlingService = behandlingService,
             pdlTjenesterKlient = pdlTjenesterKlient,

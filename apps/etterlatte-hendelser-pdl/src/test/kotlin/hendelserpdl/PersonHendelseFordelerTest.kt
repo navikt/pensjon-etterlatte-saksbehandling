@@ -10,7 +10,7 @@ import no.nav.etterlatte.hendelserpdl.pdl.PdlTjenesterKlient
 import no.nav.etterlatte.kafka.JsonMessage
 import no.nav.etterlatte.kafka.KafkaProdusent
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype.OPPRETTET
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.PdlHendelserKeys
@@ -160,7 +160,7 @@ internal class PersonHendelseFordelerTest {
                 eventName = PdlHendelserKeys.PERSONHENDELSE.lagEventnameForType(),
                 hendelse = LeesahOpplysningstype.DOEDSFALL_V1,
                 hendelse_data =
-                    Doedshendelse(
+                    DoedshendelsePdl(
                         hendelseId = personHendelse.hendelseId,
                         endringstype = OPPRETTET,
                         fnr = personHendelse.personidenter.first(),
@@ -175,7 +175,7 @@ internal class PersonHendelseFordelerTest {
             kafkaProduser.publiser(
                 any(),
                 match {
-                    val hendelse: MeldingSendtPaaRapid<Doedshendelse> = objectMapper.readValue(it.toJson())
+                    val hendelse: MeldingSendtPaaRapid<DoedshendelsePdl> = objectMapper.readValue(it.toJson())
                     hendelse == forventetMeldingPaaRapid
                 },
             )

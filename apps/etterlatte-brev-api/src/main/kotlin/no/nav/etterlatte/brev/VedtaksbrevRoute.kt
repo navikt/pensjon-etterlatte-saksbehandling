@@ -5,6 +5,7 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
@@ -37,6 +38,13 @@ fun Route.vedtaksbrevRoute(
                     logger.info("Henting av brev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(brev ?: HttpStatusCode.NoContent)
                 }
+            }
+        }
+
+        delete("vedtak") {
+            withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
+                service.settVedtaksbrevTilSlettet(behandlingId, brukerTokenInfo)
+                call.respond(HttpStatusCode.NoContent)
             }
         }
 

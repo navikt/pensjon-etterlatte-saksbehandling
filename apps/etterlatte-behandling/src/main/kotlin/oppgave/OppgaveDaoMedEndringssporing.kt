@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.etterlatte.behandling.objectMapper
 import no.nav.etterlatte.common.ConnectionAutoclosing
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
+import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -12,6 +13,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.toList
 import java.sql.ResultSet
+import java.time.LocalDate
 import java.util.UUID
 
 interface OppgaveDaoMedEndringssporing : OppgaveDao {
@@ -169,6 +171,14 @@ class OppgaveDaoMedEndringssporingImpl(
         merknad: String,
         oppgaveStatus: Status,
     ) {
-        oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, oppgaveStatus)
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, oppgaveStatus)
+        }
     }
+
+    override fun hentFristGaarUt(
+        dato: LocalDate,
+        type: OppgaveType,
+        kilde: OppgaveKilde,
+    ): List<UUID> = oppgaveDao.hentFristGaarUt(dato, type, kilde)
 }

@@ -4,28 +4,39 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.BehandlingService
+import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
+import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnOppgaveId
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnSak
 import no.nav.etterlatte.inTransaction
+import no.nav.etterlatte.libs.common.behandling.Saksrolle
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.maskerFnr
 import no.nav.etterlatte.libs.common.sak.Sak
+import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
+import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.UUID
 
 class DoedshendelseJobService(
     private val doedshendelseDao: DoedshendelseDao,
     private val doedshendelseKontrollpunktService: DoedshendelseKontrollpunktService,
     private val featureToggleService: FeatureToggleService,
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
+    private val sakService: SakService,
     private val dagerGamleHendelserSomSkalKjoeres: Int,
     private val behandlingService: BehandlingService,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
@@ -58,31 +69,71 @@ class DoedshendelseJobService(
         }
     }
 
-    private fun haandterDoedshendelse(doedshendelse: Doedshendelse) {
+    private fun haandterDoedshendelse(doedshendelse: DoedshendelseInternal) {
         val kontrollpunkter = doedshendelseKontrollpunktService.identifiserKontrollerpunkter(doedshendelse)
 
         when (kontrollpunkter.any { it.avbryt }) {
             true -> {
                 logger.info(
-                    "Avbryter behandling av dødshendelse for person ${doedshendelse.avdoedFnr.maskerFnr()} med avdød " +
+                    "Avbryter behandling av dødshendelse for person ${doedshendelse.beroertFnr.maskerFnr()} med avdød " +
                         "${doedshendelse.avdoedFnr.maskerFnr()} grunnet kontrollpunkt: " +
                         kontrollpunkter.joinToString(","),
                 )
-                doedshendelseDao.oppdaterDoedshendelse(doedshendelse.tilAvbrutt())
+
+                doedshendelseDao.oppdaterDoedshendelse(
+                    doedshendelse.tilAvbrutt(
+                        sakId = kontrollpunkter.finnSak()?.id,
+                        oppgaveId = kontrollpunkter.finnOppgaveId(),
+                    ),
+                )
             }
 
             false -> {
-                grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(
-                    fnr = doedshendelse.avdoedFnr,
-                    grunnlagendringType = GrunnlagsendringsType.DOEDSFALL,
+                logger.info(
+                    "Oppretter grunnlagshendelse og oppgave for person ${doedshendelse.beroertFnr.maskerFnr()} " +
+                        "med avdød ${doedshendelse.avdoedFnr.maskerFnr()}",
                 )
-                // todo: EY-3539 - lukk etter oppgave er opprettet
+                val sak = // todo - EY-3572: Hvis sak ikke finnes, må vi også opprette persongrunnlag
+                    kontrollpunkter.finnSak() ?: sakService.finnEllerOpprettSak(
+                        fnr = doedshendelse.beroertFnr,
+                        type = doedshendelse.sakType(),
+                    )
+                val oppgave = opprettOppgave(doedshendelse, sak)
+                doedshendelseDao.oppdaterDoedshendelse(
+                    doedshendelse.tilBehandlet(
+                        utfall = Utfall.OPPGAVE,
+                        sakId = sak.id,
+                        oppgaveId = oppgave.id,
+                    ),
+                )
             }
         }
     }
 
+    private fun opprettOppgave(
+        doedshendelse: DoedshendelseInternal,
+        sak: Sak,
+    ) = grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
+        grunnlagsendringshendelse =
+            Grunnlagsendringshendelse(
+                id = UUID.randomUUID(),
+                sakId = sak.id,
+                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                type = GrunnlagsendringsType.DOEDSFALL,
+                opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                hendelseGjelderRolle = Saksrolle.SOEKER,
+                gjelderPerson = doedshendelse.avdoedFnr,
+                samsvarMellomKildeOgGrunnlag =
+                    SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(
+                        fraGrunnlag = null,
+                        fraPdl = doedshendelse.avdoedDoedsdato,
+                        samsvar = false,
+                    ),
+            ),
+    )
+
     private fun skalSendeBrevBP(
-        doedshendelse: Doedshendelse,
+        doedshendelse: DoedshendelseInternal,
         sak: Sak,
     ) {
         if (doedshendelse.relasjon == Relasjon.BARN) {
@@ -109,7 +160,7 @@ class DoedshendelseJobService(
         }
     }
 
-    fun harUfoereTrygd(doedshendelse: Doedshendelse): Boolean {
+    fun harUfoereTrygd(doedshendelse: DoedshendelseInternal): Boolean {
         val sakerFraPesys =
             runBlocking {
                 pesysKlient.hentSaker(doedshendelse.beroertFnr)
@@ -126,7 +177,7 @@ class DoedshendelseJobService(
         return foreldre.all { it.doedsdato != null }
     }
 
-    private fun finnGyldigeDoedshendelser(hendelser: List<Doedshendelse>): List<Doedshendelse> {
+    private fun finnGyldigeDoedshendelser(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {
         val idag = LocalDateTime.now()
         return hendelser.filter {
             Duration.between(it.endret, idag.toTidspunkt()).toDays() >= dagerGamleHendelserSomSkalKjoeres

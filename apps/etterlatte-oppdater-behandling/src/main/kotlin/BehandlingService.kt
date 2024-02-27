@@ -20,9 +20,10 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Bostedsadresse
-import no.nav.etterlatte.libs.common.pdlhendelse.Doedshendelse
+import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.ForelderBarnRelasjonHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.SivilstandHendelse
 import no.nav.etterlatte.libs.common.pdlhendelse.UtflyttingsHendelse
@@ -35,7 +36,7 @@ import no.nav.etterlatte.rapidsandrivers.migrering.MigreringRequest
 import java.util.UUID
 
 interface BehandlingService {
-    fun sendDoedshendelse(doedshendelse: Doedshendelse)
+    fun sendDoedshendelse(doedshendelse: DoedshendelsePdl)
 
     fun oppdaterDoedshendelseBrevDistribuert(doedshendelseBrevDistribuert: DoedshendelseBrevDistribuert)
 
@@ -79,6 +80,8 @@ interface BehandlingService {
         merknad: String? = null,
         frist: Tidspunkt? = null,
     ): UUID
+
+    fun taAvVent(request: VentefristGaarUtRequest)
 }
 
 data class ReguleringFeiletHendelse(val sakId: Long)
@@ -87,7 +90,7 @@ class BehandlingServiceImpl(
     private val behandlingKlient: HttpClient,
     private val url: String,
 ) : BehandlingService {
-    override fun sendDoedshendelse(doedshendelse: Doedshendelse) {
+    override fun sendDoedshendelse(doedshendelse: DoedshendelsePdl) {
         runBlocking {
             behandlingKlient.post("$url/grunnlagsendringshendelse/doedshendelse") {
                 contentType(ContentType.Application.Json)
@@ -251,6 +254,15 @@ class BehandlingServiceImpl(
                 )
             }.body<ObjectNode>().let {
                 UUID.fromString(it["id"].textValue())
+            }
+        }
+    }
+
+    override fun taAvVent(request: VentefristGaarUtRequest) {
+        runBlocking {
+            behandlingKlient.put("$url/oppgaver/ventefrist-gaar-ut") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
             }
         }
     }

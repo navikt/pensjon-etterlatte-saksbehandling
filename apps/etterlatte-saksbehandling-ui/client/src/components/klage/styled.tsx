@@ -7,8 +7,12 @@ export const Innhold = styled.div`
 
 export const VurderingWrapper = styled.div`
   margin-bottom: 2rem;
-
   width: 30rem;
+`
+
+export const BredVurderingWrapper = styled.div`
+  margin-bottom: 2rem;
+  width: 50rem;
 `
 
 export const Feilmelding = styled(BodyShort)`

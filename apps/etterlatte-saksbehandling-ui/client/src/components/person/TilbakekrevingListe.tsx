@@ -6,7 +6,6 @@ import { Heading, Link, Table } from '@navikt/ds-react'
 import { formaterDato, formaterStringDato } from '~utils/formattering'
 import styled from 'styled-components'
 
-import { mapApiResult } from '~shared/api/apiUtils'
 import {
   teksterTilbakekrevingStatus,
   TilbakekrevingBehandling,
@@ -14,6 +13,7 @@ import {
 } from '~shared/types/Tilbakekreving'
 import { hentTilbakekrevingerISak } from '~shared/api/tilbakekreving'
 import { VedtakKolonner } from '~components/person/VedtakKoloner'
+import { MapApiResult } from '~shared/components/MapApiResult'
 
 export function lenkeTilTilbakekrevingMedId(id: string): string {
   return `/tilbakekreving/${id}/`
@@ -74,11 +74,13 @@ export function TilbakekrevingListe(props: { sakId: number }) {
     void hentTilbakekrevinger(sakId)
   }, [sakId])
 
-  return mapApiResult(
-    tilbakekrevinger,
-    <Spinner visible label="Henter tilbakekrevinger til saken" />,
-    () => <ApiErrorAlert>Kunne ikke hente tilbakekrevinger</ApiErrorAlert>,
-    (tilbakekrevinger) => <TilbakekrevingTabell tilbakekrevinger={tilbakekrevinger} />
+  return (
+    <MapApiResult
+      result={tilbakekrevinger}
+      mapInitialOrPending={<Spinner visible label="Henter tilbakekrevinger til saken" />}
+      mapError={() => <ApiErrorAlert>Kunne ikke hente tilbakekrevinger</ApiErrorAlert>}
+      mapSuccess={(tilbakekrevinger) => <TilbakekrevingTabell tilbakekrevinger={tilbakekrevinger} />}
+    />
   )
 }
 

@@ -93,7 +93,7 @@ class DoedshendelseJobService(
                     "Oppretter grunnlagshendelse og oppgave for person ${doedshendelse.beroertFnr.maskerFnr()} " +
                         "med avdød ${doedshendelse.avdoedFnr.maskerFnr()}",
                 )
-                val sak: Sak = // todo - EY-3572: Hvis sak ikke finnes, må vi også opprette persongrunnlag
+                val sak: Sak =
                     kontrollpunkter.finnSak() ?: opprettSakOgLagGrunnlag(doedshendelse)
 
                 sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)

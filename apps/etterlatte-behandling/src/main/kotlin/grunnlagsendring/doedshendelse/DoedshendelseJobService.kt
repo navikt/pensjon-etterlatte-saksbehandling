@@ -93,30 +93,8 @@ class DoedshendelseJobService(
                     "Oppretter grunnlagshendelse og oppgave for person ${doedshendelse.beroertFnr.maskerFnr()} " +
                         "med avdød ${doedshendelse.avdoedFnr.maskerFnr()}",
                 )
-                val sak = // todo - EY-3572: Hvis sak ikke finnes, må vi også opprette persongrunnlag
-                    kontrollpunkter.finnSak() ?: {
-                        val sak =
-                            sakService.finnEllerOpprettSak(
-                                fnr = doedshendelse.beroertFnr,
-                                type = doedshendelse.sakType(),
-                            )
-
-                        val gjenlevende =
-                            when (sak.sakType) {
-                                SakType.BARNEPENSJON -> null
-                                SakType.OMSTILLINGSSTOENAD -> hentAnnenForelder(doedshendelse)
-                            }
-                        val galleri =
-                            Persongalleri(
-                                soeker = doedshendelse.beroertFnr,
-                                avdoed = listOf(doedshendelse.avdoedFnr),
-                                gjenlevende = listOfNotNull(gjenlevende),
-                                innsender = Vedtaksloesning.GJENNY.name,
-                            )
-
-                        grunnlagService.leggInnNyttGrunnlagSak(sak = sak, galleri)
-                        sak
-                    }
+                val sak: Sak = // todo - EY-3572: Hvis sak ikke finnes, må vi også opprette persongrunnlag
+                    kontrollpunkter.finnSak() ?: opprettSakOgLagGrunnlag(doedshendelse)
 
                 sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
                 val skalOppretteOppgave = kontrollpunkter.any { it.opprettOppgave }
@@ -132,6 +110,30 @@ class DoedshendelseJobService(
                 }
             }
         }
+    }
+
+    private fun opprettSakOgLagGrunnlag(doedshendelse: DoedshendelseInternal): Sak {
+        val opprettetSak =
+            sakService.finnEllerOpprettSak(
+                fnr = doedshendelse.beroertFnr,
+                type = doedshendelse.sakType(),
+            )
+
+        val gjenlevende =
+            when (opprettetSak.sakType) {
+                SakType.BARNEPENSJON -> null
+                SakType.OMSTILLINGSSTOENAD -> hentAnnenForelder(doedshendelse)
+            }
+        val galleri =
+            Persongalleri(
+                soeker = doedshendelse.beroertFnr,
+                avdoed = listOf(doedshendelse.avdoedFnr),
+                gjenlevende = listOfNotNull(gjenlevende),
+                innsender = Vedtaksloesning.GJENNY.name,
+            )
+
+        grunnlagService.leggInnNyttGrunnlagSak(sak = opprettetSak, galleri)
+        return opprettetSak
     }
 
     private fun hentAnnenForelder(doedshendelse: DoedshendelseInternal): String? {

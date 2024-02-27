@@ -25,7 +25,18 @@
       "kravVelgType" : "AVODD_MOR"
     }
   },
-  "trygdetidsgrunnlagListe" : [],
+  "trygdetidsgrunnlagListe" : [
+    {
+      "trygdetidGrunnlagId": 1,
+      "personGrunnlagId": 1,
+      "landTreBokstaver": "NOR",
+      "datoFom": "1974-01-01",
+      "datoTom": "2024-01-01",
+      "poengIInnAar": false,
+      "poengIUtAar": false,
+      "ikkeIProrata": false
+    }
+  ],
   "trygdetidListe" : [
     {
       "faktiskTrygdetid" : 279,

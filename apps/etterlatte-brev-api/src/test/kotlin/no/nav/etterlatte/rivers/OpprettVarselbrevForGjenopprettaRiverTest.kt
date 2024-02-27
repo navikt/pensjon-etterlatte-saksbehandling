@@ -17,6 +17,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.varselbrev.VarselbrevResponse
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
+import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.rapidsandrivers.CORRELATION_ID_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey
@@ -44,6 +45,8 @@ internal class OpprettVarselbrevForGjenopprettaRiverTest {
 
     private val behandlingKlient = mockk<BehandlingKlient>()
 
+    private val featureToggleService = mockk<FeatureToggleService>()
+
     private val opprettBrevRapid =
         TestRapid().apply {
             OpprettVarselbrevForGjenopprettaRiver(
@@ -51,6 +54,7 @@ internal class OpprettVarselbrevForGjenopprettaRiverTest {
                 varselbrevService,
                 brevhaandterer,
                 behandlingKlient,
+                featureToggleService,
             )
         }
 
@@ -69,6 +73,8 @@ internal class OpprettVarselbrevForGjenopprettaRiverTest {
 
         coEvery { varselbrevService.opprettVarselbrev(any(), behandlingId, any()) } returns response
         coEvery { varselbrevService.ferdigstillOgGenererPDF(any(), any(), any()) } returns Pdf(ByteArray(0))
+
+        coEvery { featureToggleService.isEnabled(any(), any()) } returns true
         coEvery { brevhaandterer.journalfoerOgDistribuer(any(), any(), any(), any()) } just runs
 
         opprettBrevRapid.apply { sendTestMessage(opprettMelding(Vedtaksloesning.GJENOPPRETTA).toJson()) }

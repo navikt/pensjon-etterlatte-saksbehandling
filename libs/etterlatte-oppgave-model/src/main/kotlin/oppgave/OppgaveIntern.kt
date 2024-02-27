@@ -191,3 +191,44 @@ fun opprettNyOppgaveMedReferanseOgSak(
         type = oppgaveType,
     )
 }
+
+fun tilReferanseOgKilde(
+    referanse: String,
+    kilde: OppgaveKilde?,
+) = when (kilde) {
+    OppgaveKilde.HENDELSE -> HendelseKilde(referanse)
+    OppgaveKilde.BEHANDLING -> BehandlingKilde(UUID.fromString(referanse))
+    OppgaveKilde.GENERELL_BEHANDLING -> GenerellBehandlingKilde(UUID.fromString(referanse))
+    OppgaveKilde.EKSTERN -> EksternKilde(referanse)
+    OppgaveKilde.TILBAKEKREVING -> TilbakekrevingKilde(UUID.fromString(referanse))
+    OppgaveKilde.GJENOPPRETTING -> GjenopprettingKilde(referanse)
+    null -> null
+}
+
+sealed interface ReferanseOgKilde {
+    val kilde: OppgaveKilde
+}
+
+data class BehandlingKilde(val behandlingId: UUID) : ReferanseOgKilde {
+    override val kilde: OppgaveKilde = OppgaveKilde.BEHANDLING
+}
+
+data class GenerellBehandlingKilde(val generellBehandlingId: UUID) : ReferanseOgKilde {
+    override val kilde: OppgaveKilde = OppgaveKilde.GENERELL_BEHANDLING
+}
+
+data class HendelseKilde(val referanse: String) : ReferanseOgKilde {
+    override val kilde = OppgaveKilde.HENDELSE
+}
+
+data class EksternKilde(val referanse: String) : ReferanseOgKilde {
+    override val kilde: OppgaveKilde = OppgaveKilde.EKSTERN
+}
+
+data class TilbakekrevingKilde(val tilbakekrevingId: UUID) : ReferanseOgKilde {
+    override val kilde: OppgaveKilde = OppgaveKilde.TILBAKEKREVING
+}
+
+data class GjenopprettingKilde(val referanse: String) : ReferanseOgKilde {
+    override val kilde: OppgaveKilde = OppgaveKilde.GJENOPPRETTING
+}

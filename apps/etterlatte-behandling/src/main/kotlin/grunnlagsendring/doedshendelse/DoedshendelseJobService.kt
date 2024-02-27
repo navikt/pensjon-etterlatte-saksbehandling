@@ -92,14 +92,17 @@ class DoedshendelseJobService(
                     )
 
                 sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
-                val oppgave = opprettOppgave(doedshendelse, sak)
-                doedshendelseDao.oppdaterDoedshendelse(
-                    doedshendelse.tilBehandlet(
-                        utfall = Utfall.OPPGAVE,
-                        sakId = sak.id,
-                        oppgaveId = oppgave.id,
-                    ),
-                )
+                val skalOppretteOppgave = kontrollpunkter.any { it.opprettOppgave }
+                if (skalOppretteOppgave) {
+                    val oppgave = opprettOppgave(doedshendelse, sak)
+                    doedshendelseDao.oppdaterDoedshendelse(
+                        doedshendelse.tilBehandlet(
+                            utfall = Utfall.OPPGAVE,
+                            sakId = sak.id,
+                            oppgaveId = oppgave.id,
+                        ),
+                    )
+                }
             }
         }
     }

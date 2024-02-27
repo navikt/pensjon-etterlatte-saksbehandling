@@ -10,6 +10,7 @@ import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Status
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Utfall
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -38,7 +39,7 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
     }
 
     @Test
-    fun `Kan hente doedshendelser for avdoed basert på fnr`() {
+    fun `Kan hente doedshendelser for avdoed basert paa fnr`() {
         val avdoedFnr = "12345678902"
         val doedshendelseInternal =
             DoedshendelseInternal.nyHendelse(
@@ -82,7 +83,11 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
                 endringstype = Endringstype.OPPRETTET,
             )
         doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
-        val avbruttHendelse = doedshendelseInternal.tilAvbrutt(5L)
+        val avbruttHendelse =
+            doedshendelseInternal.tilAvbrutt(
+                sakId = 5L,
+                kontrollpunkter = listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL),
+            )
 
         doedshendelseDao.oppdaterDoedshendelse(avbruttHendelse)
 
@@ -93,6 +98,7 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
             status shouldBe Status.FERDIG
             utfall shouldBe Utfall.AVBRUTT
             endret shouldBeGreaterThan opprettet
+            kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL)
         }
     }
 
@@ -108,7 +114,13 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
             )
         doedshendelseDao.opprettDoedshendelse(doedshendelseInternal)
         val opprettetOppgaveId = UUID.randomUUID()
-        val avbruttHendelse = doedshendelseInternal.tilBehandlet(Utfall.OPPGAVE, 5, opprettetOppgaveId)
+        val avbruttHendelse =
+            doedshendelseInternal.tilBehandlet(
+                utfall = Utfall.OPPGAVE,
+                sakId = 5,
+                oppgaveId = opprettetOppgaveId,
+                kontrollpunkter = emptyList(),
+            )
 
         doedshendelseDao.oppdaterDoedshendelse(avbruttHendelse)
 
@@ -120,6 +132,7 @@ class DoedshendelseDaoTest(val dataSource: DataSource) {
             utfall shouldBe Utfall.OPPGAVE
             endret shouldBeGreaterThan opprettet
             oppgaveId shouldBe opprettetOppgaveId
+            kontrollpunkter shouldBe emptyList()
         }
     }
 

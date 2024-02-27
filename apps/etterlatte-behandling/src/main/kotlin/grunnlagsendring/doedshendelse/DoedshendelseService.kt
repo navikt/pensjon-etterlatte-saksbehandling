@@ -4,6 +4,7 @@ import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -81,13 +82,19 @@ class DoedshendelseService(
                     haandterNyeBerorte(doedshendelserForAvdoed, beroerte, avdoed, doedshendelse.endringstype)
                 }
             }
+
             Endringstype.ANNULLERT -> {
                 inTransaction {
                     oppdaterDodshendelser(
-                        doedshendelserForAvdoed.map { it.tilAvbrutt() },
+                        doedshendelserForAvdoed.map {
+                            it.tilAvbrutt(
+                                kontrollpunkter = listOf(DoedshendelseKontrollpunkt.DoedshendelseErAnnulert),
+                            )
+                        },
                     )
                 }
             }
+
             Endringstype.OPPHOERT -> throw RuntimeException("Fikk opphør på dødshendelse, skal ikke skje ifølge PDL docs")
         }
         val avdoedFnr = avdoed.foedselsnummer.verdi.value

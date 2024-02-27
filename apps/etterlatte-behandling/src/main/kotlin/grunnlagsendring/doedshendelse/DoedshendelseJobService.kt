@@ -76,6 +76,7 @@ class DoedshendelseJobService(
                     doedshendelse.tilAvbrutt(
                         sakId = kontrollpunkter.finnSak()?.id,
                         oppgaveId = kontrollpunkter.finnOppgaveId(),
+                        kontrollpunkter = kontrollpunkter,
                     ),
                 )
             }
@@ -100,6 +101,7 @@ class DoedshendelseJobService(
                             utfall = Utfall.OPPGAVE,
                             sakId = sak.id,
                             oppgaveId = oppgave.id,
+                            kontrollpunkter = kontrollpunkter,
                         ),
                     )
                 }

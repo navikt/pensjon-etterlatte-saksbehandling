@@ -1,0 +1,1 @@
+alter table doedshendelse ADD COLUMN kontrollpunkter TEXT DEFAULT NULL;

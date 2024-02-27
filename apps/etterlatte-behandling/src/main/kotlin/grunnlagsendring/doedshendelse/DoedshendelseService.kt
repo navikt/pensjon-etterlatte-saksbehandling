@@ -88,7 +88,7 @@ class DoedshendelseService(
                     oppdaterDodshendelser(
                         doedshendelserForAvdoed.map {
                             it.tilAvbrutt(
-                                kontrollpunkter = listOf(DoedshendelseKontrollpunkt.DoedshendelseErAnnulert),
+                                kontrollpunkter = listOf(DoedshendelseKontrollpunkt.DoedshendelseErAnnullert),
                             )
                         },
                     )

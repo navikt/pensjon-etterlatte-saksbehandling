@@ -1,1 +1,1 @@
-alter table doedshendelse ADD COLUMN kontrollpunkter TEXT DEFAULT NULL;
+alter table doedshendelse ADD COLUMN kontrollpunkter JSONB DEFAULT NULL;

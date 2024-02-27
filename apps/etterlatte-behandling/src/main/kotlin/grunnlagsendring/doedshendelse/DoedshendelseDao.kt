@@ -8,7 +8,7 @@ import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.tidspunkt.getTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
-import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.database.setJsonb
 import no.nav.etterlatte.libs.database.toList
 import no.nav.helse.rapids_rivers.toUUID
 import java.sql.ResultSet
@@ -71,7 +71,7 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                     setTidspunkt(4, doedshendelseInternal.endret)
                     setString(5, doedshendelseInternal.oppgaveId?.toString())
                     setLong(6, doedshendelseInternal.brevId)
-                    setString(7, doedshendelseInternal.kontrollpunkter?.toJson())
+                    setJsonb(7, doedshendelseInternal.kontrollpunkter)
                     setString(8, doedshendelseInternal.id.toString())
                 }.executeUpdate()
             }

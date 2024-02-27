@@ -149,11 +149,11 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 )
             }
 
-        verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!, any()) }
+        verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
         coVerify { grunnlagService.hentPersongalleri(any()) }
         verify {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                revurdering?.id.toString(),
+                revurdering.id.toString(),
                 sak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.REVURDERING,
@@ -165,14 +165,14 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             }
         }
         inTransaction {
-            assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
+            assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering.id))
             verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
         }
         confirmVerified(hendelser, grunnlagService, oppgaveService)
     }
 
     @Test
-    fun `kan lagre og oppdatere revurderinginfo på en revurdering`() {
+    fun `kan lagre og oppdatere revurderinginfo paa en revurdering`() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val grunnlagService = spyk(applicationContext.grunnlagsService)
         val oppgaveService = spyk(applicationContext.oppgaveService)
@@ -215,14 +215,14 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         val revurderingInfo = RevurderingInfo.Soeskenjustering(BarnepensjonSoeskenjusteringGrunn.SOESKEN_DOER)
         inTransaction {
             revurderingService.lagreRevurderingInfo(
-                revurdering!!.id,
+                revurdering.id,
                 RevurderingInfoMedBegrunnelse(revurderingInfo, "abc"),
                 "saksbehandler",
             )
         }
 
         inTransaction {
-            val lagretRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering!!.id) as Revurdering
+            val lagretRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
             assertEquals(revurderingInfo, lagretRevurdering.revurderingInfo?.revurderingInfo)
             assertEquals("abc", lagretRevurdering.revurderingInfo?.begrunnelse)
         }
@@ -233,19 +233,19 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
 
         inTransaction {
             revurderingService.lagreRevurderingInfo(
-                revurdering!!.id,
+                revurdering.id,
                 RevurderingInfoMedBegrunnelse(nyRevurderingInfo, null),
                 "saksbehandler",
             )
         }
         inTransaction {
-            val oppdatert = applicationContext.behandlingDao.hentBehandling(revurdering!!.id) as Revurdering
+            val oppdatert = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
             assertEquals(nyRevurderingInfo, oppdatert.revurderingInfo?.revurderingInfo)
         }
 
         inTransaction {
             applicationContext.behandlingDao.lagreStatus(
-                revurdering!!.id,
+                revurdering.id,
                 BehandlingStatus.IVERKSATT,
                 LocalDateTime.now(),
             )
@@ -254,7 +254,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         assertThrows<BehandlingKanIkkeEndres> {
             inTransaction {
                 revurderingService.lagreRevurderingInfo(
-                    revurdering!!.id,
+                    revurdering.id,
                     RevurderingInfoMedBegrunnelse(revurderingInfo, null),
                     "saksbehandler",
                 )
@@ -262,7 +262,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         }
 
         inTransaction {
-            val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering!!.id) as Revurdering
+            val ferdigRevurdering = applicationContext.behandlingDao.hentBehandling(revurdering.id) as Revurdering
             assertEquals(nyRevurderingInfo, ferdigRevurdering.revurderingInfo?.revurderingInfo)
             verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
             verify { grunnlagService.leggInnNyttGrunnlag(any(), any()) }
@@ -283,7 +283,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `Ny regulering skal håndtere hendelser om nytt grunnbeløp`() {
+    fun `Ny regulering skal haandtere hendelser om nytt grunnbeløp`() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val grunnlagService = spyk(applicationContext.grunnlagsService)
         val oppgaveService = spyk(applicationContext.oppgaveService)
@@ -374,7 +374,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             }
 
         inTransaction {
-            assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
+            assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering.id))
             val grunnlaghendelse =
                 applicationContext.grunnlagsendringshendelseDao.hentGrunnlagsendringshendelse(
                     hendelse.id,
@@ -424,7 +424,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `kan opprette ny revurdering med årsak = SLUTTBEHANDLING_UTLAND og lagre i db`() {
+    fun `kan opprette ny revurdering med aarsak = SLUTTBEHANDLING_UTLAND og lagre i db`() {
         val hendelser = spyk(applicationContext.behandlingsHendelser)
         val grunnlagService = spyk(applicationContext.grunnlagsService)
         val oppgaveService = spyk(applicationContext.oppgaveService)
@@ -479,11 +479,11 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 )
             }
 
-        verify { grunnlagService.leggInnNyttGrunnlag(revurdering!!, any()) }
+        verify { grunnlagService.leggInnNyttGrunnlag(revurdering, any()) }
         coVerify { grunnlagService.hentPersongalleri(any()) }
         verify {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                revurdering?.id.toString(),
+                revurdering.id.toString(),
                 sak.id,
                 OppgaveKilde.BEHANDLING,
                 OppgaveType.REVURDERING,
@@ -495,7 +495,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             }
         }
         inTransaction {
-            assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering!!.id))
+            assertEquals(revurdering, applicationContext.behandlingDao.hentBehandling(revurdering.id))
             verify { hendelser.sendMeldingForHendelseMedDetaljertBehandling(any(), BehandlingHendelseType.OPPRETTET) }
         }
         confirmVerified(hendelser, grunnlagService, oppgaveService)
@@ -543,7 +543,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `Skal kunne hente revurdering basert på sak og revurderingsårsak`() {
+    fun `Skal kunne hente revurdering basert paa sak og revurderingsaarsak`() {
         val revurderingService =
             RevurderingService(
                 applicationContext.oppgaveService,
@@ -621,7 +621,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             }
         inTransaction {
             applicationContext.behandlingService.avbrytBehandling(
-                revurderingen!!.id,
+                revurderingen.id,
                 BrukerTokenInfo.of("acc", "saksbehandler", oid = null, sub = "sub", claims = null),
             )
         }
@@ -648,7 +648,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
 
         inTransaction {
             revurderingService.lagreRevurderingInfo(
-                revurderingto!!.id,
+                revurderingto.id,
                 RevurderingInfoMedBegrunnelse(
                     RevurderingInfo.SluttbehandlingUtland(
                         listOf(
@@ -728,7 +728,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `Skal få bad request hvis man mangler forrige iverksattebehandling`() {
+    fun `Skal faa bad request hvis man mangler forrige iverksattebehandling`() {
         val revurderingService =
             RevurderingService(
                 applicationContext.oppgaveService,

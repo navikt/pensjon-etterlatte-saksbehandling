@@ -130,10 +130,11 @@ class RevurderingService(
         sakId: Long,
         aarsak: Revurderingaarsak,
         paaGrunnAvHendelseId: String?,
+        paaGrunnAvOppgaveId: String? = null,
         begrunnelse: String?,
         fritekstAarsak: String? = null,
         saksbehandler: Saksbehandler,
-    ): Revurdering? {
+    ): Revurdering {
         if (!aarsak.kanBrukesIMiljo()) {
             throw RevurderingaarsakIkkeStoettet(aarsak)
         }
@@ -146,6 +147,13 @@ class RevurderingService(
                         " $sakId. " +
                         "Hendelsesid: $paaGrunnAvHendelseId",
                 )
+            }
+
+        val paaGrunnAvOppgaveUuid =
+            try {
+                paaGrunnAvOppgaveId?.let { UUID.fromString(it) }
+            } catch (e: Exception) {
+                throw BadRequestException("Ugyldig oppgaveId $paaGrunnAvOppgaveId (sakid=$sakId).")
             }
 
         maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
@@ -163,6 +171,7 @@ class RevurderingService(
             forrigeBehandling = forrigeIverksatteBehandling,
             revurderingAarsak = aarsak,
             paaGrunnAvHendelse = paaGrunnAvHendelseUuid,
+            paaGrunnAvOppgave = paaGrunnAvOppgaveUuid,
             begrunnelse = begrunnelse,
             fritekstAarsak = fritekstAarsak,
             saksbehandler = saksbehandler,
@@ -195,10 +204,11 @@ class RevurderingService(
         forrigeBehandling: Behandling,
         revurderingAarsak: Revurderingaarsak,
         paaGrunnAvHendelse: UUID?,
+        paaGrunnAvOppgave: UUID?,
         begrunnelse: String?,
         fritekstAarsak: String?,
         saksbehandler: Saksbehandler,
-    ): Revurdering? =
+    ): Revurdering =
         forrigeBehandling.let {
             val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
 
@@ -235,6 +245,10 @@ class RevurderingService(
                                 e,
                             )
                         }
+                    }
+
+                    paaGrunnAvOppgave?.let {
+                        oppgaveService.hentOgFerdigstillOppgaveById(it, saksbehandler)
                     }
                 }
         }

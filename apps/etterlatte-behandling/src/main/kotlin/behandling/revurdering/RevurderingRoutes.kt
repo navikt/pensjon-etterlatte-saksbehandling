@@ -70,19 +70,17 @@ internal fun Route.revurderingRoutes(
                         val revurdering =
                             inTransaction {
                                 revurderingService.opprettManuellRevurderingWrapper(
-                                    sakId,
-                                    opprettRevurderingRequest.aarsak,
-                                    opprettRevurderingRequest.paaGrunnAvHendelseId,
-                                    opprettRevurderingRequest.begrunnelse,
-                                    opprettRevurderingRequest.fritekstAarsak,
-                                    saksbehandler,
+                                    sakId = sakId,
+                                    aarsak = opprettRevurderingRequest.aarsak,
+                                    paaGrunnAvHendelseId = opprettRevurderingRequest.paaGrunnAvHendelseId,
+                                    paaGrunnAvOppgaveId = opprettRevurderingRequest.paaGrunnAvOppgaveId,
+                                    begrunnelse = opprettRevurderingRequest.begrunnelse,
+                                    fritekstAarsak = opprettRevurderingRequest.fritekstAarsak,
+                                    saksbehandler = saksbehandler,
                                 )
                             }
 
-                        when (revurdering) {
-                            null -> call.respond(HttpStatusCode.NotFound)
-                            else -> call.respond(revurdering.id)
-                        }
+                        call.respond(revurdering.id)
                     }
                 }
             }
@@ -144,6 +142,7 @@ data class OpprettOmgjoeringKlageRequest(
 data class OpprettRevurderingRequest(
     val aarsak: Revurderingaarsak,
     val paaGrunnAvHendelseId: String? = null,
+    val paaGrunnAvOppgaveId: String? = null,
     val begrunnelse: String? = null,
     val fritekstAarsak: String? = null,
 )

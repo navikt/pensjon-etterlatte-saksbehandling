@@ -50,7 +50,7 @@ export const mapApiResult = <T>(
   return mapResult(result, {
     pending: mapInitialOrPending,
     initial: mapInitialOrPending,
-    error: mapError,
+    error: (error) => (error.status === 502 ? null : mapError(error)),
     success: mapSuccess,
   })
 }

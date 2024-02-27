@@ -26,7 +26,7 @@ sealed class DoedshendelseKontrollpunkt {
     data object BarnHarUfoereTrygd : DoedshendelseKontrollpunkt() {
         override val beskrivelse: String = "Barnet har uføretrygd"
         override val sendBrev: Boolean = true
-        override val opprettOppgave: Boolean = true
+        override val opprettOppgave: Boolean = false
         override val avbryt: Boolean = false
     }
 

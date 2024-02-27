@@ -225,7 +225,7 @@ internal class GrunnlagServiceTest {
                                 meta = objectMapper.createObjectNode(),
                                 opplysning = galleri.toJsonNode(),
                                 attestering = null,
-                                fnr = testData.soeker.foedselsnummer,
+                                fnr = null,
                             ),
                         sakId = sakId,
                         hendelseNummer = 1,
@@ -233,7 +233,6 @@ internal class GrunnlagServiceTest {
                 )
 
             val opplysningsperson = mockPerson()
-
             coEvery {
                 grunnlagHenter.hentGrunnlagsdata(any())
             } returns sampleFetchedGrunnlag(opplysningsperson)
@@ -251,7 +250,7 @@ internal class GrunnlagServiceTest {
             assertNotNull(grunnlag)
             if (grunnlag != null) {
                 val hentetGalleriPaaSoeker =
-                    grunnlag.soeker.hentKonstantOpplysning<Persongalleri>(
+                    grunnlag.sak.hentKonstantOpplysning<Persongalleri>(
                         PERSONGALLERI_V1,
                     )?.verdi ?: throw RuntimeException("failure")
                 assertEquals(testData.soeker.foedselsnummer.value, hentetGalleriPaaSoeker.soeker)

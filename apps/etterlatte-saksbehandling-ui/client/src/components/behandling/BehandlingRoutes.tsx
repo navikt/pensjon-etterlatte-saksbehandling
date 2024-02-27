@@ -164,10 +164,6 @@ const hentAktuelleRoutes = (behandling: IBehandlingReducer | null, varselbrevAkt
   const lagVarselbrev = varselbrevAktivert && behandling?.kilde === Vedtaksloesning.GJENOPPRETTA
 
   switch (behandling.behandlingType) {
-    case IBehandlingsType.MANUELT_OPPHOER:
-      return behandlingRoutes(behandling).filter((route) =>
-        manueltOpphoerRoutes.map((pathinfo) => pathinfo.path).includes(route.path)
-      )
     case IBehandlingsType.FØRSTEGANGSBEHANDLING:
       return behandlingRoutes(behandling).filter((route) =>
         soeknadRoutes(behandling, lagVarselbrev)

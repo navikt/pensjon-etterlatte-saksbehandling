@@ -18,7 +18,6 @@ const OPPGAVETYPE_TIL_TAGDATA: Record<Oppgavetype, { variant: Variants; text: st
   FOERSTEGANGSBEHANDLING: { variant: Variants.INFO, text: 'Førstegangsbehandling' },
   REVURDERING: { variant: Variants.NEUTRAL, text: 'Revurdering' },
   VURDER_KONSEKVENS: { variant: Variants.ALT1, text: 'Hendelse' },
-  MANUELT_OPPHOER: { variant: Variants.ALT2, text: 'Manuelt opphør' },
   ATTESTERING: { variant: Variants.ALT3_FILLED, text: 'Attestering' },
   UNDERKJENT: { variant: Variants.ALT3, text: 'Underkjent' },
   GOSYS: { variant: Variants.INFO_FILLED, text: 'Gosys-oppgave' },

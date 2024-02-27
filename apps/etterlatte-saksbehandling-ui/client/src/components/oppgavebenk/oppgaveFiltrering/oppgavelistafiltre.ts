@@ -97,7 +97,6 @@ const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   visAlle: 'Vis alle',
   FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
   REVURDERING: 'Revurdering',
-  MANUELT_OPPHOER: 'Manuelt opphør',
   ATTESTERING: 'Attestering',
   VURDER_KONSEKVENS: 'Vurder konsekvense for hendelse',
   UNDERKJENT: 'Underkjent behandling',

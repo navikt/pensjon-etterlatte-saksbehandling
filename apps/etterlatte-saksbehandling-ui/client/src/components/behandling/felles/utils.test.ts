@@ -171,10 +171,8 @@ describe('behandlingSkalSendeBrev', () => {
     ...revurdering,
     revurderingsaarsak: Revurderingaarsak.REGULERING,
   }
-  const manueltopphoer = { ...behandling, behandlingType: IBehandlingsType.MANUELT_OPPHOER }
-  it('skal gi false for regulering og manuelt opphør', () => {
+  it('skal gi false for regulering', () => {
     expect(behandlingSkalSendeBrev(regulering.behandlingType, regulering.revurderingsaarsak)).toBeFalsy()
-    expect(behandlingSkalSendeBrev(manueltopphoer.behandlingType, manueltopphoer.revurderingsaarsak)).toBeFalsy()
   })
 
   it('skal gi true for foerstegangsbehandling og revurderinger som ikke er regulering', () => {

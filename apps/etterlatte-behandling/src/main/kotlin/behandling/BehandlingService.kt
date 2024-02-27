@@ -157,7 +157,7 @@ internal class BehandlingServiceImpl(
     private val behandlingRequestLogger: BehandlingRequestLogger,
     private val kommerBarnetTilGodeDao: KommerBarnetTilGodeDao,
     private val oppgaveService: OppgaveService,
-    private val grunnlagService: GrunnlagService,
+    private val grunnlagService: GrunnlagServiceImpl,
 ) : BehandlingService {
     private val logger = LoggerFactory.getLogger(this::class.java)
 

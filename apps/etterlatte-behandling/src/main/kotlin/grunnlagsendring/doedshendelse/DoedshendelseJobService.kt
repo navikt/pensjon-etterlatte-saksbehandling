@@ -117,6 +117,7 @@ class DoedshendelseJobService(
             if (doedshendelse.relasjon == Relasjon.BARN) {
                 deodshendelserProducer.sendBrevRequest(sak)
             }
+            // TODO: EY-3470 relasjon EPS
         }
     }
 

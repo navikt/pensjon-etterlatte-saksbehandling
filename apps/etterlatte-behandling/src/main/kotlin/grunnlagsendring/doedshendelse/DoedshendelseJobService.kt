@@ -111,7 +111,7 @@ class DoedshendelseJobService(
                 status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
                 type = GrunnlagsendringsType.DOEDSFALL,
                 opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                hendelseGjelderRolle = Saksrolle.SOEKER,
+                hendelseGjelderRolle = Saksrolle.AVDOED,
                 gjelderPerson = doedshendelse.avdoedFnr,
                 samsvarMellomKildeOgGrunnlag =
                     SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(

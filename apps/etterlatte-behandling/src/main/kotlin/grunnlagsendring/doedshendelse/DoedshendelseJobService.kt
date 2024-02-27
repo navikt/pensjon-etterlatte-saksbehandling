@@ -105,6 +105,7 @@ class DoedshendelseJobService(
                     } else if (oppgave != null) {
                         Utfall.OPPGAVE
                     } else {
+                        logger.error("Kan ikke håndtere dødshendelse ${doedshendelse.id}")
                         throw IllegalStateException("Kan ikke ha utfall uten brev eller oppgave")
                     }
 

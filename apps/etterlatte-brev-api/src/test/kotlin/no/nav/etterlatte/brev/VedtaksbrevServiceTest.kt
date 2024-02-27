@@ -451,7 +451,7 @@ internal class VedtaksbrevServiceTest {
                 )
 
             runBlocking {
-                assertThrows<IllegalStateException> {
+                assertThrows<SaksbehandlerOgAttestantSammePerson> {
                     vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, brukerTokenInfo = SAKSBEHANDLER)
                 }
             }
@@ -476,32 +476,6 @@ internal class VedtaksbrevServiceTest {
             }
 
             verify { db.hentBrevForBehandling(brev.behandlingId!!, Brevtype.VEDTAK) }
-        }
-
-        @Test
-        fun `Attestering av egen sak skal kaste feil`() {
-            val brev = opprettBrev(Status.OPPDATERT, mockk())
-
-            every { db.hentBrevForBehandling(any(), any()) } returns listOf(brev)
-            coEvery { vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(any(), any()) } returns
-                Pair(
-                    SAKSBEHANDLER.ident(),
-                    VedtakStatus.FATTET_VEDTAK,
-                )
-
-            assertThrows<SaksbehandlerOgAttestantSammePerson> {
-                runBlocking {
-                    vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, brukerTokenInfo = SAKSBEHANDLER)
-                }
-            }
-
-            verify {
-                db.hentBrevForBehandling(brev.behandlingId!!, Brevtype.VEDTAK)
-            }
-
-            coVerify {
-                vedtaksvurderingService.hentVedtakSaksbehandlerOgStatus(brev.behandlingId!!, SAKSBEHANDLER)
-            }
         }
 
         @Test

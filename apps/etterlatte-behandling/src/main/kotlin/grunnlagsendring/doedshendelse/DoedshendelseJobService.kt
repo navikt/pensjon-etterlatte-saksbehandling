@@ -6,8 +6,6 @@ import no.nav.etterlatte.behandling.domain.GrunnlagsendringStatus
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.behandling.domain.SamsvarMellomKildeOgGrunnlag
-import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
-import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
@@ -34,8 +32,6 @@ class DoedshendelseJobService(
     private val grunnlagsendringshendelseService: GrunnlagsendringshendelseService,
     private val sakService: SakService,
     private val dagerGamleHendelserSomSkalKjoeres: Int,
-    private val pdlTjenesterKlient: PdlTjenesterKlient,
-    private val pesysKlient: PesysKlient,
     private val deodshendelserProducer: DoedshendelserKafkaService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)

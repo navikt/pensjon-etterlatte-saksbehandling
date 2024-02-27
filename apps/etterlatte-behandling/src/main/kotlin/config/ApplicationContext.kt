@@ -371,8 +371,6 @@ internal class ApplicationContext(
             grunnlagsendringshendelseService = grunnlagsendringshendelseService,
             sakService = sakService,
             dagerGamleHendelserSomSkalKjoeres = if (isProd()) 2 else 0,
-            pdlTjenesterKlient = pdlTjenesterKlient,
-            pesysKlient = pesysKlient,
             deodshendelserProducer = deodshendelserProducer,
         )
 

@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
@@ -40,6 +41,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val sakService = mockk<SakService>()
     private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
+    private val behandlingService = mockk<BehandlingService>()
     private val kontrollpunktService =
         DoedshendelseKontrollpunktService(
             pdlTjenesterKlient = pdlTjenesterKlient,
@@ -47,6 +49,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             oppgaveService = oppgaveService,
             sakService = sakService,
             pesysKlient = pesysKlient,
+            behandlingService = behandlingService,
         )
     private val doedshendelseInternal =
         DoedshendelseInternal.nyHendelse(

@@ -58,7 +58,7 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                 prepareStatement(
                     """
                     UPDATE doedshendelse 
-                    SET sak_id = ?, status = ?, utfall = ?, endret = ?
+                    SET sak_id = ?, status = ?, utfall = ?, endret = ?, oppgave_id = ?, brev_id = ?
                     WHERE id = ?
                     """.trimIndent(),
                 ).apply {
@@ -66,7 +66,9 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                     setString(2, doedshendelseInternal.status.name)
                     setString(3, doedshendelseInternal.utfall?.name)
                     setTidspunkt(4, doedshendelseInternal.endret)
-                    setString(5, doedshendelseInternal.id.toString())
+                    setString(5, doedshendelseInternal.oppgaveId?.toString())
+                    setLong(6, doedshendelseInternal.brevId)
+                    setString(7, doedshendelseInternal.id.toString())
                 }.executeUpdate()
             }
         }

@@ -90,7 +90,7 @@ class GenerellBehandlingService(
                 OppgaveKilde.GENERELL_BEHANDLING,
                 OppgaveType.KRAVPAKKE_UTLAND,
                 merknad = null,
-                behandlingId = opprettetbehandling.id,
+                behandlingId = null,
             )
         tildelSaksbehandlerTilNyOppgaveHvisFinnes(oppgaveForGenerellBehandling, opprettetbehandling)
         opprettHendelse(GenerellBehandlingHendelseType.OPPRETTET, opprettetbehandling, saksbehandler)
@@ -144,7 +144,7 @@ class GenerellBehandlingService(
             OppgaveKilde.GENERELL_BEHANDLING,
             OppgaveType.ATTESTERING,
             merknad = "Attestering av ${generellBehandling.type.name}, behandlet av ${saksbehandlerNavn ?: saksbehandler.ident}.",
-            behandlingId = generellBehandling.id,
+            behandlingId = null,
             frist = trettiDagerFremITid,
         )
 

@@ -63,8 +63,10 @@ internal class MigrerEnEnkeltSakRiver(
                 if (res.status == HttpStatusCode.Conflict) {
                     logger.warn(
                         "Behandling er allerede oppretta for pesysid ${hendelse.pesysId} i Gjenny. " +
-                            "Trenger ikke gjøre mer, så avbryter. Denne må settes status for manuelt i migreringsbasen",
+                            "Trenger ikke gjøre mer, så avbryter.",
                     )
+                    packet.setEventNameForHendelseType(Migreringshendelser.ALLEREDE_GJENOPPRETTA)
+                    context.publish(packet.toJson())
                     return@runBlocking null
                 }
                 res.body<MigreringRespons>()

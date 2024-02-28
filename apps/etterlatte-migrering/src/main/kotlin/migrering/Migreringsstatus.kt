@@ -13,4 +13,5 @@ enum class Migreringsstatus {
     MIGRERING_FEILA,
     UTBETALING_FEILA,
     MANUELL,
+    ALLEREDE_GJENOPPRETTA,
 }

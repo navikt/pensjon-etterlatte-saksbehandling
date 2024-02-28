@@ -451,7 +451,7 @@ internal class VedtaksbrevServiceTest {
                 )
 
             runBlocking {
-                assertThrows<IllegalStateException> {
+                assertThrows<SaksbehandlerOgAttestantSammePerson> {
                     vedtaksbrevService.ferdigstillVedtaksbrev(brev.behandlingId!!, brukerTokenInfo = SAKSBEHANDLER)
                 }
             }

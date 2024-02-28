@@ -123,10 +123,7 @@ class VedtaksbrevService(
                 db.settBrevFerdigstilt(brev.id)
             }
         } else {
-            throw IllegalStateException(
-                "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerIdent)" +
-                    " og attestant (${brukerTokenInfo.ident()}) er samme person.",
-            )
+            throw SaksbehandlerOgAttestantSammePerson(saksbehandlerIdent, brukerTokenInfo.ident())
         }
     }
 
@@ -247,4 +244,10 @@ class UgyldigMottakerKanIkkeFerdigstilles(id: BrevID) : UgyldigForespoerselExcep
         mapOf(
             "id" to id,
         ),
+)
+
+class SaksbehandlerOgAttestantSammePerson(saksbehandler: String, attestant: String) : UgyldigForespoerselException(
+    code = "SAKSBEHANDLER_OG_ATTESTANT_SAMME_PERSON",
+    detail = "Kan ikke ferdigstille vedtaksbrevet når saksbehandler ($saksbehandler) og attestant ($attestant) er samme person.",
+    meta = mapOf("saksbehandler" to saksbehandler, "attestant" to attestant),
 )

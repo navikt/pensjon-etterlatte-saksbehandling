@@ -31,7 +31,7 @@ const PeriodeAccordion = (props: PeriodeAccordionProps) => {
         </ExpandButton>
         <div>{topContent}</div>
       </PeriodeAccordionHead>
-      <PeriodeAccordionContent>{children}</PeriodeAccordionContent>
+      {open && <PeriodeAccordionContent>{children}</PeriodeAccordionContent>}
     </PeriodeAccordionWrapper>
   )
 }

@@ -45,9 +45,9 @@ sealed class DoedshendelseKontrollpunkt {
     }
 
     @JsonTypeName("KRYSSENDE_YTELSE_I_PESYS")
-    data object KryssendeYtelseIPesys : DoedshendelseKontrollpunkt() {
+    data object KryssendeYtelseIPesysEps : DoedshendelseKontrollpunkt() {
         override val kode = "KRYSSENDE_YTELSE_I_PESYS"
-        override val beskrivelse: String = "Den berørte har uføretrygd eller alderspensjon i Pesys"
+        override val beskrivelse: String = "Den berørte(EPS) har uføretrygd eller alderspensjon i Pesys"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = false
         override val avbryt: Boolean = true
@@ -57,6 +57,42 @@ sealed class DoedshendelseKontrollpunkt {
     data object AvdoedHarDNummer : DoedshendelseKontrollpunkt() {
         override val kode = "AVDOED_HAR_D_NUMMER"
         override val beskrivelse: String = "Den avdøde har D-nummer"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+    }
+
+    @JsonTypeName("EPS_HAR_DOEDSDATO")
+    data object EpsHarDoedsdato : DoedshendelseKontrollpunkt() {
+        override val kode = "EPS_HAR_DOEDSDATO"
+        override val beskrivelse: String = "Eps har dødsdato"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = true
+    }
+
+    @JsonTypeName("EPS_KAN_HA_ALDERSPENSJON")
+    data object EpsKanHaAlderspensjon : DoedshendelseKontrollpunkt() {
+        override val kode = "EPS_KAN_HA_ALDERSPENSJON"
+        override val beskrivelse: String = "Eps kan ha alderspensjon"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = false
+        override val avbryt: Boolean = true
+    }
+
+    @JsonTypeName("EPS_SKILT_SISTE_5_ELLER_GIFT_I_15")
+    data object EpsHarVaertSkiltSiste5EllerGiftI15 : DoedshendelseKontrollpunkt() {
+        override val kode = "EPS_SKILT_SISTE_5_ELLER_GIFT_I_15"
+        override val beskrivelse: String = "Eps er skilt siste 5 år eller gift i 15"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+    }
+
+    @JsonTypeName("EPS_SKILT_SISTE_5_UKJENT_GIFTEMAAL_VARIGHET")
+    data object EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde : DoedshendelseKontrollpunkt() {
+        override val kode = "EPS_SKILT_SISTE_5_UKJENT_GIFTEMAAL_VARIGHET"
+        override val beskrivelse: String = "Eps er skilt siste 5 år med ukjent lengde på giftermål"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false

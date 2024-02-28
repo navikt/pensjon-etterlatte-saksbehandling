@@ -1,6 +1,7 @@
 package grunnlagsendring.doedshendelse.kontrollpunkt
 
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
@@ -27,6 +28,8 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.Sivilstand
+import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -124,6 +127,118 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             )
         } returns emptyList()
         every { oppgaveService.hentOppgaverForReferanse(any()) } returns emptyList()
+    }
+
+    @Test
+    fun `Eps har vært skilt mindre enn 5 år siden men ukjent giftedato, EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        val sivilstandSkilt =
+            Sivilstand(
+                Sivilstatus.SKILT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
+                gyldigFraOgMed = LocalDate.now().minusYears(5L),
+                null,
+                "",
+            )
+
+        val sivilstandGift =
+            Sivilstand(
+                Sivilstatus.GIFT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
+                gyldigFraOgMed = null,
+                null,
+                "",
+            )
+
+        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns
+            mockPerson()
+                .copy(sivilstand = listOf(OpplysningDTO(sivilstandSkilt, "sivilstand"), OpplysningDTO(sivilstandGift, "sivilstand")))
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactlyInAnyOrder
+            listOf(
+                DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde,
+                DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5EllerGiftI15,
+            )
+    }
+
+    @Test
+    fun `Eps har vært gift i 15 år, EpsHarVaertSkiltSiste5EllerGiftI15`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        val sivilstandGift =
+            Sivilstand(
+                Sivilstatus.GIFT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
+                gyldigFraOgMed = LocalDate.now().minusYears(16L),
+                null,
+                "",
+            )
+
+        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns
+            mockPerson()
+                .copy(sivilstand = listOf(OpplysningDTO(sivilstandGift, "sivilstand")))
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5EllerGiftI15)
+    }
+
+    @Test
+    fun `Eps har vært skilt de siste 5 år EpsHarVaertSkiltSiste5EllerGiftI15`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        val sivilstand =
+            Sivilstand(
+                Sivilstatus.SKILT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
+                gyldigFraOgMed = LocalDate.now().minusYears(2L),
+                null,
+                "",
+            )
+
+        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns
+            mockPerson()
+                .copy(sivilstand = listOf(OpplysningDTO(sivilstand, "sivilstand")))
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5EllerGiftI15)
+    }
+
+    @Test
+    fun `Eps er 67 år EpsKanHaAlderspensjon`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns
+            mockPerson()
+                .copy(
+                    foedselsdato = OpplysningDTO(LocalDate.now().minusYears(67L), "foedselsdato"),
+                )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsKanHaAlderspensjon)
+    }
+
+    @Test
+    fun `Skal gi kontrollpunkt eps er død om eps er død, EpsHarDoedsdato`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns
+            mockPerson().copy(
+                doedsdato =
+                    OpplysningDTO(
+                        LocalDate.now(),
+                        "doedsdato",
+                    ),
+            )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarDoedsdato)
     }
 
     @Test

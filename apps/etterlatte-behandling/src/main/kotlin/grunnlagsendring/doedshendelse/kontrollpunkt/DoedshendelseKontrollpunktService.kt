@@ -25,6 +25,7 @@ import no.nav.etterlatte.sak.SakService
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import kotlin.math.absoluteValue
 
 class DoedshendelseKontrollpunktService(
     private val pdlTjenesterKlient: PdlTjenesterKlient,
@@ -105,7 +106,7 @@ class DoedshendelseKontrollpunktService(
             val giftMedAvdoed = gift.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
             if (skiltMedAvdoed.isNotEmpty() && giftMedAvdoed.isNotEmpty()) {
                 val skiltsivilstand = skiltMedAvdoed.first()
-                val antallSkilteAar = ChronoUnit.YEARS.between(naa, skiltsivilstand.gyldigFraOgMed)
+                val antallSkilteAar = ChronoUnit.YEARS.between(skiltsivilstand.gyldigFraOgMed, naa).absoluteValue
                 val giftSivilstand = giftMedAvdoed.first()
                 return if (antallSkilteAar <= 5 && giftSivilstand.gyldigFraOgMed == null) {
                     DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde
@@ -130,7 +131,7 @@ class DoedshendelseKontrollpunktService(
             val naa = LocalDate.now()
             if (skiltMedAvdoed.isNotEmpty()) {
                 val skiltsivilstand = skiltMedAvdoed.first()
-                val antallSkilteAar = ChronoUnit.YEARS.between(naa, skiltsivilstand.gyldigFraOgMed)
+                val antallSkilteAar = ChronoUnit.YEARS.between(naa, skiltsivilstand.gyldigFraOgMed).absoluteValue
                 return if (antallSkilteAar <= 5) {
                     DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5EllerGiftI15
                 } else {
@@ -141,7 +142,7 @@ class DoedshendelseKontrollpunktService(
             val giftMedAvdoed = gift.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
             if (giftMedAvdoed.isNotEmpty()) {
                 val giftSivilstand = giftMedAvdoed.first()
-                val antallGifteAar = ChronoUnit.YEARS.between(naa, giftSivilstand.gyldigFraOgMed)
+                val antallGifteAar = ChronoUnit.YEARS.between(giftSivilstand.gyldigFraOgMed, naa).absoluteValue
                 return if (antallGifteAar >= 15) {
                     DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5EllerGiftI15
                 } else {
@@ -159,7 +160,7 @@ class DoedshendelseKontrollpunktService(
         return if (eps.foedselsdato != null) {
             val foedselsdato = eps.foedselsdato?.verdi
             val naaPlussEnMaaned = LocalDate.now().plusMonths(1L)
-            val alder = ChronoUnit.YEARS.between(naaPlussEnMaaned, foedselsdato)
+            val alder = ChronoUnit.YEARS.between(foedselsdato, naaPlussEnMaaned).absoluteValue
             val alderspensjonAar = 67
             if (alder >= alderspensjonAar) {
                 DoedshendelseKontrollpunkt.EpsKanHaAlderspensjon

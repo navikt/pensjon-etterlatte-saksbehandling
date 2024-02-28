@@ -200,6 +200,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
                     tomDate = null,
                 ),
             )
+        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns mockPerson()
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 
@@ -303,6 +304,8 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
                 enhet = "0000",
             )
         every { sakService.finnSak(any(), any()) } returns sak
+
+        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns mockPerson()
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 

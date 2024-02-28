@@ -59,7 +59,6 @@ class DoedshendelseKontrollpunktService(
     ): List<DoedshendelseKontrollpunkt> {
         return listOfNotNull(
             kontrollerAvdoedDoedsdato(avdoed),
-            kontrollerKryssendeYtelseEps(hendelse),
             kontrollerDNummer(avdoed),
             kontrollerUtvandring(avdoed),
             kontrollerEksisterendeHendelser(hendelse, sak),

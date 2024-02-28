@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, BodyShort, Heading, Panel } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { IBrev } from '~shared/types/Brev'
 import { BrevSpraakModal } from '~components/person/brev/spraak/BrevSpraakModal'
@@ -14,7 +14,7 @@ export default function BrevSpraak({ brev, kanRedigeres }: Props) {
   const [nyttSpraak, setNyttSpraak] = useState(brev.spraak)
 
   return (
-    <Panel border>
+    <Box padding="4" borderWidth="1" borderRadius="small">
       <FlexRow justify="space-between">
         <Heading spacing level="2" size="medium">
           Språk / målform
@@ -45,6 +45,6 @@ export default function BrevSpraak({ brev, kanRedigeres }: Props) {
           Språk mangler
         </Alert>
       )}
-    </Panel>
+    </Box>
   )
 }

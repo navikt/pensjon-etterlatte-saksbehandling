@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, Button, Heading, Link, Panel, Radio, RadioGroup, Tag } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, Link, Radio, RadioGroup, Tag } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { useNavigate } from 'react-router-dom'
@@ -102,7 +102,7 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
 }
 
 const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
-  <Panel border>
+  <Box padding="4" borderWidth="1" borderRadius="small">
     <Heading size="small" spacing>
       Oppgavedetaljer
     </Heading>
@@ -135,5 +135,5 @@ const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
       <Info label="Opprettet" tekst={formaterStringDato(oppgave.opprettet)} />
       <Info label="Frist" tekst={<FristWrapper dato={oppgave.frist} />} />
     </InfoWrapper>
-  </Panel>
+  </Box>
 )

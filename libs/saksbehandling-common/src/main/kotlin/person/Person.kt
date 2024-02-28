@@ -43,6 +43,13 @@ data class Person(
     var vergemaalEllerFremtidsfullmakt: List<VergemaalEllerFremtidsfullmakt>?,
 )
 
+data class PersonNavn(
+    val fornavn: String,
+    val mellomnavn: String? = null,
+    val etternavn: String,
+    val foedselsnummer: Folkeregisteridentifikator,
+)
+
 data class Statsborgerskap(
     val land: String,
     val gyldigFraOgMed: LocalDate?,

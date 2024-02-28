@@ -17,6 +17,7 @@ import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
 import no.nav.etterlatte.libs.common.person.PdlIdentifikator
 import no.nav.etterlatte.libs.common.person.Person
+import no.nav.etterlatte.libs.common.person.PersonNavn
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.hentPrioritertGradering
@@ -59,6 +60,32 @@ class PersonService(
                     personRolle = request.rolle,
                     hentPerson = it.data.hentPerson,
                     saktype = request.saktype,
+                )
+            }
+        }
+    }
+
+    suspend fun hentPersonNavn(foedselsnummer: Folkeregisteridentifikator): PersonNavn {
+        logger.info("Henter navn for fnr=$foedselsnummer fra PDL")
+
+        // Bruker rolle INNSENDER siden den returnerer minst info om personen
+        val request = HentPersonRequest(foedselsnummer, PersonRolle.INNSENDER, SakType.BARNEPENSJON)
+
+        return pdlKlient.hentPerson(request).let {
+            if (it.data?.hentPerson == null) {
+                val pdlFeil = it.errors?.asFormatertFeil()
+                if (it.errors?.personIkkeFunnet() == true) {
+                    throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
+                } else {
+                    throw PdlForesporselFeilet(
+                        "Kunne ikke hente person med fnr=${request.foedselsnummer} fra PDL: $pdlFeil",
+                    )
+                }
+            } else {
+                PersonMapper.mapPersonNavn(
+                    ppsKlient = ppsKlient,
+                    fnr = foedselsnummer,
+                    hentPerson = it.data.hentPerson,
                 )
             }
         }

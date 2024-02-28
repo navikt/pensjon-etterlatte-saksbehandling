@@ -60,6 +60,11 @@ export const ApiErrorAlert = styled(Alert).attrs({ variant: 'error' })`
   max-width: fit-content;
 `
 
+export const ApiWarningAlert = styled(Alert).attrs({ variant: 'warning' })`
+  margin: 2rem auto;
+  max-width: fit-content;
+`
+
 const HjemLink = styled(Link)`
   margin: 2rem auto;
   max-width: fit-content;

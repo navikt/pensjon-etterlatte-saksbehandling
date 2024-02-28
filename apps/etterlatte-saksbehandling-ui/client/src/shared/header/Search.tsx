@@ -5,29 +5,29 @@ import { useNavigate } from 'react-router-dom'
 import { ABlue500, AGray900, ANavRed } from '@navikt/ds-tokens/dist/tokens'
 import { InformationSquareIcon, XMarkOctagonIcon } from '@navikt/aksel-icons'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { getPerson } from '~shared/api/grunnlag'
-import { fnrHarGyldigFormat } from '~utils/fnr'
-import { ApiError } from '~shared/api/apiClient'
+import { fnrErGyldig } from '~utils/fnr'
 import { hentSak } from '~shared/api/behandling'
 
-import { isFailure, isPending, isSuccess } from '~shared/api/apiUtils'
+import { isPending, mapFailure } from '~shared/api/apiUtils'
 
 export const Search = () => {
   const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState('')
   const [feilInput, setFeilInput] = useState(false)
-  const [personStatus, hentPerson, reset] = useApiCall(getPerson)
   const [funnetSak, finnSak, resetSakSoek] = useApiCall(hentSak)
 
-  const gyldigInputFnr = fnrHarGyldigFormat(searchInput)
+  const gyldigInputFnr = fnrErGyldig(searchInput)
   const gyldigInputSakId = /^\d{1,10}$/.test(searchInput ?? '')
+
   const avgjoerSoek = () => {
     if (gyldigInputFnr) {
-      hentPerson(searchInput)
+      navigate(`/person/${searchInput}`)
       return
     }
     if (gyldigInputSakId) {
-      finnSak(searchInput)
+      finnSak(searchInput, (sak) => {
+        navigate(`/person/${sak.ident}`)
+      })
       return
     }
   }
@@ -39,20 +39,9 @@ export const Search = () => {
   }
 
   useEffect(() => {
-    reset()
     resetSakSoek()
     setFeilInput(!!searchInput.length && !(gyldigInputFnr || gyldigInputSakId))
   }, [searchInput])
-
-  useEffect(() => {
-    if (isSuccess(personStatus)) {
-      navigate(`/person/${searchInput}`)
-      return
-    }
-    if (isSuccess(funnetSak)) {
-      navigate(`/person/${funnetSak.data.ident}`)
-    }
-  }, [personStatus, funnetSak])
 
   return (
     <SearchWrapper>
@@ -67,7 +56,7 @@ export const Search = () => {
         <SearchField.Button onClick={avgjoerSoek} />
       </SearchField>
 
-      {(isPending(personStatus) || isPending(funnetSak)) && (
+      {isPending(funnetSak) && (
         <Dropdown>
           <SpinnerContent>
             <Loader />
@@ -87,36 +76,20 @@ export const Search = () => {
         </Dropdown>
       )}
 
-      {isFailure(funnetSak) && (
+      {mapFailure(funnetSak, (error) => (
         <Dropdown error={true}>
           <span className="icon">
             <XMarkOctagonIcon color={ANavRed} fill={AGray900} />
           </span>
           <SearchResult>
-            <BodyShort className="text">{feilmelding(funnetSak.error)}</BodyShort>
+            <BodyShort className="text">
+              {error.status === 404 ? `Fant ingen sak med id ${searchInput}` : 'En feil har skjedd'}
+            </BodyShort>
           </SearchResult>
         </Dropdown>
-      )}
-      {isFailure(personStatus) && (
-        <Dropdown error={true}>
-          <span className="icon">
-            <XMarkOctagonIcon color={ANavRed} fill={AGray900} />
-          </span>
-          <SearchResult>
-            <BodyShort className="text">{feilmelding(personStatus.error)}</BodyShort>
-          </SearchResult>
-        </Dropdown>
-      )}
+      ))}
     </SearchWrapper>
   )
-}
-
-const feilmelding = (error: ApiError) => {
-  if (error.status === 404) {
-    return 'Fant ingen data i Gjenny'
-  } else {
-    return 'En feil har skjedd'
-  }
 }
 
 const Dropdown = styled.div<{ error?: boolean; info?: boolean }>`

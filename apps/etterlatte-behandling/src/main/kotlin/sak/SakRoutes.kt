@@ -25,6 +25,7 @@ import no.nav.etterlatte.libs.common.behandling.ForenkletBehandlingListeWrapper
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeFunnetException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.kunSaksbehandler
 import no.nav.etterlatte.libs.common.kunSystembruker
@@ -114,11 +115,10 @@ internal fun Route.sakSystemRoutes(
     }
 }
 
-class PersonManglerSak() :
-    UgyldigForespoerselException(
-        code = "PERSON_MANGLER_SAK",
-        detail = "Personen har ingen saker i Gjenny",
-    )
+class PersonManglerSak : IkkeFunnetException(
+    code = "PERSON_MANGLER_SAK",
+    detail = "Personen har ingen saker i Gjenny",
+)
 
 class SakIkkeFunnetException(message: String) :
     UgyldigForespoerselException(
@@ -244,6 +244,7 @@ internal fun Route.sakWebRoutes(
                     val behandlinger =
                         inTransaction {
                             val sak = sakService.hentEnkeltSakForPerson(fnr.value)
+
                             val utlandstilknytning = behandlingService.hentUtlandstilknytningForSak(sak.id)
                             val sakMedUtlandstilknytning = SakMedUtlandstilknytning.fra(sak, utlandstilknytning)
 
@@ -257,6 +258,7 @@ internal fun Route.sakWebRoutes(
                                 .map { it.toBehandlingSammendrag() }
                                 .let { BehandlingListe(sakMedUtlandstilknytning, it) }
                         }
+
                     call.respond(behandlinger)
                 }
             }

@@ -59,3 +59,4 @@ spec:
         - application: etterlatte-grunnlag
         - application: etterlatte-migrering
         - application: etterlatte-saksbehandling-ui
+        - application: etterlatte-saksbehandling-ui-lokal # for å åpne for lokal utv. Ikke kopier denne til prod.yaml

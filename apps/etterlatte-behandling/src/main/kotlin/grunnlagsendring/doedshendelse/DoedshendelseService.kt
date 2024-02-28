@@ -163,7 +163,13 @@ class DoedshendelseService(
 
     private fun finnBeroerteEpser(avdoed: PersonDTO): List<PersonMedRelasjon> {
         return avdoed.sivilstand?.filter { it.verdi.relatertVedSiviltilstand?.value !== null }
-            ?.filter { it.verdi.sivilstatus == Sivilstatus.UGIFT }
+            ?.filter {
+                it.verdi.sivilstatus == Sivilstatus.UGIFT ||
+                    it.verdi.sivilstatus == Sivilstatus.UGIFT ||
+                    it.verdi.sivilstatus == Sivilstatus.SKILT ||
+                    it.verdi.sivilstatus == Sivilstatus.ENKE_ELLER_ENKEMANN ||
+                    it.verdi.sivilstatus == Sivilstatus.SEPARERT
+            }
             ?.map {
                 pdlTjenesterKlient.hentPdlModell(
                     it.verdi.relatertVedSiviltilstand!!.value,

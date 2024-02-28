@@ -4,7 +4,7 @@ import { BehandlingHandlingKnapper } from '../handlinger/BehandlingHandlingKnapp
 import { NesteOgTilbake } from '../handlinger/NesteOgTilbake'
 import { behandlingErRedigerbar, requireNotNull } from '../felles/utils'
 import Virkningstidspunkt, { Hjemmel } from '~components/behandling/virkningstidspunkt/Virkningstidspunkt'
-import { Start } from '~components/behandling/handlinger/start'
+import { Start } from '~components/behandling/handlinger/Start'
 import { IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { Border, InnholdPadding } from '~components/behandling/soeknadsoversikt/styled'
 import { HeadingWrapper } from '~components/person/SakOversikt'

@@ -1,5 +1,5 @@
 import AvbrytBehandling from './AvbrytBehandling'
-import { Tilbake } from './tilbake'
+import { Tilbake } from './Tilbake'
 import { ReactNode } from 'react'
 import { FlexRow } from '~shared/styled'
 

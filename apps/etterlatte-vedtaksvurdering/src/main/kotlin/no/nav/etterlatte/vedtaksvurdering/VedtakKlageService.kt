@@ -5,15 +5,19 @@ import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
 import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vedtaksvurdering.OpprettVedtak
+import no.nav.etterlatte.vedtaksvurdering.UgyldigAttestantException
+import no.nav.etterlatte.vedtaksvurdering.Vedtak
 import no.nav.etterlatte.vedtaksvurdering.VedtakInnhold
 import no.nav.etterlatte.vedtaksvurdering.VedtakTilstandException
 import no.nav.etterlatte.vedtaksvurdering.VedtaksvurderingRepository
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 class VedtakKlageService(
     private val repository: VedtaksvurderingRepository,
@@ -81,10 +85,51 @@ class VedtakKlageService(
         ).id
     }
 
+    fun attesterVedtak(
+        klage: Klage,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        logger.info("Attesterer vedtak for klage=${klage.id}")
+        val eksisterendeVedtak =
+            repository.hentVedtak(klage.id)
+                ?: throw NotFoundException("Fant ikke vedtak for klage med id=${klage.id}")
+
+        sjekkAttestantHarAnnenIdentEnnDenSomFattet(eksisterendeVedtak, brukerTokenInfo)
+        verifiserGyldigVedtakStatus(eksisterendeVedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
+
+        return repository.attesterVedtak(
+            klage.id,
+            Attestasjon(
+                attestant = brukerTokenInfo.ident(),
+                attesterendeEnhet = klage.sak.enhet,
+                tidspunkt = Tidspunkt.now(),
+            ),
+        ).id
+    }
+
+    fun underkjennVedtak(klageId: UUID): Long {
+        logger.info("Underkjenner vedtak for klage=$klageId")
+        val eksisterendeVedtak =
+            repository.hentVedtak(klageId)
+                ?: throw NotFoundException("Fant ikke vedtak for klage med id=$klageId")
+
+        verifiserGyldigVedtakStatus(eksisterendeVedtak.status, listOf(VedtakStatus.FATTET_VEDTAK))
+        return repository.underkjennVedtak(klageId).id
+    }
+
     private fun verifiserGyldigVedtakStatus(
         gjeldendeStatus: VedtakStatus,
         forventetStatus: List<VedtakStatus>,
     ) {
         if (gjeldendeStatus !in forventetStatus) throw VedtakTilstandException(gjeldendeStatus, forventetStatus)
+    }
+
+    private fun sjekkAttestantHarAnnenIdentEnnDenSomFattet(
+        vedtak: Vedtak,
+        attestant: BrukerTokenInfo,
+    ) {
+        if (attestant.erSammePerson(vedtak.vedtakFattet!!.ansvarligSaksbehandler)) {
+            throw UgyldigAttestantException(attestant.ident())
+        }
     }
 }

@@ -467,6 +467,20 @@ class VedtakKlientTest : VedtakKlient {
     ): Long {
         return 123L
     }
+
+    override suspend fun attesterVedtakKlage(
+        klage: Klage,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        return 123L
+    }
+
+    override suspend fun underkjennVedtakKlage(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Long {
+        return 123L
+    }
 }
 
 class BrevApiKlientTest : BrevApiKlient {

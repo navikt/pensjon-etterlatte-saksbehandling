@@ -2,6 +2,7 @@ package no.nav.etterlatte.behandling.klage
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -174,6 +175,28 @@ internal fun Route.klageRoutes(
                         call.respond(HttpStatusCode.OK, klage)
                     }
                 }
+
+                post("attester") {
+                    kunSkrivetilgang {
+                        val (kommentar) = call.receive<KlageAttesterRequest>()
+                        val klage =
+                            inTransaction {
+                                klageService.attesterVedtak(klageId, kommentar, brukerTokenInfo)
+                            }
+                        call.respond(HttpStatusCode.OK, klage)
+                    }
+                }
+
+                post("underkjenn") {
+                    kunSkrivetilgang {
+                        val (kommentar, valgtBegrunnelse) = call.receive<KlageUnderkjennRequest>()
+                        val klage =
+                            inTransaction {
+                                klageService.underkjennVedtak(klageId, kommentar, valgtBegrunnelse, brukerTokenInfo)
+                            }
+                        call.respond(HttpStatusCode.OK, klage)
+                    }
+                }
             }
         }
 
@@ -209,3 +232,12 @@ data class VurdereFormkravDto(val formkrav: Formkrav)
 data class VurdertUtfallDto(val utfall: KlageUtfallUtenBrev)
 
 data class AvbrytKlageDto(val aarsakTilAvbrytelse: AarsakTilAvbrytelse, val kommentar: String)
+
+data class KlageAttesterRequest(
+    val kommentar: String,
+)
+
+data class KlageUnderkjennRequest(
+    val kommentar: String,
+    val valgtBegrunnelse: String,
+)

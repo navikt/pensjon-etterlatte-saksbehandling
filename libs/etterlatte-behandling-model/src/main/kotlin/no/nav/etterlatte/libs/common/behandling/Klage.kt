@@ -31,6 +31,8 @@ enum class KlageStatus {
     FORMKRAV_IKKE_OPPFYLT,
     UTFALL_VURDERT,
     FATTET_VEDTAK,
+    ATTESTERT,
+    RETURNERT,
 
     // potensielt en status for å markere oversendingen til Kabal
     FERDIGSTILT, // klagen er ferdig fra gjenny sin side
@@ -49,7 +51,7 @@ enum class KlageStatus {
         }
 
         fun kanAvbryte(status: KlageStatus): Boolean {
-            return status !in listOf(FERDIGSTILT, AVBRUTT)
+            return status !in listOf(FERDIGSTILT, ATTESTERT, AVBRUTT)
         }
 
         fun kanEndres(status: KlageStatus): Boolean {
@@ -57,7 +59,15 @@ enum class KlageStatus {
         }
 
         fun kanFatteVedtak(status: KlageStatus): Boolean {
-            return status == UTFALL_VURDERT
+            return status in listOf(UTFALL_VURDERT, RETURNERT)
+        }
+
+        fun kanAttestereVedtak(status: KlageStatus): Boolean {
+            return status == FATTET_VEDTAK
+        }
+
+        fun kanUnderkjenneVedtak(status: KlageStatus): Boolean {
+            return status == FATTET_VEDTAK
         }
     }
 }
@@ -303,6 +313,26 @@ data class Klage(
             )
         }
         return this.copy(status = KlageStatus.FATTET_VEDTAK)
+    }
+
+    fun attesterVedtak(): Klage {
+        if (!KlageStatus.kanAttestereVedtak(this.status)) {
+            throw IllegalStateException(
+                "Kan ikke attestere vedtak for klagen med id=${this.id} " +
+                    "på grunn av status til klagen (${this.status})",
+            )
+        }
+        return this.copy(status = KlageStatus.ATTESTERT)
+    }
+
+    fun underkjennVedtak(): Klage {
+        if (!KlageStatus.kanUnderkjenneVedtak(this.status)) {
+            throw IllegalStateException(
+                "Kan ikke underkjenne vedtak for klagen med id=${this.id} " +
+                    "på grunn av status til klagen (${this.status})",
+            )
+        }
+        return this.copy(status = KlageStatus.RETURNERT)
     }
 
     companion object {

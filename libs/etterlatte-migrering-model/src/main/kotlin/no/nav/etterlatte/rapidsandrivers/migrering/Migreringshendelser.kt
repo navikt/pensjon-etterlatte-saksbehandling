@@ -17,6 +17,7 @@ enum class Migreringshendelser : EventnameHendelseType {
     IVERKSATT,
     AVBRYT_BEHANDLING,
     FIKS_ENKELTBREV,
+    ALLEREDE_GJENOPPRETTA,
     ;
 
     override fun lagEventnameForType(): String = "MIGRERING:${this.name}"

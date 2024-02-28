@@ -4,7 +4,6 @@ import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -75,7 +74,7 @@ class DoedshendelseService(
             Endringstype.OPPRETTET, Endringstype.KORRIGERT -> {
                 inTransaction {
                     aapneDoedshendelser
-                        .map { it.tilOppdatert() }
+                        .map { it.tilOppdatert(doedshendelse.endringstype) }
                         .forEach { doedshendelseDao.oppdaterDoedshendelse(it) }
 
                     haandterNyeBerorte(doedshendelserForAvdoed, beroerte, avdoed, doedshendelse.endringstype)
@@ -85,7 +84,7 @@ class DoedshendelseService(
             Endringstype.ANNULLERT -> {
                 inTransaction {
                     aapneDoedshendelser
-                        .map { it.tilAvbrutt(kontrollpunkter = listOf(DoedshendelseKontrollpunkt.DoedshendelseErAnnullert)) }
+                        .map { it.tilAnnulert() }
                         .forEach { doedshendelseDao.oppdaterDoedshendelse(it) }
                 }
             }

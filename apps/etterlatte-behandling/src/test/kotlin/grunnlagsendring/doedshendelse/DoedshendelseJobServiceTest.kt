@@ -36,7 +36,7 @@ import java.util.UUID
 import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DoedshendelseInternalPdlJobServiceTest {
+class DoedshendelseJobServiceTest {
     private val dao = mockk<DoedshendelseDao>()
     private val kontrollpunktService = mockk<DoedshendelseKontrollpunktService>()
     private val toggle =
@@ -65,6 +65,7 @@ class DoedshendelseInternalPdlJobServiceTest {
     private val grunnlagService =
         mockk<GrunnlagService> {
             every { leggInnNyttGrunnlagSak(any(), any()) } just runs
+            every { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
         }
 
     val pdlTjenesterKlient =

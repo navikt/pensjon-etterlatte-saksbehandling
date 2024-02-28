@@ -52,8 +52,6 @@ export const Oppgaver = ({
     if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
   }, [sorterteOppgaver, filtrerteOppgaver])
 
-  if (!paginerteOppgaver.length) return <Alert variant="info">Ingen oppgaver</Alert>
-
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
 
   if (!paginerteOppgaver.length) return <Alert variant="info">Ingen oppgaver</Alert>

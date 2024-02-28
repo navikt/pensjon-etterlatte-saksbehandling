@@ -10,6 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.etterlatte.grunnlag.klienter.BehandlingKlient
 import no.nav.etterlatte.libs.common.SAKID_CALL_PARAMETER
+import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
@@ -45,6 +46,17 @@ fun Route.sakGrunnlagRoute(
                     grunnlagService.opprettGrunnlagForSak(sakId, opplysningsbehov)
                     call.respond(HttpStatusCode.OK)
                 }
+            }
+        }
+
+        post("/nye-opplysninger") {
+            withSakId(behandlingKlient, skrivetilgang = true) { sakId ->
+                val opplysningsbehov = call.receive<NyeSaksopplysninger>()
+                grunnlagService.lagreNyeSaksopplysningerBareSak(
+                    opplysningsbehov.sakId,
+                    opplysningsbehov.opplysninger,
+                )
+                call.respond(HttpStatusCode.OK)
             }
         }
     }

@@ -79,6 +79,16 @@ open class Grunnlagsopplysning<T>(
         }
     }
 
+    data class Gjenny(val ident: String, val tidspunkt: Tidspunkt) : Kilde("gjenny") {
+        companion object {
+            fun create(ident: String) = Saksbehandler(ident, Tidspunkt.now())
+        }
+
+        override fun toString(): String {
+            return "gjenny $ident"
+        }
+    }
+
     data class Pesys(val tidspunkt: Tidspunkt) : Kilde("pesys") {
         companion object {
             fun create() = Pesys(Tidspunkt.now())

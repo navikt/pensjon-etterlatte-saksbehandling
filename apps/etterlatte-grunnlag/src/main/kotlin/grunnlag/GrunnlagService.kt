@@ -59,6 +59,11 @@ interface GrunnlagService {
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     )
 
+    fun lagreNyeSaksopplysningerBareSak(
+        sakId: Long,
+        nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
+    )
+
     fun lagreNyePersonopplysninger(
         sakId: Long,
         behandlingId: UUID,
@@ -469,8 +474,16 @@ class RealGrunnlagService(
         behandlingId: UUID,
         nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
     ) {
-        logger.info("Oppretter et grunnlag for saksopplysninger")
+        logger.info("Oppretter et grunnlag for saksopplysninger $sakId")
         oppdaterGrunnlagOgVersjon(sakId, behandlingId, fnr = null, nyeOpplysninger)
+    }
+
+    override fun lagreNyeSaksopplysningerBareSak(
+        sakId: Long,
+        nyeOpplysninger: List<Grunnlagsopplysning<JsonNode>>,
+    ) {
+        logger.info("Oppretter et grunnlag for saksopplysninger $sakId")
+        oppdaterGrunnlagForSak(sakId = sakId, nyeOpplysninger = nyeOpplysninger, fnr = null)
     }
 
     override suspend fun opprettGrunnlagForSak(
@@ -663,6 +676,7 @@ private fun Grunnlagsopplysning.Kilde.tilGenerellKilde() =
                 detalj = this.ident,
             )
         is Grunnlagsopplysning.UkjentInnsender -> GenerellKilde(this.type, this.tidspunkt, detalj = null)
+        is Grunnlagsopplysning.Gjenny -> GenerellKilde(this.type, this.tidspunkt, detalj = null)
     }
 
 data class GrunnlagsopplysningerPersonPdl(

@@ -33,7 +33,7 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
         initialiserRiver(rapidsConnection, EventNames.FEILA) {
             validate { it.interestedIn(FEILENDE_STEG) }
             validate { it.requireKey(KILDE_KEY) }
-            validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
+            validate { it.requireAny(KILDE_KEY, listOf(Vedtaksloesning.PESYS.name, Vedtaksloesning.GJENOPPRETTA.name)) }
             validate { it.interestedIn("vedtak.behandlingId") }
             validate { it.interestedIn(BEHANDLING_ID_KEY) }
             validate { it.interestedIn(PESYS_ID_KEY) }

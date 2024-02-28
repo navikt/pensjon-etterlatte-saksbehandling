@@ -105,7 +105,7 @@ const AdopsjonGrunnlag = () => {
   )
 }
 
-const BrukersFoedselsdatoGrunnlag = () => {
+const BrukerFyller20AarGrunnlag = () => {
   const soeker = usePersonopplysninger()?.soeker
   const foedselsdato = soeker?.opplysning?.foedselsdato
   return (
@@ -145,9 +145,7 @@ export const GrunnlagForVirkningstidspunkt = () => {
       return <AdopsjonGrunnlag />
     case Revurderingaarsak.ALDERSOVERGANG:
       return (
-        (behandling.sakType === SakType.BARNEPENSJON && <BrukersFoedselsdatoGrunnlag />) || (
-          <BrukerFyller67AarGrunnlag />
-        )
+        (behandling.sakType === SakType.BARNEPENSJON && <BrukerFyller20AarGrunnlag />) || <BrukerFyller67AarGrunnlag />
       )
   }
   return null

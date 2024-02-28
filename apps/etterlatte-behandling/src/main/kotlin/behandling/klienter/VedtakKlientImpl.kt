@@ -221,7 +221,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/vedtak/klage/${klage.id}/lagre-vedtak",
+                            url = "$resourceUrl/vedtak/klage/${klage.id}/upsert",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = klage,
@@ -246,7 +246,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/vedtak/klage/${klage.id}/fatt-vedtak",
+                            url = "$resourceUrl/vedtak/klage/${klage.id}/fatt",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = klage,
@@ -274,7 +274,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/vedtak/klage/${klage.id}/attester-vedtak",
+                            url = "$resourceUrl/vedtak/klage/${klage.id}/attester",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = klage,
@@ -302,7 +302,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                     resource =
                         Resource(
                             clientId = clientId,
-                            url = "$resourceUrl/tilbakekreving/$klageId/underkjenn-vedtak",
+                            url = "$resourceUrl/vedtak/klage/$klageId/underkjenn",
                         ),
                     brukerTokenInfo = brukerTokenInfo,
                     postBody = { },

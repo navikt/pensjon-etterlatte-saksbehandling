@@ -59,7 +59,7 @@ enum class KlageStatus {
         }
 
         fun kanFatteVedtak(status: KlageStatus): Boolean {
-            return status == UTFALL_VURDERT
+            return status in listOf(UTFALL_VURDERT, RETURNERT)
         }
 
         fun kanAttestereVedtak(status: KlageStatus): Boolean {

@@ -268,7 +268,7 @@ const HeadingWrapper = styled.div`
 `
 
 const ContentWrapper = styled.div`
-  color: var(--navds-global-color-gray-700);
+  color: var(--a-gray-700);
 `
 
 const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`

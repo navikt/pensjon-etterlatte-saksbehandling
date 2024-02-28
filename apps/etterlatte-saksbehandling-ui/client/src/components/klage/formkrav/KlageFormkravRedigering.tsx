@@ -264,7 +264,7 @@ export function KlageFormkravRedigering() {
           <Heading level="2" size="small">
             Hent informasjon fra klager
           </Heading>
-          <BodyLong $spacing>
+          <BodyLong spacing>
             Du må innhente mer informasjon fra klager for å avgjøre om formkravene kan oppfylles. Sett klagebehandlingen
             på vent og opprett et nytt brev til klager.
           </BodyLong>

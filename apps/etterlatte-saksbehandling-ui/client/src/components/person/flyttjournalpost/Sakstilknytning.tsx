@@ -1,4 +1,4 @@
-import { Alert, Button, Heading, Modal, Panel, Select } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, Modal, Select } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { isPending, isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import Spinner from '~shared/Spinner'
@@ -123,7 +123,7 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
         )}
 
         {isSuccess(nyOppgaveStatus) && (
-          <Modal open={true}>
+          <Modal open={true} onClose={() => {}} aria-label="Oppgave klar for behandling">
             <Alert variant="success">Ny oppgave er klar for behandling. Du sendes straks til oppgavebenken.</Alert>
           </Modal>
         )}
@@ -148,7 +148,7 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
         (error: ApiError) => {
           if (error.code === 'PERSON_MANGLER_SAK') {
             return (
-              <Panel>
+              <Box padding="4" borderWidth="1" borderRadius="small">
                 <Alert variant="warning">
                   Personen ({bruker}) har ingen sak i Gjenny
                   <br />
@@ -170,12 +170,12 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
                     Opprett {sakType ? formaterSakstype(sakType) : 'sak'}
                   </Button>
                 </FlexRow>
-              </Panel>
+              </Box>
             )
           } else return <ApiErrorAlert>{error.detail}</ApiErrorAlert>
         },
         (sak) => (
-          <Panel>
+          <Box padding="4" borderWidth="1" borderRadius="small">
             <Heading size="small">Brukers sak i Gjenny</Heading>
             <InfoWrapper>
               <Info label="SakID" tekst={sak.sak.id} />
@@ -207,12 +207,12 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
                 Knytt til sak {sak.sak.id}
               </Button>
             </FlexRow>
-          </Panel>
+          </Box>
         )
       )}
 
       {isSuccess(nyOppgaveStatus) && (
-        <Modal open={true}>
+        <Modal open={true} onClose={() => {}} aria-label="Oppgave klar for behandling">
           <Alert variant="success">Ny oppgave er klar for behandling. Du sendes straks til oppgavebenken.</Alert>
         </Modal>
       )}

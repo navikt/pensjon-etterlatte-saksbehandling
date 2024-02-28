@@ -80,7 +80,7 @@ internal class MigrerSpesifikkSakRiver(
                 Migreringsstatus.PAUSE,
                 Migreringsstatus.MANUELL,
                 Migreringsstatus.UNDER_MIGRERING_MANUELT,
-                Migreringsstatus.OPPGAVE_OPPRETTA_FOR_MANUELT,
+                Migreringsstatus.SENDT_TIL_MANUELT,
                 Migreringsstatus.UTBETALING_FEILA,
             )
         ) {
@@ -137,7 +137,7 @@ internal class MigrerSpesifikkSakRiver(
             if (request.kanAutomatiskGjenopprettes) {
                 Migreringsstatus.UNDER_MIGRERING
             } else {
-                Migreringsstatus.OPPGAVE_OPPRETTA_FOR_MANUELT
+                Migreringsstatus.SENDT_TIL_MANUELT
             }
         pesysRepository.oppdaterStatus(PesysId(sak.id), nyStatus)
     }

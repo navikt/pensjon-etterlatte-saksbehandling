@@ -66,10 +66,12 @@ export const hentSorteringFraLocalStorage = (): OppgaveSortering => {
         return parsetFilter
       }
     } else {
+      leggTilSorteringILocalStorage(initialSortering())
       return initialSortering()
     }
   } catch (e) {
     logger.generalError({ message: 'Feil i hentingen av sortering fra localstorage' })
+    leggTilSorteringILocalStorage(initialSortering())
     return initialSortering()
   }
 }

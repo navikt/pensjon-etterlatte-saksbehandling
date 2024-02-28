@@ -28,7 +28,7 @@ export const Oppgaver = ({
   oppdaterFrist,
   filter,
 }: OppgavelisteProps): ReactNode => {
-  if (!oppgaver.length || oppgaver.length < 1) return <Alert variant="info">Ingen oppgaver</Alert>
+  if (!oppgaver.length) return <Alert variant="info">Ingen oppgaver</Alert>
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
   const filtrerteOppgaver = filter
     ? filtrerOppgaver(

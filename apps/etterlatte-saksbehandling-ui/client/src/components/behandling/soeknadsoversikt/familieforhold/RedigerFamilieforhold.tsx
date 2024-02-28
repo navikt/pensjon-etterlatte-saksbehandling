@@ -100,7 +100,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
         </Modal.Header>
         <Modal.Body>
           <FormWrapper column={true}>
-            <Box padding="4" borderRadius="small">
+            <Box padding="4" borderWidth="1" borderRadius="small">
               <InputList>
                 {avdoedListe.fields?.map((field, index) => (
                   <InputRow key={field.id}>
@@ -127,7 +127,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
               </InputList>
             </Box>
 
-            <Box padding="4" borderRadius="small">
+            <Box padding="4" borderWidth="1" borderRadius="small">
               <InputList>
                 {gjenlevendeListe.fields?.map((field, index) => (
                   <InputRow key={field.id}>

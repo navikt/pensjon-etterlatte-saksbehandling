@@ -148,7 +148,7 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
         (error: ApiError) => {
           if (error.code === 'PERSON_MANGLER_SAK') {
             return (
-              <Box padding="4" borderRadius="small">
+              <Box padding="4" borderWidth="1" borderRadius="small">
                 <Alert variant="warning">
                   Personen ({bruker}) har ingen sak i Gjenny
                   <br />
@@ -175,7 +175,7 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
           } else return <ApiErrorAlert>{error.detail}</ApiErrorAlert>
         },
         (sak) => (
-          <Box padding="4" borderRadius="small">
+          <Box padding="4" borderWidth="1" borderRadius="small">
             <Heading size="small">Brukers sak i Gjenny</Heading>
             <InfoWrapper>
               <Info label="SakID" tekst={sak.sak.id} />

@@ -115,7 +115,7 @@ internal class PesysRepository(private val dataSource: DataSource) : Transaction
     }
 
     fun lagreKoplingTilBehandling(
-        behandlingId: UUID,
+        behandlingId: UUID?,
         pesysId: PesysId,
         sakId: Long,
         tx: TransactionalSession? = null,

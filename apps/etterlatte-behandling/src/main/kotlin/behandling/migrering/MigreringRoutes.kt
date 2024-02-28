@@ -39,8 +39,8 @@ fun Route.migreringRoutes(migreringService: MigreringService) {
         }
         post("/manuell-gjenoppretting") {
             kunSkrivetilgang {
-                migreringService.opprettOppgaveManuellGjenoppretting(call.receive())
-                call.respond(HttpStatusCode.OK)
+                val oppgave = migreringService.opprettOppgaveManuellGjenoppretting(call.receive())
+                call.respond(oppgave)
             }
         }
 

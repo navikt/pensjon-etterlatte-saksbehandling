@@ -13,6 +13,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+import java.util.UUID
 
 internal class LagreKoblingRiver(rapidsConnection: RapidsConnection, private val pesysRepository: PesysRepository) :
     ListenerMedLoggingOgFeilhaandtering() {
@@ -21,7 +22,7 @@ internal class LagreKoblingRiver(rapidsConnection: RapidsConnection, private val
     init {
         initialiserRiver(rapidsConnection, Migreringshendelser.LAGRE_KOPLING) {
             validate { it.requireKey(PESYS_ID_KEY) }
-            validate { it.requireKey(BEHANDLING_ID_KEY) }
+            validate { it.interestedIn(BEHANDLING_ID_KEY) }
             validate { it.requireKey(SAK_ID_KEY) }
         }
     }
@@ -31,11 +32,17 @@ internal class LagreKoblingRiver(rapidsConnection: RapidsConnection, private val
         context: MessageContext,
     ) {
         logger.info("Lagrer kopling fra pesyssak ${packet.pesysId} til behandling ${packet.behandlingId}")
-        pesysRepository.lagreKoplingTilBehandling(packet.behandlingId, packet.pesysId, packet.sakId)
+        val behandlingId: UUID? =
+            try {
+                packet.behandlingId
+            } catch (e: Exception) {
+                null
+            }
+        pesysRepository.lagreKoplingTilBehandling(behandlingId, packet.pesysId, packet.sakId)
         packet.setEventNameForHendelseType(Migreringshendelser.LAGRE_GRUNNLAG)
         context.publish(packet.toJson())
         logger.info(
-            "Publiserte oppdatert migreringshendelse for ${packet.behandlingId} " +
+            "Publiserte oppdatert migreringshendelse for $behandlingId " +
                 "med lagra kopling til pesyssak ${packet.pesysId}",
         )
     }

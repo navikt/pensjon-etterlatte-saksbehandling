@@ -48,25 +48,27 @@ internal class MigrerEnEnkeltSakRiver(
         logger.info("Mottatt migreringshendelse")
 
         val hendelse: MigreringRequest = objectMapper.treeToValue(packet[HENDELSE_DATA_KEY])
-        if (!hendelse.kanAutomatiskGjenopprettes) {
-            behandlinger.opprettOppgaveManuellGjenoppretting(hendelse)
-            return
-        }
-
-        val migreringRespons = behandlinger.migrer(hendelse)
-
-        packet.behandlingId = migreringRespons.behandlingId
-        packet.sakId = migreringRespons.sakId
-        packet.oppgaveId = migreringRespons.oppgaveId
 
         packet[SAK_TYPE_KEY] = SakType.BARNEPENSJON
         packet[ROLLE_KEY] = PersonRolle.AVDOED
-        packet[MIGRERING_GRUNNLAG_KEY] =
-            MigrerSoekerRequest(
-                soeker = hendelse.soeker.value,
-            )
-        packet[PERSONGALLERI_KEY] = hendelse.opprettPersongalleri()
         packet.setEventNameForHendelseType(Migreringshendelser.LAGRE_KOPLING)
+
+        if (!hendelse.kanAutomatiskGjenopprettes) {
+            val oppgave = behandlinger.opprettOppgaveManuellGjenoppretting(hendelse)
+            packet.sakId = oppgave.sakId
+            packet.oppgaveId = oppgave.id
+        } else {
+            val migreringRespons = behandlinger.migrer(hendelse)
+
+            packet.behandlingId = migreringRespons.behandlingId
+            packet.sakId = migreringRespons.sakId
+            packet.oppgaveId = migreringRespons.oppgaveId
+            packet[MIGRERING_GRUNNLAG_KEY] =
+                MigrerSoekerRequest(
+                    soeker = hendelse.soeker.value,
+                )
+            packet[PERSONGALLERI_KEY] = hendelse.opprettPersongalleri()
+        }
 
         context.publish(packet.toJson())
         logger.info("Publiserte oppdatert migreringshendelse")

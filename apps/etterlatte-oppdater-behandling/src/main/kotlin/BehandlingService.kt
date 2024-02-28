@@ -18,6 +18,7 @@ import no.nav.etterlatte.libs.common.behandling.MigreringRespons
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
@@ -62,7 +63,7 @@ interface BehandlingService {
 
     fun migrer(hendelse: MigreringRequest): MigreringRespons
 
-    fun opprettOppgaveManuellGjenoppretting(hendelse: MigreringRequest)
+    fun opprettOppgaveManuellGjenoppretting(hendelse: MigreringRequest): OppgaveIntern
 
     fun avbryt(behandlingId: UUID): HttpResponse
 
@@ -197,14 +198,13 @@ class BehandlingServiceImpl(
             }.body()
         }
 
-    override fun opprettOppgaveManuellGjenoppretting(hendelse: MigreringRequest) {
+    override fun opprettOppgaveManuellGjenoppretting(hendelse: MigreringRequest) =
         runBlocking {
             behandlingKlient.post("$url/migrering/manuell-gjenoppretting") {
                 contentType(ContentType.Application.Json)
                 setBody(hendelse)
-            }
+            }.body<OppgaveIntern>()
         }
-    }
 
     override fun hentAlleSaker(): Saker =
         runBlocking {

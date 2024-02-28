@@ -1,0 +1,1 @@
+ALTER TABLE pesyskopling ALTER COLUMN behandling_id DROP NOT NULL;

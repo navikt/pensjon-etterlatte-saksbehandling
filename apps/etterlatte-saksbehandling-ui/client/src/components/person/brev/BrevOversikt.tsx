@@ -175,7 +175,7 @@ const SlettBrev = ({ brevId, sakId }: { brevId: number; sakId: number }) => {
     <>
       <Button variant="danger" icon={<TrashIcon />} onClick={() => setIsOpen(true)} />
 
-      <Modal open={isOpen}>
+      <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-label="Slett brev">
         <Modal.Body>
           <BodyShort spacing>Er du sikker på at du vil slette brevet? Handlingen kan ikke angres.</BodyShort>
 

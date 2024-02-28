@@ -1,4 +1,4 @@
-import { BodyShort, Button, Heading, Panel, TextField } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, TextField } from '@navikt/ds-react'
 import { PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
 import {
   InputList,
@@ -51,7 +51,7 @@ export default function PersongalleriOmstillingsstoenad() {
           />
         </InputRow>
       ))}
-      <Panel border>
+      <Box padding="4" borderWidth="1" borderRadius="small">
         <Heading size="small" spacing>
           Barn
           <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>
@@ -77,7 +77,7 @@ export default function PersongalleriOmstillingsstoenad() {
             Legg til barn
           </Button>
         </InputList>
-      </Panel>
+      </Box>
     </SpaceChildren>
   )
 }

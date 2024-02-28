@@ -14,10 +14,14 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toObjectNode
+import no.nav.etterlatte.libs.common.vedtak.Attestasjon
+import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
+import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
 class VedtakKlageServiceTest {
@@ -107,6 +111,106 @@ class VedtakKlageServiceTest {
                 },
             )
         }
+    }
+
+    @Test
+    fun `attesterVedtak skal attestere vedtak og returnere vedtaket`() {
+        val klage = klage()
+        val vedtakKlage =
+            vedtakKlage(
+                status = VedtakStatus.FATTET_VEDTAK,
+                vedtakFattet =
+                    VedtakFattet(
+                        ansvarligSaksbehandler = "fatter",
+                        ansvarligEnhet = "enhet",
+                        tidspunkt = Tidspunkt.now(),
+                    ),
+            )
+        every { vedtaksvurderingRepository.hentVedtak(klage.id) } returns vedtakKlage
+
+        val attestertVedtak =
+            vedtakKlage.copy(
+                attestasjon =
+                    Attestasjon(attestant = "saksbehandler2", attesterendeEnhet = "enhet", tidspunkt = Tidspunkt.now()),
+            )
+        every { vedtaksvurderingRepository.attesterVedtak(any(), any()) } returns attestertVedtak
+
+        val vedtakDto = vedtakKlageService.attesterVedtak(klage, saksbehandler)
+
+        vedtakDto shouldBe attestertVedtak.id
+        verify { vedtaksvurderingRepository.hentVedtak(klage.id) }
+        verify {
+            vedtaksvurderingRepository.attesterVedtak(
+                klage.id,
+                withArg {
+                    it.attestant shouldBe saksbehandler.ident
+                    it.attesterendeEnhet shouldBe klage.sak.enhet
+                },
+            )
+        }
+    }
+
+    @Test
+    fun `attesterVedtak skal ikke attestere hvis feil status`() {
+        val klage = klage()
+        val vedtakKlage =
+            vedtakKlage(
+                status = VedtakStatus.ATTESTERT,
+                vedtakFattet =
+                    VedtakFattet(
+                        ansvarligSaksbehandler = "saksbehandler",
+                        ansvarligEnhet = "enhet",
+                        tidspunkt = Tidspunkt.now(),
+                    ),
+            )
+        every { vedtaksvurderingRepository.hentVedtak(klage.id) } returns vedtakKlage
+
+        assertThrows<VedtakTilstandException> {
+            vedtakKlageService.attesterVedtak(klage, saksbehandler)
+        }
+    }
+
+    @Test
+    fun `attesterVedtak skal ikke attestere hvis attestant ogsaa er saksbehandler`() {
+        val klage = klage()
+        val vedtakKlage =
+            vedtakKlage(
+                status = VedtakStatus.FATTET_VEDTAK,
+                vedtakFattet =
+                    VedtakFattet(
+                        ansvarligSaksbehandler = saksbehandler.ident(),
+                        ansvarligEnhet = "enhet",
+                        tidspunkt = Tidspunkt.now(),
+                    ),
+            )
+        every { vedtaksvurderingRepository.hentVedtak(klage.id) } returns vedtakKlage
+
+        assertThrows<UgyldigAttestantException> {
+            vedtakKlageService.attesterVedtak(klage, saksbehandler)
+        }
+    }
+
+    @Test
+    fun `underkjennVedtak skal underkjenne vedtak`() {
+        val tilbakekrevingId = UUID.randomUUID()
+        every { vedtaksvurderingRepository.hentVedtak(tilbakekrevingId) } returns vedtak(status = VedtakStatus.FATTET_VEDTAK)
+        every { vedtaksvurderingRepository.underkjennVedtak(tilbakekrevingId) } returns vedtak()
+
+        vedtakKlageService.underkjennVedtak(tilbakekrevingId) shouldBe 1L
+
+        verify { vedtaksvurderingRepository.hentVedtak(tilbakekrevingId) }
+        verify { vedtaksvurderingRepository.underkjennVedtak(tilbakekrevingId) }
+    }
+
+    @Test
+    fun `underkjennVedtak skal ikke underkjenne hvis feil status`() {
+        val tilbakekrevingId = UUID.randomUUID()
+        every { vedtaksvurderingRepository.hentVedtak(tilbakekrevingId) } returns vedtak(status = VedtakStatus.ATTESTERT)
+
+        assertThrows<VedtakTilstandException> {
+            vedtakKlageService.underkjennVedtak(tilbakekrevingId)
+        }
+        verify { vedtaksvurderingRepository.hentVedtak(tilbakekrevingId) }
     }
 
     private fun klage(): Klage {

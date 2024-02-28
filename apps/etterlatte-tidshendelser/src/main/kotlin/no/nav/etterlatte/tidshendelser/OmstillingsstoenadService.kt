@@ -15,6 +15,7 @@ class OmstillingsstoenadService(
         val yearsToSubtract =
             when (jobb.type) {
                 JobbType.OMS_DOED_3AAR -> 3L
+                JobbType.OMS_DOED_5AAR -> 5L
                 else -> throw IllegalArgumentException("Ikke-støttet jobbtype: ${jobb.type}")
             }
 

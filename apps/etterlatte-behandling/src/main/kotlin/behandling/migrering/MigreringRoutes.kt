@@ -20,11 +20,16 @@ fun Route.migreringRoutes(migreringService: MigreringService) {
         post {
             kunSkrivetilgang {
                 val behandling =
-                    migreringService.migrer(call.receive()).let {
-                        when (it) {
-                            is RetryResult.Success -> it.content
-                            is RetryResult.Failure -> throw it.samlaExceptions()
+                    try {
+                        migreringService.migrer(call.receive()).let {
+                            when (it) {
+                                is RetryResult.Success -> it.content
+                                is RetryResult.Failure -> throw it.samlaExceptions()
+                            }
                         }
+                    } catch (e: FinnesLoependeEllerIverksattBehandlingForFnr) {
+                        call.respond(HttpStatusCode.Conflict)
+                        return@post
                     }
 
                 when (behandling) {

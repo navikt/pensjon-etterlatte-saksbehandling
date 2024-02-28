@@ -70,7 +70,14 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
             feil = packet.feilmelding,
             pesysId = pesyskopling.first!!,
         )
-        repository.oppdaterStatus(pesyskopling.first!!, Migreringsstatus.MIGRERING_FEILA)
+
+        val nyStatus =
+            if (packet.feilendeSteg == "MigreringTrygdetidHendelserRiver") {
+                Migreringsstatus.TRYGDETID_FEILA
+            } else {
+                Migreringsstatus.MIGRERING_FEILA
+            }
+        repository.oppdaterStatus(pesyskopling.first!!, nyStatus)
         packet.setEventNameForHendelseType(Migreringshendelser.AVBRYT_BEHANDLING)
         pesyskopling.second?.let {
             packet.behandlingId = it

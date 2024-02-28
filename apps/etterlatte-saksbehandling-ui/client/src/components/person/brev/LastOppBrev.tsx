@@ -57,7 +57,7 @@ export const LastOppBrev = ({ sak }: { sak: ISak }) => {
         Last opp fil
       </Button>
 
-      <DokumentVisningModal open={isOpen} onClose={avbryt}>
+      <DokumentVisningModal open={isOpen} onClose={avbryt} aria-label="Last opp fil">
         <Modal.Header>
           <Heading size="medium" spacing>
             Last opp fil

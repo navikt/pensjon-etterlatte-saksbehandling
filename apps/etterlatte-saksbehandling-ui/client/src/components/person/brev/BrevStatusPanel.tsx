@@ -1,5 +1,5 @@
 import { BrevStatus, IBrev } from '~shared/types/Brev'
-import { BodyShort, Heading, Label, Panel, Tag } from '@navikt/ds-react'
+import { BodyShort, Box, Heading, Label, Tag } from '@navikt/ds-react'
 
 const mapStatusTilString = (status: BrevStatus) => {
   switch (status) {
@@ -20,7 +20,7 @@ const mapStatusTilString = (status: BrevStatus) => {
 
 export default function BrevStatusPanel({ brev }: { brev: IBrev }) {
   return (
-    <Panel border style={{ margin: '1rem' }}>
+    <Box padding="4" borderWidth="1" borderRadius="small" style={{ margin: '1rem' }}>
       <Heading size="medium" spacing>
         Oversikt
       </Heading>
@@ -44,6 +44,6 @@ export default function BrevStatusPanel({ brev }: { brev: IBrev }) {
           {mapStatusTilString(brev.status)}
         </Tag>
       </BodyShort>
-    </Panel>
+    </Box>
   )
 }

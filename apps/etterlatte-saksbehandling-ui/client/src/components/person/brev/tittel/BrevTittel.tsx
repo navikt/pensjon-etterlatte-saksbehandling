@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, BodyShort, Heading, Panel } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Heading } from '@navikt/ds-react'
 import { BrevTittelModal } from '~components/person/brev/tittel/BrevTittelModal'
 import { FlexRow } from '~shared/styled'
 
@@ -14,7 +14,7 @@ export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres }: Prop
   const [nyTittel, setNyTittel] = useState(tittel)
 
   return (
-    <Panel border>
+    <Box padding="4" borderWidth="1" borderRadius="small">
       <FlexRow justify="space-between">
         <Heading spacing level="2" size="medium">
           Tittel
@@ -38,6 +38,6 @@ export default function BrevTittel({ brevId, sakId, tittel, kanRedigeres }: Prop
           Tittel mangler
         </Alert>
       )}
-    </Panel>
+    </Box>
   )
 }

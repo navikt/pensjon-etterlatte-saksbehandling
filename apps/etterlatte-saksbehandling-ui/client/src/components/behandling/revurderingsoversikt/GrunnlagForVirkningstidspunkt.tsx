@@ -1,7 +1,7 @@
 import { Revurderingaarsak } from '~shared/types/Revurderingaarsak'
 import { useBehandling } from '~components/behandling/useBehandling'
 import { Info } from '~components/behandling/soeknadsoversikt/Info'
-import { formaterKanskjeStringDato, formaterStringDato } from '~utils/formattering'
+import { formaterDato, formaterKanskjeStringDato, formaterStringDato } from '~utils/formattering'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
@@ -14,6 +14,9 @@ import { getHistoriskForeldreansvar } from '~shared/api/grunnlag'
 import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { mapApiResult } from '~shared/api/apiUtils'
+import { SakType } from '~shared/types/sak'
+import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
+import { addYears } from 'date-fns'
 
 const SoekerDoedsdatoGrunnlag = () => {
   const soeker = usePersonopplysninger()?.soeker?.opplysning
@@ -102,6 +105,34 @@ const AdopsjonGrunnlag = () => {
   )
 }
 
+const BrukerFyller20AarGrunnlag = () => {
+  const soeker = usePersonopplysninger()?.soeker
+  const foedselsdato = soeker?.opplysning?.foedselsdato
+  return (
+    foedselsdato && (
+      <Info
+        label="Bruker 20 år (21 år)"
+        tekst={formaterDato(addYears(foedselsdato, 20)) + ' (' + formaterDato(addYears(foedselsdato, 21)) + ')'}
+        undertekst={formaterGrunnlagKilde(soeker?.kilde)}
+      />
+    )
+  )
+}
+
+const BrukerFyller67AarGrunnlag = () => {
+  const soeker = usePersonopplysninger()?.soeker
+  const foedselsdato = soeker?.opplysning?.foedselsdato
+  return (
+    foedselsdato && (
+      <Info
+        label="Bruker 67 år"
+        tekst={formaterDato(addYears(foedselsdato, 67))}
+        undertekst={formaterGrunnlagKilde(soeker?.kilde)}
+      />
+    )
+  )
+}
+
 export const GrunnlagForVirkningstidspunkt = () => {
   const behandling = useBehandling()
   switch (behandling?.revurderingsaarsak) {
@@ -112,6 +143,10 @@ export const GrunnlagForVirkningstidspunkt = () => {
       return <FoersteVirkGrunnlag />
     case Revurderingaarsak.ADOPSJON:
       return <AdopsjonGrunnlag />
+    case Revurderingaarsak.ALDERSOVERGANG:
+      return (
+        (behandling.sakType === SakType.BARNEPENSJON && <BrukerFyller20AarGrunnlag />) || <BrukerFyller67AarGrunnlag />
+      )
   }
   return null
 }

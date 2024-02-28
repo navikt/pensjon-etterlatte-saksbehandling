@@ -177,12 +177,9 @@ class DoedshendelseJobService(
     ): Boolean {
         val skalSendeBrev = kontrollpunkter.none { !it.sendBrev }
         if (skalSendeBrev) {
-            if (doedshendelse.relasjon == Relasjon.BARN) {
-                logger.info("Sender brev for ${Relasjon.BARN.name} for sak ${sak.id}")
-                deodshendelserProducer.sendBrevRequest(sak)
-            }
+            logger.info("Sender brev for ${doedshendelse.relasjon.name} for sak ${sak.id}")
+            deodshendelserProducer.sendBrevRequest(sak)
             return true
-            // TODO: EY-3470 relasjon EPS
         }
         return false
     }

@@ -123,7 +123,7 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
         )}
 
         {isSuccess(nyOppgaveStatus) && (
-          <Modal open={true} onClose={() => {}} header={{ heading: '' }}>
+          <Modal open={true} onClose={() => {}} aria-label="Oppgave klar for behandling">
             <Alert variant="success">Ny oppgave er klar for behandling. Du sendes straks til oppgavebenken.</Alert>
           </Modal>
         )}
@@ -212,7 +212,7 @@ export const Sakstilknytning = ({ bruker, valgtJournalpost, oppdaterJournalposte
       )}
 
       {isSuccess(nyOppgaveStatus) && (
-        <Modal open={true} onClose={() => {}} header={{ heading: '' }}>
+        <Modal open={true} onClose={() => {}} aria-label="Oppgave klar for behandling">
           <Alert variant="success">Ny oppgave er klar for behandling. Du sendes straks til oppgavebenken.</Alert>
         </Modal>
       )}

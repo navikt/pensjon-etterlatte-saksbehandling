@@ -12,7 +12,6 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.person.maskerFnr
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -48,7 +47,9 @@ class DoedshendelseService(
             return
         }
         val avdoedFnr = avdoed.foedselsnummer.verdi.value
-        val doedshendelserForAvdoed = inTransaction { doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) }
+        val doedshendelserForAvdoed =
+            inTransaction { doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) }
+                .filter { it.utfall !== Utfall.AVBRUTT }
         val beroerte = finnBeroerteBarn(avdoed)
         // TODO: EY-3470
 
@@ -68,38 +69,29 @@ class DoedshendelseService(
         avdoed: PersonDTO,
         beroerte: List<Person>,
     ) {
+        val aapneDoedshendelser = doedshendelserForAvdoed.filter { it.status !== Status.FERDIG }
+
         when (doedshendelse.endringstype) {
             Endringstype.OPPRETTET, Endringstype.KORRIGERT -> {
                 inTransaction {
-                    val skalOppdatere = doedshendelserForAvdoed.any { it.status !== Status.FERDIG }
-                    if (skalOppdatere) {
-                        oppdaterDodshendelser(
-                            doedshendelserForAvdoed.map {
-                                it.tilOppdatert()
-                            },
-                        )
-                    }
+                    aapneDoedshendelser
+                        .map { it.tilOppdatert() }
+                        .forEach { doedshendelseDao.oppdaterDoedshendelse(it) }
+
                     haandterNyeBerorte(doedshendelserForAvdoed, beroerte, avdoed, doedshendelse.endringstype)
                 }
             }
 
             Endringstype.ANNULLERT -> {
                 inTransaction {
-                    oppdaterDodshendelser(
-                        doedshendelserForAvdoed.map {
-                            it.tilAvbrutt(
-                                kontrollpunkter = listOf(DoedshendelseKontrollpunkt.DoedshendelseErAnnullert),
-                            )
-                        },
-                    )
+                    aapneDoedshendelser
+                        .map { it.tilAvbrutt(kontrollpunkter = listOf(DoedshendelseKontrollpunkt.DoedshendelseErAnnullert)) }
+                        .forEach { doedshendelseDao.oppdaterDoedshendelse(it) }
                 }
             }
 
             Endringstype.OPPHOERT -> throw RuntimeException("Fikk opphør på dødshendelse, skal ikke skje ifølge PDL docs")
         }
-        val avdoedFnr = avdoed.foedselsnummer.verdi.value
-        logger.info("Lagrer ikke duplikat doedshendelse for person ${avdoedFnr.maskerFnr()}")
-        sikkerLogg.info("Mottok dødshendelse for $avdoedFnr, er duplikat og lagrer det ikke")
     }
 
     private fun haandterNyeBerorte(
@@ -120,12 +112,6 @@ class DoedshendelseService(
                     endringstype = endringstype,
                 ),
             )
-        }
-    }
-
-    private fun oppdaterDodshendelser(doedshendelserForAvdoed: List<DoedshendelseInternal>) {
-        doedshendelserForAvdoed.forEach {
-            doedshendelseDao.oppdaterDoedshendelse(it)
         }
     }
 

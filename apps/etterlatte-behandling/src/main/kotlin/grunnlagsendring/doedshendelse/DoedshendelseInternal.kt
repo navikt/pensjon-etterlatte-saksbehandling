@@ -42,10 +42,15 @@ data class DoedshendelseInternal internal constructor(
         )
     }
 
-    fun tilOppdatert(): DoedshendelseInternal {
+    fun tilOppdatert(
+        avdoedDoedsdato: LocalDate,
+        endringstype: Endringstype,
+    ): DoedshendelseInternal {
         return copy(
+            avdoedDoedsdato = avdoedDoedsdato,
             status = Status.OPPDATERT,
             endret = endret,
+            endringstype = endringstype,
         )
     }
 
@@ -61,6 +66,16 @@ data class DoedshendelseInternal internal constructor(
             status = Status.FERDIG,
             utfall = Utfall.AVBRUTT,
             endret = Tidspunkt.now(),
+        )
+    }
+
+    fun tilAnnulert(): DoedshendelseInternal {
+        return copy(
+            status = Status.FERDIG,
+            utfall = Utfall.AVBRUTT,
+            endret = Tidspunkt.now(),
+            endringstype = Endringstype.ANNULLERT,
+            kontrollpunkter = listOf(DoedshendelseKontrollpunkt.DoedshendelseErAnnullert),
         )
     }
 

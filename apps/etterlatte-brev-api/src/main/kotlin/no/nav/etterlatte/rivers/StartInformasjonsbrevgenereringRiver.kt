@@ -3,7 +3,7 @@ package no.nav.etterlatte.rivers
 import kotliquery.TransactionalSession
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevRequestHendelseType
-import no.nav.etterlatte.brev.brevbaker.Brevkoder
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.rapidsandrivers.SAK_TYPE_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.lagParMedEventNameKey

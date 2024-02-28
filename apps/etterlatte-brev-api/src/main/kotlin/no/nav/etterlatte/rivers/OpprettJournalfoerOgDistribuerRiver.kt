@@ -4,9 +4,9 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.BrevRequestHendelseType
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
-import no.nav.etterlatte.brev.brevbaker.Brevkoder
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevData

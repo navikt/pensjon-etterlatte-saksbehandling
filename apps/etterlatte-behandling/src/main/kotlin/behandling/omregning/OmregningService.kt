@@ -2,7 +2,7 @@ package no.nav.etterlatte.behandling.omregning
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.GrunnlagService
+import no.nav.etterlatte.behandling.GrunnlagServiceImpl
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.revurdering.AutomatiskRevurderingService
 import no.nav.etterlatte.behandling.revurdering.RevurderingOgOppfoelging
@@ -16,7 +16,7 @@ import java.util.UUID
 
 class OmregningService(
     private val behandlingService: BehandlingService,
-    private val grunnlagService: GrunnlagService,
+    private val grunnlagService: GrunnlagServiceImpl,
     private val revurderingService: AutomatiskRevurderingService,
 ) {
     fun hentForrigeBehandling(sakId: Long) =

@@ -52,7 +52,7 @@ import java.time.LocalDateTime
 
 class BehandlingFactory(
     private val oppgaveService: OppgaveService,
-    private val grunnlagService: GrunnlagService,
+    private val grunnlagService: GrunnlagServiceImpl,
     private val revurderingService: AutomatiskRevurderingService,
     private val gyldighetsproevingService: GyldighetsproevingService,
     private val sakService: SakService,

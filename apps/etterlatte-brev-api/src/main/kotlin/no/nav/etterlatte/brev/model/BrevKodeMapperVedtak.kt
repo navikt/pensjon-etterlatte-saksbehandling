@@ -1,6 +1,6 @@
 package no.nav.etterlatte.brev.model
 
-import no.nav.etterlatte.brev.brevbaker.Brevkoder
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakType

@@ -42,8 +42,6 @@ export const formaterBehandlingstype = (behandlingstype: IBehandlingsType): stri
       return 'Førstegangsbehandling'
     case IBehandlingsType.REVURDERING:
       return 'Revurdering'
-    case IBehandlingsType.MANUELT_OPPHOER:
-      return 'Manuelt opphør'
   }
 }
 

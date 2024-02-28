@@ -7,7 +7,6 @@ import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
-import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.rivers.VedtakTilJournalfoering

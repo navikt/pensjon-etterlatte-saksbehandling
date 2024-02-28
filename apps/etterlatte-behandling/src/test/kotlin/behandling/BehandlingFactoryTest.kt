@@ -67,7 +67,7 @@ class BehandlingFactoryTest {
     private val hendelseDaoMock = mockk<HendelseDao>(relaxUnitFun = true)
     private val behandlingHendelserKafkaProducerMock = mockk<BehandlingHendelserKafkaProducer>(relaxUnitFun = true)
     private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
-    private val grunnlagService = mockk<GrunnlagService>(relaxUnitFun = true)
+    private val grunnlagService = mockk<GrunnlagServiceImpl>(relaxUnitFun = true)
     private val oppgaveService = mockk<OppgaveService>()
     private val behandlingService = mockk<BehandlingService>()
     private val sakServiceMock = mockk<SakService>()

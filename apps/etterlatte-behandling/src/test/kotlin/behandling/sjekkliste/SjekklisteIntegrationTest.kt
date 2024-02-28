@@ -108,7 +108,6 @@ class SjekklisteIntegrationTest(val dataSource: DataSource) {
 
         assertAll(
             { sjekkliste.versjon shouldBe 2 },
-            { sjekkliste.adresseForBrev shouldBe null },
             { sjekkliste.onsketSkattetrekk shouldBe 1233 },
             { sjekkliste.kommentar shouldBe "noe rart her" },
             { sjekkliste.bekreftet shouldBe true },

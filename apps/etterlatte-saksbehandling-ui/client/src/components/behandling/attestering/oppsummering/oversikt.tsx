@@ -25,12 +25,12 @@ import { SettPaaVent } from '~components/behandling/sidemeny/SettPaaVent'
 export const Oversikt = ({ behandlingsInfo }: { behandlingsInfo: IBehandlingInfo }) => {
   const kommentarFraAttestant = behandlingsInfo.attestertLogg?.slice(-1)[0]?.kommentar
 
-  const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandlingEkte] = useApiCall(
+  const [oppgaveForBehandlingenStatus, requesthentOppgaveForBehandling] = useApiCall(
     hentOppgaveForBehandlingUnderBehandlingIkkeattestertOppgave
   )
 
   const hentOppgaveForBehandling = () =>
-    requesthentOppgaveForBehandlingEkte({ referanse: behandlingsInfo.behandlingId, sakId: behandlingsInfo.sakId })
+    requesthentOppgaveForBehandling({ referanse: behandlingsInfo.behandlingId, sakId: behandlingsInfo.sakId })
 
   useEffect(() => {
     hentOppgaveForBehandling()

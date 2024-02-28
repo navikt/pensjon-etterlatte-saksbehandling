@@ -11,7 +11,13 @@ export default function BrevModal({ brev }: { brev: IBrev }) {
     <>
       <Button variant="secondary" title="Vis PDF" icon={<FilePdfFillIcon />} onClick={() => setOpen(true)} />
 
-      <Modal open={open} onClose={() => setOpen(false)} style={{ maxWidth: '100%' }} closeOnBackdropClick={true}>
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        style={{ maxWidth: '100%' }}
+        closeOnBackdropClick={true}
+        aria-label={brev.tittel}
+      >
         <Modal.Header>
           <Heading size="large">{brev.tittel}</Heading>
         </Modal.Header>

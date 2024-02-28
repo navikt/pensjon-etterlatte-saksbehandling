@@ -1,4 +1,4 @@
-import { Alert, Button, Heading, Modal, Panel, TextField } from '@navikt/ds-react'
+import { Alert, Box, Button, Heading, Modal, TextField } from '@navikt/ds-react'
 import { InputList, InputRow } from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import React, { useState } from 'react'
 import { PencilIcon, PlusIcon, XMarkIcon } from '@navikt/aksel-icons'
@@ -92,7 +92,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
         Rediger
       </Button>
 
-      <Modal open={isOpen} onClose={avbryt}>
+      <Modal open={isOpen} onClose={avbryt} aria-label="Rediger familieforhold">
         <Modal.Header>
           <Heading size="medium" spacing>
             Rediger familieforhold
@@ -100,7 +100,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
         </Modal.Header>
         <Modal.Body>
           <FormWrapper column={true}>
-            <Panel border>
+            <Box padding="4" borderRadius="small">
               <InputList>
                 {avdoedListe.fields?.map((field, index) => (
                   <InputRow key={field.id}>
@@ -125,9 +125,9 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                   Legg til avdøde
                 </Button>
               </InputList>
-            </Panel>
+            </Box>
 
-            <Panel border>
+            <Box padding="4" borderRadius="small">
               <InputList>
                 {gjenlevendeListe.fields?.map((field, index) => (
                   <InputRow key={field.id}>
@@ -153,7 +153,7 @@ export const RedigerFamilieforhold = ({ behandling, personopplysninger }: Props)
                   Legg til gjenlevende
                 </Button>
               </InputList>
-            </Panel>
+            </Box>
           </FormWrapper>
 
           <br />

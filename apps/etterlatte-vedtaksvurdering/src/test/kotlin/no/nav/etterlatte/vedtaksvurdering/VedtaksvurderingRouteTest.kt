@@ -702,7 +702,7 @@ internal class VedtaksvurderingRouteTest {
                 )
             }
             val vedtakId: Long =
-                client.post("/vedtak/klage/${klage.id}/lagre-vedtak") {
+                client.post("/vedtak/klage/${klage.id}/upsert") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                     setBody(klage.toJson())

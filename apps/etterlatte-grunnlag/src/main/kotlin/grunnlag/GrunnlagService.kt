@@ -207,7 +207,7 @@ class RealGrunnlagService(
             innsender = innsender?.opplysning?.asPersonopplysning(),
             soeker = soker?.opplysning?.asPersonopplysning(),
             avdoede = avdode.map { it.opplysning.asPersonopplysning() },
-            gjenlevende = gjenlevende.mapNotNull { it?.opplysning?.asPersonopplysning() },
+            gjenlevende = gjenlevende.map { it.opplysning.asPersonopplysning() },
         )
     }
 

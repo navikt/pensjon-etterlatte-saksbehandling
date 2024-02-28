@@ -50,7 +50,7 @@ fun Route.sakGrunnlagRoute(
         }
 
         post("/nye-opplysninger") {
-            withSakId(behandlingKlient, skrivetilgang = true) { sakId ->
+            withSakId(behandlingKlient, skrivetilgang = true) {
                 val opplysningsbehov = call.receive<NyeSaksopplysninger>()
                 grunnlagService.lagreNyeSaksopplysningerBareSak(
                     opplysningsbehov.sakId,

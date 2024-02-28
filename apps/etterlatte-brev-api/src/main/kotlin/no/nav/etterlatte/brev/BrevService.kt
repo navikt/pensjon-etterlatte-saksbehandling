@@ -101,7 +101,7 @@ class BrevService(
             .also { logger.info("Tittel på brev (id=$id) oppdatert") }
     }
 
-    suspend fun oppdaterSpraak(
+    fun oppdaterSpraak(
         id: BrevID,
         spraak: Spraak,
     ) {

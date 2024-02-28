@@ -266,7 +266,7 @@ class ApplicationBuilder {
                     behandlingKlient,
                     featureToggleService,
                 )
-                FiksEnkeltbrevRiver(this, vedtaksvurderingService)
+                FiksEnkeltbrevRiver(this, varselbrevService, ferdigstillJournalfoerOgDistribuerBrev)
                     .also { fiksEnkeltbrev() }
                 OpprettJournalfoerOgDistribuerRiver(
                     this,

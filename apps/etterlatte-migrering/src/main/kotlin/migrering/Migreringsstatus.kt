@@ -4,6 +4,7 @@ enum class Migreringsstatus {
     HENTA,
     VERIFISERING_FEILA,
     UNDER_MIGRERING,
+    SENDT_TIL_MANUELT,
     UNDER_MIGRERING_MANUELT,
     PAUSE,
     UTBETALING_OK,

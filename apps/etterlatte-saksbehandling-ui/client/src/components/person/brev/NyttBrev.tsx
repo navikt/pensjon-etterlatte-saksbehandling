@@ -18,7 +18,7 @@ import BrevTittel from '~components/person/brev/tittel/BrevTittel'
 
 import { mapApiResult } from '~shared/api/apiUtils'
 import { BrevMottaker } from '~components/person/brev/mottaker/BrevMottaker'
-import { Heading, Panel } from '@navikt/ds-react'
+import { Box, Heading } from '@navikt/ds-react'
 import BrevSpraak from '~components/person/brev/spraak/BrevSpraak'
 
 export default function NyttBrev() {
@@ -77,12 +77,12 @@ export default function NyttBrev() {
             </Column>
             <Column>
               <BrevStatusPanel brev={brev} />
-              <Panel>
+              <Box padding="4" borderRadius="small">
                 <Heading spacing level="2" size="medium">
                   Handlinger
                 </Heading>
                 <NyttBrevHandlingerPanel brev={brev} setKanRedigeres={setKanRedigeres} />
-              </Panel>
+              </Box>
             </Column>
           </GridContainer>
         )

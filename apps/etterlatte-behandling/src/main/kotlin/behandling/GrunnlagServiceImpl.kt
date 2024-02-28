@@ -33,6 +33,11 @@ interface GrunnlagService {
         opplysninger: NyeSaksopplysninger,
     )
 
+    fun leggTilNyeOpplysningerBareSak(
+        sakId: Long,
+        opplysninger: NyeSaksopplysninger,
+    )
+
     suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
 }
 
@@ -75,6 +80,13 @@ class GrunnlagServiceImpl(private val grunnlagKlient: GrunnlagKlientImpl) : Grun
         opplysninger: NyeSaksopplysninger,
     ) = runBlocking {
         grunnlagKlient.lagreNyeSaksopplysninger(behandlingId, opplysninger)
+    }
+
+    override fun leggTilNyeOpplysningerBareSak(
+        sakId: Long,
+        opplysninger: NyeSaksopplysninger,
+    ) = runBlocking {
+        grunnlagKlient.lagreNyeSaksopplysningerBareSak(sakId, opplysninger)
     }
 
     override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri {

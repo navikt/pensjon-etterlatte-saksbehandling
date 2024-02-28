@@ -56,7 +56,7 @@ fun Route.behandlingGrunnlagRoute(
             }
         }
 
-        post("nye-opplysninger") {
+        post("/nye-opplysninger") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 val opplysningsbehov = call.receive<NyeSaksopplysninger>()
                 grunnlagService.lagreNyeSaksopplysninger(
@@ -68,7 +68,7 @@ fun Route.behandlingGrunnlagRoute(
             }
         }
 
-        post("opprett-grunnlag") {
+        post("/opprett-grunnlag") {
             kunSystembruker {
                 withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                     val opplysningsbehov = call.receive<Opplysningsbehov>()

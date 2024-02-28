@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.token.Fagsaksystem
 import org.slf4j.LoggerFactory
 import java.util.Base64
 
@@ -111,7 +112,7 @@ internal class DokarkivServiceImpl(
             avsenderMottaker = request.avsenderMottaker(),
             bruker = Bruker(request.brukerident),
             eksternReferanseId = "${request.eksternReferansePrefiks}.${request.brevId}",
-            sak = JournalpostSak(Sakstype.FAGSAK, request.sakId.toString(), request.sakType.tema, "EY"),
+            sak = JournalpostSak(Sakstype.FAGSAK, request.sakId.toString(), request.sakType.tema, Fagsaksystem.EY.navn),
             dokumenter = listOf(pdf.tilJournalpostDokument(innhold.tittel)),
             tema = request.sakType.tema,
             kanal = "S",

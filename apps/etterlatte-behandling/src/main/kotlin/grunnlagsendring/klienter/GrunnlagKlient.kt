@@ -44,6 +44,11 @@ interface GrunnlagKlient {
         saksopplysninger: NyeSaksopplysninger,
     )
 
+    suspend fun lagreNyeSaksopplysningerBareSak(
+        sakId: Long,
+        saksopplysninger: NyeSaksopplysninger,
+    )
+
     suspend fun leggInnNyttGrunnlagSak(
         sakId: Long,
         opplysningsbehov: Opplysningsbehov,
@@ -98,6 +103,18 @@ class GrunnlagKlientImpl(
     ) {
         return grunnlagHttpClient
             .post("$url/grunnlag/behandling/$behandlingId/nye-opplysninger") {
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(saksopplysninger)
+            }.body()
+    }
+
+    override suspend fun lagreNyeSaksopplysningerBareSak(
+        sakId: Long,
+        saksopplysninger: NyeSaksopplysninger,
+    ) {
+        return grunnlagHttpClient
+            .post("$url/grunnlag/sak/$sakId/nye-opplysninger") {
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(saksopplysninger)

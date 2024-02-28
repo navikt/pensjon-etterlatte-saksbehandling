@@ -58,3 +58,4 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-grunnlag
         - application: etterlatte-migrering
+        - application: etterlatte-saksbehandling-ui

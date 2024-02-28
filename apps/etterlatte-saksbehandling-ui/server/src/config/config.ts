@@ -44,6 +44,10 @@ const LOKAL_API_CONFIG = () => {
       url: process.env.GRUNNLAG_API_URL || 'https://etterlatte-grunnlag.intern.dev.nav.no',
       scope: process.env.GRUNNLAG_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-grunnlag/.default',
     },
+    pdltjenester: {
+      url: process.env.PDLTJENESTER_API_URL || 'https://etterlatte-pdltjenester.intern.dev.nav.no',
+      scope: process.env.PDLTJENESTER_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-pdltjenester/.default',
+    },
     brev: {
       url: process.env.BREV_API_URL || 'https://etterlatte-brev-api.intern.dev.nav.no',
       scope: process.env.BREV_API_SCOPE || 'api://dev-gcp.etterlatte.etterlatte-brev-api/.default',
@@ -84,6 +88,10 @@ const API_CONFIG_FROM_ENV = () => {
     grunnlag: {
       url: requireEnvValue('GRUNNLAG_API_URL'),
       scope: requireEnvValue('GRUNNLAG_API_SCOPE'),
+    },
+    pdltjenester: {
+      url: requireEnvValue('PDLTJENESTER_API_URL'),
+      scope: requireEnvValue('PDLTJENESTER_API_SCOPE'),
     },
     brev: {
       url: requireEnvValue('BREV_API_URL'),

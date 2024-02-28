@@ -3,6 +3,7 @@
     <envs>
       <env name="HTTP_PORT" value="8091" />
       <env name="LOGBACK_APPENDER" value="STDOUT" />
+      <env name="NAIS_APP_NAME" value="etterlatte-pdltjenester" />
       <env name="PDL_URL" value="https://pdl-api.dev-fss-pub.nais.io/graphql" />
       <env name="PDL_OUTBOUND_SCOPE" value="api://dev-fss.pdl.pdl-api/.default" />
       <env name="PPS_URL" value="https://pensjon-parallelle-sannheter.intern.dev.nav.no" />

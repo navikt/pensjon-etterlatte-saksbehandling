@@ -42,7 +42,7 @@ export const AttesterKlage = ({ klage, kommentar }: { klage: Klage; kommentar: s
       </FlexRow>
       <GeneriskModal
         tittel="Er du sikker på at du vil attestere vedtaket?"
-        beskrivelse="" /*TODO*/
+        beskrivelse="Vedtaksbrevet sendes ut automatisk ved iverksettelse"
         tekstKnappJa="Ja, attester vedtak"
         tekstKnappNei="Nei, gå tilbake"
         onYesClick={attester}

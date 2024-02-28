@@ -6,7 +6,6 @@ import { Klage, KlageStatus, Utfall } from '~shared/types/Klage'
 import { JaNei } from '~shared/types/ISvar'
 
 export function kanVurdereUtfall(klage: Klage | null): boolean {
-  //TODO Er det ikke bare slik?
   return (
     klage?.formkrav?.formkrav.erFormkraveneOppfylt === JaNei.JA ||
     klage?.formkrav?.formkrav.erKlagenFramsattInnenFrist === JaNei.NEI
@@ -19,6 +18,10 @@ export function kanSeOppsummering(klage: Klage | null): boolean {
     case KlageStatus.FERDIGSTILT:
     case KlageStatus.UTFALL_VURDERT:
     case KlageStatus.FORMKRAV_IKKE_OPPFYLT:
+    case KlageStatus.FORMKRAV_OPPFYLT:
+    case KlageStatus.FATTET_VEDTAK:
+    case KlageStatus.ATTESTERT:
+    case KlageStatus.RETURNERT:
       return true
   }
   return false

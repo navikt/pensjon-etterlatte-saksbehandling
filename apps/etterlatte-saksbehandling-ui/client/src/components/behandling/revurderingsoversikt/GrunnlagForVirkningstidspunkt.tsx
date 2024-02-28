@@ -110,7 +110,11 @@ const BrukersFoedselsdatoGrunnlag = () => {
   const foedselsdato = soeker?.opplysning?.foedselsdato
   return (
     foedselsdato && (
-      <Info label="Fødselsdato" tekst={formaterDato(foedselsdato)} undertekst={formaterGrunnlagKilde(soeker?.kilde)} />
+      <Info
+        label="Bruker 20 år (21 år)"
+        tekst={formaterDato(addYears(foedselsdato, 20)) + ' (' + formaterDato(addYears(foedselsdato, 21)) + ')'}
+        undertekst={formaterGrunnlagKilde(soeker?.kilde)}
+      />
     )
   )
 }

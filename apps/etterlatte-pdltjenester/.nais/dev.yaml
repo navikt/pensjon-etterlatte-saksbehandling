@@ -35,6 +35,10 @@ spec:
   azure:
     application:
       enabled: true
+      tenant: trygdeetaten.no
+      claims:
+        extra:
+          - NAVident
   env:
     - name: PDL_URL
       value: https://pdl-api.dev-fss-pub.nais.io/graphql

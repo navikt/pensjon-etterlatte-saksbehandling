@@ -8,6 +8,7 @@ import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.Base64
@@ -41,7 +42,7 @@ class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val
                     generellBrevData.sak.sakType,
                 )
             }
-        val brevbakerResponse = brevbakerKlient.genererJSON(request)
+        val brevbakerResponse = retryOgPakkUt { brevbakerKlient.genererJSON(request) }
         return BlockTilSlateKonverterer.konverter(brevbakerResponse)
     }
 }

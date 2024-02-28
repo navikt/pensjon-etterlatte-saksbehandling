@@ -16,6 +16,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 import { mapApiResult } from '~shared/api/apiUtils'
 import { SakType } from '~shared/types/sak'
 import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
+import { addYears } from 'date-fns'
 
 const SoekerDoedsdatoGrunnlag = () => {
   const soeker = usePersonopplysninger()?.soeker?.opplysning
@@ -126,12 +127,6 @@ const BrukerFyller67AarGrunnlag = () => {
       />
     )
   )
-}
-
-const addYears = (date: Date, years: number) => {
-  const newDate = new Date(date)
-  newDate.setFullYear(date.getFullYear() + years)
-  return newDate
 }
 
 export const GrunnlagForVirkningstidspunkt = () => {

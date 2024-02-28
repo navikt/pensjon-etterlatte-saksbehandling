@@ -42,8 +42,12 @@ data class DoedshendelseInternal internal constructor(
         )
     }
 
-    fun tilOppdatert(endringstype: Endringstype): DoedshendelseInternal {
+    fun tilOppdatert(
+        avdoedDoedsdato: LocalDate,
+        endringstype: Endringstype,
+    ): DoedshendelseInternal {
         return copy(
+            avdoedDoedsdato = avdoedDoedsdato,
             status = Status.OPPDATERT,
             endret = endret,
             endringstype = endringstype,

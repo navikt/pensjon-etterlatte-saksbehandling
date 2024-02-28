@@ -46,19 +46,19 @@ class DoedshendelseService(
             return
         }
         val avdoedFnr = avdoed.foedselsnummer.verdi.value
-        val doedshendelserForAvdoed =
+        val gyldigeDoedshendelserForAvdoed =
             inTransaction { doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) }
                 .filter { it.utfall !== Utfall.AVBRUTT }
         val beroerte = finnBeroerteBarn(avdoed)
         // TODO: EY-3470
 
-        if (doedshendelserForAvdoed.isEmpty()) {
+        if (gyldigeDoedshendelserForAvdoed.isEmpty()) {
             sikkerLogg.info("Fant ${beroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")
             inTransaction {
                 lagreDoedshendelser(beroerte, avdoed, doedshendelse.endringstype)
             }
         } else {
-            haandterEksisterendeHendelser(doedshendelse, doedshendelserForAvdoed, avdoed, beroerte)
+            haandterEksisterendeHendelser(doedshendelse, gyldigeDoedshendelserForAvdoed, avdoed, beroerte)
         }
     }
 
@@ -74,7 +74,7 @@ class DoedshendelseService(
             Endringstype.OPPRETTET, Endringstype.KORRIGERT -> {
                 inTransaction {
                     aapneDoedshendelser
-                        .map { it.tilOppdatert(doedshendelse.endringstype) }
+                        .map { it.tilOppdatert(avdoed.doedsdato!!.verdi, doedshendelse.endringstype) }
                         .forEach { doedshendelseDao.oppdaterDoedshendelse(it) }
 
                     haandterNyeBerorte(doedshendelserForAvdoed, beroerte, avdoed, doedshendelse.endringstype)

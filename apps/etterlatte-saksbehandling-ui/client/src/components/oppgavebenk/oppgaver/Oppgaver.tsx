@@ -29,7 +29,6 @@ export const Oppgaver = ({
   filter,
 }: OppgavelisteProps): ReactNode => {
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
-
   const filtrerteOppgaver = filter
     ? filtrerOppgaver(
         filter.enhetsFilter,
@@ -48,15 +47,15 @@ export const Oppgaver = ({
 
   const [page, setPage] = useState<number>(1)
   const [rowsPerPage, setRowsPerPage] = useState<number>(hentPagineringSizeFraLocalStorage())
-
+  if (!sorterteOppgaver.length) return <Alert variant="info">Ingen oppgaver</Alert>
   let paginerteOppgaver = sorterteOppgaver
   paginerteOppgaver = paginerteOppgaver.slice((page - 1) * rowsPerPage, page * rowsPerPage)
+
+  if (!paginerteOppgaver.length) return <Alert variant="info">Ingen oppgaver</Alert>
 
   useEffect(() => {
     if (paginerteOppgaver.length === 0 && filtrerteOppgaver.length > 0) setPage(1)
   }, [paginerteOppgaver, filtrerteOppgaver])
-
-  if (!paginerteOppgaver.length) return <Alert variant="info">Ingen oppgaver</Alert>
 
   return (
     <>

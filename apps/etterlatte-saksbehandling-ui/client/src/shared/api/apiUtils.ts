@@ -18,26 +18,50 @@ export const isSuccessOrInitial = (result: Result<unknown>): result is Initial |
 export const isFailureWithCode = (result: Result<unknown>, code: number): result is Error<ApiError> =>
   result.status === 'error' && result.error.status === code
 
+export type Mappers<T, R> = {
+  success?: (_: T) => R
+  initial?: R
+  pending?: R
+  error?: ((_: ApiError) => R) | R
+}
+
+export const mapResultFallback = <T, R, F>(result: Result<T>, mappers: Mappers<T, R>, fallback: F): R | F => {
+  if (isInitial(result)) {
+    return mappers.initial !== undefined ? mappers.initial : fallback
+  }
+  if (isPending(result)) {
+    return mappers.pending !== undefined ? mappers.pending : fallback
+  }
+  if (isFailure(result)) {
+    if (mappers.error === undefined) {
+      return fallback
+    }
+    if (typeof mappers.error === 'function') {
+      return (mappers.error as Function)(result.error)
+    } else {
+      return mappers.error
+    }
+  }
+  if (isSuccess(result)) {
+    return mappers.success !== undefined ? mappers.success(result.data) : fallback
+  }
+  throw new Error(`Ukjent status på result: ${JSON.stringify(result)}`)
+}
+
+export const mapResult = <T, R>(result: Result<T>, mappers: Mappers<T, R>) => mapResultFallback(result, mappers, null)
+
 export const mapApiResult = <T>(
   result: Result<T>,
   mapInitialOrPending: ReactElement,
   mapError: (_: ApiError) => ReactElement | null,
   mapSuccess: (_: T) => ReactElement
 ): ReactElement | null => {
-  if (isPendingOrInitial(result)) {
-    return mapInitialOrPending
-  }
-  if (isFailure(result)) {
-    if (result.error.status === 502) {
-      return null
-    } else {
-      return mapError(result.error)
-    }
-  }
-  if (isSuccess(result)) {
-    return mapSuccess(result.data)
-  }
-  throw new Error(`Unknown state of result: ${JSON.stringify(result)}`)
+  return mapResult(result, {
+    pending: mapInitialOrPending,
+    initial: mapInitialOrPending,
+    error: (error) => (error.status === 502 ? null : mapError(error)),
+    success: mapSuccess,
+  })
 }
 
 export const mapAllApiResult = <T>(
@@ -47,35 +71,16 @@ export const mapAllApiResult = <T>(
   mapError: (_: ApiError) => ReactElement,
   mapSuccess: (_: T) => ReactElement | null
 ): ReactElement | null => {
-  if (isPending(result)) {
-    return mapPending
-  }
-  if (isInitial(result)) {
-    return mapInitial
-  }
-  if (isFailure(result)) {
-    if (result.error.status === 502) {
-      return null
-    } else {
-      return mapError(result.error)
-    }
-  }
-  if (isSuccess(result)) {
-    return mapSuccess(result.data)
-  }
-  throw new Error(`Unknown state of result: ${JSON.stringify(result)}`)
+  return mapResult(result, {
+    pending: mapPending,
+    initial: mapInitial,
+    error: (error) => (error.status === 502 ? null : mapError(error)),
+    success: mapSuccess,
+  })
 }
 
-export const mapSuccess = <T, R>(result: Result<T>, mapSuccess: (success: T) => R): R | null => {
-  if (isSuccess(result)) {
-    return mapSuccess(result.data)
-  }
-  return null
-}
+export const mapSuccess = <T, R>(result: Result<T>, mapSuccess: (success: T) => R): R | null =>
+  mapResult(result, { success: mapSuccess })
 
-export const mapFailure = <T, R>(result: Result<T>, mapFailure: (error: ApiError) => R): R | null => {
-  if (isFailure(result)) {
-    return mapFailure(result.error)
-  }
-  return null
-}
+export const mapFailure = <T, R>(result: Result<T>, mapFailure: (error: ApiError) => R): R | null =>
+  mapResult(result, { error: mapFailure })

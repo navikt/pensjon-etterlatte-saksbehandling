@@ -2,6 +2,7 @@ package no.nav.etterlatte.migrering
 
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingService
@@ -59,17 +60,20 @@ internal class MigrerEnEnkeltSakRiver(
 
         val migreringRespons: MigreringRespons =
             runBlocking {
-                val res = behandlinger.migrer(hendelse)
-                if (res.status == HttpStatusCode.Conflict) {
-                    logger.warn(
-                        "Behandling er allerede oppretta for pesysid ${hendelse.pesysId} i Gjenny. " +
-                            "Trenger ikke gjøre mer, så avbryter.",
-                    )
-                    packet.setEventNameForHendelseType(Migreringshendelser.ALLEREDE_GJENOPPRETTA)
-                    context.publish(packet.toJson())
-                    return@runBlocking null
+                try {
+                    behandlinger.migrer(hendelse).body<MigreringRespons>()
+                } catch (e: ClientRequestException) {
+                    if (e.response.status == HttpStatusCode.Conflict) {
+                        logger.warn(
+                            "Behandling er allerede oppretta for pesysid ${hendelse.pesysId} i Gjenny. " +
+                                "Trenger ikke gjøre mer, så avbryter.",
+                        )
+                        packet.setEventNameForHendelseType(Migreringshendelser.ALLEREDE_GJENOPPRETTA)
+                        context.publish(packet.toJson())
+                        return@runBlocking null
+                    }
+                    throw e
                 }
-                res.body<MigreringRespons>()
             } ?: return
 
         packet.behandlingId = migreringRespons.behandlingId

@@ -15,6 +15,7 @@ import { usePersonopplysninger } from '~components/person/usePersonopplysninger'
 
 import { mapApiResult } from '~shared/api/apiUtils'
 import { SakType } from '~shared/types/sak'
+import { formaterGrunnlagKilde } from '~components/behandling/soeknadsoversikt/utils'
 
 const SoekerDoedsdatoGrunnlag = () => {
   const soeker = usePersonopplysninger()?.soeker?.opplysning
@@ -104,13 +105,27 @@ const AdopsjonGrunnlag = () => {
 }
 
 const BrukersFoedselsdatoGrunnlag = () => {
-  const soeker = usePersonopplysninger()?.soeker?.opplysning
-  return soeker?.foedselsdato && <Info tekst={formaterDato(soeker?.foedselsdato)} label="Fødselsdato" />
+  const soeker = usePersonopplysninger()?.soeker
+  const foedselsdato = soeker?.opplysning?.foedselsdato
+  return (
+    foedselsdato && (
+      <Info label="Fødselsdato" tekst={formaterDato(foedselsdato)} undertekst={formaterGrunnlagKilde(soeker?.kilde)} />
+    )
+  )
 }
 
 const BrukerFyller67AarGrunnlag = () => {
-  const foedselsdato = usePersonopplysninger()?.soeker?.opplysning?.foedselsdato
-  return foedselsdato && <Info tekst={formaterDato(addYears(foedselsdato, 67))} label="Dato bruker fyller 67 år" />
+  const soeker = usePersonopplysninger()?.soeker
+  const foedselsdato = soeker?.opplysning?.foedselsdato
+  return (
+    foedselsdato && (
+      <Info
+        label="Bruker 67 år"
+        tekst={formaterDato(addYears(foedselsdato, 67))}
+        undertekst={formaterGrunnlagKilde(soeker?.kilde)}
+      />
+    )
+  )
 }
 
 const addYears = (date: Date, years: number) => {

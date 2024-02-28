@@ -39,6 +39,9 @@ internal class LagreKoblingRiver(rapidsConnection: RapidsConnection, private val
                 null
             }
         pesysRepository.lagreKoplingTilBehandling(behandlingId, packet.pesysId, packet.sakId)
+        if (behandlingId == null) {
+            pesysRepository.oppdaterStatus(packet.pesysId, Migreringsstatus.OPPGAVE_OPPRETTA_FOR_MANUELT)
+        }
         packet.setEventNameForHendelseType(Migreringshendelser.LAGRE_GRUNNLAG)
         context.publish(packet.toJson())
         logger.info(

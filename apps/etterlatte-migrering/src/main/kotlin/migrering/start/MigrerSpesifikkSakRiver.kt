@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.Pesyssak
@@ -81,6 +80,7 @@ internal class MigrerSpesifikkSakRiver(
                 Migreringsstatus.PAUSE,
                 Migreringsstatus.MANUELL,
                 Migreringsstatus.UNDER_MIGRERING_MANUELT,
+                Migreringsstatus.OPPGAVE_OPPRETTA_FOR_MANUELT,
                 Migreringsstatus.UTBETALING_FEILA,
             )
         ) {

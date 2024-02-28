@@ -73,7 +73,7 @@ export default function DokumentModal({ journalpost }: { journalpost: Journalpos
         </Button>
       )}
 
-      <DokumentVisningModal open={isOpen} onClose={() => setIsOpen(false)}>
+      <DokumentVisningModal open={isOpen} onClose={() => setIsOpen(false)} aria-label={tittel}>
         <Modal.Header>
           <Heading spacing level="2" size="medium">
             {tittel}

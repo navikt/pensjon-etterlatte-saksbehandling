@@ -3,6 +3,7 @@ package no.nav.etterlatte.trygdetid.kafka
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
@@ -87,9 +88,7 @@ internal class MigreringTrygdetidHendelserRiver(
 
         trygdetidMedFremtidig
     } catch (e: Exception) {
-        throw TrygdetidIkkeGyldigForAutomatiskGjenoppretting(
-            e.message ?: "Klarte ikke legge til perioder fra Pesys for behandling $behandlingId",
-        )
+        overstyrBeregnetTrygdetid(request, behandlingId)
     }
 
     private fun trygdetidIGjennyStemmerMedTrygdetidIPesys(
@@ -103,6 +102,19 @@ internal class MigreringTrygdetidHendelserRiver(
             trygdetid.beregnetTrygdetid?.resultat?.prorataBroek == beregning.prorataBroek &&
                 trygdetid.beregnetTrygdetid?.resultat?.samletTrygdetidTeoretisk == beregning.anvendtTrygdetid
         }
+
+    private fun overstyrBeregnetTrygdetid(
+        request: MigreringRequest,
+        behandlingId: UUID,
+    ): TrygdetidDto {
+        check(request.beregning.anvendtTrygdetid == 40) {
+            "Kan kun overstyre helnasjonal sak med 40 år trygdetid. Anvendt trygdetid er ${request.beregning.anvendtTrygdetid}"
+        }
+        return trygdetidService.overstyrBeregnetTrygdetid(
+            behandlingId = behandlingId,
+            beregnetTrygdetid = DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(request.beregning.anvendtTrygdetid),
+        ).also { logger.warn("Trygdetid for behandling $behandlingId ble overstyrt med anvendt trygdetid fra Pesys") }
+    }
 
     private fun sendBeregnetTrygdetid(
         packet: JsonMessage,

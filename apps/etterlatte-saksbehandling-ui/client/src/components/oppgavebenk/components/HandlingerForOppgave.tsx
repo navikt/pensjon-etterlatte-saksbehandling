@@ -113,6 +113,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
                   revurderinger={muligeRevurderingAarsakerStatus}
                   sakId={oppgave.sakId}
                   oppgaveId={oppgave.id}
+                  begrunnelse={oppgave.merknad}
                   litenKnapp={true}
                 />
               )

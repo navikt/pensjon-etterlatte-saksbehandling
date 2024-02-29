@@ -211,7 +211,7 @@ class RevurderingService(
     ): Revurdering =
         forrigeBehandling.let {
             val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
-            val frist = paaGrunnAvOppgave?.let { oppgaveService.hentOppgave(it)?.frist }
+            val triggendeOppgave = paaGrunnAvOppgave?.let { oppgaveService.hentOppgave(it) }
 
             opprettRevurdering(
                 sakId = sakId,
@@ -224,10 +224,10 @@ class RevurderingService(
                 virkningstidspunkt = null,
                 utlandstilknytning = forrigeBehandling.utlandstilknytning,
                 boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-                begrunnelse = begrunnelse,
+                begrunnelse = begrunnelse ?: triggendeOppgave?.merknad,
                 fritekstAarsak = fritekstAarsak,
                 saksbehandlerIdent = saksbehandler.ident,
-                frist = frist,
+                frist = triggendeOppgave?.frist,
             ).oppdater()
                 .also { revurdering ->
                     if (paaGrunnAvHendelse != null) {

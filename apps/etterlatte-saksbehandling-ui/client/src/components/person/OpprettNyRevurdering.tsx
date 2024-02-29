@@ -13,11 +13,13 @@ export const OpprettNyRevurdering = ({
   sakId,
   revurderinger,
   oppgaveId,
+  begrunnelse,
   litenKnapp = false,
 }: {
   sakId: number
   revurderinger: Array<Revurderingaarsak>
   oppgaveId?: string
+  begrunnelse?: string
   litenKnapp?: boolean
 }) => {
   const [error, setError] = useState<string | null>(null)
@@ -36,6 +38,7 @@ export const OpprettNyRevurdering = ({
         sakId: sakId,
         aarsak: valgtRevurdering,
         fritekstAarsak: fritekstgrunn ? fritekstgrunn : null,
+        begrunnelse: begrunnelse,
         paaGrunnAvOppgaveId: oppgaveId,
       },
       (behandlingId: string) => {

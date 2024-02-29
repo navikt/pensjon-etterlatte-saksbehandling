@@ -11,7 +11,7 @@ export interface OppgaveDTO {
   type: Oppgavetype
   kilde: OppgaveKilde
   referanse: string | null
-  merknad: string | null
+  merknad?: string
   opprettet: string
   sakType: SakType
   fnr: string | null

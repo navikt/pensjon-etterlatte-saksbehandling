@@ -165,23 +165,36 @@ class VilkaarsvurderingService(
         }
     }
 
+    // Her legges det til nye vilkår og det filtreres bort vilkår som ikke lenger er aktuelle.
+    // Oppdatering av vilkår med endringer er ennå ikke støttet.
     private fun oppdaterVilkaar(
         kopierteVilkaar: List<Vilkaar>,
         behandling: DetaljertBehandling,
         virkningstidspunkt: Virkningstidspunkt,
     ): List<Vilkaar> {
-        val gjeldendeVilkaar =
+        val gjeldendeVilkaarForVirkningstidspunkt =
             finnVilkaarForNyVilkaarsvurdering(
                 virkningstidspunkt,
                 behandling.behandlingType,
                 behandling.sakType,
             )
 
-        val gjeldendeHovedvilkaarTyper = gjeldendeVilkaar.map { it.hovedvilkaar.type }
-        val hovedvilkaarTyperPaaKopiertVilkaarsvurdering = kopierteVilkaar.map { it.hovedvilkaar.type }
-        val manglendeHovedvilkaarTyper = gjeldendeHovedvilkaarTyper.subtract(hovedvilkaarTyperPaaKopiertVilkaarsvurdering.toSet())
-        val manglendeVilkaar = gjeldendeVilkaar.filter { it.hovedvilkaar.type in manglendeHovedvilkaarTyper }
-        return kopierteVilkaar.toMutableList().apply { addAll(manglendeVilkaar) }
+        val nyeHovedvilkaarTyper =
+            gjeldendeVilkaarForVirkningstidspunkt.map { it.hovedvilkaar.type }
+                .subtract(kopierteVilkaar.map { it.hovedvilkaar.type }.toSet())
+
+        val slettetHovedvilkaarTyper =
+            kopierteVilkaar.map { it.hovedvilkaar.type }
+                .subtract(gjeldendeVilkaarForVirkningstidspunkt.map { it.hovedvilkaar.type }.toSet())
+
+        val nyeVilkaar =
+            gjeldendeVilkaarForVirkningstidspunkt
+                .filter { it.hovedvilkaar.type in nyeHovedvilkaarTyper }
+
+        return kopierteVilkaar
+            .filterNot { it.hovedvilkaar.type in slettetHovedvilkaarTyper }
+            .toMutableList()
+            .apply { addAll(nyeVilkaar) }
     }
 
     suspend fun opprettVilkaarsvurdering(
@@ -282,13 +295,10 @@ class VilkaarsvurderingService(
 
             SakType.OMSTILLINGSSTOENAD ->
                 when (behandlingType) {
-                    BehandlingType.FØRSTEGANGSBEHANDLING ->
-                        OmstillingstoenadVilkaar.inngangsvilkaar()
-
+                    BehandlingType.FØRSTEGANGSBEHANDLING,
                     BehandlingType.REVURDERING,
-                    -> throw IllegalArgumentException(
-                        "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType",
-                    )
+                    ->
+                        OmstillingstoenadVilkaar.inngangsvilkaar()
                 }
         }
 

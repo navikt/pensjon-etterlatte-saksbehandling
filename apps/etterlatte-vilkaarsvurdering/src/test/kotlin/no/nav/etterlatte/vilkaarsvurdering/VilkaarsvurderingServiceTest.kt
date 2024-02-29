@@ -1,7 +1,9 @@
 package no.nav.etterlatte.vilkaarsvurdering
 
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
@@ -24,7 +26,10 @@ import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.SoeknadMottattDat
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Delvilkaar
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Lovreferanse
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.Utfall
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.Vilkaar
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarType
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarVurderingData
 import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingResultat
@@ -38,6 +43,7 @@ import no.nav.etterlatte.libs.testdata.grunnlag.kilde
 import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.vilkaarsvurdering.klienter.BehandlingKlient
 import no.nav.etterlatte.vilkaarsvurdering.klienter.GrunnlagKlient
+import no.nav.etterlatte.vilkaarsvurdering.vilkaar.BarnepensjonVilkaar2024
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -48,7 +54,9 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Month
 import java.time.YearMonth
 import java.util.UUID
 import javax.sql.DataSource
@@ -539,6 +547,33 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     @Test
+    fun `skal legge til nye og fjerne slettede vilkaar ved kopiering av vilkaarsvurdering`() {
+        val nyBehandlingId = UUID.randomUUID()
+        val opprinneligBehandlingId = UUID.randomUUID()
+
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(nyBehandlingId, any()) } returns detaljertBehandling()
+
+        opprettVilkaarsvurderingMedResultat(
+            behandlingId = opprinneligBehandlingId,
+            vilkaar = ikkeGjeldendeVilkaar(),
+        )
+
+        val vilkaarsvurderingMedKopierteOppdaterteVilkaar =
+            runBlocking {
+                service.kopierVilkaarsvurdering(nyBehandlingId, opprinneligBehandlingId, brukerTokenInfo)
+            }
+
+        with(vilkaarsvurderingMedKopierteOppdaterteVilkaar.vilkaar.map { it.hovedvilkaar.type }) {
+            val gjeldendeVilkaar = BarnepensjonVilkaar2024.inngangsvilkaar()
+
+            this shouldNotContain VilkaarType.BP_FORMAAL
+            this shouldContainAll gjeldendeVilkaar.map { it.hovedvilkaar.type }
+            this shouldHaveSize gjeldendeVilkaar.size
+        }
+    }
+
+    @Test
     fun `Er ikke yrkesskade hvis ikke det er en yrkesskade oppfylt delvilkaar`() {
         val vilkaarsvurdering =
             runBlocking {
@@ -648,6 +683,57 @@ internal class VilkaarsvurderingServiceTest {
                 service.sjekkGyldighetOgOppdaterBehandlingStatus(uuid, brukerTokenInfo)
             }
         }
+    }
+
+    private fun opprettVilkaarsvurderingMedResultat(
+        behandlingId: UUID,
+        vilkaar: List<Vilkaar>,
+    ): Vilkaarsvurdering {
+        val opprettetVilkaarsvudering =
+            repository.opprettVilkaarsvurdering(
+                Vilkaarsvurdering(
+                    behandlingId = behandlingId,
+                    grunnlagVersjon = 1L,
+                    virkningstidspunkt = YearMonth.of(2024, Month.JANUARY),
+                    vilkaar = vilkaar,
+                ),
+            )
+
+        return repository.lagreVilkaarsvurderingResultat(
+            behandlingId = opprettetVilkaarsvudering.behandlingId,
+            virkningstidspunkt = LocalDate.of(2024, 1, 1),
+            resultat =
+                VilkaarsvurderingResultat(
+                    utfall = VilkaarsvurderingUtfall.OPPFYLT,
+                    kommentar = "Oppfylt",
+                    tidspunkt = LocalDateTime.now(),
+                    saksbehandler = "Z123456",
+                ),
+        )
+    }
+
+    private fun ikkeGjeldendeVilkaar(): List<Vilkaar> {
+        return BarnepensjonVilkaar2024.inngangsvilkaar()
+            .subList(0, 2) // Reduserer til de 3 første vilkårene
+            .toMutableList()
+            .apply {
+                // Legger til et mocket vilkår
+                add(
+                    Vilkaar(
+                        hovedvilkaar =
+                            Delvilkaar(
+                                type = VilkaarType.BP_FORMAAL,
+                                tittel = "Tittel",
+                                beskrivelse = "Beskrivelse",
+                                spoersmaal = "Spørsmål",
+                                lovreferanse =
+                                    Lovreferanse(
+                                        paragraf = "§ 18-1",
+                                    ),
+                            ),
+                    ),
+                )
+            }
     }
 
     private fun grunnlag() = GrunnlagTestData().hentOpplysningsgrunnlag()

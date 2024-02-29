@@ -160,7 +160,12 @@ class VilkaarsvurderingService(
                     ),
                 kopiertFraId = tidligereVilkaarsvurdering.id,
             ).also {
-                runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo) }
+                if (it.vilkaar.any { vilkaar -> vilkaar.vurdering == null }) {
+                    // Hvis noen av vilkårene mangler vurdering - slett vilkårsvurderingresultat
+                    vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(it.behandlingId)
+                } else {
+                    runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo) }
+                }
             }
         }
     }

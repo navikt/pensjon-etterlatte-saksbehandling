@@ -4,27 +4,14 @@ import { EyeIcon } from '@navikt/aksel-icons'
 import { useAppSelector } from '~store/Store'
 import { GosysOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
-import React, { useEffect } from 'react'
-import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
-import { useApiCall } from '~shared/hooks/useApiCall'
-import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
-import { isInitial, mapApiResult } from '~shared/api/apiUtils'
-import Spinner from '~shared/Spinner'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import React from 'react'
+import { OpprettRevurderingModal } from '~components/oppgavebenk/oppgaveModal/OpprettRevurderingModal'
 
 export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
   const innloggetsaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
   const erInnloggetSaksbehandlerOppgave = saksbehandler?.ident === innloggetsaksbehandler.ident
-
-  const [muligeRevurderingAarsakerStatus, hentMuligeRevurderingeraarsaker] = useApiCall(hentStoettedeRevurderinger)
-
-  useEffect(() => {
-    if (!oppgave.referanse && isInitial(muligeRevurderingAarsakerStatus)) {
-      hentMuligeRevurderingeraarsaker({ sakType: oppgave.sakType })
-    }
-  }, [oppgave.referanse])
 
   if (kilde === 'GENERELL_BEHANDLING') {
     switch (type) {
@@ -102,22 +89,7 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
               Gå til revurdering
             </Button>
           )}
-          {erInnloggetSaksbehandlerOppgave &&
-            !referanse &&
-            mapApiResult(
-              muligeRevurderingAarsakerStatus,
-              <Spinner visible label="Laster revurderingsårsaker ..." />,
-              () => <ApiErrorAlert>En feil skjedde under kallet for å hente støttede revurderinger</ApiErrorAlert>,
-              (muligeRevurderingAarsakerStatus) => (
-                <OpprettNyRevurdering
-                  revurderinger={muligeRevurderingAarsakerStatus}
-                  sakId={oppgave.sakId}
-                  oppgaveId={oppgave.id}
-                  begrunnelse={oppgave.merknad}
-                  litenKnapp={true}
-                />
-              )
-            )}
+          {erInnloggetSaksbehandlerOppgave && !referanse && <OpprettRevurderingModal oppgave={oppgave} />}
         </>
       )
     case 'ATTESTERING':

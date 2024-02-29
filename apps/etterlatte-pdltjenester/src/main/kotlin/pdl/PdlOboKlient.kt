@@ -33,7 +33,7 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
         val request =
             PdlGraphqlRequest(
                 query = getQuery("/pdl/hentPerson.graphql"),
-                variables = toPdlVariables(ident),
+                variables = PdlVariables(ident),
             )
 
         return retry<PdlPersonResponse>(times = 3) {
@@ -73,34 +73,6 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
             )
         return token.get()?.accessToken ?: ""
     }
-
-    private fun toPdlVariables(
-        ident: String,
-        bostedsadresse: Boolean = false,
-        bostedsadresseHistorikk: Boolean = false,
-        deltBostedsadresse: Boolean = false,
-        oppholdsadresse: Boolean = false,
-        oppholdsadresseHistorikk: Boolean = false,
-        kontaktadresse: Boolean = false,
-        kontaktadresseHistorikk: Boolean = false,
-        utland: Boolean = false,
-        sivilstand: Boolean = false,
-        familieRelasjon: Boolean = false,
-        vergemaal: Boolean = false,
-    ) = PdlVariables(
-        ident = ident,
-        bostedsadresse = bostedsadresse,
-        bostedsadresseHistorikk = bostedsadresseHistorikk,
-        deltBostedsadresse = deltBostedsadresse,
-        oppholdsadresse = oppholdsadresse,
-        oppholdsadresseHistorikk = oppholdsadresseHistorikk,
-        kontaktadresse = kontaktadresse,
-        kontaktadresseHistorikk = kontaktadresseHistorikk,
-        utland = utland,
-        sivilstand = sivilstand,
-        familieRelasjon = familieRelasjon,
-        vergemaal = vergemaal,
-    )
 
     companion object {
         const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"

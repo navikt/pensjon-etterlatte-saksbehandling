@@ -27,8 +27,8 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   useEffect(() => {
-    hentNavkontor(fnr)
     if (isSuccess(sakStatus)) {
+      hentNavkontor(fnr)
       hentFlyktning(sakStatus.data.sak.id)
     }
   }, [fnr, sakStatus])

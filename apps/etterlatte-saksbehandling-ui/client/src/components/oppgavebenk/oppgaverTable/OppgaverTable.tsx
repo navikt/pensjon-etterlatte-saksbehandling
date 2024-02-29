@@ -65,18 +65,15 @@ export const OppgaverTable = ({
     >
       <OppgaverTableHeader />
       <Table.Body>
-        {oppgaver &&
-          oppgaver.map((oppgave: OppgaveDTO) => {
-            return (
-              <OppgaverTableRow
-                key={oppgave.id}
-                oppgave={oppgave}
-                saksbehandlereIEnhet={saksbehandlereIEnhet}
-                oppdaterTildeling={oppdaterTildeling}
-                oppdaterFrist={oppdaterFrist}
-              />
-            )
-          })}
+        {oppgaver?.map((oppgave: OppgaveDTO) => (
+          <OppgaverTableRow
+            key={oppgave.id}
+            oppgave={oppgave}
+            saksbehandlereIEnhet={saksbehandlereIEnhet}
+            oppdaterTildeling={oppdaterTildeling}
+            oppdaterFrist={oppdaterFrist}
+          />
+        ))}
       </Table.Body>
     </Table>
   )

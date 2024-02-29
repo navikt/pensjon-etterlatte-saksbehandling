@@ -18,14 +18,12 @@ import { FlexRow } from '~shared/styled'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { OppgaveDTO } from '~shared/api/oppgaver'
 
 interface Props {
   hentAlleOppgaver: () => void
   hentOppgaverStatus: (oppgavestatusFilter: Array<string>) => void
   filter: Filter
   setFilter: (filter: Filter) => void
-  alleOppgaver: Array<OppgaveDTO>
   saksbehandlereIEnhet: Array<Saksbehandler>
 }
 
@@ -34,13 +32,14 @@ export const FilterRad = ({
   hentOppgaverStatus,
   filter,
   setFilter,
-  alleOppgaver,
+  saksbehandlereIEnhet,
 }: Props): ReactNode => {
-  const saksbehandlere: Set<string> = new Set(
-    alleOppgaver.map((oppgave) => oppgave.saksbehandler?.ident || '').filter((ident) => !!ident)
-  )
   const [saksbehandlerFilterLokal, setSaksbehandlerFilterLokal] = useState<string>(filter.saksbehandlerFilter)
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
+
+  const saksbehandlerFilterValues = (): string[] => {
+    return Object.entries(SAKSBEHANDLERFILTER).map(([, beskrivelse]) => beskrivelse)
+  }
 
   return (
     <>
@@ -71,19 +70,25 @@ export const FilterRad = ({
             ))}
         </Select>
 
-        {/* TODO: Burde være en liste over navn, ikke identer. Burde også KUN vise de som tilhører enhet */}
         <UNSAFE_Combobox
           label="Saksbehandler"
           value={saksbehandlerFilterLokal}
-          options={Object.entries(SAKSBEHANDLERFILTER)
-            .map(([, beskrivelse]) => beskrivelse)
-            .concat(Array.from(saksbehandlere))}
+          options={saksbehandlerFilterValues().concat(
+            Array.from(saksbehandlereIEnhet.map((behandler) => behandler.navn))
+          )}
           onChange={(e) => {
             setSaksbehandlerFilterLokal(e?.target.value ? e?.target.value : '')
           }}
           onToggleSelected={(option, isSelected) => {
             if (isSelected) {
-              setFilter({ ...filter, saksbehandlerFilter: option })
+              if (saksbehandlerFilterValues().find((val) => val === option)) {
+                setFilter({ ...filter, saksbehandlerFilter: option })
+              } else {
+                const selectedSaksbehandler: Saksbehandler = saksbehandlereIEnhet.find(
+                  (behandler) => behandler.navn === option
+                ) || { navn: '', ident: '' }
+                setFilter({ ...filter, saksbehandlerFilter: selectedSaksbehandler?.ident })
+              }
             }
           }}
         />

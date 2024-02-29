@@ -219,7 +219,6 @@ export const ToggleMinOppgaveliste = () => {
             hentOppgaverStatus={(oppgavestatusFilter: Array<string>) => hentOppgavelistaOppgaver(oppgavestatusFilter)}
             filter={oppgavelistaFilter}
             setFilter={setOppgavelistaFilter}
-            alleOppgaver={oppgavelistaOppgaver}
             saksbehandlereIEnhet={saksbehandlereIEnheter}
           />
 

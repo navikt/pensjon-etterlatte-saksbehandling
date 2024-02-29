@@ -54,7 +54,7 @@ class DoedshendelseKontrollpunktService(
         return kontrollpunkterForRelasjon + fellesKontrollpunkter(hendelse, avdoed, sak)
     }
 
-    fun fellesKontrollpunkter(
+    private fun fellesKontrollpunkter(
         hendelse: DoedshendelseInternal,
         avdoed: PersonDTO,
         sak: Sak?,
@@ -67,7 +67,7 @@ class DoedshendelseKontrollpunktService(
         )
     }
 
-    fun kontrollpunkterBarneRelasjon(
+    private fun kontrollpunkterBarneRelasjon(
         hendelse: DoedshendelseInternal,
         avdoed: PersonDTO,
         sak: Sak?,
@@ -79,7 +79,7 @@ class DoedshendelseKontrollpunktService(
         )
     }
 
-    fun kontrollpunkterEpsRelasjon(
+    private fun kontrollpunkterEpsRelasjon(
         hendelse: DoedshendelseInternal,
         sak: Sak?,
         eps: PersonDTO,

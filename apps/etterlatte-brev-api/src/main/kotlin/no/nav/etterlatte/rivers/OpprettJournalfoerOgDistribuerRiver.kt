@@ -83,9 +83,10 @@ class OpprettJournalfoerOgDistribuerRiver(
                     }
                 }
             } catch (e: Exception) {
-                logger.error("Fikk ved opprettelse av brev for sak $sakId for brevkode: $brevKode ")
+                val feilMelding = "Fikk feil ved opprettelse av brev for sak $sakId for brevkode: $brevKode"
+                logger.error(feilMelding)
                 throw OpprettJournalfoerOgDistribuerRiverException(
-                    "Fikk ved opprettelse av brev for sak $sakId for brevkode: $brevKode ",
+                    feilMelding,
                     e,
                 )
             }

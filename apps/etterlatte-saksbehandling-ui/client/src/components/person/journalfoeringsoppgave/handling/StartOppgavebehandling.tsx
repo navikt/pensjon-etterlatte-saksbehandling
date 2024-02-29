@@ -15,6 +15,7 @@ import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
 import { SidebarPanel } from '~shared/components/Sidebar'
+import { temaTilhoererGjenny } from '~components/person/journalfoeringsoppgave/journalpost/validering'
 
 export default function StartOppgavebehandling({ antallBehandlinger }: { antallBehandlinger: number }) {
   const { oppgave, journalpost, oppgaveHandling } = useJournalfoeringOppgave()
@@ -51,6 +52,10 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
         <Alert variant="info">Bruker har allerede {antallBehandlinger} behandling(er) i Gjenny</Alert>
       ) : (
         <Alert variant="info">Bruker har ingen behandlinger i Gjenny</Alert>
+      )}
+
+      {journalpost && !temaTilhoererGjenny(journalpost) && (
+        <Alert variant="warning">Journalposten tilhører tema {journalpost.tema}</Alert>
       )}
       <br />
 

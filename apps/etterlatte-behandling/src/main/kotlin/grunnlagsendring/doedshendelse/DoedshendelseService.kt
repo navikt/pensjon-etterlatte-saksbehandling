@@ -15,6 +15,7 @@ import no.nav.etterlatte.libs.common.person.Sivilstatus
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import kotlin.math.absoluteValue
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl as PdlDoedshendelse
 
 enum class DoedshendelseFeatureToggle(private val key: String) : FeatureToggle {
@@ -166,5 +167,5 @@ private fun Person.under20PaaDato(dato: LocalDate): Boolean {
     // for å sikre at vi får med alle som er under 20 år.
     val benyttetFoedselsdato = foedselsdato ?: LocalDate.of(foedselsaar, 12, 31)
 
-    return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato) < 20
+    return ChronoUnit.YEARS.between(benyttetFoedselsdato, dato).absoluteValue < 20
 }

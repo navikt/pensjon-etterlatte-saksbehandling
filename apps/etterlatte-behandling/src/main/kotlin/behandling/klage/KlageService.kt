@@ -520,6 +520,12 @@ class KlageServiceImpl(
 
         val oppdatertKlage = klage.attesterVedtak()
 
+        val utfall = checkNotNull(klage.utfall as? KlageUtfallMedData.Avvist) {
+          "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
+        }
+        runBlocking {
+            brevApiKlient.ferdigstillBrev(klage.sak.id, utfall.brev.brevId, brukerTokenInfo)
+        }
         val vedtakId =
             runBlocking {
                 vedtakKlient.attesterVedtakKlage(

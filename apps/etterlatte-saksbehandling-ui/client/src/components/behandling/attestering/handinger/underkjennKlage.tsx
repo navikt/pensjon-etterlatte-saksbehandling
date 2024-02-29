@@ -4,7 +4,7 @@ import { GeneriskModal } from '~shared/modal/modal'
 import { useNavigate } from 'react-router'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { Klage } from '~shared/types/Klage'
-import { underkjennVedtak } from '~shared/api/tilbakekreving'
+import { underkjennVedtakOmAvvistKlage } from '~shared/api/klage'
 
 import { isPending } from '~shared/api/apiUtils'
 
@@ -18,12 +18,19 @@ export const UnderkjennKlage = ({ klage, kommentar, valgtBegrunnelse }: Props) =
   const [modalisOpen, setModalisOpen] = useState(false)
   const navigate = useNavigate()
 
-  const [underkjennStatus, apiUnderkjennVedtak] = useApiCall(underkjennVedtak)
+  const [underkjennStatus, apiUnderkjennVedtak] = useApiCall(underkjennVedtakOmAvvistKlage)
 
   const underkjenn = () => {
-    apiUnderkjennVedtak({ behandlingsId: klage.id, kommentar, valgtBegrunnelse }, () => {
-      navigate(`/person/${klage.sak.ident}`)
-    })
+    apiUnderkjennVedtak(
+      {
+        klageId: klage.id,
+        kommentar: kommentar,
+        valgtBegrunnelse: valgtBegrunnelse,
+      },
+      () => {
+        navigate(`/person/${klage.sak.ident}`)
+      }
+    )
   }
 
   return (

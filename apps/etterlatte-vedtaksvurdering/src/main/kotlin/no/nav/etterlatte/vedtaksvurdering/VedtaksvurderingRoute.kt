@@ -103,7 +103,7 @@ fun Route.vedtaksvurderingRoute(
                     logger.error(
                         "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.id} " +
                             "Saknr: ${attestert.vedtak.sak.id}. " +
-                            "Det betyr at vi ikke sender ut brev for vedtaket eller at en utbetaling går til oppdrag. " +
+                            "Det betyr at vi ikke får sendt ut vedtaksbrev og heller ikke utbetalingsoppdrag. " +
                             "Denne hendelsen må sendes ut manuelt straks.",
                         e,
                     )

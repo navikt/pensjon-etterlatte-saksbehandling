@@ -547,11 +547,10 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     @Test
-    fun `skal legge til nye og fjerne slettede vilkaar ved kopiering av vilkaarsvurdering`() {
+    fun `skal legge til nye og fjerne slettede vilkaar ved kopiering av vilkaarsvurdering - totalvurdering slettes`() {
         val nyBehandlingId = UUID.randomUUID()
         val opprinneligBehandlingId = UUID.randomUUID()
 
-        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
         coEvery { behandlingKlient.hentBehandling(nyBehandlingId, any()) } returns detaljertBehandling()
 
         opprettVilkaarsvurderingMedResultat(
@@ -570,6 +569,49 @@ internal class VilkaarsvurderingServiceTest {
             this shouldNotContain VilkaarType.BP_FORMAAL
             this shouldContainAll gjeldendeVilkaar.map { it.hovedvilkaar.type }
             this shouldHaveSize gjeldendeVilkaar.size
+        }
+
+        vilkaarsvurderingMedKopierteOppdaterteVilkaar.resultat shouldBe null
+
+        coVerify { behandlingKlient.hentBehandling(any(), brukerTokenInfo) }
+
+        coVerify(exactly = 0) {
+            behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), brukerTokenInfo)
+        }
+    }
+
+    @Test
+    fun `skal kopiere eksisterende vilkaarsvurdering uten endringer paa vilkaar - totalvurdering er uforandret`() {
+        val nyBehandlingId = UUID.randomUUID()
+        val opprinneligBehandlingId = UUID.randomUUID()
+
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(nyBehandlingId, any()) } returns detaljertBehandling()
+
+        opprettVilkaarsvurderingMedResultat(
+            behandlingId = opprinneligBehandlingId,
+            vilkaar =
+                BarnepensjonVilkaar2024.inngangsvilkaar().map {
+                    it.copy(
+                        vurdering =
+                            VilkaarVurderingData(
+                                kommentar = "kommentar",
+                                tidspunkt = LocalDateTime.now(),
+                                saksbehandler = "Z123456",
+                            ),
+                    )
+                },
+        )
+
+        val vilkaarsvurderingMedKopierteOppdaterteVilkaar =
+            runBlocking {
+                service.kopierVilkaarsvurdering(nyBehandlingId, opprinneligBehandlingId, brukerTokenInfo)
+            }
+
+        vilkaarsvurderingMedKopierteOppdaterteVilkaar.resultat shouldNotBe null
+
+        coVerify {
+            behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), brukerTokenInfo)
         }
     }
 

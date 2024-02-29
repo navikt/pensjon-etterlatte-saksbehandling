@@ -144,28 +144,30 @@ class VilkaarsvurderingService(
             val virkningstidspunkt =
                 behandling.virkningstidspunkt ?: throw VirkningstidspunktIkkeSattException(behandlingId)
 
-            vilkaarsvurderingRepository.kopierVilkaarsvurdering(
-                nyVilkaarsvurdering =
-                    Vilkaarsvurdering(
-                        behandlingId = behandlingId,
-                        grunnlagVersjon = grunnlag.metadata.versjon,
-                        virkningstidspunkt = virkningstidspunkt.dato,
-                        vilkaar =
-                            oppdaterVilkaar(
-                                kopierteVilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
-                                behandling = behandling,
-                                virkningstidspunkt = virkningstidspunkt,
-                            ),
-                        resultat = tidligereVilkaarsvurdering.resultat,
-                    ),
-                kopiertFraId = tidligereVilkaarsvurdering.id,
-            ).also {
-                if (it.vilkaar.any { vilkaar -> vilkaar.vurdering == null }) {
-                    // Hvis noen av vilkårene mangler vurdering - slett vilkårsvurderingresultat
-                    vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(it.behandlingId)
-                } else {
-                    runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo) }
-                }
+            val nyVilkaarsvurdering =
+                vilkaarsvurderingRepository.kopierVilkaarsvurdering(
+                    nyVilkaarsvurdering =
+                        Vilkaarsvurdering(
+                            behandlingId = behandlingId,
+                            grunnlagVersjon = grunnlag.metadata.versjon,
+                            virkningstidspunkt = virkningstidspunkt.dato,
+                            vilkaar =
+                                oppdaterVilkaar(
+                                    kopierteVilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
+                                    behandling = behandling,
+                                    virkningstidspunkt = virkningstidspunkt,
+                                ),
+                            resultat = tidligereVilkaarsvurdering.resultat,
+                        ),
+                    kopiertFraId = tidligereVilkaarsvurdering.id,
+                )
+
+            // Hvis minst ett av vilkårene mangler vurdering - slett vilkårsvurderingresultat
+            if (nyVilkaarsvurdering.vilkaar.any { vilkaar -> vilkaar.vurdering == null }) {
+                vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId)
+            } else {
+                runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo) }
+                nyVilkaarsvurdering
             }
         }
     }

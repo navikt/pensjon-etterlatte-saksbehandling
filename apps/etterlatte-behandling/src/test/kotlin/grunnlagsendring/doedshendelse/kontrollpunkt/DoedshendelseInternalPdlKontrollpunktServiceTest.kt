@@ -94,7 +94,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             pdlTjenesterKlient.hentPdlModell(
                 foedselsnummer = any(),
                 rolle = PersonRolle.BARN,
-                saktype = any(),
+                saktype = SakType.BARNEPENSJON,
             )
         } returns
             mockPerson().copy(
@@ -112,7 +112,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             pdlTjenesterKlient.hentPdlModell(
                 foedselsnummer = doedshendelseInternalBP.beroertFnr,
                 rolle = PersonRolle.GJENLEVENDE,
-                saktype = any(),
+                saktype = SakType.BARNEPENSJON,
             )
         } returns
             mockPerson().copy(
@@ -150,7 +150,9 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
                 "",
             )
 
-        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns
             mockPerson()
                 .copy(sivilstand = listOf(OpplysningDTO(sivilstandSkilt, "sivilstand"), OpplysningDTO(sivilstandGift, "sivilstand")))
 
@@ -184,7 +186,9 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
                 "",
             )
 
-        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns
             mockPerson()
                 .copy(
                     sivilstand =
@@ -203,7 +207,9 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
     fun `Eps er 67 år EpsKanHaAlderspensjon`() {
         every { sakService.finnSak(any(), any()) } returns null
 
-        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns
             mockPerson()
                 .copy(
                     foedselsdato = OpplysningDTO(LocalDate.now().minusYears(67L), "foedselsdato"),
@@ -218,7 +224,9 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
     fun `Skal gi kontrollpunkt eps er død om eps er død, EpsHarDoedsdato`() {
         every { sakService.finnSak(any(), any()) } returns null
 
-        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns
             mockPerson().copy(
                 doedsdato =
                     OpplysningDTO(
@@ -306,7 +314,9 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
                     tomDate = null,
                 ),
             )
-        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns mockPerson()
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns mockPerson()
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 
@@ -361,7 +371,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             pdlTjenesterKlient.hentPdlModell(
                 foedselsnummer = doedshendelseInternalBP.beroertFnr,
                 rolle = PersonRolle.GJENLEVENDE,
-                saktype = any(),
+                saktype = SakType.BARNEPENSJON,
             )
         } returns
             mockPerson().copy(
@@ -411,7 +421,9 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             )
         every { sakService.finnSak(any(), any()) } returns sak
 
-        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns mockPerson()
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns mockPerson()
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 

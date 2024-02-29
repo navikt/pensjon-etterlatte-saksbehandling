@@ -200,7 +200,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5EllerGiftI15)
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5OgGiftI15)
     }
 
     @Test

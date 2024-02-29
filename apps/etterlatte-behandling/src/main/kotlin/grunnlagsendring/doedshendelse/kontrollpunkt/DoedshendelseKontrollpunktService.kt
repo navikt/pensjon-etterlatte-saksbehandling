@@ -125,7 +125,7 @@ class DoedshendelseKontrollpunktService(
     private fun kontrollerSkiltSistefemAarEllerGiftI15(
         eps: PersonDTO,
         avdoed: PersonDTO,
-    ): DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5EllerGiftI15? {
+    ): DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5OgGiftI15? {
         if (eps.sivilstand != null) {
             val skilt = eps.sivilstand!!.map { it.verdi }.filter { it.sivilstatus == Sivilstatus.SKILT }
             val skiltMedAvdoed = skilt.filter { it.relatertVedSiviltilstand?.value == avdoed.foedselsnummer.verdi.value }
@@ -138,7 +138,7 @@ class DoedshendelseKontrollpunktService(
                 val giftSivilstand = giftMedAvdoed.first()
                 val antallGifteAar = safeYearsBetween(giftSivilstand.gyldigFraOgMed, naa).absoluteValue
                 return if (antallSkilteAar <= 5 && antallGifteAar >= 15) {
-                    DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5EllerGiftI15
+                    DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5OgGiftI15
                 } else {
                     null
                 }

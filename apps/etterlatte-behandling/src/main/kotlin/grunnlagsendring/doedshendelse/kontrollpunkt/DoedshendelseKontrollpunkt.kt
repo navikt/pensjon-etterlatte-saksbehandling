@@ -80,10 +80,10 @@ sealed class DoedshendelseKontrollpunkt {
         override val avbryt: Boolean = true
     }
 
-    @JsonTypeName("EPS_SKILT_SISTE_5_ELLER_GIFT_I_15")
-    data object EpsHarVaertSkiltSiste5EllerGiftI15 : DoedshendelseKontrollpunkt() {
-        override val kode = "EPS_SKILT_SISTE_5_ELLER_GIFT_I_15"
-        override val beskrivelse: String = "Eps er skilt siste 5 år eller gift i 15"
+    @JsonTypeName("EPS_SKILT_SISTE_5_OG_GIFT_I_15")
+    data object EpsHarVaertSkiltSiste5OgGiftI15 : DoedshendelseKontrollpunkt() {
+        override val kode = "EPS_SKILT_SISTE_5_OG_GIFT_I_15"
+        override val beskrivelse: String = "Eps er skilt siste 5 år og gift i 15"
         override val sendBrev: Boolean = false
         override val opprettOppgave: Boolean = true
         override val avbryt: Boolean = false

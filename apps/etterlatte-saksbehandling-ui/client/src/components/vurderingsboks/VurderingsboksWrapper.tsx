@@ -57,7 +57,12 @@ export const VurderingsboksWrapper = (props: Props) => {
                 <Heading size="xsmall" level="3">
                   Begrunnelse
                 </Heading>
-                <BodyShort size="small">{props.kommentar}</BodyShort>
+
+                {props.kommentar.split('\n').map((kom, i) => (
+                  <BodyShort key={i} size="small" spacing>
+                    {kom}
+                  </BodyShort>
+                ))}
               </Kommentar>
             )}
           </Oppsummering>

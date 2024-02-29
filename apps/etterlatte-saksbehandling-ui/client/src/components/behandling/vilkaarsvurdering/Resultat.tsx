@@ -125,7 +125,11 @@ export const Resultat = (props: Props) => {
                   <Heading size="xsmall" level="3">
                     Begrunnelse
                   </Heading>
-                  <BodyShort size="small">{vilkaarsvurdering.resultat.kommentar}</BodyShort>
+                  {vilkaarsvurdering.resultat.kommentar.split('\n').map((kom, i) => (
+                    <BodyShort key={i} size="small" spacing>
+                      {kom}
+                    </BodyShort>
+                  ))}
                 </Kommentar>
               )}
               {redigerbar && (

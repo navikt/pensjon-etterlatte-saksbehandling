@@ -96,6 +96,9 @@ data class Utbetalingsinfo(
 data class Avkortingsinfo(
     val grunnbeloep: Kroner,
     val inntekt: Kroner,
+    val aarsInntekt: Kroner,
+    val fratrekkInnAar: Kroner,
+    val gjenvaerendeMaaneder: Int,
     val virkningsdato: LocalDate,
     val beregningsperioder: List<AvkortetBeregningsperiode>,
 )

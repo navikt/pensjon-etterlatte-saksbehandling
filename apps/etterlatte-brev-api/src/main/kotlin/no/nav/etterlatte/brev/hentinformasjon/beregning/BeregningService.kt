@@ -121,12 +121,14 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
                 )
             }
 
-        val aarsInntekt = ytelseMedGrunnlag.perioder.first().aarsinntekt
-        val grunnbeloep = ytelseMedGrunnlag.perioder.first().grunnbelop
+        val nyestePeriode = ytelseMedGrunnlag.perioder.maxBy { it.periode.fom }
 
         return Avkortingsinfo(
-            grunnbeloep = Kroner(grunnbeloep),
-            inntekt = Kroner(aarsInntekt),
+            grunnbeloep = Kroner(nyestePeriode.grunnbelop),
+            inntekt = Kroner(nyestePeriode.aarsinntekt - nyestePeriode.fratrekkInnAar),
+            aarsInntekt = Kroner(nyestePeriode.aarsinntekt),
+            fratrekkInnAar = Kroner(nyestePeriode.fratrekkInnAar),
+            gjenvaerendeMaaneder = 12 - (nyestePeriode.periode.fom.monthValue - 1),
             virkningsdato = virkningstidspunkt.atDay(1),
             beregningsperioder = beregningsperioder,
         )

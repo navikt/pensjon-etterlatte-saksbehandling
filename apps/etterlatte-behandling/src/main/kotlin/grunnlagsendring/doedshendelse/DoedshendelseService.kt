@@ -149,10 +149,14 @@ class DoedshendelseService(
     private fun finnBeroerteEpser(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
         return avdoed.sivilstand?.filter { it.verdi.relatertVedSiviltilstand?.value !== null }
             ?.filter {
-                it.verdi.sivilstatus == Sivilstatus.UGIFT ||
-                    it.verdi.sivilstatus == Sivilstatus.SKILT ||
-                    it.verdi.sivilstatus == Sivilstatus.ENKE_ELLER_ENKEMANN ||
-                    it.verdi.sivilstatus == Sivilstatus.SEPARERT
+                it.verdi.sivilstatus in
+                    listOf(
+                        Sivilstatus.GIFT,
+                        Sivilstatus.UGIFT,
+                        Sivilstatus.SKILT,
+                        Sivilstatus.ENKE_ELLER_ENKEMANN,
+                        Sivilstatus.SEPARERT,
+                    )
             }?.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EPS) } ?: emptyList()
     }
 }

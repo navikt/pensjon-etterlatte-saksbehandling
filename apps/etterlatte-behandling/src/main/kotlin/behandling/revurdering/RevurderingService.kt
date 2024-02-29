@@ -211,6 +211,7 @@ class RevurderingService(
     ): Revurdering =
         forrigeBehandling.let {
             val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
+            val frist = paaGrunnAvOppgave?.let { oppgaveService.hentOppgave(it)?.frist }
 
             opprettRevurdering(
                 sakId = sakId,
@@ -226,6 +227,7 @@ class RevurderingService(
                 begrunnelse = begrunnelse,
                 fritekstAarsak = fritekstAarsak,
                 saksbehandlerIdent = saksbehandler.ident,
+                frist = frist,
             ).oppdater()
                 .also { revurdering ->
                     if (paaGrunnAvHendelse != null) {
@@ -248,6 +250,7 @@ class RevurderingService(
                     }
 
                     paaGrunnAvOppgave?.let {
+                        oppgaveService.oppdaterReferanse(it, revurdering.id.toString())
                         oppgaveService.hentOgFerdigstillOppgaveById(it, saksbehandler)
                     }
                 }
@@ -291,6 +294,7 @@ class RevurderingService(
         fritekstAarsak: String? = null,
         saksbehandlerIdent: String,
         relatertBehandlingId: String? = null,
+        frist: Tidspunkt? = null,
     ): RevurderingOgOppfoelging =
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
@@ -341,6 +345,7 @@ class RevurderingService(
                             oppgaveKilde = OppgaveKilde.BEHANDLING,
                             oppgaveType = OppgaveType.REVURDERING,
                             merknad = begrunnelse,
+                            frist = frist,
                         )
                     oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
                 },

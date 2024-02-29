@@ -69,6 +69,11 @@ interface OppgaveDao {
         oppgaveStatus: Status,
     )
 
+    fun oppdaterReferanse(
+        oppgaveId: UUID,
+        referanse: String,
+    )
+
     fun hentFristGaarUt(
         dato: LocalDate,
         type: OppgaveType,
@@ -141,8 +146,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(1, referanse)
                 statement.executeQuery().toList {
                     asOppgave()
-                }.also {
-                    logger.info("Hentet antall nye oppgaver for referanse: ${it.size} referanse: $referanse")
+                }.also { oppgaveliste ->
+                    logger.info("Hentet antall nye oppgaver for referanse: ${oppgaveliste.size} referanse: $referanse")
                 }
             }
         }
@@ -162,8 +167,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setLong(1, sakId)
                 statement.executeQuery().toList {
                     asOppgave()
-                }.also {
-                    logger.info("Hentet antall nye oppgaver for sak: ${it.size} sak: $sakId")
+                }.also { oppgaveliste ->
+                    logger.info("Hentet antall nye oppgaver for sak: ${oppgaveliste.size} sak: $sakId")
                 }
             }
         }
@@ -208,8 +213,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
 
                 statement.executeQuery().toList {
                     asOppgave()
-                }.also {
-                    logger.info("Hentet antall nye oppgaver: ${it.size}")
+                }.also { oppgaveliste ->
+                    logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
                 }
             }
         }
@@ -233,8 +238,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
 
                 statement.executeQuery().toList {
                     asOppgave()
-                }.also {
-                    logger.info("Hentet antall nye oppgaver: ${it.size}")
+                }.also { oppgaveliste ->
+                    logger.info("Hentet antall nye oppgaver: ${oppgaveliste.size}")
                 }
             }
         }
@@ -369,6 +374,28 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                 statement.setString(1, merknad)
                 statement.setString(2, oppgaveStatus.name)
                 statement.setObject(3, oppgaveId)
+
+                statement.executeUpdate()
+            }
+        }
+    }
+
+    override fun oppdaterReferanse(
+        oppgaveId: UUID,
+        referanse: String,
+    ) {
+        connectionAutoclosing.hentConnection {
+            with(it) {
+                val statement =
+                    prepareStatement(
+                        """
+                        UPDATE oppgave
+                        SET referanse = ?
+                        where id = ?::UUID
+                        """.trimIndent(),
+                    )
+                statement.setString(1, referanse)
+                statement.setObject(2, oppgaveId)
 
                 statement.executeUpdate()
             }

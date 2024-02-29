@@ -176,6 +176,15 @@ class OppgaveDaoMedEndringssporingImpl(
         }
     }
 
+    override fun oppdaterReferanse(
+        oppgaveId: UUID,
+        referanse: String,
+    ) {
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.oppdaterReferanse(oppgaveId, referanse)
+        }
+    }
+
     override fun hentFristGaarUt(
         dato: LocalDate,
         type: OppgaveType,

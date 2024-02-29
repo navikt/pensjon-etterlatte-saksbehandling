@@ -58,11 +58,7 @@ export const VurderingsboksWrapper = (props: Props) => {
                   Begrunnelse
                 </Heading>
 
-                {props.kommentar.split('\n').map((kom, i) => (
-                  <BodyShort key={i} size="small" spacing>
-                    {kom}
-                  </BodyShort>
-                ))}
+                <VurderingsKommentar>{props.kommentar}</VurderingsKommentar>
               </Kommentar>
             )}
           </Oppsummering>
@@ -149,6 +145,10 @@ const Oppsummering = styled.div`
   p {
     font-weight: normal;
   }
+`
+
+const VurderingsKommentar = styled(BodyShort)`
+  white-space: pre-wrap;
 `
 
 const VurderingKnapper = styled.div`

@@ -125,11 +125,7 @@ export const Resultat = (props: Props) => {
                   <Heading size="xsmall" level="3">
                     Begrunnelse
                   </Heading>
-                  {vilkaarsvurdering.resultat.kommentar.split('\n').map((kom, i) => (
-                    <BodyShort key={i} size="small" spacing>
-                      {kom}
-                    </BodyShort>
-                  ))}
+                  <ResultatKommentar>{vilkaarsvurdering.resultat.kommentar}</ResultatKommentar>
                 </Kommentar>
               )}
               {redigerbar && (
@@ -248,6 +244,10 @@ const TekstWrapper = styled.div`
 
 const Kommentar = styled.div`
   margin-top: 20px;
+`
+
+const ResultatKommentar = styled(BodyShort)`
+  white-space: pre-wrap;
 `
 
 const SlettWrapper = styled.div`

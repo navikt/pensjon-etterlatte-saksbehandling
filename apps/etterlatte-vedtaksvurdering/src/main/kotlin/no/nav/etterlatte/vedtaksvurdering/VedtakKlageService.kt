@@ -111,7 +111,7 @@ class VedtakKlageService(
                 "Kan ikke sende attestert vedtak på kafka for behandling id: ${attestertVedtak.behandlingId}, " +
                     "vedtak: ${attestertVedtak.id}, " +
                     "saknr: ${attestertVedtak.sakId}. " +
-                    "Det betyr at vi ikke sender ut brev for vedtaket etter at en utbetaling går til oppdrag. " +
+                    "Det betyr at vi ikke får sendt ut vedtaksbrev. " +
                     "Denne hendelsen må sendes ut manuelt straks.",
                 e,
             )

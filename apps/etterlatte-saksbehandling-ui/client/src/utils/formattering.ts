@@ -4,7 +4,7 @@ import { SakType } from '~shared/types/sak'
 import { VedtakType } from '~components/vedtak/typer'
 import { Oppgavestatus } from '~shared/api/oppgaver'
 import { Spraak } from '~shared/types/Brev'
-import { Journalposttype, Journalstatus } from '~shared/types/Journalpost'
+import { Journalposttype, Journalstatus, Sakstype } from '~shared/types/Journalpost'
 
 export const capitalize = (s?: string) => {
   if (!s) return ''
@@ -143,6 +143,15 @@ export const formaterJournalpostStatus = (status: Journalstatus) => {
       return 'Opplasting dokument'
     case Journalstatus.UKJENT:
       return 'Ukjent'
+  }
+}
+
+export const formaterJournalpostSakstype = (sakstype: Sakstype) => {
+  switch (sakstype) {
+    case Sakstype.FAGSAK:
+      return 'Fagsak'
+    case Sakstype.GENERELL_SAK:
+      return 'Generell sak'
   }
 }
 

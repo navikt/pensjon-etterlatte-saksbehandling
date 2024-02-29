@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, Box, Button, Heading, Link, Radio, RadioGroup, Tag } from '@navikt/ds-react'
+import { Alert, Button, Heading, Link, Radio, RadioGroup, Tag } from '@navikt/ds-react'
 import { useJournalfoeringOppgave } from '~components/person/journalfoeringsoppgave/useJournalfoeringOppgave'
 import { useAppDispatch } from '~store/Store'
 import { useNavigate } from 'react-router-dom'
@@ -14,6 +14,7 @@ import { FormWrapper } from '../BehandleJournalfoeringOppgave'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { erOppgaveRedigerbar, OppgaveDTO } from '~shared/api/oppgaver'
+import { SidebarPanel } from '~shared/components/Sidebar'
 
 export default function StartOppgavebehandling({ antallBehandlinger }: { antallBehandlinger: number }) {
   const { oppgave, journalpost, oppgaveHandling } = useJournalfoeringOppgave()
@@ -38,23 +39,14 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
 
   if (!oppgave) return null
   else if (!erOppgaveRedigerbar(oppgave.status))
-    return (
-      <FormWrapper column>
-        <Heading size="medium">Behandle journalføringsoppgave</Heading>
-
-        <OppgaveDetaljer oppgave={oppgave} />
-
-        <Alert variant="success">Oppgaven er allerede ferdigbehandlet!</Alert>
-      </FormWrapper>
-    )
+    return <Alert variant="success">Oppgaven er allerede ferdigbehandlet!</Alert>
 
   return (
     <FormWrapper column>
-      <Heading size="medium">Behandle journalføringsoppgave</Heading>
+      <Heading size="medium" spacing>
+        Behandle journalføringsoppgave
+      </Heading>
 
-      <OppgaveDetaljer oppgave={oppgave} />
-
-      <br />
       {antallBehandlinger > 0 ? (
         <Alert variant="info">Bruker har allerede {antallBehandlinger} behandling(er) i Gjenny</Alert>
       ) : (
@@ -87,22 +79,20 @@ export default function StartOppgavebehandling({ antallBehandlinger }: { antallB
         )}
       </RadioGroup>
 
-      <div>
-        <FlexRow justify="center" $spacing>
-          <Button variant="primary" onClick={neste} disabled={!oppgaveHandling || !journalpost}>
-            Neste
-          </Button>
-        </FlexRow>
-        <FlexRow justify="center">
-          <AvbrytBehandleJournalfoeringOppgave />
-        </FlexRow>
-      </div>
+      <FlexRow justify="center" $spacing>
+        <Button variant="primary" onClick={neste} disabled={!oppgaveHandling || !journalpost}>
+          Neste
+        </Button>
+      </FlexRow>
+      <FlexRow justify="center">
+        <AvbrytBehandleJournalfoeringOppgave />
+      </FlexRow>
     </FormWrapper>
   )
 }
 
-const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
-  <Box padding="4" borderWidth="1" borderRadius="small">
+export const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
+  <SidebarPanel border>
     <Heading size="small" spacing>
       Oppgavedetaljer
     </Heading>
@@ -124,6 +114,7 @@ const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
           </Tag>
         }
       />
+      <Info label="Saksbehandler" tekst={oppgave.saksbehandler?.navn || <i>Ikke tildelt</i>} />
       <Info
         label="Bruker"
         tekst={
@@ -135,5 +126,5 @@ const OppgaveDetaljer = ({ oppgave }: { oppgave: OppgaveDTO }) => (
       <Info label="Opprettet" tekst={formaterStringDato(oppgave.opprettet)} />
       <Info label="Frist" tekst={<FristWrapper dato={oppgave.frist} />} />
     </InfoWrapper>
-  </Box>
+  </SidebarPanel>
 )

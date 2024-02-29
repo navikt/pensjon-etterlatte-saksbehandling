@@ -13,8 +13,10 @@ import Spinner from '~shared/Spinner'
 import { hentSakMedBehandlnger } from '~shared/api/sak'
 import { isPending, isPendingOrInitial, isSuccess } from '~shared/api/apiUtils'
 import { OppdaterJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/OppdaterJournalpost'
-import { InnholdJournalpost } from '~components/person/journalfoeringsoppgave/journalpost/InnholdJournalpost'
-import StartOppgavebehandling from '~components/person/journalfoeringsoppgave/handling/StartOppgavebehandling'
+import { JournalpostInnholdSidebarPanel } from '~components/person/journalfoeringsoppgave/journalpost/JournalpostInnholdSidebarPanel'
+import StartOppgavebehandling, {
+  OppgaveDetaljer,
+} from '~components/person/journalfoeringsoppgave/handling/StartOppgavebehandling'
 import OpprettNyBehandling from '~components/person/journalfoeringsoppgave/nybehandling/OpprettNyBehandling'
 import OppsummeringOppgavebehandling from '~components/person/journalfoeringsoppgave/nybehandling/OppsummeringOppgavebehandling'
 import FerdigstillOppgave from '~components/person/journalfoeringsoppgave/ferdigstilloppgave/FerdigstillOppgave'
@@ -23,6 +25,7 @@ import OpprettKlagebehandling from '~components/person/journalfoeringsoppgave/op
 import OppsummeringKlagebehandling from '~components/person/journalfoeringsoppgave/oppretteklage/OppsummeringKlagebehandling'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
+import { Sidebar } from '~shared/components/Sidebar'
 
 export default function BehandleJournalfoeringOppgave() {
   const { nyBehandlingRequest, journalpost, oppgave, sakMedBehandlinger } = useJournalfoeringOppgave()
@@ -66,7 +69,7 @@ export default function BehandleJournalfoeringOppgave() {
       <NavigerTilbakeMeny label="Tilbake til oppgavebenken" path="/" />
 
       <GridContainer>
-        <Column style={{ width: '40%' }}>
+        <Column>
           <Container>
             {!!journalpost && !!sakMedBehandlinger ? (
               kanEndreJournalpost(journalpost) ? (
@@ -102,12 +105,15 @@ export default function BehandleJournalfoeringOppgave() {
           </Container>
         </Column>
 
-        <Column>
-          <Container>
-            {isSuccess(oppgaveStatus) && <VelgJournalpost journalpostId={oppgave?.referanse || null} />}
-            {!!journalpost && !kanEndreJournalpost(journalpost) && <InnholdJournalpost journalpost={journalpost} />}
-          </Container>
-        </Column>
+        <Column>{isSuccess(oppgaveStatus) && <VelgJournalpost journalpostId={oppgave?.referanse || null} />}</Column>
+
+        {!!journalpost && !kanEndreJournalpost(journalpost) && (
+          <Sidebar>
+            {oppgave && <OppgaveDetaljer oppgave={oppgave} />}
+
+            <JournalpostInnholdSidebarPanel journalpost={journalpost} />
+          </Sidebar>
+        )}
       </GridContainer>
     </>
   )

@@ -11,7 +11,7 @@ import Spinner from '~shared/Spinner'
 import styled from 'styled-components'
 import DokumentModal from '../dokumenter/DokumentModal'
 import { Journalpost } from '~shared/types/Journalpost'
-import { FlexRow } from '~shared/styled'
+import { Container, FlexRow } from '~shared/styled'
 import { ApiErrorAlert } from '~ErrorBoundary'
 
 import { isPending, isSuccess, mapApiResult } from '~shared/api/apiUtils'
@@ -70,7 +70,7 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
   }, [fileURL])
 
   return (
-    <>
+    <JournalpostContainer>
       {isPending(journalposter) && <Spinner label="Henter journalposter for bruker" visible />}
       {isPending(journalpostStatus) && <Spinner label="Henter journalpost for bruker" visible />}
       {isFailureHandler({
@@ -133,13 +133,17 @@ export default function VelgJournalpost({ journalpostId }: { journalpostId: stri
           )}
         </>
       )}
-    </>
+    </JournalpostContainer>
   )
 }
+
+const JournalpostContainer = styled(Container)`
+  min-width: 680px;
+`
 
 const PdfViewer = styled.embed`
   min-width: 680px;
   width: 100%;
-  min-height: 600px;
-  height: 100%;
+  height: 80vh;
+  border: 1px solid var(--nav-dark-gray);
 `

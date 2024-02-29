@@ -1,7 +1,6 @@
 import React, { ReactNode, useState } from 'react'
 import { Heading } from '@navikt/ds-react'
 import { ChevronDownIcon, ChevronUpIcon } from '@navikt/aksel-icons'
-import AnimateHeight from '@navikt/ds-react/esm/table/AnimateHeight'
 import styled from 'styled-components'
 
 const defaultAccordionProps = {
@@ -32,9 +31,7 @@ const PeriodeAccordion = (props: PeriodeAccordionProps) => {
         </ExpandButton>
         <div>{topContent}</div>
       </PeriodeAccordionHead>
-      <AnimateHeight height={open ? 'auto' : 0} duration={250}>
-        <PeriodeAccordionContent>{children}</PeriodeAccordionContent>
-      </AnimateHeight>
+      {open && <PeriodeAccordionContent>{children}</PeriodeAccordionContent>}
     </PeriodeAccordionWrapper>
   )
 }

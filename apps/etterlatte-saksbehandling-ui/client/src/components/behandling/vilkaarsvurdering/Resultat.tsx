@@ -125,7 +125,7 @@ export const Resultat = (props: Props) => {
                   <Heading size="xsmall" level="3">
                     Begrunnelse
                   </Heading>
-                  <BodyShort size="small">{vilkaarsvurdering.resultat.kommentar}</BodyShort>
+                  <ResultatKommentar>{vilkaarsvurdering.resultat.kommentar}</ResultatKommentar>
                 </Kommentar>
               )}
               {redigerbar && (
@@ -246,6 +246,10 @@ const Kommentar = styled.div`
   margin-top: 20px;
 `
 
+const ResultatKommentar = styled(BodyShort)`
+  white-space: pre-wrap;
+`
+
 const SlettWrapper = styled.div`
   margin-top: 20px;
   display: inline-flex;
@@ -268,7 +272,7 @@ const HeadingWrapper = styled.div`
 `
 
 const ContentWrapper = styled.div`
-  color: var(--navds-global-color-gray-700);
+  color: var(--a-gray-700);
 `
 
 const WarningAlert = styled(Alert).attrs({ variant: 'warning' })`

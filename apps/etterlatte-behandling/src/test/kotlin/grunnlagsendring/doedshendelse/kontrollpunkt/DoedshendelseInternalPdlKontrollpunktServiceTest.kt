@@ -27,6 +27,8 @@ import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.Sivilstand
+import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -92,7 +94,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             pdlTjenesterKlient.hentPdlModell(
                 foedselsnummer = any(),
                 rolle = PersonRolle.BARN,
-                saktype = any(),
+                saktype = SakType.BARNEPENSJON,
             )
         } returns
             mockPerson().copy(
@@ -110,7 +112,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             pdlTjenesterKlient.hentPdlModell(
                 foedselsnummer = doedshendelseInternalBP.beroertFnr,
                 rolle = PersonRolle.GJENLEVENDE,
-                saktype = any(),
+                saktype = SakType.BARNEPENSJON,
             )
         } returns
             mockPerson().copy(
@@ -124,6 +126,118 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             )
         } returns emptyList()
         every { oppgaveService.hentOppgaverForReferanse(any()) } returns emptyList()
+    }
+
+    @Test
+    fun `Eps har vært skilt mindre enn 5 år siden men ukjent giftedato, EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        val sivilstandSkilt =
+            Sivilstand(
+                Sivilstatus.SKILT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
+                gyldigFraOgMed = LocalDate.now().minusYears(5L),
+                null,
+                "",
+            )
+
+        val sivilstandGift =
+            Sivilstand(
+                Sivilstatus.GIFT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
+                gyldigFraOgMed = null,
+                null,
+                "",
+            )
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns
+            mockPerson()
+                .copy(sivilstand = listOf(OpplysningDTO(sivilstandSkilt, "sivilstand"), OpplysningDTO(sivilstandGift, "sivilstand")))
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly
+            listOf(
+                DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde,
+            )
+    }
+
+    @Test
+    fun `Eps har vært gift i 15 år med avdød og skilt ila de siste 5 år, EpsHarVaertSkiltSiste5EllerGiftI15`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        val sivilstandGift =
+            Sivilstand(
+                Sivilstatus.GIFT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
+                gyldigFraOgMed = LocalDate.now().minusYears(16L),
+                null,
+                "",
+            )
+
+        val sivilstandSkiltSiste5Aar =
+            Sivilstand(
+                Sivilstatus.SKILT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
+                gyldigFraOgMed = LocalDate.now().minusYears(2L),
+                null,
+                "",
+            )
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns
+            mockPerson()
+                .copy(
+                    sivilstand =
+                        listOf(
+                            OpplysningDTO(sivilstandGift, "sivilstand"),
+                            OpplysningDTO(sivilstandSkiltSiste5Aar, "sivilstand"),
+                        ),
+                )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5OgGiftI15)
+    }
+
+    @Test
+    fun `Eps er 67 år EpsKanHaAlderspensjon`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns
+            mockPerson()
+                .copy(
+                    foedselsdato = OpplysningDTO(LocalDate.now().minusYears(67L), "foedselsdato"),
+                )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsKanHaAlderspensjon)
+    }
+
+    @Test
+    fun `Skal gi kontrollpunkt eps er død om eps er død, EpsHarDoedsdato`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns
+            mockPerson().copy(
+                doedsdato =
+                    OpplysningDTO(
+                        LocalDate.now(),
+                        "doedsdato",
+                    ),
+            )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarDoedsdato)
     }
 
     @Test
@@ -200,10 +314,13 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
                     tomDate = null,
                 ),
             )
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns mockPerson()
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.KryssendeYtelseIPesys)
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.KryssendeYtelseIPesysEps)
     }
 
     @Test
@@ -254,7 +371,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             pdlTjenesterKlient.hentPdlModell(
                 foedselsnummer = doedshendelseInternalBP.beroertFnr,
                 rolle = PersonRolle.GJENLEVENDE,
-                saktype = any(),
+                saktype = SakType.BARNEPENSJON,
             )
         } returns
             mockPerson().copy(
@@ -303,6 +420,10 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
                 enhet = "0000",
             )
         every { sakService.finnSak(any(), any()) } returns sak
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns mockPerson()
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 

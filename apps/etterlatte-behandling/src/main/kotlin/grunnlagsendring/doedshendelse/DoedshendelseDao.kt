@@ -21,7 +21,7 @@ class DoedshendelseDao(private val connectionAutoclosing: ConnectionAutoclosing)
                     """
                     UPDATE doedshendelse 
                     SET status = ?, brev_id = ?
-                    WHERE sakId = ?
+                    WHERE sak_id = ?
                     """.trimIndent(),
                 ).apply {
                     setString(1, Status.FERDIG.name)

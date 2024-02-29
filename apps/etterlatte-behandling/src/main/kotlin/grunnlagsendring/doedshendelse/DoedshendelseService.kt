@@ -4,7 +4,6 @@ import no.nav.etterlatte.behandling.sikkerLogg
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggle
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
-import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.inTransaction
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
 import no.nav.etterlatte.libs.common.behandling.SakType
@@ -12,7 +11,7 @@ import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
-import no.nav.etterlatte.libs.common.person.maskerFnr
+import no.nav.etterlatte.libs.common.person.Sivilstatus
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -39,7 +38,7 @@ class DoedshendelseService(
 
     fun opprettDoedshendelseForBeroertePersoner(doedshendelse: PdlDoedshendelse) {
         logger.info("Mottok dødsmelding fra PDL, finner berørte personer og lagrer ned dødsmelding.")
-
+        // TODO: Trenger egentlig en "sak" her og, kan være begge så kan like gjerne være denne...
         val avdoed = pdlTjenesterKlient.hentPdlModell(doedshendelse.fnr, PersonRolle.AVDOED, SakType.BARNEPENSJON)
 
         if (avdoed.doedsdato == null) {
@@ -48,17 +47,20 @@ class DoedshendelseService(
             return
         }
         val avdoedFnr = avdoed.foedselsnummer.verdi.value
-        val doedshendelserForAvdoed = inTransaction { doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) }
-        val beroerte = finnBeroerteBarn(avdoed)
-        // TODO: EY-3470
+        val gyldigeDoedshendelserForAvdoed =
+            inTransaction { doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) }
+                .filter { it.utfall !== Utfall.AVBRUTT }
+        val beroerteBarn = finnBeroerteBarn(avdoed)
+        val beroerteEpser = finnBeroerteEpser(avdoed)
+        val alleBeroerte = beroerteBarn + beroerteEpser
 
-        if (doedshendelserForAvdoed.isEmpty()) {
-            sikkerLogg.info("Fant ${beroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")
+        if (gyldigeDoedshendelserForAvdoed.isEmpty()) {
+            sikkerLogg.info("Fant ${alleBeroerte.size} berørte personer for avdød (${avdoed.foedselsnummer})")
             inTransaction {
-                lagreDoedshendelser(beroerte, avdoed, doedshendelse.endringstype)
+                lagreDoedshendelser(alleBeroerte, avdoed, doedshendelse.endringstype)
             }
         } else {
-            haandterEksisterendeHendelser(doedshendelse, doedshendelserForAvdoed, avdoed, beroerte)
+            haandterEksisterendeHendelser(doedshendelse, gyldigeDoedshendelserForAvdoed, avdoed, alleBeroerte)
         }
     }
 
@@ -66,94 +68,96 @@ class DoedshendelseService(
         doedshendelse: PdlDoedshendelse,
         doedshendelserForAvdoed: List<DoedshendelseInternal>,
         avdoed: PersonDTO,
-        beroerte: List<Person>,
+        beroerte: List<PersonFnrMedRelasjon>,
     ) {
+        val aapneDoedshendelser = doedshendelserForAvdoed.filter { it.status !== Status.FERDIG }
+
         when (doedshendelse.endringstype) {
             Endringstype.OPPRETTET, Endringstype.KORRIGERT -> {
                 inTransaction {
-                    val skalOppdatere = doedshendelserForAvdoed.any { it.status !== Status.FERDIG }
-                    if (skalOppdatere) {
-                        oppdaterDodshendelser(
-                            doedshendelserForAvdoed.map {
-                                it.tilOppdatert()
-                            },
-                        )
-                    }
+                    aapneDoedshendelser
+                        .map { it.tilOppdatert(avdoed.doedsdato!!.verdi, doedshendelse.endringstype) }
+                        .forEach { doedshendelseDao.oppdaterDoedshendelse(it) }
+
                     haandterNyeBerorte(doedshendelserForAvdoed, beroerte, avdoed, doedshendelse.endringstype)
                 }
             }
 
             Endringstype.ANNULLERT -> {
                 inTransaction {
-                    oppdaterDodshendelser(
-                        doedshendelserForAvdoed.map {
-                            it.tilAvbrutt(
-                                kontrollpunkter = listOf(DoedshendelseKontrollpunkt.DoedshendelseErAnnullert),
-                            )
-                        },
-                    )
+                    aapneDoedshendelser
+                        .map { it.tilAnnulert() }
+                        .forEach { doedshendelseDao.oppdaterDoedshendelse(it) }
                 }
             }
 
             Endringstype.OPPHOERT -> throw RuntimeException("Fikk opphør på dødshendelse, skal ikke skje ifølge PDL docs")
         }
-        val avdoedFnr = avdoed.foedselsnummer.verdi.value
-        logger.info("Lagrer ikke duplikat doedshendelse for person ${avdoedFnr.maskerFnr()}")
-        sikkerLogg.info("Mottok dødshendelse for $avdoedFnr, er duplikat og lagrer det ikke")
     }
 
     private fun haandterNyeBerorte(
         doedshendelserForAvdoed: List<DoedshendelseInternal>,
-        beroerte: List<Person>,
+        beroerte: List<PersonFnrMedRelasjon>,
         avdoed: PersonDTO,
         endringstype: Endringstype,
     ) {
         val eksisterendeBeroerte = doedshendelserForAvdoed.map { it.beroertFnr }
-        val nyeBeroerte = beroerte.map { it.foedselsnummer.value }.filter { !eksisterendeBeroerte.contains(it) }
-        nyeBeroerte.forEach { barn ->
+        val nyeBeroerte =
+            beroerte.map { PersonFnrMedRelasjon(it.fnr, it.relasjon) }
+                .filter { !eksisterendeBeroerte.contains(it.fnr) }
+        nyeBeroerte.forEach { person ->
             doedshendelseDao.opprettDoedshendelse(
                 DoedshendelseInternal.nyHendelse(
                     avdoedFnr = avdoed.foedselsnummer.verdi.value,
                     avdoedDoedsdato = avdoed.doedsdato!!.verdi,
-                    beroertFnr = barn,
-                    relasjon = Relasjon.BARN,
+                    beroertFnr = person.fnr,
+                    relasjon = person.relasjon,
                     endringstype = endringstype,
                 ),
             )
-        }
-    }
-
-    private fun oppdaterDodshendelser(doedshendelserForAvdoed: List<DoedshendelseInternal>) {
-        doedshendelserForAvdoed.forEach {
-            doedshendelseDao.oppdaterDoedshendelse(it)
         }
     }
 
     private fun lagreDoedshendelser(
-        beroerte: List<Person>,
+        beroerte: List<PersonFnrMedRelasjon>,
         avdoed: PersonDTO,
         endringstype: Endringstype,
     ) {
-        beroerte.forEach { barn ->
+        beroerte.forEach { person ->
             doedshendelseDao.opprettDoedshendelse(
                 DoedshendelseInternal.nyHendelse(
                     avdoedFnr = avdoed.foedselsnummer.verdi.value,
                     avdoedDoedsdato = avdoed.doedsdato!!.verdi,
-                    beroertFnr = barn.foedselsnummer.value,
-                    relasjon = Relasjon.BARN,
+                    beroertFnr = person.fnr,
+                    relasjon = person.relasjon,
                     endringstype = endringstype,
                 ),
             )
         }
     }
 
-    private fun finnBeroerteBarn(avdoed: PersonDTO): List<Person> {
+    private fun finnBeroerteBarn(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
         val maanedenEtterDoedsfall = avdoed.doedsdato!!.verdi.plusMonths(1).withDayOfMonth(1)
 
         return with(avdoed.avdoedesBarn ?: emptyList()) {
             this.filter { barn -> barn.doedsdato == null }
                 .filter { barn -> barn.under20PaaDato(maanedenEtterDoedsfall) }
+                .map { PersonFnrMedRelasjon(it.foedselsnummer.value, Relasjon.BARN) }
         }
+    }
+
+    private fun finnBeroerteEpser(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {
+        return avdoed.sivilstand?.filter { it.verdi.relatertVedSiviltilstand?.value !== null }
+            ?.filter {
+                it.verdi.sivilstatus in
+                    listOf(
+                        Sivilstatus.GIFT,
+                        Sivilstatus.UGIFT,
+                        Sivilstatus.SKILT,
+                        Sivilstatus.ENKE_ELLER_ENKEMANN,
+                        Sivilstatus.SEPARERT,
+                    )
+            }?.map { PersonFnrMedRelasjon(it.verdi.relatertVedSiviltilstand!!.value, Relasjon.EPS) } ?: emptyList()
     }
 }
 

@@ -9,12 +9,12 @@ import { HeadingWrapper, InfoWrapper } from '~components/behandling/soeknadsover
 import {
   Alert,
   BodyShort,
+  Box,
   Button,
   Checkbox,
   Chips,
   Heading,
   Link,
-  Panel,
   Select,
   Table,
   Textarea,
@@ -164,7 +164,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
               </p>
             </HeadingWrapper>
           </ContentHeader>
-          <Panel>
+          <Box padding="4" borderRadius="small">
             <div>
               {utlandsBehandling.tilknyttetBehandling ? (
                 <div>
@@ -465,7 +465,7 @@ const KravpakkeUtland = (props: { utlandsBehandling: Generellbehandling & { innh
                 </>
               )}
             </ButtonGroup>
-          </Panel>
+          </Box>
         </Content>
       </MainContent>
       <GenerellbehandlingSidemeny utlandsBehandling={generellBehandlingMedLocalState} />

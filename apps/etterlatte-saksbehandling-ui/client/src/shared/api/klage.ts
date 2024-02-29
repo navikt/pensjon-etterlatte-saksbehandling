@@ -52,6 +52,23 @@ export function fattVedtakOmAvvistKlage(klageId: string): Promise<ApiResponse<Kl
   return apiClient.post(`/klage/${klageId}/vedtak/fatt`, {})
 }
 
+export function attesterVedtakOmAvvistKlage(args: { klageId: string; kommentar: string }): Promise<ApiResponse<Klage>> {
+  return apiClient.post(`/klage/${args.klageId}/vedtak/attester`, {
+    kommentar: args.kommentar,
+  })
+}
+
+export function underkjennVedtakOmAvvistKlage(args: {
+  klageId: string
+  kommentar: string
+  valgtBegrunnelse: string
+}): Promise<ApiResponse<Klage>> {
+  return apiClient.post(`/klage/${args.klageId}/vedtak/underkjenn`, {
+    kommentar: args.kommentar,
+    valgtBegrunnelse: args.valgtBegrunnelse,
+  })
+}
+
 export function avsluttKlage(avsluttKlageRequest: AvsluttKlageRequest): Promise<ApiResponse<void>> {
   return apiClient.post(`/klage/${avsluttKlageRequest.klageId}/avbryt`, { ...avsluttKlageRequest })
 }

@@ -74,7 +74,7 @@ export function BrevMottakerModal({ brev, setBrev, vergeadresse }: Props) {
       <Button variant="secondary" onClick={() => setIsOpen(true)} icon={<DocPencilIcon aria-hidden />} size="small" />
 
       <form onSubmit={handleSubmit((data) => lagre(data))}>
-        <Modal open={isOpen} onClose={avbryt} width="medium">
+        <Modal open={isOpen} onClose={avbryt} width="medium" aria-label="Endre mottaker">
           <Modal.Body>
             <Heading size="large" spacing>
               Endre mottaker

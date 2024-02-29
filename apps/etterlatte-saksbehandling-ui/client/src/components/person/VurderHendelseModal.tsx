@@ -50,7 +50,7 @@ const VurderHendelseModal = (props: Props) => {
 
   return (
     <>
-      <Modal open={props.open} onClose={() => props.setOpen(false)}>
+      <Modal open={props.open} onClose={() => props.setOpen(false)} aria-label="Vurder hendelse">
         <Modal.Body>
           <ModalContentWrapper>
             <Heading spacing size="large">

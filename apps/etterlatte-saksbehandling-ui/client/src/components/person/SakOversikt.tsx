@@ -86,20 +86,18 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
                 )
               )}
               <SelectWrapper>
-                <BodyShort>
-                  Denne saken tilhører enhet {sakOgBehandlinger.sak.enhet}.
-                  {innloggetSaksbehandler.skriveTilgang && (
-                    <FlexRow>
-                      <EndreEnhet sakId={sakOgBehandlinger.sak.id} />
-                      <HelpText strategy="fixed">
-                        Om saken tilhører en annen enhet enn den du jobber i, overfører du saken til riktig enhet ved å
-                        klikke på denne knappen. Skriv først i kommentarfeltet i Sjekklisten inne i behandlingen hvilken
-                        enhet saken er overført til og hvorfor. Gå så til saksoversikten, og klikk på knappen
-                        &rsquo;Endre enhet&rsquo;, og overfør til riktig behandlende enhet.
-                      </HelpText>
-                    </FlexRow>
-                  )}
-                </BodyShort>
+                <BodyShort spacing>Denne saken tilhører enhet {sakOgBehandlinger.sak.enhet}.</BodyShort>
+                {innloggetSaksbehandler.skriveTilgang && (
+                  <FlexRow>
+                    <EndreEnhet sakId={sakOgBehandlinger.sak.id} />
+                    <HelpText strategy="fixed">
+                      Om saken tilhører en annen enhet enn den du jobber i, overfører du saken til riktig enhet ved å
+                      klikke på denne knappen. Skriv først i kommentarfeltet i Sjekklisten inne i behandlingen hvilken
+                      enhet saken er overført til og hvorfor. Gå så til saksoversikten, og klikk på knappen &rsquo;Endre
+                      enhet&rsquo;, og overfør til riktig behandlende enhet.
+                    </HelpText>
+                  </FlexRow>
+                )}
               </SelectWrapper>
               <hr />
               <Behandlingsliste sakOgBehandlinger={sakOgBehandlinger} />

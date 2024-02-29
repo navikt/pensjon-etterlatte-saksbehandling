@@ -1,5 +1,5 @@
 import { AdresseType, IBrev } from '~shared/types/Brev'
-import { Alert, Heading, Panel, Tag } from '@navikt/ds-react'
+import { Alert, Box, Heading, Tag } from '@navikt/ds-react'
 import React, { useEffect, useState } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import { getVergeadresseForPerson } from '~shared/api/grunnlag'
@@ -23,7 +23,7 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
   }, [brev])
 
   return (
-    <Panel border>
+    <Box padding="4" borderWidth="1" borderRadius="small">
       {isSuccess(vergeadresse) && (
         <Alert variant="info" size="small" inline>
           Søker har verge
@@ -119,6 +119,6 @@ export function BrevMottaker({ brev, kanRedigeres }: { brev: IBrev; kanRedigeres
       </InfoWrapper>
 
       {VergeFeilhaandtering(vergeadresse)}
-    </Panel>
+    </Box>
   )
 }

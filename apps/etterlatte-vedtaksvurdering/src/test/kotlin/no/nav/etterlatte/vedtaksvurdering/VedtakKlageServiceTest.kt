@@ -7,107 +7,101 @@ import io.kotest.matchers.shouldNotBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
+import no.nav.etterlatte.libs.common.behandling.GrunnForOmgjoering
+import no.nav.etterlatte.libs.common.behandling.InnstillingTilKabal
+import no.nav.etterlatte.libs.common.behandling.KabalHjemmel
 import no.nav.etterlatte.libs.common.behandling.Klage
+import no.nav.etterlatte.libs.common.behandling.KlageBrevInnstilling
+import no.nav.etterlatte.libs.common.behandling.KlageOmgjoering
 import no.nav.etterlatte.libs.common.behandling.KlageStatus
+import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
+import no.nav.etterlatte.libs.common.behandling.KlageVedtak
+import no.nav.etterlatte.libs.common.behandling.KlageVedtaksbrev
 import no.nav.etterlatte.libs.common.behandling.SakType
+import no.nav.etterlatte.libs.common.deserialize
+import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
-import no.nav.etterlatte.libs.common.toObjectNode
-import no.nav.etterlatte.libs.common.vedtak.Attestasjon
-import no.nav.etterlatte.libs.common.vedtak.VedtakFattet
-import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
+import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.libs.common.vedtak.VedtakKafkaHendelseHendelseType
 import no.nav.etterlatte.libs.common.vedtak.VedtakType
 import no.nav.etterlatte.no.nav.etterlatte.vedtaksvurdering.VedtakKlageService
-import org.junit.jupiter.api.AfterEach
+import no.nav.etterlatte.vedtaksvurdering.database.DatabaseExtension
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import java.util.UUID
+import javax.sql.DataSource
 
-class VedtakKlageServiceTest {
-    private val vedtaksvurderingRepository = mockk<VedtaksvurderingRepository>()
-    private val vedtakKlageService: VedtakKlageService = VedtakKlageService(vedtaksvurderingRepository)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(DatabaseExtension::class)
+internal class VedtakKlageServiceTest(dataSource: DataSource) {
+    private val vedtaksvurderingRepository = VedtaksvurderingRepository(dataSource)
+    private val vedtaksvurderingRapidService = mockk<VedtaksvurderingRapidService>()
+    private val vedtakKlageService = VedtakKlageService(vedtaksvurderingRepository, vedtaksvurderingRapidService)
 
-    @AfterEach
-    fun tearDown() {
+    @BeforeEach
+    fun beforeEach() {
         clearAllMocks()
+        every { vedtaksvurderingRapidService.sendToRapid(any()) } returns Unit
     }
 
     @Test
     fun `opprettEllerOppdaterVedtakOmAvvisning skal opprette vedtak når det ikke finnes fra før`() {
-        val vedtakKlage = vedtakKlage()
         val klage = klage()
-        every { vedtaksvurderingRepository.hentVedtak(klage.id) } returns null
-        every { vedtaksvurderingRepository.opprettVedtak(any()) } returns vedtakKlage
+        val vedtakId = vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
 
-        val vedtakId =
-            vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
-        vedtakId shouldBeEqual vedtakKlage.id
+        val vedtak = vedtaksvurderingRepository.hentVedtak(vedtakId) ?: throw RuntimeException("Vedtak ikke funnet")
 
-        verify {
-            vedtaksvurderingRepository.hentVedtak(klage.id)
-            vedtaksvurderingRepository.opprettVedtak(
-                withArg {
-                    it.soeker.value shouldBe klage.sak.ident
-                    it.behandlingId shouldBe klage.id
-                    it.sakId shouldBe klage.sak.id
-                    it.sakType shouldBe klage.sak.sakType
-                    it.type shouldBe VedtakType.AVVIST_KLAGE
-                    (it.innhold as VedtakInnhold.Klage).klage shouldBe klage.toObjectNode()
-                },
-            )
-        }
+        vedtak.soeker.value shouldBe klage.sak.ident
+        vedtak.behandlingId shouldBe klage.id
+        vedtak.sakId shouldBe klage.sak.id
+        vedtak.sakType shouldBe klage.sak.sakType
+        vedtak.type shouldBe VedtakType.AVVIST_KLAGE
+        vedtakInnholdToKlage(vedtak) shouldBeEqual klage
     }
 
     @Test
     fun `opprettEllerOppdaterVedtakOmAvvisning skal oppdatere vedtak når det finnes fra før`() {
-        val klage = klage()
-        val vedtakKlage =
-            vedtakKlage(
-                klage = klage.toObjectNode(),
-                behandlingId = klage.id,
-            )
-        every { vedtaksvurderingRepository.hentVedtak(klage.id) } returns vedtakKlage
-        every { vedtaksvurderingRepository.oppdaterVedtak(any()) } returns vedtakKlage
+        val klage = klage(utfall = utfallOmgjoering())
 
         val vedtakId =
             vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
-        vedtakId shouldBeEqual vedtakKlage.id
 
-        verify {
-            vedtaksvurderingRepository.hentVedtak(klage.id)
-            vedtaksvurderingRepository.oppdaterVedtak(
-                withArg {
-                    it.shouldBeEqualToIgnoringFields(vedtakKlage, Vedtak::innhold)
-                    (it.innhold as VedtakInnhold.Klage).klage shouldBe klage.toObjectNode()
-                },
-            )
-        }
+        val vedtak = vedtaksvurderingRepository.hentVedtak(vedtakId) ?: throw RuntimeException("Vedtak ikke funnet")
+
+        vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(
+            klage.copy(utfall = utfallStadfesteVedtak()),
+        )
+
+        val oppdatert = vedtaksvurderingRepository.hentVedtak(vedtakId) ?: throw RuntimeException("Vedtak ikke funnet")
+
+        oppdatert.shouldBeEqualToIgnoringFields(vedtak, Vedtak::innhold)
     }
 
     @Test
     fun `fattVedtak skal oppdatere og fatte vedtak når det finnes fra før`() {
-        val vedtakKlage = vedtakKlage()
         val klage = klage()
-        every { vedtaksvurderingRepository.hentVedtak(klage.id, any()) } returns vedtakKlage
-        every { vedtaksvurderingRepository.oppdaterVedtak(any(), any()) } returns vedtakKlage
-        every { vedtaksvurderingRepository.fattVedtak(any(), any(), any()) } returns vedtakKlage
+        val klageMedUtfall = klage.copy(utfall = utfallAvvist())
 
-        val vedtakId =
-            vedtakKlageService.fattVedtak(klage, saksbehandler)
-        vedtakId shouldBeEqual vedtakKlage.id
+        vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
 
+        val vedtakId = vedtakKlageService.fattVedtak(klageMedUtfall, saksbehandler).id
+
+        with(vedtaksvurderingRepository.hentVedtak(vedtakId)!!) {
+            vedtakFattet!!.ansvarligSaksbehandler shouldBe saksbehandler.ident
+            vedtakFattet!!.ansvarligEnhet shouldBe klage.sak.enhet
+            vedtakFattet!!.tidspunkt shouldNotBe null
+            vedtakInnholdToKlage(this) shouldBeEqual klageMedUtfall
+        }
         verify {
-            vedtaksvurderingRepository.hentVedtak(klage.id)
-            vedtaksvurderingRepository.oppdaterVedtak(
-                withArg { it.innhold shouldBe VedtakInnhold.Klage(klage.toObjectNode()) },
-            )
-            vedtaksvurderingRepository.fattVedtak(
-                klage.id,
+            vedtaksvurderingRapidService.sendToRapid(
                 withArg {
-                    it.ansvarligEnhet shouldBe klage.sak.enhet
-                    it.tidspunkt shouldNotBe null
-                    it.ansvarligSaksbehandler shouldBe saksbehandler.ident
+                    it.rapidInfo1.vedtakhendelse shouldBe VedtakKafkaHendelseHendelseType.FATTET
                 },
             )
         }
@@ -116,35 +110,27 @@ class VedtakKlageServiceTest {
     @Test
     fun `attesterVedtak skal attestere vedtak og returnere vedtaket`() {
         val klage = klage()
-        val vedtakKlage =
-            vedtakKlage(
-                status = VedtakStatus.FATTET_VEDTAK,
-                vedtakFattet =
-                    VedtakFattet(
-                        ansvarligSaksbehandler = "fatter",
-                        ansvarligEnhet = "enhet",
-                        tidspunkt = Tidspunkt.now(),
-                    ),
-            )
-        every { vedtaksvurderingRepository.hentVedtak(klage.id) } returns vedtakKlage
+        vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
+        val vedtakId = vedtakKlageService.fattVedtak(klage, saksbehandler).id
+        vedtakKlageService.attesterVedtak(klage, attestant)
 
-        val attestertVedtak =
-            vedtakKlage.copy(
-                attestasjon =
-                    Attestasjon(attestant = "saksbehandler2", attesterendeEnhet = "enhet", tidspunkt = Tidspunkt.now()),
-            )
-        every { vedtaksvurderingRepository.attesterVedtak(any(), any()) } returns attestertVedtak
-
-        val vedtakDto = vedtakKlageService.attesterVedtak(klage, saksbehandler)
-
-        vedtakDto shouldBe attestertVedtak.id
-        verify { vedtaksvurderingRepository.hentVedtak(klage.id) }
-        verify {
-            vedtaksvurderingRepository.attesterVedtak(
-                klage.id,
+        with(vedtaksvurderingRepository.hentVedtak(vedtakId)!!) {
+            id shouldBe vedtakId
+            attestasjon!!.attestant shouldBe attestant.ident
+            attestasjon!!.tidspunkt shouldNotBe null
+            attestasjon!!.attesterendeEnhet shouldBe klage.sak.enhet
+        }
+        verify(exactly = 1) {
+            vedtaksvurderingRapidService.sendToRapid(
                 withArg {
-                    it.attestant shouldBe saksbehandler.ident
-                    it.attesterendeEnhet shouldBe klage.sak.enhet
+                    it.rapidInfo1.vedtakhendelse shouldBe VedtakKafkaHendelseHendelseType.FATTET
+                    it.rapidInfo2 shouldBe null
+                },
+            )
+            vedtaksvurderingRapidService.sendToRapid(
+                withArg {
+                    it.rapidInfo1.vedtakhendelse shouldBe VedtakKafkaHendelseHendelseType.ATTESTERT
+                    it.rapidInfo2 shouldBe null
                 },
             )
         }
@@ -153,70 +139,105 @@ class VedtakKlageServiceTest {
     @Test
     fun `attesterVedtak skal ikke attestere hvis feil status`() {
         val klage = klage()
-        val vedtakKlage =
-            vedtakKlage(
-                status = VedtakStatus.ATTESTERT,
-                vedtakFattet =
-                    VedtakFattet(
-                        ansvarligSaksbehandler = "saksbehandler",
-                        ansvarligEnhet = "enhet",
-                        tidspunkt = Tidspunkt.now(),
-                    ),
-            )
-        every { vedtaksvurderingRepository.hentVedtak(klage.id) } returns vedtakKlage
+        vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
+        vedtakKlageService.fattVedtak(klage, saksbehandler)
+        vedtaksvurderingRepository.iverksattVedtak(klage.id)
 
         assertThrows<VedtakTilstandException> {
-            vedtakKlageService.attesterVedtak(klage, saksbehandler)
+            vedtakKlageService.attesterVedtak(klage, attestant)
         }
+        val slot = slot<VedtakOgRapid>()
+        verify(exactly = 1) { vedtaksvurderingRapidService.sendToRapid(capture(slot)) }
+        slot.captured.rapidInfo1.vedtakhendelse shouldBe VedtakKafkaHendelseHendelseType.FATTET
+        slot.captured.rapidInfo2 shouldBe null
     }
 
     @Test
     fun `attesterVedtak skal ikke attestere hvis attestant ogsaa er saksbehandler`() {
         val klage = klage()
-        val vedtakKlage =
-            vedtakKlage(
-                status = VedtakStatus.FATTET_VEDTAK,
-                vedtakFattet =
-                    VedtakFattet(
-                        ansvarligSaksbehandler = saksbehandler.ident(),
-                        ansvarligEnhet = "enhet",
-                        tidspunkt = Tidspunkt.now(),
-                    ),
-            )
-        every { vedtaksvurderingRepository.hentVedtak(klage.id) } returns vedtakKlage
-
+        vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
+        vedtakKlageService.fattVedtak(klage, saksbehandler)
         assertThrows<UgyldigAttestantException> {
             vedtakKlageService.attesterVedtak(klage, saksbehandler)
         }
+        val slot = slot<VedtakOgRapid>()
+        verify(exactly = 1) { vedtaksvurderingRapidService.sendToRapid(capture(slot)) }
+        slot.captured.rapidInfo1.vedtakhendelse shouldBe VedtakKafkaHendelseHendelseType.FATTET
+        slot.captured.rapidInfo2 shouldBe null
     }
 
     @Test
     fun `underkjennVedtak skal underkjenne vedtak`() {
-        val tilbakekrevingId = UUID.randomUUID()
-        every { vedtaksvurderingRepository.hentVedtak(tilbakekrevingId) } returns vedtak(status = VedtakStatus.FATTET_VEDTAK)
-        every { vedtaksvurderingRepository.underkjennVedtak(tilbakekrevingId) } returns vedtak()
+        val klage = klage()
+        val vedtakId = vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
+        vedtakKlageService.fattVedtak(klage, saksbehandler)
 
-        vedtakKlageService.underkjennVedtak(tilbakekrevingId) shouldBe 1L
+        vedtakKlageService.underkjennVedtak(klage.id).id shouldBe vedtakId
 
-        verify { vedtaksvurderingRepository.hentVedtak(tilbakekrevingId) }
-        verify { vedtaksvurderingRepository.underkjennVedtak(tilbakekrevingId) }
+        verify(exactly = 1) {
+            vedtaksvurderingRapidService.sendToRapid(
+                withArg {
+                    it.rapidInfo1.vedtakhendelse shouldBe VedtakKafkaHendelseHendelseType.FATTET
+                    it.rapidInfo2 shouldBe null
+                },
+            )
+            vedtaksvurderingRapidService.sendToRapid(
+                withArg {
+                    it.rapidInfo1.vedtakhendelse shouldBe VedtakKafkaHendelseHendelseType.UNDERKJENT
+                    it.rapidInfo2 shouldBe null
+                },
+            )
+        }
     }
 
     @Test
     fun `underkjennVedtak skal ikke underkjenne hvis feil status`() {
-        val tilbakekrevingId = UUID.randomUUID()
-        every { vedtaksvurderingRepository.hentVedtak(tilbakekrevingId) } returns vedtak(status = VedtakStatus.ATTESTERT)
+        val klageId = UUID.randomUUID()
+        vedtaksvurderingRepository.opprettVedtak(opprettVedtak(behandlingId = klageId))
 
         assertThrows<VedtakTilstandException> {
-            vedtakKlageService.underkjennVedtak(tilbakekrevingId)
+            vedtakKlageService.underkjennVedtak(klageId)
         }
-        verify { vedtaksvurderingRepository.hentVedtak(tilbakekrevingId) }
     }
 
-    private fun klage(): Klage {
+    private fun utfallStadfesteVedtak() =
+        KlageUtfallMedData.StadfesteVedtak(
+            InnstillingTilKabal(
+                lovhjemmel = KabalHjemmel.FTRL_18_4,
+                internKommentar = null,
+                brev = KlageBrevInnstilling(brevId = 123L),
+                innstillingTekst = "Hello",
+            ),
+            Grunnlagsopplysning.Saksbehandler(
+                ident = "TORE",
+                tidspunkt = Tidspunkt.now(),
+            ),
+        )
+
+    private fun utfallOmgjoering() =
+        KlageUtfallMedData.Omgjoering(
+            KlageOmgjoering(GrunnForOmgjoering.ANNET, "Hello"),
+            Grunnlagsopplysning.Saksbehandler(
+                ident = "TORE",
+                tidspunkt = Tidspunkt.now(),
+            ),
+        )
+
+    private fun utfallAvvist() =
+        KlageUtfallMedData.Avvist(
+            saksbehandler =
+                Grunnlagsopplysning.Saksbehandler(
+                    ident = "TORE",
+                    tidspunkt = Tidspunkt.now(),
+                ),
+            vedtak = KlageVedtak(1L),
+            brev = KlageVedtaksbrev(brevId = 1L),
+        )
+
+    private fun klage(utfall: KlageUtfallMedData? = null): Klage {
         return Klage(
             UUID.randomUUID(),
-            Sak(FNR_1, SakType.BARNEPENSJON, 1L, "einheit"),
+            Sak(FNR_1, SakType.BARNEPENSJON, 1L, ENHET_1),
             Tidspunkt.now(),
             KlageStatus.OPPRETTET,
             kabalResultat = null,
@@ -224,9 +245,11 @@ class VedtakKlageServiceTest {
             formkrav = null,
             innkommendeDokument = null,
             resultat = null,
-            utfall = null,
+            utfall = utfall,
             aarsakTilAvbrytelse = null,
             initieltUtfall = null,
         )
     }
+
+    private fun vedtakInnholdToKlage(vedtak: Vedtak) = deserialize<Klage>((vedtak.innhold as VedtakInnhold.Klage).klage.toJson())
 }

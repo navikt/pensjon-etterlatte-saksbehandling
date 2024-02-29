@@ -520,6 +520,10 @@ class KlageServiceImpl(
 
         val oppdatertKlage = klage.attesterVedtak()
 
+        val utfall = klage.utfall as KlageUtfallMedData.Avvist
+        runBlocking {
+            brevApiKlient.ferdigstillBrev(klage.sak.id, utfall.brev.brevId, brukerTokenInfo)
+        }
         val vedtakId =
             runBlocking {
                 vedtakKlient.attesterVedtakKlage(

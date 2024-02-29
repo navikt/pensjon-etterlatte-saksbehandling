@@ -1,7 +1,6 @@
 package grunnlagsendring.doedshendelse.kontrollpunkt
 
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
@@ -157,15 +156,14 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 
-        kontrollpunkter shouldContainExactlyInAnyOrder
+        kontrollpunkter shouldContainExactly
             listOf(
                 DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde,
-                DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5EllerGiftI15,
             )
     }
 
     @Test
-    fun `Eps har vært gift i 15 år, EpsHarVaertSkiltSiste5EllerGiftI15`() {
+    fun `Eps har vært gift i 15 år med avdød og skilt ila de siste 5 år, EpsHarVaertSkiltSiste5EllerGiftI15`() {
         every { sakService.finnSak(any(), any()) } returns null
 
         val sivilstandGift =
@@ -177,20 +175,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
                 "",
             )
 
-        coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns
-            mockPerson()
-                .copy(sivilstand = listOf(OpplysningDTO(sivilstandGift, "sivilstand")))
-
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
-
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5EllerGiftI15)
-    }
-
-    @Test
-    fun `Eps har vært skilt de siste 5 år EpsHarVaertSkiltSiste5EllerGiftI15`() {
-        every { sakService.finnSak(any(), any()) } returns null
-
-        val sivilstand =
+        val sivilstandSkiltSiste5Aar =
             Sivilstand(
                 Sivilstatus.SKILT,
                 Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
@@ -201,7 +186,13 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
 
         coEvery { pdlTjenesterKlient.hentPdlModell(any(), PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD) } returns
             mockPerson()
-                .copy(sivilstand = listOf(OpplysningDTO(sivilstand, "sivilstand")))
+                .copy(
+                    sivilstand =
+                        listOf(
+                            OpplysningDTO(sivilstandGift, "sivilstand"),
+                            OpplysningDTO(sivilstandSkiltSiste5Aar, "sivilstand"),
+                        ),
+                )
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
 

@@ -292,7 +292,7 @@ fun Route.klagevedtakRoute(
                 if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
                 logger.info("Oppretter vedtak for klage med id=$behandlingId")
 
-                call.respond(service.opprettEllerOppdaterVedtakOmAvvisning(klage))
+                call.respond(service.opprettEllerOppdaterVedtakOmAvvisning(klage).toDto())
             }
         }
 
@@ -302,7 +302,7 @@ fun Route.klagevedtakRoute(
                 if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
 
                 logger.info("Fatter vedtak for klage med id=$behandlingId")
-                call.respond(service.fattVedtak(klage, brukerTokenInfo))
+                call.respond(service.fattVedtak(klage, brukerTokenInfo).toDto())
             }
         }
 
@@ -312,13 +312,13 @@ fun Route.klagevedtakRoute(
                 if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
 
                 logger.info("Attesterer vedtak for klage med id=$behandlingId")
-                call.respond(service.attesterVedtak(klage, brukerTokenInfo))
+                call.respond(service.attesterVedtak(klage, brukerTokenInfo).toDto())
             }
         }
         post("/underkjenn") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 logger.info("Underkjenner vedtak for klage=$behandlingId")
-                call.respond(service.underkjennVedtak(behandlingId))
+                call.respond(service.underkjennVedtak(behandlingId).toDto())
             }
         }
     }

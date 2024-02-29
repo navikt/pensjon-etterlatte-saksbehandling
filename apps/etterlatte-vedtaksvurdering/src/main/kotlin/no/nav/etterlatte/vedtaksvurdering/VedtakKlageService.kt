@@ -30,7 +30,7 @@ class VedtakKlageService(
 ) {
     private val logger = LoggerFactory.getLogger(VedtakKlageService::class.java)
 
-    fun opprettEllerOppdaterVedtakOmAvvisning(klage: Klage): Long {
+    fun opprettEllerOppdaterVedtakOmAvvisning(klage: Klage): Vedtak {
         logger.info("Oppretter eller oppdaterer vedtak for klage med id=${klage.id}")
         val eksisterendeVedtak = repository.hentVedtak(klage.id)
         val vedtak =
@@ -61,7 +61,7 @@ class VedtakKlageService(
                     ),
                 )
             }
-        return vedtak.id
+        return vedtak
     }
 
     fun fattVedtak(

@@ -3,13 +3,13 @@ package no.nav.etterlatte.personweb
 import no.nav.etterlatte.libs.common.feilhaandtering.ForespoerselException
 import no.nav.etterlatte.libs.common.pdl.FantIkkePersonException
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
-import no.nav.etterlatte.libs.common.person.PersonNavn
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.pdl.PdlResponseError
 import no.nav.etterlatte.pdl.mapper.PersonMapper
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
+import personweb.dto.PersonNavn
 
 class PdlForesporselFeilet(message: String) : ForespoerselException(
     status = 500,

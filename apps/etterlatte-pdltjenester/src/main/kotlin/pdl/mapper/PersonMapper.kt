@@ -8,7 +8,6 @@ import no.nav.etterlatte.libs.common.person.AdressebeskyttelseGradering
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.Person
-import no.nav.etterlatte.libs.common.person.PersonNavn
 import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.Statsborgerskap
@@ -17,6 +16,7 @@ import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
 import org.slf4j.LoggerFactory
+import personweb.dto.PersonNavn
 
 object PersonMapper {
     private val logger = LoggerFactory.getLogger(this::class.java)

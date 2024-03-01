@@ -217,9 +217,7 @@ class ApplicationBuilder {
 
     private val oversendelseBrevService =
         OversendelseBrevServiceImpl(
-            db,
-            journalfoerBrevService = journalfoerBrevService,
-            distribusjonService = distribusjonService,
+            brevRepository = db,
             pdfGenerator = pdfGenerator,
             sakService = sakService,
             adresseService = adresseService,

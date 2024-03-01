@@ -71,7 +71,10 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
                 listOf(pdlScope),
                 bruker.accessToken(),
             )
-        return token.get()?.accessToken ?: ""
+
+        return requireNotNull(token.get()?.accessToken) {
+            "Kunne ikke hente ut obo-token for bruker ${bruker.ident()}"
+        }
     }
 
     /**

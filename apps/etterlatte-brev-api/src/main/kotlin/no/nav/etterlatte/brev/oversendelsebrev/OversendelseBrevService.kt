@@ -196,8 +196,9 @@ data class OversendelseBrevFerdigstillingData(
                 sakType = request.generellBrevData.sak.sakType,
                 klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
                 vedtakDato =
-                    klage.formkrav?.formkrav?.vedtaketKlagenGjelder?.datoAttestert?.toLocalDate()
-                        ?: throw IllegalStateException(""),
+                    checkNotNull(klage.formkrav?.formkrav?.vedtaketKlagenGjelder?.datoAttestert?.toLocalDate()) {
+                        "Klagen har en ugyldig referanse til når originalt vedtak ble attestert, klageId=${klage.id}"
+                    },
                 innstillingTekst = innstilling.innstillingTekst,
                 under18Aar = request.generellBrevData.personerISak.soeker.under18 ?: false,
                 harVerge = request.generellBrevData.personerISak.verge != null,

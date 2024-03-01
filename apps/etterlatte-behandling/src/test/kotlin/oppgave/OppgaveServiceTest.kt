@@ -510,10 +510,18 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
                 null,
             )
         oppgaveService.tildelSaksbehandler(nyOppgave.id, "nysaksbehandler")
-        oppgaveService.oppdaterStatusOgMerknad(nyOppgave.id, "test", nyOppgave.status)
+        oppgaveService.oppdaterStatusOgMerknad(
+            nyOppgave.id,
+            "test",
+            if (nyOppgave.status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT,
+        )
         val oppgavePaaVent = oppgaveService.hentOppgave(nyOppgave.id)
         assertEquals(Status.PAA_VENT, oppgavePaaVent?.status)
-        oppgaveService.oppdaterStatusOgMerknad(oppgavePaaVent!!.id, "test", oppgavePaaVent.status)
+        oppgaveService.oppdaterStatusOgMerknad(
+            oppgavePaaVent!!.id,
+            "test",
+            if (oppgavePaaVent.status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT,
+        )
         val oppgaveTattAvVent = oppgaveService.hentOppgave(oppgavePaaVent.id)
         assertEquals(Status.UNDER_BEHANDLING, oppgaveTattAvVent?.status)
     }

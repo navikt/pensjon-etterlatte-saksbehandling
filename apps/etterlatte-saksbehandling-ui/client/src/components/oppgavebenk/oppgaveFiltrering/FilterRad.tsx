@@ -1,5 +1,5 @@
 import { Button, Select, TextField, UNSAFE_Combobox } from '@navikt/ds-react'
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import {
   ENHETFILTER,
   EnhetFilterKeys,
@@ -36,15 +36,31 @@ export const FilterRad = ({
   setFilter,
   alleOppgaver,
 }: Props): ReactNode => {
+  const [sakId, setSakId] = useState<string>(filter.sakidFilter)
+
   const saksbehandlere: Set<string> = new Set(
     alleOppgaver.map((oppgave) => oppgave.saksbehandler?.ident || '').filter((ident) => !!ident)
   )
   const [saksbehandlerFilterLokal, setSaksbehandlerFilterLokal] = useState<string>(filter.saksbehandlerFilter)
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
+  useEffect(() => {
+    const delay = setTimeout(() => setFilter({ ...filter, sakidFilter: sakId || '' }), 500)
+    return () => clearTimeout(delay)
+  }, [sakId])
+
   return (
     <>
       <FlexRow $spacing align="start">
+        <TextField
+          label="Sak ID"
+          width="1rem"
+          value={sakId}
+          onChange={(e) => setSakId(e.target.value?.replace(/[^0-9+]/, ''))}
+          type="tel"
+          min={0}
+          placeholder="Søk"
+        />
         <TextField
           label="Fødselsnummer"
           value={filter.fnrFilter}

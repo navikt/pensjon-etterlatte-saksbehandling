@@ -31,6 +31,7 @@ export const Oppgaver = ({
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
   const filtrerteOppgaver = filter
     ? filtrerOppgaver(
+        filter.sakidFilter,
         filter.enhetsFilter,
         filter.fristFilter,
         filter.saksbehandlerFilter,

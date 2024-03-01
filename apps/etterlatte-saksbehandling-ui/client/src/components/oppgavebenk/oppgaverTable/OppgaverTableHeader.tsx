@@ -7,6 +7,7 @@ export const OppgaverTableHeader = (): ReactNode => {
   return (
     <Table.Header>
       <Table.Row>
+        <Table.HeaderCell scope="col">Sak ID</Table.HeaderCell>
         <Table.HeaderCell scope="col">Registreringsdato</Table.HeaderCell>
         <Table.ColumnHeader scope="col" sortKey={SortKey.FRIST} sortable>
           Frist

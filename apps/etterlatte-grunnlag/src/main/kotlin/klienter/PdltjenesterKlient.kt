@@ -57,7 +57,7 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
         val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, listOf(sakType))
         val response =
             runBlocking {
-                pdl.post("$url/person") { // TODO: v1 kan merges med v2?
+                pdl.post("$url/person") {
                     contentType(ContentType.Application.Json)
                     setBody(personRequest)
                 }.body<Person>()

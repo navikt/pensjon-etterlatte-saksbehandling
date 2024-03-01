@@ -53,7 +53,7 @@ class PersonMapperTest {
                 fnr = SOEKER_FOEDSELSNUMMER,
                 personRolle = PersonRolle.BARN,
                 hentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl),
-                saktype = SakType.BARNEPENSJON,
+                saktyper = listOf(SakType.BARNEPENSJON),
             )
         Assertions.assertNull(person.statsborgerskap)
         Assertions.assertEquals(2, person.pdlStatsborgerskap?.size)
@@ -101,7 +101,7 @@ class PersonMapperTest {
                 fnr = SOEKER_FOEDSELSNUMMER,
                 personRolle = PersonRolle.BARN,
                 hentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl),
-                saktype = SakType.BARNEPENSJON,
+                saktyper = listOf(SakType.BARNEPENSJON),
             )
         Assertions.assertEquals("Norge", person.statsborgerskap)
         Assertions.assertNull(person.pdlStatsborgerskap)
@@ -128,7 +128,7 @@ class PersonMapperTest {
                 fnr = SOEKER_FOEDSELSNUMMER,
                 personRolle = PersonRolle.BARN,
                 hentPerson = pdlHentPerson(statsborgerskap = statsborgerskapPdl),
-                saktype = SakType.BARNEPENSJON,
+                saktyper = listOf(SakType.BARNEPENSJON),
             )
         Assertions.assertNull(person.pdlStatsborgerskap)
         Assertions.assertNull(person.statsborgerskap)

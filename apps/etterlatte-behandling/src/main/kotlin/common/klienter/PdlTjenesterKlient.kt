@@ -35,6 +35,12 @@ interface PdlTjenesterKlient {
         saktype: SakType,
     ): PersonDTO
 
+    fun hentPdlModell(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktyper: List<SakType>,
+    ): PersonDTO
+
     fun hentGeografiskTilknytning(
         foedselsnummer: String,
         saktype: SakType,
@@ -66,10 +72,27 @@ class PdlTjenesterKlientImpl(config: Config, private val pdl_app: HttpClient) : 
     override fun hentPdlModell(
         foedselsnummer: String,
         rolle: PersonRolle,
+        saktyper: List<SakType>,
+    ): PersonDTO {
+        logger.info("Henter Pdl-modell for rolle ${rolle.name}")
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, saktyper)
+        val response =
+            runBlocking {
+                pdl_app.post("$url/person/v2") {
+                    contentType(ContentType.Application.Json)
+                    setBody(personRequest)
+                }.body<PersonDTO>()
+            }
+        return response
+    }
+
+    override fun hentPdlModell(
+        foedselsnummer: String,
+        rolle: PersonRolle,
         saktype: SakType,
     ): PersonDTO {
         logger.info("Henter Pdl-modell for rolle ${rolle.name}")
-        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, saktype)
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, listOf(saktype))
         val response =
             runBlocking {
                 pdl_app.post("$url/person/v2") {

@@ -58,7 +58,7 @@ class PdlTjenesterKlientTest {
                     HentPersonRequest(
                         foedselsnummer = SOEKER_FOEDSELSNUMMER,
                         rolle = PersonRolle.BARN,
-                        saktype = SakType.BARNEPENSJON,
+                        saktyper = listOf(SakType.BARNEPENSJON),
                     ),
                 )
             }!!

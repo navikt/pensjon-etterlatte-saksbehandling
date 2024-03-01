@@ -12,6 +12,7 @@ import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdB
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
+import no.nav.etterlatte.libs.common.person.HentPersonRequestHistorikkForeldreAnsvar
 import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import org.slf4j.LoggerFactory
 
@@ -87,7 +88,7 @@ fun Route.personRoute(service: PersonService) {
 
     route("foreldreansvar") {
         post {
-            val identRequest = call.receive<HentPersonRequest>()
+            val identRequest = call.receive<HentPersonRequestHistorikkForeldreAnsvar>()
             logger.info("Henter historikk for foreldreansvar for person med fnr=${identRequest.foedselsnummer}")
             service.hentHistorikkForeldreansvar(identRequest).let { call.respond(it) }
         }

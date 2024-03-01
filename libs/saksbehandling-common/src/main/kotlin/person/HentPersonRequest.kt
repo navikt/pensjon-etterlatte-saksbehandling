@@ -7,6 +7,12 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 data class HentPersonRequest(
     val foedselsnummer: Folkeregisteridentifikator,
     val rolle: PersonRolle,
+    val saktyper: List<SakType>,
+)
+
+data class HentPersonRequestHistorikkForeldreAnsvar(
+    val foedselsnummer: Folkeregisteridentifikator,
+    val rolle: PersonRolle,
     val saktype: SakType,
 )
 

@@ -112,9 +112,6 @@ internal class MigreringTrygdetidHendelserRiver(
         request: MigreringRequest,
         behandlingId: UUID,
     ): TrygdetidDto {
-        check(request.beregning.anvendtTrygdetid == 40) {
-            "Kan kun overstyre helnasjonal sak med 40 år trygdetid. Anvendt trygdetid er ${request.beregning.anvendtTrygdetid}"
-        }
         return trygdetidService.overstyrBeregnetTrygdetid(
             behandlingId = behandlingId,
             beregnetTrygdetid = DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(request.beregning.anvendtTrygdetid),

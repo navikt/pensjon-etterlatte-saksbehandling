@@ -50,10 +50,6 @@ internal class Verifiserer(
         val finnesIPdlFeil = pesonerFinnesIPdlEllerSoekerErDoed(patchedRequest)
         feilSomAvbryter.addAll(finnesIPdlFeil)
 
-        if (patchedRequest.beregning.anvendtTrygdetid != 40) {
-            feilSomAvbryter.add(ManglerTrygdetidsperioder)
-        }
-
         if (soeker != null) {
             feilSomMedfoererManuell.addAll(sjekkAtSoekerHarRelevantVerge(patchedRequest, soeker))
             if (!patchedRequest.erUnder18) {

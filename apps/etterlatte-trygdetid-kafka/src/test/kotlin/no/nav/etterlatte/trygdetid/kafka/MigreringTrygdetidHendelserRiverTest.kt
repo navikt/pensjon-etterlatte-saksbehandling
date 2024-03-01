@@ -233,11 +233,21 @@ internal class MigreringTrygdetidHendelserRiverTest {
             )
 
         inspector.sendTestMessage(melding.toJson())
-        val resultat = inspector.inspektør.message(0)
-        assertTrue(
-            resultat.get(FEILMELDING_KEY).textValue()
-                .contains("TrygdetidIkkeGyldigForAutomatiskGjenoppretting: Vi mottok ingen trygdetidsperioder fra Pesys for behandling"),
-        )
+
+        assertEquals(UUID.fromString("a9d42eb9-561f-4320-8bba-2ba600e66e21"), behandlingId.captured)
+        assertEquals(1, inspector.inspektør.size)
+        val trygdetidKafka: TrygdetidDto =
+            objectMapper.readValue<TrygdetidDto>(inspector.inspektør.message(0).get(TRYGDETID_KEY).asText())
+        assertTrue(beregnetTrygdetid.captured.overstyrt)
+        assertTrue(trygdetidKafka.beregnetTrygdetid!!.resultat.overstyrt)
+        coVerify(exactly = 1) { trygdetidService.beregnTrygdetid(behandlingId.captured) }
+        coVerify(exactly = 0) { trygdetidService.beregnTrygdetidGrunnlag(behandlingId.captured, any()) }
+        coVerify(exactly = 1) {
+            trygdetidService.overstyrBeregnetTrygdetid(
+                behandlingId.captured,
+                beregnetTrygdetid.captured,
+            )
+        }
     }
 
     @Test

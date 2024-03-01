@@ -5,12 +5,12 @@ versions = { id = "se.ascp.gradle.gradle-versions-filter", version = "0.1.16" }
 
 [versions]
 jackson-version = "2.16.1"
-jupiter-version = "5.10.1"
+jupiter-version = "5.10.2"
 kotlinx-version = "1.7.3"
 ktor2-version = "2.3.8"
 navfelles-token-version = "4.1.3"
 prometheus-version = "0.16.0"
-testcontainer-version = "1.19.4"
+testcontainer-version = "1.19.6"
 tjenestespesifikasjoner-version = "1.99612d7"
 
 [libraries]
@@ -88,14 +88,14 @@ navfelles-tjenestespesifikasjoner-oppdragsbehandling = { module = "com.github.na
 navfelles-tjenestespesifikasjoner-tilbakekreving = { module ="com.github.navikt.pensjon-etterlatte-tjenestespesifikasjoner:tilbakekreving-v1-tjenestespesifikasjon", version.ref = "tjenestespesifikasjoner-version" }
 navfelles-tokenclientcore = { module = "no.nav.security:token-client-core", version.ref = "navfelles-token-version" }
 navfelles-tokenvalidationktor2 = { module = "no.nav.security:token-validation-ktor-v2", version.ref = "navfelles-token-version" }
-navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.1" }
+navfelles-mockoauth2server = { module = "no.nav.security:mock-oauth2-server", version = "2.1.2" }
 
 test-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter-version" }
 test-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "jupiter-version" }
 test-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter-version" }
 test-jupiter-root = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jupiter-version" }
 test-kotest-assertionscore = { module = "io.kotest:kotest-assertions-core", version = "5.8.0" }
-test-mockk = { module = "io.mockk:mockk", version = "1.13.9" }
+test-mockk = { module = "io.mockk:mockk", version = "1.13.10" }
 test-testcontainer-jupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainer-version" }
 test-testcontainer-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainer-version" }
 test-wiremock = { module = "org.wiremock:wiremock", version = "3.3.1" }

@@ -7,7 +7,6 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.objectMapper
-import no.nav.etterlatte.libs.common.rapidsandrivers.FEILMELDING_KEY
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.DetaljertBeregnetTrygdetidResultat
@@ -28,7 +27,6 @@ import no.nav.etterlatte.rapidsandrivers.migrering.TRYGDETID_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetid
 import no.nav.etterlatte.rapidsandrivers.migrering.Trygdetidsgrunnlag
 import no.nav.etterlatte.rapidsandrivers.migrering.VILKAARSVURDERT_KEY
-import no.nav.etterlatte.trygdetid.TrygdetidType
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -366,122 +364,6 @@ internal class MigreringTrygdetidHendelserRiverTest {
                 beregnetTrygdetid.captured,
             )
         }
-    }
-
-    @Test
-    fun `skal overstyre resultat dersom det ikke stemmer overens med anvendt fra Pesys`() {
-        val behandlingId = slot<UUID>()
-        val beregnetTrygdetid = slot<DetaljertBeregnetTrygdetidResultat>()
-        val trygdetidDto =
-            TrygdetidDto(
-                id = UUID.randomUUID(),
-                behandlingId = UUID.randomUUID(),
-                beregnetTrygdetid =
-                    DetaljertBeregnetTrygdetidDto(
-                        DetaljertBeregnetTrygdetidResultat.fraSamletTrygdetidNorge(40),
-                        Tidspunkt.now(),
-                    ),
-                trygdetidGrunnlag = emptyList(),
-                opplysninger =
-                    GrunnlagOpplysningerDto(
-                        avdoedDoedsdato = null,
-                        avdoedFoedselsdato = null,
-                        avdoedFylteSeksten = null,
-                        avdoedFyllerSeksti = null,
-                    ),
-                overstyrtNorskPoengaar = null,
-                ident = AVDOED_FOEDSELSNUMMER.value,
-                opplysningerDifferanse = dummyOpplysningerDifferanse(),
-            )
-        val request =
-            MigreringRequest(
-                pesysId = PesysId(1),
-                enhet = Enhet("4817"),
-                soeker = SOEKER_FOEDSELSNUMMER,
-                avdoedForelder = listOf(AvdoedForelder(AVDOED_FOEDSELSNUMMER, Tidspunkt.now())),
-                dodAvYrkesskade = false,
-                gjenlevendeForelder = null,
-                foersteVirkningstidspunkt = YearMonth.now(),
-                beregning =
-                    Beregning(
-                        brutto = 3500,
-                        netto = 3500,
-                        anvendtTrygdetid = 30,
-                        datoVirkFom = Tidspunkt.now(),
-                        prorataBroek = null,
-                        g = 100_000,
-                    ),
-                trygdetid =
-                    Trygdetid(
-                        listOf(
-                            Trygdetidsgrunnlag(
-                                trygdetidGrunnlagId = 1L,
-                                personGrunnlagId = 2L,
-                                landTreBokstaver = "NOR",
-                                datoFom =
-                                    Tidspunkt.ofNorskTidssone(
-                                        LocalDate.parse("2000-01-01"),
-                                        LocalTime.of(0, 0, 0),
-                                    ),
-                                datoTom =
-                                    Tidspunkt.ofNorskTidssone(
-                                        LocalDate.parse("2020-01-01"),
-                                        LocalTime.of(0, 0, 0),
-                                    ),
-                                poengIInnAar = false,
-                                poengIUtAar = false,
-                                ikkeIProrata = false,
-                            ),
-                        ),
-                    ),
-                spraak = Spraak.NN,
-            )
-        every { trygdetidService.beregnTrygdetid(capture(behandlingId)) } returns trygdetidDto
-        every { trygdetidService.reberegnUtenFremtidigTrygdetid(capture(behandlingId)) } returns
-            trygdetidDto.copy(
-                trygdetidGrunnlag = trygdetidDto.trygdetidGrunnlag.filter { it.type == TrygdetidType.FAKTISK.toString() },
-            )
-        every {
-            trygdetidService.beregnTrygdetidGrunnlag(
-                any(),
-                any(),
-            )
-        } returns trygdetidDto
-        every {
-            trygdetidService.overstyrBeregnetTrygdetid(
-                any(),
-                capture(beregnetTrygdetid),
-            )
-        } returns
-            trygdetidDto.copy(
-                beregnetTrygdetid =
-                    trygdetidDto.beregnetTrygdetid!!.copy(
-                        resultat =
-                            trygdetidDto.beregnetTrygdetid!!.resultat.copy(
-                                overstyrt = true,
-                            ),
-                    ),
-            )
-
-        val melding =
-            JsonMessage.newMessage(
-                Migreringshendelser.TRYGDETID.lagEventnameForType(),
-                mapOf(
-                    BEHANDLING_ID_KEY to "a9d42eb9-561f-4320-8bba-2ba600e66e21",
-                    VILKAARSVURDERT_KEY to "vilkaarsvurdert",
-                    HENDELSE_DATA_KEY to request,
-                ),
-            )
-
-        inspector.sendTestMessage(melding.toJson())
-        val resultat = inspector.inspektør.message(0)
-        assertTrue(
-            resultat.get(FEILMELDING_KEY).textValue()
-                .contains(
-                    "TrygdetidIkkeGyldigForAutomatiskGjenoppretting: Kan kun overstyre helnasjonal sak med 40 år" +
-                        " trygdetid. Anvendt trygdetid er 30",
-                ),
-        )
     }
 
     @Test

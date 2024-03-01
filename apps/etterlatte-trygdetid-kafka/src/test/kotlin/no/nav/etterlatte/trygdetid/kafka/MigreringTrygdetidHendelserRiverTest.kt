@@ -468,8 +468,8 @@ internal class MigreringTrygdetidHendelserRiverTest {
         assertTrue(
             resultat.get(FEILMELDING_KEY).textValue()
                 .contains(
-                    "TrygdetidIkkeGyldigForAutomatiskGjenoppretting: Beregnet trygdetid i Gjenny basert på" +
-                        " perioder fra Pesys stemmer ikke med anvendt trygdetid i Pesys",
+                    "TrygdetidIkkeGyldigForAutomatiskGjenoppretting: Kan kun overstyre helnasjonal sak med 40 år" +
+                        " trygdetid. Anvendt trygdetid er 30",
                 ),
         )
     }

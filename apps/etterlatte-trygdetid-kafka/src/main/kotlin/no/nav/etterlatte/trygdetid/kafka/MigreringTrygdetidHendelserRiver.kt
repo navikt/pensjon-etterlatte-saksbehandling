@@ -88,7 +88,13 @@ internal class MigreringTrygdetidHendelserRiver(
 
         trygdetidMedFremtidig
     } catch (e: Exception) {
-        overstyrBeregnetTrygdetid(request, behandlingId)
+        try {
+            overstyrBeregnetTrygdetid(request, behandlingId)
+        } catch (e: Exception) {
+            throw TrygdetidIkkeGyldigForAutomatiskGjenoppretting(
+                e.message ?: "Klarte ikke legge til perioder fra Pesys for behandling $behandlingId",
+            )
+        }
     }
 
     private fun trygdetidIGjennyStemmerMedTrygdetidIPesys(

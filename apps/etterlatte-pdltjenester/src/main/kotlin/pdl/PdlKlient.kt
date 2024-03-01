@@ -336,11 +336,11 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
         const val HEADER_TEMA_VALUE = "PEN"
         const val PDL_BULK_SIZE = 100
     }
-}
 
-fun findBehandlingsnummerFromSaktype(saktype: SakType): Behandlingsnummer {
-    return when (saktype) {
-        SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
-        SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
+    private fun findBehandlingsnummerFromSaktype(saktype: SakType): Behandlingsnummer {
+        return when (saktype) {
+            SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
+            SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD
+        }
     }
 }

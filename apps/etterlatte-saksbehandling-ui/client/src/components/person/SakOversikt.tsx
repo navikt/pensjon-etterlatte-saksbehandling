@@ -12,12 +12,12 @@ import { SakMedBehandlinger } from '~components/person/typer'
 import { isSuccess, mapApiResult, Result } from '~shared/api/apiUtils'
 import { useEffect } from 'react'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { ApiErrorAlert } from '~ErrorBoundary'
 import { EndreEnhet } from '~components/person/EndreEnhet'
 import { hentFlyktningStatusForSak, hentNavkontorForPerson } from '~shared/api/sak'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { useAppSelector } from '~store/Store'
 import { TilbakekrevingListe } from '~components/person/TilbakekrevingListe'
+import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
 
 export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehandlinger>; fnr: string }) => {
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
@@ -27,8 +27,8 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   useEffect(() => {
-    hentNavkontor(fnr)
     if (isSuccess(sakStatus)) {
+      hentNavkontor(fnr)
       hentFlyktning(sakStatus.data.sak.id)
     }
   }, [fnr, sakStatus])
@@ -40,7 +40,11 @@ export const SakOversikt = ({ sakStatus, fnr }: { sakStatus: Result<SakMedBehand
         <Spinner visible={true} label="Henter sak og behandlinger" />,
         (error) => (
           <MainContent>
-            <Alert variant="error">{JSON.stringify(error)}</Alert>
+            {error.status === 404 ? (
+              <ApiWarningAlert>{error.detail}</ApiWarningAlert>
+            ) : (
+              <ApiErrorAlert>{error.detail || 'Feil ved henting av sak'}</ApiErrorAlert>
+            )}
           </MainContent>
         ),
         (sakOgBehandlinger) => (

@@ -14,13 +14,11 @@ export const OpprettNyRevurdering = ({
   revurderinger,
   oppgaveId,
   begrunnelse,
-  litenKnapp = false,
 }: {
   sakId: number
   revurderinger: Array<Revurderingaarsak>
   oppgaveId?: string
   begrunnelse?: string
-  litenKnapp?: boolean
 }) => {
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
@@ -59,8 +57,8 @@ export const OpprettNyRevurdering = ({
   return (
     <>
       <Button
-        variant={litenKnapp ? 'primary' : 'secondary'}
-        size={litenKnapp ? 'small' : 'medium'}
+        variant={oppgaveId ? 'primary' : 'secondary'}
+        size={oppgaveId ? 'small' : 'medium'}
         onClick={() => setOpen(true)}
       >
         Opprett ny revurdering

@@ -102,7 +102,6 @@ export const HandlingerForOppgave = ({
               sakId={oppgave.sakId}
               oppgaveId={oppgave.id}
               begrunnelse={oppgave.merknad}
-              litenKnapp={true}
             />
           )}
         </>

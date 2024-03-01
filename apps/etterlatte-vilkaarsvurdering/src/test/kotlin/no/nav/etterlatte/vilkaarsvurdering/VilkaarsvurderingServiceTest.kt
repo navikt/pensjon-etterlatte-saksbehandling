@@ -581,6 +581,45 @@ internal class VilkaarsvurderingServiceTest {
     }
 
     @Test
+    fun `skal ikke endre vilkaar ved kopiering av vilkaarsvurdering ved regulering - totalvurdering er uforandret`() {
+        val nyBehandlingId = UUID.randomUUID()
+        val opprinneligBehandlingId = UUID.randomUUID()
+
+        coEvery { behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), any()) } returns true
+        coEvery { behandlingKlient.hentBehandling(nyBehandlingId, any()) } returns
+            detaljertBehandling(
+                behandlingstype = BehandlingType.REVURDERING,
+                revurderingaarsak = Revurderingaarsak.REGULERING,
+            )
+
+        opprettVilkaarsvurderingMedResultat(
+            behandlingId = opprinneligBehandlingId,
+            vilkaar =
+                ikkeGjeldendeVilkaar().map {
+                    it.copy(vurdering = vurdering())
+                },
+        )
+
+        val vilkaarsvurderingMedKopierteOppdaterteVilkaar =
+            runBlocking {
+                service.kopierVilkaarsvurdering(nyBehandlingId, opprinneligBehandlingId, brukerTokenInfo)
+            }
+
+        with(vilkaarsvurderingMedKopierteOppdaterteVilkaar.vilkaar.map { it.hovedvilkaar.type }) {
+            val gjeldendeVilkaar = ikkeGjeldendeVilkaar()
+
+            this shouldContainAll gjeldendeVilkaar.map { it.hovedvilkaar.type }
+            this shouldHaveSize gjeldendeVilkaar.size
+        }
+
+        vilkaarsvurderingMedKopierteOppdaterteVilkaar.resultat shouldNotBe null
+
+        coVerify {
+            behandlingKlient.settBehandlingStatusVilkaarsvurdert(any(), brukerTokenInfo)
+        }
+    }
+
+    @Test
     fun `skal kopiere eksisterende vilkaarsvurdering uten endringer paa vilkaar - totalvurdering er uforandret`() {
         val nyBehandlingId = UUID.randomUUID()
         val opprinneligBehandlingId = UUID.randomUUID()
@@ -592,14 +631,7 @@ internal class VilkaarsvurderingServiceTest {
             behandlingId = opprinneligBehandlingId,
             vilkaar =
                 BarnepensjonVilkaar2024.inngangsvilkaar().map {
-                    it.copy(
-                        vurdering =
-                            VilkaarVurderingData(
-                                kommentar = "kommentar",
-                                tidspunkt = LocalDateTime.now(),
-                                saksbehandler = "Z123456",
-                            ),
-                    )
+                    it.copy(vurdering = vurdering())
                 },
         )
 
@@ -783,16 +815,25 @@ internal class VilkaarsvurderingServiceTest {
     private fun detaljertBehandling(
         behandlingStatus: BehandlingStatus = BehandlingStatus.OPPRETTET,
         virk: YearMonth = YearMonth.now(),
-    ) = mockk<DetaljertBehandling>().apply {
+        behandlingstype: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        revurderingaarsak: Revurderingaarsak? = null,
+    ) = mockk<DetaljertBehandling> {
         every { id } returns uuid
         every { sak } returns 1L
         every { sakType } returns SakType.BARNEPENSJON
         every { status } returns behandlingStatus
-        every { behandlingType } returns BehandlingType.FØRSTEGANGSBEHANDLING
+        every { behandlingType } returns behandlingstype
         every { soeker } returns "10095512345"
+        every { revurderingsaarsak } returns revurderingaarsak
         every { virkningstidspunkt } returns VirkningstidspunktTestData.virkningstidsunkt(virk)
-        every { revurderingsaarsak } returns null
     }
+
+    private fun vurdering() =
+        VilkaarVurderingData(
+            kommentar = "kommentar",
+            tidspunkt = LocalDateTime.now(),
+            saksbehandler = "Z123456",
+        )
 
     private fun assertIsSimilar(
         v1: Vilkaarsvurdering,

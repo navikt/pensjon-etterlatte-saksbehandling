@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.erPaaNyttRegelverk
@@ -144,6 +145,18 @@ class VilkaarsvurderingService(
             val virkningstidspunkt =
                 behandling.virkningstidspunkt ?: throw VirkningstidspunktIkkeSattException(behandlingId)
 
+            val kopierteVilkaar =
+                when {
+                    behandling.revurderingsaarsak == Revurderingaarsak.REGULERING ->
+                        tidligereVilkaarsvurdering.vilkaar.kopier()
+                    else ->
+                        oppdaterVilkaar(
+                            kopierteVilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
+                            behandling = behandling,
+                            virkningstidspunkt = virkningstidspunkt,
+                        )
+                }
+
             val nyVilkaarsvurdering =
                 vilkaarsvurderingRepository.kopierVilkaarsvurdering(
                     nyVilkaarsvurdering =
@@ -151,12 +164,7 @@ class VilkaarsvurderingService(
                             behandlingId = behandlingId,
                             grunnlagVersjon = grunnlag.metadata.versjon,
                             virkningstidspunkt = virkningstidspunkt.dato,
-                            vilkaar =
-                                oppdaterVilkaar(
-                                    kopierteVilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
-                                    behandling = behandling,
-                                    virkningstidspunkt = virkningstidspunkt,
-                                ),
+                            vilkaar = kopierteVilkaar,
                             resultat = tidligereVilkaarsvurdering.resultat,
                         ),
                     kopiertFraId = tidligereVilkaarsvurdering.id,

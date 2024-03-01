@@ -84,6 +84,7 @@ export const erKlageRedigerbar = (klage: Klage) => {
     KlageStatus.FORMKRAV_IKKE_OPPFYLT,
     KlageStatus.FORMKRAV_OPPFYLT,
     KlageStatus.UTFALL_VURDERT,
+    KlageStatus.RETURNERT,
   ]
   return redigerbareStatuser.includes(klage.status)
 }

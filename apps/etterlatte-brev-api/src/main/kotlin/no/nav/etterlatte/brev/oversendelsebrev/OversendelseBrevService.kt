@@ -4,15 +4,11 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.EtterlatteBrevKode
-import no.nav.etterlatte.brev.JournalfoerBrevService
 import no.nav.etterlatte.brev.PDFGenerator
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.db.BrevRepository
-import no.nav.etterlatte.brev.distribusjon.DistribusjonService
-import no.nav.etterlatte.brev.distribusjon.DistribusjonsTidspunktType
-import no.nav.etterlatte.brev.distribusjon.DistribusjonsType
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Brev
@@ -25,7 +21,6 @@ import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
-import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.toMottaker
 import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.KlageUtfallMedData
@@ -36,7 +31,6 @@ import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.Vergemaal
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
@@ -45,12 +39,6 @@ interface OversendelseBrevService {
 
     suspend fun opprettOversendelseBrev(
         behandlingId: UUID,
-        sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Brev
-
-    fun distribuerOversendelseBrev(
-        brevId: Long,
         sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
@@ -64,17 +52,13 @@ interface OversendelseBrevService {
 
 class OversendelseBrevServiceImpl(
     private val brevRepository: BrevRepository,
-    private val journalfoerBrevService: JournalfoerBrevService,
-    private val distribusjonService: DistribusjonService,
     private val pdfGenerator: PDFGenerator,
     private val sakService: SakService,
     private val adresseService: AdresseService,
     private val brevdataFacade: BrevdataFacade,
 ) : OversendelseBrevService {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
     override fun hentOversendelseBrev(behandlingId: UUID): Brev? {
-        return brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE).firstOrNull()
+        return brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE).singleOrNull()
     }
 
     override suspend fun opprettOversendelseBrev(
@@ -84,7 +68,7 @@ class OversendelseBrevServiceImpl(
     ): Brev {
         val eksisterendeBrev =
             brevRepository.hentBrevForBehandling(behandlingId, Brevtype.OVERSENDELSE_KLAGE)
-                .firstOrNull()
+                .singleOrNull()
         if (eksisterendeBrev != null) {
             return eksisterendeBrev
         }
@@ -134,51 +118,6 @@ class OversendelseBrevServiceImpl(
                 }
             }
         }
-
-    override fun distribuerOversendelseBrev(
-        brevId: BrevID,
-        sakId: Long,
-        brukerTokenInfo: BrukerTokenInfo,
-    ): Brev {
-        val brev = brevRepository.hentBrev(brevId)
-        if (brev.sakId != sakId) {
-            throw MismatchSakOgBrevException(brevId, sakId)
-        }
-        if (brev.kanEndres()) {
-            throw BrevIkkeFerdigstiltException(brevId)
-        }
-
-        if (brev.status == Status.DISTRIBUERT) {
-            return brev
-        }
-
-        if (brev.status == Status.FERDIGSTILT) {
-            // Journalfør utgående brev
-            val journalpostId =
-                runBlocking {
-                    journalfoerBrevService.journalfoer(brevId, brukerTokenInfo)
-                }
-            logger.info(
-                "Journalførte oversendelsebrev som skal distribueres med journalpostId=$journalpostId i sak=$sakId",
-            )
-        }
-
-        val journalpostId =
-            checkNotNull(brevRepository.hentJournalpostId(brevId)) {
-                "Journalpost som er distribuert mangler journalpostId! BrevID=$brevId"
-            }
-
-        val bestillingsID =
-            distribusjonService.distribuerJournalpost(
-                brevId,
-                journalpostId,
-                DistribusjonsType.VIKTIG,
-                DistribusjonsTidspunktType.KJERNETID,
-                brev.mottaker.adresse,
-            )
-
-        TODO("Not yet implemented")
-    }
 
     override fun ferdigstillOversendelseBrev(
         brevId: Long,
@@ -272,9 +211,4 @@ data class OversendelseBrevFerdigstillingData(
 class MismatchSakOgBrevException(brevId: BrevID, sakId: Long) : UgyldigForespoerselException(
     code = "SAKID_MATCHER_IKKE",
     detail = "Brevet med id=$brevId har ikke angitt sakId=$sakId",
-)
-
-class BrevIkkeFerdigstiltException(brevId: BrevID) : UgyldigForespoerselException(
-    code = "BREV_IKKE_FERDIGSTILT",
-    detail = "Brevet med id=$brevId er ikke ferdigstilt",
 )

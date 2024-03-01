@@ -60,12 +60,5 @@ fun Route.oversendelseBrevRoute(
                 call.respond(brev)
             }
         }
-
-        post("distribuer") {
-            withSakId(tilgangssjekker, skrivetilgang = true) { sakId ->
-                val brev = service.distribuerOversendelseBrev(brevId, sakId, brukerTokenInfo)
-                call.respond(brev)
-            }
-        }
     }
 }

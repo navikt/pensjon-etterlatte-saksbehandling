@@ -37,7 +37,7 @@ export const OpprettNyRevurdering = ({
       {
         sakId: sakId,
         aarsak: valgtRevurdering,
-        fritekstAarsak: fritekstgrunn ? fritekstgrunn : null,
+        fritekstAarsak: fritekstgrunn || null,
         begrunnelse: begrunnelse,
         paaGrunnAvOppgaveId: oppgaveId,
       },

@@ -50,7 +50,7 @@ internal class Verifiserer(
         val finnesIPdlFeil = pesonerFinnesIPdlEllerSoekerErDoed(patchedRequest)
         feilSomAvbryter.addAll(finnesIPdlFeil)
 
-        if (patchedRequest.trygdetid.perioder.isEmpty()) {
+        if (patchedRequest.beregning.anvendtTrygdetid != 40) {
             feilSomAvbryter.add(ManglerTrygdetidsperioder)
         }
 
@@ -371,5 +371,5 @@ data object BeregningsmetodeIkkeNasjonal : Verifiseringsfeil() {
 
 data object ManglerTrygdetidsperioder : Verifiseringsfeil() {
     override val message: String
-        get() = "Mangler trygdetidsperioder"
+        get() = "Mangler trygdetidsperioder, og anvendt trygdetid er ikke 40 i nasjonal sak"
 }

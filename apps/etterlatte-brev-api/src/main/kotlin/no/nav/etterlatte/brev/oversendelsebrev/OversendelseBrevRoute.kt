@@ -25,7 +25,7 @@ fun Route.oversendelseBrevRoute(
     tilgangssjekker: Tilgangssjekker,
     service: OversendelseBrevService,
 ) {
-    route("/brev/behandling/{$BEHANDLINGID_CALL_PARAMETER]/oversendelse") {
+    route("/brev/behandling/{$BEHANDLINGID_CALL_PARAMETER}/oversendelse") {
         get {
             withBehandlingId(tilgangssjekker) { behandlingId ->
                 measureTimedValue {

@@ -26,17 +26,17 @@ data class PdlAdressebeskyttelseRequest(
 
 data class PdlVariables(
     val ident: String,
-    val bostedsadresse: Boolean,
-    val bostedsadresseHistorikk: Boolean,
-    val deltBostedsadresse: Boolean,
-    val oppholdsadresse: Boolean,
-    val oppholdsadresseHistorikk: Boolean,
-    val kontaktadresse: Boolean,
-    val kontaktadresseHistorikk: Boolean,
-    val utland: Boolean,
-    val sivilstand: Boolean,
-    val familieRelasjon: Boolean,
-    val vergemaal: Boolean,
+    val bostedsadresse: Boolean = false,
+    val bostedsadresseHistorikk: Boolean = false,
+    val deltBostedsadresse: Boolean = false,
+    val oppholdsadresse: Boolean = false,
+    val oppholdsadresseHistorikk: Boolean = false,
+    val kontaktadresse: Boolean = false,
+    val kontaktadresseHistorikk: Boolean = false,
+    val utland: Boolean = false,
+    val sivilstand: Boolean = false,
+    val familieRelasjon: Boolean = false,
+    val vergemaal: Boolean = false,
 )
 
 data class PdlBolkVariables(

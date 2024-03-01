@@ -3,11 +3,11 @@ import { GenderIcon, GenderList } from '../icons/genderIcon'
 import { IPersonResult } from '~components/person/typer'
 import { Link } from '@navikt/ds-react'
 import { KopierbarVerdi } from '~shared/statusbar/kopierbarVerdi'
-import { IPdlPerson } from '~shared/types/Person'
+import { IPdlPerson, IPdlPersonNavn } from '~shared/types/Person'
 
 import { mapApiResult, Result } from '~shared/api/apiUtils'
 
-export const PdlPersonStatusBar = ({ person }: { person: IPdlPerson }) => (
+export const PdlPersonStatusBar = ({ person }: { person: IPdlPerson | IPdlPersonNavn }) => (
   <StatusBar
     result={{
       status: 'success',

@@ -8,20 +8,23 @@ import no.nav.etterlatte.libs.ktor.httpClient
 import no.nav.etterlatte.libs.ktor.httpClientClientCredentials
 import no.nav.etterlatte.pdl.ParallelleSannheterKlient
 import no.nav.etterlatte.pdl.PdlKlient
+import no.nav.etterlatte.pdl.PdlOboKlient
 import no.nav.etterlatte.person.PersonService
+import no.nav.etterlatte.personweb.PersonWebService
 
 class ApplicationContext(env: Map<String, String>) {
     val config: Config = ConfigFactory.load()
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
 
+    val pdlOboKlient = PdlOboKlient(httpClient(), config)
     val pdlKlient =
         PdlKlient(
             httpClient =
                 httpClientClientCredentials(
-                    azureAppClientId = config.getString("pdl.client_id"),
-                    azureAppJwk = config.getString("pdl.client_jwk"),
-                    azureAppWellKnownUrl = config.getString("pdl.well_known_url"),
-                    azureAppScope = config.getString("pdl.outbound"),
+                    azureAppClientId = config.getString("azure.app.client.id"),
+                    azureAppJwk = config.getString("azure.app.jwk"),
+                    azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                    azureAppScope = config.getString("pdl.scope"),
                 ),
             apiUrl = config.getString("pdl.url"),
         )
@@ -40,6 +43,8 @@ class ApplicationContext(env: Map<String, String>) {
             pdlKlient = pdlKlient,
             ppsKlient = parallelleSannheterKlient,
         )
+
+    val personWebService = PersonWebService(pdlOboKlient, parallelleSannheterKlient)
 }
 
 private fun featureToggleProperties(config: Config) =

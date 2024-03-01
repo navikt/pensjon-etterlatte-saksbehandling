@@ -17,8 +17,8 @@ export const hentDokumenter = async (args: {
   apiClient.post(`/dokumenter`, {
     foedselsnummer: args.fnr,
     tema: args.temaer,
-    status: args.statuser,
-    type: args.typer,
+    journalstatuser: args.statuser,
+    journalposttyper: args.typer,
     foerste: args.foerste,
   })
 

@@ -344,7 +344,7 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
 fun HttpMessageBuilder.behandlingsnummer(behandlingsnummer: List<Behandlingsnummer>): Unit =
     header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.joinToString { it.behandlingsnummer })
 
-fun hentBehandlingsnummerFromSaktyper(saktyper: List<SakType>): List<Behandlingsnummer> {
+private fun hentBehandlingsnummerFromSaktyper(saktyper: List<SakType>): List<Behandlingsnummer> {
     return saktyper.map {
         when (it) {
             SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
@@ -353,7 +353,7 @@ fun hentBehandlingsnummerFromSaktyper(saktyper: List<SakType>): List<Behandlings
     }.distinct()
 }
 
-fun finnBehandlingsnummerFromSaktype(saktype: SakType): Behandlingsnummer {
+private fun finnBehandlingsnummerFromSaktype(saktype: SakType): Behandlingsnummer {
     return when (saktype) {
         SakType.BARNEPENSJON -> Behandlingsnummer.BARNEPENSJON
         SakType.OMSTILLINGSSTOENAD -> Behandlingsnummer.OMSTILLINGSSTOENAD

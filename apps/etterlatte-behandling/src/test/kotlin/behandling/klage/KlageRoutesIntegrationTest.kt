@@ -291,7 +291,7 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                     addAuthToken(tokenSaksbehandler)
                 }.body<Klage>()
 
-            oppdatertKlage.status shouldBe KlageStatus.ATTESTERT
+            oppdatertKlage.status shouldBe KlageStatus.FERDIGSTILT
             with(oppdatertKlage.utfall as KlageUtfallMedData.Avvist) {
                 brev.brevId shouldNotBe null
                 vedtak.vedtakId shouldNotBe null

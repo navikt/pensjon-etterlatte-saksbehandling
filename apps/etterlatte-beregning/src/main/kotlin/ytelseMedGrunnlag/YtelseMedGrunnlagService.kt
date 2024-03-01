@@ -37,14 +37,19 @@ class YtelseMedGrunnlagService(
                         .filter { it.grunnlag.periode.fom <= avkortetYtelse.periode.fom }
                         .maxBy { it.grunnlag.periode.fom }
 
+                val grunnlag = avkortingsgrunnlagIPeriode.grunnlag
+                val aarsinntekt = grunnlag.aarsinntekt + grunnlag.inntektUtland
+                val fratrekkInnAar = grunnlag.fratrekkInnAar + grunnlag.fratrekkInnAarUtland
+
                 YtelseMedGrunnlagPeriodisertDto(
                     periode = avkortetYtelse.periode,
                     ytelseEtterAvkorting = avkortetYtelse.ytelseEtterAvkorting,
                     avkortingsbeloep = avkortetYtelse.avkortingsbeloep,
                     ytelseFoerAvkorting = beregningIPeriode.utbetaltBeloep,
                     trygdetid = beregningIPeriode.trygdetid,
-                    aarsinntekt = avkortingsgrunnlagIPeriode.grunnlag.aarsinntekt,
-                    fratrekkInnAar = avkortingsgrunnlagIPeriode.grunnlag.fratrekkInnAar,
+                    aarsinntekt = aarsinntekt,
+                    fratrekkInnAar = fratrekkInnAar,
+                    relevanteMaanederInnAar = grunnlag.relevanteMaanederInnAar,
                     grunnbelop = beregningIPeriode.grunnbelop,
                     grunnbelopMnd = beregningIPeriode.grunnbelopMnd,
                     beregningsMetode = beregningIPeriode.beregningsMetode,

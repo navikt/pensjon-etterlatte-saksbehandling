@@ -109,7 +109,11 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
                 AvkortetBeregningsperiode(
                     datoFOM = it.periode.fom.atDay(1),
                     datoTOM = it.periode.tom?.atEndOfMonth(),
+                    grunnbeloep = Kroner(it.grunnbelop),
                     inntekt = Kroner(it.aarsinntekt - it.fratrekkInnAar),
+                    aarsinntekt = Kroner(it.aarsinntekt),
+                    fratrekkInnAar = Kroner(it.fratrekkInnAar),
+                    relevanteMaanederInnAar = it.relevanteMaanederInnAar,
                     ytelseFoerAvkorting = Kroner(it.ytelseFoerAvkorting),
                     utbetaltBeloep = Kroner(it.ytelseEtterAvkorting),
                     trygdetid = it.trygdetid,
@@ -121,14 +125,7 @@ class BeregningService(private val beregningKlient: BeregningKlient) {
                 )
             }
 
-        val nyestePeriode = ytelseMedGrunnlag.perioder.maxBy { it.periode.fom }
-
         return Avkortingsinfo(
-            grunnbeloep = Kroner(nyestePeriode.grunnbelop),
-            inntekt = Kroner(nyestePeriode.aarsinntekt - nyestePeriode.fratrekkInnAar),
-            aarsInntekt = Kroner(nyestePeriode.aarsinntekt),
-            fratrekkInnAar = Kroner(nyestePeriode.fratrekkInnAar),
-            gjenvaerendeMaaneder = 12 - (nyestePeriode.periode.fom.monthValue - 1),
             virkningsdato = virkningstidspunkt.atDay(1),
             beregningsperioder = beregningsperioder,
         )

@@ -94,11 +94,6 @@ data class Utbetalingsinfo(
 )
 
 data class Avkortingsinfo(
-    val grunnbeloep: Kroner,
-    val inntekt: Kroner,
-    val aarsInntekt: Kroner,
-    val fratrekkInnAar: Kroner,
-    val gjenvaerendeMaaneder: Int,
     val virkningsdato: LocalDate,
     val beregningsperioder: List<AvkortetBeregningsperiode>,
 )
@@ -106,7 +101,11 @@ data class Avkortingsinfo(
 data class AvkortetBeregningsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
+    val grunnbeloep: Kroner,
     val inntekt: Kroner,
+    val aarsinntekt: Kroner,
+    val fratrekkInnAar: Kroner,
+    val relevanteMaanederInnAar: Int,
     val ytelseFoerAvkorting: Kroner,
     val trygdetid: Int,
     val utbetaltBeloep: Kroner,

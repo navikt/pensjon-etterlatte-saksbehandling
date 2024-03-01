@@ -41,11 +41,6 @@ data class BarnepensjonBeregningsperiode(
 data class OmstillingsstoenadBeregning(
     override val innhold: List<Slate.Element>,
     val virkningsdato: LocalDate,
-    val inntekt: Kroner,
-    val aarsInntekt: Kroner,
-    val fratrekkInnAar: Kroner,
-    val gjenvaerendeMaaneder: Int,
-    val grunnbeloep: Kroner,
     val beregningsperioder: List<OmstillingsstoenadBeregningsperiode>,
     val sisteBeregningsperiode: OmstillingsstoenadBeregningsperiode,
     val trygdetid: TrygdetidMedBeregningsmetode,
@@ -55,9 +50,15 @@ data class OmstillingsstoenadBeregningsperiode(
     val datoFOM: LocalDate,
     val datoTOM: LocalDate?,
     val inntekt: Kroner,
+    val aarsinntekt: Kroner,
+    val fratrekkInnAar: Kroner,
+    val relevantMaanederInnAar: Int,
+    val grunnbeloep: Kroner,
     val ytelseFoerAvkorting: Kroner,
     val utbetaltBeloep: Kroner,
     val trygdetid: Int,
+    val beregningsMetodeAnvendt: BeregningsMetode,
+    val beregningsMetodeFraGrunnlag: BeregningsMetode,
 )
 
 data class TrygdetidMedBeregningsmetode(

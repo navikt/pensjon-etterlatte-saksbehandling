@@ -20,7 +20,7 @@ class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val
         brevID: BrevID?,
         brevRequest: BrevbakerRequest,
     ): Pdf {
-        val brevbakerResponse = brevbakerKlient.genererPdf(brevRequest)
+        val brevbakerResponse = retryOgPakkUt { brevbakerKlient.genererPdf(brevRequest) }
 
         return Base64.getDecoder().decode(brevbakerResponse.base64pdf)
             .let { Pdf(it) }

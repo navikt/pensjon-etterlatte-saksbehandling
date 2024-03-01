@@ -42,7 +42,7 @@ export function KlageSidemeny() {
         dispatch(updateVedtakSammendrag(vedtakSammendrag))
       }
     })
-  }, [klage?.id])
+  }, [klage?.id, klage?.status])
 
   useEffect(() => {
     if (!klage) return

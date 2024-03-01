@@ -685,7 +685,7 @@ internal class VedtaksvurderingRouteTest {
     fun `skal opprette vedtak for avvist klage`() {
         val vedtakKlage = vedtakKlage()
         val klage = klage()
-        coEvery { vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(any()) } returns vedtakKlage.id
+        coEvery { vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(any()) } returns vedtakKlage
         every { vedtaksvurderingService.hentVedtakMedBehandlingId(any<UUID>()) } returns vedtakKlage
 
         testApplication {
@@ -701,16 +701,16 @@ internal class VedtaksvurderingRouteTest {
                     behandlingKlient,
                 )
             }
-            val vedtakId: Long =
+            val vedtakDto: VedtakDto =
                 client.post("/vedtak/klage/${klage.id}/upsert") {
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                     header(HttpHeaders.Authorization, "Bearer $token")
                     setBody(klage.toJson())
                 }.let {
                     it.status shouldBe HttpStatusCode.OK
-                    deserialize<Long>(it.bodyAsText())
+                    deserialize<VedtakDto>(it.bodyAsText())
                 }
-            vedtakId shouldBe vedtakKlage.id
+            vedtakDto.id shouldBe vedtakKlage.id
 
             coVerify(exactly = 1) {
                 behandlingKlient.harTilgangTilBehandling(any(), any(), any())

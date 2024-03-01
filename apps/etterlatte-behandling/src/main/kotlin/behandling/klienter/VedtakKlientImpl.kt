@@ -13,6 +13,7 @@ import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingFattEllerAttesterVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakDto
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.libs.ktorobo.AzureAdClient
 import no.nav.etterlatte.libs.ktorobo.DownstreamResourceClient
 import no.nav.etterlatte.libs.ktorobo.Resource
@@ -47,22 +48,22 @@ interface VedtakKlient {
     suspend fun lagreVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long
+    ): VedtakDto
 
     suspend fun fattVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long
+    ): VedtakDto
 
     suspend fun attesterVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long
+    ): VedtakDto
 
     suspend fun underkjennVedtakKlage(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long
+    ): VedtakDto
 }
 
 class VedtakKlientException(override val message: String, override val cause: Throwable) : Exception(message, cause)
@@ -211,7 +212,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     override suspend fun lagreVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long {
+    ): VedtakDto {
         try {
             logger.info(
                 "Sender klage som skal lages avvist klage-vedtak for med id=${klage.id} til vedtak",
@@ -238,7 +239,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     override suspend fun fattVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long {
+    ): VedtakDto {
         try {
             logger.info("Sender klage med id=${klage.id} til vedtak for fatting av vedtak")
             return downstreamResourceClient
@@ -266,7 +267,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     override suspend fun attesterVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long {
+    ): VedtakDto {
         try {
             logger.info("Sender klage med id=${klage.id} til vedtak for attestering")
             return downstreamResourceClient
@@ -285,7 +286,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
                 )
         } catch (e: Exception) {
             throw VedtakKlientException(
-                "Fatting av vedtak for klage med id=${klage.id} feilet",
+                "Attestering av vedtak for klage med id=${klage.id} feilet",
                 e,
             )
         }
@@ -294,7 +295,7 @@ class VedtakKlientImpl(config: Config, httpClient: HttpClient) : VedtakKlient {
     override suspend fun underkjennVedtakKlage(
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long {
+    ): VedtakDto {
         try {
             logger.info("Ber om underkjennelse for klage=$klageId til vedtak")
             return downstreamResourceClient

@@ -53,7 +53,7 @@ internal class VedtakKlageServiceTest(dataSource: DataSource) {
     @Test
     fun `opprettEllerOppdaterVedtakOmAvvisning skal opprette vedtak når det ikke finnes fra før`() {
         val klage = klage()
-        val vedtakId = vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
+        val vedtakId = vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage).id
 
         val vedtak = vedtaksvurderingRepository.hentVedtak(vedtakId) ?: throw RuntimeException("Vedtak ikke funnet")
 
@@ -70,7 +70,7 @@ internal class VedtakKlageServiceTest(dataSource: DataSource) {
         val klage = klage(utfall = utfallOmgjoering())
 
         val vedtakId =
-            vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
+            vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage).id
 
         val vedtak = vedtaksvurderingRepository.hentVedtak(vedtakId) ?: throw RuntimeException("Vedtak ikke funnet")
 
@@ -169,10 +169,10 @@ internal class VedtakKlageServiceTest(dataSource: DataSource) {
     @Test
     fun `underkjennVedtak skal underkjenne vedtak`() {
         val klage = klage()
-        val vedtakId = vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
+        val vedtak: Vedtak = vedtakKlageService.opprettEllerOppdaterVedtakOmAvvisning(klage)
         vedtakKlageService.fattVedtak(klage, saksbehandler)
 
-        vedtakKlageService.underkjennVedtak(klage.id).id shouldBe vedtakId
+        vedtakKlageService.underkjennVedtak(klage.id).id shouldBe vedtak.id
 
         verify(exactly = 1) {
             vedtaksvurderingRapidService.sendToRapid(

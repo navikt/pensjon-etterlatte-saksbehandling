@@ -10,6 +10,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpMessageBuilder
 import io.ktor.http.contentType
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.innsendtsoeknad.common.Behandlingsnummer
@@ -39,8 +40,7 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
         return retry<PdlPersonResponse>(times = 3) {
             httpClient.post(apiUrl) {
                 bearerAuth(getOboToken(bruker))
-                header(HEADER_BEHANDLINGSNUMMER, Behandlingsnummer.BARNEPENSJON.behandlingsnummer)
-                header(HEADER_TEMA, HEADER_TEMA_VALUE)
+                behandlingsnummer(Behandlingsnummer.BARNEPENSJON, Behandlingsnummer.OMSTILLINGSSTOENAD)
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 setBody(request)
@@ -77,12 +77,6 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
         }
     }
 
-    /**
-     * TODO: Vi må ta stilling til hvilke behandlingsnummer og tema vi skal bruke på "generelle" forespørsler.
-     **/
-    companion object {
-        const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
-        const val HEADER_TEMA = "Tema"
-        const val HEADER_TEMA_VALUE = "EYB"
-    }
+    public fun HttpMessageBuilder.behandlingsnummer(vararg behandlingsnummer: Behandlingsnummer): Unit =
+        header("behandlingsnummer", behandlingsnummer.joinToString { it.behandlingsnummer })
 }

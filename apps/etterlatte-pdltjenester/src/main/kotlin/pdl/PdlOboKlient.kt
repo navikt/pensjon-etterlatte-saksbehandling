@@ -77,6 +77,6 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
         }
     }
 
-    public fun HttpMessageBuilder.behandlingsnummer(vararg behandlingsnummer: Behandlingsnummer): Unit =
-        header("behandlingsnummer", behandlingsnummer.joinToString { it.behandlingsnummer })
+    private fun HttpMessageBuilder.behandlingsnummer(vararg behandlingsnummer: Behandlingsnummer): Unit =
+        header(HEADER_BEHANDLINGSNUMMER, behandlingsnummer.joinToString { it.behandlingsnummer })
 }

@@ -22,6 +22,8 @@ import no.nav.etterlatte.libs.common.person.PersonRolle
 import no.nav.etterlatte.libs.common.retry
 import org.slf4j.LoggerFactory
 
+const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
+
 class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) {
     private val logger = LoggerFactory.getLogger(PdlKlient::class.java)
 
@@ -331,7 +333,6 @@ class PdlKlient(private val httpClient: HttpClient, private val apiUrl: String) 
     }
 
     companion object {
-        const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
         const val HEADER_TEMA = "Tema"
         const val HEADER_TEMA_VALUE = "PEN"
         const val PDL_BULK_SIZE = 100

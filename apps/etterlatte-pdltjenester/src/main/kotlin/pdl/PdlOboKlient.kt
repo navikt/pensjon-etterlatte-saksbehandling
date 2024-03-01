@@ -74,9 +74,12 @@ class PdlOboKlient(private val httpClient: HttpClient, private val config: Confi
         return token.get()?.accessToken ?: ""
     }
 
+    /**
+     * TODO: Vi må ta stilling til hvilke behandlingsnummer og tema vi skal bruke på "generelle" forespørsler.
+     **/
     companion object {
         const val HEADER_BEHANDLINGSNUMMER = "behandlingsnummer"
         const val HEADER_TEMA = "Tema"
-        const val HEADER_TEMA_VALUE = "PEN"
+        const val HEADER_TEMA_VALUE = "EYB"
     }
 }

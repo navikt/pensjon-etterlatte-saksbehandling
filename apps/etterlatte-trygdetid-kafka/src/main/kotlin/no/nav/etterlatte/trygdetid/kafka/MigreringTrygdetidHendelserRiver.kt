@@ -61,9 +61,8 @@ internal class MigreringTrygdetidHendelserRiver(
                 logger.info("Mottok trygdetidsperioder for behandling $behandlingId")
                 leggTilPerioder(request, behandlingId)
             } else {
-                throw TrygdetidIkkeGyldigForAutomatiskGjenoppretting(
-                    "Vi mottok ingen trygdetidsperioder fra Pesys for behandling $behandlingId",
-                )
+                logger.info("Vi mottok ingen trygdetidsperioder fra Pesys for behandling $behandlingId")
+                overstyrBeregnetTrygdetid(request, behandlingId)
             }
 
         sendBeregnetTrygdetid(packet, oppdatertTrygdetid, context, behandlingId)

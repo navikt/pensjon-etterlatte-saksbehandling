@@ -44,7 +44,7 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
                     FEILENDE_STEG,
                     listOf(
                         Migreringshendelser.VERIFISER.lagEventnameForType(),
-                        Migreringshendelser.AVBRYT_BEHANDLING.lagEventnameForType(),
+                        "AvbrytBehandlingHvisMigreringFeilaRiver",
                     ),
                 )
             }

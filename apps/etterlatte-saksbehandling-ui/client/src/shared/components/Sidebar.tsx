@@ -23,6 +23,7 @@ export const Sidebar = ({ children }: { children: ReactNode }) => {
 export const SidebarPanel = styled.div<{ border?: boolean }>`
   margin: 20px 8px 0 8px;
   padding: 1em;
+  max-width: 800px;
 
   ${(props) =>
     props.border

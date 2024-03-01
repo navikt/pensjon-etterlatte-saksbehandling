@@ -110,29 +110,43 @@ internal fun Route.revurderingRoutes(
         }
     }
 
-    route("/api/stoettederevurderinger/{saktype}") {
+    route("/api/stoettederevurderinger") {
         get {
+            val stoettedeRevurderinger =
+                SakType.entries.associateWith { hentRevurderingaarsaker(it, featureToggleService) }
+            call.respond(stoettedeRevurderinger)
+        }
+
+        get("/{saktype}") {
             val sakType =
                 call.parameters["saktype"]?.let { SakType.valueOf(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
-            val stoettedeRevurderinger =
-                Revurderingaarsak.entries
-                    .filter { it.erStoettaRevurdering(sakType) }
-                    .filter {
-                        if (it == Revurderingaarsak.OPPHOER_UTEN_BREV) {
-                            featureToggleService.isEnabled(
-                                RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev,
-                                false,
-                            )
-                        } else {
-                            true
-                        }
-                    }
+            val stoettedeRevurderinger = hentRevurderingaarsaker(sakType, featureToggleService)
 
             call.respond(stoettedeRevurderinger)
         }
     }
+}
+
+private fun hentRevurderingaarsaker(
+    sakType: SakType,
+    featureToggleService: FeatureToggleService,
+): List<Revurderingaarsak> {
+    val stoettedeRevurderinger =
+        Revurderingaarsak.entries
+            .filter { it.erStoettaRevurdering(sakType) }
+            .filter {
+                if (it == Revurderingaarsak.OPPHOER_UTEN_BREV) {
+                    featureToggleService.isEnabled(
+                        RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev,
+                        false,
+                    )
+                } else {
+                    true
+                }
+            }
+    return stoettedeRevurderinger
 }
 
 data class OpprettOmgjoeringKlageRequest(

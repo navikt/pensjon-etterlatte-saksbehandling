@@ -12,6 +12,7 @@ import {
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveutils'
 import { Filter, filtrerOppgaver } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
+import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 
 export interface OppgavelisteProps {
   oppgaver: OppgaveDTO[]
@@ -19,6 +20,7 @@ export interface OppgavelisteProps {
   saksbehandlereIEnhet: Array<Saksbehandler>
   oppdaterFrist?: (id: string, nyfrist: string, versjon: number | null) => void
   filter?: Filter
+  revurderingsaarsaker: RevurderingsaarsakerBySakstype
 }
 
 export const Oppgaver = ({
@@ -27,6 +29,7 @@ export const Oppgaver = ({
   saksbehandlereIEnhet,
   oppdaterFrist,
   filter,
+  revurderingsaarsaker,
 }: OppgavelisteProps): ReactNode => {
   const [sortering, setSortering] = useState<OppgaveSortering>(hentSorteringFraLocalStorage())
   const filtrerteOppgaver = filter
@@ -71,6 +74,7 @@ export const Oppgaver = ({
         oppdaterFrist={oppdaterFrist}
         saksbehandlereIEnhet={saksbehandlereIEnhet}
         setSortering={setSortering}
+        revurderingsaarsaker={revurderingsaarsaker}
       />
 
       <PagineringsKontroller

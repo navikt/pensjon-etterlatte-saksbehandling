@@ -5,9 +5,16 @@ import { useAppSelector } from '~store/Store'
 import { GosysOppgaveModal } from '~components/oppgavebenk/oppgaveModal/GosysOppgaveModal'
 import { OmgjoerVedtakModal } from '~components/oppgavebenk/oppgaveModal/OmgjoerVedtakModal'
 import React from 'react'
-import { OpprettRevurderingModal } from '~components/oppgavebenk/oppgaveModal/OpprettRevurderingModal'
+import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
+import { OpprettNyRevurdering } from '~components/person/OpprettNyRevurdering'
 
-export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
+export const HandlingerForOppgave = ({
+  oppgave,
+  revurderingsaarsaker,
+}: {
+  oppgave: OppgaveDTO
+  revurderingsaarsaker: RevurderingsaarsakerBySakstype
+}) => {
   const innloggetsaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
 
   const { id, type, kilde, fnr, saksbehandler, referanse } = oppgave
@@ -89,7 +96,15 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
               Gå til revurdering
             </Button>
           )}
-          {erInnloggetSaksbehandlerOppgave && !referanse && <OpprettRevurderingModal oppgave={oppgave} />}
+          {erInnloggetSaksbehandlerOppgave && !referanse && (
+            <OpprettNyRevurdering
+              revurderinger={revurderingsaarsaker[oppgave.sakType]}
+              sakId={oppgave.sakId}
+              oppgaveId={oppgave.id}
+              begrunnelse={oppgave.merknad}
+              litenKnapp={true}
+            />
+          )}
         </>
       )
     case 'ATTESTERING':

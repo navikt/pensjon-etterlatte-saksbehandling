@@ -14,6 +14,11 @@ export const FiltrerPaaSaksbehandler = ({ filter, setFilter, saksbehandlereIEnhe
     return Object.entries(SAKSBEHANDLERFILTER).map(([, beskrivelse]) => beskrivelse)
   }
 
+  /*
+   * Først sjekkke om valgt saksbehandler finnes i SAKSBEHANDLERFILTER.
+   * Hvis ikke sjekk om den finnes i lista over saksbehandlere i enhetene til
+   * den innloggede saksbehandleren
+   */
   const valgtSaksbehandler = (sb: string): string[] => {
     if (saksbehandlerFilterValues().find((val) => val === sb)) {
       return [sb]
@@ -26,6 +31,11 @@ export const FiltrerPaaSaksbehandler = ({ filter, setFilter, saksbehandlereIEnhe
     }
   }
 
+  /*
+   * Samme her. Først sjekkke om valgt saksbehandler finnes i SAKSBEHANDLERFILTER.
+   * Hvis ikke sjekk om den finnes i lista over saksbehandlere i enhetene til
+   * den innloggede saksbehandleren
+   */
   const onVelgSaksbehandler = (option: string, isSelected: boolean) => {
     if (isSelected) {
       if (saksbehandlerFilterValues().find((val) => val === option)) {

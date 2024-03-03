@@ -90,13 +90,13 @@ const Adresse = (props: { adresse: AdresseSamsvar }) => {
     <GrunnlagSammenligningWrapper>
       <div>
         <BodySmall>Nytt grunnlag (PDL)</BodySmall>
-        <BodySmall>
+        <BodySmall as="div">
           <Adressevisning adresser={adresse.fraPdl} soeknadsoversikt={false} />
         </BodySmall>
       </div>
       <div>
         <BodySmall>Eksisterende grunnlag</BodySmall>
-        <BodySmall>
+        <BodySmall as="div">
           <Adressevisning adresser={adresse.fraGrunnlag} soeknadsoversikt={false} />
         </BodySmall>
       </div>

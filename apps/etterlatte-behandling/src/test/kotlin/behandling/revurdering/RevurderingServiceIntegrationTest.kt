@@ -758,7 +758,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
 
         val (sak, _) = opprettSakMedFoerstegangsbehandling(fnr, behandlingFactory)
 
-        assertThrows<RevurderingManglerIverksattBehandlingException> {
+        assertThrows<RevurderingManglerIverksattBehandling> {
             inTransaction {
                 revurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,
@@ -806,7 +806,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 every { it.kanBrukesIMiljo() } returns false
                 every { it.name } returns Revurderingaarsak.BARN.name
             }
-        assertThrows<RevurderingaarsakIkkeStoettetIMiljoeException> {
+        assertThrows<RevurderingaarsakIkkeStoettet> {
             revurderingService.opprettManuellRevurderingWrapper(
                 sakId = sak.id,
                 aarsak = revurderingsAarsakIkkeStoettetIMiljoeBarn,
@@ -852,7 +852,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
         inTransaction {
             applicationContext.oppgaveService.tildelSaksbehandler(oppgaveForFoerstegangsbehandling.id, "sakbeahndler")
         }
-        assertThrows<MaksEnBehandlingsOppgaveUnderbehandlingException> {
+        assertThrows<MaksEnAktivOppgavePaaBehandling> {
             inTransaction {
                 revurderingService.opprettManuellRevurderingWrapper(
                     sakId = sak.id,

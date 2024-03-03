@@ -1,5 +1,5 @@
-import { Button, Select, TextField } from '@navikt/ds-react'
-import React, { ReactNode } from 'react'
+import { Button, Select, TextField} from '@navikt/ds-react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import {
   ENHETFILTER,
   EnhetFilterKeys,
@@ -34,11 +34,26 @@ export const FilterRad = ({
   setFilter,
   saksbehandlereIEnhet,
 }: Props): ReactNode => {
+  const [sakId, setSakId] = useState<string>(filter.sakidFilter)
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
+
+  useEffect(() => {
+    const delay = setTimeout(() => setFilter({ ...filter, sakidFilter: sakId || '' }), 500)
+    return () => clearTimeout(delay)
+  }, [sakId])
 
   return (
     <>
       <FlexRow $spacing align="start">
+        <TextField
+          label="Sak ID"
+          width="1rem"
+          value={sakId}
+          onChange={(e) => setSakId(e.target.value?.replace(/[^0-9+]/, ''))}
+          type="tel"
+          min={0}
+          placeholder="Søk"
+        />
         <TextField
           label="Fødselsnummer"
           value={filter.fnrFilter}

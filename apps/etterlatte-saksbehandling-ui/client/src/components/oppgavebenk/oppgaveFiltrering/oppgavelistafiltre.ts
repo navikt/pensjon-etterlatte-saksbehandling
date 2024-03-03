@@ -133,6 +133,14 @@ function finnFnrIOppgaver(fnr: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
   }
 }
 
+function finnSakidIOppgaver(sakid: string, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
+  if (sakid && sakid.length > 0) {
+    return oppgaver.filter((o) => o.sakId?.toString() === sakid)
+  } else {
+    return oppgaver
+  }
+}
+
 export type FristFilterKeys = keyof typeof FRISTFILTER
 
 export const FRISTFILTER = {
@@ -155,6 +163,7 @@ export function filtrerFrist(fristFilterKeys: FristFilterKeys, oppgaver: Oppgave
 }
 
 export function filtrerOppgaver(
+  sakidFilter: string,
   enhetsFilter: EnhetFilterKeys,
   fristFilter: FristFilterKeys,
   saksbehandlerFilter: string,
@@ -164,7 +173,8 @@ export function filtrerOppgaver(
   oppgaver: OppgaveDTO[],
   fnr: string
 ): OppgaveDTO[] {
-  const enhetFiltrert = filtrerEnhet(enhetsFilter, oppgaver)
+  const sakidFiltrert = finnSakidIOppgaver(sakidFilter, oppgaver)
+  const enhetFiltrert = filtrerEnhet(enhetsFilter, sakidFiltrert)
   const saksbehandlerFiltrert = filtrerSaksbehandler(saksbehandlerFilter, enhetFiltrert)
   const ytelseFiltrert = filtrerYtelse(ytelseFilter, saksbehandlerFiltrert)
   const oppgaveFiltrert = filtrerOppgaveStatus(oppgavestatusFilter, ytelseFiltrert)
@@ -175,6 +185,7 @@ export function filtrerOppgaver(
 }
 
 export interface Filter {
+  sakidFilter: string
   enhetsFilter: EnhetFilterKeys
   fristFilter: FristFilterKeys
   saksbehandlerFilter: string
@@ -186,6 +197,7 @@ export interface Filter {
 
 export const initialFilter = (): Filter => {
   return {
+    sakidFilter: '',
     enhetsFilter: 'visAlle',
     fristFilter: 'visAlle',
     saksbehandlerFilter: SAKSBEHANDLERFILTER.IkkeTildelt,
@@ -198,6 +210,7 @@ export const initialFilter = (): Filter => {
 
 export const minOppgavelisteFiltre = (): Filter => {
   return {
+    sakidFilter: '',
     enhetsFilter: 'visAlle',
     fristFilter: 'visAlle',
     saksbehandlerFilter: 'visAlle',

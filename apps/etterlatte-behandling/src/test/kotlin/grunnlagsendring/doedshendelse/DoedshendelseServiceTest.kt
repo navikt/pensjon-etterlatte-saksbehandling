@@ -42,15 +42,15 @@ internal class DoedshendelseServiceTest {
 
     private val avdoed =
         mockPerson().copy(
-            doedsdato = OpplysningDTO(LocalDate.of(2022, 8, 17), null),
+            doedsdato = OpplysningDTO(LocalDate.now().minusYears(2), null),
             avdoedesBarn =
                 listOf(
-                    personOpplysning(foedselsdato = LocalDate.of(2000, 1, 1)),
-                    personOpplysning(foedselsdato = LocalDate.of(2002, 8, 30)),
-                    personOpplysning().copy(foedselsaar = 2022),
-                    personOpplysning(foedselsdato = LocalDate.of(2002, 9, 15)),
-                    personOpplysning(foedselsdato = LocalDate.of(2005, 9, 15), doedsdato = LocalDate.of(2020, 8, 17)),
-                    personOpplysning(foedselsdato = LocalDate.of(2020, 9, 15)),
+                    personOpplysning(foedselsdato = LocalDate.now().minusYears(23)),
+                    personOpplysning(foedselsdato = LocalDate.now().minusYears(22)),
+                    personOpplysning().copy(foedselsaar = LocalDate.now().minusYears(2).year),
+                    personOpplysning(foedselsdato = LocalDate.now().minusYears(18)),
+                    personOpplysning(foedselsdato = LocalDate.now().minusYears(18), doedsdato = LocalDate.now().minusYears(4)),
+                    personOpplysning(foedselsdato = LocalDate.now().minusYears(3)),
                 ),
         )
 

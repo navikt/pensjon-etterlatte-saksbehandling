@@ -25,7 +25,8 @@ export const OppgaverTableRow = ({
   oppdaterFrist,
 }: Props): ReactNode => (
   <Table.Row>
-    <Table.HeaderCell>{formaterStringDato(oppgave.opprettet)}</Table.HeaderCell>
+    <Table.DataCell>{oppgave.sakId}</Table.DataCell>
+    <Table.DataCell>{formaterStringDato(oppgave.opprettet)}</Table.DataCell>
     <Table.DataCell>
       {oppdaterFrist ? (
         <FristHandlinger

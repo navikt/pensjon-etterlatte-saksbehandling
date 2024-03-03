@@ -56,7 +56,7 @@ class StatistikkService(
         vedtakKafkaHendelseType: VedtakKafkaHendelseHendelseType,
         tekniskTid: LocalDateTime,
     ): Pair<SakRad?, StoenadRad?> {
-        val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakKafkaHendelseType, tekniskTid) ?: throw Exception("")
+        val sakRad = registrerSakStatistikkForVedtak(vedtak, vedtakKafkaHendelseType, tekniskTid)
         if (vedtakKafkaHendelseType == VedtakKafkaHendelseHendelseType.IVERKSATT) {
             val stoenadRad =
                 when (vedtak.type) {
@@ -68,7 +68,7 @@ class StatistikkService(
                             vedtakTilStoenadsrad(
                                 vedtak,
                                 tekniskTid,
-                                sakRad.kilde,
+                                sakRad!!.kilde,
                                 sakRad.pesysId,
                             ),
                         )
@@ -93,7 +93,7 @@ class StatistikkService(
         hendelse: VedtakKafkaHendelseHendelseType,
         tekniskTid: LocalDateTime,
     ): SakRad? {
-        return vedtakshendelseTilSakRad(vedtak, hendelse, tekniskTid).let { sakRad ->
+        return vedtakshendelseTilSakRad(vedtak, hendelse, tekniskTid)?.let { sakRad ->
             sakRepository.lagreRad(sakRad)
         }
     }
@@ -117,8 +117,8 @@ class StatistikkService(
         vedtak: VedtakDto,
         hendelse: VedtakKafkaHendelseHendelseType,
         tekniskTid: LocalDateTime,
-    ): SakRad {
-        val vedtakInnhold = (vedtak.innhold as VedtakInnholdDto.VedtakBehandlingDto)
+    ): SakRad? {
+        val vedtakInnhold = (vedtak.innhold as? VedtakInnholdDto.VedtakBehandlingDto) ?: return null
         val statistikkBehandling = hentStatistikkBehandling(vedtak.behandlingId)
         val mottattTid = statistikkBehandling.soeknadMottattDato ?: statistikkBehandling.behandlingOpprettet
         val (beregning, avkorting) =

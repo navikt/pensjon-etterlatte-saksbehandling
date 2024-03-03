@@ -5,7 +5,9 @@ import { requireEnvValue } from '../config/config'
 
 const NORG2_URL = requireEnvValue('NORG2_URL')
 const TEMA_CACHE_KEY = 'TEMA'
-const cache = new NodeCache({ stdTTL: 60 * 15 }) // Cache varer i 15 min
+
+// Cache varer i et døgn (24 timer) siden temaer så og si aldri blir endret.
+const cache = new NodeCache({ stdTTL: 60 * 60 * 24 })
 
 export const norg2Router = express.Router()
 

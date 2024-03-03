@@ -95,6 +95,19 @@ interface KlageService {
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): Klage
+
+    fun attesterVedtak(
+        klageId: UUID,
+        kommentar: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage
+
+    fun underkjennVedtak(
+        klageId: UUID,
+        kommentar: String,
+        valgtBegrunnelse: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage
 }
 
 class ManglerSaksbehandlerException(msg: String) : UgyldigForespoerselException(
@@ -319,8 +332,8 @@ class KlageServiceImpl(
         klage: Klage,
         saksbehandler: Saksbehandler,
     ): KlageVedtak {
-        val vedtakId = runBlocking { vedtakKlient.lagreVedtakKlage(klage, saksbehandler) }
-        return KlageVedtak(vedtakId)
+        val vedtak = runBlocking { vedtakKlient.lagreVedtakKlage(klage, saksbehandler) }
+        return KlageVedtak(vedtak.id)
     }
 
     override fun haandterKabalrespons(
@@ -465,27 +478,108 @@ class KlageServiceImpl(
         val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
 
         val oppdatertKlage = klage.fattVedtak()
-        val vedtakId =
+        val vedtak =
             runBlocking {
                 vedtakKlient.fattVedtakKlage(klage, brukerTokenInfo)
             }
+        sjekkVedtakIdLagretIUtfall(klage, vedtak.id)
+        klageDao.lagreKlage(oppdatertKlage)
+
+        hendelseDao.vedtakHendelse(
+            behandlingId = klage.id,
+            sakId = klage.sak.id,
+            vedtakId = vedtak.id,
+            hendelse = HendelseType.FATTET,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = brukerTokenInfo.ident(),
+            kommentar = null,
+            begrunnelse = null,
+        )
+        return oppdatertKlage
+    }
+
+    private fun sjekkVedtakIdLagretIUtfall(
+        klage: Klage,
+        vedtakId: Long,
+    ) {
         val utfall = klage.utfall as KlageUtfallMedData.Avvist
         if (vedtakId != utfall.vedtak.vedtakId) {
             throw IllegalStateException(
                 "VedtakId=$vedtakId er forskjellig fra det som ligger i utfall=$vedtakId",
             )
         }
+    }
+
+    override fun attesterVedtak(
+        klageId: UUID,
+        kommentar: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage {
+        logger.info("Attesterer vedtak for klage=$klageId")
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+
+        val oppdatertKlage = klage.attesterVedtak()
+
+        val utfall =
+            checkNotNull(klage.utfall as? KlageUtfallMedData.Avvist) {
+                "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
+            }
+        runBlocking {
+            brevApiKlient.ferdigstillBrev(klage.sak.id, utfall.brev.brevId, brukerTokenInfo)
+        }
+        val vedtak =
+            runBlocking {
+                vedtakKlient.attesterVedtakKlage(
+                    klage = klage,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+            }
+        sjekkVedtakIdLagretIUtfall(oppdatertKlage, vedtak.id)
+        klageDao.lagreKlage(oppdatertKlage)
+
+        hendelseDao.vedtakHendelse(
+            behandlingId = klageId,
+            sakId = klage.sak.id,
+            vedtakId = vedtak.id,
+            hendelse = HendelseType.ATTESTERT,
+            inntruffet = Tidspunkt.now(),
+            saksbehandler = brukerTokenInfo.ident(),
+            kommentar = kommentar,
+            begrunnelse = null,
+        )
+        return oppdatertKlage
+    }
+
+    override fun underkjennVedtak(
+        klageId: UUID,
+        kommentar: String,
+        valgtBegrunnelse: String,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage {
+        logger.info("Underkjenner vedtak for klage=$klageId")
+        val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+
+        val oppdatertKlage = klage.underkjennVedtak()
+
+        val vedtak =
+            runBlocking {
+                vedtakKlient.underkjennVedtakKlage(
+                    klageId = klageId,
+                    brukerTokenInfo = brukerTokenInfo,
+                )
+            }
+
         klageDao.lagreKlage(oppdatertKlage)
 
         hendelseDao.vedtakHendelse(
             behandlingId = klage.id,
             sakId = klage.sak.id,
-            vedtakId = vedtakId,
-            hendelse = HendelseType.FATTET,
+            vedtakId = vedtak.id,
+            hendelse = HendelseType.UNDERKJENT,
             inntruffet = Tidspunkt.now(),
             saksbehandler = brukerTokenInfo.ident(),
-            kommentar = null,
-            begrunnelse = null,
+            kommentar = kommentar,
+            begrunnelse = valgtBegrunnelse,
         )
         return oppdatertKlage
     }

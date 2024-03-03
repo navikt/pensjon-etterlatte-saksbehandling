@@ -124,7 +124,7 @@ export const ToggleMinOppgaveliste = () => {
   }, [location.pathname])
 
   useEffect(() => {
-    leggFilterILocalStorage({ ...oppgavelistaFilter, fnrFilter: '' })
+    leggFilterILocalStorage({ ...oppgavelistaFilter, fnrFilter: '', sakidFilter: '' })
   }, [oppgavelistaFilter])
 
   useEffect(() => {

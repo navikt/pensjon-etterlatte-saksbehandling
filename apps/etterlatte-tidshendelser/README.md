@@ -11,6 +11,10 @@ Denne appen styrer jobber som kjører med jevne mellomrom for å håndtere netto
   - `AO_OMS67` Opphør omstillingsstønad ved fylte 67 år
 - Omstillingsstønad
   - `OMS_DOED_3AAR` Opphør omstillingsstønad 3 år etter dødsfall
+    - Unntak: har rett uten tidsbegrensning
+    - NB: Mangler sjekk for utvidelse med 2 år (sannsynligvis nytt vilkår) 
+  - `OMS_DOED_5AAR` Opphør utvidet omstillingsstønad, (3 + 2) år etter dødsfall
+    - Unntak: har rett uten tidsbegrensning  
 
 ## Oversikt
 
@@ -35,8 +39,9 @@ kt{{kafka-etterlatte}}:::kafka-topic
 
 subgraph grunnlag
     grunnlag_sjekk["
-    Saker hvor bruker 
-      fyller n år
+    Saker hvor 
+    - bruker fyller n år
+    - n år siden dødsfall
       "]
 end
 subgraph vedtaksvurdering

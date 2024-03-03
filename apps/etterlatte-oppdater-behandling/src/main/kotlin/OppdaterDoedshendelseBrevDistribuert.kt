@@ -1,7 +1,9 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.brev.BrevHendelseType
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_KODE
 import no.nav.etterlatte.rapidsandrivers.ListenerMedLoggingOgFeilhaandtering
@@ -13,7 +15,8 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
 
-const val BREVKODE_BP_INFORMASJON_DOEDSFALL = "BP_INFORMASJON_DOEDSFALL"
+class OppdaterDoedshendelseException(override val detail: String, override val cause: Throwable?) :
+    InternfeilException(detail, cause)
 
 internal class OppdaterDoedshendelseBrevDistribuert(
     rapidsConnection: RapidsConnection,
@@ -34,9 +37,14 @@ internal class OppdaterDoedshendelseBrevDistribuert(
         context: MessageContext,
     ) {
         val brevkode = packet[BREV_KODE].asText()
-        if (brevkode == BREVKODE_BP_INFORMASJON_DOEDSFALL) {
+        if (brevkode == Brevkoder.BP_INFORMASJON_DOEDSFALL.name || brevkode == Brevkoder.OMS_INFORMASJON_DOEDSFALL.name) {
             logger.info("Oppdaterer brev distribuert for dødshendelse ${packet.sakId}, ${packet.brevId}")
-            behandlingService.oppdaterDoedshendelseBrevDistribuert(DoedshendelseBrevDistribuert(packet.sakId, packet.brevId))
+            try {
+                behandlingService.oppdaterDoedshendelseBrevDistribuert(DoedshendelseBrevDistribuert(packet.sakId, packet.brevId))
+            } catch (e: Exception) {
+                logger.error("Kunne ikke oppdatere distribuert brev for sak ${packet.sakId} brevid: ${packet.brevId}")
+                throw OppdaterDoedshendelseException("Kan ikke oppdatere doedshendelse ${packet.sakId}", e)
+            }
         }
     }
 }

@@ -44,11 +44,20 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-class MaksEnBehandlingsOppgaveUnderbehandlingException(message: String) : Exception(message)
+class MaksEnAktivOppgavePaaBehandling(sakId: Long) : UgyldigForespoerselException(
+    code = "MAKS_EN_AKTIV_OPPGAVE_PAA_BEHANDLING",
+    detail = "Sak $sakId har allerede en oppgave under behandling",
+)
 
-class RevurderingaarsakIkkeStoettetIMiljoeException(message: String) : Exception(message)
+class RevurderingaarsakIkkeStoettet(aarsak: Revurderingaarsak) : UgyldigForespoerselException(
+    code = "REVURDERINGAARSAK_IKKE_STOETTET",
+    detail = "Revurderingsårsak \"$aarsak\" er foreløpig ikke støttet",
+)
 
-class RevurderingManglerIverksattBehandlingException(message: String) : Exception(message)
+class RevurderingManglerIverksattBehandling(sakId: Long) : UgyldigForespoerselException(
+    code = "REVURDERING_MANGLER_IVERKSATT_BEHANDLING",
+    detail = "Sak $sakId kan ikke revurderes uten en iverksatt behandling",
+)
 
 class RevurderingSluttbehandlingUtlandMaaHaEnBehandlingMedSkalSendeKravpakke(message: String) : Exception(message)
 
@@ -113,10 +122,7 @@ class RevurderingService(
         if (ingenBehandlingerUnderarbeid) {
             return
         } else {
-            throw MaksEnBehandlingsOppgaveUnderbehandlingException(
-                "Sak $sakId har allerede en" +
-                    " oppgave under behandling",
-            )
+            throw MaksEnAktivOppgavePaaBehandling(sakId)
         }
     }
 
@@ -129,9 +135,7 @@ class RevurderingService(
         saksbehandler: Saksbehandler,
     ): Revurdering? {
         if (!aarsak.kanBrukesIMiljo()) {
-            throw RevurderingaarsakIkkeStoettetIMiljoeException(
-                "Feil revurderingsårsak $aarsak, foreløpig ikke støttet",
-            )
+            throw RevurderingaarsakIkkeStoettet(aarsak)
         }
         val paaGrunnAvHendelseUuid =
             try {
@@ -146,10 +150,9 @@ class RevurderingService(
 
         maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
         val forrigeIverksatteBehandling =
-            behandlingService.hentSisteIverksatte(sakId) ?: throw RevurderingManglerIverksattBehandlingException(
-                "Kan ikke revurdere en sak uten iverksatt behandling sakid:" +
-                    " $sakId",
-            )
+            behandlingService.hentSisteIverksatte(sakId)
+                ?: throw RevurderingManglerIverksattBehandling(sakId)
+
         val sakType = forrigeIverksatteBehandling.sak.sakType
         if (!aarsak.gyldigForSakType(sakType)) {
             throw BadRequestException("$aarsak er ikke støttet for $sakType")

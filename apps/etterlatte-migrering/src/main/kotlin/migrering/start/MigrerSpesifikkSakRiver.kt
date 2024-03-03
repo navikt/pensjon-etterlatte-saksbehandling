@@ -82,6 +82,7 @@ internal class MigrerSpesifikkSakRiver(
                 Migreringsstatus.UNDER_MIGRERING_MANUELT,
                 Migreringsstatus.SENDT_TIL_MANUELT,
                 Migreringsstatus.UTBETALING_FEILA,
+                Migreringsstatus.ALLEREDE_GJENOPPRETTA,
             )
         ) {
             logger.info("Sak $sakId har status $migreringStatus. Avbryter.")

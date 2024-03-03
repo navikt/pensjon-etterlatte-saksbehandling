@@ -298,7 +298,7 @@ class VedtaksvurderingRepository(private val datasource: DataSource) : Transacti
                         "vedtakstatus" to VedtakStatus.FATTET_VEDTAK.name,
                         "behandlingId" to behandlingId,
                     ),
-                loggtekst = "Fatter vedtok for behandling $behandlingId",
+                loggtekst = "Fatter vedtak for behandling $behandlingId",
             )
                 .also { require(it == 1) }
                 .let { hentVedtakNonNull(behandlingId, this) }

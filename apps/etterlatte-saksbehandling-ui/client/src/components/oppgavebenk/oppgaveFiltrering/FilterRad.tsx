@@ -1,5 +1,5 @@
-import { Button, Select, TextField, UNSAFE_Combobox } from '@navikt/ds-react'
-import React, { ReactNode, useState } from 'react'
+import { Button, Select, TextField } from '@navikt/ds-react'
+import React, { ReactNode } from 'react'
 import {
   ENHETFILTER,
   EnhetFilterKeys,
@@ -9,7 +9,6 @@ import {
   initialFilter,
   oppgavetypefilter,
   OppgavetypeFilterKeys,
-  SAKSBEHANDLERFILTER,
   YTELSEFILTER,
   YtelseFilterKeys,
 } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
@@ -18,6 +17,7 @@ import { FlexRow } from '~shared/styled'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
 import { Saksbehandler } from '~shared/types/saksbehandler'
+import { FiltrerPaaSaksbehandler } from '~components/oppgavebenk/oppgaveFiltrering/FiltrerPaaSaksbehandler'
 
 interface Props {
   hentAlleOppgaver: () => void
@@ -34,12 +34,7 @@ export const FilterRad = ({
   setFilter,
   saksbehandlereIEnhet,
 }: Props): ReactNode => {
-  const [saksbehandlerFilterLokal, setSaksbehandlerFilterLokal] = useState<string>(filter.saksbehandlerFilter)
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
-
-  const saksbehandlerFilterValues = (): string[] => {
-    return Object.entries(SAKSBEHANDLERFILTER).map(([, beskrivelse]) => beskrivelse)
-  }
 
   return (
     <>
@@ -70,28 +65,7 @@ export const FilterRad = ({
             ))}
         </Select>
 
-        <UNSAFE_Combobox
-          label="Saksbehandler"
-          value={saksbehandlerFilterLokal}
-          options={saksbehandlerFilterValues().concat(
-            Array.from(saksbehandlereIEnhet.map((behandler) => behandler.navn))
-          )}
-          onChange={(e) => {
-            setSaksbehandlerFilterLokal(e?.target.value ? e?.target.value : '')
-          }}
-          onToggleSelected={(option, isSelected) => {
-            if (isSelected) {
-              if (saksbehandlerFilterValues().find((val) => val === option)) {
-                setFilter({ ...filter, saksbehandlerFilter: option })
-              } else {
-                const selectedSaksbehandler: Saksbehandler = saksbehandlereIEnhet.find(
-                  (behandler) => behandler.navn === option
-                ) || { navn: '', ident: '' }
-                setFilter({ ...filter, saksbehandlerFilter: selectedSaksbehandler?.ident })
-              }
-            }
-          }}
-        />
+        <FiltrerPaaSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnhet} filter={filter} setFilter={setFilter} />
 
         <Select
           label="Enhet"

@@ -22,6 +22,7 @@ import no.nav.etterlatte.personOpplysning
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
 import java.sql.Connection
 import java.time.LocalDate
 import java.util.UUID
@@ -63,6 +64,10 @@ internal class DoedshendelseServiceTest {
                 object : DatabaseKontekst {
                     override fun activeTx(): Connection {
                         throw IllegalArgumentException()
+                    }
+
+                    override fun harIntransaction(): Boolean {
+                        throw NotImplementedException("not implemented")
                     }
 
                     override fun <T> inTransaction(block: () -> T): T {

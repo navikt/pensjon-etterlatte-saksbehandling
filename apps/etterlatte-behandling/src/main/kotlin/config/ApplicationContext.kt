@@ -103,6 +103,7 @@ import no.nav.etterlatte.sak.SakServiceImpl
 import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.sak.TilgangServiceImpl
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
+import no.nav.etterlatte.saksbehandler.SaksbehandlerServiceImpl
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.token.Fagsaksystem
 import java.time.Duration
@@ -409,6 +410,22 @@ internal class ApplicationContext(
 
     val behandlingInfoService = BehandlingInfoService(behandlingInfoDao, behandlingService, behandlingsStatusService)
 
+    val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
+
+    val tilbakekrevingService =
+        TilbakekrevingService(
+            tilbakekrevingDao = tilbakekrevingDao,
+            sakDao = sakDao,
+            hendelseDao = hendelseDao,
+            oppgaveService = oppgaveService,
+            vedtakKlient = vedtakKlient,
+            tilbakekrevingKlient = tilbakekrevingKlient,
+            tilbakekrevinghendelser = tilbakekreving,
+        )
+
+    val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
+    val saksbehandlerService = SaksbehandlerServiceImpl(saksbehandlerInfoDao, axsysKlient)
+
     val behandlingFactory =
         BehandlingFactory(
             oppgaveService = oppgaveService,
@@ -433,21 +450,6 @@ internal class ApplicationContext(
             behandlingService = behandlingService,
             oppgaveService = oppgaveService,
         )
-
-    val bosattUtlandService = BosattUtlandService(bosattUtlandDao = bosattUtlandDao)
-
-    val tilbakekrevingService =
-        TilbakekrevingService(
-            tilbakekrevingDao = tilbakekrevingDao,
-            sakDao = sakDao,
-            hendelseDao = hendelseDao,
-            oppgaveService = oppgaveService,
-            vedtakKlient = vedtakKlient,
-            tilbakekrevingKlient = tilbakekrevingKlient,
-            tilbakekrevinghendelser = tilbakekreving,
-        )
-
-    val saksbehandlerJobService = SaksbehandlerJobService(saksbehandlerInfoDao, navAnsattKlient, axsysKlient)
 
     // Jobs
 

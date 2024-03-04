@@ -12,7 +12,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.behandling.BehandlingService
@@ -72,7 +71,7 @@ internal class BehandlingInfoRoutesTest {
                 behandlingsstatusService,
             )
 
-        coEvery { applicationContext.navAnsattKlient.hentEnheterForSaksbehandler(any()) } returns
+        every { applicationContext.saksbehandlerService.hentEnheterForSaksbehandlerIdentWrapper(any()) } returns
             listOf(
                 SaksbehandlerEnhet(Enheter.defaultEnhet.enhetNr, Enheter.defaultEnhet.navn),
             )

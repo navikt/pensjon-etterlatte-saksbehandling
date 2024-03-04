@@ -1,6 +1,7 @@
 package no.nav.etterlatte
 
 import no.nav.etterlatte.common.ConnectionAutoclosing
+import org.testcontainers.shaded.org.apache.commons.lang3.NotImplementedException
 import java.sql.Connection
 import javax.sql.DataSource
 
@@ -12,6 +13,10 @@ import javax.sql.DataSource
 
 class DatabaseContextTest(private val ds: DataSource) : DatabaseKontekst {
     override fun activeTx(): Connection = ds.connection
+
+    override fun harIntransaction(): Boolean {
+        throw NotImplementedException("not implemented")
+    }
 
     override fun <T> inTransaction(block: () -> T): T {
         // NOOPP

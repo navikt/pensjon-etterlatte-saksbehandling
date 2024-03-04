@@ -30,13 +30,11 @@ import no.nav.etterlatte.migrering.person.krr.KrrKlientImpl
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class DoedshendelseJobServiceTest {
     private val dao = mockk<DoedshendelseDao>()
     private val kontrollpunktService = mockk<DoedshendelseKontrollpunktService>()

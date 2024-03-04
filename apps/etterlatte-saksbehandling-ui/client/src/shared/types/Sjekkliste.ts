@@ -1,7 +1,6 @@
 export interface ISjekkliste {
   id: string
   kommentar: string | undefined
-  adresseForBrev: string | undefined
   kontonrRegistrert: string | undefined
   onsketSkattetrekk: number | undefined
   bekreftet: boolean

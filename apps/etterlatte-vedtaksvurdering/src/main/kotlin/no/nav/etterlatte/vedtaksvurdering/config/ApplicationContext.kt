@@ -75,6 +75,7 @@ class ApplicationContext {
     val vedtakKlageService =
         VedtakKlageService(
             repository = VedtaksvurderingRepository(dataSource),
+            rapidService = vedtaksvurderingRapidService,
         )
 
     val vedtakSamordningService =

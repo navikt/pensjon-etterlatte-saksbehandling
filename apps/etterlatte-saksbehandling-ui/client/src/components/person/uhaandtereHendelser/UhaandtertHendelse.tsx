@@ -52,26 +52,22 @@ const UhaandtertHendelse = ({ sakType, hendelse, harAapenRevurdering, startRevur
         <>
           <HendelseBeskrivelse sakType={sakType} hendelse={hendelse} />
 
-          <BodyShort spacing>
-            {tattMedIBehandling ? (
+          {tattMedIBehandling ? (
+            <Alert variant="info" inline>
+              Denne hendelsen har en revurdering knyttet til seg.{' '}
+              <BlueLink href={`/behandling/${hendelse.behandlingId}/revurderingsoversikt`}>Gå til revurdering</BlueLink>
+            </Alert>
+          ) : harAapenRevurdering ? (
+            <Alert variant="info" inline>
+              Denne saken har en åpen revurdering, denne må behandles før en ny kan startes.
+            </Alert>
+          ) : (
+            !stoetterRevurdering && (
               <Alert variant="info" inline>
-                Denne hendelsen har en revurdering knyttet til seg.{' '}
-                <BlueLink href={`/behandling/${hendelse.behandlingId}/revurderingsoversikt`}>
-                  Gå til revurdering
-                </BlueLink>
+                Automatisk revurdering støttes ikke for denne hendelsen
               </Alert>
-            ) : harAapenRevurdering ? (
-              <Alert variant="info" inline>
-                Denne saken har en åpen revurdering, denne må behandles før en ny kan startes.
-              </Alert>
-            ) : (
-              !stoetterRevurdering && (
-                <Alert variant="info" inline>
-                  Automatisk revurdering støttes ikke for denne hendelsen
-                </Alert>
-              )
-            )}
-          </BodyShort>
+            )
+          )}
 
           <div style={{ minHeight: '3rem', marginTop: '1rem' }}>
             <div>

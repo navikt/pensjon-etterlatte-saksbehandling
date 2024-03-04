@@ -96,12 +96,14 @@ class BrevdataFacade(
                 vedtak?.vedtakFattet?.let { vedtak.attestasjon?.attestant ?: innloggetSaksbehandlerIdent }
 
             val behandling =
-                if (behandlingId != null && vedtak?.type in
-                    listOf(
-                        VedtakType.INNVILGELSE,
-                        VedtakType.AVSLAG,
-                        VedtakType.OPPHOER,
-                        VedtakType.ENDRING,
+                if (behandlingId != null && (
+                        vedtak?.type in
+                            listOf(
+                                VedtakType.INNVILGELSE,
+                                VedtakType.AVSLAG,
+                                VedtakType.OPPHOER,
+                                VedtakType.ENDRING,
+                            ) || vedtak == null
                     )
                 ) {
                     behandlingKlient.hentBehandling(behandlingId, brukerTokenInfo)

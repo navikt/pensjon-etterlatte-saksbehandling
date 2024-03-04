@@ -3,6 +3,7 @@ package no.nav.etterlatte.behandling.klienter
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
+import com.github.michaelbull.result.mapError
 import com.typesafe.config.Config
 import io.ktor.client.HttpClient
 import no.nav.etterlatte.behandling.objectMapper
@@ -59,6 +60,11 @@ interface BrevApiKlient {
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto
+
+    suspend fun slettVedtaksbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    )
 }
 
 class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
@@ -154,6 +160,17 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
             onSuccess = { resource -> deserialize(resource.response!!.toJson()) },
             brukerTokenInfo = brukerTokenInfo,
         )
+    }
+
+    override suspend fun slettVedtaksbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        downstreamResourceClient.delete(
+            resource = Resource(clientId = clientId, url = "$resourceUrl/api/brev/behandling/$klageId/vedtak"),
+            brukerTokenInfo = brukerTokenInfo,
+            postBody = "",
+        ).mapError { error -> throw error }
     }
 
     private suspend fun settTittelForBrev(

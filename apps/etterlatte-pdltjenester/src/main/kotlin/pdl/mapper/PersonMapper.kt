@@ -16,6 +16,7 @@ import no.nav.etterlatte.pdl.PdlHentPerson
 import no.nav.etterlatte.pdl.PdlKlient
 import no.nav.etterlatte.pdl.PdlStatsborgerskap
 import org.slf4j.LoggerFactory
+import personweb.dto.PersonNavn
 
 object PersonMapper {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -93,6 +94,22 @@ object PersonMapper {
             )
         }
 
+    fun mapPersonNavn(
+        ppsKlient: ParallelleSannheterKlient,
+        fnr: Folkeregisteridentifikator,
+        hentPerson: PdlHentPerson,
+    ): PersonNavn =
+        runBlocking {
+            val navn = ppsKlient.avklarNavn(hentPerson.navn)
+
+            PersonNavn(
+                fornavn = navn.fornavn,
+                mellomnavn = navn.mellomnavn,
+                etternavn = navn.etternavn,
+                foedselsnummer = fnr,
+            )
+        }
+
     fun mapOpplysningsperson(
         ppsKlient: ParallelleSannheterKlient,
         pdlKlient: PdlKlient,
@@ -140,7 +157,7 @@ object PersonMapper {
                     } ?: OpplysningDTO(AdressebeskyttelseGradering.UGRADERT, null),
                 bostedsadresse =
                     hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
-                        ?.map { OpplysningDTO(it, null) }, // Finn ut hva opplysningsid:n er for data fra pps
+                        ?.map { OpplysningDTO(it, null) },
                 oppholdsadresse =
                     hentPerson.oppholdsadresse?.let { AdresseMapper.mapOppholdsadresse(ppsKlient, it) }
                         ?.map { OpplysningDTO(it, null) },
@@ -168,7 +185,7 @@ object PersonMapper {
                     OpplysningDTO(
                         FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, request.rolle),
                         null,
-                    ), // TODO ai: tre opplysninger i en
+                    ),
                 avdoedesBarn = barnekull?.barn,
                 vergemaalEllerFremtidsfullmakt =
                     hentPerson.vergemaalEllerFremtidsfullmakt?.let { VergeMapper.mapVerge(it) }

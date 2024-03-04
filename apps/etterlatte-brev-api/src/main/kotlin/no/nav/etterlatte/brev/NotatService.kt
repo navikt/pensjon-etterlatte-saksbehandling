@@ -22,7 +22,6 @@ import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevInnhold
 import no.nav.etterlatte.brev.model.BrevProsessType
-import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Mottaker
 import no.nav.etterlatte.brev.model.OpprettNyttBrev
 import no.nav.etterlatte.brev.model.Pdf
@@ -30,6 +29,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.token.BrukerTokenInfo
+import no.nav.etterlatte.token.Fagsaksystem
 import no.nav.pensjon.brevbaker.api.model.Felles
 import org.slf4j.LoggerFactory
 import java.util.Base64
@@ -152,7 +152,7 @@ class NotatService(
                         sakstype = Sakstype.FAGSAK,
                         fagsakId = sak.id.toString(),
                         tema = sak.sakType.tema,
-                        fagsaksystem = "EY",
+                        fagsaksystem = Fagsaksystem.EY.navn,
                     ),
                 tema = sak.sakType.tema,
                 tittel = tittel,

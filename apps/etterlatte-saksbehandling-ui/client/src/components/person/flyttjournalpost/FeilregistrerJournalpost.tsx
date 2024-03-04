@@ -1,4 +1,4 @@
-import { Alert, BodyShort, Button, List, Panel } from '@navikt/ds-react'
+import { Alert, BodyShort, Box, Button, List } from '@navikt/ds-react'
 import { FlexRow } from '~shared/styled'
 import { isPending } from '~shared/api/apiUtils'
 import React from 'react'
@@ -33,7 +33,7 @@ export const FeilregistrerJournalpost = ({
   }
 
   return (
-    <Panel>
+    <Box padding="4" borderRadius="small">
       <BodyShort spacing>
         Du har valgt journalpost med ID {valgtJournalpost.journalpostId}.
         <br />
@@ -78,6 +78,6 @@ export const FeilregistrerJournalpost = ({
           </Button>
         )}
       </FlexRow>
-    </Panel>
+    </Box>
   )
 }

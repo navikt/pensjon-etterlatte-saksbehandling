@@ -33,7 +33,7 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
         initialiserRiver(rapidsConnection, EventNames.FEILA) {
             validate { it.interestedIn(FEILENDE_STEG) }
             validate { it.requireKey(KILDE_KEY) }
-            validate { it.requireValue(KILDE_KEY, Vedtaksloesning.PESYS.name) }
+            validate { it.requireAny(KILDE_KEY, listOf(Vedtaksloesning.PESYS.name, Vedtaksloesning.GJENOPPRETTA.name)) }
             validate { it.interestedIn("vedtak.behandlingId") }
             validate { it.interestedIn(BEHANDLING_ID_KEY) }
             validate { it.interestedIn(PESYS_ID_KEY) }
@@ -44,7 +44,7 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
                     FEILENDE_STEG,
                     listOf(
                         Migreringshendelser.VERIFISER.lagEventnameForType(),
-                        Migreringshendelser.AVBRYT_BEHANDLING.lagEventnameForType(),
+                        "AvbrytBehandlingHvisMigreringFeilaRiver",
                     ),
                 )
             }
@@ -70,7 +70,14 @@ internal class FeilendeMigreringLytterRiver(rapidsConnection: RapidsConnection, 
             feil = packet.feilmelding,
             pesysId = pesyskopling.first!!,
         )
-        repository.oppdaterStatus(pesyskopling.first!!, Migreringsstatus.MIGRERING_FEILA)
+
+        val nyStatus =
+            if (packet.feilendeSteg == "MigreringTrygdetidHendelserRiver") {
+                Migreringsstatus.TRYGDETID_FEILA
+            } else {
+                Migreringsstatus.MIGRERING_FEILA
+            }
+        repository.oppdaterStatus(pesyskopling.first!!, nyStatus)
         packet.setEventNameForHendelseType(Migreringshendelser.AVBRYT_BEHANDLING)
         pesyskopling.second?.let {
             packet.behandlingId = it

@@ -63,7 +63,7 @@ class TidshendelseRiver(
                 packet["yrkesskadefordel_pre_20240101"] = result
             }
 
-            if (type == "OMS_DOED_3AAR" && hendelseData["loependeYtelse"]?.asBoolean() == true) {
+            if (type in arrayOf("OMS_DOED_3AAR", "OMS_DOED_5AAR") && hendelseData["loependeYtelse"]?.asBoolean() == true) {
                 val loependeBehandlingId = hendelseData["loependeYtelse_behandlingId"].asText()
                 val result = vilkaarsvurderingService.harRettUtenTidsbegrensning(loependeBehandlingId)
                 logger.info("OMS: sjekk av rett uten tidsbegrensning: $result")

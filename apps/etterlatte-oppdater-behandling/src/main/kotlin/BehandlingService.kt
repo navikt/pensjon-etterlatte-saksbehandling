@@ -14,7 +14,6 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.libs.common.FoedselsNummerMedGraderingDTO
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.DoedshendelseBrevDistribuert
-import no.nav.etterlatte.libs.common.behandling.MigreringRespons
 import no.nav.etterlatte.libs.common.behandling.Omregningshendelse
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.NyOppgaveDto
@@ -61,7 +60,7 @@ interface BehandlingService {
 
     fun migrerAlleTempBehandlingerTilbakeTilTrygdetidOppdatert(saker: Saker): SakIDListe
 
-    fun migrer(hendelse: MigreringRequest): MigreringRespons
+    suspend fun migrer(hendelse: MigreringRequest): HttpResponse
 
     fun opprettOppgaveManuellGjenoppretting(hendelse: MigreringRequest)
 
@@ -190,12 +189,10 @@ class BehandlingServiceImpl(
         }
     }
 
-    override fun migrer(hendelse: MigreringRequest): MigreringRespons =
-        runBlocking {
-            behandlingKlient.post("$url/migrering") {
-                contentType(ContentType.Application.Json)
-                setBody(hendelse)
-            }.body()
+    override suspend fun migrer(hendelse: MigreringRequest): HttpResponse =
+        behandlingKlient.post("$url/migrering") {
+            contentType(ContentType.Application.Json)
+            setBody(hendelse)
         }
 
     override fun opprettOppgaveManuellGjenoppretting(hendelse: MigreringRequest) {

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
@@ -20,6 +21,7 @@ data class DoedshendelseInternal internal constructor(
     val oppgaveId: UUID? = null,
     val brevId: Long? = null,
     val sakId: Long? = null,
+    val kontrollpunkter: List<DoedshendelseKontrollpunkt>? = null,
 ) {
     companion object {
         fun nyHendelse(
@@ -40,29 +42,47 @@ data class DoedshendelseInternal internal constructor(
         )
     }
 
-    fun tilOppdatert(): DoedshendelseInternal {
+    fun tilOppdatert(
+        avdoedDoedsdato: LocalDate,
+        endringstype: Endringstype,
+    ): DoedshendelseInternal {
         return copy(
+            avdoedDoedsdato = avdoedDoedsdato,
             status = Status.OPPDATERT,
             endret = endret,
+            endringstype = endringstype,
         )
     }
 
     fun tilAvbrutt(
         sakId: Long? = null,
         oppgaveId: UUID? = null,
+        kontrollpunkter: List<DoedshendelseKontrollpunkt>,
     ): DoedshendelseInternal {
         return copy(
             sakId = sakId,
             oppgaveId = oppgaveId,
+            kontrollpunkter = kontrollpunkter,
             status = Status.FERDIG,
             utfall = Utfall.AVBRUTT,
             endret = Tidspunkt.now(),
         )
     }
 
+    fun tilAnnulert(): DoedshendelseInternal {
+        return copy(
+            status = Status.FERDIG,
+            utfall = Utfall.AVBRUTT,
+            endret = Tidspunkt.now(),
+            endringstype = Endringstype.ANNULLERT,
+            kontrollpunkter = listOf(DoedshendelseKontrollpunkt.DoedshendelseErAnnullert),
+        )
+    }
+
     fun tilBehandlet(
         utfall: Utfall,
         sakId: Long,
+        kontrollpunkter: List<DoedshendelseKontrollpunkt>,
         oppgaveId: UUID? = null,
         brevId: Long? = null,
     ): DoedshendelseInternal {
@@ -70,6 +90,7 @@ data class DoedshendelseInternal internal constructor(
             status = Status.FERDIG,
             utfall = utfall,
             sakId = sakId,
+            kontrollpunkter = kontrollpunkter,
             oppgaveId = oppgaveId,
             brevId = brevId,
             endret = Tidspunkt.now(),

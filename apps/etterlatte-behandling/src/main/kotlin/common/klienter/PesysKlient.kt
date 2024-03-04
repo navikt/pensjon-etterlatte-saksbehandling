@@ -1,5 +1,6 @@
 package no.nav.etterlatte.common.klienter
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.michaelbull.result.mapBoth
 import com.typesafe.config.Config
@@ -48,7 +49,9 @@ class PesysKlientImpl(config: Config, pen: HttpClient) : PesysKlient {
 data class SakSammendragResponse(
     val sakType: String,
     val sakStatus: Status,
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
     val fomDato: LocalDate?,
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssZ")
     val tomDate: LocalDate?,
 ) {
     companion object {

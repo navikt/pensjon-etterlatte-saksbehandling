@@ -1,5 +1,5 @@
 import React from 'react'
-import { BodyShort, Button, Heading, Panel, TextField } from '@navikt/ds-react'
+import { BodyShort, Box, Button, Heading, TextField } from '@navikt/ds-react'
 import { InputList, InputRow, NyBehandlingSkjema } from './OpprettNyBehandling'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import {
@@ -42,7 +42,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
         />
       </InputRow>
 
-      <Panel border>
+      <Box padding="4" borderWidth="1" borderRadius="small">
         <Heading size="small" spacing>
           Gjenlevende forelder
           <BodyShort textColor="subtle">Legg til gjenlevende hvis tilgjengelig</BodyShort>
@@ -74,9 +74,9 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
             Legg til gjenlevende
           </Button>
         </InputList>
-      </Panel>
+      </Box>
 
-      <Panel border>
+      <Box padding="4" borderWidth="1" borderRadius="small">
         <Heading size="small" spacing>
           Avdød forelder
           <BodyShort textColor="subtle">Legg til avdød hvis tilgjengelig</BodyShort>
@@ -108,9 +108,9 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
             Legg til avdød
           </Button>
         </InputList>
-      </Panel>
+      </Box>
 
-      <Panel border>
+      <Box padding="4" borderWidth="1" borderRadius="small">
         <Heading size="small" spacing>
           Søsken
           <BodyShort textColor="subtle">Legg til barn hvis tilgjengelig</BodyShort>
@@ -136,7 +136,7 @@ export default function PersongalleriBarnepensjon({ erManuellMigrering = false }
             Legg til søsken
           </Button>
         </InputList>
-      </Panel>
+      </Box>
     </SpaceChildren>
   )
 }

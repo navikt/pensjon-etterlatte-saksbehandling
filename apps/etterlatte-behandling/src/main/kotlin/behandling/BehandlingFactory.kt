@@ -52,7 +52,7 @@ import java.time.LocalDateTime
 
 class BehandlingFactory(
     private val oppgaveService: OppgaveService,
-    private val grunnlagService: GrunnlagService,
+    private val grunnlagService: GrunnlagServiceImpl,
     private val revurderingService: AutomatiskRevurderingService,
     private val gyldighetsproevingService: GyldighetsproevingService,
     private val sakService: SakService,
@@ -208,7 +208,7 @@ class BehandlingFactory(
 
         grunnlagService.leggTilNyeOpplysninger(behandling.id, NyeSaksopplysninger(sak.id, opplysninger))
 
-        if (request.kilde == Vedtaksloesning.PESYS) {
+        if (request.kilde in listOf(Vedtaksloesning.PESYS, Vedtaksloesning.GJENOPPRETTA)) {
             coroutineScope {
                 val pesysId = requireNotNull(request.pesysId) { "Manuell migrering må ha pesysid til sak som migreres" }
                 migreringKlient.opprettManuellMigrering(behandlingId = behandling.id, pesysId = pesysId, sakId = sak.id)

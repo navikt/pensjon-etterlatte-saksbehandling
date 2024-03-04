@@ -7,7 +7,6 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.grunnlag.opplysningstyper.Opplysningstype
 import no.nav.etterlatte.libs.common.rapidsandrivers.BEHOV_NAME_KEY
 import no.nav.etterlatte.libs.common.rapidsandrivers.setEventNameForHendelseType
-import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.migrering.Migreringsstatus
 import no.nav.etterlatte.migrering.PesysRepository
 import no.nav.etterlatte.migrering.Pesyssak
@@ -81,7 +80,9 @@ internal class MigrerSpesifikkSakRiver(
                 Migreringsstatus.PAUSE,
                 Migreringsstatus.MANUELL,
                 Migreringsstatus.UNDER_MIGRERING_MANUELT,
+                Migreringsstatus.SENDT_TIL_MANUELT,
                 Migreringsstatus.UTBETALING_FEILA,
+                Migreringsstatus.ALLEREDE_GJENOPPRETTA,
             )
         ) {
             logger.info("Sak $sakId har status $migreringStatus. Avbryter.")
@@ -133,7 +134,13 @@ internal class MigrerSpesifikkSakRiver(
         logger.info(
             "Migrering starta for pesys-sak ${sak.id} og melding om behandling ble sendt.",
         )
-        pesysRepository.oppdaterStatus(PesysId(sak.id), Migreringsstatus.UNDER_MIGRERING)
+        val nyStatus =
+            if (request.kanAutomatiskGjenopprettes) {
+                Migreringsstatus.UNDER_MIGRERING
+            } else {
+                Migreringsstatus.SENDT_TIL_MANUELT
+            }
+        pesysRepository.oppdaterStatus(PesysId(sak.id), nyStatus)
     }
 
     private fun sendSakRettTilVedtak(

@@ -56,10 +56,9 @@ class MigreringService(
                 }
             inTransaction {
                 val behandlinger =
-                    behandlingService.hentBehandlingerForSak(sak.id).filter { it.status != BehandlingStatus.AVBRUTT }
-                if (behandlinger.any { it.status == BehandlingStatus.IVERKSATT } ||
-                    behandlinger.any { it.kilde != Vedtaksloesning.GJENOPPRETTA }
-                ) {
+                    behandlingService.hentBehandlingerForSak(sak.id)
+                        .filter { it.status != BehandlingStatus.AVBRUTT }
+                if (behandlinger.isNotEmpty()) {
                     throw FinnesLoependeEllerIverksattBehandlingForFnr()
                 }
 

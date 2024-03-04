@@ -11,10 +11,6 @@ export enum SortKey {
   FNR = 'fnr',
 }
 
-interface SorteringsState extends Omit<SortState, 'direction'> {
-  direction: 'ascending' | 'descending' | 'no-order'
-}
-
 interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
@@ -30,12 +26,12 @@ export const OppgaverTable = ({
   saksbehandlereIEnhet,
   setSortering,
 }: Props): ReactNode => {
-  const [sort, setSort] = useState<SorteringsState>()
+  const [sort, setSort] = useState<SortState>()
 
   const handleSort = (sortKey: SortKey) => {
     setSort(
       sort && sortKey === sort.orderBy && sort.direction === 'descending'
-        ? { orderBy: sortKey, direction: 'no-order' }
+        ? { orderBy: sortKey, direction: 'none' }
         : {
             orderBy: sortKey,
             direction: sort && sortKey === sort.orderBy && sort.direction === 'ascending' ? 'descending' : 'ascending',
@@ -44,16 +40,16 @@ export const OppgaverTable = ({
     switch (sort?.orderBy) {
       case SortKey.FRIST:
         const nySorteringFrist: OppgaveSortering = {
-          fnrSortering: 'no-order',
-          fristSortering: sort ? sort.direction : 'no-order',
+          fnrSortering: 'none',
+          fristSortering: sort ? sort.direction : 'none',
         }
         setSortering(nySorteringFrist)
         leggTilSorteringILocalStorage(nySorteringFrist)
         break
       case SortKey.FNR:
         const nySorteringFnr: OppgaveSortering = {
-          fristSortering: 'no-order',
-          fnrSortering: sort ? sort.direction : 'no-order',
+          fristSortering: 'none',
+          fnrSortering: sort ? sort.direction : 'none',
         }
         setSortering(nySorteringFnr)
         leggTilSorteringILocalStorage(nySorteringFnr)
@@ -64,23 +60,20 @@ export const OppgaverTable = ({
   return (
     <Table
       size="small"
-      sort={sort && sort.direction !== 'no-order' ? { direction: sort.direction, orderBy: sort.orderBy } : undefined}
+      sort={sort && sort.direction !== 'none' ? { direction: sort.direction, orderBy: sort.orderBy } : undefined}
       onSortChange={(sortKey) => handleSort(sortKey as SortKey)}
     >
       <OppgaverTableHeader />
       <Table.Body>
-        {oppgaver &&
-          oppgaver.map((oppgave: OppgaveDTO) => {
-            return (
-              <OppgaverTableRow
-                key={oppgave.id}
-                oppgave={oppgave}
-                saksbehandlereIEnhet={saksbehandlereIEnhet}
-                oppdaterTildeling={oppdaterTildeling}
-                oppdaterFrist={oppdaterFrist}
-              />
-            )
-          })}
+        {oppgaver?.map((oppgave: OppgaveDTO) => (
+          <OppgaverTableRow
+            key={oppgave.id}
+            oppgave={oppgave}
+            saksbehandlereIEnhet={saksbehandlereIEnhet}
+            oppdaterTildeling={oppdaterTildeling}
+            oppdaterFrist={oppdaterFrist}
+          />
+        ))}
       </Table.Body>
     </Table>
   )

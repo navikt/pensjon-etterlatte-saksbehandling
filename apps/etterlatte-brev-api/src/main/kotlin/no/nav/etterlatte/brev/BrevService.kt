@@ -1,6 +1,5 @@
 package no.nav.etterlatte.brev
 
-import no.nav.etterlatte.brev.brevbaker.Brevkoder
 import no.nav.etterlatte.brev.brevbaker.RedigerbarTekstRequest
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.model.Brev
@@ -102,7 +101,7 @@ class BrevService(
             .also { logger.info("Tittel på brev (id=$id) oppdatert") }
     }
 
-    suspend fun oppdaterSpraak(
+    fun oppdaterSpraak(
         id: BrevID,
         spraak: Spraak,
     ) {

@@ -94,16 +94,6 @@ export const HandlingerForOppgave = ({ oppgave }: { oppgave: OppgaveDTO }) => {
           )}
         </>
       )
-    case 'MANUELT_OPPHOER':
-      return (
-        <>
-          {erInnloggetSaksbehandlerOppgave && referanse && (
-            <Button size="small" href={`/behandling/${referanse}`} as="a">
-              Gå til opphør
-            </Button>
-          )}
-        </>
-      )
     case 'ATTESTERING':
       return (
         <>

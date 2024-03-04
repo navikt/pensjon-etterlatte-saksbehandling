@@ -11,7 +11,7 @@ import { OversiktGyldigFramsatt } from '~components/behandling/soeknadsoversikt/
 import { Utlandstilknytning } from '~components/behandling/soeknadsoversikt/utlandstilknytning/Utlandstilknytning'
 import { SakType } from '~shared/types/sak'
 import { OversiktKommerBarnetTilgode } from '~components/behandling/soeknadsoversikt/kommerBarnetTilgode/OversiktKommerBarnetTilgode'
-import { Start } from '~components/behandling/handlinger/start'
+import { Start } from '~components/behandling/handlinger/Start'
 import { IDetaljertBehandling, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
 import { BoddEllerArbeidetUtlandet } from '~components/behandling/soeknadsoversikt/boddEllerArbeidetUtlandet/BoddEllerArbeidetUtlandet'
 import OppdaterGrunnlagModal from '~components/behandling/handlinger/OppdaterGrunnlagModal'

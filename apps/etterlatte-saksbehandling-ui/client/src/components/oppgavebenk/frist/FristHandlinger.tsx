@@ -85,17 +85,8 @@ export const FristHandlinger = (props: {
                 errorMessage: 'Kunne ikke lagre ny frist',
               })}
               {!nyFrist && <Alert variant="warning">Du må velge en måned</Alert>}
-              <FlexRow>
-                <Button
-                  loading={isPending(redigerfristSvar)}
-                  disabled={!nyFrist}
-                  onClick={() => {
-                    redigerFrist({ oppgaveId, type, redigerFristRequest: { frist: nyFrist, versjon: oppgaveVersjon } })
-                  }}
-                >
-                  Lagre ny frist
-                </Button>
 
+              <FlexRow justify="right">
                 {isSuccess(redigerfristSvar) ? (
                   <Button
                     variant="secondary"
@@ -107,10 +98,20 @@ export const FristHandlinger = (props: {
                     Lukk
                   </Button>
                 ) : (
-                  <Button variant="secondary" onClick={() => setOpen(false)}>
+                  <Button variant="secondary" onClick={() => setOpen(false)} disabled={isPending(redigerfristSvar)}>
                     Avbryt
                   </Button>
                 )}
+
+                <Button
+                  loading={isPending(redigerfristSvar)}
+                  disabled={!nyFrist}
+                  onClick={() => {
+                    redigerFrist({ oppgaveId, type, redigerFristRequest: { frist: nyFrist, versjon: oppgaveVersjon } })
+                  }}
+                >
+                  Lagre ny frist
+                </Button>
               </FlexRow>
             </Modal.Body>
           </Modal>

@@ -4,7 +4,6 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import no.nav.etterlatte.brev.adresse.AdresseException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -35,6 +34,6 @@ class NavansattKlient(
                 }.also { cache.put(ident, it) }
             }
         } catch (exception: Exception) {
-            throw AdresseException("Feil i kall mot navansatt med ident: $ident", exception)
+            throw RuntimeException("Feil i kall mot navansatt med ident: $ident", exception)
         }
 }

@@ -3,6 +3,7 @@ package no.nav.etterlatte
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.brev.Brevtype
 import no.nav.etterlatte.brev.NotatService
 import no.nav.etterlatte.brev.StrukturertBrev
 import no.nav.etterlatte.brev.adresse.AdresseService
@@ -12,7 +13,6 @@ import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.dokarkiv.DokarkivKlient
 import no.nav.etterlatte.brev.dokarkiv.OpprettJournalpostResponse
 import no.nav.etterlatte.brev.hentinformasjon.GrunnlagKlient
-import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.libs.common.behandling.Formkrav

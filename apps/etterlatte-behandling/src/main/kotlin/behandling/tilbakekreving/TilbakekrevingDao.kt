@@ -31,12 +31,52 @@ import java.time.YearMonth
 import java.util.UUID
 
 class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing) {
+    fun hentTilbakekrevinger(sakId: Long): List<TilbakekrevingBehandling> {
+        return connectionAutoclosing.hentConnection {
+            with(it) {
+                val tilbakekrevinger = selectTilbakekrevinger(this, sakId)
+                tilbakekrevinger.map { tilbakekreving ->
+                    tilbakekreving.copy(
+                        tilbakekreving =
+                            tilbakekreving.tilbakekreving.copy(
+                                perioder = selectTilbakekrevingsperioder(this, tilbakekreving.id),
+                            ),
+                    )
+                }
+            }
+        }
+    }
+
+    private fun selectTilbakekrevinger(
+        connection: Connection,
+        sakId: Long,
+    ): List<TilbakekrevingBehandling> =
+        with(connection) {
+            val statement =
+                prepareStatement(
+                    """
+                    SELECT t.id, t.sak_id, saktype, fnr, enhet, opprettet, status, kravgrunnlag,
+                            vurdering_beskrivelse, vurdering_konklusjon, vurdering_aarsak, vurdering_hjemmel,
+                            vurdering_aktsomhet, akstomhet_redusering_av_kravet,
+                            aktsomhet_strafferettslig_vurdering, aktsomhet_rentevurdering
+                    FROM tilbakekreving t INNER JOIN sak s on t.sak_id = s.id
+                    WHERE t.sak_id = ?
+                    """.trimIndent(),
+                )
+            statement.setObject(1, sakId)
+            statement.executeQuery().toList { toTilbakekreving() }
+        }
+
     fun hentTilbakekreving(tilbakekrevingId: UUID): TilbakekrevingBehandling {
         return connectionAutoclosing.hentConnection {
             with(it) {
-                val perioder = selectTilbakekrevingsperioder(this, tilbakekrevingId)
-                selectTilbakekreving(this, tilbakekrevingId, perioder)
-                    ?: throw TilbakekrevingFinnesIkkeException("Tilbakekreving med id=$tilbakekrevingId finnes ikke")
+                val tilbakekreving = selectTilbakekreving(this, tilbakekrevingId)
+                tilbakekreving?.copy(
+                    tilbakekreving =
+                        tilbakekreving.tilbakekreving.copy(
+                            perioder = selectTilbakekrevingsperioder(this, tilbakekrevingId),
+                        ),
+                ) ?: throw TilbakekrevingFinnesIkkeException("Tilbakekreving med id=$tilbakekrevingId finnes ikke")
             }
         }
     }
@@ -44,7 +84,6 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
     private fun selectTilbakekreving(
         connection: Connection,
         tilbakekrevingId: UUID,
-        perioder: List<TilbakekrevingPeriode>,
     ): TilbakekrevingBehandling? =
         with(connection) {
             val statement =
@@ -59,7 +98,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
                     """.trimIndent(),
                 )
             statement.setObject(1, tilbakekrevingId)
-            statement.executeQuery().singleOrNull { toTilbakekreving(perioder) }
+            statement.executeQuery().singleOrNull { toTilbakekreving() }
         }
 
     private fun selectTilbakekrevingsperioder(
@@ -210,7 +249,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
         statement.executeBatch()
     }
 
-    private fun ResultSet.toTilbakekreving(perioder: List<TilbakekrevingPeriode>) =
+    private fun ResultSet.toTilbakekreving() =
         TilbakekrevingBehandling(
             id = getString("id").let { UUID.fromString(it) },
             sak =
@@ -238,7 +277,7 @@ class TilbakekrevingDao(private val connectionAutoclosing: ConnectionAutoclosing
                                 ),
                             hjemmel = getString("vurdering_hjemmel")?.let { TilbakekrevingHjemmel.valueOf(it) },
                         ),
-                    perioder = perioder,
+                    perioder = emptyList(),
                     kravgrunnlag = getString("kravgrunnlag").let { objectMapper.readValue(it) },
                 ),
         )

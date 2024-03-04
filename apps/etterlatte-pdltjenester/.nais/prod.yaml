@@ -33,6 +33,18 @@ spec:
   azure:
     application:
       enabled: true
+      tenant: nav.no
+      claims:
+        groups:
+          - id: 11053fd7-e674-4552-9a88-f9fcedfa70b3 # 0000-GA-PENSJON_ATTESTERING
+          - id: 0af3955f-df85-4eb0-b5b2-45bf2c8aeb9e # 0000-GA-PENSJON_SAKSBEHANDLER
+          - id: ad7b87a6-9180-467c-affc-20a566b0fec0 # 0000-GA-Strengt_Fortrolig_Adresse
+          - id: 9ec6487d-f37a-4aad-a027-cd221c1ac32b #0000-GA-Fortrolig_Adresse
+          - id: e750ceb5-b70b-4d94-b4fa-9d22467b786b # 0000-GA-Egne_ansatte
+          - id: baf0a4b6-71ca-45dd-9731-9f3469627c38 # 0000-GA-PENSJON_NASJONAL_M_LOGG
+          - id: f8ceac75-30fe-4f0f-aec6-db706986caf0 # 0000-GA-PENSJON_NASJONAL_U_LOGG
+        extra:
+          - NAVident
   env:
     - name: PDL_URL
       value: https://pdl-api.prod-fss-pub.nais.io/graphql
@@ -56,3 +68,4 @@ spec:
         - application: etterlatte-behandling
         - application: etterlatte-grunnlag
         - application: etterlatte-migrering
+        - application: etterlatte-saksbehandling-ui

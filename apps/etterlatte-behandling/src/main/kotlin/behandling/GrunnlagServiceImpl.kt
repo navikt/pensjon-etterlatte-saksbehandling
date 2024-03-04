@@ -8,10 +8,51 @@ import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.grunnlag.NyeSaksopplysninger
 import no.nav.etterlatte.libs.common.grunnlag.OppdaterGrunnlagRequest
 import no.nav.etterlatte.libs.common.grunnlag.Opplysningsbehov
+import no.nav.etterlatte.libs.common.sak.Sak
 import java.util.UUID
 
-class GrunnlagService(private val grunnlagKlient: GrunnlagKlientImpl) {
+interface GrunnlagService {
+    fun leggInnNyttGrunnlagSak(
+        sak: Sak,
+        persongalleri: Persongalleri,
+    )
+
     fun leggInnNyttGrunnlag(
+        behandling: Behandling,
+        persongalleri: Persongalleri,
+    )
+
+    fun oppdaterGrunnlag(
+        behandlingId: UUID,
+        sakId: Long,
+        sakType: SakType,
+    )
+
+    fun leggTilNyeOpplysninger(
+        behandlingId: UUID,
+        opplysninger: NyeSaksopplysninger,
+    )
+
+    fun leggTilNyeOpplysningerBareSak(
+        sakId: Long,
+        opplysninger: NyeSaksopplysninger,
+    )
+
+    suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri
+}
+
+class GrunnlagServiceImpl(private val grunnlagKlient: GrunnlagKlientImpl) : GrunnlagService {
+    override fun leggInnNyttGrunnlagSak(
+        sak: Sak,
+        persongalleri: Persongalleri,
+    ) {
+        runBlocking {
+            val grunnlagsbehov = grunnlagsbehovSak(sak, persongalleri)
+            grunnlagKlient.leggInnNyttGrunnlagSak(sak.id, grunnlagsbehov)
+        }
+    }
+
+    override fun leggInnNyttGrunnlag(
         behandling: Behandling,
         persongalleri: Persongalleri,
     ) {
@@ -21,7 +62,7 @@ class GrunnlagService(private val grunnlagKlient: GrunnlagKlientImpl) {
         }
     }
 
-    fun oppdaterGrunnlag(
+    override fun oppdaterGrunnlag(
         behandlingId: UUID,
         sakId: Long,
         sakType: SakType,
@@ -34,17 +75,35 @@ class GrunnlagService(private val grunnlagKlient: GrunnlagKlientImpl) {
         }
     }
 
-    fun leggTilNyeOpplysninger(
+    override fun leggTilNyeOpplysninger(
         behandlingId: UUID,
         opplysninger: NyeSaksopplysninger,
     ) = runBlocking {
         grunnlagKlient.lagreNyeSaksopplysninger(behandlingId, opplysninger)
     }
 
-    suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri {
+    override fun leggTilNyeOpplysningerBareSak(
+        sakId: Long,
+        opplysninger: NyeSaksopplysninger,
+    ) = runBlocking {
+        grunnlagKlient.lagreNyeSaksopplysningerBareSak(sakId, opplysninger)
+    }
+
+    override suspend fun hentPersongalleri(behandlingId: UUID): Persongalleri {
         return grunnlagKlient.hentPersongalleri(behandlingId)
             ?.opplysning
             ?: throw NoSuchElementException("Persongalleri mangler for behandling id=$behandlingId")
+    }
+
+    private fun grunnlagsbehovSak(
+        sak: Sak,
+        persongalleri: Persongalleri,
+    ): Opplysningsbehov {
+        return Opplysningsbehov(
+            sakId = sak.id,
+            sakType = sak.sakType,
+            persongalleri = persongalleri,
+        )
     }
 
     private fun grunnlagsbehov(

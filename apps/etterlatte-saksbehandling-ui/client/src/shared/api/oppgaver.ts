@@ -41,7 +41,6 @@ export type OppgaveKilde = 'HENDELSE' | 'BEHANDLING' | 'EKSTERN' | 'GENERELL_BEH
 export type Oppgavetype =
   | 'FOERSTEGANGSBEHANDLING'
   | 'REVURDERING'
-  | 'MANUELT_OPPHOER'
   | 'VURDER_KONSEKVENS'
   | 'ATTESTERING'
   | 'UNDERKJENT'

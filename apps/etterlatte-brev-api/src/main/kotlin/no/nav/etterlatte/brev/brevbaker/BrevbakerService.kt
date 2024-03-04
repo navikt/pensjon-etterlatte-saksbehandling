@@ -1,5 +1,6 @@
 package no.nav.etterlatte.brev.brevbaker
 
+import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.MigreringBrevRequest
 import no.nav.etterlatte.brev.adresse.AdresseService
 import no.nav.etterlatte.brev.behandling.GenerellBrevData
@@ -7,6 +8,7 @@ import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Slate
+import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.token.BrukerTokenInfo
 import org.slf4j.LoggerFactory
 import java.util.Base64
@@ -18,7 +20,7 @@ class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val
         brevID: BrevID?,
         brevRequest: BrevbakerRequest,
     ): Pdf {
-        val brevbakerResponse = brevbakerKlient.genererPdf(brevRequest)
+        val brevbakerResponse = retryOgPakkUt { brevbakerKlient.genererPdf(brevRequest) }
 
         return Base64.getDecoder().decode(brevbakerResponse.base64pdf)
             .let { Pdf(it) }
@@ -40,7 +42,7 @@ class BrevbakerService(private val brevbakerKlient: BrevbakerKlient, private val
                     generellBrevData.sak.sakType,
                 )
             }
-        val brevbakerResponse = brevbakerKlient.genererJSON(request)
+        val brevbakerResponse = retryOgPakkUt { brevbakerKlient.genererJSON(request) }
         return BlockTilSlateKonverterer.konverter(brevbakerResponse)
     }
 }

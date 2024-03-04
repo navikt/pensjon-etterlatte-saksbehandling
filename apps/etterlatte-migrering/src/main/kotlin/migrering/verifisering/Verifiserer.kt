@@ -364,3 +364,8 @@ data object BeregningsmetodeIkkeNasjonal : Verifiseringsfeil() {
     override val message: String
         get() = "Sak har brukt annen beregningsmetode enn Nasjonal"
 }
+
+data object ManglerTrygdetidsperioder : Verifiseringsfeil() {
+    override val message: String
+        get() = "Mangler trygdetidsperioder, og anvendt trygdetid er ikke 40 i nasjonal sak"
+}

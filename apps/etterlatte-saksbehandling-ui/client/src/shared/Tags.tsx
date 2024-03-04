@@ -20,7 +20,6 @@ export const tagColors: Record<SakType | IBehandlingsType | UtlandstilknytningTy
   [IBehandlingsType.REVURDERING]: Variants.ALT3_FILLED,
   [SakType.BARNEPENSJON]: Variants.INFO,
   [SakType.OMSTILLINGSSTOENAD]: Variants.NEUTRAL,
-  [IBehandlingsType.MANUELT_OPPHOER]: Variants.ALT3_FILLED,
   [UtlandstilknytningType.NASJONAL]: Variants.INFO_FILLED,
   [UtlandstilknytningType.UTLANDSTILSNITT]: Variants.ALT3,
   [UtlandstilknytningType.BOSATT_UTLAND]: Variants.ALT2,

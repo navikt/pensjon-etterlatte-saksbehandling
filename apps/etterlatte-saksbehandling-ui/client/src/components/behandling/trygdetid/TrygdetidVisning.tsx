@@ -3,7 +3,7 @@ import { Border, HeadingWrapper } from '~components/behandling/soeknadsoversikt/
 import { Button, Heading } from '@navikt/ds-react'
 import { formaterStringDato } from '~utils/formattering'
 import { Content, ContentHeader } from '~shared/styled'
-import { IBehandlingStatus, IBehandlingsType, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
+import { IBehandlingStatus, IDetaljertBehandling } from '~shared/types/IDetaljertBehandling'
 import { useVedtaksResultat } from '~components/behandling/useVedtaksResultat'
 import { BehandlingHandlingKnapper } from '~components/behandling/handlinger/BehandlingHandlingKnapper'
 import { NesteOgTilbake } from '~components/behandling/handlinger/NesteOgTilbake'
@@ -33,8 +33,8 @@ const TrygdetidVisning = (props: { behandling: IDetaljertBehandling }) => {
   const [vilkaarsvurdering, getVilkaarsvurdering] = useApiCall(hentVilkaarsvurdering)
   const [yrkesskadeTrygdetid, setYrkesskadeTrygdetid] = useState<boolean>(false)
 
-  const vedtaksresultat =
-    behandling.behandlingType !== IBehandlingsType.MANUELT_OPPHOER ? useVedtaksResultat() : 'opphoer'
+  const vedtaksresultat = useVedtaksResultat()
+
   const virkningstidspunkt = behandling.virkningstidspunkt?.dato
     ? formaterStringDato(behandling.virkningstidspunkt.dato)
     : undefined

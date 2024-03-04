@@ -103,7 +103,7 @@ fun Route.vedtaksvurderingRoute(
                     logger.error(
                         "Kan ikke sende attestert vedtak på kafka for behandling id: $behandlingId, vedtak: ${attestert.vedtak.id} " +
                             "Saknr: ${attestert.vedtak.sak.id}. " +
-                            "Det betyr at vi ikke sender ut brev for vedtaket eller at en utbetaling går til oppdrag. " +
+                            "Det betyr at vi ikke får sendt ut vedtaksbrev og heller ikke utbetalingsoppdrag. " +
                             "Denne hendelsen må sendes ut manuelt straks.",
                         e,
                     )
@@ -286,23 +286,39 @@ fun Route.klagevedtakRoute(
     val logger = application.log
 
     route("/vedtak/klage/{$BEHANDLINGID_CALL_PARAMETER}") {
-        post("/lagre-vedtak") {
+        post("/upsert") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) { behandlingId ->
                 val klage = call.receive<Klage>()
                 if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
                 logger.info("Oppretter vedtak for klage med id=$behandlingId")
 
-                call.respond(service.opprettEllerOppdaterVedtakOmAvvisning(klage))
+                call.respond(service.opprettEllerOppdaterVedtakOmAvvisning(klage).toDto())
             }
         }
 
-        post("/fatt-vedtak") {
+        post("/fatt") {
             withBehandlingId(behandlingKlient, skrivetilgang = true) {
                 val klage = call.receive<Klage>()
                 if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
 
-                logger.info("Oppretter vedtak for klage med id=$behandlingId")
-                call.respond(service.fattVedtak(klage, brukerTokenInfo))
+                logger.info("Fatter vedtak for klage med id=$behandlingId")
+                call.respond(service.fattVedtak(klage, brukerTokenInfo).toDto())
+            }
+        }
+
+        post("/attester") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                val klage = call.receive<Klage>()
+                if (klage.id != behandlingId) throw MismatchingIdException("Klage-ID i path og i request body er ikke like")
+
+                logger.info("Attesterer vedtak for klage med id=$behandlingId")
+                call.respond(service.attesterVedtak(klage, brukerTokenInfo).toDto())
+            }
+        }
+        post("/underkjenn") {
+            withBehandlingId(behandlingKlient, skrivetilgang = true) {
+                logger.info("Underkjenner vedtak for klage=$behandlingId")
+                call.respond(service.underkjennVedtak(behandlingId).toDto())
             }
         }
     }

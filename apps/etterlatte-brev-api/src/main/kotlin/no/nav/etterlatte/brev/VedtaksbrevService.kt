@@ -2,7 +2,7 @@ package no.nav.etterlatte.brev
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.etterlatte.brev.behandling.ForenkletVedtak
-import no.nav.etterlatte.brev.brevbaker.Brevkoder
+import no.nav.etterlatte.brev.behandlingklient.BehandlingKlient
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.VedtaksvurderingService
 import no.nav.etterlatte.brev.model.Brev
@@ -10,12 +10,12 @@ import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
-import no.nav.etterlatte.brev.model.Brevtype
 import no.nav.etterlatte.brev.model.Pdf
 import no.nav.etterlatte.brev.model.Status
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperRedigerbartUtfallVarsel
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.UtlandstilknytningType
+import no.nav.etterlatte.libs.common.feilhaandtering.IkkeTillattException
 import no.nav.etterlatte.libs.common.feilhaandtering.UgyldigForespoerselException
 import no.nav.etterlatte.libs.common.vedtak.VedtakStatus
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -30,6 +30,7 @@ class VedtaksbrevService(
     private val pdfGenerator: PDFGenerator,
     private val brevDataMapperRedigerbartUtfallVedtak: BrevDataMapperRedigerbartUtfallVedtak,
     private val brevDataMapperFerdigstilling: BrevDataMapperFerdigstillingVedtak,
+    private val behandlingKlient: BehandlingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(VedtaksbrevService::class.java)
 
@@ -122,10 +123,7 @@ class VedtaksbrevService(
                 db.settBrevFerdigstilt(brev.id)
             }
         } else {
-            throw IllegalStateException(
-                "Kan ikke ferdigstille/låse brev når saksbehandler ($saksbehandlerIdent)" +
-                    " og attestant (${brukerTokenInfo.ident()}) er samme person.",
-            )
+            throw SaksbehandlerOgAttestantSammePerson(saksbehandlerIdent, brukerTokenInfo.ident())
         }
     }
 
@@ -187,6 +185,22 @@ class VedtaksbrevService(
         }
     }
 
+    suspend fun settVedtaksbrevTilSlettet(
+        behandlingId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+        val brev = db.hentBrevForBehandling(behandlingId, Brevtype.VEDTAK).firstOrNull() ?: return
+
+        if (!brev.kanEndres()) {
+            throw VedtaksbrevKanIkkeSlettes(brev.id, "Brevet har status (${brev.status})")
+        }
+        val behandlingKanEndres = behandlingKlient.hentVedtaksbehandlingKanRedigeres(behandlingId, brukerTokenInfo)
+        if (!behandlingKanEndres) {
+            throw VedtaksbrevKanIkkeSlettes(brev.id, "Behandlingen til vedtaksbrevet kan ikke endres")
+        }
+        db.settBrevSlettet(brev.id, brukerTokenInfo)
+    }
+
     fun fjernFerdigstiltStatusUnderkjentVedtak(
         id: BrevID,
         vedtak: JsonNode,
@@ -214,6 +228,15 @@ class UgyldigStatusKanIkkeFerdigstilles(id: BrevID, status: Status) : UgyldigFor
         ),
 )
 
+class VedtaksbrevKanIkkeSlettes(brevId: BrevID, detalj: String) : IkkeTillattException(
+    code = "VEDTAKSBREV_KAN_IKKE_SLETTES",
+    detail = "Vedtaksbrevet kan ikke slettes: $detalj",
+    meta =
+        mapOf(
+            "id" to brevId,
+        ),
+)
+
 class UgyldigMottakerKanIkkeFerdigstilles(id: BrevID) : UgyldigForespoerselException(
     code = "UGYLDIG_MOTTAKER_BREV",
     detail = "Brevet kan ikke ferdigstilles med ugyldig mottaker og/eller adresse",
@@ -221,4 +244,10 @@ class UgyldigMottakerKanIkkeFerdigstilles(id: BrevID) : UgyldigForespoerselExcep
         mapOf(
             "id" to id,
         ),
+)
+
+class SaksbehandlerOgAttestantSammePerson(saksbehandler: String, attestant: String) : UgyldigForespoerselException(
+    code = "SAKSBEHANDLER_OG_ATTESTANT_SAMME_PERSON",
+    detail = "Kan ikke ferdigstille vedtaksbrevet når saksbehandler ($saksbehandler) og attestant ($attestant) er samme person.",
+    meta = mapOf("saksbehandler" to saksbehandler, "attestant" to attestant),
 )

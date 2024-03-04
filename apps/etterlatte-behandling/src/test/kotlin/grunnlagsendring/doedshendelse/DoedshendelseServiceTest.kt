@@ -42,15 +42,15 @@ internal class DoedshendelseServiceTest {
 
     private val avdoed =
         mockPerson().copy(
-            doedsdato = OpplysningDTO(LocalDate.of(2022, 8, 17), null),
+            doedsdato = OpplysningDTO(LocalDate.now().minusYears(2), null),
             avdoedesBarn =
                 listOf(
-                    personOpplysning(foedselsdato = LocalDate.of(2000, 1, 1)),
-                    personOpplysning(foedselsdato = LocalDate.of(2002, 8, 30)),
-                    personOpplysning().copy(foedselsaar = 2022),
-                    personOpplysning(foedselsdato = LocalDate.of(2002, 9, 15)),
-                    personOpplysning(foedselsdato = LocalDate.of(2005, 9, 15), doedsdato = LocalDate.of(2020, 8, 17)),
-                    personOpplysning(foedselsdato = LocalDate.of(2020, 9, 15)),
+                    personOpplysning(foedselsdato = LocalDate.now().minusYears(23)),
+                    personOpplysning(foedselsdato = LocalDate.now().minusYears(22)),
+                    personOpplysning().copy(foedselsaar = LocalDate.now().minusYears(2).year),
+                    personOpplysning(foedselsdato = LocalDate.now().minusYears(18)),
+                    personOpplysning(foedselsdato = LocalDate.now().minusYears(18), doedsdato = LocalDate.now().minusYears(4)),
+                    personOpplysning(foedselsdato = LocalDate.now().minusYears(3)),
                 ),
         )
 
@@ -73,7 +73,7 @@ internal class DoedshendelseServiceTest {
     }
 
     @Test
-    fun `Skal oppdatere doedshendelse med barna som kan ha rett paa barnepensjon ved doedsfall`() {
+    fun `Skal opprette doedshendelse med barna som kan ha rett paa barnepensjon ved doedsfall`() {
         every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
         every { dao.opprettDoedshendelse(any()) } just runs
         every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
@@ -93,7 +93,7 @@ internal class DoedshendelseServiceTest {
     }
 
     @Test
-    fun `Skal lagre nye hendelser hvis nye berørte finnes`() {
+    fun `Skal lagre nye hendelser hvis nye beroerte finnes`() {
         every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
         every { dao.opprettDoedshendelse(any()) } just runs
         every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
@@ -159,7 +159,7 @@ internal class DoedshendelseServiceTest {
     }
 
     @Test
-    fun `Skal oppdatere duplikat hendelse`() {
+    fun `Skal oppdatere korrigert hendelse`() {
         every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
         every { dao.opprettDoedshendelse(any()) } just runs
         every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
@@ -206,7 +206,9 @@ internal class DoedshendelseServiceTest {
         verify(exactly = 1) {
             dao.oppdaterDoedshendelse(
                 match {
-                    it.status == Status.OPPDATERT
+                    it.status == Status.OPPDATERT &&
+                        it.endringstype == Endringstype.KORRIGERT &&
+                        it.avdoedDoedsdato == avdoed.doedsdato?.verdi
                 },
             )
         }
@@ -264,7 +266,7 @@ internal class DoedshendelseServiceTest {
         verify(exactly = 1) {
             dao.oppdaterDoedshendelse(
                 match {
-                    it.status == Status.FERDIG && it.utfall == Utfall.AVBRUTT
+                    it.status == Status.FERDIG && it.utfall == Utfall.AVBRUTT && it.endringstype == Endringstype.ANNULLERT
                 },
             )
         }

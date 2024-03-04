@@ -47,6 +47,13 @@ export interface IPdlPerson {
   vergemaalEllerFremtidsfullmakt?: VergemaalEllerFremtidsfullmakt[]
 }
 
+export interface IPdlPersonNavn {
+  fornavn: string
+  mellomnavn?: string
+  etternavn: string
+  foedselsnummer: string
+}
+
 export interface Utland {
   utflyttingFraNorge?: {
     tilflyttingsland?: string

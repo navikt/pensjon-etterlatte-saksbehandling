@@ -75,47 +75,55 @@ export default function NyttBrevHandlingerPanel({ brev, setKanRedigeres, callbac
         </Button>
       )}
 
-      {statusModalOpen && (
-        <Modal open={true} width="medium">
-          {mapAllApiResult(
-            ferdigstillStatus,
-            <Spinner label="Forsøker å ferdigstille brevet ..." visible />,
-            null,
-            (error) => (
-              <Alert variant="error">{error.detail}</Alert>
-            ),
-            () => (
-              <Alert variant="info">Ferdigstilt ok!</Alert>
-            )
-          )}
+      <Modal
+        open={statusModalOpen}
+        onClose={() => setStatusModalOpen(false)}
+        width="medium"
+        aria-label="Ferdigstilling av brev"
+      >
+        {mapAllApiResult(
+          ferdigstillStatus,
+          <Spinner label="Forsøker å ferdigstille brevet ..." visible />,
+          null,
+          (error) => (
+            <Alert variant="error">{error.detail}</Alert>
+          ),
+          () => (
+            <Alert variant="info">Ferdigstilt ok!</Alert>
+          )
+        )}
 
-          {mapAllApiResult(
-            journalfoerStatus,
-            <Spinner label="Journalfører brevet i dokarkiv ..." visible />,
-            null,
-            (error) => (
-              <Alert variant="error">{error.detail}</Alert>
-            ),
-            () => (
-              <Alert variant="info">Journalført ok!</Alert>
-            )
-          )}
+        {mapAllApiResult(
+          journalfoerStatus,
+          <Spinner label="Journalfører brevet i dokarkiv ..." visible />,
+          null,
+          (error) => (
+            <Alert variant="error">{error.detail}</Alert>
+          ),
+          () => (
+            <Alert variant="info">Journalført ok!</Alert>
+          )
+        )}
 
-          {mapAllApiResult(
-            distribuerStatus,
-            <Spinner label="Sender brev til distribusjon ..." visible />,
-            null,
-            (error) => (
-              <Alert variant="error">{error.detail}</Alert>
-            ),
-            () => (
-              <Alert variant="success">Brev sendt til distribusjon. Laster inn brev på nytt...</Alert>
-            )
-          )}
-        </Modal>
-      )}
+        {mapAllApiResult(
+          distribuerStatus,
+          <Spinner label="Sender brev til distribusjon ..." visible />,
+          null,
+          (error) => (
+            <Alert variant="error">{error.detail}</Alert>
+          ),
+          () => (
+            <Alert variant="success">Brev sendt til distribusjon. Laster inn brev på nytt...</Alert>
+          )
+        )}
+      </Modal>
 
-      <Modal open={isOpen && !statusModalOpen} aria-labelledby="modal-heading" className="padding-modal">
+      <Modal
+        open={isOpen && !statusModalOpen}
+        onClose={() => setIsOpen(false)}
+        aria-labelledby="modal-heading"
+        className="padding-modal"
+      >
         <Modal.Body style={{ textAlign: 'center' }}>
           <Heading level="1" spacing size="medium" id="modal-heading">
             Er du sikker på at du vil ferdigstille brevet?

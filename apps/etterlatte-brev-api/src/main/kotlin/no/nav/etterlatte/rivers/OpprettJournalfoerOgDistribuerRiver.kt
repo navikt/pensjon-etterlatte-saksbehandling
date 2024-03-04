@@ -4,14 +4,15 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.brev.BREVMAL_RIVER_KEY
 import no.nav.etterlatte.brev.BrevHendelseType
 import no.nav.etterlatte.brev.BrevRequestHendelseType
+import no.nav.etterlatte.brev.Brevkoder
 import no.nav.etterlatte.brev.Brevoppretter
-import no.nav.etterlatte.brev.brevbaker.Brevkoder
-import no.nav.etterlatte.brev.brevbaker.EtterlatteBrevKode
+import no.nav.etterlatte.brev.EtterlatteBrevKode
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
 import no.nav.etterlatte.brev.model.BrevID
 import no.nav.etterlatte.brev.model.ManueltBrevData
 import no.nav.etterlatte.brev.model.bp.BarnepensjonInformasjonDoedsfall
 import no.nav.etterlatte.brev.model.oms.OmstillingsstoenadInformasjonDoedsfall
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import no.nav.etterlatte.libs.common.retryOgPakkUt
 import no.nav.etterlatte.rapidsandrivers.BREV_ID_KEY
 import no.nav.etterlatte.rapidsandrivers.BREV_KODE
@@ -24,6 +25,9 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import org.slf4j.LoggerFactory
+
+class OpprettJournalfoerOgDistribuerRiverException(override val detail: String, override val cause: Throwable?) :
+    InternfeilException(detail, cause)
 
 class OpprettJournalfoerOgDistribuerRiver(
     private val rapidsConnection: RapidsConnection,
@@ -57,22 +61,36 @@ class OpprettJournalfoerOgDistribuerRiver(
         brukerTokenInfo: BrukerTokenInfo,
     ): BrevID {
         logger.info("Oppretter $brevKode-brev i sak $sakId")
+
         val brevOgData =
-            retryOgPakkUt {
-                brevoppretter.opprettBrev(
-                    sakId = sakId,
-                    behandlingId = null,
-                    bruker = brukerTokenInfo,
-                    brevKode = { brevKode.redigering },
-                    brevtype = brevKode.redigering.brevtype,
-                ) {
-                    when (brevKode.redigering) {
-                        EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL -> opprettBarnepensjonInformasjonDoedsfall(sakId)
-                        EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL -> opprettOmstillingsstoenadInformasjonDoedsfall(sakId)
-                        else -> ManueltBrevData()
+            try {
+                retryOgPakkUt {
+                    brevoppretter.opprettBrev(
+                        sakId = sakId,
+                        behandlingId = null,
+                        bruker = brukerTokenInfo,
+                        brevKode = { brevKode.redigering },
+                        brevtype = brevKode.redigering.brevtype,
+                    ) {
+                        when (brevKode.redigering) {
+                            EtterlatteBrevKode.BARNEPENSJON_INFORMASJON_DOEDSFALL -> opprettBarnepensjonInformasjonDoedsfall(sakId)
+                            EtterlatteBrevKode.OMSTILLINGSSTOENAD_INFORMASJON_DOEDSFALL ->
+                                opprettOmstillingsstoenadInformasjonDoedsfall(
+                                    sakId,
+                                )
+                            else -> ManueltBrevData()
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                val feilMelding = "Fikk feil ved opprettelse av brev for sak $sakId for brevkode: $brevKode"
+                logger.error(feilMelding)
+                throw OpprettJournalfoerOgDistribuerRiverException(
+                    feilMelding,
+                    e,
+                )
             }
+
         val brevID =
             ferdigstillJournalfoerOgDistribuerBrev.ferdigstillOgGenererPDF(
                 brevKode,

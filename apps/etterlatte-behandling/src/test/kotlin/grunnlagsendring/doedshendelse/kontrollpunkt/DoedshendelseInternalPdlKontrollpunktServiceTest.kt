@@ -7,22 +7,28 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.etterlatte.JOVIAL_LAMA
 import no.nav.etterlatte.KONTANT_FOT
+import no.nav.etterlatte.behandling.BehandlingService
 import no.nav.etterlatte.behandling.domain.GrunnlagsendringsType
 import no.nav.etterlatte.behandling.domain.Grunnlagsendringshendelse
+import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.common.klienter.PesysKlient
 import no.nav.etterlatte.common.klienter.SakSammendragResponse
+import no.nav.etterlatte.foerstegangsbehandling
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseDao
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseInternal
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.Relasjon
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
 import no.nav.etterlatte.libs.common.person.FamilieRelasjon
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
 import no.nav.etterlatte.libs.common.person.PersonRolle
+import no.nav.etterlatte.libs.common.person.Sivilstand
+import no.nav.etterlatte.libs.common.person.Sivilstatus
 import no.nav.etterlatte.libs.common.person.UtflyttingFraNorge
 import no.nav.etterlatte.libs.common.person.Utland
 import no.nav.etterlatte.libs.common.sak.Sak
@@ -40,6 +46,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
     private val oppgaveService = mockk<OppgaveService>()
     private val sakService = mockk<SakService>()
     private val grunnlagsendringshendelseDao = mockk<GrunnlagsendringshendelseDao>()
+    private val behandlingService = mockk<BehandlingService>()
     private val kontrollpunktService =
         DoedshendelseKontrollpunktService(
             pdlTjenesterKlient = pdlTjenesterKlient,
@@ -47,8 +54,9 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             oppgaveService = oppgaveService,
             sakService = sakService,
             pesysKlient = pesysKlient,
+            behandlingService = behandlingService,
         )
-    private val doedshendelseInternal =
+    private val doedshendelseInternalBP =
         DoedshendelseInternal.nyHendelse(
             avdoedFnr = KONTANT_FOT.value,
             avdoedDoedsdato = LocalDate.now(),
@@ -57,26 +65,36 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             endringstype = Endringstype.OPPRETTET,
         )
 
+    private val doedshendelseInternalOMS =
+        DoedshendelseInternal.nyHendelse(
+            avdoedFnr = KONTANT_FOT.value,
+            avdoedDoedsdato = LocalDate.now(),
+            beroertFnr = JOVIAL_LAMA.value,
+            relasjon = Relasjon.EPS,
+            endringstype = Endringstype.OPPRETTET,
+        )
+
     @BeforeEach
     fun oppsett() {
-        coEvery { pesysKlient.hentSaker(doedshendelseInternal.beroertFnr) } returns emptyList()
+        coEvery { pesysKlient.hentSaker(doedshendelseInternalBP.beroertFnr) } returns emptyList()
 
+        every { behandlingService.hentSisteIverksatte(any()) } returns null
         every {
             pdlTjenesterKlient.hentPdlModell(
-                foedselsnummer = doedshendelseInternal.avdoedFnr,
+                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
             )
         } returns
             mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternal.avdoedFnr), null),
-                doedsdato = OpplysningDTO(doedshendelseInternal.avdoedDoedsdato, null),
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalBP.avdoedFnr), null),
+                doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null),
             )
         every {
             pdlTjenesterKlient.hentPdlModell(
                 foedselsnummer = any(),
                 rolle = PersonRolle.BARN,
-                saktype = any(),
+                saktype = SakType.BARNEPENSJON,
             )
         } returns
             mockPerson().copy(
@@ -92,13 +110,13 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
             )
         every {
             pdlTjenesterKlient.hentPdlModell(
-                foedselsnummer = doedshendelseInternal.beroertFnr,
+                foedselsnummer = doedshendelseInternalBP.beroertFnr,
                 rolle = PersonRolle.GJENLEVENDE,
-                saktype = any(),
+                saktype = SakType.BARNEPENSJON,
             )
         } returns
             mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternal.beroertFnr), null),
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr), null),
             )
         every { sakService.finnSak(any(), any()) } returns null
         every {
@@ -111,23 +129,151 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
     }
 
     @Test
-    fun `Skal returnere kontrollpunkt hvis avdoed ikke har doedsdato i PDL`() {
-        every {
-            pdlTjenesterKlient.hentPdlModell(
-                foedselsnummer = doedshendelseInternal.avdoedFnr,
-                rolle = PersonRolle.AVDOED,
-                saktype = any(),
+    fun `Eps har vært skilt mindre enn 5 år siden men ukjent giftedato, EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        val sivilstandSkilt =
+            Sivilstand(
+                Sivilstatus.SKILT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
+                gyldigFraOgMed = LocalDate.now().minusYears(5L),
+                null,
+                "",
             )
-        } returns mockPerson()
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternal)
+        val sivilstandGift =
+            Sivilstand(
+                Sivilstatus.GIFT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
+                gyldigFraOgMed = null,
+                null,
+                "",
+            )
 
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL)
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns
+            mockPerson()
+                .copy(sivilstand = listOf(OpplysningDTO(sivilstandSkilt, "sivilstand"), OpplysningDTO(sivilstandGift, "sivilstand")))
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly
+            listOf(
+                DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5MedUkjentGiftemaalLengde,
+            )
     }
 
     @Test
-    fun `Skal returnere kontrollpunkt hvis den beroerte har ufoeretrygd`() {
-        coEvery { pesysKlient.hentSaker(doedshendelseInternal.beroertFnr) } returns
+    fun `Eps har vært gift i 15 år med avdød og skilt ila de siste 5 år, EpsHarVaertSkiltSiste5EllerGiftI15`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        val sivilstandGift =
+            Sivilstand(
+                Sivilstatus.GIFT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
+                gyldigFraOgMed = LocalDate.now().minusYears(16L),
+                null,
+                "",
+            )
+
+        val sivilstandSkiltSiste5Aar =
+            Sivilstand(
+                Sivilstatus.SKILT,
+                Folkeregisteridentifikator.of(doedshendelseInternalOMS.avdoedFnr),
+                gyldigFraOgMed = LocalDate.now().minusYears(2L),
+                null,
+                "",
+            )
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns
+            mockPerson()
+                .copy(
+                    sivilstand =
+                        listOf(
+                            OpplysningDTO(sivilstandGift, "sivilstand"),
+                            OpplysningDTO(sivilstandSkiltSiste5Aar, "sivilstand"),
+                        ),
+                )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarVaertSkiltSiste5OgGiftI15)
+    }
+
+    @Test
+    fun `Eps er 67 år EpsKanHaAlderspensjon`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns
+            mockPerson()
+                .copy(
+                    foedselsdato = OpplysningDTO(LocalDate.now().minusYears(67L), "foedselsdato"),
+                )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsKanHaAlderspensjon)
+    }
+
+    @Test
+    fun `Skal gi kontrollpunkt eps er død om eps er død, EpsHarDoedsdato`() {
+        every { sakService.finnSak(any(), any()) } returns null
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns
+            mockPerson().copy(
+                doedsdato =
+                    OpplysningDTO(
+                        LocalDate.now(),
+                        "doedsdato",
+                    ),
+            )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarDoedsdato)
+    }
+
+    @Test
+    fun `Skal returnere kontrollpunkt BarnHarBarnepensjon for relasjon barn og har BP`() {
+        every {
+            pdlTjenesterKlient.hentPdlModell(
+                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
+                rolle = PersonRolle.AVDOED,
+                saktype = any(),
+            )
+        } returns mockPerson().copy(doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null))
+        val sakId = 1L
+        val sak =
+            Sak(
+                doedshendelseInternalBP.beroertFnr,
+                SakType.BARNEPENSJON,
+                sakId,
+                Enheter.defaultEnhet.enhetNr,
+            )
+        every { sakService.finnSak(any(), any()) } returns sak
+        every { behandlingService.hentSisteIverksatte(any()) } returns foerstegangsbehandling(sakId = sakId)
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnHarBarnepensjon)
+    }
+
+    @Test
+    fun `Skal returnere kontrollpunkt BarnHarUfoereTrygd for relasjon barn og har uføretrygd`() {
+        every {
+            pdlTjenesterKlient.hentPdlModell(
+                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
+                rolle = PersonRolle.AVDOED,
+                saktype = any(),
+            )
+        } returns mockPerson().copy(doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null))
+        coEvery { pesysKlient.hentSaker(doedshendelseInternalBP.beroertFnr) } returns
             listOf(
                 SakSammendragResponse(
                     sakType = SakSammendragResponse.UFORE_SAKTYPE,
@@ -137,16 +283,51 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
                 ),
             )
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternal)
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
 
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.KryssendeYtelseIPesys)
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.BarnHarUfoereTrygd)
+    }
+
+    @Test
+    fun `Skal returnere kontrollpunkt hvis avdoed ikke har doedsdato i PDL`() {
+        every {
+            pdlTjenesterKlient.hentPdlModell(
+                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
+                rolle = PersonRolle.AVDOED,
+                saktype = any(),
+            )
+        } returns mockPerson()
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedLeverIPDL)
+    }
+
+    @Test
+    fun `Skal returnere kontrollpunkt hvis den beroerte har ufoeretrygd`() {
+        coEvery { pesysKlient.hentSaker(doedshendelseInternalOMS.beroertFnr) } returns
+            listOf(
+                SakSammendragResponse(
+                    sakType = SakSammendragResponse.UFORE_SAKTYPE,
+                    sakStatus = SakSammendragResponse.Status.LOPENDE,
+                    fomDato = LocalDate.now().minusMonths(2),
+                    tomDate = null,
+                ),
+            )
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns mockPerson()
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.KryssendeYtelseIPesysEps)
     }
 
     @Test
     fun `Skal returnere kontrollpunkt hvis den avdoede hadde utvandring`() {
         every {
             pdlTjenesterKlient.hentPdlModell(
-                foedselsnummer = doedshendelseInternal.avdoedFnr,
+                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
             )
@@ -157,10 +338,10 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
                     utflyttingFraNorge = listOf(UtflyttingFraNorge("Sverige", LocalDate.now().minusMonths(2))),
                 ),
             ).copy(
-                doedsdato = OpplysningDTO(doedshendelseInternal.avdoedDoedsdato, null),
+                doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null),
             )
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternal)
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarUtvandret)
     }
@@ -169,17 +350,17 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
     fun `Skal returnere kontrollpunkt hvis den avdoede har D-nummer`() {
         every {
             pdlTjenesterKlient.hentPdlModell(
-                foedselsnummer = doedshendelseInternal.avdoedFnr,
+                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
                 rolle = PersonRolle.AVDOED,
                 saktype = any(),
             )
         } returns
             mockPerson().copy(
-                doedsdato = OpplysningDTO(doedshendelseInternal.avdoedDoedsdato, null),
+                doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null),
                 foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of("69057949961"), null),
             )
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternal)
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarDNummer)
     }
@@ -188,17 +369,17 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
     fun `Skal opprette kontrollpunkt ved samtidig doedsfall`() {
         every {
             pdlTjenesterKlient.hentPdlModell(
-                foedselsnummer = doedshendelseInternal.beroertFnr,
+                foedselsnummer = doedshendelseInternalBP.beroertFnr,
                 rolle = PersonRolle.GJENLEVENDE,
-                saktype = any(),
+                saktype = SakType.BARNEPENSJON,
             )
         } returns
             mockPerson().copy(
-                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternal.beroertFnr), null),
-                doedsdato = OpplysningDTO(doedshendelseInternal.avdoedDoedsdato, null),
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalBP.beroertFnr), null),
+                doedsdato = OpplysningDTO(doedshendelseInternalBP.avdoedDoedsdato, null),
             )
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternal)
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.SamtidigDoedsfall)
     }
@@ -224,33 +405,37 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
                     ),
             )
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternal)
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
 
         kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet)
     }
 
     @Test
-    fun `Skal opprette kontrollpunkt dersom det eksisterer en sak fra foer`() {
+    fun `Skal opprette kontrollpunkt dersom det eksisterer en sak fra foer for EPS`() {
         val sak =
             Sak(
-                ident = doedshendelseInternal.beroertFnr,
-                sakType = doedshendelseInternal.sakType(),
+                ident = doedshendelseInternalOMS.beroertFnr,
+                sakType = doedshendelseInternalOMS.sakType(),
                 id = 1L,
                 enhet = "0000",
             )
         every { sakService.finnSak(any(), any()) } returns sak
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternal)
+        coEvery {
+            pdlTjenesterKlient.hentPdlModell(doedshendelseInternalOMS.beroertFnr, PersonRolle.GJENLEVENDE, SakType.OMSTILLINGSSTOENAD)
+        } returns mockPerson()
 
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.SakEksistererIGjenny(sak))
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalOMS)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarSakIGjenny(sak))
     }
 
     @Test
     fun `Skal opprette kontrollpunkt dersom det eksisterer en duplikat grunnlagsendringshendelse`() {
         val sak =
             Sak(
-                ident = doedshendelseInternal.beroertFnr,
-                sakType = doedshendelseInternal.sakType(),
+                ident = doedshendelseInternalBP.beroertFnr,
+                sakType = doedshendelseInternalBP.sakType(),
                 id = 1L,
                 enhet = "0000",
             )
@@ -261,7 +446,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
         val grunnlagsendringshendelse =
             mockk<Grunnlagsendringshendelse> {
                 every { id } returns UUID.randomUUID()
-                every { gjelderPerson } returns doedshendelseInternal.avdoedFnr
+                every { gjelderPerson } returns doedshendelseInternalBP.avdoedFnr
                 every { type } returns GrunnlagsendringsType.DOEDSFALL
             }
         every { sakService.finnSak(any(), any()) } returns sak
@@ -270,11 +455,10 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
         } returns listOf(grunnlagsendringshendelse)
         every { oppgaveService.hentOppgaverForReferanse(any()) } returns listOf(oppgaveIntern)
 
-        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternal)
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
 
         kontrollpunkter shouldContainExactly
             listOf(
-                DoedshendelseKontrollpunkt.SakEksistererIGjenny(sak),
                 DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse(
                     grunnlagsendringshendelseId = grunnlagsendringshendelse.id,
                     oppgaveId = oppgaveIntern.id,
@@ -284,6 +468,6 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
 
     @Test
     fun `Skal ikke opprette kontrollpunkt hvis alle sjekker er OK`() {
-        kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternal) shouldBe emptyList()
+        kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP) shouldBe emptyList()
     }
 }

@@ -117,7 +117,7 @@ object AvkortingRegelkjoring {
                 return resultat.periodiserteResultater.map { periodisertResultat ->
                     val resultatFom = periodisertResultat.periode.fraDato
                     val avkortingsbeloep = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).avkorting.verdi
-                    val ytelseFoerAvkorting = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).beregning.verdi
+                    val ytelseFoerAvkortingGrunnlag = regelgrunnlag.finnGrunnlagForPeriode(resultatFom).beregning.verdi
                     AvkortetYtelse(
                         id = UUID.randomUUID(),
                         type = type,
@@ -128,9 +128,9 @@ object AvkortingRegelkjoring {
                             ),
                         ytelseEtterAvkorting = periodisertResultat.resultat.verdi,
                         restanse = restanse,
-                        ytelseEtterAvkortingFoerRestanse = ytelseFoerAvkorting - avkortingsbeloep,
+                        ytelseEtterAvkortingFoerRestanse = ytelseFoerAvkortingGrunnlag - avkortingsbeloep,
                         avkortingsbeloep = avkortingsbeloep,
-                        ytelseFoerAvkorting = ytelseFoerAvkorting,
+                        ytelseFoerAvkorting = ytelseFoerAvkortingGrunnlag,
                         tidspunkt = tidspunkt,
                         regelResultat = periodisertResultat.toJsonNode(),
                         kilde =

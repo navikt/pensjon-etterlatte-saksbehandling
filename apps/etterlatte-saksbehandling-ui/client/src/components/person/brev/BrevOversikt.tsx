@@ -8,10 +8,10 @@ import { DocPencilIcon, ExternalLinkIcon, TrashIcon } from '@navikt/aksel-icons'
 import Spinner from '~shared/Spinner'
 import { Container, FlexRow } from '~shared/styled'
 import BrevModal from '~components/person/brev/BrevModal'
-import { ApiErrorAlert } from '~ErrorBoundary'
+import { ApiErrorAlert, ApiWarningAlert } from '~ErrorBoundary'
 import { SakMedBehandlinger } from '~components/person/typer'
 
-import { isPending, isSuccess, mapApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
+import { isFailure, isPending, isSuccess, mapApiResult, mapSuccess, Result } from '~shared/api/apiUtils'
 import { LastOppBrev } from '~components/person/brev/LastOppBrev'
 
 const mapAdresse = (mottaker: Mottaker) => {
@@ -88,6 +88,18 @@ export default function BrevOversikt({ sakStatus }: { sakStatus: Result<SakMedBe
     } else {
       throw Error('SakID mangler!')
     }
+  }
+
+  if (isFailure(sakStatus)) {
+    return (
+      <Container>
+        {sakStatus.error.status === 404 ? (
+          <ApiWarningAlert>Kan ikke opprette brev: {sakStatus.error.detail}</ApiWarningAlert>
+        ) : (
+          <ApiErrorAlert>{sakStatus.error.detail || 'Feil ved henting av brev'}</ApiErrorAlert>
+        )}
+      </Container>
+    )
   }
 
   return (
@@ -175,7 +187,7 @@ const SlettBrev = ({ brevId, sakId }: { brevId: number; sakId: number }) => {
     <>
       <Button variant="danger" icon={<TrashIcon />} onClick={() => setIsOpen(true)} />
 
-      <Modal open={isOpen}>
+      <Modal open={isOpen} onClose={() => setIsOpen(false)} aria-label="Slett brev">
         <Modal.Body>
           <BodyShort spacing>Er du sikker på at du vil slette brevet? Handlingen kan ikke angres.</BodyShort>
 

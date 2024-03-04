@@ -13,6 +13,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.JacksonConverter
+import io.mockk.every
+import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.etterlatte.behandling.domain.ArbeidsFordelingEnhet
 import no.nav.etterlatte.behandling.domain.Navkontor
@@ -57,6 +59,7 @@ import no.nav.etterlatte.libs.common.tilbakekreving.TilbakekrevingBehandling
 import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
+import no.nav.etterlatte.libs.common.vedtak.VedtakDto
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
@@ -457,15 +460,37 @@ class VedtakKlientTest : VedtakKlient {
     override suspend fun lagreVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long {
-        return 123L
+    ): VedtakDto {
+        return mockk<VedtakDto> {
+            every { id } returns 123L
+        }
     }
 
     override suspend fun fattVedtakKlage(
         klage: Klage,
         brukerTokenInfo: BrukerTokenInfo,
-    ): Long {
-        return 123L
+    ): VedtakDto {
+        return mockk<VedtakDto> {
+            every { id } returns 123L
+        }
+    }
+
+    override suspend fun attesterVedtakKlage(
+        klage: Klage,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VedtakDto {
+        return mockk<VedtakDto> {
+            every { id } returns 123L
+        }
+    }
+
+    override suspend fun underkjennVedtakKlage(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): VedtakDto {
+        return mockk<VedtakDto> {
+            every { id } returns 123L
+        }
     }
 }
 
@@ -516,6 +541,12 @@ class BrevApiKlientTest : BrevApiKlient {
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
         return opprettetBrevDto(brevId)
+    }
+
+    override suspend fun slettVedtaksbrev(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
     }
 
     private fun opprettetBrevDto(brevId: Long) =

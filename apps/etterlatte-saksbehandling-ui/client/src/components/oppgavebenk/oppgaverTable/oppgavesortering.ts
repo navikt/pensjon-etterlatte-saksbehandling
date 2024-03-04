@@ -8,12 +8,12 @@ export interface OppgaveSortering {
 
 export const initialSortering = (): OppgaveSortering => {
   return {
-    fnrSortering: 'no-order',
-    fristSortering: 'no-order',
+    fnrSortering: 'none',
+    fristSortering: 'none',
   }
 }
 
-type Retning = 'descending' | 'ascending' | 'no-order'
+type Retning = 'descending' | 'ascending' | 'none'
 
 const sammenlignFrist = (a: OppgaveDTO, b: OppgaveDTO) => {
   // Konverterer datoene til en numerisk verdi og sammenligner dem
@@ -26,7 +26,7 @@ export function sorterFrist(retning: Retning, oppgaver: OppgaveDTO[]) {
       return oppgaver.sort(sammenlignFrist)
     case 'descending':
       return oppgaver.sort(sammenlignFrist).reverse()
-    case 'no-order':
+    case 'none':
       return oppgaver
   }
 }
@@ -42,7 +42,7 @@ export function sorterFnr(retning: Retning, oppgaver: OppgaveDTO[]) {
       return oppgaver.sort(sammenlignFnr)
     case 'descending':
       return oppgaver.sort(sammenlignFnr).reverse()
-    case 'no-order':
+    case 'none':
       return oppgaver
   }
 }
@@ -58,7 +58,8 @@ export const hentSorteringFraLocalStorage = (): OppgaveSortering => {
     if (!!sorteringFraLocalStorage) {
       const parsetFilter = JSON.parse(sorteringFraLocalStorage)
       const harGammelVersjon = Object.values(parsetFilter).find((value) => value === 'ingen')
-      if (harGammelVersjon) {
+      const harGammelVersjonNummerTo = Object.values(parsetFilter).find((value) => value === 'no-order')
+      if (harGammelVersjon || harGammelVersjonNummerTo) {
         const initiellSortering = initialSortering()
         leggTilSorteringILocalStorage(initiellSortering)
         return initiellSortering

@@ -9,8 +9,16 @@ export const leggFilterILocalStorage = (filter: Filter) => localStorage.setItem(
 export const hentFilterFraLocalStorage = (): Filter => {
   try {
     const filter = localStorage[FILTER_KEY]
-    if (!!filter) return JSON.parse(filter)
-    else return initialFilter()
+    if (!!filter) {
+      const parsedFilter = JSON.parse(filter)
+      return {
+        ...parsedFilter,
+        oppgavetypeFilter:
+          typeof parsedFilter.oppgavetypeFilter === 'string'
+            ? [parsedFilter.oppgavetypeFilter]
+            : parsedFilter.oppgavetypeFilter,
+      }
+    } else return initialFilter()
   } catch (error) {
     logger.generalError({ message: 'Feil i hentingen av filter fra localstorage' })
 

@@ -26,7 +26,7 @@ data class OppdaterJournalpostRequest(
 
     data class DokumentInfo(
         val dokumentInfoId: String,
-        val tittel: String,
+        val tittel: String?,
     )
 
     data class AvsenderMottaker(

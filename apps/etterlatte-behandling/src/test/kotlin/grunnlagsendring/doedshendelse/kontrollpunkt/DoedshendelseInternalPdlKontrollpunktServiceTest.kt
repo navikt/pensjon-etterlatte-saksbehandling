@@ -263,29 +263,30 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
                 avdoedFnr = KONTANT_FOT.value,
                 avdoedDoedsdato = LocalDate.now(),
                 beroertFnr = JOVIAL_LAMA.value,
-                relasjon = Relasjon.EPS,
+                relasjon = Relasjon.AVDOED,
                 endringstype = Endringstype.OPPRETTET,
             )
-        every { sakService.finnSaker(any()) } returns listOf(Sak())
+        every {
+            sakService.finnSaker(
+                any(),
+            )
+        } returns listOf(Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, 1L, Enheter.defaultEnhet.enhetNr))
 
-        coEvery {
+        every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(
-                doedshendelseInternalAvdoed.beroertFnr,
-                PersonRolle.GJENLEVENDE,
-                SakType.OMSTILLINGSSTOENAD,
+                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
+                rolle = PersonRolle.AVDOED,
+                saktype = any(),
             )
         } returns
             mockPerson().copy(
-                doedsdato =
-                    OpplysningDTO(
-                        LocalDate.now(),
-                        "doedsdato",
-                    ),
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr), null),
+                doedsdato = OpplysningDTO(doedshendelseInternalAvdoed.avdoedDoedsdato, null),
             )
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalAvdoed)
 
-        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarDoedsdato)
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarYtelse)
     }
 
     @Test

@@ -206,7 +206,7 @@ class OppgaveService(
         }
     }
 
-    fun oppdaterReferanse(
+    fun endreTilKildeBehandlingOgOppdaterReferanse(
         oppgaveId: UUID,
         referanse: String,
     ) {
@@ -221,7 +221,7 @@ class OppgaveService(
         if (hentetOppgave.saksbehandler?.ident.isNullOrEmpty()) {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
         } else {
-            oppgaveDao.oppdaterReferanse(oppgaveId, referanse)
+            oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
         }
     }
 

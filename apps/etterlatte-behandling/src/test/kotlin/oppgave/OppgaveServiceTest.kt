@@ -1128,7 +1128,7 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
     }
 
     @Test
-    fun `skal kunne sette referanse paa tildelt oppgave som ikke er ferdigstilt`() {
+    fun `skal kunne endre kilde og sette referanse paa tildelt oppgave som ikke er ferdigstilt`() {
         val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
         val oppgave =
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(
@@ -1142,8 +1142,11 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
         oppgaveService.tildelSaksbehandler(oppgave.id, "Z123456")
 
         val nyReferanse = UUID.randomUUID().toString()
-        oppgaveService.oppdaterReferanse(oppgaveId = oppgave.id, referanse = nyReferanse)
+        oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId = oppgave.id, referanse = nyReferanse)
 
-        oppgaveService.hentOppgave(oppgave.id)!!.referanse shouldBe nyReferanse
+        with(oppgaveService.hentOppgave(oppgave.id)!!) {
+            kilde shouldBe OppgaveKilde.BEHANDLING
+            referanse shouldBe nyReferanse
+        }
     }
 }

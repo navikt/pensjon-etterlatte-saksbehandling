@@ -228,6 +228,7 @@ class RevurderingService(
                 fritekstAarsak = fritekstAarsak,
                 saksbehandlerIdent = saksbehandler.ident,
                 frist = triggendeOppgave?.frist,
+                paaGrunnAvOppgave = paaGrunnAvOppgave,
             ).oppdater()
                 .also { revurdering ->
                     if (paaGrunnAvHendelse != null) {
@@ -247,11 +248,6 @@ class RevurderingService(
                                 e,
                             )
                         }
-                    }
-
-                    paaGrunnAvOppgave?.let {
-                        oppgaveService.oppdaterReferanse(it, revurdering.id.toString())
-                        oppgaveService.hentOgFerdigstillOppgaveById(it, saksbehandler)
                     }
                 }
         }
@@ -295,6 +291,7 @@ class RevurderingService(
         saksbehandlerIdent: String,
         relatertBehandlingId: String? = null,
         frist: Tidspunkt? = null,
+        paaGrunnAvOppgave: UUID? = null,
     ): RevurderingOgOppfoelging =
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
@@ -338,16 +335,22 @@ class RevurderingService(
                     )
                 },
                 opprettOgTildelOppgave = {
-                    val oppgave =
-                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                            referanse = it.id.toString(),
-                            sakId = sakId,
-                            oppgaveKilde = OppgaveKilde.BEHANDLING,
-                            oppgaveType = OppgaveType.REVURDERING,
-                            merknad = begrunnelse,
-                            frist = frist,
+                    if (paaGrunnAvOppgave != null) {
+                        (
+                            oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(paaGrunnAvOppgave, it.id.toString())
                         )
-                    oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
+                    } else {
+                        val oppgave =
+                            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                                referanse = it.id.toString(),
+                                sakId = sakId,
+                                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                                oppgaveType = OppgaveType.REVURDERING,
+                                merknad = begrunnelse,
+                                frist = frist,
+                            )
+                        oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
+                    }
                 },
             )
         }

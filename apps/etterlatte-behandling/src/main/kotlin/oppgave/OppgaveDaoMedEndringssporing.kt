@@ -176,12 +176,12 @@ class OppgaveDaoMedEndringssporingImpl(
         }
     }
 
-    override fun oppdaterReferanse(
+    override fun endreTilKildeBehandlingOgOppdaterReferanse(
         oppgaveId: UUID,
         referanse: String,
     ) {
         lagreEndringerPaaOppgave(oppgaveId) {
-            oppgaveDao.oppdaterReferanse(oppgaveId, referanse)
+            oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
         }
     }
 

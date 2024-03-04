@@ -69,7 +69,7 @@ interface OppgaveDao {
         oppgaveStatus: Status,
     )
 
-    fun oppdaterReferanse(
+    fun endreTilKildeBehandlingOgOppdaterReferanse(
         oppgaveId: UUID,
         referanse: String,
     )
@@ -380,7 +380,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
         }
     }
 
-    override fun oppdaterReferanse(
+    override fun endreTilKildeBehandlingOgOppdaterReferanse(
         oppgaveId: UUID,
         referanse: String,
     ) {
@@ -390,7 +390,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                     prepareStatement(
                         """
                         UPDATE oppgave
-                        SET referanse = ?
+                        SET kilde = 'BEHANDLING',
+                            referanse = ?
                         where id = ?::UUID
                         """.trimIndent(),
                     )

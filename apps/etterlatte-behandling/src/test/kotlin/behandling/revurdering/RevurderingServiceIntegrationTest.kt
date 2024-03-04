@@ -1,6 +1,5 @@
 package no.nav.etterlatte.behandling.revurdering
 
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.ktor.server.plugins.BadRequestException
 import io.mockk.coVerify
@@ -913,7 +912,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
     }
 
     @Test
-    fun `Kan opprette revurdering paa bakgrunn av en revurderingsoppgave, skal lukke triggende oppgave`() {
+    fun `Kan opprette revurdering paa bakgrunn av en revurderingsoppgave, skal oppdatere triggende oppgave til aa gjelde behandling`() {
         val oppgaveService = applicationContext.oppgaveService
         val revurderingService = revurderingService()
         val behandlingFactory = behandlingFactory()
@@ -946,7 +945,7 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
             oppgaveService.tildelSaksbehandler(oppgaveHendelse.id, "Z123456")
         }
 
-        // Opprett revurdering m/ oppgave, og ferdigstill triggende oppgave
+        // Opprett revurdering, triggende oppgave konverteres til aa gjelde behandlingen
         val revurdering =
             inTransaction {
                 revurderingService.opprettManuellRevurderingWrapper(
@@ -959,19 +958,13 @@ class RevurderingServiceIntegrationTest : BehandlingIntegrationTest() {
                 )
             }
 
-        val oppgaver =
+        with(
             inTransaction {
-                oppgaveService.hentOppgaverForReferanse(revurdering.id.toString())
-            }
-        oppgaver shouldHaveSize 2
-
-        with(oppgaver.first { it.id == oppgaveHendelse.id }) {
-            status shouldBe Status.FERDIGSTILT
-        }
-
-        with(oppgaver.first { it.id != oppgaveHendelse.id }) {
+                oppgaveService.hentOppgave(oppgaveHendelse.id)!!
+            },
+        ) {
             status shouldBe Status.UNDER_BEHANDLING
-            merknad shouldBe oppgaveHendelse.merknad
+            referanse shouldBe revurdering.id.toString()
         }
     }
 

@@ -294,7 +294,11 @@ internal fun Route.oppgaveRoutes(
                 inTransaction {
                     val oppgaver = service.hentFristGaarUt(request)
                     oppgaver.forEach {
-                        service.oppdaterStatusOgMerknad(it.oppgaveID, "", Status.PAA_VENT)
+                        service.oppdaterStatusOgMerknad(
+                            it.oppgaveID,
+                            "",
+                            Status.UNDER_BEHANDLING,
+                        )
                     }
                     oppgaver
                 }

@@ -430,7 +430,7 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                     VentefristGaarUt(
                         oppgaveID = getUUID("id"),
                         sakId = getLong("sak_id"),
-                        behandlingId = getUUID("referanse"),
+                        behandlingId = UUID.fromString(getString("referanse")),
                         oppgavekilde = kilde,
                     )
                 }.also { utgaatte ->

@@ -11,6 +11,7 @@ import no.nav.etterlatte.rapidsandrivers.OPPGAVE_ID_FLERE_KEY
 import no.nav.etterlatte.rapidsandrivers.asUUID
 import no.nav.etterlatte.rapidsandrivers.behandlingId
 import no.nav.etterlatte.rapidsandrivers.dato
+import no.nav.etterlatte.rapidsandrivers.migrering.OPPGAVEKILDE_KEY
 import no.nav.etterlatte.rapidsandrivers.migrering.Ventehendelser
 import no.nav.etterlatte.rapidsandrivers.sakId
 import no.nav.helse.rapids_rivers.JsonMessage
@@ -42,6 +43,7 @@ internal class TaAvVentRiver(rapidsConnection: RapidsConnection, private val beh
         respons.behandlinger.forEach {
             packet.sakId = it.sakId
             packet.behandlingId = it.behandlingId
+            packet[OPPGAVEKILDE_KEY] = it.oppgavekilde
             packet.eventName = Ventehendelser.TATT_AV_VENT.lagEventnameForType()
             context.publish(packet.toJson())
         }

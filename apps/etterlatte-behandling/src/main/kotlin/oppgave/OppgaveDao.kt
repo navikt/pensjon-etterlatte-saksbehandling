@@ -17,7 +17,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.setTidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.database.singleOrNull
 import no.nav.etterlatte.libs.database.toList
-import no.nav.helse.rapids_rivers.toUUID
 import org.slf4j.LoggerFactory
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -403,7 +402,8 @@ class OppgaveDaoImpl(private val connectionAutoclosing: ConnectionAutoclosing) :
                     VentefristGaarUt(
                         oppgaveID = getUUID("id"),
                         sakId = getLong("sak_id"),
-                        behandlingId = getString("referanse").toUUID(),
+                        behandlingId = getUUID("referanse"),
+                        oppgavekilde = kilde,
                     )
                 }.also { utgaatte ->
                     logger.info("Hentet ${utgaatte.size} oppgaver der fristen går ut for dato $dato og type $type")

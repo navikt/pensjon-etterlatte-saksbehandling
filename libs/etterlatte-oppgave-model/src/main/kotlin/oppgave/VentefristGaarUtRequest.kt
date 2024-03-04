@@ -18,4 +18,5 @@ data class VentefristGaarUt(
     val sakId: Long,
     val behandlingId: UUID,
     val oppgaveID: UUID,
+    val oppgavekilde: OppgaveKilde,
 )

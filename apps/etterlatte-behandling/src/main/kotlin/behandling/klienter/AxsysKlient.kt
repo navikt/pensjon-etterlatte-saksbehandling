@@ -1,5 +1,6 @@
 package no.nav.etterlatte.behandling.klienter
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -10,6 +11,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
+import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -41,25 +43,29 @@ class AxsysKlientImpl(private val client: HttpClient, private val url: String) :
                 }
 
             if (response.status.isSuccess()) {
-                response.body<EnhetslisteResponse?>()?.enheter
-                    ?.filter { it.enhetId == null || it.navn == null }
-                    ?.map { SaksbehandlerEnhet(it.enhetId!!, it.navn!!) } ?: emptyList()
+                val res = response.body<EnhetslisteResponse?>()?.enheter
+                val refilter = res?.filter { it.enhetId != null || it.navn != null }
+                refilter?.map { SaksbehandlerEnhet(it.enhetId!!, it.navn!!) } ?: emptyList()
             } else {
                 throw ClientRequestException(response, response.toString())
             }
         } catch (cause: Throwable) {
-            logger.warn("Klarte ikke å hente enheter for ident $ident fra axsys.", cause)
-            return emptyList()
+            val feilmelding = "Klarte ikke å hente enheter for ident $ident fra axsys."
+            logger.error(feilmelding, cause)
+            throw HentEnhetException(feilmelding, cause)
         }
     }
 }
 
-class Enheter {
-    var enhetId: String? = null // Enhetsnummer
-    var temaer: ArrayList<String>? = null // EYB EYO
-    var navn: String? = null
-}
+class HentEnhetException(override val detail: String, override val cause: Throwable?) :
+    InternfeilException(detail, cause)
 
-class EnhetslisteResponse {
-    var enheter: List<Enheter>? = null
-}
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Enheter(
+    var enhetId: String? = null, // Enhetsnummer
+    var temaer: ArrayList<String>? = null, // EYB EYO
+    var navn: String? = null,
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class EnhetslisteResponse(var enheter: List<Enheter>? = null)

@@ -1,7 +1,8 @@
 package no.nav.etterlatte.behandling.domain
 
+// TODO: flytt denne classen
 data class SaksbehandlerEnhet(
-    val id: String,
+    val enhetsNummer: String,
     val navn: String,
 )
 

@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl as PdlDoedshen
 
 enum class DoedshendelseFeatureToggle(private val key: String) : FeatureToggle {
     KanLagreDoedshendelse("pensjon-etterlatte.kan-lage-doedhendelse"),
+    KanSendeBrevOgOppretteOppgave("pensjon-etterlatte.kan-sende-brev-og-opprette-oppgave"),
     ;
 
     override fun key(): String = key

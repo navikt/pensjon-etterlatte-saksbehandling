@@ -211,7 +211,7 @@ class DoedshendelseKontrollpunktService(
             this.sakStatus == SakSammendragResponse.Status.LOPENDE
     }
 
-    fun kontrollerBarnOgHarBP(
+    private fun kontrollerBarnOgHarBP(
         doedshendelse: DoedshendelseInternal,
         sak: Sak?,
     ): DoedshendelseKontrollpunkt.BarnHarBarnepensjon? {

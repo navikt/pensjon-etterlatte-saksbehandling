@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import io.kotest.matchers.shouldBe
-import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -30,15 +29,12 @@ import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.migrering.person.krr.KrrKlientImpl
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.sak.SakService
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DoedshendelseJobServiceTest {
     private val dao = mockk<DoedshendelseDao>()
     private val kontrollpunktService = mockk<DoedshendelseKontrollpunktService>()
@@ -71,12 +67,12 @@ class DoedshendelseJobServiceTest {
             every { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
         }
 
-    val pdlTjenesterKlient =
+    private val pdlTjenesterKlient =
         mockk<PdlTjenesterKlient> {
             every { hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
         }
 
-    val krrKlient =
+    private val krrKlient =
         mockk<KrrKlientImpl> {
             coEvery { hentDigitalKontaktinformasjon(any()) } returns
                 DigitalKontaktinformasjon(
@@ -103,11 +99,6 @@ class DoedshendelseJobServiceTest {
             pdlTjenesterKlient,
             krrKlient = krrKlient,
         )
-
-    @AfterEach
-    fun afterEach() {
-        clearMocks(dao, kontrollpunktService, grunnlagsendringshendelseService)
-    }
 
     @Test
     fun `skal kjoere 1 ny gyldig hendelse som er 2 dager gammel og droppe 1`() {
@@ -194,5 +185,37 @@ class DoedshendelseJobServiceTest {
         doedshendelseCapture.captured.status shouldBe Status.FERDIG
         doedshendelseCapture.captured.utfall shouldBe Utfall.OPPGAVE
         doedshendelseCapture.captured.oppgaveId shouldBe oppgaveId
+    }
+
+    @Test
+    fun `skal ikke opprette oppgave for doedshendelse dersom feature-toggle er av`() {
+        val doedshendelseInternal =
+            DoedshendelseInternal.nyHendelse(
+                avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
+                avdoedDoedsdato = LocalDate.now(),
+                beroertFnr = "12345678901",
+                relasjon = Relasjon.BARN,
+                endringstype = Endringstype.OPPRETTET,
+            ).copy(endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt())
+
+        every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
+        every { dao.oppdaterDoedshendelse(any()) } returns Unit
+        val oppgaveId = UUID.randomUUID()
+        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
+            mockk {
+                every { id } returns oppgaveId
+            }
+        every { toggle.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, any()) } returns false
+        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
+            listOf(AvdoedHarUtvandret, AvdoedHarDNummer)
+        val doedshendelseCapture = slot<DoedshendelseInternal>()
+
+        service.setupKontekstAndRun(kontekst)
+
+        verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
+        verify(exactly = 0) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
+        doedshendelseCapture.captured.status shouldBe Status.FERDIG
+        doedshendelseCapture.captured.utfall shouldBe Utfall.OPPGAVE
+        doedshendelseCapture.captured.oppgaveId shouldBe null
     }
 }

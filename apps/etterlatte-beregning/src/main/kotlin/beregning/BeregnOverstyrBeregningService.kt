@@ -1,7 +1,9 @@
 package no.nav.etterlatte.beregning
 
 import no.nav.etterlatte.beregning.grunnlag.BeregningsGrunnlagService
+import no.nav.etterlatte.beregning.grunnlag.GrunnlagMedPeriode
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
+import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
 import no.nav.etterlatte.beregning.grunnlag.PeriodisertBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.mapVerdier
 import no.nav.etterlatte.beregning.regler.finnAnvendtGrunnbeloep
@@ -9,6 +11,7 @@ import no.nav.etterlatte.beregning.regler.overstyr.PeriodisertOverstyrGrunnlag
 import no.nav.etterlatte.beregning.regler.overstyr.beregnOverstyrRegel
 import no.nav.etterlatte.beregning.regler.overstyr.grunnbeloep
 import no.nav.etterlatte.klienter.GrunnlagKlient
+import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
@@ -21,6 +24,7 @@ import no.nav.etterlatte.libs.common.grunnlag.Grunnlag
 import no.nav.etterlatte.libs.common.grunnlag.Grunnlagsopplysning
 import no.nav.etterlatte.libs.common.objectMapper
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.regler.FaktumNode
 import no.nav.etterlatte.libs.regler.RegelPeriode
 import no.nav.etterlatte.libs.regler.RegelkjoeringResultat
@@ -35,6 +39,7 @@ import java.util.UUID
 class BeregnOverstyrBeregningService(
     private val grunnlagKlient: GrunnlagKlient,
     private val beregningsGrunnlagService: BeregningsGrunnlagService,
+    private val vilkaarsvurderingKlient: VilkaarsvurderingKlient,
 ) {
     private val logger = LoggerFactory.getLogger(BeregnOverstyrBeregningService::class.java)
 
@@ -75,8 +80,34 @@ class BeregnOverstyrBeregningService(
                     overstyrBeregning = overstyrBeregning,
                 )
 
-            else ->
-                throw UnsupportedOperationException("Overstyrt beregning er ikke støttet for $behandlingType for ${behandling.id}")
+            BehandlingType.REVURDERING -> {
+                val vilkaarsvurderingUtfall =
+                    vilkaarsvurderingKlient.hentVilkaarsvurdering(behandling.id, brukerTokenInfo).resultat?.utfall
+                        ?: throw RuntimeException("Forventa å ha resultat for behandling ${behandling.id}")
+
+                when (vilkaarsvurderingUtfall) {
+                    VilkaarsvurderingUtfall.OPPFYLT ->
+                        beregnOverstyr(
+                            behandlingId = behandling.id,
+                            beregningsType = beregningsType,
+                            grunnlag = grunnlag,
+                            beregningsGrunnlag = overstyrGrunnlag,
+                            virkningstidspunkt = virkningstidspunkt,
+                            overstyrBeregning = overstyrBeregning,
+                        )
+
+                    VilkaarsvurderingUtfall.IKKE_OPPFYLT -> {
+                        beregnOverstyr(
+                            behandlingId = behandling.id,
+                            beregningsType = beregningsType,
+                            grunnlag = grunnlag,
+                            beregningsGrunnlag = opprettOverstyrGrunnlagOpphoer(beregningsGrunnlag, virkningstidspunkt.atDay(1)),
+                            virkningstidspunkt = virkningstidspunkt,
+                            overstyrBeregning = overstyrBeregning,
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -97,6 +128,31 @@ class BeregnOverstyrBeregningService(
                 fom = fom,
                 tom = null,
             ),
+    )
+
+    private fun opprettOverstyrGrunnlagOpphoer(
+        beregningsGrunnlag: OverstyrBeregningGrunnlag,
+        fom: LocalDate,
+    ) = opprettOverstyrGrunnlag(
+        OverstyrBeregningGrunnlag(
+            perioder =
+                listOf(
+                    GrunnlagMedPeriode(
+                        data =
+                            OverstyrBeregningGrunnlagData(
+                                utbetaltBeloep = 0,
+                                trygdetid = 0,
+                                prorataBroekTeller = null,
+                                prorataBroekNevner = null,
+                                beskrivelse = "Overstyr beregning grunnlag",
+                            ),
+                        fom = fom,
+                        tom = null,
+                    ),
+                ),
+            kilde = beregningsGrunnlag.kilde,
+        ),
+        fom,
     )
 
     private fun beregnOverstyr(

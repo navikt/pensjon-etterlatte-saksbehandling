@@ -379,6 +379,7 @@ internal class BeregningsGrunnlagServiceTest {
         coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
         coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
         every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(omregningsId) } returns null
+        every { beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
         every {
             beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingsId)
         } returns
@@ -397,6 +398,48 @@ internal class BeregningsGrunnlagServiceTest {
             beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId)
 
             verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+            verify(exactly = 0) { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) }
+        }
+    }
+
+    @Test
+    fun `skal lage et kopi av grunnlaget med overstyrt`() {
+        val behandling = mockBehandling(SakType.BARNEPENSJON, randomUUID())
+
+        val omregningsId = randomUUID()
+        val behandlingsId = randomUUID()
+
+        val overstyrBeregningGrunnlagDao = mockk<OverstyrBeregningGrunnlagDao>()
+
+        coEvery { behandlingKlient.hentBehandling(any(), any()) } returns behandling
+        coEvery { behandlingKlient.kanBeregnes(any(), any(), any()) } returns true
+        every { beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(omregningsId) } returns null
+        every {
+            beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(
+                any(),
+            )
+        } returns listOf(overstyrBeregningGrunnlagDao)
+        every { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) } just runs
+        every { overstyrBeregningGrunnlagDao.copy(any(), any()) } returns overstyrBeregningGrunnlagDao
+        every {
+            beregningsGrunnlagRepository.finnBarnepensjonGrunnlagForBehandling(behandlingsId)
+        } returns
+            BeregningsGrunnlag(
+                behandlingsId,
+                Grunnlagsopplysning.Saksbehandler("Z123456", Tidspunkt.now()),
+                emptyList(),
+                emptyList(),
+                BeregningsMetode.BEST.toGrunnlag(),
+            )
+
+        every { beregningsGrunnlagRepository.lagre(any()) } returns true
+        val hentOpplysningsgrunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns hentOpplysningsgrunnlag
+        runBlocking {
+            beregningsGrunnlagService.dupliserBeregningsGrunnlagBP(omregningsId, behandlingsId)
+
+            verify(exactly = 1) { beregningsGrunnlagRepository.lagre(any()) }
+            verify(exactly = 1) { beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(any(), any()) }
         }
     }
 

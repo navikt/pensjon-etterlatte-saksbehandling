@@ -11,7 +11,7 @@ interface Props {
 
 export const FiltrerPaaSaksbehandler = ({ filter, setFilter, saksbehandlereIEnhet }: Props) => {
   const saksbehandlerFilterValues: string[] = Object.entries(SAKSBEHANDLERFILTER).map(([, beskrivelse]) => beskrivelse)
-  const options = [...saksbehandlerFilterValues, ...Array.from(saksbehandlereIEnhet.map((behandler) => behandler.navn))]
+  const options = [...saksbehandlerFilterValues, ...saksbehandlereIEnhet.map((behandler) => behandler.navn)]
 
   /*
    * Først sjekkke om valgt saksbehandler finnes i SAKSBEHANDLERFILTER.

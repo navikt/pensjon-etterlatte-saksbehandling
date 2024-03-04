@@ -21,7 +21,7 @@ export const MultiSelectFilter = ({ label, options, values, onChange }: Props) =
     <UNSAFE_Combobox
       label={label}
       options={options}
-      selectedOptions={typeof values === 'string' ? [values] : values}
+      selectedOptions={values}
       onToggleSelected={onToggleSelected}
       isMultiSelect
     />

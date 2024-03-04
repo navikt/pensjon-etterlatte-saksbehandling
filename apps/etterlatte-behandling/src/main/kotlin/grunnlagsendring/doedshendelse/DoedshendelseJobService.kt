@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import io.ktor.util.toLowerCasePreservingASCIIRules
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
@@ -169,11 +170,17 @@ class DoedshendelseJobService(
             runBlocking {
                 krrKlient.hentDigitalKontaktinformasjon(doedshendelse.avdoedFnr)
             }
-        return if (kontaktInfo?.spraak != null) {
-            Spraak.valueOf(kontaktInfo.spraak)
-        } else {
-            Spraak.NB
-        }
+
+        return kontaktInfo?.spraak
+            ?.toLowerCasePreservingASCIIRules()
+            ?.let {
+                when (it) {
+                    "nb" -> Spraak.NB
+                    "nn" -> Spraak.NN
+                    "en" -> Spraak.EN
+                    else -> Spraak.NB
+                }
+            } ?: Spraak.NB
     }
 
     private fun hentAnnenForelder(doedshendelse: DoedshendelseInternal): String? {

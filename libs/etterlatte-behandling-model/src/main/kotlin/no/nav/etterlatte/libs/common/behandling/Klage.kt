@@ -628,7 +628,6 @@ data class Formkrav(
                 listOf(
                     formkrav.erKlagenSignert,
                     formkrav.erKlagerPartISaken,
-                    formkrav.erKlagenFramsattInnenFrist,
                     formkrav.gjelderKlagenNoeKonkretIVedtaket,
                 )
 

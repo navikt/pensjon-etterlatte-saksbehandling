@@ -6,7 +6,11 @@ import { useAppSelector } from '~store/Store'
 import { Container, FlexRow } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
+import {
+  Filter,
+  minOppgavelisteFiltre,
+  OPPGAVESTATUSFILTER,
+} from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
 import {
   hentFilterFraLocalStorage,
   leggFilterILocalStorage,
@@ -28,9 +32,9 @@ import {
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { FilterRad } from '~components/oppgavebenk/oppgaveFiltrering/FilterRad'
-import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/components/OppgaveFeilWrapper'
+import { MultiSelectFilter } from '~components/oppgavebenk/oppgaveFiltrering/MultiSelectFilter'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -192,11 +196,13 @@ export const ToggleMinOppgaveliste = () => {
       {oppgaveListeValg === 'MinOppgaveliste' ? (
         <>
           <FlexRow>
-            <VelgOppgavestatuser
+            <MultiSelectFilter
+              label="Oppgavestatus"
+              options={Object.entries(OPPGAVESTATUSFILTER).map(([, beskrivelse]) => beskrivelse)}
               value={minOppgavelisteFilter.oppgavestatusFilter}
-              onChange={(oppgavestatusFilter) => {
-                hentMinOppgavelisteOppgaver(oppgavestatusFilter)
-                setMinOppgavelisteFilter({ ...minOppgavelisteFilter, oppgavestatusFilter })
+              onChange={(options) => {
+                hentMinOppgavelisteOppgaver(options)
+                setMinOppgavelisteFilter({ ...minOppgavelisteFilter, oppgavestatusFilter: options })
               }}
             />
           </FlexRow>

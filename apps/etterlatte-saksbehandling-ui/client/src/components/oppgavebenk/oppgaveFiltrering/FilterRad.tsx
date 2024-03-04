@@ -7,6 +7,7 @@ import {
   FRISTFILTER,
   FristFilterKeys,
   initialFilter,
+  OPPGAVESTATUSFILTER,
   oppgavetypefilter,
   OppgavetypeFilterKeys,
   SAKSBEHANDLERFILTER,
@@ -16,9 +17,9 @@ import {
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
-import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgaveDTO } from '~shared/api/oppgaver'
+import { MultiSelectFilter } from '~components/oppgavebenk/oppgaveFiltrering/MultiSelectFilter'
 
 interface Props {
   hentAlleOppgaver: () => void
@@ -126,11 +127,14 @@ export const FilterRad = ({
             </option>
           ))}
         </Select>
-        <VelgOppgavestatuser
+
+        <MultiSelectFilter
+          label="Oppgavestatus"
+          options={Object.entries(OPPGAVESTATUSFILTER).map(([, beskrivelse]) => beskrivelse)}
           value={filter.oppgavestatusFilter}
-          onChange={(oppgavestatusFilter) => {
-            hentOppgaverStatus(oppgavestatusFilter)
-            setFilter({ ...filter, oppgavestatusFilter })
+          onChange={(options) => {
+            hentOppgaverStatus(options)
+            setFilter({ ...filter, oppgavestatusFilter: options })
           }}
         />
 

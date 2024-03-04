@@ -27,7 +27,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
 import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
-import no.nav.etterlatte.migrering.person.krr.KrrKlient
+import no.nav.etterlatte.migrering.person.krr.KrrKlientImpl
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.AfterEach
@@ -77,14 +77,14 @@ class DoedshendelseJobServiceTest {
         }
 
     val krrKlient =
-        mockk<KrrKlient> {
+        mockk<KrrKlientImpl> {
             coEvery { hentDigitalKontaktinformasjon(any()) } returns
                 DigitalKontaktinformasjon(
                     personident = "",
                     aktiv = true,
                     kanVarsles = true,
                     reservert = false,
-                    spraak = "no",
+                    spraak = "nb",
                     epostadresse = null,
                     mobiltelefonnummer = null,
                     sikkerDigitalPostkasse = null,

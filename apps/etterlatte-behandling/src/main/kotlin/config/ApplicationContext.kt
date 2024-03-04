@@ -89,6 +89,7 @@ import no.nav.etterlatte.metrics.BehandlingMetrics
 import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
 import no.nav.etterlatte.migrering.person.krr.KrrKlient
+import no.nav.etterlatte.migrering.person.krr.KrrKlientImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -168,6 +169,14 @@ private fun migreringHttpClient(config: Config) =
         azureAppScope = config.getString("migrering.outbound.scope"),
     )
 
+private fun krrHttKlient(config: Config) =
+    httpClientClientCredentials(
+        azureAppClientId = config.getString("azure.app.client.id"),
+        azureAppJwk = config.getString("azure.app.jwk"),
+        azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+        azureAppScope = config.getString("etterlatte.outbound.scope"),
+    )
+
 private fun finnBrukerIdent(): String {
     val kontekst = Kontekst.get()
     return when (kontekst) {
@@ -210,24 +219,13 @@ internal class ApplicationContext(
     val tilbakekrevingHttpClient: HttpClient = tilbakekrevingHttpClient(config),
     val migreringHttpClient: HttpClient = migreringHttpClient(config),
     val pesysKlient: PesysKlient = PesysKlientImpl(config, httpClient()),
+    val krrKlient: KrrKlient = KrrKlientImpl(krrHttKlient(config), url = config.getString("krr.url")),
 ) {
     val httpPort = env.getOrDefault("HTTP_PORT", "8080").toInt()
     val saksbehandlerGroupIdsByKey = AzureGroup.entries.associateWith { env.requireEnvValue(it.envKey) }
     val sporingslogg = Sporingslogg()
     val behandlingRequestLogger = BehandlingRequestLogger(sporingslogg)
     val dataSource = DataSourceBuilder.createDataSource(env.props)
-
-    val krrKlient =
-        KrrKlient(
-            client =
-                httpClientClientCredentials(
-                    azureAppClientId = config.getString("azure.app.client.id"),
-                    azureAppJwk = config.getString("azure.app.jwk"),
-                    azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-                    azureAppScope = config.getString("krr.scope"),
-                ),
-            url = config.getString("krr.url"),
-        )
 
     // Dao
     val autoClosingDatabase = ConnectionAutoclosingImpl(dataSource)

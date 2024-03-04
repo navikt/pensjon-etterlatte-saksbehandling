@@ -12,10 +12,14 @@ import io.ktor.http.isSuccess
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class KrrKlient(private val client: HttpClient, private val url: String) {
-    private val logger: Logger = LoggerFactory.getLogger(KrrKlient::class.java)
+interface KrrKlient {
+    suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon?
+}
 
-    suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon? {
+class KrrKlientImpl(private val client: HttpClient, private val url: String) : KrrKlient {
+    private val logger: Logger = LoggerFactory.getLogger(KrrKlientImpl::class.java)
+
+    override suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon? {
         logger.info("Henter kontaktopplysninger fra KRR.")
 
         return try {

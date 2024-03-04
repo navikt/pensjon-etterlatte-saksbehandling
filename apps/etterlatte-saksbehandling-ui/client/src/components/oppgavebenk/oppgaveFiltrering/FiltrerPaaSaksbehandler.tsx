@@ -10,9 +10,8 @@ interface Props {
 }
 
 export const FiltrerPaaSaksbehandler = ({ filter, setFilter, saksbehandlereIEnhet }: Props) => {
-  const saksbehandlerFilterValues = (): string[] => {
-    return Object.entries(SAKSBEHANDLERFILTER).map(([, beskrivelse]) => beskrivelse)
-  }
+  const saksbehandlerFilterValues: string[] = Object.entries(SAKSBEHANDLERFILTER).map(([, beskrivelse]) => beskrivelse)
+  const options = [...saksbehandlerFilterValues, ...Array.from(saksbehandlereIEnhet.map((behandler) => behandler.navn))]
 
   /*
    * Først sjekkke om valgt saksbehandler finnes i SAKSBEHANDLERFILTER.
@@ -20,14 +19,11 @@ export const FiltrerPaaSaksbehandler = ({ filter, setFilter, saksbehandlereIEnhe
    * den innloggede saksbehandleren
    */
   const valgtSaksbehandler = (sb: string): string[] => {
-    if (saksbehandlerFilterValues().find((val) => val === sb)) {
+    if (saksbehandlerFilterValues.find((val) => val === sb)) {
       return [sb]
     } else {
-      const selectedSaksbehandler: Saksbehandler = saksbehandlereIEnhet.find((behandler) => behandler.ident === sb) || {
-        navn: '',
-        ident: '',
-      }
-      return [selectedSaksbehandler.navn]
+      const selectedSaksbehandlerNavn = saksbehandlereIEnhet.find((behandler) => behandler.ident === sb)?.navn || ''
+      return [selectedSaksbehandlerNavn]
     }
   }
 
@@ -38,13 +34,12 @@ export const FiltrerPaaSaksbehandler = ({ filter, setFilter, saksbehandlereIEnhe
    */
   const onVelgSaksbehandler = (option: string, isSelected: boolean) => {
     if (isSelected) {
-      if (saksbehandlerFilterValues().find((val) => val === option)) {
+      if (saksbehandlerFilterValues.find((val) => val === option)) {
         setFilter({ ...filter, saksbehandlerFilter: option })
       } else {
-        const selectedSaksbehandler: Saksbehandler = saksbehandlereIEnhet.find(
-          (behandler) => behandler.navn === option
-        ) || { navn: '', ident: '' }
-        setFilter({ ...filter, saksbehandlerFilter: selectedSaksbehandler?.ident })
+        const selectedSaksbehandlerIdent =
+          saksbehandlereIEnhet.find((behandler) => behandler.navn === option)?.ident || ''
+        setFilter({ ...filter, saksbehandlerFilter: selectedSaksbehandlerIdent })
       }
     } else {
       setFilter({ ...filter, saksbehandlerFilter: '' })
@@ -54,7 +49,7 @@ export const FiltrerPaaSaksbehandler = ({ filter, setFilter, saksbehandlereIEnhe
   return (
     <UNSAFE_Combobox
       label="Saksbehandler"
-      options={saksbehandlerFilterValues().concat(Array.from(saksbehandlereIEnhet.map((behandler) => behandler.navn)))}
+      options={options}
       selectedOptions={valgtSaksbehandler(filter.saksbehandlerFilter)}
       onToggleSelected={onVelgSaksbehandler}
     />

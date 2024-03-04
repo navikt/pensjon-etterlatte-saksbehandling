@@ -206,6 +206,25 @@ class OppgaveService(
         }
     }
 
+    fun endreTilKildeBehandlingOgOppdaterReferanse(
+        oppgaveId: UUID,
+        referanse: String,
+    ) {
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId)
+                ?: throw IkkeFunnetException(
+                    code = "OPPGAVE_IKKE_FUNNET",
+                    detail = "Oppgaven finnes ikke",
+                    meta = mapOf("oppgaveId" to oppgaveId),
+                )
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        if (hentetOppgave.saksbehandler?.ident.isNullOrEmpty()) {
+            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
+        } else {
+            oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
+        }
+    }
+
     fun ferdigstillOppgaveUnderbehandlingOgLagNyMedType(
         fattetoppgaveReferanseOgSak: SakIdOgReferanse,
         oppgaveType: OppgaveType,

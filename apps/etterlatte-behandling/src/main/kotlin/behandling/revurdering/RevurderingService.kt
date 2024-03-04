@@ -5,7 +5,7 @@ import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.behandling.BehandlingDao
 import no.nav.etterlatte.behandling.BehandlingHendelserKafkaProducer
 import no.nav.etterlatte.behandling.BehandlingService
-import no.nav.etterlatte.behandling.GrunnlagServiceImpl
+import no.nav.etterlatte.behandling.GrunnlagService
 import no.nav.etterlatte.behandling.domain.Behandling
 import no.nav.etterlatte.behandling.domain.Foerstegangsbehandling
 import no.nav.etterlatte.behandling.domain.OpprettBehandling
@@ -81,7 +81,7 @@ data class RevurderingsinfoMedIdOgOpprettetDato(
 
 class RevurderingService(
     private val oppgaveService: OppgaveService,
-    private val grunnlagService: GrunnlagServiceImpl,
+    private val grunnlagService: GrunnlagService,
     private val behandlingHendelser: BehandlingHendelserKafkaProducer,
     private val behandlingDao: BehandlingDao,
     private val hendelseDao: HendelseDao,
@@ -130,10 +130,11 @@ class RevurderingService(
         sakId: Long,
         aarsak: Revurderingaarsak,
         paaGrunnAvHendelseId: String?,
+        paaGrunnAvOppgaveId: String? = null,
         begrunnelse: String?,
         fritekstAarsak: String? = null,
         saksbehandler: Saksbehandler,
-    ): Revurdering? {
+    ): Revurdering {
         if (!aarsak.kanBrukesIMiljo()) {
             throw RevurderingaarsakIkkeStoettet(aarsak)
         }
@@ -146,6 +147,13 @@ class RevurderingService(
                         " $sakId. " +
                         "Hendelsesid: $paaGrunnAvHendelseId",
                 )
+            }
+
+        val paaGrunnAvOppgaveUuid =
+            try {
+                paaGrunnAvOppgaveId?.let { UUID.fromString(it) }
+            } catch (e: Exception) {
+                throw BadRequestException("Ugyldig oppgaveId $paaGrunnAvOppgaveId (sakid=$sakId).")
             }
 
         maksEnOppgaveUnderbehandlingForKildeBehandling(sakId)
@@ -163,6 +171,7 @@ class RevurderingService(
             forrigeBehandling = forrigeIverksatteBehandling,
             revurderingAarsak = aarsak,
             paaGrunnAvHendelse = paaGrunnAvHendelseUuid,
+            paaGrunnAvOppgave = paaGrunnAvOppgaveUuid,
             begrunnelse = begrunnelse,
             fritekstAarsak = fritekstAarsak,
             saksbehandler = saksbehandler,
@@ -195,12 +204,14 @@ class RevurderingService(
         forrigeBehandling: Behandling,
         revurderingAarsak: Revurderingaarsak,
         paaGrunnAvHendelse: UUID?,
+        paaGrunnAvOppgave: UUID?,
         begrunnelse: String?,
         fritekstAarsak: String?,
         saksbehandler: Saksbehandler,
-    ): Revurdering? =
+    ): Revurdering =
         forrigeBehandling.let {
             val persongalleri = runBlocking { grunnlagService.hentPersongalleri(forrigeBehandling.id) }
+            val triggendeOppgave = paaGrunnAvOppgave?.let { oppgaveService.hentOppgave(it) }
 
             opprettRevurdering(
                 sakId = sakId,
@@ -213,9 +224,11 @@ class RevurderingService(
                 virkningstidspunkt = null,
                 utlandstilknytning = forrigeBehandling.utlandstilknytning,
                 boddEllerArbeidetUtlandet = forrigeBehandling.boddEllerArbeidetUtlandet,
-                begrunnelse = begrunnelse,
+                begrunnelse = begrunnelse ?: triggendeOppgave?.merknad,
                 fritekstAarsak = fritekstAarsak,
                 saksbehandlerIdent = saksbehandler.ident,
+                frist = triggendeOppgave?.frist,
+                paaGrunnAvOppgave = paaGrunnAvOppgave,
             ).oppdater()
                 .also { revurdering ->
                     if (paaGrunnAvHendelse != null) {
@@ -277,6 +290,8 @@ class RevurderingService(
         fritekstAarsak: String? = null,
         saksbehandlerIdent: String,
         relatertBehandlingId: String? = null,
+        frist: Tidspunkt? = null,
+        paaGrunnAvOppgave: UUID? = null,
     ): RevurderingOgOppfoelging =
         OpprettBehandling(
             type = BehandlingType.REVURDERING,
@@ -320,15 +335,22 @@ class RevurderingService(
                     )
                 },
                 opprettOgTildelOppgave = {
-                    val oppgave =
-                        oppgaveService.opprettNyOppgaveMedSakOgReferanse(
-                            referanse = it.id.toString(),
-                            sakId = sakId,
-                            oppgaveKilde = OppgaveKilde.BEHANDLING,
-                            oppgaveType = OppgaveType.REVURDERING,
-                            merknad = begrunnelse,
+                    if (paaGrunnAvOppgave != null) {
+                        (
+                            oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(paaGrunnAvOppgave, it.id.toString())
                         )
-                    oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
+                    } else {
+                        val oppgave =
+                            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                                referanse = it.id.toString(),
+                                sakId = sakId,
+                                oppgaveKilde = OppgaveKilde.BEHANDLING,
+                                oppgaveType = OppgaveType.REVURDERING,
+                                merknad = begrunnelse,
+                                frist = frist,
+                            )
+                        oppgaveService.tildelSaksbehandler(oppgave.id, saksbehandlerIdent)
+                    }
                 },
             )
         }

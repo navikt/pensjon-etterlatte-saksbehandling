@@ -200,7 +200,7 @@ export const initialFilter = (): Filter => {
     sakidFilter: '',
     enhetsFilter: 'visAlle',
     fristFilter: 'visAlle',
-    saksbehandlerFilter: SAKSBEHANDLERFILTER.IkkeTildelt,
+    saksbehandlerFilter: SAKSBEHANDLERFILTER.visAlle,
     ytelseFilter: 'visAlle',
     oppgavestatusFilter: [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
     oppgavetypeFilter: 'visAlle',

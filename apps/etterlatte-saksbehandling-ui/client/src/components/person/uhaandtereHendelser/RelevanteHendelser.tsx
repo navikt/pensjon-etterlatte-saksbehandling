@@ -17,6 +17,7 @@ import { hentStoettedeRevurderinger } from '~shared/api/revurdering'
 
 import { isSuccess, mapApiResult } from '~shared/api/apiUtils'
 import { ApiErrorAlert } from '~ErrorBoundary'
+import styled from 'styled-components'
 
 type Props = {
   sak: ISak
@@ -138,7 +139,9 @@ export default function RelevanteHendelser(props: Props) {
                 />
               )}
               {revurderingKanOpprettes && (
-                <OpprettNyRevurdering revurderinger={muligeRevurderingAarsakerStatus} sakId={sak.id} />
+                <OpprettRevurderingSpacer>
+                  <OpprettNyRevurdering revurderinger={muligeRevurderingAarsakerStatus} sakId={sak.id} />
+                </OpprettRevurderingSpacer>
               )}
             </>
           ) : (
@@ -150,3 +153,7 @@ export default function RelevanteHendelser(props: Props) {
     </>
   )
 }
+
+const OpprettRevurderingSpacer = styled.div`
+  margin-top: 3rem;
+`

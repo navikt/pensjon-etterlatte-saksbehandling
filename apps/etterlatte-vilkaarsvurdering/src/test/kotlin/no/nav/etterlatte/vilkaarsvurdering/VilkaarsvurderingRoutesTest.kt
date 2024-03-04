@@ -550,7 +550,7 @@ internal class VilkaarsvurderingRoutesTest {
             val vilkaarsvurdering = objectMapper.readValue(response.bodyAsText(), VilkaarsvurderingDto::class.java)
             assertEquals(HttpStatusCode.OK, response.status)
             assertEquals(revurderingBehandlingId, vilkaarsvurdering.behandlingId)
-            assertTrue(vilkaarsvurdering.resultat == null) // siden vilkår ikke har vurdering her
+            assertNull(vilkaarsvurdering.resultat) // siden vilkår ikke har vurdering her
         }
     }
 

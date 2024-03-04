@@ -145,7 +145,7 @@ class VilkaarsvurderingService(
             val virkningstidspunkt =
                 behandling.virkningstidspunkt ?: throw VirkningstidspunktIkkeSattException(behandlingId)
 
-            val kopierteVilkaar =
+            val vilkaar =
                 when {
                     behandling.revurderingsaarsak == Revurderingaarsak.REGULERING ->
                         tidligereVilkaarsvurdering.vilkaar.kopier()
@@ -164,14 +164,14 @@ class VilkaarsvurderingService(
                             behandlingId = behandlingId,
                             grunnlagVersjon = grunnlag.metadata.versjon,
                             virkningstidspunkt = virkningstidspunkt.dato,
-                            vilkaar = kopierteVilkaar,
+                            vilkaar = vilkaar,
                             resultat = tidligereVilkaarsvurdering.resultat,
                         ),
                     kopiertFraId = tidligereVilkaarsvurdering.id,
                 )
 
             // Hvis minst ett av vilkårene mangler vurdering - slett vilkårsvurderingresultat
-            if (nyVilkaarsvurdering.vilkaar.any { vilkaar -> vilkaar.vurdering == null }) {
+            if (nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }) {
                 vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId)
             } else {
                 runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo) }
@@ -206,10 +206,7 @@ class VilkaarsvurderingService(
             gjeldendeVilkaarForVirkningstidspunkt
                 .filter { it.hovedvilkaar.type in nyeHovedvilkaarTyper }
 
-        return kopierteVilkaar
-            .filterNot { it.hovedvilkaar.type in slettetHovedvilkaarTyper }
-            .toMutableList()
-            .apply { addAll(nyeVilkaar) }
+        return kopierteVilkaar.filterNot { it.hovedvilkaar.type in slettetHovedvilkaarTyper } + nyeVilkaar
     }
 
     suspend fun opprettVilkaarsvurdering(

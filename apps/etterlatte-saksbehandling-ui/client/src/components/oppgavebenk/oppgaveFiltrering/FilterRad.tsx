@@ -37,6 +37,7 @@ export const FilterRad = ({
   alleOppgaver,
 }: Props): ReactNode => {
   const [sakId, setSakId] = useState<string>(filter.sakidFilter)
+  const [fnr, setFnr] = useState<string>(filter.fnrFilter)
 
   const saksbehandlere: Set<string> = new Set(
     alleOppgaver.map((oppgave) => oppgave.saksbehandler?.ident || '').filter((ident) => !!ident)
@@ -45,9 +46,9 @@ export const FilterRad = ({
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   useEffect(() => {
-    const delay = setTimeout(() => setFilter({ ...filter, sakidFilter: sakId || '' }), 500)
+    const delay = setTimeout(() => setFilter({ ...filter, sakidFilter: sakId || '', fnrFilter: fnr || '' }), 500)
     return () => clearTimeout(delay)
-  }, [sakId])
+  }, [sakId, fnr])
 
   return (
     <>
@@ -63,8 +64,8 @@ export const FilterRad = ({
         />
         <TextField
           label="Fødselsnummer"
-          value={filter.fnrFilter}
-          onChange={(e) => setFilter({ ...filter, fnrFilter: e.target.value })}
+          value={fnr}
+          onChange={(e) => setFnr(e.target.value?.replace(/[^0-9+]/, ''))}
           placeholder="Søk"
           autoComplete="off"
         />

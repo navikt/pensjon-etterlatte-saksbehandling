@@ -35,7 +35,7 @@ sealed class StrukturertBrev {
     data class KlageBlankett(
         val klage: Klage,
     ) : StrukturertBrev() {
-        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.KLAGE_OVERSENDELSE
+        override val brevkode: EtterlatteBrevKode = EtterlatteBrevKode.KLAGE_OVERSENDELSE_BLANKETT
         override val sak: Sak = klage.sak
         override val soekerFnr: String = klage.sak.ident
         override val behandlingId = klage.id

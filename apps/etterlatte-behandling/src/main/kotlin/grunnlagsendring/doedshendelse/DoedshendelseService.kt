@@ -20,6 +20,7 @@ import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl as PdlDoedshen
 
 enum class DoedshendelseFeatureToggle(private val key: String) : FeatureToggle {
     KanLagreDoedshendelse("pensjon-etterlatte.kan-lage-doedhendelse"),
+    KanSendeBrevOgOppretteOppgave("pensjon-etterlatte.kan-sende-brev-og-opprette-oppgave"),
     ;
 
     override fun key(): String = key
@@ -39,8 +40,13 @@ class DoedshendelseService(
 
     fun opprettDoedshendelseForBeroertePersoner(doedshendelse: PdlDoedshendelse) {
         logger.info("Mottok dødsmelding fra PDL, finner berørte personer og lagrer ned dødsmelding.")
-        // TODO: Trenger egentlig en "sak" her og, kan være begge så kan like gjerne være denne...
-        val avdoed = pdlTjenesterKlient.hentPdlModell(doedshendelse.fnr, PersonRolle.AVDOED, SakType.BARNEPENSJON)
+
+        val avdoed =
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                doedshendelse.fnr,
+                PersonRolle.AVDOED,
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
 
         if (avdoed.doedsdato == null) {
             sikkerLogg.info("Mottok dødshendelse for ${avdoed.foedselsnummer}, men personen er i live i følge PDL.")

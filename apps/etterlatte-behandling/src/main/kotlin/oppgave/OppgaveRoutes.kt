@@ -163,7 +163,11 @@ internal fun Route.oppgaveRoutes(
                 kunSkrivetilgang {
                     val settPaaVentRequest = call.receive<SettPaaVentRequest>()
                     inTransaction {
-                        service.oppdaterStatusOgMerknad(oppgaveId, settPaaVentRequest.merknad, settPaaVentRequest.status)
+                        service.oppdaterStatusOgMerknad(
+                            oppgaveId,
+                            settPaaVentRequest.merknad,
+                            if (settPaaVentRequest.status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT,
+                        )
                     }
                     call.respond(HttpStatusCode.OK)
                 }
@@ -287,7 +291,11 @@ internal fun Route.oppgaveRoutes(
             val request = call.receive<VentefristGaarUtRequest>()
             inTransaction {
                 service.hentFristGaarUt(request).forEach {
-                    service.oppdaterStatusOgMerknad(it, "", Status.PAA_VENT)
+                    service.oppdaterStatusOgMerknad(
+                        it,
+                        "",
+                        Status.UNDER_BEHANDLING,
+                    )
                 }
             }
             call.respond(HttpStatusCode.OK)

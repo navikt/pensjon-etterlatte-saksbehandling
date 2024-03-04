@@ -72,6 +72,12 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
     !vilkaarsvurderingErPaaNyttRegelverk(vilkaarsvurdering) &&
     behandlingGjelderBarnepensjonPaaNyttRegelverk(behandling)
 
+  const visOppdaterteVilkaar = () =>
+    vilkaarsvurdering &&
+    redigerbar &&
+    behandling.behandlingType == IBehandlingsType.REVURDERING &&
+    vilkaarsvurdering?.resultat == undefined
+
   const resetVilkaarsvurdering = () => {
     if (!behandlingId) throw new Error('Mangler behandlingsid')
     slettGammelVilkaarsvurdering(behandlingId, () => {
@@ -108,6 +114,17 @@ export const Vilkaarsvurdering = (props: { behandling: IBehandlingReducer }) => 
                 apiResult: slettVilkaarsvurderingStatus,
                 errorMessage: 'Klarte ikke slette vilkårsvurderingen',
               })}
+            </AlertWrapper>
+          )}
+
+          {visOppdaterteVilkaar() && (
+            <AlertWrapper>
+              <Alert variant="info">
+                <BodyLong>
+                  Denne behandlingen har automatisk kopiert vilkårsvurderingen fra forrige iverksatte behandling. Et
+                  eller flere vilkår er lagt til eller fjernet og utfall må derfor vurderes på nytt.
+                </BodyLong>
+              </Alert>
             </AlertWrapper>
           )}
 

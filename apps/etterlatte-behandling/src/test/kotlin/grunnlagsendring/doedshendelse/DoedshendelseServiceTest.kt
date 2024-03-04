@@ -11,6 +11,7 @@ import no.nav.etterlatte.DatabaseKontekst
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
+import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.OpplysningDTO
 import no.nav.etterlatte.libs.common.pdlhendelse.DoedshendelsePdl
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -74,7 +75,13 @@ internal class DoedshendelseServiceTest {
 
     @Test
     fun `Skal opprette doedshendelse med barna som kan ha rett paa barnepensjon ved doedsfall`() {
-        every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                avdoed.foedselsnummer.verdi.value,
+                any(),
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
+        } returns avdoed
         every { dao.opprettDoedshendelse(any()) } just runs
         every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
 
@@ -94,7 +101,13 @@ internal class DoedshendelseServiceTest {
 
     @Test
     fun `Skal lagre nye hendelser hvis nye beroerte finnes`() {
-        every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                avdoed.foedselsnummer.verdi.value,
+                any(),
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
+        } returns avdoed
         every { dao.opprettDoedshendelse(any()) } just runs
         every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
 
@@ -134,7 +147,11 @@ internal class DoedshendelseServiceTest {
         val barnfemtenaar = LocalDate.now().minusYears(15)
         val nyttBarn = personOpplysning(foedselsdato = barnfemtenaar).copy(foedselsnummer = HELSOESKEN_FOEDSELSNUMMER)
         every {
-            pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any())
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                avdoed.foedselsnummer.verdi.value,
+                any(),
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
         } returns avdoed.copy(avdoedesBarn = listOf(nyttBarn))
         every { dao.oppdaterDoedshendelse(any()) } just runs
         service.opprettDoedshendelseForBeroertePersoner(
@@ -160,7 +177,13 @@ internal class DoedshendelseServiceTest {
 
     @Test
     fun `Skal oppdatere korrigert hendelse`() {
-        every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                avdoed.foedselsnummer.verdi.value,
+                any(),
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
+        } returns avdoed
         every { dao.opprettDoedshendelse(any()) } just runs
         every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
 
@@ -217,7 +240,13 @@ internal class DoedshendelseServiceTest {
 
     @Test
     fun `Skal oppdatere annullert hendelse`() {
-        every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns avdoed
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                avdoed.foedselsnummer.verdi.value,
+                any(),
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
+        } returns avdoed
         every { dao.opprettDoedshendelse(any()) } just runs
         every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
 
@@ -275,7 +304,13 @@ internal class DoedshendelseServiceTest {
 
     @Test
     fun `Skal ikke opprette doedshendelser dersom avdoed ikke er registert som avdoed i PDL`() {
-        every { pdlTjenesterKlient.hentPdlModell(avdoed.foedselsnummer.verdi.value, any(), any()) } returns
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                avdoed.foedselsnummer.verdi.value,
+                any(),
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
+        } returns
             avdoed.copy(doedsdato = null)
         every { dao.opprettDoedshendelse(any()) } just runs
 

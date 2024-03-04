@@ -20,7 +20,6 @@ export function kanSeOppsummering(klage: Klage | null): boolean {
     case KlageStatus.FORMKRAV_IKKE_OPPFYLT:
     case KlageStatus.FORMKRAV_OPPFYLT:
     case KlageStatus.FATTET_VEDTAK:
-    case KlageStatus.ATTESTERT:
     case KlageStatus.RETURNERT:
       return true
   }

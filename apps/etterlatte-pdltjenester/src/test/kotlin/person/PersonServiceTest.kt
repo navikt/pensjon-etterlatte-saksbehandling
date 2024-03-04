@@ -121,7 +121,7 @@ internal class PersonServiceTest {
         val person =
             runBlocking {
                 personService.hentPerson(
-                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.AVDOED, SakType.BARNEPENSJON),
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.AVDOED, listOf(SakType.BARNEPENSJON)),
                 )
             }
 
@@ -142,7 +142,7 @@ internal class PersonServiceTest {
         val person =
             runBlocking {
                 personService.hentOpplysningsperson(
-                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON),
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, listOf(SakType.BARNEPENSJON)),
                 )
             }
 
@@ -159,7 +159,7 @@ internal class PersonServiceTest {
         val person =
             runBlocking {
                 personService.hentOpplysningsperson(
-                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON),
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, listOf(SakType.BARNEPENSJON)),
                 )
             }
 
@@ -177,7 +177,7 @@ internal class PersonServiceTest {
         val person =
             runBlocking {
                 personService.hentOpplysningsperson(
-                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON),
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, listOf(SakType.BARNEPENSJON)),
                 )
             }
 
@@ -194,7 +194,7 @@ internal class PersonServiceTest {
         val person =
             runBlocking {
                 personService.hentOpplysningsperson(
-                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON),
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, listOf(SakType.BARNEPENSJON)),
                 )
             }
 
@@ -208,7 +208,7 @@ internal class PersonServiceTest {
         val person =
             runBlocking {
                 personService.hentOpplysningsperson(
-                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON),
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, listOf(SakType.BARNEPENSJON)),
                 )
             }
 
@@ -224,7 +224,7 @@ internal class PersonServiceTest {
         assertThrows<PdlForesporselFeilet> {
             runBlocking {
                 personService.hentPerson(
-                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, SakType.BARNEPENSJON),
+                    HentPersonRequest(TRIVIELL_MIDTPUNKT, rolle = PersonRolle.BARN, listOf(SakType.BARNEPENSJON)),
                 )
             }
         }
@@ -236,7 +236,7 @@ internal class PersonServiceTest {
 
         runBlocking {
             assertThrows<FantIkkePersonException> {
-                personService.hentPerson(HentPersonRequest(STOR_SNERK, rolle = PersonRolle.BARN, SakType.BARNEPENSJON))
+                personService.hentPerson(HentPersonRequest(STOR_SNERK, rolle = PersonRolle.BARN, listOf(SakType.BARNEPENSJON)))
             }
         }
     }

@@ -29,7 +29,7 @@ internal class PdlTjenesterKlient(config: Config, private val pdl_app: HttpClien
             val response =
                 pdl_app.post("$url/person/v2") {
                     contentType(ContentType.Application.Json)
-                    setBody(HentPersonRequest(folkeregisteridentifikator, rolle, SakType.BARNEPENSJON))
+                    setBody(HentPersonRequest(folkeregisteridentifikator, rolle, listOf(SakType.BARNEPENSJON)))
                 }
             if (response.status.isSuccess()) {
                 response.body<PersonDTO>()

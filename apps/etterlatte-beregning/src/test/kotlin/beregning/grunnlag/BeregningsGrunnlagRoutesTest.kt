@@ -382,6 +382,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 institusjonsoppholdBeregningsgrunnlag = emptyList(),
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
+        every { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
         every { repository.finnBarnepensjonGrunnlagForBehandling(nye) } returns null
         every { repository.lagre(any()) } returns true
 
@@ -414,6 +415,7 @@ internal class BeregningsGrunnlagRoutesTest {
                 institusjonsoppholdBeregningsgrunnlag = emptyList(),
                 beregningsMetode = BeregningsMetode.BEST.toGrunnlag(),
             )
+        every { repository.finnOverstyrBeregningGrunnlagForBehandling(any()) } returns emptyList()
         every { repository.finnBarnepensjonGrunnlagForBehandling(nye) } returns null
         every { repository.lagre(any()) } returns true
 

@@ -54,7 +54,7 @@ class PersonRouteTest {
             HentPersonRequest(
                 foedselsnummer = TRIVIELL_MIDTPUNKT,
                 rolle = PersonRolle.BARN,
-                saktype = SakType.BARNEPENSJON,
+                saktyper = listOf(SakType.BARNEPENSJON),
             )
 
         coEvery { personService.hentPerson(hentPersonRequest) } returns GrunnlagTestData().soeker
@@ -83,7 +83,7 @@ class PersonRouteTest {
             HentPersonRequest(
                 foedselsnummer = TRIVIELL_MIDTPUNKT,
                 rolle = PersonRolle.BARN,
-                saktype = SakType.BARNEPENSJON,
+                saktyper = listOf(SakType.BARNEPENSJON),
             )
 
         coEvery { personService.hentOpplysningsperson(hentPersonRequest) } returns mockPerson()
@@ -170,7 +170,7 @@ class PersonRouteTest {
             HentPersonRequest(
                 foedselsnummer = TRIVIELL_MIDTPUNKT,
                 rolle = PersonRolle.BARN,
-                saktype = SakType.BARNEPENSJON,
+                saktyper = listOf(SakType.BARNEPENSJON),
             )
 
         coEvery {

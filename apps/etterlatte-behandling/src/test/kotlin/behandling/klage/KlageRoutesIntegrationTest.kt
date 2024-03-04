@@ -1,24 +1,28 @@
 package no.nav.etterlatte.behandling.klage
 
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
-import io.mockk.coVerify
+import io.mockk.coVerifyAll
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.BehandlingIntegrationTest
-import no.nav.etterlatte.behandling.hendelse.LagretHendelse
 import no.nav.etterlatte.common.Enheter
 import no.nav.etterlatte.ktor.runServerWithModule
 import no.nav.etterlatte.libs.common.FoedselsnummerDTO
@@ -35,7 +39,7 @@ import no.nav.etterlatte.libs.common.behandling.KlageUtfallUtenBrev
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.VedtaketKlagenGjelder
 import no.nav.etterlatte.libs.common.klage.AarsakTilAvbrytelse
-import no.nav.etterlatte.libs.common.oppgave.OppgaveListe
+import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringDto
 import no.nav.etterlatte.libs.common.pdlhendelse.Adressebeskyttelse
 import no.nav.etterlatte.libs.common.pdlhendelse.Endringstype
@@ -55,6 +59,9 @@ import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
+    private val saksbehandlerIdent = "Saksbehandler01"
+    private val attestantIdent = "Saksbehandler02"
+
     @BeforeEach
     fun start() =
         startServer(
@@ -77,36 +84,25 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     fun `opprettelse av klage gaar bra og henting gir 404 etter at saken blir skjermet`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
-
             val klage: Klage = opprettKlage(sak, client)
-            val response =
-                client.get("/api/klage/${klage.id}") {
-                    addAuthToken(tokenSaksbehandler)
-                }
-            assertEquals(HttpStatusCode.OK, response.status)
-            val hentetKlage = response.body<Klage>()
+            val hentetKlage: Klage = hentKlage(client, klage.id)
             assertEquals(klage, hentetKlage)
 
             // setter skjerming for saken
-            client.post("/egenansatt") {
-                addAuthToken(fagsystemTokenEY)
-                contentType(ContentType.Application.Json)
-                setBody(EgenAnsattSkjermet(fnr = sak.ident, inntruffet = Tidspunkt.now(), skjermet = true))
-            }
+            client.postAndAssertOk(
+                "/egenansatt",
+                fagsystemTokenEY,
+                EgenAnsattSkjermet(fnr = sak.ident, inntruffet = Tidspunkt.now(), skjermet = true),
+            )
 
             // henter med saksbehandler som mangler tilgang
-            val responseNotFound =
-                client.get("/api/klage/${klage.id}") {
-                    addAuthToken(tokenSaksbehandler)
-                }
-            assertEquals(HttpStatusCode.NotFound, responseNotFound.status)
+            client.get("/api/klage/${klage.id}", tokenSaksbehandler) {
+                assertEquals(HttpStatusCode.NotFound, it.status)
+            }
             // henter med saksbehandler som har tilgang
-            val responseSaksbehandlerMedTilgang =
-                client.get("/api/klage/${klage.id}") {
-                    addAuthToken(tokenSaksbehandlerMedEgenAnsattTilgang)
-                }
-            assertEquals(HttpStatusCode.OK, responseSaksbehandlerMedTilgang.status)
-            assertEquals(klage.id, responseSaksbehandlerMedTilgang.body<Klage>().id)
+            val hentetMedTilgang: Klage =
+                client.getAndAssertOk("/api/klage/${klage.id}", tokenSaksbehandlerMedEgenAnsattTilgang).body()
+            assertEquals(klage.id, hentetMedTilgang.id)
         }
     }
 
@@ -114,43 +110,29 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     fun `opprettelse av klage gaar bra og henting gjoer tilgangskontroll naar saken faar adressebeskyttelse`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
-            val klage: Klage =
-                opprettKlage(sak, client)
-            val response =
-                client.get("/api/klage/${klage.id}") {
-                    addAuthToken(tokenSaksbehandler)
-                }
-            assertEquals(HttpStatusCode.OK, response.status)
-            val hentetKlage = response.body<Klage>()
-            assertEquals(klage, hentetKlage)
-
+            val klage: Klage = opprettKlage(sak, client)
+            assertEquals(klage, hentKlage(client, klage.id))
             // Setter strengt fortrolig på saken klagen hører til
-            client.post("/grunnlagsendringshendelse/adressebeskyttelse") {
-                addAuthToken(fagsystemTokenEY)
-                contentType(ContentType.Application.Json)
-                setBody(
-                    Adressebeskyttelse(
-                        hendelseId = "1",
-                        endringstype = Endringstype.OPPRETTET,
-                        fnr = sak.ident,
-                        adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
-                    ),
-                )
-            }
+            client.postAndAssertOk(
+                "/grunnlagsendringshendelse/adressebeskyttelse",
+                fagsystemTokenEY,
+                Adressebeskyttelse(
+                    hendelseId = "1",
+                    endringstype = Endringstype.OPPRETTET,
+                    fnr = sak.ident,
+                    adressebeskyttelseGradering = AdressebeskyttelseGradering.STRENGT_FORTROLIG,
+                ),
+            )
 
-            val responseVanligSaksbehandler =
-                client.get("/api/klage/${klage.id}") {
-                    addAuthToken(tokenSaksbehandler)
-                }
-            assertEquals(HttpStatusCode.NotFound, responseVanligSaksbehandler.status)
-            val responseSaksbehandlerMedTilgang =
-                client.get("/api/klage/${klage.id}") {
-                    addAuthToken(tokenSaksbehandlerMedStrengtFortrolig)
-                }
-            assertEquals(HttpStatusCode.OK, responseSaksbehandlerMedTilgang.status)
+            client.get("/api/klage/${klage.id}", tokenSaksbehandler) {
+                assertEquals(HttpStatusCode.NotFound, it.status)
+            }
+            val hentetMedTilgang =
+                client.getAndAssertOk("/api/klage/${klage.id}", tokenSaksbehandlerMedStrengtFortrolig)
+                    .body<Klage>()
             assertEquals(
                 klage.copy(sak = klage.sak.copy(enhet = Enheter.STRENGT_FORTROLIG.enhetNr)),
-                responseSaksbehandlerMedTilgang.body<Klage>(),
+                hentetMedTilgang,
             )
         }
     }
@@ -160,37 +142,20 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
 
-            val klage: Klage =
-                opprettKlage(sak, client)
-            val oppgaver: OppgaveListe =
-                client.get("/api/oppgaver/sak/${sak.id}/oppgaver") {
-                    addAuthToken(systemBruker)
-                }.body()
-            val oppgaveForKlagen = oppgaver.oppgaver.first { it.referanse == klage.id.toString() }
+            val klage: Klage = opprettKlage(sak, client)
+            tildelOppgavenForKlagen(client, klage, "Saksbehandler01")
 
-            client.post("/api/oppgaver/${oppgaveForKlagen.id}/tildel-saksbehandler/") {
-                addAuthToken(tokenSaksbehandler)
-                contentType(ContentType.Application.Json)
-                setBody(SaksbehandlerEndringDto("Saksbehandler01"))
+            client.postAndAssertOk(
+                "/api/klage/${klage.id}/avbryt",
+                tokenSaksbehandler,
+                AvbrytKlageDto(AarsakTilAvbrytelse.ANNET, "Bla bla"),
+            )
+            val avbruttKlage = hentKlage(client, klage.id)
+            with(avbruttKlage) {
+                id shouldBe klage.id
+                status shouldBe KlageStatus.AVBRUTT
+                aarsakTilAvbrytelse shouldBe AarsakTilAvbrytelse.ANNET
             }
-
-            val response =
-                client.post("/api/klage/${klage.id}/avbryt") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(AvbrytKlageDto(AarsakTilAvbrytelse.ANNET, "Bla bla"))
-                }
-            assertEquals(HttpStatusCode.OK, response.status)
-
-            val avbruttKlageResponse =
-                client.get("/api/klage/${klage.id}") {
-                    addAuthToken(tokenSaksbehandler)
-                }.also { assertEquals(HttpStatusCode.OK, it.status) }
-
-            val avbruttKlage = avbruttKlageResponse.body<Klage>()
-            assertEquals(klage.id, avbruttKlage.id)
-            assertEquals(KlageStatus.AVBRUTT, avbruttKlage.status)
-            assertEquals(AarsakTilAvbrytelse.ANNET, avbruttKlage.aarsakTilAvbrytelse)
         }
     }
 
@@ -198,24 +163,18 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     fun `oppdatering av kabalstatus gaar bra`() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
-
             val klage: Klage = opprettKlage(sak, client)
 
-            val response =
-                client.patch("/api/klage/${klage.id}/kabalstatus") {
-                    addAuthToken(fagsystemTokenEY)
-                    contentType(ContentType.Application.Json)
-                    setBody(Kabalrespons(KabalStatus.FERDIGSTILT, BehandlingResultat.IKKE_MEDHOLD))
-                }
-            assertEquals(HttpStatusCode.OK, response.status)
+            client.patchAndAssertOk(
+                "/api/klage/${klage.id}/kabalstatus",
+                fagsystemTokenEY,
+                Kabalrespons(KabalStatus.FERDIGSTILT, BehandlingResultat.IKKE_MEDHOLD),
+            )
 
-            client.get("/api/klage/${klage.id}") {
-                addAuthToken(tokenSaksbehandler)
-            }.also { assertEquals(HttpStatusCode.OK, it.status) }
-                .also { respons ->
-                    val oppdatert = respons.body<Klage>()
-                    assertEquals(oppdatert.id, klage.id)
-                    assertEquals(KabalStatus.FERDIGSTILT, oppdatert.kabalStatus)
+            hentKlage(client, klage.id)
+                .let { oppdatertKlage ->
+                    oppdatertKlage.id shouldBe klage.id
+                    oppdatertKlage.kabalStatus shouldBe KabalStatus.FERDIGSTILT
                 }
         }
     }
@@ -225,25 +184,17 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
         withTestApplication { client ->
             val sak: Sak = opprettSak(client)
             val klage: Klage =
-                vurderFormkrav(
-                    opprettKlage(sak, client),
-                    client,
-                )
-            val response = vurderUtfallTilAvvist(klage, client)
-            assertEquals(HttpStatusCode.OK, response.status)
+                vurderFormkrav(opprettKlage(sak, client), client)
 
-            coVerify {
+            val oppdatertKlage: Klage = vurderUtfallTilAvvist(klage, client)
+
+            coVerifyAll {
                 applicationContext.vedtakKlient.lagreVedtakKlage(
                     klage,
                     withArg { it.ident() shouldBe "Saksbehandler01" },
                 )
             }
-
-            val oppdatertKlage =
-                client.get("/api/klage/${klage.id}") {
-                    addAuthToken(tokenSaksbehandler)
-                }.body<Klage>()
-
+            oppdatertKlage shouldBeEqual hentKlage(client, klage.id)
             oppdatertKlage.status shouldBe KlageStatus.UTFALL_VURDERT
             with(oppdatertKlage.utfall as KlageUtfallMedData.Avvist) {
                 brev.brevId shouldNotBe null
@@ -252,47 +203,29 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
         }
     }
 
-    private suspend fun vurderUtfallTilAvvist(
-        klage: Klage,
-        client: HttpClient,
-    ): HttpResponse {
-        val response =
-            client.put("/api/klage/${klage.id}/utfall") {
-                addAuthToken(tokenSaksbehandler)
-                contentType(ContentType.Application.Json)
-                setBody(VurdertUtfallDto(KlageUtfallUtenBrev.Avvist()))
-            }
-        return response
-    }
-
     @Test
     fun `attestering gaar bra`() {
         withTestApplication { client ->
             val vedtakKlient = applicationContext.vedtakKlient
             val sak: Sak = opprettSak(client)
-            val klage = opprettKlageOgFattVedtak(client, sak)
+            val klage = opprettKlageOgFattVedtak(client, sak, saksbehandlerIdent)
+            tildelOppgavenForKlagen(client, klage, attestantIdent)
 
-            val response =
-                client.post("/api/klage/${klage.id}/vedtak/attester") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(KlageAttesterRequest("Laissez un commentaire ici"))
-                }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val attestert: Klage =
+                client.postAndAssertOk(
+                    "/api/klage/${klage.id}/vedtak/attester",
+                    tokenAttestant,
+                    KlageAttesterRequest("Laissez un commentaire ici"),
+                ).body()
 
-            coVerify {
+            coVerifyAll {
                 vedtakKlient.lagreVedtakKlage(any(), any())
                 vedtakKlient.fattVedtakKlage(any(), any())
-                vedtakKlient.attesterVedtakKlage(klage, withArg { it.ident() shouldBe "Saksbehandler01" })
+                vedtakKlient.attesterVedtakKlage(klage, withArg { it.ident() shouldBe attestantIdent })
             }
-
-            val oppdatertKlage =
-                client.get("/api/klage/${klage.id}") {
-                    addAuthToken(tokenSaksbehandler)
-                }.body<Klage>()
-
-            oppdatertKlage.status shouldBe KlageStatus.ATTESTERT
-            with(oppdatertKlage.utfall as KlageUtfallMedData.Avvist) {
+            attestert shouldBeEqual hentKlage(client, klage.id)
+            attestert.status shouldBe KlageStatus.FERDIGSTILT
+            with(attestert.utfall as KlageUtfallMedData.Avvist) {
                 brev.brevId shouldNotBe null
                 vedtak.vedtakId shouldNotBe null
             }
@@ -302,36 +235,33 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     @Test
     fun `underkjenn gaar bra`() {
         withTestApplication { client ->
+            val attestantIdent = "Saksbehandler02"
             val vedtakKlient = applicationContext.vedtakKlient
             val sak: Sak = opprettSak(client)
-            val klage = opprettKlageOgFattVedtak(client, sak)
+            val klage = opprettKlageOgFattVedtak(client, sak, saksbehandlerIdent)
+            tildelOppgavenForKlagen(client, klage, attestantIdent)
 
-            val response =
-                client.post("/api/klage/${klage.id}/vedtak/underkjenn") {
-                    addAuthToken(tokenSaksbehandler)
-                    contentType(ContentType.Application.Json)
-                    setBody(KlageUnderkjennRequest("Laissez un commentaire ici", "VALGT_BEGRUNNELSE"))
-                }
-            assertEquals(HttpStatusCode.OK, response.status)
+            val underkjent: Klage =
+                client.postAndAssertOk(
+                    "/api/klage/${klage.id}/vedtak/underkjenn",
+                    tokenAttestant,
+                    KlageUnderkjennRequest("Laissez un commentaire ici", "VALGT_BEGRUNNELSE"),
+                ).body()
 
-            coVerify {
+            coVerifyAll {
                 vedtakKlient.lagreVedtakKlage(any(), any())
                 vedtakKlient.fattVedtakKlage(any(), any())
-                vedtakKlient.underkjennVedtakKlage(klage.id, withArg { it.ident() shouldBe "Saksbehandler01" })
-
-                applicationContext.hendelseDao.finnHendelserIBehandling(klage.id) shouldNotBe emptyList<LagretHendelse>()
+                vedtakKlient.underkjennVedtakKlage(klage.id, withArg { it.ident() shouldBe attestantIdent })
             }
-
-            val oppdatertKlage =
-                client.get("/api/klage/${klage.id}") {
-                    addAuthToken(tokenSaksbehandler)
-                }.body<Klage>()
-
-            oppdatertKlage.status shouldBe KlageStatus.RETURNERT
-            with(oppdatertKlage.utfall as KlageUtfallMedData.Avvist) {
+            underkjent shouldBeEqual hentKlage(client, klage.id)
+            underkjent.status shouldBe KlageStatus.RETURNERT
+            with(underkjent.utfall as KlageUtfallMedData.Avvist) {
                 brev.brevId shouldNotBe null
                 vedtak.vedtakId shouldNotBe null
             }
+            val hendelserIBehandling = applicationContext.hendelseDao.finnHendelserIBehandling(klage.id)
+            hendelserIBehandling.map { it.hendelse } shouldContainExactly
+                listOf("KLAGE:OPPRETTET", "VEDTAK:FATTET", "VEDTAK:UNDERKJENT")
         }
     }
 
@@ -365,6 +295,20 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
                 )
             }.body()
         return klage
+    }
+
+    private suspend fun vurderUtfallTilAvvist(
+        klage: Klage,
+        client: HttpClient,
+    ): Klage {
+        val response =
+            client.put("/api/klage/${klage.id}/utfall") {
+                addAuthToken(tokenSaksbehandler)
+                contentType(ContentType.Application.Json)
+                setBody(VurdertUtfallDto(KlageUtfallUtenBrev.Avvist()))
+            }
+        assertEquals(HttpStatusCode.OK, response.status)
+        return response.body()
     }
 
     private suspend fun vurderFormkrav(
@@ -403,11 +347,95 @@ class KlageRoutesIntegrationTest : BehandlingIntegrationTest() {
     private suspend fun opprettKlageOgFattVedtak(
         client: HttpClient,
         sak: Sak,
+        saksbehandler: String,
     ): Klage {
         val klage = opprettKlage(sak, client)
         vurderFormkrav(klage, client)
         vurderUtfallTilAvvist(klage, client)
+        tildelOppgavenForKlagen(client, klage, saksbehandler)
         return fattVedtak(klage, client)
+    }
+
+    private suspend fun tildelOppgavenForKlagen(
+        client: HttpClient,
+        klage: Klage,
+        saksbehandler: String,
+    ) {
+        val oppgaver: List<OppgaveIntern> =
+            client.get("/api/oppgaver") {
+                addAuthToken(tokenSaksbehandler)
+                header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            }.also {
+                assertEquals(HttpStatusCode.OK, it.status)
+            }.body()
+
+        val oppgave = oppgaver.single { it.referanse == klage.id.toString() }
+
+        println("Tildeler oppgave ${oppgave.id} til saksbehandler $saksbehandler for klage ${klage.id}")
+        client.post("/api/oppgaver/${oppgave.id}/tildel-saksbehandler") {
+            val dto = SaksbehandlerEndringDto(saksbehandler)
+            addAuthToken(tokenSaksbehandler)
+            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            setBody(dto)
+        }.also {
+            assertEquals(HttpStatusCode.OK, it.status)
+        }
+    }
+
+    private suspend fun hentKlage(
+        client: HttpClient,
+        klageId: UUID,
+        token: String = tokenSaksbehandler,
+    ): Klage = client.getAndAssertOk("/api/klage/$klageId", token).body()
+
+    private fun HttpClient.getAndAssertOk(
+        url: String,
+        token: String,
+        block: ((HttpResponse) -> Unit)? = null,
+    ): HttpResponse {
+        return get(url, token, block)
+            .also { assertEquals(HttpStatusCode.OK, it.status) }
+    }
+
+    private fun HttpClient.get(
+        url: String,
+        token: String,
+        block: ((HttpResponse) -> Unit)? = null,
+    ): HttpResponse {
+        return runBlocking {
+            val response =
+                get(url) {
+                    addAuthToken(token)
+                }
+            block?.invoke(response)
+            response
+        }
+    }
+
+    private suspend fun HttpClient.postAndAssertOk(
+        s: String,
+        token: String,
+        body: Any? = null,
+    ): HttpResponse {
+        return post(s) {
+            contentType(ContentType.Application.Json)
+            setBody(body)
+            addAuthToken(token)
+        }
+    }
+
+    private suspend fun HttpClient.patchAndAssertOk(
+        url: String,
+        token: String,
+        body: Kabalrespons,
+    ) {
+        val response =
+            patch(url) {
+                addAuthToken(token)
+                contentType(ContentType.Application.Json)
+                setBody(body)
+            }
+        assertEquals(HttpStatusCode.OK, response.status)
     }
 
     private fun withTestApplication(block: suspend (client: HttpClient) -> Unit) {

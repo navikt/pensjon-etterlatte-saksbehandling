@@ -60,4 +60,6 @@ enum class Brevkoder(val redigering: EtterlatteBrevKode, val ferdigstilling: Ett
         EtterlatteBrevKode.TOM_MAL_INFORMASJONSBREV,
     ),
     AVVIST_KLAGE(EtterlatteBrevKode.AVVIST_KLAGE_INNHOLD, EtterlatteBrevKode.AVVIST_KLAGE_FERDIG),
+
+    OVERSENDELSE_KLAGE(EtterlatteBrevKode.KLAGE_OVERSENDELSE_BRUKER),
 }

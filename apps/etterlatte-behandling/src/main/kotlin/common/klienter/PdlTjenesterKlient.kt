@@ -29,10 +29,16 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 interface PdlTjenesterKlient {
-    fun hentPdlModell(
+    fun hentPdlModellFlereSaktyper(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktype: SakType,
+    ): PersonDTO
+
+    fun hentPdlModellFlereSaktyper(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktyper: List<SakType>,
     ): PersonDTO
 
     fun hentGeografiskTilknytning(
@@ -63,13 +69,30 @@ class PdlTjenesterKlientImpl(config: Config, private val pdl_app: HttpClient) : 
         }.body<AdressebeskyttelseGradering>()
     }
 
-    override fun hentPdlModell(
+    override fun hentPdlModellFlereSaktyper(
+        foedselsnummer: String,
+        rolle: PersonRolle,
+        saktyper: List<SakType>,
+    ): PersonDTO {
+        logger.info("Henter Pdl-modell for rolle ${rolle.name}")
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, saktyper)
+        val response =
+            runBlocking {
+                pdl_app.post("$url/person/v2") {
+                    contentType(ContentType.Application.Json)
+                    setBody(personRequest)
+                }.body<PersonDTO>()
+            }
+        return response
+    }
+
+    override fun hentPdlModellFlereSaktyper(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktype: SakType,
     ): PersonDTO {
         logger.info("Henter Pdl-modell for rolle ${rolle.name}")
-        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, saktype)
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, listOf(saktype))
         val response =
             runBlocking {
                 pdl_app.post("$url/person/v2") {

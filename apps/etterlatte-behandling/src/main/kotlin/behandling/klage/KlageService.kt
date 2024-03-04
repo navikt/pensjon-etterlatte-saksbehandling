@@ -36,10 +36,10 @@ import no.nav.etterlatte.libs.common.klage.StatistikkKlage
 import no.nav.etterlatte.libs.common.oppgave.OppgaveIntern
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
 import no.nav.etterlatte.libs.common.oppgave.OppgaveType
+import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.oppgave.OppgaveService
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.token.BrukerTokenInfo
 import no.nav.etterlatte.token.Saksbehandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -93,20 +93,20 @@ interface KlageService {
 
     fun fattVedtak(
         klageId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): Klage
 
     fun attesterVedtak(
         klageId: UUID,
         kommentar: String,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): Klage
 
     fun underkjennVedtak(
         klageId: UUID,
         kommentar: String,
         valgtBegrunnelse: String,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): Klage
 }
 
@@ -382,19 +382,7 @@ class KlageServiceImpl(
                 detail = "Klagen med id=$klageId kan ikke ferdigstilles siden den har feil status / tilstand",
             )
         }
-
-        val saksbehandlerForKlageOppgave =
-            oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(klageId.toString())
-                ?: throw ManglerSaksbehandlerException("Fant ingen saksbehandler på oppgave relatert til klageid $klageId")
-
-        if (saksbehandlerForKlageOppgave.ident != saksbehandler.ident) {
-            throw UgyldigForespoerselException(
-                code = "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
-                detail =
-                    "Saksbehandler er ikke ansvarlig på oppgaven til klagen med id=$klageId, " +
-                        "og kan derfor ikke ferdigstille behandlingen",
-            )
-        }
+        sjekkAtSaksbehandlerHarOppgaven(klageId, saksbehandler, "ferdigstille behandlingen")
 
         val (innstilling, omgjoering) =
             when (val utfall = klage.utfall) {
@@ -473,14 +461,15 @@ class KlageServiceImpl(
 
     override fun fattVedtak(
         klageId: UUID,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): Klage {
         val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+        sjekkAtSaksbehandlerHarOppgaven(klageId, saksbehandler, "fatte vedtak")
 
         val oppdatertKlage = klage.fattVedtak()
         val vedtak =
             runBlocking {
-                vedtakKlient.fattVedtakKlage(klage, brukerTokenInfo)
+                vedtakKlient.fattVedtakKlage(klage, saksbehandler)
             }
         sjekkVedtakIdLagretIUtfall(klage, vedtak.id)
         klageDao.lagreKlage(oppdatertKlage)
@@ -491,11 +480,40 @@ class KlageServiceImpl(
             vedtakId = vedtak.id,
             hendelse = HendelseType.FATTET,
             inntruffet = Tidspunkt.now(),
-            saksbehandler = brukerTokenInfo.ident(),
+            saksbehandler = saksbehandler.ident(),
             kommentar = null,
             begrunnelse = null,
         )
+
+        oppgaveService.hentOppgaveUnderBehandlingForReferanse(klageId.toString()).let { oppgave ->
+            oppgaveService.oppdaterStatusOgMerknad(
+                oppgave.id,
+                "Vedtak er fattet",
+                Status.UNDER_BEHANDLING,
+            )
+            oppgaveService.fjernSaksbehandler(oppgave.id)
+        }
+
         return oppdatertKlage
+    }
+
+    private fun sjekkAtSaksbehandlerHarOppgaven(
+        klageId: UUID,
+        saksbehandler: Saksbehandler,
+        handling: String,
+    ) {
+        val saksbehandlerForKlageOppgave =
+            oppgaveService.hentSaksbehandlerForOppgaveUnderArbeidByReferanse(klageId.toString())
+                ?: throw ManglerSaksbehandlerException("Fant ingen saksbehandler på oppgave relatert til klageid $klageId")
+
+        if (saksbehandlerForKlageOppgave.ident != saksbehandler.ident) {
+            throw UgyldigForespoerselException(
+                code = "SAKSBEHANDLER_HAR_IKKE_OPPGAVEN",
+                detail =
+                    "Saksbehandler er ikke ansvarlig på oppgaven til klagen med id=$klageId, " +
+                        "og kan derfor ikke $handling",
+            )
+        }
     }
 
     private fun sjekkVedtakIdLagretIUtfall(
@@ -513,10 +531,11 @@ class KlageServiceImpl(
     override fun attesterVedtak(
         klageId: UUID,
         kommentar: String,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): Klage {
         logger.info("Attesterer vedtak for klage=$klageId")
         val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
+        sjekkAtSaksbehandlerHarOppgaven(klageId, saksbehandler, "attestere vedtak")
 
         val oppdatertKlage = klage.attesterVedtak()
 
@@ -525,13 +544,13 @@ class KlageServiceImpl(
                 "Vi har en klage som kunne attesteres, men har feil utfall lagret. Id: $klageId"
             }
         runBlocking {
-            brevApiKlient.ferdigstillBrev(klage.sak.id, utfall.brev.brevId, brukerTokenInfo)
+            brevApiKlient.ferdigstillBrev(klage.sak.id, utfall.brev.brevId, saksbehandler)
         }
         val vedtak =
             runBlocking {
                 vedtakKlient.attesterVedtakKlage(
                     klage = klage,
-                    brukerTokenInfo = brukerTokenInfo,
+                    brukerTokenInfo = saksbehandler,
                 )
             }
         sjekkVedtakIdLagretIUtfall(oppdatertKlage, vedtak.id)
@@ -543,10 +562,12 @@ class KlageServiceImpl(
             vedtakId = vedtak.id,
             hendelse = HendelseType.ATTESTERT,
             inntruffet = Tidspunkt.now(),
-            saksbehandler = brukerTokenInfo.ident(),
+            saksbehandler = saksbehandler.ident(),
             kommentar = kommentar,
             begrunnelse = null,
         )
+
+        oppgaveService.ferdigStillOppgaveUnderBehandling(klageId.toString(), saksbehandler)
         return oppdatertKlage
     }
 
@@ -554,7 +575,7 @@ class KlageServiceImpl(
         klageId: UUID,
         kommentar: String,
         valgtBegrunnelse: String,
-        brukerTokenInfo: BrukerTokenInfo,
+        saksbehandler: Saksbehandler,
     ): Klage {
         logger.info("Underkjenner vedtak for klage=$klageId")
         val klage = klageDao.hentKlage(klageId) ?: throw NotFoundException("Klage med id=$klageId finnes ikke")
@@ -565,7 +586,7 @@ class KlageServiceImpl(
             runBlocking {
                 vedtakKlient.underkjennVedtakKlage(
                     klageId = klageId,
-                    brukerTokenInfo = brukerTokenInfo,
+                    brukerTokenInfo = saksbehandler,
                 )
             }
 
@@ -577,10 +598,20 @@ class KlageServiceImpl(
             vedtakId = vedtak.id,
             hendelse = HendelseType.UNDERKJENT,
             inntruffet = Tidspunkt.now(),
-            saksbehandler = brukerTokenInfo.ident(),
+            saksbehandler = saksbehandler.ident(),
             kommentar = kommentar,
             begrunnelse = valgtBegrunnelse,
         )
+
+        oppgaveService.hentOppgaveUnderBehandlingForReferanse(klageId.toString()).let { oppgave ->
+            oppgaveService.oppdaterStatusOgMerknad(
+                oppgave.id,
+                "Vedtak er underkjent",
+                Status.UNDER_BEHANDLING,
+            )
+            oppgaveService.fjernSaksbehandler(oppgave.id)
+        }
+
         return oppdatertKlage
     }
 

@@ -31,7 +31,6 @@ enum class KlageStatus {
     FORMKRAV_IKKE_OPPFYLT,
     UTFALL_VURDERT,
     FATTET_VEDTAK,
-    ATTESTERT,
     RETURNERT,
 
     // potensielt en status for å markere oversendingen til Kabal
@@ -51,7 +50,7 @@ enum class KlageStatus {
         }
 
         fun kanAvbryte(status: KlageStatus): Boolean {
-            return status !in listOf(FERDIGSTILT, ATTESTERT, AVBRUTT)
+            return status !in listOf(FERDIGSTILT, AVBRUTT)
         }
 
         fun kanEndres(status: KlageStatus): Boolean {
@@ -322,7 +321,7 @@ data class Klage(
                     "på grunn av status til klagen (${this.status})",
             )
         }
-        return this.copy(status = KlageStatus.ATTESTERT)
+        return this.copy(status = KlageStatus.FERDIGSTILT)
     }
 
     fun underkjennVedtak(): Klage {

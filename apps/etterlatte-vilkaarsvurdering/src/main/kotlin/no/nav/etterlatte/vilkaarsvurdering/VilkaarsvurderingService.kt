@@ -7,6 +7,7 @@ import no.nav.etterlatte.libs.common.Vedtaksloesning
 import no.nav.etterlatte.libs.common.behandling.BehandlingStatus
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Revurderingaarsak
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.behandling.Virkningstidspunkt
 import no.nav.etterlatte.libs.common.behandling.erPaaNyttRegelverk
@@ -144,20 +145,68 @@ class VilkaarsvurderingService(
             val virkningstidspunkt =
                 behandling.virkningstidspunkt ?: throw VirkningstidspunktIkkeSattException(behandlingId)
 
-            vilkaarsvurderingRepository.kopierVilkaarsvurdering(
-                nyVilkaarsvurdering =
-                    Vilkaarsvurdering(
-                        behandlingId = behandlingId,
-                        grunnlagVersjon = grunnlag.metadata.versjon,
-                        virkningstidspunkt = virkningstidspunkt.dato,
-                        vilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
-                        resultat = tidligereVilkaarsvurdering.resultat,
-                    ),
-                kopiertFraId = tidligereVilkaarsvurdering.id,
-            ).also {
+            val vilkaar =
+                when {
+                    behandling.revurderingsaarsak == Revurderingaarsak.REGULERING ->
+                        tidligereVilkaarsvurdering.vilkaar.kopier()
+                    else ->
+                        oppdaterVilkaar(
+                            kopierteVilkaar = tidligereVilkaarsvurdering.vilkaar.kopier(),
+                            behandling = behandling,
+                            virkningstidspunkt = virkningstidspunkt,
+                        )
+                }
+
+            val nyVilkaarsvurdering =
+                vilkaarsvurderingRepository.kopierVilkaarsvurdering(
+                    nyVilkaarsvurdering =
+                        Vilkaarsvurdering(
+                            behandlingId = behandlingId,
+                            grunnlagVersjon = grunnlag.metadata.versjon,
+                            virkningstidspunkt = virkningstidspunkt.dato,
+                            vilkaar = vilkaar,
+                            resultat = tidligereVilkaarsvurdering.resultat,
+                        ),
+                    kopiertFraId = tidligereVilkaarsvurdering.id,
+                )
+
+            // Hvis minst ett av vilkårene mangler vurdering - slett vilkårsvurderingresultat
+            if (nyVilkaarsvurdering.vilkaar.any { v -> v.vurdering == null }) {
+                vilkaarsvurderingRepository.slettVilkaarsvurderingResultat(nyVilkaarsvurdering.behandlingId)
+            } else {
                 runBlocking { behandlingKlient.settBehandlingStatusVilkaarsvurdert(behandlingId, brukerTokenInfo) }
+                nyVilkaarsvurdering
             }
         }
+    }
+
+    // Her legges det til nye vilkår og det filtreres bort vilkår som ikke lenger er aktuelle.
+    // Oppdatering av vilkår med endringer er ennå ikke støttet.
+    private fun oppdaterVilkaar(
+        kopierteVilkaar: List<Vilkaar>,
+        behandling: DetaljertBehandling,
+        virkningstidspunkt: Virkningstidspunkt,
+    ): List<Vilkaar> {
+        val gjeldendeVilkaarForVirkningstidspunkt =
+            finnVilkaarForNyVilkaarsvurdering(
+                virkningstidspunkt,
+                behandling.behandlingType,
+                behandling.sakType,
+            )
+
+        val nyeHovedvilkaarTyper =
+            gjeldendeVilkaarForVirkningstidspunkt.map { it.hovedvilkaar.type }
+                .subtract(kopierteVilkaar.map { it.hovedvilkaar.type }.toSet())
+
+        val slettetHovedvilkaarTyper =
+            kopierteVilkaar.map { it.hovedvilkaar.type }
+                .subtract(gjeldendeVilkaarForVirkningstidspunkt.map { it.hovedvilkaar.type }.toSet())
+
+        val nyeVilkaar =
+            gjeldendeVilkaarForVirkningstidspunkt
+                .filter { it.hovedvilkaar.type in nyeHovedvilkaarTyper }
+
+        return kopierteVilkaar.filterNot { it.hovedvilkaar.type in slettetHovedvilkaarTyper } + nyeVilkaar
     }
 
     suspend fun opprettVilkaarsvurdering(
@@ -258,13 +307,10 @@ class VilkaarsvurderingService(
 
             SakType.OMSTILLINGSSTOENAD ->
                 when (behandlingType) {
-                    BehandlingType.FØRSTEGANGSBEHANDLING ->
-                        OmstillingstoenadVilkaar.inngangsvilkaar()
-
+                    BehandlingType.FØRSTEGANGSBEHANDLING,
                     BehandlingType.REVURDERING,
-                    -> throw IllegalArgumentException(
-                        "Støtter ikke vilkårsvurdering for behandlingType=$behandlingType",
-                    )
+                    ->
+                        OmstillingstoenadVilkaar.inngangsvilkaar()
                 }
         }
 

@@ -121,6 +121,7 @@ abstract class BehandlingIntegrationTest {
                             "pdltjenester.url" to "http://localhost",
                             "grunnlag.resource.url" to "http://localhost",
                             "vedtak.resource.url" to "http://localhost",
+                            "krr.url" to "http://localhost",
                         ),
                     ),
                 rapid = TestProdusent(),

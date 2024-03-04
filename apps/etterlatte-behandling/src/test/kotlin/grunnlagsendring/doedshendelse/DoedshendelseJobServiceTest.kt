@@ -1,7 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import io.kotest.matchers.shouldBe
-import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
@@ -30,7 +29,6 @@ import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
 import no.nav.etterlatte.migrering.person.krr.KrrKlientImpl
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.sak.SakService
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
@@ -38,7 +36,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class DoedshendelseJobServiceTest {
     private val dao = mockk<DoedshendelseDao>()
     private val kontrollpunktService = mockk<DoedshendelseKontrollpunktService>()
@@ -71,12 +69,12 @@ class DoedshendelseJobServiceTest {
             every { leggTilNyeOpplysningerBareSak(any(), any()) } just runs
         }
 
-    val pdlTjenesterKlient =
+    private val pdlTjenesterKlient =
         mockk<PdlTjenesterKlient> {
             every { hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
         }
 
-    val krrKlient =
+    private val krrKlient =
         mockk<KrrKlientImpl> {
             coEvery { hentDigitalKontaktinformasjon(any()) } returns
                 DigitalKontaktinformasjon(
@@ -103,11 +101,6 @@ class DoedshendelseJobServiceTest {
             pdlTjenesterKlient,
             krrKlient = krrKlient,
         )
-
-    @AfterEach
-    fun afterEach() {
-        clearMocks(dao, kontrollpunktService, grunnlagsendringshendelseService)
-    }
 
     @Test
     fun `skal kjoere 1 ny gyldig hendelse som er 2 dager gammel og droppe 1`() {

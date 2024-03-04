@@ -36,7 +36,7 @@ export const SamordningSak = ({ sakStatus }: { sakStatus: Result<SakMedBehandlin
       )}
 
       {isSuccess(hentet) && samordningsdata && (
-        <Table>
+        <Table zebraStripes>
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell>VedtaksID</Table.HeaderCell>

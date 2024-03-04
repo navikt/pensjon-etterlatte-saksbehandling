@@ -8,6 +8,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
+import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.saksbehandler.SaksbehandlerInfoDao
@@ -27,6 +28,7 @@ val SAKSBEHANDLERPATTERN = Regex("[a-zA-Z]\\d{6}")
 class SaksbehandlerJobService(
     private val saksbehandlerInfoDao: SaksbehandlerInfoDao,
     private val navAnsattKlient: NavAnsattKlient,
+    private val axsysKlient: AxsysKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -45,7 +47,7 @@ class SaksbehandlerJobService(
                     logger.error("Kunne ikke hente navn for saksbehandlere", e)
                 }
                 try {
-                    oppdaterSaksbehandlerEnhet(logger, saksbehandlerInfoDao, navAnsattKlient, subCoroutineExceptionHandler)
+                    oppdaterSaksbehandlerEnhet(logger, saksbehandlerInfoDao, axsysKlient, subCoroutineExceptionHandler)
                 } catch (e: Exception) {
                     logger.error("Kunne ikke hente enheter for saksbehandlere", e)
                 }
@@ -57,7 +59,7 @@ class SaksbehandlerJobService(
 internal suspend fun oppdaterSaksbehandlerEnhet(
     logger: Logger,
     saksbehandlerInfoDao: SaksbehandlerInfoDao,
-    navAnsattKlient: NavAnsattKlient,
+    axsysKlient: AxsysKlient,
     subCoroutineExceptionHandler: CoroutineExceptionHandler,
 ) {
     val tidbrukt =
@@ -75,7 +77,7 @@ internal suspend fun oppdaterSaksbehandlerEnhet(
                         it to
                             scope.async(
                                 subCoroutineExceptionHandler,
-                            ) { navAnsattKlient.hentEnheterForSaksbehandler(it) }
+                            ) { axsysKlient.hentEnheterForIdent(it) }
                     }
                     .mapNotNull {
                         try {
@@ -126,7 +128,12 @@ internal suspend fun oppdaterSaksbehandlerNavn(
                     filtrerteIdenter.filter {
                         it !in ugyldigeIdenter && SAKSBEHANDLERPATTERN.matches(it)
                     }
-                        .map { it to async(subCoroutineExceptionHandler) { navAnsattKlient.hentSaksbehanderNavn(it) } }
+                        .map {
+                            it to
+                                async(subCoroutineExceptionHandler) {
+                                    navAnsattKlient.hentSaksbehanderNavn(it)
+                                }
+                        }
                         .map { it.first to it.second.await() }
                 }
 

@@ -1,6 +1,7 @@
 package no.nav.etterlatte.oppgave
 
 import com.nimbusds.jwt.JWTClaimsSet
+import io.kotest.matchers.shouldBe
 import io.ktor.server.plugins.BadRequestException
 import io.mockk.every
 import io.mockk.mockk
@@ -13,8 +14,6 @@ import no.nav.etterlatte.SaksbehandlerMedEnheterOgRoller
 import no.nav.etterlatte.SystemUser
 import no.nav.etterlatte.User
 import no.nav.etterlatte.common.Enheter
-import no.nav.etterlatte.funksjonsbrytere.DummyFeatureToggleService
-import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.oppgave.OppgaveKilde
@@ -26,7 +25,6 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.sak.SakDao
-import no.nav.etterlatte.sak.SakTilgangDao
 import no.nav.etterlatte.tilgangsstyring.AzureGroup
 import no.nav.etterlatte.tilgangsstyring.SaksbehandlerMedRoller
 import no.nav.etterlatte.token.BrukerTokenInfo
@@ -37,7 +35,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -50,28 +47,17 @@ import javax.sql.DataSource
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DatabaseExtension::class)
 internal class OppgaveServiceTest(val dataSource: DataSource) {
-    private lateinit var sakDao: SakDao
-    private lateinit var oppgaveDao: OppgaveDao
-    private lateinit var oppgaveService: OppgaveService
-    private lateinit var saktilgangDao: SakTilgangDao
-    private lateinit var oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing
-    private lateinit var featureToggleService: FeatureToggleService
+    private val sakDao: SakDao = SakDao(ConnectionAutoclosingTest(dataSource))
+    private val oppgaveDao: OppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
+    private val oppgaveDaoMedEndringssporing: OppgaveDaoMedEndringssporing =
+        OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
+    private val oppgaveService: OppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao)
     private val saksbehandlerRolleDev = "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"
     private val strengtfortroligDev = "5ef775f2-61f8-4283-bf3d-8d03f428aa14"
     private val attestantRolleDev = "63f46f74-84a8-4d1c-87a8-78532ab3ae60"
     private val saksbehandler = mockk<SaksbehandlerMedEnheterOgRoller>()
 
-    @BeforeAll
-    fun beforeAll() {
-        featureToggleService = DummyFeatureToggleService()
-        sakDao = SakDao(ConnectionAutoclosingTest(dataSource))
-        oppgaveDao = OppgaveDaoImpl(ConnectionAutoclosingTest(dataSource))
-        oppgaveDaoMedEndringssporing = OppgaveDaoMedEndringssporingImpl(oppgaveDao, ConnectionAutoclosingTest(dataSource))
-        oppgaveService = OppgaveService(oppgaveDaoMedEndringssporing, sakDao)
-        saktilgangDao = SakTilgangDao(dataSource)
-    }
-
-    val azureGroupToGroupIDMap =
+    private val azureGroupToGroupIDMap =
         mapOf(
             AzureGroup.SAKSBEHANDLER to saksbehandlerRolleDev,
             AzureGroup.ATTESTANT to attestantRolleDev,
@@ -1139,5 +1125,28 @@ internal class OppgaveServiceTest(val dataSource: DataSource) {
             oppgaveService.hentSisteSaksbehandlerIkkeAttestertOppgave(behandlingId)
 
         Assertions.assertNull(saksbehandlerHentet?.ident)
+    }
+
+    @Test
+    fun `skal kunne endre kilde og sette referanse paa tildelt oppgave som ikke er ferdigstilt`() {
+        val opprettetSak = sakDao.opprettSak("fnr", SakType.BARNEPENSJON, Enheter.AALESUND.enhetNr)
+        val oppgave =
+            oppgaveService.opprettNyOppgaveMedSakOgReferanse(
+                "dummy",
+                opprettetSak.id,
+                OppgaveKilde.HENDELSE,
+                OppgaveType.REVURDERING,
+                "Aldersovergang",
+            )
+
+        oppgaveService.tildelSaksbehandler(oppgave.id, "Z123456")
+
+        val nyReferanse = UUID.randomUUID().toString()
+        oppgaveService.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId = oppgave.id, referanse = nyReferanse)
+
+        with(oppgaveService.hentOppgave(oppgave.id)!!) {
+            kilde shouldBe OppgaveKilde.BEHANDLING
+            referanse shouldBe nyReferanse
+        }
     }
 }

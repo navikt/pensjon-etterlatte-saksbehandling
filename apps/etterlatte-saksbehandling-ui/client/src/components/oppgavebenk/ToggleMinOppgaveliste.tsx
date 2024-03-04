@@ -31,6 +31,8 @@ import { FilterRad } from '~components/oppgavebenk/oppgaveFiltrering/FilterRad'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/components/OppgaveFeilWrapper'
+import { hentAlleStoettedeRevurderinger } from '~shared/api/revurdering'
+import { RevurderingsaarsakerBySakstype, RevurderingsaarsakerDefault } from '~shared/types/Revurderingaarsak'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -57,6 +59,11 @@ export const ToggleMinOppgaveliste = () => {
 
   const [, hentSaksbehandlereIEnheterFetch] = useApiCall(saksbehandlereIEnhetApi)
   const [saksbehandlereIEnheter, setSaksbehandlereIEnheter] = useState<Array<Saksbehandler>>([])
+
+  const [hentRevurderingsaarsakerStatus, hentRevurderingsaarsaker] = useApiCall(hentAlleStoettedeRevurderinger)
+  const [revurderingsaarsaker, setRevurderingsaarsaker] = useState<RevurderingsaarsakerBySakstype>(
+    new RevurderingsaarsakerDefault()
+  )
 
   const oppdaterOppgavelisteValg = (oppgaveListeValg: OppgavelisteToggle) => {
     setOppgaveListeValg(oppgaveListeValg)
@@ -88,6 +95,7 @@ export const ToggleMinOppgaveliste = () => {
     hentMinOppgavelisteOppgaver()
     hentOppgavelistaOppgaver()
     hentGosysOppgaverFetch({})
+    hentRevurderingsaarsaker({})
   }
 
   const filtrerKunInnloggetBrukerOppgaver = (oppgaver: Array<OppgaveDTO>) => {
@@ -167,6 +175,12 @@ export const ToggleMinOppgaveliste = () => {
     }
   }, [gosysOppgaverResult, minOppgavelisteOppgaverResult])
 
+  useEffect(() => {
+    if (isSuccess(hentRevurderingsaarsakerStatus)) {
+      setRevurderingsaarsaker(hentRevurderingsaarsakerStatus.data)
+    }
+  }, [hentRevurderingsaarsakerStatus])
+
   return (
     <Container>
       <TabsWidth
@@ -209,6 +223,7 @@ export const ToggleMinOppgaveliste = () => {
                 oppdaterFrist(setMinOppgavelisteOppgaver, minOppgavelisteOppgaver, id, nyfrist, versjon)
               }
               saksbehandlereIEnhet={saksbehandlereIEnheter}
+              revurderingsaarsaker={revurderingsaarsaker}
             />
           </OppgaveFeilWrapper>
         </>
@@ -229,6 +244,7 @@ export const ToggleMinOppgaveliste = () => {
               oppdaterTildeling={oppdaterSaksbehandlerTildeling}
               saksbehandlereIEnhet={saksbehandlereIEnheter}
               filter={oppgavelistaFilter}
+              revurderingsaarsaker={revurderingsaarsaker}
             />
           </OppgaveFeilWrapper>
         </>

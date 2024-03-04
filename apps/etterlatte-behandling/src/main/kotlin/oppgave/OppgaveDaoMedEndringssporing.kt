@@ -176,6 +176,15 @@ class OppgaveDaoMedEndringssporingImpl(
         }
     }
 
+    override fun endreTilKildeBehandlingOgOppdaterReferanse(
+        oppgaveId: UUID,
+        referanse: String,
+    ) {
+        lagreEndringerPaaOppgave(oppgaveId) {
+            oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
+        }
+    }
+
     override fun hentFristGaarUt(
         dato: LocalDate,
         type: OppgaveType,

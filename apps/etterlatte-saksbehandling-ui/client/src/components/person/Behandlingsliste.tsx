@@ -19,7 +19,7 @@ import { VedtakKolonner } from '~components/person/VedtakKoloner'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { IBehandlingStatus, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
-import { SamordningModal } from '~components/person/Samordning'
+import { SamordningModal } from '~components/person/SamordningModal'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 
 const BehandlingPanel = styled.div`

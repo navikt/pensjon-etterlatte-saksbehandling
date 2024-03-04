@@ -1,6 +1,7 @@
 package grunnlagsendring.doedshendelse.kontrollpunkt
 
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.every
@@ -290,6 +291,62 @@ class DoedshendelseKontrollpunktServiceTest {
     }
 
     @Test
+    fun `Skal gi kontrollpunkt AvdoedHarYtelse, DuplikatGrunnlagsendringsHendelse avdød med tidligere hendelse`() {
+        val doedshendelseInternalAvdoed =
+            DoedshendelseInternal.nyHendelse(
+                avdoedFnr = KONTANT_FOT.value,
+                avdoedDoedsdato = LocalDate.now(),
+                beroertFnr = JOVIAL_LAMA.value,
+                relasjon = Relasjon.AVDOED,
+                endringstype = Endringstype.OPPRETTET,
+            )
+        val sakIdd = 1L
+        every {
+            sakService.finnSaker(
+                any(),
+            )
+        } returns listOf(Sak(KONTANT_FOT.value, SakType.OMSTILLINGSSTOENAD, sakIdd, Enheter.defaultEnhet.enhetNr))
+
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                foedselsnummer = doedshendelseInternalAvdoed.avdoedFnr,
+                rolle = PersonRolle.AVDOED,
+                saktype = any(),
+            )
+        } returns
+            mockPerson().copy(
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr), null),
+                doedsdato = OpplysningDTO(doedshendelseInternalAvdoed.avdoedDoedsdato, null),
+            )
+
+        val oppgaveIntern =
+            mockk<OppgaveIntern> {
+                every { id } returns UUID.randomUUID()
+            }
+        val grunnlagshendelseID = UUID.randomUUID()
+        val grunnlagsendringshendelse =
+            mockk<Grunnlagsendringshendelse> {
+                every { id } returns grunnlagshendelseID
+                every { gjelderPerson } returns doedshendelseInternalAvdoed.avdoedFnr
+                every { type } returns GrunnlagsendringsType.DOEDSFALL
+                every { sakId } returns sakIdd
+            }
+
+        every {
+            grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
+        } returns listOf(grunnlagsendringshendelse)
+        every { oppgaveService.hentOppgaverForReferanse(grunnlagshendelseID.toString()) } returns listOf(oppgaveIntern)
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalAvdoed)
+
+        kontrollpunkter shouldContainExactlyInAnyOrder
+            listOf(
+                DoedshendelseKontrollpunkt.AvdoedHarYtelse,
+                DoedshendelseKontrollpunkt.DuplikatGrunnlagsendringsHendelse(grunnlagsendringshendelse.id, oppgaveIntern.id),
+            )
+    }
+
+    @Test
     fun `Skal returnere kontrollpunkt BarnHarBarnepensjon for relasjon barn og har BP`() {
         every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(
@@ -500,9 +557,10 @@ class DoedshendelseKontrollpunktServiceTest {
             mockk<OppgaveIntern> {
                 every { id } returns UUID.randomUUID()
             }
+        val grunnlagsendringshendelseId = UUID.randomUUID()
         val grunnlagsendringshendelse =
             mockk<Grunnlagsendringshendelse> {
-                every { id } returns UUID.randomUUID()
+                every { id } returns grunnlagsendringshendelseId
                 every { gjelderPerson } returns doedshendelseInternalBP.avdoedFnr
                 every { type } returns GrunnlagsendringsType.DOEDSFALL
             }
@@ -510,7 +568,7 @@ class DoedshendelseKontrollpunktServiceTest {
         every {
             grunnlagsendringshendelseDao.hentGrunnlagsendringshendelserMedStatuserISak(any(), any())
         } returns listOf(grunnlagsendringshendelse)
-        every { oppgaveService.hentOppgaverForReferanse(any()) } returns listOf(oppgaveIntern)
+        every { oppgaveService.hentOppgaverForReferanse(grunnlagsendringshendelseId.toString()) } returns listOf(oppgaveIntern)
 
         val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalBP)
 

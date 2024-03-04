@@ -57,7 +57,7 @@ class DoedshendelseKontrollpunktService(
                 }
 
                 Relasjon.AVDOED -> {
-                    listOfNotNull(kontrollerAvdoedHarYtelseIGjenny(hendelse))
+                    kontrollerAvdoedHarYtelseIGjenny(hendelse) ?: emptyList()
                 }
             }
 
@@ -112,15 +112,16 @@ class DoedshendelseKontrollpunktService(
         )
     }
 
-    private fun kontrollerAvdoedHarYtelseIGjenny(hendelse: DoedshendelseInternal): DoedshendelseKontrollpunkt.AvdoedHarYtelse? {
+    private fun kontrollerAvdoedHarYtelseIGjenny(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt>? {
         val sakerForAvdoed = sakService.finnSaker(hendelse.avdoedFnr)
         return if (sakerForAvdoed.isEmpty()) {
             null
         } else {
-            sakerForAvdoed.forEach {
-                kontrollerEksisterendeHendelser(hendelse, it)
-            }
-            DoedshendelseKontrollpunkt.AvdoedHarYtelse
+            val duplikat =
+                sakerForAvdoed.map {
+                    kontrollerEksisterendeHendelser(hendelse, it)
+                }.first()
+            listOfNotNull(DoedshendelseKontrollpunkt.AvdoedHarYtelse, duplikat)
         }
     }
 

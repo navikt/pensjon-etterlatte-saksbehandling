@@ -94,7 +94,7 @@ internal class DoedshendelseServiceTest {
             ),
         )
 
-        verify(exactly = 3) {
+        verify(exactly = 4) {
             dao.opprettDoedshendelse(any())
         }
     }
@@ -121,7 +121,7 @@ internal class DoedshendelseServiceTest {
         service.opprettDoedshendelseForBeroertePersoner(
             doedshendelseOpprettet,
         )
-        verify(exactly = 3) {
+        verify(exactly = 4) {
             dao.opprettDoedshendelse(any())
         }
 
@@ -222,7 +222,7 @@ internal class DoedshendelseServiceTest {
             korrigertPdlhendelse,
         )
 
-        verify(exactly = 3) {
+        verify(exactly = 4) {
             dao.opprettDoedshendelse(any())
         }
         verify(exactly = 2) { dao.hentDoedshendelserForPerson(any()) }
@@ -287,7 +287,7 @@ internal class DoedshendelseServiceTest {
             annullertPdlHendelse,
         )
 
-        verify(exactly = 3) {
+        verify(exactly = 4) {
             dao.opprettDoedshendelse(any())
         }
         verify(exactly = 2) { dao.hentDoedshendelserForPerson(any()) }

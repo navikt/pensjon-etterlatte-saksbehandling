@@ -1,5 +1,6 @@
 package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
+import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Context
 import no.nav.etterlatte.Kontekst
 import no.nav.etterlatte.behandling.GrunnlagService
@@ -32,6 +33,7 @@ import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
 import no.nav.etterlatte.libs.common.tidspunkt.toLocalDatetimeUTC
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.common.toJsonNode
+import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.sak.SakService
 import no.nav.etterlatte.token.Fagsaksystem
 import org.slf4j.LoggerFactory
@@ -49,6 +51,7 @@ class DoedshendelseJobService(
     private val deodshendelserProducer: DoedshendelserKafkaService,
     private val grunnlagService: GrunnlagService,
     private val pdlTjenesterKlient: PdlTjenesterKlient,
+    private val krrKlient: KrrKlient,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -151,13 +154,26 @@ class DoedshendelseJobService(
 
         grunnlagService.leggInnNyttGrunnlagSak(sak = opprettetSak, galleri)
         val kilde = Grunnlagsopplysning.Gjenny(Fagsaksystem.EY.navn, Tidspunkt.now())
-        // TODO: må gå mot KRR gjøres i EY-3588
-        val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, Spraak.NB.verdi.toJsonNode())
+
+        val spraak = hentSpraak(doedshendelse)
+        val spraakOpplysning = lagOpplysning(Opplysningstype.SPRAAK, kilde, spraak.verdi.toJsonNode())
         grunnlagService.leggTilNyeOpplysningerBareSak(
             sakId = opprettetSak.id,
             opplysninger = NyeSaksopplysninger(opprettetSak.id, listOf(spraakOpplysning)),
         )
         return opprettetSak
+    }
+
+    private fun hentSpraak(doedshendelse: DoedshendelseInternal): Spraak {
+        val kontaktInfo =
+            runBlocking {
+                krrKlient.hentDigitalKontaktinformasjon(doedshendelse.avdoedFnr)
+            }
+        return if (kontaktInfo?.spraak != null) {
+            Spraak.valueOf(kontaktInfo.spraak)
+        } else {
+            Spraak.NB
+        }
     }
 
     private fun hentAnnenForelder(doedshendelse: DoedshendelseInternal): String? {

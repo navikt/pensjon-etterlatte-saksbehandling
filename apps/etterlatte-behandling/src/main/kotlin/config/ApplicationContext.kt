@@ -88,6 +88,7 @@ import no.nav.etterlatte.libs.sporingslogg.Sporingslogg
 import no.nav.etterlatte.metrics.BehandlingMetrics
 import no.nav.etterlatte.metrics.BehandlingMetrikkerDao
 import no.nav.etterlatte.metrics.OppgaveMetrikkerDao
+import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.oppgave.OppgaveDaoImpl
 import no.nav.etterlatte.oppgave.OppgaveDaoMedEndringssporingImpl
 import no.nav.etterlatte.oppgave.OppgaveService
@@ -215,6 +216,18 @@ internal class ApplicationContext(
     val sporingslogg = Sporingslogg()
     val behandlingRequestLogger = BehandlingRequestLogger(sporingslogg)
     val dataSource = DataSourceBuilder.createDataSource(env.props)
+
+    val krrKlient =
+        KrrKlient(
+            client =
+                httpClientClientCredentials(
+                    azureAppClientId = config.getString("azure.app.client.id"),
+                    azureAppJwk = config.getString("azure.app.jwk"),
+                    azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
+                    azureAppScope = config.getString("krr.scope"),
+                ),
+            url = config.getString("krr.url"),
+        )
 
     // Dao
     val autoClosingDatabase = ConnectionAutoclosingImpl(dataSource)
@@ -374,6 +387,7 @@ internal class ApplicationContext(
             deodshendelserProducer = deodshendelserProducer,
             pdlTjenesterKlient = pdlTjenesterKlient,
             grunnlagService = grunnlagsService,
+            krrKlient = krrKlient,
         )
 
     val behandlingsStatusService =

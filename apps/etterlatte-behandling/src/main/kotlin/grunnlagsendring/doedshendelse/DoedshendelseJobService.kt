@@ -108,14 +108,13 @@ class DoedshendelseJobService(
                     kontrollpunkter.finnSak() ?: opprettSakOgLagGrunnlag(doedshendelse)
 
                 val brevSendt = sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
-                val oppgave: Pair<Boolean, OppgaveIntern?> =
-                    opprettOppgaveHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
+                val (oppgaveOpprettet, oppgave) = opprettOppgaveHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
                 val utfall =
-                    if (brevSendt && oppgave.first) {
+                    if (brevSendt && oppgaveOpprettet) {
                         Utfall.BREV_OG_OPPGAVE
                     } else if (brevSendt) {
                         Utfall.BREV
-                    } else if (oppgave.first) {
+                    } else if (oppgaveOpprettet) {
                         Utfall.OPPGAVE
                     } else {
                         logger.error("Kan ikke håndtere dødshendelse ${doedshendelse.id}")
@@ -126,7 +125,7 @@ class DoedshendelseJobService(
                     doedshendelse.tilBehandlet(
                         utfall = utfall,
                         sakId = sak.id,
-                        oppgaveId = oppgave.second?.id,
+                        oppgaveId = oppgave?.id,
                         kontrollpunkter = kontrollpunkter,
                     ),
                 )

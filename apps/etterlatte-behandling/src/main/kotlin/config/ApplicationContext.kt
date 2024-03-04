@@ -174,7 +174,7 @@ private fun krrHttKlient(config: Config) =
         azureAppClientId = config.getString("azure.app.client.id"),
         azureAppJwk = config.getString("azure.app.jwk"),
         azureAppWellKnownUrl = config.getString("azure.app.well.known.url"),
-        azureAppScope = config.getString("etterlatte.outbound.scope"),
+        azureAppScope = config.getString("krr.scope"),
     )
 
 private fun finnBrukerIdent(): String {

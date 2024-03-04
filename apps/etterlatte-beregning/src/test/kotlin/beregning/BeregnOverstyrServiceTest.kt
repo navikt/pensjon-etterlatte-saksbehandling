@@ -13,17 +13,19 @@ import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlag
 import no.nav.etterlatte.beregning.grunnlag.OverstyrBeregningGrunnlagData
 import no.nav.etterlatte.beregning.regler.bruker
 import no.nav.etterlatte.klienter.GrunnlagKlientImpl
+import no.nav.etterlatte.klienter.VilkaarsvurderingKlient
 import no.nav.etterlatte.libs.common.IntBroek
 import no.nav.etterlatte.libs.common.behandling.BehandlingType
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.beregning.Beregningstype
 import no.nav.etterlatte.libs.common.tidspunkt.Tidspunkt
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingDto
+import no.nav.etterlatte.libs.common.vilkaarsvurdering.VilkaarsvurderingUtfall
 import no.nav.etterlatte.libs.testdata.behandling.VirkningstidspunktTestData
 import no.nav.etterlatte.libs.testdata.grunnlag.GrunnlagTestData
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -32,14 +34,16 @@ import java.util.UUID
 internal class BeregnOverstyrServiceTest {
     private val grunnlagKlient = mockk<GrunnlagKlientImpl>()
     private val beregningsGrunnlagService = mockk<BeregningsGrunnlagService>()
+    private val vilkaarsvurderingKlient = mockk<VilkaarsvurderingKlient>()
     private lateinit var beregnOverstyrBeregningService: BeregnOverstyrBeregningService
 
     @BeforeEach
     fun setup() {
         beregnOverstyrBeregningService =
             BeregnOverstyrBeregningService(
-                grunnlagKlient,
-                beregningsGrunnlagService,
+                grunnlagKlient = grunnlagKlient,
+                beregningsGrunnlagService = beregningsGrunnlagService,
+                vilkaarsvurderingKlient = vilkaarsvurderingKlient,
             )
     }
 
@@ -194,11 +198,18 @@ internal class BeregnOverstyrServiceTest {
     }
 
     @Test
-    fun `skal ikke beregne overstyrt revurdering`() {
+    fun `skal beregne overstyrt revurdering hvis vilkaar er oppfylt`() {
         val behandling = mockBehandling(BehandlingType.REVURDERING, YearMonth.of(2019, 11))
         val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
 
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
         coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        every { vilkaarsvurderingDto.resultat } returns
+            mockk {
+                every { utfall } returns VilkaarsvurderingUtfall.OPPFYLT
+            }
         every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
             OverstyrBeregningGrunnlag(
                 perioder =
@@ -212,7 +223,7 @@ internal class BeregnOverstyrServiceTest {
                                 beskrivelse = "test periode 1",
                             ),
                             LocalDate.of(2019, 11, 1),
-                            LocalDate.of(2020, 4, 1),
+                            LocalDate.of(2020, 4, 30),
                         ),
                         GrunnlagMedPeriode(
                             OverstyrBeregningGrunnlagData(
@@ -222,7 +233,7 @@ internal class BeregnOverstyrServiceTest {
                                 prorataBroekNevner = null,
                                 beskrivelse = "test periode 2",
                             ),
-                            LocalDate.of(2020, 4, 2),
+                            LocalDate.of(2020, 5, 1),
                             null,
                         ),
                     ),
@@ -235,12 +246,117 @@ internal class BeregnOverstyrServiceTest {
             )
 
         runBlocking {
-            assertThrows<UnsupportedOperationException> {
+            val beregning =
                 beregnOverstyrBeregningService.beregn(
                     behandling,
                     OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now()),
                     bruker,
                 )
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.OMS
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe 123
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2020, Month.APRIL)
+                    grunnbelop shouldBe 99858
+                    grunnbelopMnd shouldBe 8322
+                    soeskenFlokk shouldBe null
+                    institusjonsopphold shouldBe null
+                    trygdetid shouldBe 20
+                    samletNorskTrygdetid shouldBe 20
+                    samletTeoretiskTrygdetid shouldBe null
+                    broek shouldBe null
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `skal beregne overstyrt revurdering hvis vilkaar som opphoer ikke er oppfylt`() {
+        val behandling = mockBehandling(BehandlingType.REVURDERING, YearMonth.of(2019, 11))
+        val grunnlag = GrunnlagTestData().hentOpplysningsgrunnlag()
+
+        val vilkaarsvurderingDto = mockk<VilkaarsvurderingDto>()
+
+        coEvery { grunnlagKlient.hentGrunnlag(any(), any()) } returns grunnlag
+        coEvery { vilkaarsvurderingKlient.hentVilkaarsvurdering(any(), any()) } returns vilkaarsvurderingDto
+        every { vilkaarsvurderingDto.resultat } returns
+            mockk {
+                every { utfall } returns VilkaarsvurderingUtfall.IKKE_OPPFYLT
+            }
+        every { beregningsGrunnlagService.hentOverstyrBeregningGrunnlag(any()) } returns
+            OverstyrBeregningGrunnlag(
+                perioder =
+                    listOf(
+                        GrunnlagMedPeriode(
+                            OverstyrBeregningGrunnlagData(
+                                utbetaltBeloep = 123L,
+                                trygdetid = 20L,
+                                prorataBroekTeller = null,
+                                prorataBroekNevner = null,
+                                beskrivelse = "test periode 1",
+                            ),
+                            LocalDate.of(2019, 11, 1),
+                            LocalDate.of(2020, 4, 30),
+                        ),
+                        GrunnlagMedPeriode(
+                            OverstyrBeregningGrunnlagData(
+                                utbetaltBeloep = 456,
+                                trygdetid = 10L,
+                                prorataBroekTeller = null,
+                                prorataBroekNevner = null,
+                                beskrivelse = "test periode 2",
+                            ),
+                            LocalDate.of(2020, 5, 1),
+                            null,
+                        ),
+                    ),
+                kilde =
+                    mockk {
+                        every { ident } returns "Z123456"
+                        every { tidspunkt } returns Tidspunkt.now()
+                        every { type } returns ""
+                    },
+            )
+
+        runBlocking {
+            val beregning =
+                beregnOverstyrBeregningService.beregn(
+                    behandling,
+                    OverstyrBeregning(behandling.sak, "Test", Tidspunkt.now()),
+                    bruker,
+                )
+
+            with(beregning) {
+                beregningId shouldNotBe null
+                behandlingId shouldBe behandling.id
+                type shouldBe Beregningstype.OMS
+                beregnetDato shouldNotBe null
+                grunnlagMetadata shouldBe grunnlag.metadata
+                beregningsperioder.size shouldBeGreaterThanOrEqual 2
+                with(beregningsperioder.first()) {
+                    utbetaltBeloep shouldBe 0
+                    datoFOM shouldBe behandling.virkningstidspunkt?.dato
+                    datoTOM shouldBe YearMonth.of(2020, Month.APRIL)
+                    grunnbelop shouldBe 99858
+                    grunnbelopMnd shouldBe 8322
+                    soeskenFlokk shouldBe null
+                    institusjonsopphold shouldBe null
+                    trygdetid shouldBe 0
+                    samletNorskTrygdetid shouldBe 0
+                    samletTeoretiskTrygdetid shouldBe null
+                    broek shouldBe null
+                    regelResultat shouldNotBe null
+                    regelVersjon shouldNotBe null
+                }
             }
         }
     }

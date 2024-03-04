@@ -263,6 +263,24 @@ class BeregningsGrunnlagService(
         }
 
         beregningsGrunnlagRepository.lagre(forrigeGrunnlagBP.copy(behandlingId = behandlingId))
+
+        dupliserOverstyrBeregningGrunnlag(behandlingId, forrigeBehandlingId)
+    }
+
+    private fun dupliserOverstyrBeregningGrunnlag(
+        behandlingId: UUID,
+        forrigeBehandlingId: UUID,
+    ) {
+        beregningsGrunnlagRepository.finnOverstyrBeregningGrunnlagForBehandling(forrigeBehandlingId).let { grunnlag ->
+            if (grunnlag.isNotEmpty()) {
+                beregningsGrunnlagRepository.lagreOverstyrBeregningGrunnlagForBehandling(
+                    behandlingId,
+                    grunnlag.map {
+                        it.copy(id = behandlingId)
+                    },
+                )
+            }
+        }
     }
 
     fun hentOverstyrBeregningGrunnlag(behandlingId: UUID): OverstyrBeregningGrunnlag {

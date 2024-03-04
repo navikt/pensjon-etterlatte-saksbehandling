@@ -59,6 +59,7 @@ class ApplicationContext {
         BeregnOverstyrBeregningService(
             beregningsGrunnlagService = beregningsGrunnlagService,
             grunnlagKlient = grunnlagKlient,
+            vilkaarsvurderingKlient = vilkaarsvurderingKlient,
         )
     val beregningRepository = BeregningRepository(dataSource)
     val beregningService =

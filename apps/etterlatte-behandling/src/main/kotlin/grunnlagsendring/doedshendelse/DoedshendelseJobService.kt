@@ -13,6 +13,7 @@ import no.nav.etterlatte.brev.model.Spraak
 import no.nav.etterlatte.common.klienter.PdlTjenesterKlient
 import no.nav.etterlatte.funksjonsbrytere.FeatureToggleService
 import no.nav.etterlatte.grunnlagsendring.GrunnlagsendringshendelseService
+import no.nav.etterlatte.grunnlagsendring.doedshendelse.DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunkt
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.DoedshendelseKontrollpunktService
 import no.nav.etterlatte.grunnlagsendring.doedshendelse.kontrollpunkt.finnOppgaveId
@@ -107,13 +108,14 @@ class DoedshendelseJobService(
                     kontrollpunkter.finnSak() ?: opprettSakOgLagGrunnlag(doedshendelse)
 
                 val brevSendt = sendBrevHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
-                val oppgave = opprettOppgaveHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
+                val oppgave: Pair<Boolean, OppgaveIntern?> =
+                    opprettOppgaveHvisKravOppfylles(doedshendelse, sak, kontrollpunkter)
                 val utfall =
-                    if (brevSendt && oppgave != null) {
+                    if (brevSendt && oppgave.first) {
                         Utfall.BREV_OG_OPPGAVE
                     } else if (brevSendt) {
                         Utfall.BREV
-                    } else if (oppgave != null) {
+                    } else if (oppgave.first) {
                         Utfall.OPPGAVE
                     } else {
                         logger.error("Kan ikke håndtere dødshendelse ${doedshendelse.id}")
@@ -124,7 +126,7 @@ class DoedshendelseJobService(
                     doedshendelse.tilBehandlet(
                         utfall = utfall,
                         sakId = sak.id,
-                        oppgaveId = oppgave?.id,
+                        oppgaveId = oppgave.second?.id,
                         kontrollpunkter = kontrollpunkter,
                     ),
                 )
@@ -200,9 +202,14 @@ class DoedshendelseJobService(
     ): Boolean {
         val skalSendeBrev = kontrollpunkter.none { !it.sendBrev }
         if (skalSendeBrev) {
-            logger.info("Sender brev for ${doedshendelse.relasjon.name} for sak ${sak.id}")
-            deodshendelserProducer.sendBrevRequest(sak)
-            return true
+            if (featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
+                logger.info("Sender brev for ${doedshendelse.relasjon.name} for sak ${sak.id}")
+                deodshendelserProducer.sendBrevRequest(sak)
+                return true
+            } else {
+                logger.info("Sender ikke brev for ${doedshendelse.relasjon.name} for sak ${sak.id} fordi feature toggle er av")
+                return true
+            }
         }
         return false
     }
@@ -211,30 +218,39 @@ class DoedshendelseJobService(
         doedshendelse: DoedshendelseInternal,
         sak: Sak,
         kontrollpunkter: List<DoedshendelseKontrollpunkt>,
-    ): OppgaveIntern? {
+    ): Pair<Boolean, OppgaveIntern?> {
         val skalOppretteOppgave = kontrollpunkter.any { it.opprettOppgave }
-        return if (skalOppretteOppgave) {
-            grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
-                grunnlagsendringshendelse =
-                    Grunnlagsendringshendelse(
-                        id = UUID.randomUUID(),
-                        sakId = sak.id,
-                        status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
-                        type = GrunnlagsendringsType.DOEDSFALL,
-                        opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
-                        hendelseGjelderRolle = Saksrolle.AVDOED,
-                        gjelderPerson = doedshendelse.avdoedFnr,
-                        samsvarMellomKildeOgGrunnlag =
-                            SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(
-                                fraGrunnlag = null,
-                                fraPdl = doedshendelse.avdoedDoedsdato,
-                                samsvar = false,
+
+        if (skalOppretteOppgave) {
+            if (featureToggleService.isEnabled(KanSendeBrevOgOppretteOppgave, false)) {
+                logger.info("Oppretter oppgave for ${doedshendelse.relasjon.name} for sak ${sak.id}")
+                val oppgave =
+                    grunnlagsendringshendelseService.opprettDoedshendelseForPerson(
+                        grunnlagsendringshendelse =
+                            Grunnlagsendringshendelse(
+                                id = UUID.randomUUID(),
+                                sakId = sak.id,
+                                status = GrunnlagsendringStatus.SJEKKET_AV_JOBB,
+                                type = GrunnlagsendringsType.DOEDSFALL,
+                                opprettet = Tidspunkt.now().toLocalDatetimeUTC(),
+                                hendelseGjelderRolle = Saksrolle.AVDOED,
+                                gjelderPerson = doedshendelse.avdoedFnr,
+                                samsvarMellomKildeOgGrunnlag =
+                                    SamsvarMellomKildeOgGrunnlag.Doedsdatoforhold(
+                                        fraGrunnlag = null,
+                                        fraPdl = doedshendelse.avdoedDoedsdato,
+                                        samsvar = false,
+                                    ),
                             ),
-                    ),
-            )
-        } else {
-            null
+                    )
+                return true to oppgave
+            } else {
+                logger.info("Oppretter ikke oppgave for ${doedshendelse.relasjon.name} for sak ${sak.id} fordi feature toggle er av")
+                return true to null
+            }
         }
+
+        return false to null
     }
 
     private fun finnGyldigeDoedshendelser(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {

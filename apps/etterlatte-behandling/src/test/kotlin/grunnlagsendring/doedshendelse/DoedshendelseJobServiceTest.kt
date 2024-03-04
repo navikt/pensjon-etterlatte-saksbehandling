@@ -195,4 +195,36 @@ class DoedshendelseJobServiceTest {
         doedshendelseCapture.captured.utfall shouldBe Utfall.OPPGAVE
         doedshendelseCapture.captured.oppgaveId shouldBe oppgaveId
     }
+
+    @Test
+    fun `skal ikke opprette oppgave for doedshendelse dersom feature-toggle er av`() {
+        val doedshendelseInternal =
+            DoedshendelseInternal.nyHendelse(
+                avdoedFnr = AVDOED2_FOEDSELSNUMMER.value,
+                avdoedDoedsdato = LocalDate.now(),
+                beroertFnr = "12345678901",
+                relasjon = Relasjon.BARN,
+                endringstype = Endringstype.OPPRETTET,
+            ).copy(endret = LocalDateTime.now().minusDays(todagergammel.toLong()).toTidspunkt())
+
+        every { dao.hentDoedshendelserMedStatus(any()) } returns listOf(doedshendelseInternal)
+        every { dao.oppdaterDoedshendelse(any()) } returns Unit
+        val oppgaveId = UUID.randomUUID()
+        every { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) } returns
+            mockk {
+                every { id } returns oppgaveId
+            }
+        every { toggle.isEnabled(DoedshendelseFeatureToggle.KanSendeBrevOgOppretteOppgave, any()) } returns false
+        every { kontrollpunktService.identifiserKontrollerpunkter(any()) } returns
+            listOf(AvdoedHarUtvandret, AvdoedHarDNummer)
+        val doedshendelseCapture = slot<DoedshendelseInternal>()
+
+        service.setupKontekstAndRun(kontekst)
+
+        verify(exactly = 1) { dao.oppdaterDoedshendelse(capture(doedshendelseCapture)) }
+        verify(exactly = 0) { grunnlagsendringshendelseService.opprettDoedshendelseForPerson(any()) }
+        doedshendelseCapture.captured.status shouldBe Status.FERDIG
+        doedshendelseCapture.captured.utfall shouldBe Utfall.OPPGAVE
+        doedshendelseCapture.captured.oppgaveId shouldBe null
+    }
 }

@@ -2,6 +2,7 @@ package no.nav.etterlatte.grunnlagsendring.doedshendelse
 
 import io.kotest.matchers.shouldBe
 import io.mockk.clearMocks
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -25,6 +26,8 @@ import no.nav.etterlatte.libs.common.sak.Sak
 import no.nav.etterlatte.libs.common.tidspunkt.toTidspunkt
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED2_FOEDSELSNUMMER
 import no.nav.etterlatte.libs.testdata.grunnlag.AVDOED_FOEDSELSNUMMER
+import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
+import no.nav.etterlatte.migrering.person.krr.KrrKlientImpl
 import no.nav.etterlatte.mockPerson
 import no.nav.etterlatte.sak.SakService
 import org.junit.jupiter.api.AfterEach
@@ -72,6 +75,21 @@ class DoedshendelseJobServiceTest {
         mockk<PdlTjenesterKlient> {
             every { hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
         }
+
+    val krrKlient =
+        mockk<KrrKlientImpl> {
+            coEvery { hentDigitalKontaktinformasjon(any()) } returns
+                DigitalKontaktinformasjon(
+                    personident = "",
+                    aktiv = true,
+                    kanVarsles = true,
+                    reservert = false,
+                    spraak = "nb",
+                    epostadresse = null,
+                    mobiltelefonnummer = null,
+                    sikkerDigitalPostkasse = null,
+                )
+        }
     private val service =
         DoedshendelseJobService(
             doedshendelseDao = dao,
@@ -83,6 +101,7 @@ class DoedshendelseJobServiceTest {
             doedshendelserProducer,
             grunnlagService,
             pdlTjenesterKlient,
+            krrKlient = krrKlient,
         )
 
     @AfterEach

@@ -1,6 +1,6 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { SakType } from '~shared/types/sak'
-import { konverterFilterValuesTilKeys } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
+import { konverterOppgavestatusFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 
 export interface OppgaveDTO {
@@ -59,7 +59,7 @@ export const hentOppgaverMedStatus = async (args: {
   oppgavestatusFilter: Array<string>
   minOppgavelisteIdent?: boolean
 }): Promise<ApiResponse<OppgaveDTO[]>> => {
-  const konverterteFiltre = konverterFilterValuesTilKeys(args.oppgavestatusFilter)
+  const konverterteFiltre = konverterOppgavestatusFilterValuesTilKeys(args.oppgavestatusFilter)
 
   const queryParams = konverterteFiltre
     .map((i) => `oppgaveStatus=${i}&`)

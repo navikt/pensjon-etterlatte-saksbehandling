@@ -8,9 +8,9 @@ import { OppgavetypeTag, SaktypeTag } from '~components/oppgavebenk/components/T
 import { HandlingerForOppgave } from '~components/oppgavebenk/components/HandlingerForOppgave'
 import { FristHandlinger } from '~components/oppgavebenk/frist/FristHandlinger'
 import { VelgSaksbehandler } from '~components/oppgavebenk/tildeling/VelgSaksbehandler'
-import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
+import { OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 
 interface Props {
   oppgave: OppgaveDTO

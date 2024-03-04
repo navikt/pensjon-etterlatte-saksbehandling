@@ -57,6 +57,7 @@ class DoedshendelseService(
         val gyldigeDoedshendelserForAvdoed =
             inTransaction { doedshendelseDao.hentDoedshendelserForPerson(avdoedFnr) }
                 .filter { it.utfall !== Utfall.AVBRUTT }
+
         val beroerteBarn = finnBeroerteBarn(avdoed)
         val beroerteEpser = finnBeroerteEpser(avdoed)
         val alleBeroerte = beroerteBarn + beroerteEpser
@@ -130,10 +131,11 @@ class DoedshendelseService(
         avdoed: PersonDTO,
         endringstype: Endringstype,
     ) {
+        val avdoedFnr = avdoed.foedselsnummer.verdi.value
         beroerte.forEach { person ->
             doedshendelseDao.opprettDoedshendelse(
                 DoedshendelseInternal.nyHendelse(
-                    avdoedFnr = avdoed.foedselsnummer.verdi.value,
+                    avdoedFnr = avdoedFnr,
                     avdoedDoedsdato = avdoed.doedsdato!!.verdi,
                     beroertFnr = person.fnr,
                     relasjon = person.relasjon,
@@ -141,6 +143,15 @@ class DoedshendelseService(
                 ),
             )
         }
+        doedshendelseDao.opprettDoedshendelse(
+            DoedshendelseInternal.nyHendelse(
+                avdoedFnr = avdoedFnr,
+                avdoedDoedsdato = avdoed.doedsdato!!.verdi,
+                beroertFnr = avdoedFnr,
+                relasjon = Relasjon.AVDOED,
+                endringstype = endringstype,
+            ),
+        )
     }
 
     private fun finnBeroerteBarn(avdoed: PersonDTO): List<PersonFnrMedRelasjon> {

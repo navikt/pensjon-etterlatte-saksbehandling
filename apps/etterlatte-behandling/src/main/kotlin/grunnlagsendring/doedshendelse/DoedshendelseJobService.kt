@@ -138,7 +138,7 @@ class DoedshendelseJobService(
         val opprettetSak =
             sakService.finnEllerOpprettSak(
                 fnr = doedshendelse.beroertFnr,
-                type = doedshendelse.sakType(),
+                type = doedshendelse.sakTypeForEpsEllerBarn(),
             )
 
         val gjenlevende =
@@ -254,9 +254,11 @@ class DoedshendelseJobService(
 
     private fun finnGyldigeDoedshendelser(hendelser: List<DoedshendelseInternal>): List<DoedshendelseInternal> {
         val idag = LocalDateTime.now()
+
+        val avdoedHendelser = hendelser.filter { it.relasjon == Relasjon.AVDOED }
         return hendelser.filter {
             Duration.between(it.endret, idag.toTidspunkt()).toDays() >= dagerGamleHendelserSomSkalKjoeres
-        }.distinctBy { it.avdoedFnr }.also { logger.info("Antall gyldige dødsmeldinger ${it.size}") }
+        }.distinctBy { it.avdoedFnr } + avdoedHendelser.also { logger.info("Antall gyldige dødsmeldinger ${it.size}") }
     }
 
     private fun hentAlleNyeDoedsmeldinger() = doedshendelseDao.hentDoedshendelserMedStatus(Status.NY)

@@ -6,7 +6,7 @@ import { useAppSelector } from '~store/Store'
 import { Container, FlexRow } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
+import { minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import {
   hentFilterFraLocalStorage,
   leggFilterILocalStorage,
@@ -33,6 +33,7 @@ import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/components/OppgaveFeilWrapper'
 import { hentAlleStoettedeRevurderinger } from '~shared/api/revurdering'
 import { RevurderingsaarsakerBySakstype, RevurderingsaarsakerDefault } from '~shared/types/Revurderingaarsak'
+import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 

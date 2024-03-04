@@ -33,7 +33,9 @@ export const SamordningSak = ({ sakStatus }: { sakStatus: Result<SakMedBehandlin
 }
 
 function SamordningTabell({ samordningsdata }: { samordningsdata: Array<Samordningsvedtak> }) {
-  return (
+  return samordningsdata.length == 0 ? (
+    <p>Ingen samordningsmeldinger</p>
+  ) : (
     <Table zebraStripes>
       <Table.Header>
         <Table.Row>

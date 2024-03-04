@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 interface PdlTjenesterKlient {
-    fun hentPdlModellFlereSaktyper( // //TODO: fiks naming
+    fun hentPdlModellFlereSaktyper(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktype: SakType,

@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-class DoedshendelseInternalPdlKontrollpunktServiceTest {
+class DoedshendelseKontrollpunktServiceTest {
     private val pdlTjenesterKlient = mockk<PdlTjenesterKlient>()
     private val pesysKlient = mockk<PesysKlient>()
     private val oppgaveService = mockk<OppgaveService>()

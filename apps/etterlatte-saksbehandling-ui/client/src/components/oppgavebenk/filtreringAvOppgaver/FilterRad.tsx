@@ -1,4 +1,4 @@
-import { Button, Select, TextField} from '@navikt/ds-react'
+import { Button, Select, TextField } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
 import {
   ENHETFILTER,
@@ -11,13 +11,13 @@ import {
   OppgavetypeFilterKeys,
   YTELSEFILTER,
   YtelseFilterKeys,
-} from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
+} from '~components/oppgavebenk/filtreringAvOppgaver/oppgavelistafiltre'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
-import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
+import { VelgOppgavestatuser } from '~components/oppgavebenk/filtreringAvOppgaver/VelgOppgavestatuser'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { FiltrerPaaSaksbehandler } from '~components/oppgavebenk/oppgaveFiltrering/FiltrerPaaSaksbehandler'
+import { FiltrerPaaSaksbehandler } from '~components/oppgavebenk/filtreringAvOppgaver/FiltrerPaaSaksbehandler'
 
 interface Props {
   hentAlleOppgaver: () => void

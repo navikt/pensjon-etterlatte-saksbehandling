@@ -6,11 +6,11 @@ import { useAppSelector } from '~store/Store'
 import { Container, FlexRow } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
+import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/oppgavelistafiltre'
 import {
   hentFilterFraLocalStorage,
   leggFilterILocalStorage,
-} from '~components/oppgavebenk/oppgaveFiltrering/filterLocalStorage'
+} from '~components/oppgavebenk/filtreringAvOppgaver/filterLocalStorage'
 import { useApiCall } from '~shared/hooks/useApiCall'
 import {
   hentGosysOppgaver,
@@ -27,8 +27,8 @@ import {
   sorterOppgaverEtterOpprettet,
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { FilterRad } from '~components/oppgavebenk/oppgaveFiltrering/FilterRad'
-import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
+import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRad'
+import { VelgOppgavestatuser } from '~components/oppgavebenk/filtreringAvOppgaver/VelgOppgavestatuser'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/components/OppgaveFeilWrapper'
 import { hentAlleStoettedeRevurderinger } from '~shared/api/revurdering'

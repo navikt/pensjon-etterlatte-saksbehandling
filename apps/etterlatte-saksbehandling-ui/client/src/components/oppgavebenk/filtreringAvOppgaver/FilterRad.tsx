@@ -79,7 +79,6 @@ export const FilterRad = ({
             ))}
         </Select>
 
-        {/* TODO: FÅ DENNE TIL Å FUNKE IGJEN */}
         <FiltrerPaaSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnhet} filter={filter} setFilter={setFilter} />
 
         <Select

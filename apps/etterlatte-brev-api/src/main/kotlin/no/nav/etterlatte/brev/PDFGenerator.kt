@@ -69,9 +69,10 @@ class PDFGenerator(
             logger.info("Brev er en opplastet PDF – returnerer lagret innhold")
             return requireNotNull(db.hentPdf(brev.id)) { "Fant ikke pdf for brev med id=${brev.id}" }
         }
+        val behandlingId = brev.behandlingId?.takeIf { brev.brevtype.erKobletTilEnBehandling() }
 
         val generellBrevData =
-            retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, brev.behandlingId, brev.spraak, bruker) }
+            retryOgPakkUt { brevDataFacade.hentGenerellBrevData(brev.sakId, behandlingId, brev.spraak, bruker) }
         val avsender = adresseService.hentAvsender(avsenderRequest(bruker, generellBrevData))
 
         val brevkodePar =

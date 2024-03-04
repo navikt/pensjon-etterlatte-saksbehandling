@@ -44,7 +44,8 @@ enum class EtterlatteBrevKode(val brevtype: Brevtype, val tittel: String? = null
     TOM_MAL(Brevtype.MANUELT),
     UTSATT_KLAGEFRIST(Brevtype.INFORMASJON, "Informasjon om barnepensjon fra 1. januar 2024"),
 
-    KLAGE_OVERSENDELSE(Brevtype.NOTAT, "Oversendelse til KA"),
+    KLAGE_OVERSENDELSE_BRUKER(Brevtype.OVERSENDELSE_KLAGE, "Klagen er oversendt til NAV Klageinstans Vest"),
+    KLAGE_OVERSENDELSE_BLANKETT(Brevtype.NOTAT, "Oversendelse til KA"),
 }
 
 enum class Brevtype {
@@ -55,4 +56,10 @@ enum class Brevtype {
     MANUELT,
     VEDLEGG,
     NOTAT,
+    OVERSENDELSE_KLAGE,
+    ;
+
+    fun erKobletTilEnBehandling(): Boolean {
+        return this in listOf(VEDTAK, VARSEL, VEDLEGG)
+    }
 }

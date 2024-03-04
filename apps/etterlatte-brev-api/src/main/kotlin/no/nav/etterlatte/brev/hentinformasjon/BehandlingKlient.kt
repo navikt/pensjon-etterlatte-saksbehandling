@@ -7,6 +7,7 @@ import no.nav.etterlatte.brev.model.EtterbetalingDTO
 import no.nav.etterlatte.libs.common.RetryResult
 import no.nav.etterlatte.libs.common.behandling.BrevutfallDto
 import no.nav.etterlatte.libs.common.behandling.DetaljertBehandling
+import no.nav.etterlatte.libs.common.behandling.Klage
 import no.nav.etterlatte.libs.common.behandling.SisteIverksatteBehandling
 import no.nav.etterlatte.libs.common.deserialize
 import no.nav.etterlatte.libs.common.oppgave.RedigerFristRequest
@@ -168,6 +169,18 @@ class BehandlingKlient(config: Config, httpClient: HttpClient) {
                 }
             }
         }
+    }
+
+    suspend fun hentKlage(
+        klageId: UUID,
+        brukerTokenInfo: BrukerTokenInfo,
+    ): Klage {
+        return get(
+            url = "$resourceUrl/api/klage/$klageId",
+            onSuccess = { deserialize(it.response!!.toString()) },
+            errorMessage = { "Kunne ikke hente klage med id=$klageId" },
+            brukerTokenInfo = brukerTokenInfo,
+        )
     }
 }
 

@@ -33,7 +33,7 @@ internal class PdlKlientTest {
         runBlocking {
             val personResponse =
                 pdlKlient.hentPerson(
-                    HentPersonRequest(STOR_SNERK, PersonRolle.BARN, SakType.BARNEPENSJON),
+                    HentPersonRequest(STOR_SNERK, PersonRolle.BARN, listOf(SakType.BARNEPENSJON)),
                 )
             val hentPerson = personResponse.data?.hentPerson
 
@@ -50,7 +50,7 @@ internal class PdlKlientTest {
         mockEndpoint("/pdl/personBolk.json")
 
         runBlocking {
-            val personResponse = pdlKlient.hentPersonBolk(listOf(STOR_SNERK), SakType.BARNEPENSJON)
+            val personResponse = pdlKlient.hentPersonBolk(listOf(STOR_SNERK), listOf(SakType.BARNEPENSJON))
             val hentPerson = personResponse.data?.hentPersonBolk
 
             assertEquals("TRIVIELL", hentPerson?.first()?.person?.navn?.first()?.fornavn)
@@ -68,7 +68,7 @@ internal class PdlKlientTest {
         runBlocking {
             val personResponse =
                 pdlKlient.hentPerson(
-                    HentPersonRequest(STOR_SNERK, PersonRolle.BARN, SakType.BARNEPENSJON),
+                    HentPersonRequest(STOR_SNERK, PersonRolle.BARN, listOf(SakType.BARNEPENSJON)),
                 )
             val errors = personResponse.errors
 

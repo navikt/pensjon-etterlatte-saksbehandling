@@ -166,7 +166,7 @@ class FordelerService(
                     it.type == PersonType.GJENLEVENDE_FORELDER
                 }.foedselsnummer.svar.toFolkeregisteridentifikator(),
             rolle = PersonRolle.GJENLEVENDE,
-            saktype = SakType.BARNEPENSJON,
+            saktyper = listOf(SakType.BARNEPENSJON),
         )
 
     private fun hentAvdoedRequest(soeknad: Barnepensjon) =
@@ -176,14 +176,14 @@ class FordelerService(
                     it.type == PersonType.AVDOED
                 }.foedselsnummer.svar.toFolkeregisteridentifikator(),
             rolle = PersonRolle.AVDOED,
-            saktype = SakType.BARNEPENSJON,
+            saktyper = listOf(SakType.BARNEPENSJON),
         )
 
     private fun hentBarnRequest(soeknad: Barnepensjon) =
         HentPersonRequest(
             foedselsnummer = soeknad.soeker.foedselsnummer.svar.toFolkeregisteridentifikator(),
             rolle = PersonRolle.BARN,
-            saktype = SakType.BARNEPENSJON,
+            saktyper = listOf(SakType.BARNEPENSJON),
         )
 
     fun hentSakId(

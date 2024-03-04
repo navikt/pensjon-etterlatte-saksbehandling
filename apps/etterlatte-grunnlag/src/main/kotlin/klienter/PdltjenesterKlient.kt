@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.HentPersonHistorikkForeldreAnsvarRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.common.person.Person
@@ -53,7 +54,7 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
         rolle: PersonRolle,
         sakType: SakType,
     ): Person {
-        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, sakType)
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, listOf(sakType))
         val response =
             runBlocking {
                 pdl.post("$url/person") {
@@ -103,7 +104,7 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
         rolle: PersonRolle,
         sakType: SakType,
     ): PersonDTO {
-        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, sakType)
+        val personRequest = HentPersonRequest(Folkeregisteridentifikator.of(foedselsnummer), rolle, listOf(sakType))
         val response =
             runBlocking {
                 pdl.post("$url/person/v2") {
@@ -119,7 +120,7 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
         rolle: PersonRolle,
         sakType: SakType,
     ): HistorikkForeldreansvar {
-        val personRequest = HentPersonRequest(fnr, rolle, sakType)
+        val personRequest = HentPersonHistorikkForeldreAnsvarRequest(fnr, rolle, sakType)
         return runBlocking {
             pdl.post("$url/foreldreansvar") {
                 contentType(ContentType.Application.Json)

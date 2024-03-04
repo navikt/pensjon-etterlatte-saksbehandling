@@ -39,7 +39,7 @@ class DoedshendelseKontrollpunktService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun identifiserKontrollerpunkter(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt> {
-        val sakType = hendelse.sakType()
+        val sakType = hendelse.sakTypeForEpsEllerBarn()
         val avdoed = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.avdoedFnr, PersonRolle.AVDOED, sakType)
         val sak = sakService.finnSak(hendelse.beroertFnr, sakType)
 
@@ -49,6 +49,10 @@ class DoedshendelseKontrollpunktService(
                 Relasjon.EPS -> {
                     val eps = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.beroertFnr, PersonRolle.GJENLEVENDE, sakType)
                     kontrollpunkterEpsRelasjon(hendelse, sak, eps, avdoed)
+                }
+
+                Relasjon.AVDOED -> {
+                    listOfNotNull(kontrollerAvdoedHarYtelseIGjenny(hendelse))
                 }
             }
         return kontrollpunkterForRelasjon + fellesKontrollpunkter(hendelse, avdoed, sak)
@@ -93,6 +97,18 @@ class DoedshendelseKontrollpunktService(
             kontrollerSkiltSistefemAarEllerGiftI15(eps, avdoed),
             kontrollerSkilti5AarMedUkjentGiftemaalStart(eps, avdoed),
         )
+    }
+
+    private fun kontrollerAvdoedHarYtelseIGjenny(hendelse: DoedshendelseInternal): DoedshendelseKontrollpunkt.AvdoedHarYtelse? {
+        val sakerForAvdoed = sakService.finnSaker(hendelse.avdoedFnr)
+        return if (sakerForAvdoed.isEmpty()) {
+            null
+        } else {
+            sakerForAvdoed.forEach {
+                kontrollerEksisterendeHendelser(hendelse, it)
+            }
+            DoedshendelseKontrollpunkt.AvdoedHarYtelse
+        }
     }
 
     private fun kontrollerSkilti5AarMedUkjentGiftemaalStart(
@@ -237,7 +253,7 @@ class DoedshendelseKontrollpunktService(
         }
 
     private fun kontrollerKryssendeYtelseEps(hendelse: DoedshendelseInternal): DoedshendelseKontrollpunkt? {
-        if (hendelse.sakType() == SakType.BARNEPENSJON) {
+        if (hendelse.sakTypeForEpsEllerBarn() == SakType.BARNEPENSJON) {
             return null
         }
         return runBlocking {

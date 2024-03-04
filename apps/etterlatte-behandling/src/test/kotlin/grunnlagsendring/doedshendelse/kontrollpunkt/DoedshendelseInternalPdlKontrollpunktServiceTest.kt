@@ -257,6 +257,38 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
     }
 
     @Test
+    fun `Skal gi kontrollpunkt AvdoedHarYtelse dersom relasjon avdød og har sak`() {
+        val doedshendelseInternalAvdoed =
+            DoedshendelseInternal.nyHendelse(
+                avdoedFnr = KONTANT_FOT.value,
+                avdoedDoedsdato = LocalDate.now(),
+                beroertFnr = JOVIAL_LAMA.value,
+                relasjon = Relasjon.EPS,
+                endringstype = Endringstype.OPPRETTET,
+            )
+        every { sakService.finnSaker(any()) } returns listOf(Sak())
+
+        coEvery {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                doedshendelseInternalAvdoed.beroertFnr,
+                PersonRolle.GJENLEVENDE,
+                SakType.OMSTILLINGSSTOENAD,
+            )
+        } returns
+            mockPerson().copy(
+                doedsdato =
+                    OpplysningDTO(
+                        LocalDate.now(),
+                        "doedsdato",
+                    ),
+            )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalAvdoed)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.EpsHarDoedsdato)
+    }
+
+    @Test
     fun `Skal returnere kontrollpunkt BarnHarBarnepensjon for relasjon barn og har BP`() {
         every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(
@@ -435,7 +467,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
         val sak =
             Sak(
                 ident = doedshendelseInternalOMS.beroertFnr,
-                sakType = doedshendelseInternalOMS.sakType(),
+                sakType = doedshendelseInternalOMS.sakTypeForEpsEllerBarn(),
                 id = 1L,
                 enhet = "0000",
             )
@@ -459,7 +491,7 @@ class DoedshendelseInternalPdlKontrollpunktServiceTest {
         val sak =
             Sak(
                 ident = doedshendelseInternalBP.beroertFnr,
-                sakType = doedshendelseInternalBP.sakType(),
+                sakType = doedshendelseInternalBP.sakTypeForEpsEllerBarn(),
                 id = 1L,
                 enhet = "0000",
             )

@@ -1,5 +1,6 @@
 package no.nav.etterlatte.saksbehandler
 
+import io.kotest.matchers.collections.shouldContainExactly
 import no.nav.etterlatte.ConnectionAutoclosingTest
 import no.nav.etterlatte.DatabaseExtension
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
@@ -42,5 +43,20 @@ internal class SaksbehandlerInfoDaoTransTest(val dataSource: DataSource) {
 
         val ingenSteinkjerSaksbehandlere = saksbehandlerInfoDaoTrans.hentSaksbehandlereForEnhet(Enheter.STEINKJER.enhetNr)
         Assertions.assertEquals(0, ingenSteinkjerSaksbehandlere.size)
+    }
+
+    @Test
+    fun `Kan hente enheter for saksbehandlerident`() {
+        val sbporsgrunn = SaksbehandlerInfo("identporsgrunn", "navn")
+        val sbaalesund = SaksbehandlerInfo("identaalesund", "navn")
+        saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbporsgrunn)
+        saksbehandlerInfoDao.upsertSaksbehandlerNavn(sbaalesund)
+        saksbehandlerInfoDao.upsertSaksbehandlerEnheter(sbporsgrunn.ident to listOf(Enheter.PORSGRUNN.enhetNr))
+
+        val enheterAalesundSaksbehandler = listOf(Enheter.AALESUND.enhetNr, Enheter.AALESUND_UTLAND.enhetNr)
+        saksbehandlerInfoDao.upsertSaksbehandlerEnheter(sbaalesund.ident to enheterAalesundSaksbehandler)
+
+        val hentetEnheterForAalesundSB = saksbehandlerInfoDaoTrans.hentEnheterIderForSaksbehandler(sbaalesund.ident)
+        hentetEnheterForAalesundSB shouldContainExactly enheterAalesundSaksbehandler
     }
 }

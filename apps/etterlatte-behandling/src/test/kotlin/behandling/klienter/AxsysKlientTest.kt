@@ -13,8 +13,8 @@ import io.ktor.http.fullPath
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 import kotlinx.coroutines.runBlocking
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.libs.common.toJson
+import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import org.junit.jupiter.api.Test
 
 internal class AxsysKlientTest {

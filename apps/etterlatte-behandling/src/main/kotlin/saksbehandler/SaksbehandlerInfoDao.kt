@@ -49,7 +49,6 @@ class SaksbehandlerInfoDao(private val connectionAutoclosing: ConnectionAutoclos
         }
     }
 
-    // TODO: lag test for denne
     fun hentEnheterIderForSaksbehandler(ident: String): List<String>? {
         return connectionAutoclosing.hentConnection {
             with(it) {

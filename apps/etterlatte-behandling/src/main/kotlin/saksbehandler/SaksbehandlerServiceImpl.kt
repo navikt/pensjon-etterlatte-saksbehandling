@@ -2,7 +2,6 @@ package no.nav.etterlatte.saksbehandler
 
 import kotlinx.coroutines.runBlocking
 import no.nav.etterlatte.Kontekst
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.behandling.klienter.AxsysKlient
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.common.Enheter
@@ -58,6 +57,7 @@ class SaksbehandlerServiceImpl(
         }
     }
 
+    // TODO: burde ha noen tester
     private fun hentEnheterForSaksbehandler(ident: String): List<SaksbehandlerEnhet> {
         val enheterForSaksbehandler = dao.hentEnheterIderForSaksbehandler(ident)
 
@@ -82,3 +82,9 @@ class SaksbehandlerServiceImpl(
         }
     }
 }
+
+// TODO: flytt denne classen
+data class SaksbehandlerEnhet(
+    val enhetsNummer: String,
+    val navn: String,
+)

@@ -10,8 +10,8 @@ import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
-import no.nav.etterlatte.behandling.domain.SaksbehandlerEnhet
 import no.nav.etterlatte.libs.common.feilhaandtering.InternfeilException
+import no.nav.etterlatte.saksbehandler.SaksbehandlerEnhet
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration

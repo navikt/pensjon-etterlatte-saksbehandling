@@ -109,7 +109,7 @@ export const FilterRad = ({
         <MultiSelectFilter
           label="Oppgavestatus"
           options={Object.entries(OPPGAVESTATUSFILTER).map(([, beskrivelse]) => beskrivelse)}
-          value={filter.oppgavestatusFilter}
+          values={filter.oppgavestatusFilter}
           onChange={(statuser) => {
             hentOppgaverStatus(statuser)
             setFilter({ ...filter, oppgavestatusFilter: statuser })
@@ -119,7 +119,7 @@ export const FilterRad = ({
         <MultiSelectFilter
           label="Oppgavetype"
           options={oppgavetypefilter(kanBrukeKlage).map(([, beskrivelse]) => beskrivelse)}
-          value={filter.oppgavetypeFilter}
+          values={filter.oppgavetypeFilter}
           onChange={(statuser) => setFilter({ ...filter, oppgavetypeFilter: statuser })}
         />
       </FlexRow>

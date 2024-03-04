@@ -4,16 +4,16 @@ import { UNSAFE_Combobox } from '@navikt/ds-react'
 interface Props {
   label: string
   options: Array<string>
-  value: Array<string>
+  values: Array<string>
   onChange: (options: Array<string>) => void
 }
 
-export const MultiSelectFilter = ({ label, options, value, onChange }: Props) => {
+export const MultiSelectFilter = ({ label, options, values, onChange }: Props) => {
   const onToggleSelected = (option: string, isSelected: boolean) => {
     if (isSelected) {
-      onChange([...value, option])
+      onChange([...values, option])
     } else {
-      onChange([...value.filter((val) => val !== option)])
+      onChange([...values.filter((val) => val !== option)])
     }
   }
 
@@ -21,7 +21,7 @@ export const MultiSelectFilter = ({ label, options, value, onChange }: Props) =>
     <UNSAFE_Combobox
       label={label}
       options={options}
-      selectedOptions={value}
+      selectedOptions={typeof values === 'string' ? [values] : values}
       onToggleSelected={onToggleSelected}
       isMultiSelect
     />

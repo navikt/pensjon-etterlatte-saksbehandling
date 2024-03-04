@@ -210,7 +210,7 @@ export const ToggleMinOppgaveliste = () => {
             <MultiSelectFilter
               label="Oppgavestatus"
               options={Object.entries(OPPGAVESTATUSFILTER).map(([, beskrivelse]) => beskrivelse)}
-              value={minOppgavelisteFilter.oppgavestatusFilter}
+              values={minOppgavelisteFilter.oppgavestatusFilter}
               onChange={(statuser) => {
                 hentMinOppgavelisteOppgaver(statuser)
                 setMinOppgavelisteFilter({ ...minOppgavelisteFilter, oppgavestatusFilter: statuser })

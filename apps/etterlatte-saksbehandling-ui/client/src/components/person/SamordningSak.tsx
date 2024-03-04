@@ -38,22 +38,24 @@ export const SamordningSak = ({ sakStatus }: { sakStatus: Result<SakMedBehandlin
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {samordningsdata.map((vedtak) =>
-                vedtak.samordningsmeldinger.map((mld) => (
-                  <Table.Row key={mld.samId}>
-                    <Table.DataCell>{vedtak.vedtakId}</Table.DataCell>
-                    <Table.DataCell>{mld.samId}</Table.DataCell>
-                    <Table.DataCell>
-                      {mld.tpNr} {mld.tpNavn}
-                    </Table.DataCell>
-                    <Table.DataCell>{mld.meldingstatusKode}</Table.DataCell>
-                    <Table.DataCell>{formaterStringDato(mld.sendtDato)}</Table.DataCell>
-                    <Table.DataCell>{mld.svartDato && formaterStringDato(mld.svartDato)}</Table.DataCell>
-                    <Table.DataCell>{mld.purretDato && formaterStringDato(mld.purretDato)}</Table.DataCell>
-                    <Table.DataCell>{mld.refusjonskrav}</Table.DataCell>
-                  </Table.Row>
-                ))
-              )}
+              {samordningsdata
+                .sort((v1, v2) => v2.vedtakId - v1.vedtakId)
+                .map((vedtak) =>
+                  vedtak.samordningsmeldinger.map((mld) => (
+                    <Table.Row key={mld.samId}>
+                      <Table.DataCell>{vedtak.vedtakId}</Table.DataCell>
+                      <Table.DataCell>{mld.samId}</Table.DataCell>
+                      <Table.DataCell>
+                        {mld.tpNr} {mld.tpNavn}
+                      </Table.DataCell>
+                      <Table.DataCell>{mld.meldingstatusKode}</Table.DataCell>
+                      <Table.DataCell>{formaterStringDato(mld.sendtDato)}</Table.DataCell>
+                      <Table.DataCell>{mld.svartDato && formaterStringDato(mld.svartDato)}</Table.DataCell>
+                      <Table.DataCell>{mld.purretDato && formaterStringDato(mld.purretDato)}</Table.DataCell>
+                      <Table.DataCell>{mld.refusjonskrav}</Table.DataCell>
+                    </Table.Row>
+                  ))
+                )}
             </Table.Body>
           </Table>
         ),

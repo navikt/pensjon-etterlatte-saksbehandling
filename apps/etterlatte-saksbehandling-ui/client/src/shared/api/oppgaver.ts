@@ -1,6 +1,6 @@
 import { apiClient, ApiResponse } from '~shared/api/apiClient'
 import { SakType } from '~shared/types/sak'
-import { konverterFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/oppgavelistafiltre'
+import { konverterFilterValuesTilKeys } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 
 export interface OppgaveDTO {

@@ -6,7 +6,7 @@ import { useAppSelector } from '~store/Store'
 import { Container, FlexRow } from '~shared/styled'
 import { Tilgangsmelding } from '~components/oppgavebenk/components/Tilgangsmelding'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/oppgavelistafiltre'
+import { Filter, minOppgavelisteFiltre } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import {
   hentFilterFraLocalStorage,
   leggFilterILocalStorage,

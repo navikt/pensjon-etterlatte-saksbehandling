@@ -11,7 +11,7 @@ import {
 } from '~components/oppgavebenk/oppgaverTable/oppgavesortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { hentPagineringSizeFraLocalStorage } from '~components/oppgavebenk/utils/oppgaveutils'
-import { Filter, filtrerOppgaver } from '~components/oppgavebenk/filtreringAvOppgaver/oppgavelistafiltre'
+import { Filter, filtrerOppgaver } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 
 export interface OppgavelisteProps {

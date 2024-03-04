@@ -1,6 +1,6 @@
 import React from 'react'
 import { UNSAFE_Combobox } from '@navikt/ds-react'
-import { Filter, SAKSBEHANDLERFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/oppgavelistafiltre'
+import { Filter, SAKSBEHANDLERFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 
 interface Props {

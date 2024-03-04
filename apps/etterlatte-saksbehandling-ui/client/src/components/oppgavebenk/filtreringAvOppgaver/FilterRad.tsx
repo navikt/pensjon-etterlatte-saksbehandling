@@ -11,7 +11,7 @@ import {
   OppgavetypeFilterKeys,
   YTELSEFILTER,
   YtelseFilterKeys,
-} from '~components/oppgavebenk/filtreringAvOppgaver/oppgavelistafiltre'
+} from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'

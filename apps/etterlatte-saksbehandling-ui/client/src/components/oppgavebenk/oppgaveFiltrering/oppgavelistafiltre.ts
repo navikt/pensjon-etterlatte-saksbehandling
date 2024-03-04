@@ -46,14 +46,16 @@ function filtrerSaksbehandler(saksbehandlerFilter: string, oppgaver: OppgaveDTO[
   }
 }
 
-export const konverterFilterValuesTilKeys = (oppgavestatusFilter: Array<string>): Array<OppgavestatusFilterKeys> => {
+export const konverterOppgavestatusFilterValuesTilKeys = (
+  oppgavestatusFilter: Array<string>
+): Array<OppgavestatusFilterKeys> => {
   return Object.entries(OPPGAVESTATUSFILTER)
     .filter(([, val]) => oppgavestatusFilter.includes(val))
     .map(([key]) => key as OppgavestatusFilterKeys)
 }
 
 export function filtrerOppgaveStatus(oppgavestatusFilter: Array<string>, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-  const konverterteFiltre = konverterFilterValuesTilKeys(oppgavestatusFilter)
+  const konverterteFiltre = konverterOppgavestatusFilterValuesTilKeys(oppgavestatusFilter)
 
   if (oppgavestatusFilter.includes(OPPGAVESTATUSFILTER.visAlle) || oppgavestatusFilter.length === 0) {
     return oppgaver

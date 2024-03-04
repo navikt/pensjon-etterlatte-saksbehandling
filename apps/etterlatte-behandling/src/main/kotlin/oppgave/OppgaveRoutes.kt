@@ -164,7 +164,11 @@ internal fun Route.oppgaveRoutes(
                 kunSkrivetilgang {
                     val settPaaVentRequest = call.receive<SettPaaVentRequest>()
                     inTransaction {
-                        service.oppdaterStatusOgMerknad(oppgaveId, settPaaVentRequest.merknad, settPaaVentRequest.status)
+                        service.oppdaterStatusOgMerknad(
+                            oppgaveId,
+                            settPaaVentRequest.merknad,
+                            if (settPaaVentRequest.status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT,
+                        )
                     }
                     call.respond(HttpStatusCode.OK)
                 }

@@ -191,7 +191,6 @@ class OppgaveService(
         merknad: String,
         status: Status,
     ) {
-        val nyStatus = if (status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId)
                 ?: throw IkkeFunnetException(
@@ -203,7 +202,26 @@ class OppgaveService(
         if (hentetOppgave.saksbehandler?.ident.isNullOrEmpty()) {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
         } else {
-            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, nyStatus)
+            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
+        }
+    }
+
+    fun endreTilKildeBehandlingOgOppdaterReferanse(
+        oppgaveId: UUID,
+        referanse: String,
+    ) {
+        val hentetOppgave =
+            oppgaveDao.hentOppgave(oppgaveId)
+                ?: throw IkkeFunnetException(
+                    code = "OPPGAVE_IKKE_FUNNET",
+                    detail = "Oppgaven finnes ikke",
+                    meta = mapOf("oppgaveId" to oppgaveId),
+                )
+        sikreAtOppgaveIkkeErAvsluttet(hentetOppgave)
+        if (hentetOppgave.saksbehandler?.ident.isNullOrEmpty()) {
+            throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
+        } else {
+            oppgaveDao.endreTilKildeBehandlingOgOppdaterReferanse(oppgaveId, referanse)
         }
     }
 
@@ -343,9 +361,7 @@ class OppgaveService(
         saksbehandler: BrukerTokenInfo,
     ): OppgaveIntern {
         try {
-            val oppgaveUnderbehandling =
-                oppgaveDao.hentOppgaverForReferanse(behandlingEllerHendelseId)
-                    .single { it.status == Status.UNDER_BEHANDLING }
+            val oppgaveUnderbehandling = hentOppgaveUnderBehandlingForReferanse(behandlingEllerHendelseId)
             sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
             oppgaveDao.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.AVBRUTT)
             return requireNotNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
@@ -363,6 +379,10 @@ class OppgaveService(
             )
         }
     }
+
+    fun hentOppgaveUnderBehandlingForReferanse(behandlingEllerHendelseId: String) =
+        oppgaveDao.hentOppgaverForReferanse(behandlingEllerHendelseId)
+            .single { it.status == Status.UNDER_BEHANDLING }
 
     fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
         referanse: String,

@@ -12,9 +12,13 @@ import { isPending } from '~shared/api/apiUtils'
 export const OpprettNyRevurdering = ({
   sakId,
   revurderinger,
+  oppgaveId,
+  begrunnelse,
 }: {
   sakId: number
   revurderinger: Array<Revurderingaarsak>
+  oppgaveId?: string
+  begrunnelse?: string
 }) => {
   const [error, setError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
@@ -28,7 +32,13 @@ export const OpprettNyRevurdering = ({
       return setError('Du må velge en revurdering')
     }
     opprettRevurdering(
-      { sakId: sakId, aarsak: valgtRevurdering, fritekstAarsak: fritekstgrunn ? fritekstgrunn : null },
+      {
+        sakId: sakId,
+        aarsak: valgtRevurdering,
+        fritekstAarsak: fritekstgrunn || null,
+        begrunnelse: begrunnelse,
+        paaGrunnAvOppgaveId: oppgaveId,
+      },
       (behandlingId: string) => {
         navigate(`/behandling/${behandlingId}/`)
       },
@@ -45,62 +55,60 @@ export const OpprettNyRevurdering = ({
   }
 
   return (
-    <OpprettRevurderingWrapper>
-      <>
-        <Button variant="secondary" onClick={() => setOpen(true)}>
-          Opprett ny revurdering
-        </Button>
-        <Modal open={open} onClose={closeAndReset} aria-labelledby="modal-heading">
-          <Modal.Body>
-            <Modal.Header closeButton={false}>
-              <Heading spacing level="2" size="medium" id="modal-heading">
-                Opprett ny revurdering
-              </Heading>
-            </Modal.Header>
-            <Select
-              label="Årsak til revurdering"
-              value={valgtRevurdering}
-              onChange={(e) => setValgtRevurdering(e.target.value as Revurderingaarsak)}
-              error={error}
-            >
-              <option>Velg type</option>
-              {revurderinger.map((revurdering, i) => {
-                return (
-                  <option key={`revurdering${i}`} value={revurdering}>
-                    {tekstRevurderingsaarsak[revurdering]}
-                  </option>
-                )
-              })}
-            </Select>
-            {valgtRevurdering === Revurderingaarsak.ANNEN && (
-              <AnnenRevurderingWrapper>
-                <TextField
-                  label="Beskriv årsak"
-                  size="medium"
-                  type="text"
-                  value={fritekstgrunn}
-                  onChange={(e) => setFritekstgrunn(e.target.value)}
-                />
-              </AnnenRevurderingWrapper>
-            )}
-            <ButtonGroup>
-              <Button variant="secondary" onClick={closeAndReset}>
-                Avbryt
-              </Button>
-              <Button loading={isPending(opprettRevurderingStatus)} onClick={opprettBehandling}>
-                Opprett
-              </Button>
-            </ButtonGroup>
-          </Modal.Body>
-        </Modal>
-      </>
-    </OpprettRevurderingWrapper>
+    <>
+      <Button
+        variant={oppgaveId ? 'primary' : 'secondary'}
+        size={oppgaveId ? 'small' : 'medium'}
+        onClick={() => setOpen(true)}
+      >
+        Opprett ny revurdering
+      </Button>
+      <Modal open={open} onClose={closeAndReset} aria-labelledby="modal-heading">
+        <Modal.Body>
+          <Modal.Header closeButton={false}>
+            <Heading spacing level="2" size="medium" id="modal-heading">
+              Opprett ny revurdering
+            </Heading>
+          </Modal.Header>
+          <Select
+            label="Årsak til revurdering"
+            value={valgtRevurdering}
+            onChange={(e) => setValgtRevurdering(e.target.value as Revurderingaarsak)}
+            error={error}
+          >
+            <option>Velg type</option>
+            {revurderinger.map((revurdering, i) => {
+              return (
+                <option key={`revurdering${i}`} value={revurdering}>
+                  {tekstRevurderingsaarsak[revurdering]}
+                </option>
+              )
+            })}
+          </Select>
+          {valgtRevurdering === Revurderingaarsak.ANNEN && (
+            <AnnenRevurderingWrapper>
+              <TextField
+                label="Beskriv årsak"
+                size="medium"
+                type="text"
+                value={fritekstgrunn}
+                onChange={(e) => setFritekstgrunn(e.target.value)}
+              />
+            </AnnenRevurderingWrapper>
+          )}
+          <ButtonGroup>
+            <Button variant="secondary" onClick={closeAndReset}>
+              Avbryt
+            </Button>
+            <Button loading={isPending(opprettRevurderingStatus)} onClick={opprettBehandling}>
+              Opprett
+            </Button>
+          </ButtonGroup>
+        </Modal.Body>
+      </Modal>
+    </>
   )
 }
-
-const OpprettRevurderingWrapper = styled.div`
-  margin-top: 3rem;
-`
 
 const AnnenRevurderingWrapper = styled.div`
   margin-top: 1rem;

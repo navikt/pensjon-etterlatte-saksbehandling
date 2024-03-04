@@ -27,7 +27,6 @@ import no.nav.etterlatte.libs.common.klageId
 import no.nav.etterlatte.libs.common.kunSystembruker
 import no.nav.etterlatte.libs.common.medBody
 import no.nav.etterlatte.libs.common.sakId
-import no.nav.etterlatte.libs.ktor.brukerTokenInfo
 import no.nav.etterlatte.tilgangsstyring.kunSaksbehandlerMedSkrivetilgang
 import no.nav.etterlatte.tilgangsstyring.kunSkrivetilgang
 
@@ -167,32 +166,32 @@ internal fun Route.klageRoutes(
 
             route("vedtak") {
                 post("fatt") {
-                    kunSkrivetilgang {
+                    kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                         val klage =
                             inTransaction {
-                                klageService.fattVedtak(klageId, brukerTokenInfo)
+                                klageService.fattVedtak(klageId, saksbehandler)
                             }
                         call.respond(HttpStatusCode.OK, klage)
                     }
                 }
 
                 post("attester") {
-                    kunSkrivetilgang {
+                    kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                         val (kommentar) = call.receive<KlageAttesterRequest>()
                         val klage =
                             inTransaction {
-                                klageService.attesterVedtak(klageId, kommentar, brukerTokenInfo)
+                                klageService.attesterVedtak(klageId, kommentar, saksbehandler)
                             }
                         call.respond(HttpStatusCode.OK, klage)
                     }
                 }
 
                 post("underkjenn") {
-                    kunSkrivetilgang {
+                    kunSaksbehandlerMedSkrivetilgang { saksbehandler ->
                         val (kommentar, valgtBegrunnelse) = call.receive<KlageUnderkjennRequest>()
                         val klage =
                             inTransaction {
-                                klageService.underkjennVedtak(klageId, kommentar, valgtBegrunnelse, brukerTokenInfo)
+                                klageService.underkjennVedtak(klageId, kommentar, valgtBegrunnelse, saksbehandler)
                             }
                         call.respond(HttpStatusCode.OK, klage)
                     }

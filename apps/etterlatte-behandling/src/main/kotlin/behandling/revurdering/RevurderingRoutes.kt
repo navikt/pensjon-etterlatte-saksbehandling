@@ -70,19 +70,17 @@ internal fun Route.revurderingRoutes(
                         val revurdering =
                             inTransaction {
                                 revurderingService.opprettManuellRevurderingWrapper(
-                                    sakId,
-                                    opprettRevurderingRequest.aarsak,
-                                    opprettRevurderingRequest.paaGrunnAvHendelseId,
-                                    opprettRevurderingRequest.begrunnelse,
-                                    opprettRevurderingRequest.fritekstAarsak,
-                                    saksbehandler,
+                                    sakId = sakId,
+                                    aarsak = opprettRevurderingRequest.aarsak,
+                                    paaGrunnAvHendelseId = opprettRevurderingRequest.paaGrunnAvHendelseId,
+                                    paaGrunnAvOppgaveId = opprettRevurderingRequest.paaGrunnAvOppgaveId,
+                                    begrunnelse = opprettRevurderingRequest.begrunnelse,
+                                    fritekstAarsak = opprettRevurderingRequest.fritekstAarsak,
+                                    saksbehandler = saksbehandler,
                                 )
                             }
 
-                        when (revurdering) {
-                            null -> call.respond(HttpStatusCode.NotFound)
-                            else -> call.respond(revurdering.id)
-                        }
+                        call.respond(revurdering.id)
                     }
                 }
             }
@@ -112,29 +110,43 @@ internal fun Route.revurderingRoutes(
         }
     }
 
-    route("/api/stoettederevurderinger/{saktype}") {
+    route("/api/stoettederevurderinger") {
         get {
+            val stoettedeRevurderinger =
+                SakType.entries.associateWith { hentRevurderingaarsaker(it, featureToggleService) }
+            call.respond(stoettedeRevurderinger)
+        }
+
+        get("/{saktype}") {
             val sakType =
                 call.parameters["saktype"]?.let { SakType.valueOf(it) }
                     ?: return@get call.respond(HttpStatusCode.BadRequest, "Ugyldig saktype")
 
-            val stoettedeRevurderinger =
-                Revurderingaarsak.entries
-                    .filter { it.erStoettaRevurdering(sakType) }
-                    .filter {
-                        if (it == Revurderingaarsak.OPPHOER_UTEN_BREV) {
-                            featureToggleService.isEnabled(
-                                RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev,
-                                false,
-                            )
-                        } else {
-                            true
-                        }
-                    }
+            val stoettedeRevurderinger = hentRevurderingaarsaker(sakType, featureToggleService)
 
             call.respond(stoettedeRevurderinger)
         }
     }
+}
+
+private fun hentRevurderingaarsaker(
+    sakType: SakType,
+    featureToggleService: FeatureToggleService,
+): List<Revurderingaarsak> {
+    val stoettedeRevurderinger =
+        Revurderingaarsak.entries
+            .filter { it.erStoettaRevurdering(sakType) }
+            .filter {
+                if (it == Revurderingaarsak.OPPHOER_UTEN_BREV) {
+                    featureToggleService.isEnabled(
+                        RevurderingRoutesFeatureToggle.VisRevurderingsaarsakOpphoerUtenBrev,
+                        false,
+                    )
+                } else {
+                    true
+                }
+            }
+    return stoettedeRevurderinger
 }
 
 data class OpprettOmgjoeringKlageRequest(
@@ -144,6 +156,7 @@ data class OpprettOmgjoeringKlageRequest(
 data class OpprettRevurderingRequest(
     val aarsak: Revurderingaarsak,
     val paaGrunnAvHendelseId: String? = null,
+    val paaGrunnAvOppgaveId: String? = null,
     val begrunnelse: String? = null,
     val fritekstAarsak: String? = null,
 )

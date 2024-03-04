@@ -21,7 +21,7 @@ object BarnekullMapper {
         pdlKlient: PdlKlient,
         ppsKlient: ParallelleSannheterKlient,
         forelder: PdlHentPerson,
-        saktype: SakType,
+        saktyper: List<SakType>,
     ): Barnekull? {
         val barnFnr =
             forelder.forelderBarnRelasjon
@@ -48,14 +48,14 @@ object BarnekullMapper {
 
         val personer =
             barnFnr?.let { fnr ->
-                pdlKlient.hentPersonBolk(fnr, saktype).data?.hentPersonBolk?.map {
+                pdlKlient.hentPersonBolk(fnr, saktyper).data?.hentPersonBolk?.map {
                     PersonMapper.mapPerson(
                         ppsKlient,
                         pdlKlient,
                         Folkeregisteridentifikator.of(it.ident),
                         PersonRolle.TILKNYTTET_BARN,
                         it.person!!,
-                        saktype,
+                        saktyper,
                     )
                 }
             }

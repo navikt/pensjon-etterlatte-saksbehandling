@@ -60,6 +60,8 @@ import no.nav.etterlatte.libs.common.toJson
 import no.nav.etterlatte.libs.common.toObjectNode
 import no.nav.etterlatte.libs.common.vedtak.TilbakekrevingVedtakLagretDto
 import no.nav.etterlatte.libs.common.vedtak.VedtakDto
+import no.nav.etterlatte.migrering.person.krr.DigitalKontaktinformasjon
+import no.nav.etterlatte.migrering.person.krr.KrrKlient
 import no.nav.etterlatte.oppgaveGosys.GosysApiOppgave
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaveKlient
 import no.nav.etterlatte.oppgaveGosys.GosysOppgaver
@@ -119,6 +121,7 @@ abstract class BehandlingIntegrationTest {
                             "pdltjenester.url" to "http://localhost",
                             "grunnlag.resource.url" to "http://localhost",
                             "vedtak.resource.url" to "http://localhost",
+                            "krr.url" to "http://localhost",
                         ),
                     ),
                 rapid = TestProdusent(),
@@ -137,6 +140,7 @@ abstract class BehandlingIntegrationTest {
                 tilbakekrevingHttpClient = tilbakekrevingHttpClientTest(),
                 migreringHttpClient = migreringHttpClientTest(),
                 pesysKlient = PesysKlientTest(),
+                krrKlient = KrrklientTest(),
             )
     }
 
@@ -648,5 +652,20 @@ class NavAnsattKlientTest : NavAnsattKlient {
 class PesysKlientTest : PesysKlient {
     override suspend fun hentSaker(fnr: String): List<SakSammendragResponse> {
         return emptyList()
+    }
+}
+
+class KrrklientTest : KrrKlient {
+    override suspend fun hentDigitalKontaktinformasjon(fnr: String): DigitalKontaktinformasjon? {
+        return DigitalKontaktinformasjon(
+            personident = "",
+            aktiv = true,
+            kanVarsles = true,
+            reservert = false,
+            spraak = "nb",
+            epostadresse = null,
+            mobiltelefonnummer = null,
+            sikkerDigitalPostkasse = null,
+        )
     }
 }

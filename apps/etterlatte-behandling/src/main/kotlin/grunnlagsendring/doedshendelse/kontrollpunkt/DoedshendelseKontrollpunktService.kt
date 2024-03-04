@@ -40,14 +40,14 @@ class DoedshendelseKontrollpunktService(
 
     fun identifiserKontrollerpunkter(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt> {
         val sakType = hendelse.sakType()
-        val avdoed = pdlTjenesterKlient.hentPdlModell(hendelse.avdoedFnr, PersonRolle.AVDOED, sakType)
+        val avdoed = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.avdoedFnr, PersonRolle.AVDOED, sakType)
         val sak = sakService.finnSak(hendelse.beroertFnr, sakType)
 
         val kontrollpunkterForRelasjon =
             when (hendelse.relasjon) {
                 Relasjon.BARN -> kontrollpunkterBarneRelasjon(hendelse, avdoed, sak)
                 Relasjon.EPS -> {
-                    val eps = pdlTjenesterKlient.hentPdlModell(hendelse.beroertFnr, PersonRolle.GJENLEVENDE, sakType)
+                    val eps = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.beroertFnr, PersonRolle.GJENLEVENDE, sakType)
                     kontrollpunkterEpsRelasjon(hendelse, sak, eps, avdoed)
                 }
             }
@@ -291,7 +291,7 @@ class DoedshendelseKontrollpunktService(
         try {
             avdoed.doedsdato?.verdi?.let { avdoedDoedsdato ->
                 val annenForelderFnr =
-                    pdlTjenesterKlient.hentPdlModell(
+                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(
                         foedselsnummer = hendelse.beroertFnr,
                         rolle = PersonRolle.BARN,
                         saktype = SakType.BARNEPENSJON,
@@ -302,7 +302,7 @@ class DoedshendelseKontrollpunktService(
                 if (annenForelderFnr == null) {
                     DoedshendelseKontrollpunkt.AnnenForelderIkkeFunnet
                 } else {
-                    pdlTjenesterKlient.hentPdlModell(annenForelderFnr, PersonRolle.GJENLEVENDE, SakType.BARNEPENSJON)
+                    pdlTjenesterKlient.hentPdlModellFlereSaktyper(annenForelderFnr, PersonRolle.GJENLEVENDE, SakType.BARNEPENSJON)
                         .doedsdato?.verdi?.let { annenForelderDoedsdato ->
                             if (annenForelderDoedsdato == avdoedDoedsdato) {
                                 DoedshendelseKontrollpunkt.SamtidigDoedsfall

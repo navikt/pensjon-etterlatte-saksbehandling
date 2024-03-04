@@ -1,0 +1,5 @@
+UPDATE oppgave SET status = 'AVBRUTT' where sak_id=11895 and id = '14096364-756c-4919-981f-3aaca288638c' AND status != 'FERDIGSTILT' and merknad = 'Opprettelse av manuell behandling for gjenoppretting av opphørt sak i Pesys' ;
+UPDATE oppgave SET status = 'AVBRUTT' where sak_id=12331 and id = 'fcd5a0af-3d32-4bb8-933f-48404d80c1a4' AND status != 'FERDIGSTILT' and merknad = 'Opprettelse av manuell behandling for gjenoppretting av opphørt sak i Pesys';
+UPDATE oppgave SET status = 'AVBRUTT' where sak_id=12439 and id = '0dd7e291-011a-4dd3-97fb-4df78028998b' AND status != 'FERDIGSTILT' and merknad = 'Opprettelse av manuell behandling for gjenoppretting av opphørt sak i Pesys';
+UPDATE oppgave SET status = 'AVBRUTT' where sak_id=12500 and id = '322afbe4-726d-474e-9475-dda34a427b0b' AND status != 'FERDIGSTILT' and merknad = 'Opprettelse av manuell behandling for gjenoppretting av opphørt sak i Pesys';
+UPDATE oppgave SET status = 'AVBRUTT' where sak_id=12900 and id = 'd1d761e7-95c9-406a-b938-97d3e79638f5' AND status != 'FERDIGSTILT' and merknad = 'Opprettelse av manuell behandling for gjenoppretting av opphørt sak i Pesys';

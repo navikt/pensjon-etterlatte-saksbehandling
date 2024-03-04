@@ -372,7 +372,7 @@ class GrunnlagsendringshendelseService(
     ) {
         val personRolle = grunnlagsendringshendelse.hendelseGjelderRolle.toPersonrolle(sak.sakType)
         val pdlData =
-            pdltjenesterKlient.hentPdlModell(grunnlagsendringshendelse.gjelderPerson, personRolle, sak.sakType)
+            pdltjenesterKlient.hentPdlModellFlereSaktyper(grunnlagsendringshendelse.gjelderPerson, personRolle, sak.sakType)
         val grunnlag =
             runBlocking {
                 grunnlagKlient.hentGrunnlag(sak.id)

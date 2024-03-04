@@ -11,6 +11,7 @@ import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
+import no.nav.etterlatte.libs.common.person.HentPersonHistorikkForeldreAnsvarRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
 import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
@@ -38,6 +39,30 @@ class PersonService(
 ) {
     private val logger = LoggerFactory.getLogger(PersonService::class.java)
 
+    suspend fun hentOpplysningsperson(request: HentPersonRequest): PersonDTO {
+        logger.info("Henter opplysninger for person med fnr=${request.foedselsnummer} fra PDL")
+
+        return pdlKlient.hentPerson(request).let {
+            if (it.data?.hentPerson == null) {
+                val pdlFeil = it.errors?.asFormatertFeil()
+                if (it.errors?.personIkkeFunnet() == true) {
+                    throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
+                } else {
+                    throw PdlForesporselFeilet(
+                        "Kunne ikke hente opplysninger for ${request.foedselsnummer} fra PDL: $pdlFeil",
+                    )
+                }
+            } else {
+                PersonMapper.mapOpplysningsperson(
+                    ppsKlient = ppsKlient,
+                    pdlKlient = pdlKlient,
+                    request = request,
+                    hentPerson = it.data.hentPerson,
+                )
+            }
+        }
+    }
+
     suspend fun hentPerson(request: HentPersonRequest): Person {
         logger.info("Henter person med fnr=${request.foedselsnummer} fra PDL")
 
@@ -52,13 +77,14 @@ class PersonService(
                     )
                 }
             } else {
+                // TODO: bruke mapOpplysningsperson også PersonDTO toPerson?
                 PersonMapper.mapPerson(
                     ppsKlient = ppsKlient,
                     pdlKlient = pdlKlient,
                     fnr = request.foedselsnummer,
                     personRolle = request.rolle,
                     hentPerson = it.data.hentPerson,
-                    saktype = request.saktype,
+                    saktyper = request.saktyper,
                 )
             }
         }
@@ -86,7 +112,7 @@ class PersonService(
         }
     }
 
-    suspend fun hentHistorikkForeldreansvar(hentPersonRequest: HentPersonRequest): HistorikkForeldreansvar {
+    suspend fun hentHistorikkForeldreansvar(hentPersonRequest: HentPersonHistorikkForeldreAnsvarRequest): HistorikkForeldreansvar {
         if (hentPersonRequest.saktype != SakType.BARNEPENSJON) {
             throw IllegalArgumentException("Kan kun hente historikk i foreldreansvar for barnepensjonssaker")
         }
@@ -110,30 +136,6 @@ class PersonService(
                     ForeldreansvarHistorikkMapper.mapForeldreAnsvar(it.data.hentPerson)
                 }
             }
-    }
-
-    suspend fun hentOpplysningsperson(request: HentPersonRequest): PersonDTO {
-        logger.info("Henter opplysninger for person med fnr=${request.foedselsnummer} fra PDL")
-
-        return pdlKlient.hentPerson(request).let {
-            if (it.data?.hentPerson == null) {
-                val pdlFeil = it.errors?.asFormatertFeil()
-                if (it.errors?.personIkkeFunnet() == true) {
-                    throw FantIkkePersonException("Fant ikke personen ${request.foedselsnummer}")
-                } else {
-                    throw PdlForesporselFeilet(
-                        "Kunne ikke hente opplysninger for ${request.foedselsnummer} fra PDL: $pdlFeil",
-                    )
-                }
-            } else {
-                PersonMapper.mapOpplysningsperson(
-                    ppsKlient = ppsKlient,
-                    pdlKlient = pdlKlient,
-                    request = request,
-                    hentPerson = it.data.hentPerson,
-                )
-            }
-        }
     }
 
     suspend fun hentPdlIdentifikator(request: HentPdlIdentRequest): PdlIdentifikator {
@@ -208,7 +210,7 @@ class PersonService(
                     HentPersonRequest(
                         foedselsnummer = mottakerAvYtelsen,
                         rolle = PersonRolle.BARN,
-                        saktype = SakType.BARNEPENSJON,
+                        saktyper = listOf(SakType.BARNEPENSJON),
                     ),
             )
         val foreldre =
@@ -218,7 +220,7 @@ class PersonService(
                         HentPersonRequest(
                             foedselsnummer = it,
                             rolle = PersonRolle.GJENLEVENDE,
-                            saktype = SakType.BARNEPENSJON,
+                            saktyper = listOf(SakType.BARNEPENSJON),
                         ),
                 )
             } ?: emptyList()
@@ -252,7 +254,7 @@ class PersonService(
                 HentPersonRequest(
                     foedselsnummer = mottakerAvYtelsen,
                     rolle = PersonRolle.GJENLEVENDE,
-                    saktype = SakType.OMSTILLINGSSTOENAD,
+                    saktyper = listOf(SakType.BARNEPENSJON),
                 ),
             )
 
@@ -271,7 +273,7 @@ class PersonService(
                     HentPersonRequest(
                         foedselsnummer = it,
                         rolle = PersonRolle.GJENLEVENDE,
-                        saktype = SakType.OMSTILLINGSSTOENAD,
+                        saktyper = listOf(SakType.OMSTILLINGSSTOENAD),
                     ),
                 )
             }.partition { it.doedsdato != null }

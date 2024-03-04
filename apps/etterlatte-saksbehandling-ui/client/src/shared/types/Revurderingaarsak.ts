@@ -1,5 +1,7 @@
 //Denne må matche det som er definert i backend Revurderingaarsak.kt
 
+import { SakType } from '~shared/types/sak'
+
 export enum Revurderingaarsak {
   REGULERING = 'REGULERING',
   ANSVARLIGE_FORELDRE = 'ANSVARLIGE_FORELDRE',
@@ -63,3 +65,12 @@ export const erOpphoer = (revurderingsaarsak: Revurderingaarsak) =>
     Revurderingaarsak.OPPHOER_UTEN_BREV,
     Revurderingaarsak.ALDERSOVERGANG,
   ].includes(revurderingsaarsak)
+
+export type RevurderingsaarsakerBySakstype = {
+  [key in SakType]: Array<Revurderingaarsak>
+}
+
+export class RevurderingsaarsakerDefault implements RevurderingsaarsakerBySakstype {
+  [SakType.BARNEPENSJON]: Array<Revurderingaarsak> = [];
+  [SakType.OMSTILLINGSSTOENAD]: Array<Revurderingaarsak> = []
+}

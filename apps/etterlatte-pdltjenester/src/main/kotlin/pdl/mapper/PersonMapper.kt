@@ -27,7 +27,7 @@ object PersonMapper {
         fnr: Folkeregisteridentifikator,
         personRolle: PersonRolle,
         hentPerson: PdlHentPerson,
-        saktype: SakType,
+        saktyper: List<SakType>,
     ): Person =
         runBlocking {
             val navn = ppsKlient.avklarNavn(hentPerson.navn)
@@ -46,7 +46,7 @@ object PersonMapper {
                         pdlKlient,
                         ppsKlient,
                         hentPerson,
-                        saktype,
+                        saktyper,
                     )
                 } else {
                     null
@@ -133,7 +133,7 @@ object PersonMapper {
                         pdlKlient,
                         ppsKlient,
                         hentPerson,
-                        request.saktype,
+                        request.saktyper,
                     )
                 } else {
                     null
@@ -155,6 +155,7 @@ object PersonMapper {
                             it.metadata.opplysningsId,
                         )
                     } ?: OpplysningDTO(AdressebeskyttelseGradering.UGRADERT, null),
+                // Finn ut hva opplysningsid:n er for data fra pps
                 bostedsadresse =
                     hentPerson.bostedsadresse?.let { AdresseMapper.mapBostedsadresse(ppsKlient, it) }
                         ?.map { OpplysningDTO(it, null) },
@@ -181,6 +182,7 @@ object PersonMapper {
                     hentPerson.sivilstand?.let { SivilstandMapper.mapSivilstand(it) }
                         ?.map { OpplysningDTO(it, null) },
                 utland = OpplysningDTO(UtlandMapper.mapUtland(hentPerson), null),
+                // TODO ai: tre opplysninger i en
                 familieRelasjon =
                     OpplysningDTO(
                         FamilieRelasjonMapper.mapFamilieRelasjon(hentPerson, request.rolle),

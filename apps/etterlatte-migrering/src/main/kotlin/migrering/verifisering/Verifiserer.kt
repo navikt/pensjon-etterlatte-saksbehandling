@@ -55,7 +55,7 @@ internal class Verifiserer(
             if (!patchedRequest.erUnder18) {
                 feilSomMedfoererManuell.addAll(sjekkOmSoekerHaddeFlyktningerfordel(patchedRequest))
                 feilSomMedfoererManuell.addAll(sjekkAdresseOgUtlandsopphold(patchedRequest.pesysId.id, soeker, patchedRequest))
-                feilSomMedfoererManuell.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(patchedRequest, soeker))
+                feilSomMedfoererManuell.addAll(sjekkOmSoekerHarFlereAvoedeForeldre(patchedRequest))
                 feilSomMedfoererManuell.addAll(sjekkOmForandringIForeldreforhold(patchedRequest, soeker))
                 // Trolig unødvendig da ukjente foreldre alltid er utlandsaker
                 feilSomMedfoererManuell.addAll(sjekkOmUkjentForelder(patchedRequest))
@@ -218,10 +218,7 @@ internal class Verifiserer(
     private fun erGyldigNaaEllerFramover(opplysning: OpplysningDTO<Adresse>) =
         opplysning.verdi.gyldigTilOgMed.let { tilOgMed -> tilOgMed == null || tilOgMed > LocalDateTime.now() }
 
-    private fun sjekkOmSoekerHarFlereAvoedeForeldre(
-        request: MigreringRequest,
-        soeker: PersonDTO,
-    ): List<Verifiseringsfeil> {
+    private fun sjekkOmSoekerHarFlereAvoedeForeldre(request: MigreringRequest): List<Verifiseringsfeil> {
         if (request.avdoedForelder.size > 1) {
             return listOf(SoekerHarFlereAvdoede)
         }

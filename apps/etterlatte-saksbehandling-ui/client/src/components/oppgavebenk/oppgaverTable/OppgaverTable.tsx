@@ -5,6 +5,7 @@ import { OppgaveDTO, OppgaveSaksbehandler } from '~shared/api/oppgaver'
 import { OppgaverTableRow } from '~components/oppgavebenk/oppgaverTable/OppgaverTableRow'
 import { leggTilSorteringILocalStorage, OppgaveSortering } from '~components/oppgavebenk/oppgaverTable/oppgavesortering'
 import { Saksbehandler } from '~shared/types/saksbehandler'
+import { RevurderingsaarsakerBySakstype } from '~shared/types/Revurderingaarsak'
 
 export enum SortKey {
   FRIST = 'frist',
@@ -15,6 +16,7 @@ interface Props {
   oppgaver: ReadonlyArray<OppgaveDTO>
   oppdaterTildeling: (oppgave: OppgaveDTO, saksbehandler: OppgaveSaksbehandler | null, versjon: number | null) => void
   oppdaterFrist?: (id: string, nyfrist: string, versjon: number | null) => void
+  revurderingsaarsaker: RevurderingsaarsakerBySakstype
   saksbehandlereIEnhet: Array<Saksbehandler>
   setSortering: (nySortering: OppgaveSortering) => void
 }
@@ -23,6 +25,7 @@ export const OppgaverTable = ({
   oppgaver,
   oppdaterTildeling,
   oppdaterFrist,
+  revurderingsaarsaker,
   saksbehandlereIEnhet,
   setSortering,
 }: Props): ReactNode => {
@@ -72,6 +75,7 @@ export const OppgaverTable = ({
             saksbehandlereIEnhet={saksbehandlereIEnhet}
             oppdaterTildeling={oppdaterTildeling}
             oppdaterFrist={oppdaterFrist}
+            revurderingsaarsaker={revurderingsaarsaker}
           />
         ))}
       </Table.Body>

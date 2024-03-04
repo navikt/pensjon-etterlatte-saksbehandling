@@ -1,4 +1,4 @@
-import { Button, Select, TextField, UNSAFE_Combobox } from '@navikt/ds-react'
+import { Button, Select, TextField } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
 import {
   ENHETFILTER,
@@ -9,7 +9,6 @@ import {
   initialFilter,
   oppgavetypefilter,
   OppgavetypeFilterKeys,
-  SAKSBEHANDLERFILTER,
   YTELSEFILTER,
   YtelseFilterKeys,
 } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
@@ -18,14 +17,13 @@ import { FlexRow } from '~shared/styled'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { VelgOppgavestatuser } from '~components/oppgavebenk/oppgaveFiltrering/VelgOppgavestatuser'
 import { Saksbehandler } from '~shared/types/saksbehandler'
-import { OppgaveDTO } from '~shared/api/oppgaver'
+import { FiltrerPaaSaksbehandler } from '~components/oppgavebenk/oppgaveFiltrering/FiltrerPaaSaksbehandler'
 
 interface Props {
   hentAlleOppgaver: () => void
   hentOppgaverStatus: (oppgavestatusFilter: Array<string>) => void
   filter: Filter
   setFilter: (filter: Filter) => void
-  alleOppgaver: Array<OppgaveDTO>
   saksbehandlereIEnhet: Array<Saksbehandler>
 }
 
@@ -34,20 +32,17 @@ export const FilterRad = ({
   hentOppgaverStatus,
   filter,
   setFilter,
-  alleOppgaver,
+  saksbehandlereIEnhet,
 }: Props): ReactNode => {
   const [sakId, setSakId] = useState<string>(filter.sakidFilter)
+  const [fnr, setFnr] = useState<string>(filter.fnrFilter)
 
-  const saksbehandlere: Set<string> = new Set(
-    alleOppgaver.map((oppgave) => oppgave.saksbehandler?.ident || '').filter((ident) => !!ident)
-  )
-  const [saksbehandlerFilterLokal, setSaksbehandlerFilterLokal] = useState<string>(filter.saksbehandlerFilter)
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   useEffect(() => {
-    const delay = setTimeout(() => setFilter({ ...filter, sakidFilter: sakId || '' }), 500)
+    const delay = setTimeout(() => setFilter({ ...filter, sakidFilter: sakId || '', fnrFilter: fnr || '' }), 500)
     return () => clearTimeout(delay)
-  }, [sakId])
+  }, [sakId, fnr])
 
   return (
     <>
@@ -63,8 +58,8 @@ export const FilterRad = ({
         />
         <TextField
           label="Fødselsnummer"
-          value={filter.fnrFilter}
-          onChange={(e) => setFilter({ ...filter, fnrFilter: e.target.value })}
+          value={fnr}
+          onChange={(e) => setFnr(e.target.value?.replace(/[^0-9+]/, ''))}
           placeholder="Søk"
           autoComplete="off"
         />
@@ -87,22 +82,7 @@ export const FilterRad = ({
             ))}
         </Select>
 
-        {/* TODO: Burde være en liste over navn, ikke identer. Burde også KUN vise de som tilhører enhet */}
-        <UNSAFE_Combobox
-          label="Saksbehandler"
-          value={saksbehandlerFilterLokal}
-          options={Object.entries(SAKSBEHANDLERFILTER)
-            .map(([, beskrivelse]) => beskrivelse)
-            .concat(Array.from(saksbehandlere))}
-          onChange={(e) => {
-            setSaksbehandlerFilterLokal(e?.target.value ? e?.target.value : '')
-          }}
-          onToggleSelected={(option, isSelected) => {
-            if (isSelected) {
-              setFilter({ ...filter, saksbehandlerFilter: option })
-            }
-          }}
-        />
+        <FiltrerPaaSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnhet} filter={filter} setFilter={setFilter} />
 
         <Select
           label="Enhet"

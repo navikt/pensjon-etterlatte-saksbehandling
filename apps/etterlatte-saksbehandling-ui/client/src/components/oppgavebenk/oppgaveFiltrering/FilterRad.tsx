@@ -1,25 +1,23 @@
 import { Button, Select, TextField, UNSAFE_Combobox } from '@navikt/ds-react'
 import React, { ReactNode, useEffect, useState } from 'react'
-import {
-  ENHETFILTER,
-  EnhetFilterKeys,
-  Filter,
-  FRISTFILTER,
-  FristFilterKeys,
-  initialFilter,
-  OPPGAVESTATUSFILTER,
-  oppgavetypefilter,
-  OppgavetypeFilterKeys,
-  SAKSBEHANDLERFILTER,
-  YTELSEFILTER,
-  YtelseFilterKeys,
-} from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
+import { Filter, initialFilter, oppgavetypefilter } from '~components/oppgavebenk/oppgaveFiltrering/oppgavelistafiltre'
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { OppgaveDTO } from '~shared/api/oppgaver'
 import { MultiSelectFilter } from '~components/oppgavebenk/oppgaveFiltrering/MultiSelectFilter'
+import {
+  ENHETFILTER,
+  EnhetFilterKeys,
+  FRISTFILTER,
+  FristFilterKeys,
+  OPPGAVESTATUSFILTER,
+  OppgavetypeFilterKeys,
+  SAKSBEHANDLERFILTER,
+  YTELSEFILTER,
+  YtelseFilterKeys,
+} from '~components/oppgavebenk/oppgaveFiltrering/filterTyper'
 
 interface Props {
   hentAlleOppgaver: () => void

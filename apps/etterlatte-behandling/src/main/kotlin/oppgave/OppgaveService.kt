@@ -190,7 +190,6 @@ class OppgaveService(
         merknad: String,
         status: Status,
     ) {
-        val nyStatus = if (status == Status.PAA_VENT) Status.UNDER_BEHANDLING else Status.PAA_VENT
         val hentetOppgave =
             oppgaveDao.hentOppgave(oppgaveId)
                 ?: throw IkkeFunnetException(
@@ -202,7 +201,7 @@ class OppgaveService(
         if (hentetOppgave.saksbehandler?.ident.isNullOrEmpty()) {
             throw OppgaveIkkeTildeltSaksbehandler(oppgaveId)
         } else {
-            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, nyStatus)
+            oppgaveDao.oppdaterStatusOgMerknad(oppgaveId, merknad, status)
         }
     }
 
@@ -361,9 +360,7 @@ class OppgaveService(
         saksbehandler: BrukerTokenInfo,
     ): OppgaveIntern {
         try {
-            val oppgaveUnderbehandling =
-                oppgaveDao.hentOppgaverForReferanse(behandlingEllerHendelseId)
-                    .single { it.status == Status.UNDER_BEHANDLING }
+            val oppgaveUnderbehandling = hentOppgaveUnderBehandlingForReferanse(behandlingEllerHendelseId)
             sikreAtSaksbehandlerSomLukkerOppgaveEierOppgaven(oppgaveUnderbehandling, saksbehandler)
             oppgaveDao.endreStatusPaaOppgave(oppgaveUnderbehandling.id, Status.AVBRUTT)
             return requireNotNull(oppgaveDao.hentOppgave(oppgaveUnderbehandling.id)) {
@@ -381,6 +378,10 @@ class OppgaveService(
             )
         }
     }
+
+    fun hentOppgaveUnderBehandlingForReferanse(behandlingEllerHendelseId: String) =
+        oppgaveDao.hentOppgaverForReferanse(behandlingEllerHendelseId)
+            .single { it.status == Status.UNDER_BEHANDLING }
 
     fun opprettFoerstegangsbehandlingsOppgaveForInnsendtSoeknad(
         referanse: String,

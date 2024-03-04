@@ -1,5 +1,6 @@
-import { Filter, initialFilter } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
+import { initialFilter } from '~components/oppgavebenk/filtreringAvOppgaver/filtrerOppgaver'
 import { logger } from '~utils/logger'
+import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 
 const FILTER_KEY = 'filter'
 

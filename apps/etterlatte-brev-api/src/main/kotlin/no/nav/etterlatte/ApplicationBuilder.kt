@@ -237,7 +237,7 @@ class ApplicationBuilder {
                     dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)
                     notatRoute(notatService, tilgangssjekker)
-                    oversendelseBrevRoute(tilgangssjekker, oversendelseBrevService)
+                    oversendelseBrevRoute(oversendelseBrevService, tilgangssjekker)
                 }
             }
             .build()

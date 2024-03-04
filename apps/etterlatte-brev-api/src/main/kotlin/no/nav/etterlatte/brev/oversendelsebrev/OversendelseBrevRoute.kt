@@ -22,8 +22,8 @@ import kotlin.time.measureTimedValue
 private val logger = LoggerFactory.getLogger("oversendelseBrevRoute")
 
 fun Route.oversendelseBrevRoute(
-    tilgangssjekker: Tilgangssjekker,
     service: OversendelseBrevService,
+    tilgangssjekker: Tilgangssjekker,
 ) {
     route("/brev/behandling/{$BEHANDLINGID_CALL_PARAMETER}/oversendelse") {
         get {

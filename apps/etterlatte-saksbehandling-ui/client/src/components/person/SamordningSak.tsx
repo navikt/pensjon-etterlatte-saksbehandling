@@ -22,6 +22,8 @@ export const SamordningSak = ({ sakStatus }: { sakStatus: Result<SakMedBehandlin
 
   return (
     <Container>
+      <Heading size="medium">Samordningsmeldinger</Heading>
+
       <Spinner visible={isPending(hentet)} label="Henter data" />
 
       {isFailureHandler({
@@ -37,67 +39,38 @@ export const SamordningSak = ({ sakStatus }: { sakStatus: Result<SakMedBehandlin
         <Table>
           <Table.Header>
             <Table.Row>
-              <Table.HeaderCell>VedtakID</Table.HeaderCell>
-              <Table.HeaderCell>SamordningID</Table.HeaderCell>
+              <Table.HeaderCell>VedtaksID</Table.HeaderCell>
+              <Table.HeaderCell>SamordningsID</Table.HeaderCell>
+              <Table.HeaderCell>Tjenestepensjon</Table.HeaderCell>
               <Table.HeaderCell>Status</Table.HeaderCell>
-              <Table.HeaderCell>Etterbetaling</Table.HeaderCell>
-              <Table.HeaderCell>Utvidet samordningsfrist</Table.HeaderCell>
+              <Table.HeaderCell>Sendt dato</Table.HeaderCell>
+              <Table.HeaderCell>Mottatt dato</Table.HeaderCell>
+              <Table.HeaderCell>Purret dato</Table.HeaderCell>
+              <Table.HeaderCell>Refusjonskrav</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           <Table.Body>
             {!samordningsdata.length && (
               <Table.Row>
-                <Table.DataCell colSpan={5}>Ingen samordningsvedtak</Table.DataCell>
+                <Table.DataCell colSpan={7}>Ingen samordningsmeldinger funnet</Table.DataCell>
               </Table.Row>
             )}
-            {samordningsdata.map((vedtak) => (
-              <Table.Row key={vedtak.vedtakId}>
-                <Table.DataCell>{vedtak.vedtakId}</Table.DataCell>
-                <Table.DataCell>{vedtak.samordningVedtakId}</Table.DataCell>
-                <Table.DataCell>{vedtak.vedtakstatusKode}</Table.DataCell>
-                <Table.DataCell>{vedtak.etterbetaling ? 'Ja' : 'Nei'}</Table.DataCell>
-                <Table.DataCell>{vedtak.utvidetSamordningsfrist ? 'Ja' : 'Nei'}</Table.DataCell>
-                <div key={vedtak.samordningVedtakId}>
-                  <Heading size="small" id="modal-heading">
-                    Samordningsmeldinger
-                  </Heading>
-
-                  <Table>
-                    <Table.Header>
-                      <Table.Row>
-                        <Table.HeaderCell>ID</Table.HeaderCell>
-                        <Table.HeaderCell>Tjenestepensjon</Table.HeaderCell>
-                        <Table.HeaderCell>Status</Table.HeaderCell>
-                        <Table.HeaderCell>Sendt dato</Table.HeaderCell>
-                        <Table.HeaderCell>Mottatt dato</Table.HeaderCell>
-                        <Table.HeaderCell>Purret dato</Table.HeaderCell>
-                        <Table.HeaderCell>Refusjonskrav</Table.HeaderCell>
-                      </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                      {!vedtak.samordningsmeldinger.length && (
-                        <Table.Row>
-                          <Table.DataCell colSpan={7}>Ingen samordningsmeldinger funnet</Table.DataCell>
-                        </Table.Row>
-                      )}
-                      {vedtak.samordningsmeldinger.map((mld) => (
-                        <Table.Row key={mld.samId}>
-                          <Table.DataCell>{mld.samId}</Table.DataCell>
-                          <Table.DataCell>
-                            {mld.tpNr} {mld.tpNavn}
-                          </Table.DataCell>
-                          <Table.DataCell>{mld.meldingstatusKode}</Table.DataCell>
-                          <Table.DataCell>{mld.sendtDato}</Table.DataCell>
-                          <Table.DataCell>{mld.svartDato && formaterStringDato(mld.svartDato)}</Table.DataCell>
-                          <Table.DataCell>{mld.purretDato && formaterStringDato(mld.purretDato)}</Table.DataCell>
-                          <Table.DataCell>{mld.refusjonskrav}</Table.DataCell>
-                        </Table.Row>
-                      ))}
-                    </Table.Body>
-                  </Table>
-                </div>
-              </Table.Row>
-            ))}
+            {samordningsdata.map((vedtak) =>
+              vedtak.samordningsmeldinger.map((mld) => (
+                <Table.Row key={mld.samId}>
+                  <Table.DataCell>{vedtak.vedtakId}</Table.DataCell>
+                  <Table.DataCell>{mld.samId}</Table.DataCell>
+                  <Table.DataCell>
+                    {mld.tpNr} {mld.tpNavn}
+                  </Table.DataCell>
+                  <Table.DataCell>{mld.meldingstatusKode}</Table.DataCell>
+                  <Table.DataCell>{formaterStringDato(mld.sendtDato)}</Table.DataCell>
+                  <Table.DataCell>{mld.svartDato && formaterStringDato(mld.svartDato)}</Table.DataCell>
+                  <Table.DataCell>{mld.purretDato && formaterStringDato(mld.purretDato)}</Table.DataCell>
+                  <Table.DataCell>{mld.refusjonskrav}</Table.DataCell>
+                </Table.Row>
+              ))
+            )}
           </Table.Body>
         </Table>
       )}

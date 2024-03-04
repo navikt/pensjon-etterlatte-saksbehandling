@@ -4,7 +4,6 @@ import { initialFilter, oppgavetypefilter } from '~components/oppgavebenk/filtre
 import { useFeatureEnabledMedDefault } from '~shared/hooks/useFeatureToggle'
 import { FlexRow } from '~shared/styled'
 import { FEATURE_TOGGLE_KAN_BRUKE_KLAGE } from '~components/person/KlageListe'
-import { VelgOppgavestatuser } from '~components/oppgavebenk/filtreringAvOppgaver/VelgOppgavestatuser'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { FiltrerPaaSaksbehandler } from '~components/oppgavebenk/filtreringAvOppgaver/FiltrerPaaSaksbehandler'
 import {
@@ -13,10 +12,11 @@ import {
   Filter,
   FRISTFILTER,
   FristFilterKeys,
-  OppgavetypeFilterKeys,
+  OPPGAVESTATUSFILTER,
   YTELSEFILTER,
   YtelseFilterKeys,
 } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { MultiSelectFilter } from '~components/oppgavebenk/filtreringAvOppgaver/MultiSelectFilter'
 
 interface Props {
   hentAlleOppgaver: () => void
@@ -79,6 +79,7 @@ export const FilterRad = ({
             ))}
         </Select>
 
+        {/* TODO: FÅ DENNE TIL Å FUNKE IGJEN */}
         <FiltrerPaaSaksbehandler saksbehandlereIEnhet={saksbehandlereIEnhet} filter={filter} setFilter={setFilter} />
 
         <Select
@@ -103,25 +104,23 @@ export const FilterRad = ({
             </option>
           ))}
         </Select>
-        <VelgOppgavestatuser
+
+        <MultiSelectFilter
+          label="Oppgavestatus"
+          options={Object.entries(OPPGAVESTATUSFILTER).map(([, beskrivelse]) => beskrivelse)}
           value={filter.oppgavestatusFilter}
-          onChange={(oppgavestatusFilter) => {
-            hentOppgaverStatus(oppgavestatusFilter)
-            setFilter({ ...filter, oppgavestatusFilter })
+          onChange={(statuser) => {
+            hentOppgaverStatus(statuser)
+            setFilter({ ...filter, oppgavestatusFilter: statuser })
           }}
         />
 
-        <Select
+        <MultiSelectFilter
           label="Oppgavetype"
+          options={oppgavetypefilter(kanBrukeKlage).map(([, beskrivelse]) => beskrivelse)}
           value={filter.oppgavetypeFilter}
-          onChange={(e) => setFilter({ ...filter, oppgavetypeFilter: e.target.value as OppgavetypeFilterKeys })}
-        >
-          {oppgavetypefilter(kanBrukeKlage).map(([type, typebeskrivelse]) => (
-            <option key={type} value={type}>
-              {typebeskrivelse}
-            </option>
-          ))}
-        </Select>
+          onChange={(statuser) => setFilter({ ...filter, oppgavetypeFilter: statuser })}
+        />
       </FlexRow>
 
       <FlexRow $spacing>

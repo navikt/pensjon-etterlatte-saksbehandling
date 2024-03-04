@@ -28,12 +28,12 @@ import {
 } from '~components/oppgavebenk/utils/oppgaveutils'
 import { Saksbehandler } from '~shared/types/saksbehandler'
 import { FilterRad } from '~components/oppgavebenk/filtreringAvOppgaver/FilterRad'
-import { VelgOppgavestatuser } from '~components/oppgavebenk/filtreringAvOppgaver/VelgOppgavestatuser'
 import { Oppgaver } from '~components/oppgavebenk/oppgaver/Oppgaver'
 import { OppgaveFeilWrapper } from '~components/oppgavebenk/components/OppgaveFeilWrapper'
 import { hentAlleStoettedeRevurderinger } from '~shared/api/revurdering'
 import { RevurderingsaarsakerBySakstype, RevurderingsaarsakerDefault } from '~shared/types/Revurderingaarsak'
-import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { Filter, OPPGAVESTATUSFILTER } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
+import { MultiSelectFilter } from '~components/oppgavebenk/filtreringAvOppgaver/MultiSelectFilter'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
@@ -207,11 +207,13 @@ export const ToggleMinOppgaveliste = () => {
       {oppgaveListeValg === 'MinOppgaveliste' ? (
         <>
           <FlexRow>
-            <VelgOppgavestatuser
+            <MultiSelectFilter
+              label="Oppgavestatus"
+              options={Object.entries(OPPGAVESTATUSFILTER).map(([, beskrivelse]) => beskrivelse)}
               value={minOppgavelisteFilter.oppgavestatusFilter}
-              onChange={(oppgavestatusFilter) => {
-                hentMinOppgavelisteOppgaver(oppgavestatusFilter)
-                setMinOppgavelisteFilter({ ...minOppgavelisteFilter, oppgavestatusFilter })
+              onChange={(statuser) => {
+                hentMinOppgavelisteOppgaver(statuser)
+                setMinOppgavelisteFilter({ ...minOppgavelisteFilter, oppgavestatusFilter: statuser })
               }}
             />
           </FlexRow>

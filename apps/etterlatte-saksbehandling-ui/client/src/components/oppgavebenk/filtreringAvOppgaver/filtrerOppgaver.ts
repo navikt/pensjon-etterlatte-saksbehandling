@@ -47,14 +47,16 @@ function filtrerSaksbehandler(saksbehandlerFilter: string, oppgaver: OppgaveDTO[
   }
 }
 
-export const konverterFilterValuesTilKeys = (oppgavestatusFilter: Array<string>): Array<OppgavestatusFilterKeys> => {
+export const konverterOppgavestatusFilterValuesTilKeys = (
+  oppgavestatusFilter: Array<string>
+): Array<OppgavestatusFilterKeys> => {
   return Object.entries(OPPGAVESTATUSFILTER)
     .filter(([, val]) => oppgavestatusFilter.includes(val))
     .map(([key]) => key as OppgavestatusFilterKeys)
 }
 
 export function filtrerOppgaveStatus(oppgavestatusFilter: Array<string>, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-  const konverterteFiltre = konverterFilterValuesTilKeys(oppgavestatusFilter)
+  const konverterteFiltre = konverterOppgavestatusFilterValuesTilKeys(oppgavestatusFilter)
 
   if (oppgavestatusFilter.includes(OPPGAVESTATUSFILTER.visAlle) || oppgavestatusFilter.length === 0) {
     return oppgaver
@@ -71,11 +73,17 @@ export const oppgavetypefilter = (kanBrukeKlage: boolean): Array<[OppgavetypeFil
   return entries
 }
 
-export function filtrerOppgaveType(oppgavetypeFilterKeys: OppgavetypeFilterKeys, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
-  if (oppgavetypeFilterKeys === 'visAlle') {
+const konverterOppgavetypeFilterTilKeys = (oppgavetypeFilter: Array<string>): Array<OppgavetypeFilterKeys> => {
+  return oppgavetypefilter(false)
+    .filter(([, val]) => oppgavetypeFilter.includes(val))
+    .map(([key]) => key as OppgavetypeFilterKeys)
+}
+
+export function filtrerOppgaveType(oppgavetypeFilter: Array<string>, oppgaver: OppgaveDTO[]): OppgaveDTO[] {
+  if (oppgavetypeFilter.includes(OPPGAVESTATUSFILTER.visAlle) || oppgavetypeFilter.length === 0) {
     return oppgaver
   } else {
-    return oppgaver.filter((o) => o.type === oppgavetypeFilterKeys)
+    return oppgaver.filter((o) => konverterOppgavetypeFilterTilKeys(oppgavetypeFilter).includes(o.type))
   }
 }
 
@@ -115,7 +123,7 @@ export function filtrerOppgaver(
   saksbehandlerFilter: string,
   ytelseFilter: YtelseFilterKeys,
   oppgavestatusFilter: Array<string>,
-  oppgavetypeFilter: OppgavetypeFilterKeys,
+  oppgavetypeFilter: Array<string>,
   oppgaver: OppgaveDTO[],
   fnr: string
 ): OppgaveDTO[] {
@@ -138,7 +146,7 @@ export const initialFilter = (): Filter => {
     saksbehandlerFilter: SAKSBEHANDLERFILTER.visAlle,
     ytelseFilter: 'visAlle',
     oppgavestatusFilter: [OPPGAVESTATUSFILTER.NY, OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
-    oppgavetypeFilter: 'visAlle',
+    oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
     fnrFilter: '',
   }
 }
@@ -151,7 +159,7 @@ export const minOppgavelisteFiltre = (): Filter => {
     saksbehandlerFilter: 'visAlle',
     ytelseFilter: 'visAlle',
     oppgavestatusFilter: [OPPGAVESTATUSFILTER.UNDER_BEHANDLING],
-    oppgavetypeFilter: 'visAlle',
+    oppgavetypeFilter: [OPPGAVETYPEFILTER.visAlle],
     fnrFilter: '',
   }
 }

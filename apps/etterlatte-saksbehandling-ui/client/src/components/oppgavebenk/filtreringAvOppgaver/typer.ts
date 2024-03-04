@@ -69,6 +69,6 @@ export interface Filter {
   saksbehandlerFilter: string
   ytelseFilter: YtelseFilterKeys
   oppgavestatusFilter: Array<string>
-  oppgavetypeFilter: OppgavetypeFilterKeys
+  oppgavetypeFilter: Array<string>
   fnrFilter: string
 }

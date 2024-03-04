@@ -76,7 +76,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal opprette doedshendelse med barna som kan ha rett paa barnepensjon ved doedsfall`() {
         every {
-            pdlTjenesterKlient.hentPdlModell(
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -102,7 +102,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal lagre nye hendelser hvis nye beroerte finnes`() {
         every {
-            pdlTjenesterKlient.hentPdlModell(
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -147,7 +147,7 @@ internal class DoedshendelseServiceTest {
         val barnfemtenaar = LocalDate.now().minusYears(15)
         val nyttBarn = personOpplysning(foedselsdato = barnfemtenaar).copy(foedselsnummer = HELSOESKEN_FOEDSELSNUMMER)
         every {
-            pdlTjenesterKlient.hentPdlModell(
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -178,7 +178,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal oppdatere korrigert hendelse`() {
         every {
-            pdlTjenesterKlient.hentPdlModell(
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -241,7 +241,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal oppdatere annullert hendelse`() {
         every {
-            pdlTjenesterKlient.hentPdlModell(
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
@@ -305,7 +305,7 @@ internal class DoedshendelseServiceTest {
     @Test
     fun `Skal ikke opprette doedshendelser dersom avdoed ikke er registert som avdoed i PDL`() {
         every {
-            pdlTjenesterKlient.hentPdlModell(
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
                 avdoed.foedselsnummer.verdi.value,
                 any(),
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),

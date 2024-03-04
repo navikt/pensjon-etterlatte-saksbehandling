@@ -161,7 +161,7 @@ class DoedshendelseJobService(
     }
 
     private fun hentAnnenForelder(doedshendelse: DoedshendelseInternal): String? {
-        return pdlTjenesterKlient.hentPdlModell(
+        return pdlTjenesterKlient.hentPdlModellFlereSaktyper(
             foedselsnummer = doedshendelse.beroertFnr,
             rolle = PersonRolle.BARN,
             saktype = SakType.BARNEPENSJON,

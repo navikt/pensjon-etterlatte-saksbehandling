@@ -70,7 +70,7 @@ class DoedshendelseJobServiceTest {
 
     val pdlTjenesterKlient =
         mockk<PdlTjenesterKlient> {
-            every { hentPdlModell(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
+            every { hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
         }
     private val service =
         DoedshendelseJobService(

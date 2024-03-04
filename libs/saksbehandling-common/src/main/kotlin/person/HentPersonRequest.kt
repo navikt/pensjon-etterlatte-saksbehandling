@@ -10,7 +10,7 @@ data class HentPersonRequest(
     val saktyper: List<SakType>,
 )
 
-data class HentPersonRequestHistorikkForeldreAnsvar(
+data class HentPersonHistorikkForeldreAnsvarRequest(
     val foedselsnummer: Folkeregisteridentifikator,
     val rolle: PersonRolle,
     val saktype: SakType,

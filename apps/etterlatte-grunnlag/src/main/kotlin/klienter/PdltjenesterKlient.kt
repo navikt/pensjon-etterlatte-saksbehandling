@@ -11,8 +11,8 @@ import no.nav.etterlatte.libs.common.behandling.Persongalleri
 import no.nav.etterlatte.libs.common.behandling.SakType
 import no.nav.etterlatte.libs.common.pdl.PersonDTO
 import no.nav.etterlatte.libs.common.person.Folkeregisteridentifikator
+import no.nav.etterlatte.libs.common.person.HentPersonHistorikkForeldreAnsvarRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
-import no.nav.etterlatte.libs.common.person.HentPersonRequestHistorikkForeldreAnsvar
 import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.common.person.Person
 import no.nav.etterlatte.libs.common.person.PersonRolle
@@ -120,7 +120,7 @@ class PdlTjenesterKlientImpl(private val pdl: HttpClient, private val url: Strin
         rolle: PersonRolle,
         sakType: SakType,
     ): HistorikkForeldreansvar {
-        val personRequest = HentPersonRequestHistorikkForeldreAnsvar(fnr, rolle, sakType)
+        val personRequest = HentPersonHistorikkForeldreAnsvarRequest(fnr, rolle, sakType)
         return runBlocking {
             pdl.post("$url/foreldreansvar") {
                 contentType(ContentType.Application.Json)

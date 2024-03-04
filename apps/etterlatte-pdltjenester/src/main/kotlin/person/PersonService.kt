@@ -11,8 +11,8 @@ import no.nav.etterlatte.libs.common.person.HentAdressebeskyttelseRequest
 import no.nav.etterlatte.libs.common.person.HentFolkeregisterIdenterForAktoerIdBolkRequest
 import no.nav.etterlatte.libs.common.person.HentGeografiskTilknytningRequest
 import no.nav.etterlatte.libs.common.person.HentPdlIdentRequest
+import no.nav.etterlatte.libs.common.person.HentPersonHistorikkForeldreAnsvarRequest
 import no.nav.etterlatte.libs.common.person.HentPersonRequest
-import no.nav.etterlatte.libs.common.person.HentPersonRequestHistorikkForeldreAnsvar
 import no.nav.etterlatte.libs.common.person.HentPersongalleriRequest
 import no.nav.etterlatte.libs.common.person.NavPersonIdent
 import no.nav.etterlatte.libs.common.person.PDLIdentGruppeTyper
@@ -112,7 +112,7 @@ class PersonService(
         }
     }
 
-    suspend fun hentHistorikkForeldreansvar(hentPersonRequest: HentPersonRequestHistorikkForeldreAnsvar): HistorikkForeldreansvar {
+    suspend fun hentHistorikkForeldreansvar(hentPersonRequest: HentPersonHistorikkForeldreAnsvarRequest): HistorikkForeldreansvar {
         if (hentPersonRequest.saktype != SakType.BARNEPENSJON) {
             throw IllegalArgumentException("Kan kun hente historikk i foreldreansvar for barnepensjonssaker")
         }

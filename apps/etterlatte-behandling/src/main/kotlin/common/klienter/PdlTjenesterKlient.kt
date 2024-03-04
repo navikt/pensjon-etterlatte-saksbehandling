@@ -29,13 +29,13 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 interface PdlTjenesterKlient {
-    fun hentPdlModell(
+    fun hentPdlModellFlereSaktyper(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktype: SakType,
     ): PersonDTO
 
-    fun hentPdlModell(
+    fun hentPdlModellFlereSaktyper(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktyper: List<SakType>,
@@ -69,7 +69,7 @@ class PdlTjenesterKlientImpl(config: Config, private val pdl_app: HttpClient) : 
         }.body<AdressebeskyttelseGradering>()
     }
 
-    override fun hentPdlModell(
+    override fun hentPdlModellFlereSaktyper(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktyper: List<SakType>,
@@ -86,7 +86,7 @@ class PdlTjenesterKlientImpl(config: Config, private val pdl_app: HttpClient) : 
         return response
     }
 
-    override fun hentPdlModell(
+    override fun hentPdlModellFlereSaktyper(
         foedselsnummer: String,
         rolle: PersonRolle,
         saktype: SakType,

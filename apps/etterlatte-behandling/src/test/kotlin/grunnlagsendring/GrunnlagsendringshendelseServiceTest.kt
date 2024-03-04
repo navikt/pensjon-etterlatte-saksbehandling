@@ -238,7 +238,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             grunnlagshendelsesDao.opprettGrunnlagsendringshendelse(capture(opprettGrunnlagsendringshendelse))
         } returns grunnlagsendringshendelse
 
-        every { pdlService.hentPdlModell(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
+        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
         val opprettedeHendelser =
             grunnlagsendringshendelseService.opprettHendelseAvTypeForPerson(fnr, GrunnlagsendringsType.DOEDSFALL)
         assertEquals(6, opprettedeHendelser.size)
@@ -289,7 +289,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
         } returns mockOppgave
 
-        every { pdlService.hentPdlModell(any(), any(), SakType.BARNEPENSJON) } returns
+        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns
             mockPerson()
                 .copy(doedsdato = OpplysningDTO(LocalDate.now(), "doedsdato"))
 
@@ -355,7 +355,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
         // Så hendelse ikke blir forkastet i oppdaterHendelseSjekket og da er ikke grunnlag null
 
-        every { pdlService.hentPdlModell(any(), any(), SakType.BARNEPENSJON) } returns
+        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns
             mockPerson()
                 .copy(doedsdato = OpplysningDTO(doedsdato, "doedsdato"))
 
@@ -437,7 +437,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
         // Så hendelse ikke blir forkastet i oppdaterHendelseSjekket og da er ikke grunnlag null
 
-        every { pdlService.hentPdlModell(any(), any(), SakType.BARNEPENSJON) } returns
+        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns
             mockPerson()
                 .copy(doedsdato = OpplysningDTO(doedsdato, "doedsdato"))
 
@@ -518,7 +518,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every { behandlingService.hentBehandlingerForSak(sakId) } returns emptyList()
         // Så hendelse ikke blir forkastet i oppdaterHendelseSjekket
 
-        every { pdlService.hentPdlModell(any(), any(), SakType.BARNEPENSJON) } returns
+        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns
             mockPerson()
                 .copy(doedsdato = OpplysningDTO(doedsdato, "doedsdato"))
 
@@ -590,7 +590,7 @@ internal class GrunnlagsendringshendelseServiceTest {
             )
         // Så hendelse ikke blir forkastet i oppdaterHendelseSjekket
 
-        every { pdlService.hentPdlModell(any(), any(), SakType.BARNEPENSJON) } returns
+        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns
             mockPerson()
                 .copy(doedsdato = OpplysningDTO(doedsdato, "doedsdato"))
 
@@ -677,7 +677,7 @@ internal class GrunnlagsendringshendelseServiceTest {
 
         coVerify(exactly = 1) { grunnlagKlient.hentAlleSakIder(adressebeskyttelse.fnr) }
 
-        every { pdlService.hentPdlModell(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
+        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
 
         sakIder.forEach {
             verify(exactly = 1) {
@@ -766,7 +766,7 @@ internal class GrunnlagsendringshendelseServiceTest {
         every {
             oppgaveService.opprettNyOppgaveMedSakOgReferanse(any(), any(), any(), any(), any())
         } returns mockOppgave
-        every { pdlService.hentPdlModell(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
+        every { pdlService.hentPdlModellFlereSaktyper(any(), any(), SakType.BARNEPENSJON) } returns mockPerson()
         every { behandlingService.hentBehandlingerForSak(any()) } returns emptyList()
 
         coEvery { grunnlagKlient.hentGrunnlag(sakId) } returns Grunnlag.empty()

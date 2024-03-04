@@ -41,7 +41,7 @@ class DoedshendelseService(
         logger.info("Mottok dødsmelding fra PDL, finner berørte personer og lagrer ned dødsmelding.")
 
         val avdoed =
-            pdlTjenesterKlient.hentPdlModell(
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
                 doedshendelse.fnr,
                 PersonRolle.AVDOED,
                 listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),

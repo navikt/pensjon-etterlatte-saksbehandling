@@ -25,6 +25,7 @@ import no.nav.etterlatte.behandling.klienter.BrevStatus
 import no.nav.etterlatte.behandling.klienter.GrunnlagKlient
 import no.nav.etterlatte.behandling.klienter.NavAnsattKlient
 import no.nav.etterlatte.behandling.klienter.Norg2Klient
+import no.nav.etterlatte.behandling.klienter.OpprettJournalpostDto
 import no.nav.etterlatte.behandling.klienter.OpprettetBrevDto
 import no.nav.etterlatte.behandling.klienter.SaksbehandlerInfo
 import no.nav.etterlatte.behandling.klienter.VedtakKlient
@@ -501,8 +502,8 @@ class VedtakKlientTest : VedtakKlient {
 class BrevApiKlientTest : BrevApiKlient {
     private var brevId = 1L
 
-    override suspend fun opprettKlageInnstillingsbrevISak(
-        sakId: Long,
+    override suspend fun opprettKlageOversendelsesbrevISak(
+        klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
         return opprettetBrevDto(brevId++)
@@ -517,6 +518,13 @@ class BrevApiKlientTest : BrevApiKlient {
     }
 
     override suspend fun ferdigstillBrev(
+        sakId: Long,
+        brevId: Long,
+        brukerTokenInfo: BrukerTokenInfo,
+    ) {
+    }
+
+    override suspend fun ferdigstillOversendelseBrev(
         sakId: Long,
         brevId: Long,
         brukerTokenInfo: BrukerTokenInfo,
@@ -551,6 +559,13 @@ class BrevApiKlientTest : BrevApiKlient {
         klageId: UUID,
         brukerTokenInfo: BrukerTokenInfo,
     ) {
+    }
+
+    override suspend fun journalfoerNotatKa(
+        klage: Klage,
+        brukerInfoToken: BrukerTokenInfo,
+    ): OpprettJournalpostDto {
+        return OpprettJournalpostDto(UUID.randomUUID().toString())
     }
 
     private fun opprettetBrevDto(brevId: Long) =

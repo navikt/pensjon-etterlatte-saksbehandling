@@ -233,10 +233,10 @@ class KlageServiceImpl(
             // Vi må rydde bort det vedtaksbrevet som ble opprettet ved forrige utfall
             runBlocking { brevApiKlient.slettVedtaksbrev(klageId, saksbehandler) }
         }
+        // Vurder å slette brev hvis det finnes her? Så vi ikke polluter med hengende brev
 
         val utfallMedBrev =
             when (utfall) {
-                // Vurder å slette brev hvis det finnes her? Så vi ikke polluter med hengende brev
                 is KlageUtfallUtenBrev.Omgjoering ->
                     KlageUtfallMedData.Omgjoering(
                         omgjoering = utfall.omgjoering,
@@ -314,7 +314,13 @@ class KlageServiceImpl(
             is KlageUtfallMedData.DelvisOmgjoering -> utfall.innstilling.brev
             is KlageUtfallMedData.StadfesteVedtak -> utfall.innstilling.brev
             else -> {
-                val brev = runBlocking { brevApiKlient.opprettKlageInnstillingsbrevISak(klage.sak.id, saksbehandler) }
+                val brev =
+                    runBlocking {
+                        brevApiKlient.opprettKlageOversendelsesbrevISak(
+                            klage.id,
+                            saksbehandler,
+                        )
+                    }
                 KlageBrevInnstilling(brev.id)
             }
         }
@@ -395,7 +401,8 @@ class KlageServiceImpl(
             }
 
         val oppgaveOmgjoering = omgjoering?.let { lagOppgaveForOmgjoering(klage) }
-        val sendtInnstillingsbrev = innstilling?.let { ferdigstillInnstilling(it, klage, saksbehandler) }
+        val sendtInnstillingsbrev =
+            innstilling?.let { runBlocking { ferdigstillInnstilling(it, klage, saksbehandler) } }
 
         val resultat =
             KlageResultat(
@@ -615,46 +622,49 @@ class KlageServiceImpl(
         return oppdatertKlage
     }
 
-    private fun ferdigstillInnstilling(
+    private suspend fun ferdigstillInnstilling(
         innstilling: InnstillingTilKabal,
         klage: Klage,
         saksbehandler: Saksbehandler,
     ): SendtInnstillingsbrev {
         val innstillingsbrev = innstilling.brev
         val (tidJournalfoert, journalpostId) =
-            runBlocking {
-                ferdigstillOgDistribuerBrev(
-                    sakId = klage.sak.id,
-                    brevId = innstillingsbrev.brevId,
-                    saksbehandler = saksbehandler,
-                )
-            }
-        val brev =
-            runBlocking {
-                brevApiKlient.hentBrev(
-                    sakId = klage.sak.id,
-                    brevId = innstillingsbrev.brevId,
-                    brukerTokenInfo = saksbehandler,
-                )
-            }
-        runBlocking {
-            klageKlient.sendKlageTilKabal(
-                klage = klage,
-                ekstradataInnstilling =
-                    EkstradataInnstilling(
-                        mottakerInnstilling = brev.mottaker,
-                        // TODO: Håndter verge
-                        vergeEllerFullmektig = null,
-                        journalpostInnstillingsbrev = journalpostId,
-                        journalpostKlage = klage.innkommendeDokument?.journalpostId,
-                        // TODO: koble på når vi har journalpost soeknad inn
-                        journalpostSoeknad = null,
-                        // TODO: hent ut vedtaksbrev for vedtaket
-                        journalpostVedtak = null,
-                    ),
+            ferdigstillOgDistribuerBrev(
+                sakId = klage.sak.id,
+                brevId = innstillingsbrev.brevId,
+                saksbehandler = saksbehandler,
             )
-        }
+        val brev =
+            brevApiKlient.hentBrev(
+                sakId = klage.sak.id,
+                brevId = innstillingsbrev.brevId,
+                brukerTokenInfo = saksbehandler,
+            )
+        val notatTilKa =
+            brevApiKlient.journalfoerNotatKa(
+                klage = klage,
+                brukerInfoToken = saksbehandler,
+            )
+        logger.info(
+            "Journalførte notat til KA for innstilling i klageId=${klage.id} på " +
+                "journalpostId=${notatTilKa.journalpostId}",
+        )
 
+        klageKlient.sendKlageTilKabal(
+            klage = klage,
+            ekstradataInnstilling =
+                EkstradataInnstilling(
+                    mottakerInnstilling = brev.mottaker,
+                    // TODO: Håndter verge
+                    vergeEllerFullmektig = null,
+                    journalpostInnstillingsbrev = notatTilKa.journalpostId,
+                    journalpostKlage = klage.innkommendeDokument?.journalpostId,
+                    // TODO: koble på når vi har journalpost soeknad inn
+                    journalpostSoeknad = null,
+                    // TODO: hent ut vedtaksbrev for vedtaket
+                    journalpostVedtak = null,
+                ),
+        )
         return SendtInnstillingsbrev(
             journalfoerTidspunkt = tidJournalfoert,
             sendtKabalTidspunkt = Tidspunkt.now(),
@@ -687,7 +697,7 @@ class KlageServiceImpl(
     ): Pair<Tidspunkt, String> {
         val eksisterendeInnstillingsbrev = brevApiKlient.hentBrev(sakId, brevId, saksbehandler)
         if (eksisterendeInnstillingsbrev.status.ikkeFerdigstilt()) {
-            brevApiKlient.ferdigstillBrev(sakId, brevId, saksbehandler)
+            brevApiKlient.ferdigstillOversendelseBrev(sakId, brevId, saksbehandler)
         } else {
             logger.info("Brev med id=$brevId har status ${eksisterendeInnstillingsbrev.status} og er allerede ferdigstilt")
         }

@@ -30,9 +30,9 @@
     "react-redux": "^9.0.4",
     "react-router-dom": "^6.21.1",
     "redux": "^5.0.1",
-    "slate": "^0.101.5",
+    "slate": "^0.102.0",
     "slate-history": "^0.100.0",
-    "slate-react": "^0.101.5",
+    "slate-react": "^0.102.0",
     "styled-components": "^5.3.10"
   },
   "devDependencies": {
@@ -40,14 +40,14 @@
     "@testing-library/react": "^14.1.2",
     "@testing-library/react-hooks": "^8.0.1",
     "@testing-library/user-event": "^14.5.2",
-    "@types/node": "^20.11.16",
+    "@types/node": "^20.11.24",
     "@types/react": "^18.2.47",
     "@types/react-datepicker": "^4.19.5",
     "@types/react-dom": "^18.2.18",
     "@types/react-tabs": "^5.0.5",
     "@types/styled-components": "^5.1.26",
-    "@typescript-eslint/eslint-plugin": "~6.20.0",
-    "@typescript-eslint/parser": "~6.20.0",
+    "@typescript-eslint/eslint-plugin": "~7.1.0",
+    "@typescript-eslint/parser": "~7.1.0",
     "@vitejs/plugin-react-swc": "~3.6.0",
     "eslint": "^8.56.0",
     "eslint-plugin-jsx-a11y": "^6.8.0",
@@ -55,9 +55,9 @@
     "jsdom": "^24.0.0",
     "prettier": "^3.1.1",
     "typescript": "^5.3.3",
-    "vite": "5.0.12",
+    "vite": "5.1.4",
     "vite-tsconfig-paths": "4.3.1",
-    "vitest": "1.2.2"
+    "vitest": "1.3.1"
   },
   "browserslist": {
     "production": [

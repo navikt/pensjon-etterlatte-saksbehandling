@@ -35,7 +35,7 @@ object OppdragJaxb {
 
     private fun String.toValidXml() =
         this
-            .replace("<oppdrag xmlns=", "<ns2:oppdrag xmlns:ns2=")
-            .replace("</Oppdrag>", "</ns2:oppdrag>")
+            .replace("<oppdrag xmlns=", "<ns2:oppdrag xmlns:ns2=", ignoreCase = true)
+            .replace("</Oppdrag>", "</ns2:oppdrag>", ignoreCase = true)
             .let { StringReader(it) }
 }

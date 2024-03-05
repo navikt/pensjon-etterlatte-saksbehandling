@@ -17,6 +17,15 @@ sealed class DoedshendelseKontrollpunkt {
     abstract val opprettOppgave: Boolean
     abstract val avbryt: Boolean
 
+    @JsonTypeName("AVDOED_HAR_YTELSE_I_GJENNY")
+    data object AvdoedHarYtelse : DoedshendelseKontrollpunkt() {
+        override val kode = "AVDOED_HAR_YTELSE_I_GJENNY"
+        override val beskrivelse: String = "Avdød har ytelse i gjenny"
+        override val sendBrev: Boolean = false
+        override val opprettOppgave: Boolean = true
+        override val avbryt: Boolean = false
+    }
+
     @JsonTypeName("AVDOED_LEVER_I_PDL")
     data object AvdoedLeverIPDL : DoedshendelseKontrollpunkt() {
         override val kode = "AVDOED_LEVER_I_PDL"

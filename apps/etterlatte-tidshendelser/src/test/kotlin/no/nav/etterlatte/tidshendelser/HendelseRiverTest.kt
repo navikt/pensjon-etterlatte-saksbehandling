@@ -75,5 +75,9 @@ class HendelseRiverTest(dataSource: DataSource) {
             this.status shouldBe HendelseStatus.FERDIG
             this.info shouldNotBe null
         }
+
+        with(hendelseDao.hentJobb(jobb.id)) {
+            this.status shouldBe JobbStatus.FERDIG
+        }
     }
 }

@@ -97,10 +97,11 @@ data class DoedshendelseInternal internal constructor(
         )
     }
 
-    fun sakType(): SakType =
+    fun sakTypeForEpsEllerBarn(): SakType =
         when (relasjon) {
             Relasjon.BARN -> SakType.BARNEPENSJON
             Relasjon.EPS -> SakType.OMSTILLINGSSTOENAD
+            Relasjon.AVDOED -> throw IllegalStateException("Saktype for relasjon er kun gyldig for BARN og EPS")
         }
 }
 
@@ -123,4 +124,5 @@ enum class Utfall {
 enum class Relasjon {
     BARN,
     EPS,
+    AVDOED,
 }

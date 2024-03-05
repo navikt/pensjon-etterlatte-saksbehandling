@@ -6,6 +6,7 @@ import no.nav.etterlatte.brev.model.BrevDataRedigerbar
 import no.nav.etterlatte.brev.model.InnholdMedVedlegg
 import no.nav.etterlatte.brev.model.Slate
 import no.nav.etterlatte.libs.common.behandling.SakType
+import java.time.LocalDate
 
 data class AvvistKlageFerdigData(override val innhold: List<Slate.Element>, val data: AvvistKlageInnholdBrevData) :
     BrevDataFerdigstilling {
@@ -22,15 +23,18 @@ data class AvvistKlageFerdigData(override val innhold: List<Slate.Element>, val 
     }
 }
 
-// TODO: Mer innhold inn i greia
 data class AvvistKlageInnholdBrevData(
     val sakType: SakType,
+    val klageDato: LocalDate,
+    val datoForVedtaketKlagenGjelder: LocalDate?,
 ) : BrevDataRedigerbar {
     companion object {
         fun fra(generellBrevData: GenerellBrevData): AvvistKlageInnholdBrevData {
             val klage = generellBrevData.forenkletVedtak?.klage ?: throw IllegalArgumentException("Vedtak mangler klage")
             return AvvistKlageInnholdBrevData(
                 sakType = klage.sak.sakType,
+                klageDato = klage.innkommendeDokument?.mottattDato ?: klage.opprettet.toLocalDate(),
+                datoForVedtaketKlagenGjelder = klage.formkrav?.formkrav?.vedtaketKlagenGjelder?.datoAttestert?.toLocalDate(),
             )
         }
     }

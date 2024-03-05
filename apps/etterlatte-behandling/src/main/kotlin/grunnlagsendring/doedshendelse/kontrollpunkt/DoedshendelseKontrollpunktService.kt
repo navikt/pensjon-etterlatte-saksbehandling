@@ -39,19 +39,36 @@ class DoedshendelseKontrollpunktService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     fun identifiserKontrollerpunkter(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt> {
-        val sakType = hendelse.sakType()
-        val avdoed = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.avdoedFnr, PersonRolle.AVDOED, sakType)
-        val sak = sakService.finnSak(hendelse.beroertFnr, sakType)
-
         val kontrollpunkterForRelasjon =
             when (hendelse.relasjon) {
-                Relasjon.BARN -> kontrollpunkterBarneRelasjon(hendelse, avdoed, sak)
+                Relasjon.BARN -> {
+                    val (sak, avdoed) = hentDataForBeroert(hendelse)
+                    kontrollpunkterBarneRelasjon(hendelse, avdoed, sak) + fellesKontrollpunkter(hendelse, avdoed, sak)
+                }
                 Relasjon.EPS -> {
-                    val eps = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.beroertFnr, PersonRolle.GJENLEVENDE, sakType)
-                    kontrollpunkterEpsRelasjon(hendelse, sak, eps, avdoed)
+                    val (sak, avdoed) = hentDataForBeroert(hendelse)
+                    val eps =
+                        pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                            hendelse.beroertFnr,
+                            PersonRolle.GJENLEVENDE,
+                            hendelse.sakTypeForEpsEllerBarn(),
+                        )
+                    kontrollpunkterEpsRelasjon(hendelse, sak, eps, avdoed) + fellesKontrollpunkter(hendelse, avdoed, sak)
+                }
+
+                Relasjon.AVDOED -> {
+                    kontrollerAvdoedHarYtelseIGjenny(hendelse) ?: emptyList()
                 }
             }
-        return kontrollpunkterForRelasjon + fellesKontrollpunkter(hendelse, avdoed, sak)
+
+        return kontrollpunkterForRelasjon
+    }
+
+    private fun hentDataForBeroert(hendelse: DoedshendelseInternal): Pair<Sak?, PersonDTO> {
+        val sakType = hendelse.sakTypeForEpsEllerBarn()
+        val sak = sakService.finnSak(hendelse.beroertFnr, sakType)
+        val avdoed = pdlTjenesterKlient.hentPdlModellFlereSaktyper(hendelse.avdoedFnr, PersonRolle.AVDOED, sakType)
+        return Pair(sak, avdoed)
     }
 
     private fun fellesKontrollpunkter(
@@ -93,6 +110,19 @@ class DoedshendelseKontrollpunktService(
             kontrollerSkiltSistefemAarEllerGiftI15(eps, avdoed),
             kontrollerSkilti5AarMedUkjentGiftemaalStart(eps, avdoed),
         )
+    }
+
+    private fun kontrollerAvdoedHarYtelseIGjenny(hendelse: DoedshendelseInternal): List<DoedshendelseKontrollpunkt>? {
+        val sakerForAvdoed = sakService.finnSaker(hendelse.avdoedFnr)
+        return if (sakerForAvdoed.isEmpty()) {
+            null
+        } else {
+            val duplikat =
+                sakerForAvdoed.map {
+                    kontrollerEksisterendeHendelser(hendelse, it)
+                }.first()
+            listOfNotNull(DoedshendelseKontrollpunkt.AvdoedHarYtelse, duplikat)
+        }
     }
 
     private fun kontrollerSkilti5AarMedUkjentGiftemaalStart(
@@ -237,7 +267,7 @@ class DoedshendelseKontrollpunktService(
         }
 
     private fun kontrollerKryssendeYtelseEps(hendelse: DoedshendelseInternal): DoedshendelseKontrollpunkt? {
-        if (hendelse.sakType() == SakType.BARNEPENSJON) {
+        if (hendelse.sakTypeForEpsEllerBarn() == SakType.BARNEPENSJON) {
             return null
         }
         return runBlocking {

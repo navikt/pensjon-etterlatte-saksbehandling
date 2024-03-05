@@ -46,6 +46,8 @@ import no.nav.etterlatte.brev.model.BrevDataMapperFerdigstillingVedtak
 import no.nav.etterlatte.brev.model.BrevDataMapperRedigerbartUtfallVedtak
 import no.nav.etterlatte.brev.model.BrevKodeMapperVedtak
 import no.nav.etterlatte.brev.notatRoute
+import no.nav.etterlatte.brev.oversendelsebrev.OversendelseBrevServiceImpl
+import no.nav.etterlatte.brev.oversendelsebrev.oversendelseBrevRoute
 import no.nav.etterlatte.brev.varselbrev.BrevDataMapperFerdigstillVarsel
 import no.nav.etterlatte.brev.varselbrev.VarselbrevService
 import no.nav.etterlatte.brev.varselbrev.varselbrevRoute
@@ -213,6 +215,14 @@ class ApplicationBuilder {
             SafKlient(httpClient(), env.requireEnvValue("SAF_BASE_URL"), env.requireEnvValue("SAF_SCOPE")),
         )
 
+    private val oversendelseBrevService =
+        OversendelseBrevServiceImpl(
+            brevRepository = db,
+            pdfGenerator = pdfGenerator,
+            adresseService = adresseService,
+            brevdataFacade = brevdataFacade,
+        )
+
     private val notatService = NotatService(db, adresseService, brevbakerService, grunnlagKlient, dokarkivKlient)
 
     private val tilgangssjekker = Tilgangssjekker(config, httpClient())
@@ -226,6 +236,7 @@ class ApplicationBuilder {
                     dokumentRoute(safService, dokarkivService, tilgangssjekker)
                     varselbrevRoute(varselbrevService, tilgangssjekker)
                     notatRoute(notatService, tilgangssjekker)
+                    oversendelseBrevRoute(oversendelseBrevService, tilgangssjekker)
                 }
             }
             .build()

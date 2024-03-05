@@ -74,6 +74,32 @@ internal class DoedshendelseServiceTest {
     }
 
     @Test
+    fun `Skal opprette doedshendelse en for avdød uten barn`() {
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                avdoed.foedselsnummer.verdi.value,
+                any(),
+                listOf(SakType.BARNEPENSJON, SakType.OMSTILLINGSSTOENAD),
+            )
+        } returns avdoed.copy(avdoedesBarn = null)
+        every { dao.opprettDoedshendelse(any()) } just runs
+        every { dao.hentDoedshendelserForPerson(any()) } returns emptyList()
+
+        service.opprettDoedshendelseForBeroertePersoner(
+            DoedshendelsePdl(
+                UUID.randomUUID().toString(),
+                Endringstype.OPPRETTET,
+                fnr = avdoed.foedselsnummer.verdi.value,
+                doedsdato = avdoed.doedsdato!!.verdi,
+            ),
+        )
+
+        verify(exactly = 1) {
+            dao.opprettDoedshendelse(any())
+        }
+    }
+
+    @Test
     fun `Skal opprette doedshendelse med barna som kan ha rett paa barnepensjon ved doedsfall`() {
         every {
             pdlTjenesterKlient.hentPdlModellFlereSaktyper(
@@ -94,7 +120,7 @@ internal class DoedshendelseServiceTest {
             ),
         )
 
-        verify(exactly = 3) {
+        verify(exactly = 4) {
             dao.opprettDoedshendelse(any())
         }
     }
@@ -121,7 +147,7 @@ internal class DoedshendelseServiceTest {
         service.opprettDoedshendelseForBeroertePersoner(
             doedshendelseOpprettet,
         )
-        verify(exactly = 3) {
+        verify(exactly = 4) {
             dao.opprettDoedshendelse(any())
         }
 
@@ -222,7 +248,7 @@ internal class DoedshendelseServiceTest {
             korrigertPdlhendelse,
         )
 
-        verify(exactly = 3) {
+        verify(exactly = 4) {
             dao.opprettDoedshendelse(any())
         }
         verify(exactly = 2) { dao.hentDoedshendelserForPerson(any()) }
@@ -287,7 +313,7 @@ internal class DoedshendelseServiceTest {
             annullertPdlHendelse,
         )
 
-        verify(exactly = 3) {
+        verify(exactly = 4) {
             dao.opprettDoedshendelse(any())
         }
         verify(exactly = 2) { dao.hentDoedshendelserForPerson(any()) }

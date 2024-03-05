@@ -42,13 +42,10 @@ export const Person = () => {
 
   useEffect(() => {
     if (fnrHarGyldigFormat(fnr)) {
+      hentPerson(fnr!!)
       hentSak(fnr!!)
     }
   }, [fnr])
-
-  useEffect(() => {
-    hentPerson(fnr!!)
-  }, [])
 
   const handleError = (error: ApiError) => {
     if (error.status === 400) {

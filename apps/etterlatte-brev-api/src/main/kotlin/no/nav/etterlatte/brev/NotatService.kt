@@ -109,7 +109,7 @@ class NotatService(
             brevRequest =
                 BrevbakerRequest.fraStrukturertBrev(
                     strukturertBrev = notatData,
-                    felles = mapFelles(notatData.sak.id, notatData.soekerFnr, bruker),
+                    felles = mapFelles(notatData.sak.id, notatData.sak.enhet, bruker),
                 ),
         )
     }

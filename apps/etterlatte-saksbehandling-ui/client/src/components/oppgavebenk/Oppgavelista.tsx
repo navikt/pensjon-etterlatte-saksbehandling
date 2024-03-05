@@ -35,7 +35,7 @@ import { Filter } from '~components/oppgavebenk/filtreringAvOppgaver/typer'
 
 type OppgavelisteToggle = 'Oppgavelista' | 'MinOppgaveliste'
 
-export const ToggleMinOppgaveliste = () => {
+export const Oppgavelista = () => {
   const innloggetSaksbehandler = useAppSelector((state) => state.saksbehandlerReducer.innloggetSaksbehandler)
   if (!innloggetSaksbehandler.skriveTilgang) {
     return <Tilgangsmelding />

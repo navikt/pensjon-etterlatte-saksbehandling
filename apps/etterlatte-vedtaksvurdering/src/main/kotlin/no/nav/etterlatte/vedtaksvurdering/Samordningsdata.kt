@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped
 import java.time.LocalDate
 import java.util.UUID
 
-class Samordningsvedtak(
+data class Samordningsvedtak(
     val samordningVedtakId: Long,
     val fagsystem: String,
     val saksId: Long,
@@ -19,7 +19,7 @@ class Samordningsvedtak(
     val samordningsmeldinger: List<Samordningsmelding> = emptyList(),
 )
 
-class Samordningsmelding(
+data class Samordningsmelding(
     val samId: Long,
     val meldingstatusKode: String,
     val tpNr: String,
@@ -31,7 +31,7 @@ class Samordningsmelding(
     val versjon: Long,
 )
 
-class SamordningsvedtakWrapper(
+data class SamordningsvedtakWrapper(
     @JsonUnwrapped
     val samordningsvedtak: Samordningsvedtak,
     val behandlingId: UUID,

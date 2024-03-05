@@ -291,6 +291,39 @@ class DoedshendelseKontrollpunktServiceTest {
     }
 
     @Test
+    fun `Skal gi kontrollpunkt AvdoedHarIkkeYtelse dersom relasjon avdoed og ikke har noen sak`() {
+        val doedshendelseInternalAvdoed =
+            DoedshendelseInternal.nyHendelse(
+                avdoedFnr = KONTANT_FOT.value,
+                avdoedDoedsdato = LocalDate.now(),
+                beroertFnr = JOVIAL_LAMA.value,
+                relasjon = Relasjon.AVDOED,
+                endringstype = Endringstype.OPPRETTET,
+            )
+        every {
+            sakService.finnSaker(
+                any(),
+            )
+        } returns emptyList()
+
+        every {
+            pdlTjenesterKlient.hentPdlModellFlereSaktyper(
+                foedselsnummer = doedshendelseInternalBP.avdoedFnr,
+                rolle = PersonRolle.AVDOED,
+                saktype = any(),
+            )
+        } returns
+            mockPerson().copy(
+                foedselsnummer = OpplysningDTO(Folkeregisteridentifikator.of(doedshendelseInternalAvdoed.avdoedFnr), null),
+                doedsdato = OpplysningDTO(doedshendelseInternalAvdoed.avdoedDoedsdato, null),
+            )
+
+        val kontrollpunkter = kontrollpunktService.identifiserKontrollerpunkter(doedshendelseInternalAvdoed)
+
+        kontrollpunkter shouldContainExactly listOf(DoedshendelseKontrollpunkt.AvdoedHarIkkeYtelse)
+    }
+
+    @Test
     fun `Skal gi kontrollpunkt AvdoedHarYtelse, DuplikatGrunnlagsendringsHendelse avdød med tidligere hendelse`() {
         val doedshendelseInternalAvdoed =
             DoedshendelseInternal.nyHendelse(

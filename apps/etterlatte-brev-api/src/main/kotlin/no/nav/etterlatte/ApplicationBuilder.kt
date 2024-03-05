@@ -219,7 +219,6 @@ class ApplicationBuilder {
         OversendelseBrevServiceImpl(
             brevRepository = db,
             pdfGenerator = pdfGenerator,
-            sakService = sakService,
             adresseService = adresseService,
             brevdataFacade = brevdataFacade,
         )

@@ -318,7 +318,6 @@ class KlageServiceImpl(
                     runBlocking {
                         brevApiKlient.opprettKlageOversendelsesbrevISak(
                             klage.id,
-                            klage.sak.id,
                             saksbehandler,
                         )
                     }

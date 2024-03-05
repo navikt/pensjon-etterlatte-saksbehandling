@@ -504,7 +504,6 @@ class BrevApiKlientTest : BrevApiKlient {
 
     override suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
-        sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
         return opprettetBrevDto(brevId++)

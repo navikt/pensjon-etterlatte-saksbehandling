@@ -22,7 +22,6 @@ import java.util.UUID
 interface BrevApiKlient {
     suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
-        sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto
 
@@ -88,11 +87,10 @@ class BrevApiKlientObo(config: Config, client: HttpClient) : BrevApiKlient {
 
     override suspend fun opprettKlageOversendelsesbrevISak(
         klageId: UUID,
-        sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): OpprettetBrevDto {
         return post(
-            url = "$resourceUrl/api/brev/behandling/$klageId/oversendelse?sakId=$sakId",
+            url = "$resourceUrl/api/brev/behandling/$klageId/oversendelse",
             onSuccess = { resource ->
                 resource.response?.let { objectMapper.readValue(it.toJson()) }
                     ?: throw RuntimeException("Fikk ikke en riktig respons fra oppretting av brev")

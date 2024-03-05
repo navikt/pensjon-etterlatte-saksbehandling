@@ -23,6 +23,7 @@ import no.nav.etterlatte.libs.common.trygdetid.TrygdetidDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidGrunnlagKildeDto
 import no.nav.etterlatte.libs.common.trygdetid.TrygdetidOverstyringDto
+import no.nav.etterlatte.libs.common.trygdetid.TrygdetidYrkesskadeDto
 import no.nav.etterlatte.libs.common.uuid
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withParam
@@ -74,6 +75,22 @@ fun Route.trygdetid(
             }
         }
 
+        post("yrkesskade") {
+            withBehandlingId(behandlingKlient) {
+                logger.info("Oppdater trygdetid (yrkesskade) for behandling $behandlingId")
+                val trygdetidYrkesskadeDto = call.receive<TrygdetidYrkesskadeDto>()
+
+                trygdetidService.setYrkesskade(
+                    trygdetidYrkesskadeDto.id,
+                    behandlingId,
+                    trygdetidYrkesskadeDto.yrkesskade,
+                    brukerTokenInfo,
+                )
+
+                call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
+            }
+        }
+
         post("/grunnlag") {
             withBehandlingId(behandlingKlient) {
                 logger.info("Legger til trygdetidsgrunnlag for behandling $behandlingId")
@@ -90,17 +107,6 @@ fun Route.trygdetid(
                     logger.info("Klarte ikke legge til ny trygdetidsperiode for $behandlingId pga overlapp.")
                     call.respond(HttpStatusCode.Conflict)
                 }
-            }
-        }
-
-        post("/grunnlag/yrkesskade") {
-            withBehandlingId(behandlingKlient) {
-                logger.info("Legger til yrkesskade trygdetidsgrunnlag for behandling $behandlingId")
-                trygdetidService.lagreYrkesskadeTrygdetidGrunnlag(
-                    behandlingId,
-                    brukerTokenInfo,
-                )
-                call.respond(trygdetidService.hentTrygdetid(behandlingId, brukerTokenInfo)!!.toDto())
             }
         }
 

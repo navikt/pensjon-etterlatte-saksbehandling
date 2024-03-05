@@ -63,7 +63,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                         trygdetid_tidspunkt,
                         trygdetid_regelresultat,
                         beregnet_trygdetid_overstyrt,
-                        poengaar_overstyrt
+                        poengaar_overstyrt,
+                        yrkesskade
                     FROM trygdetid 
                     WHERE behandling_id = :behandlingId
                     """.trimIndent(),
@@ -106,6 +107,13 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 gjeldendeTrygdetid.id,
                 gjeldendeTrygdetid.behandlingId,
                 oppdatertTrygdetid.overstyrtNorskPoengaar,
+                tx,
+            )
+
+            oppdaterYrkesskade(
+                gjeldendeTrygdetid.id,
+                gjeldendeTrygdetid.behandlingId,
+                oppdatertTrygdetid.yrkesskade,
                 tx,
             )
 
@@ -163,7 +171,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
     ) = queryOf(
         statement =
             """
-            INSERT INTO trygdetid(id, behandling_id, sak_id, ident) VALUES(:id, :behandlingId, :sakId, :ident)
+            INSERT INTO trygdetid(id, behandling_id, sak_id, ident, yrkesskade) VALUES(:id, :behandlingId, :sakId, :ident, :yrkesskade)
             """.trimIndent(),
         paramMap =
             mapOf(
@@ -171,6 +179,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 "behandlingId" to trygdetid.behandlingId,
                 "sakId" to trygdetid.sakId,
                 "ident" to trygdetid.ident,
+                "yrkesskade" to trygdetid.yrkesskade,
             ),
     ).let { query -> tx.update(query) }
 
@@ -338,6 +347,29 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         }
     }
 
+    private fun oppdaterYrkesskade(
+        id: UUID,
+        behandlingId: UUID,
+        yrkesskade: Boolean,
+        tx: TransactionalSession,
+    ) {
+        queryOf(
+            statement =
+                """
+                UPDATE trygdetid 
+                  SET yrkesskade = :yrkesskade WHERE id = :id AND  behandling_id = :behandlingId
+                """.trimIndent(),
+            paramMap =
+                mapOf(
+                    "id" to id,
+                    "behandlingId" to behandlingId,
+                    "yrkesskade" to yrkesskade,
+                ),
+        ).let { query ->
+            tx.update(query)
+        }
+    }
+
     private fun oppdaterBeregnetTrygdetid(
         behandlingId: UUID,
         beregnetTrygdetid: DetaljertBeregnetTrygdetid,
@@ -372,7 +404,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                   prorata_broek_nevner = :prorataBroekNevner,
                   trygdetid_tidspunkt = :trygdetidTidspunkt,
                   trygdetid_regelresultat = :trygdetidRegelresultat,
-                  beregnet_trygdetid_overstyrt = :overstyrt
+                  beregnet_trygdetid_overstyrt = :overstyrt,
+                  yrkesskade = :yrkesskade
                 WHERE behandling_id = :behandlingId
                 """.trimIndent(),
             paramMap =
@@ -404,6 +437,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                     "trygdetidTidspunkt" to beregnetTrygdetid.tidspunkt.toTimestamp(),
                     "trygdetidRegelresultat" to beregnetTrygdetid.regelResultat.toJson(),
                     "overstyrt" to overstyrt,
+                    "yrkesskade" to beregnetVerdi.yrkesskade,
                 ),
         ).let { query ->
             tx.update(query)
@@ -436,7 +470,8 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                 prorata_broek_nevner = null,
                 trygdetid_tidspunkt = null,
                 trygdetid_regelresultat = null,
-                beregnet_trygdetid_overstyrt = false
+                beregnet_trygdetid_overstyrt = false,
+                yrkesskade = false
             WHERE behandling_id = :behandlingId
             """.trimIndent(),
         paramMap = mapOf("behandlingId" to behandlingId),
@@ -540,6 +575,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
                             Pair(intOrNull("prorata_broek_teller"), intOrNull("prorata_broek_nevner")),
                         ),
                     overstyrt = boolean("beregnet_trygdetid_overstyrt"),
+                    yrkesskade = boolean("yrkesskade"),
                 ),
             tidspunkt = tidspunkt("trygdetid_tidspunkt"),
             regelResultat =
@@ -563,6 +599,7 @@ class TrygdetidRepository(private val dataSource: DataSource) {
         opplysninger = opplysninger,
         overstyrtNorskPoengaar = intOrNull("poengaar_overstyrt"),
         ident = string("ident"),
+        yrkesskade = boolean("yrkesskade"),
     )
 
     private fun Row.toTrygdetidGrunnlag() =

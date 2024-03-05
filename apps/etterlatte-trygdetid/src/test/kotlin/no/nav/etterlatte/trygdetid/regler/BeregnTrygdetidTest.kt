@@ -244,6 +244,7 @@ internal class BeregnTrygdetidTest {
         forventet: DetaljertBeregnetTrygdetidResultat,
         datoer: Pair<LocalDate, LocalDate>?,
         norskPoengaar: Int?,
+        yrkesskade: Boolean,
     ) {
         val grunnlag =
             FaktumNode(
@@ -253,6 +254,7 @@ internal class BeregnTrygdetidTest {
                         foedselsDato = datoer?.first ?: LocalDate.of(1981, 2, 21),
                         doedsDato = datoer?.second ?: LocalDate.of(2023, 3, 15),
                         norskPoengaar = norskPoengaar,
+                        yrkesskade = yrkesskade,
                     ),
                 kilde = Grunnlagsopplysning.Saksbehandler("Z12345", Tidspunkt.now()),
                 beskrivelse = "Perioder",
@@ -261,7 +263,7 @@ internal class BeregnTrygdetidTest {
         val trygdetidGrunnlagMedAvdoedGrunnlag = TrygdetidGrunnlagMedAvdoedGrunnlag(grunnlag)
 
         val resultat =
-            beregnDetaljertBeregnetTrygdetid.anvend(trygdetidGrunnlagMedAvdoedGrunnlag, RegelPeriode(LocalDate.now()))
+            beregnDetaljertBeregnetTrygdetidMedYrkesskade.anvend(trygdetidGrunnlagMedAvdoedGrunnlag, RegelPeriode(LocalDate.now()))
 
         resultat.verdi shouldBe forventet
     }
@@ -316,9 +318,11 @@ internal class BeregnTrygdetidTest {
                         samletTrygdetidTeoretisk = null,
                         prorataBroek = null,
                         overstyrt = false,
+                        yrkesskade = false,
                     ),
                     null,
                     null,
+                    false,
                 ),
                 Arguments.of(
                     "Nasjonal poengInnAar",
@@ -352,9 +356,11 @@ internal class BeregnTrygdetidTest {
                         samletTrygdetidTeoretisk = 1,
                         prorataBroek = null,
                         overstyrt = false,
+                        yrkesskade = false,
                     ),
                     null,
                     null,
+                    false,
                 ),
                 Arguments.of(
                     "Nasjonal poengUtAar",
@@ -388,9 +394,11 @@ internal class BeregnTrygdetidTest {
                         samletTrygdetidTeoretisk = 1,
                         prorataBroek = null,
                         overstyrt = false,
+                        yrkesskade = false,
                     ),
                     null,
                     null,
+                    false,
                 ),
                 Arguments.of(
                     "Nasjonal poengInnAar og poengUtAar",
@@ -424,9 +432,11 @@ internal class BeregnTrygdetidTest {
                         samletTrygdetidTeoretisk = 1,
                         prorataBroek = null,
                         overstyrt = false,
+                        yrkesskade = false,
                     ),
                     null,
                     null,
+                    false,
                 ),
                 Arguments.of(
                     "Utland",
@@ -505,12 +515,14 @@ internal class BeregnTrygdetidTest {
                         samletTrygdetidTeoretisk = 40,
                         prorataBroek = IntBroek(219, 363),
                         overstyrt = false,
+                        yrkesskade = false,
                     ),
                     Pair(
                         LocalDate.of(1976, 10, 3),
                         LocalDate.of(2023, 1, 29),
                     ),
                     null,
+                    false,
                 ),
                 Arguments.of(
                     "Utland 2",
@@ -578,12 +590,14 @@ internal class BeregnTrygdetidTest {
                         samletTrygdetidTeoretisk = 40,
                         prorataBroek = IntBroek(167, 313),
                         overstyrt = false,
+                        yrkesskade = false,
                     ),
                     Pair(
                         LocalDate.of(1981, 2, 21),
                         LocalDate.of(2023, 3, 15),
                     ),
                     null,
+                    false,
                 ),
                 Arguments.of(
                     "Utland 3",
@@ -636,12 +650,14 @@ internal class BeregnTrygdetidTest {
                         samletTrygdetidTeoretisk = 31,
                         prorataBroek = null,
                         overstyrt = false,
+                        yrkesskade = false,
                     ),
                     Pair(
                         LocalDate.of(1981, 2, 21),
                         LocalDate.of(2023, 3, 15),
                     ),
                     null,
+                    false,
                 ),
                 Arguments.of(
                     "Utland med overstyrt norsk poengaar",
@@ -697,12 +713,14 @@ internal class BeregnTrygdetidTest {
                         samletTrygdetidTeoretisk = 14,
                         prorataBroek = IntBroek(24, 170),
                         overstyrt = false,
+                        yrkesskade = false,
                     ),
                     Pair(
                         LocalDate.of(1981, 2, 21),
                         LocalDate.of(2023, 3, 15),
                     ),
                     2,
+                    false,
                 ),
                 Arguments.of(
                     // ...arguments =
@@ -761,12 +779,14 @@ internal class BeregnTrygdetidTest {
                         samletTrygdetidTeoretisk = 40,
                         prorataBroek = null,
                         overstyrt = false,
+                        yrkesskade = false,
                     ),
                     Pair(
                         LocalDate.of(2023, 2, 21).minusYears(36),
                         LocalDate.of(2023, 2, 21),
                     ),
                     null,
+                    false,
                 ),
                 Arguments.of(
                     // ...arguments =
@@ -838,12 +858,53 @@ internal class BeregnTrygdetidTest {
                         samletTrygdetidTeoretisk = 40,
                         prorataBroek = IntBroek(241, 480),
                         overstyrt = false,
+                        yrkesskade = false,
                     ),
                     Pair(
                         LocalDate.of(1958, 11, 12),
                         LocalDate.of(2015, 1, 7),
                     ),
                     null,
+                    false,
+                ),
+                Arguments.of(
+                    // ...arguments =
+                    "Nasjonal ikke poengAar med yrkesskade",
+                    listOf(
+                        byggTrygdetidGrunnlag(
+                            TrygdetidType.FAKTISK,
+                            LandNormalisert.NORGE.isoCode,
+                            TrygdetidPeriode(
+                                fra = LocalDate.of(2022, 4, 2),
+                                til = LocalDate.of(2023, 6, 9),
+                            ),
+                            poengInnAar = false,
+                            poengUtAar = false,
+                            medIProrata = true,
+                        ),
+                    ),
+                    DetaljertBeregnetTrygdetidResultat(
+                        faktiskTrygdetidNorge =
+                            FaktiskTrygdetid(
+                                periode = Period.of(1, 3, 0),
+                                antallMaaneder = 15,
+                            ),
+                        faktiskTrygdetidTeoretisk =
+                            FaktiskTrygdetid(
+                                periode = Period.of(1, 3, 0),
+                                antallMaaneder = 15,
+                            ),
+                        fremtidigTrygdetidNorge = null,
+                        fremtidigTrygdetidTeoretisk = null,
+                        samletTrygdetidNorge = 40,
+                        samletTrygdetidTeoretisk = 1,
+                        prorataBroek = null,
+                        overstyrt = false,
+                        yrkesskade = true,
+                    ),
+                    null,
+                    null,
+                    true,
                 ),
             )
 

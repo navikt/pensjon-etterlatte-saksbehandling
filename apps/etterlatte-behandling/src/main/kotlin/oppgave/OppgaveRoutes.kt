@@ -29,6 +29,7 @@ import no.nav.etterlatte.libs.common.oppgave.SaksbehandlerEndringGosysDto
 import no.nav.etterlatte.libs.common.oppgave.SettPaaVentRequest
 import no.nav.etterlatte.libs.common.oppgave.Status
 import no.nav.etterlatte.libs.common.oppgave.VentefristGaarUtRequest
+import no.nav.etterlatte.libs.common.oppgave.VentefristerGaarUtResponse
 import no.nav.etterlatte.libs.common.oppgaveId
 import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -289,16 +290,19 @@ internal fun Route.oppgaveRoutes(
 
         put("ventefrist-gaar-ut") {
             val request = call.receive<VentefristGaarUtRequest>()
-            inTransaction {
-                service.hentFristGaarUt(request).forEach {
-                    service.oppdaterStatusOgMerknad(
-                        it,
-                        "",
-                        Status.UNDER_BEHANDLING,
-                    )
+            val oppgaver =
+                inTransaction {
+                    val oppgaver = service.hentFristGaarUt(request)
+                    oppgaver.forEach {
+                        service.oppdaterStatusOgMerknad(
+                            it.oppgaveID,
+                            "",
+                            Status.UNDER_BEHANDLING,
+                        )
+                    }
+                    oppgaver
                 }
-            }
-            call.respond(HttpStatusCode.OK)
+            call.respond(VentefristerGaarUtResponse(oppgaver))
         }
     }
 }

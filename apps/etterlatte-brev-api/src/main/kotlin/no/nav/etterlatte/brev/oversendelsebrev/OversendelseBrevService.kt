@@ -10,7 +10,6 @@ import no.nav.etterlatte.brev.adresse.AvsenderRequest
 import no.nav.etterlatte.brev.behandling.PersonerISak
 import no.nav.etterlatte.brev.db.BrevRepository
 import no.nav.etterlatte.brev.hentinformasjon.BrevdataFacade
-import no.nav.etterlatte.brev.hentinformasjon.SakService
 import no.nav.etterlatte.brev.model.Brev
 import no.nav.etterlatte.brev.model.BrevDataFerdigstilling
 import no.nav.etterlatte.brev.model.BrevDataFerdigstillingRequest
@@ -39,7 +38,6 @@ interface OversendelseBrevService {
 
     suspend fun opprettOversendelseBrev(
         behandlingId: UUID,
-        sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev
 
@@ -53,7 +51,6 @@ interface OversendelseBrevService {
 class OversendelseBrevServiceImpl(
     private val brevRepository: BrevRepository,
     private val pdfGenerator: PDFGenerator,
-    private val sakService: SakService,
     private val adresseService: AdresseService,
     private val brevdataFacade: BrevdataFacade,
 ) : OversendelseBrevService {
@@ -63,7 +60,6 @@ class OversendelseBrevServiceImpl(
 
     override suspend fun opprettOversendelseBrev(
         behandlingId: UUID,
-        sakId: Long,
         brukerTokenInfo: BrukerTokenInfo,
     ): Brev {
         val eksisterendeBrev =
@@ -72,11 +68,11 @@ class OversendelseBrevServiceImpl(
         if (eksisterendeBrev != null) {
             return eksisterendeBrev
         }
+        val klage = brevdataFacade.hentKlage(behandlingId, brukerTokenInfo)
 
-        val sak = sakService.hentSak(sakId, brukerTokenInfo)
         val generellBrevData =
             brevdataFacade.hentGenerellBrevData(
-                sakId = sakId,
+                sakId = klage.sak.id,
                 // Setter behandlingId som null for å unngå å hente en behandling med klageId'en
                 behandlingId = null,
                 brukerTokenInfo = brukerTokenInfo,
@@ -84,11 +80,11 @@ class OversendelseBrevServiceImpl(
         val brev =
             brevRepository.opprettBrev(
                 OpprettNyttBrev(
-                    sakId = sakId,
+                    sakId = klage.sak.id,
                     behandlingId = behandlingId,
-                    soekerFnr = sak.ident,
+                    soekerFnr = klage.sak.ident,
                     prosessType = BrevProsessType.AUTOMATISK,
-                    mottaker = finnMottaker(sak.sakType, generellBrevData.personerISak),
+                    mottaker = finnMottaker(klage.sak.sakType, generellBrevData.personerISak),
                     opprettet = Tidspunkt.now(),
                     innhold =
                         BrevInnhold(

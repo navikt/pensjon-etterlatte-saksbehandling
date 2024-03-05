@@ -157,7 +157,7 @@ export const Oppgavelista = () => {
   }, [hentRevurderingsaarsakerStatus])
 
   useEffect(() => {
-    leggFilterILocalStorage({ ...oppgavelistaFilter, fnrFilter: '', sakidFilter: '' })
+    leggFilterILocalStorage({ ...oppgavelistaFilter, sakEllerFnrFilter: '' })
   }, [oppgavelistaFilter])
 
   useEffect(() => {

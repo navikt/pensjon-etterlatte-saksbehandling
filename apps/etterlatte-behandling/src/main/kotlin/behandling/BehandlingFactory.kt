@@ -173,7 +173,7 @@ class BehandlingFactory(
                 ).also {
                     if (request.kilde == Vedtaksloesning.GJENOPPRETTA) {
                         oppgaveService.hentOppgaverForSak(sak.id)
-                            .find { it.type == OppgaveType.GJENOPPRETTING_ALDERSOVERGANG }?.let {
+                            .find { it.type == OppgaveType.GJENOPPRETTING_ALDERSOVERGANG && !it.erAvsluttet() }?.let {
                                 oppgaveService.hentOgFerdigstillOppgaveById(it.id, brukerTokenInfo)
                             }
                     }

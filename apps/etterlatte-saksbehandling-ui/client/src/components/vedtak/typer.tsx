@@ -18,10 +18,10 @@ export enum VedtakType {
 }
 
 export interface Samordningsvedtak {
-  samordningVedtakId: string
-  saksId: string
+  samordningVedtakId: number
+  saksId: number
   saksKode: string
-  vedtakId: string
+  vedtakId: number
   vedtakstatusKode: string
   etterbetaling: boolean
   utvidetSamordningsfrist: boolean

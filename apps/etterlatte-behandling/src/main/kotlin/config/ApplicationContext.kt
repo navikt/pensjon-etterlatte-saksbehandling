@@ -475,7 +475,7 @@ internal class ApplicationContext(
             saksbehandlerJobService = saksbehandlerJobService,
             { leaderElectionKlient.isLeader() },
             initialDelay = Duration.of(30, ChronoUnit.SECONDS).toMillis(),
-            interval = Duration.of(30, ChronoUnit.SECONDS),
+            interval = Duration.of(10, ChronoUnit.MINUTES),
         )
     }
 

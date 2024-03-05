@@ -33,34 +33,26 @@ export const FilterRad = ({
   setFilter,
   saksbehandlereIEnhet,
 }: Props): ReactNode => {
-  const [sakId, setSakId] = useState<string>(filter.sakidFilter)
-  const [fnr, setFnr] = useState<string>(filter.fnrFilter)
+  const [sakEllerFnr, setSakEllerFnr] = useState<string>(filter.sakEllerFnrFilter)
 
   const kanBrukeKlage = useFeatureEnabledMedDefault(FEATURE_TOGGLE_KAN_BRUKE_KLAGE, false)
 
   useEffect(() => {
-    const delay = setTimeout(() => setFilter({ ...filter, sakidFilter: sakId || '', fnrFilter: fnr || '' }), 500)
+    const delay = setTimeout(() => setFilter({ ...filter, sakEllerFnrFilter: sakEllerFnr }), 500)
     return () => clearTimeout(delay)
-  }, [sakId, fnr])
+  }, [sakEllerFnr])
 
   return (
     <>
       <FlexRow $spacing align="start">
         <TextField
-          label="Sak ID"
+          label="Sakid / Fnr."
           width="1rem"
-          value={sakId}
-          onChange={(e) => setSakId(e.target.value?.replace(/[^0-9+]/, ''))}
+          value={sakEllerFnr}
+          onChange={(e) => setSakEllerFnr(e.target.value?.replace(/[^0-9+]/, ''))}
           type="tel"
           min={0}
           placeholder="Søk"
-        />
-        <TextField
-          label="Fødselsnummer"
-          value={fnr}
-          onChange={(e) => setFnr(e.target.value?.replace(/[^0-9+]/, ''))}
-          placeholder="Søk"
-          autoComplete="off"
         />
         <Select
           label="Frist"

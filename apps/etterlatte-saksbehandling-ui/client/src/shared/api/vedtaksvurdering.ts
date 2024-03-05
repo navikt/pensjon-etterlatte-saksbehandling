@@ -40,3 +40,7 @@ export const underkjennVedtak = async ({
 export const hentSamordningsdata = async (behandlingId: string): Promise<ApiResponse<Samordningsvedtak[]>> => {
   return apiClient.get(`vedtak/${behandlingId}/samordning`)
 }
+
+export const hentSamordningsdataForSak = async (sakId: number): Promise<ApiResponse<Samordningsvedtak[]>> => {
+  return apiClient.get(`vedtak/sak/${sakId}/samordning`)
+}

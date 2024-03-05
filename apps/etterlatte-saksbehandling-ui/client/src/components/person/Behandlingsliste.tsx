@@ -19,7 +19,7 @@ import { VedtakKolonner } from '~components/person/VedtakKoloner'
 import { isPending, isSuccess } from '~shared/api/apiUtils'
 import { isFailureHandler } from '~shared/api/IsFailureHandler'
 import { IBehandlingStatus, UtlandstilknytningType } from '~shared/types/IDetaljertBehandling'
-import { SamordningModal } from '~components/person/Samordning'
+import { SamordningModal } from '~components/person/SamordningModal'
 import { EessiPensjonLenke } from '~components/behandling/soeknadsoversikt/bosattUtland/EessiPensjonLenke'
 
 const BehandlingPanel = styled.div`
@@ -89,7 +89,8 @@ export const Behandlingsliste = ({ sakOgBehandlinger }: { sakOgBehandlinger: Sak
                   <Table.DataCell>
                     <BehandlingstypeWrapper>
                       {formaterBehandlingstype(behandling.behandlingType)}
-                      {sak.utlandstilknytning?.type !== UtlandstilknytningType.NASJONAL && (
+                      {(sak.utlandstilknytning?.type === UtlandstilknytningType.UTLANDSTILSNITT ||
+                        sak.utlandstilknytning?.type === UtlandstilknytningType.BOSATT_UTLAND) && (
                         <EessiPensjonLenke sakId={sak.id} behandlingId={behandling.id} sakType={sak.sakType} />
                       )}
                     </BehandlingstypeWrapper>

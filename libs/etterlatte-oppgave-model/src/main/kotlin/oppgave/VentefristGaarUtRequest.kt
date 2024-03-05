@@ -9,3 +9,14 @@ data class VentefristGaarUtRequest(
     val oppgaveKilde: OppgaveKilde,
     val oppgaver: List<UUID>,
 )
+
+data class VentefristerGaarUtResponse(
+    val behandlinger: List<VentefristGaarUt>,
+)
+
+data class VentefristGaarUt(
+    val sakId: Long,
+    val behandlingId: UUID,
+    val oppgaveID: UUID,
+    val oppgavekilde: OppgaveKilde,
+)

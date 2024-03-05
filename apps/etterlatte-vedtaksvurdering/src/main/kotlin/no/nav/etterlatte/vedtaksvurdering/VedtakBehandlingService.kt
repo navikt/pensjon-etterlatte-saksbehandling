@@ -359,9 +359,15 @@ class VedtakBehandlingService(
         return null
     }
 
+    suspend fun samordningsinfo(sakId: Long): List<Samordningsvedtak> {
+        return repository.hentVedtakForSak(sakId).firstOrNull()?.let { vedtak ->
+            return samKlient.hentSamordningsdata(vedtak, alleVedtak = true)
+        } ?: emptyList()
+    }
+
     suspend fun samordningsinfo(behandlingId: UUID): List<Samordningsvedtak> {
         val vedtak = hentVedtakNonNull(behandlingId)
-        return samKlient.hentSamordningsdata(vedtak)
+        return samKlient.hentSamordningsdata(vedtak, alleVedtak = false)
     }
 
     suspend fun iverksattVedtak(

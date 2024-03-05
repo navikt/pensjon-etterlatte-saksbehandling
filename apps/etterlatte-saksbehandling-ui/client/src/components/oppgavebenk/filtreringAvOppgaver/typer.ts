@@ -44,7 +44,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
   REVURDERING: 'Revurdering',
   ATTESTERING: 'Attestering',
-  VURDER_KONSEKVENS: 'Vurder konsekvense for hendelse',
+  VURDER_KONSEKVENS: 'Hendelse',
   UNDERKJENT: 'Underkjent behandling',
   GOSYS: 'Gosys',
   KRAVPAKKE_UTLAND: 'Kravpakke utland',
@@ -63,12 +63,11 @@ export const FRISTFILTER = {
 export type FristFilterKeys = keyof typeof FRISTFILTER
 
 export interface Filter {
-  sakidFilter: string
+  sakEllerFnrFilter: string
   enhetsFilter: EnhetFilterKeys
   fristFilter: FristFilterKeys
   saksbehandlerFilter: string
   ytelseFilter: YtelseFilterKeys
   oppgavestatusFilter: Array<string>
   oppgavetypeFilter: Array<string>
-  fnrFilter: string
 }

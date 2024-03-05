@@ -7,7 +7,7 @@ import React, { useEffect } from 'react'
 import Spinner from '~shared/Spinner'
 import { Klage } from '~shared/types/Klage'
 import { useApiCall } from '~shared/hooks/useApiCall'
-import { BrevStatus, kanBrevRedigeres } from '~shared/types/Brev'
+import { BrevProsessType, BrevStatus, kanBrevRedigeres } from '~shared/types/Brev'
 import ForhaandsvisningBrev from '~components/behandling/brev/ForhaandsvisningBrev'
 import RedigerbartBrev from '~components/behandling/brev/RedigerbartBrev'
 import { hentBrev } from '~shared/api/brev'
@@ -92,7 +92,7 @@ export function KlageBrev() {
             <ApiErrorAlert>Kunne ikke hente brevet. Prøv å laste siden på nytt</ApiErrorAlert>
           ),
           (brev) => {
-            if (brev.status === BrevStatus.DISTRIBUERT) {
+            if (brev.status === BrevStatus.DISTRIBUERT || brev.prosessType !== BrevProsessType.REDIGERBAR) {
               return <ForhaandsvisningBrev brev={brev} />
             } else {
               return <RedigerbartBrev brev={brev} kanRedigeres={kanBrevRedigeres(brev.status)} />

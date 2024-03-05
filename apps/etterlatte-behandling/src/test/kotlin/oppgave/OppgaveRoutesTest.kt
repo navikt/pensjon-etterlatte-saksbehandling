@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OppgaveRoutesTest : BehandlingIntegrationTest() {
@@ -66,10 +67,11 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                     assertEquals(HttpStatusCode.OK, status)
                 }.body()
 
+            val referanse = UUID.randomUUID().toString()
             val oppgave =
                 client.post("/oppgaver/sak/${sak.id}/opprett") {
                     val dto =
-                        NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.JOURNALFOERING, "Mottatt journalpost", "12345")
+                        NyOppgaveDto(OppgaveKilde.EKSTERN, OppgaveType.JOURNALFOERING, "Mottatt journalpost", referanse)
 
                     addAuthToken(systemBruker)
                     header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
@@ -78,7 +80,7 @@ class OppgaveRoutesTest : BehandlingIntegrationTest() {
                     assertEquals(HttpStatusCode.OK, it.status)
                     val lestOppgave: OppgaveIntern = it.body()
                     assertEquals(fnr, lestOppgave.fnr)
-                    assertEquals("12345", lestOppgave.referanse)
+                    assertEquals(referanse, lestOppgave.referanse)
                     assertEquals(OppgaveType.JOURNALFOERING, lestOppgave.type)
                     lestOppgave
                 }

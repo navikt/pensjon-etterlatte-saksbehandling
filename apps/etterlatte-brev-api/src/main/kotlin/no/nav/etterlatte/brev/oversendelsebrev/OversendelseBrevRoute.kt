@@ -11,7 +11,6 @@ import no.nav.etterlatte.brev.BREV_ID_CALL_PARAMETER
 import no.nav.etterlatte.brev.brevId
 import no.nav.etterlatte.brev.hentinformasjon.Tilgangssjekker
 import no.nav.etterlatte.libs.common.BEHANDLINGID_CALL_PARAMETER
-import no.nav.etterlatte.libs.common.sakId
 import no.nav.etterlatte.libs.common.withBehandlingId
 import no.nav.etterlatte.libs.common.withSakId
 import no.nav.etterlatte.libs.ktor.brukerTokenInfo
@@ -44,7 +43,7 @@ fun Route.oversendelseBrevRoute(
         post {
             withBehandlingId(tilgangssjekker, skrivetilgang = true) { behandlingId ->
                 measureTimedValue {
-                    service.opprettOversendelseBrev(behandlingId, sakId, brukerTokenInfo)
+                    service.opprettOversendelseBrev(behandlingId, brukerTokenInfo)
                 }.let { (brev, varighet) ->
                     logger.info("Oppretting av oversendelsebrev tok ${varighet.toString(DurationUnit.SECONDS, 2)}")
                     call.respond(brev)

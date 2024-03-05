@@ -44,7 +44,7 @@ export const OPPGAVETYPEFILTER: Record<OppgavetypeFilterKeys, string> = {
   FOERSTEGANGSBEHANDLING: 'Førstegangsbehandling',
   REVURDERING: 'Revurdering',
   ATTESTERING: 'Attestering',
-  VURDER_KONSEKVENS: 'Vurder konsekvense for hendelse',
+  VURDER_KONSEKVENS: 'Hendelse',
   UNDERKJENT: 'Underkjent behandling',
   GOSYS: 'Gosys',
   KRAVPAKKE_UTLAND: 'Kravpakke utland',
